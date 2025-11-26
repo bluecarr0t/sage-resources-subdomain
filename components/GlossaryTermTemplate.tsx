@@ -29,7 +29,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
       <div className="min-h-screen bg-white">
         {/* Header */}
         <header className="bg-black border-b border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
             <div className="flex items-center justify-between">
               <Link href="https://sageoutdooradvisory.com" className="flex items-center">
                 <Image
@@ -37,7 +37,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                   alt="Sage Outdoor Advisory"
                   width={200}
                   height={100}
-                  className="h-10 w-auto"
+                  className="h-16 w-auto"
                   priority
                 />
               </Link>
@@ -173,9 +173,10 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                         <h3 className="text-xl font-semibold text-gray-900 mb-3">
                           {faq.question}
                         </h3>
-                        <p className="text-gray-700 leading-relaxed">
-                          {faq.answer}
-                        </p>
+                        <p 
+                          className="text-gray-700 leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: faq.answer }}
+                        />
                       </div>
                     ))}
                   </div>
@@ -202,7 +203,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
               <div className="text-center">
                 <Link
                   href="/glossary"
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-[#00b6a6] hover:text-[#009688] font-medium"
                 >
                   ← Back to Glossary
                 </Link>
@@ -242,7 +243,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                     <li>
                       <Link
                         href="/glossary"
-                        className="text-blue-600 hover:text-blue-700 underline"
+                        className="text-[#00b6a6] hover:text-[#009688] underline"
                       >
                         View All Terms
                       </Link>
@@ -250,7 +251,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                     <li>
                       <Link
                         href="https://sageoutdooradvisory.com/our-services/"
-                        className="text-blue-600 hover:text-blue-700 underline"
+                        className="text-[#00b6a6] hover:text-[#009688] underline"
                       >
                         Our Services
                       </Link>
@@ -258,7 +259,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                     <li>
                       <Link
                         href="https://sageoutdooradvisory.com/market-reports/"
-                        className="text-blue-600 hover:text-blue-700 underline"
+                        className="text-[#00b6a6] hover:text-[#009688] underline"
                       >
                         Market Reports
                       </Link>
@@ -266,7 +267,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                     <li>
                       <Link
                         href="https://sageoutdooradvisory.com/contact-us/"
-                        className="text-blue-600 hover:text-blue-700 underline font-semibold"
+                        className="text-[#00b6a6] hover:text-[#009688] underline font-semibold"
                       >
                         Schedule Consultation
                       </Link>

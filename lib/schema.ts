@@ -5,6 +5,19 @@ export interface FAQItem {
   answer: string;
 }
 
+export function generateOrganizationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Sage Outdoor Advisory",
+    "url": "https://sageoutdooradvisory.com",
+    "sameAs": [
+      "https://resources.sageoutdooradvisory.com"
+    ],
+    "logo": "https://sageoutdooradvisory.com/logo.png"
+  };
+}
+
 export function generateLocalBusinessSchema() {
   return {
     "@context": "https://schema.org",
@@ -137,6 +150,28 @@ export function generateServiceSchema(content: LandingPageContent) {
       "name": "United States"
     },
     "serviceType": content.hero.headline
+  };
+}
+
+export function generateHowToSchema(steps: string[], title: string, description?: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": title,
+    "description": description || title,
+    "step": steps.map((step, index) => {
+      // Extract step name and text (format: "Step Name: Step description")
+      const parts = step.split(':');
+      const stepName = parts[0]?.trim() || `Step ${index + 1}`;
+      const stepText = parts.slice(1).join(':').trim() || step;
+      
+      return {
+        "@type": "HowToStep",
+        "position": index + 1,
+        "name": stepName,
+        "text": stepText
+      };
+    })
   };
 }
 

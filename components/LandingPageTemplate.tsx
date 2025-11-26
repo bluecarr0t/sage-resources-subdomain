@@ -1,11 +1,13 @@
-import { LandingPageContent } from "@/lib/landing-pages";
+import { LandingPageContent, getLandingPage } from "@/lib/landing-pages";
 import Link from "next/link";
 import Image from "next/image";
 import {
+  generateOrganizationSchema,
   generateLocalBusinessSchema,
   generateBreadcrumbSchema,
   generateFAQSchema,
   generateServiceSchema,
+  generateHowToSchema,
 } from "@/lib/schema";
 
 interface LandingPageTemplateProps {
@@ -14,14 +16,22 @@ interface LandingPageTemplateProps {
 
 export default function LandingPageTemplate({ content }: LandingPageTemplateProps) {
   // Generate structured data
+  const organizationSchema = generateOrganizationSchema();
   const localBusinessSchema = generateLocalBusinessSchema();
   const breadcrumbSchema = generateBreadcrumbSchema(content.slug, content.hero.headline);
   const serviceSchema = generateServiceSchema(content);
   const faqSchema = content.faqs ? generateFAQSchema(content.faqs) : null;
+  const howToSchema = content.howToSteps && content.howToSteps.length > 0
+    ? generateHowToSchema(content.howToSteps, content.hero.headline, content.metaDescription)
+    : null;
 
   return (
     <>
       {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
@@ -40,6 +50,12 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
+      {howToSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        />
+      )}
 
       {/* Floating CTA Button */}
       <div className="fixed bottom-6 right-6 z-50">
@@ -54,7 +70,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-black border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex items-center justify-between">
             <Link href="https://sageoutdooradvisory.com" className="flex items-center">
               <Image
@@ -62,7 +78,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                 alt="Sage Outdoor Advisory"
                 width={200}
                 height={100}
-                className="h-10 w-auto"
+                className="h-16 w-auto"
                 priority
               />
             </Link>
@@ -111,9 +127,11 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               {section.bullets && (
                 <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
                   {section.bullets.map((bullet, bulletIndex) => (
-                    <li key={bulletIndex} className="leading-relaxed">
-                      {bullet}
-                    </li>
+                    <li 
+                      key={bulletIndex} 
+                      className="leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: bullet }}
+                    />
                   ))}
                 </ul>
               )}
@@ -260,8 +278,93 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
         </section>
       )}
 
+      {/* Related Landing Pages Section - Internal Cross-Linking */}
+      {content.relatedPages && content.relatedPages.length > 0 && (
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
+              Related Resources
+            </h2>
+            <p className="text-center text-gray-600 mb-8">
+              Explore related guides and resources for your outdoor hospitality project
+            </p>
+            <div className="grid md:grid-cols-2 gap-6">
+              {content.relatedPages.map((relatedSlug) => {
+                const relatedPage = getLandingPage(relatedSlug);
+                if (!relatedPage) return null;
+                return (
+                  <Link
+                    key={relatedSlug}
+                    href={`/landing/${relatedSlug}`}
+                    className="block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all"
+                  >
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {relatedPage.hero.headline}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      {relatedPage.metaDescription}
+                    </p>
+                    <span className="text-[#00b6a6] hover:text-[#009688] font-medium text-sm">
+                      Read more →
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Related Services Section - Root Domain Linking */}
+      {content.relatedServices && content.relatedServices.services.length > 0 && (
+        <section className={`py-16 ${content.relatedPages ? "bg-white" : "bg-gray-50"}`}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
+              {content.relatedServices.title}
+            </h2>
+            <p className="text-center text-gray-600 mb-8">
+              Explore Sage Outdoor Advisory&apos;s professional services for outdoor hospitality projects
+            </p>
+            <div className="grid md:grid-cols-3 gap-6">
+              {content.relatedServices.services.map((service, index) => (
+                <div
+                  key={index}
+                  className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all"
+                >
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    <Link
+                      href={service.url}
+                      className="text-[#00b6a6] hover:text-[#009688]"
+                    >
+                      {service.name}
+                    </Link>
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {service.description}
+                  </p>
+                  <Link
+                    href={service.url}
+                    className="inline-block text-[#00b6a6] hover:text-[#009688] font-medium text-sm"
+                  >
+                    Learn More →
+                  </Link>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <Link
+                href="https://sageoutdooradvisory.com/our-services/"
+                className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
+              >
+                View All Services
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Related Resources Section - SEO Cross-Linking */}
-      <section className="py-16 bg-white border-t border-gray-200">
+      <section className={`py-16 border-t border-gray-200 ${content.relatedPages || content.relatedServices ? "bg-white" : "bg-gray-50"}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
             Related Resources from Sage Outdoor Advisory
@@ -360,7 +463,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
 
       {/* FAQ Section */}
       {content.faqs && content.faqs.length > 0 && (
-        <section className={`py-16 ${content.partners ? "bg-white" : "bg-gray-50"}`}>
+        <section className={`py-16 ${content.relatedPages || content.partners ? "bg-white" : "bg-gray-50"}`}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
               Frequently Asked Questions
@@ -371,9 +474,10 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">
                     {faq.question}
                   </h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    {faq.answer}
-                  </p>
+                  <p 
+                    className="text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: faq.answer }}
+                  />
                 </div>
               ))}
             </div>

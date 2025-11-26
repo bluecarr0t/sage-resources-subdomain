@@ -47,7 +47,10 @@ Sage Outdoor Advisory specializes in creating comprehensive, bank-approved feasi
       { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
       { text: "RV Resort Feasibility Study", url: "/landing/rv-resort-feasibility-study" },
       { text: "Campground Feasibility Study", url: "/landing/campground-feasibility-study" },
-      { text: "Our Services", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Glamping Feasibility Study Services", url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/" },
+      { text: "RV Resort Feasibility Study Services", url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/" },
+      { text: "Campground Feasibility Study Services", url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/" },
+      { text: "All Feasibility Study Services", url: "https://sageoutdooradvisory.com/our-services/" }
     ],
     faqs: [
       {
@@ -91,7 +94,9 @@ Appraisals are required for bank financing, property sales, refinancing, insuran
     internalLinks: [
       { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
       { text: "RV Resort Appraisal", url: "/landing/rv-resort-appraisal" },
-      { text: "Our Services", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Glamping Property Appraisal Services", url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/" },
+      { text: "RV Resort Appraisal Services", url: "https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/" },
+      { text: "All Appraisal Services", url: "https://sageoutdooradvisory.com/our-services/" }
     ],
     faqs: [
       {
