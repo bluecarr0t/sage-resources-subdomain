@@ -1,0 +1,26 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/:slug",
+      "destination": "/landing/:slug"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "marketing.sageoutdooradvisory.com"
+        }
+      ],
+      "destination": "https://resources.sageoutdooradvisory.com/:path*",
+      "permanent": true
+    }
+  ]
+}
+
