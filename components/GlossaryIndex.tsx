@@ -42,7 +42,7 @@ export default function GlossaryIndex({
             placeholder="Search glossary terms..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-6 py-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-6 py-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-[#00b6a6] focus:border-[#00b6a6]"
           />
           <svg
             className="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400"
@@ -70,7 +70,7 @@ export default function GlossaryIndex({
             }}
             className={`py-4 px-2 border-b-2 font-semibold ${
               activeTab === "alphabetical"
-                ? "border-blue-600 text-blue-600"
+                ? "border-[#00b6a6] text-[#00b6a6]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -83,7 +83,7 @@ export default function GlossaryIndex({
             }}
             className={`py-4 px-2 border-b-2 font-semibold ${
               activeTab === "category"
-                ? "border-blue-600 text-blue-600"
+                ? "border-[#00b6a6] text-[#00b6a6]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -106,7 +106,7 @@ export default function GlossaryIndex({
                 }}
                 className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                   selectedLetter === letter
-                    ? "bg-blue-600 text-white"
+                    ? "bg-[#00b6a6] text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -182,7 +182,7 @@ export default function GlossaryIndex({
           <p className="text-gray-500 text-lg">No terms found matching &ldquo;{searchQuery}&rdquo;</p>
           <button
             onClick={() => setSearchQuery("")}
-            className="mt-4 text-blue-600 hover:text-blue-700 underline"
+            className="mt-4 text-[#00b6a6] hover:text-[#009688] underline"
           >
             Clear search
           </button>
@@ -196,16 +196,16 @@ function GlossaryTermCard({ term }: { term: GlossaryTerm }) {
   return (
     <Link
       href={`/glossary/${term.slug}`}
-      className="block bg-white border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-lg transition-all"
+      className="block bg-white border border-gray-200 rounded-lg p-6 hover:border-[#00b6a6] hover:shadow-lg transition-all"
     >
       <div className="flex items-start justify-between mb-2">
         <h3 className="text-xl font-bold text-gray-900">{term.term}</h3>
-        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+        <span className="text-xs bg-[#00b6a6]/10 text-[#00b6a6] px-2 py-1 rounded-full">
           {term.category}
         </span>
       </div>
       <p className="text-gray-600 text-sm line-clamp-2">{term.definition}</p>
-      <div className="mt-4 flex items-center text-blue-600 text-sm font-medium">
+      <div className="mt-4 flex items-center text-[#00b6a6] text-sm font-medium">
         Read more →
       </div>
     </Link>

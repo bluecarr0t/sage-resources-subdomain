@@ -11,6 +11,10 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        sage: {
+          teal: "#00b6a6",
+          "teal-dark": "#009688",
+        },
       },
     },
   },

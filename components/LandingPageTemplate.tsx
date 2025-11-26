@@ -1,5 +1,6 @@
 import { LandingPageContent } from "@/lib/landing-pages";
 import Link from "next/link";
+import Image from "next/image";
 import {
   generateLocalBusinessSchema,
   generateBreadcrumbSchema,
@@ -44,7 +45,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       <div className="fixed bottom-6 right-6 z-50">
         <Link
           href="https://sageoutdooradvisory.com/contact-us/"
-          className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-2xl hover:bg-blue-700 transition-all transform hover:scale-105"
+          className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-full shadow-2xl hover:bg-[#009688] transition-all transform hover:scale-105"
         >
           Schedule Free Call
         </Link>
@@ -52,15 +53,22 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
 
       <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-black border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link href="https://sageoutdooradvisory.com" className="text-2xl font-bold text-gray-900">
-              Sage Outdoor Advisory
+            <Link href="https://sageoutdooradvisory.com" className="flex items-center">
+              <Image
+                src="/sage-logo-black-header.png"
+                alt="Sage Outdoor Advisory"
+                width={200}
+                height={100}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
             <Link
               href="https://sageoutdooradvisory.com/contact-us"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors"
             >
               Contact Us
             </Link>
@@ -80,7 +88,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             </p>
             <Link
               href={content.hero.ctaLink}
-              className="inline-block px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+              className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
             >
               {content.hero.ctaText}
             </Link>
@@ -114,7 +122,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                 <div className="mt-8 text-center">
                   <Link
                     href="https://sageoutdooradvisory.com/contact-us/"
-                    className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                    className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
                   >
                     Schedule Free Consultation
                   </Link>
@@ -145,7 +153,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <div className="mt-12 text-center">
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="inline-block px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+                className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
               >
                 Schedule Your Free Consultation
               </Link>
@@ -186,7 +194,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <div className="text-center">
               <Link
                 href={content.testimonials.ctaLink || "https://sageoutdooradvisory.com/clients/"}
-                className="text-blue-600 hover:text-blue-700 font-semibold text-lg"
+                className="text-[#00b6a6] hover:text-[#009688] font-semibold text-lg"
               >
                 {content.testimonials.ctaText || "View All Client Testimonials"} →
               </Link>
@@ -195,7 +203,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               <p className="text-gray-700 mb-4">Ready to join our success stories?</p>
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="inline-block px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+                className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
               >
                 Schedule Your Free Consultation
               </Link>
@@ -218,14 +226,14 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               {content.partners.links.map((partner, index) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    <Link
-                      href={partner.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      {partner.name}
-                    </Link>
+                <Link
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#00b6a6] hover:text-[#009688]"
+                >
+                  {partner.name}
+                </Link>
                   </h3>
                   <p className="text-gray-700 leading-relaxed">
                     {partner.description}
@@ -236,14 +244,14 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <div className="mt-8 text-center space-y-4">
               <Link
                 href="https://sageoutdooradvisory.com/sage-key-partners/"
-                className="text-blue-600 hover:text-blue-700 font-medium block mb-4"
+                className="text-[#00b6a6] hover:text-[#009688] font-medium block mb-4"
               >
                 View All Sage Partners →
               </Link>
               <p className="text-gray-700 mb-2">Ready to get started with your project?</p>
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
               >
                 Schedule Free Consultation
               </Link>
@@ -266,7 +274,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 <Link
                   href="https://sageoutdooradvisory.com/our-services/"
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-[#00b6a6] hover:text-[#009688]"
                 >
                   Our Complete Services
                 </Link>
@@ -276,7 +284,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               </p>
               <Link
                 href="https://sageoutdooradvisory.com/our-services/"
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                className="text-[#00b6a6] hover:text-[#009688] font-medium text-sm"
               >
                 View Services →
               </Link>
@@ -285,7 +293,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 <Link
                   href="https://sageoutdooradvisory.com/market-reports/"
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-[#00b6a6] hover:text-[#009688]"
                 >
                   Free Market Reports
                 </Link>
@@ -295,7 +303,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               </p>
               <Link
                 href="https://sageoutdooradvisory.com/market-reports/"
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                className="text-[#00b6a6] hover:text-[#009688] font-medium text-sm"
               >
                 Download Reports →
               </Link>
@@ -304,7 +312,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 <Link
                   href="https://sageoutdooradvisory.com/clients/"
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-[#00b6a6] hover:text-[#009688]"
                 >
                   Client Success Stories
                 </Link>
@@ -314,7 +322,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               </p>
               <Link
                 href="https://sageoutdooradvisory.com/clients/"
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                className="text-[#00b6a6] hover:text-[#009688] font-medium text-sm"
               >
                 View Case Studies →
               </Link>
@@ -323,7 +331,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 <Link
                   href="https://sageoutdooradvisory.com/data-insights/"
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-[#00b6a6] hover:text-[#009688]"
                 >
                   Data & Insights
                 </Link>
@@ -333,7 +341,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               </p>
               <Link
                 href="https://sageoutdooradvisory.com/data-insights/"
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                className="text-[#00b6a6] hover:text-[#009688] font-medium text-sm"
               >
                 Explore Data →
               </Link>
@@ -342,7 +350,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
           <div className="mt-8 text-center">
             <Link
               href="https://sageoutdooradvisory.com/blog/"
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-[#00b6a6] hover:text-[#009688] font-medium"
             >
               Read our blog for industry insights and trends →
             </Link>
@@ -375,7 +383,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               </p>
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="inline-block px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+                className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
               >
                 Schedule Your Free Consultation
               </Link>
@@ -385,29 +393,29 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       )}
 
       {/* CTA Section */}
-      <section className="py-20 bg-blue-600">
+      <section className="py-20 bg-[#00b6a6]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
             {content.cta.title}
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-white/90 mb-8">
             {content.cta.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="https://sageoutdooradvisory.com/contact-us/"
-              className="inline-block px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
+              className="inline-block px-8 py-4 bg-white text-[#00b6a6] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
             >
               Schedule Free Consultation
             </Link>
             <Link
               href="https://sageoutdooradvisory.com/our-services/"
-              className="inline-block px-8 py-4 bg-transparent border-2 border-white text-white text-lg font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors"
+              className="inline-block px-8 py-4 bg-transparent border-2 border-white text-white text-lg font-semibold rounded-lg hover:bg-white hover:text-[#00b6a6] transition-colors"
             >
               Learn More About Our Services
             </Link>
           </div>
-          <p className="text-blue-100 mt-6 text-sm">
+          <p className="text-white/90 mt-6 text-sm">
             <Link href="https://sageoutdooradvisory.com/about/" className="underline hover:text-white">
               Learn more about Sage Outdoor Advisory
             </Link> or <Link href="https://sageoutdooradvisory.com/clients/" className="underline hover:text-white">view our client success stories</Link>
@@ -416,7 +424,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-black text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             <div>

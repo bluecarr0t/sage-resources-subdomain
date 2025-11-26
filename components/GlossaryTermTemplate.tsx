@@ -1,5 +1,6 @@
 import { GlossaryTerm } from "@/lib/glossary";
 import Link from "next/link";
+import Image from "next/image";
 import { generateDefinitionSchema, generateFAQSchema } from "@/lib/glossary-schema";
 
 interface GlossaryTermTemplateProps {
@@ -27,22 +28,29 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
 
       <div className="min-h-screen bg-white">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200">
+        <header className="bg-black border-b border-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
-              <Link href="https://sageoutdooradvisory.com" className="text-2xl font-bold text-gray-900">
-                Sage Outdoor Advisory
+              <Link href="https://sageoutdooradvisory.com" className="flex items-center">
+                <Image
+                  src="/sage-logo-black-header.png"
+                  alt="Sage Outdoor Advisory"
+                  width={200}
+                  height={100}
+                  className="h-10 w-auto"
+                  priority
+                />
               </Link>
               <div className="flex gap-4">
                 <Link
                   href="/glossary"
-                  className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                  className="px-4 py-2 text-white hover:text-gray-300"
                 >
                   Glossary
                 </Link>
                 <Link
                   href="https://sageoutdooradvisory.com/contact-us/"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors"
                 >
                   Contact Us
                 </Link>
@@ -74,13 +82,13 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
             <div className="lg:col-span-2">
               {/* Term Header */}
               <div className="mb-8">
-                <div className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full mb-4">
+                <div className="inline-block px-3 py-1 bg-[#00b6a6]/10 text-[#00b6a6] text-sm font-semibold rounded-full mb-4">
                   {term.category}
                 </div>
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
                   What is {term.term}?
                 </h1>
-                <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-lg">
+                <div className="bg-[#00b6a6]/10 border-l-4 border-[#00b6a6] p-6 rounded-lg">
                   <p className="text-lg text-gray-800 leading-relaxed">
                     {term.definition}
                   </p>
@@ -107,7 +115,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                   <ul className="space-y-3">
                     {term.examples.map((example, index) => (
                       <li key={index} className="flex items-start">
-                        <span className="text-blue-600 mr-2">•</span>
+                        <span className="text-[#00b6a6] mr-2">•</span>
                         <span className="text-gray-700">{example}</span>
                       </li>
                     ))}
@@ -124,7 +132,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                   <ul className="space-y-3">
                     {term.useCases.map((useCase, index) => (
                       <li key={index} className="flex items-start">
-                        <span className="text-blue-600 mr-2">•</span>
+                        <span className="text-[#00b6a6] mr-2">•</span>
                         <span className="text-gray-700">{useCase}</span>
                       </li>
                     ))}
@@ -143,7 +151,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                       <li key={index}>
                         <Link
                           href={link.url}
-                          className="text-blue-600 hover:text-blue-700 underline"
+                          className="text-[#00b6a6] hover:text-[#009688] underline"
                         >
                           {link.text}
                         </Link>
@@ -175,16 +183,16 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
               )}
 
               {/* CTA */}
-              <section className="bg-blue-600 rounded-lg p-8 text-center mb-8">
+              <section className="bg-[#00b6a6] rounded-lg p-8 text-center mb-8">
                 <h2 className="text-2xl font-bold text-white mb-4">
                   Need Help with Your Outdoor Hospitality Project?
                 </h2>
-                <p className="text-blue-100 mb-6">
+                <p className="text-white/90 mb-6">
                   Our experts can help you understand how {term.term.toLowerCase()} applies to your project.
                 </p>
                 <Link
                   href="https://sageoutdooradvisory.com/contact-us/"
-                  className="inline-block px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
+                  className="inline-block px-8 py-4 bg-white text-[#00b6a6] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
                 >
                   Schedule Free Consultation
                 </Link>
@@ -215,7 +223,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                         <li key={relatedTerm.slug}>
                           <Link
                             href={`/glossary/${relatedTerm.slug}`}
-                            className="text-blue-600 hover:text-blue-700 underline"
+                            className="text-[#00b6a6] hover:text-[#009688] underline"
                           >
                             {relatedTerm.term}
                           </Link>
@@ -271,7 +279,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
         </div>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-12 mt-16">
+        <footer className="bg-black text-white py-12 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-3 gap-8">
               <div>

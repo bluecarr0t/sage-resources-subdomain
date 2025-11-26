@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getAllGlossaryTerms, getGlossaryTermsByCategory } from "@/lib/glossary";
 import GlossaryIndex from "@/components/GlossaryIndex";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Outdoor Hospitality Glossary | Industry Terms & Definitions | Sage Outdoor Advisory",
@@ -55,15 +56,22 @@ export default function GlossaryPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-black border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link href="https://sageoutdooradvisory.com" className="text-2xl font-bold text-gray-900">
-              Sage Outdoor Advisory
+            <Link href="https://sageoutdooradvisory.com" className="flex items-center">
+              <Image
+                src="/sage-logo-black-header.png"
+                alt="Sage Outdoor Advisory"
+                width={200}
+                height={100}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
             <Link
               href="https://sageoutdooradvisory.com/contact-us/"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors"
             >
               Contact Us
             </Link>
@@ -94,17 +102,17 @@ export default function GlossaryPage() {
       />
 
       {/* CTA Section */}
-      <section className="bg-blue-600 py-16">
+      <section className="bg-[#00b6a6] py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Need Help Understanding These Terms?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-white/90 mb-8">
             Our experts can help you understand how these industry terms apply to your outdoor hospitality project.
           </p>
           <Link
             href="https://sageoutdooradvisory.com/contact-us/"
-            className="inline-block px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
+            className="inline-block px-8 py-4 bg-white text-[#00b6a6] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
           >
             Schedule Free Consultation
           </Link>
@@ -112,7 +120,7 @@ export default function GlossaryPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-black text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             <div>
