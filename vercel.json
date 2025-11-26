@@ -18,7 +18,7 @@
           "value": "marketing.sageoutdooradvisory.com"
         }
       ],
-      "destination": "https://resources.sageoutdooradvisory.com/:path*",
+      "destination": "https://resources.sageoutdooradvisory.com/$1",
       "permanent": true
     }
   ]
