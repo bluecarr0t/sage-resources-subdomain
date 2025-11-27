@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   title: "Sage Outdoor Advisory - Outdoor Hospitality Expertise",
   description: "Leading consultancy for feasibility studies and appraisals in the outdoor hospitality industry",
   metadataBase: new URL("https://resources.sageoutdooradvisory.com"),
+  verification: {
+    // Google Search Console verification code
+    // Get this code from: https://search.google.com/search-console
+    // After adding your property, choose "HTML tag" verification method
+    google: "REPLACE-WITH-YOUR-GOOGLE-VERIFICATION-CODE",
+  },
   openGraph: {
     title: "Sage Outdoor Advisory - Outdoor Hospitality Expertise",
     description: "Leading consultancy for feasibility studies and appraisals in the outdoor hospitality industry",
