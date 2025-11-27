@@ -32,9 +32,9 @@ Sage Outdoor Advisory specializes in creating comprehensive, bank-approved feasi
     category: "Feasibility & Appraisal",
     relatedTerms: ["market-analysis", "appraisal", "revenue-projections", "competitive-analysis"],
     examples: [
-      "A glamping resort feasibility study might analyze demand in a mountain region",
-      "An RV park feasibility study could evaluate market potential near a national park",
-      "A campground feasibility study might assess seasonal demand patterns"
+      "A developer planning a 30-unit glamping resort in Colorado's mountain region commissions a feasibility study. The study analyzes local tourism data showing 2.3M annual visitors to nearby attractions, identifies 8 competing properties with average 78% occupancy and $285 ADR, projects 65% first-year occupancy growing to 82% by year 3, estimates $1.2M development costs, and forecasts $650K Year 1 revenue growing to $1.1M by Year 5. The study concludes the project is viable with 18% IRR and recommends proceeding, helping secure $800K bank financing based on the comprehensive analysis.",
+      "An investor considering a 150-site RV park near Great Smoky Mountains National Park needs a feasibility study. The analysis examines national park visitation (12M+ annually), analyzes 12 competing RV parks within 15 miles showing strong demand (average 75% occupancy), evaluates local zoning and utility requirements ($850K estimated development costs), projects $920K annual revenue at 70% occupancy and $60/night average rate, and identifies seasonal patterns with peak summer occupancy at 95%. The study validates strong market demand and projects positive cash flow by month 8, supporting the investment decision and lender requirements.",
+      "A campground feasibility study for a proposed 80-site property assesses seasonal demand patterns by analyzing monthly visitor data from nearby state parks, weather patterns affecting camping season length (March-October with peak June-August), local event calendars driving weekend demand, and competitive pricing analysis. The study projects 55% annual occupancy with summer peaks at 90% and shoulder seasons at 40%, estimates $380K annual revenue, and identifies the need for winter storage income to offset low-season occupancy. This comprehensive demand analysis helps the owner optimize pricing strategy and plan operational expenses to match revenue patterns."
     ],
     useCases: [
       "Securing bank financing for development projects",
@@ -55,7 +55,7 @@ Sage Outdoor Advisory specializes in creating comprehensive, bank-approved feasi
     faqs: [
       {
         question: "How long does a feasibility study take?",
-        answer: "A comprehensive feasibility study typically takes 4-6 weeks to complete, depending on project complexity and data availability."
+        answer: "Our feasibility studies typically take between 4 to 8 weeks, depending on the size and complexity of the property. This timeframe allows us to thoroughly review market data, inspect the property, and prepare a detailed, accurate report. For a more specific timeline based on your project, please contact our team—we're happy to discuss your feasibility study needs."
       },
       {
         question: "What's included in a feasibility study?",
@@ -172,11 +172,11 @@ In outdoor hospitality, ADR is often higher for glamping accommodations compared
 
 Sage Outdoor Advisory includes ADR analysis and benchmarking in our feasibility studies, helping clients understand market rates and optimize pricing strategies.`,
     category: "Financial",
-    relatedTerms: ["revpar", "occupancy-rate", "revenue-projections", "noi"],
+    relatedTerms: ["ardr", "revpar", "occupancy-rate", "revenue-projections", "noi"],
     examples: [
-      "A glamping resort with $300 ADR during peak season",
-      "An RV park with $75 ADR for full hookup sites",
-      "A campground with $45 ADR for tent sites"
+      "A 20-unit glamping resort generates $180K in monthly revenue from 600 occupied unit-nights (20 units × 30 days). ADR = $180K ÷ 600 = $300 per night. During peak season, rates increase to $400/night, while offseason rates drop to $200/night, creating seasonal ADR variations. This $300 ADR helps property managers track pricing effectiveness and compare to competitors averaging $280 ADR in the same market.",
+      "An RV park with 80 full hookup sites charges $75/night. In a month with 1,680 occupied site-nights (70% occupancy), total revenue is $126K. ADR = $126K ÷ 1,680 = $75. The park also offers premium waterfront sites at $95/night and basic sites at $55/night. The blended ADR of $75 reflects the mix of site types, helping owners understand their average rate across different offerings and seasons.",
+      "A family campground with 50 tent sites charges $45/night. During a summer month with 1,125 occupied site-nights (75% occupancy), revenue totals $50,625. ADR = $50,625 ÷ 1,125 = $45. This ADR is competitive with nearby campgrounds averaging $42-48, demonstrating proper market positioning. By tracking ADR monthly, the owner can identify pricing opportunities and seasonal trends."
     ],
     useCases: [
       "Pricing strategy development",
@@ -204,6 +204,54 @@ Sage Outdoor Advisory includes ADR analysis and benchmarking in our feasibility 
       }
     ]
   },
+  "ardr": {
+    slug: "ardr",
+    term: "ARDR (Average Retail Daily Rate)",
+    definition: "The average listing price shown on websites and marketplaces for accommodation units, representing the advertised rate before any discounts or bookings.",
+    extendedDefinition: `ARDR, or Average Retail Daily Rate, is a pricing metric that represents the average listed or advertised price for accommodation units across websites and marketplaces. Unlike ADR (Average Daily Rate), which reflects actual revenue earned per occupied unit, ARDR captures the asking price displayed to potential guests before bookings occur.
+
+ARDR is calculated by averaging the listed rates across booking platforms, property websites, and marketplaces. For example, if a glamping resort lists units at $300, $350, and $400 across different dates, the ARDR would be $350.
+
+This metric is valuable for understanding pricing positioning in the marketplace, competitive pricing analysis, and marketing strategy. ARDR helps property owners see how their listed prices compare to market rates and competitors. It's particularly useful for tracking pricing trends on third-party platforms like Airbnb, Booking.com, and VRBO.
+
+In outdoor hospitality, ARDR can differ from actual ADR due to discounts, promotions, last-minute pricing adjustments, or commission structures. Understanding the gap between ARDR and ADR helps property owners optimize pricing strategies and revenue management.
+
+Sage Outdoor Advisory uses ARDR analysis in market research and feasibility studies to help clients understand competitive pricing positioning and optimize their listing strategies across distribution channels.`,
+    category: "Financial",
+    relatedTerms: ["adr", "revpar", "revenue-projections", "competitive-analysis"],
+    examples: [
+      "A glamping resort with $350 ARDR listed across booking platforms",
+      "Comparing ARDR across competing RV parks on marketplace websites",
+      "Tracking ARDR trends to understand market pricing dynamics"
+    ],
+    useCases: [
+      "Competitive pricing analysis",
+      "Market positioning assessment",
+      "Pricing strategy development",
+      "Distribution channel optimization",
+      "Marketing strategy planning"
+    ],
+    seoKeywords: ["ARDR", "average retail daily rate", "listed price", "advertised rate", "marketplace pricing", "booking platform rates"],
+    internalLinks: [
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/market-reports/" },
+      { text: "Data Insights", url: "https://sageoutdooradvisory.com/data-insights/" },
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+    ],
+    faqs: [
+      {
+        question: "What's the difference between ARDR and ADR?",
+        answer: "ARDR represents the average listed or advertised price on websites and marketplaces, while ADR represents the average actual revenue earned per occupied unit. ARDR is the asking price; ADR is what you actually receive."
+      },
+      {
+        question: "Why is ARDR important for outdoor hospitality properties?",
+        answer: "ARDR helps property owners understand their competitive positioning in the marketplace, analyze pricing trends, and optimize listing strategies across different booking platforms and distribution channels."
+      },
+      {
+        question: "How does ARDR differ from the actual price guests pay?",
+        answer: "ARDR shows listed prices before discounts, promotions, or last-minute adjustments. The actual price paid may be lower due to special offers, seasonal discounts, or platform-specific promotions."
+      }
+    ]
+  },
   "occupancy-rate": {
     slug: "occupancy-rate",
     term: "Occupancy Rate",
@@ -220,9 +268,9 @@ Sage Outdoor Advisory includes occupancy rate analysis and forecasting in our fe
     category: "Financial",
     relatedTerms: ["adr", "revpar", "revenue-projections", "seasonality"],
     examples: [
-      "A glamping resort with 75% annual occupancy rate",
-      "An RV park with 85% occupancy during peak season",
-      "A campground with 60% occupancy year-round"
+      "A 25-unit glamping resort operates year-round. In January, 450 units are occupied out of 775 available (25 units × 31 days), resulting in 58% occupancy. During peak summer months (June-August), occupancy averages 90% with 2,090 occupied out of 2,325 available units. The annual occupancy rate of 75% (6,825 occupied out of 9,125 available unit-nights) reflects seasonal variations and helps with financial planning. Property managers use this metric to optimize pricing, with higher rates during high-occupancy periods and promotions during slower seasons.",
+      "An RV resort in Florida experiences strong seasonality. During snowbird season (November-April), 180 of 200 sites are consistently occupied, achieving 90% occupancy. Summer months (May-October) drop to 60% occupancy (120 of 200 sites). The peak season occupancy of 85% during the best months demonstrates strong demand during prime periods. Understanding this pattern helps owners maximize revenue during high-demand periods and plan maintenance or renovations during slower months.",
+      "A year-round campground maintains steady 60% occupancy with minimal seasonal variation. With 50 sites available 365 days, there are 18,250 available site-nights annually. At 60% occupancy, 10,950 site-nights are occupied. This consistent occupancy rate provides predictable cash flow compared to highly seasonal properties. The owner can reliably project annual revenue based on this stable occupancy pattern and plan capital improvements knowing income won't fluctuate dramatically."
     ],
     useCases: [
       "Demand forecasting",
@@ -334,9 +382,9 @@ Sage Outdoor Advisory creates detailed revenue projections as part of our feasib
     category: "Feasibility & Appraisal",
     relatedTerms: ["adr", "occupancy-rate", "revpar", "feasibility-study", "noi"],
     examples: [
-      "5-year revenue forecast for a new glamping resort",
-      "Seasonal revenue projections for an RV park",
-      "Annual revenue estimates for a campground expansion"
+      "A feasibility study for a new 20-unit glamping resort includes 5-year revenue projections: Year 1 projects $420K revenue at 55% occupancy (4,015 occupied unit-nights) with $105 ADR, growing to Year 5 with $850K revenue at 80% occupancy (5,840 unit-nights) and $145 ADR as the property gains reputation and can command premium rates. These projections help lenders assess loan repayment ability and help investors understand when profitability will be achieved. The projection includes conservative, base, and optimistic scenarios to account for market uncertainty.",
+      "An RV park owner creates seasonal revenue projections: Summer months (June-August) generate $280K quarterly with 85% occupancy at $95/night average rate. Spring and fall (March-May, September-November) generate $180K quarterly at 65% occupancy. Winter months (December-February) generate $95K quarterly at 40% occupancy. Total annual revenue projection = $735K. These seasonal projections help with cash flow planning, staffing decisions, and identifying when to schedule capital improvements during slower periods.",
+      "A campground expansion project evaluates revenue impact of adding 25 new RV sites: Current revenue is $480K annually from 75 sites. The expansion would add approximately $160K in new revenue (25 sites × $65 average rate × 80% occupancy × 365 days = $474K, but accounting for startup ramp-up, Year 1 projects $160K additional). Combined with existing operations, total projected revenue grows to $640K annually. This revenue projection justifies the $320K expansion cost and helps secure financing by demonstrating increased cash flow potential."
     ],
     useCases: [
       "Feasibility studies",
@@ -373,8 +421,9 @@ Sage Outdoor Advisory includes RevPAR analysis and benchmarking in our feasibili
     category: "Financial",
     relatedTerms: ["adr", "occupancy-rate", "revenue-projections", "noi"],
     examples: [
-      "A glamping resort with $200 ADR and 80% occupancy has $160 RevPAR",
-      "An RV park with $75 ADR and 70% occupancy has $52.50 RevPAR"
+      "A glamping resort charges $200/night (ADR) and maintains 80% occupancy. RevPAR = $200 × 0.80 = $160. This means the property generates $160 per available unit, regardless of whether it's occupied. If the resort has 30 units, total potential revenue is $4,800 per night (30 × $160). A competitor with $180 ADR but 90% occupancy has $162 RevPAR, showing higher revenue efficiency. The glamping resort could improve RevPAR by either raising ADR to $225 (if demand supports it) or increasing occupancy through marketing, demonstrating how this single metric combines pricing and demand.",
+      "An RV park with $75 ADR and 70% occupancy calculates RevPAR = $75 × 0.70 = $52.50. With 100 sites, this generates $5,250 potential revenue per night across all sites. If occupancy drops to 60% while maintaining $75 ADR, RevPAR falls to $45. Alternatively, if they raise rates to $85 and occupancy stays at 70%, RevPAR increases to $59.50. This metric helps owners understand that increasing occupancy or ADR both improve revenue, and guides decisions about whether to focus on pricing strategy or demand generation.",
+      "Comparing two campgrounds: Campground A has $50 ADR and 65% occupancy = $32.50 RevPAR. Campground B has $45 ADR and 80% occupancy = $36 RevPAR. Despite lower ADR, Campground B generates more revenue per available site due to higher occupancy. This RevPAR comparison reveals Campground A might be overpriced (low occupancy) or needs better marketing, while Campground B's strategy of competitive pricing drives better overall performance."
     ],
     useCases: [
       "Performance measurement",
@@ -411,8 +460,9 @@ Sage Outdoor Advisory includes NOI projections and analysis in our feasibility s
     category: "Financial",
     relatedTerms: ["cap-rate", "revenue-projections", "operating-expenses", "appraisal"],
     examples: [
-      "A glamping resort with $500,000 gross income and $200,000 operating expenses has $300,000 NOI",
-      "An RV park generating $1M revenue with $400K expenses has $600K NOI"
+      "A glamping resort generates $800K in gross operating income from room revenue. Operating expenses total $500K including: utilities ($95K), property maintenance ($120K), insurance ($35K), management fees ($120K), marketing ($40K), administrative costs ($25K), property taxes ($35K), and other expenses ($30K). NOI = $800K - $500K = $300K. This NOI is then used for property valuation: at an 8% cap rate, the property value = $300K ÷ 0.08 = $3.75M. NOI excludes debt service ($180K) and capital improvements, focusing purely on operational profitability.",
+      "An RV park with $1.2M annual revenue incurs $600K in operating expenses: utilities ($180K), maintenance ($150K), property management ($90K), insurance ($45K), marketing ($35K), administrative ($40K), property taxes ($50K), and repairs ($10K). NOI = $1.2M - $600K = $600K. Lenders use this NOI to determine loan capacity: requiring 1.4 DSCR, maximum debt service = $600K ÷ 1.4 = $428K annually, which supports approximately a $4.5M loan at current interest rates. This NOI demonstrates strong operational performance and ability to service debt.",
+      "A campground owner analyzes NOI improvement: Current revenue is $650K with $390K operating expenses = $260K NOI. By reducing utilities through efficiency upgrades ($15K savings) and renegotiating management fees ($10K savings), operating expenses drop to $365K. New NOI = $285K, a 9.6% increase. At an 8.5% cap rate, this $25K NOI improvement increases property value by $294K ($25K ÷ 0.085), showing how operational efficiency directly impacts property valuation and investor returns."
     ],
     useCases: [
       "Property valuation",
@@ -450,8 +500,9 @@ Sage Outdoor Advisory uses cap rates in our appraisals and feasibility studies t
     category: "Financial",
     relatedTerms: ["noi", "appraisal", "roi", "income-approach"],
     examples: [
-      "A property with $300K NOI valued at $4M has a 7.5% cap rate",
-      "A glamping resort with $500K NOI and $6M value has an 8.3% cap rate"
+      "An RV park generates $300K in Net Operating Income. Recent comparable sales and market analysis indicate the property should trade at a 7.5% cap rate based on similar properties. Property value = $300K ÷ 0.075 = $4M. If market cap rates compress to 6.5% (indicating stronger demand and lower perceived risk), the same property would be worth $4.6M ($300K ÷ 0.065), demonstrating how cap rate changes affect property values. Investors use cap rates to quickly assess if a property is priced correctly relative to its income.",
+      "A glamping resort appraiser determines the property generates $500K NOI. Researching recent sales of similar glamping properties shows cap rates ranging from 7.5% to 9%, with premium properties in desirable locations at lower cap rates. Applying an 8.3% cap rate (middle of the range) values the property at $6M ($500K ÷ 0.083). A higher cap rate of 9% would value it at $5.56M, while a lower 7.5% cap rate would value it at $6.67M. This cap rate analysis provides a range for negotiations and helps buyers understand expected returns.",
+      "Cap rate comparison for investment decisions: Property A is an RV park with $400K NOI priced at $5M = 8% cap rate. Property B is a glamping resort with $450K NOI priced at $5.5M = 8.2% cap rate. While Property B has higher NOI, Property A offers a slightly better cap rate (return on investment). However, the glamping resort might have better appreciation potential or lower risk, which isn't captured in cap rate alone. Cap rate helps normalize properties with different income levels for comparison, but investors must also consider growth potential, location, and risk factors."
     ],
     useCases: [
       "Property valuation",
@@ -488,8 +539,9 @@ Sage Outdoor Advisory includes ROI analysis in our feasibility studies, helping 
     category: "Financial",
     relatedTerms: ["irr", "cap-rate", "cash-on-cash-return", "feasibility-study"],
     examples: [
-      "An investment of $2M generating $200K annual profit has 10% ROI",
-      "A glamping resort purchase with 15% annual ROI"
+      "An investor purchases a glamping resort for $2M. After operating expenses and debt service, the property generates $200K in annual net profit. ROI = ($200K ÷ $2M) × 100 = 10% annually. Over 5 years, if the property is sold for $2.5M, the total ROI includes both the $1M in profit from operations ($200K × 5 years) plus the $500K appreciation, totaling $1.5M on a $2M investment = 75% total ROI or 15% annualized. This helps compare to alternative investments like stocks or bonds.",
+      "A glamping resort investment analysis: Purchase price is $3.5M with $700K down payment (80% financing). Annual cash flow after all expenses is $105K. ROI on the cash investment = ($105K ÷ $700K) × 100 = 15% cash-on-cash return. However, total ROI including loan paydown and appreciation might be higher. If the property appreciates 3% annually ($105K) and loan principal paydown is $40K, total annual return is $250K on $700K investment = 35.7% ROI, demonstrating how leverage amplifies returns in real estate.",
+      "Comparing ROI across investment options: Option A is a $1M all-cash campground purchase generating $80K annual profit = 8% ROI. Option B is a $2M glamping resort with $400K down generating $120K cash flow = 30% cash-on-cash ROI but lower absolute profit. Option C is stocks returning 10% annually. The ROI comparison helps investors choose based on risk tolerance, cash availability, and return expectations, with higher ROI often correlating with higher risk or leverage."
     ],
     useCases: [
       "Investment analysis",
@@ -526,8 +578,9 @@ Sage Outdoor Advisory uses the income approach in our appraisals, along with sal
     category: "Feasibility & Appraisal",
     relatedTerms: ["appraisal", "noi", "cap-rate", "dcf"],
     examples: [
-      "Valuing a glamping resort based on $400K NOI and 7% cap rate = $5.7M value",
-      "Using income approach to appraise an RV park"
+      "An appraiser values a glamping resort using the income approach: The property generates $400K in stabilized NOI (after accounting for normal vacancy and operating expenses). Researching recent sales of comparable glamping properties reveals cap rates between 6.5% and 8%, with similar properties trading at 7% cap rate. Using income approach: Property value = NOI ÷ Cap rate = $400K ÷ 0.07 = $5.7M. The appraiser also considers the sales comparison approach ($5.4M) and cost approach ($6.1M), then reconciles to a final value of $5.7M, giving the income approach the most weight since this is an income-producing property. Lenders use this valuation to determine loan amounts and loan-to-value ratios.",
+      "An RV park appraisal using income approach: The 120-site property generates $750K annual revenue with $320K operating expenses, resulting in $430K NOI. Market research shows RV parks in this region trade at 7.5-8.5% cap rates, with premium resorts at lower rates. The appraiser selects an 8% cap rate based on property characteristics and comparable sales. Income approach valuation = $430K ÷ 0.08 = $5.375M. This valuation method is most appropriate for income-producing properties like RV parks, as it directly relates value to income-generating ability. The appraisal helps buyers understand fair market value and helps lenders assess collateral value for financing decisions.",
+      "A campground owner requests an appraisal before refinancing: The property shows $280K NOI from $650K revenue and $370K operating expenses. The appraiser researches cap rates from recent campground sales in the region, finding a range of 8.5-10% depending on location and amenities. Applying a 9% cap rate based on the property's characteristics, income approach indicates $3.11M value ($280K ÷ 0.09). However, the appraiser also notes potential NOI improvement opportunities (energy efficiency, rate optimization) that could increase value to $3.5M if implemented, providing both current and prospective value for the refinancing analysis."
     ],
     useCases: [
       "Property appraisals",
@@ -630,8 +683,9 @@ Sage Outdoor Advisory uses DCF analysis in our feasibility studies and appraisal
     category: "Financial",
     relatedTerms: ["feasibility-study", "revenue-projections", "roi", "irr"],
     examples: [
-      "Valuing a glamping resort based on 10-year cash flow projections",
-      "Using DCF to evaluate a campground development project"
+      "A glamping resort owner wants to sell and needs to determine fair market value. Using DCF analysis, they project annual cash flows: Years 1-3 show $250K, $320K, $380K as occupancy builds, then stabilize at $450K annually for years 4-10. Discounting these future cash flows at 12% (reflecting risk), plus a terminal value, results in a present value of $3.2M - providing a data-driven valuation for sale negotiations.",
+      "An investor evaluating a new campground development uses DCF to assess project viability. The 10-year projection shows initial negative cash flows during construction and startup ($-200K, $-50K), then positive cash flows growing from $180K in Year 3 to $420K in Year 10. Using a 15% discount rate (higher risk for new development), the DCF analysis shows the project creates value only if initial investment stays below $2.1M, helping inform the go/no-go decision.",
+      "A feasibility study uses DCF analysis to compare two RV park expansion options: Option A requires $500K investment, generates $120K annual cash flow. Option B requires $800K, generates $200K annually. DCF analysis reveals Option B has a higher net present value despite larger investment, because the incremental $80K annual return on the additional $300K investment exceeds the discount rate, making it the better financial choice."
     ],
     useCases: [
       "Feasibility studies",
@@ -663,8 +717,9 @@ Sage Outdoor Advisory includes IRR analysis in our feasibility studies, helping 
     category: "Financial",
     relatedTerms: ["roi", "dcf", "cash-on-cash-return", "feasibility-study"],
     examples: [
-      "A glamping resort investment with 18% IRR over 10 years",
-      "Comparing two RV park opportunities using IRR"
+      "An investor purchases a glamping resort for $2.5M with $500K down payment and finances $2M. Over 10 years, they receive annual cash flows starting at $180K and growing to $320K, plus they sell the property for $4.2M at the end. The IRR calculation shows this investment generates an 18% annualized return, accounting for the timing of all cash flows. This IRR exceeds their 12% required return, making it an attractive investment.",
+      "An investor comparing two RV park opportunities: Property A costs $3M, generates steady $360K annual cash flow for 7 years, then sells for $4.5M - resulting in 16% IRR. Property B costs $2.2M, starts with $200K cash flow but grows to $420K, sells for $3.8M in 10 years - resulting in 19% IRR. Despite Property A having higher absolute returns, Property B's higher IRR indicates better return efficiency per dollar invested.",
+      "A developer evaluating a campground project with initial $1.5M investment: Years 1-2 show negative cash flows (-$100K, -$30K) during startup, then positive cash flows of $180K-350K for years 3-10, with a $2.4M sale at year 10. The IRR calculation shows 17% annualized return, which accounts for the delayed positive returns and helps compare this longer-term investment to faster-return alternatives."
     ],
     useCases: [
       "Investment comparison",
@@ -700,8 +755,9 @@ Sage Outdoor Advisory includes cash-on-cash return analysis in our feasibility s
     category: "Financial",
     relatedTerms: ["roi", "irr", "noi", "feasibility-study"],
     examples: [
-      "A $500K down payment generating $60K annual cash flow = 12% cash-on-cash return",
-      "Comparing cash-on-cash returns for different financing scenarios"
+      "An investor puts $500K down on a $2.5M glamping resort (80% LTV financing). After debt service of $120K on the $2M loan, they receive $60K in annual cash flow. Cash-on-cash return = $60K ÷ $500K = 12%. This shows their actual return on the cash invested, which is more relevant than total property ROI when using leverage. A 12% cash-on-cash return beats many alternative investments while building equity through loan paydown.",
+      "Comparing financing scenarios for an RV park purchase: Option A uses 70% LTV ($1.4M loan on $2M property), requires $600K down, generates $45K cash flow after debt = 7.5% cash-on-cash. Option B uses 75% LTV ($1.5M loan), requires $500K down, generates $42K cash flow = 8.4% cash-on-cash. Option B is better despite lower absolute cash flow because it requires less cash invested, demonstrating leverage's impact on returns.",
+      "A campground investor analyzes a potential acquisition: $800K down payment on a $3M property with $2.2M financing. After covering $175K annual debt service, remaining cash flow is $85K. Cash-on-cash return of 10.6% ($85K/$800K) helps them compare to other investment options and assess whether the leverage strategy makes sense compared to an all-cash purchase that might yield 8% total return."
     ],
     useCases: [
       "Leveraged investment analysis",
@@ -737,8 +793,9 @@ Sage Outdoor Advisory includes DSCR analysis in our feasibility studies, helping
     category: "Financial",
     relatedTerms: ["noi", "feasibility-study", "roi"],
     examples: [
-      "A property with $300K NOI and $200K debt service has 1.5 DSCR",
-      "Lenders requiring minimum 1.25 DSCR for RV park loans"
+      "A glamping resort generates $500K annual revenue with $200K operating expenses, resulting in $300K NOI. The property has annual debt service (principal + interest) of $200K. DSCR = $300K ÷ $200K = 1.5. This means the property generates 50% more income than required for debt payments, providing a safety cushion. Most lenders require at least 1.25-1.5 DSCR, so this property meets financing requirements and shows strong ability to service debt even with seasonal fluctuations.",
+      "An RV park with $850K NOI applies for a $5M loan with $420K annual debt service. DSCR = $850K ÷ $420K = 2.02. This strong 2.0+ DSCR position means the property could still cover debt payments even if income dropped by 50%, making it very attractive to lenders who may offer better interest rates or terms due to lower perceived risk.",
+      "A campground seeking refinancing: Current NOI is $280K, but debt service on a new $2.2M loan would be $240K annually. DSCR = $280K ÷ $240K = 1.17, which is below the lender's 1.25 minimum requirement. The borrower must either increase NOI (raise rates, improve occupancy), reduce loan amount, or accept less favorable terms. This demonstrates why DSCR analysis is critical before applying for financing."
     ],
     useCases: [
       "Loan applications",
@@ -774,8 +831,9 @@ Sage Outdoor Advisory creates detailed pro forma financial statements as part of
     category: "Financial",
     relatedTerms: ["revenue-projections", "feasibility-study", "noi"],
     examples: [
-      "5-year pro forma income statement for a glamping resort",
-      "Pro forma cash flow projections for an RV park development"
+      "A developer planning a 25-unit glamping resort creates a 5-year pro forma showing: Year 1 projects $450K revenue at 60% occupancy, growing to $850K by Year 5 at 80% occupancy. Operating expenses start at $180K and increase to $300K as the property scales. This pro forma helps secure financing by demonstrating expected cash flow and profitability trajectory.",
+      "An investor evaluating an RV park acquisition uses pro forma projections to estimate performance: Based on market research, the 100-site park could generate $750K annual revenue with $350K operating expenses, resulting in $400K NOI. The pro forma includes 3 scenarios (conservative, base, optimistic) to show different outcomes based on occupancy and rate assumptions.",
+      "A campground expansion project includes pro forma financials showing how adding 30 new RV sites would impact revenue. The pro forma projects construction costs of $450K, new revenue of $180K annually, and additional operating expenses of $45K, demonstrating a positive ROI and payback period to justify the investment."
     ],
     useCases: [
       "Feasibility studies",
@@ -808,8 +866,9 @@ Sage Outdoor Advisory includes EBITDA analysis in our feasibility studies and fi
     category: "Financial",
     relatedTerms: ["noi", "revenue-projections", "feasibility-study"],
     examples: [
-      "A glamping resort with $500K EBITDA",
-      "Comparing EBITDA across multiple RV park properties"
+      "A glamping resort generates $800K in revenue, has $200K in operating expenses (utilities, maintenance, insurance), and $100K in depreciation. EBITDA = $800K - $200K = $600K, showing operating profitability excluding financing and accounting decisions. This helps compare operational performance across properties regardless of financing structure.",
+      "An investor comparing two RV park acquisitions: Property A shows $400K EBITDA while Property B shows $350K EBITDA. Despite Property A having higher interest payments due to larger debt, EBITDA reveals it has better operational profitability. Property A's EBITDA margin (EBITDA/revenue) of 40% vs Property B's 35% indicates more efficient operations.",
+      "A feasibility study for a new campground project projects $500K in revenue with $180K in operating expenses and $50K in depreciation. The projected EBITDA of $320K helps lenders evaluate the property's core operating performance and ability to service debt, separate from tax benefits or financing structure."
     ],
     useCases: [
       "Financial analysis",
@@ -831,17 +890,22 @@ Sage Outdoor Advisory includes EBITDA analysis in our feasibility studies and fi
   "glamping-resort": {
     slug: "glamping-resort",
     term: "Glamping Resort",
-    definition: "A luxury outdoor accommodation destination featuring high-end glamping units with premium amenities, often in scenic natural settings.",
-    extendedDefinition: `A glamping resort is a commercial outdoor hospitality property that offers luxury camping accommodations, typically featuring multiple glamping units such as safari tents, yurts, treehouses, or other unique structures. Unlike basic campgrounds, glamping resorts provide premium amenities like private bathrooms, comfortable beds, heating and cooling, and often include on-site services like restaurants, activities, and concierge services.
+    definition: "A commercial outdoor accommodation destination featuring standalone glamping units with bedding and linens, ranging from budget-friendly to ultra-luxury, typically located in scenic natural settings.",
+    extendedDefinition: `A glamping resort is a commercial outdoor hospitality property that offers standalone glamping accommodations, typically featuring multiple glamping units such as safari tents, yurts, treehouses, Airstream trailers, or other unique structures. Each unit is a complete, standalone accommodation with its own bedding and linens.
 
-Glamping resorts are positioned as upscale outdoor experiences, appealing to travelers who want to connect with nature without sacrificing comfort. They typically command higher rates than traditional camping and often include unique experiences or activities.
+Glamping resorts span a wide quality and price spectrum, from budget-friendly options with basic amenities to ultra-luxury properties with premium features. Budget-friendly glamping resorts may offer simple but comfortable units with basic bedding, while ultra-luxury resorts provide high-end amenities like private bathrooms, premium linens, heating and cooling, hot tubs, gourmet kitchens, and concierge services.
 
-Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping resorts, understanding the unique market dynamics, revenue models, and operational considerations of these properties.`,
+Unlike basic campgrounds that require guests to bring their own equipment, glamping resorts provide fully furnished units that are ready for occupancy. Many glamping resorts also include on-site services like restaurants, activities, and guest services to enhance the experience.
+
+Glamping resorts appeal to travelers who want to connect with nature without sacrificing comfort, and they typically command rates between traditional camping and hotel accommodations, varying based on the quality level and amenities offered.
+
+Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping resorts across all price points, understanding the unique market dynamics, revenue models, and operational considerations of these properties.`,
     category: "Glamping",
     relatedTerms: ["glamping", "safari-tent", "yurt", "adr", "occupancy-rate"],
     examples: [
-      "A 20-unit glamping resort in the mountains with safari tents and treehouses",
-      "A coastal glamping resort featuring luxury Airstream trailers"
+      "A budget-friendly glamping resort offering 15 basic yurts with queen beds, linens, and simple furnishings at $75-100/night, providing comfortable standalone accommodations without luxury amenities",
+      "A mid-range 25-unit glamping resort in the mountains featuring safari tents and treehouses with private bathrooms, quality bedding, heating/cooling, and basic kitchenettes at $150-200/night",
+      "An ultra-luxury coastal glamping resort with 12 premium Airstream trailers featuring high-end linens, private hot tubs, gourmet kitchens, concierge service, and premium amenities at $400-600/night"
     ],
     useCases: [
       "Developing new glamping resorts",
@@ -856,7 +920,7 @@ Sage Outdoor Advisory provides feasibility studies and appraisals specifically f
     faqs: [
       {
         question: "What makes a glamping resort different from a campground?",
-        answer: "Glamping resorts offer luxury accommodations with premium amenities, private bathrooms, and often on-site services, while campgrounds are more basic with shared facilities."
+        answer: "Glamping resorts provide standalone, fully furnished units with bedding and linens already included, so guests don't need to bring their own equipment. While glamping resorts range from budget-friendly to ultra-luxury, all offer ready-to-use accommodations. Campgrounds typically require guests to bring their own tents, RVs, or equipment, and facilities like restrooms and showers are usually shared rather than private to each unit."
       }
     ]
   },
@@ -1032,8 +1096,9 @@ Sage Outdoor Advisory includes detailed operating expense analysis in our feasib
     category: "Financial",
     relatedTerms: ["noi", "revenue-projections", "feasibility-study"],
     examples: [
-      "A glamping resort with $500K revenue and $200K operating expenses",
-      "Operating expenses including utilities, maintenance, and management fees"
+      "A 30-unit glamping resort tracks operating expenses: Utilities (electric, water, sewer) = $45K annually, property insurance = $25K, maintenance and repairs = $60K, property management fees (15% of revenue) = $75K on $500K revenue, marketing and advertising = $20K, administrative costs = $15K. Total operating expenses = $240K. These represent 48% of revenue, which is within the typical 30-50% range for outdoor hospitality. Understanding these expenses helps project NOI and property value.",
+      "An RV park owner analyzes operating expenses: With 100 sites generating $750K annual revenue, operating expenses total $300K including: utilities ($85K), property maintenance ($75K), landscaping and groundskeeping ($40K), management fees ($60K), insurance ($25K), and administrative ($15K). The 40% expense ratio leaves $450K NOI. By benchmarking against industry standards, the owner identifies that utilities are high and could invest in efficiency improvements to reduce costs and increase NOI.",
+      "Operating expense tracking for a campground: Monthly expenses include $3,500 utilities, $4,200 maintenance, $2,800 management, $1,500 insurance, $1,200 marketing = $13,200 monthly or $158K annually. On $420K revenue, this 38% expense ratio is efficient. These operating expenses are critical for calculating NOI ($420K - $158K = $262K), which is then used for property valuation using the income approach (NOI ÷ cap rate = value)."
     ],
     useCases: [
       "Financial planning",
