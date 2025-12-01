@@ -1,6 +1,6 @@
 "use client";
 
-import { GlossaryTerm } from "@/lib/glossary";
+import { GlossaryTerm } from "@/lib/glossary/index";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -29,8 +29,12 @@ export default function GlossaryIndex({
     term.seoKeywords.some(keyword => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Get letters that have terms
-  const availableLetters = Object.keys(termsByLetter).sort();
+  // Get letters that have terms, with "#" first for numeric terms
+  const availableLetters = Object.keys(termsByLetter).sort((a, b) => {
+    if (a === "#") return -1;
+    if (b === "#") return 1;
+    return a.localeCompare(b);
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -42,7 +46,7 @@ export default function GlossaryIndex({
             placeholder="Search glossary terms..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-6 py-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-[#00b6a6] focus:border-[#00b6a6]"
+            className="w-full px-6 py-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-[#006b5f] focus:border-[#006b5f]"
           />
           <svg
             className="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400"
@@ -70,7 +74,7 @@ export default function GlossaryIndex({
             }}
             className={`py-4 px-2 border-b-2 font-semibold ${
               activeTab === "alphabetical"
-                ? "border-[#00b6a6] text-[#00b6a6]"
+                ? "border-[#006b5f] text-[#006b5f]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -83,7 +87,7 @@ export default function GlossaryIndex({
             }}
             className={`py-4 px-2 border-b-2 font-semibold ${
               activeTab === "category"
-                ? "border-[#00b6a6] text-[#00b6a6]"
+                ? "border-[#006b5f] text-[#006b5f]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -106,7 +110,7 @@ export default function GlossaryIndex({
                 }}
                 className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                   selectedLetter === letter
-                    ? "bg-[#00b6a6] text-white"
+                    ? "bg-[#006b5f] text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -182,7 +186,7 @@ export default function GlossaryIndex({
           <p className="text-gray-500 text-lg">No terms found matching &ldquo;{searchQuery}&rdquo;</p>
           <button
             onClick={() => setSearchQuery("")}
-            className="mt-4 text-[#00b6a6] hover:text-[#009688] underline"
+            className="mt-4 text-[#006b5f] hover:text-[#005a4f] underline"
           >
             Clear search
           </button>
@@ -196,16 +200,16 @@ function GlossaryTermCard({ term }: { term: GlossaryTerm }) {
   return (
     <Link
       href={`/glossary/${term.slug}`}
-      className="block bg-white border border-gray-200 rounded-lg p-6 hover:border-[#00b6a6] hover:shadow-lg transition-all"
+      className="block bg-white border border-gray-200 rounded-lg p-6 hover:border-[#006b5f] hover:shadow-lg transition-all"
     >
       <div className="flex items-start justify-between mb-2">
         <h3 className="text-xl font-bold text-gray-900">{term.term}</h3>
-        <span className="text-xs bg-[#00b6a6]/10 text-[#00b6a6] px-2 py-1 rounded-full">
+        <span className="text-xs bg-[#006b5f]/10 text-[#006b5f] px-2 py-1 rounded-full">
           {term.category}
         </span>
       </div>
       <p className="text-gray-600 text-sm line-clamp-2">{term.definition}</p>
-      <div className="mt-4 flex items-center text-[#00b6a6] text-sm font-medium">
+      <div className="mt-4 flex items-center text-[#006b5f] text-sm font-medium">
         Read more →
       </div>
     </Link>

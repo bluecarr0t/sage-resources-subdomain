@@ -1,7 +1,8 @@
-import { GlossaryTerm } from "@/lib/glossary";
+import { GlossaryTerm } from "@/lib/glossary/index";
 import Link from "next/link";
 import Image from "next/image";
 import { generateDefinitionSchema, generateFAQSchema } from "@/lib/glossary-schema";
+import Footer from "./Footer";
 
 interface GlossaryTermTemplateProps {
   term: GlossaryTerm;
@@ -76,13 +77,13 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
           </div>
         </nav>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
               {/* Term Header */}
               <div className="mb-8">
-                <div className="inline-block px-3 py-1 bg-[#00b6a6]/10 text-[#00b6a6] text-sm font-semibold rounded-full mb-4">
+                <div className="inline-block px-3 py-1 bg-[#00b6a6]/10 text-[#006b5f] text-sm font-semibold rounded-full mb-4">
                   {term.category}
                 </div>
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -115,7 +116,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                   <ul className="space-y-3">
                     {term.examples.map((example, index) => (
                       <li key={index} className="flex items-start">
-                        <span className="text-[#00b6a6] mr-2">•</span>
+                        <span className="text-[#006b5f] mr-2">•</span>
                         <span className="text-gray-700">{example}</span>
                       </li>
                     ))}
@@ -132,7 +133,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                   <ul className="space-y-3">
                     {term.useCases.map((useCase, index) => (
                       <li key={index} className="flex items-start">
-                        <span className="text-[#00b6a6] mr-2">•</span>
+                        <span className="text-[#006b5f] mr-2">•</span>
                         <span className="text-gray-700">{useCase}</span>
                       </li>
                     ))}
@@ -151,7 +152,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                       <li key={index}>
                         <Link
                           href={link.url}
-                          className="text-[#00b6a6] hover:text-[#009688] underline"
+                          className="text-[#006b5f] hover:text-[#005a4f] underline"
                         >
                           {link.text}
                         </Link>
@@ -193,7 +194,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                 </p>
                 <Link
                   href="https://sageoutdooradvisory.com/contact-us/"
-                  className="inline-block px-8 py-4 bg-white text-[#00b6a6] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
+                  className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
                 >
                   Schedule Free Consultation
                 </Link>
@@ -203,7 +204,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
               <div className="text-center">
                 <Link
                   href="/glossary"
-                  className="text-[#00b6a6] hover:text-[#009688] font-medium"
+                  className="text-[#006b5f] hover:text-[#005a4f] font-medium"
                 >
                   ← Back to Glossary
                 </Link>
@@ -224,7 +225,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                         <li key={relatedTerm.slug}>
                           <Link
                             href={`/glossary/${relatedTerm.slug}`}
-                            className="text-[#00b6a6] hover:text-[#009688] underline"
+                            className="text-[#006b5f] hover:text-[#005a4f] underline"
                           >
                             {relatedTerm.term}
                           </Link>
@@ -243,23 +244,23 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                     <li>
                       <Link
                         href="/glossary"
-                        className="text-[#00b6a6] hover:text-[#009688] underline"
+                        className="text-[#006b5f] hover:text-[#005a4f] underline"
                       >
                         View All Terms
                       </Link>
                     </li>
                     <li>
                       <Link
-                        href="https://sageoutdooradvisory.com/our-services/"
-                        className="text-[#00b6a6] hover:text-[#009688] underline"
+                        href="https://sageoutdooradvisory.com/services-overview/"
+                        className="text-[#006b5f] hover:text-[#005a4f] underline"
                       >
                         Our Services
                       </Link>
                     </li>
                     <li>
                       <Link
-                        href="https://sageoutdooradvisory.com/market-reports/"
-                        className="text-[#00b6a6] hover:text-[#009688] underline"
+                        href="https://sageoutdooradvisory.com/shop/"
+                        className="text-[#006b5f] hover:text-[#005a4f] underline"
                       >
                         Market Reports
                       </Link>
@@ -267,7 +268,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                     <li>
                       <Link
                         href="https://sageoutdooradvisory.com/contact-us/"
-                        className="text-[#00b6a6] hover:text-[#009688] underline font-semibold"
+                        className="text-[#006b5f] hover:text-[#005a4f] underline font-semibold"
                       >
                         Schedule Consultation
                       </Link>
@@ -277,65 +278,10 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
               </div>
             </div>
           </div>
-        </div>
+        </main>
 
         {/* Footer */}
-        <footer className="bg-black text-white py-12 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div>
-                <h3 className="text-xl font-bold mb-4">Sage Outdoor Advisory</h3>
-                <p className="text-gray-400">
-                  5113 South Harper, Suite 2C – #4001<br />
-                  Chicago, Illinois 60615
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Resources</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>
-                    <Link href="/glossary" className="hover:text-white">
-                      Glossary
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="https://sageoutdooradvisory.com/our-services" className="hover:text-white">
-                      Services
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="https://sageoutdooradvisory.com/market-reports" className="hover:text-white">
-                      Market Reports
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Connect</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>
-                    <Link href="https://sageoutdooradvisory.com/contact-us/" className="hover:text-white font-semibold">
-                      Schedule Consultation →
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="https://sageoutdooradvisory.com/clients/" className="hover:text-white">
-                      Client Testimonials
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="https://sageoutdooradvisory.com/about" className="hover:text-white">
-                      About
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-              <p>&copy; {new Date().getFullYear()} Sage Outdoor Advisory. All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   );

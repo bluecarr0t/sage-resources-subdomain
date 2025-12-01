@@ -1,6 +1,7 @@
 import { Metadata } from "next";
-import { getAllGlossaryTerms, getGlossaryTermsByCategory } from "@/lib/glossary";
+import { getAllGlossaryTerms, getGlossaryTermsByCategory } from "@/lib/glossary/index";
 import GlossaryIndex from "@/components/GlossaryIndex";
+import Footer from "@/components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -14,10 +15,27 @@ export const metadata: Metadata = {
     url: "https://resources.sageoutdooradvisory.com/glossary",
     siteName: "Sage Outdoor Advisory",
     type: "website",
+    images: [
+      {
+        url: "https://resources.sageoutdooradvisory.com/images/gradient-2.jpg",
+        width: 1920,
+        height: 1080,
+        alt: "Outdoor hospitality glossary background featuring natural landscape gradient",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["https://resources.sageoutdooradvisory.com/images/gradient-2.jpg"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+    },
   },
 };
 
@@ -35,11 +53,13 @@ export default function GlossaryPage() {
   // Group terms by first letter for alphabetical navigation
   const termsByLetter: Record<string, typeof allTerms> = {};
   allTerms.forEach(term => {
-    const firstLetter = term.term.charAt(0).toUpperCase();
-    if (!termsByLetter[firstLetter]) {
-      termsByLetter[firstLetter] = [];
+    const firstChar = term.term.charAt(0);
+    // Group all numeric terms (0-9) under "#"
+    const letter = /[0-9]/.test(firstChar) ? "#" : firstChar.toUpperCase();
+    if (!termsByLetter[letter]) {
+      termsByLetter[letter] = [];
     }
-    termsByLetter[firstLetter].push(term);
+    termsByLetter[letter].push(term);
   });
 
   // Sort terms alphabetically
@@ -80,19 +100,36 @@ export default function GlossaryPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-16 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/gradient-2.jpg"
+            alt="Outdoor hospitality glossary background featuring natural landscape gradient"
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+            quality={90}
+          />
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-indigo-900/40" />
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
               Outdoor Hospitality Glossary
             </h1>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+            <p className="text-xl text-white/95 max-w-3xl mx-auto drop-shadow-md">
               Comprehensive definitions of industry terms for glamping, RV resorts, campgrounds, feasibility studies, and appraisals
             </p>
           </div>
         </div>
       </section>
 
+      <main>
       {/* Glossary Index Component */}
       <GlossaryIndex
         allTerms={allTerms}
@@ -112,70 +149,16 @@ export default function GlossaryPage() {
           </p>
           <Link
             href="https://sageoutdooradvisory.com/contact-us/"
-            className="inline-block px-8 py-4 bg-white text-[#00b6a6] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
+            className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
           >
             Schedule Free Consultation
           </Link>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-black text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">Sage Outdoor Advisory</h3>
-              <p className="text-gray-400">
-                5113 South Harper, Suite 2C – #4001<br />
-                Chicago, Illinois 60615
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/glossary" className="hover:text-white">
-                    Glossary
-                  </Link>
-                </li>
-                <li>
-                  <Link href="https://sageoutdooradvisory.com/our-services" className="hover:text-white">
-                    Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="https://sageoutdooradvisory.com/market-reports" className="hover:text-white">
-                    Market Reports
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Connect</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="https://sageoutdooradvisory.com/contact-us/" className="hover:text-white font-semibold">
-                    Schedule Consultation →
-                  </Link>
-                </li>
-                <li>
-                  <Link href="https://sageoutdooradvisory.com/clients/" className="hover:text-white">
-                    Client Testimonials
-                  </Link>
-                </li>
-                <li>
-                  <Link href="https://sageoutdooradvisory.com/about" className="hover:text-white">
-                    About
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Sage Outdoor Advisory. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

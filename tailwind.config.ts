@@ -14,6 +14,8 @@ const config: Config = {
         sage: {
           teal: "#00b6a6",
           "teal-dark": "#009688",
+          "teal-text": "#006b5f", // WCAG AA compliant for text on white
+          "teal-text-hover": "#005a4f", // Darker for hover states
         },
       },
     },

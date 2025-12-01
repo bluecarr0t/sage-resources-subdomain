@@ -1,4 +1,4 @@
-import { GlossaryTerm } from "./glossary";
+import { GlossaryTerm } from "./glossary/index";
 
 interface FAQItem {
   question: string;

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getGlossaryTerm, getAllGlossaryTerms, getRelatedTerms } from "@/lib/glossary";
+import { getGlossaryTerm, getAllGlossaryTerms, getRelatedTerms } from "@/lib/glossary/index";
 import { notFound } from "next/navigation";
 import GlossaryTermTemplate from "@/components/GlossaryTermTemplate";
 import Link from "next/link";

@@ -1,11 +1,13 @@
 import { MetadataRoute } from "next";
 import { getAllLandingPageSlugs, getLandingPage } from "@/lib/landing-pages";
-import { getAllGlossaryTerms } from "@/lib/glossary";
+import { getAllGlossaryTerms } from "@/lib/glossary/index";
+import { getAllGuideSlugs, getGuide } from "@/lib/guides";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const landingPageSlugs = getAllLandingPageSlugs();
   const glossaryTerms = getAllGlossaryTerms();
+  const guideSlugs = getAllGuideSlugs();
 
   const landingPages = landingPageSlugs.map((slug) => {
     const page = getLandingPage(slug);
@@ -29,6 +31,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  const guidePages = guideSlugs.map((slug) => {
+    const guide = getGuide(slug);
+    // Determine if it's a pillar page (ends with "-complete-guide") or cluster page
+    const isPillarPage = slug.endsWith("-complete-guide");
+    const lastModified = guide?.lastModified 
+      ? new Date(guide.lastModified)
+      : new Date("2025-01-15");
+    
+    return {
+      url: `${baseUrl}/guides/${slug}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: isPillarPage ? 0.9 : 0.8, // Higher priority for pillar pages
+    };
+  });
+
   return [
     {
       url: baseUrl,
@@ -42,6 +60,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    {
+      url: `${baseUrl}/partners`,
+      lastModified: new Date(), // Partners page
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    ...guidePages,
     ...landingPages,
     ...glossaryPages,
   ];
