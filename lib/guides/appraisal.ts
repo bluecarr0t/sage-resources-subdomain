@@ -322,35 +322,101 @@ export const appraisalGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What is a property appraisal?",
-        answer: "A property appraisal is an unbiased professional opinion of a property's value, typically required for financing, transactions, or investment analysis."
+        answer: `<p>A property appraisal is an unbiased professional opinion of a property's value. For outdoor hospitality properties, appraisals determine fair market value based on the property's income potential, comparable sales, and replacement cost.</p>
+        
+        <p>Appraisals serve several critical purposes:</p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Financing:</strong> Lenders require appraisals to determine loan amounts</li>
+          <li><strong>Transactions:</strong> Buyers and sellers use appraisals to establish fair purchase prices</li>
+          <li><strong>Refinancing:</strong> Property owners need appraisals when refinancing loans</li>
+          <li><strong>Investment Analysis:</strong> Investors use appraisals to evaluate opportunities</li>
+        </ul>`
       },
       {
         question: "Why do I need an appraisal?",
-        answer: "Appraisals are required for financing, buying/selling properties, refinancing, and investment analysis. Lenders require them to determine loan amounts."
+        answer: `<p>Appraisals are essential for several reasons:</p>
+        
+        <p><strong>Financing Requirements:</strong> Lenders require appraisals to determine loan amounts and assess collateral value. You typically cannot secure financing without a professional appraisal.</p>
+        
+        <p><strong>Transaction Support:</strong> When buying or selling a property, appraisals help establish fair market value and support negotiation.</p>
+        
+        <p><strong>Refinancing:</strong> If you're refinancing an existing loan, lenders require a current appraisal to determine the property's current value.</p>
+        
+        <p><strong>Investment Analysis:</strong> Appraisals provide objective valuation that helps investors make informed decisions about acquisitions, dispositions, and portfolio management.</p>`
       },
       {
         question: "How much does an appraisal cost?",
-        answer: "Appraisal costs vary based on property complexity, typically ranging from $5,000 to $50,000+ for outdoor hospitality properties."
+        answer: `<p>Appraisal costs vary based on property complexity and scope. For outdoor hospitality properties, typical costs range from:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Simple properties:</strong> $5,000 - $15,000</li>
+          <li><strong>Standard properties:</strong> $15,000 - $35,000</li>
+          <li><strong>Complex properties:</strong> $35,000 - $50,000+</li>
+        </ul>
+        
+        <p>Factors affecting cost include property size, complexity, location, data availability, and timeline. <a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a customized quote based on your specific property.</p>`
       },
       {
         question: "How long does an appraisal take?",
-        answer: "Most appraisals take 2-4 weeks to complete, though timelines vary based on property complexity and data availability."
+        answer: `<p>Most appraisals take <strong>2-4 weeks</strong> to complete, though timelines vary based on:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Property complexity</li>
+          <li>Data availability</li>
+          <li>Comparable sales access</li>
+          <li>Client responsiveness</li>
+        </ul>
+        
+        <p>The process typically includes property inspection, data collection, analysis, report preparation, and quality review. Rush appraisals may be possible but typically cost more.</p>`
       },
       {
         question: "What's the difference between an appraisal and a feasibility study?",
-        answer: "An appraisal determines the current value of an existing property, while a feasibility study evaluates the viability of a proposed project."
+        answer: `<p>Appraisals and feasibility studies serve different purposes:</p>
+        
+        <p><strong>Appraisal:</strong> Determines the <em>current value</em> of an existing property. It's present-focused and answers questions like "What is this property worth today?"</p>
+        
+        <p><strong>Feasibility Study:</strong> Evaluates whether a <em>proposed project</em> is viable and profitable. It's forward-looking and answers questions like "Should I build this?" and "What will revenues be?"</p>
+        
+        <p><strong>When You Need Both:</strong> For development projects, you typically need both—a feasibility study to validate the concept, and an appraisal to determine property value. Learn more in our <a href="/guides/appraisal-vs-feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">appraisal vs feasibility study guide</a>.</p>`
       },
       {
         question: "Will banks accept Sage's appraisals?",
-        answer: "Yes, Sage Outdoor Advisory's appraisals are bank-approved and trusted by financial institutions nationwide for outdoor hospitality property financing."
+        answer: `<p><strong>Yes, absolutely.</strong> Sage Outdoor Advisory's appraisals are bank-approved and trusted by financial institutions nationwide for outdoor hospitality property financing.</p>
+        
+        <p>We've completed over 300 appraisals in the outdoor hospitality industry. Our appraisals meet USPAP standards and are specifically designed to satisfy lender requirements with:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Comprehensive property analysis</li>
+          <li>Multiple valuation approaches</li>
+          <li>Professional documentation</li>
+          <li>Specialized industry expertise</li>
+        </ul>
+        
+        <p>We've helped numerous clients secure financing for their glamping, RV resort, and campground properties.</p>`
       },
       {
         question: "What appraisal methods are used?",
-        answer: "Appraisers typically use three approaches: income approach (based on income potential), sales comparison approach (comparable sales), and cost approach (replacement cost)."
+        answer: `<p>Appraisers typically use three approaches to determine property value:</p>
+        
+        <p><strong>1. Income Approach:</strong> Based on the property's income-generating potential. This is typically the primary method for income-producing properties like outdoor hospitality properties. Formula: Value = NOI / Cap Rate</p>
+        
+        <p><strong>2. Sales Comparison Approach:</strong> Based on comparable sales of similar properties. This method compares your property to recently sold similar properties and adjusts for differences.</p>
+        
+        <p><strong>3. Cost Approach:</strong> Based on replacement cost minus depreciation. This method estimates what it would cost to replace the property and adjusts for depreciation.</p>
+        
+        <p>For outdoor hospitality properties, the income approach is typically given the most weight, as these properties are primarily valued based on their income potential. Learn more in our <a href="/guides/income-approach-appraisal" className="text-[#006b5f] hover:text-[#005a4f] underline">income approach appraisal guide</a>.</p>`
       },
       {
         question: "Why do I need a specialized appraiser for outdoor hospitality?",
-        answer: "Outdoor hospitality properties have unique characteristics that require specialized expertise to ensure accurate valuations. Standard appraisers may not understand the specific market dynamics and revenue models."
+        answer: `<p>Outdoor hospitality properties have unique characteristics that require specialized expertise to ensure accurate valuations:</p>
+        
+        <p><strong>Unique Revenue Models:</strong> Glamping resorts, RV parks, and campgrounds have revenue models that differ significantly from traditional hospitality properties. Specialized appraisers understand occupancy patterns, seasonal variations, and revenue streams specific to these property types.</p>
+        
+        <p><strong>Market Dynamics:</strong> The outdoor hospitality market has specific dynamics, trends, and comparable sales that general appraisers may not fully understand.</p>
+        
+        <p><strong>Property Characteristics:</strong> These properties often have unique features like extensive land, natural amenities, specialized infrastructure, and location-specific factors that require specialized knowledge to properly value.</p>
+        
+        <p>Standard appraisers may not understand these nuances, which can result in inaccurate valuations that don't reflect the property's true value. Working with a specialized appraiser ensures you get an accurate, defensible valuation.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -488,11 +554,32 @@ export const appraisalGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What is the income approach?",
-        answer: "The income approach is a property valuation method that determines value based on the property's income-generating potential, using the formula: Value = NOI / Cap Rate."
+        answer: `<p>The income approach is a property valuation method that determines value based on the property's income-generating potential. It's based on the principle that a property's value is directly related to its ability to generate income.</p>
+        
+        <p>The basic formula is: <strong>Value = NOI (Net Operating Income) / Cap Rate</strong></p>
+        
+        <p><strong>Key Components:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>NOI (Net Operating Income):</strong> The property's annual income minus operating expenses</li>
+          <li><strong>Cap Rate:</strong> The capitalization rate, which reflects the rate of return investors expect</li>
+        </ul>
+        
+        <p>For outdoor hospitality properties, the income approach typically provides the most accurate valuation because these properties are primarily valued based on their income potential.</p>`
       },
       {
         question: "When is the income approach used?",
-        answer: "The income approach is typically the primary method for income-producing properties like outdoor hospitality properties, as it reflects their income-generating potential."
+        answer: `<p>The income approach is typically the <strong>primary method</strong> for income-producing properties like outdoor hospitality properties, as it reflects their income-generating potential.</p>
+        
+        <p><strong>Best For:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Income-producing properties (rental properties, hospitality properties)</li>
+          <li>Properties with stable or predictable income streams</li>
+          <li>Investment properties where income is the primary value driver</li>
+        </ul>
+        
+        <p><strong>Outdoor Hospitality Properties:</strong> For glamping resorts, RV parks, and campgrounds, the income approach is typically given the most weight because these properties are valued primarily based on their ability to generate rental income and operating revenue.</p>
+        
+        <p>Appraisers may also use sales comparison and cost approaches to support or validate the income approach valuation, but the income approach is typically the primary method for these property types.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -578,11 +665,29 @@ export const appraisalGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What's the difference between an appraisal and a feasibility study?",
-        answer: "An appraisal determines the current value of an existing property, while a feasibility study evaluates the viability of a proposed project."
+        answer: `<p>Appraisals and feasibility studies serve different purposes:</p>
+        
+        <p><strong>Appraisal:</strong> Determines the <em>current value</em> of an existing property. It's present-focused and answers "What is this property worth today?" Appraisals are typically used for financing, transactions, or refinancing.</p>
+        
+        <p><strong>Feasibility Study:</strong> Evaluates whether a <em>proposed project</em> is viable and profitable. It's forward-looking and answers "Should I build this?" and "What will revenues be?" Feasibility studies are used for planning new developments or expansions.</p>
+        
+        <p>While both involve property analysis, they serve different decision-making purposes at different stages of property ownership or development.</p>`
       },
       {
         question: "Do I need both?",
-        answer: "For development projects, yes. The feasibility study validates the concept, and the appraisal determines property value."
+        answer: `<p><strong>For development projects, yes—you typically need both.</strong></p>
+        
+        <p><strong>Feasibility Study:</strong> Validates the project concept early in the planning process. It helps you understand if the project is viable before committing significant resources.</p>
+        
+        <p><strong>Appraisal:</strong> Determines property value, which is needed for financing. You may need:</p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>A pre-development appraisal to establish baseline value</li>
+          <li>An appraisal during or after development for financing</li>
+        </ul>
+        
+        <p>Lenders often require both documents for development financing because they provide complementary information: the feasibility study assesses project viability, while the appraisal determines collateral value.</p>
+        
+        <p>Learn more about the differences in our <a href="/guides/feasibility-study-vs-appraisal" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study vs appraisal guide</a>.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -654,7 +759,24 @@ export const appraisalGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "How much does an appraisal cost?",
-        answer: "Appraisal costs vary based on property complexity, typically ranging from $5,000 to $50,000+ for outdoor hospitality properties."
+        answer: `<p>Appraisal costs vary based on property complexity and scope. For outdoor hospitality properties, typical costs range from:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Simple properties:</strong> $5,000 - $15,000</li>
+          <li><strong>Standard properties:</strong> $15,000 - $35,000</li>
+          <li><strong>Complex properties:</strong> $35,000 - $50,000+</li>
+        </ul>
+        
+        <p><strong>Factors Affecting Cost:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Property size and complexity</li>
+          <li>Number of units or sites</li>
+          <li>Location and data availability</li>
+          <li>Scope of analysis required</li>
+          <li>Timeline (rush appraisals may cost more)</li>
+        </ul>
+        
+        <p><a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a detailed quote based on your specific property.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -755,11 +877,44 @@ export const appraisalGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What do banks require in an appraisal?",
-        answer: "Banks require qualified appraisers, comprehensive property analysis, multiple valuation approaches, and professional documentation that meets USPAP standards."
+        answer: `<p>Banks and lenders have specific requirements for property appraisals. Key requirements include:</p>
+        
+        <p><strong>Qualified Appraisers:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Certified or licensed appraisers with appropriate credentials</li>
+          <li>Industry expertise relevant to the property type</li>
+          <li>Experience with similar properties</li>
+        </ul>
+        
+        <p><strong>Comprehensive Property Analysis:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Physical property inspection and assessment</li>
+          <li>Market analysis and comparable sales</li>
+          <li>Income analysis for income-producing properties</li>
+          <li>Location and accessibility evaluation</li>
+        </ul>
+        
+        <p><strong>Multiple Valuation Approaches:</strong> Typically requires at least two of the three approaches (income, sales comparison, cost) with clear rationale for weighting.</p>
+        
+        <p><strong>USPAP Compliance:</strong> Professional documentation that meets Uniform Standards of Professional Appraisal Practice (USPAP) standards.</p>
+        
+        <p>See our <a href="/guides/bank-appraisal-requirements" className="text-[#006b5f] hover:text-[#005a4f] underline">bank appraisal requirements guide</a> for detailed information.</p>`
       },
       {
         question: "Will banks accept Sage's appraisals?",
-        answer: "Yes, Sage Outdoor Advisory's appraisals are bank-approved and trusted by financial institutions nationwide for outdoor hospitality property financing."
+        answer: `<p><strong>Yes, absolutely.</strong> Sage Outdoor Advisory's appraisals are bank-approved and trusted by financial institutions nationwide for outdoor hospitality property financing.</p>
+        
+        <p>We've completed over 300 appraisals in the outdoor hospitality industry. Our appraisals meet all lender requirements with:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Qualified, certified appraisers with specialized expertise</li>
+          <li>Comprehensive property analysis</li>
+          <li>Multiple valuation approaches</li>
+          <li>USPAP-compliant professional documentation</li>
+          <li>Proven track record with lenders nationwide</li>
+        </ul>
+        
+        <p>We've helped numerous clients secure financing for their glamping, RV resort, and campground properties.</p>`
       }
     ],
     lastModified: "2025-01-15",

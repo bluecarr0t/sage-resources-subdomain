@@ -141,6 +141,11 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
               {content.hero.subheadline}
             </p>
+            {content.lastModified && (
+              <p className="text-xs text-gray-500 mb-6">
+                Last Updated: December 1, 2025
+              </p>
+            )}
             <Link
               href={content.hero.ctaLink}
               className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
@@ -150,19 +155,6 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
           </div>
         </div>
       </section>
-
-      {/* Last Updated Badge */}
-      {content.lastModified && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 mx-4 sm:mx-6 lg:mx-8 my-8 p-4 rounded-lg">
-          <p className="text-sm text-gray-600">
-            <strong>Last Updated:</strong> {new Date(content.lastModified).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </p>
-        </div>
-      )}
 
       {/* Key Takeaways Section */}
       {content.keyTakeaways && content.keyTakeaways.length > 0 && (

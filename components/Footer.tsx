@@ -21,6 +21,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/guides" className="hover:text-white">
+                  Guides
+                </Link>
+              </li>
+              <li>
                 <Link href="https://sageoutdooradvisory.com/services-overview/" className="hover:text-white">
                   Services
                 </Link>

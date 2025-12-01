@@ -5,35 +5,43 @@ import { getAllGuideSlugs, getGuide } from "@/lib/guides";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
+  
+  // Get all dynamic content
   const landingPageSlugs = getAllLandingPageSlugs();
   const glossaryTerms = getAllGlossaryTerms();
   const guideSlugs = getAllGuideSlugs();
 
-  const landingPages = landingPageSlugs.map((slug) => {
-    const page = getLandingPage(slug);
-    // Use lastModified date if provided, otherwise use a default date (content creation date)
-    const lastModified = page?.lastModified 
-      ? new Date(page.lastModified)
-      : new Date("2025-01-01"); // Default to a recent date for existing content
-    
-    return {
-      url: `${baseUrl}/landing/${slug}`,
-      lastModified,
+  // Generate landing pages (21 pages)
+  const landingPages = landingPageSlugs
+    .map((slug) => {
+      const page = getLandingPage(slug);
+      const lastModified = page?.lastModified 
+        ? new Date(page.lastModified)
+        : new Date("2025-01-01");
+      
+      return {
+        url: `${baseUrl}/landing/${slug}`,
+        lastModified,
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      };
+    })
+    .sort((a, b) => a.url.localeCompare(b.url)); // Sort alphabetically
+
+  // Generate glossary term pages (57 pages)
+  const glossaryPages = glossaryTerms
+    .map((term) => ({
+      url: `${baseUrl}/glossary/${term.slug}`,
+      lastModified: new Date("2025-01-01"),
       changeFrequency: "monthly" as const,
-      priority: 0.8,
-    };
-  });
+      priority: 0.7,
+    }))
+    .sort((a, b) => a.url.localeCompare(b.url)); // Sort alphabetically
 
-  const glossaryPages = glossaryTerms.map((term) => ({
-    url: `${baseUrl}/glossary/${term.slug}`,
-    lastModified: new Date("2025-01-01"), // Glossary terms - update when terms are added/modified
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  const guidePages = guideSlugs.map((slug) => {
+  // Generate guide pages (21 pages)
+  // Separate pillar pages (higher priority) from cluster pages and sort
+  const guidePagesWithType = guideSlugs.map((slug) => {
     const guide = getGuide(slug);
-    // Determine if it's a pillar page (ends with "-complete-guide") or cluster page
     const isPillarPage = slug.endsWith("-complete-guide");
     const lastModified = guide?.lastModified 
       ? new Date(guide.lastModified)
@@ -43,31 +51,64 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/guides/${slug}`,
       lastModified,
       changeFrequency: "monthly" as const,
-      priority: isPillarPage ? 0.9 : 0.8, // Higher priority for pillar pages
+      priority: isPillarPage ? (0.9 as const) : (0.8 as const),
+      isPillarPage,
     };
   });
 
+  // Sort: pillar pages first, then alphabetically within each group
+  const guidePages = guidePagesWithType
+    .sort((a, b) => {
+      if (a.isPillarPage && !b.isPillarPage) return -1;
+      if (!a.isPillarPage && b.isPillarPage) return 1;
+      return a.url.localeCompare(b.url);
+    })
+    .map(({ isPillarPage, ...page }) => page);
+
+  // Build sitemap with proper ordering:
+  // 1. Main pages (highest priority)
+  // 2. Index pages (glossary, guides)
+  // 3. Guide pages (pillar pages first)
+  // 4. Landing pages
+  // 5. Glossary pages
   return [
+    // Main homepage
     {
       url: baseUrl,
-      lastModified: new Date(), // Homepage - updates frequently
-      changeFrequency: "weekly",
-      priority: 1,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 1.0,
     },
+    
+    // Index pages (high priority navigation pages)
     {
-      url: `${baseUrl}/glossary`,
-      lastModified: new Date(), // Glossary index - updates when terms added
-      changeFrequency: "weekly",
+      url: `${baseUrl}/guides`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/glossary`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    },
+    
+    // Partners page
+    {
       url: `${baseUrl}/partners`,
-      lastModified: new Date(), // Partners page
-      changeFrequency: "monthly",
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
       priority: 0.8,
     },
+    
+    // Guide pages (organized by priority - pillar pages first)
     ...guidePages,
+    
+    // Landing pages (service and location-based)
     ...landingPages,
+    
+    // Glossary term pages
     ...glossaryPages,
   ];
 }

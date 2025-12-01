@@ -272,27 +272,105 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What is glamping?",
-        answer: "Glamping is a fusion of 'glamorous' and 'camping' - luxury accommodations in natural settings that offer outdoor experiences without sacrificing comfort."
+        answer: `<p>Glamping is a fusion of <em>"glamorous"</em> and <em>"camping"</em>—luxury accommodations in natural settings that offer outdoor experiences without sacrificing comfort.</p>
+        
+        <p>Unlike traditional camping, glamping provides:</p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Comfortable, furnished accommodations</li>
+          <li>Premium amenities and services</li>
+          <li>Unique, memorable experiences</li>
+          <li>Connection to nature with modern conveniences</li>
+        </ul>
+        
+        <p>Glamping appeals to travelers who want to experience the outdoors while enjoying hotel-like comfort and amenities.</p>`
       },
       {
         question: "How profitable is a glamping business?",
-        answer: "Profitability varies significantly based on location, market, pricing, and operations. A professional feasibility study can help assess profit potential for your specific project."
+        answer: `<p>Profitability varies significantly based on several factors:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Location:</strong> Prime locations with high demand can command premium pricing</li>
+          <li><strong>Market:</strong> Local market conditions, competition, and tourism trends</li>
+          <li><strong>Pricing Strategy:</strong> Premium positioning vs. value positioning</li>
+          <li><strong>Operations:</strong> Efficient operations and cost management</li>
+          <li><strong>Occupancy Rates:</strong> Achieving strong occupancy, especially during peak seasons</li>
+        </ul>
+        
+        <p>A professional <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> can help assess profit potential for your specific project by analyzing market demand, competitive positioning, and financial projections.</p>`
       },
       {
         question: "How much does it cost to start a glamping business?",
-        answer: "Startup costs vary widely based on property size, accommodation types, and amenities, typically ranging from $100,000 to several million dollars."
+        answer: `<p>Startup costs vary widely based on several factors:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Property Size:</strong> Land acquisition and development costs</li>
+          <li><strong>Accommodation Types:</strong> Different structures have different costs (yurts, A-frames, tents, etc.)</li>
+          <li><strong>Amenities:</strong> Premium amenities increase costs but can also increase revenue potential</li>
+          <li><strong>Location:</strong> Land costs and development requirements vary by location</li>
+        </ul>
+        
+        <p>Typical startup costs range from <strong>$100,000 to several million dollars</strong>, depending on the scope and scale of your project.</p>
+        
+        <p>A feasibility study can help you develop accurate cost estimates and identify opportunities to optimize your investment. See our <a href="/guides/how-to-start-glamping-business" className="text-[#006b5f] hover:text-[#005a4f] underline">how to start a glamping business guide</a> for detailed information.</p>`
       },
       {
         question: "Do I need a feasibility study for a glamping project?",
-        answer: "Yes, a feasibility study is essential for validating your concept, securing financing, and making informed development decisions."
+        answer: `<p><strong>Yes, a feasibility study is essential</strong> for several reasons:</p>
+        
+        <p><strong>Validating Your Concept:</strong> A feasibility study helps validate that your glamping concept is viable in your target market before you commit significant resources.</p>
+        
+        <p><strong>Securing Financing:</strong> Banks and lenders typically require a feasibility study to assess project viability before approving financing. A bank-approved feasibility study significantly increases your chances of securing financing.</p>
+        
+        <p><strong>Making Informed Decisions:</strong> Feasibility studies provide data-driven insights about market demand, competitive positioning, revenue potential, and risk factors to help you make informed development decisions.</p>
+        
+        <p><strong>Optimizing Your Project:</strong> Studies identify opportunities to optimize project scope, amenities, and pricing strategies to maximize revenue and profitability.</p>
+        
+        <p>Learn more in our <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility studies complete guide</a>.</p>`
       },
       {
         question: "What types of accommodations work best for glamping?",
-        answer: "Popular options include yurts, A-frames, safari tents, treehouses, and tiny homes. The best choice depends on your market, location, and target guests."
+        answer: `<p>Popular glamping accommodation options include:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Yurts:</strong> Circular structures that offer unique aesthetic appeal</li>
+          <li><strong>A-frames:</strong> Modern, geometric structures popular with contemporary travelers</li>
+          <li><strong>Safari Tents:</strong> Large, luxurious tents with full amenities</li>
+          <li><strong>Treehouses:</strong> Elevated accommodations offering unique perspectives</li>
+          <li><strong>Tiny Homes:</strong> Fully functional small homes with all modern conveniences</li>
+          <li><strong>Geodesic Domes:</strong> Futuristic-looking structures that maximize views</li>
+        </ul>
+        
+        <p><strong>The best choice depends on:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Your target market and guest preferences</li>
+          <li>Location and terrain</li>
+          <li>Budget and cost considerations</li>
+          <li>Local regulations and permitting requirements</li>
+        </ul>
+        
+        <p>See our <a href="/guides/glamping-accommodation-types" className="text-[#006b5f] hover:text-[#005a4f] underline">glamping accommodation types guide</a> for detailed information.</p>`
       },
       {
         question: "How do I get financing for a glamping resort?",
-        answer: "Financing typically requires a feasibility study, property appraisal, business plan, and market analysis. See our financing guide for detailed information."
+        answer: `<p>Securing financing for a glamping resort typically requires several key components:</p>
+        
+        <p><strong>Required Documentation:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Feasibility Study:</strong> Validates project viability and revenue potential</li>
+          <li><strong>Property Appraisal:</strong> Determines property value for collateral</li>
+          <li><strong>Business Plan:</strong> Outlines your business strategy and operations</li>
+          <li><strong>Market Analysis:</strong> Demonstrates market demand and competitive positioning</li>
+        </ul>
+        
+        <p><strong>Additional Considerations:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Strong personal financial position and credit history</li>
+          <li>Experience in hospitality or related industries</li>
+          <li>Clear development timeline and budget</li>
+          <li>Professional team (architect, contractor, etc.)</li>
+        </ul>
+        
+        <p>Banks and lenders want to see comprehensive planning and professional documentation. Working with specialized consultants who understand glamping projects can significantly improve your financing prospects.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -482,19 +560,71 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What is an RV resort?",
-        answer: "An RV resort is a premium outdoor hospitality property designed for RVs, offering enhanced amenities, services, and facilities compared to traditional RV parks."
+        answer: `<p>An RV resort is a premium outdoor hospitality property designed for RVs, offering enhanced amenities, services, and facilities compared to traditional RV parks.</p>
+        
+        <p>RV resorts typically feature:</p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Premium sites with full hookups (water, sewer, electric)</li>
+          <li>Enhanced amenities like pools, recreation centers, and restaurants</li>
+          <li>Higher-quality facilities and grounds maintenance</li>
+          <li>Additional services and concierge-level customer service</li>
+          <li>Premium pricing reflecting the enhanced experience</li>
+        </ul>
+        
+        <p>RV resorts appeal to RVers seeking a more luxurious and amenity-rich experience compared to basic RV parks.</p>`
       },
       {
         question: "What's the difference between an RV resort and an RV park?",
-        answer: "RV resorts offer premium amenities and services at higher price points, while RV parks provide more basic services at lower price points."
+        answer: `<p>The key differences between RV resorts and RV parks include:</p>
+        
+        <p><strong>RV Resorts:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Premium amenities and services</li>
+          <li>Higher price points</li>
+          <li>Enhanced facilities and landscaping</li>
+          <li>Additional services and entertainment</li>
+          <li>Target market: Discerning RVers seeking luxury experiences</li>
+        </ul>
+        
+        <p><strong>RV Parks:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Basic amenities and services</li>
+          <li>Lower price points</li>
+          <li>Essential facilities (hookups, restrooms, laundry)</li>
+          <li>Focus on functionality and value</li>
+          <li>Target market: Cost-conscious RVers seeking basic services</li>
+        </ul>
+        
+        <p>See our <a href="/guides/rv-resort-vs-rv-park" className="text-[#006b5f] hover:text-[#005a4f] underline">RV resort vs RV park guide</a> for a detailed comparison.</p>`
       },
       {
         question: "How much does it cost to start an RV resort?",
-        answer: "Startup costs vary significantly based on size, location, and amenities, typically ranging from several hundred thousand to tens of millions of dollars."
+        answer: `<p>Startup costs vary significantly based on several factors:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Size:</strong> Number of sites impacts land, infrastructure, and development costs</li>
+          <li><strong>Location:</strong> Land costs and development requirements vary by location</li>
+          <li><strong>Amenities:</strong> Premium amenities (pools, recreation centers, restaurants) increase costs but can also increase revenue potential</li>
+          <li><strong>Infrastructure:</strong> Utilities, roads, and site development costs</li>
+        </ul>
+        
+        <p>Typical startup costs range from <strong>several hundred thousand to tens of millions of dollars</strong>, depending on the scope and scale of your project.</p>
+        
+        <p>A <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> can help you develop accurate cost estimates and identify opportunities to optimize your investment.</p>`
       },
       {
         question: "Do I need a feasibility study for an RV resort?",
-        answer: "Yes, a feasibility study is essential for validating your concept, securing financing, and making informed development decisions."
+        answer: `<p><strong>Yes, a feasibility study is essential</strong> for several reasons:</p>
+        
+        <p><strong>Validating Your Concept:</strong> A feasibility study helps validate that your RV resort concept is viable in your target market before you commit significant resources.</p>
+        
+        <p><strong>Securing Financing:</strong> Banks and lenders typically require a feasibility study to assess project viability. A bank-approved feasibility study significantly increases your chances of securing financing.</p>
+        
+        <p><strong>Making Informed Decisions:</strong> Feasibility studies provide data-driven insights about market demand, competitive positioning, revenue potential, and risk factors.</p>
+        
+        <p><strong>Optimizing Your Project:</strong> Studies identify opportunities to optimize project scope, amenities, and pricing strategies to maximize revenue and profitability.</p>
+        
+        <p>Learn more in our <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility studies complete guide</a>.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -637,7 +767,19 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What are the most popular glamping accommodation types?",
-        answer: "Popular types include yurts, A-frame cabins, safari tents, treehouses, and geodesic domes. Each offers unique characteristics and appeal to different markets."
+        answer: `<p>Popular glamping accommodation types include:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Yurts:</strong> Circular structures with unique aesthetic appeal and good insulation</li>
+          <li><strong>A-frame cabins:</strong> Modern, geometric structures popular with contemporary travelers</li>
+          <li><strong>Safari tents:</strong> Large, luxurious tents with full amenities</li>
+          <li><strong>Treehouses:</strong> Elevated accommodations offering unique perspectives and experiences</li>
+          <li><strong>Geodesic domes:</strong> Futuristic-looking structures that maximize views and natural light</li>
+        </ul>
+        
+        <p>Each accommodation type offers unique characteristics and appeals to different markets. The best choice depends on your target guests, location, budget, and local regulations.</p>
+        
+        <p>See our comprehensive <a href="/guides/glamping-accommodation-types" className="text-[#006b5f] hover:text-[#005a4f] underline">glamping accommodation types guide</a> for detailed information on each option.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -732,7 +874,19 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What are the current glamping market trends?",
-        answer: "Key trends include market growth, luxury amenities demand, sustainability focus, professionalization of operations, and growing institutional investment."
+        answer: `<p>Key glamping market trends for 2025 include:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Market Growth:</strong> Continued expansion of the glamping market with increasing consumer demand</li>
+          <li><strong>Luxury Amenities Demand:</strong> Guests expect premium amenities and services at glamping properties</li>
+          <li><strong>Sustainability Focus:</strong> Growing emphasis on eco-friendly practices and environmental responsibility</li>
+          <li><strong>Professionalization of Operations:</strong> More sophisticated business operations and management practices</li>
+          <li><strong>Institutional Investment:</strong> Growing interest from institutional investors and larger hospitality companies</li>
+        </ul>
+        
+        <p>Understanding these trends can help you position your glamping business for success and align your offerings with market demands.</p>
+        
+        <p>See our <a href="/guides/glamping-market-trends-2025" className="text-[#006b5f] hover:text-[#005a4f] underline">glamping market trends 2025 guide</a> for detailed analysis and insights.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -845,7 +999,23 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "How do I start a glamping business?",
-        answer: "Start with research and planning, conduct a feasibility study, select a location, develop a business plan, secure permits, obtain financing, design and construct, set up operations, and launch with marketing."
+        answer: `<p>Starting a glamping business involves several key steps:</p>
+        
+        <ol className="list-decimal list-inside space-y-1 ml-4">
+          <li><strong>Research and Planning:</strong> Understand the market, competition, and your target guests</li>
+          <li><strong>Feasibility Study:</strong> Validate your concept and assess market viability</li>
+          <li><strong>Location Selection:</strong> Choose a site with appropriate zoning, access, and natural appeal</li>
+          <li><strong>Business Plan:</strong> Develop a comprehensive business plan outlining your strategy</li>
+          <li><strong>Permits and Approvals:</strong> Secure necessary zoning, building, and operational permits</li>
+          <li><strong>Financing:</strong> Obtain funding through loans, investors, or other sources</li>
+          <li><strong>Design and Construction:</strong> Design your property and build accommodations and amenities</li>
+          <li><strong>Operations Setup:</strong> Establish operations systems, staff, and procedures</li>
+          <li><strong>Marketing and Launch:</strong> Market your property and launch with a strong opening strategy</li>
+        </ol>
+        
+        <p>Each step requires careful planning and execution. A professional feasibility study can help guide you through the early stages and increase your chances of success.</p>
+        
+        <p>See our comprehensive <a href="/guides/how-to-start-glamping-business" className="text-[#006b5f] hover:text-[#005a4f] underline">how to start a glamping business guide</a> for detailed information on each step.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -951,7 +1121,29 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What's the difference between glamping and RV resorts?",
-        answer: "Glamping provides furnished accommodations for guests, while RV resorts provide spaces and amenities for guests bringing their own RVs. Business models, investment requirements, and target markets differ."
+        answer: `<p>Glamping and RV resorts serve different markets with distinct business models:</p>
+        
+        <p><strong>Glamping:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Provides <em>furnished accommodations</em> for guests (yurts, tents, cabins, etc.)</li>
+          <li>Guests don't need to bring their own accommodations</li>
+          <li>Focus on unique, experiential stays</li>
+          <li>Typically higher per-night rates</li>
+          <li>Target market: Travelers seeking unique outdoor experiences</li>
+        </ul>
+        
+        <p><strong>RV Resorts:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Provides <em>spaces and amenities</em> for guests bringing their own RVs</li>
+          <li>Guests provide their own accommodations (RVs)</li>
+          <li>Focus on premium amenities and services</li>
+          <li>Revenue from site rentals and amenities</li>
+          <li>Target market: RV owners seeking premium camping experiences</li>
+        </ul>
+        
+        <p>Business models, investment requirements, and operational considerations differ significantly between these property types. A feasibility study can help determine which model best fits your goals and market.</p>
+        
+        <p>See our <a href="/guides/glamping-vs-rv-resort" className="text-[#006b5f] hover:text-[#005a4f] underline">glamping vs RV resort guide</a> for a detailed comparison.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -1047,7 +1239,31 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What's the difference between an RV resort and an RV park?",
-        answer: "RV resorts offer premium amenities and experiences at higher price points, while RV parks provide basic amenities and services at lower price points."
+        answer: `<p>The main differences between RV resorts and RV parks include:</p>
+        
+        <p><strong>RV Resorts:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Premium amenities and experiences</li>
+          <li>Higher price points</li>
+          <li>Enhanced facilities (pools, recreation centers, restaurants)</li>
+          <li>Superior landscaping and maintenance</li>
+          <li>Additional services and concierge-level customer service</li>
+          <li>Target market: Discerning RVers seeking luxury experiences</li>
+        </ul>
+        
+        <p><strong>RV Parks:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Basic amenities and services</li>
+          <li>Lower price points</li>
+          <li>Essential facilities (hookups, restrooms, laundry)</li>
+          <li>Focus on functionality and value</li>
+          <li>Minimal additional services</li>
+          <li>Target market: Cost-conscious RVers seeking basic services</li>
+        </ul>
+        
+        <p>Both serve RVers but cater to different market segments with different expectations and price points.</p>
+        
+        <p>See our <a href="/guides/rv-resort-vs-rv-park" className="text-[#006b5f] hover:text-[#005a4f] underline">RV resort vs RV park guide</a> for a detailed comparison.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -1152,7 +1368,30 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What amenities are essential for RV resorts?",
-        answer: "Essential amenities include full hookups, Wi-Fi, restrooms, showers, laundry, and waste disposal. Premium amenities like pools, recreation centers, and restaurants enhance appeal."
+        answer: `<p>RV resorts should include both essential and premium amenities:</p>
+        
+        <p><strong>Essential Amenities:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Full hookups:</strong> Water, sewer, and electrical connections</li>
+          <li><strong>Wi-Fi:</strong> Reliable internet access</li>
+          <li><strong>Restrooms and showers:</strong> Clean, well-maintained facilities</li>
+          <li><strong>Laundry facilities:</strong> Washers and dryers for guests</li>
+          <li><strong>Waste disposal:</strong> Dump stations and waste management</li>
+        </ul>
+        
+        <p><strong>Premium Amenities (Enhance Appeal):</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Swimming pools and hot tubs</li>
+          <li>Recreation centers and clubhouses</li>
+          <li>Restaurants and dining options</li>
+          <li>Fitness centers and sports facilities</li>
+          <li>Entertainment and activity programming</li>
+          <li>Pet facilities and services</li>
+        </ul>
+        
+        <p>The right mix of amenities depends on your target market, location, and positioning strategy.</p>
+        
+        <p>See our <a href="/guides/rv-resort-amenities-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">RV resort amenities guide</a> for comprehensive information.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -1247,7 +1486,19 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What are the current RV resort market trends?",
-        answer: "Key trends include market growth, demand for premium amenities, longer stays, professionalization of operations, and growing institutional investment."
+        answer: `<p>Key RV resort market trends include:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Market Growth:</strong> Continued expansion of the RV market with increasing numbers of RV owners</li>
+          <li><strong>Demand for Premium Amenities:</strong> RVers increasingly seek enhanced amenities and services</li>
+          <li><strong>Longer Stays:</strong> Growing trend toward extended stays and seasonal residents</li>
+          <li><strong>Professionalization of Operations:</strong> More sophisticated business operations and management practices</li>
+          <li><strong>Institutional Investment:</strong> Growing interest from institutional investors and larger hospitality companies</li>
+        </ul>
+        
+        <p>Understanding these trends can help you position your RV resort for success and align your offerings with market demands.</p>
+        
+        <p>See our <a href="/guides/rv-resort-market-trends" className="text-[#006b5f] hover:text-[#005a4f] underline">RV resort market trends guide</a> for detailed analysis and insights.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -1352,7 +1603,37 @@ export const industryGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "How do I analyze an RV resort investment?",
-        answer: "Analyze financial projections, market conditions, property characteristics, competitive positioning, and risks. Conduct a feasibility study for comprehensive analysis."
+        answer: `<p>Analyzing an RV resort investment requires evaluating multiple factors:</p>
+        
+        <p><strong>Financial Analysis:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Revenue projections and income potential</li>
+          <li>Operating expenses and cash flow</li>
+          <li>Return on investment (ROI) calculations</li>
+          <li>Capital requirements and financing needs</li>
+        </ul>
+        
+        <p><strong>Market Analysis:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Market demand and growth trends</li>
+          <li>Competitive positioning</li>
+          <li>Target market demographics</li>
+          <li>Seasonal patterns and occupancy potential</li>
+        </ul>
+        
+        <p><strong>Property Evaluation:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Location and accessibility</li>
+          <li>Site characteristics and development potential</li>
+          <li>Infrastructure and utility availability</li>
+          <li>Regulatory and zoning considerations</li>
+        </ul>
+        
+        <p><strong>Risk Assessment:</strong> Identify and evaluate market, financial, operational, and regulatory risks.</p>
+        
+        <p>A professional <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> provides comprehensive analysis across all these areas to support informed investment decisions.</p>
+        
+        <p>See our <a href="/guides/rv-resort-investment-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">RV resort investment guide</a> for detailed information.</p>`
       }
     ],
     lastModified: "2025-01-15",

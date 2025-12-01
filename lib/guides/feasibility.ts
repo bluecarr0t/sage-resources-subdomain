@@ -500,35 +500,99 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What is a feasibility study?",
-        answer: "A feasibility study is a comprehensive analysis that evaluates the viability, market potential, and financial prospects of a proposed outdoor hospitality project. It helps developers, investors, and lenders understand whether a project is worth pursuing and how to maximize success."
+        answer: `<p>A feasibility study is a comprehensive analysis that evaluates the viability, market potential, and financial prospects of a proposed outdoor hospitality project.</p>
+        
+        <p>It helps developers, investors, and lenders understand:</p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Whether a project is worth pursuing</li>
+          <li>What risks exist</li>
+          <li>How to maximize success</li>
+        </ul>
+        
+        <p>Think of it as a detailed roadmap that combines quantitative financial analysis with qualitative market insights to create a comprehensive evaluation of your project's potential.</p>`
       },
       {
         question: "Why do I need a feasibility study?",
-        answer: "Feasibility studies are essential for securing financing, making informed decisions, mitigating risks, and optimizing your project design. Banks and lenders require them to assess project viability before approving financing."
+        answer: `<p>Feasibility studies serve multiple critical purposes:</p>
+        
+        <p><strong>Securing Financing:</strong> Banks and lenders require feasibility studies to assess project risk and viability. A comprehensive, bank-approved feasibility study significantly increases your chances of securing financing.</p>
+        
+        <p><strong>Informed Decision-Making:</strong> Before committing significant capital, you need objective analysis of your project's viability to validate your business concept and make data-driven decisions.</p>
+        
+        <p><strong>Risk Mitigation:</strong> A feasibility study identifies potential risks before you commit resources, allowing you to address challenges proactively and avoid costly mistakes.</p>
+        
+        <p><strong>Project Optimization:</strong> Feasibility studies provide actionable insights for optimizing project scope, design, amenities, and pricing strategies.</p>`
       },
       {
         question: "How much does a feasibility study cost?",
-        answer: "Costs vary based on project scope and complexity, typically ranging from $10,000 to $100,000+ for outdoor hospitality projects. Contact us for a customized quote based on your specific project needs."
+        answer: `<p>Feasibility study costs vary significantly based on project scope, complexity, and location. For outdoor hospitality projects, typical costs range from:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Small projects (10-20 units):</strong> $10,000 - $25,000</li>
+          <li><strong>Medium projects (20-50 units):</strong> $25,000 - $50,000</li>
+          <li><strong>Large projects (50+ units):</strong> $50,000 - $100,000+</li>
+        </ul>
+        
+        <p>Factors affecting cost include project size, property type, location, scope of analysis, and timeline. <a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a customized quote based on your specific project needs.</p>`
       },
       {
         question: "How long does a feasibility study take?",
-        answer: "Most feasibility studies take 4-6 weeks to complete, though timelines vary based on project complexity and data availability."
+        answer: `<p>Most feasibility studies for outdoor hospitality projects take <strong>4-6 weeks</strong> to complete, though timelines vary based on:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Project complexity</li>
+          <li>Market data availability</li>
+          <li>Client responsiveness</li>
+          <li>Scope of analysis</li>
+        </ul>
+        
+        <p>The process typically includes project kickoff, market research, financial analysis, and report preparation phases.</p>`
       },
       {
         question: "What's the difference between a feasibility study and an appraisal?",
-        answer: "A feasibility study evaluates whether a proposed project is viable and profitable (forward-looking), while an appraisal determines the current value of an existing property (present-focused). For development projects, you typically need both."
+        answer: `<p>Feasibility studies and appraisals serve different purposes:</p>
+        
+        <p><strong>Feasibility Study:</strong> Evaluates whether a <em>proposed project</em> is viable and profitable. It's forward-looking and answers questions like "Should I build this?" and "What will revenues and expenses be?"</p>
+        
+        <p><strong>Appraisal:</strong> Determines the <em>current value</em> of an existing property. It's present-focused and answers questions like "What is this property worth today?"</p>
+        
+        <p><strong>When You Need Both:</strong> For development projects, you typically need both—a feasibility study to validate the project concept, and an appraisal to determine property value after development. Learn more in our <a href="/guides/feasibility-study-vs-appraisal" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study vs appraisal comparison guide</a>.</p>`
       },
       {
         question: "Will banks accept Sage's feasibility studies?",
-        answer: "Yes, Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide. We've helped numerous clients secure financing for their outdoor hospitality projects."
+        answer: `<p><strong>Yes, absolutely.</strong> Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide.</p>
+        
+        <p>We've completed over 300 feasibility studies and appraisals in the outdoor hospitality industry, and our studies are specifically designed to meet lender requirements with comprehensive analysis and professional documentation.</p>
+        
+        <p>We've helped numerous clients secure financing for their glamping, RV resort, and campground projects.</p>`
       },
       {
         question: "What information do I need to provide for a feasibility study?",
-        answer: "You'll need to provide site details, proposed project scope, target market information, and any existing research. Our team guides you through the entire information gathering process."
+        answer: `<p>To get started, you'll need to provide:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Site details:</strong> Location, size, current condition, zoning information</li>
+          <li><strong>Proposed project scope:</strong> Property type, number of units, amenities planned</li>
+          <li><strong>Target market information:</strong> Your understanding of the target audience</li>
+          <li><strong>Existing research:</strong> Any prior market analysis or studies</li>
+        </ul>
+        
+        <p>Don't worry if you don't have everything—our team guides you through the entire information gathering process and can help identify what additional data may be needed.</p>`
       },
       {
         question: "Can a feasibility study help optimize my project?",
-        answer: "Absolutely. Feasibility studies identify opportunities to optimize project scope, design, amenities, and pricing strategies to maximize revenue and profitability."
+        answer: `<p><strong>Absolutely.</strong> Feasibility studies do much more than just validate your project—they provide actionable insights for optimization.</p>
+        
+        <p>A comprehensive feasibility study can help you:</p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Optimize project scope and scale</li>
+          <li>Identify the right mix of amenities and features</li>
+          <li>Develop effective pricing strategies</li>
+          <li>Optimize development phasing</li>
+          <li>Maximize revenue and profitability potential</li>
+        </ul>
+        
+        <p>The strategic recommendations section of your feasibility study will provide specific, actionable guidance tailored to your project.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -756,19 +820,55 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What should I focus on first in a feasibility study?",
-        answer: "Start with the executive summary for an overview, then review the market analysis to understand context, and finally examine the financial projections which are the core of the study."
+        answer: `<p>When reading a feasibility study, follow this recommended approach:</p>
+        
+        <p><strong>1. Start with the Executive Summary</strong></p>
+        <p>The executive summary provides a high-level overview of key findings, recommendations, and conclusions. This gives you essential information at a glance.</p>
+        
+        <p><strong>2. Review the Market Analysis</strong></p>
+        <p>The market analysis section provides context for financial projections. Pay attention to demand drivers, competitive positioning, and market trends.</p>
+        
+        <p><strong>3. Examine the Financial Projections</strong></p>
+        <p>Financial projections are the heart of a feasibility study. Understand revenue projections, occupancy rates, operating expenses, and cash flow timelines.</p>
+        
+        <p>For more detailed guidance, see our <a href="/guides/how-to-read-feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">how to read a feasibility study guide</a>.</p>`
       },
       {
         question: "How do I know if financial projections are realistic?",
-        answer: "Compare projections to industry benchmarks, evaluate the assumptions behind them, and assess whether they align with the market analysis and competitive positioning."
+        answer: `<p>Evaluating the realism of financial projections requires careful analysis:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Compare to industry benchmarks:</strong> How do the projections compare to similar properties in the market?</li>
+          <li><strong>Evaluate assumptions:</strong> Are the underlying assumptions reasonable and well-supported?</li>
+          <li><strong>Assess alignment:</strong> Do the projections align with the market analysis and competitive positioning?</li>
+          <li><strong>Check methodology:</strong> Is the projection methodology sound and clearly explained?</li>
+        </ul>
+        
+        <p>A professional feasibility study should include sensitivity analysis and comparisons to industry benchmarks to help you assess projection realism.</p>`
       },
       {
         question: "What if I disagree with the feasibility study findings?",
-        answer: "Discuss your concerns with the consultant. They can provide additional analysis or clarification. Sometimes studies identify areas that need refinement rather than suggesting project abandonment."
+        answer: `<p>If you disagree with the feasibility study findings, don't panic. Here's how to address it:</p>
+        
+        <p><strong>Discuss Your Concerns:</strong> Reach out to your consultant to discuss your concerns. They can provide additional analysis, clarification, or explanation of their methodology.</p>
+        
+        <p><strong>Understand the Context:</strong> Sometimes studies identify areas that need refinement rather than suggesting project abandonment. The recommendations section often provides actionable steps to address identified issues.</p>
+        
+        <p><strong>Request Additional Analysis:</strong> If you have specific concerns, your consultant can often provide additional analysis or scenario modeling to address your questions.</p>
+        
+        <p>Remember, a feasibility study is a tool to help you make informed decisions, and open communication with your consultant is key to getting the most value from the study.</p>`
       },
       {
         question: "How should I use the recommendations?",
-        answer: "Prioritize recommendations based on impact and feasibility. Focus on those that significantly improve project viability or reduce risk."
+        answer: `<p>The strategic recommendations section provides actionable insights for optimizing your project. Here's how to prioritize and use them:</p>
+        
+        <p><strong>Prioritize by Impact:</strong> Focus on recommendations that significantly improve project viability or reduce risk. High-impact recommendations should be addressed first.</p>
+        
+        <p><strong>Consider Feasibility:</strong> Evaluate each recommendation based on your resources, timeline, and capabilities. Some recommendations may require significant investment or changes.</p>
+        
+        <p><strong>Create an Action Plan:</strong> Use the recommendations to develop a prioritized action plan for your project development and implementation phases.</p>
+        
+        <p><strong>Review Regularly:</strong> As your project evolves, revisit the recommendations to ensure they remain relevant and aligned with your progress.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -946,15 +1046,37 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "Do I need both a feasibility study and an appraisal?",
-        answer: "For development projects, yes. A feasibility study validates the project concept, while an appraisal determines property value. Lenders often require both for financing."
+        answer: `<p><strong>Yes, for development projects, you typically need both.</strong></p>
+        
+        <p>A feasibility study validates the project concept and evaluates whether the proposed project is viable and profitable. It's forward-looking and helps answer "Should I build this?"</p>
+        
+        <p>An appraisal determines the property value—either current value or projected value after development. It's essential for financing, as lenders need to know the property's worth.</p>
+        
+        <p>Lenders often require both documents for development financing because they provide complementary information: the feasibility study assesses project viability, while the appraisal determines collateral value.</p>`
       },
       {
         question: "Can I use a feasibility study instead of an appraisal?",
-        answer: "No, they serve different purposes. A feasibility study evaluates project viability, while an appraisal determines property value. Both are typically needed for development financing."
+        answer: `<p><strong>No, they serve different purposes and cannot be substituted for each other.</strong></p>
+        
+        <p>A feasibility study evaluates <em>project viability</em>—whether a proposed project is worth pursuing and how to optimize it for success. It's forward-looking and focuses on the project concept.</p>
+        
+        <p>An appraisal determines <em>property value</em>—what the property is worth in the current market. It's present-focused and essential for financing, transactions, and investment analysis.</p>
+        
+        <p>Both are typically needed for development financing because lenders need to assess both project viability (feasibility study) and collateral value (appraisal).</p>`
       },
       {
         question: "Which comes first, feasibility study or appraisal?",
-        answer: "For new developments, the feasibility study typically comes first to validate the project concept. The appraisal can be done during or after development to determine property value."
+        answer: `<p><strong>For new developments, the feasibility study typically comes first.</strong></p>
+        
+        <p>The feasibility study should be completed early in the planning process to validate your project concept before you commit significant resources. It helps you understand if the project is viable and worth pursuing.</p>
+        
+        <p>The appraisal can be done:</p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>During development:</strong> To assess value as the project progresses</li>
+          <li><strong>After completion:</strong> To determine final property value for financing or transactions</li>
+        </ul>
+        
+        <p>Some lenders may require a pre-development appraisal to establish baseline value, while others will accept an appraisal closer to project completion. Your lender can clarify their specific requirements.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -1061,11 +1183,29 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "How much does a feasibility study cost?",
-        answer: "Costs vary based on project scope and complexity, typically ranging from $10,000 to $100,000+ for outdoor hospitality projects."
+        answer: `<p>Feasibility study costs vary significantly based on project scope and complexity. For outdoor hospitality projects, typical costs range from:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Small projects (10-20 units):</strong> $10,000 - $25,000</li>
+          <li><strong>Medium projects (20-50 units):</strong> $25,000 - $50,000</li>
+          <li><strong>Large projects (50+ units):</strong> $50,000 - $100,000+</li>
+        </ul>
+        
+        <p>These are general guidelines—actual costs depend on specific project characteristics. <a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a customized quote based on your project.</p>`
       },
       {
         question: "What factors affect feasibility study costs?",
-        answer: "Project size, property type, location, scope of analysis, and timeline all affect costs."
+        answer: `<p>Several factors influence feasibility study pricing:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Project Size:</strong> Larger, more complex projects require more extensive analysis</li>
+          <li><strong>Property Type:</strong> Some property types require more specialized analysis</li>
+          <li><strong>Location:</strong> Market data availability and complexity vary by location</li>
+          <li><strong>Scope:</strong> Depth of analysis and number of scenarios evaluated</li>
+          <li><strong>Timeline:</strong> Rush projects may cost more due to compressed schedules</li>
+        </ul>
+        
+        <p>A professional feasibility study is an investment that often pays for itself through optimized project design, improved financing terms, and risk mitigation.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -1186,11 +1326,35 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "How long does a feasibility study take?",
-        answer: "Most feasibility studies take 4-6 weeks to complete, though timelines vary based on project complexity and data availability."
+        answer: `<p>Most feasibility studies for outdoor hospitality projects take <strong>4-6 weeks</strong> to complete, though timelines vary based on:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Project complexity</li>
+          <li>Market data availability</li>
+          <li>Client responsiveness</li>
+          <li>Scope of analysis</li>
+        </ul>
+        
+        <p>The process typically includes:</p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Week 1:</strong> Project kickoff and information gathering</li>
+          <li><strong>Weeks 2-3:</strong> Market research and analysis</li>
+          <li><strong>Weeks 3-4:</strong> Financial analysis</li>
+          <li><strong>Weeks 4-6:</strong> Report preparation and finalization</li>
+        </ul>`
       },
       {
         question: "What can delay a feasibility study?",
-        answer: "Delays can occur if client information is not provided promptly, if market data is difficult to obtain, or if project scope changes significantly."
+        answer: `<p>Several factors can cause delays in the feasibility study process:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li><strong>Client Information Delays:</strong> If requested information isn't provided promptly, it can slow down the analysis phase</li>
+          <li><strong>Market Data Availability:</strong> Difficult-to-obtain or limited market data can extend research time</li>
+          <li><strong>Project Scope Changes:</strong> Significant changes to project scope during the study may require additional analysis</li>
+          <li><strong>Review Cycles:</strong> Extended review periods can push back finalization</li>
+        </ul>
+        
+        <p>To keep the process on track, provide requested information promptly and respond to questions and clarifications quickly. See our <a href="/guides/feasibility-study-process-timeline" className="text-[#006b5f] hover:text-[#005a4f] underline">process and timeline guide</a> for more details.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -1316,11 +1480,42 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     faqs: [
       {
         question: "What do banks require in a feasibility study?",
-        answer: "Banks require comprehensive market analysis, realistic financial projections, risk assessment, and professional documentation from qualified consultants."
+        answer: `<p>Banks and lenders have specific requirements for feasibility studies. Key components they look for include:</p>
+        
+        <p><strong>Comprehensive Market Analysis:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Market demand validation</li>
+          <li>Competitive property analysis</li>
+          <li>Location and accessibility assessment</li>
+          <li>Tourism and economic factors</li>
+        </ul>
+        
+        <p><strong>Realistic Financial Projections:</strong></p>
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Multiple-year revenue and expense projections</li>
+          <li>Clear assumptions and methodology</li>
+          <li>Sensitivity analysis</li>
+          <li>Comparison to industry benchmarks</li>
+        </ul>
+        
+        <p><strong>Risk Assessment:</strong> Lenders need to see identified risks and mitigation strategies.</p>
+        
+        <p><strong>Professional Documentation:</strong> Studies must be from recognized consultants with industry expertise and meet lender standards.</p>`
       },
       {
         question: "Will banks accept Sage's feasibility studies?",
-        answer: "Yes, Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide for outdoor hospitality financing."
+        answer: `<p><strong>Yes, absolutely.</strong> Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide for outdoor hospitality financing.</p>
+        
+        <p>We've completed over 300 feasibility studies and appraisals in the outdoor hospitality industry. Our studies are specifically designed to meet lender requirements with:</p>
+        
+        <ul className="list-disc list-inside space-y-1 ml-4">
+          <li>Comprehensive market and financial analysis</li>
+          <li>Professional documentation</li>
+          <li>Industry expertise and credibility</li>
+          <li>Proven track record with lenders</li>
+        </ul>
+        
+        <p>We've helped numerous clients secure financing for their glamping, RV resort, and campground projects.</p>`
       }
     ],
     lastModified: "2025-01-15",

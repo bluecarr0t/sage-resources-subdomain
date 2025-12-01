@@ -145,6 +145,11 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
               <p className="text-xl text-gray-700 mb-8">
                 {content.hero.subheadline}
               </p>
+              {content.lastModified && (
+                <p className="text-xs text-gray-500 mb-6">
+                  Last Updated: December 1, 2025
+                </p>
+              )}
               {content.hero.ctaText && content.hero.ctaLink && (
                 <Link
                   href={content.hero.ctaLink}
