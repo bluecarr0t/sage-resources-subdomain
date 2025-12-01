@@ -65,35 +65,114 @@ export const landingPages: Record<string, LandingPageContent> = {
     metaDescription: "Expert glamping feasibility studies to validate your outdoor hospitality project. Get comprehensive market analysis and financial projections.",
     hero: {
       headline: "Glamping Feasibility Study",
-      subheadline: "Validate your glamping resort project with expert market analysis and financial projections",
+      subheadline: "In the rapidly growing glamping market, understanding nuances and market demands is key to success. Our feasibility studies provide a thorough examination of potential for upscale and unique outdoor accommodations.",
       ctaText: "Schedule Free Consultation",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
       {
         title: "Why Choose Sage for Your Glamping Feasibility Study?",
-        content: "Sage Outdoor Advisory has completed over 300+ <a href='/glossary/feasibility-study' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility studies</a> and <a href='/glossary/appraisal' className='text-[#006b5f] hover:text-[#005a4f] underline'>appraisals</a> in the <a href='/glossary/outdoor-hospitality' className='text-[#006b5f] hover:text-[#005a4f] underline'>outdoor hospitality</a> industry. Our specialized expertise in <a href='/glossary/glamping-resort' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping resorts</a> ensures you get accurate, actionable insights. Learn more about our <a href='https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping feasibility study services</a> and see how we've helped clients like <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Open Sky in Zion, UT</a> secure financing for their <a href='/glossary/glamping' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping</a> projects.",
+        content: "Sage Outdoor Advisory specializes in feasibility studies and market analysis for glamping resorts, helping developers create profitable and well-positioned outdoor hospitality projects. We focus on ensuring that every aspect of the venture—from concept to completion—is meticulously analyzed to guarantee that it meets market needs and exceeds guest expectations.",
       },
       {
-        title: "What's Included in Your Feasibility Study",
-        content: "Our comprehensive glamping feasibility studies include:",
+        title: "Breakdown of Our Glamping Resort Feasibility Studies",
+        content: "Our comprehensive glamping feasibility studies include the following components:",
+      },
+      {
+        title: "Industry Overview",
+        content: "Analysis of the broader glamping and outdoor hospitality industry context:",
         bullets: [
-          "<a href='/glossary/market-analysis' className='text-[#006b5f] hover:text-[#005a4f] underline'>Market analysis</a> and <a href='/glossary/competitive-analysis' className='text-[#006b5f] hover:text-[#005a4f] underline'>competitive landscape assessment</a>",
-          "Demand forecasting and <a href='/glossary/occupancy-rate' className='text-[#006b5f] hover:text-[#005a4f] underline'>occupancy projections</a>",
-          "<a href='/glossary/revenue-projections' className='text-[#006b5f] hover:text-[#005a4f] underline'>Revenue projections</a> and financial modeling",
-          "Site-specific recommendations",
-          "Development cost estimates",
-          "<a href='/glossary/operating-expenses' className='text-[#006b5f] hover:text-[#005a4f] underline'>Operating expense</a> insights",
-          "Risk assessment and mitigation strategies",
+          "<strong>Economic Trends:</strong> Examination of economic indicators and their impact on the glamping industry",
+          "<strong>Tourism Analysis:</strong> Insights into tourism patterns and their influence on the glamping market",
+          "<strong>Outdoor Recreation:</strong> Evaluation of outdoor recreational activities and their popularity in your target area",
+          "<strong>Outdoor Hospitality:</strong> Trends and forecasts in the outdoor hospitality sector affecting glamping demand",
+        ],
+      },
+      {
+        title: "Area Analysis",
+        content: "Comprehensive evaluation of your project's geographic and market context:",
+        bullets: [
+          "<strong>Location Assessment:</strong> Detailed review of the geographical location and its advantages for glamping operations",
+          "<strong>Demographics:</strong> Analysis of population statistics and demographics relevant to the trade area",
+          "<strong>Recreation Opportunities:</strong> Identification of recreational amenities and their appeal to potential guests",
+          "<strong>Demand Generators:</strong> Identification and analysis of key demand generators for the business, including nearby attractions, events, and activities",
+          "<strong>Accessibility:</strong> Evaluation of transportation infrastructure and accessibility for target markets",
+          "<strong>Area Development:</strong> Insights into current and future development projects in the area that may impact demand",
+        ],
+      },
+      {
+        title: "Market Analysis",
+        content: "Thorough examination of the competitive landscape and market dynamics:",
+        bullets: [
+          "<strong>Competitive Summary:</strong> Overview of existing competitors and their market positions, pricing, and offerings",
+          "<strong>Market Opportunities:</strong> Identification and analysis of potential market opportunities and gaps",
+          "<strong>New Competition:</strong> Assessment of emerging competitors and their potential impact on your project",
+        ],
+      },
+      {
+        title: "Revenue Projection",
+        content: "Detailed financial forecasting based on market data and analysis:",
+        bullets: [
+          "<strong>Rates Projection:</strong> Forecasting future rates based on market trends, competitive positioning, and data analysis",
+          "<strong>Occupancy Trends:</strong> Forecasting occupancy rates by unit type and any potential stabilization period",
+          "<strong>Insights and Trends:</strong> Utilization of Sage's proprietary outdoor hospitality database for trend analysis and benchmarking",
+        ],
+      },
+      {
+        title: "Operating Expense Projection",
+        content: "Comprehensive analysis of projected operating costs:",
+        bullets: [
+          "<strong>Expense Analysis:</strong> Detailed breakdown of projected operating expenses by category",
+          "<strong>Industry Averages Comparison:</strong> Comparison with industry averages to benchmark performance and identify optimization opportunities",
+        ],
+      },
+      {
+        title: "Pro Forma / Net Operating Income",
+        content: "Long-term financial projections and analysis:",
+        bullets: [
+          "<strong>10-Year Pro Forma:</strong> Long-term income and expense projections, with a monthly breakdown during the stabilization period",
+          "<strong>Net Operating Income:</strong> Calculation and analysis of projected net operating income (NOI) and profitability metrics",
+        ],
+      },
+      {
+        title: "Site Analysis",
+        content: "Evaluation of the physical site and development constraints:",
+        bullets: [
+          "<strong>Zoning Requirements:</strong> Review of zoning regulations and compliance requirements for glamping development",
+          "<strong>Flood Risk and Wetlands Assessment:</strong> Identification of any flood risk and/or wetland areas and related restrictions",
+          "<strong>Physical Restrictions:</strong> Analysis of physical site limitations that may impact development",
+          "<strong>Utilities:</strong> Evaluation of utility availability and infrastructure requirements",
+          "<strong>Transportation Analysis:</strong> Assessment of transportation links and access to the property",
+        ],
+      },
+      {
+        title: "Development Costs",
+        content: "Detailed cost estimation for project development:",
+        bullets: [
+          "<strong>Site Development Costs:</strong> Preliminary estimation of site development costs including infrastructure and site preparation",
+          "<strong>Unit Cost Projection:</strong> Detailed unit cost projection for development of glamping/lodging units",
+          "<strong>Amenity Cost Project:</strong> Preliminary estimate for all amenities, support structures, and FF&E (furniture, fixtures, and equipment)",
+          "<strong>Total Cost Projection:</strong> Comprehensive total cost estimation for the project",
+        ],
+      },
+      {
+        title: "Feasibility Analysis",
+        content: "Final assessment and financial viability evaluation:",
+        bullets: [
+          "<strong>Debt/Financing Analysis:</strong> Calculation of projected debt payments and financing requirements",
+          "<strong>Debt Coverage Analysis:</strong> Evaluation of the project's ability to cover debt obligations",
+          "<strong>Net Income to Equity After Debt:</strong> Calculation of net income available to equity holders post-debt",
+          "<strong>Return on Investment Projection:</strong> ROI analysis for the proposed project",
+          "<strong>Feasibility Conclusion and Recommendations:</strong> Final feasibility assessment and strategic recommendations for optimizing project success",
         ],
       },
       {
         title: "Get Started with Your Glamping Feasibility Study",
-        content: "Ready to validate your glamping resort project? <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our glamping specialists. We'll discuss your project, answer your questions, and provide a customized proposal. You can also explore our <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping market data</a> and <a href='https://sageoutdooradvisory.com/market-reports/' className='text-[#006b5f] hover:text-[#005a4f] underline'>download our free 2025 USA Glamping Market Report</a> to get started.",
+        content: "Ready to validate your glamping resort project? Our feasibility studies help you avoid costly mistakes and build a profitable, guest-ready destination. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our glamping specialists to discuss your project. You can also explore our <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping market data</a> and <a href='https://sageoutdooradvisory.com/market-reports/' className='text-[#006b5f] hover:text-[#005a4f] underline'>download our free 2025 USA Glamping Market Report</a> to get started.",
       },
     ],
     benefits: [
-      "300+ completed projects in outdoor hospitality",
+      "350+ completed projects in outdoor hospitality",
       "Industry-leading glamping market data",
       "Bank-approved feasibility studies",
       "Strategic insights for investors and developers",
@@ -106,20 +185,32 @@ export const landingPages: Record<string, LandingPageContent> = {
     },
     faqs: [
       {
-        question: "How much does a glamping feasibility study cost?",
-        answer: "The cost of a glamping feasibility study varies based on project scope, location, and complexity. Contact us for a customized quote based on your specific project needs."
+        question: "What is a glamping feasibility study and why do I need one?",
+        answer: "A glamping feasibility study evaluates the potential success of a proposed glamping resort based on location, market trends, costs, ROI, and more. It helps you avoid costly mistakes and build a profitable, guest-ready destination. Additionally, a well-prepared feasibility study is often a critical requirement when seeking financing, as banks and investors use it to assess the project's viability and risk profile."
       },
       {
         question: "How long does a glamping feasibility study take?",
-        answer: "Typically, a comprehensive glamping feasibility study takes 4-6 weeks to complete, depending on the project size and data availability."
+        answer: "Our feasibility studies typically take between 4 to 8 weeks, depending on the size and complexity of the property. This timeframe allows us to thoroughly review market data, inspect the property, and prepare a detailed, accurate report. For a more specific timeline based on your project, please contact our team—we're happy to discuss your feasibility study needs."
       },
       {
-        question: "What information do I need to provide for a glamping feasibility study?",
-        answer: "You'll need to provide site details, proposed unit types, target market information, and any existing market research. Our team will guide you through the process."
+        question: "Do I need land before starting a feasibility study?",
+        answer: "Not necessarily. While having a parcel in mind is helpful, we can also assess multiple candidate sites or advise on ideal site criteria to guide your land acquisition strategy. We can provide valuable insights that help you identify the best location for your glamping resort project."
+      },
+      {
+        question: "What makes Sage Outdoor Advisory's glamping feasibility studies different?",
+        answer: "We've completed over 350 outdoor hospitality projects across North America. Our proprietary data on rates, occupancy, and trends—combined with deep industry experience—ensures that your project is built on real market insight. Our studies are bank-approved and trusted by financial institutions nationwide."
+      },
+      {
+        question: "What is the cost of a glamping resort feasibility study?",
+        answer: "Cost varies based on scope and complexity, but we offer transparent pricing and flexible options. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Schedule a call</a> with our team to receive a tailored quote and consultation."
+      },
+      {
+        question: "What is the difference between a market study, a feasibility study and an appraisal?",
+        answer: "A <strong>market study</strong> analyzes supply and demand trends in a particular market and is typically a good first step in determining the potential for a viable project. It focuses on broader market dynamics, including competitor analysis, occupancy trends, and rate positioning, without tying the findings to a specific site. A <strong>feasibility study</strong> includes the components of a market study but is tailored to a specific site. It incorporates detailed projections for revenue, operating expenses, and construction costs, and evaluates key financial metrics such as return on equity and debt service coverage. Feasibility studies are typically used to guide investment decisions or secure financing for new developments or expansions. An <strong>appraisal</strong> is similar in scope to a feasibility study but instead determines the market value of a property. Rather than focusing on investor returns, the appraisal provides a professional opinion of value based on market conditions and comparable properties. Appraisals can reflect the value of a property \"as is,\" \"as permitted but not yet built,\" \"as complete,\" or \"as stabilized,\" and are commonly used for lending, acquisitions, or internal decision-making."
       },
       {
         question: "Will banks accept Sage's glamping feasibility studies?",
-        answer: "Yes, Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide for glamping resort financing. <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>See how we've helped clients</a> like Open Sky in Zion, UT secure traditional bank funding. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a consultation</a> to learn more."
+        answer: "Yes, absolutely. Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide for glamping resort financing. <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>See how we've helped clients</a> like Open Sky in Zion, UT secure traditional bank funding. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a consultation</a> to learn more."
       }
     ],
     keywords: ["glamping feasibility", "glamping resort analysis", "glamping market study", "glamping investment analysis"],
@@ -190,7 +281,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
     ],
     benefits: [
-      "300+ outdoor hospitality projects completed",
+      "350+ outdoor hospitality projects completed",
       "Deep expertise in RV resort markets",
       "Bank-approved feasibility documentation",
       "Data-driven investment insights",
@@ -291,7 +382,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
     ],
     benefits: [
-      "300+ outdoor hospitality projects",
+      "350+ outdoor hospitality projects",
       "Nationwide campground market expertise",
       "Bank-approved feasibility studies",
       "Strategic development guidance",
@@ -364,30 +455,121 @@ export const landingPages: Record<string, LandingPageContent> = {
     metaDescription: "Professional glamping property appraisals and valuations. Bank-approved appraisals for financing and investment decisions.",
     hero: {
       headline: "Glamping Property Appraisal",
-      subheadline: "Get bank-approved appraisals for your glamping resort property",
+      subheadline: "Sage Outdoor Advisory offers specialized appraisal services for glamping resorts, ensuring that stakeholders receive accurate valuations that reflect the unique aspects and luxury offerings of these properties. Our appraisals are crucial for financing, selling, or expanding glamping operations, providing comprehensive assessments that consider market trends and revenue potential.",
       ctaText: "Schedule Free Consultation",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
       {
-        title: "Specialized Glamping Appraisal Services",
-        content: "Sage Outdoor Advisory provides expert <a href='/glossary/glamping' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping</a> property <a href='/glossary/appraisal' className='text-[#006b5f] hover:text-[#005a4f] underline'>appraisals</a> that banks and investors trust. Our specialized knowledge of the glamping market ensures accurate valuations. Learn more about our <a href='https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping appraisal services</a>. Our appraisals helped <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Open Sky in Zion, UT</a> secure traditional bank funding for their glamping property.",
+        title: "Why Choose Sage for Your Glamping Appraisal?",
+        content: "Sage Outdoor Advisory specializes exclusively in outdoor hospitality appraisals, bringing deep expertise and proprietary market data from hundreds of projects across North America. Our appraisals reflect the unique luxury and experiential nature of glamping resorts, something traditional appraisers often miss.",
       },
       {
-        title: "Comprehensive Appraisal Services",
-        content: "Our glamping appraisals include:",
+        title: "Breakdown of Our Glamping Resort Appraisals",
+        content: "Our comprehensive glamping resort appraisals include the following components:",
+      },
+      {
+        title: "Area and Neighborhood Analysis",
+        content: "Comprehensive evaluation of the property's geographic and market context:",
         bullets: [
-          "Property valuation using multiple approaches",
-          "<a href='/glossary/comparable-sales' className='text-[#006b5f] hover:text-[#005a4f] underline'>Market comparable analysis</a>",
-          "<a href='/glossary/income-approach' className='text-[#006b5f] hover:text-[#005a4f] underline'>Income approach</a> valuation",
-          "<a href='/glossary/cost-approach' className='text-[#006b5f] hover:text-[#005a4f] underline'>Cost approach</a> analysis",
-          "Market trend assessment",
-          "Bank-approved documentation",
+          "<strong>Location Assessment:</strong> Detailed review of the geographical location and its advantages for glamping operations",
+          "<strong>Demographics:</strong> Analysis of population statistics and demographics relevant to the trade area",
+          "<strong>Recreation Opportunities:</strong> Identification of recreational amenities and their appeal to potential guests",
+          "<strong>Demand Generators:</strong> Identification and analysis of key demand generators for the business, including nearby attractions, events, and activities",
+          "<strong>Accessibility:</strong> Evaluation of transportation infrastructure and accessibility for target markets",
+          "<strong>Area Development:</strong> Insights into current and future development projects in the area that may impact value",
         ],
+      },
+      {
+        title: "Industry Overview",
+        content: "Analysis of the broader glamping and outdoor hospitality industry context:",
+        bullets: [
+          "<strong>Economic Trends:</strong> Examination of economic indicators and their impact on the glamping industry",
+          "<strong>Tourism Analysis:</strong> Insights into tourism patterns and their influence on the glamping market",
+          "<strong>Outdoor Recreation:</strong> Evaluation of outdoor recreational activities and their popularity in your target area",
+          "<strong>Outdoor Hospitality:</strong> Trends and forecasts in the outdoor hospitality sector affecting glamping demand",
+        ],
+      },
+      {
+        title: "Market Analysis",
+        content: "Thorough examination of the competitive landscape and market dynamics:",
+        bullets: [
+          "<strong>Competitive Summary:</strong> Overview of existing competitors and their market positions, pricing, and offerings",
+          "<strong>Market Opportunities:</strong> Identification and analysis of potential market opportunities and gaps",
+          "<strong>New Competition:</strong> Assessment of emerging competitors and their potential impact on property value",
+        ],
+      },
+      {
+        title: "Site and Improvement Analysis",
+        content: "Evaluation of the physical site and property improvements:",
+        bullets: [
+          "<strong>Zoning Requirements:</strong> Review of zoning regulations and compliance requirements for glamping development",
+          "<strong>Flood Risk and Wetlands Assessment:</strong> Identification of any flood risk and/or wetland areas and related restrictions",
+          "<strong>Physical Restrictions:</strong> Analysis of physical site limitations that may impact value",
+          "<strong>Utilities:</strong> Evaluation of utility availability and infrastructure requirements",
+          "<strong>Transportation Analysis:</strong> Assessment of transportation links and access to the property",
+          "<strong>Improvement Analysis:</strong> Assessment of the condition and functionality of the improvements, including accommodations, amenities, and infrastructure",
+        ],
+      },
+      {
+        title: "Highest and Best Use Analysis",
+        content: "Determination of the property's optimal use and value potential:",
+        bullets: [
+          "<strong>As Vacant:</strong> Review of legally permissible, physically possible, financially feasible, and maximally productive uses for the land",
+          "<strong>As Improved:</strong> Review of legally permissible, physically possible, financially feasible, and maximally productive uses for the improved property",
+          "<strong>Conclusions:</strong> Conclusion of highest and best use, most likely user, and most likely buyer",
+        ],
+      },
+      {
+        title: "Cost Approach",
+        content: "Valuation based on replacement cost and depreciation:",
+        bullets: [
+          "<strong>Land Valuation:</strong> For unentitled land, research and analyze comparable land sales to develop a market value of the land, as if vacant. For entitled but not yet constructed properties, land valuation is a function of the market value \"as complete\" conclusion less the cost of construction and appropriate profit",
+          "<strong>Site Development Costs:</strong> Preliminary estimation of site development costs including infrastructure and site preparation",
+          "<strong>Unit Cost Projection:</strong> Detailed unit cost projection for development of glamping/lodging units",
+          "<strong>Amenity Cost Project:</strong> Preliminary estimate for all amenities, support structures, and FF&E (furniture, fixtures, and equipment)",
+          "<strong>Total Cost New Projection:</strong> Comprehensive total cost new estimation for the project",
+          "<strong>Depreciation Deduction:</strong> Estimate all forms of depreciation, if applicable",
+          "<strong>Conclusion:</strong> Conclude value indication via the Cost Approach",
+        ],
+      },
+      {
+        title: "Income Capitalization Approach",
+        content: "Valuation based on the property's income-generating potential:",
+        bullets: [
+          "<strong>Rates Projection:</strong> Forecasting future rates based on market trends, competitive positioning, and data analysis",
+          "<strong>Occupancy Trends:</strong> Forecasting occupancy rates by unit type and any potential stabilization period",
+          "<strong>Insights and Trends:</strong> Utilization of Sage's proprietary outdoor hospitality database for trend analysis and benchmarking",
+          "<strong>Expense Analysis:</strong> Detailed breakdown of projected operating expenses by category",
+          "<strong>Industry Averages Comparison:</strong> Comparison with industry averages to benchmark performance",
+          "<strong>Net Operating Income Pro Forma:</strong> Develop a stabilized pro forma NOI for stabilized properties, and a 10-year discounted cash flow for proposed or unstabilized properties",
+          "<strong>Conclusion:</strong> Apply the appropriate risk rates to develop the value indication via the Income Capitalization Approach",
+        ],
+      },
+      {
+        title: "Sales Comparison Approach",
+        content: "Valuation based on comparable property sales:",
+        bullets: [
+          "<strong>Comparable Sales Data:</strong> Utilize our extensive database and primary research techniques to identify recent comparable sales of similar properties to the subject. Depending on the property type, this might be on a local, regional, or national basis",
+          "<strong>Analyze Sales Data:</strong> Analyze all aspects of the comparable sales and apply adjustments in comparison to the subject, to come up with a range of value",
+          "<strong>Conclusion:</strong> Analyze the results of the analysis, including which comparables are most meaningful and develop the value indication via the Sales Comparison Approach",
+        ],
+      },
+      {
+        title: "Reconciliation",
+        content: "Final value determination through reconciliation of all approaches:",
+        bullets: [
+          "<strong>Reconcile Approaches to Value:</strong> Summarize and analyze the value indications via each approach utilized, including a discussion of which approach is most meaningful and why",
+          "<strong>Conclusion:</strong> Conclude market value, and reconcile to any recent purchase price",
+        ],
+      },
+      {
+        title: "Get Started with Your Glamping Appraisal",
+        content: "A professionally prepared appraisal demonstrates the financial viability and market value of your glamping resort, which is often a critical step in obtaining a bank loan or attracting serious investors. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our glamping appraisal specialists to discuss your property. You can also explore our <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping market data</a> and <a href='https://sageoutdooradvisory.com/market-reports/' className='text-[#006b5f] hover:text-[#005a4f] underline'>download our free 2025 USA Glamping Market Report</a> to get started.",
       },
     ],
     benefits: [
-      "300+ outdoor hospitality appraisals completed",
+      "350+ outdoor hospitality appraisals completed",
       "Bank-approved appraisal reports",
       "Deep glamping market expertise",
       "Fast turnaround times",
@@ -400,24 +582,32 @@ export const landingPages: Record<string, LandingPageContent> = {
     },
     faqs: [
       {
-        question: "How much does a glamping property appraisal cost?",
-        answer: "Glamping property appraisal costs vary based on property size, complexity, and appraisal type. Contact us for a customized quote based on your specific glamping property."
+        question: "What is a glamping resort appraisal and why is it important?",
+        answer: "A glamping resort appraisal is a professional valuation that assesses the market value of your property based on its location, amenities, income potential, and comparable sales. It's essential for securing financing, supporting a sale, or making informed decisions about future development or expansion."
       },
       {
-        question: "How long does a glamping appraisal take?",
-        answer: "A comprehensive glamping property appraisal typically takes 2-4 weeks to complete, depending on property complexity and data availability."
+        question: "How long does the glamping appraisal process take?",
+        answer: "Our appraisals typically take between 4 to 8 weeks, depending on the size and complexity of the property. This timeframe allows us to thoroughly review market data, inspect the property, and prepare a detailed, accurate report. For a more specific timeline based on your project, please contact our team—we're happy to discuss your appraisal needs."
       },
       {
-        question: "What's included in a glamping property appraisal?",
-        answer: "Our glamping appraisals include property valuation using multiple approaches (sales comparison, income, and cost), market comparable analysis, income approach valuation, and bank-approved documentation."
+        question: "What makes Sage Outdoor Advisory's appraisals different?",
+        answer: "We specialize exclusively in outdoor hospitality, bringing deep expertise and proprietary market data from hundreds of projects across North America. Our appraisals reflect the unique luxury and experiential nature of glamping resorts, something traditional appraisers often miss."
+      },
+      {
+        question: "Can an appraisal help me secure a loan or attract investors?",
+        answer: "Yes. A professionally prepared appraisal demonstrates the financial viability and market value of your glamping resort, which is often a critical step in obtaining a bank loan or attracting serious investors. Our bank-approved appraisals are trusted by financial institutions nationwide."
+      },
+      {
+        question: "Do I need to have an operating resort to get an appraisal?",
+        answer: "Not necessarily. We can appraise both existing and proposed developments. For new projects, we use market data, cost projections, and pro forma income to deliver a value estimate based on expected performance. Appraisals can reflect the value of a property \"as is,\" \"as permitted but not yet built,\" \"as complete,\" or \"as stabilized.\""
+      },
+      {
+        question: "What is the difference between a market study, a feasibility study and an appraisal?",
+        answer: "A <strong>market study</strong> analyzes supply and demand trends in a particular market and is typically a good first step in determining the potential for a viable project. It focuses on broader market dynamics, including competitor analysis, occupancy trends, and rate positioning, without tying the findings to a specific site. A <strong>feasibility study</strong> includes the components of a market study but is tailored to a specific site. It incorporates detailed projections for revenue, operating expenses, and construction costs, and evaluates key financial metrics such as return on equity and debt service coverage. Feasibility studies are typically used to guide investment decisions or secure financing for new developments or expansions. An <strong>appraisal</strong> is similar in scope to a feasibility study but instead determines the market value of a property. Rather than focusing on investor returns, the appraisal provides a professional opinion of value based on market conditions and comparable properties. Appraisals can reflect the value of a property \"as is,\" \"as permitted but not yet built,\" \"as complete,\" or \"as stabilized,\" and are commonly used for lending, acquisitions, or internal decision-making."
       },
       {
         question: "Will banks accept Sage's glamping appraisals?",
-        answer: "Yes, Sage Outdoor Advisory's glamping appraisals are bank-approved and trusted by financial institutions nationwide for glamping property financing and transactions."
-      },
-      {
-        question: "Why do I need a specialized glamping appraiser?",
-        answer: "Glamping properties have unique characteristics that require specialized appraisal expertise. Standard appraisers may not understand the glamping market, revenue models, and property values specific to outdoor hospitality."
+        answer: "Yes, absolutely. Sage Outdoor Advisory's glamping appraisals are bank-approved and trusted by financial institutions nationwide for glamping property financing and transactions. Our appraisals meet USPAP standards and are specifically designed to satisfy lender requirements. <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>See how we've helped clients</a> like Open Sky in Zion, UT secure traditional bank funding. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a consultation</a> to learn more."
       }
     ],
     keywords: ["glamping appraisal", "glamping property valuation", "glamping resort appraisal", "glamping property value"],
@@ -483,7 +673,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
     ],
     benefits: [
-      "300+ outdoor hospitality appraisals",
+      "350+ outdoor hospitality appraisals",
       "Bank-approved valuations",
       "RV resort market specialization",
       "Reliable, accurate appraisals",
@@ -635,7 +825,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       "Bank-approved feasibility studies",
       "Specialized glamping appraisals",
       "Understanding of lender requirements",
-      "300+ successful projects",
+      "350+ successful projects",
     ],
     cta: {
       title: "Get Help Financing Your Glamping Resort",
@@ -1208,7 +1398,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
     ],
     benefits: [
-      "300+ outdoor hospitality appraisals completed",
+      "350+ outdoor hospitality appraisals completed",
       "Bank-approved appraisal reports",
       "Deep campground market expertise",
       "Fast turnaround times",

@@ -41,7 +41,7 @@ Understanding seasonality is critical for financial planning, staffing, marketin
 
 The outdoor hospitality industry has experienced significant growth as travelers seek unique, experiential accommodations that connect them with nature. This growth has been driven by trends toward experiential travel, interest in outdoor recreation, and the appeal of unique accommodation types.
 
-Sage Outdoor Advisory specializes exclusively in outdoor hospitality, providing feasibility studies and appraisals for glamping resorts, RV parks, campgrounds, and related properties. Our deep industry expertise ensures accurate analysis and valuations for these unique property types.`,
+Sage Outdoor Advisory specializes exclusively in outdoor hospitality, providing feasibility studies and appraisals for glamping resorts, RV parks, campgrounds, and related properties. Our deep industry expertise ensures accurate analysis and valuations for these unique property types. For a comprehensive assessment of current industry trends, challenges, and opportunities, see our <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" class="text-[#006b5f] hover:text-[#005a4f] underline">2025 Outdoor Hospitality Industry Overview</a> blog post.`,
     category: "General",
     relatedTerms: ["glamping", "rv-resort", "campground", "feasibility-study"],
     examples: [
@@ -56,7 +56,8 @@ Sage Outdoor Advisory specializes exclusively in outdoor hospitality, providing 
     seoKeywords: ["outdoor hospitality", "outdoor accommodations", "outdoor recreation hospitality"],
     internalLinks: [
       { text: "Our Services", url: "https://sageoutdooradvisory.com/our-services/" },
-      { text: "About Sage", url: "https://sageoutdooradvisory.com/about/" }
+      { text: "About Sage", url: "https://sageoutdooradvisory.com/about/" },
+      { text: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" }
     ],
     faqs: [
       {

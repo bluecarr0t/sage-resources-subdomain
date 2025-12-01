@@ -9,7 +9,7 @@ export const feasibilityAppraisalTerms: Record<string, GlossaryTerm> = {
 
 The study typically includes market analysis to understand demand and competition, financial modeling to project revenues and expenses, site analysis to evaluate location suitability, and strategic recommendations for development. Feasibility studies are essential for securing financing, as banks and lenders require them to assess project risk and viability.
 
-Sage Outdoor Advisory specializes in creating comprehensive, bank-approved feasibility studies for outdoor hospitality projects. Our studies provide investors, developers, and lenders with the detailed analysis needed to make informed decisions about project development and financing.`,
+Sage Outdoor Advisory specializes in creating comprehensive, bank-approved feasibility studies for outdoor hospitality projects. Our studies provide investors, developers, and lenders with the detailed analysis needed to make informed decisions about project development and financing. For current industry trends that inform feasibility studies, see our <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" class="text-[#006b5f] hover:text-[#005a4f] underline">2025 Outdoor Hospitality Industry Overview</a> blog post.`,
     category: "Feasibility & Appraisal",
     relatedTerms: ["market-analysis", "appraisal", "revenue-projections", "competitive-analysis"],
     examples: [

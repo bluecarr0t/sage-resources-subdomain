@@ -38,6 +38,7 @@ export interface GuideContent {
     subheadline: string;
     ctaText?: string;
     ctaLink?: string;
+    backgroundImage?: string; // Optional hero background image path
   };
   tableOfContents: TableOfContentsItem[];
   sections: GuideSection[];

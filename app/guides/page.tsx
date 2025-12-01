@@ -154,7 +154,7 @@ export default function GuidesPage() {
               Need Help with Your Outdoor Hospitality Project?
             </h2>
             <p className="text-xl text-white/90 mb-8">
-              Our experts have completed over 300 feasibility studies and appraisals. Get personalized guidance for your project.
+              Our experts have completed over 350 feasibility studies and appraisals. Get personalized guidance for your project.
             </p>
             <Link
               href="https://sageoutdooradvisory.com/contact-us/"

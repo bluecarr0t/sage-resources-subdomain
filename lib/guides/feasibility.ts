@@ -31,11 +31,11 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "introduction",
         title: "Introduction",
-        content: `<p>A <a href="/glossary/feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> is one of the most critical documents you'll need when developing or investing in an outdoor hospitality property. Whether you're planning a <a href="/glossary/glamping-resort" className="text-[#006b5f] hover:text-[#005a4f] underline">glamping resort</a>, <a href="/glossary/rv-resort" className="text-[#006b5f] hover:text-[#005a4f] underline">RV resort</a>, or <a href="/glossary/campground" className="text-[#006b5f] hover:text-[#005a4f] underline">campground</a>, a comprehensive feasibility study provides the foundation for informed decision-making, secures financing, and guides your project's success.</p>
+        content: `<p>A <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> is one of the most critical documents you'll need when developing or investing in an outdoor hospitality property. Whether you're planning a <a href="/glossary/glamping-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping resort</a>, <a href="/glossary/rv-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort</a>, or <a href="/glossary/campground" class="text-[#006b5f] hover:text-[#005a4f] underline">campground</a>, a comprehensive feasibility study provides the foundation for informed decision-making, secures financing, and guides your project's success.</p>
         
         <p>This complete guide covers everything you need to know about feasibility studies for outdoor hospitality projects. From understanding what a feasibility study is to choosing the right consultant, we'll walk you through every aspect of the process.</p>
         
-        <p>Sage Outdoor Advisory has completed over 300 feasibility studies and appraisals in the outdoor hospitality industry. Our expertise spans glamping resorts, RV parks, campgrounds, and related properties across the United States. This guide draws from our extensive experience to provide you with comprehensive, actionable information.</p>`
+        <p>Sage Outdoor Advisory has completed over 350 feasibility studies and appraisals in the outdoor hospitality industry. Our expertise spans glamping resorts, RV parks, campgrounds, and related properties across the United States. This guide draws from our extensive experience to provide you with comprehensive, actionable information. For current industry trends and market insights that inform feasibility studies, see our <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" class="text-[#006b5f] hover:text-[#005a4f] underline">2025 Outdoor Hospitality Industry Overview</a> blog post.</p>`
       },
       {
         id: "what-is-feasibility-study",
@@ -44,7 +44,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <p>Think of a feasibility study as a detailed roadmap for your project. It examines multiple dimensions:</p>
         
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li><strong>Market Analysis:</strong> Understanding demand, competition, and market dynamics in your target area</li>
           <li><strong>Financial Projections:</strong> Revenue forecasts, operating expenses, and profitability analysis</li>
           <li><strong>Site Suitability:</strong> Evaluating location, accessibility, zoning, and development requirements</li>
@@ -63,7 +63,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Securing Financing</h3>
         <p>Banks and lenders require feasibility studies to assess project risk and viability. A comprehensive, bank-approved feasibility study significantly increases your chances of securing financing. Lenders need to understand:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Market demand for your property type</li>
           <li>Realistic revenue projections</li>
           <li>Operating expense expectations</li>
@@ -73,7 +73,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Informed Decision-Making</h3>
         <p>Before committing significant capital to a project, you need objective analysis of its viability. A feasibility study helps you:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Validate your business concept</li>
           <li>Understand market dynamics</li>
           <li>Identify potential challenges early</li>
@@ -83,7 +83,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Risk Mitigation</h3>
         <p>Outdoor hospitality projects involve substantial investment and risk. A feasibility study identifies potential risks before you commit resources, allowing you to:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Address challenges proactively</li>
           <li>Avoid costly mistakes</li>
           <li>Develop contingency plans</li>
@@ -99,18 +99,18 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         content: `<p>Feasibility studies are tailored to specific property types within the outdoor hospitality industry. Each property type has unique characteristics, market dynamics, and considerations:</p>
         
         <h3>Glamping Resort Feasibility Studies</h3>
-        <p><a href="/landing/glamping-feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">Glamping feasibility studies</a> analyze the viability of glamping resort developments. These studies focus on:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <p><a href="/landing/glamping-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping feasibility studies</a> analyze the viability of glamping resort developments. These studies focus on:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Accommodation mix optimization (yurts, A-frames, safari tents, etc.)</li>
-          <li>Premium pricing potential and <a href="/glossary/adr" className="text-[#006b5f] hover:text-[#005a4f] underline">ADR</a> expectations</li>
+          <li>Premium pricing potential and <a href="/glossary/adr" class="text-[#006b5f] hover:text-[#005a4f] underline">ADR</a> expectations</li>
           <li>Seasonal demand patterns</li>
           <li>Amenities that drive bookings and revenue</li>
           <li>Experiential tourism trends</li>
         </ul>
         
         <h3>RV Resort Feasibility Studies</h3>
-        <p><a href="/landing/rv-resort-feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">RV resort feasibility studies</a> evaluate the potential for RV resort developments. Key focus areas include:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <p><a href="/landing/rv-resort-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort feasibility studies</a> evaluate the potential for RV resort developments. Key focus areas include:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Site density and layout optimization</li>
           <li>Amenity requirements and cost-benefit analysis</li>
           <li>Long-term versus short-term stay dynamics</li>
@@ -119,8 +119,8 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Campground Feasibility Studies</h3>
-        <p><a href="/landing/campground-feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">Campground feasibility studies</a> assess traditional campground developments. These studies examine:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <p><a href="/landing/campground-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">Campground feasibility studies</a> assess traditional campground developments. These studies examine:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Market demand for traditional camping experiences</li>
           <li>Site requirements and development costs</li>
           <li>Recreational vehicle and tent site mix</li>
@@ -140,7 +140,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Market Analysis</h3>
         <p>Detailed examination of the market environment, including:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Demand drivers and market trends</li>
           <li>Target market demographics and psychographics</li>
           <li>Visitor spending patterns</li>
@@ -150,7 +150,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Competitive Analysis</h3>
         <p>Assessment of existing and proposed competitive properties, including:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Competitor identification and evaluation</li>
           <li>Competitive positioning analysis</li>
           <li>Pricing strategies and occupancy rates</li>
@@ -160,18 +160,18 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Financial Projections</h3>
         <p>Detailed financial modeling including:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><a href="/glossary/revenue-projections" className="text-[#006b5f] hover:text-[#005a4f] underline">Revenue projections</a> by source</li>
-          <li><a href="/glossary/occupancy-rate" className="text-[#006b5f] hover:text-[#005a4f] underline">Occupancy rate</a> forecasts</li>
-          <li><a href="/glossary/operating-expenses" className="text-[#006b5f] hover:text-[#005a4f] underline">Operating expense</a> estimates</li>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li><a href="/glossary/revenue-projections" class="text-[#006b5f] hover:text-[#005a4f] underline">Revenue projections</a> by source</li>
+          <li><a href="/glossary/occupancy-rate" class="text-[#006b5f] hover:text-[#005a4f] underline">Occupancy rate</a> forecasts</li>
+          <li><a href="/glossary/operating-expenses" class="text-[#006b5f] hover:text-[#005a4f] underline">Operating expense</a> estimates</li>
           <li>Cash flow projections</li>
-          <li><a href="/glossary/noi" className="text-[#006b5f] hover:text-[#005a4f] underline">Net operating income</a> (NOI) analysis</li>
-          <li><a href="/glossary/roi" className="text-[#006b5f] hover:text-[#005a4f] underline">Return on investment</a> (ROI) calculations</li>
+          <li><a href="/glossary/noi" class="text-[#006b5f] hover:text-[#005a4f] underline">Net operating income</a> (NOI) analysis</li>
+          <li><a href="/glossary/roi" class="text-[#006b5f] hover:text-[#005a4f] underline">Return on investment</a> (ROI) calculations</li>
         </ul>
         
         <h3>Site Analysis</h3>
         <p>Evaluation of the proposed site, including:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Location attributes and accessibility</li>
           <li>Zoning and regulatory requirements</li>
           <li>Environmental considerations</li>
@@ -181,7 +181,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Risk Assessment</h3>
         <p>Identification and analysis of project risks, including:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Market risks</li>
           <li>Financial risks</li>
           <li>Regulatory risks</li>
@@ -191,7 +191,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Strategic Recommendations</h3>
         <p>Actionable recommendations for optimizing project success, including:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Optimal project scope and scale</li>
           <li>Recommended amenities and features</li>
           <li>Pricing strategies</li>
@@ -204,35 +204,55 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "how-to-read",
         title: "How to Read a Feasibility Study",
-        content: `<p>Understanding how to read and interpret a feasibility study is crucial for making informed decisions. Here's a guide to navigating the key sections:</p>
+        content: `<p>Understanding how to read and interpret a feasibility study is crucial for making informed decisions. Here's a step-by-step guide to navigating the key sections effectively:</p>
         
-        <h3>Start with the Executive Summary</h3>
-        <p>The executive summary provides a high-level overview of findings and recommendations. Read this first to understand the overall assessment of your project's viability.</p>
-        
-        <h3>Review Market Analysis Thoroughly</h3>
-        <p>The market analysis section provides context for financial projections. Pay attention to:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Demand drivers - what's creating demand in your market?</li>
-          <li>Competitive positioning - how does your project compare?</li>
-          <li>Market trends - is the market growing or declining?</li>
+        <h3>1. Start with the Executive Summary</h3>
+        <p>The executive summary provides a high-level overview of findings and recommendations. Read this first to understand the overall assessment of your project's viability. This section will give you a quick understanding of:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Key findings and conclusions</li>
+          <li>Primary recommendations</li>
+          <li>Overall project viability assessment</li>
         </ul>
         
-        <h3>Examine Financial Projections Carefully</h3>
-        <p>Financial projections are the heart of a feasibility study. Key metrics to understand:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Revenue Projections:</strong> Are they realistic based on market analysis?</li>
-          <li><strong>Occupancy Rates:</strong> Compare to competitive properties</li>
-          <li><strong>Operating Expenses:</strong> Are expense ratios appropriate for your property type?</li>
-          <li><strong>Cash Flow:</strong> When does the project become cash flow positive?</li>
+        <h3>2. Review Market Analysis Thoroughly</h3>
+        <p>The market analysis section provides essential context for financial projections. Pay close attention to:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li><strong>Demand drivers:</strong> What's creating demand in your market?</li>
+          <li><strong>Competitive positioning:</strong> How does your project compare to existing properties?</li>
+          <li><strong>Market trends:</strong> Is the market growing or declining?</li>
+          <li><strong>Target demographics:</strong> Who are your potential customers?</li>
+          <li><strong>Seasonal patterns:</strong> How does demand vary throughout the year?</li>
         </ul>
         
-        <h3>Assess Risk Factors</h3>
-        <p>Every project has risks. Understand what risks are identified and how they're being mitigated. Are the mitigation strategies adequate?</p>
+        <h3>3. Examine Financial Projections Carefully</h3>
+        <p>Financial projections are the heart of a feasibility study. These projections should be realistic and well-supported by the market analysis. Key metrics to understand:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li><strong>Revenue Projections:</strong> Are they realistic based on market analysis and competitive positioning?</li>
+          <li><strong>Occupancy Rates:</strong> Compare projected rates to competitive properties—are they achievable?</li>
+          <li><strong>Operating Expenses:</strong> Are expense ratios appropriate for your property type? Compare to industry benchmarks.</li>
+          <li><strong>Cash Flow:</strong> When does the project become cash flow positive? Is this timeline realistic?</li>
+          <li><strong>Return on Investment:</strong> What returns can you expect, and how do they compare to alternative investments?</li>
+        </ul>
         
-        <h3>Evaluate Recommendations</h3>
-        <p>The strategic recommendations section provides actionable insights. Consider which recommendations align with your vision and capabilities.</p>
+        <h3>4. Assess Risk Factors</h3>
+        <p>Every project has risks. A comprehensive feasibility study should identify potential risks and provide mitigation strategies. As you review the risk assessment:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Understand what risks are identified</li>
+          <li>Evaluate how risks are being mitigated</li>
+          <li>Consider whether mitigation strategies are adequate</li>
+          <li>Assess your ability to manage identified risks</li>
+        </ul>
         
-        <p>For a detailed guide on interpreting feasibility studies, see our <a href="/guides/how-to-read-feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">how to read a feasibility study</a> guide.</p>`
+        <h3>5. Evaluate Strategic Recommendations</h3>
+        <p>The strategic recommendations section provides actionable insights for optimizing your project. When reviewing recommendations:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Consider which recommendations align with your vision and capabilities</li>
+          <li>Prioritize recommendations based on impact and feasibility</li>
+          <li>Understand how implementing recommendations could improve project viability</li>
+          <li>Evaluate the cost and effort required for each recommendation</li>
+        </ul>
+        
+        <p>For a more detailed guide on interpreting feasibility studies, see our comprehensive <a href="/guides/how-to-read-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">how to read a feasibility study guide</a>.</p>`
       },
       {
         id: "vs-appraisal",
@@ -241,7 +261,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Feasibility Study</h3>
         <p>A feasibility study evaluates whether a <strong>proposed project</strong> is viable and profitable. It answers questions like:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Should I build this project?</li>
           <li>What will the revenues and expenses be?</li>
           <li>What are the risks?</li>
@@ -250,8 +270,8 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p>Feasibility studies are forward-looking and focus on a project that doesn't yet exist.</p>
         
         <h3>Appraisal</h3>
-        <p>An <a href="/glossary/appraisal" className="text-[#006b5f] hover:text-[#005a4f] underline">appraisal</a> determines the <strong>current value</strong> of an existing property. It answers questions like:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <p>An <a href="/glossary/appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">appraisal</a> determines the <strong>current value</strong> of an existing property. It answers questions like:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>What is this property worth today?</li>
           <li>What is the fair market value?</li>
           <li>What would it cost to replace this property?</li>
@@ -260,7 +280,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>When Do You Need Each?</h3>
         <p><strong>You need a feasibility study when:</strong></p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Planning a new development</li>
           <li>Expanding an existing property</li>
           <li>Evaluating an acquisition opportunity</li>
@@ -268,7 +288,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <p><strong>You need an appraisal when:</strong></p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Securing financing for an existing property</li>
           <li>Buying or selling a property</li>
           <li>Refinancing</li>
@@ -277,7 +297,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <p>For development projects, you typically need both: a feasibility study to validate the project concept, and an appraisal to determine the property value after development.</p>
         
-        <p>Learn more about the differences in our <a href="/guides/feasibility-study-vs-appraisal" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study vs appraisal comparison guide</a>.</p>`
+        <p>Learn more about the differences in our <a href="/guides/feasibility-study-vs-appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study vs appraisal comparison guide</a>.</p>`
       },
       {
         id: "cost",
@@ -286,7 +306,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Factors Affecting Cost</h3>
         <p>Several factors influence feasibility study pricing:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li><strong>Project Size:</strong> Larger, more complex projects require more analysis</li>
           <li><strong>Property Type:</strong> Some property types require more specialized analysis</li>
           <li><strong>Location:</strong> Market data availability and complexity vary by location</li>
@@ -296,7 +316,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Typical Cost Range</h3>
         <p>For outdoor hospitality projects, feasibility studies typically range from:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Small projects (10-20 units): $10,000 - $25,000</li>
           <li>Medium projects (20-50 units): $25,000 - $50,000</li>
           <li>Large projects (50+ units): $50,000 - $100,000+</li>
@@ -306,7 +326,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>What You're Paying For</h3>
         <p>A professional feasibility study includes:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Market research and analysis</li>
           <li>Competitive property evaluation</li>
           <li>Financial modeling and projections</li>
@@ -318,7 +338,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Value vs. Cost</h3>
         <p>While feasibility studies represent a significant investment, they provide substantial value:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Help avoid costly mistakes</li>
           <li>Increase financing success rates</li>
           <li>Optimize project design and revenue</li>
@@ -328,7 +348,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <p>A well-executed feasibility study often pays for itself through optimized project design, improved financing terms, and risk mitigation.</p>
         
-        <p>For detailed cost information, see our <a href="/guides/feasibility-study-cost-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study cost guide</a>.</p>`
+        <p>For detailed cost information, see our <a href="/guides/feasibility-study-cost-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study cost guide</a>.</p>`
       },
       {
         id: "timeline-process",
@@ -337,7 +357,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Typical Timeline</h3>
         <p>Most feasibility studies for outdoor hospitality projects take <strong>4-6 weeks</strong> to complete, though timelines vary based on:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Project complexity</li>
           <li>Market data availability</li>
           <li>Client responsiveness</li>
@@ -348,7 +368,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p>The typical process includes these phases:</p>
         
         <h4>Phase 1: Project Kickoff and Information Gathering (Week 1)</h4>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Initial consultation and project understanding</li>
           <li>Site visit and evaluation</li>
           <li>Information gathering from client</li>
@@ -356,7 +376,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <h4>Phase 2: Market Research and Analysis (Weeks 2-3)</h4>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Market data collection</li>
           <li>Competitive property analysis</li>
           <li>Demand analysis</li>
@@ -364,7 +384,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <h4>Phase 3: Financial Analysis (Weeks 3-4)</h4>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Revenue modeling</li>
           <li>Expense estimation</li>
           <li>Financial projections</li>
@@ -372,7 +392,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <h4>Phase 4: Report Preparation (Weeks 4-6)</h4>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Draft report preparation</li>
           <li>Client review and feedback</li>
           <li>Report revision and finalization</li>
@@ -381,14 +401,14 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Client Responsibilities</h3>
         <p>To keep the process on track, clients should:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Provide requested information promptly</li>
           <li>Respond to questions and clarifications quickly</li>
           <li>Schedule and attend necessary meetings</li>
           <li>Review draft materials within agreed timeframes</li>
         </ul>
         
-        <p>For a detailed breakdown of the process, see our <a href="/guides/feasibility-study-process-timeline" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study process and timeline guide</a>.</p>`
+        <p>For a detailed breakdown of the process, see our <a href="/guides/feasibility-study-process-timeline" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study process and timeline guide</a>.</p>`
       },
       {
         id: "choose-consultant",
@@ -397,7 +417,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Industry Expertise</h3>
         <p>Outdoor hospitality requires specialized knowledge. Look for consultants with:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Specific experience in your property type (glamping, RV resort, campground)</li>
           <li>Track record in outdoor hospitality feasibility studies</li>
           <li>Understanding of unique market dynamics</li>
@@ -406,7 +426,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Track Record</h3>
         <p>Evaluate the consultant's experience:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Number of completed feasibility studies</li>
           <li>Success rate with financing (bank-approved studies)</li>
           <li>Client testimonials and case studies</li>
@@ -415,7 +435,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Data and Resources</h3>
         <p>Quality feasibility studies require access to:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Market data and industry databases</li>
           <li>Comparable property information</li>
           <li>Financial benchmarking data</li>
@@ -424,7 +444,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Methodology and Approach</h3>
         <p>Understand the consultant's approach:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Analysis methodology</li>
           <li>Financial modeling approach</li>
           <li>Report structure and deliverables</li>
@@ -433,7 +453,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Bank Recognition</h3>
         <p>For financing purposes, ensure your consultant's studies are:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Recognized by banks and lenders</li>
           <li>Meet lender requirements</li>
           <li>Include all necessary documentation</li>
@@ -442,7 +462,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Questions to Ask</h3>
         <p>When evaluating consultants, ask:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>How many outdoor hospitality feasibility studies have you completed?</li>
           <li>What's your success rate with bank approvals?</li>
           <li>What market data sources do you use?</li>
@@ -451,7 +471,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
           <li>What's your typical timeline?</li>
         </ul>
         
-        <p>Sage Outdoor Advisory has completed over 300 feasibility studies and appraisals in the outdoor hospitality industry. Our studies are bank-approved and trusted by financial institutions nationwide. <a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">Contact us</a> to discuss your project and learn how we can help.</p>`
+        <p>Sage Outdoor Advisory has completed over 350 feasibility studies and appraisals in the outdoor hospitality industry. Our studies are bank-approved and trusted by financial institutions nationwide. <a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">Contact us</a> to discuss your project and learn how we can help.</p>`
       }
     ],
     clusterPages: [
@@ -503,7 +523,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         answer: `<p>A feasibility study is a comprehensive analysis that evaluates the viability, market potential, and financial prospects of a proposed outdoor hospitality project.</p>
         
         <p>It helps developers, investors, and lenders understand:</p>
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li>Whether a project is worth pursuing</li>
           <li>What risks exist</li>
           <li>How to maximize success</li>
@@ -527,19 +547,19 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         question: "How much does a feasibility study cost?",
         answer: `<p>Feasibility study costs vary significantly based on project scope, complexity, and location. For outdoor hospitality projects, typical costs range from:</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>Small projects (10-20 units):</strong> $10,000 - $25,000</li>
           <li><strong>Medium projects (20-50 units):</strong> $25,000 - $50,000</li>
           <li><strong>Large projects (50+ units):</strong> $50,000 - $100,000+</li>
         </ul>
         
-        <p>Factors affecting cost include project size, property type, location, scope of analysis, and timeline. <a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a customized quote based on your specific project needs.</p>`
+        <p>Factors affecting cost include project size, property type, location, scope of analysis, and timeline. <a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a customized quote based on your specific project needs.</p>`
       },
       {
         question: "How long does a feasibility study take?",
         answer: `<p>Most feasibility studies for outdoor hospitality projects take <strong>4-6 weeks</strong> to complete, though timelines vary based on:</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li>Project complexity</li>
           <li>Market data availability</li>
           <li>Client responsiveness</li>
@@ -556,13 +576,13 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <p><strong>Appraisal:</strong> Determines the <em>current value</em> of an existing property. It's present-focused and answers questions like "What is this property worth today?"</p>
         
-        <p><strong>When You Need Both:</strong> For development projects, you typically need both—a feasibility study to validate the project concept, and an appraisal to determine property value after development. Learn more in our <a href="/guides/feasibility-study-vs-appraisal" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study vs appraisal comparison guide</a>.</p>`
+        <p><strong>When You Need Both:</strong> For development projects, you typically need both—a feasibility study to validate the project concept, and an appraisal to determine property value after development. Learn more in our <a href="/guides/feasibility-study-vs-appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study vs appraisal comparison guide</a>.</p>`
       },
       {
         question: "Will banks accept Sage's feasibility studies?",
         answer: `<p><strong>Yes, absolutely.</strong> Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide.</p>
         
-        <p>We've completed over 300 feasibility studies and appraisals in the outdoor hospitality industry, and our studies are specifically designed to meet lender requirements with comprehensive analysis and professional documentation.</p>
+        <p>We've completed over 350 feasibility studies and appraisals in the outdoor hospitality industry, and our studies are specifically designed to meet lender requirements with comprehensive analysis and professional documentation.</p>
         
         <p>We've helped numerous clients secure financing for their glamping, RV resort, and campground projects.</p>`
       },
@@ -570,7 +590,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         question: "What information do I need to provide for a feasibility study?",
         answer: `<p>To get started, you'll need to provide:</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>Site details:</strong> Location, size, current condition, zoning information</li>
           <li><strong>Proposed project scope:</strong> Property type, number of units, amenities planned</li>
           <li><strong>Target market information:</strong> Your understanding of the target audience</li>
@@ -584,7 +604,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         answer: `<p><strong>Absolutely.</strong> Feasibility studies do much more than just validate your project—they provide actionable insights for optimization.</p>
         
         <p>A comprehensive feasibility study can help you:</p>
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li>Optimize project scope and scale</li>
           <li>Identify the right mix of amenities and features</li>
           <li>Develop effective pricing strategies</li>
@@ -650,11 +670,11 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "introduction",
         title: "Introduction",
-        content: `<p>A <a href="/glossary/feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> is a comprehensive document that evaluates your project's viability. Understanding how to read and interpret it is crucial for making informed decisions about your outdoor hospitality development.</p>
+        content: `<p>A <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> is a comprehensive document that evaluates your project's viability. Understanding how to read and interpret it is crucial for making informed decisions about your outdoor hospitality development.</p>
         
         <p>This guide walks you through each section of a feasibility study, explains what to look for, and helps you extract actionable insights from the analysis. Whether you're a developer, investor, or lender, this guide will help you understand feasibility studies effectively.</p>
         
-        <p>For a complete overview of feasibility studies, see our <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a>.</p>`
+        <p>For a complete overview of feasibility studies, see our <a href="/guides/feasibility-studies-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a>.</p>`
       },
       {
         id: "executive-summary",
@@ -663,7 +683,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Key Findings</h3>
         <p>The executive summary should clearly state whether the project is viable, the main opportunities, and primary risks. Look for:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Overall project viability assessment</li>
           <li>Key market opportunities</li>
           <li>Primary risk factors</li>
@@ -701,16 +721,16 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Revenue Projections</h3>
         <p>Examine revenue projections carefully. Key questions:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Are they based on realistic <a href="/glossary/occupancy-rate" className="text-[#006b5f] hover:text-[#005a4f] underline">occupancy rates</a>?</li>
-          <li>Do <a href="/glossary/adr" className="text-[#006b5f] hover:text-[#005a4f] underline">ADR</a> assumptions align with competitive properties?</li>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Are they based on realistic <a href="/glossary/occupancy-rate" class="text-[#006b5f] hover:text-[#005a4f] underline">occupancy rates</a>?</li>
+          <li>Do <a href="/glossary/adr" class="text-[#006b5f] hover:text-[#005a4f] underline">ADR</a> assumptions align with competitive properties?</li>
           <li>Are revenue sources clearly explained?</li>
           <li>Do projections account for seasonality?</li>
         </ul>
         
         <h3>Operating Expenses</h3>
         <p>Review expense assumptions:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Are expense ratios appropriate for your property type?</li>
           <li>Do they align with industry benchmarks?</li>
           <li>Are all major expense categories included?</li>
@@ -718,14 +738,14 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Cash Flow</h3>
         <p>Understand the cash flow projections:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>When does the project become cash flow positive?</li>
           <li>Are there seasonal cash flow variations?</li>
           <li>What are the peak cash flow periods?</li>
         </ul>
         
         <h3>Key Metrics</h3>
-        <p>Review important financial metrics like <a href="/glossary/roi" className="text-[#006b5f] hover:text-[#005a4f] underline">ROI</a>, payback period, and <a href="/glossary/noi" className="text-[#006b5f] hover:text-[#005a4f] underline">net operating income</a>. Compare them to your investment criteria.</p>`
+        <p>Review important financial metrics like <a href="/glossary/roi" class="text-[#006b5f] hover:text-[#005a4f] underline">ROI</a>, payback period, and <a href="/glossary/noi" class="text-[#006b5f] hover:text-[#005a4f] underline">net operating income</a>. Compare them to your investment criteria.</p>`
       },
       {
         id: "competitive-analysis",
@@ -786,7 +806,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         title: "Key Questions to Ask",
         content: `<p>After reading the feasibility study, ask yourself these questions:</p>
         
-        <ol className="list-decimal list-inside space-y-2 ml-4">
+        <ol class="list-decimal list-inside space-y-2 ml-4">
           <li>Are the financial projections realistic based on the market analysis?</li>
           <li>Do the recommendations make sense for my situation?</li>
           <li>Are the identified risks manageable?</li>
@@ -796,7 +816,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
           <li>What are the key next steps?</li>
         </ol>
         
-        <p>If you have questions or need clarification, <a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">contact the feasibility study consultant</a> to discuss the findings.</p>`
+        <p>If you have questions or need clarification, <a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">contact the feasibility study consultant</a> to discuss the findings.</p>`
       }
     ],
     clusterPages: [
@@ -831,13 +851,13 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p><strong>3. Examine the Financial Projections</strong></p>
         <p>Financial projections are the heart of a feasibility study. Understand revenue projections, occupancy rates, operating expenses, and cash flow timelines.</p>
         
-        <p>For more detailed guidance, see our <a href="/guides/how-to-read-feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">how to read a feasibility study guide</a>.</p>`
+        <p>For more detailed guidance, see our <a href="/guides/how-to-read-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">how to read a feasibility study guide</a>.</p>`
       },
       {
         question: "How do I know if financial projections are realistic?",
         answer: `<p>Evaluating the realism of financial projections requires careful analysis:</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>Compare to industry benchmarks:</strong> How do the projections compare to similar properties in the market?</li>
           <li><strong>Evaluate assumptions:</strong> Are the underlying assumptions reasonable and well-supported?</li>
           <li><strong>Assess alignment:</strong> Do the projections align with the market analysis and competitive positioning?</li>
@@ -920,17 +940,17 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "introduction",
         title: "Introduction",
-        content: `<p>Many people confuse <a href="/glossary/feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility studies</a> and <a href="/glossary/appraisal" className="text-[#006b5f] hover:text-[#005a4f] underline">appraisals</a>, but they serve different purposes and are used at different stages of a project. Understanding their differences is crucial for making informed decisions.</p>
+        content: `<p>Many people confuse <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility studies</a> and <a href="/glossary/appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">appraisals</a>, but they serve different purposes and are used at different stages of a project. Understanding their differences is crucial for making informed decisions.</p>
         
         <p>This guide explains the key differences between feasibility studies and appraisals, when you need each, and how they work together in the development and financing process.</p>
         
-        <p>For comprehensive information, see our <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> and <a href="/guides/property-appraisals-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">Property Appraisals Complete Guide</a>.</p>`
+        <p>For comprehensive information, see our <a href="/guides/feasibility-studies-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> and <a href="/guides/property-appraisals-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Property Appraisals Complete Guide</a>.</p>`
       },
       {
         id: "what-is-feasibility",
         title: "What is a Feasibility Study?",
         content: `<p>A feasibility study evaluates whether a <strong>proposed project</strong> is viable and profitable. It's forward-looking and answers questions like:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Should I build this project?</li>
           <li>What will revenues and expenses be?</li>
           <li>What are the risks?</li>
@@ -942,7 +962,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "what-is-appraisal",
         title: "What is an Appraisal?",
         content: `<p>An appraisal determines the <strong>current value</strong> of an existing property. It's present-focused and answers questions like:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>What is this property worth today?</li>
           <li>What is the fair market value?</li>
           <li>What would it cost to replace this property?</li>
@@ -955,25 +975,25 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         content: `<p>Here are the main differences:</p>
         
         <h3>Purpose</h3>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li><strong>Feasibility Study:</strong> Evaluates project viability</li>
           <li><strong>Appraisal:</strong> Determines property value</li>
         </ul>
         
         <h3>Focus</h3>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li><strong>Feasibility Study:</strong> Forward-looking (future project)</li>
           <li><strong>Appraisal:</strong> Present-focused (existing property)</li>
         </ul>
         
         <h3>Content</h3>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li><strong>Feasibility Study:</strong> Market analysis, financial projections, strategic recommendations</li>
           <li><strong>Appraisal:</strong> Property valuation using standardized approaches</li>
         </ul>
         
         <h3>When Used</h3>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li><strong>Feasibility Study:</strong> Planning and development stage</li>
           <li><strong>Appraisal:</strong> Financing, buying/selling, refinancing</li>
         </ul>`
@@ -982,7 +1002,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "when-need-each",
         title: "When Do You Need Each?",
         content: `<p><strong>You need a feasibility study when:</strong></p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Planning a new development</li>
           <li>Expanding an existing property</li>
           <li>Evaluating an acquisition opportunity</li>
@@ -991,7 +1011,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <p><strong>You need an appraisal when:</strong></p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Securing financing for an existing property</li>
           <li>Buying or selling a property</li>
           <li>Refinancing</li>
@@ -1006,7 +1026,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         title: "How They Work Together",
         content: `<p>In development projects, feasibility studies and appraisals complement each other:</p>
         
-        <ol className="list-decimal list-inside space-y-2 ml-4">
+        <ol class="list-decimal list-inside space-y-2 ml-4">
           <li><strong>Feasibility Study First:</strong> Validates project concept and provides financial projections</li>
           <li><strong>Appraisal During/After:</strong> Determines property value at various stages</li>
           <li><strong>Both for Financing:</strong> Lenders often require both to assess project viability and property value</li>
@@ -1027,7 +1047,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <p>For development projects, budget for both since they serve different purposes and are often required together for financing.</p>
         
-        <p>See our <a href="/guides/feasibility-study-cost-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study cost guide</a> and <a href="/guides/appraisal-cost-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">appraisal cost guide</a> for detailed information.</p>`
+        <p>See our <a href="/guides/feasibility-study-cost-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study cost guide</a> and <a href="/guides/appraisal-cost-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">appraisal cost guide</a> for detailed information.</p>`
       }
     ],
     clusterPages: [
@@ -1071,7 +1091,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p>The feasibility study should be completed early in the planning process to validate your project concept before you commit significant resources. It helps you understand if the project is viable and worth pursuing.</p>
         
         <p>The appraisal can be done:</p>
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>During development:</strong> To assess value as the project progresses</li>
           <li><strong>After completion:</strong> To determine final property value for financing or transactions</li>
         </ul>
@@ -1102,7 +1122,6 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     tableOfContents: [
       { title: "Introduction", anchor: "introduction", level: 1 },
       { title: "Factors Affecting Cost", anchor: "factors", level: 1 },
-      { title: "Typical Cost Ranges", anchor: "cost-ranges", level: 1 },
       { title: "What You're Paying For", anchor: "what-paying-for", level: 1 },
       { title: "Value vs. Cost", anchor: "value-vs-cost", level: 1 },
       { title: "Getting a Custom Quote", anchor: "custom-quote", level: 1 },
@@ -1112,7 +1131,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "introduction",
         title: "Introduction",
-        content: `<p>Understanding <a href="/glossary/feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> costs helps you budget appropriately and evaluate proposals. This guide breaks down what affects pricing and what you can expect to pay.</p>
+        content: `<p>Understanding <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> costs helps you budget appropriately and evaluate proposals. This guide breaks down what affects pricing and what you can expect to pay.</p>
         
         <p>Feasibility study costs vary significantly based on project scope, complexity, and location. This guide helps you understand the factors and typical ranges.</p>`
       },
@@ -1137,21 +1156,10 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p>Rush projects may cost more due to accelerated timelines requiring more resources.</p>`
       },
       {
-        id: "cost-ranges",
-        title: "Typical Cost Ranges",
-        content: `<p>For outdoor hospitality projects, feasibility studies typically range from:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Small projects (10-20 units): $10,000 - $25,000</li>
-          <li>Medium projects (20-50 units): $25,000 - $50,000</li>
-          <li>Large projects (50+ units): $50,000 - $100,000+</li>
-        </ul>
-        <p>These are general guidelines. Actual costs depend on specific project characteristics.</p>`
-      },
-      {
         id: "what-paying-for",
         title: "What You're Paying For",
         content: `<p>A professional feasibility study includes:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Market research and analysis</li>
           <li>Competitive property evaluation</li>
           <li>Financial modeling and projections</li>
@@ -1169,7 +1177,9 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "custom-quote",
         title: "Getting a Custom Quote",
-        content: `<p><a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">Contact us</a> for a customized quote based on your specific project needs.</p>`
+        content: `<p>Contact us for a customized quote based on your specific project needs. Our team will review your project details and provide a detailed proposal tailored to your requirements.</p>
+        
+        <p><a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">Schedule a consultation to get your custom feasibility study quote →</a></p>`
       }
     ],
     clusterPages: [
@@ -1182,22 +1192,24 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     relatedGuides: ["feasibility-studies-complete-guide"],
     faqs: [
       {
-        question: "How much does a feasibility study cost?",
-        answer: `<p>Feasibility study costs vary significantly based on project scope and complexity. For outdoor hospitality projects, typical costs range from:</p>
+        question: "How do I get a custom quote for my feasibility study?",
+        answer: `<p>Getting a custom quote for your feasibility study is simple. <a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> to schedule a free consultation where we'll discuss your specific project needs.</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
-          <li><strong>Small projects (10-20 units):</strong> $10,000 - $25,000</li>
-          <li><strong>Medium projects (20-50 units):</strong> $25,000 - $50,000</li>
-          <li><strong>Large projects (50+ units):</strong> $50,000 - $100,000+</li>
+        <p>During the consultation, we'll review:</p>
+        <ul class="list-disc list-inside space-y-1 ml-4">
+          <li>Your project scope and size</li>
+          <li>Property type and location</li>
+          <li>Timeline requirements</li>
+          <li>Specific analysis needs</li>
         </ul>
         
-        <p>These are general guidelines—actual costs depend on specific project characteristics. <a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a customized quote based on your project.</p>`
+        <p>Based on this information, we'll provide a detailed proposal with transparent pricing tailored to your project. We've completed over 350 feasibility studies in the outdoor hospitality industry and will ensure your quote reflects the comprehensive analysis your project requires.</p>`
       },
       {
         question: "What factors affect feasibility study costs?",
         answer: `<p>Several factors influence feasibility study pricing:</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>Project Size:</strong> Larger, more complex projects require more extensive analysis</li>
           <li><strong>Property Type:</strong> Some property types require more specialized analysis</li>
           <li><strong>Location:</strong> Market data availability and complexity vary by location</li>
@@ -1242,17 +1254,17 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "introduction",
         title: "Introduction",
-        content: `<p>Understanding the <a href="/glossary/feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> process helps you plan effectively and set appropriate expectations. This guide walks through each phase of the process and typical timelines.</p>
+        content: `<p>Understanding the <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> process helps you plan effectively and set appropriate expectations. This guide walks through each phase of the process and typical timelines.</p>
         
         <p>Most feasibility studies take <strong>4-6 weeks</strong> to complete, though timelines vary based on project complexity and data availability.</p>
         
-        <p>See our <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> for comprehensive information.</p>`
+        <p>See our <a href="/guides/feasibility-studies-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> for comprehensive information.</p>`
       },
       {
         id: "timeline",
         title: "Typical Timeline",
         content: `<p>Most feasibility studies for outdoor hospitality projects take <strong>4-6 weeks</strong> to complete. Timeline factors include:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Project complexity</li>
           <li>Market data availability</li>
           <li>Client responsiveness</li>
@@ -1263,7 +1275,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "phase-1",
         title: "Phase 1: Project Kickoff and Information Gathering (Week 1)",
         content: `<p>The process begins with:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Initial consultation and project understanding</li>
           <li>Site visit and evaluation</li>
           <li>Information gathering from client</li>
@@ -1274,7 +1286,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "phase-2",
         title: "Phase 2: Market Research and Analysis (Weeks 2-3)",
         content: `<p>This phase includes:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Market data collection</li>
           <li>Competitive property analysis</li>
           <li>Demand analysis</li>
@@ -1285,7 +1297,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "phase-3",
         title: "Phase 3: Financial Analysis (Weeks 3-4)",
         content: `<p>Financial modeling includes:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Revenue modeling</li>
           <li>Expense estimation</li>
           <li>Financial projections</li>
@@ -1296,7 +1308,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "phase-4",
         title: "Phase 4: Report Preparation (Weeks 4-6)",
         content: `<p>Final phase includes:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Draft report preparation</li>
           <li>Client review and feedback</li>
           <li>Report revision and finalization</li>
@@ -1307,7 +1319,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "client-responsibilities",
         title: "Client Responsibilities",
         content: `<p>To keep the process on track:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Provide requested information promptly</li>
           <li>Respond to questions quickly</li>
           <li>Schedule necessary meetings</li>
@@ -1328,7 +1340,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         question: "How long does a feasibility study take?",
         answer: `<p>Most feasibility studies for outdoor hospitality projects take <strong>4-6 weeks</strong> to complete, though timelines vary based on:</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li>Project complexity</li>
           <li>Market data availability</li>
           <li>Client responsiveness</li>
@@ -1336,7 +1348,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <p>The process typically includes:</p>
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>Week 1:</strong> Project kickoff and information gathering</li>
           <li><strong>Weeks 2-3:</strong> Market research and analysis</li>
           <li><strong>Weeks 3-4:</strong> Financial analysis</li>
@@ -1347,14 +1359,14 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         question: "What can delay a feasibility study?",
         answer: `<p>Several factors can cause delays in the feasibility study process:</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>Client Information Delays:</strong> If requested information isn't provided promptly, it can slow down the analysis phase</li>
           <li><strong>Market Data Availability:</strong> Difficult-to-obtain or limited market data can extend research time</li>
           <li><strong>Project Scope Changes:</strong> Significant changes to project scope during the study may require additional analysis</li>
           <li><strong>Review Cycles:</strong> Extended review periods can push back finalization</li>
         </ul>
         
-        <p>To keep the process on track, provide requested information promptly and respond to questions and clarifications quickly. See our <a href="/guides/feasibility-study-process-timeline" className="text-[#006b5f] hover:text-[#005a4f] underline">process and timeline guide</a> for more details.</p>`
+        <p>To keep the process on track, provide requested information promptly and respond to questions and clarifications quickly. See our <a href="/guides/feasibility-study-process-timeline" class="text-[#006b5f] hover:text-[#005a4f] underline">process and timeline guide</a> for more details.</p>`
       }
     ],
     lastModified: "2025-01-15",
@@ -1391,17 +1403,17 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "introduction",
         title: "Introduction",
-        content: `<p>Banks and lenders require <a href="/glossary/feasibility-study" className="text-[#006b5f] hover:text-[#005a4f] underline">feasibility studies</a> to assess project risk and viability before approving financing. Understanding what lenders look for helps ensure your feasibility study meets their requirements.</p>
+        content: `<p>Banks and lenders require <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility studies</a> to assess project risk and viability before approving financing. Understanding what lenders look for helps ensure your feasibility study meets their requirements.</p>
         
         <p>This guide explains lender expectations and requirements for feasibility studies, helping you prepare documentation that meets bank standards.</p>
         
-        <p>See our <a href="/guides/feasibility-studies-complete-guide" className="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> for comprehensive information.</p>`
+        <p>See our <a href="/guides/feasibility-studies-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> for comprehensive information.</p>`
       },
       {
         id: "why-required",
         title: "Why Banks Require Feasibility Studies",
         content: `<p>Lenders use feasibility studies to:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Assess project viability and risk</li>
           <li>Validate revenue projections</li>
           <li>Understand market dynamics</li>
@@ -1430,7 +1442,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "financial-requirements",
         title: "Financial Projections Requirements",
         content: `<p>Lenders expect:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Realistic, conservative projections</li>
           <li>Clear assumptions and methodology</li>
           <li>Multiple-year projections</li>
@@ -1442,7 +1454,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "market-standards",
         title: "Market Analysis Standards",
         content: `<p>Lenders require:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Comprehensive competitive analysis</li>
           <li>Market demand validation</li>
           <li>Location and accessibility assessment</li>
@@ -1453,7 +1465,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         id: "red-flags",
         title: "Common Red Flags",
         content: `<p>Lenders watch for:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Overly optimistic projections</li>
           <li>Insufficient market analysis</li>
           <li>Missing risk assessment</li>
@@ -1466,7 +1478,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         title: "Working with Sage Outdoor Advisory",
         content: `<p>Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide. Our studies are specifically designed to meet lender requirements with comprehensive analysis and professional documentation.</p>
         
-        <p><a href="https://sageoutdooradvisory.com/contact-us/" className="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">Contact us</a> to learn how our feasibility studies can help you secure financing.</p>`
+        <p><a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">Contact us</a> to learn how our feasibility studies can help you secure financing.</p>`
       }
     ],
     clusterPages: [
@@ -1483,7 +1495,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         answer: `<p>Banks and lenders have specific requirements for feasibility studies. Key components they look for include:</p>
         
         <p><strong>Comprehensive Market Analysis:</strong></p>
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li>Market demand validation</li>
           <li>Competitive property analysis</li>
           <li>Location and accessibility assessment</li>
@@ -1491,7 +1503,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <p><strong>Realistic Financial Projections:</strong></p>
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li>Multiple-year revenue and expense projections</li>
           <li>Clear assumptions and methodology</li>
           <li>Sensitivity analysis</li>
@@ -1506,9 +1518,9 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         question: "Will banks accept Sage's feasibility studies?",
         answer: `<p><strong>Yes, absolutely.</strong> Sage Outdoor Advisory's feasibility studies are bank-approved and trusted by financial institutions nationwide for outdoor hospitality financing.</p>
         
-        <p>We've completed over 300 feasibility studies and appraisals in the outdoor hospitality industry. Our studies are specifically designed to meet lender requirements with:</p>
+        <p>We've completed over 350 feasibility studies and appraisals in the outdoor hospitality industry. Our studies are specifically designed to meet lender requirements with:</p>
         
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul class="list-disc list-inside space-y-1 ml-4">
           <li>Comprehensive market and financial analysis</li>
           <li>Professional documentation</li>
           <li>Industry expertise and credibility</li>

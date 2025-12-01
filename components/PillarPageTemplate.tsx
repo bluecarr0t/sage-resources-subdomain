@@ -136,17 +136,35 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
 
         <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className={`relative ${content.hero.backgroundImage ? 'py-16 overflow-hidden' : 'bg-gradient-to-br from-blue-50 to-indigo-100 py-16'}`}>
+          {content.hero.backgroundImage && (
+            <>
+              {/* Background Image */}
+              <div className="absolute inset-0 z-0">
+                <Image
+                  src={content.hero.backgroundImage}
+                  alt={`${content.hero.headline} background`}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="100vw"
+                  quality={90}
+                />
+                {/* Overlay for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-indigo-900/40" />
+              </div>
+            </>
+          )}
+          <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${content.hero.backgroundImage ? 'relative z-10' : ''}`}>
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-5xl font-bold text-gray-900 mb-6" style={{ fontSize: '3rem' }}>
+              <h1 className={`text-5xl font-bold mb-6 ${content.hero.backgroundImage ? 'text-white drop-shadow-lg' : 'text-gray-900'}`} style={{ fontSize: '3rem' }}>
                 {content.hero.headline}
               </h1>
-              <p className="text-xl text-gray-700 mb-8">
+              <p className={`text-xl mb-8 ${content.hero.backgroundImage ? 'text-white/95 drop-shadow-md' : 'text-gray-700'}`}>
                 {content.hero.subheadline}
               </p>
               {content.lastModified && (
-                <p className="text-xs text-gray-500 mb-6">
+                <p className={`text-xs mb-6 ${content.hero.backgroundImage ? 'text-white/80' : 'text-gray-500'}`}>
                   Last Updated: December 1, 2025
                 </p>
               )}
