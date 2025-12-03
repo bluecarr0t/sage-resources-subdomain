@@ -1,8 +1,16 @@
-'use client';
-
+import { Metadata } from "next";
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { MapProvider } from '@/components/MapContext';
 import GooglePropertyMap from '@/components/GooglePropertyMap';
+import { createServerClient } from '@/lib/supabase';
+import {
+  generateOrganizationSchema,
+  generateMapSchema,
+  generateMapItemListSchema,
+  generateMapWebApplicationSchema,
+  generateMapBreadcrumbSchema,
+} from '@/lib/schema';
 
 // Dynamically import Google Maps component to prevent SSR issues
 const DynamicGooglePropertyMap = dynamic(() => Promise.resolve(GooglePropertyMap), {
@@ -10,46 +18,200 @@ const DynamicGooglePropertyMap = dynamic(() => Promise.resolve(GooglePropertyMap
   loading: () => null, // No loading state - let the component handle it
 });
 
-export default function MapPage() {
-  return (
-    <MapProvider>
-      <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-gray-50">
-        {/* Left Sidebar - Narrow Column */}
-        <aside className="w-full md:w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col overflow-y-auto shadow-sm relative z-20">
-          <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-            <a
-              href="https://sageoutdooradvisory.com/"
-              className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors group"
-            >
-              <svg
-                className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span>Back to Site</span>
-            </a>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Glamping Properties
-            </h1>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Explore properties across the United States and Canada. Click on markers to view property details.
-            </p>
-          </div>
-          
-          {/* Filters Section */}
-          <div className="p-6 space-y-6 flex-1 relative overflow-visible">
-            <DynamicGooglePropertyMap showMap={false} />
-          </div>
-        </aside>
+export async function generateMetadata(): Promise<Metadata> {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const url = `${baseUrl}/map`;
+  const imageUrl = `${baseUrl}/og-map-image.jpg`;
 
-        {/* Right Column - Map (Full Height) */}
-        <main className="flex-1 relative overflow-hidden">
-          <DynamicGooglePropertyMap showMap={true} />
-        </main>
-      </div>
-    </MapProvider>
+  return {
+    title: "Interactive Glamping Properties Map | 470+ Locations | Sage Outdoor Advisory",
+    description: "Explore 470+ glamping properties across the United States and Canada on our interactive map. Filter by location, unit type, and price range. Find the perfect glamping destination.",
+    keywords: "glamping properties map, glamping locations, glamping sites by state, interactive glamping map, glamping near me, glamping properties USA, glamping properties Canada, glamping map North America",
+    openGraph: {
+      title: "Interactive Glamping Properties Map | Sage Outdoor Advisory",
+      description: "Explore 470+ glamping properties across the United States and Canada on our interactive map. Filter by location, unit type, and price range.",
+      url,
+      siteName: "Sage Outdoor Advisory",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: "Interactive glamping properties map showing locations across USA and Canada",
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Interactive Glamping Properties Map",
+      description: "Explore 470+ glamping properties across the United States and Canada",
+      images: [imageUrl],
+    },
+    alternates: {
+      canonical: url,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  };
+}
+
+async function getPropertyStatistics() {
+  try {
+    const supabase = createServerClient();
+    
+    // Get all properties to count unique property names
+    const { data: properties, error } = await supabase
+      .from('sage-glamping-data')
+      .select('property_name, state, country');
+
+    if (error) {
+      console.error('Error fetching property count:', error);
+      return { uniqueProperties: 1266, states: 43, provinces: 5, countries: 2 }; // Fallback values
+    }
+
+    // Count unique property names
+    const uniquePropertyNames = new Set<string>();
+    const uniqueStates = new Set<string>();
+    const uniqueProvinces = new Set<string>();
+    const uniqueCountries = new Set<string>();
+
+    properties?.forEach((prop) => {
+      // Count unique property names (non-null, non-empty)
+      if (prop.property_name && prop.property_name.trim()) {
+        uniquePropertyNames.add(prop.property_name.trim());
+      }
+      
+      if (prop.country) {
+        uniqueCountries.add(prop.country);
+      }
+      if (prop.state) {
+        // Check if it's a Canadian province
+        const canadianProvinces = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+        if (canadianProvinces.includes(prop.state)) {
+          uniqueProvinces.add(prop.state);
+        } else {
+          uniqueStates.add(prop.state);
+        }
+      }
+    });
+
+    return {
+      uniqueProperties: uniquePropertyNames.size || 1266,
+      states: uniqueStates.size,
+      provinces: uniqueProvinces.size,
+      countries: uniqueCountries.size,
+    };
+  } catch (error) {
+    console.error('Error in getPropertyStatistics:', error);
+    return { uniqueProperties: 1266, states: 43, provinces: 5, countries: 2 }; // Fallback values
+  }
+}
+
+export default async function MapPage() {
+  const stats = await getPropertyStatistics();
+
+  // Generate structured data
+  const organizationSchema = generateOrganizationSchema();
+  const mapSchema = generateMapSchema();
+  const itemListSchema = generateMapItemListSchema(stats.uniqueProperties);
+  const webApplicationSchema = generateMapWebApplicationSchema();
+  const breadcrumbSchema = generateMapBreadcrumbSchema();
+
+  return (
+    <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(mapSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
+      <MapProvider>
+        <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-gray-50">
+          {/* Left Sidebar - Narrow Column */}
+          <aside className="w-full md:w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col overflow-y-auto shadow-sm relative z-20">
+            <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+              {/* Breadcrumb Navigation */}
+              <nav aria-label="Breadcrumb" className="mb-4">
+                <ol className="flex items-center gap-1.5 text-sm text-gray-600">
+                  <li>
+                    <Link
+                      href="https://sageoutdooradvisory.com/"
+                      className="hover:text-gray-900 transition-colors"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li aria-hidden="true" className="text-gray-400">/</li>
+                  <li className="text-gray-900 font-medium" aria-current="page">
+                    Map
+                  </li>
+                </ol>
+              </nav>
+              
+              {/* SEO Content Section */}
+              <section className="mb-4">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  Glamping Properties Map
+                </h1>
+                <p className="text-xs text-gray-600 leading-relaxed mb-3">
+                  Explore {stats.uniqueProperties}+ glamping properties across {stats.states} US states and {stats.provinces} Canadian provinces. Click on markers to view property details, photos, and amenities.
+                </p>
+              </section>
+            </div>
+            
+            {/* Filters Section */}
+            <section className="p-6 space-y-6 flex-1 relative overflow-visible">
+              <DynamicGooglePropertyMap showMap={false} />
+            </section>
+            
+            {/* Footer */}
+            <div className="p-6 border-t border-gray-200 mt-auto">
+              <p className="text-xs text-gray-500 text-center">
+                Powered by{' '}
+                <a
+                  href="https://sageoutdooradvisory.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-gray-900 underline transition-colors"
+                >
+                  Sage Outdoor Advisory
+                </a>
+              </p>
+            </div>
+          </aside>
+
+          {/* Right Column - Map (Full Height) */}
+          <main className="flex-1 relative overflow-hidden">
+            <DynamicGooglePropertyMap showMap={true} />
+          </main>
+        </div>
+      </MapProvider>
+    </>
   );
 }

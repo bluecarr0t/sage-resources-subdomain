@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import { supabase } from '@/lib/supabase';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
@@ -223,6 +224,12 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [displayedCount, setDisplayedCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [urlInitialized, setUrlInitialized] = useState(false);
+
+  // URL parameter handling
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Reset photo index when selected property changes
   useEffect(() => {
@@ -235,6 +242,59 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Initialize filters from URL parameters on mount
+  useEffect(() => {
+    if (!isClient || urlInitialized) return;
+
+    const urlState = searchParams.getAll('state');
+    const urlCountry = searchParams.getAll('country');
+    const urlUnitType = searchParams.getAll('unitType');
+    const urlRateRange = searchParams.getAll('rateRange');
+
+    if (urlState.length > 0 || urlCountry.length > 0 || urlUnitType.length > 0 || urlRateRange.length > 0) {
+      if (urlCountry.length > 0) {
+        setFilterCountry(urlCountry);
+      }
+      if (urlState.length > 0) {
+        setFilterState(urlState);
+      }
+      if (urlUnitType.length > 0) {
+        setFilterUnitType(urlUnitType);
+      }
+      if (urlRateRange.length > 0) {
+        setFilterRateRange(urlRateRange);
+      }
+    }
+    setUrlInitialized(true);
+  }, [isClient, searchParams, urlInitialized, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange]);
+
+  // Update URL when filters change
+  useEffect(() => {
+    if (!isClient || !urlInitialized) return;
+
+    const params = new URLSearchParams();
+
+    if (filterCountry.length > 0) {
+      filterCountry.forEach(country => params.append('country', country));
+    }
+    if (filterState.length > 0) {
+      filterState.forEach(state => params.append('state', state));
+    }
+    if (filterUnitType.length > 0) {
+      filterUnitType.forEach(type => params.append('unitType', type));
+    }
+    if (filterRateRange.length > 0) {
+      filterRateRange.forEach(range => params.append('rateRange', range));
+    }
+
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    const currentUrl = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
+
+    if (newUrl !== currentUrl) {
+      router.replace(newUrl, { scroll: false });
+    }
+  }, [filterCountry, filterState, filterUnitType, filterRateRange, isClient, urlInitialized, pathname, router, searchParams]);
 
   // Fetch all properties once (without filters) for filter option calculation
   useEffect(() => {
@@ -371,8 +431,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             query = query.in('country', ['Canada', 'CA']);
             console.log('Filtering by country: Canada (including Canada, CA)');
           }
+        } else if (filterCountry.length === 2 && filterCountry.includes('United States') && filterCountry.includes('Canada')) {
+          // Both countries selected - don't filter by country at database level
+          // Return all properties and use client-side coordinate-based detection to identify which are Canadian/US
+          // This ensures we catch properties with incorrect country field values
+          console.log('Both countries selected - returning all properties (will filter client-side using coordinate detection)');
+          // No country filter - return all properties
         }
-        // If both countries are selected, don't filter by country (show all)
+        // If neither condition matches, don't filter by country (show all)
 
         if (filterState.length > 0) {
           // Expand filterState to include both full names and their abbreviations
@@ -639,6 +705,32 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         
         // Additional client-side country filtering to ensure accuracy
         // This handles cases where country field might be missing or inconsistent
+        // Uses improved coordinate-based detection to catch properties with incorrect country data
+        
+        // Helper function to check if coordinates are likely in Canada (same as countryCounts)
+        const isLikelyCanadaByCoords = (lat: number, lon: number): boolean => {
+          if (lat < 41.7 || lat >= 85 || lon < -141 || lon > -52) {
+            return false;
+          }
+          if (lat >= 60) return true;
+          if (lat >= 41.7 && lat < 60 && lon >= -95 && lon <= -52) return true;
+          if (lat >= 48 && lat < 60 && lon >= -139 && lon <= -89) return true;
+          if (lat >= 49 && lat < 60) {
+            if (lon < -100) return true;
+            if (lon >= -100 && lon <= -89 && lat >= 50) return true;
+            if (lon >= -95 && lon <= -89 && lat >= 49) return true;
+          }
+          if (lat >= 45 && lat < 49) {
+            if (lon >= -75 && lon <= -52) return true;
+            if (lon >= -95 && lon < -75) {
+              if (lat >= 46) return true;
+              if (lon >= -80) return true;
+            }
+          }
+          if (lat >= 41.7 && lat < 45 && lon >= -95.2 && lon <= -74.3) return true;
+          return false;
+        };
+        
         if (filterCountry.length === 1) {
           if (filterCountry.includes('Canada')) {
             uniqueProperties = uniqueProperties.filter((property: any) => {
@@ -659,6 +751,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               // Check if state is a Canadian province full name
               if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) {
                 return true;
+              }
+              
+              // Check coordinates if available
+              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
+              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
+              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+                if (isLikelyCanadaByCoords(lat, lon)) {
+                  return true;
+                }
               }
               
               return false;
@@ -689,6 +790,146 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             });
             console.log(`After client-side US filtering: ${uniqueProperties.length} properties`);
           }
+        } else if (filterCountry.length === 2 && filterCountry.includes('Canada') && filterCountry.includes('United States')) {
+          // Both countries selected - database query returns all properties
+          // Apply permissive client-side filtering using coordinate-based detection to include ALL properties from both countries
+          // This catches properties with incorrect country field values
+          uniqueProperties = uniqueProperties.filter((property: any) => {
+            const country = String(property.country || '').toUpperCase();
+            const state = String(property.state || '').toUpperCase();
+            
+            // Helper functions
+            const isCanadianProperty = (): boolean => {
+              if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
+              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+              if (canadianProvinceCodes.includes(state)) return true;
+              if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
+              
+              // Check coordinates if available - prioritize coordinate-based detection
+              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
+              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
+              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+                if (isLikelyCanadaByCoords(lat, lon)) return true;
+              }
+              
+              return false;
+            };
+            
+            const isUSProperty = (): boolean => {
+              if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
+              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+              const isCanadianProvince = canadianProvinceCodes.includes(state) || 
+                CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
+              if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
+              if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
+              
+              // Check coordinates if available and not Canadian
+              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
+              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
+              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+                if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
+                  if (!isLikelyCanadaByCoords(lat, lon)) return true;
+                }
+              }
+              
+              return false;
+            };
+            
+            // Check if Canadian first (using coordinate-based detection)
+            if (isCanadianProperty()) {
+              return true;
+            }
+            
+            // Check if US
+            if (isUSProperty()) {
+              return true;
+            }
+            
+            // If we can't determine, check coordinates - include any property in North America
+            const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
+            const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
+            if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+              // Include any property with coordinates in North America (Canada or US)
+              if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
+                return true;
+              }
+            }
+            
+            // Include all other properties that don't have coordinates (database query already filtered)
+            return true;
+          });
+          console.log(`After client-side filtering (both countries): ${uniqueProperties.length} properties`);
+        } else {
+          // Fallback: apply filtering if needed
+          uniqueProperties = uniqueProperties.filter((property: any) => {
+            const country = String(property.country || '').toUpperCase();
+            const state = String(property.state || '').toUpperCase();
+            
+            // Helper functions
+            const isCanadianProperty = (): boolean => {
+              if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
+              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+              if (canadianProvinceCodes.includes(state)) return true;
+              if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
+              
+              // Check coordinates if available - prioritize coordinate-based detection
+              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
+              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
+              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+                if (isLikelyCanadaByCoords(lat, lon)) return true;
+              }
+              
+              return false;
+            };
+            
+            const isUSProperty = (): boolean => {
+              if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
+              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+              const isCanadianProvince = canadianProvinceCodes.includes(state) || 
+                CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
+              if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
+              if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
+              
+              // Check coordinates if available and not Canadian
+              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
+              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
+              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+                // If coordinates are in North America and not Canadian, likely US
+                if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
+                  if (!isLikelyCanadaByCoords(lat, lon)) return true;
+                }
+              }
+              
+              return false;
+            };
+            
+            // When both countries are selected, be very permissive
+            // Check if property is Canadian first (using coordinate-based detection to catch incorrect country data)
+            if (isCanadianProperty()) {
+              return true;
+            }
+            
+            // Then check if property is US
+            if (isUSProperty()) {
+              return true;
+            }
+            
+            // If we can't determine from country/state fields, check coordinates
+            // Include any property with coordinates in North America (Canada or US)
+            const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
+            const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
+            if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+              // If coordinates are in North America (Canada or US), include it
+              if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
+                return true;
+              }
+            }
+            
+            // Include all other properties (database query already filtered by country)
+            // This ensures we don't accidentally exclude valid properties
+            return true;
+          });
+          console.log(`After client-side filtering (both countries): ${uniqueProperties.length} properties`);
         }
         
         console.log(`Grouped ${transformedData.length} records into ${uniqueProperties.length} unique properties`);
@@ -1952,7 +2193,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Active Filters</span>
               <button
-                onClick={clearFilters}
+                onClick={() => {
+                  clearFilters();
+                  // URL will be updated by the useEffect that watches filter changes
+                }}
                 className="text-xs font-medium text-blue-600 hover:text-blue-700 underline transition-colors"
               >
                 Clear All
@@ -2252,12 +2496,19 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                         setCurrentPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
                       };
                       
+                      // Generate descriptive alt text
+                      const propertyName = selectedProperty.property_name || 'Glamping property';
+                      const city = selectedProperty.city || '';
+                      const state = selectedProperty.state || '';
+                      const location = city && state ? ` in ${city}, ${state}` : state ? ` in ${state}` : '';
+                      const altText = `Photo of ${propertyName} glamping property${location} - Image ${safeIndex + 1} of ${photos.length}`;
+
                       return (
                         <div className="mb-3 -mx-2 -mt-2 relative">
                           <div className="relative w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 group">
                             <img
                               src={photoUrl}
-                              alt={`${selectedProperty.property_name || 'Property'} photo ${safeIndex + 1} of ${photos.length}`}
+                              alt={altText}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 console.error('❌ Image failed to load:', {

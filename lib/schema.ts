@@ -382,3 +382,87 @@ export function generateAggregateRatingSchema(ratingValue: number, reviewCount: 
   };
 }
 
+export function generateMapSchema() {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  return {
+    "@context": "https://schema.org",
+    "@type": "Map",
+    "name": "Glamping Properties Interactive Map",
+    "description": "Interactive map showing glamping properties across the United States and Canada",
+    "mapType": "InteractiveMap",
+    "url": `${baseUrl}/map`,
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 38.5,
+      "longitude": -96.0
+    }
+  };
+}
+
+export function generateMapItemListSchema(propertyCount: number) {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Glamping Properties Map",
+    "description": `Interactive map of ${propertyCount}+ glamping properties across the United States and Canada`,
+    "numberOfItems": propertyCount,
+    "url": `${baseUrl}/map`,
+    "itemListElement": {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Glamping Properties",
+      "description": `Explore ${propertyCount}+ glamping properties on an interactive map`
+    }
+  };
+}
+
+export function generateMapWebApplicationSchema() {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Glamping Properties Map",
+    "applicationCategory": "TravelApplication",
+    "operatingSystem": "Web",
+    "url": `${baseUrl}/map`,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "Interactive map with glamping properties",
+      "Filter by location, unit type, and price",
+      "Property details and photos",
+      "Google Places integration"
+    ],
+    "browserRequirements": "Requires JavaScript. Requires HTML5.",
+    "softwareHelp": {
+      "@type": "CreativeWork",
+      "text": "Use the filters on the left to narrow down properties by location, unit type, or price range. Click on map markers to view property details."
+    }
+  };
+}
+
+export function generateMapBreadcrumbSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://sageoutdooradvisory.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Glamping Properties Map",
+        "item": "https://resources.sageoutdooradvisory.com/map"
+      }
+    ]
+  };
+}
+

@@ -102,6 +102,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     
+    // Map page (high priority resource page)
+    {
+      url: `${baseUrl}/map`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    },
+    
     // Guide pages (organized by priority - pillar pages first)
     ...guidePages,
     
