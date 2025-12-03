@@ -154,8 +154,8 @@ export default async function MapPage() {
       <MapProvider>
         <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-gray-50">
           {/* Left Sidebar - Narrow Column */}
-          <aside className="w-full md:w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col overflow-y-auto shadow-sm relative z-20">
-            <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <aside className="w-full md:w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col overflow-y-auto shadow-sm relative z-20 md:max-h-screen">
+            <div className="p-4 md:p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
               {/* Breadcrumb Navigation */}
               <nav aria-label="Breadcrumb" className="mb-4">
                 <ol className="flex items-center gap-1.5 text-sm text-gray-600">
@@ -186,12 +186,12 @@ export default async function MapPage() {
             </div>
             
             {/* Filters Section */}
-            <section className="p-6 space-y-6 flex-1 relative overflow-visible">
+            <section className="p-4 md:p-6 space-y-6 flex-1 relative overflow-visible md:overflow-y-auto">
               <DynamicGooglePropertyMap showMap={false} />
             </section>
             
             {/* Footer */}
-            <div className="p-6 border-t border-gray-200 mt-auto">
+            <div className="p-4 md:p-6 border-t border-gray-200 mt-auto">
               <p className="text-xs text-gray-500 text-center">
                 Powered by{' '}
                 <a

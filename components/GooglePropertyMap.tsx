@@ -225,6 +225,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [urlInitialized, setUrlInitialized] = useState(false);
+  const [filtersExpanded, setFiltersExpanded] = useState(false); // Collapsed by default on mobile
 
   // URL parameter handling
   const searchParams = useSearchParams();
@@ -2278,117 +2279,154 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           </div>
         )}
 
-        {/* Filters */}
-        <div className="space-y-5 relative">
-          <MultiSelect
-            id="country-filter"
-            label="Filter by Country"
-            placeholder="All Countries"
-            allSelectedText="All Countries"
-            options={[
-              { value: 'United States', label: `United States (${countryCounts['United States'] || 0})` },
-              { value: 'Canada', label: `Canada (${countryCounts['Canada'] || 0})` },
-            ].filter((option) => {
-              const count = countryCounts[option.value] || 0;
-              return count > 0;
-            })}
-            selectedValues={filterCountry}
-            onToggle={(country) => {
-              toggleCountry(country);
-              // Clear state filter when country changes to avoid invalid combinations
-              setFilterState([]);
-            }}
-            onClear={() => {
-              setFilterCountry(['United States', 'Canada']);
-              setFilterState([]);
-            }}
-            activeColor="indigo"
-          />
+        {/* Filters - Collapsible on Mobile */}
+        <div className="border-t border-gray-200 pt-5 md:border-t-0 md:pt-0">
+          {/* Filter Toggle Button - Mobile Only */}
+          <button
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+            className="md:hidden w-full flex items-center justify-between py-3 px-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-expanded={filtersExpanded}
+            aria-controls="filters-section"
+          >
+            <span className="text-sm font-semibold text-gray-900">
+              Filters
+            </span>
+            <svg
+              className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
+                filtersExpanded ? 'rotate-180' : ''
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
 
-          <MultiSelect
-            id="state-filter"
-            label="Filter by State"
-            placeholder="All States"
-            options={uniqueStates
-              .filter((state) => {
-                const count = stateCounts[state] ?? 0;
-                return count > 0;
-              })
-              .map((state) => {
-                const count = stateCounts[state] ?? 0;
-                return {
-                  value: state,
-                  label: `${state} (${count})`,
-                };
-              })}
-            selectedValues={filterState}
-            onToggle={toggleState}
-            onClear={() => setFilterState([])}
-            activeColor="blue"
-          />
-          
-          <MultiSelect
-            id="unit-type-filter"
-            label="Filter by Unit Type"
-            placeholder="All Unit Types"
-            options={availableUnitTypes
-              .filter((unitType) => {
-                // Filter out RV-related unit types (case-insensitive)
-                if (unitType.toLowerCase().includes('rv')) {
-                  return false;
-                }
-                // Filter out "Lodge or Hotel Room"
-                if (unitType === 'Lodge or Hotel Room') {
-                  return false;
-                }
-                // Filter out "Other Glamping Units"
-                if (unitType === 'Other Glamping Units') {
-                  return false;
-                }
-                // Filter out "Vacation Rental"
-                if (unitType === 'Vacation Rental') {
-                  return false;
-                }
-                // Filter out unit types with 0 count or 4 or fewer properties
-                const count = unitTypeCounts[unitType] || 0;
-                return count > 4;
-              })
-              .map((unitType) => {
-                const count = unitTypeCounts[unitType] || 0;
-                return {
-                value: unitType,
-                  label: `${unitType} (${count})`,
-                };
-              })
-              .filter((option) => {
-                // Double-check: remove any with 0 count (shouldn't happen due to above filter, but just in case)
-                const count = unitTypeCounts[option.value] || 0;
+          {/* Filters Section - Collapsible on Mobile, Always Visible on Desktop */}
+          <div
+            id="filters-section"
+            className={`space-y-5 relative transition-all duration-300 ease-in-out ${
+              filtersExpanded
+                ? 'max-h-[2000px] opacity-100 overflow-visible mt-4'
+                : 'max-h-0 opacity-0 overflow-hidden md:max-h-none md:opacity-100 md:overflow-visible md:mt-0'
+            }`}
+          >
+            <MultiSelect
+              id="country-filter"
+              label="Filter by Country"
+              placeholder="All Countries"
+              allSelectedText="All Countries"
+              options={[
+                { value: 'United States', label: `United States (${countryCounts['United States'] || 0})` },
+                { value: 'Canada', label: `Canada (${countryCounts['Canada'] || 0})` },
+              ].filter((option) => {
+                const count = countryCounts[option.value] || 0;
                 return count > 0;
               })}
-            selectedValues={filterUnitType}
-            onToggle={toggleUnitType}
-            onClear={() => setFilterUnitType([])}
-            activeColor="orange"
-          />
-          
-          <MultiSelect
-            id="rate-range-filter"
-            label="Filter by Avg. Retail Rate Range"
-            placeholder="All Rate Ranges"
-            options={availableRateCategories
-              .filter((category) => (rateCategoryCounts[category] || 0) > 0)
-              .map((category) => {
-                const count = rateCategoryCounts[category] || 0;
-                return {
-                value: category,
-                  label: `${category} (${count})`,
-                };
-              })}
-            selectedValues={filterRateRange}
-            onToggle={toggleRateRange}
-            onClear={() => setFilterRateRange([])}
-            activeColor="green"
-          />
+              selectedValues={filterCountry}
+              onToggle={(country) => {
+                toggleCountry(country);
+                // Clear state filter when country changes to avoid invalid combinations
+                setFilterState([]);
+              }}
+              onClear={() => {
+                setFilterCountry(['United States', 'Canada']);
+                setFilterState([]);
+              }}
+              activeColor="indigo"
+            />
+
+            <MultiSelect
+              id="state-filter"
+              label="Filter by State"
+              placeholder="All States"
+              options={uniqueStates
+                .filter((state) => {
+                  const count = stateCounts[state] ?? 0;
+                  return count > 0;
+                })
+                .map((state) => {
+                  const count = stateCounts[state] ?? 0;
+                  return {
+                    value: state,
+                    label: `${state} (${count})`,
+                  };
+                })}
+              selectedValues={filterState}
+              onToggle={toggleState}
+              onClear={() => setFilterState([])}
+              activeColor="blue"
+            />
+            
+            <MultiSelect
+              id="unit-type-filter"
+              label="Filter by Unit Type"
+              placeholder="All Unit Types"
+              options={availableUnitTypes
+                .filter((unitType) => {
+                  // Filter out RV-related unit types (case-insensitive)
+                  if (unitType.toLowerCase().includes('rv')) {
+                    return false;
+                  }
+                  // Filter out "Lodge or Hotel Room"
+                  if (unitType === 'Lodge or Hotel Room') {
+                    return false;
+                  }
+                  // Filter out "Other Glamping Units"
+                  if (unitType === 'Other Glamping Units') {
+                    return false;
+                  }
+                  // Filter out "Vacation Rental"
+                  if (unitType === 'Vacation Rental') {
+                    return false;
+                  }
+                  // Filter out unit types with 0 count or 4 or fewer properties
+                  const count = unitTypeCounts[unitType] || 0;
+                  return count > 4;
+                })
+                .map((unitType) => {
+                  const count = unitTypeCounts[unitType] || 0;
+                  return {
+                  value: unitType,
+                    label: `${unitType} (${count})`,
+                  };
+                })
+                .filter((option) => {
+                  // Double-check: remove any with 0 count (shouldn't happen due to above filter, but just in case)
+                  const count = unitTypeCounts[option.value] || 0;
+                  return count > 0;
+                })}
+              selectedValues={filterUnitType}
+              onToggle={toggleUnitType}
+              onClear={() => setFilterUnitType([])}
+              activeColor="orange"
+            />
+            
+            <MultiSelect
+              id="rate-range-filter"
+              label="Filter by Avg. Retail Rate Range"
+              placeholder="All Rate Ranges"
+              options={availableRateCategories
+                .filter((category) => (rateCategoryCounts[category] || 0) > 0)
+                .map((category) => {
+                  const count = rateCategoryCounts[category] || 0;
+                  return {
+                  value: category,
+                    label: `${category} (${count})`,
+                  };
+                })}
+              selectedValues={filterRateRange}
+              onToggle={toggleRateRange}
+              onClear={() => setFilterRateRange([])}
+              activeColor="green"
+            />
+          </div>
         </div>
       </div>
     );
