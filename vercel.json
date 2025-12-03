@@ -3,12 +3,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/:slug",
-      "destination": "/landing/:slug"
-    }
-  ],
   "redirects": [
     {
       "source": "/(.*)",
