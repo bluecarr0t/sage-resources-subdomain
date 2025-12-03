@@ -1,9 +1,10 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 
-if (!supabaseUrl || !supabasePublishableKey) {
+// Only throw error in runtime, not during build
+if (typeof window !== 'undefined' && (!supabaseUrl || !supabasePublishableKey)) {
   throw new Error('Missing Supabase environment variables. Please check your .env.local file.');
 }
 
@@ -11,8 +12,11 @@ if (!supabaseUrl || !supabasePublishableKey) {
  * Client-side Supabase client
  * Safe to use in browser/client components
  * Uses the publishable key and respects Row Level Security (RLS)
+ * Returns a dummy client during build if env vars are missing
  */
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabasePublishableKey);
+export const supabase: SupabaseClient = supabaseUrl && supabasePublishableKey
+  ? createClient(supabaseUrl, supabasePublishableKey)
+  : createClient('https://placeholder.supabase.co', 'placeholder-key');
 
 /**
  * Server-side Supabase client

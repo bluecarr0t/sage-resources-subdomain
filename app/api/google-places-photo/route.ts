@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * API route to proxy Google Places Photo requests
  * This is needed because the new Places API requires authentication via headers
