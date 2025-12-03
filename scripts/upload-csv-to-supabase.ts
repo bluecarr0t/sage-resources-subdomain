@@ -47,7 +47,7 @@ function parseCSV(filePath: string): CSVRow[] {
       trim: true,
       relax_column_count: true, // Allow inconsistent column counts
       cast: false, // Don't auto-cast - we'll handle it manually
-    });
+    }) as CSVRow[];
     
     console.log(`✅ Parsed ${records.length} rows from CSV`);
     return records;
