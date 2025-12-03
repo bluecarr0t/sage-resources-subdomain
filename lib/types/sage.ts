@@ -161,6 +161,8 @@ export interface SageProperty {
   google_icon_uri: string | null;
   google_icon_background_color: string | null;
   google_reservable: boolean | null;
+  google_rating: number | null;
+  google_user_rating_total: number | null;
 }
 
 /**
@@ -186,16 +188,18 @@ export function parseCoordinates(
 
 /**
  * Check if coordinates are within USA or Canada bounds
- * USA: approximately 24°N to 49°N, -125°W to -66°W
- * Canada: approximately 41°N to 83°N, -141°W to -52°W
- * Combined bounds: 20°N to 85°N, -141°W to -50°W (with some buffer)
+ * USA (mainland): approximately 24°N to 49°N, -125°W to -66°W
+ * Alaska: 51°N to 71°N, -179°W to -130°W
+ * Hawaii: 18°N to 22°N, -160°W to -154°W
+ * Canada: approximately 41°N to 83°N, -141°W to -52°W (mainland)
+ * Combined bounds: 18°N to 85°N, -179°W to -50°W (includes Alaska and Hawaii)
  */
 export function isInUSAOrCanada(lat: number, lon: number): boolean {
-  // Latitude bounds (20°N to 85°N)
-  if (lat < 20 || lat > 85) return false;
+  // Latitude bounds (18°N to 85°N) - includes Hawaii (starts at ~18°N)
+  if (lat < 18 || lat > 85) return false;
   
-  // Longitude bounds (-141°W to -50°W)
-  if (lon < -141 || lon > -50) return false;
+  // Longitude bounds (-179°W to -50°W) - includes all of Alaska (extends to -179°W)
+  if (lon < -179 || lon > -50) return false;
   
   return true;
 }

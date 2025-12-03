@@ -181,15 +181,36 @@ function validateCoordinatesForLocation(
   state: string,
   country: string
 ): boolean {
+  const stateUpper = state?.trim().toUpperCase() || '';
+  
   // Basic validation ranges for USA and Canada
   if (country?.toUpperCase().includes('USA') || country?.toUpperCase().includes('UNITED STATES')) {
-    // USA: approximately 24°N to 49°N, -125°W to -66°W
+    // Check for Alaska (extends much further west)
+    if (stateUpper === 'AK' || stateUpper === 'ALASKA') {
+      // Alaska: 51°N to 71°N, -179°W to -130°W
+      if (lat < 51 || lat > 71 || lon > -130 || lon < -179) {
+        return false;
+      }
+      return true;
+    }
+    
+    // Check for Hawaii (lower latitude, further west)
+    if (stateUpper === 'HI' || stateUpper === 'HAWAII') {
+      // Hawaii: 18°N to 22°N, -160°W to -154°W
+      if (lat < 18 || lat > 22 || lon > -154 || lon < -160) {
+        return false;
+      }
+      return true;
+    }
+    
+    // USA (mainland): approximately 24°N to 49°N, -125°W to -66°W
     if (lat < 20 || lat > 50 || lon > -50 || lon < -130) {
       return false;
     }
   } else if (country?.toUpperCase().includes('CANADA')) {
-    // Canada: approximately 41°N to 83°N, -141°W to -52°W
-    if (lat < 40 || lat > 85 || lon > -50 || lon < -145) {
+    // Canada: approximately 41°N to 83°N, -141°W to -52°W (mainland)
+    // Some islands extend further west
+    if (lat < 40 || lat > 85 || lon > -50 || lon < -179) {
       return false;
     }
   }

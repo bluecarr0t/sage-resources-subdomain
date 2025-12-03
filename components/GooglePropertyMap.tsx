@@ -7,12 +7,15 @@ import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage'
 import { useMapContext } from './MapContext';
 import MultiSelect from './MultiSelect';
 
+// Default center for lower 48 states (continental USA)
+// Geographic center of the contiguous United States
 const defaultCenter = {
   lat: 39.8283,
   lng: -98.5795,
 };
 
-const defaultZoom = 4;
+// Zoom level 5 better frames the lower 48 states, excluding Alaska and Hawaii
+const defaultZoom = 5;
 
 // Libraries array must be a constant to prevent LoadScript reload warnings
 const libraries: ('places')[] = ['places'];
@@ -708,25 +711,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     [properties]
   );
 
-  // Initialize displayed count on first load
-  useEffect(() => {
-    if (displayedCount === 0 && propertiesWithCoords.length > 0) {
-      setDisplayedCount(propertiesWithCoords.length);
-    }
-  }, [propertiesWithCoords.length, displayedCount]);
-
-  // Animate count when it changes
-  useEffect(() => {
-    if (propertiesWithCoords.length !== displayedCount && displayedCount > 0) {
-      setIsAnimating(true);
-      setDisplayedCount(propertiesWithCoords.length);
-      // Reset animation state after transition completes
-      const timer = setTimeout(() => {
-        setIsAnimating(false);
-      }, 500); // Match transition duration
-      return () => clearTimeout(timer);
-    }
-  }, [propertiesWithCoords.length, displayedCount]);
 
   // Fit map bounds to show all markers
   useEffect(() => {
@@ -912,30 +896,288 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     return Array.from(stateMap.values()).sort();
   }, [allProperties, filterCountry]);
 
-  // Calculate state counts from properties with valid coordinates, filtered by country, unit type, and rate range
-  // Count unique properties (not sites) per state - only count properties that can be plotted on the map
-  // This should match what's displayed when a state is selected
-  // Use the same country detection logic as countryCounts and the property fetch
-  const stateCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    
+  // Helper function to get filtered properties matching current filters (same logic as displayed properties)
+  // This ensures state counts match the displayed count
+  const getFilteredPropertiesForCounting = useCallback((propertiesToFilter: SageProperty[]) => {
     // Helper functions that match the exact client-side filter logic
     const isCanadianProperty = (property: any): boolean => {
       const country = String(property.country || '').toUpperCase();
       const state = String(property.state || '').toUpperCase();
       
-      // Check country field
+      if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
+      const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+      if (canadianProvinceCodes.includes(state)) return true;
+      if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
+      return false;
+    };
+    
+    const isUSProperty = (property: any): boolean => {
+      const country = String(property.country || '').toUpperCase();
+      const state = String(property.state || '').toUpperCase();
+      
+      if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
+      const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+      const isCanadianProvince = canadianProvinceCodes.includes(state) || CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
+      if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
+      if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
+      return false;
+    };
+    
+    let filtered = propertiesToFilter;
+    
+    // Apply country filter
+    if (filterCountry.length === 1) {
+      if (filterCountry.includes('United States')) {
+        filtered = filtered.filter((p) => isUSProperty(p));
+      } else if (filterCountry.includes('Canada')) {
+        filtered = filtered.filter((p) => isCanadianProperty(p));
+      }
+    }
+    
+    // Apply state filter (same logic as fetchProperties)
+    if (filterState.length > 0) {
+      const filterStateSet = new Set<string>();
+      filterState.forEach((state) => {
+        filterStateSet.add(state);
+        filterStateSet.add(state.toUpperCase());
+        filterStateSet.add(state.toLowerCase());
+        filterStateSet.add(state.charAt(0).toUpperCase() + state.slice(1).toLowerCase());
+        
+        const abbreviation = Object.entries(STATE_ABBREVIATIONS).find(
+          ([_, fullName]) => fullName.toLowerCase() === state.toLowerCase()
+        );
+        if (abbreviation) {
+          filterStateSet.add(abbreviation[0]);
+          filterStateSet.add(abbreviation[0].toUpperCase());
+        }
+        
+        if (STATE_ABBREVIATIONS[state.toUpperCase()]) {
+          const fullName = STATE_ABBREVIATIONS[state.toUpperCase()];
+          filterStateSet.add(fullName);
+          filterStateSet.add(fullName.toUpperCase());
+          filterStateSet.add(fullName.toLowerCase());
+        }
+      });
+      
+      filtered = filtered.filter((property: any) => {
+        if (!property.state) return false;
+        const propertyState = String(property.state);
+        return filterStateSet.has(propertyState) || 
+               filterStateSet.has(propertyState.toUpperCase()) ||
+               filterStateSet.has(propertyState.toLowerCase()) ||
+               filterStateSet.has(propertyState.charAt(0).toUpperCase() + propertyState.slice(1).toLowerCase());
+      });
+    }
+    
+    // Apply unit type filter
+    if (filterUnitType.length > 0) {
+      filtered = filtered.filter((p) => {
+        const prop = p as any;
+        if (prop.all_unit_types && Array.isArray(prop.all_unit_types)) {
+          return prop.all_unit_types.some((ut: string) => filterUnitType.includes(ut));
+        }
+        return p.unit_type && filterUnitType.includes(p.unit_type);
+      });
+    }
+    
+    // Apply rate range filter
+    if (filterRateRange.length > 0) {
+      filtered = filtered.filter((p) => {
+        const prop = p as any;
+        return prop.rate_category && filterRateRange.includes(prop.rate_category);
+      });
+    }
+    
+    // Only include properties with valid coordinates
+    return filterPropertiesWithCoordinates(filtered);
+  }, [filterCountry, filterState, filterUnitType, filterRateRange]);
+
+  // Calculate state counts - for each state, show what the count would be if that state were selected
+  // This ensures the dropdown count matches what would be displayed when that state is selected
+  const stateCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    
+    // Helper functions for country detection (same as getFilteredPropertiesForCounting)
+    const isCanadianProperty = (property: any): boolean => {
+      const country = String(property.country || '').toUpperCase();
+      const state = String(property.state || '').toUpperCase();
+      if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
+      const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+      if (canadianProvinceCodes.includes(state)) return true;
+      if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
+      return false;
+    };
+    
+    const isUSProperty = (property: any): boolean => {
+      const country = String(property.country || '').toUpperCase();
+      const state = String(property.state || '').toUpperCase();
+      if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
+      const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+      const isCanadianProvince = canadianProvinceCodes.includes(state) || CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
+      if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
+      if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
+      return false;
+    };
+    
+    // Start with all properties, apply filters EXCEPT state filter
+    let propertiesToCount = allProperties;
+    
+    // Apply country filter
+    if (filterCountry.length === 1) {
+      if (filterCountry.includes('United States')) {
+        propertiesToCount = propertiesToCount.filter((p) => isUSProperty(p));
+      } else if (filterCountry.includes('Canada')) {
+        propertiesToCount = propertiesToCount.filter((p) => isCanadianProperty(p));
+      }
+    }
+    
+    // Apply unit type filter
+    if (filterUnitType.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => {
+        const prop = p as any;
+        if (prop.all_unit_types && Array.isArray(prop.all_unit_types)) {
+          return prop.all_unit_types.some((ut: string) => filterUnitType.includes(ut));
+        }
+        return p.unit_type && filterUnitType.includes(p.unit_type);
+      });
+    }
+    
+    // Apply rate range filter
+    if (filterRateRange.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => {
+        const prop = p as any;
+        return prop.rate_category && filterRateRange.includes(prop.rate_category);
+      });
+    }
+    
+    // Only include properties with valid coordinates
+    const propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
+    
+    // Group by property_name and state to count unique properties per state
+    const propertiesByState = new Map<string, Set<string>>();
+    
+    propertiesWithValidCoords.forEach((p) => {
+      const state = p.state;
+      const propertyName = p.property_name;
+      if (!state || !propertyName) return;
+      
+      // Normalize state name (convert abbreviation to full name if applicable)
+      const stateStr = String(state);
+      const upperState = stateStr.toUpperCase();
+      let normalizedState = stateStr;
+      
+      if (STATE_ABBREVIATIONS[upperState]) {
+        normalizedState = STATE_ABBREVIATIONS[upperState];
+      } else {
+        const abbreviation = Object.entries(STATE_ABBREVIATIONS).find(
+          ([_, fullName]) => fullName.toLowerCase() === stateStr.toLowerCase()
+        );
+        if (abbreviation) {
+          normalizedState = abbreviation[1];
+        }
+      }
+      
+      // Add property to the set for this state
+      if (!propertiesByState.has(normalizedState)) {
+        propertiesByState.set(normalizedState, new Set());
+      }
+      propertiesByState.get(normalizedState)!.add(propertyName);
+    });
+    
+    // Count unique properties per state
+    propertiesByState.forEach((propertySet, state) => {
+      counts[state] = propertySet.size;
+    });
+    
+    return counts;
+  }, [allProperties, filterUnitType, filterRateRange]);
+
+  // Helper function to check if a state matches the filter (defined early for use in calculatedDisplayedCount)
+  const stateMatchesFilter = useCallback((state: string | null, filterStates: string[]): boolean => {
+    if (!state) return false;
+    if (filterStates.length === 0) return true; // No filter = all match
+    
+    const filterStateSet = new Set<string>();
+    filterStates.forEach((s) => {
+      filterStateSet.add(s);
+      filterStateSet.add(s.toUpperCase());
+      filterStateSet.add(s.toLowerCase());
+      filterStateSet.add(s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
+      
+      // Add abbreviation if it's a full name
+      const abbreviation = Object.entries(STATE_ABBREVIATIONS).find(
+        ([_, fullName]) => fullName.toLowerCase() === s.toLowerCase()
+      );
+      if (abbreviation) {
+        filterStateSet.add(abbreviation[0]);
+        filterStateSet.add(abbreviation[0].toUpperCase());
+      }
+      
+      // Add full name if it's an abbreviation
+      if (STATE_ABBREVIATIONS[s.toUpperCase()]) {
+        const fullName = STATE_ABBREVIATIONS[s.toUpperCase()];
+        filterStateSet.add(fullName);
+        filterStateSet.add(fullName.toUpperCase());
+        filterStateSet.add(fullName.toLowerCase());
+      }
+    });
+    
+    const stateStr = String(state);
+    return filterStateSet.has(stateStr) || 
+           filterStateSet.has(stateStr.toUpperCase()) ||
+           filterStateSet.has(stateStr.toLowerCase()) ||
+           filterStateSet.has(stateStr.charAt(0).toUpperCase() + stateStr.slice(1).toLowerCase());
+  }, []);
+
+  // Calculate displayed count using the EXACT SAME logic as countryCounts
+  // This ensures the displayed count matches the country dropdown filter counts
+  // Groups by property_name to count unique properties (not individual records)
+  const calculatedDisplayedCount = useMemo(() => {
+    // Apply unit type filter if active
+    let propertiesToCount = allProperties;
+    if (filterUnitType.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => {
+        const prop = p as any;
+        if (prop.all_unit_types && Array.isArray(prop.all_unit_types)) {
+          return prop.all_unit_types.some((ut: string) => filterUnitType.includes(ut));
+        }
+        return p.unit_type && filterUnitType.includes(p.unit_type);
+      });
+    }
+    
+    // Apply rate range filter if active
+    if (filterRateRange.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => {
+        const prop = p as any;
+        return prop.rate_category && filterRateRange.includes(prop.rate_category);
+      });
+    }
+    
+    // Apply state filter if active
+    if (filterState.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => stateMatchesFilter(p.state, filterState));
+    }
+    
+    // Only count properties with valid coordinates (matching what's shown on the map)
+    const propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
+    
+    // Group by property_name to count unique properties (same as countryCounts logic)
+    const uniquePropertyNames = new Set<string>();
+    
+    // Helper functions that match the EXACT countryCounts logic
+    const isCanadianProperty = (property: any): boolean => {
+      const country = String(property.country || '').toUpperCase();
+      const state = String(property.state || '').toUpperCase();
+      
       if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
         return true;
       }
       
-      // Check if state is a Canadian province
       const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
       if (canadianProvinceCodes.includes(state)) {
         return true;
       }
       
-      // Check if state is a Canadian province full name
       if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) {
         return true;
       }
@@ -947,22 +1189,18 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       const country = String(property.country || '').toUpperCase();
       const state = String(property.state || '').toUpperCase();
       
-      // Check country field
       if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
         return true;
       }
       
-      // If country is not set but state is a US state (not a Canadian province), include it
       const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
       const isCanadianProvince = canadianProvinceCodes.includes(state) || 
         CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
       
       if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) {
-        // Likely a US state abbreviation
         return true;
       }
       
-      // If country field indicates US
       if (country && (country.includes('US') || country.includes('UNITED STATES'))) {
         return true;
       }
@@ -970,17 +1208,49 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       return false;
     };
     
-    // Filter properties by country if only one country is selected - use the same logic as client-side filter
-    let propertiesToCount = allProperties;
+    // Filter by country if only one country is selected
+    let filteredProperties = propertiesWithValidCoords;
     if (filterCountry.length === 1) {
       if (filterCountry.includes('United States')) {
-        propertiesToCount = allProperties.filter((p) => isUSProperty(p));
+        filteredProperties = propertiesWithValidCoords.filter((p) => isUSProperty(p));
       } else if (filterCountry.includes('Canada')) {
-        propertiesToCount = allProperties.filter((p) => isCanadianProperty(p));
+        filteredProperties = propertiesWithValidCoords.filter((p) => isCanadianProperty(p));
       }
     }
+    // If both countries selected or none selected, include all (matching countryCounts behavior)
+    
+    // Count unique properties by property_name (same as countryCounts)
+    filteredProperties.forEach((p) => {
+      const propertyName = p.property_name;
+      if (propertyName) {
+        uniquePropertyNames.add(propertyName);
+      }
+    });
+    
+    return uniquePropertyNames.size;
+  }, [allProperties, filterCountry, filterState, filterUnitType, filterRateRange, stateMatchesFilter]);
+
+  // Update displayed count to match calculated count (ensures it matches dropdown counts)
+  useEffect(() => {
+    if (calculatedDisplayedCount !== displayedCount && calculatedDisplayedCount > 0) {
+      setIsAnimating(true);
+      setDisplayedCount(calculatedDisplayedCount);
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [calculatedDisplayedCount, displayedCount]);
+
+  // Calculate country counts from properties with valid coordinates
+  // Count unique properties (not sites) per country - only count properties that can be plotted on the map
+  // Use the EXACT same country detection logic as the client-side filter
+  // Also respect unit type and rate range filters when counting
+  const countryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
     
     // Apply unit type filter if active
+    let propertiesToCount = allProperties;
     if (filterUnitType.length > 0) {
       propertiesToCount = propertiesToCount.filter((p) => {
         const prop = p as any;
@@ -1001,55 +1271,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     
     // Only count properties with valid coordinates (matching what's shown on the map)
     const propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
-    
-    // Group by property_name to count unique properties
-    const propertiesByState = new Map<string, Set<string>>();
-    
-    propertiesWithValidCoords.forEach((p) => {
-      const state = p.state;
-      const propertyName = p.property_name;
-      if (!state || !propertyName) return;
-      
-      // Normalize state name (convert abbreviation to full name if applicable)
-      const stateStr = String(state);
-      const upperState = stateStr.toUpperCase();
-      let normalizedState = stateStr;
-      
-      if (STATE_ABBREVIATIONS[upperState]) {
-        normalizedState = STATE_ABBREVIATIONS[upperState];
-      } else {
-        // Check if it's a full name that has an abbreviation
-        const abbreviation = Object.entries(STATE_ABBREVIATIONS).find(
-          ([_, fullName]) => fullName.toLowerCase() === stateStr.toLowerCase()
-        );
-        if (abbreviation) {
-          normalizedState = abbreviation[1]; // Use the full name
-        }
-      }
-      
-      // Add property to the set for this state
-      if (!propertiesByState.has(normalizedState)) {
-        propertiesByState.set(normalizedState, new Set());
-      }
-      propertiesByState.get(normalizedState)!.add(propertyName);
-    });
-    
-    // Count unique properties per state
-    propertiesByState.forEach((propertySet, state) => {
-      counts[state] = propertySet.size;
-    });
-    
-    return counts;
-  }, [allProperties, filterCountry, filterUnitType, filterRateRange]);
-
-  // Calculate country counts from properties with valid coordinates
-  // Count unique properties (not sites) per country - only count properties that can be plotted on the map
-  // Use the EXACT same country detection logic as the client-side filter
-  const countryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    
-    // Only count properties with valid coordinates (matching what's shown on the map)
-    const propertiesWithValidCoords = filterPropertiesWithCoordinates(allProperties);
     
     // Group by property_name to count unique properties per country
     const propertiesByCountry = new Map<string, Set<string>>();
@@ -1177,44 +1398,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     if (!counts['Canada']) counts['Canada'] = 0;
     
     return counts;
-  }, [allProperties]);
-
-  // Helper function to check if a state matches the filter
-  const stateMatchesFilter = useCallback((state: string | null, filterStates: string[]): boolean => {
-    if (!state) return false;
-    if (filterStates.length === 0) return true; // No filter = all match
-    
-    const filterStateSet = new Set<string>();
-    filterStates.forEach((s) => {
-      filterStateSet.add(s);
-      filterStateSet.add(s.toUpperCase());
-      filterStateSet.add(s.toLowerCase());
-      filterStateSet.add(s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
-      
-      // Add abbreviation if it's a full name
-      const abbreviation = Object.entries(STATE_ABBREVIATIONS).find(
-        ([_, fullName]) => fullName.toLowerCase() === s.toLowerCase()
-      );
-      if (abbreviation) {
-        filterStateSet.add(abbreviation[0]);
-        filterStateSet.add(abbreviation[0].toUpperCase());
-      }
-      
-      // Add full name if it's an abbreviation
-      if (STATE_ABBREVIATIONS[s.toUpperCase()]) {
-        const fullName = STATE_ABBREVIATIONS[s.toUpperCase()];
-        filterStateSet.add(fullName);
-        filterStateSet.add(fullName.toUpperCase());
-        filterStateSet.add(fullName.toLowerCase());
-      }
-    });
-    
-    const stateStr = String(state);
-    return filterStateSet.has(stateStr) || 
-           filterStateSet.has(stateStr.toUpperCase()) ||
-           filterStateSet.has(stateStr.toLowerCase()) ||
-           filterStateSet.has(stateStr.charAt(0).toUpperCase() + stateStr.slice(1).toLowerCase());
-  }, []);
+  }, [allProperties, filterUnitType, filterRateRange]);
 
   // Get available unit types based on selected states
   const availableUnitTypes = useMemo(() => {
@@ -1250,9 +1434,48 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   // Get unit type counts for filtering
   const unitTypeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    let propertiesToCount = filterState.length === 0 
-      ? allProperties 
-      : allProperties.filter((p) => stateMatchesFilter(p.state, filterState));
+    let propertiesToCount = allProperties;
+    
+    // Apply country filter if only one country is selected
+    if (filterCountry.length === 1) {
+      const isCanadianProperty = (property: any): boolean => {
+        const country = String(property.country || '').toUpperCase();
+        const state = String(property.state || '').toUpperCase();
+        if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
+        const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+        if (canadianProvinceCodes.includes(state)) return true;
+        if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
+        return false;
+      };
+      const isUSProperty = (property: any): boolean => {
+        const country = String(property.country || '').toUpperCase();
+        const state = String(property.state || '').toUpperCase();
+        if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
+        const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+        const isCanadianProvince = canadianProvinceCodes.includes(state) || CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
+        if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
+        if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
+        return false;
+      };
+      if (filterCountry.includes('United States')) {
+        propertiesToCount = propertiesToCount.filter((p) => isUSProperty(p));
+      } else if (filterCountry.includes('Canada')) {
+        propertiesToCount = propertiesToCount.filter((p) => isCanadianProperty(p));
+      }
+    }
+    
+    // Apply state filter
+    if (filterState.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => stateMatchesFilter(p.state, filterState));
+    }
+    
+    // Apply rate range filter if active
+    if (filterRateRange.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => {
+        const prop = p as any;
+        return prop.rate_category && filterRateRange.includes(prop.rate_category);
+      });
+    }
     
     // Only count properties with valid coordinates (matching what's shown on the map)
     propertiesToCount = filterPropertiesWithCoordinates(propertiesToCount);
@@ -1287,7 +1510,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     });
     
     return counts;
-  }, [allProperties, filterState, stateMatchesFilter]);
+  }, [allProperties, filterCountry, filterState, filterRateRange, stateMatchesFilter]);
 
   // Get available rate categories based on selected states and unit types
   const availableRateCategories = useMemo(() => {
@@ -1323,18 +1546,51 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const rateCategoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     
-    let propertiesToCount = allProperties.filter((p) => {
-      const prop = p as any; // Type assertion for transformed properties
-      // Check state filter
-      const matchesState = filterState.length === 0 || stateMatchesFilter(p.state, filterState);
-      // Check unit type filter
-      const matchesUnitType = filterUnitType.length === 0 || 
-        (prop.all_unit_types && Array.isArray(prop.all_unit_types) && 
-         prop.all_unit_types.some((ut: string) => filterUnitType.includes(ut))) ||
-        (p.unit_type && filterUnitType.includes(p.unit_type));
-      
-      return matchesState && matchesUnitType;
-    });
+    let propertiesToCount = allProperties;
+    
+    // Apply country filter if only one country is selected
+    if (filterCountry.length === 1) {
+      const isCanadianProperty = (property: any): boolean => {
+        const country = String(property.country || '').toUpperCase();
+        const state = String(property.state || '').toUpperCase();
+        if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
+        const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+        if (canadianProvinceCodes.includes(state)) return true;
+        if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
+        return false;
+      };
+      const isUSProperty = (property: any): boolean => {
+        const country = String(property.country || '').toUpperCase();
+        const state = String(property.state || '').toUpperCase();
+        if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
+        const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+        const isCanadianProvince = canadianProvinceCodes.includes(state) || CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
+        if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
+        if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
+        return false;
+      };
+      if (filterCountry.includes('United States')) {
+        propertiesToCount = propertiesToCount.filter((p) => isUSProperty(p));
+      } else if (filterCountry.includes('Canada')) {
+        propertiesToCount = propertiesToCount.filter((p) => isCanadianProperty(p));
+      }
+    }
+    
+    // Apply state filter
+    if (filterState.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => stateMatchesFilter(p.state, filterState));
+    }
+    
+    // Apply unit type filter
+    if (filterUnitType.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => {
+        const prop = p as any;
+        if (prop.all_unit_types && Array.isArray(prop.all_unit_types)) {
+          return prop.all_unit_types.some((ut: string) => filterUnitType.includes(ut));
+        }
+        return p.unit_type && filterUnitType.includes(p.unit_type);
+      });
+    }
     
     // Only count properties with valid coordinates (matching what's shown on the map)
     propertiesToCount = filterPropertiesWithCoordinates(propertiesToCount);
@@ -1359,7 +1615,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     });
     
     return counts;
-  }, [allProperties, filterState, filterUnitType, stateMatchesFilter]);
+  }, [allProperties, filterCountry, filterState, filterUnitType, stateMatchesFilter]);
 
   // Clear selected unit types that are no longer available when states change
   useEffect(() => {
@@ -1926,16 +2182,24 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     <h3 className="font-bold text-lg mb-2 text-gray-900">
                       {selectedProperty.property_name || 'Unnamed Property'}
                     </h3>
-                    {selectedProperty.city && selectedProperty.state && (
-                      <p className="text-sm text-gray-600 mb-2">
-                        {selectedProperty.city}, {selectedProperty.state}
-                      </p>
-                    )}
-                    {selectedProperty.address && (
-                      <p className="text-sm text-gray-600 mb-2">
-                        {selectedProperty.address}
-                      </p>
-                    )}
+                    {(() => {
+                      const addressParts = [];
+                      if (selectedProperty.address) {
+                        addressParts.push(selectedProperty.address.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim());
+                      }
+                      if (selectedProperty.city) {
+                        addressParts.push(selectedProperty.city);
+                      }
+                      if (selectedProperty.state) {
+                        addressParts.push(selectedProperty.state);
+                      }
+                      const fullAddress = addressParts.join(', ');
+                      return fullAddress ? (
+                        <p className="text-sm text-gray-600 mb-2 truncate" title={fullAddress}>
+                          {fullAddress}
+                        </p>
+                      ) : null;
+                    })()}
                     {(selectedProperty as any).all_unit_types && (selectedProperty as any).all_unit_types.length > 0 && (
                       <p className="text-sm text-gray-700 mb-2">
                         <span className="font-semibold">Unit Types:</span>{' '}
@@ -1948,16 +2212,60 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                         {(selectedProperty as any).rate_category}
                       </p>
                     )}
-                    {selectedProperty.url && (
-                      <a
-                        href={selectedProperty.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-800 underline"
-                      >
-                        Visit Website →
-                      </a>
+                    {((selectedProperty as any).google_rating || (selectedProperty as any).google_user_rating_total) && (
+                      <div className="flex items-center gap-2 mb-2">
+                        {(selectedProperty as any).google_rating && (
+                          <div className="flex items-center gap-1">
+                            <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                              <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                            </svg>
+                            <span className="text-sm font-semibold text-gray-900">
+                              {(selectedProperty as any).google_rating.toFixed(1)}
+                            </span>
+                          </div>
+                        )}
+                        {(selectedProperty as any).google_user_rating_total && (
+                          <span className="text-sm text-gray-600">
+                            ({(selectedProperty as any).google_user_rating_total.toLocaleString()} {((selectedProperty as any).google_user_rating_total === 1) ? 'review' : 'reviews'})
+                          </span>
+                        )}
+                      </div>
                     )}
+                    {(() => {
+                      // Check if photos are available (indicates Google Places data exists)
+                      const hasPhotos = (() => {
+                        let photos = (selectedProperty as any).google_photos;
+                        if (photos && typeof photos === 'string') {
+                          try {
+                            photos = JSON.parse(photos);
+                          } catch (e) {
+                            return false;
+                          }
+                        }
+                        return photos && Array.isArray(photos) && photos.length > 0;
+                      })();
+                      
+                      // Prioritize google_website_uri if photos are available (Google data exists)
+                      // Otherwise fall back to url field
+                      const websiteUrl = hasPhotos 
+                        ? ((selectedProperty as any).google_website_uri || selectedProperty.url)
+                        : (selectedProperty.url || (selectedProperty as any).google_website_uri);
+                      
+                      // Show website link if URL exists
+                      if (websiteUrl) {
+                        return (
+                          <a
+                            href={websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                          >
+                            Visit Website →
+                          </a>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 </InfoWindow>
               )}

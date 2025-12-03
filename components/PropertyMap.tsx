@@ -186,12 +186,33 @@ export default function PropertyMap() {
         try {
           const marker = L.marker(property.coordinates).addTo(map);
           
+          const rating = (property as any).google_rating;
+          const reviewCount = (property as any).google_user_rating_total;
+          const ratingHtml = rating || reviewCount ? `
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              ${rating ? `
+                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                  <svg style="width: 16px; height: 16px; color: #fbbf24; fill: currentColor;" viewBox="0 0 20 20">
+                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                  </svg>
+                  <span style="font-size: 0.875rem; font-weight: 600; color: #111827;">${rating.toFixed(1)}</span>
+                </div>
+              ` : ''}
+              ${reviewCount ? `
+                <span style="font-size: 0.875rem; color: #4b5563;">
+                  (${reviewCount.toLocaleString()} ${reviewCount === 1 ? 'review' : 'reviews'})
+                </span>
+              ` : ''}
+            </div>
+          ` : '';
+
           const popupContent = `
             <div style="max-width: 300px;">
               <h3 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 0.5rem; color: #111827;">
                 ${escapeHtml(property.property_name || property.site_name || 'Unnamed Property')}
               </h3>
               ${property.city && property.state ? `<p style="font-size: 0.875rem; color: #4b5563; margin-bottom: 0.5rem;">${escapeHtml(property.city)}, ${escapeHtml(property.state)}</p>` : ''}
+              ${ratingHtml}
               ${property.property_type ? `<p style="font-size: 0.875rem; color: #374151; margin-bottom: 0.5rem;"><strong>Type:</strong> ${escapeHtml(property.property_type)}</p>` : ''}
               ${property.unit_type ? `<p style="font-size: 0.875rem; color: #374151; margin-bottom: 0.5rem;"><strong>Unit Type:</strong> ${escapeHtml(property.unit_type)}</p>` : ''}
               ${property.avg_retail_daily_rate_2024 ? `<p style="font-size: 0.875rem; color: #374151; margin-bottom: 0.5rem;"><strong>Avg Rate (2024):</strong> $${escapeHtml(property.avg_retail_daily_rate_2024)}</p>` : ''}
