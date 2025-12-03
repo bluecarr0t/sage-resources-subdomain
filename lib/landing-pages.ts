@@ -294,10 +294,6 @@ export const landingPages: Record<string, LandingPageContent> = {
     },
     faqs: [
       {
-        question: "How much does an RV resort feasibility study cost?",
-        answer: "The cost of an RV resort feasibility study depends on project size, location, and complexity. Contact us for a customized quote tailored to your specific RV resort project."
-      },
-      {
         question: "How long does an RV resort feasibility study take?",
         answer: "Typically, an RV resort feasibility study takes 4-6 weeks to complete, depending on the project scope and availability of market data."
       },
@@ -394,10 +390,6 @@ export const landingPages: Record<string, LandingPageContent> = {
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     faqs: [
-      {
-        question: "How much does a campground feasibility study cost?",
-        answer: "Campground feasibility study costs vary based on project scope, location, and complexity. Contact us for a detailed quote specific to your campground project."
-      },
       {
         question: "What information is needed for a campground feasibility study?",
         answer: "You'll need to provide site location and details, proposed amenities, target market information, and any existing market research. Our team will guide you through the entire process."
@@ -686,10 +678,6 @@ export const landingPages: Record<string, LandingPageContent> = {
     },
     faqs: [
       {
-        question: "How much does an RV resort appraisal cost?",
-        answer: "RV resort appraisal costs depend on property size, complexity, and appraisal scope. Contact us for a detailed quote specific to your RV resort property."
-      },
-      {
         question: "How long does an RV resort appraisal take?",
         answer: "An RV resort appraisal typically takes 2-4 weeks to complete, depending on property complexity and the availability of comparable sales data."
       },
@@ -837,10 +825,6 @@ export const landingPages: Record<string, LandingPageContent> = {
       {
         question: "Do I need a feasibility study to get a loan for a glamping resort?",
         answer: "Yes, most banks require a professional feasibility study from a specialized consultant. This demonstrates the viability of your project and helps lenders assess risk."
-      },
-      {
-        question: "How much does a glamping resort feasibility study cost?",
-        answer: "The cost varies based on project scope, but it's a critical investment for securing financing. Contact us for a customized quote based on your specific project."
       },
       {
         question: "Will banks accept Sage's feasibility studies?",
@@ -1411,10 +1395,6 @@ export const landingPages: Record<string, LandingPageContent> = {
     },
     faqs: [
       {
-        question: "How much does a campground property appraisal cost?",
-        answer: "Campground property appraisal costs vary based on property size, complexity, and appraisal type. Contact us for a customized quote based on your specific campground property."
-      },
-      {
         question: "How long does a campground appraisal take?",
         answer: "A comprehensive campground property appraisal typically takes 2-4 weeks to complete, depending on property complexity and data availability."
       },
@@ -1454,7 +1434,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "feasibility-study-faq": {
     slug: "feasibility-study-faq",
     title: "Feasibility Study FAQ | Frequently Asked Questions | Sage Outdoor Advisory",
-    metaDescription: "Frequently asked questions about feasibility studies for outdoor hospitality projects. Get answers about costs, timelines, requirements, and what to expect from a feasibility study.",
+    metaDescription: "Frequently asked questions about feasibility studies for outdoor hospitality projects. Get answers about timelines, requirements, and what to expect from a feasibility study.",
     hero: {
       headline: "Feasibility Study FAQ",
       subheadline: "Answers to common questions about feasibility studies for outdoor hospitality projects",
@@ -1464,7 +1444,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     sections: [
       {
         title: "Common Questions About Feasibility Studies",
-        content: "Feasibility studies are essential for outdoor hospitality projects, but many people have questions about what they involve, how much they cost, and what to expect. Here are answers to the most frequently asked questions about feasibility studies.",
+        content: "Feasibility studies are essential for outdoor hospitality projects, but many people have questions about what they involve and what to expect. Here are answers to the most frequently asked questions about feasibility studies.",
       },
     ],
     faqs: [
@@ -1475,10 +1455,6 @@ export const landingPages: Record<string, LandingPageContent> = {
       {
         question: "Why do I need a feasibility study?",
         answer: "Feasibility studies are essential for securing financing, making informed decisions, mitigating risks, and optimizing your project design. Banks and lenders require them to assess project viability before approving financing."
-      },
-      {
-        question: "How much does a feasibility study cost?",
-        answer: "Costs vary based on project scope and complexity, typically ranging from $10,000 to $100,000+ for outdoor hospitality projects. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Contact us</a> for a customized quote based on your specific project needs."
       },
       {
         question: "How long does a feasibility study take?",
@@ -1509,7 +1485,7 @@ export const landingPages: Record<string, LandingPageContent> = {
         answer: "Feasibility studies are typically used for proposed or planned projects. For existing properties, you may need an appraisal or market analysis instead. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Contact us</a> to discuss your specific needs."
       }
     ],
-    keywords: ["feasibility study FAQ", "feasibility study questions", "feasibility study cost", "feasibility study timeline"],
+    keywords: ["feasibility study FAQ", "feasibility study questions", "feasibility study timeline"],
     relatedPages: [
       "glamping-feasibility-study",
       "rv-resort-feasibility-study",
@@ -1546,7 +1522,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "appraisal-faq": {
     slug: "appraisal-faq",
     title: "Property Appraisal FAQ | Frequently Asked Questions | Sage Outdoor Advisory",
-    metaDescription: "Frequently asked questions about property appraisals for outdoor hospitality. Get answers about costs, timelines, methods, and what to expect from an appraisal.",
+    metaDescription: "Frequently asked questions about property appraisals for outdoor hospitality. Get answers about timelines, methods, and what to expect from an appraisal.",
     hero: {
       headline: "Property Appraisal FAQ",
       subheadline: "Answers to common questions about property appraisals for outdoor hospitality",
@@ -1556,7 +1532,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     sections: [
       {
         title: "Common Questions About Property Appraisals",
-        content: "Property appraisals are essential for outdoor hospitality property transactions and financing, but many people have questions about the process, costs, and requirements. Here are answers to the most frequently asked questions about appraisals.",
+        content: "Property appraisals are essential for outdoor hospitality property transactions and financing, but many people have questions about the process and requirements. Here are answers to the most frequently asked questions about appraisals.",
       },
     ],
     faqs: [
@@ -1567,10 +1543,6 @@ export const landingPages: Record<string, LandingPageContent> = {
       {
         question: "Why do I need an appraisal?",
         answer: "Appraisals are required for financing, buying/selling properties, refinancing, and investment analysis. Lenders require them to determine loan amounts."
-      },
-      {
-        question: "How much does an appraisal cost?",
-        answer: "Appraisal costs vary based on property complexity, typically ranging from $5,000 to $50,000+ for outdoor hospitality properties. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Contact us</a> for a customized quote."
       },
       {
         question: "How long does an appraisal take?",
@@ -1601,7 +1573,7 @@ export const landingPages: Record<string, LandingPageContent> = {
         answer: "Lenders often have approved appraiser lists. Sage Outdoor Advisory is recognized by many lenders nationwide for outdoor hospitality appraisals. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Contact us</a> to discuss your lender's requirements."
       }
     ],
-    keywords: ["appraisal FAQ", "property appraisal questions", "appraisal cost", "appraisal timeline"],
+    keywords: ["appraisal FAQ", "property appraisal questions", "appraisal timeline"],
     relatedPages: [
       "glamping-appraisal",
       "rv-resort-appraisal",

@@ -1269,7 +1269,7 @@ export const industryGuides: Record<string, GuideContent> = {
           <li>Present a compelling case to lenders and investors</li>
         </ul>
         
-        <p>For glamping projects, feasibility studies typically cost $25,000-$50,000 and take 4-6 weeks to complete. A professional study conducted by an experienced outdoor hospitality consultant can significantly increase your chances of success and financing approval.</p>
+        <p>For glamping projects, feasibility studies typically take 4-6 weeks to complete. A professional study conducted by an experienced outdoor hospitality consultant can significantly increase your chances of success and financing approval.</p>
         
         <p>See our <a href="/guides/feasibility-studies-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> for comprehensive information about feasibility studies for outdoor hospitality projects.</p>`
       },

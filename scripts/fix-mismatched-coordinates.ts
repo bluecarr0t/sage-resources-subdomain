@@ -1,0 +1,371 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import { parse } from 'csv-parse/sync';
+
+interface CSVRow {
+  [key: string]: string;
+}
+
+// State boundaries for validation (simplified version)
+const US_STATE_BOUNDS: { [key: string]: { lat: [number, number]; lon: [number, number] } } = {
+  'AL': { lat: [30.1, 35.0], lon: [-88.5, -84.9] },
+  'AK': { lat: [51.0, 71.6], lon: [-179.0, -130.0] },
+  'AZ': { lat: [31.3, 37.0], lon: [-114.8, -109.0] },
+  'AR': { lat: [33.0, 36.5], lon: [-94.6, -89.6] },
+  'CA': { lat: [32.5, 42.0], lon: [-124.5, -114.1] },
+  'CO': { lat: [37.0, 41.0], lon: [-109.1, -102.0] },
+  'CT': { lat: [40.9, 42.1], lon: [-73.7, -71.8] },
+  'DE': { lat: [38.4, 39.7], lon: [-75.8, -75.0] },
+  'FL': { lat: [24.4, 31.0], lon: [-87.6, -80.0] },
+  'GA': { lat: [30.3, 35.0], lon: [-85.6, -80.8] },
+  'HI': { lat: [18.9, 22.2], lon: [-160.3, -154.8] },
+  'ID': { lat: [41.9, 49.0], lon: [-117.2, -111.0] },
+  'IL': { lat: [36.9, 42.5], lon: [-91.5, -87.0] },
+  'IN': { lat: [37.7, 41.7], lon: [-88.1, -84.8] },
+  'IA': { lat: [40.3, 43.5], lon: [-96.6, -90.1] },
+  'KS': { lat: [37.0, 40.0], lon: [-102.0, -94.6] },
+  'KY': { lat: [36.4, 39.1], lon: [-89.5, -81.9] },
+  'LA': { lat: [28.9, 33.0], lon: [-94.0, -88.8] },
+  'ME': { lat: [43.0, 47.5], lon: [-71.1, -66.9] },
+  'MD': { lat: [37.9, 39.7], lon: [-79.5, -75.0] },
+  'MA': { lat: [41.2, 42.9], lon: [-73.5, -69.9] },
+  'MI': { lat: [41.7, 48.3], lon: [-90.4, -82.4] },
+  'MN': { lat: [43.5, 49.4], lon: [-97.2, -89.5] },
+  'MS': { lat: [30.1, 35.0], lon: [-91.7, -88.1] },
+  'MO': { lat: [36.0, 40.6], lon: [-95.8, -89.1] },
+  'MT': { lat: [44.3, 49.0], lon: [-116.1, -104.0] },
+  'NE': { lat: [40.0, 43.0], lon: [-104.1, -95.3] },
+  'NV': { lat: [35.0, 42.0], lon: [-120.0, -114.0] },
+  'NH': { lat: [42.7, 45.3], lon: [-72.6, -70.6] },
+  'NJ': { lat: [38.9, 41.4], lon: [-75.6, -73.9] },
+  'NM': { lat: [31.3, 37.0], lon: [-109.1, -103.0] },
+  'NY': { lat: [40.5, 45.0], lon: [-79.8, -71.8] },
+  'NC': { lat: [33.8, 36.6], lon: [-84.3, -75.4] },
+  'ND': { lat: [45.9, 49.0], lon: [-104.1, -96.6] },
+  'OH': { lat: [38.4, 42.0], lon: [-84.8, -80.5] },
+  'OK': { lat: [33.6, 37.0], lon: [-103.0, -94.4] },
+  'OR': { lat: [41.9, 46.3], lon: [-124.6, -116.5] },
+  'PA': { lat: [39.7, 42.3], lon: [-80.5, -74.7] },
+  'RI': { lat: [41.1, 42.0], lon: [-71.9, -71.1] },
+  'SC': { lat: [32.0, 35.2], lon: [-83.4, -78.5] },
+  'SD': { lat: [42.4, 45.9], lon: [-104.1, -96.4] },
+  'TN': { lat: [35.0, 36.7], lon: [-90.3, -81.6] },
+  'TX': { lat: [25.8, 36.5], lon: [-106.7, -93.5] },
+  'UT': { lat: [36.9, 42.0], lon: [-114.1, -109.0] },
+  'VT': { lat: [42.7, 45.0], lon: [-73.4, -71.5] },
+  'VA': { lat: [36.5, 39.5], lon: [-83.7, -75.2] },
+  'WA': { lat: [45.5, 49.0], lon: [-124.8, -116.9] },
+  'WV': { lat: [37.2, 40.6], lon: [-82.7, -77.7] },
+  'WI': { lat: [42.4, 47.1], lon: [-92.9, -86.8] },
+  'WY': { lat: [41.0, 45.0], lon: [-111.1, -104.0] },
+};
+
+const CANADA_PROVINCE_BOUNDS: { [key: string]: { lat: [number, number]; lon: [number, number] } } = {
+  'AB': { lat: [49.0, 60.0], lon: [-120.0, -110.0] },
+  'BC': { lat: [48.0, 60.0], lon: [-139.0, -114.0] },
+  'MB': { lat: [49.0, 60.0], lon: [-102.0, -89.0] },
+  'NB': { lat: [44.5, 48.0], lon: [-69.0, -63.0] },
+  'NL': { lat: [46.5, 60.0], lon: [-67.8, -52.6] },
+  'NS': { lat: [43.4, 47.0], lon: [-66.3, -59.7] },
+  'NT': { lat: [60.0, 70.0], lon: [-136.0, -102.0] },
+  'NU': { lat: [60.0, 83.0], lon: [-95.0, -61.0] },
+  'ON': { lat: [41.7, 57.0], lon: [-95.2, -74.3] },
+  'PE': { lat: [46.0, 47.1], lon: [-64.4, -62.0] },
+  'QC': { lat: [45.0, 62.0], lon: [-79.8, -57.1] },
+  'SK': { lat: [49.0, 60.0], lon: [-110.0, -101.0] },
+  'YT': { lat: [60.0, 70.0], lon: [-141.0, -123.0] },
+};
+
+/**
+ * Check if coordinates match state/country
+ */
+function isCoordinateInState(
+  lat: number,
+  lon: number,
+  state: string,
+  country: string
+): boolean {
+  const stateUpper = state.trim().toUpperCase();
+
+  if (
+    country?.toUpperCase().includes('USA') ||
+    country?.toUpperCase().includes('UNITED STATES') ||
+    country?.toUpperCase().includes('US')
+  ) {
+    if (US_STATE_BOUNDS[stateUpper]) {
+      const bounds = US_STATE_BOUNDS[stateUpper];
+      return (
+        lat >= bounds.lat[0] &&
+        lat <= bounds.lat[1] &&
+        lon >= bounds.lon[0] &&
+        lon <= bounds.lon[1]
+      );
+    }
+  }
+
+  if (country?.toUpperCase().includes('CANADA')) {
+    if (CANADA_PROVINCE_BOUNDS[stateUpper]) {
+      const bounds = CANADA_PROVINCE_BOUNDS[stateUpper];
+      return (
+        lat >= bounds.lat[0] &&
+        lat <= bounds.lat[1] &&
+        lon >= bounds.lon[0] &&
+        lon <= bounds.lon[1]
+      );
+    }
+  }
+
+  return true; // Unknown state/country - assume valid
+}
+
+/**
+ * Geocode an address
+ */
+async function geocodeAddress(
+  address: string,
+  city: string,
+  state: string,
+  zipCode: string,
+  country: string
+): Promise<{ lat: number; lon: number } | null> {
+  const fullAddress = [
+    address?.trim(),
+    city?.trim(),
+    state?.trim(),
+    zipCode?.trim(),
+    country?.trim(),
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  if (!fullAddress) {
+    return null;
+  }
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+      fullAddress
+    )}&limit=1`;
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Sage-Outdoor-Advisory-Coordinate-Validator/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (Array.isArray(data) && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lon: parseFloat(data[0].lon),
+      };
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Escape a CSV field value
+ */
+function escapeCSVField(value: string): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  const str = String(value);
+  if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+async function fixMismatchedCoordinates(inputFile: string, outputFile: string) {
+  console.log(`Reading CSV file: ${inputFile}\n`);
+
+  const fileContent = fs.readFileSync(inputFile, 'utf-8');
+  const lines = fileContent.split('\n').filter((line) => line.trim());
+
+  // Combine header lines
+  const headerLine1 = lines[0].trim();
+  const headerLine2 = lines[1]?.trim() || '';
+  const cleanHeader1 = headerLine1.replace(/,$/, '');
+  const combinedHeader = cleanHeader1 + (headerLine2 ? ',' + headerLine2 : '');
+
+  const dataLines = lines.slice(2);
+  const reconstructedContent = combinedHeader + '\n' + dataLines.join('\n');
+
+  // Parse CSV
+  const records: CSVRow[] = parse(reconstructedContent, {
+    columns: true,
+    skip_empty_lines: true,
+    relax_column_count: true,
+    bom: true,
+  });
+
+  console.log(`Total rows: ${records.length}\n`);
+
+  // Step 1: Identify mismatched rows
+  console.log('Step 1: Identifying mismatched rows...\n');
+  const mismatchedRows: number[] = [];
+
+  for (let i = 0; i < records.length; i++) {
+    const row = records[i];
+    const lat = parseFloat(row.Latitude || '');
+    const lon = parseFloat(row.Longitude || '');
+    const state = (row.State || '').trim();
+    const country = (row.Country || '').trim();
+
+    if (isNaN(lat) || isNaN(lon) || !state) {
+      continue;
+    }
+
+    if (!isCoordinateInState(lat, lon, state, country)) {
+      mismatchedRows.push(i);
+    }
+  }
+
+  console.log(`Found ${mismatchedRows.length} rows with coordinate mismatches.\n`);
+
+  if (mismatchedRows.length === 0) {
+    console.log('✅ No mismatches found! All coordinates are valid.\n');
+    return;
+  }
+
+  // Step 2: Re-geocode mismatched rows
+  console.log('Step 2: Re-geocoding mismatched rows...\n');
+  console.log('⚠️  This will take approximately 4-5 minutes (1 second per row).\n');
+  console.log('Processing...\n\n');
+
+  let fixedCount = 0;
+  let failedCount = 0;
+  let stillInvalidCount = 0;
+
+  for (let idx = 0; idx < mismatchedRows.length; idx++) {
+    const i = mismatchedRows[idx];
+    const row = records[i];
+    const rowNumber = i + 3;
+
+    const address = (row.Address || '').trim();
+    const city = (row.City || '').trim();
+    const state = (row.State || '').trim();
+    const zipCode = (row['Zip Code'] || '').trim();
+    const country = (row.Country || '').trim();
+    const propertyName = (row['Property Name'] || '').trim();
+
+    const oldLat = parseFloat(row.Latitude || '');
+    const oldLon = parseFloat(row.Longitude || '');
+
+    console.log(
+      `[${idx + 1}/${mismatchedRows.length}] Row ${rowNumber}: ${propertyName || 'Unknown'}`
+    );
+    console.log(`  Address: ${[address, city, state, zipCode].filter(Boolean).join(', ')}`);
+
+    // Geocode the address
+    const geocoded = await geocodeAddress(address, city, state, zipCode, country);
+
+    if (geocoded) {
+      // Verify the new coordinates match the state/country
+      if (isCoordinateInState(geocoded.lat, geocoded.lon, state, country)) {
+        row.Latitude = geocoded.lat.toString();
+        row.Longitude = geocoded.lon.toString();
+        fixedCount++;
+        console.log(
+          `  ✓ Fixed: ${oldLat.toFixed(4)}, ${oldLon.toFixed(4)} → ${geocoded.lat.toFixed(4)}, ${geocoded.lon.toFixed(4)}`
+        );
+      } else {
+        stillInvalidCount++;
+        console.log(
+          `  ⚠ Still invalid: New coordinates ${geocoded.lat.toFixed(4)}, ${geocoded.lon.toFixed(4)} don't match ${state}`
+        );
+      }
+    } else {
+      failedCount++;
+      console.log(`  ✗ Failed to geocode`);
+    }
+
+    console.log('');
+
+    // Rate limiting: wait 1 second between requests
+    if (idx < mismatchedRows.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+
+  // Step 3: Write updated CSV
+  console.log('\nStep 3: Writing updated CSV...\n');
+
+  if (records.length === 0) {
+    console.log('No records to write');
+    return;
+  }
+
+  const headers = Object.keys(records[0]);
+  const csvLines: string[] = [];
+
+  // Add header row
+  csvLines.push(headers.map((h) => escapeCSVField(h)).join(','));
+
+  // Add data rows
+  for (const record of records) {
+    const row = headers.map((header) => {
+      const value = record[header] || '';
+      return escapeCSVField(value);
+    });
+    csvLines.push(row.join(','));
+  }
+
+  fs.writeFileSync(outputFile, csvLines.join('\n'));
+  console.log(`✓ Written updated CSV to: ${outputFile}\n`);
+
+  // Print summary
+  console.log('=== FIX SUMMARY ===\n');
+  console.log(`Rows identified as mismatched: ${mismatchedRows.length}`);
+  console.log(`Successfully fixed: ${fixedCount}`);
+  console.log(`Still invalid (geocoding didn't match state): ${stillInvalidCount}`);
+  console.log(`Failed to geocode: ${failedCount}`);
+  console.log('\n✓ Fix complete!\n');
+
+  if (stillInvalidCount > 0 || failedCount > 0) {
+    console.log(
+      '⚠️  Some rows could not be fixed. You may need to:'
+    );
+    console.log('  - Verify addresses are correct');
+    console.log('  - Check if state/country fields are correct');
+    console.log('  - Manually review these rows');
+  }
+}
+
+// Main execution
+const inputFile =
+  process.argv[2] ||
+  path.join(
+    __dirname,
+    '../csv/Sage Database_ Glamping Sites  - Work In Progress (1)_FINAL.csv'
+  );
+const outputFile =
+  process.argv[3] ||
+  path.join(
+    __dirname,
+    '../csv/Sage Database_ Glamping Sites  - Work In Progress (1)_COORDS_FIXED.csv'
+  );
+
+console.log('🎯 Targeted Coordinate Fix Script\n');
+console.log(`Input: ${path.basename(inputFile)}`);
+console.log(`Output: ${path.basename(outputFile)}\n`);
+
+fixMismatchedCoordinates(inputFile, outputFile)
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    process.exit(1);
+  });
+

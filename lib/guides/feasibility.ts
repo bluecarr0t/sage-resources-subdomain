@@ -6,7 +6,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
 "feasibility-studies-complete-guide": {
     slug: "feasibility-studies-complete-guide",
     title: "Feasibility Studies Complete Guide | 2025 | Sage Outdoor Advisory",
-    metaDescription: "Comprehensive guide to feasibility studies for outdoor hospitality projects. Learn what feasibility studies include, how they work, costs, timeline, and how to choose a consultant. Essential reading for glamping, RV resort, and campground developers.",
+    metaDescription: "Comprehensive guide to feasibility studies for outdoor hospitality projects. Learn what feasibility studies include, how they work, timeline, and how to choose a consultant. Essential reading for glamping, RV resort, and campground developers.",
     category: "feasibility",
     hero: {
       headline: "Feasibility Studies Complete Guide",
@@ -22,7 +22,6 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       { title: "What's Included in a Feasibility Study", anchor: "whats-included", level: 1 },
       { title: "How to Read a Feasibility Study", anchor: "how-to-read", level: 1 },
       { title: "Feasibility Study vs. Appraisal", anchor: "vs-appraisal", level: 1 },
-      { title: "Cost of Feasibility Studies", anchor: "cost", level: 1 },
       { title: "Timeline and Process", anchor: "timeline-process", level: 1 },
       { title: "How to Choose a Consultant", anchor: "choose-consultant", level: 1 },
       { title: "Frequently Asked Questions", anchor: "faqs", level: 1 }
@@ -300,57 +299,6 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p>Learn more about the differences in our <a href="/guides/feasibility-study-vs-appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study vs appraisal comparison guide</a>.</p>`
       },
       {
-        id: "cost",
-        title: "Cost of Feasibility Studies",
-        content: `<p>Feasibility study costs vary significantly based on project scope, complexity, and location. Understanding cost factors helps you budget appropriately and evaluate proposals.</p>
-        
-        <h3>Factors Affecting Cost</h3>
-        <p>Several factors influence feasibility study pricing:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Project Size:</strong> Larger, more complex projects require more analysis</li>
-          <li><strong>Property Type:</strong> Some property types require more specialized analysis</li>
-          <li><strong>Location:</strong> Market data availability and complexity vary by location</li>
-          <li><strong>Scope:</strong> Depth of analysis and number of scenarios evaluated</li>
-          <li><strong>Timeline:</strong> Rush projects may cost more</li>
-        </ul>
-        
-        <h3>Typical Cost Range</h3>
-        <p>For outdoor hospitality projects, feasibility studies typically range from:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Small projects (10-20 units): $10,000 - $25,000</li>
-          <li>Medium projects (20-50 units): $25,000 - $50,000</li>
-          <li>Large projects (50+ units): $50,000 - $100,000+</li>
-        </ul>
-        
-        <p>These are general guidelines. Actual costs depend on specific project characteristics and consultant pricing structures.</p>
-        
-        <h3>What You're Paying For</h3>
-        <p>A professional feasibility study includes:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Market research and analysis</li>
-          <li>Competitive property evaluation</li>
-          <li>Financial modeling and projections</li>
-          <li>Risk assessment</li>
-          <li>Strategic recommendations</li>
-          <li>Professional report preparation</li>
-          <li>Industry expertise and knowledge</li>
-        </ul>
-        
-        <h3>Value vs. Cost</h3>
-        <p>While feasibility studies represent a significant investment, they provide substantial value:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Help avoid costly mistakes</li>
-          <li>Increase financing success rates</li>
-          <li>Optimize project design and revenue</li>
-          <li>Identify opportunities and risks</li>
-          <li>Provide objective analysis for decision-making</li>
-        </ul>
-        
-        <p>A well-executed feasibility study often pays for itself through optimized project design, improved financing terms, and risk mitigation.</p>
-        
-        <p>For detailed cost information, see our <a href="/guides/feasibility-study-cost-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study cost guide</a>.</p>`
-      },
-      {
         id: "timeline-process",
         title: "Timeline and Process",
         content: `<p>Understanding the feasibility study process and timeline helps you plan effectively and set appropriate expectations.</p>
@@ -501,11 +449,6 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         description: "Understand the differences between feasibility studies and appraisals."
       },
       {
-        title: "Feasibility Study Cost Guide",
-        url: "/guides/feasibility-study-cost-guide",
-        description: "Comprehensive breakdown of feasibility study costs and pricing factors."
-      },
-      {
         title: "Feasibility Study Process Timeline",
         url: "/guides/feasibility-study-process-timeline",
         description: "Step-by-step guide to the feasibility study process and timeline."
@@ -542,18 +485,6 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p><strong>Risk Mitigation:</strong> A feasibility study identifies potential risks before you commit resources, allowing you to address challenges proactively and avoid costly mistakes.</p>
         
         <p><strong>Project Optimization:</strong> Feasibility studies provide actionable insights for optimizing project scope, design, amenities, and pricing strategies.</p>`
-      },
-      {
-        question: "How much does a feasibility study cost?",
-        answer: `<p>Feasibility study costs vary significantly based on project scope, complexity, and location. For outdoor hospitality projects, typical costs range from:</p>
-        
-        <ul class="list-disc list-inside space-y-1 ml-4">
-          <li><strong>Small projects (10-20 units):</strong> $10,000 - $25,000</li>
-          <li><strong>Medium projects (20-50 units):</strong> $25,000 - $50,000</li>
-          <li><strong>Large projects (50+ units):</strong> $50,000 - $100,000+</li>
-        </ul>
-        
-        <p>Factors affecting cost include project size, property type, location, scope of analysis, and timeline. <a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a customized quote based on your specific project needs.</p>`
       },
       {
         question: "How long does a feasibility study take?",
@@ -933,7 +864,6 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       { title: "Key Differences", anchor: "key-differences", level: 1 },
       { title: "When Do You Need Each?", anchor: "when-need-each", level: 1 },
       { title: "How They Work Together", anchor: "work-together", level: 1 },
-      { title: "Cost Comparison", anchor: "cost-comparison", level: 1 },
       { title: "Frequently Asked Questions", anchor: "faqs", level: 1 }
     ],
     sections: [
@@ -1034,21 +964,6 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <p>The feasibility study informs the appraisal by providing projected income and expenses, while the appraisal validates the property's value based on those projections.</p>`
       },
-      {
-        id: "cost-comparison",
-        title: "Cost Comparison",
-        content: `<p>Costs vary based on project complexity:</p>
-        
-        <h3>Feasibility Studies</h3>
-        <p>Typically range from $10,000 to $100,000+ depending on project size and complexity.</p>
-        
-        <h3>Appraisals</h3>
-        <p>Typically range from $5,000 to $50,000+ depending on property complexity.</p>
-        
-        <p>For development projects, budget for both since they serve different purposes and are often required together for financing.</p>
-        
-        <p>See our <a href="/guides/feasibility-study-cost-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study cost guide</a> and <a href="/guides/appraisal-cost-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">appraisal cost guide</a> for detailed information.</p>`
-      }
     ],
     clusterPages: [
       {
@@ -1104,127 +1019,6 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Understanding Which You Need?",
       description: "Schedule a consultation to discuss your project needs",
-      buttonText: "Schedule Free Consultation",
-      buttonLink: "https://sageoutdooradvisory.com/contact-us"
-    }
-  },
-"feasibility-study-cost-guide": {
-    slug: "feasibility-study-cost-guide",
-    title: "Feasibility Study Cost Guide | Pricing Breakdown | Sage Outdoor Advisory",
-    metaDescription: "Complete breakdown of feasibility study costs for outdoor hospitality projects. Understand pricing factors, typical costs, and what affects feasibility study pricing.",
-    category: "feasibility",
-    hero: {
-      headline: "Feasibility Study Cost Guide",
-      subheadline: "Understanding feasibility study pricing and what factors affect costs",
-      ctaText: "Get Your Custom Quote",
-      ctaLink: "https://sageoutdooradvisory.com/contact-us"
-    },
-    tableOfContents: [
-      { title: "Introduction", anchor: "introduction", level: 1 },
-      { title: "Factors Affecting Cost", anchor: "factors", level: 1 },
-      { title: "What You're Paying For", anchor: "what-paying-for", level: 1 },
-      { title: "Value vs. Cost", anchor: "value-vs-cost", level: 1 },
-      { title: "Getting a Custom Quote", anchor: "custom-quote", level: 1 },
-      { title: "Frequently Asked Questions", anchor: "faqs", level: 1 }
-    ],
-    sections: [
-      {
-        id: "introduction",
-        title: "Introduction",
-        content: `<p>Understanding <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> costs helps you budget appropriately and evaluate proposals. This guide breaks down what affects pricing and what you can expect to pay.</p>
-        
-        <p>Feasibility study costs vary significantly based on project scope, complexity, and location. This guide helps you understand the factors and typical ranges.</p>`
-      },
-      {
-        id: "factors",
-        title: "Factors Affecting Cost",
-        content: `<p>Several factors influence feasibility study pricing:</p>
-        
-        <h3>Project Size</h3>
-        <p>Larger, more complex projects require more analysis, increasing costs. Factors include number of units, property size, and development scope.</p>
-        
-        <h3>Property Type</h3>
-        <p>Some property types require more specialized analysis. Glamping resorts may need more market research than basic campgrounds.</p>
-        
-        <h3>Location</h3>
-        <p>Market data availability and market complexity vary by location. Remote or unique markets may cost more due to data challenges.</p>
-        
-        <h3>Scope and Depth</h3>
-        <p>Depth of analysis and number of scenarios evaluated affect costs. More comprehensive studies cost more.</p>
-        
-        <h3>Timeline</h3>
-        <p>Rush projects may cost more due to accelerated timelines requiring more resources.</p>`
-      },
-      {
-        id: "what-paying-for",
-        title: "What You're Paying For",
-        content: `<p>A professional feasibility study includes:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Market research and analysis</li>
-          <li>Competitive property evaluation</li>
-          <li>Financial modeling and projections</li>
-          <li>Risk assessment</li>
-          <li>Strategic recommendations</li>
-          <li>Professional report preparation</li>
-          <li>Industry expertise and knowledge</li>
-        </ul>`
-      },
-      {
-        id: "value-vs-cost",
-        title: "Value vs. Cost",
-        content: `<p>While feasibility studies represent a significant investment, they provide substantial value through optimized project design, improved financing terms, and risk mitigation. A well-executed study often pays for itself.</p>`
-      },
-      {
-        id: "custom-quote",
-        title: "Getting a Custom Quote",
-        content: `<p>Contact us for a customized quote based on your specific project needs. Our team will review your project details and provide a detailed proposal tailored to your requirements.</p>
-        
-        <p><a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">Schedule a consultation to get your custom feasibility study quote →</a></p>`
-      }
-    ],
-    clusterPages: [
-      {
-        title: "Feasibility Studies Complete Guide",
-        url: "/guides/feasibility-studies-complete-guide",
-        description: "Comprehensive guide to feasibility studies."
-      }
-    ],
-    relatedGuides: ["feasibility-studies-complete-guide"],
-    faqs: [
-      {
-        question: "How do I get a custom quote for my feasibility study?",
-        answer: `<p>Getting a custom quote for your feasibility study is simple. <a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> to schedule a free consultation where we'll discuss your specific project needs.</p>
-        
-        <p>During the consultation, we'll review:</p>
-        <ul class="list-disc list-inside space-y-1 ml-4">
-          <li>Your project scope and size</li>
-          <li>Property type and location</li>
-          <li>Timeline requirements</li>
-          <li>Specific analysis needs</li>
-        </ul>
-        
-        <p>Based on this information, we'll provide a detailed proposal with transparent pricing tailored to your project. We've completed over 350 feasibility studies in the outdoor hospitality industry and will ensure your quote reflects the comprehensive analysis your project requires.</p>`
-      },
-      {
-        question: "What factors affect feasibility study costs?",
-        answer: `<p>Several factors influence feasibility study pricing:</p>
-        
-        <ul class="list-disc list-inside space-y-1 ml-4">
-          <li><strong>Project Size:</strong> Larger, more complex projects require more extensive analysis</li>
-          <li><strong>Property Type:</strong> Some property types require more specialized analysis</li>
-          <li><strong>Location:</strong> Market data availability and complexity vary by location</li>
-          <li><strong>Scope:</strong> Depth of analysis and number of scenarios evaluated</li>
-          <li><strong>Timeline:</strong> Rush projects may cost more due to compressed schedules</li>
-        </ul>
-        
-        <p>A professional feasibility study is an investment that often pays for itself through optimized project design, improved financing terms, and risk mitigation.</p>`
-      }
-    ],
-    lastModified: "2025-01-15",
-    keywords: ["feasibility study cost", "feasibility study pricing", "how much does a feasibility study cost"],
-    cta: {
-      title: "Get a Custom Feasibility Study Quote",
-      description: "Contact us for a detailed quote based on your project",
       buttonText: "Schedule Free Consultation",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }

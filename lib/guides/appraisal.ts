@@ -6,7 +6,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
 "property-appraisals-complete-guide": {
     slug: "property-appraisals-complete-guide",
     title: "Property Appraisals Complete Guide | 2025 | Sage Outdoor Advisory",
-    metaDescription: "Comprehensive guide to property appraisals for outdoor hospitality. Learn about appraisal methods, costs, timelines, and how to choose an appraiser for glamping, RV resort, and campground properties.",
+    metaDescription: "Comprehensive guide to property appraisals for outdoor hospitality. Learn about appraisal methods, timelines, and how to choose an appraiser for glamping, RV resort, and campground properties.",
     category: "appraisal",
     hero: {
       headline: "Property Appraisals Complete Guide",
@@ -23,7 +23,6 @@ export const appraisalGuides: Record<string, GuideContent> = {
       { title: "Appraisal Methods", anchor: "appraisal-methods", level: 1 },
       { title: "What's Included in an Appraisal Report", anchor: "whats-included", level: 1 },
       { title: "Appraisal vs. Feasibility Study", anchor: "vs-feasibility-study", level: 1 },
-      { title: "Cost of Appraisals", anchor: "cost", level: 1 },
       { title: "Timeline and Process", anchor: "timeline-process", level: 1 },
       { title: "How to Choose an Appraiser", anchor: "choose-appraiser", level: 1 },
       { title: "Frequently Asked Questions", anchor: "faqs", level: 1 }
@@ -224,25 +223,6 @@ export const appraisalGuides: Record<string, GuideContent> = {
         <p>Learn more in our <a href="/guides/appraisal-vs-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">appraisal vs feasibility study comparison guide</a>.</p>`
       },
       {
-        id: "cost",
-        title: "Cost of Appraisals",
-        content: `<p>Appraisal costs vary based on property complexity and scope:</p>
-        
-        <h3>Factors Affecting Cost</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Property size and complexity</li>
-          <li>Property type (glamping, RV resort, campground)</li>
-          <li>Appraisal scope and purpose</li>
-          <li>Market data availability</li>
-          <li>Timeline requirements</li>
-        </ul>
-        
-        <h3>Typical Cost Range</h3>
-        <p>For outdoor hospitality properties, appraisals typically range from $5,000 to $50,000+, depending on property complexity.</p>
-        
-        <p>See our <a href="/guides/appraisal-cost-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">appraisal cost guide</a> for detailed pricing information.</p>`
-      },
-      {
         id: "timeline-process",
         title: "Timeline and Process",
         content: `<p>Most appraisals take <strong>2-4 weeks</strong> to complete. The process includes:</p>
@@ -309,11 +289,6 @@ export const appraisalGuides: Record<string, GuideContent> = {
         description: "Understand the differences between appraisals and feasibility studies."
       },
       {
-        title: "Appraisal Cost Guide",
-        url: "/guides/appraisal-cost-guide",
-        description: "Comprehensive breakdown of appraisal costs and pricing."
-      },
-      {
         title: "Bank Appraisal Requirements",
         url: "/guides/bank-appraisal-requirements",
         description: "Learn what lenders require in property appraisals."
@@ -356,7 +331,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
           <li>Client responsiveness</li>
         </ul>
         
-        <p>The process typically includes property inspection, data collection, analysis, report preparation, and quality review. Rush appraisals may be possible but typically cost more.</p>`
+        <p>The process typically includes property inspection, data collection, analysis, report preparation, and quality review.</p>`
       },
       {
         question: "What's the difference between an appraisal and a feasibility study?",
@@ -684,95 +659,6 @@ export const appraisalGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Understanding Which You Need?",
       description: "Schedule a consultation to discuss your project needs",
-      buttonText: "Schedule Free Consultation",
-      buttonLink: "https://sageoutdooradvisory.com/contact-us"
-    }
-  },
-"appraisal-cost-guide": {
-    slug: "appraisal-cost-guide",
-    title: "Appraisal Cost Guide | Pricing Breakdown | Sage Outdoor Advisory",
-    metaDescription: "Complete breakdown of property appraisal costs for outdoor hospitality. Understand pricing factors, typical costs, and what affects appraisal pricing.",
-    category: "appraisal",
-    hero: {
-      headline: "Appraisal Cost Guide",
-      subheadline: "Understanding appraisal pricing and what factors affect costs",
-      ctaText: "Get Your Custom Quote",
-      ctaLink: "https://sageoutdooradvisory.com/contact-us"
-    },
-    tableOfContents: [
-      { title: "Introduction", anchor: "introduction", level: 1 },
-      { title: "Factors Affecting Cost", anchor: "factors", level: 1 },
-      { title: "Typical Cost Ranges", anchor: "cost-ranges", level: 1 },
-      { title: "Value vs. Cost", anchor: "value-vs-cost", level: 1 },
-      { title: "Frequently Asked Questions", anchor: "faqs", level: 1 }
-    ],
-    sections: [
-      {
-        id: "introduction",
-        title: "Introduction",
-        content: `<p>Appraisal costs vary based on property complexity and scope. This guide helps you understand the factors and typical ranges for outdoor hospitality property appraisals.</p>
-        
-        <p>See our <a href="/guides/property-appraisals-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Property Appraisals Complete Guide</a> for comprehensive information.</p>`
-      },
-      {
-        id: "factors",
-        title: "Factors Affecting Cost",
-        content: `<p>Key factors include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Property size and complexity</li>
-          <li>Property type (glamping, RV resort, campground)</li>
-          <li>Appraisal scope and purpose</li>
-          <li>Market data availability</li>
-          <li>Timeline requirements</li>
-        </ul>`
-      },
-      {
-        id: "cost-ranges",
-        title: "Typical Cost Ranges",
-        content: `<p>For outdoor hospitality properties, appraisals typically range from <strong>$5,000 to $50,000+</strong>, depending on property complexity.</p>`
-      },
-      {
-        id: "value-vs-cost",
-        title: "Value vs. Cost",
-        content: `<p>Professional appraisals provide essential value for financing, transactions, and investment decisions. <a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline font-semibold">Contact us</a> for a customized quote.</p>`
-      }
-    ],
-    clusterPages: [
-      {
-        title: "Property Appraisals Complete Guide",
-        url: "/guides/property-appraisals-complete-guide",
-        description: "Comprehensive guide to property appraisals."
-      }
-    ],
-    relatedGuides: ["property-appraisals-complete-guide"],
-    faqs: [
-      {
-        question: "How much does an appraisal cost?",
-        answer: `<p>Appraisal costs vary based on property complexity and scope. For outdoor hospitality properties, typical costs range from:</p>
-        
-        <ul class="list-disc list-inside space-y-1 ml-4">
-          <li><strong>Simple properties:</strong> $5,000 - $15,000</li>
-          <li><strong>Standard properties:</strong> $15,000 - $35,000</li>
-          <li><strong>Complex properties:</strong> $35,000 - $50,000+</li>
-        </ul>
-        
-        <p><strong>Factors Affecting Cost:</strong></p>
-        <ul class="list-disc list-inside space-y-1 ml-4">
-          <li>Property size and complexity</li>
-          <li>Number of units or sites</li>
-          <li>Location and data availability</li>
-          <li>Scope of analysis required</li>
-          <li>Timeline (rush appraisals may cost more)</li>
-        </ul>
-        
-        <p><a href="https://sageoutdooradvisory.com/contact-us/" class="text-[#006b5f] hover:text-[#005a4f] underline">Contact us</a> for a detailed quote based on your specific property.</p>`
-      }
-    ],
-    lastModified: "2025-01-15",
-    keywords: ["appraisal cost", "appraisal pricing", "how much does an appraisal cost"],
-    cta: {
-      title: "Get a Custom Appraisal Quote",
-      description: "Contact us for a detailed quote based on your property",
       buttonText: "Schedule Free Consultation",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }

@@ -81,10 +81,6 @@ Appraisals are required for bank financing, property sales, refinancing, insuran
     ],
     faqs: [
       {
-        question: "How much does an appraisal cost?",
-        answer: "Appraisal costs vary based on property size, complexity, and location. Contact us for a customized quote."
-      },
-      {
         question: "How long does an appraisal take?",
         answer: "A comprehensive property appraisal typically takes 2-4 weeks to complete."
       },
