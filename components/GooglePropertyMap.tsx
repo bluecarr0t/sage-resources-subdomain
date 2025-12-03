@@ -8,14 +8,14 @@ import { useMapContext } from './MapContext';
 import MultiSelect from './MultiSelect';
 
 // Default center for lower 48 states (continental USA)
-// Geographic center of the contiguous United States
+// Optimized to better frame the lower 48 states, excluding most of Canada and Mexico
 const defaultCenter = {
-  lat: 39.8283,
-  lng: -98.5795,
+  lat: 38.5,
+  lng: -96.0,
 };
 
-// Zoom level 5 better frames the lower 48 states, excluding Alaska and Hawaii
-const defaultZoom = 5;
+// Zoom level 6 provides a closer view of the lower 48 states, excluding Alaska and Hawaii
+const defaultZoom = 6;
 
 // Libraries array must be a constant to prevent LoadScript reload warnings
 const libraries: ('places')[] = ['places'];
@@ -1164,6 +1164,64 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     // Group by property_name to count unique properties (same as countryCounts logic)
     const uniquePropertyNames = new Set<string>();
     
+    // Helper function to check if coordinates are likely in Canada (same as countryCounts)
+    const isLikelyCanadaByCoords = (lat: number, lon: number): boolean => {
+      // Check if within overall Canada bounds
+      if (lat < 41.7 || lat >= 85 || lon < -141 || lon > -52) {
+        return false;
+      }
+      
+      // Northern territories (above 60°N) - definitely Canada
+      if (lat >= 60) {
+        return true;
+      }
+      
+      // Eastern Canada (Ontario, Quebec, Maritimes) - 41.7°N to 60°N, -95°W to -52°W
+      if (lat >= 41.7 && lat < 60 && lon >= -95 && lon <= -52) {
+        return true;
+      }
+      
+      // Western provinces (BC, Alberta, Saskatchewan, Manitoba) - 48°N to 60°N, -139°W to -89°W
+      if (lat >= 48 && lat < 60 && lon >= -139 && lon <= -89) {
+        return true;
+      }
+      
+      // Border region (49°N to 60°N) - check more carefully
+      if (lat >= 49 && lat < 60) {
+        if (lon < -100) {
+          return true;
+        }
+        if (lon >= -100 && lon <= -89 && lat >= 50) {
+          return true;
+        }
+        if (lon >= -95 && lon <= -89 && lat >= 49) {
+          return true;
+        }
+      }
+      
+      // Border region near US-Canada border (45°N to 49°N)
+      if (lat >= 45 && lat < 49) {
+        if (lon >= -75 && lon <= -52) {
+          return true;
+        }
+        if (lon >= -95 && lon < -75) {
+          if (lat >= 46) {
+            return true;
+          }
+          if (lon >= -80) {
+            return true;
+          }
+        }
+      }
+      
+      // Additional check: 41.7°N to 45°N - could be southern Ontario
+      if (lat >= 41.7 && lat < 45 && lon >= -95.2 && lon <= -74.3) {
+        return true;
+      }
+      
+      return false;
+    };
+    
     // Helper functions that match the EXACT countryCounts logic
     const isCanadianProperty = (property: any): boolean => {
       const country = String(property.country || '').toUpperCase();
@@ -1208,23 +1266,49 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       return false;
     };
     
-    // Filter by country if only one country is selected
-    let filteredProperties = propertiesWithValidCoords;
-    if (filterCountry.length === 1) {
-      if (filterCountry.includes('United States')) {
-        filteredProperties = propertiesWithValidCoords.filter((p) => isUSProperty(p));
-      } else if (filterCountry.includes('Canada')) {
-        filteredProperties = propertiesWithValidCoords.filter((p) => isCanadianProperty(p));
-      }
-    }
-    // If both countries selected or none selected, include all (matching countryCounts behavior)
-    
-    // Count unique properties by property_name (same as countryCounts)
-    filteredProperties.forEach((p) => {
+    // Determine country for each property using the same logic as countryCounts
+    // Prioritize coordinate-based detection when coordinates are available
+    propertiesWithValidCoords.forEach((p) => {
       const propertyName = p.property_name;
-      if (propertyName) {
-        uniquePropertyNames.add(propertyName);
+      if (!propertyName) return;
+      
+      let normalizedCountry: string | null = null;
+      const coords = p.coordinates;
+      
+      // Prioritize coordinate-based detection when coordinates are available
+      if (coords) {
+        const [lat, lon] = coords;
+        
+        if (isLikelyCanadaByCoords(lat, lon)) {
+          normalizedCountry = 'Canada';
+        } else if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
+          normalizedCountry = 'United States';
+        }
       }
+      
+      // If coordinate-based detection didn't work, fall back to country/state fields
+      if (!normalizedCountry) {
+        if (isCanadianProperty(p)) {
+          normalizedCountry = 'Canada';
+        } else if (isUSProperty(p)) {
+          normalizedCountry = 'United States';
+        } else {
+          return; // Skip properties we can't determine
+        }
+      }
+      
+      // Apply country filter if only one country is selected
+      if (filterCountry.length === 1) {
+        if (filterCountry.includes('United States') && normalizedCountry !== 'United States') {
+          return; // Skip if doesn't match filter
+        }
+        if (filterCountry.includes('Canada') && normalizedCountry !== 'Canada') {
+          return; // Skip if doesn't match filter
+        }
+      }
+      
+      // Add to unique properties count
+      uniquePropertyNames.add(propertyName);
     });
     
     return uniquePropertyNames.size;
@@ -1326,53 +1410,106 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       return false;
     };
     
+    // Helper function to check if coordinates are likely in Canada
+    // Canada spans approximately 41.7°N to 83°N and -141°W to -52°W
+    const isLikelyCanadaByCoords = (lat: number, lon: number): boolean => {
+      // Check if within overall Canada bounds
+      if (lat < 41.7 || lat >= 85 || lon < -141 || lon > -52) {
+        return false;
+      }
+      
+      // Northern territories (above 60°N) - definitely Canada
+      if (lat >= 60) {
+        return true;
+      }
+      
+      // Eastern Canada (Ontario, Quebec, Maritimes) - 41.7°N to 60°N, -95°W to -52°W
+      // This covers most of Eastern Canada including major cities like Toronto, Montreal
+      if (lat >= 41.7 && lat < 60 && lon >= -95 && lon <= -52) {
+        return true;
+      }
+      
+      // Western provinces (BC, Alberta, Saskatchewan, Manitoba) - 48°N to 60°N, -139°W to -89°W
+      if (lat >= 48 && lat < 60 && lon >= -139 && lon <= -89) {
+        return true;
+      }
+      
+      // Border region (49°N to 60°N) - check more carefully
+      if (lat >= 49 && lat < 60) {
+        // West of -100°W is likely Canada (BC, Alberta)
+        if (lon < -100) {
+          return true;
+        }
+        // Between -100°W and -89°W, above 50°N is likely Canada (Manitoba)
+        if (lon >= -100 && lon <= -89 && lat >= 50) {
+          return true;
+        }
+        // Even between -89°W and -95°W at this latitude could be Ontario
+        if (lon >= -95 && lon <= -89 && lat >= 49) {
+          return true;
+        }
+      }
+      
+      // Border region near US-Canada border (45°N to 49°N)
+      // Check if longitude suggests Canada vs US
+      if (lat >= 45 && lat < 49) {
+        // East of -75°W is likely Canada (Quebec, Maritimes)
+        if (lon >= -75 && lon <= -52) {
+          return true;
+        }
+        // Between -95°W and -75°W, this could be Ontario or border states
+        // Be more inclusive - if it's above 46°N, it's more likely Canada
+        if (lon >= -95 && lon < -75) {
+          if (lat >= 46) {
+            return true;
+          }
+          // For 45-46°N in this region, check longitude more carefully
+          // Closer to -75°W is more likely Canada (eastern Canada)
+          if (lon >= -80) {
+            return true;
+          }
+        }
+      }
+      
+      // Additional check: 41.7°N to 45°N - could be southern Ontario
+      // Ontario extends down to 41.7°N, between -95.2°W and -74.3°W
+      if (lat >= 41.7 && lat < 45 && lon >= -95.2 && lon <= -74.3) {
+        return true;
+      }
+      
+      return false;
+    };
+    
     propertiesWithValidCoords.forEach((p) => {
       const propertyName = p.property_name;
       if (!propertyName) return;
       
       let normalizedCountry: string | null = null;
+      const coords = p.coordinates;
       
-      // Use the exact same logic as client-side filter
-      if (isCanadianProperty(p)) {
-        normalizedCountry = 'Canada';
-      } else if (isUSProperty(p)) {
-        normalizedCountry = 'United States';
+      // Prioritize coordinate-based detection when coordinates are available
+      // This helps catch properties with incorrect country/state data
+      if (coords) {
+        const [lat, lon] = coords;
+        
+        if (isLikelyCanadaByCoords(lat, lon)) {
+          normalizedCountry = 'Canada';
+        } else if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
+          // Check if it's likely in USA (includes Alaska and Hawaii)
+          normalizedCountry = 'United States';
+        }
       }
       
-      // Fallback: use coordinate-based detection if still not determined
+      // If coordinate-based detection didn't work, fall back to country/state fields
       if (!normalizedCountry) {
-        const coords = p.coordinates;
-        if (coords) {
-          const [lat, lon] = coords;
-          
-          // Northern Canada (above 60°N) - definitely Canada
-          if (lat >= 60 && lon >= -141 && lon <= -52) {
-            normalizedCountry = 'Canada';
-          }
-          // Southern border region (49°N to 60°N) - need to check longitude
-          else if (lat >= 49 && lat < 60) {
-            // West of -100°W is more likely Canada (British Columbia, Alberta)
-            if (lon < -100) {
-              normalizedCountry = 'Canada';
-            }
-            // East of -100°W could be either, but if lat > 50°N, more likely Canada
-            else if (lat > 50) {
-              normalizedCountry = 'Canada';
-            } else {
-              normalizedCountry = 'United States';
-            }
-          }
-          // Below 49°N is more likely USA
-          else if (lat >= 24 && lat < 49) {
-            normalizedCountry = 'United States';
-          }
-          // Otherwise assume United States (most properties are in US)
-          else {
-            normalizedCountry = 'United States';
-          }
-        } else {
-          // No coordinates, default to US
+        // Use the exact same logic as client-side filter
+        if (isCanadianProperty(p)) {
+          normalizedCountry = 'Canada';
+        } else if (isUSProperty(p)) {
           normalizedCountry = 'United States';
+        } else {
+          // If no country/state match and no coordinates, skip this property
+          return;
         }
       }
       

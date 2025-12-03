@@ -68,9 +68,9 @@ export default function InteractiveMap() {
     new Set(properties.map((p) => p.state).filter(Boolean))
   ).sort() as string[];
 
-  // Default center: USA center
-  const defaultCenter: [number, number] = [39.8283, -98.5795];
-  const defaultZoom = 4;
+  // Default center: Optimized for lower 48 states
+  const defaultCenter: [number, number] = [38.5, -96.0];
+  const defaultZoom = 6;
 
   if (!isClient) {
     return (

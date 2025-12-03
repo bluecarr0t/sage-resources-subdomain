@@ -121,8 +121,8 @@ export default function PropertyMap() {
 
         // Create map
         const map = L.map(mapRef.current, {
-          center: [39.8283, -98.5795],
-          zoom: 4,
+          center: [38.5, -96.0],
+          zoom: 6,
         });
 
         // Add tile layer

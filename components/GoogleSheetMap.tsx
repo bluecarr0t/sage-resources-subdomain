@@ -14,11 +14,11 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: 39.8283,
-  lng: -98.5795,
+  lat: 38.5,
+  lng: -96.0,
 };
 
-const defaultZoom = 4;
+const defaultZoom = 6;
 
 // Libraries array must be a constant to prevent LoadScript reload warnings
 const libraries: ('places')[] = ['places'];
