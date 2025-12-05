@@ -80,6 +80,15 @@ const CANADIAN_PROVINCES = [
 ];
 
 /**
+ * Normalize property name for consistent grouping and counting
+ * Trims whitespace and converts to lowercase to prevent duplicates
+ */
+function normalizePropertyName(name: string | null | undefined): string {
+  if (!name) return '';
+  return name.trim().toLowerCase();
+}
+
+/**
  * Convert exact rate to a rough range to avoid revealing precise scraped data
  */
 function getRoughRateRange(rate: string | number | null): string | null {
@@ -383,42 +392,45 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             const propertyName = item.property_name;
             if (!propertyName) return;
 
-            if (!unitTypesMap.has(propertyName)) {
-              unitTypesMap.set(propertyName, new Set());
+            // Normalize property name to prevent duplicates from whitespace/case differences
+            const normalizedName = normalizePropertyName(propertyName);
+
+            if (!unitTypesMap.has(normalizedName)) {
+              unitTypesMap.set(normalizedName, new Set());
             }
             if (item.unit_type) {
-              unitTypesMap.get(propertyName)!.add(item.unit_type);
+              unitTypesMap.get(normalizedName)!.add(item.unit_type);
             }
 
-            if (!ratesMap.has(propertyName)) {
-              ratesMap.set(propertyName, []);
+            if (!ratesMap.has(normalizedName)) {
+              ratesMap.set(normalizedName, []);
             }
             const rate = item.avg__rate__next_12_months_;
             if (rate != null && !isNaN(Number(rate)) && isFinite(Number(rate))) {
-              ratesMap.get(propertyName)!.push(Number(rate));
+              ratesMap.get(normalizedName)!.push(Number(rate));
             }
 
             // When grouping, if a property appears in multiple states, keep all state records
             // We'll handle deduplication when counting per state
-            if (!propertyMap.has(propertyName)) {
-              propertyMap.set(propertyName, [item]);
+            // Use normalized name for grouping to prevent duplicates
+            if (!propertyMap.has(normalizedName)) {
+              propertyMap.set(normalizedName, [item]);
             } else {
               // Store multiple records for the same property (different states)
-              const existing = propertyMap.get(propertyName)!;
+              const existing = propertyMap.get(normalizedName)!;
               if (Array.isArray(existing)) {
                 existing.push(item);
               } else {
-                propertyMap.set(propertyName, [existing, item]);
+                propertyMap.set(normalizedName, [existing, item]);
               }
             }
           });
 
-          const uniqueProperties = Array.from(propertyMap.values()).map((propertyOrArray: any) => {
+          const uniqueProperties = Array.from(propertyMap.entries()).map(([normalizedName, propertyOrArray]: [string, any]) => {
             // Handle case where property might be an array (multiple records for same property_name)
             const property = Array.isArray(propertyOrArray) ? propertyOrArray[0] : propertyOrArray;
-            const propertyName = property.property_name;
-            const unitTypes = unitTypesMap.get(propertyName);
-            const rates = ratesMap.get(propertyName) || [];
+            const unitTypes = unitTypesMap.get(normalizedName);
+            const rates = ratesMap.get(normalizedName) || [];
 
             let rateRange: { min: number | null; max: number | null } = { min: null, max: null };
             if (rates.length > 0) {
@@ -626,30 +638,33 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           const propertyName = item.property_name;
           if (!propertyName) return; // Skip records without property_name
           
+          // Normalize property name to prevent duplicates from whitespace/case differences
+          const normalizedName = normalizePropertyName(propertyName);
+          
           // Collect unit types for this property
-          if (!unitTypesMap.has(propertyName)) {
-            unitTypesMap.set(propertyName, new Set());
+          if (!unitTypesMap.has(normalizedName)) {
+            unitTypesMap.set(normalizedName, new Set());
           }
           if (item.unit_type) {
-            unitTypesMap.get(propertyName)!.add(item.unit_type);
+            unitTypesMap.get(normalizedName)!.add(item.unit_type);
           }
           
           // Collect rates for this property
-          if (!ratesMap.has(propertyName)) {
-            ratesMap.set(propertyName, []);
+          if (!ratesMap.has(normalizedName)) {
+            ratesMap.set(normalizedName, []);
           }
           const rate = item.avg__rate__next_12_months_;
           if (rate != null && !isNaN(Number(rate)) && isFinite(Number(rate))) {
-            ratesMap.get(propertyName)!.push(Number(rate));
+            ratesMap.get(normalizedName)!.push(Number(rate));
           }
           
           // Check if we already have this property
-          if (!propertyMap.has(propertyName)) {
+          if (!propertyMap.has(normalizedName)) {
             // Use this record as the representative
-            propertyMap.set(propertyName, item);
+            propertyMap.set(normalizedName, item);
           } else {
             // If we already have this property, prefer one that matches the state filter and has valid coordinates
-            const existing = propertyMap.get(propertyName);
+            const existing = propertyMap.get(normalizedName);
             const existingLat = typeof existing.lat === 'number' ? existing.lat : parseFloat(String(existing.lat));
             const existingLon = typeof existing.lon === 'number' ? existing.lon : parseFloat(String(existing.lon));
             const existingHasCoords = existing.lat != null && existing.lon != null && 
@@ -666,20 +681,19 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             
             // Priority: 1) Matches state filter + has coords, 2) Matches state filter, 3) Has coords
             if (currentMatchesState && currentHasCoords && (!existingMatchesState || !existingHasCoords)) {
-              propertyMap.set(propertyName, item);
+              propertyMap.set(normalizedName, item);
             } else if (currentMatchesState && !existingMatchesState) {
-              propertyMap.set(propertyName, item);
+              propertyMap.set(normalizedName, item);
             } else if (currentHasCoords && !existingHasCoords && existingMatchesState === currentMatchesState) {
-              propertyMap.set(propertyName, item);
+              propertyMap.set(normalizedName, item);
             }
           }
         });
         
         // Convert map to array and add unit types and rate range to each property
-        let uniqueProperties = Array.from(propertyMap.values()).map((property: any) => {
-          const propertyName = property.property_name;
-          const unitTypes = unitTypesMap.get(propertyName);
-          const rates = ratesMap.get(propertyName) || [];
+        let uniqueProperties = Array.from(propertyMap.entries()).map(([normalizedName, property]: [string, any]) => {
+          const unitTypes = unitTypesMap.get(normalizedName);
+          const rates = ratesMap.get(normalizedName) || [];
           
           // Calculate min and max rates
           let rateRange: { min: number | null; max: number | null } = { min: null, max: null };
@@ -1379,6 +1393,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       const propertyName = p.property_name;
       if (!state || !propertyName) return;
       
+      // Normalize property name to prevent duplicates from whitespace/case differences
+      const normalizedName = normalizePropertyName(propertyName);
+      
       // Normalize state name (convert abbreviation to full name if applicable)
       const stateStr = String(state);
       const upperState = stateStr.toUpperCase();
@@ -1395,11 +1412,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         }
       }
       
-      // Add property to the set for this state
+      // Add property to the set for this state using normalized name
       if (!propertiesByState.has(normalizedState)) {
         propertiesByState.set(normalizedState, new Set());
       }
-      propertiesByState.get(normalizedState)!.add(propertyName);
+      propertiesByState.get(normalizedState)!.add(normalizedName);
     });
     
     // Count unique properties per state
@@ -1408,7 +1425,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     });
     
     return counts;
-  }, [allProperties, filterUnitType, filterRateRange]);
+  }, [allProperties, filterCountry, filterUnitType, filterRateRange]);
 
   // Helper function to check if a state matches the filter (defined early for use in calculatedDisplayedCount)
   const stateMatchesFilter = useCallback((state: string | null, filterStates: string[]): boolean => {
@@ -1590,6 +1607,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       const propertyName = p.property_name;
       if (!propertyName) return;
       
+      // Normalize property name to prevent duplicates from whitespace/case differences
+      const normalizedName = normalizePropertyName(propertyName);
+      
       let normalizedCountry: string | null = null;
       const coords = p.coordinates;
       
@@ -1625,8 +1645,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         }
       }
       
-      // Add to unique properties count
-      uniquePropertyNames.add(propertyName);
+      // Add to unique properties count using normalized name
+      uniquePropertyNames.add(normalizedName);
     });
     
     return uniquePropertyNames.size;
@@ -1802,6 +1822,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       const propertyName = p.property_name;
       if (!propertyName) return;
       
+      // Normalize property name to prevent duplicates from whitespace/case differences
+      const normalizedName = normalizePropertyName(propertyName);
+      
       let normalizedCountry: string | null = null;
       const coords = p.coordinates;
       
@@ -1836,11 +1859,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         return;
       }
       
-      // Add property to the set for this country
+      // Add property to the set for this country using normalized name
       if (!propertiesByCountry.has(normalizedCountry)) {
         propertiesByCountry.set(normalizedCountry, new Set());
       }
-      propertiesByCountry.get(normalizedCountry)!.add(propertyName);
+      propertiesByCountry.get(normalizedCountry)!.add(normalizedName);
     });
     
     // Count unique properties per country
@@ -1943,19 +1966,22 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       const propertyName = p.property_name;
       if (!propertyName) return;
       
+      // Normalize property name to prevent duplicates from whitespace/case differences
+      const normalizedName = normalizePropertyName(propertyName);
+      
       if (prop.all_unit_types && Array.isArray(prop.all_unit_types)) {
         prop.all_unit_types.forEach((ut: string) => {
           if (!propertiesByUnitType.has(ut)) {
             propertiesByUnitType.set(ut, new Set());
           }
-          propertiesByUnitType.get(ut)!.add(propertyName);
+          propertiesByUnitType.get(ut)!.add(normalizedName);
         });
       } else if (p.unit_type) {
         const ut = p.unit_type;
         if (!propertiesByUnitType.has(ut)) {
           propertiesByUnitType.set(ut, new Set());
         }
-        propertiesByUnitType.get(ut)!.add(propertyName);
+        propertiesByUnitType.get(ut)!.add(normalizedName);
       }
     });
     
@@ -2620,6 +2646,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       return (
                         <div className="mb-3 -mx-2 -mt-2 relative">
                           <div className="relative w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 group">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={photoUrl}
                               alt={altText}

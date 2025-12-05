@@ -231,6 +231,7 @@ export default function PropertyDetailTemplate({
                   tabIndex={photos.length > 1 ? 0 : -1}
                   onKeyDown={handlePhotoKeyDown}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={getGooglePhotoUrl(photos[currentPhotoIndex], 1200, 800)}
                     alt={`${propertyName} - Photo ${currentPhotoIndex + 1} of ${photos.length}`}

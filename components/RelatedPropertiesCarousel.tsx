@@ -132,14 +132,17 @@ export default function RelatedPropertiesCarousel({
               {/* Property Image */}
               <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
                 {photos.length > 0 ? (
-                  <img
-                    src={getGooglePhotoUrl(photos[0], 600, 400)}
-                    alt={propertyName}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                    width={600}
-                    height={400}
-                  />
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={getGooglePhotoUrl(photos[0], 600, 400)}
+                      alt={propertyName}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      width={600}
+                      height={400}
+                    />
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-200">
                     <p className="text-gray-400 text-sm">No photo available</p>
