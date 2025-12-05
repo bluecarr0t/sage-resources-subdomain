@@ -1607,6 +1607,1783 @@ export const landingPages: Record<string, LandingPageContent> = {
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
+  // ============================================
+  // NEW LOCATION-BASED PAGES (49 total)
+  // ============================================
+  
+  // GLAMPING FEASIBILITY STUDIES - Missing States
+  "glamping-feasibility-study-california": {
+    slug: "glamping-feasibility-study-california",
+    title: "Glamping Feasibility Study California | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping feasibility studies for California properties. Wine country, coastal, and mountain market analysis for California glamping resorts.",
+    location: "California",
+    hero: {
+      headline: "Glamping Feasibility Study in California",
+      subheadline: "Expert glamping market analysis and feasibility studies for California properties. Understand your California glamping resort potential across wine country, coastal, and mountain markets.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "California Glamping Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with glamping feasibility studies throughout California. We understand the unique market dynamics across wine country regions, coastal areas, mountain resort markets, and the diverse opportunities in California's outdoor hospitality industry.",
+      },
+      {
+        title: "Why California is Ideal for Glamping",
+        content: "California offers exceptional opportunities for glamping resorts:",
+        bullets: [
+          "Diverse markets from Napa Valley wine country to Big Sur coastal regions",
+          "Premium mountain resort areas including Lake Tahoe and Mammoth Lakes",
+          "Year-round appeal in many regions with favorable weather",
+          "High property values and premium positioning potential",
+          "Strong tourism infrastructure and visitor demand",
+          "Growing interest in unique outdoor accommodations",
+        ],
+      },
+      {
+        title: "Breakdown of Our Glamping Resort Feasibility Studies",
+        content: "Our comprehensive glamping feasibility studies for California properties include the following components:",
+      },
+      {
+        title: "Industry Overview",
+        content: "Analysis of the broader glamping and outdoor hospitality industry context:",
+        bullets: [
+          "<strong>Economic Trends:</strong> Examination of economic indicators and their impact on the glamping industry in California",
+          "<strong>Tourism Analysis:</strong> Insights into California tourism patterns and their influence on the glamping market",
+          "<strong>Outdoor Recreation:</strong> Evaluation of outdoor recreational activities and their popularity in California",
+          "<strong>Outdoor Hospitality:</strong> Trends and forecasts in the outdoor hospitality sector affecting glamping demand in California",
+        ],
+      },
+      {
+        title: "Area Analysis",
+        content: "Comprehensive evaluation of your project's geographic and market context:",
+        bullets: [
+          "<strong>Location Assessment:</strong> Detailed review of the geographical location and its advantages for glamping operations in California",
+          "<strong>Demographics:</strong> Analysis of population statistics and demographics relevant to the trade area",
+          "<strong>Recreation Opportunities:</strong> Identification of recreational amenities and their appeal to potential guests",
+          "<strong>Demand Generators:</strong> Identification and analysis of key demand generators including nearby attractions, events, and activities",
+          "<strong>Accessibility:</strong> Evaluation of transportation infrastructure and accessibility for target markets",
+          "<strong>Area Development:</strong> Insights into current and future development projects in the area that may impact demand",
+        ],
+      },
+      {
+        title: "Market Analysis",
+        content: "Thorough examination of the competitive landscape and market dynamics:",
+        bullets: [
+          "<strong>Competitive Summary:</strong> Overview of existing competitors and their market positions, pricing, and offerings",
+          "<strong>Market Opportunities:</strong> Identification and analysis of potential market opportunities and gaps",
+          "<strong>New Competition:</strong> Assessment of emerging competitors and their potential impact on your project",
+        ],
+      },
+    ],
+    benefits: [
+      "California-specific market data and insights",
+      "Knowledge of wine country, coastal, and mountain markets",
+      "Understanding of California regulations and zoning",
+      "Experience with California glamping projects",
+    ],
+    cta: {
+      title: "Start Your California Glamping Feasibility Study",
+      description: "Get expert analysis for your California glamping resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping California", "California glamping feasibility", "glamping resort California", "California outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "glamping-industry-complete-guide"],
+    relatedPages: [
+      "glamping-feasibility-study",
+      "glamping-appraisal-california",
+      "glamping-feasibility-study-oregon",
+      "glamping-feasibility-study-texas",
+    ],
+    relatedServices: {
+      title: "Related Services",
+      services: [
+        {
+          name: "Glamping Feasibility Studies",
+          url: "https://sageoutdooradvisory.com/feasibility-study-glamping-resorts/",
+          description: "Expert glamping feasibility studies to validate your project and secure financing."
+        },
+        {
+          name: "Glamping Property Appraisals",
+          url: "https://sageoutdooradvisory.com/appraisal-glamping-resorts/",
+          description: "Bank-approved glamping property appraisals for financing and transactions."
+        },
+        {
+          name: "RV Resort Feasibility Studies",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
+          description: "Professional RV resort feasibility studies with comprehensive market analysis."
+        }
+      ]
+    },
+    lastModified: "2025-01-15",
+  },
+  "glamping-feasibility-study-colorado": {
+    slug: "glamping-feasibility-study-colorado",
+    title: "Glamping Feasibility Study Colorado | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping feasibility studies for Colorado properties. Mountain resort market analysis and financial projections for Colorado glamping resorts.",
+    location: "Colorado",
+    hero: {
+      headline: "Glamping Feasibility Study in Colorado",
+      subheadline: "Expert glamping market analysis and feasibility studies for Colorado properties. Understand your Colorado glamping resort potential in mountain resort markets.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Colorado Glamping Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with glamping feasibility studies in Colorado. We understand the unique market dynamics, Rocky Mountain appeal, mountain resort markets, and opportunities in Colorado outdoor hospitality.",
+      },
+      {
+        title: "Why Colorado is Ideal for Glamping",
+        content: "Colorado offers exceptional opportunities for glamping resorts:",
+        bullets: [
+          "Premium mountain resort markets with stunning scenery",
+          "Rocky Mountain appeal and outdoor recreation culture",
+          "Seasonal variations and year-round tourism potential",
+          "Premium positioning potential in mountain locations",
+          "Strong outdoor recreation and adventure tourism market",
+          "Growing demand for unique mountain accommodations",
+        ],
+      },
+    ],
+    benefits: [
+      "Colorado-specific market data and insights",
+      "Understanding of mountain resort markets",
+      "Knowledge of Colorado outdoor recreation trends",
+      "Experience with Colorado glamping projects",
+    ],
+    cta: {
+      title: "Start Your Colorado Glamping Feasibility Study",
+      description: "Get expert analysis for your Colorado glamping resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping Colorado", "Colorado glamping feasibility", "glamping resort Colorado", "Colorado outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "glamping-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-feasibility-study-arizona": {
+    slug: "glamping-feasibility-study-arizona",
+    title: "Glamping Feasibility Study Arizona | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping feasibility studies for Arizona properties. Desert glamping market analysis for Sedona area and Arizona glamping resorts.",
+    location: "Arizona",
+    hero: {
+      headline: "Glamping Feasibility Study in Arizona",
+      subheadline: "Expert glamping market analysis and feasibility studies for Arizona properties. Understand your Arizona glamping resort potential in desert markets.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Arizona Glamping Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with glamping feasibility studies in Arizona. We understand the unique desert market dynamics, Sedona area appeal, year-round tourism, and opportunities in Arizona outdoor hospitality.",
+      },
+      {
+        title: "Why Arizona is Ideal for Glamping",
+        content: "Arizona offers exceptional opportunities for glamping resorts:",
+        bullets: [
+          "Desert glamping markets with unique landscapes",
+          "Sedona area and red rock country appeal",
+          "Year-round appeal with favorable weather",
+          "Snowbird season and winter demand",
+          "Premium location factors and positioning",
+          "Growing interest in desert outdoor experiences",
+        ],
+      },
+    ],
+    benefits: [
+      "Arizona-specific market data and insights",
+      "Understanding of desert glamping markets",
+      "Knowledge of Arizona tourism trends",
+      "Experience with Arizona glamping projects",
+    ],
+    cta: {
+      title: "Start Your Arizona Glamping Feasibility Study",
+      description: "Get expert analysis for your Arizona glamping resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping Arizona", "Arizona glamping feasibility", "glamping resort Arizona", "Arizona outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "glamping-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-feasibility-study-north-carolina": {
+    slug: "glamping-feasibility-study-north-carolina",
+    title: "Glamping Feasibility Study North Carolina | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping feasibility studies for North Carolina properties. Mountain and coastal market analysis for North Carolina glamping resorts.",
+    location: "North Carolina",
+    hero: {
+      headline: "Glamping Feasibility Study in North Carolina",
+      subheadline: "Expert glamping market analysis and feasibility studies for North Carolina properties. Understand your North Carolina glamping resort potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "North Carolina Glamping Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with glamping feasibility studies in North Carolina. We understand the unique market dynamics across mountain regions like the Blue Ridge Parkway and Asheville area, as well as coastal opportunities.",
+      },
+      {
+        title: "Why North Carolina is Ideal for Glamping",
+        content: "North Carolina offers exceptional opportunities for glamping resorts:",
+        bullets: [
+          "Mountain glamping in Blue Ridge Parkway region",
+          "Asheville area with strong tourism appeal",
+          "Coastal opportunities along the Outer Banks",
+          "Four-season appeal with diverse landscapes",
+          "Strong outdoor recreation culture",
+          "Growing tourism market",
+        ],
+      },
+    ],
+    benefits: [
+      "North Carolina-specific market data and insights",
+      "Understanding of mountain and coastal markets",
+      "Knowledge of NC outdoor recreation trends",
+      "Experience with North Carolina glamping projects",
+    ],
+    cta: {
+      title: "Start Your North Carolina Glamping Feasibility Study",
+      description: "Get expert analysis for your North Carolina glamping resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping North Carolina", "NC glamping feasibility", "glamping resort North Carolina", "North Carolina outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "glamping-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-feasibility-study-georgia": {
+    slug: "glamping-feasibility-study-georgia",
+    title: "Glamping Feasibility Study Georgia | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping feasibility studies for Georgia properties. Mountain and coastal market analysis for Georgia glamping resorts.",
+    location: "Georgia",
+    hero: {
+      headline: "Glamping Feasibility Study in Georgia",
+      subheadline: "Expert glamping market analysis and feasibility studies for Georgia properties. Understand your Georgia glamping resort potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Georgia Glamping Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with glamping feasibility studies in Georgia. We understand the unique market dynamics across mountain regions and coastal opportunities in Georgia's outdoor hospitality industry.",
+      },
+      {
+        title: "Why Georgia is Ideal for Glamping",
+        content: "Georgia offers exceptional opportunities for glamping resorts:",
+        bullets: [
+          "Mountain opportunities in North Georgia",
+          "Coastal markets along the Georgia coast",
+          "Growing tourism market and outdoor recreation demand",
+          "Family-friendly outdoor destinations",
+          "Four-season appeal",
+          "Strong outdoor recreation culture",
+        ],
+      },
+    ],
+    benefits: [
+      "Georgia-specific market data and insights",
+      "Understanding of mountain and coastal markets",
+      "Knowledge of Georgia tourism trends",
+      "Experience with Georgia glamping projects",
+    ],
+    cta: {
+      title: "Start Your Georgia Glamping Feasibility Study",
+      description: "Get expert analysis for your Georgia glamping resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping Georgia", "Georgia glamping feasibility", "glamping resort Georgia", "Georgia outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "glamping-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-feasibility-study-tennessee": {
+    slug: "glamping-feasibility-study-tennessee",
+    title: "Glamping Feasibility Study Tennessee | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping feasibility studies for Tennessee properties. Smoky Mountains and Nashville area market analysis for Tennessee glamping resorts.",
+    location: "Tennessee",
+    hero: {
+      headline: "Glamping Feasibility Study in Tennessee",
+      subheadline: "Expert glamping market analysis and feasibility studies for Tennessee properties. Understand your Tennessee glamping resort potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Tennessee Glamping Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with glamping feasibility studies in Tennessee. We understand the unique market dynamics in the Smoky Mountains region, Nashville area, and opportunities in Tennessee outdoor hospitality.",
+      },
+      {
+        title: "Why Tennessee is Ideal for Glamping",
+        content: "Tennessee offers exceptional opportunities for glamping resorts:",
+        bullets: [
+          "Smoky Mountains region with stunning natural beauty",
+          "Nashville area tourism and music scene appeal",
+          "Strong tourism infrastructure and visitor demand",
+          "Four-season appeal",
+          "Growing interest in outdoor accommodations",
+          "Family-friendly outdoor destinations",
+        ],
+      },
+    ],
+    benefits: [
+      "Tennessee-specific market data and insights",
+      "Understanding of Smoky Mountains and Nashville markets",
+      "Knowledge of Tennessee tourism trends",
+      "Experience with Tennessee glamping projects",
+    ],
+    cta: {
+      title: "Start Your Tennessee Glamping Feasibility Study",
+      description: "Get expert analysis for your Tennessee glamping resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping Tennessee", "Tennessee glamping feasibility", "glamping resort Tennessee", "Tennessee outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "glamping-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  
+  // GLAMPING APPRAISALS - Missing States (CO already exists)
+  "glamping-appraisal-california": {
+    slug: "glamping-appraisal-california",
+    title: "Glamping Appraisal California | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping property appraisals in California. Bank-approved valuations for California glamping resorts. Trusted by California lenders.",
+    location: "California",
+    hero: {
+      headline: "Glamping Property Appraisal in California",
+      subheadline: "Expert glamping appraisals for California properties. Bank-approved valuations trusted by California lenders for wine country, coastal, and mountain markets.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "California Glamping Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in glamping property appraisals throughout California. We understand the unique California market, premium property values across wine country, coastal, and mountain regions, and property values for glamping properties.",
+      },
+      {
+        title: "Why California Glamping Properties Need Specialized Appraisals",
+        content: "California glamping properties have unique characteristics:",
+        bullets: [
+          "Premium locations in wine country, coastal areas, and mountain resorts",
+          "High property values requiring specialized expertise",
+          "Diverse markets with varying valuation approaches",
+          "Strict regulatory environment considerations",
+          "Seasonal demand variations in different regions",
+          "Unique market comparables across diverse markets",
+        ],
+      },
+    ],
+    benefits: [
+      "California-specific market knowledge",
+      "Understanding of premium property valuations",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your California Glamping Property Appraised",
+      description: "Schedule a consultation for your California glamping appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping appraisal California", "California glamping appraisal", "glamping property valuation California", "California outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-appraisal-texas": {
+    slug: "glamping-appraisal-texas",
+    title: "Glamping Appraisal Texas | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping property appraisals in Texas. Bank-approved valuations for Texas glamping resorts. Trusted by Texas lenders.",
+    location: "Texas",
+    hero: {
+      headline: "Glamping Property Appraisal in Texas",
+      subheadline: "Expert glamping appraisals for Texas properties. Bank-approved valuations trusted by Texas lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Texas Glamping Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in glamping property appraisals throughout Texas. We understand the unique Texas market, diverse regions from Hill Country to coastal, and property values for glamping properties.",
+      },
+      {
+        title: "Why Texas Glamping Properties Need Specialized Appraisals",
+        content: "Texas glamping properties have unique characteristics:",
+        bullets: [
+          "Diverse geographic markets across the state",
+          "Year-round appeal in many regions",
+          "Varied property values by region",
+          "Strong RV and camping culture",
+          "Unique market comparables",
+          "Growing tourism market",
+        ],
+      },
+    ],
+    benefits: [
+      "Texas-specific market knowledge",
+      "Understanding of Texas glamping markets",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Texas Glamping Property Appraised",
+      description: "Schedule a consultation for your Texas glamping appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping appraisal Texas", "Texas glamping appraisal", "glamping property valuation Texas", "Texas outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-appraisal-florida": {
+    slug: "glamping-appraisal-florida",
+    title: "Glamping Appraisal Florida | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping property appraisals in Florida. Bank-approved valuations for Florida glamping resorts. Trusted by Florida lenders.",
+    location: "Florida",
+    hero: {
+      headline: "Glamping Property Appraisal in Florida",
+      subheadline: "Expert glamping appraisals for Florida properties. Bank-approved valuations trusted by Florida lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Florida Glamping Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in glamping property appraisals throughout Florida. We understand the unique Florida market, year-round tourism, coastal markets, and property values for glamping properties.",
+      },
+      {
+        title: "Why Florida Glamping Properties Need Specialized Appraisals",
+        content: "Florida glamping properties have unique characteristics:",
+        bullets: [
+          "Year-round tourism and demand",
+          "Coastal and Everglades markets",
+          "Premium location factors",
+          "High property values",
+          "Seasonal variation considerations",
+          "Unique market comparables",
+        ],
+      },
+    ],
+    benefits: [
+      "Florida-specific market knowledge",
+      "Understanding of Florida tourism trends",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Florida Glamping Property Appraised",
+      description: "Schedule a consultation for your Florida glamping appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping appraisal Florida", "Florida glamping appraisal", "glamping property valuation Florida", "Florida outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-appraisal-utah": {
+    slug: "glamping-appraisal-utah",
+    title: "Glamping Appraisal Utah | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping property appraisals in Utah. Bank-approved valuations for Utah glamping resorts near national parks. Trusted by Utah lenders.",
+    location: "Utah",
+    hero: {
+      headline: "Glamping Property Appraisal in Utah",
+      subheadline: "Expert glamping appraisals for Utah properties. Bank-approved valuations trusted by Utah lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Utah Glamping Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in glamping property appraisals throughout Utah. We understand the unique Utah market, national park proximity, stunning landscapes, and property values for glamping properties.",
+      },
+      {
+        title: "Why Utah Glamping Properties Need Specialized Appraisals",
+        content: "Utah glamping properties have unique characteristics:",
+        bullets: [
+          "Premium locations near national parks",
+          "Stunning natural landscapes",
+          "Adventure tourism appeal",
+          "Premium positioning potential",
+          "Unique market comparables",
+          "Strong outdoor recreation culture",
+        ],
+      },
+    ],
+    benefits: [
+      "Utah-specific market knowledge",
+      "Understanding of national park tourism markets",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Utah Glamping Property Appraised",
+      description: "Schedule a consultation for your Utah glamping appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping appraisal Utah", "Utah glamping appraisal", "glamping property valuation Utah", "Utah outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-appraisal-oregon": {
+    slug: "glamping-appraisal-oregon",
+    title: "Glamping Appraisal Oregon | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping property appraisals in Oregon. Bank-approved valuations for Oregon glamping resorts. Trusted by Oregon lenders.",
+    location: "Oregon",
+    hero: {
+      headline: "Glamping Property Appraisal in Oregon",
+      subheadline: "Expert glamping appraisals for Oregon properties. Bank-approved valuations trusted by Oregon lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Oregon Glamping Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in glamping property appraisals throughout Oregon. We understand the unique Oregon market, Pacific Northwest appeal, stunning landscapes, and property values for glamping properties.",
+      },
+      {
+        title: "Why Oregon Glamping Properties Need Specialized Appraisals",
+        content: "Oregon glamping properties have unique characteristics:",
+        bullets: [
+          "Stunning Pacific Northwest landscapes",
+          "Strong outdoor recreation culture",
+          "Eco-tourism market appeal",
+          "Premium positioning potential",
+          "Unique market comparables",
+          "Diverse geographic opportunities",
+        ],
+      },
+    ],
+    benefits: [
+      "Oregon-specific market knowledge",
+      "Understanding of Pacific Northwest markets",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Oregon Glamping Property Appraised",
+      description: "Schedule a consultation for your Oregon glamping appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping appraisal Oregon", "Oregon glamping appraisal", "glamping property valuation Oregon", "Oregon outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-appraisal-arizona": {
+    slug: "glamping-appraisal-arizona",
+    title: "Glamping Appraisal Arizona | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping property appraisals in Arizona. Bank-approved valuations for Arizona glamping resorts in Sedona area. Trusted by Arizona lenders.",
+    location: "Arizona",
+    hero: {
+      headline: "Glamping Property Appraisal in Arizona",
+      subheadline: "Expert glamping appraisals for Arizona properties. Bank-approved valuations trusted by Arizona lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Arizona Glamping Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in glamping property appraisals throughout Arizona. We understand the unique Arizona market, desert glamping markets, Sedona area appeal, and property values for glamping properties.",
+      },
+      {
+        title: "Why Arizona Glamping Properties Need Specialized Appraisals",
+        content: "Arizona glamping properties have unique characteristics:",
+        bullets: [
+          "Desert markets with unique landscapes",
+          "Sedona area and red rock country appeal",
+          "Year-round appeal",
+          "Snowbird season factors",
+          "Premium location factors",
+          "Unique market comparables",
+        ],
+      },
+    ],
+    benefits: [
+      "Arizona-specific market knowledge",
+      "Understanding of desert glamping markets",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Arizona Glamping Property Appraised",
+      description: "Schedule a consultation for your Arizona glamping appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping appraisal Arizona", "Arizona glamping appraisal", "glamping property valuation Arizona", "Arizona outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "glamping-appraisal-north-carolina": {
+    slug: "glamping-appraisal-north-carolina",
+    title: "Glamping Appraisal North Carolina | Sage Outdoor Advisory",
+    metaDescription: "Expert glamping property appraisals in North Carolina. Bank-approved valuations for North Carolina glamping resorts. Trusted by NC lenders.",
+    location: "North Carolina",
+    hero: {
+      headline: "Glamping Property Appraisal in North Carolina",
+      subheadline: "Expert glamping appraisals for North Carolina properties. Bank-approved valuations trusted by North Carolina lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "North Carolina Glamping Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in glamping property appraisals throughout North Carolina. We understand the unique North Carolina market, mountain and coastal opportunities, and property values for glamping properties.",
+      },
+      {
+        title: "Why North Carolina Glamping Properties Need Specialized Appraisals",
+        content: "North Carolina glamping properties have unique characteristics:",
+        bullets: [
+          "Mountain markets in Blue Ridge Parkway region",
+          "Asheville area appeal",
+          "Coastal opportunities",
+          "Four-season appeal",
+          "Unique market comparables",
+          "Growing tourism market",
+        ],
+      },
+    ],
+    benefits: [
+      "North Carolina-specific market knowledge",
+      "Understanding of mountain and coastal markets",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your North Carolina Glamping Property Appraised",
+      description: "Schedule a consultation for your North Carolina glamping appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["glamping appraisal North Carolina", "NC glamping appraisal", "glamping property valuation North Carolina", "North Carolina outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  
+  // RV RESORT FEASIBILITY STUDIES - Missing States (FL, AZ, TN already exist)
+  "rv-resort-feasibility-study-california": {
+    slug: "rv-resort-feasibility-study-california",
+    title: "RV Resort Feasibility Study California | Sage Outdoor Advisory",
+    metaDescription: "Professional RV resort feasibility studies for California. Expert market analysis and financial projections for California RV resorts.",
+    location: "California",
+    hero: {
+      headline: "RV Resort Feasibility Study in California",
+      subheadline: "Expert RV resort market analysis and feasibility studies for California properties. Make informed investment decisions.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "California RV Resort Market Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort feasibility studies throughout California. We understand the unique California market, coastal RV markets, desert markets, and premium positioning opportunities.",
+      },
+      {
+        title: "Why California is Ideal for RV Resorts",
+        content: "California offers strong opportunities for RV resorts:",
+        bullets: [
+          "Coastal RV markets with premium positioning",
+          "Desert markets in Palm Springs area",
+          "Year-round appeal in many regions",
+          "Strong infrastructure for RV travelers",
+          "Premium pricing potential",
+          "Diverse geographic markets across the state",
+        ],
+      },
+    ],
+    benefits: [
+      "California-specific RV market data",
+      "Understanding of coastal and desert markets",
+      "Knowledge of California regulations",
+      "Experience with California RV projects",
+    ],
+    cta: {
+      title: "Validate Your California RV Resort Investment",
+      description: "Get expert analysis for your California RV resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort California", "California RV park feasibility", "RV resort California", "California RV market"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "rv-resort-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "rv-resort-feasibility-study-texas": {
+    slug: "rv-resort-feasibility-study-texas",
+    title: "RV Resort Feasibility Study Texas | Sage Outdoor Advisory",
+    metaDescription: "Professional RV resort feasibility studies for Texas. Expert market analysis and financial projections for Texas RV resorts.",
+    location: "Texas",
+    hero: {
+      headline: "RV Resort Feasibility Study in Texas",
+      subheadline: "Expert RV resort market analysis and feasibility studies for Texas properties. Understand your Texas RV resort potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Texas RV Resort Market Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort feasibility studies throughout Texas. We understand the unique Texas market, diverse regions, strong RV culture, and year-round appeal.",
+      },
+      {
+        title: "Why Texas is Ideal for RV Resorts",
+        content: "Texas offers strong opportunities for RV resorts:",
+        bullets: [
+          "Diverse geographic markets across the state",
+          "Hill Country and coastal opportunities",
+          "Year-round appeal in many regions",
+          "Strong RV culture and infrastructure",
+          "Growing RV ownership and travel trends",
+          "Premium positioning potential",
+        ],
+      },
+    ],
+    benefits: [
+      "Texas-specific RV market data",
+      "Understanding of diverse regional markets",
+      "Knowledge of Texas regulations",
+      "Experience with Texas RV projects",
+    ],
+    cta: {
+      title: "Validate Your Texas RV Resort Investment",
+      description: "Get expert analysis for your Texas RV resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort Texas", "Texas RV park feasibility", "RV resort Texas", "Texas RV market"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "rv-resort-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "rv-resort-feasibility-study-colorado": {
+    slug: "rv-resort-feasibility-study-colorado",
+    title: "RV Resort Feasibility Study Colorado | Sage Outdoor Advisory",
+    metaDescription: "Professional RV resort feasibility studies for Colorado. Expert market analysis and financial projections for Colorado RV resorts.",
+    location: "Colorado",
+    hero: {
+      headline: "RV Resort Feasibility Study in Colorado",
+      subheadline: "Expert RV resort market analysis and feasibility studies for Colorado properties. Make informed investment decisions.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Colorado RV Resort Market Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort feasibility studies throughout Colorado. We understand the unique Colorado market, mountain resort dynamics, and outdoor recreation culture.",
+      },
+      {
+        title: "Why Colorado is Ideal for RV Resorts",
+        content: "Colorado offers strong opportunities for RV resorts:",
+        bullets: [
+          "Mountain resort markets with premium positioning",
+          "Rocky Mountain appeal and outdoor recreation",
+          "Seasonal variations and tourism patterns",
+          "Strong RV culture and infrastructure",
+          "Premium location factors",
+          "Growing RV travel market",
+        ],
+      },
+    ],
+    benefits: [
+      "Colorado-specific RV market data",
+      "Understanding of mountain resort markets",
+      "Knowledge of Colorado regulations",
+      "Experience with Colorado RV projects",
+    ],
+    cta: {
+      title: "Validate Your Colorado RV Resort Investment",
+      description: "Get expert analysis for your Colorado RV resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort Colorado", "Colorado RV park feasibility", "RV resort Colorado", "Colorado RV market"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "rv-resort-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "rv-resort-feasibility-study-north-carolina": {
+    slug: "rv-resort-feasibility-study-north-carolina",
+    title: "RV Resort Feasibility Study North Carolina | Sage Outdoor Advisory",
+    metaDescription: "Professional RV resort feasibility studies for North Carolina. Expert market analysis and financial projections for North Carolina RV resorts.",
+    location: "North Carolina",
+    hero: {
+      headline: "RV Resort Feasibility Study in North Carolina",
+      subheadline: "Expert RV resort market analysis and feasibility studies for North Carolina properties. Make informed investment decisions.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "North Carolina RV Resort Market Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort feasibility studies throughout North Carolina. We understand the unique North Carolina market, mountain and coastal opportunities, and RV resort development dynamics.",
+      },
+      {
+        title: "Why North Carolina is Ideal for RV Resorts",
+        content: "North Carolina offers strong opportunities for RV resorts:",
+        bullets: [
+          "Mountain markets in Blue Ridge Parkway region",
+          "Coastal RV markets along the Outer Banks",
+          "Four-season appeal",
+          "Strong outdoor recreation culture",
+          "Growing RV travel market",
+          "Family-friendly destinations",
+        ],
+      },
+    ],
+    benefits: [
+      "North Carolina-specific RV market data",
+      "Understanding of mountain and coastal markets",
+      "Knowledge of NC regulations",
+      "Experience with North Carolina RV projects",
+    ],
+    cta: {
+      title: "Validate Your North Carolina RV Resort Investment",
+      description: "Get expert analysis for your North Carolina RV resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort North Carolina", "NC RV park feasibility", "RV resort North Carolina", "North Carolina RV market"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "rv-resort-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "rv-resort-feasibility-study-georgia": {
+    slug: "rv-resort-feasibility-study-georgia",
+    title: "RV Resort Feasibility Study Georgia | Sage Outdoor Advisory",
+    metaDescription: "Professional RV resort feasibility studies for Georgia. Expert market analysis and financial projections for Georgia RV resorts.",
+    location: "Georgia",
+    hero: {
+      headline: "RV Resort Feasibility Study in Georgia",
+      subheadline: "Expert RV resort market analysis and feasibility studies for Georgia properties. Make informed investment decisions.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Georgia RV Resort Market Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort feasibility studies throughout Georgia. We understand the unique Georgia market, mountain and coastal opportunities, and RV resort development.",
+      },
+      {
+        title: "Why Georgia is Ideal for RV Resorts",
+        content: "Georgia offers strong opportunities for RV resorts:",
+        bullets: [
+          "Mountain opportunities in North Georgia",
+          "Coastal markets along the Georgia coast",
+          "Four-season appeal",
+          "Growing tourism market",
+          "Family-friendly destinations",
+          "Growing RV travel market",
+        ],
+      },
+    ],
+    benefits: [
+      "Georgia-specific RV market data",
+      "Understanding of regional markets",
+      "Knowledge of Georgia regulations",
+      "Experience with Georgia RV projects",
+    ],
+    cta: {
+      title: "Validate Your Georgia RV Resort Investment",
+      description: "Get expert analysis for your Georgia RV resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort Georgia", "Georgia RV park feasibility", "RV resort Georgia", "Georgia RV market"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "rv-resort-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "rv-resort-feasibility-study-utah": {
+    slug: "rv-resort-feasibility-study-utah",
+    title: "RV Resort Feasibility Study Utah | Sage Outdoor Advisory",
+    metaDescription: "Professional RV resort feasibility studies for Utah. Expert market analysis and financial projections for Utah RV resorts.",
+    location: "Utah",
+    hero: {
+      headline: "RV Resort Feasibility Study in Utah",
+      subheadline: "Expert RV resort market analysis and feasibility studies for Utah properties. Make informed investment decisions.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Utah RV Resort Market Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort feasibility studies throughout Utah. We understand the unique Utah market, national park proximity, and RV resort opportunities.",
+      },
+      {
+        title: "Why Utah is Ideal for RV Resorts",
+        content: "Utah offers strong opportunities for RV resorts:",
+        bullets: [
+          "Proximity to world-class national parks",
+          "Stunning natural landscapes",
+          "Adventure tourism market",
+          "Premium positioning potential",
+          "Strong outdoor recreation culture",
+          "Growing RV travel market",
+        ],
+      },
+    ],
+    benefits: [
+      "Utah-specific RV market data",
+      "Understanding of national park tourism markets",
+      "Knowledge of Utah regulations",
+      "Experience with Utah RV projects",
+    ],
+    cta: {
+      title: "Validate Your Utah RV Resort Investment",
+      description: "Get expert analysis for your Utah RV resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort Utah", "Utah RV park feasibility", "RV resort Utah", "Utah RV market"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "rv-resort-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "rv-resort-feasibility-study-oregon": {
+    slug: "rv-resort-feasibility-study-oregon",
+    title: "RV Resort Feasibility Study Oregon | Sage Outdoor Advisory",
+    metaDescription: "Professional RV resort feasibility studies for Oregon. Expert market analysis and financial projections for Oregon RV resorts.",
+    location: "Oregon",
+    hero: {
+      headline: "RV Resort Feasibility Study in Oregon",
+      subheadline: "Expert RV resort market analysis and feasibility studies for Oregon properties. Make informed investment decisions.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Oregon RV Resort Market Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort feasibility studies throughout Oregon. We understand the unique Oregon market, Pacific Northwest appeal, and RV resort opportunities.",
+      },
+      {
+        title: "Why Oregon is Ideal for RV Resorts",
+        content: "Oregon offers strong opportunities for RV resorts:",
+        bullets: [
+          "Stunning Pacific Northwest landscapes",
+          "Strong outdoor recreation culture",
+          "Coastal and mountain opportunities",
+          "Eco-tourism market appeal",
+          "Growing RV travel market",
+          "Four-season appeal",
+        ],
+      },
+    ],
+    benefits: [
+      "Oregon-specific RV market data",
+      "Understanding of Pacific Northwest markets",
+      "Knowledge of Oregon regulations",
+      "Experience with Oregon RV projects",
+    ],
+    cta: {
+      title: "Validate Your Oregon RV Resort Investment",
+      description: "Get expert analysis for your Oregon RV resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort Oregon", "Oregon RV park feasibility", "RV resort Oregon", "Oregon RV market"],
+    relatedPillarPages: ["feasibility-studies-complete-guide", "rv-resort-industry-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  
+  // RV RESORT APPRAISALS - Missing States (CA, TX already exist)
+  "rv-resort-appraisal-florida": {
+    slug: "rv-resort-appraisal-florida",
+    title: "RV Resort Appraisal Florida | Sage Outdoor Advisory",
+    metaDescription: "Expert RV resort appraisals in Florida. Bank-approved valuations for Florida RV parks and resorts. Trusted by Florida lenders.",
+    location: "Florida",
+    hero: {
+      headline: "RV Resort Appraisal in Florida",
+      subheadline: "Expert RV resort and RV park appraisals for Florida properties. Bank-approved valuations trusted by Florida lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Florida RV Resort Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort appraisals throughout Florida. We understand the unique Florida market, year-round demand, snowbird season, and property values for outdoor hospitality properties.",
+      },
+      {
+        title: "Why Florida RV Resorts Need Specialized Appraisals",
+        content: "Florida RV resorts have unique characteristics:",
+        bullets: [
+          "Year-round RV tourism and snowbird season",
+          "Premium location factors and high property values",
+          "Coastal and inland markets",
+          "Strong infrastructure for RV travelers",
+          "Unique market comparables",
+          "Premium pricing potential",
+        ],
+      },
+    ],
+    benefits: [
+      "Florida-specific market knowledge",
+      "Understanding of Florida RV markets and snowbird season",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Florida RV Resort Appraised",
+      description: "Schedule a consultation for your Florida RV resort appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort Florida", "Florida RV park appraisal", "RV resort appraisal FL", "Florida outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "rv-resort-appraisal-arizona": {
+    slug: "rv-resort-appraisal-arizona",
+    title: "RV Resort Appraisal Arizona | Sage Outdoor Advisory",
+    metaDescription: "Expert RV resort appraisals in Arizona. Bank-approved valuations for Arizona RV parks and resorts. Trusted by Arizona lenders.",
+    location: "Arizona",
+    hero: {
+      headline: "RV Resort Appraisal in Arizona",
+      subheadline: "Expert RV resort and RV park appraisals for Arizona properties. Bank-approved valuations trusted by Arizona lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Arizona RV Resort Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort appraisals throughout Arizona. We understand the unique Arizona market, desert markets, snowbird season, and property values for outdoor hospitality properties.",
+      },
+      {
+        title: "Why Arizona RV Resorts Need Specialized Appraisals",
+        content: "Arizona RV resorts have unique characteristics:",
+        bullets: [
+          "Prime snowbird destination with winter demand",
+          "Desert climate with year-round appeal",
+          "Strong RV culture and infrastructure",
+          "Premium location factors",
+          "Unique market comparables",
+          "Growing retirement and tourism markets",
+        ],
+      },
+    ],
+    benefits: [
+      "Arizona-specific market knowledge",
+      "Understanding of snowbird season patterns",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Arizona RV Resort Appraised",
+      description: "Schedule a consultation for your Arizona RV resort appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort Arizona", "Arizona RV park appraisal", "RV resort appraisal AZ", "Arizona outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "rv-resort-appraisal-colorado": {
+    slug: "rv-resort-appraisal-colorado",
+    title: "RV Resort Appraisal Colorado | Sage Outdoor Advisory",
+    metaDescription: "Expert RV resort appraisals in Colorado. Bank-approved valuations for Colorado RV parks and resorts. Trusted by Colorado lenders.",
+    location: "Colorado",
+    hero: {
+      headline: "RV Resort Appraisal in Colorado",
+      subheadline: "Expert RV resort and RV park appraisals for Colorado properties. Bank-approved valuations trusted by Colorado lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Colorado RV Resort Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in RV resort appraisals throughout Colorado. We understand the unique Colorado market, mountain resort markets, and property values for outdoor hospitality properties.",
+      },
+      {
+        title: "Why Colorado RV Resorts Need Specialized Appraisals",
+        content: "Colorado RV resorts have unique characteristics:",
+        bullets: [
+          "Mountain resort markets with premium positioning",
+          "Rocky Mountain appeal",
+          "Seasonal demand variations",
+          "Premium location factors",
+          "Unique market comparables",
+          "Strong outdoor recreation culture",
+        ],
+      },
+    ],
+    benefits: [
+      "Colorado-specific market knowledge",
+      "Understanding of mountain resort markets",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Colorado RV Resort Appraised",
+      description: "Schedule a consultation for your Colorado RV resort appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["RV resort Colorado", "Colorado RV park appraisal", "RV resort appraisal CO", "Colorado outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  
+  // CAMPGROUND FEASIBILITY STUDIES - Missing States (NC already exists)
+  "campground-feasibility-study-california": {
+    slug: "campground-feasibility-study-california",
+    title: "Campground Feasibility Study California | Sage Outdoor Advisory",
+    metaDescription: "Professional campground feasibility studies for California. Expert market analysis and financial projections for California campgrounds.",
+    location: "California",
+    hero: {
+      headline: "Campground Feasibility Study in California",
+      subheadline: "Expert campground market analysis and feasibility studies for California properties. Validate your California campground project.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "California Campground Market Expertise",
+        content: "Sage Outdoor Advisory specializes in campground feasibility studies throughout California. We understand the unique California market, state park proximity, national park access, and campground development opportunities.",
+      },
+      {
+        title: "Why California is Ideal for Campgrounds",
+        content: "California offers excellent opportunities for campgrounds:",
+        bullets: [
+          "State park proximity and national park access",
+          "Coastal and mountain opportunities",
+          "Strong outdoor recreation culture",
+          "Year-round appeal in many regions",
+          "Premium positioning potential",
+          "Growing outdoor recreation demand",
+        ],
+      },
+    ],
+    benefits: [
+      "California-specific campground market data",
+      "Understanding of state and national park markets",
+      "Knowledge of California regulations",
+      "Experience with California campground projects",
+    ],
+    cta: {
+      title: "Start Your California Campground Feasibility Study",
+      description: "Get expert analysis for your California campground project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["campground California", "California campground feasibility", "campground California", "California outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "campground-feasibility-study-texas": {
+    slug: "campground-feasibility-study-texas",
+    title: "Campground Feasibility Study Texas | Sage Outdoor Advisory",
+    metaDescription: "Professional campground feasibility studies for Texas. Expert market analysis and financial projections for Texas campgrounds.",
+    location: "Texas",
+    hero: {
+      headline: "Campground Feasibility Study in Texas",
+      subheadline: "Expert campground market analysis and feasibility studies for Texas properties. Validate your Texas campground project.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Texas Campground Market Expertise",
+        content: "Sage Outdoor Advisory specializes in campground feasibility studies throughout Texas. We understand the unique Texas market, diverse regions, state park proximity, and campground development opportunities.",
+      },
+      {
+        title: "Why Texas is Ideal for Campgrounds",
+        content: "Texas offers excellent opportunities for campgrounds:",
+        bullets: [
+          "Diverse geographic markets across the state",
+          "Hill Country and coastal opportunities",
+          "State park proximity",
+          "Year-round appeal in many regions",
+          "Strong RV and camping culture",
+          "Growing outdoor recreation demand",
+        ],
+      },
+    ],
+    benefits: [
+      "Texas-specific campground market data",
+      "Understanding of diverse regional markets",
+      "Knowledge of Texas regulations",
+      "Experience with Texas campground projects",
+    ],
+    cta: {
+      title: "Start Your Texas Campground Feasibility Study",
+      description: "Get expert analysis for your Texas campground project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["campground Texas", "Texas campground feasibility", "campground Texas", "Texas outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "campground-feasibility-study-florida": {
+    slug: "campground-feasibility-study-florida",
+    title: "Campground Feasibility Study Florida | Sage Outdoor Advisory",
+    metaDescription: "Professional campground feasibility studies for Florida. Expert market analysis and financial projections for Florida campgrounds.",
+    location: "Florida",
+    hero: {
+      headline: "Campground Feasibility Study in Florida",
+      subheadline: "Expert campground market analysis and feasibility studies for Florida properties. Validate your Florida campground project.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Florida Campground Market Expertise",
+        content: "Sage Outdoor Advisory specializes in campground feasibility studies throughout Florida. We understand the unique Florida market, year-round tourism, state park proximity, and campground development opportunities.",
+      },
+      {
+        title: "Why Florida is Ideal for Campgrounds",
+        content: "Florida offers excellent opportunities for campgrounds:",
+        bullets: [
+          "Year-round tourism and demand",
+          "State park proximity and national park access",
+          "Coastal and Everglades opportunities",
+          "Strong outdoor recreation culture",
+          "Premium positioning potential",
+          "Family-friendly outdoor destinations",
+        ],
+      },
+    ],
+    benefits: [
+      "Florida-specific campground market data",
+      "Understanding of year-round tourism patterns",
+      "Knowledge of Florida regulations",
+      "Experience with Florida campground projects",
+    ],
+    cta: {
+      title: "Start Your Florida Campground Feasibility Study",
+      description: "Get expert analysis for your Florida campground project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["campground Florida", "Florida campground feasibility", "campground Florida", "Florida outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "campground-feasibility-study-colorado": {
+    slug: "campground-feasibility-study-colorado",
+    title: "Campground Feasibility Study Colorado | Sage Outdoor Advisory",
+    metaDescription: "Professional campground feasibility studies for Colorado. Expert market analysis and financial projections for Colorado campgrounds.",
+    location: "Colorado",
+    hero: {
+      headline: "Campground Feasibility Study in Colorado",
+      subheadline: "Expert campground market analysis and feasibility studies for Colorado properties. Validate your Colorado campground project.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Colorado Campground Market Expertise",
+        content: "Sage Outdoor Advisory specializes in campground feasibility studies throughout Colorado. We understand the unique Colorado market, mountain resort areas, national park proximity, and campground development opportunities.",
+      },
+      {
+        title: "Why Colorado is Ideal for Campgrounds",
+        content: "Colorado offers excellent opportunities for campgrounds:",
+        bullets: [
+          "Mountain resort areas with stunning scenery",
+          "National park proximity",
+          "Strong outdoor recreation culture",
+          "Premium positioning potential",
+          "Four-season appeal",
+          "Growing outdoor recreation demand",
+        ],
+      },
+    ],
+    benefits: [
+      "Colorado-specific campground market data",
+      "Understanding of mountain and national park markets",
+      "Knowledge of Colorado regulations",
+      "Experience with Colorado campground projects",
+    ],
+    cta: {
+      title: "Start Your Colorado Campground Feasibility Study",
+      description: "Get expert analysis for your Colorado campground project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["campground Colorado", "Colorado campground feasibility", "campground Colorado", "Colorado outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "campground-feasibility-study-arizona": {
+    slug: "campground-feasibility-study-arizona",
+    title: "Campground Feasibility Study Arizona | Sage Outdoor Advisory",
+    metaDescription: "Professional campground feasibility studies for Arizona. Expert market analysis and financial projections for Arizona campgrounds.",
+    location: "Arizona",
+    hero: {
+      headline: "Campground Feasibility Study in Arizona",
+      subheadline: "Expert campground market analysis and feasibility studies for Arizona properties. Validate your Arizona campground project.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Arizona Campground Market Expertise",
+        content: "Sage Outdoor Advisory specializes in campground feasibility studies throughout Arizona. We understand the unique Arizona market, desert markets, national park proximity, and campground development opportunities.",
+      },
+      {
+        title: "Why Arizona is Ideal for Campgrounds",
+        content: "Arizona offers excellent opportunities for campgrounds:",
+        bullets: [
+          "Desert markets with unique landscapes",
+          "National park proximity",
+          "Year-round appeal with favorable weather",
+          "Strong outdoor recreation culture",
+          "Premium positioning potential",
+          "Growing outdoor recreation demand",
+        ],
+      },
+    ],
+    benefits: [
+      "Arizona-specific campground market data",
+      "Understanding of desert and national park markets",
+      "Knowledge of Arizona regulations",
+      "Experience with Arizona campground projects",
+    ],
+    cta: {
+      title: "Start Your Arizona Campground Feasibility Study",
+      description: "Get expert analysis for your Arizona campground project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["campground Arizona", "Arizona campground feasibility", "campground Arizona", "Arizona outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  "campground-feasibility-study-utah": {
+    slug: "campground-feasibility-study-utah",
+    title: "Campground Feasibility Study Utah | Sage Outdoor Advisory",
+    metaDescription: "Professional campground feasibility studies for Utah. Expert market analysis and financial projections for Utah campgrounds.",
+    location: "Utah",
+    hero: {
+      headline: "Campground Feasibility Study in Utah",
+      subheadline: "Expert campground market analysis and feasibility studies for Utah properties. Validate your Utah campground project.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Utah Campground Market Expertise",
+        content: "Sage Outdoor Advisory specializes in campground feasibility studies throughout Utah. We understand the unique Utah market, national park proximity, stunning landscapes, and campground development opportunities.",
+      },
+      {
+        title: "Why Utah is Ideal for Campgrounds",
+        content: "Utah offers excellent opportunities for campgrounds:",
+        bullets: [
+          "Proximity to world-class national parks",
+          "Stunning natural landscapes",
+          "Adventure tourism market",
+          "Premium positioning potential",
+          "Strong outdoor recreation culture",
+          "Growing outdoor recreation demand",
+        ],
+      },
+    ],
+    benefits: [
+      "Utah-specific campground market data",
+      "Understanding of national park tourism markets",
+      "Knowledge of Utah regulations",
+      "Experience with Utah campground projects",
+    ],
+    cta: {
+      title: "Start Your Utah Campground Feasibility Study",
+      description: "Get expert analysis for your Utah campground project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["campground Utah", "Utah campground feasibility", "campground Utah", "Utah outdoor hospitality"],
+    relatedPillarPages: ["feasibility-studies-complete-guide"],
+    lastModified: "2025-01-15",
+  },
+  
+  // CAMPGROUND APPRAISALS - Missing States (FL already exists)
+  "campground-appraisal-california": {
+    slug: "campground-appraisal-california",
+    title: "Campground Appraisal California | Sage Outdoor Advisory",
+    metaDescription: "Expert campground appraisals in California. Bank-approved valuations for California campgrounds. Trusted by California lenders.",
+    location: "California",
+    hero: {
+      headline: "Campground Appraisal in California",
+      subheadline: "Expert campground appraisals for California properties. Bank-approved valuations trusted by California lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "California Campground Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in campground appraisals throughout California. We understand the unique California market, state park proximity, national park access, and property values for campground properties.",
+      },
+      {
+        title: "Why California Campgrounds Need Specialized Appraisals",
+        content: "California campgrounds have unique characteristics:",
+        bullets: [
+          "State park and national park proximity",
+          "High property values",
+          "Premium location factors",
+          "Coastal and mountain markets",
+          "Unique market comparables",
+          "Year-round appeal considerations",
+        ],
+      },
+    ],
+    benefits: [
+      "California-specific market knowledge",
+      "Understanding of state and national park markets",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your California Campground Appraised",
+      description: "Schedule a consultation for your California campground appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["campground California", "California campground appraisal", "campground appraisal CA", "California outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "campground-appraisal-texas": {
+    slug: "campground-appraisal-texas",
+    title: "Campground Appraisal Texas | Sage Outdoor Advisory",
+    metaDescription: "Expert campground appraisals in Texas. Bank-approved valuations for Texas campgrounds. Trusted by Texas lenders.",
+    location: "Texas",
+    hero: {
+      headline: "Campground Appraisal in Texas",
+      subheadline: "Expert campground appraisals for Texas properties. Bank-approved valuations trusted by Texas lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Texas Campground Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in campground appraisals throughout Texas. We understand the unique Texas market, diverse regions, state park proximity, and property values for campground properties.",
+      },
+      {
+        title: "Why Texas Campgrounds Need Specialized Appraisals",
+        content: "Texas campgrounds have unique characteristics:",
+        bullets: [
+          "Diverse geographic markets across the state",
+          "State park proximity",
+          "Year-round appeal in many regions",
+          "Varied property values by region",
+          "Unique market comparables",
+          "Strong RV and camping culture",
+        ],
+      },
+    ],
+    benefits: [
+      "Texas-specific market knowledge",
+      "Understanding of diverse regional markets",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your Texas Campground Appraised",
+      description: "Schedule a consultation for your Texas campground appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["campground Texas", "Texas campground appraisal", "campground appraisal TX", "Texas outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  
+  // OUTDOOR RESORT FEASIBILITY STUDIES
+  "outdoor-resort-feasibility-study-california": {
+    slug: "outdoor-resort-feasibility-study-california",
+    title: "Outdoor Resort Feasibility Study California | Sage Outdoor Advisory",
+    metaDescription: "Professional outdoor resort feasibility studies for California. Expert market analysis and financial projections for California outdoor resorts.",
+    location: "California",
+    hero: {
+      headline: "Outdoor Resort Feasibility Study in California",
+      subheadline: "Expert outdoor resort market analysis and feasibility studies for California properties. Understand your California outdoor resort potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "California Outdoor Resort Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with outdoor resort feasibility studies in California. We understand the unique market dynamics across wine country, coastal areas, mountain resorts, and diverse opportunities in California's outdoor hospitality industry.",
+      },
+      {
+        title: "Why California is Ideal for Outdoor Resorts",
+        content: "California offers exceptional opportunities for outdoor resorts:",
+        bullets: [
+          "Diverse markets from wine country to coastal to mountain regions",
+          "Premium positioning potential",
+          "Year-round appeal in many regions",
+          "Strong tourism infrastructure and visitor demand",
+          "High property values and premium markets",
+          "Growing interest in outdoor and experiential accommodations",
+        ],
+      },
+    ],
+    benefits: [
+      "California-specific market data and insights",
+      "Understanding of diverse outdoor resort markets",
+      "Knowledge of California regulations and zoning",
+      "Experience with California outdoor resort projects",
+    ],
+    cta: {
+      title: "Start Your California Outdoor Resort Feasibility Study",
+      description: "Get expert analysis for your California outdoor resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["outdoor resort California", "California outdoor resort feasibility", "outdoor resort California", "California outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "outdoor-resort-feasibility-study-florida": {
+    slug: "outdoor-resort-feasibility-study-florida",
+    title: "Outdoor Resort Feasibility Study Florida | Sage Outdoor Advisory",
+    metaDescription: "Professional outdoor resort feasibility studies for Florida. Expert market analysis and financial projections for Florida outdoor resorts.",
+    location: "Florida",
+    hero: {
+      headline: "Outdoor Resort Feasibility Study in Florida",
+      subheadline: "Expert outdoor resort market analysis and feasibility studies for Florida properties. Understand your Florida outdoor resort potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Florida Outdoor Resort Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with outdoor resort feasibility studies in Florida. We understand the unique market dynamics, year-round tourism, coastal markets, and opportunities in Florida's outdoor hospitality industry.",
+      },
+      {
+        title: "Why Florida is Ideal for Outdoor Resorts",
+        content: "Florida offers exceptional opportunities for outdoor resorts:",
+        bullets: [
+          "Year-round warm weather and tourism",
+          "Diverse landscapes from beaches to Everglades",
+          "Strong tourism infrastructure and visitor demand",
+          "Premium market positioning",
+          "High ADR potential",
+          "Growing interest in outdoor and experiential accommodations",
+        ],
+      },
+    ],
+    benefits: [
+      "Florida-specific market data and insights",
+      "Understanding of year-round tourism patterns",
+      "Knowledge of Florida regulations and zoning",
+      "Experience with Florida outdoor resort projects",
+    ],
+    cta: {
+      title: "Start Your Florida Outdoor Resort Feasibility Study",
+      description: "Get expert analysis for your Florida outdoor resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["outdoor resort Florida", "Florida outdoor resort feasibility", "outdoor resort Florida", "Florida outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  "outdoor-resort-feasibility-study-texas": {
+    slug: "outdoor-resort-feasibility-study-texas",
+    title: "Outdoor Resort Feasibility Study Texas | Sage Outdoor Advisory",
+    metaDescription: "Professional outdoor resort feasibility studies for Texas. Expert market analysis and financial projections for Texas outdoor resorts.",
+    location: "Texas",
+    hero: {
+      headline: "Outdoor Resort Feasibility Study in Texas",
+      subheadline: "Expert outdoor resort market analysis and feasibility studies for Texas properties. Understand your Texas outdoor resort potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Texas Outdoor Resort Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with outdoor resort feasibility studies in Texas. We understand the unique market dynamics across Hill Country, coastal regions, and diverse opportunities in Texas's outdoor hospitality industry.",
+      },
+      {
+        title: "Why Texas is Ideal for Outdoor Resorts",
+        content: "Texas offers exceptional opportunities for outdoor resorts:",
+        bullets: [
+          "Diverse landscapes from Hill Country to coastal regions",
+          "Year-round favorable weather in many regions",
+          "Growing tourism market and outdoor recreation demand",
+          "Supportive regulatory environment",
+          "Strong RV and camping culture",
+          "Premium positioning potential",
+        ],
+      },
+    ],
+    benefits: [
+      "Texas-specific market data and insights",
+      "Understanding of diverse outdoor resort markets",
+      "Knowledge of Texas regulations and zoning",
+      "Experience with Texas outdoor resort projects",
+    ],
+    cta: {
+      title: "Start Your Texas Outdoor Resort Feasibility Study",
+      description: "Get expert analysis for your Texas outdoor resort project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["outdoor resort Texas", "Texas outdoor resort feasibility", "outdoor resort Texas", "Texas outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  
+  // OUTDOOR RESORT APPRAISAL
+  "outdoor-resort-appraisal-california": {
+    slug: "outdoor-resort-appraisal-california",
+    title: "Outdoor Resort Appraisal California | Sage Outdoor Advisory",
+    metaDescription: "Expert outdoor resort appraisals in California. Bank-approved valuations for California outdoor resorts. Trusted by California lenders.",
+    location: "California",
+    hero: {
+      headline: "Outdoor Resort Appraisal in California",
+      subheadline: "Expert outdoor resort appraisals for California properties. Bank-approved valuations trusted by California lenders.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "California Outdoor Resort Appraisal Expertise",
+        content: "Sage Outdoor Advisory specializes in outdoor resort appraisals throughout California. We understand the unique California market, premium property values across diverse markets, and property values for outdoor resort properties.",
+      },
+      {
+        title: "Why California Outdoor Resorts Need Specialized Appraisals",
+        content: "California outdoor resorts have unique characteristics:",
+        bullets: [
+          "Premium locations in diverse markets",
+          "High property values requiring specialized expertise",
+          "Diverse markets with varying valuation approaches",
+          "Strict regulatory environment considerations",
+          "Unique market comparables across markets",
+          "Year-round appeal in many regions",
+        ],
+      },
+    ],
+    benefits: [
+      "California-specific market knowledge",
+      "Understanding of premium property valuations",
+      "Bank-approved appraisal reports",
+      "Fast turnaround times",
+    ],
+    cta: {
+      title: "Get Your California Outdoor Resort Appraised",
+      description: "Schedule a consultation for your California outdoor resort appraisal",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["outdoor resort California", "California outdoor resort appraisal", "outdoor resort appraisal CA", "California outdoor hospitality"],
+    lastModified: "2025-01-15",
+  },
+  
+  // MARINA FEASIBILITY STUDIES
+  "marina-feasibility-study-florida": {
+    slug: "marina-feasibility-study-florida",
+    title: "Marina Feasibility Study Florida | Sage Outdoor Advisory",
+    metaDescription: "Professional marina feasibility studies for Florida. Expert market analysis and financial projections for Florida marinas.",
+    location: "Florida",
+    hero: {
+      headline: "Marina Feasibility Study in Florida",
+      subheadline: "Expert marina market analysis and feasibility studies for Florida properties. Understand your Florida marina potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "Florida Marina Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with marina feasibility studies in Florida. We understand the unique market dynamics, year-round boating season, coastal markets, and opportunities in Florida's marina industry.",
+      },
+      {
+        title: "Why Florida is Ideal for Marinas",
+        content: "Florida offers exceptional opportunities for marinas:",
+        bullets: [
+          "Year-round boating season and favorable weather",
+          "Extensive coastline and waterways",
+          "Strong boating culture and infrastructure",
+          "Premium market positioning",
+          "Growing boating and water recreation demand",
+          "Tourist and local market appeal",
+        ],
+      },
+    ],
+    benefits: [
+      "Florida-specific marina market data and insights",
+      "Understanding of year-round boating patterns",
+      "Knowledge of Florida regulations and zoning",
+      "Experience with Florida marina projects",
+    ],
+    cta: {
+      title: "Start Your Florida Marina Feasibility Study",
+      description: "Get expert analysis for your Florida marina project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["marina Florida", "Florida marina feasibility", "marina Florida", "Florida marina"],
+    relatedPages: [
+      "marina-feasibility-study-california",
+      "outdoor-resort-feasibility-study-florida",
+    ],
+    relatedServices: {
+      title: "Related Services",
+      services: [
+        {
+          name: "Marina Feasibility Studies",
+          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/marinas/",
+          description: "Professional marina feasibility studies with comprehensive market analysis."
+        },
+        {
+          name: "Marina Appraisals",
+          url: "https://sageoutdooradvisory.com/our-services/appraisals/marinas/",
+          description: "Expert marina appraisals trusted by banks and investors."
+        },
+        {
+          name: "All Our Services",
+          url: "https://sageoutdooradvisory.com/our-services/",
+          description: "Explore all of Sage's feasibility study and appraisal services."
+        }
+      ]
+    },
+    lastModified: "2025-01-15",
+  },
+  "marina-feasibility-study-california": {
+    slug: "marina-feasibility-study-california",
+    title: "Marina Feasibility Study California | Sage Outdoor Advisory",
+    metaDescription: "Professional marina feasibility studies for California. Expert market analysis and financial projections for California marinas.",
+    location: "California",
+    hero: {
+      headline: "Marina Feasibility Study in California",
+      subheadline: "Expert marina market analysis and feasibility studies for California properties. Understand your California marina potential.",
+      ctaText: "Schedule Free Consultation",
+      ctaLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    sections: [
+      {
+        title: "California Marina Market Expertise",
+        content: "Sage Outdoor Advisory has extensive experience with marina feasibility studies in California. We understand the unique market dynamics across coastal markets, premium locations, and opportunities in California's marina industry.",
+      },
+      {
+        title: "Why California is Ideal for Marinas",
+        content: "California offers exceptional opportunities for marinas:",
+        bullets: [
+          "Extensive coastline with premium locations",
+          "Strong boating culture and infrastructure",
+          "Premium market positioning",
+          "Year-round appeal in many regions",
+          "High property values and premium markets",
+          "Growing boating and water recreation demand",
+        ],
+      },
+    ],
+    benefits: [
+      "California-specific marina market data and insights",
+      "Understanding of coastal marina markets",
+      "Knowledge of California regulations and zoning",
+      "Experience with California marina projects",
+    ],
+    cta: {
+      title: "Start Your California Marina Feasibility Study",
+      description: "Get expert analysis for your California marina project",
+      buttonText: "Schedule Free Consultation",
+      buttonLink: "https://sageoutdooradvisory.com/contact-us",
+    },
+    keywords: ["marina California", "California marina feasibility", "marina California", "California marina"],
+    relatedPages: [
+      "marina-feasibility-study-florida",
+      "outdoor-resort-feasibility-study-california",
+    ],
+    relatedServices: {
+      title: "Related Services",
+      services: [
+        {
+          name: "Marina Feasibility Studies",
+          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/marinas/",
+          description: "Professional marina feasibility studies with comprehensive market analysis."
+        },
+        {
+          name: "Marina Appraisals",
+          url: "https://sageoutdooradvisory.com/our-services/appraisals/marinas/",
+          description: "Expert marina appraisals trusted by banks and investors."
+        },
+        {
+          name: "All Our Services",
+          url: "https://sageoutdooradvisory.com/our-services/",
+          description: "Explore all of Sage's feasibility study and appraisal services."
+        }
+      ]
+    },
+    lastModified: "2025-01-15",
+  },
 };
 
 export function getLandingPage(slug: string): LandingPageContent | null {

@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const glossaryTerms = getAllGlossaryTerms();
   const guideSlugs = getAllGuideSlugs();
 
-  // Generate landing pages (21 pages)
+  // Generate landing pages (58 pages - includes 49 location-based pages)
   const landingPages = landingPageSlugs
     .map((slug) => {
       const page = getLandingPage(slug);

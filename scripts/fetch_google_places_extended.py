@@ -188,12 +188,15 @@ def search_place(api_key, property_name, city, state, address=None):
 def get_place_details(api_key, place_id):
     """
     Get detailed place information using Places API (New) Place Details.
-    Fetches: contact info, amenities, categorization, photos (top 5), reservation fields.
+    Fetches: contact info, amenities, categorization, photos (top 5), reservation fields,
+    business status, opening hours, parking options, price level, payment options,
+    accessibility options, and allows dogs.
     """
     url = f"https://places.googleapis.com/v1/places/{place_id}"
     
     # Field mask for all requested fields
-    # Note: 'icon', 'iconBackgroundColor', and 'menuForPlace' are not valid fields in Places API (New)
+    # Note: Accessibility fields are accessed via accessibilityOptions object
+    # Some fields may require Atmosphere Details SKU (increases cost)
     field_mask = (
         "id,"
         "internationalPhoneNumber,"
@@ -211,7 +214,15 @@ def get_place_details(api_key, place_id):
         "primaryType,"
         "primaryTypeDisplayName,"
         "photos,"
-        "reservable"
+        "reservable,"
+        "businessStatus,"
+        "regularOpeningHours,"
+        "currentOpeningHours,"
+        "parkingOptions,"
+        "priceLevel,"
+        "paymentOptions,"
+        "accessibilityOptions,"
+        "allowsDogs"
     )
     
     headers = {
@@ -253,6 +264,9 @@ def get_place_details(api_key, place_id):
                 for photo in photos
             ]
         
+        # Extract accessibility options (nested object)
+        accessibility = data.get('accessibilityOptions', {})
+        
         return {
             'phone_number': data.get('internationalPhoneNumber'),
             'website_uri': data.get('websiteUri'),
@@ -272,23 +286,43 @@ def get_place_details(api_key, place_id):
             'photos': photos if photos else None,
             'icon_uri': None,  # Not available in Places API (New)
             'icon_background_color': None,  # Not available in Places API (New)
-            'reservable': data.get('reservable')
+            'reservable': data.get('reservable'),
+            # New fields
+            'business_status': data.get('businessStatus'),
+            'opening_hours': data.get('regularOpeningHours'),
+            'current_opening_hours': data.get('currentOpeningHours'),
+            'parking_options': data.get('parkingOptions'),
+            'price_level': data.get('priceLevel'),
+            'payment_options': data.get('paymentOptions'),
+            'wheelchair_accessible_parking': accessibility.get('wheelchairAccessibleParking') if isinstance(accessibility, dict) else None,
+            'wheelchair_accessible_entrance': accessibility.get('wheelchairAccessibleEntrance') if isinstance(accessibility, dict) else None,
+            'wheelchair_accessible_restroom': accessibility.get('wheelchairAccessibleRestroom') if isinstance(accessibility, dict) else None,
+            'wheelchair_accessible_seating': accessibility.get('wheelchairAccessibleSeating') if isinstance(accessibility, dict) else None,
+            'allows_dogs': data.get('allowsDogs')
         }
     except requests.exceptions.RequestException as e:
         print(f"  ⚠ Details API error: {e}")
         return None
 
-def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=None, skip_existing=True):
+def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=None, skip_existing=False, update_all=False):
     """
     Fetch properties from Supabase, get Google Places data, and update the database.
     
     Args:
         skip_existing: If True, skip properties that already have Google phone number or website
+        update_all: If True, update ALL properties regardless of existing data (overwrites)
     """
     print("Fetching properties from Supabase...")
     
     # Fetch properties that need updating
-    if skip_existing:
+    if update_all:
+        # Get ALL properties - will update/overwrite existing data
+        query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address')
+        if limit:
+            query = query.limit(limit)
+        response = query.execute()
+        properties = response.data
+    elif skip_existing:
         # Only get properties without Google data
         query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address,google_phone_number,google_website_uri')
         # Filter for properties without Google data
@@ -377,7 +411,19 @@ def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=No
             'google_photos': place_data.get('photos'),  # List of dicts - will be stored as JSONB
             'google_icon_uri': place_data.get('icon_uri'),
             'google_icon_background_color': place_data.get('icon_background_color'),
-            'google_reservable': place_data.get('reservable')
+            'google_reservable': place_data.get('reservable'),
+            # New fields
+            'google_business_status': place_data.get('business_status'),
+            'google_opening_hours': place_data.get('opening_hours'),  # Dict - will be stored as JSONB
+            'google_current_opening_hours': place_data.get('current_opening_hours'),  # Dict - will be stored as JSONB
+            'google_parking_options': place_data.get('parking_options'),  # Dict - will be stored as JSONB
+            'google_price_level': place_data.get('price_level'),
+            'google_payment_options': place_data.get('payment_options'),  # Dict - will be stored as JSONB
+            'google_wheelchair_accessible_parking': place_data.get('wheelchair_accessible_parking'),
+            'google_wheelchair_accessible_entrance': place_data.get('wheelchair_accessible_entrance'),
+            'google_wheelchair_accessible_restroom': place_data.get('wheelchair_accessible_restroom'),
+            'google_wheelchair_accessible_seating': place_data.get('wheelchair_accessible_seating'),
+            'google_allows_dogs': place_data.get('allows_dogs')
         }
         
         # Remove None values to avoid overwriting with null
@@ -416,7 +462,9 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='Fetch Google Places API extended data and update Supabase')
     parser.add_argument('--limit', type=int, help='Limit number of properties to process (for testing)')
-    parser.add_argument('--delay', type=float, default=0.1, help='Delay between API calls in seconds (default: 0.1)')
+    parser.add_argument('--delay', type=float, default=0.15, help='Delay between API calls in seconds (default: 0.15)')
+    parser.add_argument('--update-all', action='store_true', help='Update ALL properties, including those with existing Google data (overwrites)')
+    parser.add_argument('--skip-existing', action='store_true', help='Skip properties that already have Google phone number or website')
     
     args = parser.parse_args()
     
@@ -427,5 +475,12 @@ if __name__ == '__main__':
     print("=" * 70)
     print()
     
-    update_supabase_with_google_data(supabase, api_key, delay=args.delay, limit=args.limit)
+    update_supabase_with_google_data(
+        supabase, 
+        api_key, 
+        delay=args.delay, 
+        limit=args.limit,
+        update_all=args.update_all,
+        skip_existing=args.skip_existing
+    )
 

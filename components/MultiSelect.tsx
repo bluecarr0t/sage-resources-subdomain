@@ -32,7 +32,7 @@ export default function MultiSelect({
   activeColor = 'blue',
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 240 });
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -88,10 +88,34 @@ export default function MultiSelect({
   const updateDropdownPosition = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      
+      // Calculate available space below the button
+      const spaceBelow = viewportHeight - rect.bottom - 4; // 4px gap
+      
+      // Default max height (240px = max-h-60)
+      const defaultMaxHeight = 240;
+      
+      // Calculate max height based on available space below
+      // Use the smaller of: available space or default max height
+      // This ensures the dropdown fits in viewport and scrolls if needed
+      let maxHeight = Math.min(spaceBelow, defaultMaxHeight);
+      
+      // Ensure minimum height for usability (at least 100px)
+      maxHeight = Math.max(maxHeight, 100);
+      
+      // Always position below the button
+      const top = rect.bottom + 4;
+      
+      // Ensure dropdown doesn't go off-screen horizontally
+      const left = Math.max(4, Math.min(rect.left, viewportWidth - rect.width - 4));
+      
       setDropdownPosition({
-        top: rect.bottom + 4, // Use viewport coordinates for fixed positioning
-        left: rect.left,
+        top,
+        left,
         width: rect.width,
+        maxHeight,
       });
     }
   };
@@ -154,11 +178,12 @@ export default function MultiSelect({
       {isOpen && isMounted && createPortal(
         <div 
           ref={dropdownRef}
-          className="fixed z-[9999] bg-white border border-gray-300 rounded-lg shadow-2xl max-h-60 overflow-auto"
+          className="fixed z-[9999] bg-white border border-gray-300 rounded-lg shadow-2xl overflow-y-auto"
           style={{ 
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,
             width: `${dropdownPosition.width}px`,
+            maxHeight: `${dropdownPosition.maxHeight}px`,
             zIndex: 99999,
             position: 'fixed'
           }}

@@ -163,6 +163,44 @@ export interface SageProperty {
   google_reservable: boolean | null;
   google_rating: number | null;
   google_user_rating_total: number | null;
+  // Additional Google Places API fields
+  google_business_status: string | null;
+  google_opening_hours: {
+    openNow?: boolean;
+    weekdayDescriptions?: string[];
+    periods?: Array<{
+      open: { day: number; hour: number; minute: number };
+      close?: { day: number; hour: number; minute: number };
+    }>;
+  } | null;
+  google_current_opening_hours: {
+    openNow?: boolean;
+    weekdayDescriptions?: string[];
+    periods?: Array<{
+      open: { day: number; hour: number; minute: number };
+      close?: { day: number; hour: number; minute: number };
+    }>;
+  } | null;
+  google_parking_options: {
+    parkingLot?: boolean;
+    parkingValet?: boolean;
+    parkingGarage?: boolean;
+    parkingStreet?: boolean;
+    parkingFree?: boolean;
+    parkingPaid?: boolean;
+  } | null;
+  google_price_level: number | null; // 0-4: FREE, INEXPENSIVE, MODERATE, EXPENSIVE, VERY_EXPENSIVE
+  google_payment_options: {
+    acceptsCreditCards?: boolean;
+    acceptsDebitCards?: boolean;
+    acceptsCashOnly?: boolean;
+    acceptsNfc?: boolean;
+  } | null;
+  google_wheelchair_accessible_parking: boolean | null;
+  google_wheelchair_accessible_entrance: boolean | null;
+  google_wheelchair_accessible_restroom: boolean | null;
+  google_wheelchair_accessible_seating: boolean | null;
+  google_allows_dogs: boolean | null;
 }
 
 /**
