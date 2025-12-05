@@ -486,10 +486,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             query = query.in('country', ['USA', 'United States', 'US']);
             console.log('Filtering by country: United States (including USA, United States, US)');
           } else if (filterCountry.includes('Canada')) {
-            // Handle both 'Canada' and 'CA' values
-            // Note: We'll do additional client-side filtering for Canadian provinces
+            // Filter by country field only - only show properties with country='Canada' or 'CA'
             query = query.in('country', ['Canada', 'CA']);
-            console.log('Filtering by country: Canada (including Canada, CA)');
+            console.log('Filtering by country: Canada (including Canada, CA) - only properties with country field set');
           }
         } else if (filterCountry.length === 2 && filterCountry.includes('United States') && filterCountry.includes('Canada')) {
           // Both countries selected - don't filter by country at database level
@@ -795,62 +794,35 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         
         if (filterCountry.length === 1) {
           if (filterCountry.includes('Canada')) {
+            // Strict filtering: only properties with country field set to Canada/CA
+            // Do NOT use coordinate-based detection - only trust the country field
             uniqueProperties = uniqueProperties.filter((property: any) => {
               const country = String(property.country || '').toUpperCase();
-              const state = String(property.state || '').toUpperCase();
               
-              // Check country field
+              // Only check country field - must be 'CA', 'CAN', or 'CANADA'
               if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
                 return true;
               }
               
-              // Check if state is a Canadian province
-              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-              if (canadianProvinceCodes.includes(state)) {
-                return true;
-              }
-              
-              // Check if state is a Canadian province full name
-              if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) {
-                return true;
-              }
-              
-              // Check coordinates if available
-              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
-              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
-              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-                if (isLikelyCanadaByCoords(lat, lon)) {
-                  return true;
-                }
-              }
-              
+              // Reject all others
               return false;
             });
-            console.log(`After client-side Canada filtering: ${uniqueProperties.length} properties`);
+            console.log(`After client-side Canada filtering (country field only): ${uniqueProperties.length} properties`);
           } else if (filterCountry.includes('United States')) {
+            // Strict filtering: only properties with country field set to United States/USA/US
+            // Do NOT use coordinate-based detection - only trust the country field
             uniqueProperties = uniqueProperties.filter((property: any) => {
               const country = String(property.country || '').toUpperCase();
-              const state = String(property.state || '').toUpperCase();
               
-              // Check country field
+              // Only check country field - must be 'US', 'USA', or 'UNITED STATES'
               if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
                 return true;
               }
               
-              // If country is not set but state is a US state (not a Canadian province), include it
-              if (!country || country === '' || country === 'NULL') {
-                const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-                const isCanadianProvince = canadianProvinceCodes.includes(state) || 
-                  CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
-                if (!isCanadianProvince && state && state.length === 2) {
-                  // Likely a US state abbreviation
-                  return true;
-                }
-              }
-              
+              // Reject all others
               return false;
             });
-            console.log(`After client-side US filtering: ${uniqueProperties.length} properties`);
+            console.log(`After client-side US filtering (country field only): ${uniqueProperties.length} properties`);
           }
         } else if (filterCountry.length === 2 && filterCountry.includes('Canada') && filterCountry.includes('United States')) {
           // Both countries selected - database query returns all properties
@@ -1601,8 +1573,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       return false;
     };
     
-    // Determine country for each property using the same logic as countryCounts
-    // Prioritize coordinate-based detection when coordinates are available
+    // Determine country for each property
+    // For Canada filter: only use country field (strict filtering)
+    // For US or both countries: use coordinate-based detection + country/state fields
     propertiesWithValidCoords.forEach((p) => {
       const propertyName = p.property_name;
       if (!propertyName) return;
@@ -1611,37 +1584,50 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       const normalizedName = normalizePropertyName(propertyName);
       
       let normalizedCountry: string | null = null;
-      const coords = p.coordinates;
       
-      // Prioritize coordinate-based detection when coordinates are available
-      if (coords) {
-        const [lat, lon] = coords;
-        
-        if (isLikelyCanadaByCoords(lat, lon)) {
-          normalizedCountry = 'Canada';
-        } else if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
-          normalizedCountry = 'United States';
-        }
-      }
-      
-      // If coordinate-based detection didn't work, fall back to country/state fields
-      if (!normalizedCountry) {
-        if (isCanadianProperty(p)) {
-          normalizedCountry = 'Canada';
-        } else if (isUSProperty(p)) {
-          normalizedCountry = 'United States';
-        } else {
-          return; // Skip properties we can't determine
-        }
-      }
-      
-      // Apply country filter if only one country is selected
+      // If a single country filter is active, use strict country field only
       if (filterCountry.length === 1) {
-        if (filterCountry.includes('United States') && normalizedCountry !== 'United States') {
-          return; // Skip if doesn't match filter
+        if (filterCountry.includes('Canada')) {
+          // Canada: only check country field
+          const country = String(p.country || '').toUpperCase();
+          if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
+            normalizedCountry = 'Canada';
+          } else {
+            return; // Skip - not Canada
+          }
+        } else if (filterCountry.includes('United States')) {
+          // United States: only check country field
+          const country = String(p.country || '').toUpperCase();
+          if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
+            normalizedCountry = 'United States';
+          } else {
+            return; // Skip - not United States
+          }
         }
-        if (filterCountry.includes('Canada') && normalizedCountry !== 'Canada') {
-          return; // Skip if doesn't match filter
+      } else {
+        // For both countries selected: use coordinate-based detection + country/state fields
+        const coords = p.coordinates;
+        
+        // Prioritize coordinate-based detection when coordinates are available
+        if (coords) {
+          const [lat, lon] = coords;
+          
+          if (isLikelyCanadaByCoords(lat, lon)) {
+            normalizedCountry = 'Canada';
+          } else if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
+            normalizedCountry = 'United States';
+          }
+        }
+        
+        // If coordinate-based detection didn't work, fall back to country/state fields
+        if (!normalizedCountry) {
+          if (isCanadianProperty(p)) {
+            normalizedCountry = 'Canada';
+          } else if (isUSProperty(p)) {
+            normalizedCountry = 'United States';
+          } else {
+            return; // Skip properties we can't determine
+          }
         }
       }
       
@@ -1826,32 +1812,21 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       const normalizedName = normalizePropertyName(propertyName);
       
       let normalizedCountry: string | null = null;
-      const coords = p.coordinates;
       
-      // Prioritize coordinate-based detection when coordinates are available
-      // This helps catch properties with incorrect country/state data
-      if (coords) {
-        const [lat, lon] = coords;
-        
-        if (isLikelyCanadaByCoords(lat, lon)) {
-          normalizedCountry = 'Canada';
-        } else if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
-          // Check if it's likely in USA (includes Alaska and Hawaii)
-          normalizedCountry = 'United States';
-        }
-      }
+      // Use strict country field only for both countries (must have country field set correctly)
+      const country = String(p.country || '').toUpperCase();
       
-      // If coordinate-based detection didn't work, fall back to country/state fields
-      if (!normalizedCountry) {
-        // Use the exact same logic as client-side filter
-        if (isCanadianProperty(p)) {
-          normalizedCountry = 'Canada';
-        } else if (isUSProperty(p)) {
-          normalizedCountry = 'United States';
-        } else {
-          // If no country/state match and no coordinates, skip this property
-          return;
-        }
+      // Check Canada first
+      if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
+        normalizedCountry = 'Canada';
+      } 
+      // Check United States
+      else if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
+        normalizedCountry = 'United States';
+      } 
+      // If country field is not set correctly, skip this property
+      else {
+        return; // Skip properties without proper country field
       }
       
       // Only count USA and Canada
