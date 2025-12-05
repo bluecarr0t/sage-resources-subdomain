@@ -226,6 +226,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [urlInitialized, setUrlInitialized] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false); // Collapsed by default on mobile
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(defaultCenter);
+  const [mapZoom, setMapZoom] = useState<number>(defaultZoom);
+  const [shouldFitBounds, setShouldFitBounds] = useState(true);
 
   // URL parameter handling
   const searchParams = useSearchParams();
@@ -238,13 +241,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   }, [selectedProperty?.id]);
   const clustererRef = useRef<any | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const hasCenteredFromUrlRef = useRef<boolean>(false);
 
   // Ensure we're on the client side
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Initialize filters from URL parameters on mount
+  // Initialize filters and map position from URL parameters on mount
   useEffect(() => {
     if (!isClient || urlInitialized) return;
 
@@ -252,6 +256,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     const urlCountry = searchParams.getAll('country');
     const urlUnitType = searchParams.getAll('unitType');
     const urlRateRange = searchParams.getAll('rateRange');
+    
+    // Check for lat/lon/zoom parameters for map positioning
+    const urlLat = searchParams.get('lat');
+    const urlLon = searchParams.get('lon');
+    const urlZoom = searchParams.get('zoom');
 
     if (urlState.length > 0 || urlCountry.length > 0 || urlUnitType.length > 0 || urlRateRange.length > 0) {
       if (urlCountry.length > 0) {
@@ -267,10 +276,40 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         setFilterRateRange(urlRateRange);
       }
     }
+    
+    // If lat/lon/zoom are provided, use them to center and zoom the map
+    if (urlLat && urlLon) {
+      const lat = parseFloat(urlLat);
+      const lon = parseFloat(urlLon);
+      if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+        setMapCenter({ lat, lng: lon });
+        setShouldFitBounds(false); // Don't fit bounds if we have specific coordinates
+        hasCenteredFromUrlRef.current = false; // Reset so we can center again with new coordinates
+        
+        // Set zoom if provided, otherwise use default zoom for single location
+        if (urlZoom) {
+          const zoom = parseFloat(urlZoom);
+          if (!isNaN(zoom) && isFinite(zoom) && zoom >= 1 && zoom <= 20) {
+            setMapZoom(zoom);
+          } else {
+            setMapZoom(15); // Default zoom for single location
+          }
+        } else {
+          setMapZoom(15); // Default zoom for single location
+        }
+      }
+    } else {
+      // No URL params, reset to defaults and allow fitBounds
+      setMapCenter(defaultCenter);
+      setMapZoom(defaultZoom);
+      setShouldFitBounds(true);
+      hasCenteredFromUrlRef.current = false;
+    }
+    
     setUrlInitialized(true);
   }, [isClient, searchParams, urlInitialized, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange]);
 
-  // Update URL when filters change
+  // Update URL when filters change (preserve lat/lon/zoom if they exist)
   useEffect(() => {
     if (!isClient || !urlInitialized) return;
 
@@ -288,6 +327,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     if (filterRateRange.length > 0) {
       filterRateRange.forEach(range => params.append('rateRange', range));
     }
+    
+    // Preserve lat/lon/zoom parameters if they exist
+    const urlLat = searchParams.get('lat');
+    const urlLon = searchParams.get('lon');
+    const urlZoom = searchParams.get('zoom');
+    if (urlLat) params.set('lat', urlLat);
+    if (urlLon) params.set('lon', urlLon);
+    if (urlZoom) params.set('zoom', urlZoom);
 
     const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     const currentUrl = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
@@ -954,9 +1001,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   );
 
 
-  // Fit map bounds to show all markers
+  // Fit map bounds to show all markers (only if shouldFitBounds is true)
   useEffect(() => {
-    if (map && propertiesWithCoords.length > 0) {
+    if (map && propertiesWithCoords.length > 0 && shouldFitBounds) {
       const bounds = new google.maps.LatLngBounds();
       propertiesWithCoords.forEach((property) => {
         bounds.extend({
@@ -966,7 +1013,36 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       });
       map.fitBounds(bounds);
     }
-  }, [map, propertiesWithCoords]);
+  }, [map, propertiesWithCoords, shouldFitBounds]);
+  
+  // When map is loaded and we have specific coordinates from URL, center and zoom to that location
+  useEffect(() => {
+    if (map && !shouldFitBounds && mapCenter && mapZoom && !hasCenteredFromUrlRef.current) {
+      // Only center/zoom if coordinates are different from defaults (meaning we have URL params)
+      const isFromUrl = mapCenter.lat !== defaultCenter.lat || mapCenter.lng !== defaultCenter.lng || mapZoom !== defaultZoom;
+      
+      if (isFromUrl) {
+        map.setCenter(mapCenter);
+        map.setZoom(mapZoom);
+        hasCenteredFromUrlRef.current = true;
+        
+        // Try to find and select the property at these coordinates
+        if (propertiesWithCoords.length > 0) {
+          const targetProperty = propertiesWithCoords.find((property) => {
+            const [lat, lon] = property.coordinates;
+            // Check if coordinates are close (within ~0.01 degrees, roughly 1km)
+            const latDiff = Math.abs(lat - mapCenter.lat);
+            const lonDiff = Math.abs(lon - mapCenter.lng);
+            return latDiff < 0.01 && lonDiff < 0.01;
+          });
+          
+          if (targetProperty) {
+            setSelectedProperty(targetProperty);
+          }
+        }
+      }
+    }
+  }, [map, mapCenter, mapZoom, shouldFitBounds, propertiesWithCoords]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
@@ -2476,8 +2552,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             <GoogleMap
               key={`map-${filterState.join(',')}-${filterUnitType.join(',')}-${filterRateRange.join(',')}`}
               mapContainerStyle={{ width: '100%', height: '100%' }}
-              center={defaultCenter}
-              zoom={defaultZoom}
+              center={mapCenter}
+              zoom={mapZoom}
               onLoad={onLoad}
               onUnmount={onUnmount}
               options={{
@@ -2658,24 +2734,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       </div>
                     )}
                     {(() => {
-                      // Check if photos are available (indicates Google Places data exists)
-                      const hasPhotos = (() => {
-                        let photos = (selectedProperty as any).google_photos;
-                        if (photos && typeof photos === 'string') {
-                          try {
-                            photos = JSON.parse(photos);
-                          } catch (e) {
-                            return false;
-                          }
-                        }
-                        return photos && Array.isArray(photos) && photos.length > 0;
-                      })();
-                      
-                      // Prioritize google_website_uri if photos are available (Google data exists)
-                      // Otherwise fall back to url field
-                      const websiteUrl = hasPhotos 
-                        ? ((selectedProperty as any).google_website_uri || selectedProperty.url)
-                        : (selectedProperty.url || (selectedProperty as any).google_website_uri);
+                      // Prioritize google_website_uri, fall back to url if not available
+                      const websiteUrl = (selectedProperty as any).google_website_uri || selectedProperty.url;
                       
                       // Show website link if URL exists
                       if (websiteUrl) {

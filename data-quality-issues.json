@@ -1,0 +1,1090 @@
+[
+  {
+    "id": 9516,
+    "property_name": "The Fields of Michigan",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.undercanvas.com/outdoor-collection/the-fields-of-michigan/",
+    "suggestion": "Extract URL: https://www.undercanvas.com/outdoor-collection/the-fields-of-michigan/"
+  },
+  {
+    "id": 9515,
+    "property_name": "Under Canvas White Mountains",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.undercanvas.com/camps/white-mountains/",
+    "suggestion": "Extract URL: https://www.undercanvas.com/camps/white-mountains/"
+  },
+  {
+    "id": 9523,
+    "property_name": "Elk & Embers Resort",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.travelandleisure.com/elk-and-embers-resort-opening-in-waynesville-north-carolina-11795038",
+    "suggestion": "Extract URL: https://www.travelandleisure.com/elk-and-embers-resort-opening-in-waynesville-north-carolina-11795038"
+  },
+  {
+    "id": 9524,
+    "property_name": "Elk & Embers Resort",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.travelandleisure.com/elk-and-embers-resort-opening-in-waynesville-north-carolina-11795038",
+    "suggestion": "Extract URL: https://www.travelandleisure.com/elk-and-embers-resort-opening-in-waynesville-north-carolina-11795038"
+  },
+  {
+    "id": 9525,
+    "property_name": "Elk & Embers Resort",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.travelandleisure.com/elk-and-embers-resort-opening-in-waynesville-north-carolina-11795038",
+    "suggestion": "Extract URL: https://www.travelandleisure.com/elk-and-embers-resort-opening-in-waynesville-north-carolina-11795038"
+  },
+  {
+    "id": 9531,
+    "property_name": "Skye Texas Hill Country Resort",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.skyetexashillcountry.com/",
+    "suggestion": "Extract URL: https://www.skyetexashillcountry.com/"
+  },
+  {
+    "id": 9534,
+    "property_name": "Basecamp Terlingua",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.basecampterlingua.com/",
+    "suggestion": "Extract URL: https://www.basecampterlingua.com/"
+  },
+  {
+    "id": 9540,
+    "property_name": "Ferncrest Chambers Creek",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://moderncampground.com/usa/texas/ferncrest-chambers-creek-set-to-bring-upscale-glamping-to-grandview-texas-in-2026/",
+    "suggestion": "Extract URL: https://moderncampground.com/usa/texas/ferncrest-chambers-creek-set-to-bring-upscale-glamping-to-grandview-texas-in-2026/"
+  },
+  {
+    "id": 9532,
+    "property_name": "Skye Texas Hill Country Resort",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.skyetexashillcountry.com/",
+    "suggestion": "Extract URL: https://www.skyetexashillcountry.com/"
+  },
+  {
+    "id": 9547,
+    "property_name": "Wildhaven Yosemite",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://wildhavenyosemite.com/",
+    "suggestion": "Extract URL: https://wildhavenyosemite.com/"
+  },
+  {
+    "id": 9535,
+    "property_name": "Basecamp Terlingua",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.basecampterlingua.com/",
+    "suggestion": "Extract URL: https://www.basecampterlingua.com/"
+  },
+  {
+    "id": 9639,
+    "property_name": "Blue River Bells",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.blueriverbells.com/",
+    "suggestion": "Extract URL: https://www.blueriverbells.com/"
+  },
+  {
+    "id": 9660,
+    "property_name": "Field Trip",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://fieldtripnm.com/",
+    "suggestion": "Extract URL: https://fieldtripnm.com/"
+  },
+  {
+    "id": 9661,
+    "property_name": "Field Trip",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://fieldtripnm.com/",
+    "suggestion": "Extract URL: https://fieldtripnm.com/"
+  },
+  {
+    "id": 9664,
+    "property_name": "El Mistico Ranch",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://elmisticoranch.com/",
+    "suggestion": "Extract URL: https://elmisticoranch.com/"
+  },
+  {
+    "id": 9695,
+    "property_name": "Sankoty Lakes",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://sankotylakes.com/",
+    "suggestion": "Extract URL: https://sankotylakes.com/"
+  },
+  {
+    "id": 9546,
+    "property_name": "Wildhaven Yosemite",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://wildhavenyosemite.com/",
+    "suggestion": "Extract URL: https://wildhavenyosemite.com/"
+  },
+  {
+    "id": 9696,
+    "property_name": "Timber Ridge Outpost & Cabins",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.timberridgeoutpost.com/",
+    "suggestion": "Extract URL: https://www.timberridgeoutpost.com/"
+  },
+  {
+    "id": 9543,
+    "property_name": "WeeCasa Tiny House Resort",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://weecasa.com/",
+    "suggestion": "Extract URL: https://weecasa.com/"
+  },
+  {
+    "id": 9538,
+    "property_name": "Blue Skies Retro Resort",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "http://blueskiesretroresort.com/",
+    "suggestion": "Extract URL: http://blueskiesretroresort.com/"
+  },
+  {
+    "id": 9587,
+    "property_name": "Pacific Dunes Resort",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://jethospitality.com/pacific-dunes-resort/",
+    "suggestion": "Extract URL: https://jethospitality.com/pacific-dunes-resort/"
+  },
+  {
+    "id": 9580,
+    "property_name": "Glacier View Adventures",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://glacierviewadventures.com/",
+    "suggestion": "Extract URL: https://glacierviewadventures.com/"
+  },
+  {
+    "id": 9542,
+    "property_name": "Royal View Campground",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://royalviewcampground.com/glamping/",
+    "suggestion": "Extract URL: https://royalviewcampground.com/glamping/"
+  },
+  {
+    "id": 9582,
+    "property_name": "Snow Peak Campfield",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://snowpeakcampfield.com/",
+    "suggestion": "Extract URL: https://snowpeakcampfield.com/"
+  },
+  {
+    "id": 9569,
+    "property_name": "Willow-Witt Ranch",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.willowwittranch.com/farm-stays/camping",
+    "suggestion": "Extract URL: https://www.willowwittranch.com/farm-stays/camping"
+  },
+  {
+    "id": 9629,
+    "property_name": "Butter & Grahams - Bell Tent Glamping",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://butterandgrahams.com/",
+    "suggestion": "Extract URL: https://butterandgrahams.com/"
+  },
+  {
+    "id": 9697,
+    "property_name": "Timber Ridge Outpost & Cabins",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.timberridgeoutpost.com/",
+    "suggestion": "Extract URL: https://www.timberridgeoutpost.com/"
+  },
+  {
+    "id": 9712,
+    "property_name": "The Fields of Michigan",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.thefieldsofmichigan.com/",
+    "suggestion": "Extract URL: https://www.thefieldsofmichigan.com/"
+  },
+  {
+    "id": 9722,
+    "property_name": "Paddler's Village",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.paddlersvillage.com/",
+    "suggestion": "Extract URL: https://www.paddlersvillage.com/"
+  },
+  {
+    "id": 9723,
+    "property_name": "Paddler's Village",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.paddlersvillage.com/",
+    "suggestion": "Extract URL: https://www.paddlersvillage.com/"
+  },
+  {
+    "id": 9517,
+    "property_name": "The Fields of Michigan",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.undercanvas.com/outdoor-collection/the-fields-of-michigan/",
+    "suggestion": "Extract URL: https://www.undercanvas.com/outdoor-collection/the-fields-of-michigan/"
+  },
+  {
+    "id": 9711,
+    "property_name": "The Fields of Michigan",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.thefieldsofmichigan.com/",
+    "suggestion": "Extract URL: https://www.thefieldsofmichigan.com/"
+  },
+  {
+    "id": 9506,
+    "property_name": "Jellystone Park Zion",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.zionjellystonepark.com/",
+    "suggestion": "Extract URL: https://www.zionjellystonepark.com/"
+  },
+  {
+    "id": 9624,
+    "property_name": "The Fields of Michigan",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.thefieldsofmichigan.com/",
+    "suggestion": "Extract URL: https://www.thefieldsofmichigan.com/"
+  },
+  {
+    "id": 9709,
+    "property_name": "Gingerhill Farm Retreat",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://www.gingerhillfarm.com/",
+    "suggestion": "Extract URL: https://www.gingerhillfarm.com/"
+  },
+  {
+    "id": 9721,
+    "property_name": "Butter & Grahams",
+    "issue_type": "URL_IN_DESCRIPTION",
+    "field": "description",
+    "current_value": "https://butterandgrahams.com/",
+    "suggestion": "Extract URL: https://butterandgrahams.com/"
+  },
+  {
+    "id": 9520,
+    "property_name": "Tuxedo Falls Luxury Camp",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://woodallscm.com/n-c-glamping-retreat-opens-with-2-treehouses-4-tents/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9553,
+    "property_name": "Mendocino Grove",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://mendocinogrove.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9551,
+    "property_name": "Ventana Big Sur",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.ventanabigsur.com/glamping/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9545,
+    "property_name": "Gunnison Glamping Wagons",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://gunnisonrvpark.com/camping/glamping/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9564,
+    "property_name": "Two Capes Lookout",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://twocapeslookout.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9574,
+    "property_name": "Borealis Basecamp",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://borealisbasecamp.net/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9579,
+    "property_name": "Shearwater Cove",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.shearwatercove.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9764,
+    "property_name": "Chattooga River Lodge and Campground",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://chattoogalodge.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9584,
+    "property_name": "Doe Bay Resort & Retreat",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "with access to saltwater soaking tubs overlooking the bay",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9591,
+    "property_name": "Starlight Retreat Yellowstone",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "device charging stations",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9592,
+    "property_name": "River Dance Lodge",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "and private claw-footed soaking tubs",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9593,
+    "property_name": "Linn Canyon Ranch",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "with activities including trail rides",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9597,
+    "property_name": "Downata Hot Springs",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "each with an outdoor firepit",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9606,
+    "property_name": "Hope Acres Glampground",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://hopeacresglampground.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9610,
+    "property_name": "The Hohnstead Glamping Cabins",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "communal lounge with full kitchen",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9521,
+    "property_name": "Tuxedo Falls Luxury Camp",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://woodallscm.com/n-c-glamping-retreat-opens-with-2-treehouses-4-tents/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9644,
+    "property_name": "Under Canvas Grand Canyon",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "complimentary s'mores",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9645,
+    "property_name": "Shash Dine' EcoRetreat",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "with views of Lake Powell and Navajo Mountain",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9648,
+    "property_name": "Clear Sky Resorts - Grand Canyon",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "and skylights with telescopes for stargazing",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9652,
+    "property_name": "Wander Camp Grand Canyon",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.thewandercamp.com/glamping/arizona/grand-canyon",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9666,
+    "property_name": "ReTreet Resort",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://retreetresort.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9667,
+    "property_name": "ReTreet Resort",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://retreetresort.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9668,
+    "property_name": "ReTreet Resort",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://retreetresort.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9544,
+    "property_name": "Colorado Cabin Adventures at Grand Lake",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.coloradocabinadventures.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9704,
+    "property_name": "The Point at Haleiwa",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://pointathaleiwa.com/glamping/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9699,
+    "property_name": "Black Sheep Flower Farm",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.blacksheepflowerfarm.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9705,
+    "property_name": "Kalōpā State Recreation Area",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "featuring nature trails",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9522,
+    "property_name": "Glamping Wild",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://goglampingwild.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9565,
+    "property_name": "Two Capes Lookout",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://twocapeslookout.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9577,
+    "property_name": "Log Cabin Wilderness Lodge",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.logcabinwildernesslodge.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9719,
+    "property_name": "The Woods Luxury Camping",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "featuring winding trails",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9680,
+    "property_name": "Eden Reserve",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://stayedenreserve.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9751,
+    "property_name": "Under Canvas White Mountains",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.undercanvas.com/camps/white-mountains/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9759,
+    "property_name": "Nature Nook Retreats",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "situated within the historic Hollywild Animal Preserve",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9763,
+    "property_name": "Chattooga River Lodge and Campground",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://chattoogalodge.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9555,
+    "property_name": "Treebones Resort",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.treebonesresort.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9761,
+    "property_name": "WYLDSTAY Greenville",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "with activities like canoeing",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9706,
+    "property_name": "Kalōpā State Recreation Area",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "featuring nature trails",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9755,
+    "property_name": "Toad Hill",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.hipcamp.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9632,
+    "property_name": "Timberglow Getaway",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://timberglowgetaway.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9643,
+    "property_name": "Tiger Safari Zoological Park",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.tigersafari.us/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9589,
+    "property_name": "Washington Glamping",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://washingtonglamping.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9611,
+    "property_name": "Yellowstone Dreamin Camp",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.yellowstonedreamincamp.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9670,
+    "property_name": "Starlight Haven at Weiss Lake",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://visitstarlight.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9672,
+    "property_name": "Starlight Haven at Weiss Lake",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://visitstarlight.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9646,
+    "property_name": "Shash Dine' EcoRetreat",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "with views of Lake Powell and Navajo Mountain",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9647,
+    "property_name": "Shash Dine' EcoRetreat",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "with views of Lake Powell and Navajo Mountain",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9669,
+    "property_name": "The Destination Glamping Resort",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.tdbsc.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9671,
+    "property_name": "Starlight Haven at Weiss Lake",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://visitstarlight.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9571,
+    "property_name": "Bay Point Landing",
+    "issue_type": "PARTIAL_SENTENCE_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://baypointlanding.com/",
+    "suggestion": "May be a partial sentence or fragment"
+  },
+  {
+    "id": 9541,
+    "property_name": "Echo Canyon Campground",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9540,
+    "property_name": "Ferncrest Chambers Creek",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9550,
+    "property_name": "Del Rio Ranch",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9549,
+    "property_name": "Del Rio Ranch",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9568,
+    "property_name": "Lost Lake Resort",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9595,
+    "property_name": "Willow Glamping Yurt",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9596,
+    "property_name": "Huckleberry Tent & Breakfast",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9613,
+    "property_name": "Norwegian Wood Ranch",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9665,
+    "property_name": "Cliff River Springs",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9744,
+    "property_name": "Brigid Spring",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9756,
+    "property_name": "Skoolie Retreat",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9751,
+    "property_name": "Under Canvas White Mountains",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9758,
+    "property_name": "Low Country Oasis",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 10665,
+    "property_name": "Zion Ponderosa",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 10794,
+    "property_name": "Monument Glamping",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9594,
+    "property_name": "Cascade Dome",
+    "issue_type": "MISSING_WEBSITE",
+    "field": "url",
+    "current_value": null,
+    "suggestion": "Fetch from Google Places API"
+  },
+  {
+    "id": 9520,
+    "property_name": "Tuxedo Falls Luxury Camp",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://woodallscm.com/n-c-glamping-retreat-opens-with-2-treehouses-4-tents/",
+    "suggestion": "Extract URL: https://woodallscm.com/n-c-glamping-retreat-opens-with-2-treehouses-4-tents/"
+  },
+  {
+    "id": 9553,
+    "property_name": "Mendocino Grove",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://mendocinogrove.com/",
+    "suggestion": "Extract URL: https://mendocinogrove.com/"
+  },
+  {
+    "id": 9551,
+    "property_name": "Ventana Big Sur",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.ventanabigsur.com/glamping/",
+    "suggestion": "Extract URL: https://www.ventanabigsur.com/glamping/"
+  },
+  {
+    "id": 9545,
+    "property_name": "Gunnison Glamping Wagons",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://gunnisonrvpark.com/camping/glamping/",
+    "suggestion": "Extract URL: https://gunnisonrvpark.com/camping/glamping/"
+  },
+  {
+    "id": 9564,
+    "property_name": "Two Capes Lookout",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://twocapeslookout.com/",
+    "suggestion": "Extract URL: https://twocapeslookout.com/"
+  },
+  {
+    "id": 9574,
+    "property_name": "Borealis Basecamp",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://borealisbasecamp.net/",
+    "suggestion": "Extract URL: https://borealisbasecamp.net/"
+  },
+  {
+    "id": 9579,
+    "property_name": "Shearwater Cove",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.shearwatercove.com/",
+    "suggestion": "Extract URL: https://www.shearwatercove.com/"
+  },
+  {
+    "id": 9764,
+    "property_name": "Chattooga River Lodge and Campground",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://chattoogalodge.com/",
+    "suggestion": "Extract URL: https://chattoogalodge.com/"
+  },
+  {
+    "id": 9606,
+    "property_name": "Hope Acres Glampground",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://hopeacresglampground.com/",
+    "suggestion": "Extract URL: https://hopeacresglampground.com/"
+  },
+  {
+    "id": 9521,
+    "property_name": "Tuxedo Falls Luxury Camp",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://woodallscm.com/n-c-glamping-retreat-opens-with-2-treehouses-4-tents/",
+    "suggestion": "Extract URL: https://woodallscm.com/n-c-glamping-retreat-opens-with-2-treehouses-4-tents/"
+  },
+  {
+    "id": 9652,
+    "property_name": "Wander Camp Grand Canyon",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.thewandercamp.com/glamping/arizona/grand-canyon",
+    "suggestion": "Extract URL: https://www.thewandercamp.com/glamping/arizona/grand-canyon"
+  },
+  {
+    "id": 9666,
+    "property_name": "ReTreet Resort",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://retreetresort.com/",
+    "suggestion": "Extract URL: https://retreetresort.com/"
+  },
+  {
+    "id": 9667,
+    "property_name": "ReTreet Resort",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://retreetresort.com/",
+    "suggestion": "Extract URL: https://retreetresort.com/"
+  },
+  {
+    "id": 9668,
+    "property_name": "ReTreet Resort",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://retreetresort.com/",
+    "suggestion": "Extract URL: https://retreetresort.com/"
+  },
+  {
+    "id": 9544,
+    "property_name": "Colorado Cabin Adventures at Grand Lake",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.coloradocabinadventures.com/",
+    "suggestion": "Extract URL: https://www.coloradocabinadventures.com/"
+  },
+  {
+    "id": 9704,
+    "property_name": "The Point at Haleiwa",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://pointathaleiwa.com/glamping/",
+    "suggestion": "Extract URL: https://pointathaleiwa.com/glamping/"
+  },
+  {
+    "id": 9699,
+    "property_name": "Black Sheep Flower Farm",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.blacksheepflowerfarm.com/",
+    "suggestion": "Extract URL: https://www.blacksheepflowerfarm.com/"
+  },
+  {
+    "id": 9522,
+    "property_name": "Glamping Wild",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://goglampingwild.com/",
+    "suggestion": "Extract URL: https://goglampingwild.com/"
+  },
+  {
+    "id": 9565,
+    "property_name": "Two Capes Lookout",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://twocapeslookout.com/",
+    "suggestion": "Extract URL: https://twocapeslookout.com/"
+  },
+  {
+    "id": 9577,
+    "property_name": "Log Cabin Wilderness Lodge",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.logcabinwildernesslodge.com/",
+    "suggestion": "Extract URL: https://www.logcabinwildernesslodge.com/"
+  },
+  {
+    "id": 9680,
+    "property_name": "Eden Reserve",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://stayedenreserve.com/",
+    "suggestion": "Extract URL: https://stayedenreserve.com/"
+  },
+  {
+    "id": 9751,
+    "property_name": "Under Canvas White Mountains",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.undercanvas.com/camps/white-mountains/",
+    "suggestion": "Extract URL: https://www.undercanvas.com/camps/white-mountains/"
+  },
+  {
+    "id": 9763,
+    "property_name": "Chattooga River Lodge and Campground",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://chattoogalodge.com/",
+    "suggestion": "Extract URL: https://chattoogalodge.com/"
+  },
+  {
+    "id": 9555,
+    "property_name": "Treebones Resort",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.treebonesresort.com/",
+    "suggestion": "Extract URL: https://www.treebonesresort.com/"
+  },
+  {
+    "id": 9755,
+    "property_name": "Toad Hill",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.hipcamp.com/",
+    "suggestion": "Extract URL: https://www.hipcamp.com/"
+  },
+  {
+    "id": 9632,
+    "property_name": "Timberglow Getaway",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://timberglowgetaway.com/",
+    "suggestion": "Extract URL: https://timberglowgetaway.com/"
+  },
+  {
+    "id": 9643,
+    "property_name": "Tiger Safari Zoological Park",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.tigersafari.us/",
+    "suggestion": "Extract URL: https://www.tigersafari.us/"
+  },
+  {
+    "id": 9589,
+    "property_name": "Washington Glamping",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://washingtonglamping.com/",
+    "suggestion": "Extract URL: https://washingtonglamping.com/"
+  },
+  {
+    "id": 9611,
+    "property_name": "Yellowstone Dreamin Camp",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.yellowstonedreamincamp.com/",
+    "suggestion": "Extract URL: https://www.yellowstonedreamincamp.com/"
+  },
+  {
+    "id": 9670,
+    "property_name": "Starlight Haven at Weiss Lake",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://visitstarlight.com/",
+    "suggestion": "Extract URL: https://visitstarlight.com/"
+  },
+  {
+    "id": 9672,
+    "property_name": "Starlight Haven at Weiss Lake",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://visitstarlight.com/",
+    "suggestion": "Extract URL: https://visitstarlight.com/"
+  },
+  {
+    "id": 9669,
+    "property_name": "The Destination Glamping Resort",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://www.tdbsc.com/",
+    "suggestion": "Extract URL: https://www.tdbsc.com/"
+  },
+  {
+    "id": 9671,
+    "property_name": "Starlight Haven at Weiss Lake",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://visitstarlight.com/",
+    "suggestion": "Extract URL: https://visitstarlight.com/"
+  },
+  {
+    "id": 9571,
+    "property_name": "Bay Point Landing",
+    "issue_type": "URL_IN_GETTING_THERE",
+    "field": "getting_there",
+    "current_value": "https://baypointlanding.com/",
+    "suggestion": "Extract URL: https://baypointlanding.com/"
+  }
+]

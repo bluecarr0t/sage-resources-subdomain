@@ -2,14 +2,16 @@ import { MetadataRoute } from "next";
 import { getAllLandingPageSlugs, getLandingPage } from "@/lib/landing-pages";
 import { getAllGlossaryTerms } from "@/lib/glossary/index";
 import { getAllGuideSlugs, getGuide } from "@/lib/guides";
+import { getAllPropertySlugs } from "@/lib/properties";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   
   // Get all dynamic content
   const landingPageSlugs = getAllLandingPageSlugs();
   const glossaryTerms = getAllGlossaryTerms();
   const guideSlugs = getAllGuideSlugs();
+  const propertySlugs = await getAllPropertySlugs();
 
   // Generate landing pages (58 pages - includes 49 location-based pages)
   const landingPages = landingPageSlugs
@@ -65,12 +67,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })
     .map(({ isPillarPage, ...page }) => page);
 
+  // Generate property pages
+  const propertyPages = propertySlugs
+    .map((item) => ({
+      url: `${baseUrl}/property/${item.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    }))
+    .sort((a, b) => a.url.localeCompare(b.url)); // Sort alphabetically
+
   // Build sitemap with proper ordering:
   // 1. Main pages (highest priority)
   // 2. Index pages (glossary, guides)
   // 3. Guide pages (pillar pages first)
-  // 4. Landing pages
-  // 5. Glossary pages
+  // 4. Map page
+  // 5. Property pages
+  // 6. Landing pages
+  // 7. Glossary pages
   return [
     // Main homepage
     {
@@ -112,6 +126,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     
     // Guide pages (organized by priority - pillar pages first)
     ...guidePages,
+    
+    // Property pages (dynamic pages for each property)
+    ...propertyPages,
     
     // Landing pages (service and location-based)
     ...landingPages,

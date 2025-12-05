@@ -10,6 +10,7 @@ const excludedRoutes = [
   'map-sheet',
   'api',
   'landing',
+  'property',
   'sitemap.xml',
   'robots.txt',
   'favicon.ico',

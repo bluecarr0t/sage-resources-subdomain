@@ -9,6 +9,7 @@ export interface SageProperty {
   date_added: string | null;
   date_updated: string | null;
   property_name: string | null;
+  slug: string | null;
   site_name: string | null;
   unit_type: string | null;
   property_type: string | null;
@@ -135,6 +136,7 @@ export interface SageProperty {
   // Google Places API fields
   google_phone_number: string | null;
   google_website_uri: string | null;
+  google_description: string | null;
   google_dine_in: boolean | null;
   google_takeout: boolean | null;
   google_delivery: boolean | null;

@@ -75,6 +75,44 @@ class SupabaseTable:
         
         return Result(response.json())
     
+    def range(self, start: int, end: int):
+        """Add range (pagination) to query."""
+        self.range_start = start
+        self.range_end = end
+        return self
+    
+    def execute_with_pagination(self):
+        """Execute query with pagination to fetch all records."""
+        all_data = []
+        start = 0
+        batch_size = 1000
+        has_more = True
+        
+        while has_more:
+            params = {}
+            if hasattr(self, 'select_columns'):
+                params['select'] = self.select_columns
+            
+            # Supabase REST API uses Range header for pagination
+            headers_with_range = self.headers.copy()
+            headers_with_range['Range'] = f'{start}-{start + batch_size - 1}'
+            
+            response = requests.get(self.url, headers=headers_with_range, params=params)
+            response.raise_for_status()
+            
+            batch_data = response.json()
+            all_data.extend(batch_data)
+            
+            # Check if we got a full batch (more might be available)
+            has_more = len(batch_data) == batch_size
+            start += batch_size
+        
+        class Result:
+            def __init__(self, data):
+                self.data = data
+        
+        return Result(all_data)
+    
     def update(self, data: dict):
         """Create an update query builder."""
         return UpdateBuilder(self.url, self.headers, data)
@@ -190,7 +228,7 @@ def get_place_details(api_key, place_id):
     Get detailed place information using Places API (New) Place Details.
     Fetches: contact info, amenities, categorization, photos (top 5), reservation fields,
     business status, opening hours, parking options, price level, payment options,
-    accessibility options, and allows dogs.
+    accessibility options, allows dogs, and description (editorialSummary with generativeSummary fallback).
     """
     url = f"https://places.googleapis.com/v1/places/{place_id}"
     
@@ -222,7 +260,9 @@ def get_place_details(api_key, place_id):
         "priceLevel,"
         "paymentOptions,"
         "accessibilityOptions,"
-        "allowsDogs"
+        "allowsDogs,"
+        "editorialSummary,"
+        "generativeSummary"
     )
     
     headers = {
@@ -267,6 +307,25 @@ def get_place_details(api_key, place_id):
         # Extract accessibility options (nested object)
         accessibility = data.get('accessibilityOptions', {})
         
+        # Extract description: prioritize editorialSummary, fallback to generativeSummary
+        description = None
+        
+        # Try editorialSummary first (Google's curated description)
+        editorial_summary = data.get('editorialSummary', {})
+        if isinstance(editorial_summary, dict):
+            description = editorial_summary.get('text')
+        elif isinstance(editorial_summary, str):
+            description = editorial_summary
+        
+        # Fallback to generativeSummary (AI-generated description) if editorialSummary not available
+        if not description:
+            generative_summary = data.get('generativeSummary', {})
+            if isinstance(generative_summary, dict):
+                # generativeSummary has 'text' field with the description
+                description = generative_summary.get('text')
+            elif isinstance(generative_summary, str):
+                description = generative_summary
+        
         return {
             'phone_number': data.get('internationalPhoneNumber'),
             'website_uri': data.get('websiteUri'),
@@ -298,7 +357,8 @@ def get_place_details(api_key, place_id):
             'wheelchair_accessible_entrance': accessibility.get('wheelchairAccessibleEntrance') if isinstance(accessibility, dict) else None,
             'wheelchair_accessible_restroom': accessibility.get('wheelchairAccessibleRestroom') if isinstance(accessibility, dict) else None,
             'wheelchair_accessible_seating': accessibility.get('wheelchairAccessibleSeating') if isinstance(accessibility, dict) else None,
-            'allows_dogs': data.get('allowsDogs')
+            'allows_dogs': data.get('allowsDogs'),
+            'description': description
         }
     except requests.exceptions.RequestException as e:
         print(f"  ⚠ Details API error: {e}")
@@ -317,17 +377,23 @@ def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=No
     # Fetch properties that need updating
     if update_all:
         # Get ALL properties - will update/overwrite existing data
+        # Use pagination to fetch all records (Supabase REST API has default limit of 1000)
         query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address')
         if limit:
             query = query.limit(limit)
-        response = query.execute()
-        properties = response.data
+            response = query.execute()
+            properties = response.data
+        else:
+            # Fetch all records using pagination
+            response = query.execute_with_pagination()
+            properties = response.data
     elif skip_existing:
         # Only get properties without Google data
         query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address,google_phone_number,google_website_uri')
         # Filter for properties without Google data
         # Note: Supabase REST API doesn't support OR filters easily, so we'll filter in Python
-        response = query.execute()
+        # Use pagination to fetch all records
+        response = query.execute_with_pagination()
         
         # Filter in Python for properties without Google data
         properties = [
@@ -339,8 +405,12 @@ def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=No
         query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address')
         if limit:
             query = query.limit(limit)
-        response = query.execute()
-        properties = response.data
+            response = query.execute()
+            properties = response.data
+        else:
+            # Fetch all records using pagination
+            response = query.execute_with_pagination()
+            properties = response.data
     
     if not properties:
         print("No properties found that need Google data")
@@ -423,7 +493,8 @@ def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=No
             'google_wheelchair_accessible_entrance': place_data.get('wheelchair_accessible_entrance'),
             'google_wheelchair_accessible_restroom': place_data.get('wheelchair_accessible_restroom'),
             'google_wheelchair_accessible_seating': place_data.get('wheelchair_accessible_seating'),
-            'google_allows_dogs': place_data.get('allows_dogs')
+            'google_allows_dogs': place_data.get('allows_dogs'),
+            'google_description': place_data.get('description')
         }
         
         # Remove None values to avoid overwriting with null

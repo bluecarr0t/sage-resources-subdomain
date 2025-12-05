@@ -1,435 +1,267 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { parse } from 'csv-parse/sync';
+#!/usr/bin/env npx tsx
+/**
+ * Analyze sage-glamping-data table for data quality issues
+ * Identifies:
+ * - URLs in description field
+ * - Partial sentences in getting_there field
+ * - Missing website data
+ * - Other data quality issues
+ */
 
-interface CSVRow {
-  [key: string]: string;
+import { createClient } from '@supabase/supabase-js';
+import * as dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config({ path: '.env.local' });
+dotenv.config();
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+
+if (!supabaseUrl || !secretKey) {
+  console.error('❌ Missing Supabase credentials');
+  console.error('Required: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+  process.exit(1);
 }
+
+const supabase = createClient(supabaseUrl, secretKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
+
+// URL regex pattern
+const URL_PATTERN = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/gi;
 
 interface DataQualityIssue {
-  type: string;
-  severity: 'high' | 'medium' | 'low';
-  description: string;
-  examples: Array<{ row: number; value: string; field: string }>;
-  count: number;
+  id: number;
+  property_name: string | null;
+  issue_type: string;
+  field: string;
+  current_value: string | null;
+  suggestion?: string;
 }
 
-const issues: DataQualityIssue[] = [];
+async function analyzeDataQuality() {
+  console.log('🔍 Analyzing sage-glamping-data for data quality issues...\n');
 
-function addIssue(
-  type: string,
-  severity: 'high' | 'medium' | 'low',
-  description: string,
-  row: number,
-  value: string,
-  field: string
-) {
-  let issue = issues.find((i) => i.type === type);
-  if (!issue) {
-    issue = {
-      type,
-      severity,
-      description,
-      examples: [],
-      count: 0,
-    };
-    issues.push(issue);
-  }
-  issue.count++;
-  if (issue.examples.length < 5) {
-    issue.examples.push({ row, value, field });
-  }
-}
+  try {
+    // Fetch all records
+    console.log('📥 Fetching all records...');
+    let allData: any[] = [];
+    let offset = 0;
+    const batchSize = 1000;
+    let hasMore = true;
 
-async function analyzeDataQuality(inputFile: string) {
-  console.log(`Analyzing data quality for: ${inputFile}\n`);
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('sage-glamping-data')
+        .select('id, property_name, description, getting_there, url, google_website_uri')
+        .range(offset, offset + batchSize - 1);
 
-  const fileContent = fs.readFileSync(inputFile, 'utf-8');
-  const lines = fileContent.split('\n').filter((line) => line.trim());
-
-  // Combine header lines
-  const headerLine1 = lines[0].trim();
-  const headerLine2 = lines[1]?.trim() || '';
-  const cleanHeader1 = headerLine1.replace(/,$/, '');
-  const combinedHeader = cleanHeader1 + (headerLine2 ? ',' + headerLine2 : '');
-
-  const dataLines = lines.slice(2);
-  const reconstructedContent = combinedHeader + '\n' + dataLines.join('\n');
-
-  const records: CSVRow[] = parse(reconstructedContent, {
-    columns: true,
-    skip_empty_lines: true,
-    relax_column_count: true,
-    bom: true,
-  });
-
-  console.log(`Total rows: ${records.length}\n`);
-
-  // Track various issues
-  const emptyFields: { [key: string]: number } = {};
-  const inconsistentCountryCodes: Set<string> = new Set();
-  const inconsistentStateCodes: { [key: string]: Set<string> } = {};
-  let priceFormatIssues: number = 0;
-  let urlFormatIssues: number = 0;
-  let missingCoordinates: number = 0;
-  const duplicateEntries: Map<string, number[]> = new Map();
-
-  for (let i = 0; i < records.length; i++) {
-    const row = records[i];
-    const rowNumber = i + 3; // +3 for header lines and 1-indexed
-
-    // Check for empty critical fields
-    const criticalFields = [
-      'Property Name',
-      'Address',
-      'City',
-      'State',
-      'Country',
-      'Latitude',
-      'Longitude',
-    ];
-
-    for (const field of criticalFields) {
-      const value = (row[field] || '').trim();
-      if (!value || value === '') {
-        if (!emptyFields[field]) emptyFields[field] = 0;
-        emptyFields[field]++;
-        addIssue(
-          `Missing ${field}`,
-          field === 'Latitude' || field === 'Longitude' ? 'high' : 'medium',
-          `${field} is empty or missing`,
-          rowNumber,
-          '',
-          field
-        );
+      if (error) {
+        console.error('❌ Error fetching data:', error);
+        process.exit(1);
       }
-    }
 
-    // Check Country field consistency
-    const country = (row.Country || '').trim();
-    if (country) {
-      const normalized = country.toUpperCase();
-      if (
-        !normalized.includes('USA') &&
-        !normalized.includes('UNITED STATES') &&
-        !normalized.includes('CANADA') &&
-        !normalized.includes('US')
-      ) {
-        inconsistentCountryCodes.add(country);
-        addIssue(
-          'Inconsistent Country Format',
-          'medium',
-          `Country value "${country}" may need standardization`,
-          rowNumber,
-          country,
-          'Country'
-        );
+      if (!data || data.length === 0) {
+        break;
       }
+
+      allData = allData.concat(data);
+      offset += batchSize;
+      hasMore = data.length === batchSize;
+      console.log(`  Fetched ${allData.length} records...`);
     }
 
-    // Check State field for trailing spaces or inconsistencies
-    const state = (row.State || '').trim();
-    if (state && state !== row.State) {
-      addIssue(
-        'State Field Has Trailing Spaces',
-        'low',
-        'State field has leading/trailing whitespace',
-        rowNumber,
-        `"${row.State}"`,
-        'State'
-      );
-    }
+    console.log(`✅ Fetched ${allData.length} total records\n`);
 
-    // Check for inconsistent state abbreviations
-    if (state && state.length > 2) {
-      // Full state name instead of abbreviation
-      addIssue(
-        'State Not Abbreviated',
-        'low',
-        'State should be abbreviated (e.g., CA not California)',
-        rowNumber,
-        state,
-        'State'
-      );
-    }
+    const issues: DataQualityIssue[] = [];
 
-    // Check Address field for issues
-    const address = (row.Address || '').trim();
-    if (address) {
-      // Check for trailing commas or spaces
-      if (address.endsWith(',') || address.endsWith(' ')) {
-        addIssue(
-          'Address Has Trailing Characters',
-          'low',
-          'Address field has trailing comma or space',
-          rowNumber,
-          address,
-          'Address'
-        );
-      }
-      // Check for empty address values like ", "
-      if (address === ',' || address.match(/^,\s*$/)) {
-        addIssue(
-          'Address Field Empty',
-          'medium',
-          'Address field contains only comma/whitespace',
-          rowNumber,
-          address,
-          'Address'
-        );
-      }
-    }
+    console.log('🔍 Analyzing data quality issues...\n');
 
-    // Check URL format
-    const url = (row.Url || '').trim();
-    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-      addIssue(
-        'URL Missing Protocol',
-        'medium',
-        'URL should start with http:// or https://',
-        rowNumber,
-        url,
-        'Url'
-      );
-    }
-
-    // Check price formatting
-    const priceFields = [
-      'Retail Daily Rate 2024',
-      'Retail Daily Rate(+fees) 2024',
-      '2024 - Fall Weekday',
-      '2024 - Fall Weekend',
-      '2025 - Winter Weekday',
-      '2025 - Winter Weekend',
-      '2025 - Spring Weekday',
-      '2025 - Spring Weekend',
-      '2025 - Summer Weekday',
-      '2025 - Summer Weekend',
-    ];
-
-    for (const field of priceFields) {
-      const value = (row[field] || '').trim();
-      if (value && value !== '') {
-        // Check for inconsistent price formats
-        if (
-          value.includes('$') &&
-          !value.match(/^\$[\d,]+(\.\d{2})?$/) &&
-          !value.match(/^\$[\d,]+-\$[\d,]+$/)
-        ) {
-          addIssue(
-            'Inconsistent Price Format',
-            'low',
-            `Price format may be inconsistent: ${value}`,
-            rowNumber,
-            value,
-            field
-          );
+    // 1. Check for URLs in description
+    console.log('1. Checking for URLs in description field...');
+    let urlsInDescription = 0;
+    for (const record of allData) {
+      if (record.description) {
+        const urlMatches = record.description.match(URL_PATTERN);
+        if (urlMatches && urlMatches.length > 0) {
+          urlsInDescription++;
+          issues.push({
+            id: record.id,
+            property_name: record.property_name,
+            issue_type: 'URL_IN_DESCRIPTION',
+            field: 'description',
+            current_value: record.description.substring(0, 200),
+            suggestion: `Extract URL: ${urlMatches[0]}`,
+          });
         }
       }
     }
+    console.log(`   Found ${urlsInDescription} records with URLs in description\n`);
 
-    // Check coordinates
-    const lat = parseFloat(row.Latitude || '');
-    const lon = parseFloat(row.Longitude || '');
-    if (isNaN(lat) || isNaN(lon)) {
-      missingCoordinates++;
-    }
-
-    // Check for duplicate entries (same property name, address, and site name)
-    const key = `${row['Property Name']}|${row.Address}|${row['Site Name']}`;
-    if (!duplicateEntries.has(key)) {
-      duplicateEntries.set(key, []);
-    }
-    duplicateEntries.get(key)!.push(rowNumber);
-  }
-
-  // Find actual duplicates
-  for (const [key, rows] of duplicateEntries.entries()) {
-    if (rows.length > 1) {
-      addIssue(
-        'Potential Duplicate Entry',
-        'high',
-        `Same property/address/site name appears ${rows.length} times`,
-        rows[0],
-        key.split('|')[0],
-        'Property Name'
-      );
-    }
-  }
-
-  // Check for empty Site Name
-  let emptySiteNames = 0;
-  for (let i = 0; i < records.length; i++) {
-    const siteName = (records[i]['Site Name'] || '').trim();
-    if (!siteName) {
-      emptySiteNames++;
-      if (emptySiteNames <= 5) {
-        addIssue(
-          'Empty Site Name',
-          'medium',
-          'Site Name field is empty',
-          i + 3,
-          '',
-          'Site Name'
-        );
-      }
-    }
-  }
-  if (emptySiteNames > 5) {
-    const issue = issues.find((i) => i.type === 'Empty Site Name');
-    if (issue) {
-      issue.count = emptySiteNames;
-    }
-  }
-
-  // Check for inconsistent Unit Type values
-  const unitTypes = new Set<string>();
-  for (const row of records) {
-    const unitType = (row['Unit Type'] || '').trim();
-    if (unitType) unitTypes.add(unitType);
-  }
-
-  // Check for inconsistent Property Type values
-  const propertyTypes = new Set<string>();
-  for (const row of records) {
-    const propType = (row['Property Type'] || '').trim();
-    if (propType) propertyTypes.add(propType);
-  }
-
-  // Print summary
-  console.log('=== DATA QUALITY ANALYSIS SUMMARY ===\n');
-
-  // Group by severity
-  const highIssues = issues.filter((i) => i.severity === 'high');
-  const mediumIssues = issues.filter((i) => i.severity === 'medium');
-  const lowIssues = issues.filter((i) => i.severity === 'low');
-
-  if (highIssues.length > 0) {
-    console.log('🔴 HIGH PRIORITY ISSUES:\n');
-    highIssues.forEach((issue) => {
-      console.log(`  ${issue.type}: ${issue.count} occurrences`);
-      issue.examples.forEach((ex) => {
-        console.log(`    - Row ${ex.row}: ${ex.value || '(empty)'} (${ex.field})`);
-      });
-      console.log('');
-    });
-  }
-
-  if (mediumIssues.length > 0) {
-    console.log('🟡 MEDIUM PRIORITY ISSUES:\n');
-    mediumIssues.forEach((issue) => {
-      console.log(`  ${issue.type}: ${issue.count} occurrences`);
-      if (issue.examples.length > 0) {
-        issue.examples.slice(0, 3).forEach((ex) => {
-          console.log(`    - Row ${ex.row}: ${ex.value || '(empty)'} (${ex.field})`);
-        });
-        if (issue.examples.length > 3) {
-          console.log(`    ... and ${issue.count - 3} more`);
+    // 2. Check for partial sentences in getting_there
+    console.log('2. Checking for partial sentences in getting_there field...');
+    let partialSentences = 0;
+    for (const record of allData) {
+      if (record.getting_there) {
+        const text = record.getting_there.trim();
+        // Check if it doesn't end with proper punctuation and isn't too short
+        if (text.length > 20 && !text.match(/[.!?]$/) && text.split(' ').length < 10) {
+          partialSentences++;
+          issues.push({
+            id: record.id,
+            property_name: record.property_name,
+            issue_type: 'PARTIAL_SENTENCE_IN_GETTING_THERE',
+            field: 'getting_there',
+            current_value: text,
+            suggestion: 'May be a partial sentence or fragment',
+          });
         }
       }
-      console.log('');
-    });
-  }
+    }
+    console.log(`   Found ${partialSentences} records with potential partial sentences\n`);
 
-  if (lowIssues.length > 0) {
-    console.log('🟢 LOW PRIORITY ISSUES:\n');
-    lowIssues.forEach((issue) => {
-      console.log(`  ${issue.type}: ${issue.count} occurrences`);
-      if (issue.examples.length > 0 && issue.count <= 10) {
-        issue.examples.forEach((ex) => {
-          console.log(`    - Row ${ex.row}: ${ex.value || '(empty)'} (${ex.field})`);
+    // 3. Check for missing website data
+    console.log('3. Checking for missing website data...');
+    let missingWebsites = 0;
+    const missingWebsiteRecords: DataQualityIssue[] = [];
+    for (const record of allData) {
+      const hasUrl = record.url && record.url.trim().length > 0;
+      const hasGoogleUrl = record.google_website_uri && record.google_website_uri.trim().length > 0;
+      
+      if (!hasUrl && !hasGoogleUrl) {
+        missingWebsites++;
+        missingWebsiteRecords.push({
+          id: record.id,
+          property_name: record.property_name,
+          issue_type: 'MISSING_WEBSITE',
+          field: 'url',
+          current_value: null,
+          suggestion: 'Fetch from Google Places API',
         });
       }
-      console.log('');
-    });
-  }
+    }
+    console.log(`   Found ${missingWebsites} records with missing website data\n`);
+    issues.push(...missingWebsiteRecords);
 
-  // Additional statistics
-  console.log('=== ADDITIONAL STATISTICS ===\n');
-  console.log(`Total unique Unit Types: ${unitTypes.size}`);
-  console.log(`  Examples: ${Array.from(unitTypes).slice(0, 10).join(', ')}`);
-  console.log('');
-  console.log(`Total unique Property Types: ${propertyTypes.size}`);
-  console.log(`  Examples: ${Array.from(propertyTypes).slice(0, 10).join(', ')}`);
-  console.log('');
-  console.log(`Rows with missing coordinates: ${missingCoordinates}`);
-  console.log(`Inconsistent country codes found: ${inconsistentCountryCodes.size}`);
-  if (inconsistentCountryCodes.size > 0) {
-    console.log(`  Examples: ${Array.from(inconsistentCountryCodes).slice(0, 5).join(', ')}`);
-  }
-  console.log('');
+    // 4. Check for URLs in getting_there
+    console.log('4. Checking for URLs in getting_there field...');
+    let urlsInGettingThere = 0;
+    for (const record of allData) {
+      if (record.getting_there) {
+        const urlMatches = record.getting_there.match(URL_PATTERN);
+        if (urlMatches && urlMatches.length > 0) {
+          urlsInGettingThere++;
+          issues.push({
+            id: record.id,
+            property_name: record.property_name,
+            issue_type: 'URL_IN_GETTING_THERE',
+            field: 'getting_there',
+            current_value: record.getting_there.substring(0, 200),
+            suggestion: `Extract URL: ${urlMatches[0]}`,
+          });
+        }
+      }
+    }
+    console.log(`   Found ${urlsInGettingThere} records with URLs in getting_there\n`);
 
-  // Recommendations
-  console.log('=== RECOMMENDATIONS ===\n');
-  const recommendations: string[] = [];
+    // 5. Check for very long descriptions (potential data issues)
+    console.log('5. Checking for unusually long descriptions...');
+    let longDescriptions = 0;
+    for (const record of allData) {
+      if (record.description && record.description.length > 2000) {
+        longDescriptions++;
+        issues.push({
+          id: record.id,
+          property_name: record.property_name,
+          issue_type: 'VERY_LONG_DESCRIPTION',
+          field: 'description',
+          current_value: `[${record.description.length} characters]`,
+          suggestion: 'Review for potential concatenation or data issues',
+        });
+      }
+    }
+    console.log(`   Found ${longDescriptions} records with very long descriptions (>2000 chars)\n`);
 
-  if (highIssues.length > 0) {
-    recommendations.push(
-      '1. Fix high-priority issues first (missing coordinates, duplicates)'
-    );
-  }
+    // 6. Check for empty or whitespace-only fields that should have data
+    console.log('6. Checking for empty but expected fields...');
+    let emptyDescriptions = 0;
+    for (const record of allData) {
+      if (!record.description || record.description.trim().length === 0) {
+        emptyDescriptions++;
+      }
+    }
+    console.log(`   Found ${emptyDescriptions} records with empty descriptions\n`);
 
-  if (missingCoordinates > 0) {
-    recommendations.push(
-      `2. Geocode ${missingCoordinates} rows with missing coordinates`
-    );
-  }
+    // Generate summary report
+    console.log('='.repeat(70));
+    console.log('DATA QUALITY ANALYSIS SUMMARY');
+    console.log('='.repeat(70));
+    console.log(`Total Records Analyzed: ${allData.length}`);
+    console.log(`Total Issues Found: ${issues.length}\n`);
+    
+    console.log('Issue Breakdown:');
+    const issueCounts = issues.reduce((acc, issue) => {
+      acc[issue.issue_type] = (acc[issue.issue_type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    for (const [type, count] of Object.entries(issueCounts)) {
+      console.log(`  ${type}: ${count}`);
+    }
 
-  if (inconsistentCountryCodes.size > 0) {
-    recommendations.push(
-      '3. Standardize country field values (use "USA" or "United States" for US, "Canada" for Canada)'
-    );
-  }
+    // Show sample issues
+    console.log('\n' + '='.repeat(70));
+    console.log('SAMPLE ISSUES (first 10)');
+    console.log('='.repeat(70));
+    
+    for (let i = 0; i < Math.min(10, issues.length); i++) {
+      const issue = issues[i];
+      console.log(`\n${i + 1}. ${issue.property_name} (ID: ${issue.id})`);
+      console.log(`   Issue: ${issue.issue_type}`);
+      console.log(`   Field: ${issue.field}`);
+      if (issue.current_value) {
+        console.log(`   Current: ${issue.current_value.substring(0, 150)}${issue.current_value.length > 150 ? '...' : ''}`);
+      }
+      if (issue.suggestion) {
+        console.log(`   Suggestion: ${issue.suggestion}`);
+      }
+    }
 
-  const stateIssues = issues.filter((i) => i.type.includes('State'));
-  if (stateIssues.length > 0) {
-    recommendations.push(
-      '4. Standardize state abbreviations (use 2-letter codes: CA, NY, TX, etc.)'
-    );
-  }
+    // Export issues to JSON for further processing
+    const fs = require('fs');
+    const issuesJson = JSON.stringify(issues, null, 2);
+    fs.writeFileSync('data-quality-issues.json', issuesJson);
+    console.log('\n' + '='.repeat(70));
+    console.log(`✅ Detailed issues exported to: data-quality-issues.json`);
+    console.log(`   Total issues: ${issues.length}`);
 
-  const addressIssues = issues.filter((i) => i.type.includes('Address'));
-  if (addressIssues.length > 0) {
-    recommendations.push('5. Clean up address fields (remove trailing commas/spaces)');
-  }
+    // Statistics for missing websites
+    console.log('\n' + '='.repeat(70));
+    console.log('MISSING WEBSITE STATISTICS');
+    console.log('='.repeat(70));
+    console.log(`Records missing website (url AND google_website_uri): ${missingWebsites}`);
+    console.log(`Percentage: ${((missingWebsites / allData.length) * 100).toFixed(2)}%`);
 
-  const urlIssues = issues.filter((i) => i.type.includes('URL'));
-  if (urlIssues.length > 0) {
-    recommendations.push('6. Add http:// or https:// protocol to URLs missing them');
-  }
+    // Check how many have google_website_uri but not url
+    let googleOnly = 0;
+    for (const record of allData) {
+      const hasUrl = record.url && record.url.trim().length > 0;
+      const hasGoogleUrl = record.google_website_uri && record.google_website_uri.trim().length > 0;
+      if (!hasUrl && hasGoogleUrl) {
+        googleOnly++;
+      }
+    }
+    console.log(`Records with google_website_uri but not url: ${googleOnly}`);
+    console.log(`Records that need website from Google Places: ${missingWebsites}`);
 
-  const priceIssues = issues.filter((i) => i.type.includes('Price'));
-  if (priceIssues.length > 0) {
-    recommendations.push('7. Standardize price formatting (use $XXX.XX format)');
-  }
-
-  if (emptySiteNames > 0) {
-    recommendations.push(
-      `8. Fill in ${emptySiteNames} empty Site Name fields (or use Property Name as default)`
-    );
-  }
-
-  recommendations.forEach((rec, idx) => {
-    console.log(`  ${rec}`);
-  });
-
-  console.log('\n=== ANALYSIS COMPLETE ===\n');
-}
-
-// Main execution
-const inputFile =
-  process.argv[2] ||
-  path.join(
-    __dirname,
-    '../csv/Sage Database_ Glamping Sites  - Work In Progress (1)_CORRECTED.csv'
-  );
-
-analyzeDataQuality(inputFile)
-  .then(() => {
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('Error:', error);
+  } catch (error) {
+    console.error('❌ Analysis failed:', error);
     process.exit(1);
-  });
+  }
+}
 
+analyzeDataQuality();
