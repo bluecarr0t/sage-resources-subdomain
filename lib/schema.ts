@@ -523,7 +523,7 @@ export function generatePropertyLocalBusinessSchema(property: {
   const url = `${baseUrl}/property/${property.slug}`;
   
   // Parse photos if string
-  let photos: Array<{ name: string }> = [];
+  let photos: Array<{ name: string; widthPx?: number; heightPx?: number }> = [];
   if (property.google_photos) {
     if (typeof property.google_photos === 'string') {
       try {
