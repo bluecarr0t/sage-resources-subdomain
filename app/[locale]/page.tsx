@@ -1,17 +1,32 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from 'next/dynamic';
 import { getAllGuideSlugs, getGuide, getGuidesByCategory } from "@/lib/guides";
 import { getAllGlossaryTerms } from "@/lib/glossary/index";
 import { getAllLandingPageSlugs, getLandingPage } from "@/lib/landing-pages";
 import { generateOrganizationSchema, generateItemListSchema } from "@/lib/schema";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
-import LocationSearch from "@/components/LocationSearch";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
 import { notFound } from "next/navigation";
+
+// Dynamically import LocationSearch to prevent SSR issues
+const DynamicLocationSearch = dynamic(() => import('@/components/LocationSearch'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4 border border-white/20">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-14 bg-gray-200 rounded-xl animate-pulse" />
+          <div className="w-32 h-14 bg-gray-200 rounded-xl animate-pulse" />
+        </div>
+      </div>
+    </div>
+  ),
+});
 
 interface PageProps {
   params: {
@@ -35,12 +50,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
   
   return {
-    title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
-    description: "Discover your perfect glamping experience. Search 500+ unique glamping properties across the US and Canada. From luxury safari tents to cozy cabins, find your ideal outdoor adventure today.",
+    title: "Find Glamping Near You | 500+ Properties | Sage Outdoor Advisory",
+    description: "Discover 500+ unique glamping properties across the US and Canada. Search by location, view photos, amenities, and rates. Find your perfect outdoor adventure today.",
     keywords: "glamping near me, find glamping, glamping properties, glamping destinations, luxury camping, outdoor hospitality, glamping resorts, glamping experiences",
     openGraph: {
-      title: "Find Glamping Near You | 500+ Properties Across North America",
-      description: "Discover your perfect glamping experience. Search 500+ unique glamping properties across the US and Canada.",
+      title: "Find Glamping Near You | 500+ Properties | Sage Outdoor Advisory",
+      description: "Discover 500+ unique glamping properties across the US and Canada. Search by location, view photos, amenities, and rates.",
       url,
       siteName: "Sage Outdoor Advisory",
       locale: getOpenGraphLocale(locale as Locale),
@@ -56,8 +71,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: "Find Glamping Near You | 500+ Properties Across North America",
-      description: "Discover your perfect glamping experience. Search 500+ unique glamping properties.",
+      title: "Find Glamping Near You | 500+ Properties | Sage",
+      description: "Discover 500+ unique glamping properties across the US and Canada. Search by location and view photos.",
       images: ["https://sageoutdooradvisory.com/og-image.jpg"],
     },
     alternates: {
@@ -120,7 +135,7 @@ export default async function HomePage({ params }: PageProps) {
 
       <div className="min-h-screen bg-white">
         {/* Floating Header */}
-        <FloatingHeader locale={locale} showSpacer={false} />
+        <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
 
         {/* Hero Section */}
         <section className="relative overflow-hidden h-screen">
@@ -149,7 +164,7 @@ export default async function HomePage({ params }: PageProps) {
                 
                 {/* Location Search */}
                 <div className="mb-8">
-                  <LocationSearch locale={locale} />
+                  <DynamicLocationSearch locale={locale} />
                 </div>
 
                 {/* Quick Stats */}

@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
 import { Analytics } from '@vercel/analytics/next';
-import GoogleAnalytics from "@/components/GoogleAnalytics";
+import dynamic from 'next/dynamic';
 import '../globals.css';
+
+// Dynamically import GoogleAnalytics to prevent SSR issues with useSearchParams
+const DynamicGoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), {
+  ssr: false,
+});
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -55,7 +61,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body>
-        <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <DynamicGoogleAnalytics />
+        </Suspense>
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
