@@ -328,13 +328,13 @@ export default async function PropertyPage({ params }: PageProps) {
   if (slugType === 'national-park') {
     const park = await getNationalParkBySlug(slug);
     
-    if (!park) {
+    if (!park || !park.name) {
       notFound();
     }
     
     // Fetch Google Places data
     const googlePlacesData = await fetchGooglePlacesData(
-      park.name || null,
+      park.name,
       null,
       park.state || null,
       null
