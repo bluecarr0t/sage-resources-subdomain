@@ -24,12 +24,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const imageUrl = `${baseUrl}/og-map-image.jpg`;
 
   return {
-    title: "Interactive Glamping Properties Map | 470+ Locations | Sage Outdoor Advisory",
-    description: "Explore 470+ glamping properties across the United States and Canada on our interactive map. Filter by location, unit type, and price range. Find the perfect glamping destination.",
+    title: "Glamping Properties Map | 500+ Locations | Sage Outdoor Advisory",
+    description: "Explore 500+ glamping properties across the US and Canada on our interactive map. Filter by location, unit type, and price range. Find your perfect glamping destination.",
     keywords: "glamping properties map, glamping locations, glamping sites by state, interactive glamping map, glamping near me, glamping properties USA, glamping properties Canada, glamping map North America",
     openGraph: {
-      title: "Interactive Glamping Properties Map | Sage Outdoor Advisory",
-      description: "Explore 470+ glamping properties across the United States and Canada on our interactive map. Filter by location, unit type, and price range.",
+      title: "Glamping Properties Map | 500+ Locations | Sage",
+      description: "Explore 500+ glamping properties across the US and Canada on our interactive map. Filter by location, unit type, and price range.",
       url,
       siteName: "Sage Outdoor Advisory",
       images: [
@@ -45,8 +45,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Interactive Glamping Properties Map",
-      description: "Explore 470+ glamping properties across the United States and Canada",
+      title: "Glamping Properties Map | 500+ Locations",
+      description: "Explore 500+ glamping properties across the US and Canada on our interactive map",
       images: [imageUrl],
     },
     alternates: {
@@ -161,7 +161,7 @@ export default async function MapPage() {
                 <ol className="flex items-center gap-1.5 text-sm text-gray-600">
                   <li>
                     <Link
-                      href="https://sageoutdooradvisory.com/"
+                      href="/"
                       className="hover:text-gray-900 transition-colors"
                     >
                       Home
@@ -179,9 +179,6 @@ export default async function MapPage() {
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
                   Glamping Properties Map
                 </h1>
-                <p className="text-xs text-gray-600 leading-relaxed mb-3">
-                  Explore {stats.uniqueProperties}+ glamping properties across {stats.states} US states and {stats.provinces} Canadian provinces. Click on markers to view property details, photos, and amenities.
-                </p>
               </section>
             </div>
             

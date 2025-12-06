@@ -115,10 +115,10 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
 
       <div className="min-h-screen bg-white">
         {/* Floating Header */}
-        <FloatingHeader showFullNav={false} />
+        <FloatingHeader showFullNav={true} showSpacer={false} />
 
         {/* Breadcrumbs */}
-        <nav className="bg-gray-50 border-b border-gray-200 py-3">
+        <nav className="bg-gray-50 border-b border-gray-200 py-3 pt-32 md:pt-36">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Link href="https://sageoutdooradvisory.com" className="hover:text-[#006b5f]">
@@ -136,7 +136,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
 
         <main>
         {/* Hero Section */}
-        <section className={`relative ${content.hero.backgroundImage ? 'py-16 overflow-hidden' : 'bg-gradient-to-br from-blue-50 to-indigo-100 py-16'}`}>
+        <section className={`relative ${content.hero.backgroundImage ? 'pt-32 md:pt-36 pb-16 overflow-hidden' : 'bg-gradient-to-br from-blue-50 to-indigo-100 pt-32 md:pt-36 pb-16'}`}>
           {content.hero.backgroundImage && (
             <>
               {/* Background Image */}
@@ -163,17 +163,6 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
               <p className={`text-xl mb-8 ${content.hero.backgroundImage ? 'text-white/95 drop-shadow-md' : 'text-gray-700'}`}>
                 {content.hero.subheadline}
               </p>
-              {content.lastModified && (
-                <div className={`bg-blue-50/90 border-l-4 border-blue-400 p-3 rounded mb-6 inline-block ${content.hero.backgroundImage ? 'bg-white/90' : ''}`}>
-                  <p className={`text-sm ${content.hero.backgroundImage ? 'text-gray-700' : 'text-gray-700'}`}>
-                    <strong>Last Updated:</strong> {new Date(content.lastModified).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </div>
-              )}
               {content.hero.ctaText && content.hero.ctaLink && (
                 <Link
                   href={content.hero.ctaLink}

@@ -7,6 +7,7 @@ interface MapContextType {
   filterState: string[];
   filterUnitType: string[];
   filterRateRange: string[];
+  showNationalParks: boolean;
   setFilterCountry: (country: string[]) => void;
   setFilterState: (state: string[]) => void;
   setFilterUnitType: (unitType: string[]) => void;
@@ -15,6 +16,7 @@ interface MapContextType {
   toggleState: (state: string) => void;
   toggleUnitType: (unitType: string) => void;
   toggleRateRange: (rateRange: string) => void;
+  toggleNationalParks: () => void;
   clearFilters: () => void;
   hasActiveFilters: boolean;
 }
@@ -26,6 +28,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const [filterState, setFilterState] = useState<string[]>([]);
   const [filterUnitType, setFilterUnitType] = useState<string[]>([]);
   const [filterRateRange, setFilterRateRange] = useState<string[]>([]);
+  const [showNationalParks, setShowNationalParks] = useState<boolean>(true);
 
   const toggleCountry = (country: string) => {
     setFilterCountry((prev) => 
@@ -59,11 +62,16 @@ export function MapProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const toggleNationalParks = () => {
+    setShowNationalParks((prev) => !prev);
+  };
+
   const clearFilters = () => {
     setFilterCountry(['United States', 'Canada']);
     setFilterState([]);
     setFilterUnitType([]);
     setFilterRateRange([]);
+    // Note: showNationalParks is not reset by clearFilters as it's a display preference, not a filter
   };
 
   const hasActiveFilters = filterCountry.length !== 2 || !filterCountry.includes('United States') || !filterCountry.includes('Canada') || filterState.length > 0 || filterUnitType.length > 0 || filterRateRange.length > 0;
@@ -75,6 +83,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         filterState, 
         filterUnitType,
         filterRateRange,
+        showNationalParks,
         setFilterCountry,
         setFilterState, 
         setFilterUnitType,
@@ -83,6 +92,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         toggleState,
         toggleUnitType,
         toggleRateRange,
+        toggleNationalParks,
         clearFilters,
         hasActiveFilters
       }}

@@ -32,8 +32,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
   
   return {
-    title: "Outdoor Hospitality Glossary | Industry Terms & Definitions | Sage Outdoor Advisory",
-    description: "Comprehensive glossary of outdoor hospitality industry terms. Learn definitions for glamping, RV resorts, feasibility studies, appraisals, and more.",
+    title: "Outdoor Hospitality Glossary | Terms & Definitions | Sage Outdoor Advisory",
+    description: "Comprehensive glossary of outdoor hospitality terms. Learn definitions for glamping, RV resorts, feasibility studies, appraisals, and more.",
     keywords: "outdoor hospitality glossary, glamping terms, RV resort definitions, feasibility study terms, hospitality industry glossary",
     openGraph: {
       title: "Outdoor Hospitality Glossary | Sage Outdoor Advisory",
@@ -116,10 +116,10 @@ export default function GlossaryPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Header */}
-      <FloatingHeader locale={locale} />
+      <FloatingHeader locale={locale} showSpacer={false} />
 
       {/* Hero Section */}
-      <section className="relative py-16 overflow-hidden">
+      <section className="relative pt-32 md:pt-36 pb-32 md:pb-40 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -136,7 +136,7 @@ export default function GlossaryPage({ params }: PageProps) {
         </div>
         
         {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
               Outdoor Hospitality Glossary

@@ -81,6 +81,30 @@ const CANADIAN_PROVINCES = [
 ];
 
 /**
+ * Convert state abbreviation(s) to full state name(s)
+ * Handles multiple states separated by commas, and preserves full names
+ */
+function getFullStateName(state: string | null): string | null {
+  if (!state) return null;
+  
+  // Handle multiple states separated by commas or semicolons
+  const stateSeparator = state.includes(',') ? ',' : (state.includes(';') ? ';' : null);
+  
+  if (stateSeparator) {
+    const states = state.split(stateSeparator).map(s => s.trim()).filter(Boolean);
+    const fullNames = states.map(s => {
+      const upperState = s.toUpperCase();
+      return STATE_ABBREVIATIONS[upperState] || s;
+    });
+    return fullNames.join(', ');
+  }
+  
+  // Single state - check if it's an abbreviation
+  const upperState = state.toUpperCase();
+  return STATE_ABBREVIATIONS[upperState] || state;
+}
+
+/**
  * Normalize property name for consistent grouping and counting
  * Trims whitespace and converts to lowercase to prevent duplicates
  */
@@ -223,7 +247,7 @@ interface GooglePropertyMapProps {
 }
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
-  const { filterCountry, filterState, filterUnitType, filterRateRange, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, clearFilters, hasActiveFilters } = useMapContext();
+  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, clearFilters, hasActiveFilters } = useMapContext();
   const [properties, setProperties] = useState<SageProperty[]>([]);
   const [allProperties, setAllProperties] = useState<SageProperty[]>([]); // Store all properties for filter option calculation
   const [nationalParks, setNationalParks] = useState<NationalPark[]>([]);
@@ -370,6 +394,46 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       router.replace(newUrl, { scroll: false });
     }
   }, [filterCountry, filterState, filterUnitType, filterRateRange, isClient, urlInitialized, pathname, router, searchParams]);
+
+  // Watch for changes to lat/lon/zoom URL parameters and update map position
+  useEffect(() => {
+    if (!isClient || !urlInitialized) return;
+
+    const urlLat = searchParams.get('lat');
+    const urlLon = searchParams.get('lon');
+    const urlZoom = searchParams.get('zoom');
+
+    // If lat/lon/zoom are provided, use them to center and zoom the map
+    if (urlLat && urlLon) {
+      const lat = parseFloat(urlLat);
+      const lon = parseFloat(urlLon);
+      if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
+        const newCenter = { lat, lng: lon };
+        // Always update mapCenter when URL params change (comparison prevents unnecessary re-renders in map effect)
+        setMapCenter(newCenter);
+        setShouldFitBounds(false); // Don't fit bounds if we have specific coordinates
+        hasCenteredFromUrlRef.current = false; // Reset so we can center again with new coordinates
+        
+        // Set zoom if provided, otherwise use default zoom for single location
+        if (urlZoom) {
+          const zoom = parseFloat(urlZoom);
+          if (!isNaN(zoom) && isFinite(zoom) && zoom >= 1 && zoom <= 20) {
+            setMapZoom(zoom);
+          } else {
+            setMapZoom(15); // Default zoom for single location
+          }
+        } else {
+          setMapZoom(15); // Default zoom for single location
+        }
+      }
+    } else {
+      // No lat/lon params, reset to defaults
+      setMapCenter(defaultCenter);
+      setMapZoom(defaultZoom);
+      setShouldFitBounds(true);
+      hasCenteredFromUrlRef.current = false;
+    }
+  }, [isClient, urlInitialized, searchParams]);
 
   // Fetch all properties once (without filters) for filter option calculation
   useEffect(() => {
@@ -1051,27 +1115,38 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   
   // When map is loaded and we have specific coordinates from URL, center and zoom to that location
   useEffect(() => {
-    if (map && !shouldFitBounds && mapCenter && mapZoom && !hasCenteredFromUrlRef.current) {
+    if (map && !shouldFitBounds && mapCenter && mapZoom) {
       // Only center/zoom if coordinates are different from defaults (meaning we have URL params)
       const isFromUrl = mapCenter.lat !== defaultCenter.lat || mapCenter.lng !== defaultCenter.lng || mapZoom !== defaultZoom;
       
       if (isFromUrl) {
-        map.setCenter(mapCenter);
-        map.setZoom(mapZoom);
-        hasCenteredFromUrlRef.current = true;
+        // Check if map is already at the desired position (within a small threshold to avoid unnecessary updates)
+        const currentCenter = map.getCenter();
+        const currentZoom = map.getZoom();
+        const centerDiff = currentCenter ? 
+          Math.abs(currentCenter.lat() - mapCenter.lat) + Math.abs(currentCenter.lng() - mapCenter.lng) : 
+          Infinity;
+        const zoomDiff = currentZoom ? Math.abs(currentZoom - mapZoom) : Infinity;
         
-        // Try to find and select the property at these coordinates
-        if (propertiesWithCoords.length > 0) {
-          const targetProperty = propertiesWithCoords.find((property) => {
-            const [lat, lon] = property.coordinates;
-            // Check if coordinates are close (within ~0.01 degrees, roughly 1km)
-            const latDiff = Math.abs(lat - mapCenter.lat);
-            const lonDiff = Math.abs(lon - mapCenter.lng);
-            return latDiff < 0.01 && lonDiff < 0.01;
-          });
+        // Only update if position has changed significantly (more than 0.001 degrees or 0.5 zoom levels)
+        if (centerDiff > 0.001 || zoomDiff > 0.5) {
+          map.setCenter(mapCenter);
+          map.setZoom(mapZoom);
+          hasCenteredFromUrlRef.current = true;
           
-          if (targetProperty) {
-            setSelectedProperty(targetProperty);
+          // Try to find and select the property at these coordinates
+          if (propertiesWithCoords.length > 0) {
+            const targetProperty = propertiesWithCoords.find((property) => {
+              const [lat, lon] = property.coordinates;
+              // Check if coordinates are close (within ~0.01 degrees, roughly 1km)
+              const latDiff = Math.abs(lat - mapCenter.lat);
+              const lonDiff = Math.abs(lon - mapCenter.lng);
+              return latDiff < 0.01 && lonDiff < 0.01;
+            });
+            
+            if (targetProperty) {
+              setSelectedProperty(targetProperty);
+            }
           }
         }
       }
@@ -1193,6 +1268,18 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       return;
     }
 
+    // If National Parks are hidden, clean up and return early
+    if (!showNationalParks) {
+      parkMarkersRef.current.forEach(marker => {
+        marker.setMap(null);
+        google.maps.event.clearInstanceListeners(marker);
+      });
+      parkMarkersRef.current = [];
+      // Close park InfoWindow if open
+      setSelectedPark(null);
+      return;
+    }
+
     // Filter parks with valid coordinates
     const parksWithCoords = filterParksWithCoordinates(nationalParks);
 
@@ -1249,7 +1336,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         google.maps.event.clearInstanceListeners(marker);
       });
     };
-  }, [map, isClient, nationalParks]);
+  }, [map, isClient, nationalParks, showNationalParks]);
 
   const uniqueStates = useMemo(() => {
     // Filter properties by country if only one country is selected
@@ -2619,6 +2706,45 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               onClear={() => setFilterRateRange([])}
               activeColor="green"
             />
+
+            {/* National Parks Toggle */}
+            <div className="space-y-2">
+              <label htmlFor="national-parks-toggle" className="block text-sm font-semibold text-gray-900">
+                Map Layers
+              </label>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900">
+                      Show National Parks
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({filterParksWithCoordinates(nationalParks).length} parks)
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    Display National Parks markers on the map
+                  </p>
+                </div>
+                <button
+                  id="national-parks-toggle"
+                  type="button"
+                  role="switch"
+                  aria-checked={showNationalParks}
+                  aria-label={showNationalParks ? 'Hide National Parks' : 'Show National Parks'}
+                  onClick={toggleNationalParks}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2 ${
+                    showNationalParks ? 'bg-[#10B981]' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      showNationalParks ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2693,16 +2819,13 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                 >
                   <div className="max-w-xs p-2">
                     <h3 className="font-bold text-lg mb-2 text-gray-900">
-                      {selectedPark.name}
+                      {selectedPark.name.includes('National Park') 
+                        ? selectedPark.name 
+                        : `${selectedPark.name} National Park`}
                     </h3>
                     {selectedPark.state && (
                       <p className="text-sm text-gray-600 mb-2">
-                        {selectedPark.state}
-                      </p>
-                    )}
-                    {selectedPark.park_code && (
-                      <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">Park Code:</span> {selectedPark.park_code}
+                        {getFullStateName(selectedPark.state)}
                       </p>
                     )}
                     {selectedPark.date_established && (
@@ -2717,7 +2840,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     )}
                     {selectedPark.recreation_visitors_2021 && (
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">Visitors (2021):</span> {selectedPark.recreation_visitors_2021.toLocaleString()}
+                        <span className="font-semibold">Visitors (2021):</span> {parseInt(selectedPark.recreation_visitors_2021, 10).toLocaleString()}
                       </p>
                     )}
                     {selectedPark.description && (

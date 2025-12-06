@@ -10,18 +10,21 @@ const GOOGLE_MAPS_LIBRARIES: ('places')[] = ['places'];
 interface LocationSearchProps {
   locale: string;
   onLocationSelect?: (location: { lat: number; lng: number; name: string }) => void;
+  variant?: 'default' | 'compact';
 }
 
-export default function LocationSearch({ locale, onLocationSelect }: LocationSearchProps) {
+export default function LocationSearch({ locale, onLocationSelect, variant = 'default' }: LocationSearchProps) {
   const [searchValue, setSearchValue] = useState('');
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [dropdownMaxHeight, setDropdownMaxHeight] = useState<number>(400);
   const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownScrollRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
@@ -59,6 +62,91 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
       console.log('[LocationSearch] Dropdown state:', isOpen ? 'open' : 'closed');
     }
   }, [isOpen]);
+
+  // Calculate available space for dropdown when it opens
+  useEffect(() => {
+    if (isOpen && containerRef.current && inputRef.current) {
+      const calculateMaxHeight = () => {
+        const input = inputRef.current;
+        if (!input) return;
+
+        const inputRect = input.getBoundingClientRect();
+        
+        // Check if we're in a sidebar (map page) or hero section (landing page)
+        const sidebar = input.closest('aside');
+        const heroSection: HTMLElement | null = input.closest('section');
+        
+        let availableSpace: number;
+        const isDesktop = window.innerWidth >= 768; // md breakpoint
+        
+        if (sidebar) {
+          // For sidebar context (map page): calculate space to bottom of sidebar or viewport
+          const sidebarRect = sidebar.getBoundingClientRect();
+          const viewportBottom = window.innerHeight;
+          const sidebarBottom = sidebarRect.bottom;
+          
+          // Use the smaller of sidebar bottom or viewport bottom
+          const containerBottom = Math.min(sidebarBottom, viewportBottom);
+          const inputBottom = inputRect.bottom;
+          
+          // Account for: input bottom + mt-2 (8px margin) + padding (16px)
+          availableSpace = containerBottom - inputBottom - 8 - 16;
+          
+          // On desktop, allow larger dropdown (up to 500px), on mobile cap at 300px
+          const maxHeight = isDesktop ? 500 : 300;
+          const minHeight = isDesktop ? 200 : 120;
+          
+          availableSpace = Math.max(minHeight, Math.min(maxHeight, Math.max(0, availableSpace)));
+        } else if (heroSection) {
+          // For hero section context (landing page): use existing logic
+          const heroRect = heroSection.getBoundingClientRect();
+          const heroBottom = heroRect.bottom;
+          const inputBottom = inputRect.bottom;
+          const spaceBelow = heroBottom - inputBottom - 8 - 16;
+          
+          // Original limits for hero section
+          availableSpace = Math.max(120, Math.min(280, Math.max(0, spaceBelow)));
+        } else {
+          // Fallback: use viewport height
+          const viewportBottom = window.innerHeight;
+          const inputBottom = inputRect.bottom;
+          const spaceBelow = viewportBottom - inputBottom - 8 - 16;
+          
+          const maxHeight = isDesktop ? 500 : 300;
+          const minHeight = isDesktop ? 200 : 120;
+          availableSpace = Math.max(minHeight, Math.min(maxHeight, Math.max(0, spaceBelow)));
+        }
+        
+        setDropdownMaxHeight(availableSpace);
+      };
+
+      // Calculate on open with a small delay to ensure DOM is ready
+      const timeoutId = setTimeout(calculateMaxHeight, 10);
+
+      // Recalculate on window resize or scroll
+      window.addEventListener('resize', calculateMaxHeight);
+      window.addEventListener('scroll', calculateMaxHeight, true);
+
+      return () => {
+        clearTimeout(timeoutId);
+        window.removeEventListener('resize', calculateMaxHeight);
+        window.removeEventListener('scroll', calculateMaxHeight, true);
+      };
+    }
+  }, [isOpen]);
+
+  // Scroll selected item into view when using keyboard navigation
+  useEffect(() => {
+    if (selectedIndex >= 0 && dropdownScrollRef.current) {
+      const selectedElement = dropdownScrollRef.current.children[selectedIndex] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+      }
+    }
+  }, [selectedIndex]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -263,6 +351,9 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
     e.preventDefault();
     if (predictions.length > 0) {
       handlePlaceSelect(predictions[0].place_id, predictions[0].description);
+    } else {
+      // If nothing is selected, redirect to map page
+      router.push(`/${locale}/map`);
     }
   };
 
@@ -296,16 +387,20 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
   }
 
   const showDropdown = isOpen && predictions.length > 0;
+  const isCompact = variant === 'compact';
 
   return (
-    <div ref={containerRef} className="w-full max-w-2xl mx-auto relative">
+    <div ref={containerRef} className={`w-full relative ${isCompact ? '' : 'max-w-2xl mx-auto'}`}>
       <form onSubmit={handleSubmit}>
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-1 border border-white/20">
+        <div className={isCompact 
+          ? "bg-white rounded-lg shadow-sm border border-gray-200 p-1"
+          : "bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-1 border border-white/20"
+        }>
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <div className={`absolute top-1/2 -translate-y-1/2 text-gray-400 ${isCompact ? 'left-3' : 'left-4'}`}>
                 <svg
-                  className="w-6 h-6"
+                  className={isCompact ? "w-5 h-5" : "w-6 h-6"}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -314,7 +409,7 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
                   />
                 </svg>
               </div>
@@ -325,8 +420,10 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 onFocus={handleFocus}
-                placeholder="Enter your destination (city, state, or region)"
-                className="w-full pl-12 pr-4 py-4 text-lg bg-transparent border-none outline-none text-gray-900 placeholder-gray-400"
+                placeholder={isCompact ? "Search location..." : "Enter your destination (city, state, or region)"}
+                className={`w-full bg-transparent border-none outline-none text-gray-900 placeholder-gray-400 ${
+                  isCompact ? 'pl-10 pr-3 py-2.5 text-sm' : 'pl-12 pr-4 py-4 text-lg'
+                }`}
                 autoComplete="off"
                 role="combobox"
                 aria-expanded={showDropdown}
@@ -334,17 +431,19 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
                 aria-autocomplete="list"
               />
               {isSearching && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00b6a6]" />
+                <div className={`absolute top-1/2 -translate-y-1/2 ${isCompact ? 'right-3' : 'right-4'}`}>
+                  <div className={`animate-spin rounded-full border-[#00b6a6] ${isCompact ? 'h-4 w-4 border-2' : 'h-5 w-5 border-b-2'}`} />
                 </div>
               )}
             </div>
-            <button
-              type="submit"
-              className="px-8 py-4 bg-[#00b6a6] text-white font-semibold rounded-xl hover:bg-[#009688] transition-colors shadow-lg hover:shadow-xl whitespace-nowrap"
-            >
-              Find Glamping
-            </button>
+            {!isCompact && (
+              <button
+                type="submit"
+                className="px-8 py-4 bg-[#00b6a6] text-white font-semibold rounded-xl hover:bg-[#009688] transition-colors shadow-lg hover:shadow-xl whitespace-nowrap"
+              >
+                Find Glamping
+              </button>
+            )}
           </div>
         </div>
       </form>
@@ -374,12 +473,15 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
         <div
           id="location-listbox"
           role="listbox"
-          className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-[100] max-h-80 overflow-y-auto"
+          className={`absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 z-[100] overflow-hidden flex flex-col ${
+            isCompact ? 'rounded-lg shadow-lg' : 'rounded-xl shadow-2xl'
+          }`}
+          style={{ maxHeight: `${dropdownMaxHeight}px` }}
         >
-          <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Suggestions</p>
+          <div className={`${isCompact ? 'px-2 py-1.5' : 'px-3 py-2'} bg-gray-50 border-b border-gray-200 flex-shrink-0`}>
+            <p className={`${isCompact ? 'text-[10px]' : 'text-xs'} font-semibold text-gray-600 uppercase tracking-wide`}>Suggestions</p>
           </div>
-          <div>
+          <div ref={dropdownScrollRef} className="location-dropdown-scroll overflow-y-auto overscroll-contain">
             {predictions.map((prediction, index) => (
               <div
                 key={prediction.place_id}
@@ -389,16 +491,18 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
                   handlePlaceSelect(prediction.place_id, prediction.description);
                 }}
                 onMouseEnter={() => setSelectedIndex(index)}
-                className={`w-full px-4 py-3 text-left transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer ${
+                className={`w-full text-left transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer ${
+                  isCompact ? 'px-3 py-2' : 'px-4 py-3'
+                } ${
                   selectedIndex === index
                     ? 'bg-[#00b6a6]/10 border-[#00b6a6]/20'
                     : 'hover:bg-[#00b6a6]/5 active:bg-[#00b6a6]/10'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`mt-0.5 flex-shrink-0 ${selectedIndex === index ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
+                  <div className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${selectedIndex === index ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
                     <svg
-                      className="w-5 h-5"
+                      className={isCompact ? "w-4 h-4" : "w-5 h-5"}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -418,10 +522,10 @@ export default function LocationSearch({ locale, onLocationSelect }: LocationSea
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className={`font-semibold truncate ${selectedIndex === index ? 'text-[#006b5f]' : 'text-gray-900'}`}>
+                    <div className={`${isCompact ? 'text-sm' : ''} font-semibold truncate ${selectedIndex === index ? 'text-[#006b5f]' : 'text-gray-900'}`}>
                       {prediction.structured_formatting.main_text}
                     </div>
-                    <div className="text-sm text-gray-500 truncate">{prediction.structured_formatting.secondary_text}</div>
+                    <div className={`${isCompact ? 'text-xs' : 'text-sm'} text-gray-500 truncate`}>{prediction.structured_formatting.secondary_text}</div>
                   </div>
                 </div>
               </div>

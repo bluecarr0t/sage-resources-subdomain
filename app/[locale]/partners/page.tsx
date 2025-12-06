@@ -5,12 +5,12 @@ import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
 
 export const metadata: Metadata = {
-  title: "Sage Partners | Industry-Leading Outdoor Hospitality Experts | Sage Outdoor Advisory",
-  description: "Sage partners exclusively with industry-leading firms specializing in architecture, engineering, financing, management, planning, and development for outdoor hospitality projects.",
+  title: "Sage Partners | Outdoor Hospitality Experts | Sage Outdoor Advisory",
+  description: "Trusted partners for outdoor hospitality development. Industry-leading firms in architecture, engineering, financing, management, and planning for your project.",
   keywords: "outdoor hospitality partners, glamping consultants, RV resort partners, campground development partners, hospitality financing",
   openGraph: {
-    title: "Sage Partners | Industry-Leading Outdoor Hospitality Experts",
-    description: "Trusted partners for outdoor hospitality development, from design and engineering to financing and management",
+    title: "Sage Partners | Outdoor Hospitality Experts | Sage",
+    description: "Trusted partners for outdoor hospitality development. Industry-leading firms in architecture, engineering, financing, management, and planning",
     url: "https://resources.sageoutdooradvisory.com/partners",
     siteName: "Sage Outdoor Advisory",
     type: "website",
@@ -174,10 +174,10 @@ export default function PartnersPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Header */}
-      <FloatingHeader />
+      <FloatingHeader showSpacer={false} />
 
       {/* Hero Section */}
-      <section className="relative py-16 overflow-hidden">
+      <section className="relative pt-32 md:pt-36 pb-16 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image

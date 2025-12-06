@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -26,9 +26,17 @@ export default function FloatingHeader({
   showSpacer = true
 }: FloatingHeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isForBusinessesOpen, setIsForBusinessesOpen] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
   const pathname = usePathname();
+  const resourcesDropdownRef = useRef<HTMLDivElement>(null);
+  const servicesDropdownRef = useRef<HTMLDivElement>(null);
+  const resourcesButtonRef = useRef<HTMLButtonElement>(null);
+  const servicesButtonRef = useRef<HTMLButtonElement>(null);
+  const lastScrollY = useRef(0);
+  const scrollThreshold = 100; // Minimum scroll distance before hiding header
 
   // Auto-detect locale from pathname if not provided
   const locale = useMemo(() => {
@@ -57,12 +65,54 @@ export default function FloatingHeader({
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const currentScrollY = window.scrollY;
+      
+      // Update scrolled state for styling
+      setIsScrolled(currentScrollY > 20);
+      
+      // Always show header at the top of the page
+      if (currentScrollY < scrollThreshold) {
+        setIsHeaderVisible(true);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+      
+      // Determine scroll direction
+      const scrollingDown = currentScrollY > lastScrollY.current;
+      const scrollingUp = currentScrollY < lastScrollY.current;
+      
+      // Only update if scroll direction changed significantly (prevents flickering)
+      if (scrollingDown && currentScrollY - lastScrollY.current > 5) {
+        setIsHeaderVisible(false);
+      } else if (scrollingUp && lastScrollY.current - currentScrollY > 5) {
+        setIsHeaderVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    // Throttle scroll events for better performance
+    let ticking = false;
+    const throttledHandleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', throttledHandleScroll);
+  }, [scrollThreshold]);
+
+  // Keep header visible when dropdowns or mobile menu are open
+  useEffect(() => {
+    if (isResourcesOpen || isServicesOpen || isMobileMenuOpen) {
+      setIsHeaderVisible(true);
+    }
+  }, [isResourcesOpen, isServicesOpen, isMobileMenuOpen]);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -81,6 +131,54 @@ export default function FloatingHeader({
     };
   }, [isMobileMenuOpen]);
 
+  // Handle click outside for Resources dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        isResourcesOpen &&
+        resourcesDropdownRef.current &&
+        resourcesButtonRef.current &&
+        !resourcesDropdownRef.current.contains(target) &&
+        !resourcesButtonRef.current.contains(target)
+      ) {
+        setIsResourcesOpen(false);
+      }
+    };
+
+    if (isResourcesOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isResourcesOpen]);
+
+  // Handle click outside for Services dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        isServicesOpen &&
+        servicesDropdownRef.current &&
+        servicesButtonRef.current &&
+        !servicesDropdownRef.current.contains(target) &&
+        !servicesButtonRef.current.contains(target)
+      ) {
+        setIsServicesOpen(false);
+      }
+    };
+
+    if (isServicesOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isServicesOpen]);
+
   const isActive = (path: string) => {
     return pathname === path || pathname?.startsWith(path + '/');
   };
@@ -93,6 +191,10 @@ export default function FloatingHeader({
       {/* Floating Header */}
       <header
         className={`fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-50 transition-all duration-300 ${
+          isHeaderVisible
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-full opacity-0 pointer-events-none'
+        } ${
           isScrolled
             ? 'shadow-2xl backdrop-blur-xl bg-black border border-gray-800/50'
             : 'shadow-xl backdrop-blur-lg bg-black border border-gray-800/30'
@@ -101,14 +203,14 @@ export default function FloatingHeader({
           borderRadius: '24px',
         }}
       >
-        <div className="px-4 sm:px-6 lg:px-8 py-1 md:py-1.5">
+        <div className="px-4 sm:px-6 lg:px-8 py-0">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link 
-              href="https://resources.sageoutdooradvisory.com" 
+              href={`/${locale}`}
               className="flex items-center flex-shrink-0 hover:opacity-90 transition-opacity"
             >
-              <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0">
+              <div className="relative w-[115px] h-[115px] md:w-36 md:h-36 flex-shrink-0 -my-4 md:-my-6">
                 <Image
                   src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/logos/sage-logo-black-header.webp"
                   alt="Sage Outdoor Advisory"
@@ -119,122 +221,165 @@ export default function FloatingHeader({
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            {showFullNav && (
-              <>
-                <nav className="hidden lg:flex items-center gap-1">
-                  {/* For Businesses Dropdown */}
-                  <div
-                    className="relative"
-                    onMouseEnter={() => setIsForBusinessesOpen(true)}
-                    onMouseLeave={(e) => {
-                      // Only close if mouse is not moving to dropdown
-                      const relatedTarget = e.relatedTarget as HTMLElement;
-                      if (!relatedTarget || !relatedTarget.closest('[data-dropdown-menu]')) {
-                        setIsForBusinessesOpen(false);
-                      }
-                    }}
-                  >
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsForBusinessesOpen(!isForBusinessesOpen);
-                      }}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
-                        isActive(navLinks.guides) || isActive(navLinks.partners || '')
-                          ? 'text-white bg-white/10'
-                          : 'text-gray-300 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      For Businesses
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isForBusinessesOpen ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-                    {isForBusinessesOpen && (
-                      <div
-                        data-dropdown-menu
-                        className="absolute top-full left-0 mt-2 w-48 bg-[#1a1a1a] border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl z-50"
-                        onMouseEnter={() => setIsForBusinessesOpen(true)}
-                        onMouseLeave={() => {
-                          // Delay closing to allow clicks
-                          setTimeout(() => {
-                            setIsForBusinessesOpen(false);
-                          }, 150);
-                        }}
-                        onMouseDown={(e) => {
-                          // Prevent closing when clicking inside dropdown
+            {/* Action Buttons and Navigation */}
+            <div className="flex items-center gap-3">
+              {/* Desktop Navigation - Resources and Services */}
+              {showFullNav && (
+                <>
+                  <nav className="hidden lg:flex items-center gap-1">
+                    {/* Resources Dropdown */}
+                    <div className="relative">
+                      <button
+                        ref={resourcesButtonRef}
+                        onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
+                          setIsResourcesOpen(!isResourcesOpen);
                         }}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
+                          isActive(navLinks.guides) || isActive(navLinks.glossary)
+                            ? 'text-white bg-white/10'
+                            : 'text-gray-300 hover:text-white hover:bg-white/5'
+                        }`}
                       >
-                        <Link
-                          href={navLinks.guides}
-                          className={`block px-4 py-3 text-sm font-medium transition-all ${
-                            isActive(navLinks.guides)
-                              ? 'text-white bg-white/10'
-                              : 'text-gray-300 hover:text-white hover:bg-white/5'
+                        Resources
+                        <svg
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            isResourcesOpen ? 'rotate-180' : ''
                           }`}
-                          onClick={() => {
-                            // Close dropdown after navigation
-                            setIsForBusinessesOpen(false);
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+                      {isResourcesOpen && (
+                        <div
+                          ref={resourcesDropdownRef}
+                          className="absolute top-full right-0 mt-2 w-48 bg-[#1a1a1a] border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl z-50"
+                          onClick={(e) => {
+                            // Keep dropdown open when clicking inside
+                            e.stopPropagation();
                           }}
                         >
-                          Guides
-                        </Link>
-                        {navLinks.partners && (
                           <Link
-                            href={navLinks.partners}
-                            className={`block px-4 py-3 text-sm font-medium transition-all ${
-                              isActive(navLinks.partners)
+                            href={navLinks.guides}
+                            className={`block px-4 py-3 text-base font-medium transition-all ${
+                              isActive(navLinks.guides)
                                 ? 'text-white bg-white/10'
                                 : 'text-gray-300 hover:text-white hover:bg-white/5'
                             }`}
                             onClick={() => {
-                              // Close dropdown after navigation
-                              setIsForBusinessesOpen(false);
+                              // Only close when actually navigating
+                              setIsResourcesOpen(false);
                             }}
                           >
-                            Partners
+                            Guides
                           </Link>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <Link
-                    href={navLinks.glossary}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActive(navLinks.glossary)
-                        ? 'text-white bg-white/10'
-                        : 'text-gray-300 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    Glossary
-                  </Link>
-                </nav>
-              </>
-            )}
+                          <Link
+                            href={navLinks.glossary}
+                            className={`block px-4 py-3 text-base font-medium transition-all ${
+                              isActive(navLinks.glossary)
+                                ? 'text-white bg-white/10'
+                                : 'text-gray-300 hover:text-white hover:bg-white/5'
+                            }`}
+                            onClick={() => {
+                              // Only close when actually navigating
+                              setIsResourcesOpen(false);
+                            }}
+                          >
+                            Industry Terms
+                          </Link>
+                        </div>
+                      )}
+                    </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
+                    {/* Services Dropdown - Links to Main Site */}
+                    <div className="relative">
+                      <button
+                        ref={servicesButtonRef}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsServicesOpen(!isServicesOpen);
+                        }}
+                        className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 text-gray-300 hover:text-white hover:bg-white/5"
+                      >
+                        Services
+                        <svg
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            isServicesOpen ? 'rotate-180' : ''
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+                      {isServicesOpen && (
+                        <div
+                          ref={servicesDropdownRef}
+                          className="absolute top-full right-0 mt-2 w-56 bg-[#1a1a1a] border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl z-50"
+                          onClick={(e) => {
+                            // Keep dropdown open when clicking inside
+                            e.stopPropagation();
+                          }}
+                        >
+                          <Link
+                            href="https://sageoutdooradvisory.com/feasibility-study-glamping-resorts/"
+                            className="block px-4 py-3 text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5"
+                            onClick={() => {
+                              // Only close when actually navigating
+                              setIsServicesOpen(false);
+                            }}
+                          >
+                            Feasibility Studies
+                          </Link>
+                          <Link
+                            href="https://sageoutdooradvisory.com/appraisal-glamping-resorts/"
+                            className="block px-4 py-3 text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5"
+                            onClick={() => {
+                              // Only close when actually navigating
+                              setIsServicesOpen(false);
+                            }}
+                          >
+                            Appraisals
+                          </Link>
+                          <div className="border-t border-gray-800/50 my-1" />
+                          <Link
+                            href="https://sageoutdooradvisory.com/our-services/"
+                            className="block px-4 py-3 text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5 font-semibold"
+                            onClick={() => {
+                              // Only close when actually navigating
+                              setIsServicesOpen(false);
+                            }}
+                          >
+                            All Services →
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </nav>
+                </>
+              )}
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
                 className="px-4 py-2 md:px-6 md:py-2.5 bg-[#00b6a6] text-white text-sm font-semibold rounded-lg hover:bg-[#009688] transition-all duration-200 shadow-lg hover:shadow-xl flex-shrink-0"
                 style={{ borderRadius: '12px' }}
               >
-                Contact Us
+                Get Free Consultation
               </Link>
 
               {/* Mobile Menu Button */}
@@ -270,16 +415,16 @@ export default function FloatingHeader({
         {showFullNav && isMobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-800/50 px-4 py-4">
             <nav className="flex flex-col gap-2">
-              {/* For Businesses Section */}
+              {/* Resources Section */}
               <div>
                 <button
-                  onClick={() => setIsForBusinessesOpen(!isForBusinessesOpen)}
-                  className="w-full px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between"
+                  onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                  className="w-full px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between"
                 >
-                  For Businesses
+                  Resources
                   <svg
                     className={`w-4 h-4 transition-transform duration-200 ${
-                      isForBusinessesOpen ? 'rotate-180' : ''
+                      isResourcesOpen ? 'rotate-180' : ''
                     }`}
                     fill="none"
                     stroke="currentColor"
@@ -293,18 +438,18 @@ export default function FloatingHeader({
                     />
                   </svg>
                 </button>
-                {isForBusinessesOpen && (
+                {isResourcesOpen && (
                   <div className="ml-4 mt-2 flex flex-col gap-1">
                     <Link
                       href={navLinks.guides}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
                         isActive(navLinks.guides)
                           ? 'text-white bg-white/10'
                           : 'text-gray-300 hover:text-white hover:bg-white/5'
                       }`}
                       onClick={() => {
                         setIsMobileMenuOpen(false);
-                        setIsForBusinessesOpen(false);
+                        setIsResourcesOpen(false);
                       }}
                     >
                       Guides
@@ -312,33 +457,95 @@ export default function FloatingHeader({
                     {navLinks.partners && (
                       <Link
                         href={navLinks.partners}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
                           isActive(navLinks.partners)
                             ? 'text-white bg-white/10'
                             : 'text-gray-300 hover:text-white hover:bg-white/5'
                         }`}
                         onClick={() => {
                           setIsMobileMenuOpen(false);
-                          setIsForBusinessesOpen(false);
+                          setIsResourcesOpen(false);
                         }}
                       >
-                        Partners
+                        Our Partners
                       </Link>
                     )}
+                    <Link
+                      href={navLinks.glossary}
+                      className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
+                        isActive(navLinks.glossary)
+                          ? 'text-white bg-white/10'
+                          : 'text-gray-300 hover:text-white hover:bg-white/5'
+                      }`}
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsResourcesOpen(false);
+                      }}
+                    >
+                      Industry Terms
+                    </Link>
                   </div>
                 )}
               </div>
-              <Link
-                href={navLinks.glossary}
-                className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                  isActive(navLinks.glossary)
-                    ? 'text-white bg-white/10'
-                    : 'text-gray-300 hover:text-white hover:bg-white/5'
-                }`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Glossary
-              </Link>
+
+              {/* Services Section */}
+              <div>
+                <button
+                  onClick={() => setIsServicesOpen(!isServicesOpen)}
+                  className="w-full px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between"
+                >
+                  Services
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isServicesOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+                {isServicesOpen && (
+                  <div className="ml-4 mt-2 flex flex-col gap-1">
+                    <Link
+                      href="https://sageoutdooradvisory.com/feasibility-study-glamping-resorts/"
+                      className="px-4 py-2 rounded-lg text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsServicesOpen(false);
+                      }}
+                    >
+                      Feasibility Studies
+                    </Link>
+                    <Link
+                      href="https://sageoutdooradvisory.com/appraisal-glamping-resorts/"
+                      className="px-4 py-2 rounded-lg text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsServicesOpen(false);
+                      }}
+                    >
+                      Appraisals
+                    </Link>
+                    <Link
+                      href="https://sageoutdooradvisory.com/our-services/"
+                      className="px-4 py-2 rounded-lg text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5 font-semibold"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsServicesOpen(false);
+                      }}
+                    >
+                      All Services →
+                    </Link>
+                  </div>
+                )}
+              </div>
             </nav>
           </div>
         )}

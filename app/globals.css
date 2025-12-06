@@ -26,3 +26,27 @@ body {
   }
 }
 
+/* Location Search Dropdown Scrollbar Styling */
+.location-dropdown-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(209 213 219) rgb(243 244 246);
+}
+
+.location-dropdown-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.location-dropdown-scroll::-webkit-scrollbar-track {
+  background: rgb(243 244 246);
+  border-radius: 4px;
+}
+
+.location-dropdown-scroll::-webkit-scrollbar-thumb {
+  background: rgb(209 213 219);
+  border-radius: 4px;
+}
+
+.location-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(156 163 175);
+}
+
