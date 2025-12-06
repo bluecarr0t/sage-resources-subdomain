@@ -21,6 +21,8 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [apiError, setApiError] = useState<string | null>(null);
   const [dropdownMaxHeight, setDropdownMaxHeight] = useState<number>(400);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -321,16 +323,18 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
       case 'ArrowDown':
         e.preventDefault();
         setSelectedIndex((prev) => 
-          prev < predictions.length - 1 ? prev + 1 : prev
+          prev < predictions.length ? prev + 1 : prev
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        setSelectedIndex((prev) => (prev > -1 ? prev - 1 : -1));
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0 && selectedIndex < predictions.length) {
+        if (selectedIndex === -1) {
+          handleUseCurrentLocation();
+        } else if (selectedIndex >= 0 && selectedIndex < predictions.length) {
           handlePlaceSelect(
             predictions[selectedIndex].place_id,
             predictions[selectedIndex].description
@@ -358,11 +362,91 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   };
 
   const handleFocus = () => {
-    if (predictions.length > 0) {
-      setIsOpen(true);
-    } else if (searchValue.length >= 2) {
+    // Always show dropdown on focus to display "Use Current Location" option
+    setIsOpen(true);
+    if (searchValue.length >= 2 && predictions.length === 0) {
       performSearch(searchValue);
     }
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setIsGettingLocation(true);
+    setLocationError(null);
+    setIsOpen(false);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setIsGettingLocation(false);
+
+        // Use reverse geocoding to get a location name
+        if (typeof window !== 'undefined' && window.google && isLoaded) {
+          const geocoder = new window.google.maps.Geocoder();
+          geocoder.geocode(
+            { location: { lat: latitude, lng: longitude } },
+            (results, status) => {
+              if (status === 'OK' && results && results[0]) {
+                const locationName = results[0].formatted_address || `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+                setSearchValue(locationName);
+
+                if (onLocationSelect) {
+                  onLocationSelect({ lat: latitude, lng: longitude, name: locationName });
+                } else {
+                  router.push(`/${locale}/map?lat=${latitude}&lon=${longitude}&zoom=10&search=${encodeURIComponent(locationName)}`);
+                }
+              } else {
+                // Fallback: use coordinates if geocoding fails
+                const locationName = `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+                setSearchValue(locationName);
+
+                if (onLocationSelect) {
+                  onLocationSelect({ lat: latitude, lng: longitude, name: locationName });
+                } else {
+                  router.push(`/${locale}/map?lat=${latitude}&lon=${longitude}&zoom=10&search=${encodeURIComponent(locationName)}`);
+                }
+              }
+            }
+          );
+        } else {
+          // Fallback if Google Maps isn't loaded
+          const locationName = `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+          setSearchValue(locationName);
+
+          if (onLocationSelect) {
+            onLocationSelect({ lat: latitude, lng: longitude, name: locationName });
+          } else {
+            router.push(`/${locale}/map?lat=${latitude}&lon=${longitude}&zoom=10&search=${encodeURIComponent(locationName)}`);
+          }
+        }
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError('Location access denied. Please enable location permissions in your browser settings.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError('Location information unavailable.');
+            break;
+          case error.TIMEOUT:
+            setLocationError('Location request timed out. Please try again.');
+            break;
+          default:
+            setLocationError('An unknown error occurred while getting your location.');
+            break;
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
   };
 
   if (loadError) {
@@ -386,7 +470,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     );
   }
 
-  const showDropdown = isOpen && predictions.length > 0;
+  const showDropdown = isOpen; // Show dropdown when open to display "Use Current Location" and/or predictions
   const isCompact = variant === 'compact';
 
   return (
@@ -468,6 +552,30 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
         </div>
       )}
 
+      {/* Location Error Message */}
+      {locationError && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-red-50 border border-red-200 rounded-xl p-3 z-[100]">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-800">Location Error</p>
+              <p className="text-xs text-red-600 mt-1">{locationError}</p>
+            </div>
+            <button
+              onClick={() => setLocationError(null)}
+              className="text-red-600 hover:text-red-800"
+              aria-label="Dismiss error"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Autocomplete Predictions Dropdown */}
       {showDropdown && (
         <div
@@ -482,25 +590,113 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
             <p className={`${isCompact ? 'text-[10px]' : 'text-xs'} font-semibold text-gray-600 uppercase tracking-wide`}>Suggestions</p>
           </div>
           <div ref={dropdownScrollRef} className="location-dropdown-scroll overflow-y-auto overscroll-contain">
+            {/* Use Current Location Option */}
+            <div
+              role="option"
+              aria-selected={selectedIndex === -1}
+              onClick={handleUseCurrentLocation}
+              onMouseEnter={() => setSelectedIndex(-1)}
+              className={`w-full text-left transition-colors border-b border-gray-100 cursor-pointer ${
+                isCompact ? 'px-3 py-2' : 'px-4 py-3'
+              } ${
+                selectedIndex === -1
+                  ? 'bg-[#00b6a6]/10 border-[#00b6a6]/20'
+                  : 'hover:bg-[#00b6a6]/5 active:bg-[#00b6a6]/10'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${selectedIndex === -1 ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
+                  {isGettingLocation ? (
+                    <div className={`animate-spin rounded-full border-[#00b6a6] ${isCompact ? 'h-4 w-4 border-2' : 'h-5 w-5 border-b-2'}`} />
+                  ) : (
+                    <svg
+                      className={isCompact ? "w-4 h-4" : "w-5 h-5"}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="2"
+                        fill="currentColor"
+                      />
+                      {/* Crosshairs */}
+                      <line
+                        x1="2"
+                        y1="12"
+                        x2="6"
+                        y2="12"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="18"
+                        y1="12"
+                        x2="22"
+                        y2="12"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="12"
+                        y1="2"
+                        x2="12"
+                        y2="6"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="12"
+                        y1="18"
+                        x2="12"
+                        y2="22"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className={`${isCompact ? 'text-sm' : ''} font-semibold ${selectedIndex === -1 ? 'text-[#006b5f]' : 'text-gray-900'}`}>
+                    {isGettingLocation ? 'Getting your location...' : 'Use Current Location'}
+                  </div>
+                  <div className={`${isCompact ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                    {isGettingLocation ? 'Please wait...' : 'Find glamping near you'}
+                  </div>
+                </div>
+              </div>
+            </div>
             {predictions.map((prediction, index) => (
               <div
                 key={prediction.place_id}
                 role="option"
-                aria-selected={selectedIndex === index}
+                aria-selected={selectedIndex === index + 1}
                 onClick={() => {
                   handlePlaceSelect(prediction.place_id, prediction.description);
                 }}
-                onMouseEnter={() => setSelectedIndex(index)}
+                onMouseEnter={() => setSelectedIndex(index + 1)}
                 className={`w-full text-left transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer ${
                   isCompact ? 'px-3 py-2' : 'px-4 py-3'
                 } ${
-                  selectedIndex === index
+                  selectedIndex === index + 1
                     ? 'bg-[#00b6a6]/10 border-[#00b6a6]/20'
                     : 'hover:bg-[#00b6a6]/5 active:bg-[#00b6a6]/10'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${selectedIndex === index ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
+                  <div className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${selectedIndex === index + 1 ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
                     <svg
                       className={isCompact ? "w-4 h-4" : "w-5 h-5"}
                       fill="none"
@@ -522,7 +718,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className={`${isCompact ? 'text-sm' : ''} font-semibold truncate ${selectedIndex === index ? 'text-[#006b5f]' : 'text-gray-900'}`}>
+                    <div className={`${isCompact ? 'text-sm' : ''} font-semibold truncate ${selectedIndex === index + 1 ? 'text-[#006b5f]' : 'text-gray-900'}`}>
                       {prediction.structured_formatting.main_text}
                     </div>
                     <div className={`${isCompact ? 'text-xs' : 'text-sm'} text-gray-500 truncate`}>{prediction.structured_formatting.secondary_text}</div>

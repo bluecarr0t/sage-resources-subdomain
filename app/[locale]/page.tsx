@@ -50,12 +50,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
   
   return {
-    title: "Find Glamping Near You | 500+ Properties | Sage Outdoor Advisory",
-    description: "Discover 500+ unique glamping properties across the US and Canada. Search by location, view photos, amenities, and rates. Find your perfect outdoor adventure today.",
-    keywords: "glamping near me, find glamping, glamping properties, glamping destinations, luxury camping, outdoor hospitality, glamping resorts, glamping experiences",
+    title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
+    description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. From luxury safari tents to cozy cabins, find your perfect outdoor adventure today.",
+    keywords: "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business",
     openGraph: {
-      title: "Find Glamping Near You | 500+ Properties | Sage Outdoor Advisory",
-      description: "Discover 500+ unique glamping properties across the US and Canada. Search by location, view photos, amenities, and rates.",
+      title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
+      description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. From luxury safari tents to cozy cabins, find your perfect outdoor adventure.",
       url,
       siteName: "Sage Outdoor Advisory",
       locale: getOpenGraphLocale(locale as Locale),
@@ -71,8 +71,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: "Find Glamping Near You | 500+ Properties | Sage",
-      description: "Discover 500+ unique glamping properties across the US and Canada. Search by location and view photos.",
+      title: "Find Glamping Near You | 500+ Properties Across North America",
+      description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure.",
       images: ["https://sageoutdooradvisory.com/og-image.jpg"],
     },
     alternates: {
@@ -156,10 +156,10 @@ export default async function HomePage({ params }: PageProps) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
               <div className="text-center max-w-5xl mx-auto text-white">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-2xl">
-                  Find Your Perfect Glamping Experience
+                  Your Complete Glamping Resource
                 </h1>
                 <p className="text-xl md:text-2xl mb-10 text-white/95 drop-shadow-lg max-w-3xl mx-auto">
-                  Discover 500+ unique glamping properties across North America. From luxury safari tents to cozy cabins, find your ideal outdoor adventure.
+                  500+ properties, expert guides, and industry resources for travelers and outdoor hospitality professionals.
                 </p>
                 
                 {/* Location Search */}
