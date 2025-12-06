@@ -16,6 +16,7 @@ export interface GlossaryTerm {
     question: string;
     answer: string;
   }[];
+  image?: string; // Path to image for this glossary term
 }
 
 export type GlossaryCategory = GlossaryTerm["category"];

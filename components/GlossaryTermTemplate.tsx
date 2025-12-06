@@ -2,7 +2,10 @@ import { GlossaryTerm } from "@/lib/glossary/index";
 import Link from "next/link";
 import Image from "next/image";
 import { generateDefinitionSchema, generateFAQSchema } from "@/lib/glossary-schema";
+import { generateSpeakableSchema } from "@/lib/schema";
+import { generateGlossaryImageAltText, generateImageTitle } from "@/lib/glossary/image-alt-text";
 import Footer from "./Footer";
+import FloatingHeader from "./FloatingHeader";
 
 interface GlossaryTermTemplateProps {
   term: GlossaryTerm;
@@ -12,6 +15,9 @@ interface GlossaryTermTemplateProps {
 export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTermTemplateProps) {
   const definitionSchema = generateDefinitionSchema(term);
   const faqSchema = term.faqs ? generateFAQSchema(term.faqs) : null;
+  const speakableSchema = term.faqs && term.faqs.length > 0 
+    ? generateSpeakableSchema([".speakable-answer", "h1", "h2"])
+    : null;
 
   return (
     <>
@@ -26,39 +32,16 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
+      {speakableSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
+        />
+      )}
 
       <div className="min-h-screen bg-white">
-        {/* Header */}
-        <header className="bg-black border-b border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <div className="flex items-center justify-between">
-              <Link href="https://sageoutdooradvisory.com" className="flex items-center">
-                <Image
-                  src="/sage-logo-black-header.png"
-                  alt="Sage Outdoor Advisory"
-                  width={200}
-                  height={100}
-                  className="h-16 w-auto"
-                  priority
-                />
-              </Link>
-              <div className="flex gap-4">
-                <Link
-                  href="/glossary"
-                  className="px-4 py-2 text-white hover:text-gray-300"
-                >
-                  Glossary
-                </Link>
-                <Link
-                  href="https://sageoutdooradvisory.com/contact-us/"
-                  className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors"
-                >
-                  Contact Us
-                </Link>
-              </div>
-            </div>
-          </div>
-        </header>
+        {/* Floating Header */}
+        <FloatingHeader />
 
         {/* Breadcrumb */}
         <nav className="bg-gray-50 border-b border-gray-200">
@@ -89,7 +72,25 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
                   What is {term.term}?
                 </h1>
-                <div className="bg-[#00b6a6]/10 border-l-4 border-[#00b6a6] p-6 rounded-lg">
+                {term.image && (
+                  <div className="mb-6 relative overflow-hidden rounded-3xl shadow-2xl border-4 border-white/20 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10">
+                    <div className="aspect-video relative">
+                      <Image
+                        src={term.image}
+                        alt={generateGlossaryImageAltText(term.term, term.definition)}
+                        fill
+                        className="object-cover"
+                        priority
+                        fetchPriority="high"
+                        quality={90}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
+                        title={generateImageTitle(term.term)}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                    </div>
+                  </div>
+                )}
+                <div className="bg-[#00b6a6]/10 border-l-4 border-[#00b6a6] p-6 rounded-2xl shadow-sm">
                   <p className="text-lg text-gray-800 leading-relaxed">
                     {term.definition}
                   </p>
@@ -175,7 +176,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                           {faq.question}
                         </h3>
                         <p 
-                          className="text-gray-700 leading-relaxed"
+                          className="text-gray-700 leading-relaxed speakable-answer"
                           dangerouslySetInnerHTML={{ __html: faq.answer }}
                         />
                       </div>

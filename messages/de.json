@@ -1,0 +1,38 @@
+{
+  "common": {
+    "siteName": "Sage Outdoor Advisory",
+    "cta": {
+      "contactUs": "Kontaktieren Sie uns",
+      "learnMore": "Mehr Erfahren",
+      "getStarted": "Loslegen",
+      "requestQuote": "Angebot Anfordern"
+    },
+    "navigation": {
+      "home": "Startseite",
+      "guides": "Leitfäden",
+      "glossary": "Glossar",
+      "map": "Karte",
+      "partners": "Partner"
+    },
+    "meta": {
+      "defaultTitle": "Sage Outdoor Advisory - Expertise für Outdoor-Hospitality",
+      "defaultDescription": "Führende Beratung für Machbarkeitsstudien und Bewertungen in der Outdoor-Hospitality-Branche"
+    }
+  },
+  "landing": {
+    "glampingFeasibilityStudy": {
+      "title": "Glamping-Machbarkeitsstudie | Sage Outdoor Advisory",
+      "metaDescription": "Professionelle Glamping-Machbarkeitsstudien zur Validierung Ihrer Investition. Expertenanalyse der Marktnachfrage, Finanzprognosen und Standortviabilität.",
+      "hero": {
+        "headline": "Glamping-Machbarkeitsstudie",
+        "subheadline": "Validieren Sie Ihre Glamping-Investition mit Experten-Marktanalyse und Finanzprognosen",
+        "ctaText": "Ihre Machbarkeitsstudie Erhalten",
+        "ctaLink": "https://sageoutdooradvisory.com/contact-us"
+      }
+    }
+  },
+  "errors": {
+    "pageNotFound": "Seite Nicht Gefunden",
+    "pageNotFoundDescription": "Die gesuchte Seite existiert nicht."
+  }
+}

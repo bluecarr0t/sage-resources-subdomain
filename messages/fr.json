@@ -1,0 +1,38 @@
+{
+  "common": {
+    "siteName": "Sage Outdoor Advisory",
+    "cta": {
+      "contactUs": "Contactez-nous",
+      "learnMore": "En Savoir Plus",
+      "getStarted": "Commencer",
+      "requestQuote": "Demander un Devis"
+    },
+    "navigation": {
+      "home": "Accueil",
+      "guides": "Guides",
+      "glossary": "Glossaire",
+      "map": "Carte",
+      "partners": "Partenaires"
+    },
+    "meta": {
+      "defaultTitle": "Sage Outdoor Advisory - Expertise en Hospitalité de Plein Air",
+      "defaultDescription": "Cabinet de conseil de premier plan pour les études de faisabilité et les évaluations dans l'industrie de l'hospitalité de plein air"
+    }
+  },
+  "landing": {
+    "glampingFeasibilityStudy": {
+      "title": "Étude de Faisabilité Glamping | Sage Outdoor Advisory",
+      "metaDescription": "Études de faisabilité glamping professionnelles pour valider votre investissement. Analyse experte de la demande du marché, projections financières et viabilité du site.",
+      "hero": {
+        "headline": "Étude de Faisabilité Glamping",
+        "subheadline": "Validez votre investissement glamping avec une analyse de marché experte et des projections financières",
+        "ctaText": "Obtenez Votre Étude de Faisabilité",
+        "ctaLink": "https://sageoutdooradvisory.com/contact-us"
+      }
+    }
+  },
+  "errors": {
+    "pageNotFound": "Page Non Trouvée",
+    "pageNotFoundDescription": "La page que vous recherchez n'existe pas."
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "common": {
+    "siteName": "Sage Outdoor Advisory",
+    "cta": {
+      "contactUs": "Contact Us",
+      "learnMore": "Learn More",
+      "getStarted": "Get Started",
+      "requestQuote": "Request a Quote"
+    },
+    "navigation": {
+      "home": "Home",
+      "guides": "Guides",
+      "glossary": "Glossary",
+      "map": "Map",
+      "partners": "Partners"
+    },
+    "meta": {
+      "defaultTitle": "Sage Outdoor Advisory - Outdoor Hospitality Expertise",
+      "defaultDescription": "Leading consultancy for feasibility studies and appraisals in the outdoor hospitality industry"
+    }
+  },
+  "landing": {
+    "glampingFeasibilityStudy": {
+      "title": "Glamping Feasibility Study | Sage Outdoor Advisory",
+      "metaDescription": "Professional glamping feasibility studies to validate your investment. Expert analysis of market demand, financial projections, and site viability.",
+      "hero": {
+        "headline": "Glamping Feasibility Study",
+        "subheadline": "Validate your glamping investment with expert market analysis and financial projections",
+        "ctaText": "Get Your Feasibility Study",
+        "ctaLink": "https://sageoutdooradvisory.com/contact-us"
+      }
+    }
+  },
+  "errors": {
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundDescription": "The page you're looking for doesn't exist."
+  }
+}

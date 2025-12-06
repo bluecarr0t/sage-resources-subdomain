@@ -17,6 +17,7 @@ import {
 } from "@/lib/schema";
 import TableOfContents from "@/components/TableOfContents";
 import Footer from "./Footer";
+import FloatingHeader from "./FloatingHeader";
 
 // Helper function to create a slug from a title (must match TOC component)
 function slugify(text: string): string {
@@ -105,30 +106,8 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       </div>
 
       <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-black border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-          <div className="flex items-center justify-between">
-            <Link href="https://sageoutdooradvisory.com" className="flex items-center">
-              <Image
-                src="/sage-logo-black-header.png"
-                alt="Sage Outdoor Advisory - Outdoor Hospitality Feasibility Studies and Appraisals"
-                width={200}
-                height={100}
-                className="h-16 w-auto"
-                priority
-                fetchPriority="high"
-              />
-            </Link>
-            <Link
-              href="https://sageoutdooradvisory.com/contact-us"
-              className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors"
-            >
-              Contact Us
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Floating Header */}
+      <FloatingHeader showFullNav={false} />
 
       <main>
       {/* Hero Section */}
@@ -141,11 +120,6 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
               {content.hero.subheadline}
             </p>
-            {content.lastModified && (
-              <p className="text-xs text-gray-500 mb-6">
-                Last Updated: December 1, 2025
-              </p>
-            )}
             <Link
               href={content.hero.ctaLink}
               className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"

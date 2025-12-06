@@ -6,7 +6,7 @@ interface FAQItem {
 }
 
 export function generateDefinitionSchema(term: GlossaryTerm) {
-  return {
+  const schema: any = {
     "@context": "https://schema.org",
     "@type": "DefinedTerm",
     "name": term.term,
@@ -18,6 +18,13 @@ export function generateDefinitionSchema(term: GlossaryTerm) {
     },
     "url": `https://resources.sageoutdooradvisory.com/glossary/${term.slug}`
   };
+  
+  // Add image if available
+  if (term.image) {
+    schema.image = `https://resources.sageoutdooradvisory.com${term.image}`;
+  }
+  
+  return schema;
 }
 
 export function generateFAQSchema(faqs: FAQItem[]) {

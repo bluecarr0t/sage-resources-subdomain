@@ -114,6 +114,21 @@ In Vercel:
 2. Add your subdomain (e.g., `resources.sageoutdooradvisory.com`)
 3. Update DNS records as instructed by Vercel
 
+### Environment Variables
+
+Add the following environment variable in Vercel (Project Settings → Environment Variables):
+
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID` - Your Google Analytics 4 Measurement ID (format: `G-XXXXXXXXXX`)
+
+**To get your GA4 Measurement ID:**
+1. Go to [Google Analytics](https://analytics.google.com/)
+2. Select your property (or create a new one)
+3. Go to Admin → Data Streams
+4. Click on your web stream
+5. Copy the Measurement ID (starts with `G-`)
+
+**Note:** The `NEXT_PUBLIC_` prefix makes this variable available to the client-side code, which is required for Google Analytics tracking.
+
 ## Customization
 
 ### Styling

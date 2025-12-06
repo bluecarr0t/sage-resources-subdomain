@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getAllGuideSlugs, getGuidesByCategory, getGuide } from "@/lib/guides";
 import GuidesIndex from "@/components/GuidesIndex";
 import Footer from "@/components/Footer";
+import FloatingHeader from "@/components/FloatingHeader";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://resources.sageoutdooradvisory.com/images/gradient-3.jpg",
+        url: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg",
         width: 1920,
         height: 1080,
         alt: "Outdoor hospitality guides background featuring scenic landscape gradient",
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    images: ["https://resources.sageoutdooradvisory.com/images/gradient-3.jpg"],
+    images: ["https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg"],
   },
   robots: {
     index: true,
@@ -89,36 +90,15 @@ export default function GuidesPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-black border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-          <div className="flex items-center justify-between">
-            <Link href="https://sageoutdooradvisory.com" className="flex items-center">
-              <Image
-                src="/sage-logo-black-header.png"
-                alt="Sage Outdoor Advisory"
-                width={200}
-                height={100}
-                className="h-16 w-auto"
-                priority
-              />
-            </Link>
-            <Link
-              href="https://sageoutdooradvisory.com/contact-us/"
-              className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors"
-            >
-              Contact Us
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Floating Header */}
+      <FloatingHeader />
 
       {/* Hero Section */}
       <section className="relative py-16 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/gradient-3.jpg"
+            src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg"
             alt="Outdoor hospitality guides background featuring scenic landscape gradient"
             fill
             className="object-cover"

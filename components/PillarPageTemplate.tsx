@@ -10,8 +10,11 @@ import {
   generateGuideBreadcrumbSchema,
   generateFAQSchema,
   generateArticleSchema,
+  generateSpeakableSchema,
+  generateCourseSchema,
 } from "@/lib/schema";
 import Footer from "./Footer";
+import FloatingHeader from "./FloatingHeader";
 
 interface PillarPageTemplateProps {
   content: GuideContent;
@@ -27,6 +30,12 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
   const breadcrumbSchema = generateGuideBreadcrumbSchema(content.slug, content.hero.headline);
   const articleSchema = generateArticleSchema(content);
   const faqSchema = content.faqs ? generateFAQSchema(content.faqs) : null;
+  const speakableSchema = content.faqs && content.faqs.length > 0 
+    ? generateSpeakableSchema([".speakable-answer", "h1", "h2"])
+    : null;
+  // Add Course schema for comprehensive pillar guides
+  const isComprehensiveGuide = content.slug.endsWith("-complete-guide");
+  const courseSchema = isComprehensiveGuide ? generateCourseSchema(content) : null;
 
   // Track scroll position for active section highlighting
   useEffect(() => {
@@ -73,6 +82,18 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
+      {speakableSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
+        />
+      )}
+      {courseSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
+        />
+      )}
 
       {/* Floating CTA Button */}
       <div className="fixed bottom-6 right-6 z-50">
@@ -93,29 +114,8 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
       </button>
 
       <div className="min-h-screen bg-white">
-        {/* Header */}
-        <header className="bg-black border-b border-gray-800 sticky top-0 z-30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <div className="flex items-center justify-between">
-              <Link href="https://sageoutdooradvisory.com" className="flex items-center">
-                <Image
-                  src="/sage-logo-black-header.png"
-                  alt="Sage Outdoor Advisory"
-                  width={200}
-                  height={100}
-                  className="h-16 w-auto"
-                  priority
-                />
-              </Link>
-              <Link
-                href="https://sageoutdooradvisory.com/contact-us"
-                className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors"
-              >
-                Contact Us
-              </Link>
-            </div>
-          </div>
-        </header>
+        {/* Floating Header */}
+        <FloatingHeader showFullNav={false} />
 
         {/* Breadcrumbs */}
         <nav className="bg-gray-50 border-b border-gray-200 py-3">
@@ -164,9 +164,15 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                 {content.hero.subheadline}
               </p>
               {content.lastModified && (
-                <p className={`text-xs mb-6 ${content.hero.backgroundImage ? 'text-white/80' : 'text-gray-500'}`}>
-                  Last Updated: December 1, 2025
-                </p>
+                <div className={`bg-blue-50/90 border-l-4 border-blue-400 p-3 rounded mb-6 inline-block ${content.hero.backgroundImage ? 'bg-white/90' : ''}`}>
+                  <p className={`text-sm ${content.hero.backgroundImage ? 'text-gray-700' : 'text-gray-700'}`}>
+                    <strong>Last Updated:</strong> {new Date(content.lastModified).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
               )}
               {content.hero.ctaText && content.hero.ctaLink && (
                 <Link
@@ -226,7 +232,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                       {section.title}
                     </h2>
                     <div
-                      className="text-gray-700 leading-relaxed prose prose-lg max-w-none"
+                      className="text-gray-700 leading-relaxed prose prose-lg max-w-none prose-img:rounded-3xl prose-img:shadow-2xl prose-img:border-4 prose-img:border-white/20"
                       dangerouslySetInnerHTML={{ __html: section.content }}
                     />
                     {section.subsections && (
@@ -359,7 +365,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                       {faq.question}
                     </h3>
                     <div
-                      className="text-gray-700 leading-relaxed"
+                      className="text-gray-700 leading-relaxed speakable-answer"
                       dangerouslySetInnerHTML={{ __html: faq.answer }}
                     />
                   </div>

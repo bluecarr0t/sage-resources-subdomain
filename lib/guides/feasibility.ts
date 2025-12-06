@@ -30,7 +30,27 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       {
         id: "introduction",
         title: "Introduction",
-        content: `<p>A <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> is one of the most critical documents you'll need when developing or investing in an outdoor hospitality property. Whether you're planning a <a href="/glossary/glamping-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping resort</a>, <a href="/glossary/rv-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort</a>, or <a href="/glossary/campground" class="text-[#006b5f] hover:text-[#005a4f] underline">campground</a>, a comprehensive feasibility study provides the foundation for informed decision-making, secures financing, and guides your project's success.</p>
+        content: `<div class="relative overflow-hidden rounded-3xl shadow-2xl border-4 border-white/20 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10 mb-8">
+          <div class="aspect-video relative w-full">
+            <img 
+              src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg" 
+              alt="Mountain landscape showcasing outdoor hospitality feasibility study locations for glamping resorts, RV parks, and campgrounds" 
+              class="w-full h-full object-cover" 
+              loading="eager"
+              fetchpriority="high"
+              width="1920"
+              height="1080"
+              title="Outdoor hospitality feasibility study locations"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent"></div>
+            <div class="absolute bottom-8 left-8 right-8">
+              <h2 class="text-3xl font-bold text-white drop-shadow-2xl mb-2">Expert Feasibility Studies for Outdoor Hospitality</h2>
+              <p class="text-white/90 text-lg drop-shadow-lg">Data-driven insights for glamping, RV resorts, and campgrounds</p>
+            </div>
+          </div>
+        </div>
+        
+        <p>A <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> is one of the most critical documents you'll need when developing or investing in an outdoor hospitality property. Whether you're planning a <a href="/glossary/glamping-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping resort</a>, <a href="/glossary/rv-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort</a>, or <a href="/glossary/campground" class="text-[#006b5f] hover:text-[#005a4f] underline">campground</a>, a comprehensive feasibility study provides the foundation for informed decision-making, secures financing, and guides your project's success.</p>
         
         <p>This complete guide covers everything you need to know about feasibility studies for outdoor hospitality projects. From understanding what a feasibility study is to choosing the right consultant, we'll walk you through every aspect of the process.</p>
         
@@ -98,6 +118,20 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         content: `<p>Feasibility studies are tailored to specific property types within the outdoor hospitality industry. Each property type has unique characteristics, market dynamics, and considerations:</p>
         
         <h3>Glamping Resort Feasibility Studies</h3>
+        <div class="my-8 relative overflow-hidden rounded-3xl shadow-2xl border-4 border-white/20 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10">
+          <div class="aspect-video relative w-full">
+            <img 
+              src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/safari-tent.jpg" 
+              alt="Luxury safari tent glamping accommodation example used in glamping resort feasibility studies and market analysis" 
+              class="absolute inset-0 w-full h-full object-cover" 
+              loading="lazy"
+              width="1920"
+              height="1080"
+              title="Safari tent glamping accommodation"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+          </div>
+        </div>
         <p><a href="/landing/glamping-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping feasibility studies</a> analyze the viability of glamping resort developments. These studies focus on:</p>
         <ul class="list-disc list-inside space-y-2 ml-4">
           <li>Accommodation mix optimization (yurts, A-frames, safari tents, etc.)</li>
@@ -106,6 +140,60 @@ export const feasibilityGuides: Record<string, GuideContent> = {
           <li>Amenities that drive bookings and revenue</li>
           <li>Experiential tourism trends</li>
         </ul>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
+          <div class="relative overflow-hidden rounded-2xl shadow-xl border-2 border-white/30 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10 group hover:scale-105 transition-transform duration-300">
+            <div class="aspect-square relative w-full">
+              <img 
+                src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/yurt.jpg" 
+                alt="Yurt glamping accommodation - circular tent structure with wooden lattice frame used in glamping resort feasibility studies" 
+                class="absolute inset-0 w-full h-full object-cover" 
+                loading="lazy"
+                width="800"
+                height="800"
+                title="Yurt glamping unit type"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+              <div class="absolute bottom-4 left-4 right-4">
+                <p class="text-white font-semibold text-sm drop-shadow-lg">Yurts</p>
+              </div>
+            </div>
+          </div>
+          <div class="relative overflow-hidden rounded-2xl shadow-xl border-2 border-white/30 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10 group hover:scale-105 transition-transform duration-300">
+            <div class="aspect-square relative w-full">
+              <img 
+                src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/a-frame-cabin.jpg" 
+                alt="A-frame cabin glamping accommodation - triangular structure with steeply angled sides for glamping resort development" 
+                class="absolute inset-0 w-full h-full object-cover" 
+                loading="lazy"
+                width="800"
+                height="800"
+                title="A-frame cabin glamping unit"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+              <div class="absolute bottom-4 left-4 right-4">
+                <p class="text-white font-semibold text-sm drop-shadow-lg">A-Frames</p>
+              </div>
+            </div>
+          </div>
+          <div class="relative overflow-hidden rounded-2xl shadow-xl border-2 border-white/30 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10 group hover:scale-105 transition-transform duration-300">
+            <div class="aspect-square relative w-full">
+              <img 
+                src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/treehouse.jpg" 
+                alt="Treehouse glamping accommodation - elevated structure built among tree branches for unique glamping experiences" 
+                class="absolute inset-0 w-full h-full object-cover" 
+                loading="lazy"
+                width="800"
+                height="800"
+                title="Treehouse glamping unit"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+              <div class="absolute bottom-4 left-4 right-4">
+                <p class="text-white font-semibold text-sm drop-shadow-lg">Treehouses</p>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <h3>RV Resort Feasibility Studies</h3>
         <p><a href="/landing/rv-resort-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort feasibility studies</a> evaluate the potential for RV resort developments. Key focus areas include:</p>

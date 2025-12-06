@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import { supabase } from '@/lib/supabase';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
+import { NationalPark, NationalParkWithCoords, filterParksWithCoordinates } from '@/lib/types/national-parks';
 import { useMapContext } from './MapContext';
 import MultiSelect from './MultiSelect';
 
@@ -225,9 +226,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const { filterCountry, filterState, filterUnitType, filterRateRange, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, clearFilters, hasActiveFilters } = useMapContext();
   const [properties, setProperties] = useState<SageProperty[]>([]);
   const [allProperties, setAllProperties] = useState<SageProperty[]>([]); // Store all properties for filter option calculation
+  const [nationalParks, setNationalParks] = useState<NationalPark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<PropertyWithCoords | null>(null);
+  const [selectedPark, setSelectedPark] = useState<NationalParkWithCoords | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(0);
@@ -248,8 +251,23 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   useEffect(() => {
     setCurrentPhotoIndex(0);
   }, [selectedProperty?.id]);
+
+  // Close property InfoWindow when park is selected
+  useEffect(() => {
+    if (selectedPark) {
+      setSelectedProperty(null);
+    }
+  }, [selectedPark]);
+
+  // Close park InfoWindow when property is selected
+  useEffect(() => {
+    if (selectedProperty) {
+      setSelectedPark(null);
+    }
+  }, [selectedProperty]);
   const clustererRef = useRef<any | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const parkMarkersRef = useRef<google.maps.Marker[]>([]);
   const hasCenteredFromUrlRef = useRef<boolean>(false);
 
   // Ensure we're on the client side
@@ -461,6 +479,31 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       }
     }
     fetchAllProperties();
+  }, []);
+
+  // Fetch national parks
+  useEffect(() => {
+    async function fetchNationalParks() {
+      try {
+        console.log('Fetching national parks from Supabase...');
+        const { data, error: supabaseError } = await supabase
+          .from('national-parks')
+          .select('*');
+
+        if (supabaseError) {
+          console.error('Error fetching national parks:', supabaseError);
+          return;
+        }
+
+        if (data) {
+          setNationalParks(data as NationalPark[]);
+          console.log(`✅ Fetched ${data.length} national parks`);
+        }
+      } catch (err) {
+        console.error('Error fetching national parks:', err);
+      }
+    }
+    fetchNationalParks();
   }, []);
 
   // Fetch properties
@@ -989,17 +1032,22 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
   // Fit map bounds to show all markers (only if shouldFitBounds is true)
   useEffect(() => {
-    if (map && propertiesWithCoords.length > 0 && shouldFitBounds) {
-      const bounds = new google.maps.LatLngBounds();
-      propertiesWithCoords.forEach((property) => {
-        bounds.extend({
-          lat: property.coordinates[0],
-          lng: property.coordinates[1],
+    if (map && shouldFitBounds) {
+      const parksWithCoords = filterParksWithCoordinates(nationalParks);
+      const allItems = [...propertiesWithCoords, ...parksWithCoords];
+      
+      if (allItems.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        allItems.forEach((item) => {
+          bounds.extend({
+            lat: item.coordinates[0],
+            lng: item.coordinates[1],
+          });
         });
-      });
-      map.fitBounds(bounds);
+        map.fitBounds(bounds);
+      }
     }
-  }, [map, propertiesWithCoords, shouldFitBounds]);
+  }, [map, propertiesWithCoords, nationalParks, shouldFitBounds]);
   
   // When map is loaded and we have specific coordinates from URL, center and zoom to that location
   useEffect(() => {
@@ -1117,6 +1165,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       // Add click listener to open InfoWindow
       marker.addListener('click', () => {
         setSelectedProperty(property as PropertyWithCoords);
+        setSelectedPark(null); // Close park InfoWindow if open
       });
 
       return marker;
@@ -1134,6 +1183,73 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       });
     };
   }, [map, isClient, propertiesWithCoords]);
+
+  // Manage national park markers
+  useEffect(() => {
+    if (!map || !isClient) {
+      // Clean up if no map
+      parkMarkersRef.current.forEach(marker => marker.setMap(null));
+      parkMarkersRef.current = [];
+      return;
+    }
+
+    // Filter parks with valid coordinates
+    const parksWithCoords = filterParksWithCoordinates(nationalParks);
+
+    // Clean up old park markers first
+    parkMarkersRef.current.forEach(marker => {
+      marker.setMap(null);
+      google.maps.event.clearInstanceListeners(marker);
+    });
+    parkMarkersRef.current = [];
+
+    // Create green/tree marker icon for national parks
+    const greenParkIcon = {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+        <svg width="24" height="40" viewBox="0 0 24 40" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 8.5 12 28 12 28s12-19.5 12-28C24 5.373 18.627 0 12 0z" fill="#10B981"/>
+          <path d="M12 6L10 8L12 10L14 8L12 6Z" fill="#FFFFFF"/>
+          <path d="M8 10L10 12L8 14L6 12L8 10Z" fill="#FFFFFF"/>
+          <path d="M16 10L18 12L16 14L14 12L16 10Z" fill="#FFFFFF"/>
+        </svg>
+      `),
+      scaledSize: new google.maps.Size(24, 40),
+      anchor: new google.maps.Point(12, 40),
+    };
+
+    // Create markers for national parks
+    const parkMarkers = parksWithCoords.map((park) => {
+      const marker = new google.maps.Marker({
+        position: {
+          lat: park.coordinates[0],
+          lng: park.coordinates[1],
+        },
+        map: map,
+        icon: greenParkIcon,
+        title: park.name,
+      });
+
+      // Add click listener to open InfoWindow
+      marker.addListener('click', () => {
+        setSelectedPark(park);
+        setSelectedProperty(null); // Close property InfoWindow if open
+      });
+
+      return marker;
+    });
+
+    // Update park markers ref
+    parkMarkersRef.current = parkMarkers;
+
+    // Cleanup function
+    return () => {
+      // Clean up markers when dependencies change
+      parkMarkers.forEach(marker => {
+        marker.setMap(null);
+        google.maps.event.clearInstanceListeners(marker);
+      });
+    };
+  }, [map, isClient, nationalParks]);
 
   const uniqueStates = useMemo(() => {
     // Filter properties by country if only one country is selected
@@ -2565,6 +2681,53 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                 fullscreenControl: true,
               }}
             >
+              {selectedPark && (
+                <InfoWindow
+                  position={{
+                    lat: selectedPark.coordinates[0],
+                    lng: selectedPark.coordinates[1],
+                  }}
+                  onCloseClick={() => {
+                    setSelectedPark(null);
+                  }}
+                >
+                  <div className="max-w-xs p-2">
+                    <h3 className="font-bold text-lg mb-2 text-gray-900">
+                      {selectedPark.name}
+                    </h3>
+                    {selectedPark.state && (
+                      <p className="text-sm text-gray-600 mb-2">
+                        {selectedPark.state}
+                      </p>
+                    )}
+                    {selectedPark.park_code && (
+                      <p className="text-sm text-gray-700 mb-2">
+                        <span className="font-semibold">Park Code:</span> {selectedPark.park_code}
+                      </p>
+                    )}
+                    {selectedPark.date_established && (
+                      <p className="text-sm text-gray-700 mb-2">
+                        <span className="font-semibold">Established:</span> {selectedPark.date_established}
+                      </p>
+                    )}
+                    {selectedPark.acres && (
+                      <p className="text-sm text-gray-700 mb-2">
+                        <span className="font-semibold">Size:</span> {selectedPark.acres.toLocaleString()} acres
+                      </p>
+                    )}
+                    {selectedPark.recreation_visitors_2021 && (
+                      <p className="text-sm text-gray-700 mb-2">
+                        <span className="font-semibold">Visitors (2021):</span> {selectedPark.recreation_visitors_2021.toLocaleString()}
+                      </p>
+                    )}
+                    {selectedPark.description && (
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-3">
+                        {selectedPark.description}
+                      </p>
+                    )}
+                  </div>
+                </InfoWindow>
+              )}
               {selectedProperty && (
                 <InfoWindow
                   position={{
@@ -2573,6 +2736,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   }}
                   onCloseClick={() => {
                     setSelectedProperty(null);
+                    setSelectedPark(null); // Close park InfoWindow if open
                     setCurrentPhotoIndex(0); // Reset photo index when closing
                   }}
                 >

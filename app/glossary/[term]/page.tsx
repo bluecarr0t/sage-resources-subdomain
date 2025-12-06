@@ -30,6 +30,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `What is ${glossaryTerm.term}? | Definition & Guide | Sage Outdoor Advisory`;
   const description = `${glossaryTerm.definition} Learn more about ${glossaryTerm.term.toLowerCase()} in outdoor hospitality.`;
 
+  const openGraphImages = glossaryTerm.image 
+    ? [{
+        url: `https://resources.sageoutdooradvisory.com${glossaryTerm.image}`,
+        width: 1200,
+        height: 630,
+        alt: `${glossaryTerm.term} - ${glossaryTerm.definition.substring(0, 100)}`,
+      }]
+    : undefined;
+
   return {
     title,
     description,
@@ -40,11 +49,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url,
       siteName: "Sage Outdoor Advisory",
       type: "article",
+      images: openGraphImages,
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
+      images: openGraphImages ? [openGraphImages[0].url] : undefined,
     },
     alternates: {
       canonical: url,

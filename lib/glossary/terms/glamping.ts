@@ -4,6 +4,7 @@ export const glampingTerms: Record<string, GlossaryTerm> = {
     "glamping": {
     slug: "glamping",
     term: "Glamping",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/safari-tent.jpg",
     definition: "A portmanteau of 'glamorous' and 'camping,' glamping refers to luxury outdoor accommodations that combine the experience of camping with the comfort and amenities of a hotel.",
     extendedDefinition: `Glamping, short for "glamorous camping," is a form of outdoor hospitality that merges the natural setting and adventure of camping with the luxury, comfort, and amenities typically found in high-end hotels. Unlike traditional camping, glamping accommodations feature real beds, electricity, heating and cooling, private bathrooms, and often include premium amenities like hot tubs, gourmet kitchens, and concierge services.
 
@@ -51,6 +52,7 @@ Sage Outdoor Advisory provides feasibility studies and appraisals specifically f
     "glamping-resort": {
     slug: "glamping-resort",
     term: "Glamping Resort",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/yurt.jpg",
     definition: "A commercial outdoor accommodation destination featuring standalone glamping units with bedding and linens, ranging from budget-friendly to ultra-luxury, typically located in scenic natural settings.",
     extendedDefinition: `A glamping resort is a commercial outdoor hospitality property that offers standalone glamping accommodations, typically featuring multiple glamping units such as safari tents, yurts, treehouses, Airstream trailers, or other unique structures. Each unit is a complete, standalone accommodation with its own bedding and linens.
 
@@ -88,6 +90,7 @@ Sage Outdoor Advisory provides feasibility studies and appraisals specifically f
     "a-frame": {
     slug: "a-frame",
     term: "A-Frame",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/a-frame-cabin.jpg",
     definition: "A triangular-shaped glamping structure with steeply angled sides that meet at the top, forming the letter 'A', providing a cozy interior with efficient use of space.",
     extendedDefinition: `An A-frame is a distinctive triangular-shaped structure characterized by steeply angled sides that meet at the top, forming the letter "A." This architectural design has become increasingly popular in glamping accommodations due to its aesthetic appeal, efficient use of space, and ability to blend seamlessly into natural surroundings.
 
@@ -133,6 +136,7 @@ Sage Outdoor Advisory includes A-frame units in our feasibility studies and appr
     "airstream": {
     slug: "airstream",
     term: "Airstream",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/cabin.jpg",
     definition: "A brand of iconic streamlined, silver aluminum travel trailers known for their distinctive rounded shape, often refurbished and used as stationary glamping accommodations.",
     extendedDefinition: `An Airstream is a brand of luxury travel trailers known for their distinctive streamlined, silver aluminum bodies and rounded shape. Originally designed in the 1930s, Airstream trailers have become iconic symbols of American travel and mobile living, and they have found a prominent place in the glamping industry.
 
@@ -180,6 +184,7 @@ Sage Outdoor Advisory includes Airstream and other vintage trailer accommodation
     "bell-tent": {
     slug: "bell-tent",
     term: "Bell Tent",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/bell-tent.jpg",
     definition: "A circular canvas tent supported by a single central pole, with a design resembling a bell, providing a spacious interior and popular for its simplicity and charm in glamping.",
     extendedDefinition: `A bell tent is a circular canvas tent supported by a single central pole, with a design that dates back to the 19th century. The structure gets its name from its bell-like shape, with vertical walls that slope outward from a central point, creating a spacious interior with a high ceiling.
 
@@ -229,6 +234,7 @@ Sage Outdoor Advisory includes bell tents and other canvas tent structures in ou
     "cabin": {
     slug: "cabin",
     term: "Cabin",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/cabin.jpg",
     definition: "A small house, typically made of wood, situated in a natural setting, ranging from rustic to luxurious and providing solid, weather-resistant glamping accommodations.",
     extendedDefinition: `A cabin is a small house, typically constructed from wood, situated in a natural setting such as a forest, mountain, or near a lake. Cabins are one of the most traditional and versatile forms of glamping accommodations, offering a solid structure with varying levels of amenities and luxury.
 
@@ -280,6 +286,7 @@ Sage Outdoor Advisory includes cabin accommodations in our glamping property ana
     "canvas-tent": {
     slug: "canvas-tent",
     term: "Canvas Tent",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/canvas-tent.jpg",
     definition: "A tent made from heavy-duty canvas material, known for durability and breathability, used in glamping to provide traditional camping experiences with modern comfort.",
     extendedDefinition: `A canvas tent is a shelter made from heavy-duty canvas fabric, a material known for its durability, breathability, and traditional camping aesthetic. Canvas tents are a fundamental type of glamping accommodation, offering the authentic feel of tent camping while providing the comfort and amenities associated with glamping.
 
@@ -383,6 +390,7 @@ Sage Outdoor Advisory includes covered wagon and other unique glamping accommoda
     "dome": {
     slug: "dome",
     term: "Dome",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/geodesic-dome.jpg",
     definition: "A geodesic dome structure composed of a network of triangles, providing a spherical glamping accommodation known for durability, panoramic views, and modern aesthetic appeal.",
     extendedDefinition: `A dome, specifically a geodesic dome, is a spherical or partially spherical structure composed of a network of triangular elements that distribute stress evenly throughout the framework. This architectural design has gained popularity in glamping for its unique aesthetic, structural strength, and ability to provide panoramic views of the surrounding environment.
 
@@ -434,6 +442,7 @@ Sage Outdoor Advisory includes dome accommodations in our glamping feasibility s
     "safari-tent": {
     slug: "safari-tent",
     term: "Safari Tent",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/safari-tent.jpg",
     definition: "A large, rectangular canvas tent with straight vertical walls and a peaked roof, often built on a raised platform, originally used in African safaris and now popular for spacious, luxurious glamping accommodations.",
     extendedDefinition: `A safari tent is a large, rectangular canvas tent structure with straight vertical walls and a peaked or gabled roof. Originally designed for use on African safaris, these tents have become one of the most popular and recognizable types of glamping accommodations, offering spacious interiors and the ability to house luxurious amenities.
 
@@ -539,6 +548,7 @@ Sage Outdoor Advisory includes tiny home accommodations in our glamping property
     "tipi": {
     slug: "tipi",
     term: "Tipi",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/tipi.jpg",
     definition: "A conical tent traditionally used by Native American tribes, constructed with a framework of wooden poles covered by canvas, adapted for modern glamping accommodations offering a culturally rich and unique experience.",
     extendedDefinition: `A tipi (also spelled teepee) is a conical tent structure traditionally used by Native American tribes, particularly those of the Great Plains. Modern tipis have been adapted for glamping accommodations, offering guests a culturally rich and unique lodging experience that connects them with Native American heritage while providing modern comfort.
 
@@ -592,6 +602,7 @@ Sage Outdoor Advisory includes tipi accommodations in our glamping feasibility s
     "treehouse": {
     slug: "treehouse",
     term: "Treehouse",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/treehouse.jpg",
     definition: "A structure built among the branches or around the trunk of a tree, elevated above the ground, providing a unique and immersive glamping experience with elevated views and connection to nature.",
     extendedDefinition: `A treehouse is a structure built among the branches or around the trunk of a tree, elevated above the ground. In glamping settings, treehouses have become highly sought-after accommodations that offer guests a unique, whimsical experience combining childhood nostalgia with modern luxury and comfort.
 
@@ -702,6 +713,7 @@ Sage Outdoor Advisory includes vintage trailer accommodations in our glamping pr
     "yurt": {
     slug: "yurt",
     term: "Yurt",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/yurt.jpg",
     definition: "A circular tent with a wooden lattice frame and fabric covering, traditionally used by nomadic peoples in Central Asia, adapted for modern glamping with amenities and built on platforms for comfortable, spacious accommodations.",
     extendedDefinition: `A yurt is a circular tent structure with a collapsible framework typically made of wood or bamboo and a fabric covering, traditionally used by nomadic peoples in Central Asia, particularly Mongolia. Modern yurts have been adapted for glamping accommodations, offering guests a unique cultural experience combined with contemporary comfort and amenities.
 

@@ -326,6 +326,46 @@ export function generateItemListSchema(items: string[], name: string) {
   };
 }
 
+export function generateCourseSchema(content: GuideContent) {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const url = `${baseUrl}/guides/${content.slug}`;
+  
+  // Determine what the course teaches based on category and content
+  const teaches: string[] = [];
+  if (content.category === 'feasibility') {
+    teaches.push("Feasibility Analysis", "Market Research", "Financial Projections", "Outdoor Hospitality Feasibility Studies");
+  } else if (content.category === 'appraisal') {
+    teaches.push("Property Valuation", "Real Estate Appraisal Methods", "Outdoor Hospitality Property Appraisal");
+  } else if (content.category === 'industry') {
+    teaches.push("Outdoor Hospitality Industry", "Glamping Industry", "RV Resort Industry", "Industry Analysis");
+  }
+  
+  // Add keywords as additional topics taught
+  if (content.keywords && content.keywords.length > 0) {
+    teaches.push(...content.keywords.slice(0, 5)); // Limit to 5 additional keywords
+  }
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    "name": content.title,
+    "description": content.metaDescription,
+    "url": url,
+    "provider": {
+      "@type": "Organization",
+      "name": "Sage Outdoor Advisory",
+      "url": "https://sageoutdooradvisory.com",
+      "sameAs": "https://resources.sageoutdooradvisory.com"
+    },
+    "educationalLevel": "Professional",
+    "teaches": teaches.length > 0 ? teaches : ["Outdoor Hospitality", "Feasibility Studies", "Property Appraisals"],
+    "courseCode": content.slug,
+    "inLanguage": "en-US",
+    "isAccessibleForFree": true,
+    "learningResourceType": "Guide"
+  };
+}
+
 export function generateSpeakableSchema(selectors: string[] = [".speakable-answer", "h1", "h2"]) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   return {

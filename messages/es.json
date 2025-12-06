@@ -1,0 +1,38 @@
+{
+  "common": {
+    "siteName": "Sage Outdoor Advisory",
+    "cta": {
+      "contactUs": "Contáctenos",
+      "learnMore": "Saber Más",
+      "getStarted": "Comenzar",
+      "requestQuote": "Solicitar Cotización"
+    },
+    "navigation": {
+      "home": "Inicio",
+      "guides": "Guías",
+      "glossary": "Glosario",
+      "map": "Mapa",
+      "partners": "Socios"
+    },
+    "meta": {
+      "defaultTitle": "Sage Outdoor Advisory - Experiencia en Hospitalidad al Aire Libre",
+      "defaultDescription": "Consultoría líder en estudios de viabilidad y valoraciones en la industria de hospitalidad al aire libre"
+    }
+  },
+  "landing": {
+    "glampingFeasibilityStudy": {
+      "title": "Estudio de Viabilidad de Glamping | Sage Outdoor Advisory",
+      "metaDescription": "Estudios de viabilidad de glamping profesionales para validar su inversión. Análisis experto de la demanda del mercado, proyecciones financieras y viabilidad del sitio.",
+      "hero": {
+        "headline": "Estudio de Viabilidad de Glamping",
+        "subheadline": "Valide su inversión en glamping con análisis de mercado experto y proyecciones financieras",
+        "ctaText": "Obtenga Su Estudio de Viabilidad",
+        "ctaLink": "https://sageoutdooradvisory.com/contact-us"
+      }
+    }
+  },
+  "errors": {
+    "pageNotFound": "Página No Encontrada",
+    "pageNotFoundDescription": "La página que busca no existe."
+  }
+}
