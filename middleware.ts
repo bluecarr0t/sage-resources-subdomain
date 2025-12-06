@@ -25,6 +25,7 @@ const excludedRoutes = [
   'landing',
   'property',
   'sitemap.xml',
+  'sitemaps',
   'robots.txt',
   'favicon.ico',
   '_next',
@@ -34,6 +35,11 @@ export function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
 
+    // Check if pathname already has a locale prefix (needed early for sitemap logic)
+    const pathnameHasLocale = locales.some(
+      (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    );
+
     // Handle root path - redirect to default locale
     if (pathname === '/') {
       const url = request.nextUrl.clone();
@@ -41,10 +47,26 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Check if pathname already has a locale prefix
-    const pathnameHasLocale = locales.some(
-      (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-    );
+    // Handle sitemap routes - completely exclude from i18n middleware
+    // These should be served directly without any locale processing
+    if (pathname === '/sitemap.xml' || pathname.startsWith('/sitemaps/')) {
+      // Let Next.js serve the route handler directly, no middleware processing
+      return NextResponse.next();
+    }
+
+    // Handle locale-prefixed sitemap requests - redirect to root sitemap
+    // e.g., /en/sitemap.xml -> /sitemap.xml
+    // e.g., /en/sitemaps/main.xml -> /sitemaps/main.xml
+    if (pathname.endsWith('/sitemap.xml') && pathname !== '/sitemap.xml') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/sitemap.xml';
+      return NextResponse.redirect(url);
+    }
+    if (pathname.includes('/sitemaps/') && pathnameHasLocale) {
+      const url = request.nextUrl.clone();
+      url.pathname = pathname.replace(/^\/[a-z]{2}\//, '/');
+      return NextResponse.redirect(url);
+    }
 
     // Check if pathname is just a locale (e.g., /en, /es, /fr, /de)
     const isLocaleOnly = locales.some((locale) => pathname === `/${locale}`);
@@ -56,7 +78,11 @@ export function middleware(request: NextRequest) {
       pathname.startsWith('/api') ||
       pathname.includes('.') // Skip static files (images, etc.)
     ) {
-      // Still apply i18n middleware for these routes
+      // For sitemap and robots.txt, skip i18n middleware entirely
+      if (pathname === '/sitemap.xml' || pathname.startsWith('/sitemaps/') || pathname === '/robots.txt') {
+        return NextResponse.next();
+      }
+      // Still apply i18n middleware for other excluded routes
       return intlMiddleware(request);
     }
 
