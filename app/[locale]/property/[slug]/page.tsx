@@ -1,11 +1,14 @@
 import { Metadata } from "next";
 import { getAllPropertySlugs, getPropertiesBySlug, getNearbyProperties } from "@/lib/properties";
+import { getAllNationalParkSlugs, getNationalParkBySlug, getSlugType } from "@/lib/national-parks";
 import { parseCoordinates } from "@/lib/types/sage";
 import { notFound } from "next/navigation";
 import PropertyDetailTemplate from "@/components/PropertyDetailTemplate";
+import NationalParkDetailTemplate from "@/components/NationalParkDetailTemplate";
 import { generatePropertyBreadcrumbSchema, generatePropertyLocalBusinessSchema, generatePropertyFAQSchema, generatePropertyAmenitiesSchema } from "@/lib/schema";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { fetchGooglePlacesData } from "@/lib/google-places";
 
 interface PageProps {
   params: {
@@ -15,13 +18,25 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const slugs = await getAllPropertySlugs();
+  // Get slugs from both glamping properties and national parks
+  const [propertySlugs, nationalParkSlugs] = await Promise.all([
+    getAllPropertySlugs(),
+    getAllNationalParkSlugs(),
+  ]);
+  
   const params: Array<{ locale: string; slug: string }> = [];
   
   // Property pages are data-driven and don't need localization
   // Only generate for default locale (en) to reduce build time and page count
   const defaultLocale = 'en';
-  for (const item of slugs) {
+  
+  // Add glamping property slugs
+  for (const item of propertySlugs) {
+    params.push({ locale: defaultLocale, slug: item.slug });
+  }
+  
+  // Add national park slugs
+  for (const item of nationalParkSlugs) {
     params.push({ locale: defaultLocale, slug: item.slug });
   }
   
@@ -36,6 +51,108 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     notFound();
   }
   
+  // Determine if this is a national park or glamping property
+  const slugType = await getSlugType(slug);
+  
+  // Handle national parks
+  if (slugType === 'national-park') {
+    const park = await getNationalParkBySlug(slug);
+    
+    if (!park) {
+      return {
+        title: "Park Not Found | Sage Outdoor Advisory",
+      };
+    }
+    
+    const parkName = park.name || "National Park";
+    
+    // Fetch Google Places data for metadata
+    const googlePlacesData = await fetchGooglePlacesData(
+      parkName,
+      null,
+      park.state || null,
+      null
+    );
+    
+    const baseUrl = "https://resources.sageoutdooradvisory.com";
+    const pathname = `/${locale}/property/${slug}`;
+    const url = `${baseUrl}${pathname}`;
+    
+    // Build description
+    const descriptionParts: string[] = [];
+    if (park.state) descriptionParts.push(`in ${park.state}`);
+    if (park.date_established) descriptionParts.push(`established ${park.date_established}`);
+    if (googlePlacesData?.rating && googlePlacesData?.userRatingCount) {
+      descriptionParts.push(`${googlePlacesData.rating.toFixed(1)}★ from ${googlePlacesData.userRatingCount} reviews`);
+    }
+    
+    let description = parkName;
+    if (descriptionParts.length > 0) {
+      description += `: ${descriptionParts.join(' • ')}.`;
+    }
+    description += ` View photos, details, and visitor information.`;
+    
+    if (description.length > 160) {
+      description = description.substring(0, 157) + '...';
+    }
+    
+    // Get first photo for OG image if available
+    let imageUrl = `${baseUrl}/og-map-image.jpg`;
+    if (googlePlacesData?.photos && googlePlacesData.photos.length > 0) {
+      const photo = googlePlacesData.photos[0];
+      if (photo?.name) {
+        const maxWidth = photo.widthPx ? Math.min(photo.widthPx, 1200) : 1200;
+        const maxHeight = photo.heightPx ? Math.min(photo.heightPx, 630) : 630;
+        const encodedPhotoName = encodeURIComponent(photo.name);
+        imageUrl = `${baseUrl}/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=${maxWidth}&maxHeightPx=${maxHeight}`;
+      }
+    }
+    
+    return {
+      title: `${parkName} | National Park | Sage Outdoor Advisory`,
+      description,
+      keywords: `${parkName}, national park, ${park.state || ""}, ${park.park_code || ""}`.trim(),
+      openGraph: {
+        title: parkName,
+        description,
+        url,
+        siteName: "Sage Outdoor Advisory",
+        images: [
+          {
+            url: imageUrl,
+            width: 1200,
+            height: 630,
+            alt: parkName,
+          },
+        ],
+        locale: getOpenGraphLocale(locale as Locale),
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: parkName,
+        description,
+        images: [imageUrl],
+      },
+      alternates: {
+        canonical: url,
+        ...generateHreflangAlternates(pathname),
+      },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
+    };
+  }
+  
+  // Handle glamping properties (existing logic)
   const properties = await getPropertiesBySlug(slug);
   
   if (!properties || properties.length === 0) {
@@ -47,6 +164,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const firstProperty = properties[0];
   const propertyName = firstProperty.property_name || "Unnamed Property";
   
+  // Fetch Google Places data for metadata
+  const googlePlacesData = await fetchGooglePlacesData(
+    propertyName,
+    firstProperty.city || null,
+    firstProperty.state || null,
+    firstProperty.address || null
+  );
+  
   // Build location string
   const locationParts: string[] = [];
   if (firstProperty.city) locationParts.push(firstProperty.city);
@@ -57,9 +182,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // Build optimized description with key information
   const descriptionParts: string[] = [];
   
-  // Add rating if available
-  if (firstProperty.google_rating && firstProperty.google_user_rating_total) {
-    descriptionParts.push(`${firstProperty.google_rating.toFixed(1)}★ from ${firstProperty.google_user_rating_total} reviews`);
+  // Add rating if available (from Google Places API, not database)
+  if (googlePlacesData?.rating && googlePlacesData?.userRatingCount) {
+    descriptionParts.push(`${googlePlacesData.rating.toFixed(1)}★ from ${googlePlacesData.userRatingCount} reviews`);
   }
   
   // Add location
@@ -132,25 +257,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const pathname = `/${locale}/property/${slug}`;
   const url = `${baseUrl}${pathname}`;
   
-  // Get first photo for OG image if available
+  // Get first photo for OG image if available (from Google Places API)
   let imageUrl = `${baseUrl}/og-map-image.jpg`; // Fallback image
-  if (firstProperty.google_photos) {
-    let photos: any = firstProperty.google_photos;
-    if (typeof photos === 'string') {
-      try {
-        photos = JSON.parse(photos);
-      } catch (e) {
-        // Ignore parse errors
-      }
-    }
-    if (Array.isArray(photos) && photos.length > 0) {
-      const photo = photos[0];
-      if (photo?.name) {
-        const maxWidth = photo.widthPx ? Math.min(photo.widthPx, 1200) : 1200;
-        const maxHeight = photo.heightPx ? Math.min(photo.heightPx, 630) : 630;
-        const encodedPhotoName = encodeURIComponent(photo.name);
-        imageUrl = `${baseUrl}/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=${maxWidth}&maxHeightPx=${maxHeight}`;
-      }
+  if (googlePlacesData?.photos && googlePlacesData.photos.length > 0) {
+    const photo = googlePlacesData.photos[0];
+    if (photo?.name) {
+      const maxWidth = photo.widthPx ? Math.min(photo.widthPx, 1200) : 1200;
+      const maxHeight = photo.heightPx ? Math.min(photo.heightPx, 630) : 630;
+      const encodedPhotoName = encodeURIComponent(photo.name);
+      imageUrl = `${baseUrl}/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=${maxWidth}&maxHeightPx=${maxHeight}`;
     }
   }
 
@@ -206,6 +321,36 @@ export default async function PropertyPage({ params }: PageProps) {
     notFound();
   }
   
+  // Determine if this is a national park or glamping property
+  const slugType = await getSlugType(slug);
+  
+  // Handle national parks
+  if (slugType === 'national-park') {
+    const park = await getNationalParkBySlug(slug);
+    
+    if (!park) {
+      notFound();
+    }
+    
+    // Fetch Google Places data
+    const googlePlacesData = await fetchGooglePlacesData(
+      park.name || null,
+      null,
+      park.state || null,
+      null
+    );
+    
+    return (
+      <NationalParkDetailTemplate
+        park={park}
+        slug={slug}
+        googlePlacesData={googlePlacesData}
+        locale={locale}
+      />
+    );
+  }
+  
+  // Handle glamping properties (existing logic)
   const properties = await getPropertiesBySlug(slug);
 
   if (!properties || properties.length === 0) {
@@ -214,6 +359,14 @@ export default async function PropertyPage({ params }: PageProps) {
 
   const firstProperty = properties[0];
   const propertyName = firstProperty.property_name || "Unnamed Property";
+  
+  // Fetch Google Places data (rating, reviews, photos, website, description)
+  const googlePlacesData = await fetchGooglePlacesData(
+    propertyName,
+    firstProperty.city || null,
+    firstProperty.state || null,
+    firstProperty.address || null
+  );
   
   // Get coordinates for nearby properties search
   const coordinates = parseCoordinates(firstProperty.lat, firstProperty.lon);
@@ -230,12 +383,21 @@ export default async function PropertyPage({ params }: PageProps) {
     );
   }
   
-  // Generate structured data
-  const breadcrumbSchema = generatePropertyBreadcrumbSchema(slug, propertyName);
-  const localBusinessSchema = generatePropertyLocalBusinessSchema({
+  // Merge Google Places data into property object for schema generation
+  const propertyWithGoogleData = {
     ...firstProperty,
     slug: slug,
-  });
+    // Override with Google Places API data (not from database)
+    google_rating: googlePlacesData?.rating || null,
+    google_user_rating_total: googlePlacesData?.userRatingCount || null,
+    google_photos: googlePlacesData?.photos || null,
+    google_website_uri: googlePlacesData?.websiteUri || null,
+    google_phone_number: googlePlacesData?.phoneNumber || null,
+  };
+  
+  // Generate structured data
+  const breadcrumbSchema = generatePropertyBreadcrumbSchema(slug, propertyName);
+  const localBusinessSchema = generatePropertyLocalBusinessSchema(propertyWithGoogleData);
   const faqSchema = generatePropertyFAQSchema({
     property_name: firstProperty.property_name,
     unit_type: firstProperty.unit_type,
@@ -245,8 +407,8 @@ export default async function PropertyPage({ params }: PageProps) {
     minimum_nights: firstProperty.minimum_nights,
     pets: firstProperty.pets,
     avg_retail_daily_rate_2024: firstProperty.avg_retail_daily_rate_2024,
-    google_rating: firstProperty.google_rating || null,
-    google_user_rating_total: firstProperty.google_user_rating_total || null,
+    google_rating: googlePlacesData?.rating || null,
+    google_user_rating_total: googlePlacesData?.userRatingCount || null,
   });
   
   const amenitiesSchema = generatePropertyAmenitiesSchema({
@@ -297,6 +459,8 @@ export default async function PropertyPage({ params }: PageProps) {
         slug={slug}
         propertyName={propertyName}
         nearbyProperties={nearbyProperties}
+        googlePlacesData={googlePlacesData}
+        locale={locale}
       />
     </>
   );

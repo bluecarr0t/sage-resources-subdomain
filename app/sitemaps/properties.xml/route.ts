@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getAllPropertySlugs } from '@/lib/properties';
-import { locales } from '@/i18n';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
@@ -12,16 +11,14 @@ export async function GET() {
   const urls: string[] = [];
   const propertyDefaultDate = new Date().toISOString();
 
-  // Generate property pages for all locales
-  for (const locale of locales) {
-    for (const item of propertySlugs) {
-      urls.push(`  <url>
-    <loc>${baseUrl}/${locale}/property/${item.slug}</loc>
+  // Generate property pages for English only
+  for (const item of propertySlugs) {
+    urls.push(`  <url>
+    <loc>${baseUrl}/en/property/${item.slug}</loc>
     <lastmod>${propertyDefaultDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>`);
-    }
   }
 
   urls.sort((a, b) => a.localeCompare(b));

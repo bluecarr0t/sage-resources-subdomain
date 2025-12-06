@@ -265,6 +265,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(defaultCenter);
   const [mapZoom, setMapZoom] = useState<number>(defaultZoom);
   const [shouldFitBounds, setShouldFitBounds] = useState(true);
+  const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
 
   // URL parameter handling
   const searchParams = useSearchParams();
@@ -1134,6 +1135,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           map.setZoom(mapZoom);
           hasCenteredFromUrlRef.current = true;
           
+          // Update bounds after map finishes moving (onIdle will handle this)
+          // Also set a timeout as backup in case onIdle doesn't fire immediately
+          setTimeout(() => {
+            const bounds = map.getBounds();
+            if (bounds) {
+              setMapBounds(bounds);
+            }
+          }, 500);
+          
           // Try to find and select the property at these coordinates
           if (propertiesWithCoords.length > 0) {
             const targetProperty = propertiesWithCoords.find((property) => {
@@ -1155,7 +1165,37 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
+    // Initialize bounds after a short delay to ensure map has rendered
+    setTimeout(() => {
+      const bounds = map.getBounds();
+      if (bounds) {
+        setMapBounds(bounds);
+      }
+    }, 200);
   }, []);
+
+  const onIdle = useCallback(() => {
+    if (map) {
+      const bounds = map.getBounds();
+      if (bounds) {
+        setMapBounds(bounds);
+      }
+    }
+  }, [map]);
+
+  // Update bounds when map changes (center/zoom)
+  useEffect(() => {
+    if (map && !shouldFitBounds) {
+      // When a location is selected, update bounds after map settles
+      const timer = setTimeout(() => {
+        const bounds = map.getBounds();
+        if (bounds) {
+          setMapBounds(bounds);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [map, mapCenter, mapZoom, shouldFitBounds]);
 
   const onUnmount = useCallback(() => {
     // Clean up clusterer and markers
@@ -1669,7 +1709,28 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
     
     // Only count properties with valid coordinates (matching what's shown on the map)
-    const propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
+    let propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
+    
+    // If a location is selected (has lat/lon in URL) and we have map bounds, filter by bounds
+    const hasLocationParams = searchParams.get('lat') && searchParams.get('lon');
+    if (hasLocationParams && !shouldFitBounds && map) {
+      // Get current bounds from map (more reliable than stored state)
+      const currentBounds = map.getBounds();
+      if (currentBounds) {
+        propertiesWithValidCoords = propertiesWithValidCoords.filter((p) => {
+          const coords = p.coordinates;
+          if (!coords) return false;
+          const [lat, lng] = coords;
+          try {
+            const latLng = new google.maps.LatLng(lat, lng);
+            return currentBounds.contains(latLng);
+          } catch (e) {
+            // If bounds check fails, include the property to be safe
+            return true;
+          }
+        });
+      }
+    }
     
     // Group by property_name to count unique properties (same as countryCounts logic)
     const uniquePropertyNames = new Set<string>();
@@ -1839,7 +1900,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     });
     
     return uniquePropertyNames.size;
-  }, [allProperties, filterCountry, filterState, filterUnitType, filterRateRange, stateMatchesFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allProperties, filterCountry, filterState, filterUnitType, filterRateRange, stateMatchesFilter, shouldFitBounds, map, mapBounds, searchParams]);
 
   // Update displayed count to match calculated count (ensures it matches dropdown counts)
   useEffect(() => {
@@ -2798,6 +2860,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               center={mapCenter}
               zoom={mapZoom}
               onLoad={onLoad}
+              onIdle={onIdle}
               onUnmount={onUnmount}
               options={{
                 disableDefaultUI: false,

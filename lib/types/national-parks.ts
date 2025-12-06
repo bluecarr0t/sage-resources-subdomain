@@ -14,6 +14,7 @@ export interface NationalPark {
   acres: number | null;
   latitude: number | null;
   longitude: number | null;
+  slug: string | null;
   created_at: string;
   updated_at: string;
 }

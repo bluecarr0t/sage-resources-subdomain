@@ -7,12 +7,15 @@ import { SageProperty } from '@/lib/types/sage';
 import { parseCoordinates } from '@/lib/types/sage';
 import RelatedPropertiesCarousel from '@/components/RelatedPropertiesCarousel';
 import FloatingHeader from './FloatingHeader';
+import { GooglePlacesData } from '@/lib/google-places';
 
 interface PropertyDetailTemplateProps {
   properties: SageProperty[];
   slug: string;
   propertyName: string;
   nearbyProperties?: SageProperty[];
+  googlePlacesData?: GooglePlacesData | null;
+  locale?: string;
 }
 
 /**
@@ -83,22 +86,13 @@ export default function PropertyDetailTemplate({
   slug,
   propertyName,
   nearbyProperties = [],
+  googlePlacesData,
+  locale,
 }: PropertyDetailTemplateProps) {
   const firstProperty = properties[0];
   
-  // Parse photos from first property
-  let photos: any[] = [];
-  if (firstProperty.google_photos) {
-    if (typeof firstProperty.google_photos === 'string') {
-      try {
-        photos = JSON.parse(firstProperty.google_photos);
-      } catch (e) {
-        // Ignore parse errors
-      }
-    } else if (Array.isArray(firstProperty.google_photos)) {
-      photos = firstProperty.google_photos;
-    }
-  }
+  // Use photos from Google Places API (not from database)
+  const photos = googlePlacesData?.photos || [];
   
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   
@@ -133,8 +127,8 @@ export default function PropertyDetailTemplate({
   if (firstProperty.zip_code) addressParts.push(firstProperty.zip_code);
   const fullAddress = addressParts.join(", ");
   
-  // Get website URL (prioritize google_website_uri)
-  const websiteUrl = firstProperty.google_website_uri || firstProperty.url;
+  // Get website URL from Google Places API (not from database)
+  const websiteUrl = googlePlacesData?.websiteUri || firstProperty.url;
   
   // Get coordinates for map link
   const coordinates = parseCoordinates(firstProperty.lat, firstProperty.lon);
@@ -176,7 +170,7 @@ export default function PropertyDetailTemplate({
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Header */}
-      <FloatingHeader showFullNav={false} showSpacer={false} />
+      <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
 
       {/* Breadcrumbs */}
       <nav className="bg-gray-50 border-b border-gray-200 py-3 pt-32 md:pt-36">
@@ -283,22 +277,22 @@ export default function PropertyDetailTemplate({
                 <p className="text-gray-600 mb-4">{fullAddress}</p>
               )}
               
-              {/* Rating */}
-              {(firstProperty.google_rating || firstProperty.google_user_rating_total) && (
+              {/* Rating from Google Places API */}
+              {(googlePlacesData?.rating || googlePlacesData?.userRatingCount) && (
                 <div className="flex items-center gap-2 mb-4">
-                  {firstProperty.google_rating && (
-                    <div className="flex items-center gap-1" role="img" aria-label={`Rating: ${firstProperty.google_rating.toFixed(1)} out of 5 stars`}>
+                  {googlePlacesData?.rating && (
+                    <div className="flex items-center gap-1" role="img" aria-label={`Rating: ${googlePlacesData.rating.toFixed(1)} out of 5 stars`}>
                       <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20" aria-hidden="true">
                         <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                       </svg>
                       <span className="text-lg font-semibold text-gray-900">
-                        {firstProperty.google_rating.toFixed(1)}
+                        {googlePlacesData.rating.toFixed(1)}
                       </span>
                     </div>
                   )}
-                  {firstProperty.google_user_rating_total && (
+                  {googlePlacesData?.userRatingCount && (
                     <span className="text-gray-600">
-                      ({firstProperty.google_user_rating_total.toLocaleString()} {firstProperty.google_user_rating_total === 1 ? 'review' : 'reviews'})
+                      ({googlePlacesData.userRatingCount.toLocaleString()} {googlePlacesData.userRatingCount === 1 ? 'review' : 'reviews'})
                     </span>
                   )}
                 </div>
@@ -326,15 +320,15 @@ export default function PropertyDetailTemplate({
                 </Link>
               </div>
               
-              {firstProperty.google_phone_number && (
+              {googlePlacesData?.phoneNumber && (
                 <p className="text-gray-700 mt-4">
                   <span className="font-semibold">Phone:</span>{' '}
                   <a 
-                    href={`tel:${firstProperty.google_phone_number}`} 
+                    href={`tel:${googlePlacesData.phoneNumber}`} 
                     className="text-[#006b5f] hover:underline focus:outline-none focus:ring-2 focus:ring-[#006b5f] focus:ring-offset-2 rounded"
-                    aria-label={`Call ${propertyName} at ${formatPhoneNumber(firstProperty.google_phone_number)}`}
+                    aria-label={`Call ${propertyName} at ${formatPhoneNumber(googlePlacesData.phoneNumber)}`}
                   >
-                    {formatPhoneNumber(firstProperty.google_phone_number)}
+                    {formatPhoneNumber(googlePlacesData.phoneNumber)}
                   </a>
                 </p>
               )}
@@ -390,12 +384,12 @@ export default function PropertyDetailTemplate({
         <div className={`grid grid-cols-1 gap-8 mb-8 ${hasAnyAmenities ? 'lg:grid-cols-3' : ''}`}>
           {/* Left Column - Details */}
           <div className={hasAnyAmenities ? 'lg:col-span-2 space-y-6' : 'space-y-4'}>
-            {/* Description - Prioritize Google description, fallback to regular description */}
-            {(firstProperty.google_description || firstProperty.description) && (
+            {/* Description from Google Places API, fallback to database description */}
+            {(googlePlacesData?.description || firstProperty.description) && (
               <section aria-labelledby="description-heading">
                 <h2 id="description-heading" className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
                 <div className="text-gray-700 whitespace-pre-line" role="article" aria-label={`Description of ${propertyName}`}>
-                  {firstProperty.google_description || firstProperty.description}
+                  {googlePlacesData?.description || firstProperty.description}
                 </div>
               </section>
             )}
@@ -437,38 +431,38 @@ export default function PropertyDetailTemplate({
               </dl>
             </section>
             
-            {/* Reviews Section */}
-            {(firstProperty.google_rating || firstProperty.google_user_rating_total) && (
+            {/* Reviews Section from Google Places API */}
+            {(googlePlacesData?.rating || googlePlacesData?.userRatingCount) && (
               <section aria-labelledby="reviews-heading">
                 <h2 id="reviews-heading" className="text-2xl font-bold text-gray-900 mb-4">Reviews</h2>
                 <div className="bg-gray-50 rounded-lg p-6" role="region" aria-label="Property reviews and ratings">
                   <div className="flex items-center gap-4 mb-4">
-                    {firstProperty.google_rating && (
+                    {googlePlacesData?.rating && (
                       <div className="flex items-center gap-2">
                         <svg className="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 20 20" aria-hidden="true">
                           <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                         </svg>
-                        <span className="text-3xl font-bold text-gray-900" aria-label={`Rating: ${firstProperty.google_rating.toFixed(1)} out of 5 stars`}>
-                          {firstProperty.google_rating.toFixed(1)}
+                        <span className="text-3xl font-bold text-gray-900" aria-label={`Rating: ${googlePlacesData.rating.toFixed(1)} out of 5 stars`}>
+                          {googlePlacesData.rating.toFixed(1)}
                         </span>
                       </div>
                     )}
-                    {firstProperty.google_user_rating_total && (
+                    {googlePlacesData?.userRatingCount && (
                       <div className="flex flex-col">
                         <span className="text-lg font-semibold text-gray-900">
-                          {firstProperty.google_user_rating_total.toLocaleString()} {firstProperty.google_user_rating_total === 1 ? 'Review' : 'Reviews'}
+                          {googlePlacesData.userRatingCount.toLocaleString()} {googlePlacesData.userRatingCount === 1 ? 'Review' : 'Reviews'}
                         </span>
                         <span className="text-sm text-gray-600">Google Reviews</span>
                       </div>
                     )}
                   </div>
-                  {firstProperty.google_rating && (
-                    <div className="flex items-center gap-1" role="img" aria-label={`${Math.round(firstProperty.google_rating)} out of 5 stars`}>
+                  {googlePlacesData?.rating && (
+                    <div className="flex items-center gap-1" role="img" aria-label={`${Math.round(googlePlacesData.rating)} out of 5 stars`}>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <svg
                           key={star}
                           className={`w-5 h-5 ${
-                            star <= Math.round(firstProperty.google_rating!)
+                            star <= Math.round(googlePlacesData.rating!)
                               ? 'text-yellow-400 fill-current'
                               : 'text-gray-300'
                           }`}
