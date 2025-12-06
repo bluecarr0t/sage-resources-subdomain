@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { defaultLocale } from './i18n';
+import { defaultLocale } from '@/i18n';
 import { Metadata } from 'next';
 
 // Root page - redirect to default locale
