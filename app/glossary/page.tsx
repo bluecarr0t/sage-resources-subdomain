@@ -7,8 +7,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Outdoor Hospitality Glossary | Industry Terms & Definitions | Sage Outdoor Advisory",
-  description: "Comprehensive glossary of outdoor hospitality industry terms. Learn definitions for glamping, RV resorts, feasibility studies, appraisals, and more.",
+  title: "Outdoor Hospitality Glossary | Terms & Definitions | Sage Outdoor Advisory",
+  description: "Comprehensive glossary of outdoor hospitality terms. Learn definitions for glamping, RV resorts, feasibility studies, appraisals, and more.",
   keywords: "outdoor hospitality glossary, glamping terms, RV resort definitions, feasibility study terms, hospitality industry glossary",
   openGraph: {
     title: "Outdoor Hospitality Glossary | Sage Outdoor Advisory",
@@ -77,10 +77,10 @@ export default function GlossaryPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Header */}
-      <FloatingHeader />
+      <FloatingHeader showSpacer={false} />
 
       {/* Hero Section */}
-      <section className="relative py-16 overflow-hidden">
+      <section className="relative pt-32 md:pt-36 pb-16 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image

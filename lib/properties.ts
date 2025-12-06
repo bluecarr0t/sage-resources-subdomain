@@ -56,17 +56,19 @@ export async function getUniquePropertyNames(): Promise<string[]> {
 
 /**
  * Get all unique property slugs for generateStaticParams
- * Queries slugs directly from database (much faster than generating from property names)
+ * Gets one slug per unique property name (not per database record)
+ * This ensures we generate pages for unique properties (513) not all records (1,266)
  */
 export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
   try {
     const supabase = createServerClient();
     
-    // Get unique slugs directly from database
-    // Using DISTINCT ON or grouping to get unique slugs
+    // Get unique property names first, then get one slug per unique property
+    // This ensures we only get 513 slugs (one per unique property) not 1,266 (one per record)
     const { data: properties, error } = await supabase
       .from('sage-glamping-data')
-      .select('slug')
+      .select('property_name, slug')
+      .not('property_name', 'is', null)
       .not('slug', 'is', null)
       .limit(10000);
 
@@ -75,15 +77,23 @@ export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
       return [];
     }
 
-    // Get unique slugs
-    const uniqueSlugs = new Set<string>();
+    // Map: property_name -> slug (ensures one slug per unique property name)
+    const propertyNameToSlug = new Map<string, string>();
     properties?.forEach((prop) => {
-      if (prop.slug && prop.slug.trim()) {
-        uniqueSlugs.add(prop.slug.trim());
+      const propertyName = prop.property_name?.trim();
+      const slug = prop.slug?.trim();
+      if (propertyName && slug) {
+        // Only add if we haven't seen this property name before
+        // This ensures we get one slug per unique property, not per record
+        if (!propertyNameToSlug.has(propertyName)) {
+          propertyNameToSlug.set(propertyName, slug);
+        }
       }
     });
 
-    return Array.from(uniqueSlugs).sort().map((slug) => ({ slug }));
+    // Return unique slugs (one per unique property name)
+    const uniqueSlugs = Array.from(new Set(propertyNameToSlug.values()));
+    return uniqueSlugs.sort().map((slug) => ({ slug }));
   } catch (error) {
     console.error('Error in getAllPropertySlugs:', error);
     return [];

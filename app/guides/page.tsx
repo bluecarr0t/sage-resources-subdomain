@@ -7,8 +7,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Outdoor Hospitality Guides | Comprehensive Resources | Sage Outdoor Advisory",
-  description: "Comprehensive guides covering feasibility studies, property appraisals, and the outdoor hospitality industry. Expert insights for glamping, RV resort, and campground developers and investors.",
+  title: "Outdoor Hospitality Guides | Expert Resources | Sage Outdoor Advisory",
+  description: "Expert guides on feasibility studies, property appraisals, and outdoor hospitality. Essential reading for glamping, RV resort, and campground developers and investors.",
   keywords: "feasibility study guides, property appraisal guides, glamping guides, RV resort guides, outdoor hospitality resources, campground development guides",
   openGraph: {
     title: "Outdoor Hospitality Guides | Sage Outdoor Advisory",
@@ -91,10 +91,10 @@ export default function GuidesPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Header */}
-      <FloatingHeader />
+      <FloatingHeader showSpacer={false} />
 
       {/* Hero Section */}
-      <section className="relative py-16 overflow-hidden">
+      <section className="relative pt-32 md:pt-36 pb-16 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image

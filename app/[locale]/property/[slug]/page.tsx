@@ -18,11 +18,11 @@ export async function generateStaticParams() {
   const slugs = await getAllPropertySlugs();
   const params: Array<{ locale: string; slug: string }> = [];
   
-  // Generate params for all locales and slugs
-  for (const locale of locales) {
-    for (const item of slugs) {
-      params.push({ locale, slug: item.slug });
-    }
+  // Property pages are data-driven and don't need localization
+  // Only generate for default locale (en) to reduce build time and page count
+  const defaultLocale = 'en';
+  for (const item of slugs) {
+    params.push({ locale: defaultLocale, slug: item.slug });
   }
   
   return params;
