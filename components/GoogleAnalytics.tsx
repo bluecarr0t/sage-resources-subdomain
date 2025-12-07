@@ -27,6 +27,11 @@ export default function GoogleAnalytics() {
         allow_enhanced_conversions: true,
         allow_google_signals: true,
         allow_ad_personalization_signals: true,
+        // Cross-domain tracking configuration
+        linker: {
+          domains: ['sageoutdooradvisory.com', 'resources.sageoutdooradvisory.com']
+        },
+        cookie_flags: 'SameSite=None;Secure',
         // Debug mode in development
         debug_mode: IS_DEVELOPMENT,
       });
@@ -203,6 +208,11 @@ export default function GoogleAnalytics() {
               allow_enhanced_conversions: true,
               allow_google_signals: true,
               allow_ad_personalization_signals: true,
+              // Cross-domain tracking configuration
+              linker: {
+                domains: ['sageoutdooradvisory.com', 'resources.sageoutdooradvisory.com']
+              },
+              cookie_flags: 'SameSite=None;Secure',
               ${IS_DEVELOPMENT ? "debug_mode: true," : ""}
             });
           `,
