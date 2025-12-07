@@ -28,10 +28,10 @@ Sage Outdoor Advisory specializes in creating comprehensive, bank-approved feasi
       { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
       { text: "RV Resort Feasibility Study", url: "/landing/rv-resort-feasibility-study" },
       { text: "Campground Feasibility Study", url: "/landing/campground-feasibility-study" },
-      { text: "Glamping Feasibility Study Services", url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/" },
-      { text: "RV Resort Feasibility Study Services", url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/" },
-      { text: "Campground Feasibility Study Services", url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/" },
-      { text: "All Feasibility Study Services", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Glamping Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/" },
+      { text: "RV Resort Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/rv-resorts/" },
+      { text: "Campground Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/campgrounds/" },
+      { text: "All Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -75,9 +75,9 @@ Appraisals are required for bank financing, property sales, refinancing, insuran
     internalLinks: [
       { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
       { text: "RV Resort Appraisal", url: "/landing/rv-resort-appraisal" },
-      { text: "Glamping Property Appraisal Services", url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/" },
-      { text: "RV Resort Appraisal Services", url: "https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/" },
-      { text: "All Appraisal Services", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Glamping Property Appraisal Services", url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/" },
+      { text: "RV Resort Appraisal Services", url: "https://sageoutdooradvisory.com/appraisal-rv-parks/" },
+      { text: "All Appraisal Services", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -114,8 +114,8 @@ Sage Outdoor Advisory conducts detailed market analysis as part of our feasibili
     ],
     seoKeywords: ["market analysis", "market research", "market assessment", "market evaluation", "demand analysis"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" },
-      { text: "Market Reports", url: "https://sageoutdooradvisory.com/market-reports/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" }
     ],
     faqs: [
       {
@@ -152,7 +152,7 @@ Sage Outdoor Advisory includes comprehensive competitive analysis in our feasibi
     ],
     seoKeywords: ["competitive analysis", "competitor analysis", "market competition", "competitive landscape"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -185,7 +185,7 @@ Sage Outdoor Advisory creates detailed revenue projections as part of our feasib
     ],
     seoKeywords: ["revenue projections", "revenue forecast", "income projections", "revenue estimates"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -224,7 +224,7 @@ Sage Outdoor Advisory uses the income approach in our appraisals, along with sal
     ],
     seoKeywords: ["income approach", "income valuation", "property valuation", "income method"],
     internalLinks: [
-      { text: "Appraisals", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Appraisals", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -261,7 +261,7 @@ Sage Outdoor Advisory has extensive knowledge of outdoor hospitality property sa
     ],
     seoKeywords: ["comparable sales", "comps", "comparable properties", "sales comparison"],
     internalLinks: [
-      { text: "Appraisals", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Appraisals", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -294,7 +294,7 @@ Sage Outdoor Advisory uses the cost approach in our appraisals, particularly for
     ],
     seoKeywords: ["cost approach", "replacement cost", "cost valuation", "reproduction cost"],
     internalLinks: [
-      { text: "Appraisals", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Appraisals", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {

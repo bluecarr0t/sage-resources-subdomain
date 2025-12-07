@@ -390,17 +390,17 @@ export const appraisalGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "Glamping Property Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
           description: "Bank-approved glamping property appraisals for financing and transactions."
         },
         {
           name: "RV Resort Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/appraisal-rv-parks/",
           description: "Expert RV resort appraisals trusted by banks and investors."
         },
         {
           name: "Campground Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/campgrounds/",
+          url: "https://sageoutdooradvisory.com/appraisal-campgrounds/",
           description: "Professional campground appraisals for financing and investment decisions."
         }
       ]

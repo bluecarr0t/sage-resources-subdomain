@@ -41,7 +41,7 @@ Enhanced subdomain → root domain linking to improve direct link equity transfe
 - `https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/`
 - `https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/`
 - `https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/`
-- `https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/`
+- `https://sageoutdooradvisory.com/appraisal-rv-parks/`
 - `https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/`
 
 **Impact:** Direct authority boost to specific service pages instead of just homepage.

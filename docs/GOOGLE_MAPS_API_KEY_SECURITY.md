@@ -13,9 +13,12 @@ This document provides specific security recommendations for your Google Maps AP
 
 ## 🔒 Application Restrictions (CRITICAL)
 
-### Current Status: ❌ None (Not Secure)
+### Current Status: ⚠️ Needs Verification
 
-**Action Required:** Change to **"Websites (HTTP referrers)"**
+**Action Required:** 
+1. Verify HTTP referrer restrictions are configured in Google Cloud Console
+2. Follow the step-by-step guide: `docs/audit/API_KEY_SECURITY_SETUP_GUIDE.md`
+3. Run verification script: `npx tsx scripts/verify-api-key-restrictions.ts`
 
 ### Recommended HTTP Referrers
 

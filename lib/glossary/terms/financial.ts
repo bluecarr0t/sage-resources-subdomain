@@ -29,7 +29,7 @@ Sage Outdoor Advisory includes ADR analysis and benchmarking in our feasibility 
     ],
     seoKeywords: ["ADR", "average daily rate", "room rate", "daily rate", "revenue per room"],
     internalLinks: [
-      { text: "Market Reports", url: "https://sageoutdooradvisory.com/market-reports/" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
       { text: "Data Insights", url: "https://sageoutdooradvisory.com/data-insights/" }
     ],
     faqs: [
@@ -76,9 +76,9 @@ Sage Outdoor Advisory uses ARDR analysis in market research and feasibility stud
     ],
     seoKeywords: ["ARDR", "average retail daily rate", "listed price", "advertised rate", "marketplace pricing", "booking platform rates"],
     internalLinks: [
-      { text: "Market Reports", url: "https://sageoutdooradvisory.com/market-reports/" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
       { text: "Data Insights", url: "https://sageoutdooradvisory.com/data-insights/" },
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -123,8 +123,8 @@ Sage Outdoor Advisory includes occupancy rate analysis and forecasting in our fe
     ],
     seoKeywords: ["occupancy rate", "occupancy percentage", "room occupancy", "occupancy metrics"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" },
-      { text: "Market Reports", url: "https://sageoutdooradvisory.com/market-reports/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" }
     ],
     faqs: [
       {
@@ -167,7 +167,7 @@ Sage Outdoor Advisory includes RevPAR analysis and benchmarking in our feasibili
     ],
     seoKeywords: ["RevPAR", "revenue per available room", "revenue per available unit", "RevPAR calculation"],
     internalLinks: [
-      { text: "Market Reports", url: "https://sageoutdooradvisory.com/market-reports/" }
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" }
     ],
     faqs: [
       {
@@ -206,8 +206,8 @@ Sage Outdoor Advisory includes NOI projections and analysis in our feasibility s
     ],
     seoKeywords: ["NOI", "net operating income", "operating income", "property NOI"],
     internalLinks: [
-      { text: "Appraisals", url: "https://sageoutdooradvisory.com/our-services/" },
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Appraisals", url: "https://sageoutdooradvisory.com/services-overview/" },
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -246,7 +246,7 @@ Sage Outdoor Advisory uses cap rates in our appraisals and feasibility studies t
     ],
     seoKeywords: ["cap rate", "capitalization rate", "real estate cap rate", "investment cap rate"],
     internalLinks: [
-      { text: "Appraisals", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Appraisals", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -285,7 +285,7 @@ Sage Outdoor Advisory includes ROI analysis in our feasibility studies, helping 
     ],
     seoKeywords: ["ROI", "return on investment", "investment return", "ROI calculation"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -323,7 +323,7 @@ Sage Outdoor Advisory uses DCF analysis in our feasibility studies and appraisal
     ],
     seoKeywords: ["DCF", "discounted cash flow", "cash flow valuation", "DCF analysis"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -357,7 +357,7 @@ Sage Outdoor Advisory includes IRR analysis in our feasibility studies, helping 
     ],
     seoKeywords: ["IRR", "internal rate of return", "investment IRR", "IRR calculation"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -395,7 +395,7 @@ Sage Outdoor Advisory includes cash-on-cash return analysis in our feasibility s
     ],
     seoKeywords: ["cash on cash return", "cash-on-cash", "cash return", "investment return"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -433,7 +433,7 @@ Sage Outdoor Advisory includes DSCR analysis in our feasibility studies, helping
     ],
     seoKeywords: ["DSCR", "debt service coverage", "debt coverage ratio", "loan coverage"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -472,7 +472,7 @@ Sage Outdoor Advisory creates detailed pro forma financial statements as part of
     ],
     seoKeywords: ["pro forma", "pro forma financials", "financial projections", "pro forma statements"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -506,7 +506,7 @@ Sage Outdoor Advisory includes EBITDA analysis in our feasibility studies and fi
     ],
     seoKeywords: ["EBITDA", "earnings before interest taxes", "operating profit", "EBITDA calculation"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -541,7 +541,7 @@ Sage Outdoor Advisory includes detailed operating expense analysis in our feasib
     ],
     seoKeywords: ["operating expenses", "property expenses", "operating costs", "property operating expenses"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -582,8 +582,8 @@ Sage Outdoor Advisory includes LTV analysis in our feasibility studies and appra
     ],
     seoKeywords: ["LTV", "loan to value ratio", "loan-to-value", "LTV ratio", "financing ratio", "mortgage LTV"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" },
-      { text: "Appraisals", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" },
+      { text: "Appraisals", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -634,7 +634,7 @@ Sage Outdoor Advisory includes break-even analysis in our feasibility studies, h
     ],
     seoKeywords: ["break even analysis", "break-even point", "break even calculation", "profitability analysis", "break even occupancy"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -685,7 +685,7 @@ Sage Outdoor Advisory includes payback period analysis in our feasibility studie
     ],
     seoKeywords: ["payback period", "investment payback", "payback calculation", "return of capital", "investment recovery"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -747,7 +747,7 @@ Sage Outdoor Advisory includes detailed gross revenue analysis in our feasibilit
     ],
     seoKeywords: ["gross revenue", "total revenue", "gross income", "revenue calculation", "property revenue"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" },
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" },
       { text: "Revenue Projections", url: "/glossary/revenue-projections" }
     ],
     faqs: [
@@ -805,7 +805,7 @@ Sage Outdoor Advisory includes operating margin analysis in our feasibility stud
     ],
     seoKeywords: ["operating margin", "profit margin", "operating profit margin", "profitability ratio", "operational efficiency"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" },
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" },
       { text: "Operating Expenses", url: "/glossary/operating-expenses" }
     ],
     faqs: [
@@ -867,7 +867,7 @@ Sage Outdoor Advisory includes detailed cash flow analysis in our feasibility st
     ],
     seoKeywords: ["cash flow", "property cash flow", "cash flow analysis", "positive cash flow", "negative cash flow", "investment cash flow"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" },
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" },
       { text: "Cash-on-Cash Return", url: "/glossary/cash-on-cash-return" }
     ],
     faqs: [

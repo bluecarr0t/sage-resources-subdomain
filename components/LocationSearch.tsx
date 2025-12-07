@@ -28,18 +28,23 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownScrollRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
+  const autocompleteCacheRef = useRef<Map<string, google.maps.places.AutocompletePrediction[]>>(new Map());
   const router = useRouter();
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
-  // Log API key status (only in development)
+  // Security validation and logging (only in development)
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      if (apiKey) {
-        console.log('[LocationSearch] API Key loaded');
-      } else {
-        console.warn('[LocationSearch] ⚠️ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set!');
-      }
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      // Import security utilities dynamically to avoid SSR issues
+      import('../lib/api-key-security').then(({ logSecurityInfo, getSecurityWarnings }) => {
+        logSecurityInfo(apiKey);
+        const warnings = getSecurityWarnings();
+        if (warnings.length > 0) {
+          console.warn('[LocationSearch] Security Warnings:', warnings);
+        }
+      });
     }
   }, [apiKey]);
 
@@ -55,6 +60,8 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     
     if (isLoaded && typeof window !== 'undefined' && window.google) {
       autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+      // Create a new session token when Google Maps loads
+      sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
     }
   }, [isLoaded, loadError]);
 
@@ -197,10 +204,27 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
       return;
     }
     
-    if (!autocompleteServiceRef.current || value.length < 2) {
-      console.log('[LocationSearch] Search aborted - no service or value too short');
+    // Increased minimum character limit from 2 to 3
+    if (!autocompleteServiceRef.current || value.length < 3) {
+      console.log('[LocationSearch] Search aborted - no service or value too short (minimum 3 characters)');
       setPredictions([]);
       return;
+    }
+
+    // Check client-side cache first
+    const cacheKey = value.toLowerCase().trim();
+    const cachedResults = autocompleteCacheRef.current.get(cacheKey);
+    if (cachedResults) {
+      console.log('[LocationSearch] Using cached results');
+      setPredictions(cachedResults);
+      setIsOpen(true);
+      setApiError(null);
+      return;
+    }
+
+    // Ensure session token exists (create new one if not available)
+    if (!sessionTokenRef.current && typeof window !== 'undefined' && window.google) {
+      sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
     }
 
     console.log('[LocationSearch] Starting Google Places API call...');
@@ -210,6 +234,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
         input: value,
         types: ['(cities)'],
         componentRestrictions: { country: ['us', 'ca'] },
+        sessionToken: sessionTokenRef.current || undefined,
       },
       (results, status) => {
         console.log('[LocationSearch] API Response - Status:', status, 'Results:', results?.length || 0);
@@ -217,6 +242,9 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
         
         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
           console.log('[LocationSearch] Setting predictions and opening dropdown');
+          // Store results in client-side cache
+          const cacheKey = value.toLowerCase().trim();
+          autocompleteCacheRef.current.set(cacheKey, results);
           setPredictions(results);
           setIsOpen(true);
           setApiError(null);
@@ -248,7 +276,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
         }
       }
     );
-  }, []);
+  }, [apiKey]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -263,16 +291,21 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
       return;
     }
 
-    // Debounce the search
+    // Debounce the search (increased from 150ms to 300ms)
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    if (value.length >= 2) {
-      console.log('[LocationSearch] Scheduling search in 150ms');
+    // Increased minimum character limit from 2 to 3
+    if (value.length >= 3) {
+      console.log('[LocationSearch] Scheduling search in 300ms');
       searchTimeoutRef.current = setTimeout(() => {
         performSearch(value);
-      }, 150);
+      }, 300);
+    } else {
+      // Clear predictions if input is less than 3 characters
+      setPredictions([]);
+      setIsOpen(false);
     }
   };
 
@@ -285,16 +318,29 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
       document.createElement('div')
     );
 
+    // Use session token for getDetails call to optimize billing
+    const request: google.maps.places.PlaceDetailsRequest = {
+      placeId,
+      fields: ['geometry', 'name', 'formatted_address'],
+    };
+    
+    // Add session token if available
+    if (sessionTokenRef.current) {
+      request.sessionToken = sessionTokenRef.current;
+    }
+
     service.getDetails(
-      {
-        placeId,
-        fields: ['geometry', 'name', 'formatted_address'],
-      },
+      request,
       (place, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
           const lat = place.geometry.location.lat();
           const lng = place.geometry.location.lng();
           const name = place.name || description;
+
+          // Session complete - create new session token for next search
+          if (sessionTokenRef.current && typeof window !== 'undefined' && window.google) {
+            sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+          }
 
           if (onLocationSelect) {
             onLocationSelect({ lat, lng, name });
@@ -364,7 +410,8 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   const handleFocus = () => {
     // Always show dropdown on focus to display "Use Current Location" option
     setIsOpen(true);
-    if (searchValue.length >= 2 && predictions.length === 0) {
+    // Updated to require 3 characters minimum
+    if (searchValue.length >= 3 && predictions.length === 0) {
       performSearch(searchValue);
     }
   };

@@ -359,7 +359,7 @@ export default function FloatingHeader({
                           </Link>
                           <div className="border-t border-gray-800/50 my-1" />
                           <Link
-                            href="https://sageoutdooradvisory.com/our-services/"
+                            href="https://sageoutdooradvisory.com/services-overview/"
                             className="block px-4 py-3 text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5 font-semibold"
                             onClick={() => {
                               // Only close when actually navigating
@@ -534,7 +534,7 @@ export default function FloatingHeader({
                       Appraisals
                     </Link>
                     <Link
-                      href="https://sageoutdooradvisory.com/our-services/"
+                      href="https://sageoutdooradvisory.com/services-overview/"
                       className="px-4 py-2 rounded-lg text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5 font-semibold"
                       onClick={() => {
                         setIsMobileMenuOpen(false);

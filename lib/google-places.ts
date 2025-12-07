@@ -86,12 +86,14 @@ async function searchPlace(
 
 /**
  * Get detailed place information using Google Places API (New) Place Details
- * Fetches: photos, website, description (editorialSummary or generativeSummary)
+ * Fetches: rating, review count, photos, website, description (editorialSummary or generativeSummary)
  */
 async function getPlaceDetails(
   apiKey: string,
   placeId: string
 ): Promise<{
+  rating?: number;
+  userRatingCount?: number;
   photos?: Array<{
     name: string;
     widthPx?: number;
@@ -110,7 +112,7 @@ async function getPlaceDetails(
   const headers = {
     'Content-Type': 'application/json',
     'X-Goog-Api-Key': apiKey,
-    'X-Goog-FieldMask': 'photos,websiteUri,editorialSummary,generativeSummary,internationalPhoneNumber',
+    'X-Goog-FieldMask': 'rating,userRatingCount,photos,websiteUri,editorialSummary,generativeSummary,internationalPhoneNumber',
   };
 
   try {
@@ -174,6 +176,8 @@ async function getPlaceDetails(
     }
 
     return {
+      rating: data.rating,
+      userRatingCount: data.userRatingCount,
       photos,
       websiteUri: data.websiteUri,
       description,
@@ -187,13 +191,20 @@ async function getPlaceDetails(
 
 /**
  * Fetch Google Places data for a property
- * Combines search and details calls to get all required information
+ * Optionally accepts placeId to skip Text Search call (for efficiency)
+ * 
+ * @param propertyName - Name of the property
+ * @param city - City name (optional)
+ * @param state - State name (optional)
+ * @param address - Street address (optional)
+ * @param placeId - Optional place ID (if provided, skips Text Search call)
  */
 export async function fetchGooglePlacesData(
   propertyName: string,
   city?: string | null,
   state?: string | null,
-  address?: string | null
+  address?: string | null,
+  placeId?: string | null
 ): Promise<GooglePlacesData | null> {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -202,25 +213,36 @@ export async function fetchGooglePlacesData(
     return null;
   }
 
-  // Step 1: Search for the place to get place_id, rating, and review count
-  const searchResult = await searchPlace(apiKey, propertyName, city, state, address);
+  let finalPlaceId = placeId || null;
 
-  if (!searchResult || !searchResult.placeId) {
-    // Property not found in Google Places
-    return null;
+  // Step 1: Search for the place to get place_id (if not provided)
+  if (!finalPlaceId) {
+    const searchResult = await searchPlace(apiKey, propertyName, city, state, address);
+
+    if (!searchResult || !searchResult.placeId) {
+      // Property not found in Google Places
+      return null;
+    }
+
+    finalPlaceId = searchResult.placeId;
   }
 
-  // Step 2: Get detailed information (photos, website, description)
-  const details = await getPlaceDetails(apiKey, searchResult.placeId);
+  // Step 2: Get detailed information (rating, photos, website, description)
+  // This ALWAYS fetches fresh - never cached per Google Terms
+  const details = await getPlaceDetails(apiKey, finalPlaceId);
 
-  // Combine results
+  if (!details) {
+    return { placeId: finalPlaceId };
+  }
+
+  // Combine results - all data is fresh from API
   return {
-    placeId: searchResult.placeId,
-    rating: searchResult.rating,
-    userRatingCount: searchResult.userRatingCount,
-    photos: details?.photos,
-    websiteUri: details?.websiteUri,
-    description: details?.description,
-    phoneNumber: details?.phoneNumber,
+    placeId: finalPlaceId,
+    rating: details.rating,
+    userRatingCount: details.userRatingCount,
+    photos: details.photos,
+    websiteUri: details.websiteUri,
+    description: details.description,
+    phoneNumber: details.phoneNumber,
   };
 }

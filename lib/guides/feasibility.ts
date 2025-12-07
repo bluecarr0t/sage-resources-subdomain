@@ -641,17 +641,17 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
           description: "Expert glamping feasibility studies to validate your project and secure financing."
         },
         {
           name: "RV Resort Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
           description: "Professional RV resort feasibility studies with comprehensive market analysis."
         },
         {
           name: "Campground Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-campgrounds/",
           description: "Comprehensive campground feasibility studies with market analysis and financial projections."
         }
       ]
@@ -917,12 +917,12 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
           description: "Expert glamping feasibility studies with clear, actionable insights."
         },
         {
           name: "RV Resort Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
           description: "Professional RV resort feasibility studies for informed decisions."
         }
       ]

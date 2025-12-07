@@ -238,12 +238,6 @@ export default function NationalParkDetailTemplate({
                     <dd className="text-gray-700">{park.date_established}</dd>
                   </div>
                 )}
-                {park.area_2021 && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="font-semibold text-gray-900">Area:</dt>
-                    <dd className="text-gray-700">{park.area_2021}</dd>
-                  </div>
-                )}
                 {park.acres && (
                   <div className="flex items-baseline gap-2">
                     <dt className="font-semibold text-gray-900">Acres:</dt>
@@ -254,18 +248,6 @@ export default function NationalParkDetailTemplate({
                   <div className="flex items-baseline gap-2">
                     <dt className="font-semibold text-gray-900">Recreation Visitors (2021):</dt>
                     <dd className="text-gray-700">{park.recreation_visitors_2021}</dd>
-                  </div>
-                )}
-                {park.park_code && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="font-semibold text-gray-900">Park Code:</dt>
-                    <dd className="text-gray-700">{park.park_code}</dd>
-                  </div>
-                )}
-                {park.latitude && park.longitude && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="font-semibold text-gray-900">Coordinates:</dt>
-                    <dd className="text-gray-700">{park.latitude.toFixed(4)}, {park.longitude.toFixed(4)}</dd>
                   </div>
                 )}
               </dl>

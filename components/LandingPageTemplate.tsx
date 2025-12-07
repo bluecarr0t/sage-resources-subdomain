@@ -462,7 +462,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             </div>
             <div className="mt-8 text-center">
               <Link
-                href="https://sageoutdooradvisory.com/our-services/"
+                href="https://sageoutdooradvisory.com/services-overview/"
                 className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
               >
                 View All Services
@@ -485,7 +485,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 <Link
-                  href="https://sageoutdooradvisory.com/our-services/"
+                  href="https://sageoutdooradvisory.com/services-overview/"
                   className="text-[#006b5f] hover:text-[#005a4f]"
                 >
                   Our Complete Services
@@ -495,7 +495,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                 Learn about all of Sage&apos;s feasibility study and appraisal services for outdoor hospitality properties.
               </p>
               <Link
-                href="https://sageoutdooradvisory.com/our-services/"
+                href="https://sageoutdooradvisory.com/services-overview/"
                 className="text-[#006b5f] hover:text-[#005a4f] font-medium text-sm"
               >
                 View Services →
@@ -504,7 +504,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 <Link
-                  href="https://sageoutdooradvisory.com/market-reports/"
+                  href="https://sageoutdooradvisory.com/shop/"
                   className="text-[#006b5f] hover:text-[#005a4f]"
                 >
                   Free Market Reports
@@ -514,7 +514,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                 Download our comprehensive market reports including the 2025 USA Glamping Market Report.
               </p>
               <Link
-                href="https://sageoutdooradvisory.com/market-reports/"
+                href="https://sageoutdooradvisory.com/shop/"
                 className="text-[#006b5f] hover:text-[#005a4f] font-medium text-sm"
               >
                 Download Reports →
@@ -622,7 +622,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               Schedule Free Consultation
             </Link>
             <Link
-              href="https://sageoutdooradvisory.com/our-services/"
+              href="https://sageoutdooradvisory.com/services-overview/"
               className="inline-block px-8 py-4 bg-transparent border-2 border-white text-white text-lg font-semibold rounded-lg hover:bg-white hover:text-[#006b5f] transition-colors"
             >
               Learn More About Our Services

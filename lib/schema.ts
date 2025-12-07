@@ -326,6 +326,25 @@ export function generateItemListSchema(items: string[], name: string) {
   };
 }
 
+/**
+ * Generate ItemList schema with URLs for carousel eligibility
+ * Each item must have a URL for Google to recognize it as a carousel
+ */
+export function generateItemListSchemaWithUrls(items: Array<{ name: string; url: string }>, name: string) {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": name,
+    "itemListElement": items.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": item.name,
+      "item": item.url.startsWith("http") ? item.url : `${baseUrl}${item.url}`
+    }))
+  };
+}
+
 export function generateCourseSchema(content: GuideContent) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const url = `${baseUrl}/guides/${content.slug}`;
@@ -362,7 +381,14 @@ export function generateCourseSchema(content: GuideContent) {
     "courseCode": content.slug,
     "inLanguage": "en-US",
     "isAccessibleForFree": true,
-    "learningResourceType": "Guide"
+    "learningResourceType": {
+      "@type": "DefinedTerm",
+      "name": "Guide",
+      "inDefinedTermSet": {
+        "@type": "DefinedTermSet",
+        "name": "Learning Resource Types"
+      }
+    }
   };
 }
 
@@ -448,12 +474,15 @@ export function generateMapItemListSchema(propertyCount: number) {
     "description": `Interactive map of ${propertyCount}+ glamping properties across the United States and Canada`,
     "numberOfItems": propertyCount,
     "url": `${baseUrl}/map`,
-    "itemListElement": {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Glamping Properties",
-      "description": `Explore ${propertyCount}+ glamping properties on an interactive map`
-    }
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Glamping Properties",
+        "item": `${baseUrl}/map`,
+        "description": `Explore ${propertyCount}+ glamping properties on an interactive map`
+      }
+    ]
   };
 }
 

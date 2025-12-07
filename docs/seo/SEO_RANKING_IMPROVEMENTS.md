@@ -80,7 +80,7 @@ Add to each landing page template:
       <Link href="https://sageoutdooradvisory.com/our-services/feasibility-studies/">
         Our Feasibility Study Services
       </Link>
-      <Link href="https://sageoutdooradvisory.com/market-reports/">
+      <Link href="https://sageoutdooradvisory.com/shop/">
         Download Free Market Reports
       </Link>
       <Link href="https://sageoutdooradvisory.com/clients/">

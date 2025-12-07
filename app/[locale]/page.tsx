@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { getAllGuideSlugs, getGuide, getGuidesByCategory } from "@/lib/guides";
 import { getAllGlossaryTerms } from "@/lib/glossary/index";
 import { getAllLandingPageSlugs, getLandingPage } from "@/lib/landing-pages";
-import { generateOrganizationSchema, generateItemListSchema } from "@/lib/schema";
+import { generateOrganizationSchema, generateItemListSchemaWithUrls } from "@/lib/schema";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
 import { locales, type Locale } from "@/i18n";
@@ -116,8 +116,14 @@ export default async function HomePage({ params }: PageProps) {
 
   // Generate schema markup
   const organizationSchema = generateOrganizationSchema();
-  const guidesListSchema = generateItemListSchema(
-    pillarGuides.map(guide => guide?.title || "").filter(Boolean) as string[],
+  // Generate ItemList with URLs for carousel eligibility
+  const guidesListSchema = generateItemListSchemaWithUrls(
+    pillarGuides
+      .filter((guide): guide is NonNullable<typeof guide> => guide !== null)
+      .map(guide => ({
+        name: guide.title,
+        url: links.guide(guide.slug)
+      })),
     "Featured Guides"
   );
 

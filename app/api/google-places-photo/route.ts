@@ -100,6 +100,9 @@ export async function GET(request: NextRequest) {
     return new NextResponse(imageBuffer, {
       headers: {
         'Content-Type': 'image/jpeg',
+        // Optimal cache headers: 1 year max-age with immutable directive
+        // Photos from Google Places API are stable references and don't change,
+        // so they can be cached indefinitely by browsers and CDNs
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });

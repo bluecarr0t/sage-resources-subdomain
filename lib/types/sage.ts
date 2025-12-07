@@ -51,6 +51,7 @@ export interface SageProperty {
   description: string | null;
   minimum_nights: string | null;
   getting_there: string | null;
+  phone_number: string | null;
   lon: string | null;
   lat: string | null;
   toilet: string | null;
@@ -134,6 +135,7 @@ export interface SageProperty {
   created_at: string | null;
   updated_at: string | null;
   // Google Places API fields
+  google_place_id: string | null;
   google_phone_number: string | null;
   google_website_uri: string | null;
   google_description: string | null;
@@ -203,6 +205,8 @@ export interface SageProperty {
   google_wheelchair_accessible_restroom: boolean | null;
   google_wheelchair_accessible_seating: boolean | null;
   google_allows_dogs: boolean | null;
+  // Quality score
+  quality_score: number | null;
 }
 
 /**

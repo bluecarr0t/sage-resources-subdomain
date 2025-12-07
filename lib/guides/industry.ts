@@ -380,12 +380,12 @@ export const industryGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
           description: "Expert glamping feasibility studies to validate your project."
         },
         {
           name: "Glamping Property Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
           description: "Bank-approved glamping appraisals for financing."
         }
       ]
@@ -889,12 +889,12 @@ export const industryGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "RV Resort Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
           description: "Professional RV resort feasibility studies."
         },
         {
           name: "RV Resort Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/appraisal-rv-parks/",
           description: "Expert RV resort appraisals for financing."
         }
       ]

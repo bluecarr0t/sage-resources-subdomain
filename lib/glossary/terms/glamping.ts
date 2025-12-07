@@ -30,7 +30,7 @@ Sage Outdoor Advisory provides feasibility studies and appraisals specifically f
     internalLinks: [
       { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
       { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
-      { text: "Glamping Market Report", url: "https://sageoutdooradvisory.com/market-reports/" },
+      { text: "Glamping Market Report", url: "https://sageoutdooradvisory.com/shop/" },
       { text: "Complete Guide to Glamping Unit Types", url: "https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/" },
       { text: "Glamping Market Data 2025", url: "https://sageoutdooradvisory.com/blog/glamping-market-data-2025/" }
     ],

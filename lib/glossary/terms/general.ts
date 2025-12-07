@@ -24,7 +24,7 @@ Understanding seasonality is critical for financial planning, staffing, marketin
     ],
     seoKeywords: ["seasonality", "seasonal demand", "seasonal patterns", "tourism seasonality"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/our-services/" }
+      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
       {
@@ -55,7 +55,7 @@ Sage Outdoor Advisory specializes exclusively in outdoor hospitality, providing 
     ],
     seoKeywords: ["outdoor hospitality", "outdoor accommodations", "outdoor recreation hospitality"],
     internalLinks: [
-      { text: "Our Services", url: "https://sageoutdooradvisory.com/our-services/" },
+      { text: "Our Services", url: "https://sageoutdooradvisory.com/services-overview/" },
       { text: "About Sage", url: "https://sageoutdooradvisory.com/about/" },
       { text: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" }
     ],

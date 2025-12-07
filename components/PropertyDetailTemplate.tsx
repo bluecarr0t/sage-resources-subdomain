@@ -145,23 +145,38 @@ export default function PropertyDetailTemplate({
     )
   ).sort();
 
-  // Collect all amenities from all properties
+  // Collect all amenities from database columns ONLY (from toilet to water_hookup)
+  // Do NOT use Google Places API for amenities - only use sage-glamping-data columns
   const amenities = {
-    pool: properties.some(p => hasAmenity(p.pool)),
-    hotTub: properties.some(p => hasAmenity(p.hot_tub_sauna)),
-    wifi: properties.some(p => hasAmenity(p.wifi)),
-    pets: properties.some(p => hasAmenity(p.pets)),
     toilet: properties.some(p => hasAmenity(p.toilet)),
-    shower: properties.some(p => hasAmenity(p.shower)),
+    hotTub: properties.some(p => hasAmenity(p.hot_tub_sauna)),
+    pool: properties.some(p => hasAmenity(p.pool)),
+    pets: properties.some(p => hasAmenity(p.pets)),
     water: properties.some(p => hasAmenity(p.water)),
+    shower: properties.some(p => hasAmenity(p.shower)),
     trash: properties.some(p => hasAmenity(p.trash)),
     cooking: properties.some(p => hasAmenity(p.cooking_equipment)),
     picnicTable: properties.some(p => hasAmenity(p.picnic_table)),
+    wifi: properties.some(p => hasAmenity(p.wifi)),
     laundry: properties.some(p => hasAmenity(p.laundry)),
     campfires: properties.some(p => hasAmenity(p.campfires)),
     playground: properties.some(p => hasAmenity(p.playground)),
-    restaurant: properties.some(p => hasAmenity(p.sage_p_amenity_restaurant)),
-    waterfront: properties.some(p => hasAmenity(p.sage_p_amenity_waterfront)),
+    rvVehicleLength: properties.some(p => hasAmenity(p.rv_vehicle_length)),
+    rvParking: properties.some(p => hasAmenity(p.rv_parking)),
+    rvAccommodatesSlideout: properties.some(p => hasAmenity(p.rv_accommodates_slideout)),
+    rvSurfaceType: properties.some(p => hasAmenity(p.rv_surface_type)),
+    rvSurfaceLevel: properties.some(p => hasAmenity(p.rv_surface_level)),
+    rvVehiclesFifthWheels: properties.some(p => hasAmenity(p.rv_vehicles_fifth_wheels)),
+    rvVehiclesClassA: properties.some(p => hasAmenity(p.rv_vehicles_class_a_rvs)),
+    rvVehiclesClassB: properties.some(p => hasAmenity(p.rv_vehicles_class_b_rvs)),
+    rvVehiclesClassC: properties.some(p => hasAmenity(p.rv_vehicles_class_c_rvs)),
+    rvVehiclesToyHauler: properties.some(p => hasAmenity(p.rv_vehicles_toy_hauler)),
+    electricity: properties.some(p => hasAmenity(p.electricity)),
+    charcoalGrill: properties.some(p => hasAmenity(p.charcoal_grill)),
+    sewerHookUp: properties.some(p => hasAmenity(p.sewer_hook_up)),
+    electricalHookUp: properties.some(p => hasAmenity(p.electrical_hook_up)),
+    generatorsAllowed: properties.some(p => hasAmenity(p.generators_allowed)),
+    waterHookup: properties.some(p => hasAmenity(p.water_hookup)),
   };
   
   // Check if any amenities are present
@@ -320,15 +335,15 @@ export default function PropertyDetailTemplate({
                 </Link>
               </div>
               
-              {googlePlacesData?.phoneNumber && (
+              {firstProperty.phone_number && (
                 <p className="text-gray-700 mt-4">
                   <span className="font-semibold">Phone:</span>{' '}
                   <a 
-                    href={`tel:${googlePlacesData.phoneNumber}`} 
+                    href={`tel:${firstProperty.phone_number}`} 
                     className="text-[#006b5f] hover:underline focus:outline-none focus:ring-2 focus:ring-[#006b5f] focus:ring-offset-2 rounded"
-                    aria-label={`Call ${propertyName} at ${formatPhoneNumber(googlePlacesData.phoneNumber)}`}
+                    aria-label={`Call ${propertyName} at ${formatPhoneNumber(firstProperty.phone_number)}`}
                   >
-                    {formatPhoneNumber(googlePlacesData.phoneNumber)}
+                    {formatPhoneNumber(firstProperty.phone_number)}
                   </a>
                 </p>
               )}
@@ -384,12 +399,12 @@ export default function PropertyDetailTemplate({
         <div className={`grid grid-cols-1 gap-8 mb-8 ${hasAnyAmenities ? 'lg:grid-cols-3' : ''}`}>
           {/* Left Column - Details */}
           <div className={hasAnyAmenities ? 'lg:col-span-2 space-y-6' : 'space-y-4'}>
-            {/* Description from Google Places API, fallback to database description */}
-            {(googlePlacesData?.description || firstProperty.description) && (
+            {/* Description from database column (not from Google Places API) */}
+            {firstProperty.description && firstProperty.description.trim() && (
               <section aria-labelledby="description-heading">
                 <h2 id="description-heading" className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
                 <div className="text-gray-700 whitespace-pre-line" role="article" aria-label={`Description of ${propertyName}`}>
-                  {googlePlacesData?.description || firstProperty.description}
+                  {firstProperty.description}
                 </div>
               </section>
             )}
@@ -517,22 +532,6 @@ export default function PropertyDetailTemplate({
                     <span className="text-gray-700">Pets Allowed</span>
                   </li>
                 )}
-                {amenities.restaurant && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Restaurant</span>
-                  </li>
-                )}
-                {amenities.waterfront && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Waterfront</span>
-                  </li>
-                )}
                 {amenities.shower && (
                   <li className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -555,6 +554,110 @@ export default function PropertyDetailTemplate({
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     <span className="text-gray-700">Cooking Equipment</span>
+                  </li>
+                )}
+                {amenities.toilet && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Restrooms</span>
+                  </li>
+                )}
+                {amenities.water && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Water Access</span>
+                  </li>
+                )}
+                {amenities.trash && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Trash Service</span>
+                  </li>
+                )}
+                {amenities.picnicTable && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Picnic Tables</span>
+                  </li>
+                )}
+                {amenities.campfires && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Campfires Allowed</span>
+                  </li>
+                )}
+                {amenities.playground && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Playground</span>
+                  </li>
+                )}
+                {amenities.electricity && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Electricity</span>
+                  </li>
+                )}
+                {amenities.charcoalGrill && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Charcoal Grill</span>
+                  </li>
+                )}
+                {amenities.sewerHookUp && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Sewer Hookup</span>
+                  </li>
+                )}
+                {amenities.electricalHookUp && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Electrical Hookup</span>
+                  </li>
+                )}
+                {amenities.generatorsAllowed && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Generators Allowed</span>
+                  </li>
+                )}
+                {amenities.waterHookup && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Water Hookup</span>
+                  </li>
+                )}
+                {amenities.rvParking && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">RV Parking</span>
                   </li>
                 )}
                 </ul>

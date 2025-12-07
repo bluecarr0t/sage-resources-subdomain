@@ -2,22 +2,26 @@
 
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import { supabase } from '@/lib/supabase';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
 import { NationalPark, NationalParkWithCoords, filterParksWithCoordinates } from '@/lib/types/national-parks';
 import { useMapContext } from './MapContext';
 import MultiSelect from './MultiSelect';
+import { slugifyPropertyName } from '@/lib/properties';
 
 // Default center for lower 48 states (continental USA)
 // Optimized to better frame the lower 48 states, excluding most of Canada and Mexico
+// Centered on the continental US (approximately central US)
 const defaultCenter = {
-  lat: 38.5,
-  lng: -96.0,
+  lat: 39.5,
+  lng: -98.5,
 };
 
-// Zoom level 6 provides a closer view of the lower 48 states, excluding Alaska and Hawaii
-const defaultZoom = 6;
+// Zoom level 4 provides a wider view showing the entire lower 48 states with more surrounding area
+// This shows the full continental United States with some buffer, excluding Alaska and Hawaii
+const defaultZoom = 4;
 
 // Libraries array must be a constant to prevent LoadScript reload warnings
 const libraries: ('places')[] = ['places'];
@@ -264,7 +268,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [filtersExpanded, setFiltersExpanded] = useState(false); // Collapsed by default on mobile
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(defaultCenter);
   const [mapZoom, setMapZoom] = useState<number>(defaultZoom);
-  const [shouldFitBounds, setShouldFitBounds] = useState(true);
+  const [shouldFitBounds, setShouldFitBounds] = useState(false); // Disabled by default - use fixed zoom/center for lower 48 states
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
 
   // URL parameter handling
@@ -351,10 +355,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         }
       }
     } else {
-      // No URL params, reset to defaults and allow fitBounds
+      // No URL params, reset to defaults and use fixed zoom/center (don't fit bounds)
       setMapCenter(defaultCenter);
       setMapZoom(defaultZoom);
-      setShouldFitBounds(true);
+      setShouldFitBounds(false); // Keep fixed zoom/center for lower 48 states
       hasCenteredFromUrlRef.current = false;
     }
     
@@ -428,10 +432,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         }
       }
     } else {
-      // No lat/lon params, reset to defaults
+      // No lat/lon params, reset to defaults (use fixed zoom/center, don't fit bounds)
       setMapCenter(defaultCenter);
       setMapZoom(defaultZoom);
-      setShouldFitBounds(true);
+      setShouldFitBounds(false); // Keep fixed zoom/center for lower 48 states
       hasCenteredFromUrlRef.current = false;
     }
   }, [isClient, urlInitialized, searchParams]);
@@ -1095,7 +1099,36 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   );
 
 
+  // Set default center and zoom for lower 48 states when map loads (if no URL params)
+  // This overrides any fitBounds behavior to ensure consistent view
+  useEffect(() => {
+    if (map && !shouldFitBounds) {
+      const urlLat = searchParams.get('lat');
+      const urlLon = searchParams.get('lon');
+      
+      // Only set default if no URL location parameters
+      if (!urlLat || !urlLon) {
+        // Ensure map is at default center and zoom for lower 48 states
+        const currentCenter = map.getCenter();
+        const currentZoom = map.getZoom();
+        
+        // Check if we need to update (only if significantly different)
+        const needsUpdate = !currentCenter || 
+          Math.abs(currentCenter.lat() - defaultCenter.lat) > 0.1 ||
+          Math.abs(currentCenter.lng() - defaultCenter.lng) > 0.1 ||
+          !currentZoom ||
+          Math.abs(currentZoom - defaultZoom) > 0.5;
+        
+        if (needsUpdate) {
+          map.setCenter(defaultCenter);
+          map.setZoom(defaultZoom);
+        }
+      }
+    }
+  }, [map, shouldFitBounds, searchParams]);
+  
   // Fit map bounds to show all markers (only if shouldFitBounds is true)
+  // NOTE: This is now disabled by default to maintain fixed zoom/center for lower 48 states
   useEffect(() => {
     if (map && shouldFitBounds) {
       const parksWithCoords = filterParksWithCoordinates(nationalParks);
@@ -1165,6 +1198,18 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
+    
+    // Set default center and zoom for lower 48 states if no URL params
+    const urlLat = searchParams.get('lat');
+    const urlLon = searchParams.get('lon');
+    const urlZoom = searchParams.get('zoom');
+    
+    if (!urlLat || !urlLon) {
+      // No URL params - use default center and zoom for lower 48 states
+      map.setCenter(defaultCenter);
+      map.setZoom(defaultZoom);
+    }
+    
     // Initialize bounds after a short delay to ensure map has rendered
     setTimeout(() => {
       const bounds = map.getBounds();
@@ -1172,7 +1217,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         setMapBounds(bounds);
       }
     }, 200);
-  }, []);
+  }, [searchParams]);
 
   const onIdle = useCallback(() => {
     if (map) {
@@ -1735,111 +1780,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     // Group by property_name to count unique properties (same as countryCounts logic)
     const uniquePropertyNames = new Set<string>();
     
-    // Helper function to check if coordinates are likely in Canada (same as countryCounts)
-    const isLikelyCanadaByCoords = (lat: number, lon: number): boolean => {
-      // Check if within overall Canada bounds
-      if (lat < 41.7 || lat >= 85 || lon < -141 || lon > -52) {
-        return false;
-      }
-      
-      // Northern territories (above 60°N) - definitely Canada
-      if (lat >= 60) {
-        return true;
-      }
-      
-      // Eastern Canada (Ontario, Quebec, Maritimes) - 41.7°N to 60°N, -95°W to -52°W
-      if (lat >= 41.7 && lat < 60 && lon >= -95 && lon <= -52) {
-        return true;
-      }
-      
-      // Western provinces (BC, Alberta, Saskatchewan, Manitoba) - 48°N to 60°N, -139°W to -89°W
-      if (lat >= 48 && lat < 60 && lon >= -139 && lon <= -89) {
-        return true;
-      }
-      
-      // Border region (49°N to 60°N) - check more carefully
-      if (lat >= 49 && lat < 60) {
-        if (lon < -100) {
-          return true;
-        }
-        if (lon >= -100 && lon <= -89 && lat >= 50) {
-          return true;
-        }
-        if (lon >= -95 && lon <= -89 && lat >= 49) {
-          return true;
-        }
-      }
-      
-      // Border region near US-Canada border (45°N to 49°N)
-      if (lat >= 45 && lat < 49) {
-        if (lon >= -75 && lon <= -52) {
-          return true;
-        }
-        if (lon >= -95 && lon < -75) {
-          if (lat >= 46) {
-            return true;
-          }
-          if (lon >= -80) {
-            return true;
-          }
-        }
-      }
-      
-      // Additional check: 41.7°N to 45°N - could be southern Ontario
-      if (lat >= 41.7 && lat < 45 && lon >= -95.2 && lon <= -74.3) {
-        return true;
-      }
-      
-      return false;
-    };
-    
-    // Helper functions that match the EXACT countryCounts logic
-    const isCanadianProperty = (property: any): boolean => {
-      const country = String(property.country || '').toUpperCase();
-      const state = String(property.state || '').toUpperCase();
-      
-      if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
-        return true;
-      }
-      
-      const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-      if (canadianProvinceCodes.includes(state)) {
-        return true;
-      }
-      
-      if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) {
-        return true;
-      }
-      
-      return false;
-    };
-    
-    const isUSProperty = (property: any): boolean => {
-      const country = String(property.country || '').toUpperCase();
-      const state = String(property.state || '').toUpperCase();
-      
-      if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
-        return true;
-      }
-      
-      const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-      const isCanadianProvince = canadianProvinceCodes.includes(state) || 
-        CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
-      
-      if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) {
-        return true;
-      }
-      
-      if (country && (country.includes('US') || country.includes('UNITED STATES'))) {
-        return true;
-      }
-      
-      return false;
-    };
-    
-    // Determine country for each property
-    // For Canada filter: only use country field (strict filtering)
-    // For US or both countries: use coordinate-based detection + country/state fields
+    // Determine country for each property using ONLY the country column
+    // This ensures we only count USA and Canada properties
     propertiesWithValidCoords.forEach((p) => {
       const propertyName = p.property_name;
       if (!propertyName) return;
@@ -1847,51 +1789,27 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       // Normalize property name to prevent duplicates from whitespace/case differences
       const normalizedName = normalizePropertyName(propertyName);
       
+      // Use ONLY the country field - no coordinate-based detection
+      const country = String(p.country || '').toUpperCase();
       let normalizedCountry: string | null = null;
       
-      // If a single country filter is active, use strict country field only
-      if (filterCountry.length === 1) {
-        if (filterCountry.includes('Canada')) {
-          // Canada: only check country field
-          const country = String(p.country || '').toUpperCase();
-          if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
-            normalizedCountry = 'Canada';
-          } else {
-            return; // Skip - not Canada
-          }
-        } else if (filterCountry.includes('United States')) {
-          // United States: only check country field
-          const country = String(p.country || '').toUpperCase();
-          if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
-            normalizedCountry = 'United States';
-          } else {
-            return; // Skip - not United States
-          }
-        }
-      } else {
-        // For both countries selected: use coordinate-based detection + country/state fields
-        const coords = p.coordinates;
-        
-        // Prioritize coordinate-based detection when coordinates are available
-        if (coords) {
-          const [lat, lon] = coords;
-          
-          if (isLikelyCanadaByCoords(lat, lon)) {
-            normalizedCountry = 'Canada';
-          } else if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
-            normalizedCountry = 'United States';
-          }
-        }
-        
-        // If coordinate-based detection didn't work, fall back to country/state fields
-        if (!normalizedCountry) {
-          if (isCanadianProperty(p)) {
-            normalizedCountry = 'Canada';
-          } else if (isUSProperty(p)) {
-            normalizedCountry = 'United States';
-          } else {
-            return; // Skip properties we can't determine
-          }
+      // Check for Canada
+      if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
+        normalizedCountry = 'Canada';
+      }
+      // Check for United States
+      else if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
+        normalizedCountry = 'United States';
+      }
+      // Skip properties that are not USA or Canada
+      else {
+        return;
+      }
+      
+      // Only count if country filter matches (or both are selected)
+      if (filterCountry.length > 0) {
+        if (!filterCountry.includes(normalizedCountry)) {
+          return; // Skip if not in the selected countries
         }
       }
       
@@ -1948,127 +1866,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     // Group by property_name to count unique properties per country
     const propertiesByCountry = new Map<string, Set<string>>();
     
-    // Helper function that matches the EXACT client-side filter logic
-    const isCanadianProperty = (property: any): boolean => {
-      const country = String(property.country || '').toUpperCase();
-      const state = String(property.state || '').toUpperCase();
-      
-      // Check country field
-      if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
-        return true;
-      }
-      
-      // Check if state is a Canadian province
-      const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-      if (canadianProvinceCodes.includes(state)) {
-        return true;
-      }
-      
-      // Check if state is a Canadian province full name
-      if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) {
-        return true;
-      }
-      
-      return false;
-    };
-    
-    const isUSProperty = (property: any): boolean => {
-      const country = String(property.country || '').toUpperCase();
-      const state = String(property.state || '').toUpperCase();
-      
-      // Check country field
-      if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
-        return true;
-      }
-      
-      // If country is not set but state is a US state (not a Canadian province), include it
-      const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-      const isCanadianProvince = canadianProvinceCodes.includes(state) || 
-        CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
-      
-      if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) {
-        // Likely a US state abbreviation
-        return true;
-      }
-      
-      // If country field indicates US
-      if (country && (country.includes('US') || country.includes('UNITED STATES'))) {
-        return true;
-      }
-      
-      return false;
-    };
-    
-    // Helper function to check if coordinates are likely in Canada
-    // Canada spans approximately 41.7°N to 83°N and -141°W to -52°W
-    const isLikelyCanadaByCoords = (lat: number, lon: number): boolean => {
-      // Check if within overall Canada bounds
-      if (lat < 41.7 || lat >= 85 || lon < -141 || lon > -52) {
-        return false;
-      }
-      
-      // Northern territories (above 60°N) - definitely Canada
-      if (lat >= 60) {
-        return true;
-      }
-      
-      // Eastern Canada (Ontario, Quebec, Maritimes) - 41.7°N to 60°N, -95°W to -52°W
-      // This covers most of Eastern Canada including major cities like Toronto, Montreal
-      if (lat >= 41.7 && lat < 60 && lon >= -95 && lon <= -52) {
-        return true;
-      }
-      
-      // Western provinces (BC, Alberta, Saskatchewan, Manitoba) - 48°N to 60°N, -139°W to -89°W
-      if (lat >= 48 && lat < 60 && lon >= -139 && lon <= -89) {
-        return true;
-      }
-      
-      // Border region (49°N to 60°N) - check more carefully
-      if (lat >= 49 && lat < 60) {
-        // West of -100°W is likely Canada (BC, Alberta)
-        if (lon < -100) {
-          return true;
-        }
-        // Between -100°W and -89°W, above 50°N is likely Canada (Manitoba)
-        if (lon >= -100 && lon <= -89 && lat >= 50) {
-          return true;
-        }
-        // Even between -89°W and -95°W at this latitude could be Ontario
-        if (lon >= -95 && lon <= -89 && lat >= 49) {
-          return true;
-        }
-      }
-      
-      // Border region near US-Canada border (45°N to 49°N)
-      // Check if longitude suggests Canada vs US
-      if (lat >= 45 && lat < 49) {
-        // East of -75°W is likely Canada (Quebec, Maritimes)
-        if (lon >= -75 && lon <= -52) {
-          return true;
-        }
-        // Between -95°W and -75°W, this could be Ontario or border states
-        // Be more inclusive - if it's above 46°N, it's more likely Canada
-        if (lon >= -95 && lon < -75) {
-          if (lat >= 46) {
-            return true;
-          }
-          // For 45-46°N in this region, check longitude more carefully
-          // Closer to -75°W is more likely Canada (eastern Canada)
-          if (lon >= -80) {
-            return true;
-          }
-        }
-      }
-      
-      // Additional check: 41.7°N to 45°N - could be southern Ontario
-      // Ontario extends down to 41.7°N, between -95.2°W and -74.3°W
-      if (lat >= 41.7 && lat < 45 && lon >= -95.2 && lon <= -74.3) {
-        return true;
-      }
-      
-      return false;
-    };
-    
     propertiesWithValidCoords.forEach((p) => {
       const propertyName = p.property_name;
       if (!propertyName) return;
@@ -2076,26 +1873,20 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       // Normalize property name to prevent duplicates from whitespace/case differences
       const normalizedName = normalizePropertyName(propertyName);
       
+      // Use ONLY the country field - no coordinate-based detection
+      const country = String(p.country || '').toUpperCase();
       let normalizedCountry: string | null = null;
       
-      // Use strict country field only for both countries (must have country field set correctly)
-      const country = String(p.country || '').toUpperCase();
-      
-      // Check Canada first
+      // Check for Canada
       if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
         normalizedCountry = 'Canada';
-      } 
-      // Check United States
+      }
+      // Check for United States
       else if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
         normalizedCountry = 'United States';
-      } 
-      // If country field is not set correctly, skip this property
-      else {
-        return; // Skip properties without proper country field
       }
-      
-      // Only count USA and Canada
-      if (normalizedCountry !== 'United States' && normalizedCountry !== 'Canada') {
+      // Skip properties that are not USA or Canada
+      else {
         return;
       }
       
@@ -2360,12 +2151,17 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  // Debug: Log API key status (first few chars only for security)
+  // Security validation and logging (only in development)
   useEffect(() => {
-    if (apiKey) {
-      console.log('Google Maps API Key loaded:', apiKey.substring(0, 10) + '...');
-    } else {
-      console.warn('Google Maps API Key not found in environment variables');
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      // Import security utilities dynamically to avoid SSR issues
+      import('../lib/api-key-security').then(({ logSecurityInfo, getSecurityWarnings }) => {
+        logSecurityInfo(apiKey);
+        const warnings = getSecurityWarnings();
+        if (warnings.length > 0) {
+          console.warn('[GooglePropertyMap] Security Warnings:', warnings);
+        }
+      });
     }
   }, [apiKey]);
 
@@ -2911,6 +2707,21 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                         {selectedPark.description}
                       </p>
                     )}
+                    {selectedPark.slug && (() => {
+                      // Extract locale from pathname (e.g., "/en/map" -> "en")
+                      const pathSegments = pathname.split('/').filter(Boolean);
+                      const locale = pathSegments[0] || 'en';
+                      const parkUrl = `/${locale}/property/${selectedPark.slug}`;
+                      
+                      return (
+                        <Link
+                          href={parkUrl}
+                          className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
+                        >
+                          View More →
+                        </Link>
+                      );
+                    })()}
                   </div>
                 </InfoWindow>
               )}
@@ -3086,20 +2897,23 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       </div>
                     )}
                     {(() => {
-                      // Prioritize google_website_uri, fall back to url if not available
-                      const websiteUrl = (selectedProperty as any).google_website_uri || selectedProperty.url;
+                      // Generate or use property slug for "View more" link
+                      const propertySlug = selectedProperty.slug || 
+                        (selectedProperty.property_name ? slugifyPropertyName(selectedProperty.property_name) : null);
                       
-                      // Show website link if URL exists
-                      if (websiteUrl) {
+                      if (propertySlug) {
+                        // Extract locale from pathname (e.g., "/en/map" -> "en")
+                        const pathSegments = pathname.split('/').filter(Boolean);
+                        const locale = pathSegments[0] || 'en';
+                        const propertyUrl = `/${locale}/property/${propertySlug}`;
+                        
                         return (
-                          <a
-                            href={websiteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                          <Link
+                            href={propertyUrl}
+                            className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
                           >
-                            Visit Website →
-                          </a>
+                            View More →
+                          </Link>
                         );
                       }
                       return null;

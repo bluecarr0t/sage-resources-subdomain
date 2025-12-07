@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { cache } from "react";
 import { getAllPropertySlugs, getPropertiesBySlug, getNearbyProperties } from "@/lib/properties";
 import { getAllNationalParkSlugs, getNationalParkBySlug, getSlugType } from "@/lib/national-parks";
 import { parseCoordinates } from "@/lib/types/sage";
@@ -8,7 +9,7 @@ import NationalParkDetailTemplate from "@/components/NationalParkDetailTemplate"
 import { generatePropertyBreadcrumbSchema, generatePropertyLocalBusinessSchema, generatePropertyFAQSchema, generatePropertyAmenitiesSchema } from "@/lib/schema";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
-import { fetchGooglePlacesData } from "@/lib/google-places";
+import { fetchGooglePlacesDataCached } from "@/lib/google-places-cache";
 
 interface PageProps {
   params: {
@@ -43,6 +44,27 @@ export async function generateStaticParams() {
   return params;
 }
 
+/**
+ * Helper function to get Google Places data with request-level memoization
+ * This ensures that within a single request, both generateMetadata and the page component
+ * share the same promise, eliminating duplicate API calls.
+ */
+const getGooglePlacesDataForProperty = cache(async (
+  propertyName: string,
+  city: string | null,
+  state: string | null,
+  address: string | null
+) => {
+  return fetchGooglePlacesDataCached(propertyName, city, state, address);
+});
+
+const getGooglePlacesDataForPark = cache(async (
+  parkName: string,
+  state: string | null
+) => {
+  return fetchGooglePlacesDataCached(parkName, null, state, null);
+});
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale, slug } = params;
   
@@ -66,12 +88,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     
     const parkName = park.name || "National Park";
     
-    // Fetch Google Places data for metadata
-    const googlePlacesData = await fetchGooglePlacesData(
+    // Fetch Google Places data for metadata (cached and memoized per request)
+    const googlePlacesData = await getGooglePlacesDataForPark(
       parkName,
-      null,
-      park.state || null,
-      null
+      park.state || null
     );
     
     const baseUrl = "https://resources.sageoutdooradvisory.com";
@@ -164,8 +184,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const firstProperty = properties[0];
   const propertyName = firstProperty.property_name || "Unnamed Property";
   
-  // Fetch Google Places data for metadata
-  const googlePlacesData = await fetchGooglePlacesData(
+  // Fetch Google Places data for metadata (cached and memoized per request)
+  const googlePlacesData = await getGooglePlacesDataForProperty(
     propertyName,
     firstProperty.city || null,
     firstProperty.state || null,
@@ -332,12 +352,10 @@ export default async function PropertyPage({ params }: PageProps) {
       notFound();
     }
     
-    // Fetch Google Places data
-    const googlePlacesData = await fetchGooglePlacesData(
+    // Fetch Google Places data (cached and memoized per request - same promise as generateMetadata)
+    const googlePlacesData = await getGooglePlacesDataForPark(
       park.name,
-      null,
-      park.state || null,
-      null
+      park.state || null
     );
     
     return (
@@ -360,8 +378,8 @@ export default async function PropertyPage({ params }: PageProps) {
   const firstProperty = properties[0];
   const propertyName = firstProperty.property_name || "Unnamed Property";
   
-  // Fetch Google Places data (rating, reviews, photos, website, description)
-  const googlePlacesData = await fetchGooglePlacesData(
+  // Fetch Google Places data (cached and memoized per request - same promise as generateMetadata)
+  const googlePlacesData = await getGooglePlacesDataForProperty(
     propertyName,
     firstProperty.city || null,
     firstProperty.state || null,
@@ -392,7 +410,8 @@ export default async function PropertyPage({ params }: PageProps) {
     google_user_rating_total: googlePlacesData?.userRatingCount || null,
     google_photos: googlePlacesData?.photos || null,
     google_website_uri: googlePlacesData?.websiteUri || null,
-    google_phone_number: googlePlacesData?.phoneNumber || null,
+    // Use phone_number from database, not Google Places API
+    google_phone_number: firstProperty.phone_number || null,
   };
   
   // Generate structured data

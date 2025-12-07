@@ -168,7 +168,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
       {
         title: "Get Started with Your Glamping Feasibility Study",
-        content: "Ready to validate your glamping resort project? Our feasibility studies help you avoid costly mistakes and build a profitable, guest-ready destination. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our glamping specialists to discuss your project. You can also explore our <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping market data</a> and <a href='https://sageoutdooradvisory.com/market-reports/' className='text-[#006b5f] hover:text-[#005a4f] underline'>download our free 2025 USA Glamping Market Report</a> to get started.",
+        content: "Ready to validate your glamping resort project? Our feasibility studies help you avoid costly mistakes and build a profitable, guest-ready destination. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our glamping specialists to discuss your project. You can also explore our <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping market data</a> and <a href='https://sageoutdooradvisory.com/shop/' className='text-[#006b5f] hover:text-[#005a4f] underline'>download our free 2025 USA Glamping Market Report</a> to get started.",
       },
     ],
     benefits: [
@@ -226,17 +226,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
           description: "Expert glamping feasibility studies to validate your project and secure financing."
         },
         {
           name: "Glamping Property Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
           description: "Bank-approved glamping property appraisals for financing and transactions."
         },
         {
           name: "RV Resort Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
           description: "Professional RV resort feasibility studies with comprehensive market analysis."
         }
       ]
@@ -261,7 +261,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     sections: [
       {
         title: "Expert RV Resort Feasibility Analysis",
-        content: "Sage Outdoor Advisory specializes in <a href='/glossary/rv-resort' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV resort</a> and <a href='/glossary/rv-park' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV park</a> <a href='/glossary/feasibility-study' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility studies</a>. We provide the insights you need to make confident investment decisions. Our <a href='https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV resort feasibility studies</a> have helped clients like <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Margaritaville RV Resort in Florida</a> and <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Verde Ranch RV Resort in Arizona</a> successfully develop and expand their properties.",
+        content: "Sage Outdoor Advisory specializes in <a href='/glossary/rv-resort' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV resort</a> and <a href='/glossary/rv-park' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV park</a> <a href='/glossary/feasibility-study' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility studies</a>. We provide the insights you need to make confident investment decisions. Our <a href='https://sageoutdooradvisory.com/feasibility-study-rv-parks/' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV resort feasibility studies</a> have helped clients like <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Margaritaville RV Resort in Florida</a> and <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Verde Ranch RV Resort in Arizona</a> successfully develop and expand their properties.",
       },
       {
         title: "Comprehensive Feasibility Study Components",
@@ -277,7 +277,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
       {
         title: "Ready to Validate Your RV Resort Investment?",
-        content: "Take the first step toward your RV resort project. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our RV resort specialists today. We'll discuss your vision, review your site, and explain how our feasibility study can help you make informed decisions. Learn more about our <a href='https://sageoutdooradvisory.com/our-services/' className='text-[#006b5f] hover:text-[#005a4f] underline'>complete range of services</a> for outdoor hospitality projects.",
+        content: "Take the first step toward your RV resort project. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our RV resort specialists today. We'll discuss your vision, review your site, and explain how our feasibility study can help you make informed decisions. Learn more about our <a href='https://sageoutdooradvisory.com/services-overview/' className='text-[#006b5f] hover:text-[#005a4f] underline'>complete range of services</a> for outdoor hospitality projects.",
       },
     ],
     benefits: [
@@ -323,17 +323,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "RV Resort Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
           description: "Professional RV resort feasibility studies to guide your investment decisions."
         },
         {
           name: "RV Resort Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/appraisal-rv-parks/",
           description: "Expert RV resort appraisals trusted by banks and investors."
         },
         {
           name: "Campground Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-campgrounds/",
           description: "Comprehensive campground feasibility studies with market analysis."
         }
       ]
@@ -358,7 +358,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     sections: [
       {
         title: "Campground Feasibility Expertise",
-        content: "Sage Outdoor Advisory has extensive experience in <a href='/glossary/campground' className='text-[#006b5f] hover:text-[#005a4f] underline'>campground</a> <a href='/glossary/feasibility-study' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility studies</a> across the United States. We help you understand market potential and financial viability. Explore our <a href='https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/' className='text-[#006b5f] hover:text-[#005a4f] underline'>campground feasibility study services</a> and see how we've supported successful projects nationwide. For market insights, check out our <a href='https://sageoutdooradvisory.com/market-reports/' className='text-[#006b5f] hover:text-[#005a4f] underline'>market reports</a> and <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>data insights</a>.",
+        content: "Sage Outdoor Advisory has extensive experience in <a href='/glossary/campground' className='text-[#006b5f] hover:text-[#005a4f] underline'>campground</a> <a href='/glossary/feasibility-study' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility studies</a> across the United States. We help you understand market potential and financial viability. Explore our <a href='https://sageoutdooradvisory.com/feasibility-study-campgrounds/' className='text-[#006b5f] hover:text-[#005a4f] underline'>campground feasibility study services</a> and see how we've supported successful projects nationwide. For market insights, check out our <a href='https://sageoutdooradvisory.com/shop/' className='text-[#006b5f] hover:text-[#005a4f] underline'>market reports</a> and <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>data insights</a>.",
       },
       {
         title: "What Your Campground Feasibility Study Includes",
@@ -419,17 +419,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Campground Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-campgrounds/",
           description: "Professional campground feasibility studies with market analysis and financial projections."
         },
         {
           name: "Campground Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/campgrounds/",
+          url: "https://sageoutdooradvisory.com/appraisal-campgrounds/",
           description: "Expert campground appraisals for financing and investment decisions."
         },
         {
           name: "RV Resort Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
           description: "Comprehensive RV resort feasibility studies to validate your investment."
         }
       ]
@@ -557,7 +557,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
       {
         title: "Get Started with Your Glamping Appraisal",
-        content: "A professionally prepared appraisal demonstrates the financial viability and market value of your glamping resort, which is often a critical step in obtaining a bank loan or attracting serious investors. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our glamping appraisal specialists to discuss your property. You can also explore our <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping market data</a> and <a href='https://sageoutdooradvisory.com/market-reports/' className='text-[#006b5f] hover:text-[#005a4f] underline'>download our free 2025 USA Glamping Market Report</a> to get started.",
+        content: "A professionally prepared appraisal demonstrates the financial viability and market value of your glamping resort, which is often a critical step in obtaining a bank loan or attracting serious investors. <a href='https://sageoutdooradvisory.com/contact-us/' className='text-[#006b5f] hover:text-[#005a4f] underline font-semibold'>Schedule a free consultation</a> with our glamping appraisal specialists to discuss your property. You can also explore our <a href='https://sageoutdooradvisory.com/data-insights/' className='text-[#006b5f] hover:text-[#005a4f] underline'>glamping market data</a> and <a href='https://sageoutdooradvisory.com/shop/' className='text-[#006b5f] hover:text-[#005a4f] underline'>download our free 2025 USA Glamping Market Report</a> to get started.",
       },
     ],
     benefits: [
@@ -614,17 +614,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Glamping Property Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
           description: "Bank-approved glamping property appraisals for financing and transactions."
         },
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
           description: "Expert glamping feasibility studies to validate your project and secure financing."
         },
         {
           name: "RV Resort Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/appraisal-rv-parks/",
           description: "Professional RV resort appraisals trusted by banks and investors."
         }
       ]
@@ -649,7 +649,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     sections: [
       {
         title: "RV Resort Appraisal Expertise",
-        content: "Sage Outdoor Advisory specializes in <a href='/glossary/rv-resort' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV resort</a> and <a href='/glossary/rv-park' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV park</a> <a href='/glossary/appraisal' className='text-[#006b5f] hover:text-[#005a4f] underline'>appraisals</a>. Our valuations are trusted by financial institutions and investors nationwide. Explore our <a href='https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV resort appraisal services</a>. Our appraisals have helped clients like <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Walden Retreats in Austin, TX</a> close construction loans successfully.",
+        content: "Sage Outdoor Advisory specializes in <a href='/glossary/rv-resort' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV resort</a> and <a href='/glossary/rv-park' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV park</a> <a href='/glossary/appraisal' className='text-[#006b5f] hover:text-[#005a4f] underline'>appraisals</a>. Our valuations are trusted by financial institutions and investors nationwide. Explore our <a href='https://sageoutdooradvisory.com/appraisal-rv-parks/' className='text-[#006b5f] hover:text-[#005a4f] underline'>RV resort appraisal services</a>. Our appraisals have helped clients like <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>Walden Retreats in Austin, TX</a> close construction loans successfully.",
       },
       {
         title: "Complete Appraisal Services",
@@ -706,17 +706,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "RV Resort Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/appraisal-rv-parks/",
           description: "Expert RV resort appraisals trusted by banks and investors for financing decisions."
         },
         {
           name: "RV Resort Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
           description: "Professional RV resort feasibility studies to guide your investment decisions."
         },
         {
           name: "Glamping Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
           description: "Bank-approved glamping property appraisals for financing and transactions."
         }
       ]
@@ -802,7 +802,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
       {
         title: "Why Banks Trust Sage's Feasibility Studies",
-        content: "Sage Outdoor Advisory's <a href='/glossary/feasibility-study' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility studies</a> are specifically designed to meet bank requirements. We understand what lenders need to see and provide comprehensive, bank-approved documentation that helps you secure financing. As <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>one lender noted</a>, our feasibility studies are 'the most comprehensive' they've seen. Learn more about our <a href='https://sageoutdooradvisory.com/our-services/' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility study services</a>.",
+        content: "Sage Outdoor Advisory's <a href='/glossary/feasibility-study' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility studies</a> are specifically designed to meet bank requirements. We understand what lenders need to see and provide comprehensive, bank-approved documentation that helps you secure financing. As <a href='https://sageoutdooradvisory.com/clients/' className='text-[#006b5f] hover:text-[#005a4f] underline'>one lender noted</a>, our feasibility studies are 'the most comprehensive' they've seen. Learn more about our <a href='https://sageoutdooradvisory.com/services-overview/' className='text-[#006b5f] hover:text-[#005a4f] underline'>feasibility study services</a>.",
       },
       {
         title: "Partner with Trusted Financing Experts",
@@ -847,17 +847,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
           description: "Bank-approved feasibility studies required for glamping resort financing."
         },
         {
           name: "Glamping Property Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
           description: "Professional appraisals needed to secure financing for your glamping project."
         },
         {
           name: "All Our Services",
-          url: "https://sageoutdooradvisory.com/our-services/",
+          url: "https://sageoutdooradvisory.com/services-overview/",
           description: "Explore all of Sage's feasibility study and appraisal services."
         }
       ]
@@ -1366,7 +1366,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     sections: [
       {
         title: "Campground Appraisal Expertise",
-        content: "Sage Outdoor Advisory specializes in <a href='/glossary/campground' className='text-[#006b5f] hover:text-[#005a4f] underline'>campground</a> property <a href='/glossary/appraisal' className='text-[#006b5f] hover:text-[#005a4f] underline'>appraisals</a>. Our valuations are trusted by financial institutions and investors nationwide. Explore our <a href='https://sageoutdooradvisory.com/our-services/appraisals/campgrounds/' className='text-[#006b5f] hover:text-[#005a4f] underline'>campground appraisal services</a>.",
+        content: "Sage Outdoor Advisory specializes in <a href='/glossary/campground' className='text-[#006b5f] hover:text-[#005a4f] underline'>campground</a> property <a href='/glossary/appraisal' className='text-[#006b5f] hover:text-[#005a4f] underline'>appraisals</a>. Our valuations are trusted by financial institutions and investors nationwide. Explore our <a href='https://sageoutdooradvisory.com/appraisal-campgrounds/' className='text-[#006b5f] hover:text-[#005a4f] underline'>campground appraisal services</a>.",
       },
       {
         title: "Comprehensive Appraisal Services",
@@ -1414,12 +1414,12 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Campground Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/campgrounds/",
+          url: "https://sageoutdooradvisory.com/appraisal-campgrounds/",
           description: "Professional campground appraisals for financing and investment decisions."
         },
         {
           name: "Campground Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-campgrounds/",
           description: "Comprehensive campground feasibility studies with market analysis."
         }
       ]
@@ -1496,17 +1496,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
           description: "Expert glamping feasibility studies to validate your project."
         },
         {
           name: "RV Resort Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/",
           description: "Professional RV resort feasibility studies with comprehensive analysis."
         },
         {
           name: "Campground Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/campgrounds/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-campgrounds/",
           description: "Comprehensive campground feasibility studies with market analysis."
         }
       ]
@@ -1584,17 +1584,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Glamping Property Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
           description: "Bank-approved glamping property appraisals for financing."
         },
         {
           name: "RV Resort Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/rv-resorts/",
+          url: "https://sageoutdooradvisory.com/appraisal-rv-parks/",
           description: "Expert RV resort appraisals trusted by banks."
         },
         {
           name: "Campground Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/campgrounds/",
+          url: "https://sageoutdooradvisory.com/appraisal-campgrounds/",
           description: "Professional campground appraisals for financing."
         }
       ]
@@ -3299,17 +3299,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Marina Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/marinas/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-marinas/",
           description: "Professional marina feasibility studies with comprehensive market analysis."
         },
         {
           name: "Marina Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/marinas/",
+          url: "https://sageoutdooradvisory.com/appraisal-marinas/",
           description: "Expert marina appraisals trusted by banks and investors."
         },
         {
           name: "All Our Services",
-          url: "https://sageoutdooradvisory.com/our-services/",
+          url: "https://sageoutdooradvisory.com/services-overview/",
           description: "Explore all of Sage's feasibility study and appraisal services."
         }
       ]
@@ -3367,17 +3367,17 @@ export const landingPages: Record<string, LandingPageContent> = {
       services: [
         {
           name: "Marina Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/our-services/feasibility-studies/marinas/",
+          url: "https://sageoutdooradvisory.com/feasibility-study-marinas/",
           description: "Professional marina feasibility studies with comprehensive market analysis."
         },
         {
           name: "Marina Appraisals",
-          url: "https://sageoutdooradvisory.com/our-services/appraisals/marinas/",
+          url: "https://sageoutdooradvisory.com/appraisal-marinas/",
           description: "Expert marina appraisals trusted by banks and investors."
         },
         {
           name: "All Our Services",
-          url: "https://sageoutdooradvisory.com/our-services/",
+          url: "https://sageoutdooradvisory.com/services-overview/",
           description: "Explore all of Sage's feasibility study and appraisal services."
         }
       ]

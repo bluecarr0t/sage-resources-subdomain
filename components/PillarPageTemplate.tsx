@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
   generateOrganizationSchema,
-  generateLocalBusinessSchema,
   generateGuideBreadcrumbSchema,
   generateFAQSchema,
   generateArticleSchema,
@@ -26,7 +25,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
 
   // Generate structured data
   const organizationSchema = generateOrganizationSchema();
-  const localBusinessSchema = generateLocalBusinessSchema();
+  // Note: Removed LocalBusiness schema - guide pages are articles, not local businesses
   const breadcrumbSchema = generateGuideBreadcrumbSchema(content.slug, content.hero.headline);
   const articleSchema = generateArticleSchema(content);
   const faqSchema = content.faqs ? generateFAQSchema(content.faqs) : null;
@@ -63,10 +62,6 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
       <script
         type="application/ld+json"
