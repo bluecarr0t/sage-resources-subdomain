@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SageProperty } from '@/lib/types/sage';
@@ -86,10 +86,52 @@ export default function PropertyDetailTemplate({
   slug,
   propertyName,
   nearbyProperties = [],
-  googlePlacesData,
+  googlePlacesData: initialGooglePlacesData,
   locale,
 }: PropertyDetailTemplateProps) {
   const firstProperty = properties[0];
+  
+  // State for client-side fetched Google Places data
+  const [googlePlacesData, setGooglePlacesData] = useState<GooglePlacesData | null>(initialGooglePlacesData || null);
+  const [isLoadingPlacesData, setIsLoadingPlacesData] = useState(!initialGooglePlacesData);
+  
+  // Fetch Google Places data client-side if not provided
+  useEffect(() => {
+    if (initialGooglePlacesData) {
+      // Already have data, no need to fetch
+      return;
+    }
+    
+    const fetchGooglePlacesData = async () => {
+      try {
+        setIsLoadingPlacesData(true);
+        const params = new URLSearchParams({
+          propertyName: propertyName,
+        });
+        
+        if (firstProperty.city) params.append('city', firstProperty.city);
+        if (firstProperty.state) params.append('state', firstProperty.state);
+        if (firstProperty.address) params.append('address', firstProperty.address);
+        
+        const response = await fetch(`/api/google-places?${params.toString()}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setGooglePlacesData(data);
+        } else {
+          // Silently fail - page will work without Google Places data
+          console.warn('Failed to fetch Google Places data:', response.statusText);
+        }
+      } catch (error) {
+        // Silently fail - page will work without Google Places data
+        console.warn('Error fetching Google Places data:', error);
+      } finally {
+        setIsLoadingPlacesData(false);
+      }
+    };
+    
+    fetchGooglePlacesData();
+  }, [propertyName, firstProperty.city, firstProperty.state, firstProperty.address, initialGooglePlacesData]);
   
   // Use photos from Google Places API (not from database)
   const photos = googlePlacesData?.photos || [];

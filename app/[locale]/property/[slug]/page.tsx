@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { cache } from "react";
 import { getAllPropertySlugs, getPropertiesBySlug, getNearbyProperties } from "@/lib/properties";
 import { getAllNationalParkSlugs, getNationalParkBySlug, getSlugType } from "@/lib/national-parks";
 import { parseCoordinates } from "@/lib/types/sage";
@@ -9,7 +8,9 @@ import NationalParkDetailTemplate from "@/components/NationalParkDetailTemplate"
 import { generatePropertyBreadcrumbSchema, generatePropertyLocalBusinessSchema, generatePropertyFAQSchema, generatePropertyAmenitiesSchema } from "@/lib/schema";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
-import { fetchGooglePlacesDataCached } from "@/lib/google-places-cache";
+
+// ISR: Revalidate pages every 24 hours
+export const revalidate = 86400;
 
 interface PageProps {
   params: {
@@ -44,27 +45,6 @@ export async function generateStaticParams() {
   return params;
 }
 
-/**
- * Helper function to get Google Places data with request-level memoization
- * This ensures that within a single request, both generateMetadata and the page component
- * share the same promise, eliminating duplicate API calls.
- */
-const getGooglePlacesDataForProperty = cache(async (
-  propertyName: string,
-  city: string | null,
-  state: string | null,
-  address: string | null
-) => {
-  return fetchGooglePlacesDataCached(propertyName, city, state, address);
-});
-
-const getGooglePlacesDataForPark = cache(async (
-  parkName: string,
-  state: string | null
-) => {
-  return fetchGooglePlacesDataCached(parkName, null, state, null);
-});
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale, slug } = params;
   
@@ -88,23 +68,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     
     const parkName = park.name || "National Park";
     
-    // Fetch Google Places data for metadata (cached and memoized per request)
-    const googlePlacesData = await getGooglePlacesDataForPark(
-      parkName,
-      park.state || null
-    );
-    
     const baseUrl = "https://resources.sageoutdooradvisory.com";
     const pathname = `/${locale}/property/${slug}`;
     const url = `${baseUrl}${pathname}`;
     
-    // Build description
+    // Build description without Google Places data (fetched client-side)
     const descriptionParts: string[] = [];
     if (park.state) descriptionParts.push(`in ${park.state}`);
     if (park.date_established) descriptionParts.push(`established ${park.date_established}`);
-    if (googlePlacesData?.rating && googlePlacesData?.userRatingCount) {
-      descriptionParts.push(`${googlePlacesData.rating.toFixed(1)}★ from ${googlePlacesData.userRatingCount} reviews`);
-    }
     
     let description = parkName;
     if (descriptionParts.length > 0) {
@@ -116,17 +87,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description = description.substring(0, 157) + '...';
     }
     
-    // Get first photo for OG image if available
-    let imageUrl = `${baseUrl}/og-map-image.jpg`;
-    if (googlePlacesData?.photos && googlePlacesData.photos.length > 0) {
-      const photo = googlePlacesData.photos[0];
-      if (photo?.name) {
-        const maxWidth = photo.widthPx ? Math.min(photo.widthPx, 1200) : 1200;
-        const maxHeight = photo.heightPx ? Math.min(photo.heightPx, 630) : 630;
-        const encodedPhotoName = encodeURIComponent(photo.name);
-        imageUrl = `${baseUrl}/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=${maxWidth}&maxHeightPx=${maxHeight}`;
-      }
-    }
+    // Use fallback OG image (Google Places photos fetched client-side)
+    const imageUrl = `${baseUrl}/og-map-image.jpg`;
     
     return {
       title: `${parkName} | National Park | Sage Outdoor Advisory`,
@@ -184,14 +146,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const firstProperty = properties[0];
   const propertyName = firstProperty.property_name || "Unnamed Property";
   
-  // Fetch Google Places data for metadata (cached and memoized per request)
-  const googlePlacesData = await getGooglePlacesDataForProperty(
-    propertyName,
-    firstProperty.city || null,
-    firstProperty.state || null,
-    firstProperty.address || null
-  );
-  
   // Build location string
   const locationParts: string[] = [];
   if (firstProperty.city) locationParts.push(firstProperty.city);
@@ -199,13 +153,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (firstProperty.country) locationParts.push(firstProperty.country);
   const location = locationParts.join(", ") || "";
   
-  // Build optimized description with key information
+  // Build optimized description with key information (without Google Places data - fetched client-side)
   const descriptionParts: string[] = [];
-  
-  // Add rating if available (from Google Places API, not database)
-  if (googlePlacesData?.rating && googlePlacesData?.userRatingCount) {
-    descriptionParts.push(`${googlePlacesData.rating.toFixed(1)}★ from ${googlePlacesData.userRatingCount} reviews`);
-  }
   
   // Add location
   if (location) {
@@ -277,17 +226,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const pathname = `/${locale}/property/${slug}`;
   const url = `${baseUrl}${pathname}`;
   
-  // Get first photo for OG image if available (from Google Places API)
-  let imageUrl = `${baseUrl}/og-map-image.jpg`; // Fallback image
-  if (googlePlacesData?.photos && googlePlacesData.photos.length > 0) {
-    const photo = googlePlacesData.photos[0];
-    if (photo?.name) {
-      const maxWidth = photo.widthPx ? Math.min(photo.widthPx, 1200) : 1200;
-      const maxHeight = photo.heightPx ? Math.min(photo.heightPx, 630) : 630;
-      const encodedPhotoName = encodeURIComponent(photo.name);
-      imageUrl = `${baseUrl}/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=${maxWidth}&maxHeightPx=${maxHeight}`;
-    }
-  }
+  // Use fallback OG image (Google Places photos fetched client-side)
+  const imageUrl = `${baseUrl}/og-map-image.jpg`;
 
   return {
     title,
@@ -352,17 +292,12 @@ export default async function PropertyPage({ params }: PageProps) {
       notFound();
     }
     
-    // Fetch Google Places data (cached and memoized per request - same promise as generateMetadata)
-    const googlePlacesData = await getGooglePlacesDataForPark(
-      park.name,
-      park.state || null
-    );
-    
+    // Google Places data is now fetched client-side
     return (
       <NationalParkDetailTemplate
         park={park}
         slug={slug}
-        googlePlacesData={googlePlacesData}
+        googlePlacesData={null}
         locale={locale}
       />
     );
@@ -377,14 +312,6 @@ export default async function PropertyPage({ params }: PageProps) {
 
   const firstProperty = properties[0];
   const propertyName = firstProperty.property_name || "Unnamed Property";
-  
-  // Fetch Google Places data (cached and memoized per request - same promise as generateMetadata)
-  const googlePlacesData = await getGooglePlacesDataForProperty(
-    propertyName,
-    firstProperty.city || null,
-    firstProperty.state || null,
-    firstProperty.address || null
-  );
   
   // Get coordinates for nearby properties search
   const coordinates = parseCoordinates(firstProperty.lat, firstProperty.lon);
@@ -401,22 +328,21 @@ export default async function PropertyPage({ params }: PageProps) {
     );
   }
   
-  // Merge Google Places data into property object for schema generation
-  const propertyWithGoogleData = {
+  // Property data for schema generation (Google Places data fetched client-side, not included in schema)
+  const propertyForSchema = {
     ...firstProperty,
     slug: slug,
-    // Override with Google Places API data (not from database)
-    google_rating: googlePlacesData?.rating || null,
-    google_user_rating_total: googlePlacesData?.userRatingCount || null,
-    google_photos: googlePlacesData?.photos || null,
-    google_website_uri: googlePlacesData?.websiteUri || null,
-    // Use phone_number from database, not Google Places API
+    // Google Places data is not available at build time, so use null
+    google_rating: null,
+    google_user_rating_total: null,
+    google_photos: null,
+    google_website_uri: null,
     google_phone_number: firstProperty.phone_number || null,
   };
   
   // Generate structured data
   const breadcrumbSchema = generatePropertyBreadcrumbSchema(slug, propertyName);
-  const localBusinessSchema = generatePropertyLocalBusinessSchema(propertyWithGoogleData);
+  const localBusinessSchema = generatePropertyLocalBusinessSchema(propertyForSchema);
   const faqSchema = generatePropertyFAQSchema({
     property_name: firstProperty.property_name,
     unit_type: firstProperty.unit_type,
@@ -426,8 +352,8 @@ export default async function PropertyPage({ params }: PageProps) {
     minimum_nights: firstProperty.minimum_nights,
     pets: firstProperty.pets,
     avg_retail_daily_rate_2024: firstProperty.avg_retail_daily_rate_2024,
-    google_rating: googlePlacesData?.rating || null,
-    google_user_rating_total: googlePlacesData?.userRatingCount || null,
+    google_rating: null, // Not available at build time
+    google_user_rating_total: null, // Not available at build time
   });
   
   const amenitiesSchema = generatePropertyAmenitiesSchema({
@@ -478,7 +404,7 @@ export default async function PropertyPage({ params }: PageProps) {
         slug={slug}
         propertyName={propertyName}
         nearbyProperties={nearbyProperties}
-        googlePlacesData={googlePlacesData}
+        googlePlacesData={null}
         locale={locale}
       />
     </>

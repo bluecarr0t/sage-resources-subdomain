@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { NationalPark } from '@/lib/types/national-parks';
 import FloatingHeader from './FloatingHeader';
 import { GooglePlacesData } from '@/lib/google-places';
@@ -16,10 +17,50 @@ interface NationalParkDetailTemplateProps {
 export default function NationalParkDetailTemplate({
   park,
   slug,
-  googlePlacesData,
+  googlePlacesData: initialGooglePlacesData,
   locale,
 }: NationalParkDetailTemplateProps) {
   const parkName = park.name || 'National Park';
+  
+  // State for client-side fetched Google Places data
+  const [googlePlacesData, setGooglePlacesData] = useState<GooglePlacesData | null>(initialGooglePlacesData || null);
+  const [isLoadingPlacesData, setIsLoadingPlacesData] = useState(!initialGooglePlacesData);
+  
+  // Fetch Google Places data client-side if not provided
+  useEffect(() => {
+    if (initialGooglePlacesData) {
+      // Already have data, no need to fetch
+      return;
+    }
+    
+    const fetchGooglePlacesData = async () => {
+      try {
+        setIsLoadingPlacesData(true);
+        const params = new URLSearchParams({
+          propertyName: parkName,
+        });
+        
+        if (park.state) params.append('state', park.state);
+        
+        const response = await fetch(`/api/google-places?${params.toString()}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setGooglePlacesData(data);
+        } else {
+          // Silently fail - page will work without Google Places data
+          console.warn('Failed to fetch Google Places data:', response.statusText);
+        }
+      } catch (error) {
+        // Silently fail - page will work without Google Places data
+        console.warn('Error fetching Google Places data:', error);
+      } finally {
+        setIsLoadingPlacesData(false);
+      }
+    };
+    
+    fetchGooglePlacesData();
+  }, [parkName, park.state, initialGooglePlacesData]);
   
   // Use photos from Google Places API if available
   const photos = googlePlacesData?.photos || [];
@@ -89,15 +130,14 @@ export default function NationalParkDetailTemplate({
                   tabIndex={photos.length > 1 ? 0 : -1}
                   onKeyDown={handlePhotoKeyDown}
                 >
-                  <img
+                  <Image
                     src={`/api/google-places-photo?photoName=${encodeURIComponent(photos[currentPhotoIndex].name)}&maxWidthPx=1200&maxHeightPx=800`}
                     alt={`${parkName} - Photo ${currentPhotoIndex + 1} of ${photos.length}`}
                     className="w-full h-full object-cover"
-                    loading={currentPhotoIndex === 0 ? "eager" : "lazy"}
-                    fetchPriority={currentPhotoIndex === 0 ? "high" : "auto"}
                     width={1200}
                     height={800}
-                    decoding="async"
+                    priority={currentPhotoIndex === 0}
+                    unoptimized
                   />
                   
                   {/* Navigation Arrows */}

@@ -6,6 +6,9 @@ import Link from "next/link";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 
+// ISR: Revalidate pages every 24 hours
+export const revalidate = 86400;
+
 interface PageProps {
   params: {
     locale: string;
