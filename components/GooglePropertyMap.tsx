@@ -13,7 +13,7 @@ import { slugifyPropertyName } from '@/lib/properties';
 import PopulationLayer from './PopulationLayer';
 import GDPLayer from './GDPLayer';
 import { PopulationLookup } from '@/lib/population/parse-population-csv';
-import { fetchPopulationDataFromSupabase } from '@/lib/population/supabase-population';
+import { fetchPopulationDataFromSupabase, PopulationDataByFIPS } from '@/lib/population/supabase-population';
 import { fetchGDPDataFromSupabase, GDPLookup, GDPDataByFIPS } from '@/lib/gdp/supabase-gdp';
 import { getChangeRanges } from '@/lib/maps/county-boundaries';
 
@@ -277,7 +277,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [shouldFitBounds, setShouldFitBounds] = useState(false); // Disabled by default - use fixed zoom/center for lower 48 states
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
   const [populationLookup, setPopulationLookup] = useState<PopulationLookup | null>(null);
-  const [populationFipsLookup, setPopulationFipsLookup] = useState<{ [fips: string]: { 2010: number | null; 2020: number | null; name: string; geoId: string } } | null>(null);
+  const [populationFipsLookup, setPopulationFipsLookup] = useState<PopulationDataByFIPS | null>(null);
   const [populationLoading, setPopulationLoading] = useState(false);
   const [gdpLookup, setGdpLookup] = useState<GDPLookup | null>(null);
   const [gdpFipsLookup, setGdpFipsLookup] = useState<GDPDataByFIPS | null>(null);
