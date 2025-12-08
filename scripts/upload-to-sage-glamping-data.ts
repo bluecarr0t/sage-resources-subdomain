@@ -1,11 +1,15 @@
 /**
- * Script to clear sage-glamping-data table, upload CSV file, and calculate rate categories
+ * Script to upload CSV file to sage-glamping-data table and calculate rate categories
  * 
  * Usage:
- *   npx tsx scripts/upload-to-sage-glamping-data.ts <path-to-csv-file>
+ *   npx tsx scripts/upload-to-sage-glamping-data.ts <path-to-csv-file> [--append]
  * 
- * Example:
+ * Examples:
  *   npx tsx scripts/upload-to-sage-glamping-data.ts csv/data.csv
+ *   npx tsx scripts/upload-to-sage-glamping-data.ts csv/data.csv --append
+ * 
+ * Options:
+ *   --append    Skip clearing existing data and append new data instead
  */
 
 import { config } from 'dotenv';
@@ -420,6 +424,8 @@ async function uploadData(
       'Google Reservable': 'google_reservable',
       'Google Rating': null, // Already handled above
       'Google Review Count': null, // Already handled above
+      'Verification Status': null, // Skip - not in table schema
+      'Verification Notes': null, // Skip - not in table schema
     };
     
     // Clean the data: remove empty strings, convert "None" and similar to null
@@ -585,13 +591,15 @@ async function uploadData(
  */
 async function main() {
   const csvPath = process.argv[2];
+  const appendMode = process.argv.includes('--append');
   
   if (!csvPath) {
     console.error('❌ Please provide a CSV file path');
     console.error('\nUsage:');
-    console.error('  npx tsx scripts/upload-to-sage-glamping-data.ts <path-to-csv-file>');
-    console.error('\nExample:');
+    console.error('  npx tsx scripts/upload-to-sage-glamping-data.ts <path-to-csv-file> [--append]');
+    console.error('\nExamples:');
     console.error('  npx tsx scripts/upload-to-sage-glamping-data.ts csv/data.csv');
+    console.error('  npx tsx scripts/upload-to-sage-glamping-data.ts csv/data.csv --append');
     process.exit(1);
   }
   
@@ -620,18 +628,22 @@ async function main() {
     // Check if table exists
     await ensureTableExists(supabase);
     
-    // Clear existing data first
-    console.log(`\n🗑️  Clearing existing data from '${TABLE_NAME}' table...`);
-    const { error: deleteError, count: deleteCount } = await supabase
-      .from(TABLE_NAME)
-      .delete()
-      .neq('id', 0); // Delete all rows (id is always > 0)
-    
-    if (deleteError) {
-      console.error(`  ❌ Error clearing table: ${deleteError.message}`);
-      throw deleteError;
+    // Clear existing data first (unless in append mode)
+    if (!appendMode) {
+      console.log(`\n🗑️  Clearing existing data from '${TABLE_NAME}' table...`);
+      const { error: deleteError, count: deleteCount } = await supabase
+        .from(TABLE_NAME)
+        .delete()
+        .neq('id', 0); // Delete all rows (id is always > 0)
+      
+      if (deleteError) {
+        console.error(`  ❌ Error clearing table: ${deleteError.message}`);
+        throw deleteError;
+      } else {
+        console.log(`  ✅ Table cleared (${deleteCount || 0} rows deleted)`);
+      }
     } else {
-      console.log(`  ✅ Table cleared (${deleteCount || 0} rows deleted)`);
+      console.log(`\n➕ Append mode: Keeping existing data and adding new records...`);
     }
     
     // Upload data

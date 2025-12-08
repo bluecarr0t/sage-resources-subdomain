@@ -257,12 +257,14 @@ interface GooglePropertyMapProps {
 }
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
-  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, showGDPLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, toggleGDPLayer, setPopulationYear, clearFilters, hasActiveFilters } = useMapContext();
-  const [properties, setProperties] = useState<SageProperty[]>([]);
-  const [allProperties, setAllProperties] = useState<SageProperty[]>([]); // Store all properties for filter option calculation
+  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, showGDPLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, toggleGDPLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError } = useMapContext();
+  // Use shared properties from context instead of local state
+  const properties = sharedProperties;
+  const allProperties = sharedAllProperties;
   const [nationalParks, setNationalParks] = useState<NationalPark[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use shared loading/error state from context
+  const loading = sharedPropertiesLoading;
+  const error = sharedPropertiesError;
   const [selectedProperty, setSelectedProperty] = useState<PropertyWithCoords | null>(null);
   const [selectedPark, setSelectedPark] = useState<NationalParkWithCoords | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -452,115 +454,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
   }, [isClient, urlInitialized, searchParams]);
 
-  // Fetch all properties once (without filters) for filter option calculation
-  useEffect(() => {
-    async function fetchAllProperties() {
-      try {
-        const { data, error: supabaseError } = await supabase
-          .from('sage-glamping-data')
-          .select('*')
-          .limit(5000);
-
-        if (supabaseError) {
-          console.error('Error fetching all properties:', supabaseError);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          // Transform data to map new column names to expected format
-          const transformedData = (data || []).map((item: any) => ({
-            ...item,
-            avg_retail_daily_rate_2024: item.avg__retail_daily_rate_2024 ?? item.avg_retail_daily_rate_2024,
-            duplicate_note: item.duplicatenote ?? item.duplicate_note,
-            property_total_sites: item.property__total_sites ?? item.property_total_sites,
-            operating_season_months: item.operating_season__months_ ?? item.operating_season_months,
-            num_locations: item.__of_locations ?? item.num_locations,
-            retail_daily_rate_fees_2024: item.retail_daily_rate__fees__2024 ?? item.retail_daily_rate_fees_2024,
-            retail_daily_rate_fees_ytd: item.retail_daily_rate__fees__ytd ?? item.retail_daily_rate_fees_ytd,
-            avg_rate_next_12_months: item.avg__rate__next_12_months_ ?? item.avg_rate_next_12_months,
-            lat: item.lat ?? null,
-            lon: item.lon ?? null,
-          }));
-
-          // Group by property_name similar to the main fetch
-          const propertyMap = new Map<string, any>();
-          const unitTypesMap = new Map<string, Set<string>>();
-          const ratesMap = new Map<string, number[]>();
-
-          transformedData.forEach((item: any) => {
-            const propertyName = item.property_name;
-            if (!propertyName) return;
-
-            // Normalize property name to prevent duplicates from whitespace/case differences
-            const normalizedName = normalizePropertyName(propertyName);
-
-            if (!unitTypesMap.has(normalizedName)) {
-              unitTypesMap.set(normalizedName, new Set());
-            }
-            if (item.unit_type) {
-              unitTypesMap.get(normalizedName)!.add(item.unit_type);
-            }
-
-            if (!ratesMap.has(normalizedName)) {
-              ratesMap.set(normalizedName, []);
-            }
-            const rate = item.avg__rate__next_12_months_;
-            if (rate != null && !isNaN(Number(rate)) && isFinite(Number(rate))) {
-              ratesMap.get(normalizedName)!.push(Number(rate));
-            }
-
-            // When grouping, if a property appears in multiple states, keep all state records
-            // We'll handle deduplication when counting per state
-            // Use normalized name for grouping to prevent duplicates
-            if (!propertyMap.has(normalizedName)) {
-              propertyMap.set(normalizedName, [item]);
-            } else {
-              // Store multiple records for the same property (different states)
-              const existing = propertyMap.get(normalizedName)!;
-              if (Array.isArray(existing)) {
-                existing.push(item);
-              } else {
-                propertyMap.set(normalizedName, [existing, item]);
-              }
-            }
-          });
-
-          const uniqueProperties = Array.from(propertyMap.entries()).map(([normalizedName, propertyOrArray]: [string, any]) => {
-            // Handle case where property might be an array (multiple records for same property_name)
-            const property = Array.isArray(propertyOrArray) ? propertyOrArray[0] : propertyOrArray;
-            const unitTypes = unitTypesMap.get(normalizedName);
-            const rates = ratesMap.get(normalizedName) || [];
-
-            let rateRange: { min: number | null; max: number | null } = { min: null, max: null };
-            if (rates.length > 0) {
-              rateRange.min = Math.min(...rates);
-              rateRange.max = Math.max(...rates);
-            }
-
-            let rateCategory = property.rate_category;
-            if (!rateCategory) {
-              const avgRate = rateRange.min !== null && rateRange.max !== null 
-                ? (rateRange.min + rateRange.max) / 2 
-                : null;
-              rateCategory = getRateCategory(avgRate);
-            }
-
-            return {
-              ...property,
-              all_unit_types: unitTypes ? Array.from(unitTypes).sort() : [],
-              rate_range: rateRange,
-              rate_category: rateCategory,
-            };
-          });
-
-          setAllProperties(uniqueProperties);
-        }
-      } catch (err) {
-        console.error('Error fetching all properties:', err);
-      }
-    }
-    fetchAllProperties();
-  }, []);
+  // Use shared allProperties from context for filter option calculation
+  // No need to fetch separately - context already provides this
+  // The allProperties from context contains all properties without filters for filter dropdowns
 
   // Fetch national parks
   useEffect(() => {
@@ -632,141 +528,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   //   loadGDPData();
   // }, [gdpLookup]);
 
-  // Fetch properties
-  useEffect(() => {
-    async function fetchProperties() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        console.log('Fetching properties from Supabase...');
-        
-        let query = supabase.from('sage-glamping-data').select('*').limit(5000);
-
-        // Filter by country
-        if (filterCountry.length === 0) {
-          // No countries selected - return empty result
-          query = query.eq('id', -1); // This will return no results
-          console.log('No countries selected - showing no properties');
-        } else if (filterCountry.length === 1) {
-          // Only one country selected
-          if (filterCountry.includes('United States')) {
-            // Handle both 'USA' and 'United States' values
-            query = query.in('country', ['USA', 'United States', 'US']);
-            console.log('Filtering by country: United States (including USA, United States, US)');
-          } else if (filterCountry.includes('Canada')) {
-            // Filter by country field only - only show properties with country='Canada' or 'CA'
-            query = query.in('country', ['Canada', 'CA']);
-            console.log('Filtering by country: Canada (including Canada, CA) - only properties with country field set');
-          }
-        } else if (filterCountry.length === 2 && filterCountry.includes('United States') && filterCountry.includes('Canada')) {
-          // Both countries selected - don't filter by country at database level
-          // Return all properties and use client-side coordinate-based detection to identify which are Canadian/US
-          // This ensures we catch properties with incorrect country field values
-          console.log('Both countries selected - returning all properties (will filter client-side using coordinate detection)');
-          // No country filter - return all properties
-        }
-        // If neither condition matches, don't filter by country (show all)
-
-        if (filterState.length > 0) {
-          // Expand filterState to include both full names and their abbreviations
-          const expandedStates: string[] = [];
-          filterState.forEach((state) => {
-            // Add the state as-is (case-insensitive matching will be handled by Supabase)
-            expandedStates.push(state);
-            
-            // Find abbreviation for this state (if it's a full name)
-            const abbreviation = Object.entries(STATE_ABBREVIATIONS).find(
-              ([_, fullName]) => fullName.toLowerCase() === state.toLowerCase()
-            );
-            if (abbreviation) {
-              expandedStates.push(abbreviation[0]); // Add "CA" if state is "California"
-            }
-            
-            // Also check if the state itself is an abbreviation
-            if (STATE_ABBREVIATIONS[state.toUpperCase()]) {
-              const fullName = STATE_ABBREVIATIONS[state.toUpperCase()];
-              expandedStates.push(fullName); // Add "California" if state is "CA"
-              expandedStates.push(state.toUpperCase()); // Add "CA" in uppercase
-            }
-          });
-          
-          // Remove duplicates and ensure we have all variations
-          const uniqueExpandedStates = Array.from(new Set(expandedStates));
-          
-          // Also try case-insensitive variations
-          const allVariations: string[] = [];
-          uniqueExpandedStates.forEach((s) => {
-            allVariations.push(s);
-            allVariations.push(s.toUpperCase());
-            allVariations.push(s.toLowerCase());
-            // Capitalize first letter
-            allVariations.push(s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
-          });
-          
-          const finalStates = Array.from(new Set(allVariations));
-          query = query.in('state', finalStates);
-          console.log('Filtering by states:', filterState, 'expanded to:', finalStates);
-        }
-
-        if (filterUnitType.length > 0) {
-          query = query.in('unit_type', filterUnitType);
-          console.log('Filtering by unit types:', filterUnitType);
-        }
-
-        if (filterRateRange.length > 0) {
-          query = query.in('rate_category', filterRateRange);
-          console.log('Filtering by rate categories:', filterRateRange);
-        }
-
-        const { data, error: supabaseError } = await query;
-
-        if (supabaseError) {
-          console.error('Supabase error:', supabaseError);
-          // Provide more detailed error message
-          const errorDetails = {
-            message: supabaseError.message,
-            details: supabaseError.details,
-            hint: supabaseError.hint,
-            code: supabaseError.code,
-          };
-          console.error('Supabase error details:', errorDetails);
-          throw new Error(
-            `Supabase query failed: ${supabaseError.message}${supabaseError.details ? ` (${supabaseError.details})` : ''}${supabaseError.hint ? ` Hint: ${supabaseError.hint}` : ''}`
-          );
-        }
-
-        console.log('Fetched properties:', data?.length || 0);
-        if (data && data.length > 0) {
-          console.log('Sample property:', data[0]);
-          console.log('Sample property state:', data[0].state);
-          console.log('Sample property lat/lon:', { lat: data[0].lat, lon: data[0].lon, latType: typeof data[0].lat, lonType: typeof data[0].lon });
-          // Log states distribution
-          const stateCounts: Record<string, number> = {};
-          data.forEach((p: any) => {
-            if (p.state) {
-              stateCounts[p.state] = (stateCounts[p.state] || 0) + 1;
-            }
-          });
-          console.log('States in fetched data:', stateCounts);
-        }
-        
-        // Transform data to map new column names to expected format
-        const transformedData = (data || []).map((item: any) => ({
-          ...item,
-          // Map column names with double underscores to single underscores
-          avg_retail_daily_rate_2024: item.avg__retail_daily_rate_2024 ?? item.avg_retail_daily_rate_2024,
-          duplicate_note: item.duplicatenote ?? item.duplicate_note,
-          property_total_sites: item.property__total_sites ?? item.property_total_sites,
-          operating_season_months: item.operating_season__months_ ?? item.operating_season_months,
-          num_locations: item.__of_locations ?? item.num_locations,
-          retail_daily_rate_fees_2024: item.retail_daily_rate__fees__2024 ?? item.retail_daily_rate_fees_2024,
-          retail_daily_rate_fees_ytd: item.retail_daily_rate__fees__ytd ?? item.retail_daily_rate_fees_ytd,
-          avg_rate_next_12_months: item.avg__rate__next_12_months_ ?? item.avg_rate_next_12_months,
-          // Ensure lat and lon are accessible (they may be numbers from NUMERIC columns)
-          lat: item.lat ?? null,
-          lon: item.lon ?? null,
-        }));
+  // Process shared properties from context (no fetching - that's done in context)
+  // The context fetches raw data, and this component processes it for display
+  const processedProperties = useMemo(() => {
+    if (!properties || properties.length === 0) {
+      return [];
+    }
+    
+    const transformedData = properties;
         
         // Create a set of all state variations we're filtering by (for use during grouping)
         const filterStateSet = new Set<string>();
@@ -1145,32 +914,17 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           console.log(`After client-side filtering (both countries): ${uniqueProperties.length} properties`);
         }
         
-        console.log(`Grouped ${transformedData.length} records into ${uniqueProperties.length} unique properties`);
-        
-        setProperties(uniqueProperties);
-      } catch (err) {
-        console.error('Error fetching properties:', err);
-        let errorMessage = 'Failed to fetch properties';
-        if (err instanceof Error) {
-          errorMessage = err.message;
-        } else if (err && typeof err === 'object' && 'message' in err) {
-          errorMessage = String(err.message);
-        } else if (err && typeof err === 'object' && 'error' in err) {
-          errorMessage = String((err as any).error);
-        }
-        console.error('Error details:', { err, errorMessage, type: typeof err });
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchProperties();
-  }, [filterCountry, filterState, filterUnitType, filterRateRange]);
+    console.log(`Grouped ${transformedData.length} records into ${uniqueProperties.length} unique properties`);
+    
+    return uniqueProperties;
+  }, [properties, filterState, filterCountry]);
+  
+  // Use processed properties for display
+  const displayProperties = processedProperties;
 
   const propertiesWithCoords = useMemo(
-    () => filterPropertiesWithCoordinates(properties),
-    [properties]
+    () => filterPropertiesWithCoordinates(displayProperties),
+    [displayProperties]
   );
 
 
@@ -3174,7 +2928,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             </GoogleMap>
           </div>
         )}
-        {!loading && !error && properties.length === 0 && (
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 pointer-events-none z-20">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600"></div>
+              <p className="text-gray-600 font-medium mt-4">Loading properties...</p>
+            </div>
+          </div>
+        )}
+        {!loading && !error && displayProperties.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 pointer-events-none z-20">
             <div className="text-center p-4 bg-white rounded-lg shadow-sm">
               <p className="text-gray-600 font-medium">No properties found</p>

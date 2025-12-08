@@ -1,6 +1,20 @@
 -- Create the county-population table
 -- Run this SQL in your Supabase SQL Editor before uploading the CSV data
 -- This table stores 2010 and 2020 census population data by county
+--
+-- CSV Files:
+--   - csv/population/2020-census-by-county.csv
+--   - csv/population/2010-censes-by-county.csv
+--
+-- To upload the data, use the TypeScript script:
+--   npx tsx scripts/upload-county-population.ts
+--
+-- The script will automatically:
+--   1. Parse both CSV files
+--   2. Extract GEO_ID, NAME, and population data (P1_001N for 2020, P001001 for 2010)
+--   3. Combine the data by GEO_ID
+--   4. Calculate percentage change from 2010 to 2020
+--   5. Upload to this table using upsert (updates existing records)
 
 CREATE TABLE IF NOT EXISTS "county-population" (
   geo_id TEXT PRIMARY KEY,
