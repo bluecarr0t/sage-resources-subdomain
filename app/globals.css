@@ -50,3 +50,57 @@ body {
   background: rgb(156 163 175);
 }
 
+/* Guide Content Spacing Improvements - Applies to ALL guides */
+.prose h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Unordered and ordered lists */
+.prose ul,
+.prose ol {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.prose ul li,
+.prose ol li {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+}
+
+/* Paragraph spacing */
+.prose p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+/* Extra spacing when h3 follows a paragraph or list */
+.prose p + h3,
+.prose ul + h3,
+.prose ol + h3 {
+  margin-top: 2.5rem;
+}
+
+/* Extra spacing when list follows a paragraph */
+.prose p + ul,
+.prose p + ol {
+  margin-top: 1.5rem;
+}
+
+/* Extra spacing when paragraph follows a list */
+.prose ul + p,
+.prose ol + p {
+  margin-top: 1.5rem;
+}
+
+/* Extra spacing when h3 follows another h3 (for nested subsections) */
+.prose h3 + h3 {
+  margin-top: 1.5rem;
+}
+

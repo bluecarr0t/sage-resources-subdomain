@@ -45,7 +45,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p><a href="/glossary/glamping" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping</a>, a portmanteau of "glamorous" and "camping," represents a fusion of outdoor experiences with luxury accommodations and amenities. Unlike traditional camping, glamping offers comfortable, often luxurious accommodations while maintaining a connection to nature.</p>
         
         <p>Key characteristics of glamping include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Unique, experiential accommodations (yurts, A-frames, safari tents, treehouses, etc.)</li>
           <li>Premium amenities and services</li>
           <li>Connection to nature and outdoor experiences</li>
@@ -62,7 +62,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Market Growth</h3>
         <p>The glamping market has grown significantly, with increasing demand from travelers seeking unique, experiential accommodations. Key growth drivers include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Rising interest in experiential travel</li>
           <li>Desire for authentic, nature-based experiences</li>
           <li>Premium pricing potential for operators</li>
@@ -72,7 +72,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Market Segments</h3>
         <p>The glamping market includes various segments:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Luxury glamping resorts with high-end amenities</li>
           <li>Boutique glamping properties with unique accommodations</li>
           <li>Eco-friendly glamping focused on sustainability</li>
@@ -86,7 +86,7 @@ export const industryGuides: Record<string, GuideContent> = {
         title: "Types of Glamping Accommodations",
         content: `<p>Glamping properties offer diverse accommodation types, each with unique appeal and operational considerations:</p>
         
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Yurts:</strong> Circular tent-like structures offering spacious, comfortable accommodations</li>
           <li><strong>A-Frames:</strong> Iconic triangular structures with modern amenities</li>
           <li><strong>Safari Tents:</strong> Spacious canvas tents with luxury furnishings</li>
@@ -105,7 +105,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>Understanding current and emerging trends is crucial for glamping business success:</p>
         
         <h3>Current Trends</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Premium experiences with unique amenities</li>
           <li>Emphasis on sustainability and eco-friendliness</li>
           <li>Integration with outdoor activities and experiences</li>
@@ -120,7 +120,7 @@ export const industryGuides: Record<string, GuideContent> = {
         title: "How to Start a Glamping Business",
         content: `<p>Starting a glamping business requires careful planning and execution. Key steps include:</p>
         
-        <ol class="list-decimal list-inside space-y-2 ml-4">
+        <ol class="list-decimal list-inside space-y-3 ml-4">
           <li><strong>Market Research:</strong> Understand your target market and competition</li>
           <li><strong>Site Selection:</strong> Choose a location with appropriate attributes</li>
           <li><strong>Business Planning:</strong> Develop comprehensive business and financial plans</li>
@@ -139,7 +139,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>Successful glamping businesses employ various revenue models:</p>
         
         <h3>Revenue Sources</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Accommodation rentals (primary revenue source)</li>
           <li>Activity fees and experiences</li>
           <li>Food and beverage services</li>
@@ -149,7 +149,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Pricing Strategies</h3>
         <p>Effective pricing considers:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Market positioning and competitive analysis</li>
           <li>Seasonal demand variations</li>
           <li>Accommodation uniqueness and amenities</li>
@@ -158,7 +158,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Operating Costs</h3>
         <p>Key operating expenses include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Property maintenance and utilities</li>
           <li>Housekeeping and operations staff</li>
           <li>Marketing and distribution</li>
@@ -171,7 +171,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>A <a href="/landing/glamping-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping feasibility study</a> is essential for validating your glamping business concept. These studies analyze market potential, financial viability, and project risks specific to glamping developments.</p>
         
         <p>Glamping feasibility studies consider unique factors like:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Accommodation mix optimization</li>
           <li>Premium pricing potential</li>
           <li>Seasonal demand patterns</li>
@@ -193,7 +193,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>Securing financing for glamping projects requires understanding lender requirements and preparing comprehensive documentation. Learn more in our <a href="/landing/how-to-finance-glamping-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">how to finance a glamping resort guide</a>.</p>
         
         <p>Key financing requirements typically include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Professional feasibility study</li>
           <li>Property appraisal</li>
           <li>Business plan with financial projections</li>
@@ -205,7 +205,7 @@ export const industryGuides: Record<string, GuideContent> = {
         title: "Glamping Regulations & Zoning",
         content: `<p>Navigating zoning and regulatory requirements is crucial for glamping developments. Regulations vary by location and may address:</p>
         
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Zoning classifications and permitted uses</li>
           <li>Building codes and structure requirements</li>
           <li>Environmental regulations</li>
@@ -221,7 +221,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `        <p>Successful glamping projects demonstrate the potential of well-executed glamping businesses. For example, Open Sky in Zion, UT, successfully secured traditional bank funding with Sage's appraisal services, demonstrating that glamping projects can access conventional financing when properly analyzed. Learn more about operational excellence from <a href="https://sageoutdooradvisory.com/blog/the-unique-hospitality-podcast-what-does-a-glamping-gm-do-wes-mccloskey-from-open-sky-reveals-all/" class="text-[#006b5f] hover:text-[#005a4f] underline">The Unique Hospitality Podcast featuring Wes McCloskey from Open Sky</a>, who reveals what it really takes to manage a glamping resort.</p>
         
         <p>Key success factors from successful glamping projects include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Strong market positioning and unique appeal</li>
           <li>Comprehensive planning and analysis</li>
           <li>Professional feasibility studies and appraisals</li>
@@ -439,7 +439,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>An <a href="/glossary/rv-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort</a> is a premium outdoor hospitality property designed specifically for recreational vehicles (RVs). RV resorts offer enhanced amenities, services, and facilities compared to traditional RV parks, targeting travelers seeking premium RV experiences.</p>
         
         <p>Key characteristics of RV resorts include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Premium, spacious RV sites with full hookups</li>
           <li>Extensive amenities (pools, clubhouses, recreation facilities)</li>
           <li>High-quality landscaping and design</li>
@@ -456,7 +456,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Tailwinds and Green Lights</h3>
         <p>The biggest tailwind propelling the RV resort industry forward is growing consumer preference. This drives all other factors forward. The following trends are apparent across the entire hospitality industry:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Unique Stays:</strong> One-of-a-kind experiences that are authentic and cannot be easily replicated</li>
           <li><strong>Shareable:</strong> Experiences that are highly shareable on social media</li>
           <li><strong>Nature Immersion:</strong> Nature-based stays and experiences like outdoor adventure, recreation, and national parks</li>
@@ -466,7 +466,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <p>Additional positive factors include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>In a higher interest rate and higher construction cost environment, many developers continue to look to the outdoor hospitality space as an option to maintain margins</li>
           <li>Institutional interest from large hotel brands for brand partnerships and outright acquisitions remains consistent</li>
           <li>Institutional investment interest outweighs the small and limited supply of large and multi-site RV resort operations</li>
@@ -478,7 +478,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Headwinds and Roadblocks</h3>
         <p>Despite positive trends, the RV resort industry faces several challenges:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>As with almost every single industry, outdoor hospitality has seen a softening in demand due to inflation and economic slowdown starting in 2023</li>
           <li>Development costs have increased significantly, with horizontal development over large areas often more expensive than building vertically. Running utility lines, walking paths, and roads across dispersed sites can increase project costs dramatically</li>
           <li>Staffing is often challenging in more remote RV resort locations. On-site staff housing may be a necessity in some locations to address this challenge</li>
@@ -498,7 +498,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>RV Resort</h3>
         <p>Premium properties with extensive amenities, premium pricing, and focus on guest experience. Key characteristics include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Premium, spacious sites with full hookups</li>
           <li>Extensive amenities (pools, clubhouses, recreation facilities, restaurants)</li>
           <li>High-quality landscaping and resort-style design</li>
@@ -510,7 +510,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>RV Park</h3>
         <p>Basic to mid-tier properties offering essential RV services at more affordable price points. Characteristics include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Essential amenities (hookups, restrooms, laundry)</li>
           <li>Functional facilities focused on practicality</li>
           <li>Moderate pricing ($25-$75 per night)</li>
@@ -519,7 +519,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Campground</h3>
         <p>Traditional camping properties serving both tents and RVs with basic amenities. Features include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Basic amenities (restrooms, picnic tables, fire rings)</li>
           <li>May accommodate both tent and RV camping</li>
           <li>Lower pricing ($15-$50 per night)</li>
@@ -532,7 +532,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>Key trends shaping the RV resort industry reflect both opportunities and challenges in the current market environment. Understanding these trends is essential for making informed investment and operational decisions.</p>
         
         <h3>Positive Market Trends</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Growing Demand for Premium Amenities:</strong> RVers increasingly seek enhanced amenities and resort-style experiences. According to STR and CBRE hotel reports, the upper scale, luxury, and boutique segments have continued to show strong growth and performance, which is consistent in the RV resort market</li>
           <li><strong>Long-Term Stay Options:</strong> Growing trend toward extended stays and seasonal residents, particularly in snowbird markets, providing stable revenue streams</li>
           <li><strong>Experiential Offerings:</strong> Demand for activities, events, and unique experiences beyond basic accommodations, driven by consumer preference for shareable, nature-immersive experiences</li>
@@ -541,7 +541,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Market Challenges</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Softening Demand:</strong> The industry has seen a softening in demand due to inflation and economic slowdown starting in 2023, as evidenced by declining revenue per room</li>
           <li><strong>Development Cost Increases:</strong> Higher interest rates and construction costs have impacted development economics, though many developers continue to look to outdoor hospitality as an option to maintain margins</li>
           <li><strong>Operational Cost Pressures:</strong> Staffing challenges in remote locations, increased laundry and site turnover expenses, and infrastructure maintenance costs</li>
@@ -556,7 +556,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>Starting an RV resort is a complex process that requires careful planning, market analysis, and execution. Following a structured approach increases your chances of success.</p>
         
         <h3>Key Steps to Starting an RV Resort</h3>
-        <ol class="list-decimal list-inside space-y-2 ml-4">
+        <ol class="list-decimal list-inside space-y-3 ml-4">
           <li><strong>Market Research and Site Selection:</strong> Analyze demand, identify target markets, and select a location with appropriate zoning and market access</li>
           <li><strong>Business Planning and Financial Projections:</strong> Develop a comprehensive business plan with detailed financial projections and operations strategy</li>
           <li><strong>Feasibility Study:</strong> Conduct a professional feasibility study to validate your concept, assess market viability, and optimize your project</li>
@@ -567,7 +567,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ol>
         
         <h3>Critical Success Factors</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Thorough market research before committing resources</li>
           <li>Professional feasibility analysis to validate concepts</li>
           <li>Strategic location selection with market access</li>
@@ -584,14 +584,14 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>RV resort revenue comes from multiple sources, with site rentals as the primary income stream:</p>
         
         <h3>Primary Revenue Sources</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Site Rentals:</strong> Daily, weekly, monthly, and annual site rental fees (primary revenue source)</li>
           <li><strong>Long-Term Stays:</strong> Seasonal and annual rentals provide stable, predictable revenue</li>
           <li><strong>Premium Site Fees:</strong> Waterfront, pull-through, or premium location premiums</li>
         </ul>
         
         <h3>Additional Revenue Sources</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Amenity Fees:</strong> Pool access, recreation facilities, special events</li>
           <li><strong>Services:</strong> Concierge services, tours, activity coordination</li>
           <li><strong>Retail:</strong> Camp store, propane sales, RV supplies</li>
@@ -600,7 +600,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Business Model Considerations</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Balance between short-term and long-term guests for revenue stability</li>
           <li>Seasonal revenue patterns require careful cash flow management</li>
           <li>Operational efficiency is critical for profitability</li>
@@ -615,7 +615,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p><a href="/landing/rv-resort-feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort feasibility studies</a> are essential for validating RV resort concepts and assessing market viability before committing significant resources.</p>
         
         <h3>Why RV Resort Feasibility Studies Are Important</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Market Validation:</strong> Assess demand for RV resort accommodations in your target location</li>
           <li><strong>Securing Financing:</strong> Banks and lenders require feasibility studies to assess project risk</li>
           <li><strong>Revenue Projections:</strong> Develop realistic occupancy and pricing projections based on market data</li>
@@ -624,7 +624,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>What's Included in an RV Resort Feasibility Study</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Market demand analysis specific to RV resorts</li>
           <li>Competitive property evaluation</li>
           <li>Revenue projections by site type and season</li>
@@ -642,7 +642,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p><a href="/landing/rv-resort-appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort appraisals</a> require specialized expertise to accurately value these unique properties. Unlike traditional real estate, RV resorts have distinct characteristics that require industry-specific knowledge.</p>
         
         <h3>Why RV Resort Appraisals Require Specialized Expertise</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Unique Property Type:</strong> RV resorts have distinct valuation considerations compared to traditional real estate</li>
           <li><strong>Income Approach Focus:</strong> Valuation heavily relies on income potential and operating performance</li>
           <li><strong>Limited Comparable Sales:</strong> Fewer comparable properties require specialized market knowledge</li>
@@ -650,7 +650,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Appraisal Uses for RV Resorts</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Financing and refinancing</li>
           <li>Buying or selling transactions</li>
           <li>Investment analysis and due diligence</li>
@@ -659,7 +659,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Key Factors in RV Resort Valuation</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Site count and density</li>
           <li>Occupancy rates and revenue performance</li>
           <li>Amenity quality and condition</li>
@@ -677,7 +677,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Financing Documentation Requirements</h3>
         <p>Lenders typically require:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Feasibility Study:</strong> Professional feasibility study demonstrating market viability and revenue potential</li>
           <li><strong>Property Appraisal:</strong> Current property valuation for existing properties or development projections</li>
           <li><strong>Business Plan:</strong> Comprehensive plan outlining operations, marketing, and financial projections</li>
@@ -687,7 +687,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Financing Options</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Commercial Real Estate Loans:</strong> Traditional financing for land acquisition and development</li>
           <li><strong>SBA Loans:</strong> Government-backed loans with favorable terms for qualifying projects</li>
           <li><strong>Construction Loans:</strong> Short-term financing for development phases</li>
@@ -696,7 +696,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Why Work with Experienced Lenders</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Understanding of RV resort business models and revenue streams</li>
           <li>Knowledge of seasonal cash flow patterns</li>
           <li>Acceptance of feasibility studies from recognized consultants</li>
@@ -713,7 +713,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Essential Amenities</h3>
         <p>Every RV resort should provide:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Full Hookups:</strong> Water, sewer, and electrical connections (30/50 amp service)</li>
           <li><strong>Wi-Fi:</strong> Reliable internet access throughout the property</li>
           <li><strong>Restrooms and Showers:</strong> Clean, well-maintained facilities</li>
@@ -723,7 +723,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Premium Amenities</h3>
         <p>Resort-style amenities that justify premium pricing:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Swimming Pools:</strong> Pools, hot tubs, and poolside amenities</li>
           <li><strong>Clubhouses:</strong> Community gathering spaces with activities and events</li>
           <li><strong>Recreation Facilities:</strong> Fitness centers, pickleball courts, shuffleboard, and game rooms</li>
@@ -733,7 +733,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Design Considerations</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Site Layout:</strong> Efficient use of space with appropriate site spacing for privacy</li>
           <li><strong>Landscaping:</strong> High-quality landscaping that enhances aesthetic appeal</li>
           <li><strong>Infrastructure:</strong> Well-maintained roads, utilities, and common areas</li>
@@ -750,7 +750,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Margaritaville RV Resort (Florida)</h3>
         <p>This premium RV resort demonstrates:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Integration of branded hospitality concepts with RV resort operations</li>
           <li>Premium amenities and resort-style experiences</li>
           <li>Strategic location in high-demand markets</li>
@@ -759,7 +759,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Verde Ranch RV Resort (Arizona)</h3>
         <p>This development showcases:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Comprehensive feasibility analysis and market validation</li>
           <li>Strategic site layout and amenity selection</li>
           <li>Appeal to both short-term vacationers and long-term snowbird markets</li>
@@ -768,7 +768,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Key Success Factors</h3>
         <p>These projects share common success factors:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Thorough market research and feasibility analysis</li>
           <li>Strategic location selection</li>
           <li>Professional development and operations management</li>
@@ -940,7 +940,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "yurts",
         title: "Yurts",
         content: `<p>Yurts are circular, tent-like structures with wooden frames. They offer:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Unique circular design</li>
           <li>Relatively affordable construction</li>
           <li>Good insulation options</li>
@@ -951,7 +951,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "a-frames",
         title: "A-Frame Cabins",
         content: `<p>A-frame cabins have triangular structures. Benefits include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Modern, minimalist aesthetic</li>
           <li>Good weather resistance</li>
           <li>Easy to construct</li>
@@ -962,7 +962,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "safari-tents",
         title: "Safari Tents",
         content: `<p>Safari tents offer luxury camping experiences. Features include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Luxury amenities</li>
           <li>Hardwood floors</li>
           <li>Canvas construction</li>
@@ -973,7 +973,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "treehouses",
         title: "Treehouses",
         content: `<p>Treehouses provide elevated experiences. Characteristics:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Unique elevated location</li>
           <li>Premium pricing potential</li>
           <li>Complex construction</li>
@@ -984,7 +984,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "domes",
         title: "Dome Structures",
         content: `<p>Geodesic domes offer modern appeal. Benefits:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Sturdy construction</li>
           <li>Efficient space utilization</li>
           <li>Modern aesthetic</li>
@@ -1000,7 +1000,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "choosing",
         title: "Choosing the Right Type",
         content: `<p>Consider factors like:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Target market and pricing</li>
           <li>Construction costs</li>
           <li>Permit requirements</li>
@@ -1077,7 +1077,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "market-growth",
         title: "Market Growth",
         content: `<p>The glamping market continues strong growth, driven by:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Increased interest in outdoor recreation</li>
           <li>Luxury travel preferences</li>
           <li>Investment in new properties</li>
@@ -1088,7 +1088,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "consumer-trends",
         title: "Consumer Trends",
         content: `<p>Key consumer trends include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Demand for unique experiences</li>
           <li>Luxury amenities expectations</li>
           <li>Sustainability focus</li>
@@ -1099,7 +1099,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "industry-trends",
         title: "Industry Trends",
         content: `<p>Industry developments include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Professionalization of operations</li>
           <li>Diversification of accommodation types</li>
           <li>Expansion into new markets</li>
@@ -1110,7 +1110,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "investment-trends",
         title: "Investment Trends",
         content: `<p>Investment patterns show:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Growing institutional interest</li>
           <li>Larger-scale developments</li>
           <li>Premium market focus</li>
@@ -1196,7 +1196,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Market Research</h3>
         <p>Conduct comprehensive market research to understand:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Market Demand:</strong> Analyze demand for glamping in your target area, including seasonal patterns and visitor trends</li>
           <li><strong>Target Demographics:</strong> Identify who your potential guests are—adventure-seeking couples, eco-conscious travelers, luxury-seeking families, or corporate retreat organizers</li>
           <li><strong>Visitor Spending Patterns:</strong> Understand what guests are willing to pay and what amenities drive bookings</li>
@@ -1205,7 +1205,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Competitive Analysis</h3>
         <p>Analyze existing glamping properties and traditional accommodations in your target market:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Identify direct competitors (other glamping properties) and indirect competitors (hotels, cabins, RV parks)</li>
           <li>Evaluate their pricing strategies, occupancy rates, and amenities</li>
           <li>Identify gaps in the market that your property could fill</li>
@@ -1214,7 +1214,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Define Your Niche and Target Market</h3>
         <p>Identifying your niche is crucial for success. Your target market will influence everything from accommodation types to pricing and marketing strategies:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Luxury Seekers:</strong> High-end amenities, premium accommodations, and exceptional service</li>
           <li><strong>Eco-Conscious Travelers:</strong> Sustainable practices, eco-friendly materials, and environmental stewardship</li>
           <li><strong>Adventure Enthusiasts:</strong> Proximity to outdoor activities, equipment rentals, and guided experiences</li>
@@ -1224,7 +1224,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Concept Development</h3>
         <p>Develop your unique glamping concept based on your research:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Define your brand identity and positioning in the market</li>
           <li>Determine your accommodation mix (yurts, A-frames, safari tents, treehouses, etc.)</li>
           <li>Plan your amenities and services that align with your target market</li>
@@ -1240,7 +1240,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Why You Need a Feasibility Study</h3>
         <p>Feasibility studies serve multiple critical purposes:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Validate Market Viability:</strong> Assess whether there's sufficient demand for your glamping concept in your target location</li>
           <li><strong>Secure Financing:</strong> Banks and lenders typically require a feasibility study to assess project risk before approving loans</li>
           <li><strong>Optimize Your Project:</strong> Receive data-driven recommendations for project scope, pricing, and amenities</li>
@@ -1250,7 +1250,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>What's Included in a Glamping Feasibility Study</h3>
         <p>A comprehensive feasibility study for a glamping business typically includes:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Market demand analysis specific to glamping</li>
           <li>Competitive property evaluation and positioning</li>
           <li>Revenue projections by accommodation type and season</li>
@@ -1263,7 +1263,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>When to Conduct a Feasibility Study</h3>
         <p>Ideally, conduct a feasibility study after your initial research but before finalizing your business plan and seeking financing. This allows you to:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Make informed decisions based on professional analysis</li>
           <li>Refine your concept based on market insights</li>
           <li>Present a compelling case to lenders and investors</li>
@@ -1280,7 +1280,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Market Access and Proximity</h3>
         <p>Evaluate location based on proximity to your target market:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Urban Proximity:</strong> Consider distance to major cities or tourist destinations that drive demand</li>
           <li><strong>Accessibility:</strong> Ensure the site is accessible by road, ideally within 2-4 hours of your primary market</li>
           <li><strong>Visibility:</strong> Consider whether the location is discoverable or requires significant marketing investment</li>
@@ -1289,7 +1289,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Natural Features and Appeal</h3>
         <p>Glamping guests choose locations for natural beauty and outdoor experiences:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Scenic Views:</strong> Mountains, forests, lakes, or unique landscapes that create memorable experiences</li>
           <li><strong>Outdoor Activities:</strong> Access to hiking, fishing, kayaking, or other activities guests can enjoy</li>
           <li><strong>Privacy:</strong> Sufficient space between accommodations to create a sense of seclusion</li>
@@ -1298,7 +1298,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Zoning and Regulatory Considerations</h3>
         <p>Before purchasing or leasing land, thoroughly investigate zoning and regulatory requirements:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Zoning Classification:</strong> Verify the property is zoned for commercial use, tourism, or hospitality</li>
           <li><strong>Permitted Uses:</strong> Confirm that glamping or temporary accommodations are allowed</li>
           <li><strong>Development Restrictions:</strong> Understand limitations on structures, density, and site development</li>
@@ -1308,7 +1308,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Infrastructure and Utilities</h3>
         <p>Evaluate existing infrastructure and utility requirements:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Road Access:</strong> Ensure adequate road access for guests and deliveries</li>
           <li><strong>Water Supply:</strong> Assess water availability, quality, and whether a well or municipal connection is needed</li>
           <li><strong>Wastewater Treatment:</strong> Determine septic requirements or connection to municipal systems</li>
@@ -1318,7 +1318,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Site Suitability</h3>
         <p>Assess the physical characteristics of the site:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Topography:</strong> Evaluate slopes, drainage, and suitability for structures</li>
           <li><strong>Soil Conditions:</strong> Assess soil for foundation requirements and septic suitability</li>
           <li><strong>Climate Considerations:</strong> Understand seasonal weather patterns and operational constraints</li>
@@ -1335,7 +1335,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Executive Summary</h3>
         <p>Create a compelling overview that includes:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Business concept and unique value proposition</li>
           <li>Target market and competitive positioning</li>
           <li>Key financial projections and funding requirements</li>
@@ -1344,7 +1344,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Startup Costs</h3>
         <p>Develop a detailed startup cost breakdown:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Land Acquisition:</strong> Purchase price or long-term lease costs</li>
           <li><strong>Accommodations:</strong> Tents, yurts, A-frames, or other structures ($15,000-$100,000+ per unit)</li>
           <li><strong>Platforms and Foundations:</strong> Decking, foundations, and site preparation ($5,000-$20,000 per unit)</li>
@@ -1358,7 +1358,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Operational Costs</h3>
         <p>Plan for ongoing operational expenses:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Utilities:</strong> Electricity, water, internet, propane ($500-$2,000+ per month)</li>
           <li><strong>Maintenance:</strong> Property upkeep, repairs, and seasonal preparations ($1,000-$5,000+ per month)</li>
           <li><strong>Staffing:</strong> Property manager, housekeeping, maintenance staff ($2,000-$10,000+ per month)</li>
@@ -1370,7 +1370,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Pricing Strategy and Revenue Goals</h3>
         <p>Develop a pricing strategy based on:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Market analysis and competitive positioning</li>
           <li>Target occupancy rates (typically 50-70% for seasonal properties)</li>
           <li>Seasonal variations and dynamic pricing opportunities</li>
@@ -1380,7 +1380,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Marketing Strategy</h3>
         <p>Outline your marketing approach:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Brand identity and positioning</li>
           <li>Online presence (website, social media, online listings)</li>
           <li>Partnership strategies (tour operators, local businesses, influencers)</li>
@@ -1389,7 +1389,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Operations Plan</h3>
         <p>Define your operational structure:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Staffing requirements and roles</li>
           <li>Booking and reservation management systems</li>
           <li>Guest services and experience standards</li>
@@ -1399,7 +1399,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Financial Projections</h3>
         <p>Create detailed financial projections including:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>5-year revenue and expense forecasts</li>
           <li>Break-even analysis</li>
           <li>Cash flow projections</li>
@@ -1416,7 +1416,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Business Licenses and Registration</h3>
         <p>Start with basic business requirements:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Business Entity Registration:</strong> Register your business as an LLC, corporation, or partnership</li>
           <li><strong>Business License:</strong> Obtain a general business license from your local municipality or county</li>
           <li><strong>Tax Registration:</strong> Register for state and local taxes, including occupancy or lodging taxes</li>
@@ -1425,7 +1425,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Zoning and Land Use Permits</h3>
         <p>Zoning approvals are typically the most critical and time-consuming:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Zoning Compliance:</strong> Verify your property is zoned for commercial tourism or hospitality use</li>
           <li><strong>Conditional Use Permit:</strong> May be required if glamping isn't explicitly permitted in your zoning district</li>
           <li><strong>Variance Requests:</strong> If needed, apply for variances for density, setbacks, or other requirements</li>
@@ -1434,7 +1434,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Building Permits</h3>
         <p>Even temporary structures often require permits:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Structure Permits:</strong> Permits for platforms, decks, and permanent structures</li>
           <li><strong>Electrical Permits:</strong> For wiring, panels, and electrical installations</li>
           <li><strong>Plumbing Permits:</strong> If installing bathrooms, kitchens, or utility connections</li>
@@ -1443,7 +1443,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Health and Safety Permits</h3>
         <p>Ensure compliance with health regulations:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Health Department Permits:</strong> Required for hospitality operations in many jurisdictions</li>
           <li><strong>Food Service Permits:</strong> If offering food service, even simple amenities</li>
           <li><strong>Water Quality Testing:</strong> Regular testing if using well water</li>
@@ -1452,7 +1452,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Environmental and Conservation Permits</h3>
         <p>Protect natural resources and comply with environmental regulations:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Environmental Impact Assessment:</strong> May be required in sensitive areas</li>
           <li><strong>Wetlands or Waterway Permits:</strong> If developing near water bodies</li>
           <li><strong>Tree Removal Permits:</strong> If clearing trees for development</li>
@@ -1461,7 +1461,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Operational Permits</h3>
         <p>Additional permits may be required for operations:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Sign Permits:</strong> For directional and marketing signs</li>
           <li><strong>Special Events Permits:</strong> If hosting events, weddings, or activities</li>
           <li><strong>Alcohol Permits:</strong> If serving alcohol to guests</li>
@@ -1470,7 +1470,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Navigating the Permit Process</h3>
         <p>The permit process can be complex and time-consuming:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Start Early:</strong> Begin permit applications 6-12 months before planned construction</li>
           <li><strong>Hire Professionals:</strong> Consider hiring a permit expediter or consultant familiar with local requirements</li>
           <li><strong>Budget for Delays:</strong> Permits can take months and may require revisions</li>
@@ -1489,7 +1489,7 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>Several financing options are available for glamping businesses:</p>
         
         <h4>Traditional Bank Loans</h4>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Commercial Real Estate Loans:</strong> For land acquisition and development</li>
           <li><strong>Small Business Administration (SBA) Loans:</strong> Government-backed loans with favorable terms</li>
           <li><strong>Business Term Loans:</strong> Fixed-rate loans for equipment and construction</li>
@@ -1497,21 +1497,21 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h4>Alternative Lenders</h4>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Online Lenders:</strong> Faster approval but typically higher interest rates</li>
           <li><strong>Equipment Financing:</strong> Specific loans for accommodations and equipment</li>
           <li><strong>Revenue-Based Financing:</strong> Loans based on projected revenue</li>
         </ul>
         
         <h4>Investors and Partnerships</h4>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Private Investors:</strong> Individuals seeking investment opportunities</li>
           <li><strong>Partnerships:</strong> Partners who contribute capital and expertise</li>
           <li><strong>Real Estate Crowdfunding:</strong> Multiple investors funding your project</li>
         </ul>
         
         <h4>Personal Resources</h4>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Personal Savings:</strong> Using your own capital</li>
           <li><strong>Home Equity:</strong> Loans against home equity</li>
           <li><strong>Retirement Funds:</strong> Self-directed IRA or 401(k) rollover (consult a tax advisor)</li>
@@ -1520,7 +1520,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Preparing for Financing</h3>
         <p>To improve your chances of securing financing:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Professional Feasibility Study:</strong> Banks and lenders require this to assess viability</li>
           <li><strong>Comprehensive Business Plan:</strong> Detailed financial projections and operations plan</li>
           <li><strong>Strong Credit History:</strong> Personal and business credit scores impact loan terms</li>
@@ -1531,7 +1531,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Financing Timeline</h3>
         <p>Plan for the financing process:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Preparation:</strong> 1-2 months to prepare documents and applications</li>
           <li><strong>Application Review:</strong> 2-8 weeks for lender review and due diligence</li>
           <li><strong>Approval and Closing:</strong> 2-4 weeks for final approval and funding</li>
@@ -1540,7 +1540,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Key Financial Metrics Lenders Consider</h3>
         <p>Lenders evaluate several factors:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Debt-to-income ratio</li>
           <li>Loan-to-value ratio (typically 70-80% maximum)</li>
           <li>Debt service coverage ratio (typically 1.25x minimum)</li>
@@ -1559,7 +1559,7 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>Choose accommodations that align with your brand, target market, and budget:</p>
         
         <h4>Popular Glamping Accommodations</h4>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Safari Tents:</strong> Spacious canvas tents ($15,000-$50,000 per unit) offering luxury camping experiences</li>
           <li><strong>Yurts:</strong> Circular structures ($20,000-$80,000 per unit) with excellent space efficiency</li>
           <li><strong>A-Frames:</strong> Iconic triangular cabins ($25,000-$100,000 per unit) with modern appeal</li>
@@ -1571,7 +1571,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Design Considerations</h3>
         <p>Develop a cohesive design that creates memorable experiences:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Site Layout:</strong> Design for privacy, views, and efficient operations</li>
           <li><strong>Interior Design:</strong> Create comfortable, Instagram-worthy spaces that reflect your brand</li>
           <li><strong>Outdoor Spaces:</strong> Design decks, fire pits, and outdoor seating areas</li>
@@ -1582,7 +1582,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Essential Amenities</h3>
         <p>Plan amenities that enhance guest experience:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Comfortable Bedding:</strong> High-quality mattresses, linens, and pillows</li>
           <li><strong>Climate Control:</strong> Heating and cooling solutions for year-round comfort</li>
           <li><strong>Private Bathrooms:</strong> Ensuite facilities or well-maintained shared facilities</li>
@@ -1593,7 +1593,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Construction Management</h3>
         <p>Effective construction management ensures quality and stays on budget:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Site Preparation:</strong> Clearing, grading, and infrastructure installation</li>
           <li><strong>Contractor Selection:</strong> Choose experienced contractors familiar with glamping structures</li>
           <li><strong>Project Timeline:</strong> Develop realistic schedules accounting for weather and permit delays</li>
@@ -1604,7 +1604,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Building Codes and Standards</h3>
         <p>Ensure compliance with building codes and safety standards:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Fire safety requirements and egress standards</li>
           <li>Structural engineering for platforms and foundations</li>
           <li>Electrical code compliance</li>
@@ -1614,7 +1614,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Sustainability Considerations</h3>
         <p>Incorporate sustainable practices that appeal to eco-conscious guests:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Solar power systems for electricity</li>
           <li>Composting toilets or efficient septic systems</li>
           <li>Sustainable building materials</li>
@@ -1631,7 +1631,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Booking and Reservation Management</h3>
         <p>Implement a robust booking system to manage reservations:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Property Management System (PMS):</strong> Choose software that integrates with booking channels</li>
           <li><strong>Online Booking:</strong> Direct booking through your website for better margins</li>
           <li><strong>Channel Management:</strong> Connect to Airbnb, Hipcamp, Booking.com, and other platforms</li>
@@ -1642,7 +1642,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Staffing and Team Building</h3>
         <p>Determine your staffing needs based on property size and services:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Property Manager:</strong> Oversees daily operations, guest relations, and staff management</li>
           <li><strong>Housekeeping:</strong> Maintains cleanliness and prepares accommodations between guests</li>
           <li><strong>Maintenance Staff:</strong> Handles repairs, groundskeeping, and preventative maintenance</li>
@@ -1652,7 +1652,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Housekeeping and Maintenance Procedures</h3>
         <p>Establish clear standards and procedures:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Cleaning Checklists:</strong> Detailed procedures for each accommodation type</li>
           <li><strong>Quality Control:</strong> Inspection processes to ensure standards are met</li>
           <li><strong>Maintenance Schedules:</strong> Regular inspections and preventative maintenance</li>
@@ -1662,7 +1662,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Guest Services and Experience</h3>
         <p>Design guest experiences that create memorable stays:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Check-In Process:</strong> Streamlined arrival experience with clear instructions</li>
           <li><strong>Welcome Packages:</strong> Welcome baskets, local information, or special touches</li>
           <li><strong>Guest Communication:</strong> Clear expectations, house rules, and local recommendations</li>
@@ -1672,7 +1672,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Financial Management Systems</h3>
         <p>Set up systems to track finances effectively:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Accounting Software:</strong> Track income, expenses, and generate financial reports</li>
           <li><strong>Payment Processing:</strong> Accept credit cards, online payments, and deposits</li>
           <li><strong>Tax Management:</strong> Track and remit occupancy taxes and sales taxes</li>
@@ -1682,7 +1682,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Technology and Connectivity</h3>
         <p>Ensure reliable technology infrastructure:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Internet Access:</strong> Reliable Wi-Fi for guests and operations</li>
           <li><strong>Security Systems:</strong> Property security and guest safety measures</li>
           <li><strong>Communication Tools:</strong> Phone systems and messaging platforms for staff coordination</li>
@@ -1691,7 +1691,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Insurance and Risk Management</h3>
         <p>Protect your business with appropriate insurance:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>General Liability Insurance:</strong> Covers guest injuries and property damage ($2,500-$7,500+ annually)</li>
           <li><strong>Property Insurance:</strong> Protects accommodations, furnishings, and equipment</li>
           <li><strong>Business Interruption Insurance:</strong> Covers lost revenue from unexpected closures</li>
@@ -1701,7 +1701,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Standard Operating Procedures (SOPs)</h3>
         <p>Document procedures for consistency and training:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Check-in and check-out procedures</li>
           <li>Housekeeping standards and schedules</li>
           <li>Maintenance and repair protocols</li>
@@ -1719,7 +1719,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Pre-Launch Marketing</h3>
         <p>Build buzz before your grand opening:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Website Development:</strong> Create a professional website with high-quality photos and booking functionality</li>
           <li><strong>Social Media Presence:</strong> Build anticipation on Instagram, Facebook, and TikTok with behind-the-scenes content</li>
           <li><strong>Email List Building:</strong> Collect emails for launch announcements and special offers</li>
@@ -1730,7 +1730,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Online Listings and Distribution</h3>
         <p>List your property on key booking platforms:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Airbnb:</strong> Essential for glamping properties, reaches millions of travelers</li>
           <li><strong>Hipcamp:</strong> Specialized platform for outdoor accommodations</li>
           <li><strong>Glamping Hub:</strong> Dedicated glamping booking platform</li>
@@ -1741,7 +1741,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Social Media Marketing</h3>
         <p>Leverage social media to showcase your property and engage potential guests:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Instagram:</strong> Share stunning photos of accommodations, amenities, and natural surroundings</li>
           <li><strong>Facebook:</strong> Build community, share updates, and run targeted ads</li>
           <li><strong>TikTok:</strong> Create engaging video content showing guest experiences</li>
@@ -1751,7 +1751,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Content Marketing</h3>
         <p>Create valuable content that attracts and engages your target audience:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Blog Content:</strong> Write about local attractions, outdoor activities, and travel tips</li>
           <li><strong>SEO Optimization:</strong> Optimize your website for search engines to attract organic traffic</li>
           <li><strong>Video Tours:</strong> Create virtual tours of accommodations and property</li>
@@ -1761,7 +1761,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Local Partnerships and Collaborations</h3>
         <p>Build relationships that drive bookings:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Tourism Boards:</strong> Partner with local tourism organizations for promotion</li>
           <li><strong>Local Businesses:</strong> Collaborate with restaurants, tour operators, and activity providers</li>
           <li><strong>Event Partnerships:</strong> Host or sponsor local events for visibility</li>
@@ -1771,7 +1771,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Launch Strategy</h3>
         <p>Plan a memorable grand opening:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Soft Opening:</strong> Invite friends, family, and influencers for initial stays and feedback</li>
           <li><strong>Grand Opening Event:</strong> Host a launch event with media, local business owners, and community members</li>
           <li><strong>Launch Promotions:</strong> Offer special rates, packages, or contests to generate initial bookings</li>
@@ -1781,7 +1781,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Managing Reviews and Reputation</h3>
         <p>Reviews are critical for glamping businesses:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Encourage Reviews:</strong> Follow up with guests to request reviews on booking platforms</li>
           <li><strong>Respond to Reviews:</strong> Thank positive reviewers and address concerns professionally</li>
           <li><strong>Monitor Reputation:</strong> Track reviews across all platforms and respond promptly</li>
@@ -1790,7 +1790,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Seasonal Marketing Strategies</h3>
         <p>Adapt marketing to seasonal patterns:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Peak Season:</strong> Maximize rates and occupancy through strategic promotions</li>
           <li><strong>Off-Season:</strong> Offer special packages, retreats, or events to attract guests</li>
           <li><strong>Holiday Packages:</strong> Create special offers for holidays and events</li>
@@ -1799,7 +1799,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <h3>Marketing Budget</h3>
         <p>Allocate resources for marketing activities:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Launch Marketing:</strong> 10-15% of startup budget for pre-launch and launch marketing</li>
           <li><strong>Ongoing Marketing:</strong> 5-10% of monthly revenue for ongoing marketing efforts</li>
           <li><strong>Channel Fees:</strong> 10-20% commission on bookings through third-party platforms</li>
@@ -1886,12 +1886,12 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "investment",
         title: "Investment Requirements",
         content: `<p>Glamping typically requires:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Higher per-unit construction costs</li>
           <li>Furnishing and amenity investments</li>
         </ul>
         <p>RV resorts typically require:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Infrastructure development</li>
           <li>Utility installations</li>
           <li>Common area amenities</li>
@@ -1901,7 +1901,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "revenue",
         title: "Revenue Potential",
         content: `<p>Both can be profitable, but revenue models differ:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Glamping: Higher per-night rates</li>
           <li>RV Resort: Potentially more units, lower per-night rates</li>
           <li>Both benefit from amenity revenue</li>
@@ -1916,7 +1916,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "which-right",
         title: "Which is Right for You?",
         content: `<p>Consider your:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Investment capacity</li>
           <li>Market opportunities</li>
           <li>Location characteristics</li>
@@ -2015,14 +2015,14 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "amenities",
         title: "Amenities Comparison",
         content: `<p>RV resorts typically offer:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Premium pools and recreation</li>
           <li>Restaurants and retail</li>
           <li>Activity programming</li>
           <li>Luxury facilities</li>
         </ul>
         <p>RV parks typically offer:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Basic utilities</li>
           <li>Simple recreation</li>
           <li>Essential services</li>
@@ -2128,7 +2128,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "essential",
         title: "Essential Amenities",
         content: `<p>Essential amenities include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Full hookups (water, sewer, electric)</li>
           <li>Wi-Fi</li>
           <li>Restrooms and showers</li>
@@ -2140,7 +2140,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "premium",
         title: "Premium Amenities",
         content: `<p>Premium amenities that enhance appeal include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Swimming pools</li>
           <li>Recreation centers</li>
           <li>Restaurants and bars</li>
@@ -2152,7 +2152,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "revenue",
         title: "Revenue-Generating Amenities",
         content: `<p>Amenities that generate additional revenue:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Restaurants and food service</li>
           <li>Retail operations</li>
           <li>Activity fees</li>
@@ -2168,7 +2168,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "planning",
         title: "Amenity Planning",
         content: `<p>Plan amenities based on:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Target market preferences</li>
           <li>Competitive positioning</li>
           <li>Budget constraints</li>
@@ -2268,7 +2268,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "consumer-trends",
         title: "Consumer Trends",
         content: `<p>The following consumer trends are apparent across the entire hospitality industry and are particularly relevant to RV resorts:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Unique Stays:</strong> One-of-a-kind experiences that are authentic and cannot be easily replicated</li>
           <li><strong>Shareable:</strong> Experiences that are highly shareable on social media</li>
           <li><strong>Nature Immersion:</strong> Nature-based stays and experiences like outdoor adventure, recreation, and national parks</li>
@@ -2287,7 +2287,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>Several key industry trends are shaping the RV resort market:</p>
         
         <h3>Development and Investment Trends</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>In a higher interest rate and higher construction cost environment, many developers continue to look to the outdoor hospitality space as an option to maintain margins</li>
           <li>Institutional interest from large hotel brands for brand partnerships and outright acquisitions remains consistent</li>
           <li>Institutional investment interest outweighs the small and limited supply of large and multi-site RV resort operations</li>
@@ -2295,7 +2295,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Operational Trends</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Professionalization of operations with more sophisticated business practices</li>
           <li>Enhanced guest experiences focused on premium amenities and services</li>
           <li>Technology integration in booking systems, Wi-Fi expectations, and digital guest experiences</li>
@@ -2304,7 +2304,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Market Challenges</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Softening demand due to inflation and economic slowdown starting in 2023</li>
           <li>International travel expected to decrease in the near term due to geopolitical tensions, though this may be offset by less travel abroad for many Americans</li>
           <li>Government spending cuts to national parks, national forests, and wildland conservation areas may curtail historically growing outdoor demand</li>
@@ -2316,7 +2316,7 @@ export const industryGuides: Record<string, GuideContent> = {
         content: `<p>Investment trends in the RV resort industry reflect both opportunities and challenges in the current market environment:</p>
         
         <h3>Positive Investment Signals</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Institutional interest from large hotel brands for brand partnerships and outright acquisitions remains consistent</li>
           <li>Institutional investment interest outweighs the small and limited supply of large and multi-site RV resort operations</li>
           <li>In a higher interest rate and higher construction cost environment, many developers continue to look to the outdoor hospitality space as an option to maintain margins</li>
@@ -2324,7 +2324,7 @@ export const industryGuides: Record<string, GuideContent> = {
         </ul>
         
         <h3>Investment Considerations</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Development costs have increased significantly, requiring careful financial planning and feasibility analysis</li>
           <li>Horizontal development over large areas is often more expensive than building vertically, impacting project economics</li>
           <li>Market softening starting in 2023 requires realistic revenue projections and conservative underwriting</li>
@@ -2410,7 +2410,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "overview",
         title: "Investment Overview",
         content: `<p>RV resort investments offer:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Income-producing potential</li>
           <li>Real estate appreciation</li>
           <li>Market growth opportunities</li>
@@ -2421,7 +2421,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "analysis",
         title: "Investment Analysis",
         content: `<p>Key analysis areas include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Financial projections</li>
           <li>Market analysis</li>
           <li>ROI calculations</li>
@@ -2433,7 +2433,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "factors",
         title: "Key Investment Factors",
         content: `<p>Important factors include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Location and market</li>
           <li>Property condition</li>
           <li>Amenities and facilities</li>
@@ -2450,7 +2450,7 @@ export const industryGuides: Record<string, GuideContent> = {
         id: "strategies",
         title: "Investment Strategies",
         content: `<p>Strategies include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Acquisition of existing properties</li>
           <li>Development of new properties</li>
           <li>Value-add improvements</li>

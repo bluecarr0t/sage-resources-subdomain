@@ -204,15 +204,15 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 max-w-4xl">
+            <div className="flex-1 max-w-4xl pb-24">
               <article className="prose prose-lg max-w-none">
                 {content.sections.map((section) => (
                   <section
                     key={section.id}
                     id={section.id}
-                    className="mb-12 scroll-mt-24"
+                    className="mb-16 scroll-mt-24"
                   >
-                    <h2 className="text-3xl font-bold text-gray-900 mb-6 mt-12 first:mt-0">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8 mt-12 first:mt-0">
                       {section.title}
                     </h2>
                     <div

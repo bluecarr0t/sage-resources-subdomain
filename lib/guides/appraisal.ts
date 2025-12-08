@@ -43,7 +43,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         content: `<p>A <a href="/glossary/appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">property appraisal</a> is an unbiased professional opinion of a property's value. For outdoor hospitality properties, appraisals determine fair market value based on the property's income potential, comparable sales, and replacement cost.</p>
         
         <p>Appraisals serve several critical purposes:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li><strong>Financing:</strong> Lenders require appraisals to determine loan amounts</li>
           <li><strong>Transactions:</strong> Buyers and sellers use appraisals to establish fair purchase prices</li>
           <li><strong>Refinancing:</strong> Property owners need appraisals when refinancing loans</li>
@@ -60,7 +60,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Securing Financing</h3>
         <p>Banks and lenders require appraisals before approving loans. The appraisal determines:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Maximum loan amount (based on loan-to-value ratios)</li>
           <li>Property value for loan underwriting</li>
           <li>Risk assessment for lenders</li>
@@ -68,7 +68,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Purchase Decisions</h3>
         <p>When buying a property, appraisals help you:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Determine if the asking price is fair</li>
           <li>Negotiate purchase price</li>
           <li>Make informed investment decisions</li>
@@ -76,7 +76,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Refinancing</h3>
         <p>When refinancing, appraisals determine:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Current property value</li>
           <li>Available equity</li>
           <li>New loan terms</li>
@@ -92,7 +92,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Glamping Property Appraisals</h3>
         <p><a href="/landing/glamping-appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping appraisals</a> evaluate unique accommodations like yurts, A-frames, safari tents, and other glamping structures. These appraisals consider:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Premium pricing potential</li>
           <li>Experiential value and amenities</li>
           <li>Seasonal demand patterns</li>
@@ -101,7 +101,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>RV Resort Appraisals</h3>
         <p><a href="/landing/rv-resort-appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort appraisals</a> assess properties designed for recreational vehicles. Key considerations include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Site density and layout</li>
           <li>Amenity value and impact</li>
           <li>Long-term stay potential</li>
@@ -110,7 +110,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Campground Appraisals</h3>
         <p>Campground appraisals evaluate traditional camping properties. These focus on:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Site capacity and configuration</li>
           <li>Natural amenities and location</li>
           <li>Operating model and efficiency</li>
@@ -126,7 +126,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Income Approach</h3>
         <p>The <a href="/glossary/income-approach" class="text-[#006b5f] hover:text-[#005a4f] underline">income approach</a> values properties based on their income-generating potential. For outdoor hospitality properties, this is often the most relevant approach. The method:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Analyzes property income (revenue from rentals)</li>
           <li>Estimates operating expenses</li>
           <li>Calculates net operating income (NOI)</li>
@@ -137,7 +137,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Sales Comparison Approach</h3>
         <p>The sales comparison approach (or market approach) compares the property to similar recently sold properties. This method:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Identifies comparable properties</li>
           <li>Adjusts for differences</li>
           <li>Derives value from market sales</li>
@@ -146,7 +146,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Cost Approach</h3>
         <p>The <a href="/glossary/cost-approach" class="text-[#006b5f] hover:text-[#005a4f] underline">cost approach</a> estimates value based on replacement cost. This method:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Estimates land value</li>
           <li>Calculates replacement cost of improvements</li>
           <li>Accounts for depreciation</li>
@@ -164,7 +164,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Property Description</h3>
         <p>Detailed description of the property including:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Location and site characteristics</li>
           <li>Physical improvements and structures</li>
           <li>Amenities and features</li>
@@ -173,7 +173,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Market Analysis</h3>
         <p>Analysis of the local market including:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Market conditions and trends</li>
           <li>Economic factors affecting value</li>
           <li>Market area description</li>
@@ -181,7 +181,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Income Analysis</h3>
         <p>For income-producing properties, the report includes:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Revenue analysis and projections</li>
           <li>Operating expense analysis</li>
           <li>Net operating income calculation</li>
@@ -190,7 +190,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Valuation Analysis</h3>
         <p>The report presents valuation using applicable approaches:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Income approach analysis</li>
           <li>Sales comparison approach</li>
           <li>Cost approach (if applicable)</li>
@@ -200,7 +200,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Supporting Documentation</h3>
         <p>Additional materials including:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Comparable sales data</li>
           <li>Market data and statistics</li>
           <li>Photos and maps</li>
@@ -227,7 +227,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         title: "Timeline and Process",
         content: `<p>Most appraisals take <strong>2-4 weeks</strong> to complete. The process includes:</p>
         
-        <ol class="list-decimal list-inside space-y-2 ml-4">
+        <ol class="list-decimal list-inside space-y-3 ml-4">
           <li>Engagement and scope definition</li>
           <li>Property inspection and data collection</li>
           <li>Market research and analysis</li>
@@ -245,7 +245,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Specialized Expertise</h3>
         <p>Outdoor hospitality properties require specialized knowledge. Choose an appraiser with:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Experience appraising your property type</li>
           <li>Understanding of outdoor hospitality market dynamics</li>
           <li>Access to relevant comparable data</li>
@@ -253,7 +253,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         
         <h3>Bank Recognition</h3>
         <p>For financing, ensure your appraiser is:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Recognized by your lender</li>
           <li>Meets lender qualification requirements</li>
           <li>Provides bank-approved reports</li>
@@ -454,7 +454,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         title: "How the Income Approach Works",
         content: `<p>The income approach involves several steps:</p>
         
-        <ol class="list-decimal list-inside space-y-2 ml-4">
+        <ol class="list-decimal list-inside space-y-3 ml-4">
           <li>Estimate potential gross income (revenue from rentals)</li>
           <li>Subtract vacancy and collection losses</li>
           <li>Calculate effective gross income</li>
@@ -480,7 +480,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         id: "when-used",
         title: "When Income Approach is Used",
         content: `<p>The income approach is typically the primary valuation method for:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Income-producing properties (most outdoor hospitality)</li>
           <li>Investment properties</li>
           <li>Properties with established rental history</li>
@@ -493,14 +493,14 @@ export const appraisalGuides: Record<string, GuideContent> = {
         id: "advantages-limitations",
         title: "Advantages and Limitations",
         content: `<h3>Advantages</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Reflects income-generating potential</li>
           <li>Relevant for investment properties</li>
           <li>Considers property-specific factors</li>
         </ul>
         
         <h3>Limitations</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Requires accurate income/expense data</li>
           <li>Cap rate selection can be subjective</li>
           <li>Less reliable for properties without income history</li>
@@ -696,7 +696,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         id: "why-required",
         title: "Why Banks Require Appraisals",
         content: `<p>Lenders require appraisals to:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Determine property value for loan amounts</li>
           <li>Assess collateral value</li>
           <li>Evaluate loan-to-value ratios</li>
@@ -707,7 +707,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         id: "appraiser-qualifications",
         title: "Appraiser Qualifications",
         content: `<p>Lenders typically require appraisers with:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Appropriate licensing and certification</li>
           <li>Industry-specific expertise</li>
           <li>Experience with property type</li>
@@ -718,7 +718,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         id: "appraisal-standards",
         title: "Appraisal Standards",
         content: `<p>Lenders expect appraisals that:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Follow USPAP standards</li>
           <li>Use multiple valuation approaches</li>
           <li>Include comprehensive analysis</li>
@@ -729,7 +729,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
         id: "key-requirements",
         title: "Key Requirements",
         content: `<p>Typical lender requirements include:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
+        <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Qualified, recognized appraiser</li>
           <li>Comprehensive property analysis</li>
           <li>Multiple valuation approaches</li>
