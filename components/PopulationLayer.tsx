@@ -113,9 +113,12 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
       // Method 3: Try toGeoJson as final fallback
       if (Object.keys(props).length === 0) {
         try {
-          const geoJson = feature.toGeoJson();
-          if (geoJson?.properties) {
-            props = geoJson.properties;
+          let geoJsonData: any = null;
+          feature.toGeoJson((geoJson) => {
+            geoJsonData = geoJson;
+          });
+          if (geoJsonData?.properties) {
+            props = geoJsonData.properties;
           }
         } catch (e) {
           console.warn('Error accessing feature properties via toGeoJson:', e);
@@ -325,12 +328,15 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
             // Log sample feature for debugging
             if (!sampleFeatureLogged && styledCount < 5) {
               try {
-                const geoJson = feature.toGeoJson();
+                let geoJsonData: any = null;
+                feature.toGeoJson((geoJson) => {
+                  geoJsonData = geoJson;
+                });
                 console.log('Sample feature properties:', {
                   props,
                   change,
                   directChange: feature.getProperty('change'),
-                  geoJsonProperties: geoJson?.properties,
+                  geoJsonProperties: geoJsonData?.properties,
                   allPropertyKeys: Object.keys(props || {}),
                 });
                 if (styledCount === 4) sampleFeatureLogged = true;
