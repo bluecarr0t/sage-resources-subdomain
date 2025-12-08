@@ -537,7 +537,7 @@ export default function PropertyDetailTemplate({
           </div>
 
           {/* Right Column - Amenities */}
-          {hasAnyAmenities && (
+          {false && hasAnyAmenities && (
             <div className="lg:col-span-1">
               <section aria-labelledby="amenities-heading">
                 <h2 id="amenities-heading" className="text-2xl font-bold text-gray-900 mb-4">Amenities</h2>

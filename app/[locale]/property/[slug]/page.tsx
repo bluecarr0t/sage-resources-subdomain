@@ -166,20 +166,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     descriptionParts.push(`from $${firstProperty.avg_retail_daily_rate_2024}/night`);
   }
   
-  // Add key amenities
-  const topAmenities: string[] = [];
-  if (firstProperty.pool === 'yes' || firstProperty.pool === 'Yes' || firstProperty.pool === 'Y') topAmenities.push('pool');
-  if (firstProperty.hot_tub_sauna === 'yes' || firstProperty.hot_tub_sauna === 'Yes' || firstProperty.hot_tub_sauna === 'Y') topAmenities.push('hot tub');
-  if (firstProperty.wifi === 'yes' || firstProperty.wifi === 'Yes' || firstProperty.wifi === 'Y') topAmenities.push('WiFi');
-  if (topAmenities.length > 0 && topAmenities.length <= 2) {
-    descriptionParts.push(`with ${topAmenities.join(' & ')}`);
-  }
+  // Add key amenities (currently hidden)
+  // const topAmenities: string[] = [];
+  // if (firstProperty.pool === 'yes' || firstProperty.pool === 'Yes' || firstProperty.pool === 'Y') topAmenities.push('pool');
+  // if (firstProperty.hot_tub_sauna === 'yes' || firstProperty.hot_tub_sauna === 'Yes' || firstProperty.hot_tub_sauna === 'Y') topAmenities.push('hot tub');
+  // if (firstProperty.wifi === 'yes' || firstProperty.wifi === 'Yes' || firstProperty.wifi === 'Y') topAmenities.push('WiFi');
+  // if (topAmenities.length > 0 && topAmenities.length <= 2) {
+  //   descriptionParts.push(`with ${topAmenities.join(' & ')}`);
+  // }
   
   let description = propertyName;
   if (descriptionParts.length > 0) {
     description += `: ${descriptionParts.join(' • ')}.`;
   }
-  description += ` View photos, amenities, rates, and book directly.`;
+  description += ` View photos, rates, and book directly.`;
   
   // Ensure description is 150-160 characters (optimal length)
   if (description.length > 160) {
@@ -392,7 +392,7 @@ export default async function PropertyPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
-      {amenitiesSchema && (
+      {false && amenitiesSchema && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(amenitiesSchema) }}
