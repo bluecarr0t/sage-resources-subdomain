@@ -8,6 +8,9 @@ interface MapContextType {
   filterUnitType: string[];
   filterRateRange: string[];
   showNationalParks: boolean;
+  showPopulationLayer: boolean;
+  showGDPLayer: boolean;
+  populationYear: '2010' | '2020';
   setFilterCountry: (country: string[]) => void;
   setFilterState: (state: string[]) => void;
   setFilterUnitType: (unitType: string[]) => void;
@@ -17,6 +20,9 @@ interface MapContextType {
   toggleUnitType: (unitType: string) => void;
   toggleRateRange: (rateRange: string) => void;
   toggleNationalParks: () => void;
+  togglePopulationLayer: () => void;
+  toggleGDPLayer: () => void;
+  setPopulationYear: (year: '2010' | '2020') => void;
   clearFilters: () => void;
   hasActiveFilters: boolean;
 }
@@ -29,6 +35,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const [filterUnitType, setFilterUnitType] = useState<string[]>([]);
   const [filterRateRange, setFilterRateRange] = useState<string[]>([]);
   const [showNationalParks, setShowNationalParks] = useState<boolean>(true);
+  const [showPopulationLayer, setShowPopulationLayer] = useState<boolean>(false);
+  const [showGDPLayer, setShowGDPLayer] = useState<boolean>(false);
+  const [populationYear, setPopulationYear] = useState<'2010' | '2020'>('2020');
 
   const toggleCountry = (country: string) => {
     setFilterCountry((prev) => 
@@ -66,6 +75,14 @@ export function MapProvider({ children }: { children: ReactNode }) {
     setShowNationalParks((prev) => !prev);
   };
 
+  const togglePopulationLayer = () => {
+    setShowPopulationLayer((prev) => !prev);
+  };
+
+  const toggleGDPLayer = () => {
+    setShowGDPLayer((prev) => !prev);
+  };
+
   const clearFilters = () => {
     setFilterCountry(['United States', 'Canada']);
     setFilterState([]);
@@ -84,6 +101,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
         filterUnitType,
         filterRateRange,
         showNationalParks,
+        showPopulationLayer,
+        showGDPLayer,
+        populationYear,
         setFilterCountry,
         setFilterState, 
         setFilterUnitType,
@@ -93,6 +113,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
         toggleUnitType,
         toggleRateRange,
         toggleNationalParks,
+        togglePopulationLayer,
+        toggleGDPLayer,
+        setPopulationYear,
         clearFilters,
         hasActiveFilters
       }}

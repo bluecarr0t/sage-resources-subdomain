@@ -10,6 +10,12 @@ import { NationalPark, NationalParkWithCoords, filterParksWithCoordinates } from
 import { useMapContext } from './MapContext';
 import MultiSelect from './MultiSelect';
 import { slugifyPropertyName } from '@/lib/properties';
+import PopulationLayer from './PopulationLayer';
+import GDPLayer from './GDPLayer';
+import { PopulationLookup } from '@/lib/population/parse-population-csv';
+import { fetchPopulationDataFromSupabase } from '@/lib/population/supabase-population';
+import { fetchGDPDataFromSupabase, GDPLookup, GDPDataByFIPS } from '@/lib/gdp/supabase-gdp';
+import { getChangeRanges } from '@/lib/maps/county-boundaries';
 
 // Default center for lower 48 states (continental USA)
 // Optimized to better frame the lower 48 states, excluding most of Canada and Mexico
@@ -251,7 +257,7 @@ interface GooglePropertyMapProps {
 }
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
-  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, clearFilters, hasActiveFilters } = useMapContext();
+  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, showGDPLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, toggleGDPLayer, setPopulationYear, clearFilters, hasActiveFilters } = useMapContext();
   const [properties, setProperties] = useState<SageProperty[]>([]);
   const [allProperties, setAllProperties] = useState<SageProperty[]>([]); // Store all properties for filter option calculation
   const [nationalParks, setNationalParks] = useState<NationalPark[]>([]);
@@ -270,6 +276,12 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [mapZoom, setMapZoom] = useState<number>(defaultZoom);
   const [shouldFitBounds, setShouldFitBounds] = useState(false); // Disabled by default - use fixed zoom/center for lower 48 states
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
+  const [populationLookup, setPopulationLookup] = useState<PopulationLookup | null>(null);
+  const [populationFipsLookup, setPopulationFipsLookup] = useState<{ [fips: string]: { 2010: number | null; 2020: number | null; name: string; geoId: string } } | null>(null);
+  const [populationLoading, setPopulationLoading] = useState(false);
+  const [gdpLookup, setGdpLookup] = useState<GDPLookup | null>(null);
+  const [gdpFipsLookup, setGdpFipsLookup] = useState<GDPDataByFIPS | null>(null);
+  const [gdpLoading, setGdpLoading] = useState(false);
 
   // URL parameter handling
   const searchParams = useSearchParams();
@@ -575,6 +587,51 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     fetchNationalParks();
   }, []);
 
+  // Fetch population data from Supabase
+  useEffect(() => {
+    async function loadPopulationData() {
+      if (populationLookup) return; // Already loaded
+
+      setPopulationLoading(true);
+      try {
+        console.log('Loading population data from Supabase...');
+        const { lookup, fipsLookup } = await fetchPopulationDataFromSupabase();
+        setPopulationLookup(lookup);
+        setPopulationFipsLookup(fipsLookup);
+      } catch (err) {
+        console.error('Error loading population data from Supabase:', err);
+        // Optionally fallback to CSV API routes if needed
+        // This would require keeping the combineCensusData import
+      } finally {
+        setPopulationLoading(false);
+      }
+    }
+
+    loadPopulationData();
+  }, [populationLookup]);
+
+  // Fetch GDP data from Supabase
+  // Temporarily disabled - will be re-enabled later
+  // useEffect(() => {
+  //   async function loadGDPData() {
+  //     if (gdpLookup) return; // Already loaded
+
+  //     setGdpLoading(true);
+  //     try {
+  //       console.log('Loading GDP data from Supabase...');
+  //       const { lookup, fipsLookup } = await fetchGDPDataFromSupabase();
+  //       setGdpLookup(lookup);
+  //       setGdpFipsLookup(fipsLookup);
+  //     } catch (err) {
+  //       console.error('Error loading GDP data from Supabase:', err);
+  //     } finally {
+  //       setGdpLoading(false);
+  //     }
+  //   }
+
+  //   loadGDPData();
+  // }, [gdpLookup]);
+
   // Fetch properties
   useEffect(() => {
     async function fetchProperties() {
@@ -666,7 +723,17 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
         if (supabaseError) {
           console.error('Supabase error:', supabaseError);
-          throw supabaseError;
+          // Provide more detailed error message
+          const errorDetails = {
+            message: supabaseError.message,
+            details: supabaseError.details,
+            hint: supabaseError.hint,
+            code: supabaseError.code,
+          };
+          console.error('Supabase error details:', errorDetails);
+          throw new Error(
+            `Supabase query failed: ${supabaseError.message}${supabaseError.details ? ` (${supabaseError.details})` : ''}${supabaseError.hint ? ` Hint: ${supabaseError.hint}` : ''}`
+          );
         }
 
         console.log('Fetched properties:', data?.length || 0);
@@ -1083,7 +1150,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         setProperties(uniqueProperties);
       } catch (err) {
         console.error('Error fetching properties:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch properties';
+        let errorMessage = 'Failed to fetch properties';
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (err && typeof err === 'object' && 'message' in err) {
+          errorMessage = String(err.message);
+        } else if (err && typeof err === 'object' && 'error' in err) {
+          errorMessage = String((err as any).error);
+        }
+        console.error('Error details:', { err, errorMessage, type: typeof err });
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -2565,11 +2640,13 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               activeColor="green"
             />
 
-            {/* National Parks Toggle */}
+            {/* Map Layers */}
             <div className="space-y-2">
-              <label htmlFor="national-parks-toggle" className="block text-sm font-semibold text-gray-900">
+              <label className="block text-sm font-semibold text-gray-900">
                 Map Layers
               </label>
+              
+              {/* National Parks Toggle */}
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -2602,6 +2679,158 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   />
                 </button>
               </div>
+
+              {/* Population Layer Toggle */}
+              <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-900">
+                        Show Population Change
+                      </span>
+                      {populationLoading && (
+                        <span className="text-xs text-gray-500">(Loading...)</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      Display population change (2010-2020) as color-coded regions
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 italic">
+                      Data source: <a 
+                        href="https://data.census.gov" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        data.census.gov
+                      </a>
+                    </p>
+                  </div>
+                  <button
+                    id="population-layer-toggle"
+                    type="button"
+                    role="switch"
+                    aria-checked={showPopulationLayer}
+                    aria-label={showPopulationLayer ? 'Hide Population Layer' : 'Show Population Layer'}
+                    onClick={togglePopulationLayer}
+                    disabled={populationLoading}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      showPopulationLayer ? 'bg-[#2196f3]' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        showPopulationLayer ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+                
+              </div>
+
+              {/* Population Change Legend */}
+              {showPopulationLayer && !populationLoading && (
+                <div className="p-3 bg-white rounded-lg border border-gray-200">
+                  <h4 className="text-xs font-semibold text-gray-900 mb-2">Population Change (2010-2020)</h4>
+                  <div className="space-y-1">
+                    {getChangeRanges().map((range) => (
+                      <div key={range.label} className="flex items-center gap-2 text-xs">
+                        <div
+                          className="w-4 h-4 rounded border border-gray-300"
+                          style={{ backgroundColor: range.color }}
+                        />
+                        <span className="text-gray-700">{range.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic text-center">
+                    Data source: <a 
+                      href="https://data.census.gov" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      data.census.gov
+                    </a>
+                  </p>
+                </div>
+              )}
+
+              {/* GDP Layer Toggle - Temporarily hidden, will be re-enabled later */}
+              {/* <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-900">
+                        Show GDP Change
+                      </span>
+                      {gdpLoading && (
+                        <span className="text-xs text-gray-500">(Loading...)</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      Display GDP change (2022-2023) as color-coded regions
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 italic">
+                      Data source: <a 
+                        href="https://www.bea.gov/data/gdp/gdp-county-metro-and-other-areas" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        U.S. Bureau of Economic Analysis
+                      </a>
+                    </p>
+                  </div>
+                  <button
+                    id="gdp-layer-toggle"
+                    type="button"
+                    role="switch"
+                    aria-checked={showGDPLayer}
+                    aria-label={showGDPLayer ? 'Hide GDP Layer' : 'Show GDP Layer'}
+                    onClick={toggleGDPLayer}
+                    disabled={gdpLoading}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      showGDPLayer ? 'bg-[#2196f3]' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        showGDPLayer ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+                
+              </div>
+
+              {/* GDP Change Legend */}
+              {/* {showGDPLayer && !gdpLoading && (
+                <div className="p-3 bg-white rounded-lg border border-gray-200">
+                  <h4 className="text-xs font-semibold text-gray-900 mb-2">GDP Change (2022-2023)</h4>
+                  <div className="space-y-1">
+                    {getChangeRanges().map((range) => (
+                      <div key={range.label} className="flex items-center gap-2 text-xs">
+                        <div
+                          className="w-4 h-4 rounded border border-gray-300"
+                          style={{ backgroundColor: range.color }}
+                        />
+                        <span className="text-gray-700">{range.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic text-center">
+                    Data source: <a 
+                      href="https://www.bea.gov/data/gdp/gdp-county-metro-and-other-areas" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      U.S. Bureau of Economic Analysis
+                    </a>
+                  </p>
+                </div>
+              )} */}
             </div>
           </div>
         </div>
@@ -2921,6 +3150,27 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   </div>
                 </InfoWindow>
               )}
+              
+              {/* Population Change Layer */}
+              {showPopulationLayer && map && (
+                <PopulationLayer
+                  map={map}
+                  populationLookup={populationLookup}
+                  fipsLookup={populationFipsLookup || undefined}
+                  year="2020"
+                  visible={showPopulationLayer}
+                />
+              )}
+
+              {/* GDP Change Layer - Temporarily disabled, will be re-enabled later */}
+              {/* {showGDPLayer && map && (
+                <GDPLayer
+                  map={map}
+                  gdpLookup={gdpLookup}
+                  fipsLookup={gdpFipsLookup || undefined}
+                  visible={showGDPLayer}
+                />
+              )} */}
             </GoogleMap>
           </div>
         )}
