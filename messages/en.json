@@ -31,6 +31,64 @@
       }
     }
   },
+  "map": {
+    "title": "Glamping Properties Map",
+    "loading": "Loading map...",
+    "fullscreen": {
+      "enter": "Enter fullscreen",
+      "exit": "Exit fullscreen"
+    },
+    "poweredBy": "Powered by"
+  },
+  "guides": {
+    "title": "Outdoor Hospitality Guides",
+    "subtitle": "Comprehensive, expert-written guides covering feasibility studies, property appraisals, and the outdoor hospitality industry",
+    "categories": {
+      "feasibility": {
+        "name": "Feasibility Studies",
+        "description": "Learn everything about feasibility studies for outdoor hospitality projects"
+      },
+      "appraisal": {
+        "name": "Property Appraisals",
+        "description": "Comprehensive guides on property appraisals for outdoor hospitality properties"
+      },
+      "industry": {
+        "name": "Industry Guides",
+        "description": "In-depth guides about the glamping and RV resort industry"
+      }
+    },
+    "cta": {
+      "title": "Need Help with Your Outdoor Hospitality Project?",
+      "description": "Our experts have completed over 350 feasibility studies and appraisals. Get personalized guidance for your project.",
+      "button": "Schedule Free Consultation"
+    }
+  },
+  "glossary": {
+    "title": "Outdoor Hospitality Glossary",
+    "subtitle": "Comprehensive definitions of industry terms for glamping, RV resorts, campgrounds, feasibility studies, and appraisals",
+    "searchPlaceholder": "Search glossary terms...",
+    "tabs": {
+      "alphabetical": "Alphabetical",
+      "byCategory": "By Category"
+    },
+    "searchResults": "Search Results ({count})",
+    "noResults": "No terms found matching \"{query}\"",
+    "clearSearch": "Clear search",
+    "readMore": "Read more",
+    "categories": {
+      "feasibilityAppraisal": "Feasibility & Appraisal",
+      "glamping": "Glamping",
+      "rvCampground": "RV & Campground",
+      "financial": "Financial",
+      "realEstate": "Real Estate",
+      "general": "General"
+    },
+    "cta": {
+      "title": "Need Help Understanding These Terms?",
+      "description": "Our experts can help you understand how these industry terms apply to your outdoor hospitality project.",
+      "button": "Schedule Free Consultation"
+    }
+  },
   "errors": {
     "pageNotFound": "Page Not Found",
     "pageNotFoundDescription": "The page you're looking for doesn't exist."

@@ -31,6 +31,64 @@
       }
     }
   },
+  "map": {
+    "title": "Glamping-Immobilienkarte",
+    "loading": "Karte wird geladen...",
+    "fullscreen": {
+      "enter": "Vollbild",
+      "exit": "Vollbild verlassen"
+    },
+    "poweredBy": "Unterstützt von"
+  },
+  "guides": {
+    "title": "Outdoor-Hospitality-Leitfäden",
+    "subtitle": "Umfassende, von Experten verfasste Leitfäden zu Machbarkeitsstudien, Immobilienbewertungen und der Outdoor-Hospitality-Branche",
+    "categories": {
+      "feasibility": {
+        "name": "Machbarkeitsstudien",
+        "description": "Erfahren Sie alles über Machbarkeitsstudien für Outdoor-Hospitality-Projekte"
+      },
+      "appraisal": {
+        "name": "Immobilienbewertungen",
+        "description": "Umfassende Leitfäden zu Immobilienbewertungen für Outdoor-Hospitality-Immobilien"
+      },
+      "industry": {
+        "name": "Branchenleitfäden",
+        "description": "Detaillierte Leitfäden über die Glamping- und Wohnmobil-Resort-Branche"
+      }
+    },
+    "cta": {
+      "title": "Benötigen Sie Hilfe bei Ihrem Outdoor-Hospitality-Projekt?",
+      "description": "Unsere Experten haben über 350 Machbarkeitsstudien und Bewertungen durchgeführt. Erhalten Sie personalisierte Beratung für Ihr Projekt.",
+      "button": "Kostenlose Beratung Vereinbaren"
+    }
+  },
+  "glossary": {
+    "title": "Outdoor-Hospitality-Glossar",
+    "subtitle": "Umfassende Definitionen von Branchenbegriffen für Glamping, Wohnmobil-Resorts, Campingplätze, Machbarkeitsstudien und Bewertungen",
+    "searchPlaceholder": "Glossar-Begriffe suchen...",
+    "tabs": {
+      "alphabetical": "Alphabetisch",
+      "byCategory": "Nach Kategorie"
+    },
+    "searchResults": "Suchergebnisse ({count})",
+    "noResults": "Keine Begriffe gefunden, die zu \"{query}\" passen",
+    "clearSearch": "Suche löschen",
+    "readMore": "Mehr lesen",
+    "categories": {
+      "feasibilityAppraisal": "Machbarkeit & Bewertung",
+      "glamping": "Glamping",
+      "rvCampground": "Wohnmobil & Camping",
+      "financial": "Finanziell",
+      "realEstate": "Immobilien",
+      "general": "Allgemein"
+    },
+    "cta": {
+      "title": "Benötigen Sie Hilfe beim Verstehen dieser Begriffe?",
+      "description": "Unsere Experten können Ihnen helfen zu verstehen, wie diese Branchenbegriffe auf Ihr Outdoor-Hospitality-Projekt zutreffen.",
+      "button": "Kostenlose Beratung Vereinbaren"
+    }
+  },
   "errors": {
     "pageNotFound": "Seite Nicht Gefunden",
     "pageNotFoundDescription": "Die gesuchte Seite existiert nicht."

@@ -9,6 +9,7 @@ import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 interface PageProps {
   params: {
@@ -71,13 +72,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default function GuidesPage({ params }: PageProps) {
+export default async function GuidesPage({ params }: PageProps) {
   const { locale } = params;
   
   // Validate locale
   if (!locales.includes(locale as Locale)) {
     notFound();
   }
+  
+  const t = await getTranslations({ locale, namespace: 'guides' });
+  
   const allGuides = getAllGuideSlugs()
     .map((slug) => getGuide(slug))
     .filter((guide): guide is NonNullable<typeof guide> => guide !== null);
@@ -89,8 +93,8 @@ export default function GuidesPage({ params }: PageProps) {
   const categories = [
     {
       id: "feasibility",
-      name: "Feasibility Studies",
-      description: "Learn everything about feasibility studies for outdoor hospitality projects",
+      name: t('categories.feasibility.name'),
+      description: t('categories.feasibility.description'),
       guides: feasibilityGuides,
       pillarPages: feasibilityGuides.filter((guide) =>
         guide.slug.endsWith("-complete-guide")
@@ -101,8 +105,8 @@ export default function GuidesPage({ params }: PageProps) {
     },
     {
       id: "appraisal",
-      name: "Property Appraisals",
-      description: "Comprehensive guides on property appraisals for outdoor hospitality properties",
+      name: t('categories.appraisal.name'),
+      description: t('categories.appraisal.description'),
       guides: appraisalGuides,
       pillarPages: appraisalGuides.filter((guide) =>
         guide.slug.endsWith("-complete-guide")
@@ -113,8 +117,8 @@ export default function GuidesPage({ params }: PageProps) {
     },
     {
       id: "industry",
-      name: "Industry Guides",
-      description: "In-depth guides about the glamping and RV resort industry",
+      name: t('categories.industry.name'),
+      description: t('categories.industry.description'),
       guides: industryGuides,
       pillarPages: industryGuides.filter((guide) =>
         guide.slug.endsWith("-complete-guide")
@@ -153,10 +157,10 @@ export default function GuidesPage({ params }: PageProps) {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-              Outdoor Hospitality Guides
+              {t('title')}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto drop-shadow-md">
-              Comprehensive, expert-written guides covering feasibility studies, property appraisals, and the outdoor hospitality industry
+              {t('subtitle')}
             </p>
           </div>
         </div>
@@ -170,16 +174,16 @@ export default function GuidesPage({ params }: PageProps) {
         <section className="bg-[#00b6a6] py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Need Help with Your Outdoor Hospitality Project?
+              {t('cta.title')}
             </h2>
             <p className="text-xl text-white/90 mb-8">
-              Our experts have completed over 350 feasibility studies and appraisals. Get personalized guidance for your project.
+              {t('cta.description')}
             </p>
             <Link
               href="https://sageoutdooradvisory.com/contact-us/"
               className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
             >
-              Schedule Free Consultation
+              {t('cta.button')}
             </Link>
           </div>
         </section>

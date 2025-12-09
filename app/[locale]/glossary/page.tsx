@@ -9,6 +9,7 @@ import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 interface PageProps {
   params: {
@@ -71,21 +72,36 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default function GlossaryPage({ params }: PageProps) {
+export default async function GlossaryPage({ params }: PageProps) {
   const { locale } = params;
   
   // Validate locale
   if (!locales.includes(locale as Locale)) {
     notFound();
   }
+  
+  const t = await getTranslations({ locale, namespace: 'glossary' });
+  
   const allTerms = getAllGlossaryTerms();
+  
+  // Map translated category names to original English category names
+  // (getGlossaryTermsByCategory expects English category names)
+  const categoryMap: Record<string, string> = {
+    [t('categories.feasibilityAppraisal')]: 'Feasibility & Appraisal',
+    [t('categories.glamping')]: 'Glamping',
+    [t('categories.rvCampground')]: 'RV & Campground',
+    [t('categories.financial')]: 'Financial',
+    [t('categories.realEstate')]: 'Real Estate',
+    [t('categories.general')]: 'General'
+  };
+  
   const categories = [
-    "Feasibility & Appraisal",
-    "Glamping",
-    "RV & Campground",
-    "Financial",
-    "Real Estate",
-    "General"
+    t('categories.feasibilityAppraisal'),
+    t('categories.glamping'),
+    t('categories.rvCampground'),
+    t('categories.financial'),
+    t('categories.realEstate'),
+    t('categories.general')
   ];
 
   // Group terms by first letter for alphabetical navigation
@@ -105,10 +121,11 @@ export default function GlossaryPage({ params }: PageProps) {
     termsByLetter[letter].sort((a, b) => a.term.localeCompare(b.term));
   });
 
-  // Get terms by category
+  // Get terms by category - use translated category name as key, but fetch with English name
   const termsByCategory: Record<string, typeof allTerms> = {};
-  categories.forEach(category => {
-    termsByCategory[category] = getGlossaryTermsByCategory(category as any);
+  categories.forEach(translatedCategory => {
+    const englishCategory = categoryMap[translatedCategory];
+    termsByCategory[translatedCategory] = getGlossaryTermsByCategory(englishCategory as any);
   });
 
   const links = createLocaleLinks(locale);
@@ -139,10 +156,10 @@ export default function GlossaryPage({ params }: PageProps) {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-              Outdoor Hospitality Glossary
+              {t('title')}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto drop-shadow-md">
-              Comprehensive definitions of industry terms for glamping, RV resorts, campgrounds, feasibility studies, and appraisals
+              {t('subtitle')}
             </p>
           </div>
         </div>
@@ -155,22 +172,23 @@ export default function GlossaryPage({ params }: PageProps) {
         termsByLetter={termsByLetter}
         termsByCategory={termsByCategory}
         categories={categories}
+        locale={locale}
       />
 
       {/* CTA Section */}
       <section className="bg-[#00b6a6] py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Need Help Understanding These Terms?
+            {t('cta.title')}
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Our experts can help you understand how these industry terms apply to your outdoor hospitality project.
+            {t('cta.description')}
           </p>
           <Link
             href="https://sageoutdooradvisory.com/contact-us/"
             className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
           >
-            Schedule Free Consultation
+            {t('cta.button')}
           </Link>
         </div>
       </section>

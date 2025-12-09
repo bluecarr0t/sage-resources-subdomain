@@ -31,6 +31,64 @@
       }
     }
   },
+  "map": {
+    "title": "Carte des Propriétés de Glamping",
+    "loading": "Chargement de la carte...",
+    "fullscreen": {
+      "enter": "Plein écran",
+      "exit": "Quitter le plein écran"
+    },
+    "poweredBy": "Propulsé par"
+  },
+  "guides": {
+    "title": "Guides d'Hospitalité de Plein Air",
+    "subtitle": "Guides complets rédigés par des experts couvrant les études de faisabilité, les évaluations immobilières et l'industrie de l'hospitalité de plein air",
+    "categories": {
+      "feasibility": {
+        "name": "Études de Faisabilité",
+        "description": "Apprenez tout sur les études de faisabilité pour les projets d'hospitalité de plein air"
+      },
+      "appraisal": {
+        "name": "Évaluations Immobilières",
+        "description": "Guides complets sur les évaluations immobilières pour les propriétés d'hospitalité de plein air"
+      },
+      "industry": {
+        "name": "Guides de l'Industrie",
+        "description": "Guides approfondis sur l'industrie du glamping et des resorts pour camping-cars"
+      }
+    },
+    "cta": {
+      "title": "Besoin d'Aide pour Votre Projet d'Hospitalité de Plein Air?",
+      "description": "Nos experts ont réalisé plus de 350 études de faisabilité et évaluations. Obtenez des conseils personnalisés pour votre projet.",
+      "button": "Planifier une Consultation Gratuite"
+    }
+  },
+  "glossary": {
+    "title": "Glossaire de l'Hospitalité de Plein Air",
+    "subtitle": "Définitions complètes des termes de l'industrie pour le glamping, les resorts pour camping-cars, les campings, les études de faisabilité et les évaluations",
+    "searchPlaceholder": "Rechercher des termes du glossaire...",
+    "tabs": {
+      "alphabetical": "Alphabétique",
+      "byCategory": "Par Catégorie"
+    },
+    "searchResults": "Résultats de recherche ({count})",
+    "noResults": "Aucun terme trouvé correspondant à \"{query}\"",
+    "clearSearch": "Effacer la recherche",
+    "readMore": "Lire la suite",
+    "categories": {
+      "feasibilityAppraisal": "Faisabilité et Évaluation",
+      "glamping": "Glamping",
+      "rvCampground": "Camping-Car et Camping",
+      "financial": "Financier",
+      "realEstate": "Immobilier",
+      "general": "Général"
+    },
+    "cta": {
+      "title": "Besoin d'Aide pour Comprendre Ces Termes?",
+      "description": "Nos experts peuvent vous aider à comprendre comment ces termes de l'industrie s'appliquent à votre projet d'hospitalité de plein air.",
+      "button": "Planifier une Consultation Gratuite"
+    }
+  },
   "errors": {
     "pageNotFound": "Page Non Trouvée",
     "pageNotFoundDescription": "La page que vous recherchez n'existe pas."

@@ -3,12 +3,14 @@
 import { GlossaryTerm } from "@/lib/glossary/index";
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface GlossaryIndexProps {
   allTerms: GlossaryTerm[];
   termsByLetter: Record<string, GlossaryTerm[]>;
   termsByCategory: Record<string, GlossaryTerm[]>;
   categories: string[];
+  locale: string;
 }
 
 export default function GlossaryIndex({
@@ -16,7 +18,9 @@ export default function GlossaryIndex({
   termsByLetter,
   termsByCategory,
   categories,
+  locale,
 }: GlossaryIndexProps) {
+  const t = useTranslations('glossary');
   const [activeTab, setActiveTab] = useState<"alphabetical" | "category">("alphabetical");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -43,7 +47,7 @@ export default function GlossaryIndex({
         <div className="relative">
           <input
             type="text"
-            placeholder="Search glossary terms..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-6 py-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-[#006b5f] focus:border-[#006b5f]"
@@ -78,7 +82,7 @@ export default function GlossaryIndex({
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            Alphabetical
+            {t('tabs.alphabetical')}
           </button>
           <button
             onClick={() => {
@@ -91,7 +95,7 @@ export default function GlossaryIndex({
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            By Category
+            {t('tabs.byCategory')}
           </button>
         </div>
       </div>
@@ -123,11 +127,11 @@ export default function GlossaryIndex({
           {searchQuery ? (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Search Results ({filteredTerms.length})
+                {t('searchResults', { count: filteredTerms.length })}
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredTerms.map((term) => (
-                  <GlossaryTermCard key={term.slug} term={term} />
+                  <GlossaryTermCard key={term.slug} term={term} locale={locale} />
                 ))}
               </div>
             </div>
@@ -144,7 +148,7 @@ export default function GlossaryIndex({
                     </h2>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {terms.map((term) => (
-                        <GlossaryTermCard key={term.slug} term={term} />
+                        <GlossaryTermCard key={term.slug} term={term} locale={locale} />
                       ))}
                     </div>
                   </div>
@@ -171,7 +175,7 @@ export default function GlossaryIndex({
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {terms.map((term) => (
-                    <GlossaryTermCard key={term.slug} term={term} />
+                    <GlossaryTermCard key={term.slug} term={term} locale={locale} />
                   ))}
                 </div>
               </div>
@@ -183,12 +187,12 @@ export default function GlossaryIndex({
       {/* No Results */}
       {searchQuery && filteredTerms.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No terms found matching &ldquo;{searchQuery}&rdquo;</p>
+          <p className="text-gray-500 text-lg">{t('noResults', { query: searchQuery })}</p>
           <button
             onClick={() => setSearchQuery("")}
             className="mt-4 text-[#006b5f] hover:text-[#005a4f] underline"
           >
-            Clear search
+            {t('clearSearch')}
           </button>
         </div>
       )}
@@ -196,10 +200,12 @@ export default function GlossaryIndex({
   );
 }
 
-function GlossaryTermCard({ term }: { term: GlossaryTerm }) {
+function GlossaryTermCard({ term, locale }: { term: GlossaryTerm; locale: string }) {
+  const t = useTranslations('glossary');
+  
   return (
     <Link
-      href={`/glossary/${term.slug}`}
+      href={`/${locale}/glossary/${term.slug}`}
       className="block bg-white border border-gray-200 rounded-lg p-6 hover:border-[#006b5f] hover:shadow-lg transition-all"
     >
       <div className="flex items-start justify-between mb-2">
@@ -210,7 +216,7 @@ function GlossaryTermCard({ term }: { term: GlossaryTerm }) {
       </div>
       <p className="text-gray-600 text-sm line-clamp-2">{term.definition}</p>
       <div className="mt-4 flex items-center text-[#006b5f] text-sm font-medium">
-        Read more →
+        {t('readMore')} →
       </div>
     </Link>
   );

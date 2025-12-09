@@ -1,8 +1,10 @@
 'use client';
 
 import { useMapContext } from '@/components/MapContext';
+import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import MapLoading from './MapLoading';
 
 // Dynamically import Google Maps component for sidebar (no loading animation)
 const DynamicGooglePropertyMapSidebar = dynamic(() => import('@/components/GooglePropertyMap'), {
@@ -13,14 +15,7 @@ const DynamicGooglePropertyMapSidebar = dynamic(() => import('@/components/Googl
 // Dynamically import Google Maps component for map (with loading animation)
 const DynamicGooglePropertyMap = dynamic(() => import('@/components/GooglePropertyMap'), {
   ssr: false,
-  loading: () => (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00b6a6] mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading map...</p>
-      </div>
-    </div>
-  ),
+  loading: () => <MapLoading />,
 });
 
 // Dynamically import LocationSearch component
@@ -37,6 +32,8 @@ interface MapLayoutProps {
 
 export default function MapLayout({ locale }: MapLayoutProps) {
   const { isFullscreen, toggleFullscreen } = useMapContext();
+  const t = useTranslations('map');
+  const tCommon = useTranslations('common');
 
   return (
     <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-gray-50">
@@ -55,12 +52,12 @@ export default function MapLayout({ locale }: MapLayoutProps) {
                   href={`/${locale}`}
                   className="hover:text-gray-900 transition-colors"
                 >
-                  Home
+                  {tCommon('navigation.home')}
                 </Link>
               </li>
               <li aria-hidden="true" className="text-gray-400">/</li>
               <li className="text-gray-900 font-medium" aria-current="page">
-                Map
+                {tCommon('navigation.map')}
               </li>
             </ol>
           </nav>
@@ -68,7 +65,7 @@ export default function MapLayout({ locale }: MapLayoutProps) {
           {/* SEO Content Section */}
           <section className="mb-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Glamping Properties Map
+              {t('title')}
             </h1>
           </section>
           
@@ -86,14 +83,14 @@ export default function MapLayout({ locale }: MapLayoutProps) {
         {/* Footer */}
         <div className="py-2 px-4 border-t border-gray-200 mt-auto">
           <p className="text-xs text-gray-500 text-center">
-            Powered by{' '}
+            {t('poweredBy')}{' '}
             <a
               href="https://sageoutdooradvisory.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-600 hover:text-gray-900 underline transition-colors"
             >
-              Sage Outdoor Advisory
+              {tCommon('siteName')}
             </a>
           </p>
         </div>
@@ -107,8 +104,8 @@ export default function MapLayout({ locale }: MapLayoutProps) {
         <button
           onClick={toggleFullscreen}
           className="md:hidden absolute top-4 right-4 z-30 bg-white hover:bg-gray-50 text-gray-700 p-3 rounded-lg shadow-lg border border-gray-200 transition-colors"
-          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          aria-label={isFullscreen ? t('fullscreen.exit') : t('fullscreen.enter')}
+          title={isFullscreen ? t('fullscreen.exit') : t('fullscreen.enter')}
         >
           {isFullscreen ? (
             <svg
