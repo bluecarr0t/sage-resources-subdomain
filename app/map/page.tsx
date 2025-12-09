@@ -18,11 +18,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: "Glamping Properties Map | 500+ Locations | Sage Outdoor Advisory",
-    description: "Explore 500+ glamping properties across the US and Canada on our interactive map. Filter by location, unit type, and price range. Find your perfect glamping destination.",
+    description: "Explore 500+ glamping properties across the US and Canada on our interactive map. Compare glamping locations with population growth data to identify high-growth markets. Filter by location, unit type, and price range.",
     keywords: "glamping properties map, glamping locations, glamping sites by state, interactive glamping map, glamping near me, glamping properties USA, glamping properties Canada, glamping map North America",
     openGraph: {
       title: "Glamping Properties Map | 500+ Locations | Sage",
-      description: "Explore 500+ glamping properties across the US and Canada on our interactive map. Filter by location, unit type, and price range.",
+      description: "Explore 500+ glamping properties across the US and Canada on our interactive map. Compare glamping locations with population growth data to identify high-growth markets.",
       url,
       siteName: "Sage Outdoor Advisory",
       images: [
@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: "Glamping Properties Map | 500+ Locations",
-      description: "Explore 500+ glamping properties across the US and Canada on our interactive map",
+      description: "Explore 500+ glamping properties and compare with population growth data to identify high-growth markets",
       images: [imageUrl],
     },
     alternates: {

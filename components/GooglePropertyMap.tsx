@@ -257,7 +257,7 @@ interface GooglePropertyMapProps {
 }
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
-  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, showGDPLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, toggleGDPLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError } = useMapContext();
+  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, showGDPLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, toggleGDPLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError, hasLoadedOnce } = useMapContext();
   // Use shared properties from context instead of local state
   const properties = sharedProperties;
   const allProperties = sharedAllProperties;
@@ -312,6 +312,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const markersRef = useRef<google.maps.Marker[]>([]);
   const parkMarkersRef = useRef<google.maps.Marker[]>([]);
   const hasCenteredFromUrlRef = useRef<boolean>(false);
+  const hasJustFittedBoundsRef = useRef<boolean>(false);
 
   // Ensure we're on the client side
   useEffect(() => {
@@ -413,6 +414,33 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       router.replace(newUrl, { scroll: false });
     }
   }, [filterCountry, filterState, filterUnitType, filterRateRange, isClient, urlInitialized, pathname, router, searchParams]);
+
+  // Enable fitBounds when state filter is applied, disable when cleared
+  useEffect(() => {
+    if (!isClient || !urlInitialized) return;
+    
+    const urlLat = searchParams.get('lat');
+    const urlLon = searchParams.get('lon');
+    
+    // Don't enable fitBounds if there are URL coordinates (user has navigated to a specific location)
+    if (urlLat && urlLon) {
+      setShouldFitBounds(false);
+      hasJustFittedBoundsRef.current = false;
+      return;
+    }
+    
+    // Enable fitBounds when state filter is applied
+    if (filterState.length > 0) {
+      setShouldFitBounds(true);
+      // Reset the flag when enabling fitBounds
+      hasJustFittedBoundsRef.current = false;
+    } else {
+      // Disable fitBounds when state filter is cleared
+      // The default center/zoom effect will handle resetting the view
+      setShouldFitBounds(false);
+      hasJustFittedBoundsRef.current = false;
+    }
+  }, [filterState, isClient, urlInitialized, searchParams]);
 
   // Watch for changes to lat/lon/zoom URL parameters and update map position
   useEffect(() => {
@@ -930,8 +958,23 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
   // Set default center and zoom for lower 48 states when map loads (if no URL params)
   // This overrides any fitBounds behavior to ensure consistent view
+  // BUT: Don't reset if we've just fitted bounds or if state filter is active (prevents zooming out immediately after fitting)
   useEffect(() => {
     if (map && !shouldFitBounds) {
+      // Don't reset if we just fitted bounds - give it time to settle
+      if (hasJustFittedBoundsRef.current) {
+        // Clear the flag after a delay to allow fitBounds to complete
+        const timer = setTimeout(() => {
+          hasJustFittedBoundsRef.current = false;
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+      
+      // Don't reset if state filter is active (even if shouldFitBounds is false, we might be transitioning)
+      if (filterState.length > 0) {
+        return;
+      }
+      
       const urlLat = searchParams.get('lat');
       const urlLon = searchParams.get('lon');
       
@@ -954,27 +997,33 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         }
       }
     }
-  }, [map, shouldFitBounds, searchParams]);
+  }, [map, shouldFitBounds, searchParams, filterState]);
   
-  // Fit map bounds to show all markers (only if shouldFitBounds is true)
-  // NOTE: This is now disabled by default to maintain fixed zoom/center for lower 48 states
+  // Fit map bounds to show all glamping property markers (only if shouldFitBounds is true)
+  // NOTE: Only includes glamping properties, not national parks, so state filters zoom to properties only
+  // This is disabled by default to maintain fixed zoom/center for lower 48 states
   useEffect(() => {
     if (map && shouldFitBounds) {
-      const parksWithCoords = filterParksWithCoordinates(nationalParks);
-      const allItems = [...propertiesWithCoords, ...parksWithCoords];
-      
-      if (allItems.length > 0) {
+      // Only use glamping properties for bounds calculation, exclude national parks
+      // This ensures state filters zoom to show only the filtered properties
+      if (propertiesWithCoords.length > 0) {
         const bounds = new google.maps.LatLngBounds();
-        allItems.forEach((item) => {
+        propertiesWithCoords.forEach((item) => {
           bounds.extend({
             lat: item.coordinates[0],
             lng: item.coordinates[1],
           });
         });
         map.fitBounds(bounds);
+        // Mark that we've just fitted bounds to prevent immediate reset
+        hasJustFittedBoundsRef.current = true;
+        // Clear the flag after fitBounds completes (Google Maps fitBounds is async)
+        setTimeout(() => {
+          hasJustFittedBoundsRef.current = false;
+        }, 2000); // Give enough time for fitBounds animation to complete
       }
     }
-  }, [map, propertiesWithCoords, nationalParks, shouldFitBounds]);
+  }, [map, propertiesWithCoords, shouldFitBounds]);
   
   // When map is loaded and we have specific coordinates from URL, center and zoom to that location
   useEffect(() => {
@@ -1583,28 +1632,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
     
     // Only count properties with valid coordinates (matching what's shown on the map)
-    let propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
-    
-    // If a location is selected (has lat/lon in URL) and we have map bounds, filter by bounds
-    const hasLocationParams = searchParams.get('lat') && searchParams.get('lon');
-    if (hasLocationParams && !shouldFitBounds && map) {
-      // Get current bounds from map (more reliable than stored state)
-      const currentBounds = map.getBounds();
-      if (currentBounds) {
-        propertiesWithValidCoords = propertiesWithValidCoords.filter((p) => {
-          const coords = p.coordinates;
-          if (!coords) return false;
-          const [lat, lng] = coords;
-          try {
-            const latLng = new google.maps.LatLng(lat, lng);
-            return currentBounds.contains(latLng);
-          } catch (e) {
-            // If bounds check fails, include the property to be safe
-            return true;
-          }
-        });
-      }
-    }
+    // Note: We do NOT apply map bounds filter here to ensure the displayed count matches
+    // the sum of country dropdown counts (countryCounts doesn't apply bounds filter)
+    const propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
     
     // Group by property_name to count unique properties (same as countryCounts logic)
     const uniquePropertyNames = new Set<string>();
@@ -1648,7 +1678,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     
     return uniquePropertyNames.size;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allProperties, filterCountry, filterState, filterUnitType, filterRateRange, stateMatchesFilter, shouldFitBounds, map, mapBounds, searchParams]);
+  }, [allProperties, filterCountry, filterState, filterUnitType, filterRateRange, stateMatchesFilter]);
 
   // Update displayed count to match calculated count (ensures it matches dropdown counts)
   useEffect(() => {
@@ -1665,7 +1695,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   // Calculate country counts from properties with valid coordinates
   // Count unique properties (not sites) per country - only count properties that can be plotted on the map
   // Use the EXACT same country detection logic as the client-side filter
-  // Also respect unit type and rate range filters when counting
+  // Also respect unit type, rate range, and state filters when counting to match displayed count
   const countryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     
@@ -1689,11 +1719,17 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       });
     }
     
+    // Apply state filter if active (to match calculatedDisplayedCount logic)
+    if (filterState.length > 0) {
+      propertiesToCount = propertiesToCount.filter((p) => stateMatchesFilter(p.state, filterState));
+    }
+    
     // Only count properties with valid coordinates (matching what's shown on the map)
     const propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
     
-    // Group by property_name to count unique properties per country
-    const propertiesByCountry = new Map<string, Set<string>>();
+    // First, group by normalized property name to get unique properties
+    // This ensures each property is only counted once, matching calculatedDisplayedCount logic
+    const propertyToCountryMap = new Map<string, string>(); // normalizedName -> country
     
     propertiesWithValidCoords.forEach((p) => {
       const propertyName = p.property_name;
@@ -1719,16 +1755,17 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         return;
       }
       
-      // Add property to the set for this country using normalized name
-      if (!propertiesByCountry.has(normalizedCountry)) {
-        propertiesByCountry.set(normalizedCountry, new Set());
+      // If this property hasn't been assigned a country yet, assign it
+      // If it has been assigned and the country is different, keep the first assignment
+      // This ensures each unique property is only counted in one country
+      if (!propertyToCountryMap.has(normalizedName)) {
+        propertyToCountryMap.set(normalizedName, normalizedCountry);
       }
-      propertiesByCountry.get(normalizedCountry)!.add(normalizedName);
     });
     
     // Count unique properties per country
-    propertiesByCountry.forEach((propertySet, country) => {
-      counts[country] = propertySet.size;
+    propertyToCountryMap.forEach((country) => {
+      counts[country] = (counts[country] || 0) + 1;
     });
     
     // Ensure both countries are in the counts object (even if 0)
@@ -1736,7 +1773,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     if (!counts['Canada']) counts['Canada'] = 0;
     
     return counts;
-  }, [allProperties, filterUnitType, filterRateRange]);
+  }, [allProperties, filterUnitType, filterRateRange, filterState, stateMatchesFilter]);
 
   // Get available unit types based on selected states
   const availableUnitTypes = useMemo(() => {
@@ -2025,7 +2062,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   // Show loading state only in map column, not in sidebar
   if (!isClient && showMap) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Initializing...</p>
@@ -2116,7 +2153,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   // Only show loading for map, not for sidebar
   if (!isLoaded && showMap) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading Google Maps...</p>
@@ -2606,7 +2643,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           </div>
         )}
         {!isLoaded && !error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-20">
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Loading Google Maps script...</p>
@@ -2920,7 +2957,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             )}
           </div>
         )}
-        {!loading && !error && displayProperties.length === 0 && (
+        {!loading && !error && hasLoadedOnce && displayProperties.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 pointer-events-none z-20">
             <div className="text-center p-4 bg-white rounded-lg shadow-sm">
               <p className="text-gray-600 font-medium">No properties found</p>

@@ -33,6 +33,7 @@ interface MapContextType {
   allProperties: SageProperty[];
   propertiesLoading: boolean;
   propertiesError: string | null;
+  hasLoadedOnce: boolean;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -53,6 +54,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const [allProperties, setAllProperties] = useState<SageProperty[]>([]);
   const [propertiesLoading, setPropertiesLoading] = useState<boolean>(true);
   const [propertiesError, setPropertiesError] = useState<string | null>(null);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState<boolean>(false);
   const fetchInProgressRef = useRef<boolean>(false);
   const allPropertiesFetchInProgressRef = useRef<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -214,6 +216,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         console.log('Fetched properties (shared):', data?.length || 0);
         
         setProperties(data);
+        setHasLoadedOnce(true); // Mark that we've successfully loaded properties at least once
       } catch (err) {
         // Ignore abort errors
         if (err instanceof Error && err.name === 'AbortError') {
@@ -280,6 +283,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         allProperties,
         propertiesLoading,
         propertiesError,
+        hasLoadedOnce,
       }}
     >
       {children}
