@@ -15,7 +15,7 @@ In outdoor hospitality, ADR is often higher for glamping accommodations compared
 
 Sage Outdoor Advisory includes ADR analysis and benchmarking in our feasibility studies, helping clients understand market rates and optimize pricing strategies.`,
     category: "Financial",
-    relatedTerms: ["ardr", "revpar", "occupancy-rate", "revenue-projections", "noi"],
+    relatedTerms: ["ardr", "revpar", "occupancy-rate", "revenue-projections", "noi", "revenue-management"],
     examples: [
       "A 20-unit glamping resort generates $180K in monthly revenue from 600 occupied unit-nights (20 units × 30 days). ADR = $180K ÷ 600 = $300 per night. During peak season, rates increase to $400/night, while offseason rates drop to $200/night, creating seasonal ADR variations. This $300 ADR helps property managers track pricing effectiveness and compare to competitors averaging $280 ADR in the same market.",
       "An RV park with 80 full hookup sites charges $75/night. In a month with 1,680 occupied site-nights (70% occupancy), total revenue is $126K. ADR = $126K ÷ 1,680 = $75. The park also offers premium waterfront sites at $95/night and basic sites at $55/night. The blended ADR of $75 reflects the mix of site types, helping owners understand their average rate across different offerings and seasons.",
@@ -109,7 +109,7 @@ In outdoor hospitality, occupancy rates often vary seasonally. For example, prop
 
 Sage Outdoor Advisory includes occupancy rate analysis and forecasting in our feasibility studies, helping clients understand demand patterns and optimize revenue management strategies.`,
     category: "Financial",
-    relatedTerms: ["adr", "revpar", "revenue-projections", "seasonality"],
+    relatedTerms: ["adr", "revpar", "revenue-projections", "seasonality", "revenue-management"],
     examples: [
       "A 25-unit glamping resort operates year-round. In January, 450 units are occupied out of 775 available (25 units × 31 days), resulting in 58% occupancy. During peak summer months (June-August), occupancy averages 90% with 2,090 occupied out of 2,325 available units. The annual occupancy rate of 75% (6,825 occupied out of 9,125 available unit-nights) reflects seasonal variations and helps with financial planning. Property managers use this metric to optimize pricing, with higher rates during high-occupancy periods and promotions during slower seasons.",
       "An RV resort in Florida experiences strong seasonality. During snowbird season (November-April), 180 of 200 sites are consistently occupied, achieving 90% occupancy. Summer months (May-October) drop to 60% occupancy (120 of 200 sites). The peak season occupancy of 85% during the best months demonstrates strong demand during prime periods. Understanding this pattern helps owners maximize revenue during high-demand periods and plan maintenance or renovations during slower months.",
@@ -153,7 +153,7 @@ For example, if a glamping resort has an ADR of $200 and 75% occupancy, the RevP
 
 Sage Outdoor Advisory includes RevPAR analysis and benchmarking in our feasibility studies, helping clients understand revenue potential and optimize performance.`,
     category: "Financial",
-    relatedTerms: ["adr", "occupancy-rate", "revenue-projections", "noi"],
+    relatedTerms: ["adr", "occupancy-rate", "revenue-projections", "noi", "revenue-management"],
     examples: [
       "A glamping resort charges $200/night (ADR) and maintains 80% occupancy. RevPAR = $200 × 0.80 = $160. This means the property generates $160 per available unit, regardless of whether it's occupied. If the resort has 30 units, total potential revenue is $4,800 per night (30 × $160). A competitor with $180 ADR but 90% occupancy has $162 RevPAR, showing higher revenue efficiency. The glamping resort could improve RevPAR by either raising ADR to $225 (if demand supports it) or increasing occupancy through marketing, demonstrating how this single metric combines pricing and demand.",
       "An RV park with $75 ADR and 70% occupancy calculates RevPAR = $75 × 0.70 = $52.50. With 100 sites, this generates $5,250 potential revenue per night across all sites. If occupancy drops to 60% while maintaining $75 ADR, RevPAR falls to $45. Alternatively, if they raise rates to $85 and occupancy stays at 70%, RevPAR increases to $59.50. This metric helps owners understand that increasing occupancy or ADR both improve revenue, and guides decisions about whether to focus on pricing strategy or demand generation.",
@@ -527,7 +527,7 @@ For outdoor hospitality properties, operating expenses typically range from 30-5
 
 Sage Outdoor Advisory includes detailed operating expense analysis in our feasibility studies and appraisals, using industry benchmarks and property-specific factors.`,
     category: "Financial",
-    relatedTerms: ["noi", "revenue-projections", "feasibility-study"],
+    relatedTerms: ["noi", "revenue-projections", "feasibility-study", "property-management"],
     examples: [
       "A 30-unit glamping resort tracks operating expenses: Utilities (electric, water, sewer) = $45K annually, property insurance = $25K, maintenance and repairs = $60K, property management fees (15% of revenue) = $75K on $500K revenue, marketing and advertising = $20K, administrative costs = $15K. Total operating expenses = $240K. These represent 48% of revenue, which is within the typical 30-50% range for outdoor hospitality. Understanding these expenses helps project NOI and property value.",
       "An RV park owner analyzes operating expenses: With 100 sites generating $750K annual revenue, operating expenses total $300K including: utilities ($85K), property maintenance ($75K), landscaping and groundskeeping ($40K), management fees ($60K), insurance ($25K), and administrative ($15K). The 40% expense ratio leaves $450K NOI. By benchmarking against industry standards, the owner identifies that utilities are high and could invest in efficiency improvements to reduce costs and increase NOI.",
@@ -882,6 +882,167 @@ Sage Outdoor Advisory includes detailed cash flow analysis in our feasibility st
       {
         question: "How do you improve cash flow?",
         answer: "Cash flow can be improved by increasing revenue (higher occupancy, higher rates, additional revenue streams), reducing operating expenses, refinancing to lower debt service, or deferring non-essential capital expenditures. The most sustainable improvements come from operational efficiency and revenue optimization."
+      }
+    ]
+  },
+  "revenue-management": {
+    slug: "revenue-management",
+    term: "Revenue Management",
+    definition: "The strategic practice of optimizing pricing, inventory, and distribution to maximize revenue and profitability for outdoor hospitality properties through data-driven pricing decisions and demand forecasting.",
+    extendedDefinition: `Revenue management, also known as yield management, is the strategic practice of optimizing pricing, inventory, and distribution to maximize revenue and profitability. For outdoor hospitality properties like glamping resorts, RV parks, and campgrounds, effective revenue management is essential for maximizing financial performance.
+
+Revenue management involves:
+
+**Dynamic Pricing:**
+- Adjusting rates based on demand, seasonality, and market conditions
+- Implementing premium pricing during high-demand periods
+- Offering discounts during low-demand periods
+- Responding to competitor pricing changes
+- Optimizing rates for different booking channels
+
+**Demand Forecasting:**
+- Analyzing historical booking patterns
+- Predicting future demand based on trends
+- Identifying peak and off-peak periods
+- Understanding seasonal variations
+- Anticipating special events and holidays
+
+**Inventory Management:**
+- Optimizing availability across booking channels
+- Managing different unit types and site categories
+- Balancing direct bookings vs. third-party channels
+- Controlling last-minute availability
+- Managing group bookings and extended stays
+
+**Distribution Strategy:**
+- Managing multiple booking channels (direct, OTA, wholesale)
+- Optimizing channel mix for maximum revenue
+- Minimizing commission costs
+- Balancing channel distribution
+- Managing rate parity across channels
+
+**Length of Stay Optimization:**
+- Encouraging longer stays during low-demand periods
+- Managing minimum stay requirements
+- Optimizing for revenue per available unit (RevPAR)
+- Balancing occupancy vs. rate optimization
+
+**Market Segmentation:**
+- Identifying different guest segments
+- Pricing for different market segments
+- Understanding price sensitivity
+- Targeting promotions to specific segments
+- Optimizing for different booking windows
+
+Key revenue management metrics include:
+- **ADR (Average Daily Rate):** Average revenue per occupied unit
+- **RevPAR (Revenue Per Available Room):** Revenue per available unit
+- **Occupancy Rate:** Percentage of units occupied
+- **Booking Window:** Time between booking and arrival
+- **Channel Mix:** Distribution of bookings across channels
+- **Length of Stay:** Average number of nights per booking
+
+Revenue management strategies for outdoor hospitality:
+
+**Seasonal Pricing:**
+- Premium rates during peak seasons (summer, holidays)
+- Discounted rates during shoulder seasons
+- Special packages during off-peak periods
+- Dynamic adjustments based on weather and events
+
+**Advance Booking Incentives:**
+- Early bird discounts for advance bookings
+- Last-minute deals to fill remaining inventory
+- Length of stay discounts
+- Group booking discounts
+
+**Channel Optimization:**
+- Direct booking incentives (avoiding OTA commissions)
+- Strategic use of OTAs for visibility
+- Managing rate parity
+- Optimizing channel mix for maximum net revenue
+
+**Demand-Based Pricing:**
+- Higher rates during high-demand periods
+- Lower rates to stimulate demand during slow periods
+- Weekend vs. weekday pricing
+- Event-based pricing adjustments
+
+**Competitive Positioning:**
+- Monitoring competitor rates
+- Positioning relative to market
+- Adjusting rates based on competitive landscape
+- Maintaining competitive advantage
+
+Revenue management tools and systems:
+- Property management systems (PMS) with revenue management features
+- Channel managers for multi-channel distribution
+- Analytics and reporting tools
+- Demand forecasting software
+- Competitive intelligence tools
+
+For outdoor hospitality properties, revenue management challenges include:
+- High seasonality requiring dynamic pricing
+- Weather-dependent demand
+- Limited inventory (fixed number of units/sites)
+- Multiple booking channels to manage
+- Competitive market dynamics
+- Guest price sensitivity
+
+Effective revenue management can significantly impact profitability:
+- 5-15% revenue increase through optimized pricing
+- Improved RevPAR through better rate and occupancy balance
+- Reduced dependency on discounting
+- Better channel mix optimization
+- Increased direct bookings (reducing commission costs)
+
+In feasibility studies, revenue management analysis helps:
+- Project revenue potential with optimized pricing
+- Understand demand patterns and seasonality
+- Assess pricing strategies and positioning
+- Evaluate revenue management system needs
+- Estimate revenue optimization opportunities
+
+Sage Outdoor Advisory includes revenue management considerations in our feasibility studies, helping clients understand pricing strategies, demand patterns, revenue optimization opportunities, and the impact of effective revenue management on property financial performance.`,
+    category: "Financial",
+    relatedTerms: ["adr", "occupancy-rate", "revpar", "seasonality", "revenue-projections"],
+    examples: [
+      "A glamping resort implements revenue management: During peak summer (June-August), rates are $400/night with 90% occupancy. Shoulder seasons (May, September) use $300/night rates to maintain 75% occupancy. Off-peak (October-April) offers $200/night with early bird discounts, achieving 55% occupancy. This dynamic pricing strategy maximizes annual revenue by optimizing rates for each demand period, resulting in $850K annual revenue versus $720K with static pricing.",
+      "An RV park uses revenue management: Weekend rates are $95/night (high demand), weekday rates $75/night. Advance bookings (30+ days) receive 10% discount to encourage early reservations. Last-minute bookings (within 7 days) during low-demand periods get 15% discount to fill remaining inventory. This strategy balances occupancy and rate, achieving 80% annual occupancy with $78 blended ADR, maximizing RevPAR.",
+      "A campground implements seasonal revenue management: Peak summer rates are $65/night, spring/fall $45/night, winter $35/night. During special events (holidays, festivals), rates increase 20% due to high demand. Length-of-stay discounts: 3+ nights get 5% off, 7+ nights get 10% off. This strategy optimizes revenue across seasons and encourages longer stays, resulting in $420K annual revenue with 70% occupancy."
+    ],
+    useCases: [
+      "Maximizing revenue and profitability",
+      "Optimizing pricing strategies",
+      "Improving RevPAR performance",
+      "Managing seasonal demand variations"
+    ],
+    seoKeywords: ["revenue management", "yield management", "dynamic pricing", "revenue optimization", "pricing strategy", "hospitality revenue management"],
+    internalLinks: [
+      { text: "ADR", url: "/glossary/adr" },
+      { text: "RevPAR", url: "/glossary/revpar" },
+      { text: "Occupancy Rate", url: "/glossary/occupancy-rate" },
+      { text: "Seasonality", url: "/glossary/seasonality" },
+      { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
+      { text: "RV Resort Feasibility Study", url: "/landing/rv-resort-feasibility-study" },
+      { text: "All Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/" }
+    ],
+    faqs: [
+      {
+        question: "What is revenue management and why is it important?",
+        answer: "Revenue management is the strategic practice of optimizing pricing, inventory, and distribution to maximize revenue. It's critical for outdoor hospitality properties because it can increase revenue by 5-15% through better pricing strategies, improved occupancy, and optimized channel mix. Effective revenue management balances rate and occupancy to maximize RevPAR and profitability."
+      },
+      {
+        question: "How does revenue management work for outdoor hospitality?",
+        answer: "Revenue management for outdoor hospitality involves dynamic pricing based on demand, seasonality, and market conditions. It includes adjusting rates for peak/off-peak periods, managing multiple booking channels, optimizing length of stay, and responding to competitive pricing. The goal is to maximize revenue per available unit (RevPAR) by balancing occupancy and average daily rate (ADR)."
+      },
+      {
+        question: "What tools are needed for revenue management?",
+        answer: "Revenue management requires property management systems (PMS) with pricing capabilities, channel managers for multi-channel distribution, analytics tools for demand forecasting, and competitive intelligence. Many properties start with basic tools and add more sophisticated systems as they grow. A feasibility study can help identify revenue management needs and opportunities."
+      },
+      {
+        question: "How much can revenue management improve profitability?",
+        answer: "Effective revenue management can increase revenue by 5-15% through optimized pricing, better demand forecasting, improved channel mix, and strategic discounting. This translates directly to improved profitability, as revenue increases without proportional cost increases. The impact depends on current pricing strategies, market conditions, and implementation effectiveness."
       }
     ]
   },

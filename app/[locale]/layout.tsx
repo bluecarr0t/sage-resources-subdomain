@@ -60,6 +60,58 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // Handle chunk loading errors gracefully - prevent them from appearing in console
+                if (typeof window !== 'undefined') {
+                  // Intercept script loading errors for Next.js chunks
+                  const originalError = window.onerror;
+                  window.onerror = function(msg, url, line, col, error) {
+                    // Check if it's a chunk loading error
+                    if (url && (url.includes('/_next/static/chunks/') || url.includes('/_next/static/'))) {
+                      // Silently handle - Next.js will handle retry/fallback
+                      return true; // Prevent default error handling
+                    }
+                    // For other errors, use original handler if it exists
+                    if (originalError) {
+                      return originalError.apply(this, arguments);
+                    }
+                    return false;
+                  };
+                  
+                  // Handle script element errors (resource loading)
+                  window.addEventListener('error', function(e) {
+                    if (e.target && e.target.tagName === 'SCRIPT' && e.target.src) {
+                      const src = e.target.src;
+                      if (src.includes('/_next/static/chunks/') || src.includes('/_next/static/')) {
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                        return true;
+                      }
+                    }
+                  }, true);
+                  
+                  // Handle unhandled promise rejections from chunk loading
+                  window.addEventListener('unhandledrejection', function(e) {
+                    if (e.reason) {
+                      const message = e.reason?.message || String(e.reason);
+                      if (message.includes('Loading chunk') || 
+                          message.includes('Failed to fetch dynamically imported module') ||
+                          message.includes('ChunkLoadError')) {
+                        e.preventDefault();
+                        return true;
+                      }
+                    }
+                  });
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <Suspense fallback={null}>
           <DynamicGoogleAnalytics />

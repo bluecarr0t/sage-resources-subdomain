@@ -7,7 +7,6 @@ import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
-import { createLocaleLinks } from "@/lib/locale-links";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -80,9 +79,35 @@ export default async function GlossaryPage({ params }: PageProps) {
     notFound();
   }
   
-  const t = await getTranslations({ locale, namespace: 'glossary' });
+  let t;
+  try {
+    t = await getTranslations({ locale, namespace: 'glossary' });
+  } catch (error) {
+    console.error('Error loading translations:', error);
+    throw new Error(`Failed to load translations for locale: ${locale}`);
+  }
   
-  const allTerms = getAllGlossaryTerms();
+  let allTerms;
+  try {
+    allTerms = getAllGlossaryTerms();
+  } catch (error) {
+    console.error('Error loading glossary terms:', error);
+    throw new Error('Failed to load glossary terms');
+  }
+  
+  // Ensure allTerms is an array
+  if (!Array.isArray(allTerms)) {
+    throw new Error('getAllGlossaryTerms() did not return an array');
+  }
+  
+  // Filter out any invalid terms
+  allTerms = allTerms.filter(term => 
+    term && 
+    typeof term === 'object' && 
+    term.term && 
+    typeof term.term === 'string' &&
+    term.term.length > 0
+  );
   
   // English category names (used for getGlossaryTermsByCategory)
   const englishCategories = [
@@ -94,7 +119,7 @@ export default async function GlossaryPage({ params }: PageProps) {
     'General'
   ] as const;
   
-  // Get translated category names
+  // Get translated category names with error handling
   const translatedCategories = [
     t('categories.feasibilityAppraisal'),
     t('categories.glamping'),
@@ -109,7 +134,7 @@ export default async function GlossaryPage({ params }: PageProps) {
   const categoryMap: Record<string, string> = {};
   englishCategories.forEach((englishCategory, index) => {
     const translatedCategory = translatedCategories[index];
-    if (translatedCategory) {
+    if (translatedCategory && typeof translatedCategory === 'string') {
       categoryMap[translatedCategory] = englishCategory;
     }
   });
@@ -117,7 +142,9 @@ export default async function GlossaryPage({ params }: PageProps) {
   // Group terms by first letter for alphabetical navigation
   const termsByLetter: Record<string, typeof allTerms> = {};
   allTerms.forEach(term => {
-    const firstChar = term.term.charAt(0);
+    if (!term || !term.term || typeof term.term !== 'string') return; // Skip invalid terms
+    const firstChar = term.term.trim().charAt(0);
+    if (!firstChar) return; // Skip empty strings
     // Group all numeric terms (0-9) under "#"
     const letter = /[0-9]/.test(firstChar) ? "#" : firstChar.toUpperCase();
     if (!termsByLetter[letter]) {
@@ -126,23 +153,47 @@ export default async function GlossaryPage({ params }: PageProps) {
     termsByLetter[letter].push(term);
   });
 
-  // Sort terms alphabetically
+  // Sort terms alphabetically with safe comparison
   Object.keys(termsByLetter).forEach(letter => {
-    termsByLetter[letter].sort((a, b) => a.term.localeCompare(b.term));
+    termsByLetter[letter].sort((a, b) => {
+      const aTerm = a?.term || '';
+      const bTerm = b?.term || '';
+      return aTerm.localeCompare(bTerm, locale, { sensitivity: 'base' });
+    });
   });
 
   // Get terms by category - use translated category name as key, but fetch with English name
   const termsByCategory: Record<string, typeof allTerms> = {};
   translatedCategories.forEach((translatedCategory, index) => {
-    if (translatedCategory && index < englishCategories.length) {
+    if (translatedCategory && typeof translatedCategory === 'string' && translatedCategory.length > 0 && index < englishCategories.length) {
       const englishCategory = englishCategories[index];
       if (englishCategory) {
-        termsByCategory[translatedCategory] = getGlossaryTermsByCategory(englishCategory);
+        try {
+          const categoryTerms = getGlossaryTermsByCategory(englishCategory);
+          if (Array.isArray(categoryTerms)) {
+            // Filter out invalid terms
+            termsByCategory[translatedCategory] = categoryTerms.filter(term => 
+              term && 
+              typeof term === 'object' && 
+              term.term && 
+              typeof term.term === 'string'
+            );
+          } else {
+            termsByCategory[translatedCategory] = [];
+          }
+        } catch (error) {
+          console.error(`Error getting terms for category ${englishCategory}:`, error);
+          // If there's an error getting terms for a category, use empty array
+          termsByCategory[translatedCategory] = [];
+        }
       }
     }
   });
-
-  const links = createLocaleLinks(locale);
+  
+  // Filter out any undefined or invalid categories
+  const validCategories = translatedCategories.filter((cat): cat is string => 
+    typeof cat === 'string' && cat.length > 0
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -185,12 +236,12 @@ export default async function GlossaryPage({ params }: PageProps) {
         allTerms={allTerms}
         termsByLetter={termsByLetter}
         termsByCategory={termsByCategory}
-        categories={translatedCategories}
+        categories={validCategories}
         locale={locale}
       />
 
       {/* CTA Section */}
-      <section className="bg-[#00b6a6] py-16">
+      <section className="bg-[#006b5f] py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             {t('cta.title')}

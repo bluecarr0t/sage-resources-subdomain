@@ -317,7 +317,7 @@ export default function PropertyDetailTemplate({
                   role="img"
                   aria-label={`No photos available for ${propertyName}`}
                 >
-                  <p className="text-gray-500">No photos available</p>
+                  <p className="text-gray-700">No photos available</p>
                 </div>
               )}
             </div>
@@ -362,7 +362,7 @@ export default function PropertyDetailTemplate({
                     href={websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2"
+                    className="px-6 py-2 bg-[#006b5f] text-white rounded-lg hover:bg-[#005a4f] transition-colors focus:outline-none focus:ring-2 focus:ring-[#006b5f] focus:ring-offset-2"
                     aria-label={`Visit ${propertyName}'s website (opens in new tab)`}
                   >
                     Visit Website

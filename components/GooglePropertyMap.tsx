@@ -10,12 +10,16 @@ import { NationalPark, NationalParkWithCoords, filterParksWithCoordinates } from
 import { useMapContext } from './MapContext';
 import MultiSelect from './MultiSelect';
 import { slugifyPropertyName } from '@/lib/properties';
-import PopulationLayer from './PopulationLayer';
-import GDPLayer from './GDPLayer';
 import { PopulationLookup } from '@/lib/population/parse-population-csv';
 import { fetchPopulationDataFromSupabase, PopulationDataByFIPS } from '@/lib/population/supabase-population';
-import { fetchGDPDataFromSupabase, GDPLookup, GDPDataByFIPS } from '@/lib/gdp/supabase-gdp';
 import { getChangeRanges } from '@/lib/maps/county-boundaries';
+import dynamic from 'next/dynamic';
+
+// Dynamically import layer components to reduce initial bundle size
+const PopulationLayer = dynamic(() => import('./PopulationLayer'), {
+  ssr: false,
+  loading: () => null, // No loading state needed - layer loads when visible
+});
 
 // Default center for lower 48 states (continental USA)
 // Optimized to better frame the lower 48 states, excluding most of Canada and Mexico
@@ -30,7 +34,9 @@ const defaultCenter = {
 const defaultZoom = 4;
 
 // Libraries array must be a constant to prevent LoadScript reload warnings
-const libraries: ('places')[] = ['places'];
+// Note: 'places' library is loaded by LocationSearch component when needed
+// Don't load it here to reduce initial bundle size
+const libraries: never[] = [];
 
 type PropertyWithCoords = SageProperty & { coordinates: [number, number] };
 
@@ -257,7 +263,7 @@ interface GooglePropertyMapProps {
 }
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
-  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, showGDPLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, toggleGDPLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError, hasLoadedOnce } = useMapContext();
+  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError, hasLoadedOnce } = useMapContext();
   // Use shared properties from context instead of local state
   const properties = sharedProperties;
   const allProperties = sharedAllProperties;
@@ -281,9 +287,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [populationLookup, setPopulationLookup] = useState<PopulationLookup | null>(null);
   const [populationFipsLookup, setPopulationFipsLookup] = useState<PopulationDataByFIPS | null>(null);
   const [populationLoading, setPopulationLoading] = useState(false);
-  const [gdpLookup, setGdpLookup] = useState<GDPLookup | null>(null);
-  const [gdpFipsLookup, setGdpFipsLookup] = useState<GDPDataByFIPS | null>(null);
-  const [gdpLoading, setGdpLoading] = useState(false);
 
   // URL parameter handling
   const searchParams = useSearchParams();
@@ -486,8 +489,18 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   // No need to fetch separately - context already provides this
   // The allProperties from context contains all properties without filters for filter dropdowns
 
-  // Fetch national parks
+  // Fetch national parks only when the toggle is enabled
   useEffect(() => {
+    // Only fetch when user enables the national parks layer
+    if (!showNationalParks) {
+      return;
+    }
+
+    // If already loaded, don't reload
+    if (nationalParks.length > 0) {
+      return;
+    }
+
     async function fetchNationalParks() {
       try {
         console.log('Fetching national parks from Supabase...');
@@ -509,13 +522,21 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       }
     }
     fetchNationalParks();
-  }, []);
+  }, [showNationalParks, nationalParks.length]);
 
-  // Fetch population data from Supabase
+  // Fetch population data from Supabase only when layer is enabled
   useEffect(() => {
-    async function loadPopulationData() {
-      if (populationLookup) return; // Already loaded
+    // Only load data when the layer is actually enabled
+    if (!showPopulationLayer) {
+      return;
+    }
 
+    // If already loaded, don't reload
+    if (populationLookup) {
+      return;
+    }
+
+    async function loadPopulationData() {
       setPopulationLoading(true);
       try {
         console.log('Loading population data from Supabase...');
@@ -524,37 +545,13 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         setPopulationFipsLookup(fipsLookup);
       } catch (err) {
         console.error('Error loading population data from Supabase:', err);
-        // Optionally fallback to CSV API routes if needed
-        // This would require keeping the combineCensusData import
       } finally {
         setPopulationLoading(false);
       }
     }
 
     loadPopulationData();
-  }, [populationLookup]);
-
-  // Fetch GDP data from Supabase
-  // Temporarily disabled - will be re-enabled later
-  // useEffect(() => {
-  //   async function loadGDPData() {
-  //     if (gdpLookup) return; // Already loaded
-
-  //     setGdpLoading(true);
-  //     try {
-  //       console.log('Loading GDP data from Supabase...');
-  //       const { lookup, fipsLookup } = await fetchGDPDataFromSupabase();
-  //       setGdpLookup(lookup);
-  //       setGdpFipsLookup(fipsLookup);
-  //     } catch (err) {
-  //       console.error('Error loading GDP data from Supabase:', err);
-  //     } finally {
-  //       setGdpLoading(false);
-  //     }
-  //   }
-
-  //   loadGDPData();
-  // }, [gdpLookup]);
+  }, [showPopulationLayer, populationLookup]);
 
   // Process shared properties from context (no fetching - that's done in context)
   // The context fetches raw data, and this component processes it for display
@@ -950,10 +947,40 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   // Use processed properties for display
   const displayProperties = processedProperties;
 
-  const propertiesWithCoords = useMemo(
-    () => filterPropertiesWithCoordinates(displayProperties),
-    [displayProperties]
-  );
+  // Filter properties by viewport bounds to reduce rendering overhead
+  const propertiesWithCoords = useMemo(() => {
+    const allWithCoords = filterPropertiesWithCoordinates(displayProperties);
+    
+    // If no bounds available yet, return all (will filter once map loads)
+    if (!mapBounds) {
+      return allWithCoords;
+    }
+    
+    // Filter to only properties within current viewport bounds
+    const ne = mapBounds.getNorthEast();
+    const sw = mapBounds.getSouthWest();
+    
+    return allWithCoords.filter((property) => {
+      const [lat, lon] = property.coordinates;
+      
+      // Check if property is within bounds
+      // Handle longitude wraparound (if east < west, bounds cross international date line)
+      const withinLat = lat >= sw.lat() && lat <= ne.lat();
+      const east = ne.lng();
+      const west = sw.lng();
+      
+      let withinLon = false;
+      if (east >= west) {
+        // Normal case: no wraparound
+        withinLon = lon >= west && lon <= east;
+      } else {
+        // Wraparound case: bounds cross the international date line
+        withinLon = lon >= west || lon <= east;
+      }
+      
+      return withinLat && withinLon;
+    });
+  }, [displayProperties, mapBounds]);
 
 
   // Set default center and zoom for lower 48 states when map loads (if no URL params)
@@ -2546,82 +2573,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   </p>
                 </div>
               )}
-
-              {/* GDP Layer Toggle - Temporarily hidden, will be re-enabled later */}
-              {/* <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900">
-                        Show GDP Change
-                      </span>
-                      {gdpLoading && (
-                        <span className="text-xs text-gray-500">(Loading...)</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-600 mt-0.5">
-                      Display GDP change (2022-2023) as color-coded regions
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1 italic">
-                      Data source: <a 
-                        href="https://www.bea.gov/data/gdp/gdp-county-metro-and-other-areas" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline"
-                      >
-                        U.S. Bureau of Economic Analysis
-                      </a>
-                    </p>
-                  </div>
-                  <button
-                    id="gdp-layer-toggle"
-                    type="button"
-                    role="switch"
-                    aria-checked={showGDPLayer}
-                    aria-label={showGDPLayer ? 'Hide GDP Layer' : 'Show GDP Layer'}
-                    onClick={toggleGDPLayer}
-                    disabled={gdpLoading}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      showGDPLayer ? 'bg-[#2196f3]' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        showGDPLayer ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-                
-              </div>
-
-              {/* GDP Change Legend */}
-              {/* {showGDPLayer && !gdpLoading && (
-                <div className="p-3 bg-white rounded-lg border border-gray-200">
-                  <h4 className="text-xs font-semibold text-gray-900 mb-2">GDP Change (2022-2023)</h4>
-                  <div className="space-y-1">
-                    {getChangeRanges().map((range) => (
-                      <div key={range.label} className="flex items-center gap-2 text-xs">
-                        <div
-                          className="w-4 h-4 rounded border border-gray-300"
-                          style={{ backgroundColor: range.color }}
-                        />
-                        <span className="text-gray-700">{range.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic text-center">
-                    Data source: <a 
-                      href="https://www.bea.gov/data/gdp/gdp-county-metro-and-other-areas" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      U.S. Bureau of Economic Analysis
-                    </a>
-                  </p>
-                </div>
-              )} */}
             </div>
           </div>
         </div>
@@ -2631,9 +2582,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
   // Render only map if showMap is true
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full" style={{ minHeight: '100vh', height: '100%' }}>
       {/* Map - Full Viewport Height */}
-      <div className="h-full w-full relative">
+      <div className="h-full w-full relative" style={{ minHeight: '100vh' }}>
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-50 z-30">
             <div className="bg-white border border-red-200 rounded-lg p-6 m-4 max-w-md">
@@ -2652,10 +2603,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           </div>
         )}
         {isLoaded && (
-          <div className="relative h-full w-full">
+          <div className="relative h-full w-full" style={{ minHeight: '100vh', height: '100%' }}>
             <GoogleMap
               key={`map-${filterState.join(',')}-${filterUnitType.join(',')}-${filterRateRange.join(',')}`}
-              mapContainerStyle={{ width: '100%', height: '100%' }}
+              mapContainerStyle={{ width: '100%', height: '100%', minHeight: '100vh' }}
               center={mapCenter}
               zoom={mapZoom}
               onLoad={onLoad}
@@ -2935,16 +2886,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   visible={showPopulationLayer}
                 />
               )}
-
-              {/* GDP Change Layer - Temporarily disabled, will be re-enabled later */}
-              {/* {showGDPLayer && map && (
-                <GDPLayer
-                  map={map}
-                  gdpLookup={gdpLookup}
-                  fipsLookup={gdpFipsLookup || undefined}
-                  visible={showGDPLayer}
-                />
-              )} */}
             </GoogleMap>
             {/* Loading overlay when properties are being fetched */}
             {loading && (

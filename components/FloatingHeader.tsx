@@ -376,7 +376,7 @@ export default function FloatingHeader({
               )}
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="px-4 py-2 md:px-6 md:py-2.5 bg-[#00b6a6] text-white text-sm font-semibold rounded-lg hover:bg-[#009688] transition-all duration-200 shadow-lg hover:shadow-xl flex-shrink-0"
+                className="px-4 py-2 md:px-6 md:py-2.5 bg-[#006b5f] text-white text-sm font-semibold rounded-lg hover:bg-[#005a4f] transition-all duration-200 shadow-lg hover:shadow-xl flex-shrink-0"
                 style={{ borderRadius: '12px' }}
               >
                 Get Free Consultation

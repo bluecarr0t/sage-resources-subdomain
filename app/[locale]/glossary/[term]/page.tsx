@@ -5,6 +5,7 @@ import GlossaryTermTemplate from "@/components/GlossaryTermTemplate";
 import Link from "next/link";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -18,10 +19,12 @@ interface PageProps {
 
 export async function generateStaticParams() {
   const terms = getAllGlossaryTerms();
+  // Only generate for locales that have translations (currently only 'en')
+  const availableLocales = getAvailableLocalesForContent('glossary');
   const params: Array<{ locale: string; term: string }> = [];
   
-  // Generate params for all locales and terms
-  for (const locale of locales) {
+  // Generate params only for available locales
+  for (const locale of availableLocales) {
     for (const term of terms) {
       params.push({ locale, term: term.slug });
     }

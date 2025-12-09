@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { MapProvider } from '@/components/MapContext';
 import MapLayout from '@/components/MapLayout';
+import ResourceHints from '@/components/ResourceHints';
 import { createServerClient } from '@/lib/supabase';
 import { unstable_cache } from 'next/cache';
 import {
@@ -164,6 +165,9 @@ export default async function MapPage({ params }: PageProps) {
 
   return (
     <>
+      {/* Resource Hints for Performance */}
+      <ResourceHints />
+      
       {/* Structured Data */}
       <script
         type="application/ld+json"

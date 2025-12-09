@@ -94,7 +94,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
       <div className="fixed bottom-6 right-6 z-50">
         <Link
           href="https://sageoutdooradvisory.com/contact-us/"
-          className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-full shadow-2xl hover:bg-[#009688] transition-all transform hover:scale-105"
+          className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-full shadow-2xl hover:bg-[#005a4f] transition-all transform hover:scale-105"
         >
           Schedule Free Call
         </Link>
@@ -103,7 +103,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
       {/* Mobile TOC Toggle */}
       <button
         onClick={() => setShowTOC(!showTOC)}
-        className="lg:hidden fixed top-20 right-4 z-40 bg-[#00b6a6] text-white px-4 py-2 rounded-lg shadow-lg hover:bg-[#009688] transition-colors"
+        className="lg:hidden fixed top-20 right-4 z-40 bg-[#006b5f] text-white px-4 py-2 rounded-lg shadow-lg hover:bg-[#005a4f] transition-colors"
       >
         {showTOC ? "Hide" : "Show"} Contents
       </button>
@@ -161,7 +161,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
               {content.hero.ctaText && content.hero.ctaLink && (
                 <Link
                   href={content.hero.ctaLink}
-                  className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
+                  className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
                 >
                   {content.hero.ctaText}
                 </Link>
@@ -189,7 +189,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                         href={`#${item.anchor}`}
                         className={`block text-sm py-2 px-3 rounded transition-colors ${
                           activeSection === item.anchor
-                            ? "bg-[#00b6a6] text-white font-semibold"
+                            ? "bg-[#006b5f] text-white font-semibold"
                             : "text-gray-700 hover:bg-gray-100 hover:text-[#006b5f]"
                         } ${
                           item.level === 2 ? "pl-3" : item.level === 3 ? "pl-6" : ""
@@ -252,7 +252,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                       <Link
                         key={index}
                         href={clusterPage.url}
-                        className="block bg-gray-50 p-6 rounded-lg border border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all"
+                        className="block bg-gray-50 p-6 rounded-lg border border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
                       >
                         <h3 className="text-xl font-semibold text-gray-900 mb-2">
                           {clusterPage.title}
@@ -281,7 +281,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                         <Link
                           key={guideSlug}
                           href={`/guides/${guideSlug}`}
-                          className="block bg-white p-6 rounded-lg border-2 border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all"
+                          className="block bg-white p-6 rounded-lg border-2 border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
                         >
                           <h3 className="text-xl font-semibold text-gray-900 mb-2">
                             {relatedGuide.hero.headline}
@@ -309,7 +309,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                     {content.relatedServices.services.map((service, index) => (
                       <div
                         key={index}
-                        className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all"
+                        className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
                       >
                         <h3 className="text-xl font-semibold text-gray-900 mb-3">
                           <Link
@@ -361,7 +361,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                 </p>
                 <Link
                   href="https://sageoutdooradvisory.com/contact-us/"
-                  className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
+                  className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
                 >
                   Schedule Your Free Consultation
                 </Link>
@@ -372,7 +372,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
 
         {/* CTA Section */}
         {content.cta && (
-          <section className="py-20 bg-[#00b6a6]">
+          <section className="py-20 bg-[#006b5f]">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <h2 className="text-4xl font-bold text-white mb-4">{content.cta.title}</h2>
               <p className="text-xl text-white/90 mb-8">{content.cta.description}</p>

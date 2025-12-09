@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import PillarPageTemplate from "@/components/PillarPageTemplate";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -17,10 +18,12 @@ interface PageProps {
 
 export async function generateStaticParams() {
   const slugs = getAllGuideSlugs();
+  // Only generate for locales that have translations (currently only 'en')
+  const availableLocales = getAvailableLocalesForContent('guide');
   const params: Array<{ locale: string; slug: string }> = [];
   
-  // Generate params for all locales and slugs
-  for (const locale of locales) {
+  // Generate params only for available locales
+  for (const locale of availableLocales) {
     for (const slug of slugs) {
       params.push({ locale, slug });
     }

@@ -124,7 +124,7 @@ export default function GuidesIndex({
                   {category.name}
                 </h2>
                 <p className="text-gray-600 text-lg">{category.description}</p>
-                <span className="text-gray-500 text-sm">
+                <span className="text-gray-600 text-sm">
                   ({category.guides.length} guides)
                 </span>
               </div>
@@ -167,7 +167,7 @@ export default function GuidesIndex({
       {/* No Results */}
       {searchQuery && filteredGuides.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
+          <p className="text-gray-600 text-lg">
             No guides found matching &ldquo;{searchQuery}&rdquo;
           </p>
           <button

@@ -11,7 +11,7 @@ The study typically includes market analysis to understand demand and competitio
 
 Sage Outdoor Advisory specializes in creating comprehensive, bank-approved feasibility studies for outdoor hospitality projects. Our studies provide investors, developers, and lenders with the detailed analysis needed to make informed decisions about project development and financing. For current industry trends that inform feasibility studies, see our <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" class="text-[#006b5f] hover:text-[#005a4f] underline">2025 Outdoor Hospitality Industry Overview</a> blog post.`,
     category: "Feasibility & Appraisal",
-    relatedTerms: ["market-analysis", "appraisal", "revenue-projections", "competitive-analysis"],
+    relatedTerms: ["market-analysis", "appraisal", "revenue-projections", "competitive-analysis", "zoning", "permitting", "site-development", "due-diligence"],
     examples: [
       "A developer planning a 30-unit glamping resort in Colorado's mountain region commissions a feasibility study. The study analyzes local tourism data showing 2.3M annual visitors to nearby attractions, identifies 8 competing properties with average 78% occupancy and $285 ADR, projects 65% first-year occupancy growing to 82% by year 3, estimates $1.2M development costs, and forecasts $650K Year 1 revenue growing to $1.1M by Year 5. The study concludes the project is viable with 18% IRR and recommends proceeding, helping secure $800K bank financing based on the comprehensive analysis.",
       "An investor considering a 150-site RV park near Great Smoky Mountains National Park needs a feasibility study. The analysis examines national park visitation (12M+ annually), analyzes 12 competing RV parks within 15 miles showing strong demand (average 75% occupancy), evaluates local zoning and utility requirements ($850K estimated development costs), projects $920K annual revenue at 70% occupancy and $60/night average rate, and identifies seasonal patterns with peak summer occupancy at 95%. The study validates strong market demand and projects positive cash flow by month 8, supporting the investment decision and lender requirements.",
@@ -58,7 +58,7 @@ Appraisers use three primary approaches to determine value: the sales comparison
 
 Appraisals are required for bank financing, property sales, refinancing, insurance purposes, and investment analysis. Sage Outdoor Advisory provides specialized appraisals for outdoor hospitality properties, understanding the unique characteristics and valuation methods required for these asset types.`,
     category: "Feasibility & Appraisal",
-    relatedTerms: ["feasibility-study", "cap-rate", "noi", "income-approach"],
+    relatedTerms: ["feasibility-study", "cap-rate", "noi", "income-approach", "zoning", "due-diligence"],
     examples: [
       "A glamping property appraisal for bank financing",
       "An RV resort appraisal for sale purposes",
@@ -282,7 +282,7 @@ For outdoor hospitality properties, the cost approach considers the cost of site
 
 Sage Outdoor Advisory uses the cost approach in our appraisals, particularly for new developments or unique properties, to provide comprehensive valuation analysis.`,
     category: "Feasibility & Appraisal",
-    relatedTerms: ["appraisal", "income-approach", "comparable-sales"],
+    relatedTerms: ["appraisal", "income-approach", "comparable-sales", "construction-costs", "development-costs"],
     examples: [
       "Valuing a new glamping resort based on construction costs",
       "Using cost approach for a unique campground development"

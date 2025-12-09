@@ -1,5 +1,20 @@
 import type { GlossaryTerm } from "./types";
-import { glossaryTerms } from "./index";
+import { feasibilityAppraisalTerms } from "./terms/feasibility-appraisal";
+import { glampingTerms } from "./terms/glamping";
+import { financialTerms } from "./terms/financial";
+import { rvCampgroundTerms } from "./terms/rv-campground";
+import { generalTerms } from "./terms/general";
+import { realEstateTerms } from "./terms/real-estate";
+
+// Combine all terms into a single object
+const glossaryTerms: Record<string, GlossaryTerm> = {
+  ...feasibilityAppraisalTerms,
+  ...glampingTerms,
+  ...financialTerms,
+  ...rvCampgroundTerms,
+  ...generalTerms,
+  ...realEstateTerms,
+};
 
 // Helper functions for working with glossary terms
 export function getGlossaryTerm(slug: string): GlossaryTerm | null {
@@ -28,4 +43,7 @@ export function searchGlossaryTerms(query: string): GlossaryTerm[] {
     term.seoKeywords.some(keyword => keyword.toLowerCase().includes(lowerQuery))
   );
 }
+
+// Export glossaryTerms for use in other modules
+export { glossaryTerms };
 

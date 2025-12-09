@@ -99,7 +99,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       <div className="fixed bottom-6 right-6 z-50">
         <Link
           href="https://sageoutdooradvisory.com/contact-us/"
-          className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-full shadow-2xl hover:bg-[#009688] transition-all transform hover:scale-105"
+          className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-full shadow-2xl hover:bg-[#005a4f] transition-all transform hover:scale-105"
         >
           Schedule Free Call
         </Link>
@@ -122,7 +122,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             </p>
             <Link
               href={content.hero.ctaLink}
-              className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
+              className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
             >
               {content.hero.ctaText}
             </Link>
@@ -132,7 +132,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
 
       {/* Key Takeaways Section */}
       {content.keyTakeaways && content.keyTakeaways.length > 0 && (
-        <section className="bg-[#00b6a6]/10 border-l-4 border-[#00b6a6] mx-4 sm:mx-6 lg:mx-8 my-8 p-6 rounded-lg">
+        <section className="bg-[#006b5f]/10 border-l-4 border-[#006b5f] mx-4 sm:mx-6 lg:mx-8 my-8 p-6 rounded-lg">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Key Takeaways</h2>
           <ul className="space-y-2">
             {content.keyTakeaways.map((takeaway, index) => (
@@ -186,7 +186,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                 <div className="mt-8 text-center">
                   <Link
                     href="https://sageoutdooradvisory.com/contact-us/"
-                    className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
+                    className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
                   >
                     Schedule Free Consultation
                   </Link>
@@ -219,7 +219,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <div className="mt-12 text-center">
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
+                className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
                 Schedule Your Free Consultation
               </Link>
@@ -293,7 +293,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               <p className="text-gray-700 mb-4">Ready to join our success stories?</p>
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
+                className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
                 Schedule Your Free Consultation
               </Link>
@@ -341,7 +341,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               <p className="text-gray-700 mb-2">Ready to get started with your project?</p>
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
+                className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
               >
                 Schedule Free Consultation
               </Link>
@@ -368,7 +368,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                   <Link
                     key={guideSlug}
                     href={`/guides/${guideSlug}`}
-                    className="block bg-white p-6 rounded-lg shadow-lg border-2 border-gray-200 hover:shadow-xl hover:border-[#00b6a6] transition-all"
+                    className="block bg-white p-6 rounded-lg shadow-lg border-2 border-gray-200 hover:shadow-xl hover:border-[#006b5f] transition-all"
                   >
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       {guide.hero.headline}
@@ -405,7 +405,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                   <Link
                     key={relatedSlug}
                     href={`/landing/${relatedSlug}`}
-                    className="block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all"
+                    className="block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
                   >
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       {relatedPage.hero.headline}
@@ -438,7 +438,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               {content.relatedServices.services.map((service, index) => (
                 <div
                   key={index}
-                  className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all"
+                  className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
                 >
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">
                     <Link
@@ -463,7 +463,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <div className="mt-8 text-center">
               <Link
                 href="https://sageoutdooradvisory.com/services-overview/"
-                className="inline-block px-6 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
+                className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
               >
                 View All Services
               </Link>
@@ -596,7 +596,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               </p>
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
-                className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-lg"
+                className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
                 Schedule Your Free Consultation
               </Link>
@@ -606,7 +606,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       )}
 
       {/* CTA Section */}
-      <section className="py-20 bg-[#00b6a6]">
+      <section className="py-20 bg-[#006b5f]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
             {content.cta.title}

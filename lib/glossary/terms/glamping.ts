@@ -64,7 +64,7 @@ Glamping resorts appeal to travelers who want to connect with nature without sac
 
 Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping resorts across all price points, understanding the unique market dynamics, revenue models, and operational considerations of these properties.`,
     category: "Glamping",
-    relatedTerms: ["glamping", "safari-tent", "yurt", "adr", "occupancy-rate"],
+    relatedTerms: ["glamping", "safari-tent", "yurt", "adr", "occupancy-rate", "amenities"],
     examples: [
       "A budget-friendly glamping resort offering 15 basic yurts with queen beds, linens, and simple furnishings at $75-100/night, providing comfortable standalone accommodations without luxury amenities",
       "A mid-range 25-unit glamping resort in the mountains featuring safari tents and treehouses with private bathrooms, quality bedding, heating/cooling, and basic kitchenettes at $150-200/night",

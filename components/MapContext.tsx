@@ -10,7 +10,6 @@ interface MapContextType {
   filterRateRange: string[];
   showNationalParks: boolean;
   showPopulationLayer: boolean;
-  showGDPLayer: boolean;
   populationYear: '2010' | '2020';
   isFullscreen: boolean;
   setFilterCountry: (country: string[]) => void;
@@ -23,7 +22,6 @@ interface MapContextType {
   toggleRateRange: (rateRange: string) => void;
   toggleNationalParks: () => void;
   togglePopulationLayer: () => void;
-  toggleGDPLayer: () => void;
   setPopulationYear: (year: '2010' | '2020') => void;
   toggleFullscreen: () => void;
   clearFilters: () => void;
@@ -45,7 +43,6 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const [filterRateRange, setFilterRateRange] = useState<string[]>([]);
   const [showNationalParks, setShowNationalParks] = useState<boolean>(true);
   const [showPopulationLayer, setShowPopulationLayer] = useState<boolean>(false);
-  const [showGDPLayer, setShowGDPLayer] = useState<boolean>(false);
   const [populationYear, setPopulationYear] = useState<'2010' | '2020'>('2020');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   
@@ -97,10 +94,6 @@ export function MapProvider({ children }: { children: ReactNode }) {
 
   const togglePopulationLayer = () => {
     setShowPopulationLayer((prev) => !prev);
-  };
-
-  const toggleGDPLayer = () => {
-    setShowGDPLayer((prev) => !prev);
   };
 
   const toggleFullscreen = () => {
@@ -191,6 +184,10 @@ export function MapProvider({ children }: { children: ReactNode }) {
         filterUnitType.forEach(unitType => params.append('unitType', unitType));
         filterRateRange.forEach(rateRange => params.append('rateRange', rateRange));
         
+        // Note: Bounds-based filtering would go here, but for initial load we fetch all
+        // to ensure filter dropdowns work correctly. Viewport filtering can be done
+        // client-side in GooglePropertyMap for better UX.
+        
         // Fetch from cached API route with abort signal
         const response = await fetch(`/api/properties?${params.toString()}`, {
           signal: abortController.signal,
@@ -260,7 +257,6 @@ export function MapProvider({ children }: { children: ReactNode }) {
         filterRateRange,
         showNationalParks,
         showPopulationLayer,
-        showGDPLayer,
         populationYear,
         isFullscreen,
         setFilterCountry,
@@ -273,7 +269,6 @@ export function MapProvider({ children }: { children: ReactNode }) {
         toggleRateRange,
         toggleNationalParks,
         togglePopulationLayer,
-        toggleGDPLayer,
         setPopulationYear,
         toggleFullscreen,
         clearFilters,

@@ -11,7 +11,7 @@ RV resorts are positioned as destinations rather than just overnight stops, ofte
 
 Sage Outdoor Advisory provides feasibility studies and appraisals for RV resorts, understanding the premium positioning, amenities, and revenue potential of these properties.`,
     category: "RV & Campground",
-    relatedTerms: ["rv-park", "full-hookup", "campground", "adr"],
+    relatedTerms: ["rv-park", "full-hookup", "campground", "adr", "amenities"],
     examples: [
       "A 200-site RV resort with pool, clubhouse, and restaurant",
       "A beachfront RV resort with premium amenities and activities"
@@ -106,7 +106,7 @@ Full hookup sites are premium offerings at RV parks and resorts, typically comma
 
 Sage Outdoor Advisory considers hookup types and amenities in our feasibility studies and appraisals, as they significantly impact site rates and property value.`,
     category: "RV & Campground",
-    relatedTerms: ["rv-park", "rv-resort", "campground"],
+    relatedTerms: ["rv-park", "rv-resort", "campground", "infrastructure"],
     examples: [
       "A full hookup RV site with 50-amp electrical, water, and sewer connections",
       "Premium full hookup sites at an RV resort"

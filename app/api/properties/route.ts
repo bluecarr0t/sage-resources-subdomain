@@ -21,14 +21,30 @@ export async function GET(request: NextRequest) {
     const filterUnitType = searchParams.getAll('unitType');
     const filterRateRange = searchParams.getAll('rateRange');
     
-    // Create a cache key based on filters
-    const cacheKey = `properties-${JSON.stringify({ filterCountry, filterState, filterUnitType, filterRateRange })}`;
+    // Extract viewport bounds (optional - for viewport-based loading)
+    const north = searchParams.get('north');
+    const south = searchParams.get('south');
+    const east = searchParams.get('east');
+    const west = searchParams.get('west');
+    const bounds = north && south && east && west ? {
+      north: parseFloat(north),
+      south: parseFloat(south),
+      east: parseFloat(east),
+      west: parseFloat(west),
+    } : null;
+    
+    // Extract fields parameter (optional - for field selection to reduce payload)
+    const fieldsParam = searchParams.get('fields');
+    const requestedFields = fieldsParam ? fieldsParam.split(',') : null;
+    
+    // Create a cache key based on filters, bounds, and fields
+    const cacheKey = `properties-${JSON.stringify({ filterCountry, filterState, filterUnitType, filterRateRange, bounds, fields: requestedFields })}`;
     
     // Fetch properties with caching
     // Cache tag: 'properties' - can be invalidated when properties are added
     const cachedFetch = unstable_cache(
       async () => {
-        return await fetchPropertiesFromDatabase(filterCountry, filterState, filterUnitType, filterRateRange);
+        return await fetchPropertiesFromDatabase(filterCountry, filterState, filterUnitType, filterRateRange, bounds, requestedFields);
       },
       [cacheKey],
       {
@@ -69,7 +85,9 @@ async function fetchPropertiesFromDatabase(
   filterCountry: string[],
   filterState: string[],
   filterUnitType: string[],
-  filterRateRange: string[]
+  filterRateRange: string[],
+  bounds: { north: number; south: number; east: number; west: number } | null = null,
+  requestedFields: string[] | null = null
 ) {
   const supabase = createServerClient();
   
@@ -190,22 +208,70 @@ async function fetchPropertiesFromDatabase(
     }
   }
   
+  // Filter by bounds if provided (after fetching to avoid complex PostGIS queries)
+  let filteredData = allData || [];
+  if (bounds) {
+    filteredData = filteredData.filter((item: any) => {
+      const lat = typeof item.lat === 'number' ? item.lat : parseFloat(String(item.lat));
+      const lon = typeof item.lon === 'number' ? item.lon : parseFloat(String(item.lon));
+      
+      // Skip items without valid coordinates
+      if (!lat || !lon || isNaN(lat) || isNaN(lon) || !isFinite(lat) || !isFinite(lon)) {
+        return false;
+      }
+      
+      // Check if point is within bounds
+      // Handle longitude wraparound (east could be less than west if crossing 180/-180)
+      const withinLat = lat >= bounds.south && lat <= bounds.north;
+      let withinLon = false;
+      
+      if (bounds.east >= bounds.west) {
+        // Normal case: no wraparound
+        withinLon = lon >= bounds.west && lon <= bounds.east;
+      } else {
+        // Wraparound case: bounds cross the international date line
+        withinLon = lon >= bounds.west || lon <= bounds.east;
+      }
+      
+      return withinLat && withinLon;
+    });
+  }
+  
   // Transform data to map new column names to expected format
-  const transformedData = (allData || []).map((item: any) => ({
-    ...item,
-    // Map column names with double underscores to single underscores
-    avg_retail_daily_rate_2024: item.avg__retail_daily_rate_2024 ?? item.avg_retail_daily_rate_2024,
-    duplicate_note: item.duplicatenote ?? item.duplicate_note,
-    property_total_sites: item.property__total_sites ?? item.property_total_sites,
-    operating_season_months: item.operating_season__months_ ?? item.operating_season_months,
-    num_locations: item.__of_locations ?? item.num_locations,
-    retail_daily_rate_fees_2024: item.retail_daily_rate__fees__2024 ?? item.retail_daily_rate_fees_2024,
-    retail_daily_rate_fees_ytd: item.retail_daily_rate__fees__ytd ?? item.retail_daily_rate_fees_ytd,
-    avg_rate_next_12_months: item.avg__rate__next_12_months_ ?? item.avg_rate_next_12_months,
-    // Ensure lat and lon are accessible (they may be numbers from NUMERIC columns)
-    lat: item.lat ?? null,
-    lon: item.lon ?? null,
-  }));
+  let transformedData = filteredData.map((item: any) => {
+    const transformed: any = {
+      ...item,
+      // Map column names with double underscores to single underscores
+      avg_retail_daily_rate_2024: item.avg__retail_daily_rate_2024 ?? item.avg_retail_daily_rate_2024,
+      duplicate_note: item.duplicatenote ?? item.duplicate_note,
+      property_total_sites: item.property__total_sites ?? item.property_total_sites,
+      operating_season_months: item.operating_season__months_ ?? item.operating_season_months,
+      num_locations: item.__of_locations ?? item.num_locations,
+      retail_daily_rate_fees_2024: item.retail_daily_rate__fees__2024 ?? item.retail_daily_rate_fees_2024,
+      retail_daily_rate_fees_ytd: item.retail_daily_rate__fees__ytd ?? item.retail_daily_rate_fees_ytd,
+      avg_rate_next_12_months: item.avg__rate__next_12_months_ ?? item.avg_rate_next_12_months,
+      // Ensure lat and lon are accessible (they may be numbers from NUMERIC columns)
+      lat: item.lat ?? null,
+      lon: item.lon ?? null,
+    };
+    
+    // If specific fields requested, only include those fields
+    // Always include essential fields: id, property_name, lat, lon, state, country
+    if (requestedFields && requestedFields.length > 0) {
+      const essentialFields = ['id', 'property_name', 'lat', 'lon', 'state', 'country', 'unit_type', 'rate_category'];
+      const fieldsToInclude = new Set([...essentialFields, ...requestedFields]);
+      
+      const filtered: any = {};
+      fieldsToInclude.forEach((field) => {
+        if (transformed.hasOwnProperty(field)) {
+          filtered[field] = transformed[field];
+        }
+      });
+      return filtered;
+    }
+    
+    return transformed;
+  });
   
   return transformedData;
 }

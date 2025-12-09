@@ -79,7 +79,7 @@ export default function GlossaryIndex({
             className={`py-4 px-2 border-b-2 font-semibold ${
               activeTab === "alphabetical"
                 ? "border-[#006b5f] text-[#006b5f]"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                : "border-transparent text-gray-600 hover:text-gray-700"
             }`}
           >
             {t('tabs.alphabetical')}
@@ -92,7 +92,7 @@ export default function GlossaryIndex({
             className={`py-4 px-2 border-b-2 font-semibold ${
               activeTab === "category"
                 ? "border-[#006b5f] text-[#006b5f]"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                : "border-transparent text-gray-600 hover:text-gray-700"
             }`}
           >
             {t('tabs.byCategory')}
@@ -110,7 +110,9 @@ export default function GlossaryIndex({
                 key={letter}
                 onClick={() => {
                   setSelectedLetter(selectedLetter === letter ? null : letter);
-                  document.getElementById(`letter-${letter}`)?.scrollIntoView({ behavior: "smooth" });
+                  if (typeof document !== 'undefined') {
+                    document.getElementById(`letter-${letter}`)?.scrollIntoView({ behavior: "smooth" });
+                  }
                 }}
                 className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                   selectedLetter === letter
@@ -171,7 +173,7 @@ export default function GlossaryIndex({
               <div key={category} className="mb-12">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-3xl font-bold text-gray-900">{category}</h2>
-                  <span className="text-gray-500">({terms.length} terms)</span>
+                  <span className="text-gray-600">({terms.length} terms)</span>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {terms.map((term) => (
@@ -187,7 +189,7 @@ export default function GlossaryIndex({
       {/* No Results */}
       {searchQuery && filteredTerms.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">{t('noResults', { query: searchQuery })}</p>
+          <p className="text-gray-600 text-lg">{t('noResults', { query: searchQuery })}</p>
           <button
             onClick={() => setSearchQuery("")}
             className="mt-4 text-[#006b5f] hover:text-[#005a4f] underline"

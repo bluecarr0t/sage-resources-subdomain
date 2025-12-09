@@ -223,70 +223,126 @@ export async function getNearbyProperties(
   radiusMiles: number = 50,
   limit: number = 6
 ): Promise<SageProperty[]> {
-  try {
-    const supabase = createServerClient();
-    
-    // Fetch all properties with coordinates
-    const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
-      .select('*')
-      .not('lat', 'is', null)
-      .not('lon', 'is', null)
-      .not('slug', 'is', null)
-      .limit(10000);
+  const maxRetries = 3;
+  let lastError: any = null;
 
-    if (error) {
-      console.error('Error fetching properties for nearby search:', error);
-      return [];
-    }
-
-    if (!properties || properties.length === 0) {
-      return [];
-    }
-
-    // Filter and calculate distances
-    const propertiesWithDistance: Array<{ property: SageProperty; distance: number }> = [];
-    
-    for (const property of properties) {
-      // Skip the current property
-      if (property.slug === excludeSlug) continue;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const supabase = createServerClient();
       
-      // Parse coordinates
-      const propertyLat = typeof property.lat === 'string' 
-        ? parseFloat(property.lat) 
-        : property.lat;
-      const propertyLon = typeof property.lon === 'string' 
-        ? parseFloat(property.lon) 
-        : property.lon;
+      // Only fetch necessary fields to reduce response size
+      // This prevents JSON parsing errors with very large responses
+      const { data: properties, error } = await supabase
+        .from('sage-glamping-data')
+        .select('slug, property_name, lat, lon, city, state, country, unit_type, rate_range, website, phone_number, image_url')
+        .not('lat', 'is', null)
+        .not('lon', 'is', null)
+        .not('slug', 'is', null)
+        .limit(5000); // Reduced limit to prevent oversized responses
+
+      if (error) {
+        // If it's a JSON parsing error or network error, retry
+        const isRetryableError = 
+          error.message?.includes('JSON') ||
+          error.message?.includes('terminated') ||
+          error.message?.includes('socket') ||
+          error.message?.includes('UND_ERR') ||
+          error.message?.includes('Unterminated');
+        
+        if (attempt < maxRetries && isRetryableError) {
+          // Only log on first attempt to reduce noise
+          if (attempt === 1) {
+            console.warn(`Error fetching properties for nearby search (will retry):`, error.message || error);
+          }
+          lastError = error;
+          // Exponential backoff: wait 1s, 2s, 4s
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt - 1) * 1000));
+          continue;
+        }
+        // Only log non-retryable errors or final failures
+        if (attempt === maxRetries) {
+          console.error('Error fetching properties for nearby search (final attempt):', error);
+        }
+        return [];
+      }
+
+      if (!properties || properties.length === 0) {
+        return [];
+      }
+
+      // Filter and calculate distances
+      const propertiesWithDistance: Array<{ property: SageProperty; distance: number }> = [];
       
-      if (!propertyLat || !propertyLon || isNaN(propertyLat) || isNaN(propertyLon)) {
+      for (const property of properties) {
+        // Skip the current property
+        if (property.slug === excludeSlug) continue;
+        
+        // Parse coordinates
+        const propertyLat = typeof property.lat === 'string' 
+          ? parseFloat(property.lat) 
+          : property.lat;
+        const propertyLon = typeof property.lon === 'string' 
+          ? parseFloat(property.lon) 
+          : property.lon;
+        
+        if (!propertyLat || !propertyLon || isNaN(propertyLat) || isNaN(propertyLon)) {
+          continue;
+        }
+        
+        // Calculate distance
+        const distance = calculateDistance(lat, lon, propertyLat, propertyLon);
+        
+        // Only include if within radius
+        if (distance <= radiusMiles) {
+          propertiesWithDistance.push({ property: property as unknown as SageProperty, distance });
+        }
+      }
+      
+      // Sort by distance (closest first)
+      propertiesWithDistance.sort((a, b) => a.distance - b.distance);
+      
+      // Get unique properties (by slug) and limit results
+      const uniqueProperties = new Map<string, SageProperty>();
+      for (const { property } of propertiesWithDistance) {
+        if (property.slug && !uniqueProperties.has(property.slug)) {
+          uniqueProperties.set(property.slug, property);
+          if (uniqueProperties.size >= limit) break;
+        }
+      }
+      
+      return Array.from(uniqueProperties.values());
+    } catch (error: any) {
+      lastError = error;
+      
+      // Check if it's a JSON parsing error or network error that we should retry
+      const isRetryableError = 
+        error?.message?.includes('JSON') ||
+        error?.message?.includes('Unterminated') ||
+        error?.message?.includes('terminated') ||
+        error?.message?.includes('socket') ||
+        error?.message?.includes('UND_ERR') ||
+        error?.name === 'SyntaxError';
+      
+      if (attempt < maxRetries && isRetryableError) {
+        // Only log on first attempt to reduce noise
+        if (attempt === 1) {
+          console.warn(`Error in getNearbyProperties (will retry):`, error?.message || error);
+        }
+        // Exponential backoff: wait 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt - 1) * 1000));
         continue;
       }
       
-      // Calculate distance
-      const distance = calculateDistance(lat, lon, propertyLat, propertyLon);
-      
-      // Only include if within radius
-      if (distance <= radiusMiles) {
-        propertiesWithDistance.push({ property, distance });
+      // Log error but don't throw - return empty array instead
+      // Only log on final attempt to reduce noise
+      if (attempt === maxRetries) {
+        console.error('Error in getNearbyProperties (final attempt):', error?.message || error);
       }
+      return [];
     }
-    
-    // Sort by distance (closest first)
-    propertiesWithDistance.sort((a, b) => a.distance - b.distance);
-    
-    // Get unique properties (by slug) and limit results
-    const uniqueProperties = new Map<string, SageProperty>();
-    for (const { property } of propertiesWithDistance) {
-      if (property.slug && !uniqueProperties.has(property.slug)) {
-        uniqueProperties.set(property.slug, property);
-        if (uniqueProperties.size >= limit) break;
-      }
-    }
-    
-    return Array.from(uniqueProperties.values());
-  } catch (error) {
-    console.error('Error in getNearbyProperties:', error);
-    return [];
   }
+
+  // If we've exhausted all retries, return empty array
+  console.error('Failed to fetch nearby properties after', maxRetries, 'attempts:', lastError?.message || lastError);
+  return [];
 }

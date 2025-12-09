@@ -254,7 +254,7 @@ export default async function HomePage({ params }: PageProps) {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                         <div className="absolute top-4 left-4">
-                          <div className="inline-block px-3 py-1 bg-[#00b6a6] text-white text-sm font-semibold rounded-full backdrop-blur-sm">
+                          <div className="inline-block px-3 py-1 bg-[#006b5f] text-white text-sm font-semibold rounded-full backdrop-blur-sm">
                             {guide.category === 'feasibility' ? 'Feasibility' : guide.category === 'appraisal' ? 'Appraisal' : 'Industry'}
                           </div>
                         </div>
@@ -277,7 +277,7 @@ export default async function HomePage({ params }: PageProps) {
               <div className="text-center mt-8">
                 <Link
                   href={links.guides}
-                  className="inline-block px-8 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
+                  className="inline-block px-8 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
                 >
                   View All Guides
                 </Link>
@@ -374,7 +374,7 @@ export default async function HomePage({ params }: PageProps) {
               <div className="text-center mt-8">
                 <Link
                   href={links.glossary}
-                  className="inline-block px-8 py-3 bg-[#00b6a6] text-white font-semibold rounded-lg hover:bg-[#009688] transition-colors"
+                  className="inline-block px-8 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
                 >
                   Browse All Terms
                 </Link>
@@ -406,7 +406,7 @@ export default async function HomePage({ params }: PageProps) {
             </p>
             <Link
               href="https://sageoutdooradvisory.com/contact-us/"
-              className="inline-block px-8 py-4 bg-[#00b6a6] text-white text-lg font-semibold rounded-lg hover:bg-[#009688] transition-colors shadow-2xl"
+              className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-2xl"
             >
               Schedule Free Consultation
             </Link>
