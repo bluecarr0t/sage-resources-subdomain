@@ -84,18 +84,18 @@ export default async function GlossaryPage({ params }: PageProps) {
   
   const allTerms = getAllGlossaryTerms();
   
-  // Map translated category names to original English category names
-  // (getGlossaryTermsByCategory expects English category names)
-  const categoryMap: Record<string, string> = {
-    [t('categories.feasibilityAppraisal')]: 'Feasibility & Appraisal',
-    [t('categories.glamping')]: 'Glamping',
-    [t('categories.rvCampground')]: 'RV & Campground',
-    [t('categories.financial')]: 'Financial',
-    [t('categories.realEstate')]: 'Real Estate',
-    [t('categories.general')]: 'General'
-  };
+  // English category names (used for getGlossaryTermsByCategory)
+  const englishCategories = [
+    'Feasibility & Appraisal',
+    'Glamping',
+    'RV & Campground',
+    'Financial',
+    'Real Estate',
+    'General'
+  ] as const;
   
-  const categories = [
+  // Get translated category names
+  const translatedCategories = [
     t('categories.feasibilityAppraisal'),
     t('categories.glamping'),
     t('categories.rvCampground'),
@@ -103,6 +103,16 @@ export default async function GlossaryPage({ params }: PageProps) {
     t('categories.realEstate'),
     t('categories.general')
   ];
+  
+  // Map translated category names to original English category names
+  // (getGlossaryTermsByCategory expects English category names)
+  const categoryMap: Record<string, string> = {};
+  englishCategories.forEach((englishCategory, index) => {
+    const translatedCategory = translatedCategories[index];
+    if (translatedCategory) {
+      categoryMap[translatedCategory] = englishCategory;
+    }
+  });
 
   // Group terms by first letter for alphabetical navigation
   const termsByLetter: Record<string, typeof allTerms> = {};
@@ -123,9 +133,13 @@ export default async function GlossaryPage({ params }: PageProps) {
 
   // Get terms by category - use translated category name as key, but fetch with English name
   const termsByCategory: Record<string, typeof allTerms> = {};
-  categories.forEach(translatedCategory => {
-    const englishCategory = categoryMap[translatedCategory];
-    termsByCategory[translatedCategory] = getGlossaryTermsByCategory(englishCategory as any);
+  translatedCategories.forEach((translatedCategory, index) => {
+    if (translatedCategory && index < englishCategories.length) {
+      const englishCategory = englishCategories[index];
+      if (englishCategory) {
+        termsByCategory[translatedCategory] = getGlossaryTermsByCategory(englishCategory);
+      }
+    }
   });
 
   const links = createLocaleLinks(locale);
@@ -171,7 +185,7 @@ export default async function GlossaryPage({ params }: PageProps) {
         allTerms={allTerms}
         termsByLetter={termsByLetter}
         termsByCategory={termsByCategory}
-        categories={categories}
+        categories={translatedCategories}
         locale={locale}
       />
 
