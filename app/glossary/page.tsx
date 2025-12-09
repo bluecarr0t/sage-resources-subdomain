@@ -116,6 +116,7 @@ export default function GlossaryPage() {
         termsByLetter={termsByLetter}
         termsByCategory={termsByCategory}
         categories={categories}
+        locale="en"
       />
 
       {/* CTA Section */}
