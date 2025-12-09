@@ -2596,25 +2596,17 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   return (
     <div className="w-full h-full">
       {/* Map - Full Viewport Height */}
-      <div className="h-full w-full">
-        {loading && (
-          <div className="flex items-center justify-center h-full bg-gray-100">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading map data...</p>
-            </div>
-          </div>
-        )}
+      <div className="h-full w-full relative">
         {error && (
-          <div className="flex items-center justify-center h-full bg-red-50">
+          <div className="absolute inset-0 flex items-center justify-center bg-red-50 z-30">
             <div className="bg-white border border-red-200 rounded-lg p-6 m-4 max-w-md">
               <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Map</h3>
               <p className="text-red-600">{error}</p>
             </div>
           </div>
         )}
-        {!loading && !error && !isLoaded && (
-          <div className="flex items-center justify-center h-full bg-gray-100">
+        {!isLoaded && !error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-20">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Loading Google Maps script...</p>
@@ -2622,17 +2614,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             </div>
           </div>
         )}
-        {!loading && !error && isLoaded && (
+        {isLoaded && (
           <div className="relative h-full w-full">
-            {/* Loading overlay when filters are changing */}
-            {loading && (
-              <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mx-auto mb-2"></div>
-                  <p className="text-sm text-gray-600">Updating map...</p>
-                </div>
-              </div>
-            )}
             <GoogleMap
               key={`map-${filterState.join(',')}-${filterUnitType.join(',')}-${filterRateRange.join(',')}`}
               mapContainerStyle={{ width: '100%', height: '100%' }}
@@ -2926,14 +2909,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                 />
               )} */}
             </GoogleMap>
-          </div>
-        )}
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 pointer-events-none z-20">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600"></div>
-              <p className="text-gray-600 font-medium mt-4">Loading properties...</p>
-            </div>
+            {/* Loading overlay when properties are being fetched */}
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-30 pointer-events-none">
+                <div className="text-center">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600"></div>
+                  <p className="text-gray-600 font-medium mt-4">Loading properties...</p>
+                </div>
+              </div>
+            )}
           </div>
         )}
         {!loading && !error && displayProperties.length === 0 && (

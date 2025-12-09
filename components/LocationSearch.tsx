@@ -561,7 +561,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                 aria-controls="location-listbox"
                 aria-autocomplete="list"
               />
-              {isSearching && (
+              {isSearching && isLoaded && (
                 <div className={`absolute top-1/2 -translate-y-1/2 ${isCompact ? 'right-3' : 'right-4'}`}>
                   <div className={`animate-spin rounded-full border-[#00b6a6] ${isCompact ? 'h-4 w-4 border-2' : 'h-5 w-5 border-b-2'}`} />
                 </div>
