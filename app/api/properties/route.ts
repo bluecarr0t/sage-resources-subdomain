@@ -7,6 +7,10 @@ import { unstable_cache } from 'next/cache';
  * Cache can be invalidated by revalidating the 'properties' tag
  * Google API calls are NOT cached - they should use their own routes
  */
+
+// Mark route as dynamic since it uses searchParams
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
