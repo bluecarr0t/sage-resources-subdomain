@@ -39,58 +39,82 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { locale } = params;
-  
-  // Validate locale
-  if (!locales.includes(locale as Locale)) {
-    notFound();
-  }
-  
-  const pathname = `/${locale}`;
-  const url = `https://resources.sageoutdooradvisory.com${pathname}`;
-  
-  return {
-    title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
-    description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. From luxury safari tents to cozy cabins, find your perfect outdoor adventure today.",
-    keywords: "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business",
-    openGraph: {
+  try {
+    const { locale } = params;
+    
+    // Validate locale
+    if (!locales.includes(locale as Locale)) {
+      notFound();
+    }
+    
+    const pathname = `/${locale}`;
+    const url = `https://resources.sageoutdooradvisory.com${pathname}`;
+    
+    let hreflangAlternates: Metadata['alternates'] = {};
+    try {
+      hreflangAlternates = generateHreflangAlternates(pathname);
+    } catch (error) {
+      console.error('Error generating hreflang alternates:', error);
+      hreflangAlternates = {};
+    }
+    
+    let openGraphLocale = 'en_US';
+    try {
+      openGraphLocale = getOpenGraphLocale(locale as Locale);
+    } catch (error) {
+      console.error('Error getting OpenGraph locale:', error);
+    }
+    
+    return {
       title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
-      description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. From luxury safari tents to cozy cabins, find your perfect outdoor adventure.",
-      url,
-      siteName: "Sage Outdoor Advisory",
-      locale: getOpenGraphLocale(locale as Locale),
-      type: "website",
-      images: [
-        {
-          url: "https://sageoutdooradvisory.com/og-image.jpg",
-          width: 1200,
-          height: 630,
-          alt: "Sage Outdoor Advisory - Outdoor Hospitality Resources",
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: "Find Glamping Near You | 500+ Properties Across North America",
-      description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure.",
-      images: ["https://sageoutdooradvisory.com/og-image.jpg"],
-    },
-    alternates: {
-      canonical: url,
-      ...generateHreflangAlternates(pathname),
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
+      description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. From luxury safari tents to cozy cabins, find your perfect outdoor adventure today.",
+      keywords: "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business",
+      openGraph: {
+        title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
+        description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. From luxury safari tents to cozy cabins, find your perfect outdoor adventure.",
+        url,
+        siteName: "Sage Outdoor Advisory",
+        locale: openGraphLocale,
+        type: "website",
+        images: [
+          {
+            url: "https://sageoutdooradvisory.com/og-image.jpg",
+            width: 1200,
+            height: 630,
+            alt: "Sage Outdoor Advisory - Outdoor Hospitality Resources",
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Find Glamping Near You | 500+ Properties Across North America",
+        description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure.",
+        images: ["https://sageoutdooradvisory.com/og-image.jpg"],
+      },
+      alternates: {
+        canonical: url,
+        ...hreflangAlternates,
+      },
+      robots: {
         index: true,
         follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
       },
-    },
-  };
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    // Return basic metadata as fallback
+    return {
+      title: "Sage Outdoor Advisory - Outdoor Hospitality Resources",
+      description: "Comprehensive resources for the outdoor hospitality industry.",
+    };
+  }
 }
 
 export default async function HomePage({ params }: PageProps) {
@@ -101,33 +125,74 @@ export default async function HomePage({ params }: PageProps) {
     notFound();
   }
   
-  // Create locale-aware links
-  const links = createLocaleLinks(locale);
-  // Get featured content for homepage
-  const allGuides = getAllGuideSlugs().map(slug => getGuide(slug)).filter(Boolean);
-  const pillarGuides = allGuides.filter(guide => guide?.slug.endsWith("-complete-guide")).slice(0, 3);
-  const recentGuides = allGuides.slice(0, 6);
-  
-  const glossaryTerms = getAllGlossaryTerms();
-  const featuredTerms = glossaryTerms.slice(0, 12); // Top 12 terms
-  
-  const landingPageSlugs = getAllLandingPageSlugs();
-  const featuredLandingPages = landingPageSlugs.slice(0, 6).map(slug => getLandingPageSync(slug)).filter(Boolean);
+  try {
+    // Create locale-aware links
+    const links = createLocaleLinks(locale);
+    
+    // Get featured content for homepage with error handling
+    let allGuides: Array<NonNullable<ReturnType<typeof getGuide>>> = [];
+    try {
+      const guideSlugs = getAllGuideSlugs();
+      allGuides = guideSlugs
+        .map(slug => {
+          try {
+            return getGuide(slug);
+          } catch (error) {
+            console.error(`Error loading guide ${slug}:`, error);
+            return null;
+          }
+        })
+        .filter((guide): guide is NonNullable<typeof guide> => guide !== null);
+    } catch (error) {
+      console.error('Error loading guides:', error);
+      allGuides = [];
+    }
+    
+    const pillarGuides = allGuides.filter(guide => guide?.slug.endsWith("-complete-guide")).slice(0, 3);
+    const recentGuides = allGuides.slice(0, 6);
+    
+    let glossaryTerms: ReturnType<typeof getAllGlossaryTerms> = [];
+    try {
+      glossaryTerms = getAllGlossaryTerms();
+    } catch (error) {
+      console.error('Error loading glossary terms:', error);
+      glossaryTerms = [];
+    }
+    const featuredTerms = glossaryTerms.slice(0, 12); // Top 12 terms
+    
+    let featuredLandingPages: Array<NonNullable<ReturnType<typeof getLandingPageSync>>> = [];
+    try {
+      const landingPageSlugs = getAllLandingPageSlugs();
+      featuredLandingPages = landingPageSlugs
+        .slice(0, 6)
+        .map(slug => {
+          try {
+            return getLandingPageSync(slug);
+          } catch (error) {
+            console.error(`Error loading landing page ${slug}:`, error);
+            return null;
+          }
+        })
+        .filter((page): page is NonNullable<typeof page> => page !== null);
+    } catch (error) {
+      console.error('Error loading landing pages:', error);
+      featuredLandingPages = [];
+    }
 
-  // Generate schema markup
-  const organizationSchema = generateOrganizationSchema();
-  // Generate ItemList with URLs for carousel eligibility
-  const guidesListSchema = generateItemListSchemaWithUrls(
-    pillarGuides
-      .filter((guide): guide is NonNullable<typeof guide> => guide !== null)
-      .map(guide => ({
-        name: guide.title,
-        url: links.guide(guide.slug)
-      })),
-    "Featured Guides"
-  );
+    // Generate schema markup
+    const organizationSchema = generateOrganizationSchema();
+    // Generate ItemList with URLs for carousel eligibility
+    const guidesListSchema = generateItemListSchemaWithUrls(
+      pillarGuides
+        .filter((guide): guide is NonNullable<typeof guide> => guide !== null)
+        .map(guide => ({
+          name: guide.title,
+          url: links.guide(guide.slug)
+        })),
+      "Featured Guides"
+    );
 
-  return (
+    return (
     <>
       {/* Structured Data */}
       <script
@@ -417,5 +482,12 @@ export default async function HomePage({ params }: PageProps) {
         <Footer />
       </div>
     </>
-  );
+    );
+  } catch (error) {
+    // Log the error for debugging
+    console.error('Error rendering home page:', error);
+    
+    // Re-throw the error to trigger the error boundary
+    throw error;
+  }
 }
