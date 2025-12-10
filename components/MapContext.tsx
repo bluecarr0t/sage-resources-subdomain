@@ -111,8 +111,29 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const hasActiveFilters = filterCountry.length !== 2 || !filterCountry.includes('United States') || !filterCountry.includes('Canada') || filterState.length > 0 || filterUnitType.length > 0 || filterRateRange.length > 0;
 
   // Fetch all properties (unfiltered) once for filter option calculation
+  // This is optimized to reuse the filtered properties fetch when filters match defaults
   useEffect(() => {
-    // Prevent duplicate fetches (handles React Strict Mode double mounting)
+    // Check if filters match defaults
+    const isDefaultFilters = 
+      filterCountry.length === 2 && 
+      filterCountry.includes('United States') && 
+      filterCountry.includes('Canada') &&
+      filterState.length === 0 &&
+      filterUnitType.length === 0 &&
+      filterRateRange.length === 0;
+    
+    // If filters match defaults, reuse filtered properties (set by filtered properties fetch)
+    // This avoids duplicate API calls
+    if (isDefaultFilters) {
+      if (properties.length > 0 && allProperties.length === 0) {
+        console.log('Reusing filtered properties for allProperties (default filters match)');
+        setAllProperties(properties);
+      }
+      return; // Don't fetch separately when filters are defaults
+    }
+    
+    // Only fetch allProperties separately when filters don't match defaults
+    // (needed for filter dropdowns to show all available options)
     if (allPropertiesFetchInProgressRef.current || allProperties.length > 0) {
       return;
     }
@@ -125,8 +146,13 @@ export function MapProvider({ children }: { children: ReactNode }) {
       try {
         console.log('Fetching all properties (unfiltered) for filter options...');
         
+        // Use URLSearchParams for consistent URL encoding (matches filtered properties fetch)
+        const params = new URLSearchParams();
+        params.append('country', 'United States');
+        params.append('country', 'Canada');
+        
         // Fetch all properties without filters for filter dropdowns
-        const response = await fetch('/api/properties?country=United%20States&country=Canada');
+        const response = await fetch(`/api/properties?${params.toString()}`);
         
         if (!response.ok) {
           console.error('Failed to fetch all properties for filter options');
@@ -147,7 +173,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
     }
 
     fetchAllProperties();
-  }, [allProperties.length]); // Only fetch once on mount
+  }, [allProperties.length, properties.length, filterCountry, filterState, filterUnitType, filterRateRange]); // Depend on filters to detect defaults
 
   // Fetch filtered properties and share between all component instances
   useEffect(() => {
@@ -214,6 +240,20 @@ export function MapProvider({ children }: { children: ReactNode }) {
         
         setProperties(data);
         setHasLoadedOnce(true); // Mark that we've successfully loaded properties at least once
+        
+        // If filters match defaults, also set allProperties to avoid duplicate fetch
+        const isDefaultFilters = 
+          filterCountry.length === 2 && 
+          filterCountry.includes('United States') && 
+          filterCountry.includes('Canada') &&
+          filterState.length === 0 &&
+          filterUnitType.length === 0 &&
+          filterRateRange.length === 0;
+        
+        if (isDefaultFilters && allProperties.length === 0) {
+          console.log('Setting allProperties from filtered properties (default filters)');
+          setAllProperties(data);
+        }
       } catch (err) {
         // Ignore abort errors (expected when filters change quickly)
         if (err instanceof Error && err.name === 'AbortError') {

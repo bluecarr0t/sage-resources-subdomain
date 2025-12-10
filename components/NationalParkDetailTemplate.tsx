@@ -224,7 +224,7 @@ export default function NationalParkDetailTemplate({
                     href={websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-6 py-2 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2"
+                    className="px-6 py-2 bg-[#007a6e] text-white rounded-lg hover:bg-[#006b5f] transition-colors focus:outline-none focus:ring-2 focus:ring-[#007a6e] focus:ring-offset-2"
                     aria-label={`Visit ${parkName}'s website (opens in new tab)`}
                   >
                     Visit Website

@@ -11,7 +11,7 @@ export default function NotFound() {
         </p>
         <Link
           href="https://sageoutdooradvisory.com"
-          className="inline-block px-6 py-3 bg-[#00b6a6] text-white rounded-lg hover:bg-[#009688] transition-colors"
+          className="inline-block px-6 py-3 bg-[#007a6e] text-white rounded-lg hover:bg-[#006b5f] transition-colors"
         >
           Return to Main Site
         </Link>
