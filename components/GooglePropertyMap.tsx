@@ -34,6 +34,8 @@ const defaultCenter = {
 // Zoom level 4 provides a wider view showing the entire lower 48 states with more surrounding area
 // This shows the full continental United States with some buffer, excluding Alaska and Hawaii
 const defaultZoom = 4;
+// Mobile default zoom is slightly lower (more zoomed out) for better mobile viewing
+const defaultZoomMobile = 3.25;
 
 // Libraries array is now handled by GoogleMapsProvider
 // Note: 'places' library is included in GoogleMapsProvider for LocationSearch
@@ -263,7 +265,7 @@ interface GooglePropertyMapProps {
 }
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
-  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError, hasLoadedOnce } = useMapContext();
+  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError, hasLoadedOnce, isFullscreen, toggleFullscreen } = useMapContext();
   const t = useTranslations('map');
   // Use shared properties from context instead of local state
   const properties = sharedProperties;
@@ -276,12 +278,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [selectedPark, setSelectedPark] = useState<NationalParkWithCoords | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [urlInitialized, setUrlInitialized] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false); // Collapsed by default on mobile
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(defaultCenter);
+  // Initialize with mobile zoom if on mobile, otherwise desktop zoom
+  // This will be updated properly once isMobile is determined, but start with desktop default
   const [mapZoom, setMapZoom] = useState<number>(defaultZoom);
   const [shouldFitBounds, setShouldFitBounds] = useState(false); // Disabled by default - use fixed zoom/center for lower 48 states
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
@@ -319,10 +324,25 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const hasCenteredFromUrlRef = useRef<boolean>(false);
   const hasJustFittedBoundsRef = useRef<boolean>(false);
 
-  // Ensure we're on the client side
+  // Ensure we're on the client side and detect mobile
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    const checkMobile = () => {
+      const isMobileCheck = window.innerWidth < 768;
+      setIsMobile(isMobileCheck);
+      // Update zoom to mobile default if on mobile and no URL params
+      if (isMobileCheck && !urlInitialized) {
+        const urlLat = searchParams.get('lat');
+        const urlLon = searchParams.get('lon');
+        if (!urlLat || !urlLon) {
+          setMapZoom(defaultZoomMobile);
+        }
+      }
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [urlInitialized, searchParams]);
 
   // Initialize filters and map position from URL parameters on mount
   useEffect(() => {
@@ -376,8 +396,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       }
     } else {
       // No URL params, reset to defaults and use fixed zoom/center (don't fit bounds)
+      // Use mobile zoom on mobile devices, desktop zoom otherwise
+      const zoomToUse = isMobile ? defaultZoomMobile : defaultZoom;
       setMapCenter(defaultCenter);
-      setMapZoom(defaultZoom);
+      setMapZoom(zoomToUse);
       setShouldFitBounds(false); // Keep fixed zoom/center for lower 48 states
       hasCenteredFromUrlRef.current = false;
     }
@@ -480,8 +502,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       }
     } else {
       // No lat/lon params, reset to defaults (use fixed zoom/center, don't fit bounds)
+      // Use mobile zoom on mobile devices, desktop zoom otherwise
+      const zoomToUse = isMobile ? defaultZoomMobile : defaultZoom;
       setMapCenter(defaultCenter);
-      setMapZoom(defaultZoom);
+      setMapZoom(zoomToUse);
       setShouldFitBounds(false); // Keep fixed zoom/center for lower 48 states
       hasCenteredFromUrlRef.current = false;
     }
@@ -994,20 +1018,23 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         const currentCenter = map.getCenter();
         const currentZoom = map.getZoom();
         
+        // Use mobile zoom on mobile devices, desktop zoom otherwise
+        const zoomToUse = isMobile ? defaultZoomMobile : defaultZoom;
+        
         // Check if we need to update (only if significantly different)
         const needsUpdate = !currentCenter || 
           Math.abs(currentCenter.lat() - defaultCenter.lat) > 0.1 ||
           Math.abs(currentCenter.lng() - defaultCenter.lng) > 0.1 ||
           !currentZoom ||
-          Math.abs(currentZoom - defaultZoom) > 0.5;
+          Math.abs(currentZoom - zoomToUse) > 0.5;
         
         if (needsUpdate) {
           map.setCenter(defaultCenter);
-          map.setZoom(defaultZoom);
+          map.setZoom(zoomToUse);
         }
       }
     }
-  }, [map, shouldFitBounds, searchParams, filterState]);
+  }, [map, shouldFitBounds, searchParams, filterState, isMobile]);
   
   // Fit map bounds to show all glamping property markers (only if shouldFitBounds is true)
   // NOTE: Only includes glamping properties, not national parks, so state filters zoom to properties only
@@ -1088,6 +1115,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
     
+    // Set default map type to terrain
+    map.setMapTypeId('terrain');
+    
     // Set default center and zoom for lower 48 states if no URL params
     const urlLat = searchParams.get('lat');
     const urlLon = searchParams.get('lon');
@@ -1095,8 +1125,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     
     if (!urlLat || !urlLon) {
       // No URL params - use default center and zoom for lower 48 states
+      // Use mobile zoom on mobile devices, desktop zoom otherwise
+      const isMobileCheck = window.innerWidth < 768;
+      const zoomToUse = isMobileCheck ? defaultZoomMobile : defaultZoom;
       map.setCenter(defaultCenter);
-      map.setZoom(defaultZoom);
+      map.setZoom(zoomToUse);
     }
     
     // Initialize bounds after a short delay to ensure map has rendered
@@ -1140,6 +1173,80 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     markersRef.current = [];
     setMap(null);
   }, []);
+
+  // Memoize map options to update gesture handling when fullscreen/mobile state changes
+  const mapOptions = useMemo(() => ({
+    disableDefaultUI: false,
+    zoomControl: true,
+    streetViewControl: false,
+    mapTypeControl: true,
+    fullscreenControl: true,
+    // Default to terrain map type on both desktop and mobile
+    mapTypeId: 'terrain',
+    // Mobile gesture handling: 'greedy' allows single-finger drag and pinch-to-zoom when map is expanded
+    // 'cooperative' requires two fingers when map is not fullscreen (allows page scrolling)
+    gestureHandling: isMobile && isFullscreen ? 'greedy' : 'cooperative',
+    // Enable dragging (default is true, but explicit for clarity)
+    draggable: true,
+    // Disable scrollwheel zoom on mobile to prevent conflicts with touch gestures
+    scrollwheel: !isMobile,
+    // Enable keyboard shortcuts (useful for accessibility)
+    keyboardShortcuts: true,
+    mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81', // Style Map ID for custom map styling
+  }), [isMobile, isFullscreen]);
+
+  // Update map gesture handling when fullscreen/mobile state changes
+  useEffect(() => {
+    if (!map || !isClient) return;
+
+    // Update gesture handling based on current state
+    const gestureHandling = isMobile && isFullscreen ? 'greedy' : 'cooperative';
+    map.setOptions({
+      gestureHandling,
+      scrollwheel: !isMobile,
+    });
+  }, [map, isClient, isMobile, isFullscreen]);
+
+  // Listen for fullscreen changes to sync with React state (for mobile)
+  useEffect(() => {
+    if (!isClient) return;
+
+    const handleFullscreenChange = () => {
+      // Check if we're on mobile (screen width < 768px)
+      const isMobileCheck = window.innerWidth < 768;
+      if (!isMobileCheck) return;
+
+      // Check if document is in fullscreen mode
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      );
+
+      // If fullscreen was exited and our React state says we're in fullscreen, toggle it
+      if (!isCurrentlyFullscreen && isFullscreen) {
+        toggleFullscreen();
+      }
+      // If fullscreen was entered and our React state says we're not in fullscreen, toggle it
+      else if (isCurrentlyFullscreen && !isFullscreen) {
+        toggleFullscreen();
+      }
+    };
+
+    // Listen for fullscreen change events (support multiple browser prefixes)
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, [isClient, isFullscreen, toggleFullscreen]);
 
   // Manage markers (no clustering - show all markers individually)
   // Use a ref to track property IDs to avoid recreating markers unnecessarily
@@ -2195,9 +2302,73 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   // Render only filters if showMap is false
   if (!showMap) {
     return (
-      <div className="w-full space-y-6">
-        {/* Stats */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100 shadow-sm">
+      <div className="w-full space-y-1 md:space-y-6">
+        {/* Mobile-Optimized Header: Property Count + Filter Button on Same Row */}
+        <div className="md:hidden">
+          <div className="flex items-center justify-between gap-3 bg-white rounded-lg border border-gray-200 shadow-sm p-3">
+            {/* Property Count - Compact on Left */}
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span 
+                key={displayedCount}
+                className={`text-2xl font-bold text-green-700 transition-all duration-500 ease-in-out relative inline-block whitespace-nowrap ${
+                  isAnimating ? 'scale-110 opacity-70' : 'scale-100 opacity-100'
+                }`}
+              >
+                <span className={loading ? 'opacity-60' : ''}>{displayedCount}</span>
+                {loading && (
+                  <span 
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-green-50/60 to-transparent animate-shimmer pointer-events-none"
+                    aria-label="Loading property count"
+                  />
+                )}
+              </span>
+              <span className={`text-sm font-medium text-gray-600 transition-opacity duration-300 truncate ${loading ? 'opacity-50' : 'opacity-100'}`}>
+                {t('stats.properties')}
+              </span>
+            </div>
+            
+            {/* Filter Toggle Button - Compact on Right */}
+            <button
+              onClick={() => setFiltersExpanded(!filtersExpanded)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-colors flex-shrink-0 border border-indigo-200"
+              aria-expanded={filtersExpanded}
+              aria-controls="filters-section"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              <span className="text-sm font-semibold">{t('filters.title')}</span>
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  filtersExpanded ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Stats - Original Design */}
+        <div className="hidden md:block bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100 shadow-sm">
           <div className="flex items-center justify-center gap-4">
             <span 
               key={displayedCount}
@@ -2227,7 +2398,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   clearFilters();
                   // URL will be updated by the useEffect that watches filter changes
                 }}
-                className="text-xs font-medium text-blue-600 hover:text-blue-700 underline transition-colors"
+                className="text-xs font-medium text-blue-600 hover:text-blue-700 underline transition-colors flex-shrink-0"
               >
                 {t('filters.clearAll')}
               </button>
@@ -2309,33 +2480,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         )}
 
         {/* Filters - Collapsible on Mobile */}
-        <div className="border-t border-gray-200 pt-5 md:border-t-0 md:pt-0">
-          {/* Filter Toggle Button - Mobile Only */}
-          <button
-            onClick={() => setFiltersExpanded(!filtersExpanded)}
-            className="md:hidden w-full flex items-center justify-between py-3 px-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-expanded={filtersExpanded}
-            aria-controls="filters-section"
-          >
-            <span className="text-sm font-semibold text-gray-900">
-              {t('filters.title')}
-            </span>
-            <svg
-              className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
-                filtersExpanded ? 'rotate-180' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
+        <div className="pt-5 md:border-t md:border-gray-200 md:pt-0">
+          {/* Desktop Filter Title - Hidden on Mobile (now in header) */}
+          <h2 className="hidden md:block text-lg font-semibold text-gray-900 mb-4">
+            {t('filters.title')}
+          </h2>
 
           {/* Filters Section - Collapsible on Mobile, Always Visible on Desktop */}
           <div
@@ -2579,10 +2728,13 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   }
 
   // Render only map if showMap is true
+  // On mobile, only use full viewport height when in fullscreen mode
+  const shouldUseFullHeight = isFullscreen || !isMobile;
+  
   return (
-    <div className="w-full h-full" style={{ minHeight: '100vh', height: '100%' }}>
+    <div className="w-full h-full" style={shouldUseFullHeight ? { minHeight: '100vh', height: '100%' } : { height: '100%' }}>
       {/* Map - Full Viewport Height */}
-      <div className="h-full w-full relative" style={{ minHeight: '100vh' }}>
+      <div className="h-full w-full relative" style={shouldUseFullHeight ? { minHeight: '100vh' } : {}}>
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-50 z-30">
             <div className="bg-white border border-red-200 rounded-lg p-6 m-4 max-w-md">
@@ -2601,23 +2753,16 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           </div>
         )}
         {isLoaded && (
-          <div className="relative h-full w-full" style={{ minHeight: '100vh', height: '100%' }}>
+          <div className="relative h-full w-full" style={shouldUseFullHeight ? { minHeight: '100vh', height: '100%' } : { height: '100%' }}>
             <GoogleMap
               key={`map-${filterState.join(',')}-${filterUnitType.join(',')}-${filterRateRange.join(',')}`}
-              mapContainerStyle={{ width: '100%', height: '100%', minHeight: '100vh' }}
+              mapContainerStyle={{ width: '100%', height: '100%', ...(shouldUseFullHeight ? { minHeight: '100vh' } : {}) }}
               center={mapCenter}
               zoom={mapZoom}
               onLoad={onLoad}
               onIdle={onIdle}
               onUnmount={onUnmount}
-              options={{
-                disableDefaultUI: false,
-                zoomControl: true,
-                streetViewControl: false,
-                mapTypeControl: true,
-                fullscreenControl: true,
-                mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81', // Style Map ID for custom map styling
-              }}
+              options={mapOptions}
             >
               {selectedPark && (
                 <InfoWindow

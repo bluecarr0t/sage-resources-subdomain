@@ -116,6 +116,8 @@ export default function GoogleSheetMap({
   }, [map, filteredProperties]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
+    // Set default map type to terrain
+    map.setMapTypeId('terrain');
     setMap(map);
   }, []);
 
@@ -241,6 +243,8 @@ export default function GoogleSheetMap({
           mapTypeControl: true,
           streetViewControl: true,
           fullscreenControl: true,
+          // Default to terrain map type
+          mapTypeId: 'terrain',
           mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81', // Style Map ID for custom map styling
         }}
       >

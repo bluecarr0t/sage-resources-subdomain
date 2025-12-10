@@ -3,6 +3,11 @@
 import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
 import { SageProperty } from '@/lib/types/sage';
 
+// Module-level flag to prevent duplicate fetches across component mount/unmount cycles
+// This is necessary for React 18 Strict Mode which intentionally unmounts/remounts components
+let globalFetchInProgress = false;
+let globalAbortController: AbortController | null = null;
+
 interface MapContextType {
   filterCountry: string[];
   filterState: string[];
@@ -55,6 +60,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const fetchInProgressRef = useRef<boolean>(false);
   const allPropertiesFetchInProgressRef = useRef<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const allPropertiesInitializedRef = useRef<boolean>(false);
 
   const toggleCountry = (country: string) => {
     setFilterCountry((prev) => 
@@ -122,24 +128,23 @@ export function MapProvider({ children }: { children: ReactNode }) {
       filterUnitType.length === 0 &&
       filterRateRange.length === 0;
     
-    // If filters match defaults, reuse filtered properties (set by filtered properties fetch)
-    // This avoids duplicate API calls
+    // If filters match defaults, we'll reuse filtered properties (set by filtered properties fetch)
+    // Don't fetch separately when filters are defaults - the second useEffect will handle it
     if (isDefaultFilters) {
-      if (properties.length > 0 && allProperties.length === 0) {
-        console.log('Reusing filtered properties for allProperties (default filters match)');
-        setAllProperties(properties);
-      }
+      // Reset initialization flag when filters change back to defaults
+      // This allows the filtered properties fetch to set allProperties again
+      allPropertiesInitializedRef.current = false;
       return; // Don't fetch separately when filters are defaults
     }
     
     // Only fetch allProperties separately when filters don't match defaults
     // (needed for filter dropdowns to show all available options)
-    if (allPropertiesFetchInProgressRef.current || allProperties.length > 0) {
+    if (allPropertiesFetchInProgressRef.current || allPropertiesInitializedRef.current) {
       return;
     }
     
     async function fetchAllProperties() {
-      if (allPropertiesFetchInProgressRef.current || allProperties.length > 0) return;
+      if (allPropertiesFetchInProgressRef.current || allPropertiesInitializedRef.current) return;
       
       allPropertiesFetchInProgressRef.current = true;
       
@@ -164,6 +169,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         if (result.success && result.data) {
           console.log('Fetched all properties (unfiltered):', result.data.length);
           setAllProperties(result.data);
+          allPropertiesInitializedRef.current = true;
         }
       } catch (err) {
         console.error('Error fetching all properties:', err);
@@ -173,19 +179,31 @@ export function MapProvider({ children }: { children: ReactNode }) {
     }
 
     fetchAllProperties();
-  }, [allProperties.length, properties.length, filterCountry, filterState, filterUnitType, filterRateRange]); // Depend on filters to detect defaults
+  }, [filterCountry, filterState, filterUnitType, filterRateRange]); // Only depend on filters, not on properties state
 
   // Fetch filtered properties and share between all component instances
   useEffect(() => {
-    // Cancel any in-flight request when filters change
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
+    // Don't start a new fetch if one is already in progress (module-level check)
+    // This prevents duplicate fetches during React 18 Strict Mode double-mounting in development
+    if (globalFetchInProgress) {
+      console.log('Fetch already in progress (global check), skipping duplicate request');
+      return;
     }
     
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    // Cancel any in-flight request when filters change
+    if (globalAbortController) {
+      console.log('Canceling previous fetch due to filter change');
+      globalAbortController.abort();
+      globalAbortController = null;
+    }
+    
+    // Mark as in progress BEFORE creating abort controller (both local and global)
+    globalFetchInProgress = true;
     fetchInProgressRef.current = true;
+    
+    const abortController = new AbortController();
+    globalAbortController = abortController;
+    abortControllerRef.current = abortController;
     
     async function fetchProperties() {
       try {
@@ -212,6 +230,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         
         // Check if request was aborted
         if (abortController.signal.aborted) {
+          console.log('Fetch was aborted');
           return;
         }
         
@@ -243,15 +262,17 @@ export function MapProvider({ children }: { children: ReactNode }) {
             filterUnitType.length === 0 &&
             filterRateRange.length === 0;
           
-          if (isDefaultFilters && allProperties.length === 0) {
+          if (isDefaultFilters && !allPropertiesInitializedRef.current) {
             console.log('Setting allProperties from filtered properties (default filters)');
             setAllProperties(data);
+            allPropertiesInitializedRef.current = true;
           }
         }
       } catch (err) {
         // Ignore abort errors (expected when filters change quickly)
         if (err instanceof Error && err.name === 'AbortError') {
           // Silently handle abort - this is expected behavior when filters change
+          console.log('Fetch aborted (expected)');
           return;
         }
         
@@ -266,9 +287,11 @@ export function MapProvider({ children }: { children: ReactNode }) {
         }
       } finally {
         // Only update loading state if this is still the current request
-        if (abortControllerRef.current === abortController) {
+        if (globalAbortController === abortController) {
           setPropertiesLoading(false);
+          globalFetchInProgress = false;
           fetchInProgressRef.current = false;
+          globalAbortController = null;
           abortControllerRef.current = null;
         }
       }
@@ -278,8 +301,13 @@ export function MapProvider({ children }: { children: ReactNode }) {
     
     // Cleanup function to abort request if filters change or component unmounts
     return () => {
-      if (abortControllerRef.current === abortController) {
+      // Only abort if this is still the current request
+      // Don't abort during Strict Mode unmount - let the request complete for the remount
+      if (globalAbortController === abortController && abortControllerRef.current === abortController) {
+        console.log('Cleanup: aborting fetch');
         abortController.abort();
+        globalAbortController = null;
+        globalFetchInProgress = false;
         abortControllerRef.current = null;
         fetchInProgressRef.current = false;
       }

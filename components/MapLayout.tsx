@@ -95,7 +95,14 @@ export default function MapLayout({ locale }: MapLayoutProps) {
       </aside>
 
       {/* Right Column - Map (Full Height) */}
-      <main className="flex-1 relative overflow-hidden" style={{ minHeight: '100vh', height: '100vh' }}>
+      <main 
+        className={`flex-1 relative overflow-hidden ${
+          isFullscreen 
+            ? 'min-h-screen h-screen' 
+            : 'md:min-h-screen md:h-screen'
+        }`}
+        style={isFullscreen ? { minHeight: '100vh', height: '100vh' } : undefined}
+      >
         <DynamicGooglePropertyMap showMap={true} />
         
         {/* Fullscreen Toggle Button - Mobile Only */}
