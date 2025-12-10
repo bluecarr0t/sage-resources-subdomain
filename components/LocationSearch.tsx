@@ -25,7 +25,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   const dropdownScrollRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
-  const autocompleteCacheRef = useRef<Map<string, google.maps.places.AutocompletePrediction[]>>(new Map());
+  const autocompleteCacheRef = useRef<Map<string, google.maps.places.PlacePrediction[]>>(new Map());
   const router = useRouter();
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
@@ -292,7 +292,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
         
         setPredictions([]);
       });
-  }, [apiKey]);
+  }, [apiKey, isLoaded]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
