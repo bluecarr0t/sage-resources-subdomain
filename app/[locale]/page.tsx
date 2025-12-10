@@ -8,6 +8,7 @@ import { getAllLandingPageSlugs, getLandingPageSync } from "@/lib/landing-pages"
 import { generateOrganizationSchema, generateItemListSchemaWithUrls } from "@/lib/schema";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
+import { GoogleMapsProvider } from "@/components/GoogleMapsProvider";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
@@ -204,7 +205,8 @@ export default async function HomePage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(guidesListSchema) }}
       />
 
-      <div className="min-h-screen bg-white">
+      <GoogleMapsProvider>
+        <div className="min-h-screen bg-white">
         {/* Floating Header */}
         <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
 
@@ -480,7 +482,8 @@ export default async function HomePage({ params }: PageProps) {
 
         {/* Footer */}
         <Footer />
-      </div>
+        </div>
+      </GoogleMapsProvider>
     </>
     );
   } catch (error) {
