@@ -394,12 +394,13 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
         if (selectedIndex === -1) {
           handleUseCurrentLocation();
         } else if (selectedIndex >= 0 && selectedIndex < predictions.length) {
-          handlePlaceSelect(
-            predictions[selectedIndex].place_id,
-            predictions[selectedIndex].description
-          );
+          const prediction = predictions[selectedIndex];
+          const mainText = prediction.text?.text || prediction.text || '';
+          handlePlaceSelect(prediction.placeId, mainText);
         } else if (predictions.length > 0) {
-          handlePlaceSelect(predictions[0].place_id, predictions[0].description);
+          const prediction = predictions[0];
+          const mainText = prediction.text?.text || prediction.text || '';
+          handlePlaceSelect(prediction.placeId, mainText);
         }
         break;
       case 'Escape':
@@ -413,7 +414,9 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (predictions.length > 0) {
-      handlePlaceSelect(predictions[0].place_id, predictions[0].description);
+      const prediction = predictions[0];
+      const mainText = prediction.text?.text || prediction.text || '';
+      handlePlaceSelect(prediction.placeId, mainText);
     } else {
       // If nothing is selected, redirect to map page
       router.push(`/${locale}/map`);
