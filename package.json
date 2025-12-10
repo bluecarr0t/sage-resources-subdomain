@@ -29,6 +29,7 @@
     "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.8",
     "@types/cheerio": "^0.22.35",
     "@types/google.maps": "^3.58.1",
     "@types/jest": "^29.5.14",

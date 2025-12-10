@@ -177,19 +177,10 @@ export function MapProvider({ children }: { children: ReactNode }) {
 
   // Fetch filtered properties and share between all component instances
   useEffect(() => {
-    // Cancel any in-flight request
+    // Cancel any in-flight request when filters change
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
-    }
-    
-    // Prevent duplicate fetches (handles React Strict Mode double mounting)
-    if (fetchInProgressRef.current) {
-      return () => {
-        // Cleanup: abort if component unmounts
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
-        }
-      };
+      abortControllerRef.current = null;
     }
     
     const abortController = new AbortController();
@@ -238,21 +229,24 @@ export function MapProvider({ children }: { children: ReactNode }) {
         const data = result.data || [];
         console.log('Fetched properties (shared):', data?.length || 0);
         
-        setProperties(data);
-        setHasLoadedOnce(true); // Mark that we've successfully loaded properties at least once
-        
-        // If filters match defaults, also set allProperties to avoid duplicate fetch
-        const isDefaultFilters = 
-          filterCountry.length === 2 && 
-          filterCountry.includes('United States') && 
-          filterCountry.includes('Canada') &&
-          filterState.length === 0 &&
-          filterUnitType.length === 0 &&
-          filterRateRange.length === 0;
-        
-        if (isDefaultFilters && allProperties.length === 0) {
-          console.log('Setting allProperties from filtered properties (default filters)');
-          setAllProperties(data);
+        // Only update state if this request hasn't been aborted
+        if (!abortController.signal.aborted) {
+          setProperties(data);
+          setHasLoadedOnce(true); // Mark that we've successfully loaded properties at least once
+          
+          // If filters match defaults, also set allProperties to avoid duplicate fetch
+          const isDefaultFilters = 
+            filterCountry.length === 2 && 
+            filterCountry.includes('United States') && 
+            filterCountry.includes('Canada') &&
+            filterState.length === 0 &&
+            filterUnitType.length === 0 &&
+            filterRateRange.length === 0;
+          
+          if (isDefaultFilters && allProperties.length === 0) {
+            console.log('Setting allProperties from filtered properties (default filters)');
+            setAllProperties(data);
+          }
         }
       } catch (err) {
         // Ignore abort errors (expected when filters change quickly)
@@ -261,16 +255,20 @@ export function MapProvider({ children }: { children: ReactNode }) {
           return;
         }
         
-        console.error('Error fetching properties:', err);
-        let errorMessage = 'Failed to fetch properties';
-        if (err instanceof Error) {
-          errorMessage = err.message;
+        // Only set error if request wasn't aborted
+        if (!abortController.signal.aborted) {
+          console.error('Error fetching properties:', err);
+          let errorMessage = 'Failed to fetch properties';
+          if (err instanceof Error) {
+            errorMessage = err.message;
+          }
+          setPropertiesError(errorMessage);
         }
-        setPropertiesError(errorMessage);
       } finally {
-        setPropertiesLoading(false);
-        fetchInProgressRef.current = false;
+        // Only update loading state if this is still the current request
         if (abortControllerRef.current === abortController) {
+          setPropertiesLoading(false);
+          fetchInProgressRef.current = false;
           abortControllerRef.current = null;
         }
       }
