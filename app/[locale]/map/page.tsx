@@ -15,6 +15,7 @@ import {
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { notFound } from "next/navigation";
+import { getTranslations } from 'next-intl/server';
 
 interface PageProps {
   params: {
@@ -34,18 +35,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     notFound();
   }
   
+  const t = await getTranslations({ locale, namespace: 'map.metadata' });
+  
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const pathname = `/${locale}/map`;
   const url = `${baseUrl}${pathname}`;
   const imageUrl = `${baseUrl}/og-map-image.jpg`;
 
   return {
-    title: "Glamping Properties Map | 500+ Locations | Sage Outdoor Advisory",
-    description: "Explore 500+ glamping properties across the US and Canada on our interactive map. Compare glamping locations with population growth data to identify high-growth markets. Filter by location, unit type, and price range.",
-    keywords: "glamping properties map, glamping locations, glamping sites by state, interactive glamping map, glamping near me, glamping properties USA, glamping properties Canada, glamping map North America",
+    title: t('title'),
+    description: t('description'),
+    keywords: t('keywords'),
     openGraph: {
-      title: "Glamping Properties Map | 500+ Locations | Sage",
-      description: "Explore 500+ glamping properties across the US and Canada on our interactive map. Compare glamping locations with population growth data to identify high-growth markets.",
+      title: t('openGraph.title'),
+      description: t('openGraph.description'),
       url,
       siteName: "Sage Outdoor Advisory",
       images: [
@@ -53,7 +56,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: "Interactive glamping properties map showing locations across USA and Canada",
+          alt: t('openGraph.imageAlt'),
         },
       ],
       locale: getOpenGraphLocale(locale as Locale),
@@ -61,8 +64,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: "Glamping Properties Map | 500+ Locations",
-      description: "Explore 500+ glamping properties and compare with population growth data to identify high-growth markets",
+      title: t('twitter.title'),
+      description: t('twitter.description'),
       images: [imageUrl],
     },
     alternates: {

@@ -696,7 +696,116 @@
       "enter": "Vollbild",
       "exit": "Vollbild verlassen"
     },
-    "poweredBy": "Unterstützt von"
+    "poweredBy": "Unterstützt von",
+    "filters": {
+      "title": "Filter",
+      "activeFilters": "Aktive Filter",
+      "clearAll": "Alle Löschen",
+      "country": {
+        "label": "Nach Land Filtern",
+        "placeholder": "Alle Länder",
+        "allSelected": "Alle Länder"
+      },
+      "state": {
+        "label": "Nach Bundesstaat Filtern",
+        "placeholder": "Alle Bundesstaaten"
+      },
+      "unitType": {
+        "label": "Nach Einheitstyp Filtern",
+        "placeholder": "Alle Einheitstypen"
+      },
+      "rateRange": {
+        "label": "Nach Durchschnittlichem Tarifbereich Filtern",
+        "placeholder": "Alle Tarifbereiche"
+      },
+      "badges": {
+        "country": "Land",
+        "state": "Bundesstaat",
+        "unit": "Einheit",
+        "rate": "Tarif"
+      }
+    },
+    "stats": {
+      "properties": "Immobilien"
+    },
+    "layers": {
+      "title": "Kartenebenen",
+      "nationalParks": {
+        "label": "Nationalparks Anzeigen",
+        "description": "Nationalpark-Markierungen auf der Karte anzeigen",
+        "hide": "Nationalparks Ausblenden",
+        "show": "Nationalparks Anzeigen"
+      },
+      "population": {
+        "label": "Bevölkerungsänderung Anzeigen",
+        "description": "Bevölkerungsänderung (2010-2020) als farbcodierte Regionen anzeigen",
+        "loading": "Laden...",
+        "hide": "Bevölkerungsebene Ausblenden",
+        "show": "Bevölkerungsebene Anzeigen",
+        "legend": {
+          "title": "Bevölkerungsänderung (2010-2020)",
+          "dataSource": "Datenquelle"
+        }
+      }
+    },
+    "infoWindow": {
+      "property": {
+        "unnamed": "Unbenannte Immobilie",
+        "default": "Glamping-Immobilie",
+        "unitTypes": "Einheitstypen",
+        "avgRate": "Durchschnittlicher Tagespreis",
+        "viewMore": "Mehr Anzeigen →",
+        "reviews": {
+          "one": "Bewertung",
+          "other": "Bewertungen"
+        }
+      },
+      "park": {
+        "established": "Gegründet",
+        "size": "Größe",
+        "acres": "Morgen",
+        "visitors": "Besucher (2021)",
+        "viewMore": "Mehr Anzeigen →"
+      },
+      "photo": {
+        "previous": "Vorheriges Foto",
+        "next": "Nächstes Foto"
+      }
+    },
+    "errors": {
+      "loading": "Fehler beim Laden der Karte",
+      "noProperties": "Keine Immobilien gefunden",
+      "noPropertiesHint": "Versuchen Sie, Ihre Filter anzupassen",
+      "loadingProperties": "Immobilien werden geladen...",
+      "initializing": "Initialisierung...",
+      "loadingMaps": "Google Maps wird geladen...",
+      "loadingScript": "Google Maps-Skript wird geladen...",
+      "loadingScriptHint": "Dies kann einige Sekunden dauern"
+    },
+    "metadata": {
+      "title": "Glamping-Immobilienkarte | 500+ Standorte | Sage Outdoor Advisory",
+      "description": "Erkunden Sie über 500 Glamping-Immobilien in den USA und Kanada auf unserer interaktiven Karte. Vergleichen Sie Glamping-Standorte mit Bevölkerungsdaten, um wachstumsstarke Märkte zu identifizieren. Filtern Sie nach Standort, Einheitstyp und Preisbereich.",
+      "keywords": "Glamping-Immobilienkarte, Glamping-Standorte, Glamping-Standorte nach Bundesstaat, interaktive Glamping-Karte, Glamping in meiner Nähe, Glamping-Immobilien USA, Glamping-Immobilien Kanada, Glamping-Karte Nordamerika",
+      "openGraph": {
+        "title": "Glamping-Immobilienkarte | 500+ Standorte | Sage",
+        "description": "Erkunden Sie über 500 Glamping-Immobilien in den USA und Kanada auf unserer interaktiven Karte. Vergleichen Sie Glamping-Standorte mit Bevölkerungsdaten, um wachstumsstarke Märkte zu identifizieren.",
+        "imageAlt": "Interaktive Glamping-Immobilienkarte mit Standorten in den USA und Kanada"
+      },
+      "twitter": {
+        "title": "Glamping-Immobilienkarte | 500+ Standorte",
+        "description": "Erkunden Sie über 500 Glamping-Immobilien und vergleichen Sie mit Bevölkerungsdaten, um wachstumsstarke Märkte zu identifizieren"
+      }
+    }
+  },
+  "locationSearch": {
+    "placeholder": {
+      "compact": "Ort suchen...",
+      "default": "Geben Sie Ihr Ziel ein (Stadt, Bundesstaat oder Region)"
+    },
+    "button": "Glamping Finden",
+    "error": {
+      "apiError": "API-Fehler"
+    }
   },
   "guides": {
     "title": "Outdoor-Hospitality-Leitfäden",

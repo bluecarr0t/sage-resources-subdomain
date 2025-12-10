@@ -696,7 +696,116 @@
       "enter": "Pantalla completa",
       "exit": "Salir de pantalla completa"
     },
-    "poweredBy": "Impulsado por"
+    "poweredBy": "Impulsado por",
+    "filters": {
+      "title": "Filtros",
+      "activeFilters": "Filtros Activos",
+      "clearAll": "Limpiar Todo",
+      "country": {
+        "label": "Filtrar por País",
+        "placeholder": "Todos los Países",
+        "allSelected": "Todos los Países"
+      },
+      "state": {
+        "label": "Filtrar por Estado",
+        "placeholder": "Todos los Estados"
+      },
+      "unitType": {
+        "label": "Filtrar por Tipo de Unidad",
+        "placeholder": "Todos los Tipos de Unidad"
+      },
+      "rateRange": {
+        "label": "Filtrar por Rango de Tarifa Promedio",
+        "placeholder": "Todos los Rangos de Tarifa"
+      },
+      "badges": {
+        "country": "País",
+        "state": "Estado",
+        "unit": "Unidad",
+        "rate": "Tarifa"
+      }
+    },
+    "stats": {
+      "properties": "Propiedades"
+    },
+    "layers": {
+      "title": "Capas del Mapa",
+      "nationalParks": {
+        "label": "Mostrar Parques Nacionales",
+        "description": "Mostrar marcadores de Parques Nacionales en el mapa",
+        "hide": "Ocultar Parques Nacionales",
+        "show": "Mostrar Parques Nacionales"
+      },
+      "population": {
+        "label": "Mostrar Cambio de Población",
+        "description": "Mostrar cambio de población (2010-2020) como regiones codificadas por color",
+        "loading": "Cargando...",
+        "hide": "Ocultar Capa de Población",
+        "show": "Mostrar Capa de Población",
+        "legend": {
+          "title": "Cambio de Población (2010-2020)",
+          "dataSource": "Fuente de datos"
+        }
+      }
+    },
+    "infoWindow": {
+      "property": {
+        "unnamed": "Propiedad Sin Nombre",
+        "default": "propiedad de glamping",
+        "unitTypes": "Tipos de Unidad",
+        "avgRate": "Tarifa Diaria Promedio",
+        "viewMore": "Ver Más →",
+        "reviews": {
+          "one": "reseña",
+          "other": "reseñas"
+        }
+      },
+      "park": {
+        "established": "Establecido",
+        "size": "Tamaño",
+        "acres": "acres",
+        "visitors": "Visitantes (2021)",
+        "viewMore": "Ver Más →"
+      },
+      "photo": {
+        "previous": "Foto anterior",
+        "next": "Foto siguiente"
+      }
+    },
+    "errors": {
+      "loading": "Error al Cargar el Mapa",
+      "noProperties": "No se encontraron propiedades",
+      "noPropertiesHint": "Intente ajustar sus filtros",
+      "loadingProperties": "Cargando propiedades...",
+      "initializing": "Inicializando...",
+      "loadingMaps": "Cargando Google Maps...",
+      "loadingScript": "Cargando script de Google Maps...",
+      "loadingScriptHint": "Esto puede tardar unos segundos"
+    },
+    "metadata": {
+      "title": "Mapa de Propiedades de Glamping | 500+ Ubicaciones | Sage Outdoor Advisory",
+      "description": "Explore más de 500 propiedades de glamping en Estados Unidos y Canadá en nuestro mapa interactivo. Compare ubicaciones de glamping con datos de crecimiento poblacional para identificar mercados de alto crecimiento. Filtre por ubicación, tipo de unidad y rango de precios.",
+      "keywords": "mapa de propiedades de glamping, ubicaciones de glamping, sitios de glamping por estado, mapa interactivo de glamping, glamping cerca de mí, propiedades de glamping EE. UU., propiedades de glamping Canadá, mapa de glamping América del Norte",
+      "openGraph": {
+        "title": "Mapa de Propiedades de Glamping | 500+ Ubicaciones | Sage",
+        "description": "Explore más de 500 propiedades de glamping en Estados Unidos y Canadá en nuestro mapa interactivo. Compare ubicaciones de glamping con datos de crecimiento poblacional para identificar mercados de alto crecimiento.",
+        "imageAlt": "Mapa interactivo de propiedades de glamping mostrando ubicaciones en Estados Unidos y Canadá"
+      },
+      "twitter": {
+        "title": "Mapa de Propiedades de Glamping | 500+ Ubicaciones",
+        "description": "Explore más de 500 propiedades de glamping y compare con datos de crecimiento poblacional para identificar mercados de alto crecimiento"
+      }
+    }
+  },
+  "locationSearch": {
+    "placeholder": {
+      "compact": "Buscar ubicación...",
+      "default": "Ingrese su destino (ciudad, estado o región)"
+    },
+    "button": "Encontrar Glamping",
+    "error": {
+      "apiError": "Error de API"
+    }
   },
   "guides": {
     "title": "Guías de Hospitalidad al Aire Libre",

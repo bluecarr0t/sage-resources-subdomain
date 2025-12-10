@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGoogleMaps } from './GoogleMapsProvider';
+import { useTranslations } from 'next-intl';
 
 interface LocationSearchProps {
   locale: string;
@@ -27,6 +28,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const autocompleteCacheRef = useRef<Map<string, google.maps.places.PlacePrediction[]>>(new Map());
   const router = useRouter();
+  const t = useTranslations('locationSearch');
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
@@ -567,7 +569,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 onFocus={handleFocus}
-                placeholder={isCompact ? "Search location..." : "Enter your destination (city, state, or region)"}
+                placeholder={isCompact ? t('placeholder.compact') : t('placeholder.default')}
                 className={`w-full bg-transparent border-none outline-none text-gray-900 placeholder-gray-400 ${
                   isCompact ? 'pl-10 pr-3 py-2.5 text-sm' : 'pl-12 pr-4 py-4 text-lg'
                 }`}
@@ -586,9 +588,9 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
             {!isCompact && (
               <button
                 type="submit"
-                className="px-8 py-4 bg-[#00b6a6] text-white font-semibold rounded-xl hover:bg-[#009688] transition-colors shadow-lg hover:shadow-xl whitespace-nowrap"
+                className="px-8 py-4 bg-[#007a6e] text-white font-semibold rounded-xl hover:bg-[#006b5f] transition-colors shadow-lg hover:shadow-xl whitespace-nowrap"
               >
-                Find Glamping
+                {t('button')}
               </button>
             )}
           </div>
@@ -603,7 +605,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-red-800">API Error</p>
+              <p className="text-sm font-semibold text-red-800">{t('error.apiError')}</p>
               <p className="text-xs text-red-600 mt-1">{apiError}</p>
               {apiError.includes('REQUEST_DENIED') && (
                 <p className="text-xs text-red-500 mt-2">

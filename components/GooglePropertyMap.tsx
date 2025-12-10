@@ -15,6 +15,7 @@ import { PopulationLookup } from '@/lib/population/parse-population-csv';
 import { fetchPopulationDataFromSupabase, PopulationDataByFIPS } from '@/lib/population/supabase-population';
 import { getChangeRanges } from '@/lib/maps/county-boundaries';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 
 // Dynamically import layer components to reduce initial bundle size
 const PopulationLayer = dynamic(() => import('./PopulationLayer'), {
@@ -263,6 +264,7 @@ interface GooglePropertyMapProps {
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
   const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError, hasLoadedOnce } = useMapContext();
+  const t = useTranslations('map');
   // Use shared properties from context instead of local state
   const properties = sharedProperties;
   const allProperties = sharedAllProperties;
@@ -2088,7 +2090,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Initializing...</p>
+          <p className="text-gray-600">{t('errors.initializing')}</p>
         </div>
       </div>
     );
@@ -2179,7 +2181,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading Google Maps...</p>
+          <p className="text-gray-600">{t('errors.loadingMaps')}</p>
         </div>
       </div>
     );
@@ -2211,7 +2213,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                 />
               )}
             </span>
-            <span className={`text-xl font-semibold text-gray-700 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>Properties</span>
+            <span className={`text-xl font-semibold text-gray-700 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>{t('stats.properties')}</span>
           </div>
         </div>
 
@@ -2219,7 +2221,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         {hasActiveFilters && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Active Filters</span>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('filters.activeFilters')}</span>
               <button
                 onClick={() => {
                   clearFilters();
@@ -2227,7 +2229,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                 }}
                 className="text-xs font-medium text-blue-600 hover:text-blue-700 underline transition-colors"
               >
-                Clear All
+                {t('filters.clearAll')}
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -2236,7 +2238,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   key={country}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium"
                 >
-                  Country: {country}
+                  {t('filters.badges.country')}: {country}
                   <button
                     onClick={() => {
                       toggleCountry(country);
@@ -2256,7 +2258,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   key={state}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium"
                 >
-                  State: {state}
+                  {t('filters.badges.state')}: {state}
                   <button
                     onClick={() => toggleState(state)}
                     className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
@@ -2273,7 +2275,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   key={unitType}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 text-orange-800 rounded-full text-xs font-medium"
                 >
-                  Unit: {unitType}
+                  {t('filters.badges.unit')}: {unitType}
                   <button
                     onClick={() => toggleUnitType(unitType)}
                     className="hover:bg-orange-200 rounded-full p-0.5 transition-colors"
@@ -2290,7 +2292,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   key={rateRange}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-xs font-medium"
                 >
-                  Rate: {rateRange}
+                  {t('filters.badges.rate')}: {rateRange}
                   <button
                     onClick={() => toggleRateRange(rateRange)}
                     className="hover:bg-green-200 rounded-full p-0.5 transition-colors"
@@ -2316,7 +2318,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             aria-controls="filters-section"
           >
             <span className="text-sm font-semibold text-gray-900">
-              Filters
+              {t('filters.title')}
             </span>
             <svg
               className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
@@ -2346,9 +2348,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           >
             <MultiSelect
               id="country-filter"
-              label="Filter by Country"
-              placeholder="All Countries"
-              allSelectedText="All Countries"
+              label={t('filters.country.label')}
+              placeholder={t('filters.country.placeholder')}
+              allSelectedText={t('filters.country.allSelected')}
               options={[
                 { value: 'United States', label: `United States (${countryCounts['United States'] || 0})` },
                 { value: 'Canada', label: `Canada (${countryCounts['Canada'] || 0})` },
@@ -2371,8 +2373,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
             <MultiSelect
               id="state-filter"
-              label="Filter by State"
-              placeholder="All States"
+              label={t('filters.state.label')}
+              placeholder={t('filters.state.placeholder')}
               options={uniqueStates
                 .filter((state) => {
                   const count = stateCounts[state] ?? 0;
@@ -2393,8 +2395,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             
             <MultiSelect
               id="unit-type-filter"
-              label="Filter by Unit Type"
-              placeholder="All Unit Types"
+              label={t('filters.unitType.label')}
+              placeholder={t('filters.unitType.placeholder')}
               options={availableUnitTypes
                 .filter((unitType) => {
                   // Filter out RV-related unit types (case-insensitive)
@@ -2437,8 +2439,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             
             <MultiSelect
               id="rate-range-filter"
-              label="Filter by Avg. Retail Rate Range"
-              placeholder="All Rate Ranges"
+              label={t('filters.rateRange.label')}
+              placeholder={t('filters.rateRange.placeholder')}
               options={availableRateCategories
                 .filter((category) => (rateCategoryCounts[category] || 0) > 0)
                 .map((category) => {
@@ -2457,7 +2459,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             {/* Map Layers */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-900">
-                Map Layers
+                {t('layers.title')}
               </label>
               
               {/* National Parks Toggle */}
@@ -2465,14 +2467,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-900">
-                      Show National Parks
+                      {t('layers.nationalParks.label')}
                     </span>
                     <span className="text-xs text-gray-500">
                       ({filterParksWithCoordinates(nationalParks).length} parks)
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 mt-0.5">
-                    Display National Parks markers on the map
+                    {t('layers.nationalParks.description')}
                   </p>
                 </div>
                 <button
@@ -2480,7 +2482,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   type="button"
                   role="switch"
                   aria-checked={showNationalParks}
-                  aria-label={showNationalParks ? 'Hide National Parks' : 'Show National Parks'}
+                  aria-label={showNationalParks ? t('layers.nationalParks.hide') : t('layers.nationalParks.show')}
                   onClick={toggleNationalParks}
                   className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2 ${
                     showNationalParks ? 'bg-[#10B981]' : 'bg-gray-300'
@@ -2500,14 +2502,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-gray-900">
-                        Show Population Change
+                        {t('layers.population.label')}
                       </span>
                       {populationLoading && (
-                        <span className="text-xs text-gray-500">(Loading...)</span>
+                        <span className="text-xs text-gray-500">({t('layers.population.loading')})</span>
                       )}
                     </div>
                     <p className="text-xs text-gray-600 mt-0.5">
-                      Display population change (2010-2020) as color-coded regions
+                      {t('layers.population.description')}
                     </p>
                     <p className="text-xs text-gray-500 mt-1 italic">
                       Data source: <a 
@@ -2525,7 +2527,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     type="button"
                     role="switch"
                     aria-checked={showPopulationLayer}
-                    aria-label={showPopulationLayer ? 'Hide Population Layer' : 'Show Population Layer'}
+                    aria-label={showPopulationLayer ? t('layers.population.hide') : t('layers.population.show')}
                     onClick={togglePopulationLayer}
                     disabled={populationLoading}
                     className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
@@ -2545,7 +2547,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               {/* Population Change Legend */}
               {showPopulationLayer && !populationLoading && (
                 <div className="p-3 bg-white rounded-lg border border-gray-200">
-                  <h4 className="text-xs font-semibold text-gray-900 mb-2">Population Change (2010-2020)</h4>
+                  <h4 className="text-xs font-semibold text-gray-900 mb-2">{t('layers.population.legend.title')}</h4>
                   <div className="space-y-1">
                     {getChangeRanges().map((range) => (
                       <div key={range.label} className="flex items-center gap-2 text-xs">
@@ -2558,7 +2560,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     ))}
                   </div>
                   <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic text-center">
-                    Data source: <a 
+                    {t('layers.population.legend.dataSource')}: <a 
                       href="https://data.census.gov" 
                       target="_blank" 
                       rel="noopener noreferrer"
@@ -2593,8 +2595,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading Google Maps script...</p>
-              <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
+              <p className="text-gray-600">{t('errors.loadingScript')}</p>
+              <p className="text-sm text-gray-500 mt-2">{t('errors.loadingScriptHint')}</p>
             </div>
           </div>
         )}
@@ -2640,17 +2642,17 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     )}
                     {selectedPark.date_established && (
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">Established:</span> {selectedPark.date_established}
+                        <span className="font-semibold">{t('infoWindow.park.established')}:</span> {selectedPark.date_established}
                       </p>
                     )}
                     {selectedPark.acres && (
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">Size:</span> {selectedPark.acres.toLocaleString()} acres
+                        <span className="font-semibold">{t('infoWindow.park.size')}:</span> {selectedPark.acres.toLocaleString()} {t('infoWindow.park.acres')}
                       </p>
                     )}
                     {selectedPark.recreation_visitors_2021 && (
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">Visitors (2021):</span> {parseInt(selectedPark.recreation_visitors_2021, 10).toLocaleString()}
+                        <span className="font-semibold">{t('infoWindow.park.visitors')}:</span> {parseInt(selectedPark.recreation_visitors_2021, 10).toLocaleString()}
                       </p>
                     )}
                     {selectedPark.description && (
@@ -2665,12 +2667,12 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       const parkUrl = `/${locale}/property/${selectedPark.slug}`;
                       
                       return (
-                        <Link
-                          href={parkUrl}
-                          className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
-                        >
-                          View More →
-                        </Link>
+                          <Link
+                            href={parkUrl}
+                            className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
+                          >
+                            {t('infoWindow.park.viewMore')}
+                          </Link>
                       );
                     })()}
                   </div>
@@ -2724,7 +2726,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       };
                       
                       // Generate descriptive alt text
-                      const propertyName = selectedProperty.property_name || 'Glamping property';
+                      const propertyName = selectedProperty.property_name || t('infoWindow.property.default');
                       const city = selectedProperty.city || '';
                       const state = selectedProperty.state || '';
                       const location = city && state ? ` in ${city}, ${state}` : state ? ` in ${state}` : '';
@@ -2763,7 +2765,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                                 <button
                                   onClick={goToPrevious}
                                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100 z-20"
-                                  aria-label="Previous photo"
+                                  aria-label={t('infoWindow.photo.previous')}
                                   type="button"
                                 >
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2775,7 +2777,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                                 <button
                                   onClick={goToNext}
                                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100 z-20"
-                                  aria-label="Next photo"
+                                  aria-label={t('infoWindow.photo.next')}
                                   type="button"
                                 >
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2796,7 +2798,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       );
                     })()}
                     <h3 className="font-bold text-lg mb-2 text-gray-900">
-                      {selectedProperty.property_name || 'Unnamed Property'}
+                      {selectedProperty.property_name || t('infoWindow.property.unnamed')}
                     </h3>
                     {(() => {
                       const addressParts = [];
@@ -2818,13 +2820,13 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     })()}
                     {(selectedProperty as any).all_unit_types && (selectedProperty as any).all_unit_types.length > 0 && (
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">Unit Types:</span>{' '}
+                        <span className="font-semibold">{t('infoWindow.property.unitTypes')}:</span>{' '}
                         {(selectedProperty as any).all_unit_types.join(', ')}
                       </p>
                     )}
                     {(selectedProperty as any).rate_category && (
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">Avg. Retail Daily Rate:</span>{' '}
+                        <span className="font-semibold">{t('infoWindow.property.avgRate')}:</span>{' '}
                         {(selectedProperty as any).rate_category}
                       </p>
                     )}
@@ -2842,7 +2844,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                         )}
                         {(selectedProperty as any).google_user_rating_total && (
                           <span className="text-sm text-gray-600">
-                            ({(selectedProperty as any).google_user_rating_total.toLocaleString()} {((selectedProperty as any).google_user_rating_total === 1) ? 'review' : 'reviews'})
+                            ({(selectedProperty as any).google_user_rating_total.toLocaleString()} {((selectedProperty as any).google_user_rating_total === 1) ? t('infoWindow.property.reviews.one') : t('infoWindow.property.reviews.other')})
                           </span>
                         )}
                       </div>
@@ -2863,7 +2865,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                             href={propertyUrl}
                             className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
                           >
-                            View More →
+                            {t('infoWindow.property.viewMore')}
                           </Link>
                         );
                       }
@@ -2890,7 +2892,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-30 pointer-events-none">
                 <div className="text-center">
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600"></div>
-                  <p className="text-gray-600 font-medium mt-4">Loading properties...</p>
+                  <p className="text-gray-600 font-medium mt-4">{t('errors.loadingProperties')}</p>
                 </div>
               </div>
             )}
@@ -2899,8 +2901,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         {!loading && !error && hasLoadedOnce && displayProperties.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 pointer-events-none z-20">
             <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-              <p className="text-gray-600 font-medium">No properties found</p>
-              <p className="text-sm text-gray-500 mt-1">Try adjusting your filters</p>
+              <p className="text-gray-600 font-medium">{t('errors.noProperties')}</p>
+              <p className="text-sm text-gray-500 mt-1">{t('errors.noPropertiesHint')}</p>
             </div>
           </div>
         )}

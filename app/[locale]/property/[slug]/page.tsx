@@ -12,6 +12,11 @@ import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
 
+// Allow dynamic params for locales not in generateStaticParams
+// This allows /es/property/[slug], /fr/property/[slug], etc. to work
+// without generating static pages for each locale
+export const dynamicParams = true;
+
 interface PageProps {
   params: {
     locale: string;
@@ -30,6 +35,7 @@ export async function generateStaticParams() {
   
   // Property pages are data-driven and don't need localization
   // Only generate for default locale (en) to reduce build time and page count
+  // Other locales (es, fr, de) will be rendered dynamically on-demand
   const defaultLocale = 'en';
   
   // Add glamping property slugs

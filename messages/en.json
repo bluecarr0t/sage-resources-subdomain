@@ -38,7 +38,116 @@
       "enter": "Enter fullscreen",
       "exit": "Exit fullscreen"
     },
-    "poweredBy": "Powered by"
+    "poweredBy": "Powered by",
+    "filters": {
+      "title": "Filters",
+      "activeFilters": "Active Filters",
+      "clearAll": "Clear All",
+      "country": {
+        "label": "Filter by Country",
+        "placeholder": "All Countries",
+        "allSelected": "All Countries"
+      },
+      "state": {
+        "label": "Filter by State",
+        "placeholder": "All States"
+      },
+      "unitType": {
+        "label": "Filter by Unit Type",
+        "placeholder": "All Unit Types"
+      },
+      "rateRange": {
+        "label": "Filter by Avg. Retail Rate Range",
+        "placeholder": "All Rate Ranges"
+      },
+      "badges": {
+        "country": "Country",
+        "state": "State",
+        "unit": "Unit",
+        "rate": "Rate"
+      }
+    },
+    "stats": {
+      "properties": "Properties"
+    },
+    "layers": {
+      "title": "Map Layers",
+      "nationalParks": {
+        "label": "Show National Parks",
+        "description": "Display National Parks markers on the map",
+        "hide": "Hide National Parks",
+        "show": "Show National Parks"
+      },
+      "population": {
+        "label": "Show Population Change",
+        "description": "Display population change (2010-2020) as color-coded regions",
+        "loading": "Loading...",
+        "hide": "Hide Population Layer",
+        "show": "Show Population Layer",
+        "legend": {
+          "title": "Population Change (2010-2020)",
+          "dataSource": "Data source"
+        }
+      }
+    },
+    "infoWindow": {
+      "property": {
+        "unnamed": "Unnamed Property",
+        "default": "Glamping property",
+        "unitTypes": "Unit Types",
+        "avgRate": "Avg. Retail Daily Rate",
+        "viewMore": "View More →",
+        "reviews": {
+          "one": "review",
+          "other": "reviews"
+        }
+      },
+      "park": {
+        "established": "Established",
+        "size": "Size",
+        "acres": "acres",
+        "visitors": "Visitors (2021)",
+        "viewMore": "View More →"
+      },
+      "photo": {
+        "previous": "Previous photo",
+        "next": "Next photo"
+      }
+    },
+    "errors": {
+      "loading": "Error Loading Map",
+      "noProperties": "No properties found",
+      "noPropertiesHint": "Try adjusting your filters",
+      "loadingProperties": "Loading properties...",
+      "initializing": "Initializing...",
+      "loadingMaps": "Loading Google Maps...",
+      "loadingScript": "Loading Google Maps script...",
+      "loadingScriptHint": "This may take a few seconds"
+    },
+    "metadata": {
+      "title": "Glamping Properties Map | 500+ Locations | Sage Outdoor Advisory",
+      "description": "Explore 500+ glamping properties across the US and Canada on our interactive map. Compare glamping locations with population growth data to identify high-growth markets. Filter by location, unit type, and price range.",
+      "keywords": "glamping properties map, glamping locations, glamping sites by state, interactive glamping map, glamping near me, glamping properties USA, glamping properties Canada, glamping map North America",
+      "openGraph": {
+        "title": "Glamping Properties Map | 500+ Locations | Sage",
+        "description": "Explore 500+ glamping properties across the US and Canada on our interactive map. Compare glamping locations with population growth data to identify high-growth markets.",
+        "imageAlt": "Interactive glamping properties map showing locations across USA and Canada"
+      },
+      "twitter": {
+        "title": "Glamping Properties Map | 500+ Locations",
+        "description": "Explore 500+ glamping properties and compare with population growth data to identify high-growth markets"
+      }
+    }
+  },
+  "locationSearch": {
+    "placeholder": {
+      "compact": "Search location...",
+      "default": "Enter your destination (city, state, or region)"
+    },
+    "button": "Find Glamping",
+    "error": {
+      "apiError": "API Error"
+    }
   },
   "guides": {
     "title": "Outdoor Hospitality Guides",
