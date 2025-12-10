@@ -395,11 +395,11 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
           handleUseCurrentLocation();
         } else if (selectedIndex >= 0 && selectedIndex < predictions.length) {
           const prediction = predictions[selectedIndex];
-          const mainText = prediction.text?.text || prediction.text || '';
+          const mainText = typeof prediction.text === 'string' ? prediction.text : (prediction.text?.text || '');
           handlePlaceSelect(prediction.placeId, mainText);
         } else if (predictions.length > 0) {
           const prediction = predictions[0];
-          const mainText = prediction.text?.text || prediction.text || '';
+          const mainText = typeof prediction.text === 'string' ? prediction.text : (prediction.text?.text || '');
           handlePlaceSelect(prediction.placeId, mainText);
         }
         break;
@@ -415,7 +415,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     e.preventDefault();
     if (predictions.length > 0) {
       const prediction = predictions[0];
-      const mainText = prediction.text?.text || prediction.text || '';
+      const mainText = typeof prediction.text === 'string' ? prediction.text : (prediction.text?.text || '');
       handlePlaceSelect(prediction.placeId, mainText);
     } else {
       // If nothing is selected, redirect to map page
@@ -743,7 +743,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
             </div>
             {predictions.map((prediction, index) => {
               // Extract text from PlacePrediction (new API structure)
-              const mainText = prediction.text?.text || prediction.text || '';
+              const mainText = typeof prediction.text === 'string' ? prediction.text : (prediction.text?.text || '');
               const secondaryText = prediction.structuredFormatting?.secondaryText || '';
               
               return (
