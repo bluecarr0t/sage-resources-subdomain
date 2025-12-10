@@ -744,7 +744,8 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
             {predictions.map((prediction, index) => {
               // Extract text from PlacePrediction (new API structure)
               const mainText = typeof prediction.text === 'string' ? prediction.text : (prediction.text?.text || '');
-              const secondaryText = prediction.structuredFormatting?.secondaryText || '';
+              // PlacePrediction doesn't have structuredFormatting - secondary text not available in new API
+              const secondaryText = '';
               
               return (
                 <div
