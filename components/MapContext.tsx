@@ -215,9 +215,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
         setProperties(data);
         setHasLoadedOnce(true); // Mark that we've successfully loaded properties at least once
       } catch (err) {
-        // Ignore abort errors
+        // Ignore abort errors (expected when filters change quickly)
         if (err instanceof Error && err.name === 'AbortError') {
-          console.log('Properties fetch aborted');
+          // Silently handle abort - this is expected behavior when filters change
           return;
         }
         

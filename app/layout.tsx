@@ -11,8 +11,9 @@ export default function RootLayout({
 }>) {
   // Minimal HTML structure required by Next.js
   // The [locale]/layout.tsx provides the actual HTML structure with lang attribute
+  // suppressHydrationWarning prevents hydration mismatch warnings since locale layout handles lang
   return (
-    <html>
+    <html suppressHydrationWarning>
       <body>
         {children}
       </body>

@@ -21,9 +21,7 @@ const DynamicGooglePropertyMap = dynamic(() => import('@/components/GoogleProper
 // Dynamically import LocationSearch component
 const DynamicLocationSearch = dynamic(() => import('@/components/LocationSearch'), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-14 bg-gray-100 rounded-lg animate-pulse" />
-  ),
+  loading: () => null, // No loading animation
 });
 
 interface MapLayoutProps {

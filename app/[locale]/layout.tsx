@@ -61,7 +61,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <head>
+        {/* Chunk loading error handler - client-side only to avoid hydration mismatch */}
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

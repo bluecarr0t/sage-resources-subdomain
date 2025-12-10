@@ -40,7 +40,7 @@ export function findRelatedLandingPages(
 
   const allPages = getAllLandingPageSlugs()
     .map((s) => {
-      const page = getLandingPage(s);
+      const page = getLandingPageSync(s);
       if (!page || page.slug === slug) return null;
       return { slug: page.slug, title: page.title, keywords: page.keywords || [] };
     })

@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import GoogleSheetMap from '@/components/GoogleSheetMap';
+import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
 import { useSearchParams } from 'next/navigation';
 
 // Dynamically import to prevent SSR issues
@@ -31,26 +32,28 @@ export default function GoogleSheetMapPage({ params }: PageProps) {
   const mapDescription = searchParams.get('description') || 'Explore locations on the map. Click on markers to view details.';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-8 md:py-16">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              {mapTitle}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {mapDescription}
-            </p>
+    <GoogleMapsProvider>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto px-4 py-8 md:py-16">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                {mapTitle}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                {mapDescription}
+              </p>
+            </div>
+            <DynamicGoogleSheetMap
+              sheetId={sheetId}
+              sheetName={sheetName}
+              mapTitle={mapTitle}
+              mapDescription={mapDescription}
+            />
           </div>
-          <DynamicGoogleSheetMap
-            sheetId={sheetId}
-            sheetName={sheetName}
-            mapTitle={mapTitle}
-            mapDescription={mapDescription}
-          />
         </div>
       </div>
-    </div>
+    </GoogleMapsProvider>
   );
 }
 

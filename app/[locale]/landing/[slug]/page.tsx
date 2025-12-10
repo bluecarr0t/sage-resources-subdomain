@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     notFound();
   }
   
-  const page = getLandingPage(slug);
+  const page = await getLandingPage(slug, locale);
   
   if (!page) {
     return {
@@ -107,7 +107,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default function LandingPage({ params }: PageProps) {
+export default async function LandingPage({ params }: PageProps) {
   const { locale, slug } = params;
   
   // Validate locale
@@ -115,7 +115,7 @@ export default function LandingPage({ params }: PageProps) {
     notFound();
   }
   
-  const page = getLandingPage(slug);
+  const page = await getLandingPage(slug, locale);
 
   if (!page) {
     notFound();

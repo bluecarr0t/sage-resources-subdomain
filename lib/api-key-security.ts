@@ -109,22 +109,27 @@ export function logSecurityInfo(apiKey: string | undefined): void {
   const isSecure = isSecureEnvironment();
   const warnings = getSecurityWarnings();
   
-  console.group('🔐 API Key Security Info');
-  console.log('Environment:', process.env.NODE_ENV);
-  console.log('Secure Environment:', isSecure ? '✅ Yes' : '❌ No');
-  console.log('API Key Valid:', validation.valid ? '✅ Yes' : `❌ No (${validation.error})`);
-  
-  if (warnings.length > 0) {
-    console.warn('Security Warnings:');
-    warnings.forEach((warning) => console.warn(`  ${warning}`));
+  // Only log in development and only once per session
+  if (typeof window !== 'undefined' && !(window as any).__API_KEY_SECURITY_LOGGED__) {
+    (window as any).__API_KEY_SECURITY_LOGGED__ = true;
+    
+    console.group('🔐 API Key Security Info');
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Secure Environment:', isSecure ? '✅ Yes' : '❌ No');
+    console.log('API Key Valid:', validation.valid ? '✅ Yes' : `❌ No (${validation.error})`);
+    
+    if (warnings.length > 0) {
+      console.warn('Security Warnings:');
+      warnings.forEach((warning) => console.warn(`  ${warning}`));
+    }
+    
+    if (typeof window !== 'undefined') {
+      console.log('Current Domain:', window.location.hostname);
+      console.log('Protocol:', window.location.protocol);
+    }
+    
+    console.groupEnd();
   }
-  
-  if (typeof window !== 'undefined') {
-    console.log('Current Domain:', window.location.hostname);
-    console.log('Protocol:', window.location.protocol);
-  }
-  
-  console.groupEnd();
 }
 
 /**

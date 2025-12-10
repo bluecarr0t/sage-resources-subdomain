@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLandingPage, getAllLandingPageSlugs, LandingPageContent } from "@/lib/landing-pages";
+import { getLandingPageSync, getAllLandingPageSlugs, LandingPageContent } from "@/lib/landing-pages";
 
 interface RelatedLandingPagesProps {
   currentPage: LandingPageContent;
@@ -16,7 +16,7 @@ export default function RelatedLandingPages({
   const explicitRelated: LandingPageContent[] = [];
   if (currentPage.relatedPages && currentPage.relatedPages.length > 0) {
     currentPage.relatedPages.forEach((slug) => {
-      const page = getLandingPage(slug);
+      const page = getLandingPageSync(slug);
       if (page && page.slug !== currentPage.slug) {
         explicitRelated.push(page);
       }
@@ -27,7 +27,7 @@ export default function RelatedLandingPages({
   let autoRelated: LandingPageContent[] = [];
   if (explicitRelated.length < maxPages) {
     const allPages = getAllLandingPageSlugs()
-      .map((slug) => getLandingPage(slug))
+      .map((slug) => getLandingPageSync(slug))
       .filter((page): page is LandingPageContent => page !== null);
 
     // Find pages with similar keywords or service type

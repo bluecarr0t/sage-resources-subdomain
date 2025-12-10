@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { useGoogleMaps } from './GoogleMapsProvider';
 import { supabase } from '@/lib/supabase';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
 import { NationalPark, NationalParkWithCoords, filterParksWithCoordinates } from '@/lib/types/national-parks';
@@ -33,10 +34,8 @@ const defaultCenter = {
 // This shows the full continental United States with some buffer, excluding Alaska and Hawaii
 const defaultZoom = 4;
 
-// Libraries array must be a constant to prevent LoadScript reload warnings
-// Note: 'places' library is loaded by LocationSearch component when needed
-// Don't load it here to reduce initial bundle size
-const libraries: never[] = [];
+// Libraries array is now handled by GoogleMapsProvider
+// Note: 'places' library is included in GoogleMapsProvider for LocationSearch
 
 type PropertyWithCoords = SageProperty & { coordinates: [number, number] };
 
@@ -287,6 +286,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [populationLookup, setPopulationLookup] = useState<PopulationLookup | null>(null);
   const [populationFipsLookup, setPopulationFipsLookup] = useState<PopulationDataByFIPS | null>(null);
   const [populationLoading, setPopulationLoading] = useState(false);
+  const [populationLayerKey, setPopulationLayerKey] = useState(0);
 
   // URL parameter handling
   const searchParams = useSearchParams();
@@ -312,8 +312,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
   }, [selectedProperty]);
   const clustererRef = useRef<any | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const parkMarkersRef = useRef<google.maps.Marker[]>([]);
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const parkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const hasCenteredFromUrlRef = useRef<boolean>(false);
   const hasJustFittedBoundsRef = useRef<boolean>(false);
 
@@ -523,6 +523,16 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
     fetchNationalParks();
   }, [showNationalParks, nationalParks.length]);
+
+  // Increment layer key when toggled on to force remount (ensures Data component re-initializes)
+  const prevShowPopulationLayerRef = useRef(showPopulationLayer);
+  useEffect(() => {
+    // Only increment when toggling from false to true
+    if (showPopulationLayer && !prevShowPopulationLayerRef.current) {
+      setPopulationLayerKey(prev => prev + 1);
+    }
+    prevShowPopulationLayerRef.current = showPopulationLayer;
+  }, [showPopulationLayer]);
 
   // Fetch population data from Supabase only when layer is enabled
   useEffect(() => {
@@ -948,39 +958,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const displayProperties = processedProperties;
 
   // Filter properties by viewport bounds to reduce rendering overhead
+  // Show all properties with coordinates - don't filter by viewport to prevent marker flashing on zoom
   const propertiesWithCoords = useMemo(() => {
-    const allWithCoords = filterPropertiesWithCoordinates(displayProperties);
-    
-    // If no bounds available yet, return all (will filter once map loads)
-    if (!mapBounds) {
-      return allWithCoords;
-    }
-    
-    // Filter to only properties within current viewport bounds
-    const ne = mapBounds.getNorthEast();
-    const sw = mapBounds.getSouthWest();
-    
-    return allWithCoords.filter((property) => {
-      const [lat, lon] = property.coordinates;
-      
-      // Check if property is within bounds
-      // Handle longitude wraparound (if east < west, bounds cross international date line)
-      const withinLat = lat >= sw.lat() && lat <= ne.lat();
-      const east = ne.lng();
-      const west = sw.lng();
-      
-      let withinLon = false;
-      if (east >= west) {
-        // Normal case: no wraparound
-        withinLon = lon >= west && lon <= east;
-      } else {
-        // Wraparound case: bounds cross the international date line
-        withinLon = lon >= west || lon <= east;
-      }
-      
-      return withinLat && withinLon;
-    });
-  }, [displayProperties, mapBounds]);
+    return filterPropertiesWithCoordinates(displayProperties);
+  }, [displayProperties]);
 
 
   // Set default center and zoom for lower 48 states when map loads (if no URL params)
@@ -1101,6 +1082,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
   }, [map, mapCenter, mapZoom, shouldFitBounds, propertiesWithCoords]);
 
+
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
     
@@ -1158,6 +1140,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   }, []);
 
   // Manage markers (no clustering - show all markers individually)
+  // Use a ref to track property IDs to avoid recreating markers unnecessarily
+  const propertyIdsRef = useRef<Set<string | number>>(new Set());
+  
   useEffect(() => {
     if (!map || !isClient) {
       // Clean up if no map
@@ -1165,8 +1150,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         clustererRef.current.clearMarkers();
         clustererRef.current = null;
       }
-      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current.forEach(marker => {
+        marker.map = null;
+      });
       markersRef.current = [];
+      propertyIdsRef.current.clear();
       return;
     }
 
@@ -1176,15 +1164,31 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         clustererRef.current.clearMarkers();
         clustererRef.current = null;
       }
-      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current.forEach(marker => {
+        marker.map = null;
+      });
       markersRef.current = [];
+      propertyIdsRef.current.clear();
       return;
     }
 
+    // Create a set of current property IDs
+    const currentPropertyIds = new Set(propertiesWithCoords.map(p => p.id));
+    
+    // Check if property list has actually changed
+    const idsMatch = 
+      currentPropertyIds.size === propertyIdsRef.current.size &&
+      Array.from(currentPropertyIds).every(id => propertyIdsRef.current.has(id));
+    
+    // If property list hasn't changed, don't recreate markers
+    if (idsMatch && markersRef.current.length > 0) {
+      return;
+    }
+
+    // Property list has changed - recreate markers
     // Clean up old markers first
     markersRef.current.forEach(marker => {
-      marker.setMap(null);
-      google.maps.event.clearInstanceListeners(marker);
+      marker.map = null;
     });
     markersRef.current = [];
 
@@ -1194,58 +1198,52 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       clustererRef.current = null;
     }
 
-    // Create blue marker icon
-    const blueMarkerIcon = {
-      path: google.maps.SymbolPath.CIRCLE,
-      fillColor: '#3B82F6', // Blue color
-      fillOpacity: 1,
-      strokeColor: '#FFFFFF',
-      strokeWeight: 2,
-      scale: 8,
-    };
+    // Update property IDs ref
+    propertyIdsRef.current = currentPropertyIds;
 
-    // Alternative: Use a pin-shaped marker
-    const bluePinIcon = {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-        <svg width="24" height="40" viewBox="0 0 24 40" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 8.5 12 28 12 28s12-19.5 12-28C24 5.373 18.627 0 12 0z" fill="#3B82F6"/>
-          <circle cx="12" cy="12" r="6" fill="#FFFFFF"/>
-        </svg>
-      `),
-      scaledSize: new google.maps.Size(24, 40),
-      anchor: new google.maps.Point(12, 40),
-    };
+    // Create markers using AdvancedMarkerElement
+    const createMarkers = async () => {
+      // Import the marker library
+      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
-    // Create native Google Maps markers and add them directly to the map
-    const markers = propertiesWithCoords.map((property) => {
-      const marker = new google.maps.Marker({
-        position: {
-          lat: property.coordinates[0],
-          lng: property.coordinates[1],
-        },
-        map: map, // Add marker directly to map (no clustering)
-        icon: bluePinIcon, // Use blue pin icon
+      // Create native Google Maps markers and add them directly to the map
+      const markers = propertiesWithCoords.map((property) => {
+        // Create a blue pin element for each property marker
+        const bluePin = new PinElement({
+          background: '#3B82F6',
+          borderColor: '#FFFFFF',
+          glyphColor: '#FFFFFF',
+          scale: 1.0,
+        });
+        
+        const marker = new AdvancedMarkerElement({
+          map: map,
+          position: {
+            lat: property.coordinates[0],
+            lng: property.coordinates[1],
+          },
+          content: bluePin.element,
+        });
+
+        // Add click listener to open InfoWindow
+        marker.addEventListener('click', () => {
+          setSelectedProperty(property as PropertyWithCoords);
+          setSelectedPark(null); // Close park InfoWindow if open
+        });
+
+        return marker;
       });
 
-      // Add click listener to open InfoWindow
-      marker.addListener('click', () => {
-        setSelectedProperty(property as PropertyWithCoords);
-        setSelectedPark(null); // Close park InfoWindow if open
-      });
+      // Update markers ref
+      markersRef.current = markers;
+    };
 
-      return marker;
-    });
-
-    // Update markers ref
-    markersRef.current = markers;
+    createMarkers().catch(console.error);
 
     // Cleanup function
     return () => {
-      // Clean up markers when dependencies change
-      markers.forEach(marker => {
-        marker.setMap(null);
-        google.maps.event.clearInstanceListeners(marker);
-      });
+      // Only clean up if component unmounts or map/client changes
+      // Don't clean up on property list changes to prevent flashing
     };
   }, [map, isClient, propertiesWithCoords]);
 
@@ -1253,7 +1251,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   useEffect(() => {
     if (!map || !isClient) {
       // Clean up if no map
-      parkMarkersRef.current.forEach(marker => marker.setMap(null));
+      parkMarkersRef.current.forEach(marker => {
+        marker.map = null;
+      });
       parkMarkersRef.current = [];
       return;
     }
@@ -1261,8 +1261,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     // If National Parks are hidden, clean up and return early
     if (!showNationalParks) {
       parkMarkersRef.current.forEach(marker => {
-        marker.setMap(null);
-        google.maps.event.clearInstanceListeners(marker);
+        marker.map = null;
       });
       parkMarkersRef.current = [];
       // Close park InfoWindow if open
@@ -1275,55 +1274,55 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
     // Clean up old park markers first
     parkMarkersRef.current.forEach(marker => {
-      marker.setMap(null);
-      google.maps.event.clearInstanceListeners(marker);
+      marker.map = null;
     });
     parkMarkersRef.current = [];
 
-    // Create green/tree marker icon for national parks
-    const greenParkIcon = {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-        <svg width="24" height="40" viewBox="0 0 24 40" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 8.5 12 28 12 28s12-19.5 12-28C24 5.373 18.627 0 12 0z" fill="#10B981"/>
-          <path d="M12 6L10 8L12 10L14 8L12 6Z" fill="#FFFFFF"/>
-          <path d="M8 10L10 12L8 14L6 12L8 10Z" fill="#FFFFFF"/>
-          <path d="M16 10L18 12L16 14L14 12L16 10Z" fill="#FFFFFF"/>
-        </svg>
-      `),
-      scaledSize: new google.maps.Size(24, 40),
-      anchor: new google.maps.Point(12, 40),
+    // Create markers using AdvancedMarkerElement
+    const createParkMarkers = async () => {
+      // Import the marker library
+      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
+
+      // Create markers for national parks
+      const parkMarkers = parksWithCoords.map((park) => {
+        // Create a green pin element for each park marker
+        const greenPin = new PinElement({
+          background: '#10B981',
+          borderColor: '#FFFFFF',
+          glyphColor: '#FFFFFF',
+          scale: 1.0,
+        });
+        
+        const marker = new AdvancedMarkerElement({
+          map: map,
+          position: {
+            lat: park.coordinates[0],
+            lng: park.coordinates[1],
+          },
+          content: greenPin.element,
+          title: park.name,
+        });
+
+        // Add click listener to open InfoWindow
+        marker.addEventListener('click', () => {
+          setSelectedPark(park);
+          setSelectedProperty(null); // Close property InfoWindow if open
+        });
+
+        return marker;
+      });
+
+      // Update park markers ref
+      parkMarkersRef.current = parkMarkers;
     };
 
-    // Create markers for national parks
-    const parkMarkers = parksWithCoords.map((park) => {
-      const marker = new google.maps.Marker({
-        position: {
-          lat: park.coordinates[0],
-          lng: park.coordinates[1],
-        },
-        map: map,
-        icon: greenParkIcon,
-        title: park.name,
-      });
-
-      // Add click listener to open InfoWindow
-      marker.addListener('click', () => {
-        setSelectedPark(park);
-        setSelectedProperty(null); // Close property InfoWindow if open
-      });
-
-      return marker;
-    });
-
-    // Update park markers ref
-    parkMarkersRef.current = parkMarkers;
+    createParkMarkers().catch(console.error);
 
     // Cleanup function
     return () => {
       // Clean up markers when dependencies change
-      parkMarkers.forEach(marker => {
-        marker.setMap(null);
-        google.maps.event.clearInstanceListeners(marker);
+      parkMarkersRef.current.forEach(marker => {
+        marker.map = null;
       });
     };
   }, [map, isClient, nationalParks, showNationalParks]);
@@ -2058,11 +2057,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
   }, [apiKey]);
 
-  // useLoadScript must be called unconditionally (rules of hooks)
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: apiKey || '',
-    libraries: libraries,
-  });
+  // Use shared Google Maps provider instead of loading script separately
+  const { isLoaded, loadError } = useGoogleMaps();
 
   const [mapError, setMapError] = useState<string | null>(null);
 
@@ -2618,6 +2614,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                 streetViewControl: false,
                 mapTypeControl: true,
                 fullscreenControl: true,
+                mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81', // Style Map ID for custom map styling
               }}
             >
               {selectedPark && (
@@ -2879,6 +2876,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               {/* Population Change Layer */}
               {showPopulationLayer && map && (
                 <PopulationLayer
+                  key={`population-layer-${populationLayerKey}`}
                   map={map}
                   populationLookup={populationLookup}
                   fipsLookup={populationFipsLookup || undefined}

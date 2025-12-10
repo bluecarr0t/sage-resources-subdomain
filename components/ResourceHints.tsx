@@ -18,12 +18,12 @@ export default function ResourceHints() {
       <link rel="dns-prefetch" href="https://maps.googleapis.com" />
       <link rel="dns-prefetch" href="https://maps.gstatic.com" />
       
-      {/* Preload critical logo image */}
+      {/* Preload critical logo image - using blob storage URL */}
       <link
         rel="preload"
-        href="/sage-logo-black-header.png"
+        href="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/logos/sage-logo-black-header.webp"
         as="image"
-        type="image/png"
+        type="image/webp"
       />
     </>
   );

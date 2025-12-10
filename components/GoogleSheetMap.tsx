@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { useGoogleMaps } from './GoogleMapsProvider';
 import {
   ParsedSheetProperty,
   filterPropertiesWithCoordinates,
@@ -130,12 +131,8 @@ export default function GoogleSheetMap({
     [propertiesWithCoords]
   );
 
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: apiKey || '',
-    libraries,
-  });
+  // Use shared Google Maps provider instead of loading script separately
+  const { isLoaded, loadError } = useGoogleMaps();
 
   if (loadError) {
     return (
@@ -244,6 +241,7 @@ export default function GoogleSheetMap({
           mapTypeControl: true,
           streetViewControl: true,
           fullscreenControl: true,
+          mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81', // Style Map ID for custom map styling
         }}
       >
         {filteredProperties.map((property) => (

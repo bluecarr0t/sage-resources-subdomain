@@ -28,10 +28,27 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
   } | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
-  // Reset data layer ready state when visibility changes
+  // Reset data layer ready state and cleanup when visibility changes
   useEffect(() => {
     if (!visible) {
       setDataLayerReady(false);
+      // Clean up data layer when hidden
+      if (dataLayerRef.current) {
+        try {
+          // Remove all features
+          dataLayerRef.current.forEach((feature: google.maps.Data.Feature) => {
+            dataLayerRef.current?.remove(feature);
+          });
+        } catch (e) {
+          console.warn('Error cleaning up data layer:', e);
+        }
+        dataLayerRef.current = null;
+      }
+      // Close any open info windows
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+        infoWindowRef.current = null;
+      }
     }
   }, [visible]);
 
@@ -66,10 +83,35 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
     loadData();
   }, [visible, populationLookup, fipsLookup]);
 
+  // Fallback: If Data layer ref exists but dataLayerReady is false, try to initialize it
+  useEffect(() => {
+    if (!visible || !map || dataLayerReady || !dataLayerRef.current) return;
+    
+    // If we have a data layer ref but it's not marked as ready, 
+    // try to initialize it manually (fallback if onLoad didn't fire)
+    const timer = setTimeout(() => {
+      if (dataLayerRef.current && !dataLayerReady) {
+        console.log('Fallback: Manually initializing Data layer');
+        setDataLayerReady(true);
+      }
+    }, 200);
+    
+    return () => clearTimeout(timer);
+  }, [visible, map, dataLayerReady]);
+
   // Initialize data layer and set up click handlers
   const onDataLoad = useCallback((dataLayer: google.maps.Data) => {
+    if (!dataLayer || !map) return;
+    
     dataLayerRef.current = dataLayer;
-    setDataLayerReady(true);
+    
+    // Ensure the data layer is properly initialized before marking as ready
+    // Add a small delay to ensure the Data component is fully mounted and map is ready
+    setTimeout(() => {
+      if (dataLayerRef.current && map) {
+        setDataLayerReady(true);
+      }
+    }, 100);
 
     // Handle feature clicks to show InfoWindow
     dataLayer.addListener('click', (event: google.maps.Data.MouseEvent) => {
@@ -241,16 +283,34 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
 
   // Load data and apply styling when both data layer and geoJson are ready
   useEffect(() => {
-    if (!dataLayerReady || !dataLayerRef.current || !geoJson) return;
+    if (!dataLayerReady || !dataLayerRef.current || !geoJson || !map) return;
 
-    // Clear existing features
-    dataLayerRef.current.forEach((feature: google.maps.Data.Feature) => {
-      dataLayerRef.current?.remove(feature);
-    });
+    // Small delay to ensure Data layer is fully initialized and map is ready
+    const timer = setTimeout(() => {
+      if (!dataLayerRef.current || !geoJson || !map) return;
 
-    // Add GeoJSON features
-    try {
-      const addedFeatures = dataLayerRef.current.addGeoJson(geoJson);
+      // Clear existing features only if there are any
+      try {
+        let featureCount = 0;
+        dataLayerRef.current.forEach(() => {
+          featureCount++;
+        });
+        
+        if (featureCount > 0) {
+          dataLayerRef.current.forEach((feature: google.maps.Data.Feature) => {
+            dataLayerRef.current?.remove(feature);
+          });
+        }
+      } catch (e) {
+        // If clearing fails, try to continue anyway
+        console.warn('Error clearing existing features:', e);
+      }
+
+      // Add GeoJSON features
+      try {
+        if (!dataLayerRef.current || !geoJson) return;
+        
+        const addedFeatures = dataLayerRef.current.addGeoJson(geoJson);
       
       console.log(`✅ Added ${addedFeatures.length} features to map`);
       
@@ -413,16 +473,51 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
       });
 
       console.log(`✅ Applied population styling to ${styledCount} county features (${hasChangeDataCount} with change data)`);
-    } catch (err) {
-      console.error('Error adding GeoJSON to Data Layer:', err);
-    }
-  }, [dataLayerReady, year, geoJson]);
+      
+      // Force map to refresh/redraw to ensure features are visible
+      if (map) {
+        // Trigger a map refresh by briefly changing and restoring the map type
+        // This ensures the Data layer is properly rendered
+        const currentMapType = map.getMapTypeId();
+        if (currentMapType) {
+          // Use requestAnimationFrame to ensure the map redraws
+          requestAnimationFrame(() => {
+            if (map && dataLayerRef.current) {
+              // Force a redraw by toggling visibility (if needed)
+              // The Data layer should already be visible, but this ensures it renders
+              map.setOptions({});
+            }
+          });
+        }
+      }
+      } catch (err) {
+        console.error('Error adding GeoJSON to Data Layer:', err);
+      }
+    }, 100); // Increased delay to ensure Data layer is fully ready
 
-  // Cleanup InfoWindow on unmount
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [dataLayerReady, year, geoJson, map]);
+
+  // Cleanup InfoWindow and data layer on unmount
   useEffect(() => {
     return () => {
       if (infoWindowRef.current) {
         infoWindowRef.current.close();
+        infoWindowRef.current = null;
+      }
+      // Clean up data layer
+      if (dataLayerRef.current) {
+        try {
+          // Remove all features
+          dataLayerRef.current.forEach((feature: google.maps.Data.Feature) => {
+            dataLayerRef.current?.remove(feature);
+          });
+        } catch (e) {
+          console.warn('Error cleaning up data layer on unmount:', e);
+        }
+        dataLayerRef.current = null;
       }
     };
   }, []);

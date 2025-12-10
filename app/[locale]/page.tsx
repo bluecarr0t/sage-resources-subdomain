@@ -4,7 +4,7 @@ import Image from "next/image";
 import dynamic from 'next/dynamic';
 import { getAllGuideSlugs, getGuide, getGuidesByCategory } from "@/lib/guides";
 import { getAllGlossaryTerms } from "@/lib/glossary/index";
-import { getAllLandingPageSlugs, getLandingPage } from "@/lib/landing-pages";
+import { getAllLandingPageSlugs, getLandingPageSync } from "@/lib/landing-pages";
 import { generateOrganizationSchema, generateItemListSchemaWithUrls } from "@/lib/schema";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
@@ -112,7 +112,7 @@ export default async function HomePage({ params }: PageProps) {
   const featuredTerms = glossaryTerms.slice(0, 12); // Top 12 terms
   
   const landingPageSlugs = getAllLandingPageSlugs();
-  const featuredLandingPages = landingPageSlugs.slice(0, 6).map(slug => getLandingPage(slug)).filter(Boolean);
+  const featuredLandingPages = landingPageSlugs.slice(0, 6).map(slug => getLandingPageSync(slug)).filter(Boolean);
 
   // Generate schema markup
   const organizationSchema = generateOrganizationSchema();

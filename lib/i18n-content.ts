@@ -21,9 +21,8 @@ export type ContentType = 'landing' | 'guide' | 'glossary' | 'property' | 'natio
 export function getAvailableLocalesForContent(contentType: ContentType): Locale[] {
   switch (contentType) {
     case 'landing':
-      // Landing pages are primarily English-only marketing content
-      // Only generate for English to reduce build time
-      return ['en'];
+      // Landing pages now have translations for all locales
+      return [...locales];
     
     case 'guide':
       // Guides are primarily English-only educational content

@@ -2,10 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLoadScript } from '@react-google-maps/api';
-
-// Fix performance warning: keep libraries array as constant outside component
-const GOOGLE_MAPS_LIBRARIES: ('places')[] = ['places'];
+import { useGoogleMaps } from './GoogleMapsProvider';
 
 interface LocationSearchProps {
   locale: string;
@@ -15,7 +12,7 @@ interface LocationSearchProps {
 
 export default function LocationSearch({ locale, onLocationSelect, variant = 'default' }: LocationSearchProps) {
   const [searchValue, setSearchValue] = useState('');
-  const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
+  const [predictions, setPredictions] = useState<google.maps.places.PlacePrediction[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -23,7 +20,6 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   const [dropdownMaxHeight, setDropdownMaxHeight] = useState<number>(400);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownScrollRef = useRef<HTMLDivElement>(null);
@@ -48,10 +44,8 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     }
   }, [apiKey]);
 
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: apiKey,
-    libraries: GOOGLE_MAPS_LIBRARIES,
-  });
+  // Use shared Google Maps provider instead of loading script separately
+  const { isLoaded, loadError } = useGoogleMaps();
 
   useEffect(() => {
     if (loadError) {
@@ -59,17 +53,14 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     }
     
     if (isLoaded && typeof window !== 'undefined' && window.google) {
-      autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
       // Create a new session token when Google Maps loads
       sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
     }
   }, [isLoaded, loadError]);
 
-  // Debug: Log isOpen state changes (only in development)
+  // Debug: Log isOpen state changes (only in development, and only when it changes to open)
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[LocationSearch] Dropdown state:', isOpen ? 'open' : 'closed');
-    }
+    // Removed verbose logging - only log errors
   }, [isOpen]);
 
   // Calculate available space for dropdown when it opens
@@ -205,8 +196,10 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     }
     
     // Increased minimum character limit from 2 to 3
-    if (!autocompleteServiceRef.current || value.length < 3) {
-      console.log('[LocationSearch] Search aborted - no service or value too short (minimum 3 characters)');
+    if (!isLoaded || typeof window === 'undefined' || !window.google || value.length < 3) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[LocationSearch] Search aborted - Maps not loaded or value too short (minimum 3 characters)');
+      }
       setPredictions([]);
       return;
     }
@@ -215,7 +208,9 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     const cacheKey = value.toLowerCase().trim();
     const cachedResults = autocompleteCacheRef.current.get(cacheKey);
     if (cachedResults) {
-      console.log('[LocationSearch] Using cached results');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[LocationSearch] Using cached results');
+      }
       setPredictions(cachedResults);
       setIsOpen(true);
       setApiError(null);
@@ -227,65 +222,84 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
       sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
     }
 
-    console.log('[LocationSearch] Starting Google Places API call...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[LocationSearch] Starting Google Places API call...');
+    }
     setIsSearching(true);
-    autocompleteServiceRef.current.getPlacePredictions(
-      {
-        input: value,
-        types: ['(cities)'],
-        componentRestrictions: { country: ['us', 'ca'] },
-        sessionToken: sessionTokenRef.current || undefined,
-      },
-      (results, status) => {
-        console.log('[LocationSearch] API Response - Status:', status, 'Results:', results?.length || 0);
+    
+    // Use new AutocompleteSuggestion API
+    const request: google.maps.places.AutocompleteRequest = {
+      input: value,
+      includedRegionCodes: ['us', 'ca'],
+      includedPrimaryTypes: ['locality', 'administrative_area_level_1'],
+      sessionToken: sessionTokenRef.current || undefined,
+    };
+
+    google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request)
+      .then((response) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[LocationSearch] API Response - Suggestions:', response.suggestions?.length || 0);
+        }
         setIsSearching(false);
         
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-          console.log('[LocationSearch] Setting predictions and opening dropdown');
-          // Store results in client-side cache
-          const cacheKey = value.toLowerCase().trim();
-          autocompleteCacheRef.current.set(cacheKey, results);
-          setPredictions(results);
-          setIsOpen(true);
-          setApiError(null);
-        } else {
-          console.log('[LocationSearch] No results or error, clearing predictions. Status:', status);
+        if (response.suggestions && response.suggestions.length > 0) {
+          // Extract PlacePrediction from suggestions
+          const placePredictions = response.suggestions
+            .filter((suggestion) => suggestion.placePrediction)
+            .map((suggestion) => suggestion.placePrediction!);
           
-          // Handle specific error cases
-          if (status === google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
-            const errorMsg = 'Google Places API access denied. Please check your API key configuration and ensure Places API is enabled.';
-            setApiError(errorMsg);
-            console.error('[LocationSearch] ❌ API REQUEST_DENIED');
-            console.error('[LocationSearch] Fix: Enable "Places API" in Google Cloud Console > APIs & Services > Library');
-            console.error('[LocationSearch] Fix: Ensure API key has Places API enabled in restrictions');
-          } else if (status === google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
-            setApiError('API quota exceeded. Please try again later.');
-            console.warn('[LocationSearch] ⚠️ API quota exceeded');
-          } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-            setApiError(null); // No error, just no results
-            console.log('[LocationSearch] No results found for query');
-          } else if (status === google.maps.places.PlacesServiceStatus.INVALID_REQUEST) {
-            setApiError('Invalid search request. Please check your input.');
-            console.error('[LocationSearch] ❌ INVALID_REQUEST');
+          if (placePredictions.length > 0) {
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[LocationSearch] Setting predictions and opening dropdown');
+            }
+            // Store results in client-side cache
+            const cacheKey = value.toLowerCase().trim();
+            autocompleteCacheRef.current.set(cacheKey, placePredictions);
+            setPredictions(placePredictions);
+            setIsOpen(true);
+            setApiError(null);
           } else {
-            setApiError(`Search error: ${status}`);
-            console.error('[LocationSearch] ❌ API Error Status:', status);
+            setPredictions([]);
+            setApiError(null);
           }
-          
+        } else {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[LocationSearch] No results found');
+          }
           setPredictions([]);
+          setApiError(null);
         }
-      }
-    );
+      })
+      .catch((error) => {
+        setIsSearching(false);
+        console.error('[LocationSearch] API Error:', error);
+        
+        // Handle specific error cases
+        const errorMessage = error?.message || String(error);
+        if (errorMessage.includes('REQUEST_DENIED') || errorMessage.includes('permission')) {
+          const errorMsg = 'Google Places API access denied. Please check your API key configuration and ensure Places API is enabled.';
+          setApiError(errorMsg);
+          console.error('[LocationSearch] ❌ API REQUEST_DENIED');
+          console.error('[LocationSearch] Fix: Enable "Places API" in Google Cloud Console > APIs & Services > Library');
+          console.error('[LocationSearch] Fix: Ensure API key has Places API enabled in restrictions');
+        } else if (errorMessage.includes('OVER_QUERY_LIMIT') || errorMessage.includes('quota')) {
+          setApiError('API quota exceeded. Please try again later.');
+          console.warn('[LocationSearch] ⚠️ API quota exceeded');
+        } else {
+          setApiError(`Search error: ${errorMessage}`);
+          console.error('[LocationSearch] ❌ API Error:', error);
+        }
+        
+        setPredictions([]);
+      });
   }, [apiKey]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    console.log('[LocationSearch] Input changed:', value);
     setSearchValue(value);
     setSelectedIndex(-1);
 
     if (!value.trim()) {
-      console.log('[LocationSearch] Empty input - clearing');
       setPredictions([]);
       setIsOpen(false);
       return;
@@ -298,7 +312,6 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
 
     // Increased minimum character limit from 2 to 3
     if (value.length >= 3) {
-      console.log('[LocationSearch] Scheduling search in 300ms');
       searchTimeoutRef.current = setTimeout(() => {
         performSearch(value);
       }, 300);
@@ -725,54 +738,62 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                 </div>
               </div>
             </div>
-            {predictions.map((prediction, index) => (
-              <div
-                key={prediction.place_id}
-                role="option"
-                aria-selected={selectedIndex === index + 1}
-                onClick={() => {
-                  handlePlaceSelect(prediction.place_id, prediction.description);
-                }}
-                onMouseEnter={() => setSelectedIndex(index + 1)}
-                className={`w-full text-left transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer ${
-                  isCompact ? 'px-3 py-2' : 'px-4 py-3'
-                } ${
-                  selectedIndex === index + 1
-                    ? 'bg-[#00b6a6]/10 border-[#00b6a6]/20'
-                    : 'hover:bg-[#00b6a6]/5 active:bg-[#00b6a6]/10'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${selectedIndex === index + 1 ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
-                    <svg
-                      className={isCompact ? "w-4 h-4" : "w-5 h-5"}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`${isCompact ? 'text-sm' : ''} font-semibold truncate ${selectedIndex === index + 1 ? 'text-[#006b5f]' : 'text-gray-900'}`}>
-                      {prediction.structured_formatting.main_text}
+            {predictions.map((prediction, index) => {
+              // Extract text from PlacePrediction (new API structure)
+              const mainText = prediction.text?.text || prediction.text || '';
+              const secondaryText = prediction.structuredFormatting?.secondaryText || '';
+              
+              return (
+                <div
+                  key={prediction.placeId}
+                  role="option"
+                  aria-selected={selectedIndex === index + 1}
+                  onClick={() => {
+                    handlePlaceSelect(prediction.placeId, mainText);
+                  }}
+                  onMouseEnter={() => setSelectedIndex(index + 1)}
+                  className={`w-full text-left transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer ${
+                    isCompact ? 'px-3 py-2' : 'px-4 py-3'
+                  } ${
+                    selectedIndex === index + 1
+                      ? 'bg-[#00b6a6]/10 border-[#00b6a6]/20'
+                      : 'hover:bg-[#00b6a6]/5 active:bg-[#00b6a6]/10'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${selectedIndex === index + 1 ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
+                      <svg
+                        className={isCompact ? "w-4 h-4" : "w-5 h-5"}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
                     </div>
-                    <div className={`${isCompact ? 'text-xs' : 'text-sm'} text-gray-500 truncate`}>{prediction.structured_formatting.secondary_text}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className={`${isCompact ? 'text-sm' : ''} font-semibold truncate ${selectedIndex === index + 1 ? 'text-[#006b5f]' : 'text-gray-900'}`}>
+                        {mainText}
+                      </div>
+                      {secondaryText && (
+                        <div className={`${isCompact ? 'text-xs' : 'text-sm'} text-gray-500 truncate`}>{secondaryText}</div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

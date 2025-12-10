@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { MapProvider } from '@/components/MapContext';
+import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
 import MapLayoutNoLocale from '@/components/MapLayoutNoLocale';
 import { createServerClient } from '@/lib/supabase';
 import { unstable_cache } from 'next/cache';
@@ -157,9 +158,11 @@ export default async function MapPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <MapProvider>
-        <MapLayoutNoLocale />
-      </MapProvider>
+      <GoogleMapsProvider>
+        <MapProvider>
+          <MapLayoutNoLocale />
+        </MapProvider>
+      </GoogleMapsProvider>
     </>
   );
 }

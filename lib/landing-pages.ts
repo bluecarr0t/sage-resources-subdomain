@@ -3386,7 +3386,80 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
 };
 
-export function getLandingPage(slug: string): LandingPageContent | null {
+/**
+ * Convert kebab-case slug to camelCase key for translation files
+ */
+function slugToKey(slug: string): string {
+  return slug.split('-').map((word, index) => 
+    index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+  ).join('');
+}
+
+/**
+ * Get landing page content with optional locale support
+ * If locale is provided and not 'en', will attempt to load translations
+ * and merge them with the base English content
+ */
+export async function getLandingPage(slug: string, locale?: string): Promise<LandingPageContent | null> {
+  const basePage = landingPages[slug];
+  if (!basePage) {
+    return null;
+  }
+
+  // If English or no locale specified, return base content
+  if (!locale || locale === 'en') {
+    return basePage;
+  }
+
+  // For other locales, try to load translations
+  try {
+    const messages = (await import(`../messages/${locale}.json`)).default;
+    const translationKey = slugToKey(slug);
+    const translations = messages?.landing?.[translationKey];
+    
+    if (translations) {
+      // Merge translations with base content
+      return {
+        ...basePage,
+        title: translations.title || basePage.title,
+        metaDescription: translations.metaDescription || basePage.metaDescription,
+        hero: translations.hero ? {
+          ...basePage.hero,
+          ...translations.hero,
+        } : basePage.hero,
+        sections: translations.sections || basePage.sections,
+        benefits: translations.benefits || basePage.benefits,
+        cta: translations.cta ? {
+          ...basePage.cta,
+          ...translations.cta,
+        } : basePage.cta,
+        faqs: translations.faqs || basePage.faqs,
+        keywords: translations.keywords || basePage.keywords,
+        keyTakeaways: translations.keyTakeaways || basePage.keyTakeaways,
+        howToSteps: translations.howToSteps || basePage.howToSteps,
+        partners: translations.partners ? {
+          ...basePage.partners,
+          ...translations.partners,
+        } : basePage.partners,
+        relatedServices: translations.relatedServices ? {
+          ...basePage.relatedServices,
+          ...translations.relatedServices,
+        } : basePage.relatedServices,
+      };
+    }
+  } catch (error) {
+    // If translation file doesn't exist or has errors, fall back to English
+    console.warn(`Translation not found for landing page ${slug} in locale ${locale}, using English`);
+  }
+
+  return basePage;
+}
+
+/**
+ * Synchronous version for backward compatibility
+ * Use getLandingPage() with await for locale support
+ */
+export function getLandingPageSync(slug: string): LandingPageContent | null {
   return landingPages[slug] || null;
 }
 

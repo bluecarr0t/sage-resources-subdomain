@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllLandingPageSlugs, getLandingPage } from '@/lib/landing-pages';
+import { getAllLandingPageSlugs, getLandingPageSync } from '@/lib/landing-pages';
 import { locales } from '@/i18n';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
@@ -14,7 +14,7 @@ export async function GET() {
   // Generate landing pages for all locales
   for (const locale of locales) {
     for (const slug of landingPageSlugs) {
-      const page = getLandingPage(slug);
+      const page = getLandingPageSync(slug);
       const lastModified = page?.lastModified 
         ? new Date(page.lastModified).toISOString()
         : new Date("2025-01-01").toISOString();
