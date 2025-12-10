@@ -4,7 +4,7 @@
  */
 
 import { getAllGlossaryTerms } from "./glossary/index";
-import { getAllLandingPageSlugs, getLandingPage } from "./landing-pages";
+import { getAllLandingPageSlugs, getLandingPageSync } from "./landing-pages";
 import { getAllGuideSlugs, getGuide } from "./guides";
 
 /**
