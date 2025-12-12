@@ -73,13 +73,13 @@
     "layers": {
       "title": "Map Layers",
       "nationalParks": {
-        "label": "Show National Parks",
+        "label": "National Parks",
         "description": "Display National Parks markers on the map",
         "hide": "Hide National Parks",
         "show": "Show National Parks"
       },
       "population": {
-        "label": "Show Population Change",
+        "label": "Population Change",
         "description": "Display population change (2010-2020) as color-coded regions",
         "loading": "Loading...",
         "hide": "Hide Population Layer",
@@ -87,6 +87,21 @@
         "legend": {
           "title": "Population Change (2010-2020)",
           "dataSource": "Data source"
+        }
+      },
+      "dataLayers": {
+        "title": "Data Layers",
+        "none": {
+          "label": "None",
+          "description": "Hide all data visualization layers"
+        },
+        "tourism": {
+          "label": "Tourism Change",
+          "description": "Average year-over-year growth (2001-2023) in Accommodations, Food Services, Recreation, Entertainment & Arts"
+        },
+        "opportunity": {
+          "label": "Market Opportunity Zones",
+          "description": "Counties where Population Change and Tourism Change trends align to identify investment opportunities"
         }
       }
     },

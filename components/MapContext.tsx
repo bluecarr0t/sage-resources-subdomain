@@ -8,13 +8,18 @@ import { SageProperty } from '@/lib/types/sage';
 let globalFetchInProgress = false;
 let globalAbortController: AbortController | null = null;
 
+export type MapLayer = 'none' | 'population' | 'tourism' | 'opportunity';
+
 interface MapContextType {
   filterCountry: string[];
   filterState: string[];
   filterUnitType: string[];
   filterRateRange: string[];
   showNationalParks: boolean;
+  selectedMapLayer: MapLayer;
   showPopulationLayer: boolean;
+  showGDPLayer: boolean;
+  showOpportunityZones: boolean;
   populationYear: '2010' | '2020';
   isFullscreen: boolean;
   setFilterCountry: (country: string[]) => void;
@@ -26,7 +31,7 @@ interface MapContextType {
   toggleUnitType: (unitType: string) => void;
   toggleRateRange: (rateRange: string) => void;
   toggleNationalParks: () => void;
-  togglePopulationLayer: () => void;
+  setMapLayer: (layer: MapLayer) => void;
   setPopulationYear: (year: '2010' | '2020') => void;
   toggleFullscreen: () => void;
   clearFilters: () => void;
@@ -47,9 +52,14 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const [filterUnitType, setFilterUnitType] = useState<string[]>([]);
   const [filterRateRange, setFilterRateRange] = useState<string[]>([]);
   const [showNationalParks, setShowNationalParks] = useState<boolean>(true);
-  const [showPopulationLayer, setShowPopulationLayer] = useState<boolean>(false);
+  const [selectedMapLayer, setSelectedMapLayer] = useState<MapLayer>('none');
   const [populationYear, setPopulationYear] = useState<'2010' | '2020'>('2020');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  
+  // Derive boolean states from selectedMapLayer for backward compatibility
+  const showPopulationLayer = selectedMapLayer === 'population';
+  const showGDPLayer = selectedMapLayer === 'tourism';
+  const showOpportunityZones = selectedMapLayer === 'opportunity';
   
   // Shared properties state - fetched once and shared between all component instances
   const [properties, setProperties] = useState<SageProperty[]>([]);
@@ -98,8 +108,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
     setShowNationalParks((prev) => !prev);
   };
 
-  const togglePopulationLayer = () => {
-    setShowPopulationLayer((prev) => !prev);
+  const setMapLayer = (layer: MapLayer) => {
+    setSelectedMapLayer(layer);
   };
 
   const toggleFullscreen = () => {
@@ -322,7 +332,10 @@ export function MapProvider({ children }: { children: ReactNode }) {
         filterUnitType,
         filterRateRange,
         showNationalParks,
+        selectedMapLayer,
         showPopulationLayer,
+        showGDPLayer,
+        showOpportunityZones,
         populationYear,
         isFullscreen,
         setFilterCountry,
@@ -334,7 +347,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         toggleUnitType,
         toggleRateRange,
         toggleNationalParks,
-        togglePopulationLayer,
+        setMapLayer,
         setPopulationYear,
         toggleFullscreen,
         clearFilters,

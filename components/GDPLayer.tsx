@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Data } from '@react-google-maps/api';
-import { loadCountyGeoJSON, enhanceGeoJSONWithPopulation, getChangeColor, getChangeRanges, CountyGeoJSON } from '@/lib/maps/county-boundaries';
-import { PopulationLookup } from '@/lib/population/parse-population-csv';
-import { PopulationDataByFIPS } from '@/lib/population/supabase-population';
+import { loadCountyGeoJSON, enhanceGeoJSONWithGDP, getChangeColor, getChangeRanges, CountyGeoJSON } from '@/lib/maps/county-boundaries';
+import { GDPDataByFIPS, fetchGDPDataFromSupabase } from '@/lib/gdp/supabase-gdp';
 
 // State abbreviation to full name mapping
 const STATE_ABBREVIATIONS: Record<string, string> = {
@@ -38,18 +37,16 @@ function formatCountyNameWithFullState(countyName: string): string {
   return countyName;
 }
 
-interface PopulationLayerProps {
+interface GDPLayerProps {
   map: google.maps.Map | null;
-  populationLookup: PopulationLookup | null;
-  fipsLookup?: PopulationDataByFIPS;
-  year: '2010' | '2020'; // Kept for backward compatibility, but not used for change display
+  gdpLookup: GDPDataByFIPS | null;
   visible: boolean;
-  otherLayerEnabled?: boolean; // Whether GDP layer is enabled
-  otherLayerData?: any; // GDP lookup data
+  otherLayerEnabled?: boolean; // Whether Population layer is enabled
+  otherLayerData?: any; // Population lookup data
   isNearMarker?: (lat: number, lng: number) => boolean; // Function to check if position is near a marker
 }
 
-export default function PopulationLayer({ map, populationLookup, fipsLookup, year, visible, otherLayerEnabled = false, otherLayerData = null, isNearMarker }: PopulationLayerProps) {
+export default function GDPLayer({ map, gdpLookup, visible, otherLayerEnabled = false, otherLayerData = null, isNearMarker }: GDPLayerProps) {
   const [geoJson, setGeoJson] = useState<CountyGeoJSON | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +54,7 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
   const [dataLayerReady, setDataLayerReady] = useState(false);
   const [selectedCounty, setSelectedCounty] = useState<{
     name: string;
-    population: number | null;
-    year: '2010' | '2020';
+    movingAnnualAverage: number | null;
     position: { lat: number; lng: number };
   } | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
@@ -101,8 +97,8 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
       try {
         const loadedGeoJson = await loadCountyGeoJSON();
         
-        if (populationLookup) {
-          const enhanced = enhanceGeoJSONWithPopulation(loadedGeoJson, populationLookup, fipsLookup);
+        if (gdpLookup) {
+          const enhanced = enhanceGeoJSONWithGDP(loadedGeoJson, gdpLookup);
           setGeoJson(enhanced);
         } else {
           setGeoJson(loadedGeoJson);
@@ -116,14 +112,12 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
     };
 
     loadData();
-  }, [visible, populationLookup, fipsLookup]);
+  }, [visible, gdpLookup]);
 
   // Fallback: If Data layer ref exists but dataLayerReady is false, try to initialize it
   useEffect(() => {
     if (!visible || !map || dataLayerReady || !dataLayerRef.current) return;
     
-    // If we have a data layer ref but it's not marked as ready, 
-    // try to initialize it manually (fallback if onLoad didn't fire)
     const timer = setTimeout(() => {
       if (dataLayerRef.current && !dataLayerReady) {
         console.log('Fallback: Manually initializing Data layer');
@@ -140,8 +134,6 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
     
     dataLayerRef.current = dataLayer;
     
-    // Ensure the data layer is properly initialized before marking as ready
-    // Add a small delay to ensure the Data component is fully mounted and map is ready
     setTimeout(() => {
       if (dataLayerRef.current && map) {
         setDataLayerReady(true);
@@ -167,7 +159,6 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
 
       const feature = event.feature;
       
-      // Google Maps Data layer flattens GeoJSON properties - they're stored directly on the feature
       // Try multiple access methods to get all properties
       let props: any = {};
       
@@ -185,7 +176,7 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
       const propertyKeys = [
         'countyName', 'NAME', 'NAMELSAD', 'NAME_LSAD', 'LSAD',
         'STATE', 'COUNTY', 'GEO_ID', 'GEOID', 'geoid', 'id',
-        'population2010', 'population2020', 'change',
+        'movingAnnualAverage', 'gdp2023', 'gdp2022', 'gdp2021', 'gdp2020', 'gdp2019',
         'CENSUSAREA'
       ];
       
@@ -200,32 +191,15 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
         }
       });
       
-      // Method 3: Try toGeoJson as final fallback
-      if (Object.keys(props).length === 0) {
-        try {
-          let geoJsonData: any = null;
-          feature.toGeoJson((geoJson) => {
-            geoJsonData = geoJson;
-          });
-          if (geoJsonData?.properties) {
-            props = geoJsonData.properties;
-          }
-        } catch (e) {
-          console.warn('Error accessing feature properties via toGeoJson:', e);
-        }
-      }
-      
       // Extract county name with multiple fallbacks
       let countyName = props.countyName;
       
       if (!countyName) {
-        // Try various property formats
         if (props.NAMELSAD) {
           countyName = props.NAMELSAD;
         } else if (props.NAME_LSAD) {
           countyName = props.NAME_LSAD;
         } else if (props.NAME) {
-          // Construct full name
           countyName = props.NAME;
           if (props.LSAD && !countyName.includes(props.LSAD)) {
             countyName = `${countyName} ${props.LSAD}`;
@@ -233,45 +207,33 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
         }
       }
       
-      // Fallback to constructing from STATE and COUNTY if available
-      if (!countyName && props.STATE && props.COUNTY) {
-        // Try to get state name from common abbreviations
-        const stateNames: { [key: string]: string } = {
-          '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas',
-          '06': 'California', '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware',
-          '12': 'Florida', '13': 'Georgia', '15': 'Hawaii', '16': 'Idaho',
-          '17': 'Illinois', '18': 'Indiana', '19': 'Iowa', '20': 'Kansas',
-          '21': 'Kentucky', '22': 'Louisiana', '23': 'Maine', '24': 'Maryland',
-          '25': 'Massachusetts', '26': 'Michigan', '27': 'Minnesota', '28': 'Mississippi',
-          '29': 'Missouri', '30': 'Montana', '31': 'Nebraska', '32': 'Nevada',
-          '33': 'New Hampshire', '34': 'New Jersey', '35': 'New Mexico', '36': 'New York',
-          '37': 'North Carolina', '38': 'North Dakota', '39': 'Ohio', '40': 'Oklahoma',
-          '41': 'Oregon', '42': 'Pennsylvania', '44': 'Rhode Island', '45': 'South Carolina',
-          '46': 'South Dakota', '47': 'Tennessee', '48': 'Texas', '49': 'Utah',
-          '50': 'Vermont', '51': 'Virginia', '53': 'Washington', '54': 'West Virginia',
-          '55': 'Wisconsin', '56': 'Wyoming'
-        };
-        const stateCode = String(props.STATE).padStart(2, '0');
-        const stateName = stateNames[stateCode] || `State ${stateCode}`;
-        const countyCode = String(props.COUNTY).padStart(3, '0');
-        countyName = `County ${countyCode}, ${stateName}`;
-      }
-      
-      // Final fallback
       if (!countyName) {
         countyName = 'Unknown County';
-        // Debug log to help diagnose
-        console.warn('Could not determine county name. Available properties:', Object.keys(props));
       }
       
       // Convert state abbreviation to full state name (e.g., "Park, WY" -> "Park, Wyoming")
       countyName = formatCountyNameWithFullState(countyName);
       
-      const population2020 = props.population2020;
-      const population2010 = props.population2010;
-      const change = props.change;
+      const movingAnnualAverage = props.movingAnnualAverage;
+      const gdp2023 = props.gdp2023;
+      const gdp2022 = props.gdp2022;
+      const gdp2021 = props.gdp2021;
+      const gdp2020 = props.gdp2020;
+      const gdp2019 = props.gdp2019;
       
-      // Get FIPS code for looking up GDP data if other layer is enabled
+      // Calculate recent growth if we have 2022 and 2023 data
+      let recentGrowth: number | null = null;
+      if (gdp2022 !== null && gdp2023 !== null && gdp2022 !== undefined && gdp2023 !== undefined && gdp2022 > 0) {
+        recentGrowth = parseFloat(((gdp2023 - gdp2022) / gdp2022 * 100).toFixed(2));
+      }
+      
+      // Calculate recovery if we have 2019 and 2023 data
+      let recovery: number | null = null;
+      if (gdp2019 !== null && gdp2023 !== null && gdp2019 !== undefined && gdp2023 !== undefined && gdp2019 > 0) {
+        recovery = parseFloat(((gdp2023 - gdp2019) / gdp2019 * 100).toFixed(2));
+      }
+      
+      // Get FIPS code for looking up population data if other layer is enabled
       let fipsCode: string | null = null;
       if (otherLayerEnabled && otherLayerData) {
         if (props.GEO_ID) {
@@ -309,11 +271,30 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
         }
       }
       
-      // Get GDP data if other layer is enabled
-      let gdpData: any = null;
+      // Get population data if other layer is enabled
+      let populationData: any = null;
       if (otherLayerEnabled && otherLayerData && fipsCode) {
         const fips = String(fipsCode).padStart(5, '0');
-        gdpData = otherLayerData[fips] || null;
+        // otherLayerData could be PopulationDataByFIPS (fipsLookup) or PopulationLookup
+        // PopulationDataByFIPS structure: { [fips]: { 2010, 2020, change, name, geoId } }
+        // PopulationLookup structure: { [countyName]: { 2010, 2020 } }
+        if (otherLayerData[fips]) {
+          // It's PopulationDataByFIPS format
+          populationData = otherLayerData[fips];
+        } else if (typeof otherLayerData === 'object') {
+          // Try PopulationLookup format - need to match by county name
+          // This is less reliable, but we'll try
+          for (const key in otherLayerData) {
+            const data = otherLayerData[key];
+            if (data && (data[2010] !== undefined || data[2020] !== undefined)) {
+              // Check if this might be the right county by comparing names
+              if (data.name && countyName && data.name.toLowerCase().includes(countyName.toLowerCase().split(',')[0].trim())) {
+                populationData = data;
+                break;
+              }
+            }
+          }
+        }
       }
       
       // Get center of feature for InfoWindow position
@@ -332,38 +313,27 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
           infoWindowRef.current.close();
         }
         
-        // Format GDP values in millions (if needed)
+        // Format GDP values in millions
         const formatGDP = (value: number | null | undefined): string => {
           if (value === null || value === undefined) return 'N/A';
           const millions = value / 1000;
           return `$${millions.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}M`;
         };
         
-        // Calculate GDP metrics if available
-        let movingAnnualAverage = gdpData?.movingAnnualAverage ?? null;
-        let gdp2023 = gdpData?.gdp2023 ?? null;
-        let gdp2022 = gdpData?.gdp2022 ?? null;
-        let gdp2021 = gdpData?.gdp2021 ?? null;
-        let gdp2020 = gdpData?.gdp2020 ?? null;
-        let gdp2019 = gdpData?.gdp2019 ?? null;
-        
-        let recentGrowth: number | null = null;
-        if (gdp2022 !== null && gdp2023 !== null && gdp2022 !== undefined && gdp2023 !== undefined && gdp2022 > 0) {
-          recentGrowth = parseFloat(((gdp2023 - gdp2022) / gdp2022 * 100).toFixed(2));
-        }
-        
-        let recovery: number | null = null;
-        if (gdp2019 !== null && gdp2023 !== null && gdp2019 !== undefined && gdp2023 !== undefined && gdp2019 > 0) {
-          recovery = parseFloat(((gdp2023 - gdp2019) / gdp2019 * 100).toFixed(2));
-        }
+        // Extract population data - PopulationDataByFIPS format
+        const population2010 = populationData?.[2010] ?? null;
+        const population2020 = populationData?.[2020] ?? null;
+        const change = populationData?.change ?? null;
         
         // Create combined or single InfoWindow
+        const hasGDPData = (movingAnnualAverage !== null && movingAnnualAverage !== undefined) || 
+                           (gdp2023 !== null && gdp2023 !== undefined);
         const hasPopulationData = (population2010 !== null && population2010 !== undefined) || 
                                    (population2020 !== null && population2020 !== undefined) || 
                                    (change !== null && change !== undefined);
-        const hasGDPData = gdpData && (movingAnnualAverage !== null || gdp2023 !== null);
         const showCombined = otherLayerEnabled && hasPopulationData && hasGDPData;
         
+        // Create new InfoWindow
         const infoWindow = new google.maps.InfoWindow({
           content: `
             <div style="padding: 8px; min-width: 250px;">
@@ -375,17 +345,17 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
                   <h4 style="margin: 0 0 6px 0; font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase;">Population Change</h4>
                 </div>
               ` : ''}
-              ${change !== null && change !== undefined && !isNaN(change) ? `
+              ${showCombined && change !== null && change !== undefined && !isNaN(change) ? `
                 <p style="margin: 4px 0; font-size: 14px; font-weight: bold; color: ${getChangeColor(change)};">
                   <strong>Change (2010-2020):</strong> ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
                 </p>
               ` : ''}
-              ${population2020 !== null && population2020 !== undefined ? `
+              ${showCombined && population2020 !== null && population2020 !== undefined ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>Population (2020):</strong> ${population2020.toLocaleString()}
                 </p>
               ` : ''}
-              ${population2010 !== null && population2010 !== undefined ? `
+              ${showCombined && population2010 !== null && population2010 !== undefined ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>Population (2010):</strong> ${population2010.toLocaleString()}
                 </p>
@@ -398,49 +368,56 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
                   </p>
                 </div>
               ` : ''}
-              ${showCombined && movingAnnualAverage !== null && movingAnnualAverage !== undefined && !isNaN(movingAnnualAverage) ? `
+              ${!showCombined && (movingAnnualAverage !== null || gdp2023 !== null) ? `
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+                  <p style="margin: 0 0 8px 0; font-size: 11px; color: #6b7280; font-style: italic;">
+                    The gross domestic product (GDP) shown is only for Accommodations, Food Service, Recreation, Entertainment and Art.
+                  </p>
+                </div>
+              ` : ''}
+              ${movingAnnualAverage !== null && movingAnnualAverage !== undefined && !isNaN(movingAnnualAverage) ? `
                 <p style="margin: 4px 0; font-size: 14px; font-weight: bold; color: ${getChangeColor(movingAnnualAverage)};">
                   <strong>Average Year-over-Year Growth (2001-2023):</strong> ${movingAnnualAverage >= 0 ? '+' : ''}${movingAnnualAverage.toFixed(2)}%
                 </p>
               ` : ''}
-              ${showCombined && recentGrowth !== null && recentGrowth !== undefined && !isNaN(recentGrowth) ? `
+              ${recentGrowth !== null && recentGrowth !== undefined && !isNaN(recentGrowth) ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>Recent Growth (2022-2023):</strong> ${recentGrowth >= 0 ? '+' : ''}${recentGrowth.toFixed(2)}%
                 </p>
               ` : ''}
-              ${showCombined && recovery !== null && recovery !== undefined && !isNaN(recovery) ? `
+              ${recovery !== null && recovery !== undefined && !isNaN(recovery) ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>Growth Since 2019:</strong> ${recovery >= 0 ? '+' : ''}${recovery.toFixed(2)}%
                 </p>
               ` : ''}
-              ${showCombined && gdp2023 !== null && gdp2023 !== undefined ? `
+              ${gdp2023 !== null && gdp2023 !== undefined ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>2023 GDP:</strong> ${formatGDP(gdp2023)}
                 </p>
               ` : ''}
-              ${showCombined && gdp2022 !== null && gdp2022 !== undefined ? `
+              ${gdp2022 !== null && gdp2022 !== undefined ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>2022 GDP:</strong> ${formatGDP(gdp2022)}
                 </p>
               ` : ''}
-              ${showCombined && gdp2021 !== null && gdp2021 !== undefined ? `
+              ${gdp2021 !== null && gdp2021 !== undefined ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>2021 GDP:</strong> ${formatGDP(gdp2021)}
                 </p>
               ` : ''}
-              ${showCombined && gdp2020 !== null && gdp2020 !== undefined ? `
+              ${gdp2020 !== null && gdp2020 !== undefined ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>2020 GDP:</strong> ${formatGDP(gdp2020)}
                 </p>
               ` : ''}
-              ${showCombined && gdp2019 !== null && gdp2019 !== undefined ? `
+              ${gdp2019 !== null && gdp2019 !== undefined ? `
                 <p style="margin: 4px 0; font-size: 14px; color: #4b5563;">
                   <strong>2019 GDP:</strong> ${formatGDP(gdp2019)}
                 </p>
               ` : ''}
-              ${!showCombined && (population2010 === null || population2010 === undefined) && (population2020 === null || population2020 === undefined) && (change === null || change === undefined) ? `
+              ${!showCombined && (movingAnnualAverage === null || movingAnnualAverage === undefined) && (gdp2023 === null || gdp2023 === undefined) ? `
                 <p style="margin: 4px 0; font-size: 12px; color: #9ca3af; font-style: italic;">
-                  No population data available for this county.
+                  No GDP data available for this county.
                 </p>
               ` : ''}
             </div>
@@ -453,23 +430,21 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
         
         setSelectedCounty({
           name: countyName,
-          population: population2020 || population2010 || null,
-          year,
+          movingAnnualAverage: movingAnnualAverage,
           position: { lat: center.lat(), lng: center.lng() },
         });
       }
     });
-  }, [map, year, otherLayerEnabled, otherLayerData]);
+  }, [map, otherLayerEnabled, otherLayerData]);
 
   // Load data and apply styling when both data layer and geoJson are ready
   useEffect(() => {
     if (!dataLayerReady || !dataLayerRef.current || !geoJson || !map) return;
 
-    // Small delay to ensure Data layer is fully initialized and map is ready
     const timer = setTimeout(() => {
       if (!dataLayerRef.current || !geoJson || !map) return;
 
-      // Clear existing features only if there are any
+      // Clear existing features
       try {
         let featureCount = 0;
         dataLayerRef.current.forEach(() => {
@@ -482,7 +457,6 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
           });
         }
       } catch (e) {
-        // If clearing fails, try to continue anyway
         console.warn('Error clearing existing features:', e);
       }
 
@@ -492,193 +466,146 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
         
         const addedFeatures = dataLayerRef.current.addGeoJson(geoJson);
       
-      console.log(`✅ Added ${addedFeatures.length} features to map`);
+        console.log(`✅ Added ${addedFeatures.length} features to GDP map`);
       
-      // Explicitly set properties on each feature to ensure they're accessible
-      // Match features by index to preserve the enhanced properties
-      addedFeatures.forEach((feature, index) => {
-        try {
-          const originalFeature = geoJson.features[index];
-          if (originalFeature?.properties) {
-            // Set each property directly on the feature so they're accessible
-            Object.entries(originalFeature.properties).forEach(([key, value]) => {
-              try {
-                feature.setProperty(key, value);
-              } catch (e) {
-                // Some properties might not be settable, ignore
-              }
-            });
-          }
-        } catch (e) {
-          // Ignore errors setting properties
-        }
-      });
-      
-      console.log(`✅ Set properties on ${addedFeatures.length} features`);
-      
-      // Apply styling using overrideStyle for each feature individually
-      // This is more reliable than setStyle for ensuring colors appear
-      let styledCount = 0;
-      let hasChangeDataCount = 0;
-      let sampleFeatureLogged = false;
-      
-      // Use a try-catch wrapper for the forEach to handle any errors gracefully
-      try {
-        dataLayerRef.current.forEach((feature: google.maps.Data.Feature) => {
-          if (!feature) return; // Safety check
-          
+        // Set properties on each feature
+        addedFeatures.forEach((feature, index) => {
           try {
-            // Google Maps Data layer flattens GeoJSON properties - access them directly
-            let props: any = {};
-            
-            // Try nested properties first
-            try {
-              const nestedProps = feature.getProperty('properties');
-              if (nestedProps && typeof nestedProps === 'object') {
-                props = nestedProps;
-              }
-            } catch (e) {
-              // Ignore
+            const originalFeature = geoJson.features[index];
+            if (originalFeature?.properties) {
+              Object.entries(originalFeature.properties).forEach(([key, value]) => {
+                try {
+                  feature.setProperty(key, value);
+                } catch (e) {
+                  // Ignore
+                }
+              });
             }
+          } catch (e) {
+            // Ignore
+          }
+        });
+      
+        // Apply styling using overrideStyle for each feature
+        let styledCount = 0;
+        let hasGDPDataCount = 0;
+        
+        try {
+          dataLayerRef.current.forEach((feature: google.maps.Data.Feature) => {
+            if (!feature) return;
             
-            // Access properties directly (they're flattened by Google Maps)
-            const propertyKeys = ['countyName', 'NAME', 'NAMELSAD', 'STATE', 'COUNTY', 'change', 'population2010', 'population2020'];
-            propertyKeys.forEach(key => {
+            try {
+              let props: any = {};
+              
               try {
-                const value = feature.getProperty(key);
-                if (value !== undefined && value !== null) {
-                  props[key] = value;
+                const nestedProps = feature.getProperty('properties');
+                if (nestedProps && typeof nestedProps === 'object') {
+                  props = nestedProps;
                 }
               } catch (e) {
                 // Ignore
               }
-            });
-            
-            let change = props?.change;
-            
-            // Final fallback: direct property access
-            if (change === undefined || change === null) {
-              try {
-                change = feature.getProperty('change');
-              } catch (e) {
-                // Ignore
-              }
-            }
-            
-            // Log sample feature for debugging
-            if (!sampleFeatureLogged && styledCount < 5) {
-              try {
-                let geoJsonData: any = null;
-                feature.toGeoJson((geoJson) => {
-                  geoJsonData = geoJson;
-                });
-                console.log('Sample feature properties:', {
-                  props,
-                  change,
-                  directChange: feature.getProperty('change'),
-                  geoJsonProperties: geoJsonData?.properties,
-                  allPropertyKeys: Object.keys(props || {}),
-                });
-                if (styledCount === 4) sampleFeatureLogged = true;
-              } catch (e) {
-                console.warn('Error logging sample feature:', e);
-              }
-            }
-            
-            const color = getChangeColor(change);
-            
-            // Increase opacity for positive changes to make them more visible
-            const fillOpacity = (change !== null && change !== undefined && change > 0) ? 0.7 : 0.65;
-            
-            // Apply style using overrideStyle (more reliable for individual features)
-            if (dataLayerRef.current) {
-              dataLayerRef.current.overrideStyle(feature, {
-                fillColor: color,
-                fillOpacity: fillOpacity,
-                strokeColor: '#ffffff',
-                strokeWeight: 1,
-                strokeOpacity: 0.9,
+              
+              const propertyKeys = ['countyName', 'NAME', 'NAMELSAD', 'STATE', 'COUNTY', 'movingAnnualAverage', 'gdp2023', 'gdp2022', 'gdp2021', 'gdp2020'];
+              propertyKeys.forEach(key => {
+                try {
+                  const value = feature.getProperty(key);
+                  if (value !== undefined && value !== null) {
+                    props[key] = value;
+                  }
+                } catch (e) {
+                  // Ignore
+                }
               });
-            }
-            
-            styledCount++;
-            if (change !== null && change !== undefined && !isNaN(change)) {
-              hasChangeDataCount++;
-              // Debug log for positive changes to verify they're being styled
-              if (change > 0 && styledCount <= 10) {
-                console.log(`County with positive change: ${change.toFixed(2)}%, color: ${color}`);
+              
+              let movingAverage = props?.movingAnnualAverage;
+              
+              if (movingAverage === undefined || movingAverage === null) {
+                try {
+                  movingAverage = feature.getProperty('movingAnnualAverage');
+                } catch (e) {
+                  // Ignore
+                }
               }
+              
+              const color = getChangeColor(movingAverage);
+              
+              const fillOpacity = (movingAverage !== null && movingAverage !== undefined && movingAverage > 0) ? 0.7 : 0.65;
+              
+              if (dataLayerRef.current) {
+                dataLayerRef.current.overrideStyle(feature, {
+                  fillColor: color,
+                  fillOpacity: fillOpacity,
+                  strokeColor: '#ffffff',
+                  strokeWeight: 1,
+                  strokeOpacity: 0.9,
+                });
+              }
+              
+              styledCount++;
+              if (movingAverage !== null && movingAverage !== undefined && !isNaN(movingAverage)) {
+                hasGDPDataCount++;
+              }
+            } catch (featureError) {
+              console.warn(`Error processing feature ${styledCount}:`, featureError);
             }
-          } catch (featureError) {
-            console.warn(`Error processing feature ${styledCount}:`, featureError);
-          }
-        });
-      } catch (forEachError) {
-        console.error('Error in forEach loop:', forEachError);
-      }
-
-      // Also set a default style function for any new features that might be added
-      dataLayerRef.current.setStyle((feature: google.maps.Data.Feature) => {
-        // Try nested properties first
-        let props: any = {};
-        try {
-          const nestedProps = feature.getProperty('properties');
-          if (nestedProps && typeof nestedProps === 'object') {
-            props = nestedProps;
-          }
-        } catch (e) {
-          // Ignore
+          });
+        } catch (forEachError) {
+          console.error('Error in forEach loop:', forEachError);
         }
-        
-        // Also try direct property access (Google Maps flattens properties)
-        let change = props?.change;
-        if (change === undefined || change === null) {
+
+        // Also set a default style function
+        dataLayerRef.current.setStyle((feature: google.maps.Data.Feature) => {
+          let props: any = {};
           try {
-            change = feature.getProperty('change');
+            const nestedProps = feature.getProperty('properties');
+            if (nestedProps && typeof nestedProps === 'object') {
+              props = nestedProps;
+            }
           } catch (e) {
             // Ignore
           }
-        }
-        
-        const color = getChangeColor(change);
-        
-        return {
-          fillColor: color,
-          fillOpacity: 0.65,
-          strokeColor: '#ffffff',
-          strokeWeight: 1,
-          strokeOpacity: 0.9,
-          zIndex: 1,
-        };
-      });
+          
+          let movingAverage = props?.movingAnnualAverage;
+          if (movingAverage === undefined || movingAverage === null) {
+            try {
+              movingAverage = feature.getProperty('movingAnnualAverage');
+            } catch (e) {
+              // Ignore
+            }
+          }
+          
+          const color = getChangeColor(movingAverage);
+          
+          return {
+            fillColor: color,
+            fillOpacity: 0.65,
+            strokeColor: '#ffffff',
+            strokeWeight: 1,
+            strokeOpacity: 0.9,
+            zIndex: 1,
+          };
+        });
 
-      console.log(`✅ Applied population styling to ${styledCount} county features (${hasChangeDataCount} with change data)`);
-      
-      // Force map to refresh/redraw to ensure features are visible
-      if (map) {
-        // Trigger a map refresh by briefly changing and restoring the map type
-        // This ensures the Data layer is properly rendered
-        const currentMapType = map.getMapTypeId();
-        if (currentMapType) {
-          // Use requestAnimationFrame to ensure the map redraws
+        console.log(`✅ Applied GDP styling to ${styledCount} county features (${hasGDPDataCount} with GDP data)`);
+        
+        // Force map refresh
+        if (map) {
           requestAnimationFrame(() => {
             if (map && dataLayerRef.current) {
-              // Force a redraw by toggling visibility (if needed)
-              // The Data layer should already be visible, but this ensures it renders
               map.setOptions({});
             }
           });
         }
-      }
       } catch (err) {
         console.error('Error adding GeoJSON to Data Layer:', err);
       }
-    }, 100); // Increased delay to ensure Data layer is fully ready
+    }, 100);
 
     return () => {
       clearTimeout(timer);
     };
-  }, [dataLayerReady, year, geoJson, map]);
+  }, [dataLayerReady, geoJson, map]);
 
   // Cleanup InfoWindow and data layer on unmount
   useEffect(() => {
@@ -687,10 +614,8 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
         infoWindowRef.current.close();
         infoWindowRef.current = null;
       }
-      // Clean up data layer
       if (dataLayerRef.current) {
         try {
-          // Remove all features
           dataLayerRef.current.forEach((feature: google.maps.Data.Feature) => {
             dataLayerRef.current?.remove(feature);
           });
@@ -707,7 +632,7 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
   }
 
   if (error) {
-    console.error('Population layer error:', error);
+    console.error('GDP layer error:', error);
     return null;
   }
 

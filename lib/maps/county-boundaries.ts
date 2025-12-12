@@ -2,7 +2,7 @@
  * County boundaries GeoJSON loading and processing utilities
  */
 
-import { GeoJSONFeature, matchCountiesToFeatures } from '../population/county-matcher';
+import { GeoJSONFeature, matchCountiesToFeatures, extractCountyNameFromFeature } from '../population/county-matcher';
 
 export interface CountyGeoJSON {
   type: 'FeatureCollection';
@@ -238,4 +238,382 @@ export function getChangeRanges(): Array<{ min: number; max: number; label: stri
     { min: 10, max: 15, label: '+10% to +15%', color: '#ef4444' }, // Red
     { min: 15, max: Infinity, label: '> +15%', color: '#dc2626' }, // Dark red
   ];
+}
+
+/**
+ * Match GDP data to GeoJSON features by FIPS code
+ */
+export function matchGDPToFeatures(
+  features: GeoJSONFeature[],
+  gdpLookup: { [fips: string]: { movingAnnualAverage: number | null; gdp2023: number | null; gdp2022: number | null; gdp2021: number | null; gdp2020: number | null; gdp2019: number | null; geoname: string } }
+): Map<number, { movingAnnualAverage: number | null; gdp2023: number | null; gdp2022: number | null; gdp2021: number | null; gdp2020: number | null; gdp2019: number | null; countyName: string }> {
+  const matches = new Map<number, { movingAnnualAverage: number | null; gdp2023: number | null; gdp2022: number | null; gdp2021: number | null; gdp2020: number | null; gdp2019: number | null; countyName: string }>();
+  let fipsMatches = 0;
+
+  for (let i = 0; i < features.length; i++) {
+    const feature = features[i];
+    const props = feature.properties;
+    
+    let fipsCode: string | null = null;
+    
+    // Try multiple methods to get FIPS code (same as population matching)
+    if (props.GEO_ID) {
+      const geoid = String(props.GEO_ID).trim();
+      const match = geoid.match(/US(\d+)$/);
+      if (match) {
+        let extracted = match[1];
+        if (extracted.length < 5) {
+          extracted = extracted.padStart(5, '0');
+        } else if (extracted.length > 5) {
+          extracted = extracted.slice(-5);
+        }
+        fipsCode = extracted;
+      }
+    } else if (props.STATE !== undefined && props.STATE !== null && props.COUNTY !== undefined && props.COUNTY !== null) {
+      const stateCode = String(props.STATE).padStart(2, '0');
+      const countyCode = String(props.COUNTY).padStart(3, '0');
+      fipsCode = stateCode + countyCode;
+    } else if (props.id && typeof props.id === 'string') {
+      fipsCode = String(props.id).trim();
+    } else if (props.GEOID || props.geoid) {
+      const geoid = String(props.GEOID || props.geoid).trim();
+      if (geoid.match(/^\d{5}$/)) {
+        fipsCode = geoid;
+      } else {
+        const match = geoid.match(/US(\d+)$/) || geoid.match(/(\d+)$/);
+        if (match) {
+          let extracted = match[1];
+          if (extracted.length < 5) {
+            extracted = extracted.padStart(5, '0');
+          } else if (extracted.length > 5) {
+            extracted = extracted.slice(-5);
+          }
+          fipsCode = extracted;
+        }
+      }
+    }
+    
+    // Ensure it's a 5-digit FIPS code
+    if (fipsCode) {
+      fipsCode = fipsCode.trim();
+      if (fipsCode.length < 5) {
+        fipsCode = fipsCode.padStart(5, '0');
+      } else if (fipsCode.length > 5) {
+        fipsCode = fipsCode.slice(-5);
+      }
+    }
+    
+    if (fipsCode && gdpLookup[fipsCode]) {
+      const gdpData = gdpLookup[fipsCode];
+      matches.set(i, {
+        movingAnnualAverage: gdpData.movingAnnualAverage,
+        gdp2023: gdpData.gdp2023,
+        gdp2022: gdpData.gdp2022,
+        gdp2021: gdpData.gdp2021,
+        gdp2020: gdpData.gdp2020,
+        gdp2019: gdpData.gdp2019,
+        countyName: gdpData.geoname || extractCountyNameFromFeature(feature) || 'Unknown County',
+      });
+      fipsMatches++;
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    console.log(`✅ Matched ${matches.size} counties with GDP data (by FIPS)`);
+  }
+
+  return matches;
+}
+
+/**
+ * Enhance GeoJSON features with GDP data
+ */
+export function enhanceGeoJSONWithGDP(
+  geoJson: CountyGeoJSON,
+  gdpLookup: { [fips: string]: { movingAnnualAverage: number | null; gdp2023: number | null; gdp2022: number | null; gdp2021: number | null; gdp2020: number | null; gdp2019: number | null; geoname: string } }
+): CountyGeoJSON {
+  const matches = matchGDPToFeatures(geoJson.features, gdpLookup);
+  
+  // Create a new features array with enhanced properties
+  const enhancedFeatures = geoJson.features.map((feature, index) => {
+    const gdpData = matches.get(index);
+    const props = feature.properties;
+    
+    // Always set countyName from original properties if not in GDP data
+    let countyName = '';
+    if (gdpData?.countyName) {
+      countyName = gdpData.countyName;
+    } else if (props.NAMELSAD) {
+      countyName = props.NAMELSAD;
+    } else if (props.NAME_LSAD) {
+      countyName = props.NAME_LSAD;
+    } else if (props.NAME) {
+      countyName = props.NAME + (props.LSAD ? ' ' + props.LSAD : '');
+    }
+    
+    if (gdpData) {
+      return {
+        ...feature,
+        properties: {
+          ...feature.properties,
+          movingAnnualAverage: gdpData.movingAnnualAverage,
+          gdp2023: gdpData.gdp2023,
+          gdp2022: gdpData.gdp2022,
+          gdp2021: gdpData.gdp2021,
+          gdp2020: gdpData.gdp2020,
+          gdp2019: gdpData.gdp2019,
+          countyName: countyName || gdpData.countyName,
+        },
+      };
+    }
+    
+    // Even without GDP data, ensure countyName is set
+    return {
+      ...feature,
+      properties: {
+        ...feature.properties,
+        countyName: countyName,
+      },
+    };
+  });
+  
+  return {
+    ...geoJson,
+    features: enhancedFeatures,
+  };
+}
+
+/**
+ * Calculate correlation zone based on population change and tourism change
+ * High Opportunity: both >5%
+ * Moderate Opportunity: (one >5% OR both >0%)
+ * Low Opportunity: both <0% OR (one <0% and other <=0%)
+ */
+export function calculateCorrelationZone(
+  populationChange: number | null,
+  tourismChange: number | null
+): 'high' | 'moderate' | 'low' | null {
+  if (populationChange === null || tourismChange === null) {
+    return null;
+  }
+
+  // High Opportunity: both metrics >5%
+  if (populationChange > 5 && tourismChange > 5) {
+    return 'high';
+  }
+
+  // Low Opportunity: both <0% OR (one <0% and other <=0%)
+  if ((populationChange < 0 && tourismChange < 0) || 
+      (populationChange < 0 && tourismChange <= 0) || 
+      (populationChange <= 0 && tourismChange < 0)) {
+    return 'low';
+  }
+
+  // Moderate Opportunity: (one >5% OR both >0%)
+  if ((populationChange > 5 || tourismChange > 5) || 
+      (populationChange > 0 && tourismChange > 0)) {
+    return 'moderate';
+  }
+
+  // Default to low if both are 0 or negative
+  return 'low';
+}
+
+/**
+ * Get color for correlation zone
+ */
+export function getCorrelationZoneColor(zone: 'high' | 'moderate' | 'low' | null): string {
+  if (zone === null) {
+    return '#cccccc'; // Gray for no data
+  }
+
+  switch (zone) {
+    case 'high':
+      return '#22c55e'; // Green
+    case 'moderate':
+      return '#eab308'; // Yellow
+    case 'low':
+      return '#ef4444'; // Red
+    default:
+      return '#cccccc';
+  }
+}
+
+/**
+ * Get correlation zone ranges for legend
+ */
+export function getCorrelationZoneRanges(): Array<{ zone: 'high' | 'moderate' | 'low'; label: string; description: string; color: string }> {
+  return [
+    {
+      zone: 'high',
+      label: 'High Opportunity',
+      description: 'Both metrics showing positive growth (>5%)',
+      color: '#22c55e',
+    },
+    {
+      zone: 'moderate',
+      label: 'Moderate Opportunity',
+      description: 'One metric positive or both showing growth',
+      color: '#eab308',
+    },
+    {
+      zone: 'low',
+      label: 'Low Opportunity',
+      description: 'Both metrics declining or negative',
+      color: '#ef4444',
+    },
+  ];
+}
+
+/**
+ * Match correlation data to GeoJSON features by FIPS code
+ */
+export function matchCorrelationToFeatures(
+  features: GeoJSONFeature[],
+  populationLookup: { [fips: string]: { 2010: number | null; 2020: number | null; change: number | null; name: string; geoId: string } },
+  gdpLookup: { [fips: string]: { movingAnnualAverage: number | null; gdp2023: number | null; gdp2022: number | null; gdp2021: number | null; gdp2020: number | null; gdp2019: number | null; geoname: string } }
+): Map<number, { correlationZone: 'high' | 'moderate' | 'low' | null; populationChange: number | null; tourismChange: number | null; countyName: string }> {
+  const matches = new Map<number, { correlationZone: 'high' | 'moderate' | 'low' | null; populationChange: number | null; tourismChange: number | null; countyName: string }>();
+
+  for (let i = 0; i < features.length; i++) {
+    const feature = features[i];
+    const props = feature.properties;
+    
+    let fipsCode: string | null = null;
+    
+    // Try multiple methods to get FIPS code
+    if (props.GEO_ID) {
+      const geoid = String(props.GEO_ID).trim();
+      const match = geoid.match(/US(\d+)$/);
+      if (match) {
+        let extracted = match[1];
+        if (extracted.length < 5) {
+          extracted = extracted.padStart(5, '0');
+        } else if (extracted.length > 5) {
+          extracted = extracted.slice(-5);
+        }
+        fipsCode = extracted;
+      }
+    } else if (props.STATE !== undefined && props.STATE !== null && props.COUNTY !== undefined && props.COUNTY !== null) {
+      const stateCode = String(props.STATE).padStart(2, '0');
+      const countyCode = String(props.COUNTY).padStart(3, '0');
+      fipsCode = stateCode + countyCode;
+    } else if (props.id && typeof props.id === 'string') {
+      fipsCode = String(props.id).trim();
+    } else if (props.GEOID || props.geoid) {
+      const geoid = String(props.GEOID || props.geoid).trim();
+      if (geoid.match(/^\d{5}$/)) {
+        fipsCode = geoid;
+      } else {
+        const match = geoid.match(/US(\d+)$/) || geoid.match(/(\d+)$/);
+        if (match) {
+          let extracted = match[1];
+          if (extracted.length < 5) {
+            extracted = extracted.padStart(5, '0');
+          } else if (extracted.length > 5) {
+            extracted = extracted.slice(-5);
+          }
+          fipsCode = extracted;
+        }
+      }
+    }
+    
+    // Ensure it's a 5-digit FIPS code
+    if (fipsCode) {
+      fipsCode = fipsCode.trim();
+      if (fipsCode.length < 5) {
+        fipsCode = fipsCode.padStart(5, '0');
+      } else if (fipsCode.length > 5) {
+        fipsCode = fipsCode.slice(-5);
+      }
+    }
+    
+    if (fipsCode) {
+      const populationData = populationLookup[fipsCode];
+      const gdpData = gdpLookup[fipsCode];
+      
+      const populationChange = populationData?.change ?? null;
+      const tourismChange = gdpData?.movingAnnualAverage ?? null;
+      
+      const correlationZone = calculateCorrelationZone(populationChange, tourismChange);
+      
+      let countyName = '';
+      if (populationData?.name) {
+        countyName = populationData.name;
+      } else if (gdpData?.geoname) {
+        countyName = gdpData.geoname;
+      } else {
+        countyName = extractCountyNameFromFeature(feature) || 'Unknown County';
+      }
+      
+      matches.set(i, {
+        correlationZone,
+        populationChange,
+        tourismChange,
+        countyName,
+      });
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    console.log(`✅ Matched ${matches.size} counties with correlation data (by FIPS)`);
+  }
+
+  return matches;
+}
+
+/**
+ * Enhance GeoJSON features with correlation zone data
+ */
+export function enhanceGeoJSONWithCorrelation(
+  geoJson: CountyGeoJSON,
+  populationLookup: { [fips: string]: { 2010: number | null; 2020: number | null; change: number | null; name: string; geoId: string } },
+  gdpLookup: { [fips: string]: { movingAnnualAverage: number | null; gdp2023: number | null; gdp2022: number | null; gdp2021: number | null; gdp2020: number | null; gdp2019: number | null; geoname: string } }
+): CountyGeoJSON {
+  const matches = matchCorrelationToFeatures(geoJson.features, populationLookup, gdpLookup);
+  
+  // Create a new features array with enhanced properties
+  const enhancedFeatures = geoJson.features.map((feature, index) => {
+    const correlationData = matches.get(index);
+    const props = feature.properties;
+    
+    // Always set countyName from original properties if not in correlation data
+    let countyName = '';
+    if (correlationData?.countyName) {
+      countyName = correlationData.countyName;
+    } else if (props.NAMELSAD) {
+      countyName = props.NAMELSAD;
+    } else if (props.NAME_LSAD) {
+      countyName = props.NAME_LSAD;
+    } else if (props.NAME) {
+      countyName = props.NAME + (props.LSAD ? ' ' + props.LSAD : '');
+    }
+    
+    if (correlationData) {
+      return {
+        ...feature,
+        properties: {
+          ...feature.properties,
+          correlationZone: correlationData.correlationZone,
+          populationChange: correlationData.populationChange,
+          tourismChange: correlationData.tourismChange,
+          countyName: countyName || correlationData.countyName,
+        },
+      };
+    }
+    
+    // Even without correlation data, ensure countyName is set
+    return {
+      ...feature,
+      properties: {
+        ...feature.properties,
+        countyName: countyName,
+      },
+    };
+  });
+  
+  return {
+    ...geoJson,
+    features: enhancedFeatures,
+  };
 }

@@ -13,7 +13,8 @@ import MultiSelect from './MultiSelect';
 import { slugifyPropertyName } from '@/lib/properties';
 import { PopulationLookup } from '@/lib/population/parse-population-csv';
 import { fetchPopulationDataFromSupabase, PopulationDataByFIPS } from '@/lib/population/supabase-population';
-import { getChangeRanges } from '@/lib/maps/county-boundaries';
+import { fetchGDPDataFromSupabase, GDPDataByFIPS } from '@/lib/gdp/supabase-gdp';
+import { getChangeRanges, getCorrelationZoneRanges } from '@/lib/maps/county-boundaries';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
@@ -21,6 +22,14 @@ import { useTranslations } from 'next-intl';
 const PopulationLayer = dynamic(() => import('./PopulationLayer'), {
   ssr: false,
   loading: () => null, // No loading state needed - layer loads when visible
+});
+const GDPLayer = dynamic(() => import('./GDPLayer'), {
+  ssr: false,
+  loading: () => null,
+});
+const OpportunityZonesLayer = dynamic(() => import('./OpportunityZonesLayer'), {
+  ssr: false,
+  loading: () => null,
 });
 
 // Default center for lower 48 states (continental USA)
@@ -265,7 +274,7 @@ interface GooglePropertyMapProps {
 }
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
-  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, showPopulationLayer, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, togglePopulationLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError, hasLoadedOnce, isFullscreen, toggleFullscreen } = useMapContext();
+  const { filterCountry, filterState, filterUnitType, filterRateRange, showNationalParks, selectedMapLayer, showPopulationLayer, showGDPLayer, showOpportunityZones, populationYear, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, toggleCountry, toggleState, toggleUnitType, toggleRateRange, toggleNationalParks, setMapLayer, setPopulationYear, clearFilters, hasActiveFilters, properties: sharedProperties, allProperties: sharedAllProperties, propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError, hasLoadedOnce, isFullscreen, toggleFullscreen } = useMapContext();
   const t = useTranslations('map');
   // Use shared properties from context instead of local state
   const properties = sharedProperties;
@@ -294,6 +303,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [populationFipsLookup, setPopulationFipsLookup] = useState<PopulationDataByFIPS | null>(null);
   const [populationLoading, setPopulationLoading] = useState(false);
   const [populationLayerKey, setPopulationLayerKey] = useState(0);
+  const [gdpLookup, setGdpLookup] = useState<GDPDataByFIPS | null>(null);
+  const [gdpLoading, setGdpLoading] = useState(false);
+  const [gdpLayerKey, setGdpLayerKey] = useState(0);
 
   // URL parameter handling
   const searchParams = useSearchParams();
@@ -323,6 +335,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const parkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const hasCenteredFromUrlRef = useRef<boolean>(false);
   const hasJustFittedBoundsRef = useRef<boolean>(false);
+  // Ref to track when a marker is clicked to prevent data layer from opening
+  const markerClickTimeRef = useRef<number>(0);
 
   // Ensure we're on the client side and detect mobile
   useEffect(() => {
@@ -588,6 +602,42 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
     loadPopulationData();
   }, [showPopulationLayer, populationLookup]);
+
+  // Increment GDP layer key when toggled on to force remount
+  const prevShowGDPLayerRef = useRef(showGDPLayer);
+  useEffect(() => {
+    if (showGDPLayer && !prevShowGDPLayerRef.current) {
+      setGdpLayerKey(prev => prev + 1);
+    }
+    prevShowGDPLayerRef.current = showGDPLayer;
+  }, [showGDPLayer]);
+
+  // Fetch GDP data from Supabase only when layer is enabled
+  useEffect(() => {
+    if (!showGDPLayer) {
+      return;
+    }
+
+    // If already loaded, don't reload
+    if (gdpLookup) {
+      return;
+    }
+
+    async function loadGDPData() {
+      setGdpLoading(true);
+      try {
+        console.log('Loading GDP data from Supabase...');
+        const lookup = await fetchGDPDataFromSupabase();
+        setGdpLookup(lookup);
+      } catch (err) {
+        console.error('Error loading GDP data from Supabase:', err);
+      } finally {
+        setGdpLoading(false);
+      }
+    }
+
+    loadGDPData();
+  }, [showGDPLayer, gdpLookup]);
 
   // Process shared properties from context (no fetching - that's done in context)
   // The context fetches raw data, and this component processes it for display
@@ -989,6 +1039,40 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     return filterPropertiesWithCoordinates(displayProperties);
   }, [displayProperties]);
 
+  // Helper function to check if a lat/lng is near any marker (to prevent layer InfoWindow from opening on marker clicks)
+  // Uses a slightly larger threshold (0.002 degrees ≈ 222 meters) to account for coordinate precision and marker size
+  const isNearMarker = useCallback((lat: number, lng: number, threshold: number = 0.002): boolean => {
+    // First check if a marker was clicked recently (within last 100ms) - this catches marker clicks even if coordinates don't match exactly
+    const timeSinceMarkerClick = Date.now() - markerClickTimeRef.current;
+    if (timeSinceMarkerClick < 100) {
+      return true;
+    }
+    
+    // Check property markers
+    for (const property of propertiesWithCoords) {
+      const [markerLat, markerLng] = property.coordinates;
+      const latDiff = Math.abs(lat - markerLat);
+      const lngDiff = Math.abs(lng - markerLng);
+      // Use a more forgiving check - if within threshold in either direction
+      if (latDiff < threshold && lngDiff < threshold) {
+        return true;
+      }
+    }
+    // Check park markers
+    if (showNationalParks) {
+      const parksWithCoords = filterParksWithCoordinates(nationalParks);
+      for (const park of parksWithCoords) {
+        const [markerLat, markerLng] = park.coordinates;
+        const latDiff = Math.abs(lat - markerLat);
+        const lngDiff = Math.abs(lng - markerLng);
+        if (latDiff < threshold && lngDiff < threshold) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }, [propertiesWithCoords, nationalParks, showNationalParks]);
+
 
   // Set default center and zoom for lower 48 states when map loads (if no URL params)
   // This overrides any fitBounds behavior to ensure consistent view
@@ -1335,7 +1419,19 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         });
 
         // Add click listener to open InfoWindow
-        marker.addEventListener('click', () => {
+        marker.addEventListener('click', (event: any) => {
+          // Mark that a marker was clicked (use timestamp to track recent clicks)
+          markerClickTimeRef.current = Date.now();
+          
+          // Stop event propagation to prevent layer click handlers from firing
+          if (event.domEvent) {
+            event.domEvent.stopPropagation();
+            event.domEvent.stopImmediatePropagation();
+          }
+          // Also stop the Google Maps event propagation
+          if (event.stop) {
+            event.stop();
+          }
           setSelectedProperty(property as PropertyWithCoords);
           setSelectedPark(null); // Close park InfoWindow if open
         });
@@ -1413,7 +1509,19 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         });
 
         // Add click listener to open InfoWindow
-        marker.addEventListener('click', () => {
+        marker.addEventListener('click', (event: any) => {
+          // Mark that a marker was clicked (use timestamp to track recent clicks)
+          markerClickTimeRef.current = Date.now();
+          
+          // Stop event propagation to prevent layer click handlers from firing
+          if (event.domEvent) {
+            event.domEvent.stopPropagation();
+            event.domEvent.stopImmediatePropagation();
+          }
+          // Also stop the Google Maps event propagation
+          if (event.stop) {
+            event.stop();
+          }
           setSelectedPark(park);
           setSelectedProperty(null); // Close property InfoWindow if open
         });
@@ -2368,7 +2476,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         </div>
 
         {/* Desktop Stats - Original Design */}
-        <div className="hidden md:block bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100 shadow-sm">
+        <div className="hidden md:block bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100 shadow-sm md:mt-6">
           <div className="flex items-center justify-center gap-4">
             <span 
               key={displayedCount}
@@ -2482,7 +2590,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         {/* Filters - Collapsible on Mobile */}
         <div className="pt-5 md:border-t md:border-gray-200 md:pt-0">
           {/* Desktop Filter Title - Hidden on Mobile (now in header) */}
-          <h2 className="hidden md:block text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="hidden md:block text-lg font-semibold text-gray-900 mb-4 md:pt-6">
             {t('filters.title')}
           </h2>
 
@@ -2645,23 +2753,75 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                 </button>
               </div>
 
-              {/* Population Layer Toggle */}
-              <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between">
+              {/* Data Layers Radio Button Group */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-gray-900 mt-4 mb-2">{t('layers.dataLayers.title')}</h3>
+                
+                {/* None Option */}
+                <label className="flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors hover:bg-gray-50 [&:has(input:checked)]:bg-blue-50 [&:has(input:checked)]:border-blue-500 border-gray-200">
+                  <input
+                    type="radio"
+                    name="mapLayer"
+                    value="none"
+                    checked={selectedMapLayer === 'none'}
+                    onChange={() => setMapLayer('none')}
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">{t('layers.dataLayers.none.label')}</div>
+                    <div className="text-sm text-gray-600 mt-0.5">{t('layers.dataLayers.none.description')}</div>
+                  </div>
+                </label>
+
+                {/* Population Change Option */}
+                <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors hover:bg-gray-50 [&:has(input:checked)]:bg-blue-50 [&:has(input:checked)]:border-blue-500 border-gray-200 ${populationLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <input
+                    type="radio"
+                    name="mapLayer"
+                    value="population"
+                    checked={selectedMapLayer === 'population'}
+                    onChange={() => setMapLayer('population')}
+                    disabled={populationLoading}
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                  />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900">
-                        {t('layers.population.label')}
-                      </span>
+                      <span className="font-medium text-gray-900">{t('layers.population.label')}</span>
                       {populationLoading && (
                         <span className="text-xs text-gray-500">({t('layers.population.loading')})</span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-600 mt-0.5">
-                      {t('layers.population.description')}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1 italic">
+                    <div className="text-sm text-gray-600 mt-0.5">{t('layers.population.description')}</div>
+                    <div className="text-xs text-gray-500 mt-1 italic">
                       Data source: <a 
+                        href="https://data.census.gov" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        data.census.gov
+                      </a>
+                    </div>
+                  </div>
+                </label>
+
+                {/* Population Change Legend */}
+                {selectedMapLayer === 'population' && !populationLoading && (
+                  <div className="p-3 bg-white rounded-lg border border-gray-200">
+                    <h4 className="text-xs font-semibold text-gray-900 mb-2">{t('layers.population.legend.title')}</h4>
+                    <div className="space-y-1">
+                      {getChangeRanges().map((range) => (
+                        <div key={range.label} className="flex items-center gap-2 text-xs">
+                          <div
+                            className="w-4 h-4 rounded border border-gray-300"
+                            style={{ backgroundColor: range.color }}
+                          />
+                          <span className="text-gray-700">{range.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic text-center">
+                      {t('layers.population.legend.dataSource')}: <a 
                         href="https://data.census.gov" 
                         target="_blank" 
                         rel="noopener noreferrer"
@@ -2671,55 +2831,139 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       </a>
                     </p>
                   </div>
-                  <button
-                    id="population-layer-toggle"
-                    type="button"
-                    role="switch"
-                    aria-checked={showPopulationLayer}
-                    aria-label={showPopulationLayer ? t('layers.population.hide') : t('layers.population.show')}
-                    onClick={togglePopulationLayer}
-                    disabled={populationLoading}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      showPopulationLayer ? 'bg-[#2196f3]' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        showPopulationLayer ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-                
-              </div>
+                )}
 
-              {/* Population Change Legend */}
-              {showPopulationLayer && !populationLoading && (
-                <div className="p-3 bg-white rounded-lg border border-gray-200">
-                  <h4 className="text-xs font-semibold text-gray-900 mb-2">{t('layers.population.legend.title')}</h4>
-                  <div className="space-y-1">
-                    {getChangeRanges().map((range) => (
-                      <div key={range.label} className="flex items-center gap-2 text-xs">
-                        <div
-                          className="w-4 h-4 rounded border border-gray-300"
-                          style={{ backgroundColor: range.color }}
-                        />
-                        <span className="text-gray-700">{range.label}</span>
-                      </div>
-                    ))}
+                {/* Tourism Change Option */}
+                <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors hover:bg-gray-50 [&:has(input:checked)]:bg-blue-50 [&:has(input:checked)]:border-blue-500 border-gray-200 ${gdpLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <input
+                    type="radio"
+                    name="mapLayer"
+                    value="tourism"
+                    checked={selectedMapLayer === 'tourism'}
+                    onChange={() => setMapLayer('tourism')}
+                    disabled={gdpLoading}
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">{t('layers.dataLayers.tourism.label')}</span>
+                      {gdpLoading && (
+                        <span className="text-xs text-gray-500">(Loading...)</span>
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-0.5">{t('layers.dataLayers.tourism.description')}</div>
+                    <div className="text-xs text-gray-500 mt-1 italic">
+                      Data source: <a 
+                        href="https://www.bea.gov" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        U.S. Bureau of Economic Analysis
+                      </a>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic text-center">
-                    {t('layers.population.legend.dataSource')}: <a 
-                      href="https://data.census.gov" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      data.census.gov
-                    </a>
-                  </p>
-                </div>
-              )}
+                </label>
+
+                {/* GDP Growth Legend */}
+                {selectedMapLayer === 'tourism' && !gdpLoading && (
+                  <div className="p-3 bg-white rounded-lg border border-gray-200">
+                    <h4 className="text-xs font-semibold text-gray-900 mb-2">Average Year-over-Year Growth (2001-2023)</h4>
+                    <div className="space-y-1">
+                      {getChangeRanges().map((range) => (
+                        <div key={range.label} className="flex items-center gap-2 text-xs">
+                          <div
+                            className="w-4 h-4 rounded border border-gray-300"
+                            style={{ backgroundColor: range.color }}
+                          />
+                          <span className="text-gray-700">{range.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic text-center">
+                      Data source: <a 
+                        href="https://www.bea.gov" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        U.S. Bureau of Economic Analysis
+                      </a>
+                    </p>
+                  </div>
+                )}
+
+                {/* Market Opportunity Zones Option - Hidden for now, will be re-added later */}
+                {/* <label className="flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors hover:bg-gray-50 [&:has(input:checked)]:bg-blue-50 [&:has(input:checked)]:border-blue-500 border-gray-200">
+                  <input
+                    type="radio"
+                    name="mapLayer"
+                    value="opportunity"
+                    checked={selectedMapLayer === 'opportunity'}
+                    onChange={() => setMapLayer('opportunity')}
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">{t('layers.dataLayers.opportunity.label')}</div>
+                    <div className="text-sm text-gray-600 mt-0.5">{t('layers.dataLayers.opportunity.description')}</div>
+                    <div className="text-xs text-gray-500 mt-1 italic">
+                      Data sources: <a 
+                        href="https://data.census.gov" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        U.S. Census Bureau
+                      </a>, <a 
+                        href="https://www.bea.gov" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        U.S. Bureau of Economic Analysis
+                      </a>
+                    </div>
+                  </div>
+                </label> */}
+
+                {/* Market Opportunity Zones Legend - Hidden for now, will be re-added later */}
+                {/* {showOpportunityZones && !populationLoading && !gdpLoading && (
+                  <div className="p-3 bg-white rounded-lg border border-gray-200 mt-2">
+                    <h4 className="text-xs font-semibold text-gray-900 mb-2">Market Opportunity Zones</h4>
+                    <div className="space-y-1">
+                      {getCorrelationZoneRanges().map((zone) => (
+                        <div key={zone.zone} className="flex items-start gap-2 text-xs">
+                          <div
+                            className="w-4 h-4 rounded border border-gray-300 mt-0.5 flex-shrink-0"
+                            style={{ backgroundColor: zone.color }}
+                          />
+                          <div className="flex-1">
+                            <span className="text-gray-700 font-medium">{zone.label}</span>
+                            <p className="text-gray-500 text-xs mt-0.5">{zone.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic text-center">
+                      Data sources: <a 
+                        href="https://data.census.gov" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        U.S. Census Bureau
+                      </a>, <a 
+                        href="https://www.bea.gov" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        U.S. Bureau of Economic Analysis
+                      </a>
+                    </p>
+                  </div>
+                )} */}
+              </div>
             </div>
           </div>
         </div>
@@ -2766,6 +3010,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             >
               {selectedPark && (
                 <InfoWindow
+                  key={selectedPark.id}
                   position={{
                     lat: selectedPark.coordinates[0],
                     lng: selectedPark.coordinates[1],
@@ -2825,6 +3070,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               )}
               {selectedProperty && (
                 <InfoWindow
+                  key={selectedProperty.id}
                   position={{
                     lat: selectedProperty.coordinates[0],
                     lng: selectedProperty.coordinates[1],
@@ -3029,6 +3275,34 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   fipsLookup={populationFipsLookup || undefined}
                   year="2020"
                   visible={showPopulationLayer}
+                  otherLayerEnabled={showGDPLayer}
+                  otherLayerData={showGDPLayer ? gdpLookup : null}
+                  isNearMarker={isNearMarker}
+                />
+              )}
+
+              {/* GDP Growth Layer */}
+              {showGDPLayer && map && (
+                <GDPLayer
+                  key={`gdp-layer-${gdpLayerKey}`}
+                  map={map}
+                  gdpLookup={gdpLookup}
+                  visible={showGDPLayer}
+                  otherLayerEnabled={showPopulationLayer}
+                  otherLayerData={showPopulationLayer ? (populationFipsLookup || populationLookup) : null}
+                  isNearMarker={isNearMarker}
+                />
+              )}
+
+              {/* Market Opportunity Zones Layer */}
+              {showOpportunityZones && map && populationFipsLookup && gdpLookup && (
+                <OpportunityZonesLayer
+                  key={`opportunity-zones-layer-${populationLayerKey}-${gdpLayerKey}`}
+                  map={map}
+                  populationLookup={populationFipsLookup}
+                  gdpLookup={gdpLookup}
+                  visible={showOpportunityZones}
+                  isNearMarker={isNearMarker}
                 />
               )}
             </GoogleMap>

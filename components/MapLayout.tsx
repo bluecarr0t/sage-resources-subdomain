@@ -68,13 +68,13 @@ export default function MapLayout({ locale }: MapLayoutProps) {
           </section>
           
           {/* Location Search Section */}
-          <section className="mb-2">
+          <section className="mb-0">
             <DynamicLocationSearch locale={locale} variant="compact" />
           </section>
         </div>
         
         {/* Filters Section */}
-        <section className="p-4 md:p-6 space-y-6 flex-1 relative overflow-visible md:overflow-y-auto">
+        <section className="pt-2 pb-4 px-4 md:pt-0 md:pb-6 md:px-6 space-y-6 flex-1 relative overflow-visible md:overflow-y-auto">
           <DynamicGooglePropertyMapSidebar showMap={false} />
         </section>
         
