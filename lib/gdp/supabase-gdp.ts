@@ -73,7 +73,7 @@ export async function fetchGDPDataFromSupabase(): Promise<GDPDataByFIPS> {
         break;
       }
 
-      allData = allData.concat(data as SupabaseCountyGDP[]);
+      allData = allData.concat(data as unknown as SupabaseCountyGDP[]);
       offset += batchSize;
       hasMore = data.length === batchSize;
 
