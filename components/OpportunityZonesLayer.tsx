@@ -294,7 +294,7 @@ export default function OpportunityZonesLayer({ map, populationLookup, gdpLookup
         infoWindowRef.current = infoWindow;
       }
     });
-  }, [map]);
+  }, [map, isNearMarker]);
 
   // Load data and apply styling when both data layer and geoJson are ready
   useEffect(() => {
@@ -313,7 +313,7 @@ export default function OpportunityZonesLayer({ map, populationLookup, gdpLookup
 
       // Apply styling to each feature
       dataLayerRef.current.setStyle((feature: google.maps.Data.Feature) => {
-        const props = feature.getProperty('properties') || {};
+        const props: any = feature.getProperty('properties') || {};
         const correlationZone = props.correlationZone || feature.getProperty('correlationZone');
         
         if (correlationZone) {

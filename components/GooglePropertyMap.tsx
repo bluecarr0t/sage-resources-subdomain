@@ -419,7 +419,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
     
     setUrlInitialized(true);
-  }, [isClient, searchParams, urlInitialized, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange]);
+  }, [isClient, searchParams, urlInitialized, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, isMobile]);
 
   // Update URL when filters change (preserve lat/lon/zoom if they exist)
   useEffect(() => {
@@ -523,7 +523,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       setShouldFitBounds(false); // Keep fixed zoom/center for lower 48 states
       hasCenteredFromUrlRef.current = false;
     }
-  }, [isClient, urlInitialized, searchParams]);
+  }, [isClient, urlInitialized, searchParams, isMobile]);
 
   // Use shared allProperties from context for filter option calculation
   // No need to fetch separately - context already provides this

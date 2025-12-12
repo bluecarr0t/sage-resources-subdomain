@@ -435,7 +435,7 @@ export default function GDPLayer({ map, gdpLookup, visible, otherLayerEnabled = 
         });
       }
     });
-  }, [map, otherLayerEnabled, otherLayerData]);
+  }, [map, otherLayerEnabled, otherLayerData, isNearMarker]);
 
   // Load data and apply styling when both data layer and geoJson are ready
   useEffect(() => {

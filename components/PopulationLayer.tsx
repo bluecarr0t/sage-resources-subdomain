@@ -459,7 +459,7 @@ export default function PopulationLayer({ map, populationLookup, fipsLookup, yea
         });
       }
     });
-  }, [map, year, otherLayerEnabled, otherLayerData]);
+  }, [map, year, otherLayerEnabled, otherLayerData, isNearMarker]);
 
   // Load data and apply styling when both data layer and geoJson are ready
   useEffect(() => {
