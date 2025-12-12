@@ -80,7 +80,7 @@
       },
       "population": {
         "label": "Population Change",
-        "description": "Display population change (2010-2020) as color-coded regions",
+        "description": "Display population change from 2010 to 2020 as color-coded regions",
         "loading": "Loading...",
         "hide": "Hide Population Layer",
         "show": "Show Population Layer",

@@ -266,7 +266,7 @@ export default function OpportunityZonesLayer({ map, populationLookup, gdpLookup
               </div>
               ${populationChange !== null && populationChange !== undefined && !isNaN(populationChange) ? `
                 <p style="margin: 4px 0; font-size: 14px; font-weight: bold; color: ${getChangeColor(populationChange)};">
-                  <strong>Change (2010-2020):</strong> ${populationChange >= 0 ? '+' : ''}${populationChange.toFixed(2)}%
+                  <strong>Change from 2010 to 2020:</strong> ${populationChange >= 0 ? '+' : ''}${populationChange.toFixed(2)}%
                 </p>
               ` : ''}
               <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">

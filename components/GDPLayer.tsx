@@ -347,7 +347,7 @@ export default function GDPLayer({ map, gdpLookup, visible, otherLayerEnabled = 
               ` : ''}
               ${showCombined && change !== null && change !== undefined && !isNaN(change) ? `
                 <p style="margin: 4px 0; font-size: 14px; font-weight: bold; color: ${getChangeColor(change)};">
-                  <strong>Change (2010-2020):</strong> ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
+                  <strong>Change from 2010 to 2020:</strong> ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
                 </p>
               ` : ''}
               ${showCombined && population2020 !== null && population2020 !== undefined ? `
