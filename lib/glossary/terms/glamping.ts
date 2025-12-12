@@ -90,7 +90,7 @@ Sage Outdoor Advisory provides feasibility studies and appraisals specifically f
     "a-frame": {
     slug: "a-frame",
     term: "A-Frame",
-    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/a-frame-cabin.jpg",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/a-frame-cabin-1.jpg",
     definition: "A triangular-shaped glamping structure with steeply angled sides that meet at the top, forming the letter 'A', providing a cozy interior with efficient use of space.",
     extendedDefinition: `An A-frame is a distinctive triangular-shaped structure characterized by steeply angled sides that meet at the top, forming the letter "A." This architectural design has become increasingly popular in glamping accommodations due to its aesthetic appeal, efficient use of space, and ability to blend seamlessly into natural surroundings.
 
@@ -184,7 +184,6 @@ Sage Outdoor Advisory includes Airstream and other vintage trailer accommodation
     "bell-tent": {
     slug: "bell-tent",
     term: "Bell Tent",
-    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/bell-tent.jpg",
     definition: "A circular canvas tent supported by a single central pole, with a design resembling a bell, providing a spacious interior and popular for its simplicity and charm in glamping.",
     extendedDefinition: `A bell tent is a circular canvas tent supported by a single central pole, with a design that dates back to the 19th century. The structure gets its name from its bell-like shape, with vertical walls that slope outward from a central point, creating a spacious interior with a high ceiling.
 
@@ -234,7 +233,6 @@ Sage Outdoor Advisory includes bell tents and other canvas tent structures in ou
     "cabin": {
     slug: "cabin",
     term: "Cabin",
-    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/cabin.jpg",
     definition: "A small house, typically made of wood, situated in a natural setting, ranging from rustic to luxurious and providing solid, weather-resistant glamping accommodations.",
     extendedDefinition: `A cabin is a small house, typically constructed from wood, situated in a natural setting such as a forest, mountain, or near a lake. Cabins are one of the most traditional and versatile forms of glamping accommodations, offering a solid structure with varying levels of amenities and luxury.
 
@@ -390,7 +388,6 @@ Sage Outdoor Advisory includes covered wagon and other unique glamping accommoda
     "dome": {
     slug: "dome",
     term: "Dome",
-    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/geodesic-dome.jpg",
     definition: "A geodesic dome structure composed of a network of triangles, providing a spherical glamping accommodation known for durability, panoramic views, and modern aesthetic appeal.",
     extendedDefinition: `A dome, specifically a geodesic dome, is a spherical or partially spherical structure composed of a network of triangular elements that distribute stress evenly throughout the framework. This architectural design has gained popularity in glamping for its unique aesthetic, structural strength, and ability to provide panoramic views of the surrounding environment.
 
@@ -442,7 +439,6 @@ Sage Outdoor Advisory includes dome accommodations in our glamping feasibility s
     "safari-tent": {
     slug: "safari-tent",
     term: "Safari Tent",
-    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/safari-tent.jpg",
     definition: "A large, rectangular canvas tent with straight vertical walls and a peaked roof, often built on a raised platform, originally used in African safaris and now popular for spacious, luxurious glamping accommodations.",
     extendedDefinition: `A safari tent is a large, rectangular canvas tent structure with straight vertical walls and a peaked or gabled roof. Originally designed for use on African safaris, these tents have become one of the most popular and recognizable types of glamping accommodations, offering spacious interiors and the ability to house luxurious amenities.
 
