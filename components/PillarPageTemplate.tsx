@@ -12,6 +12,8 @@ import {
   generateSpeakableSchema,
   generateCourseSchema,
 } from "@/lib/schema";
+import RelatedGuides from "./RelatedGuides";
+import RelatedLandingPages from "./RelatedLandingPages";
 import Footer from "./Footer";
 import FloatingHeader from "./FloatingHeader";
 
@@ -365,6 +367,44 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                 >
                   Schedule Your Free Consultation
                 </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Related Guides Section - Enhanced Internal Linking */}
+        <RelatedGuides currentGuide={content} locale="en" maxGuides={6} />
+
+        {/* Related Landing Pages Section - Enhanced Internal Linking */}
+        {content.keywords && (
+          <section className="py-12 bg-white border-t border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                Related Resources
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Explore related landing pages and resources for your outdoor hospitality project.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {content.keywords.slice(0, 6).map((keyword) => {
+                  // Find related landing pages by keyword
+                  const allLandingPages = require("@/lib/landing-pages").getAllLandingPageSlugs()
+                    .map((slug: string) => require("@/lib/landing-pages").getLandingPageSync(slug))
+                    .filter((page: any) => page && page.keywords && page.keywords.some((k: string) => 
+                      k.toLowerCase().includes(keyword.toLowerCase()) || 
+                      keyword.toLowerCase().includes(k.toLowerCase())
+                    ));
+                  
+                  return allLandingPages.slice(0, 3).map((page: any) => (
+                    <Link
+                      key={page.slug}
+                      href={`/landing/${page.slug}`}
+                      className="inline-block px-4 py-2 bg-gray-100 hover:bg-[#00b6a6] hover:text-white text-gray-900 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      {page.hero.headline}
+                    </Link>
+                  ));
+                })}
               </div>
             </div>
           </section>

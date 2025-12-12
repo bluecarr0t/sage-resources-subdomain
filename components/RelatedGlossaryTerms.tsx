@@ -9,7 +9,7 @@ interface RelatedGlossaryTermsProps {
 
 export default function RelatedGlossaryTerms({ 
   currentTerm, 
-  maxTerms = 6,
+  maxTerms = 8,
   locale = "en"
 }: RelatedGlossaryTermsProps) {
   // Get related terms from the current term's relatedTerms field if available

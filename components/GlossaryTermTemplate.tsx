@@ -4,6 +4,8 @@ import Image from "next/image";
 import { generateDefinitionSchema, generateFAQSchema } from "@/lib/glossary-schema";
 import { generateSpeakableSchema } from "@/lib/schema";
 import { generateGlossaryImageAltText, generateImageTitle } from "@/lib/glossary/image-alt-text";
+import RelatedGlossaryTerms from "./RelatedGlossaryTerms";
+import GlossaryImageGallery from "./GlossaryImageGallery";
 import Footer from "./Footer";
 import FloatingHeader from "./FloatingHeader";
 
@@ -80,6 +82,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                         alt={generateGlossaryImageAltText(term.term, term.definition)}
                         fill
                         className="object-cover"
+                        style={{ objectPosition: 'center bottom' }}
                         priority
                         fetchPriority="high"
                         quality={90}
@@ -90,6 +93,17 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                     </div>
                   </div>
                 )}
+
+                {/* Image Gallery with Lightbox */}
+                {term.images && term.images.length > 0 && (
+                  <GlossaryImageGallery
+                    images={term.images}
+                    imageAltTexts={term.imageAltTexts}
+                    term={term.term}
+                    definition={term.definition}
+                  />
+                )}
+
                 <div className="bg-[#00b6a6]/10 border-l-4 border-[#00b6a6] p-6 rounded-2xl shadow-sm">
                   <p className="text-lg text-gray-800 leading-relaxed">
                     {term.definition}
@@ -280,6 +294,9 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
             </div>
           </div>
         </main>
+
+        {/* Related Glossary Terms Section - Enhanced Internal Linking */}
+        <RelatedGlossaryTerms currentTerm={term} locale="en" maxTerms={8} />
 
         {/* Footer */}
         <Footer />

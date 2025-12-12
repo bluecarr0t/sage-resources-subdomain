@@ -282,6 +282,17 @@ export function generateLandingPageArticleSchema(content: LandingPageContent) {
     articleSection = "Industry Guides";
   }
   
+  // Estimate word count from content sections
+  const allContent = [
+    content.hero.subheadline,
+    ...(content.sections?.map(s => s.content) || []),
+    content.metaDescription
+  ].join(" ");
+  const wordCount = allContent.split(/\s+/).length;
+  
+  // Use OG image for article image
+  const imageUrl = "https://sageoutdooradvisory.com/og-image.jpg";
+  
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -301,15 +312,27 @@ export function generateLandingPageArticleSchema(content: LandingPageContent) {
       "url": "https://sageoutdooradvisory.com",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://sageoutdooradvisory.com/logo.png"
+        "url": "https://sageoutdooradvisory.com/logo.png",
+        "width": 600,
+        "height": 600
       }
+    },
+    "image": {
+      "@type": "ImageObject",
+      "url": imageUrl,
+      "width": 1200,
+      "height": 630,
+      "alt": content.hero.headline
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": url
     },
     "articleSection": articleSection,
-    "keywords": content.keywords?.join(", ") || ""
+    "keywords": content.keywords?.join(", ") || "",
+    "wordCount": wordCount,
+    "inLanguage": "en-US",
+    "isAccessibleForFree": true
   };
 }
 

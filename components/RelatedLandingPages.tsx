@@ -9,7 +9,7 @@ interface RelatedLandingPagesProps {
 
 export default function RelatedLandingPages({ 
   currentPage, 
-  maxPages = 4,
+  maxPages = 6,
   locale = "en"
 }: RelatedLandingPagesProps) {
   // Get related pages from the current page's relatedPages field if available

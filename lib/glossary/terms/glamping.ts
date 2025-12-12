@@ -548,7 +548,25 @@ Sage Outdoor Advisory includes tiny home accommodations in our glamping property
     "tipi": {
     slug: "tipi",
     term: "Tipi",
-    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/tipi.jpg",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/tipi/tipi-6.jpg",
+    images: [
+      "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/tipi/tipi-1.jpg",
+      "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/tipi/tipi-2.jpg",
+      "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/tipi/tipi-3.jpg",
+      "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/tipi/tipi-4.jpg",
+      "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/tipi/tipi-5.jpg",
+      "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/tipi/tipi-6.jpg",
+      "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/tipi/tipi-7.jpg"
+    ],
+    imageAltTexts: [
+      "Tipi - Traditional conical tipi with wooden poles and canvas covering in natural outdoor setting for glamping accommodation",
+      "Tipi - Modern glamping tipi on wooden platform with decorative elements and cultural design in outdoor hospitality setting",
+      "Tipi - Luxury tipi accommodation with premium amenities and comfortable interior furnishings for glamping resort",
+      "Tipi - Family-sized tipi glamping unit with spacious interior and outdoor fire pit area in mountain destination",
+      "Tipi - Authentic Native American style tipi with traditional design elements and natural materials for cultural glamping experience",
+      "Tipi - Contemporary tipi glamping structure with modern amenities and scenic mountain backdrop for outdoor hospitality",
+      "Tipi - Culturally-themed tipi accommodation featuring traditional decor and educational elements in high-end glamping resort"
+    ],
     definition: "A conical tent traditionally used by Native American tribes, constructed with a framework of wooden poles covered by canvas, adapted for modern glamping accommodations offering a culturally rich and unique experience.",
     extendedDefinition: `A tipi (also spelled teepee) is a conical tent structure traditionally used by Native American tribes, particularly those of the Great Plains. Modern tipis have been adapted for glamping accommodations, offering guests a culturally rich and unique lodging experience that connects them with Native American heritage while providing modern comfort.
 
@@ -713,7 +731,7 @@ Sage Outdoor Advisory includes vintage trailer accommodations in our glamping pr
     "yurt": {
     slug: "yurt",
     term: "Yurt",
-    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/yurt.jpg",
+    image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/unit-types/yurt/yurt-2.jpg",
     definition: "A circular tent with a wooden lattice frame and fabric covering, traditionally used by nomadic peoples in Central Asia, adapted for modern glamping with amenities and built on platforms for comfortable, spacious accommodations.",
     extendedDefinition: `A yurt is a circular tent structure with a collapsible framework typically made of wood or bamboo and a fabric covering, traditionally used by nomadic peoples in Central Asia, particularly Mongolia. Modern yurts have been adapted for glamping accommodations, offering guests a unique cultural experience combined with contemporary comfort and amenities.
 

@@ -68,11 +68,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     
     return {
       title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
-      description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. From luxury safari tents to cozy cabins, find your perfect outdoor adventure today.",
+      description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
       keywords: "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business",
       openGraph: {
         title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
-        description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. From luxury safari tents to cozy cabins, find your perfect outdoor adventure.",
+        description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
         url,
         siteName: "Sage Outdoor Advisory",
         locale: openGraphLocale,
@@ -89,7 +89,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       twitter: {
         card: "summary_large_image",
         title: "Find Glamping Near You | 500+ Properties Across North America",
-        description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure.",
+        description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
         images: ["https://sageoutdooradvisory.com/og-image.jpg"],
       },
       alternates: {

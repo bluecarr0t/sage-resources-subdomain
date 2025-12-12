@@ -16,7 +16,9 @@ export interface GlossaryTerm {
     question: string;
     answer: string;
   }[];
-  image?: string; // Path to image for this glossary term
+  image?: string; // Path to main image for this glossary term
+  images?: string[]; // Array of additional images for gallery display
+  imageAltTexts?: string[]; // Optional array of alt text for gallery images (should match images array length)
 }
 
 export type GlossaryCategory = GlossaryTerm["category"];

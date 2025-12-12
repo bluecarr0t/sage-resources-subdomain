@@ -16,6 +16,8 @@ import {
   generateAggregateRatingSchema,
 } from "@/lib/schema";
 import TableOfContents from "@/components/TableOfContents";
+import RelatedLandingPages from "@/components/RelatedLandingPages";
+import RelatedGlossaryTerms from "@/components/RelatedGlossaryTerms";
 import Footer from "./Footer";
 import FloatingHeader from "./FloatingHeader";
 
@@ -387,42 +389,8 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
         </section>
       )}
 
-      {/* Related Landing Pages Section - Internal Cross-Linking */}
-      {content.relatedPages && content.relatedPages.length > 0 && (
-        <section className={`py-16 ${content.relatedPillarPages ? "bg-white" : "bg-gray-50"}`}>
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
-              Related Resources
-            </h2>
-            <p className="text-center text-gray-600 mb-8">
-              Explore related guides and resources for your outdoor hospitality project
-            </p>
-            <div className="grid md:grid-cols-2 gap-6">
-              {content.relatedPages.map((relatedSlug) => {
-                const relatedPage = getLandingPageSync(relatedSlug);
-                if (!relatedPage) return null;
-                return (
-                  <Link
-                    key={relatedSlug}
-                    href={`/landing/${relatedSlug}`}
-                    className="block bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
-                  >
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {relatedPage.hero.headline}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                      {relatedPage.metaDescription}
-                    </p>
-                    <span className="text-[#006b5f] hover:text-[#005a4f] font-medium text-sm">
-                      Read more →
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Related Landing Pages Section - Enhanced Internal Cross-Linking */}
+      <RelatedLandingPages currentPage={content} locale="en" maxPages={6} />
 
       {/* Related Services Section - Root Domain Linking */}
       {content.relatedServices && content.relatedServices.services.length > 0 && (
@@ -569,6 +537,47 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
           </div>
         </div>
       </section>
+
+      {/* Related Landing Pages Section - Enhanced Internal Linking */}
+      <RelatedLandingPages currentPage={content} locale="en" maxPages={6} />
+
+      {/* Related Glossary Terms Section - Enhanced Internal Linking */}
+      {content.keywords && content.keywords.length > 0 && (
+        <section className="py-12 bg-white border-t border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              Related Industry Terms
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Explore key terms related to this topic in our comprehensive glossary.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {content.keywords.slice(0, 8).map((keyword) => {
+                // Try to find a matching glossary term
+                const allTerms = require("@/lib/glossary/index").getAllGlossaryTerms();
+                const matchingTerm = allTerms.find((term: any) => 
+                  term.term.toLowerCase() === keyword.toLowerCase() ||
+                  term.term.toLowerCase().includes(keyword.toLowerCase()) ||
+                  keyword.toLowerCase().includes(term.term.toLowerCase())
+                );
+                
+                if (matchingTerm) {
+                  return (
+                    <Link
+                      key={matchingTerm.slug}
+                      href={`/glossary/${matchingTerm.slug}`}
+                      className="inline-block px-4 py-2 bg-gray-100 hover:bg-[#00b6a6] hover:text-white text-gray-900 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      {matchingTerm.term}
+                    </Link>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* FAQ Section */}
       {content.faqs && content.faqs.length > 0 && (

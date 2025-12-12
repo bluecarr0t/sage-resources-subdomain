@@ -213,10 +213,11 @@ export default function FloatingHeader({
               <div className="relative w-[115px] h-[115px] md:w-36 md:h-36 flex-shrink-0 -my-4 md:-my-6">
                 <Image
                   src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/logos/sage-logo-black-header.webp"
-                  alt="Sage Outdoor Advisory"
+                  alt="Sage Outdoor Advisory - Outdoor Hospitality Feasibility Studies and Appraisals"
                   fill
                   className="object-contain"
                   priority
+                  fetchPriority="high"
                 />
               </div>
             </Link>

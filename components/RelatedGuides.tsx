@@ -9,7 +9,7 @@ interface RelatedGuidesProps {
 
 export default function RelatedGuides({ 
   currentGuide, 
-  maxGuides = 3,
+  maxGuides = 6,
   locale = "en"
 }: RelatedGuidesProps) {
   // Get related guides from the current guide's relatedGuides field if available

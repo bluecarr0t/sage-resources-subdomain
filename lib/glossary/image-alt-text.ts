@@ -25,3 +25,38 @@ export function generateGlossaryImageAltText(term: string, definition: string): 
 export function generateImageTitle(term: string): string {
   return `${term} glamping accommodation example`;
 }
+
+/**
+ * Generate SEO-friendly alt text for tipi gallery images
+ * Creates descriptive alt text based on common tipi variations and features
+ */
+export function generateTipiGalleryAltText(term: string, index: number, totalImages: number): string {
+  const tipiVariations = [
+    "Traditional conical tipi with wooden poles and canvas covering in natural outdoor setting",
+    "Modern glamping tipi on wooden platform with decorative elements and cultural design",
+    "Luxury tipi accommodation with premium amenities and comfortable interior furnishings",
+    "Family-sized tipi glamping unit with spacious interior and outdoor fire pit area",
+    "Authentic Native American style tipi with traditional design elements and natural materials",
+    "Contemporary tipi glamping structure with modern amenities and scenic mountain backdrop",
+    "Culturally-themed tipi accommodation featuring traditional decor and educational elements"
+  ];
+
+  // Use specific variation if available, otherwise generate descriptive text
+  if (index < tipiVariations.length) {
+    return `${term} - ${tipiVariations[index]}`;
+  }
+
+  // Fallback for additional images
+  const contexts = [
+    "outdoor glamping setting",
+    "wooden platform base",
+    "natural landscape backdrop",
+    "cultural design elements",
+    "modern glamping amenities",
+    "traditional construction",
+    "luxury accommodation features"
+  ];
+
+  const context = contexts[index % contexts.length];
+  return `${term} glamping accommodation ${index + 1} of ${totalImages} - ${context} for outdoor hospitality feasibility studies`;
+}

@@ -265,7 +265,7 @@ export default function PropertyDetailTemplate({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={getGooglePhotoUrl(photos[currentPhotoIndex], 1200, 800)}
-                    alt={`${propertyName} - Photo ${currentPhotoIndex + 1} of ${photos.length}`}
+                    alt={`${propertyName} - ${firstProperty.city || ''} ${firstProperty.state || ''} glamping property photo ${currentPhotoIndex + 1} of ${photos.length}`}
                     className="w-full h-full object-cover"
                     loading={currentPhotoIndex === 0 ? "eager" : "lazy"}
                     fetchPriority={currentPhotoIndex === 0 ? "high" : "auto"}
