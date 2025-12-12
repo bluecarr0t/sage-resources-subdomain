@@ -14,6 +14,13 @@ interface GlossaryTermTemplateProps {
   relatedTerms: GlossaryTerm[];
 }
 
+// Helper function to determine if a term needs "an" instead of "a"
+function getArticle(term: string): string {
+  const firstChar = term.trim().charAt(0).toLowerCase();
+  const vowels = ['a', 'e', 'i', 'o', 'u'];
+  return vowels.includes(firstChar) ? 'an' : 'a';
+}
+
 export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTermTemplateProps) {
   const definitionSchema = generateDefinitionSchema(term);
   const faqSchema = term.faqs ? generateFAQSchema(term.faqs) : null;
@@ -72,7 +79,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                   {term.category}
                 </div>
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  What is {term.term}?
+                  What is {getArticle(term.term)} {term.term}?
                 </h1>
                 {term.image && (
                   <div className="mb-6 relative overflow-hidden rounded-3xl shadow-2xl border-4 border-white/20 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10">
@@ -82,7 +89,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                         alt={generateGlossaryImageAltText(term.term, term.definition)}
                         fill
                         className="object-cover"
-                        style={{ objectPosition: 'center bottom' }}
+                        style={{ objectPosition: term.slug === 'a-frame' ? 'center 70%' : 'center bottom' }}
                         priority
                         fetchPriority="high"
                         quality={90}

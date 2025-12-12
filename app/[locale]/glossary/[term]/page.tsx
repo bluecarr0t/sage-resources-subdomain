@@ -10,6 +10,13 @@ import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
 
+// Helper function to determine if a term needs "an" instead of "a"
+function getArticle(term: string): string {
+  const firstChar = term.trim().charAt(0).toLowerCase();
+  const vowels = ['a', 'e', 'i', 'o', 'u'];
+  return vowels.includes(firstChar) ? 'an' : 'a';
+}
+
 interface PageProps {
   params: {
     locale: string;
@@ -51,7 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const pathname = `/${locale}/glossary/${glossaryTerm.slug}`;
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
-  const title = `What is ${glossaryTerm.term}? | Definition & Guide | Sage Outdoor Advisory`;
+  const title = `What is ${getArticle(glossaryTerm.term)} ${glossaryTerm.term}? | Definition & Guide | Sage Outdoor Advisory`;
   const description = `${glossaryTerm.definition} Learn more about ${glossaryTerm.term.toLowerCase()} in outdoor hospitality.`;
 
   const openGraphImages = glossaryTerm.image 
