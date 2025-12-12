@@ -363,7 +363,7 @@ export default function OpportunityZonesLayer({ map, populationLookup, gdpLookup
       onLoad={onDataLoad}
       options={{
         map: map,
-        suppressInfoWindows: true,
+        controlPosition: undefined,
       }}
     />
   );
