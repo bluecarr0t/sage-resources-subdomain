@@ -67,12 +67,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
     
     return {
-      title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
-      description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
+      title: "Find Glamping Near You | 600+ Properties Across North America | Sage Outdoor Advisory",
+      description: "Discover 600+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
       keywords: "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business",
       openGraph: {
-        title: "Find Glamping Near You | 500+ Properties Across North America | Sage Outdoor Advisory",
-        description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
+        title: "Find Glamping Near You | 600+ Properties Across North America | Sage Outdoor Advisory",
+        description: "Discover 600+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
         url,
         siteName: "Sage Outdoor Advisory",
         locale: openGraphLocale,
@@ -88,8 +88,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
       twitter: {
         card: "summary_large_image",
-        title: "Find Glamping Near You | 500+ Properties Across North America",
-        description: "Discover 500+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
+        title: "Find Glamping Near You | 600+ Properties Across North America",
+        description: "Discover 600+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
         images: ["https://sageoutdooradvisory.com/og-image.jpg"],
       },
       alternates: {
@@ -232,7 +232,7 @@ export default async function HomePage({ params }: PageProps) {
                   Your Complete Glamping Resource
                 </h1>
                 <p className="text-xl md:text-2xl mb-10 text-white/95 drop-shadow-lg max-w-3xl mx-auto">
-                  500+ properties, expert guides, and industry resources for travelers and outdoor hospitality professionals.
+                  600+ properties, expert guides, and industry resources for travelers and outdoor hospitality professionals.
                 </p>
                 
                 {/* Location Search */}
@@ -246,7 +246,7 @@ export default async function HomePage({ params }: PageProps) {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-sm md:text-base">500+ Properties</span>
+                    <span className="text-sm md:text-base">600+ Properties</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -272,7 +272,7 @@ export default async function HomePage({ params }: PageProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div>
-                <div className="text-4xl font-bold text-[#006b5f] mb-2">500+</div>
+                <div className="text-4xl font-bold text-[#006b5f] mb-2">600+</div>
                 <div className="text-gray-600">Properties</div>
               </div>
               <div>
@@ -358,7 +358,7 @@ export default async function HomePage({ params }: PageProps) {
           <div className="absolute inset-0 z-0">
             <Image
               src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg"
-              alt="Mountain landscape showcasing glamping properties across North America - explore 500+ outdoor hospitality destinations"
+              alt="Mountain landscape showcasing glamping properties across North America - explore 600+ outdoor hospitality destinations"
               fill
               className="object-cover"
               loading="lazy"
@@ -369,7 +369,7 @@ export default async function HomePage({ params }: PageProps) {
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-white text-center">
             <h2 className="text-4xl font-bold mb-4 drop-shadow-2xl">
-              Explore 500+ Glamping Properties
+              Explore 600+ Glamping Properties
             </h2>
             <p className="text-xl mb-8 text-white/95 max-w-3xl mx-auto drop-shadow-lg">
               Discover glamping properties across the United States and Canada on our interactive map. 
