@@ -40,7 +40,7 @@ export async function getGuide(slug: string, locale?: string): Promise<GuideCont
 
   // For other locales, try to load translations
   try {
-    const messages = (await import(`../messages/${locale}.json`)).default;
+    const messages = (await import(`../../messages/${locale}.json`)).default;
     const translationKey = slugToKey(slug);
     const translations = messages?.guides?.[translationKey];
     

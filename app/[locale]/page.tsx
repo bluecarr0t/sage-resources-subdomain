@@ -131,7 +131,7 @@ export default async function HomePage({ params }: PageProps) {
     const links = createLocaleLinks(locale);
     
     // Get featured content for homepage with error handling
-    let allGuides: Array<NonNullable<ReturnType<typeof getGuide>>> = [];
+    let allGuides: Array<NonNullable<ReturnType<typeof getGuideSync>>> = [];
     try {
       const guideSlugs = getAllGuideSlugs();
       allGuides = guideSlugs
