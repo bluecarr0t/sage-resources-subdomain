@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
-import { getAllGuideSlugs, getGuide, getGuidesByCategory } from "@/lib/guides";
+import { getAllGuideSlugs, getGuideSync, getGuidesByCategory } from "@/lib/guides";
 import { getAllGlossaryTerms } from "@/lib/glossary/index";
 import { getAllLandingPageSlugs, getLandingPageSync } from "@/lib/landing-pages";
 import { generateOrganizationSchema, generateItemListSchemaWithUrls } from "@/lib/schema";
@@ -137,7 +137,7 @@ export default async function HomePage({ params }: PageProps) {
       allGuides = guideSlugs
         .map(slug => {
           try {
-            return getGuide(slug);
+            return getGuideSync(slug);
           } catch (error) {
             console.error(`Error loading guide ${slug}:`, error);
             return null;

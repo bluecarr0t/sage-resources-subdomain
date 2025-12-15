@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GuideContent, getGuide, getGuidesByCategory } from "@/lib/guides";
+import { GuideContent, getGuideSync, getGuidesByCategory } from "@/lib/guides";
 
 interface RelatedGuidesProps {
   currentGuide: GuideContent;
@@ -16,7 +16,7 @@ export default function RelatedGuides({
   const explicitRelated: GuideContent[] = [];
   if (currentGuide.relatedGuides && currentGuide.relatedGuides.length > 0) {
     currentGuide.relatedGuides.forEach((slug) => {
-      const guide = getGuide(slug);
+      const guide = getGuideSync(slug);
       if (guide && guide.slug !== currentGuide.slug) {
         explicitRelated.push(guide);
       }

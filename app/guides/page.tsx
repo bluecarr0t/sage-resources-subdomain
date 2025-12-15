@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getAllGuideSlugs, getGuidesByCategory, getGuide } from "@/lib/guides";
+import { getAllGuideSlugs, getGuidesByCategory, getGuideSync } from "@/lib/guides";
 import GuidesIndex from "@/components/GuidesIndex";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
 export default function GuidesPage() {
   const allGuides = getAllGuideSlugs()
-    .map((slug) => getGuide(slug))
+    .map((slug) => getGuideSync(slug))
     .filter((guide): guide is NonNullable<typeof guide> => guide !== null);
   const feasibilityGuides = getGuidesByCategory("feasibility");
   const appraisalGuides = getGuidesByCategory("appraisal");

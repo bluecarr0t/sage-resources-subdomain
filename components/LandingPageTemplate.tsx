@@ -1,5 +1,5 @@
 import { LandingPageContent, getLandingPageSync } from "@/lib/landing-pages";
-import { getGuide } from "@/lib/guides";
+import { getGuideSync } from "@/lib/guides";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -364,7 +364,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             </p>
             <div className="grid md:grid-cols-2 gap-6">
               {content.relatedPillarPages.map((guideSlug) => {
-                const guide = getGuide(guideSlug);
+                const guide = getGuideSync(guideSlug);
                 if (!guide) return null;
                 return (
                   <Link

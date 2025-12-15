@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { getAllGuideSlugs, getGuidesByCategory, getGuide } from "@/lib/guides";
+import { getAllGuideSlugs, getGuidesByCategory, getGuideSync } from "@/lib/guides";
 import GuidesIndex from "@/components/GuidesIndex";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
@@ -83,7 +83,7 @@ export default async function GuidesPage({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: 'guides' });
   
   const allGuides = getAllGuideSlugs()
-    .map((slug) => getGuide(slug))
+    .map((slug) => getGuideSync(slug))
     .filter((guide): guide is NonNullable<typeof guide> => guide !== null);
   const feasibilityGuides = getGuidesByCategory("feasibility");
   const appraisalGuides = getGuidesByCategory("appraisal");

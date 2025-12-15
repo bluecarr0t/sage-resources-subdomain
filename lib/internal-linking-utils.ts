@@ -5,7 +5,7 @@
 
 import { getAllGlossaryTerms } from "./glossary/index";
 import { getAllLandingPageSlugs, getLandingPageSync } from "./landing-pages";
-import { getAllGuideSlugs, getGuide } from "./guides";
+import { getAllGuideSlugs, getGuideSync } from "./guides";
 
 /**
  * Find glossary terms mentioned in content
@@ -77,7 +77,7 @@ export function findRelatedGuides(
 ): Array<{ slug: string; title: string }> {
   const allGuides = getAllGuideSlugs()
     .map((s) => {
-      const guide = getGuide(s);
+      const guide = getGuideSync(s);
       if (!guide || guide.slug === excludeSlug) return null;
       return guide;
     })

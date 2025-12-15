@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     notFound();
   }
   
-  const guide = getGuide(slug);
+  const guide = await getGuide(slug, locale);
   
   if (!guide) {
     return {
@@ -101,7 +101,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default function GuidePage({ params }: PageProps) {
+export default async function GuidePage({ params }: PageProps) {
   const { locale, slug } = params;
   
   // Validate locale
@@ -109,7 +109,7 @@ export default function GuidePage({ params }: PageProps) {
     notFound();
   }
   
-  const guide = getGuide(slug);
+  const guide = await getGuide(slug, locale);
 
   if (!guide) {
     notFound();

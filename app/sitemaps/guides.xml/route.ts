@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllGuideSlugs, getGuide } from '@/lib/guides';
+import { getAllGuideSlugs, getGuideSync } from '@/lib/guides';
 import { locales } from '@/i18n';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
@@ -14,7 +14,7 @@ export async function GET() {
   // Generate guide pages for all locales
   for (const locale of locales) {
     for (const slug of guideSlugs) {
-      const guide = getGuide(slug);
+      const guide = getGuideSync(slug);
       const isPillarPage = slug.endsWith("-complete-guide");
       const lastModified = guide?.lastModified 
         ? new Date(guide.lastModified).toISOString()

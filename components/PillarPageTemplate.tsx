@@ -1,6 +1,6 @@
 "use client";
 
-import { GuideContent, getGuide } from "@/lib/guides";
+import { GuideContent, getGuideSync } from "@/lib/guides";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -277,7 +277,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                   </h2>
                   <div className="grid md:grid-cols-2 gap-6">
                     {content.relatedGuides.map((guideSlug) => {
-                      const relatedGuide = getGuide(guideSlug);
+                      const relatedGuide = getGuideSync(guideSlug);
                       if (!relatedGuide) return null;
                       return (
                         <Link
