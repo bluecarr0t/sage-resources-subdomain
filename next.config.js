@@ -9,7 +9,8 @@ const nextConfig = {
   // Experimental features for faster builds
   experimental: {
     // Optimize package imports to reduce bundle size
-    optimizePackageImports: ['@supabase/supabase-js', 'next-intl'],
+    // Note: Do NOT optimize @supabase/supabase-js as it causes build issues
+    optimizePackageImports: ['next-intl'],
   },
   
   images: {
@@ -40,6 +41,24 @@ const nextConfig = {
       ...config.resolve.fallback,
       fs: false,
     };
+    
+    // Externalize @supabase/supabase-js during server-side build to prevent bundling
+    // This prevents the Supabase library code from executing during static generation
+    if (isServer) {
+      config.externals = config.externals || [];
+      // Handle both array and function formats of externals
+      if (Array.isArray(config.externals)) {
+        config.externals.push('@supabase/supabase-js');
+      } else if (typeof config.externals === 'function') {
+        const originalExternals = config.externals;
+        config.externals = async (context, request, callback) => {
+          if (request === '@supabase/supabase-js') {
+            return callback(null, `commonjs @supabase/supabase-js`);
+          }
+          return originalExternals(context, request, callback);
+        };
+      }
+    }
     
     // Handle chunk loading errors gracefully
     if (!isServer) {
