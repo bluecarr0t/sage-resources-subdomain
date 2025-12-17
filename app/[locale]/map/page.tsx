@@ -109,7 +109,7 @@ async function getPropertyStatistics() {
         const uniqueProvinces = new Set<string>();
         const uniqueCountries = new Set<string>();
 
-        properties?.forEach((prop) => {
+        properties?.forEach((prop: { property_name?: string | null; state?: string | null; country?: string | null }) => {
           // Count unique property names (non-null, non-empty)
           if (prop.property_name && prop.property_name.trim()) {
             uniquePropertyNames.add(prop.property_name.trim());
