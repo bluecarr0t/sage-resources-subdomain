@@ -25,9 +25,8 @@ export function getAvailableLocalesForContent(contentType: ContentType): Locale[
       return [...locales];
     
     case 'guide':
-      // Guides are primarily English-only educational content
-      // Only generate for English to reduce build time
-      return ['en'];
+      // Guides now have translations for all locales
+      return [...locales];
     
     case 'glossary':
       // Glossary terms might have some translations in the future
