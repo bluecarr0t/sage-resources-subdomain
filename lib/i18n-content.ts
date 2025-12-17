@@ -25,8 +25,9 @@ export function getAvailableLocalesForContent(contentType: ContentType): Locale[
       return [...locales];
     
     case 'guide':
-      // Guides now have translations for all locales
-      return [...locales];
+      // Guides don't have translations yet, only generate English pages
+      // TODO: Check messages/{locale}.json for guide translations and return locales with translations
+      return ['en'];
     
     case 'glossary':
       // Glossary terms might have some translations in the future

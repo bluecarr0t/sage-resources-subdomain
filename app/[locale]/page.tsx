@@ -13,6 +13,7 @@ import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 // Dynamically import LocationSearch to prevent SSR issues
 const DynamicLocationSearch = dynamic(() => import('@/components/LocationSearch'), {
@@ -51,6 +52,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const pathname = `/${locale}`;
     const url = `https://resources.sageoutdooradvisory.com${pathname}`;
     
+    // Load translations for metadata
+    let t;
+    try {
+      t = await getTranslations({ locale, namespace: 'home' });
+    } catch (error) {
+      console.error('Error loading translations:', error);
+      // Fallback to English metadata if translations fail
+      t = await getTranslations({ locale: 'en', namespace: 'home' });
+    }
+    
+    const title = t('metadata.title');
+    const description = t('metadata.description');
+    const keywords = t('metadata.keywords');
+    
     let hreflangAlternates: Metadata['alternates'] = {};
     try {
       hreflangAlternates = generateHreflangAlternates(pathname);
@@ -67,12 +82,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
     
     return {
-      title: "Find Glamping Near You | 600+ Properties Across North America | Sage Outdoor Advisory",
-      description: "Discover 600+ glamping properties across North America. Expert guides on feasibility studies, appraisals, and 57+ industry terms. Your complete resource for outdoor hospitality insights and property discovery.",
-      keywords: "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business",
+      title,
+      description,
+      keywords,
       openGraph: {
-        title: "Find Glamping Near You | 600+ Properties Across North America | Sage Outdoor Advisory",
-        description: "Discover 600+ glamping properties across North America. Expert guides on feasibility studies, appraisals, and 57+ industry terms. Your complete resource for outdoor hospitality insights and property discovery.",
+        title,
+        description,
         url,
         siteName: "Sage Outdoor Advisory",
         locale: openGraphLocale,
@@ -88,8 +103,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
       twitter: {
         card: "summary_large_image",
-        title: "Find Glamping Near You | 600+ Properties Across North America",
-        description: "Discover 600+ glamping properties across North America. Expert guides on feasibility studies, appraisals, and 57+ industry terms. Your complete resource for outdoor hospitality insights and property discovery.",
+        title,
+        description,
         images: ["https://sageoutdooradvisory.com/og-image.jpg"],
       },
       alternates: {
@@ -127,6 +142,9 @@ export default async function HomePage({ params }: PageProps) {
   }
   
   try {
+    // Load translations
+    const t = await getTranslations({ locale, namespace: 'home' });
+    
     // Create locale-aware links
     const links = createLocaleLinks(locale);
     
@@ -180,33 +198,8 @@ export default async function HomePage({ params }: PageProps) {
       featuredLandingPages = [];
     }
 
-    // Homepage FAQs
-    const homepageFAQs: FAQItem[] = [
-      {
-        question: "What is a glamping feasibility study?",
-        answer: "A glamping feasibility study evaluates whether a proposed glamping property will be financially viable and operationally successful. It includes market analysis, financial projections, site assessment, and competitive analysis to help investors make informed decisions about their outdoor hospitality investment."
-      },
-      {
-        question: "How do I find glamping properties near me?",
-        answer: "Use our interactive map to search for glamping properties by location. We have 600+ verified properties across the United States and Canada. You can filter by location, property type, amenities, and price range to find the perfect glamping destination for your outdoor adventure."
-      },
-      {
-        question: "What's the difference between glamping and camping?",
-        answer: "Glamping (glamorous camping) combines the outdoor experience of camping with the comfort and amenities of a hotel. Unlike traditional camping, glamping accommodations typically include comfortable beds, electricity, heating, and often private bathrooms and kitchens. It offers nature immersion without sacrificing modern conveniences."
-      },
-      {
-        question: "How much does a glamping feasibility study cost?",
-        answer: "Glamping feasibility studies typically cost between $5,000 and $15,000, depending on the scope, property size, and complexity. Factors include market research depth, financial modeling requirements, and site assessment needs. More comprehensive studies with detailed analysis may cost $20,000 or more."
-      },
-      {
-        question: "What should I look for in a glamping property?",
-        answer: "Key factors include location and accessibility, unique accommodation types, quality amenities (wifi, bathrooms, kitchen facilities), safety features, and proximity to attractions. Our database includes detailed information on 600+ properties including ratings, amenities, and pricing to help you compare options."
-      },
-      {
-        question: "Are glamping properties profitable?",
-        answer: "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve 60-80% occupancy rates with strong seasonal demand."
-      }
-    ];
+    // Homepage FAQs from translations
+    const homepageFAQs: FAQItem[] = t.raw('faq.items') as FAQItem[];
 
     // Generate schema markup
     const organizationSchema = generateOrganizationSchema();
@@ -263,10 +256,10 @@ export default async function HomePage({ params }: PageProps) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
               <div className="text-center max-w-5xl mx-auto text-white">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-2xl">
-                  Your Complete Glamping Resource
+                  {t('hero.headline')}
                 </h1>
                 <p className="text-xl md:text-2xl mb-10 text-white/95 drop-shadow-lg max-w-3xl mx-auto">
-                  600+ properties, expert guides, and industry resources for travelers and outdoor hospitality professionals.
+                  {t('hero.subheadline')}
                 </p>
                 
                 {/* Location Search */}
@@ -280,20 +273,20 @@ export default async function HomePage({ params }: PageProps) {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-sm md:text-base">600+ Properties</span>
+                    <span className="text-sm md:text-base">{t('hero.quickStats.properties')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                       <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-sm md:text-base">US & Canada</span>
+                    <span className="text-sm md:text-base">{t('hero.quickStats.usCanada')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-sm md:text-base">Verified Listings</span>
+                    <span className="text-sm md:text-base">{t('hero.quickStats.verified')}</span>
                   </div>
                 </div>
               </div>
@@ -307,15 +300,15 @@ export default async function HomePage({ params }: PageProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div>
                 <div className="text-4xl font-bold text-[#006b5f] mb-2">600+</div>
-                <div className="text-gray-600">Properties</div>
+                <div className="text-gray-600">{t('stats.properties')}</div>
               </div>
               <div>
                 <div className="text-4xl font-bold text-[#006b5f] mb-2">21</div>
-                <div className="text-gray-600">Expert Guides</div>
+                <div className="text-gray-600">{t('stats.guides')}</div>
               </div>
               <div>
                 <div className="text-4xl font-bold text-[#006b5f] mb-2">57+</div>
-                <div className="text-gray-600">Glossary Terms</div>
+                <div className="text-gray-600">{t('stats.glossary')}</div>
               </div>
             </div>
           </div>
@@ -327,10 +320,10 @@ export default async function HomePage({ params }: PageProps) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                  Comprehensive Guides
+                  {t('sections.guides.title')}
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  In-depth, expert-written guides covering every aspect of outdoor hospitality feasibility studies, appraisals, and industry insights.
+                  {t('sections.guides.description')}
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-8">
@@ -368,7 +361,7 @@ export default async function HomePage({ params }: PageProps) {
                           {guide.metaDescription}
                         </p>
                         <span className="text-[#006b5f] font-semibold group-hover:underline">
-                          Read Guide →
+                          {t('sections.guides.readGuide')}
                         </span>
                       </div>
                     </Link>
@@ -380,7 +373,7 @@ export default async function HomePage({ params }: PageProps) {
                   href={links.guides}
                   className="inline-block px-8 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
                 >
-                  View All Guides
+                  {t('sections.guides.cta')}
                 </Link>
               </div>
             </div>
@@ -403,17 +396,16 @@ export default async function HomePage({ params }: PageProps) {
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-white text-center">
             <h2 className="text-4xl font-bold mb-4 drop-shadow-2xl">
-              Explore 600+ Glamping Properties
+              {t('sections.map.title')}
             </h2>
             <p className="text-xl mb-8 text-white/95 max-w-3xl mx-auto drop-shadow-lg">
-              Discover glamping properties across the United States and Canada on our interactive map. 
-              Filter by location, property type, and amenities to find the perfect outdoor hospitality destination.
+              {t('sections.map.description')}
             </p>
             <Link
               href={links.map}
               className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-2xl"
             >
-              View Interactive Map →
+              {t('sections.map.cta')}
             </Link>
           </div>
         </section>
@@ -424,10 +416,10 @@ export default async function HomePage({ params }: PageProps) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                  Industry Glossary
+                  {t('sections.glossary.title')}
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  Comprehensive definitions for outdoor hospitality industry terms. Perfect for understanding feasibility studies, appraisals, and industry terminology.
+                  {t('sections.glossary.description')}
                 </p>
               </div>
               <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -477,7 +469,7 @@ export default async function HomePage({ params }: PageProps) {
                   href={links.glossary}
                   className="inline-block px-8 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
                 >
-                  Browse All Terms
+                  {t('sections.glossary.cta')}
                 </Link>
               </div>
             </div>
@@ -500,16 +492,16 @@ export default async function HomePage({ params }: PageProps) {
           </div>
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-white text-center">
             <h2 className="text-4xl font-bold mb-4 drop-shadow-2xl">
-              Need Expert Guidance?
+              {t('sections.cta.title')}
             </h2>
             <p className="text-xl mb-8 text-white/95 drop-shadow-lg">
-              Our team of outdoor hospitality experts can help with feasibility studies, appraisals, and market analysis for your project.
+              {t('sections.cta.description')}
             </p>
             <Link
               href="https://sageoutdooradvisory.com/contact-us/"
               className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-2xl"
             >
-              Schedule Free Consultation
+              {t('sections.cta.button')}
             </Link>
           </div>
         </section>
@@ -519,10 +511,10 @@ export default async function HomePage({ params }: PageProps) {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Frequently Asked Questions
+                {t('faq.title')}
               </h2>
               <p className="text-xl text-gray-600">
-                Common questions about glamping properties, feasibility studies, and outdoor hospitality
+                {t('faq.subtitle')}
               </p>
             </div>
             <div className="space-y-6">

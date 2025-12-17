@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     notFound();
   }
   
-  const glossaryTerm = getGlossaryTerm(term);
+  const glossaryTerm = await getGlossaryTerm(term, locale);
   
   if (!glossaryTerm) {
     return {
@@ -69,6 +69,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         alt: `${glossaryTerm.term} - ${glossaryTerm.definition.substring(0, 100)}`,
       }]
     : undefined;
+
+  // Only generate hreflang tags for locales that have translations
+  const availableLocales = getAvailableLocalesForContent('glossary');
+  const hreflangAlternates: Metadata['alternates'] = {
+    languages: {},
+  };
+  
+  availableLocales.forEach((availableLocale) => {
+    const localePath = pathname.replace(/^\/[a-z]{2}(\/|$)/, `/${availableLocale}$1`);
+    hreflangAlternates.languages![availableLocale] = `https://resources.sageoutdooradvisory.com${localePath}`;
+  });
+  
+  // Add x-default pointing to default locale
+  const defaultPath = pathname.replace(/^\/[a-z]{2}(\/|$)/, `/en$1`);
+  hreflangAlternates.languages!['x-default'] = `https://resources.sageoutdooradvisory.com${defaultPath}`;
 
   return {
     title,
@@ -91,7 +106,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: url,
-      ...generateHreflangAlternates(pathname),
+      ...hreflangAlternates,
     },
     robots: {
       index: true,
@@ -107,7 +122,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default function GlossaryTermPage({ params }: PageProps) {
+export default async function GlossaryTermPage({ params }: PageProps) {
   const { locale, term } = params;
   
   // Validate locale
@@ -115,13 +130,13 @@ export default function GlossaryTermPage({ params }: PageProps) {
     notFound();
   }
   
-  const glossaryTerm = getGlossaryTerm(term);
+  const glossaryTerm = await getGlossaryTerm(term, locale);
 
   if (!glossaryTerm) {
     notFound();
   }
 
-  const relatedTerms = getRelatedTerms(glossaryTerm);
+  const relatedTerms = await getRelatedTerms(glossaryTerm, locale);
 
   return (
     <>
