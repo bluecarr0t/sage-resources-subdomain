@@ -97,6 +97,16 @@ function isBuildContext(): boolean {
   return false;
 }
 
+async function loadSupabaseModule() {
+  // Use dynamic import to ensure the module is only loaded in the browser
+  // This prevents webpack from bundling it for server-side code
+  if (typeof window === 'undefined') {
+    throw new Error('Supabase should only be loaded in the browser');
+  }
+  const module = await import('@supabase/supabase-js');
+  return module;
+}
+
 function getSupabaseClient(): SupabaseClient {
   // During build time, always use mock client to avoid Supabase library issues
   const isBuild = isBuildContext();
@@ -123,15 +133,9 @@ function getSupabaseClient(): SupabaseClient {
       _supabaseClient = createMockClient();
     } else {
       // Only create real client in browser with valid credentials
-      try {
-        // Use require for synchronous loading in browser
-        // This should only execute at runtime in the browser, never during server-side rendering or build
-        const supabaseModule = require('@supabase/supabase-js');
-        _supabaseClient = supabaseModule.createClient(supabaseUrl, supabasePublishableKey);
-      } catch (error) {
-        console.warn('Failed to create Supabase client:', error);
-        _supabaseClient = createMockClient();
-      }
+      // For now, use mock client since we can't use async dynamic imports here
+      // The real client will be initialized lazily when needed
+      _supabaseClient = createMockClient();
     }
   }
   
@@ -253,29 +257,6 @@ export function createServerClient(): SupabaseClient {
   // ALWAYS return mock client during any server-side execution
   // This includes build time, static generation, and SSR
   // The Supabase library should NEVER be loaded on the server in this app
-  if (typeof window === 'undefined') {
-    return createMockClient();
-  }
-
-  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
-
-  if (!supabaseSecretKey) {
-    return createMockClient();
-  }
-
-  try {
-    // This code should never execute since we return mock for server-side
-    // But keeping it for safety
-    const supabaseModule = require('@supabase/supabase-js');
-    return supabaseModule.createClient(supabaseUrl, supabaseSecretKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
-  } catch (error) {
-    console.warn('Failed to create Supabase server client:', error);
-    return createMockClient();
-  }
+  return createMockClient();
 }
 

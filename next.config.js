@@ -36,21 +36,29 @@ const nextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  webpack: (config, { isServer, webpack }) => {
+  webpack: (config, { isServer }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
     };
     
-    // Completely replace @supabase/supabase-js with an empty module during server-side builds
-    // This prevents the library from being bundled or executed during static generation
+    // Mark @supabase/supabase-js as external for server-side builds
+    // This prevents it from being bundled into server chunks
     if (isServer) {
-      config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /@supabase\/supabase-js/,
-          require.resolve('./lib/supabase-server-stub.js')
-        )
-      );
+      // Add to externals to prevent bundling
+      if (!config.externals) {
+        config.externals = [];
+      }
+      
+      if (Array.isArray(config.externals)) {
+        config.externals.push('@supabase/supabase-js');
+      } else {
+        const originalExternals = config.externals;
+        config.externals = [
+          '@supabase/supabase-js',
+          ...(Array.isArray(originalExternals) ? originalExternals : [originalExternals])
+        ];
+      }
     }
     
     return config;
