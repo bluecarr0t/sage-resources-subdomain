@@ -2,8 +2,13 @@
  * Utility functions to fetch county population data from Supabase
  */
 
-import { supabase } from '@/lib/supabase';
 import { PopulationLookup, normalizeCountyName } from './parse-population-csv';
+
+// Lazy import Supabase to avoid initialization during build time
+async function getSupabaseClient() {
+  const { supabase } = await import('@/lib/supabase');
+  return supabase;
+}
 
 interface SupabaseCountyPopulation {
   geo_id: string;
@@ -73,6 +78,8 @@ export async function fetchPopulationDataFromSupabase(): Promise<{
 
     console.log('📥 Fetching county population data from Supabase...');
 
+    const supabase = await getSupabaseClient();
+    
     while (hasMore) {
       const { data, error, count } = await supabase
         .from('county-population')

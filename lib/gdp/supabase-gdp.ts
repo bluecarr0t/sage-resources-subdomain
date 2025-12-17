@@ -2,7 +2,11 @@
  * Utility functions to fetch county GDP data from Supabase
  */
 
-import { supabase } from '@/lib/supabase';
+// Lazy import Supabase to avoid initialization during build time
+async function getSupabaseClient() {
+  const { supabase } = await import('@/lib/supabase');
+  return supabase;
+}
 
 interface SupabaseCountyGDP {
   geofips: string;
@@ -56,6 +60,8 @@ export async function fetchGDPDataFromSupabase(): Promise<GDPDataByFIPS> {
     let hasMore = true;
 
     console.log('📥 Fetching county GDP data from Supabase...');
+
+    const supabase = await getSupabaseClient();
 
     while (hasMore) {
       const { data, error } = await supabase

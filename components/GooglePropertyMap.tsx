@@ -5,8 +5,13 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { useGoogleMaps } from './GoogleMapsProvider';
-import { supabase } from '@/lib/supabase';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
+
+// Lazy import Supabase to avoid initialization during build time
+async function getSupabaseClient() {
+  const { supabase } = await import('@/lib/supabase');
+  return supabase;
+}
 import { NationalPark, NationalParkWithCoords, filterParksWithCoordinates } from '@/lib/types/national-parks';
 import { useMapContext } from './MapContext';
 import MultiSelect from './MultiSelect';
@@ -544,7 +549,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     async function fetchNationalParks() {
       try {
         console.log('Fetching national parks from Supabase...');
-        const { data, error: supabaseError } = await supabase
+        const supabaseClient = await getSupabaseClient();
+        const { data, error: supabaseError } = await supabaseClient
           .from('national-parks')
           .select('*');
 

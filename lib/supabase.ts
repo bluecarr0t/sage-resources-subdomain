@@ -56,9 +56,20 @@ function getSupabaseClient(): SupabaseClient {
     if (supabaseUrl && supabasePublishableKey) {
       _supabaseClient = createClient(supabaseUrl, supabasePublishableKey);
     } else {
-      // For build time, create placeholder client
-      // At runtime, this will never be reached due to validation above
-      _supabaseClient = createClient('https://placeholder.supabase.co', 'placeholder-key');
+      // During build time, create a properly initialized client with placeholder values
+      // This ensures all properties (including 'auth') are properly initialized
+      // The client won't work for actual queries, but it won't crash during build
+      _supabaseClient = createClient(
+        'https://placeholder.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTIwMDAsImV4cCI6MTk2MDc2ODAwMH0.placeholder',
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+          },
+        }
+      );
     }
   }
   
@@ -66,12 +77,30 @@ function getSupabaseClient(): SupabaseClient {
 }
 
 // Create a proxy that validates on first property access
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(_target, prop) {
-    const client = getSupabaseClient();
-    return (client as any)[prop];
-  }
-}) as SupabaseClient;
+// During build time, return a safe mock to prevent initialization errors
+const isBuildTime = typeof window === 'undefined' && !process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+export const supabase = isBuildTime
+  ? ({
+      auth: {
+        getSession: async () => ({ data: { session: null }, error: null }),
+        getUser: async () => ({ data: { user: null }, error: null }),
+        signOut: async () => ({ error: null }),
+        onAuthStateChange: () => ({ data: { subscription: null }, error: null }),
+      },
+      from: () => ({
+        select: () => Promise.resolve({ data: null, error: null }),
+        insert: () => Promise.resolve({ data: null, error: null }),
+        update: () => Promise.resolve({ data: null, error: null }),
+        delete: () => Promise.resolve({ data: null, error: null }),
+      }),
+    } as any as SupabaseClient)
+  : new Proxy({} as SupabaseClient, {
+      get(_target, prop) {
+        const client = getSupabaseClient();
+        return (client as any)[prop];
+      }
+    }) as SupabaseClient;
 
 /**
  * Server-side Supabase client
