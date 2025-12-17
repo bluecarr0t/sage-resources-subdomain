@@ -17,6 +17,14 @@ if (typeof window !== 'undefined') {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 
+// Detect build/static generation to avoid loading Supabase during build
+function isBuildContext(): boolean {
+  return (
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.NEXT_PHASE === 'phase-export'
+  );
+}
+
 /**
  * Validates Supabase configuration and provides helpful error messages
  */
@@ -150,8 +158,8 @@ export const supabase = new Proxy({} as any, {
  * NEVER expose this key to the client
  */
 export function createServerClient(): any {
-  // Always return mock client on server-side to prevent library execution during build
-  if (typeof window === 'undefined') {
+  // During Next.js build/static generation, return mock to avoid bundling/execution
+  if (isBuildContext()) {
     return createMockClient();
   }
 
@@ -163,15 +171,19 @@ export function createServerClient(): any {
     );
   }
 
-  if (createClient) {
-    return createClient(supabaseUrl, supabaseSecretKey, {
+  try {
+    const supabaseModule = require('@supabase/supabase-js');
+    const serverCreateClient = supabaseModule.createClient;
+
+    return serverCreateClient(supabaseUrl, supabaseSecretKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
       },
     });
+  } catch (error) {
+    console.warn('Failed to create Supabase server client, falling back to mock:', error);
+    return createMockClient();
   }
-
-  return createMockClient();
 }
 
