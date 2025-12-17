@@ -6,6 +6,10 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 const nextConfig = {
   reactStrictMode: true,
   
+  // Prevent Supabase from being bundled during server-side builds
+  // This ensures the library is only loaded at runtime, not during static generation
+  serverExternalPackages: ['@supabase/supabase-js'],
+  
   // Experimental features for faster builds
   experimental: {
     // Optimize package imports to reduce bundle size
@@ -41,42 +45,6 @@ const nextConfig = {
       ...config.resolve.fallback,
       fs: false,
     };
-    
-    // Externalize @supabase/supabase-js during server-side build to prevent bundling
-    // This prevents the Supabase library code from executing during static generation
-    if (isServer) {
-      config.externals = config.externals || [];
-      // Handle both array and function formats of externals
-      if (Array.isArray(config.externals)) {
-        config.externals.push('@supabase/supabase-js');
-      } else if (typeof config.externals === 'function') {
-        const originalExternals = config.externals;
-        config.externals = async (context, request, callback) => {
-          if (request === '@supabase/supabase-js') {
-            return callback(null, `commonjs @supabase/supabase-js`);
-          }
-          return originalExternals(context, request, callback);
-        };
-      }
-    }
-    
-    // Handle chunk loading errors gracefully
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          ...config.optimization.splitChunks,
-          cacheGroups: {
-            ...config.optimization.splitChunks?.cacheGroups,
-            default: {
-              ...config.optimization.splitChunks?.cacheGroups?.default,
-              minChunks: 2,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-    }
     
     return config;
   },
