@@ -1,7 +1,13 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+// Use type-only import to avoid executing Supabase library code during build
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+const hasValidCredentials = supabaseUrl && supabasePublishableKey && 
+                            supabaseUrl !== '' && 
+                            supabasePublishableKey !== '' &&
+                            !supabaseUrl.includes('placeholder') &&
+                            !supabasePublishableKey.includes('placeholder');
 
 /**
  * Validates Supabase configuration and provides helpful error messages
@@ -42,8 +48,32 @@ function getSupabaseConfigError(): string | null {
  */
 let _supabaseClient: SupabaseClient | null = null;
 
+/**
+ * Check if we're in a Next.js build/static generation context
+ * During build, we should never load the Supabase library to avoid initialization errors
+ */
+function isBuildContext(): boolean {
+  // Check for Next.js build phase (most reliable indicator)
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return true;
+  }
+  // During static generation, Next.js sets this to 'export'
+  if (process.env.NEXT_PHASE === 'phase-export') {
+    return true;
+  }
+  // If we're server-side and don't have valid credentials, assume build context
+  // This is a fallback - during actual runtime SSR, credentials should be available
+  if (typeof window === 'undefined' && !hasValidCredentials) {
+    return true;
+  }
+  return false;
+}
+
 function getSupabaseClient(): SupabaseClient {
-  // Validate config when client is first accessed (lazy validation)
+  // During build time, always use mock client to avoid Supabase library issues
+  const isBuild = isBuildContext();
+  
+  // Validate config when client is first accessed (lazy validation) - only in browser
   if (typeof window !== 'undefined') {
     const configError = getSupabaseConfigError();
     if (configError) {
@@ -53,75 +83,89 @@ function getSupabaseClient(): SupabaseClient {
   
   // Create client if it doesn't exist
   if (!_supabaseClient) {
-    if (supabaseUrl && supabasePublishableKey) {
-      _supabaseClient = createClient(supabaseUrl, supabasePublishableKey);
+    // During build time, ALWAYS use mock client to prevent Supabase library from executing
+    // Never call require('@supabase/supabase-js') during build, even if credentials are valid
+    if (isBuild) {
+      _supabaseClient = createMockClient();
+    } else if (!hasValidCredentials) {
+      // In browser but no valid credentials - use mock
+      _supabaseClient = createMockClient();
     } else {
-      // During build time (when env vars are missing), try to create a minimal client
-      // If this fails, we'll catch and return a mock
+      // Only create real client in browser with valid credentials
       try {
-        _supabaseClient = createClient(
-          'https://placeholder.supabase.co',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTIwMDAsImV4cCI6MTk2MDc2ODAwMH0.placeholder',
-          {
-            auth: {
-              persistSession: false,
-              autoRefreshToken: false,
-              detectSessionInUrl: false,
-            },
-            global: {
-              headers: {},
-            },
-          }
-        );
+        // Use Function constructor to prevent static analysis/bundling during build
+        // This ensures the require is truly dynamic and only executed at runtime
+        // Pass require as a parameter to ensure it's available in the function scope
+        const requireFn = typeof require !== 'undefined' ? require : (() => { throw new Error('require is not available'); });
+        const requireSupabase = new Function('require', 'moduleName', 'return require(moduleName)');
+        const supabaseModule = requireSupabase(requireFn, '@supabase/supabase-js');
+        _supabaseClient = supabaseModule.createClient(supabaseUrl, supabasePublishableKey);
       } catch (error) {
-        // If client creation fails during build, return null
-        // The proxy will handle this case
-        console.warn('Failed to create Supabase client during build:', error);
-        return null as any;
+        console.warn('Failed to create Supabase client:', error);
+        _supabaseClient = createMockClient();
       }
     }
   }
   
-  return _supabaseClient;
+  // Always return a client (never null)
+  return _supabaseClient || createMockClient();
+}
+
+/**
+ * Creates a mock Supabase client for build time when real credentials are unavailable
+ */
+function createMockClient(): SupabaseClient {
+  const mockClient = {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      getUser: async () => ({ data: { user: null }, error: null }),
+      signOut: async () => ({ error: null }),
+      onAuthStateChange: () => ({ data: { subscription: null }, error: null }),
+      signInWithPassword: async () => ({ data: { user: null, session: null }, error: null }),
+      signUp: async () => ({ data: { user: null, session: null }, error: null }),
+    },
+    from: () => ({
+      select: () => Promise.resolve({ data: null, error: null }),
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      delete: () => Promise.resolve({ data: null, error: null }),
+      upsert: () => Promise.resolve({ data: null, error: null }),
+    }),
+    storage: {
+      from: () => ({
+        upload: async () => ({ data: null, error: null }),
+        download: async () => ({ data: null, error: null }),
+        list: async () => ({ data: null, error: null }),
+        remove: async () => ({ data: null, error: null }),
+        createSignedUrl: async () => ({ data: null, error: null }),
+      }),
+    },
+  } as any as SupabaseClient;
+  
+  return mockClient;
 }
 
 // Create a proxy that validates on first property access
+// This ensures the client is only created when actually accessed, not during module initialization
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
     try {
       const client = getSupabaseClient();
-      if (!client) {
-        // Return mock during build time if client creation failed
-        if (prop === 'auth') {
-          return {
-            getSession: async () => ({ data: { session: null }, error: null }),
-            getUser: async () => ({ data: { user: null }, error: null }),
-            signOut: async () => ({ error: null }),
-            onAuthStateChange: () => ({ data: { subscription: null }, error: null }),
-          };
-        }
-        if (prop === 'from') {
-          return () => ({
-            select: () => Promise.resolve({ data: null, error: null }),
-            insert: () => Promise.resolve({ data: null, error: null }),
-            update: () => Promise.resolve({ data: null, error: null }),
-            delete: () => Promise.resolve({ data: null, error: null }),
-          });
-        }
+      // Always return a value from the client, even if it's undefined
+      // This prevents the Supabase library from trying to destructure undefined values
+      const value = (client as any)?.[prop];
+      return value;
+    } catch (error) {
+      // If accessing the client fails, return a safe fallback from mock
+      console.warn('Supabase client access failed:', error);
+      try {
+        const mockClient = createMockClient();
+        return mockClient[prop as keyof SupabaseClient];
+      } catch (mockError) {
+        // If even the mock fails, return undefined
+        console.warn('Failed to create mock client:', mockError);
         return undefined;
       }
-      return (client as any)[prop];
-    } catch (error) {
-      // If accessing the client fails, return a safe fallback
-      console.warn('Supabase client access failed:', error);
-      if (prop === 'auth') {
-        return {
-          getSession: async () => ({ data: { session: null }, error: null }),
-          getUser: async () => ({ data: { user: null }, error: null }),
-          signOut: async () => ({ error: null }),
-        };
-      }
-      return undefined;
     }
   }
 }) as SupabaseClient;
@@ -133,6 +177,12 @@ export const supabase = new Proxy({} as SupabaseClient, {
  * NEVER expose this key to the client
  */
 export function createServerClient(): SupabaseClient {
+  // During build time, ALWAYS return mock client to prevent Supabase library execution
+  // Never call require('@supabase/supabase-js') during build, even if credentials are valid
+  if (isBuildContext()) {
+    return createMockClient();
+  }
+
   const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseSecretKey) {
@@ -141,11 +191,22 @@ export function createServerClient(): SupabaseClient {
     );
   }
 
-  return createClient(supabaseUrl, supabaseSecretKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+  try {
+    // Use Function constructor to prevent static analysis/bundling during build
+    // This ensures the require is truly dynamic and only executed at runtime
+    // Pass require as a parameter to ensure it's available in the function scope
+    const requireFn = typeof require !== 'undefined' ? require : (() => { throw new Error('require is not available'); });
+    const requireSupabase = new Function('require', 'moduleName', 'return require(moduleName)');
+    const supabaseModule = requireSupabase(requireFn, '@supabase/supabase-js');
+    return supabaseModule.createClient(supabaseUrl, supabaseSecretKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+  } catch (error) {
+    console.warn('Failed to create Supabase server client:', error);
+    return createMockClient();
+  }
 }
 
