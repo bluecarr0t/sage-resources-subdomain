@@ -9,6 +9,11 @@ import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
 
+// Allow dynamic params for locales not in generateStaticParams
+// This allows /es/guides/[slug], /de/guides/[slug], etc. to work
+// without generating static pages for each locale
+export const dynamicParams = true;
+
 interface PageProps {
   params: {
     locale: string;
