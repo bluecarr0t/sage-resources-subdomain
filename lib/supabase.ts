@@ -1,5 +1,19 @@
-// Use type-only import to avoid executing Supabase library code during build
-import type { SupabaseClient } from '@supabase/supabase-js';
+// Define our own SupabaseClient interface to avoid importing from @supabase/supabase-js during build
+// This prevents webpack from bundling and executing the Supabase library during build
+interface SupabaseClient {
+  auth: {
+    getSession: () => Promise<{ data: { session: any } | null; error: any }>;
+    getUser: () => Promise<{ data: { user: any } | null; error: any }>;
+    signOut: () => Promise<{ error: any }>;
+    onAuthStateChange: (callback: (event: string, session: any) => void) => { data: { subscription: any }; error: any };
+    signInWithPassword: (credentials: any) => Promise<{ data: { user: any; session: any } | null; error: any }>;
+    signUp: (credentials: any) => Promise<{ data: { user: any; session: any } | null; error: any }>;
+  };
+  from: (table: string) => any;
+  storage: {
+    from: (bucket: string) => any;
+  };
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
