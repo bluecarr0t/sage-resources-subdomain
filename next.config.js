@@ -42,25 +42,6 @@ const nextConfig = {
       fs: false,
     };
     
-    // Mark @supabase/supabase-js as external for server-side builds
-    // This prevents it from being bundled into server chunks
-    if (isServer) {
-      // Add to externals to prevent bundling
-      if (!config.externals) {
-        config.externals = [];
-      }
-      
-      if (Array.isArray(config.externals)) {
-        config.externals.push('@supabase/supabase-js');
-      } else {
-        const originalExternals = config.externals;
-        config.externals = [
-          '@supabase/supabase-js',
-          ...(Array.isArray(originalExternals) ? originalExternals : [originalExternals])
-        ];
-      }
-    }
-    
     return config;
   },
   // Exclude test scripts from build
