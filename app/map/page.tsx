@@ -68,7 +68,7 @@ async function getPropertyStatistics() {
         
         // Get all glamping properties to count unique property names
         const { data: properties, error } = await supabase
-          .from('sage-glamping-data')
+          .from('all_glamping_properties')
           .select('property_name, state, country')
           .eq('is_glamping_property', 'Yes');
 

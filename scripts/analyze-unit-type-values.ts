@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Analyze unit_type values in sage-glamping-data table
+ * Analyze unit_type values in all_glamping_properties table
  * This script shows the current distribution of unit_type values
  */
 
@@ -27,7 +27,7 @@ const supabase = createClient(supabaseUrl, secretKey, {
 });
 
 async function analyzeUnitTypes() {
-  console.log('🔍 Analyzing unit_type values in sage-glamping-data...\n');
+  console.log('🔍 Analyzing unit_type values in all_glamping_properties...\n');
 
   try {
     // Fetch all records with unit_type
@@ -38,7 +38,7 @@ async function analyzeUnitTypes() {
 
     while (hasMore) {
       const { data, error } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, unit_type')
         .range(offset, offset + batchSize - 1);
 

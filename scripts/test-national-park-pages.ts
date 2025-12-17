@@ -98,7 +98,7 @@ async function getSlugType(slug: string) {
 
     // Check glamping properties
     const { data: property, error: propertyError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id')
       .eq('slug', slug.trim())
       .limit(1)
@@ -118,7 +118,7 @@ async function getSlugType(slug: string) {
 async function getAllPropertySlugs() {
   try {
     const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name, slug')
       .not('property_name', 'is', null)
       .not('slug', 'is', null)

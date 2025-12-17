@@ -21,7 +21,7 @@ headers = {
 def check_coverage():
     """Check current Google data coverage."""
     response = requests.get(
-        f'{url}/rest/v1/sage-glamping-data?select=id,google_phone_number,google_website_uri,google_primary_type',
+        f'{url}/rest/v1/all_glamping_properties?select=id,google_phone_number,google_website_uri,google_primary_type',
         headers=headers
     )
     

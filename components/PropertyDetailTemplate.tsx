@@ -188,7 +188,7 @@ export default function PropertyDetailTemplate({
   ).sort();
 
   // Collect all amenities from database columns ONLY (from toilet to water_hookup)
-  // Do NOT use Google Places API for amenities - only use sage-glamping-data columns
+  // Do NOT use Google Places API for amenities - only use all_glamping_properties columns
   const amenities = {
     toilet: properties.some(p => hasAmenity(p.toilet)),
     hotTub: properties.some(p => hasAmenity(p.hot_tub_sauna)),

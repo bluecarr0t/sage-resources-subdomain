@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fetch Google Places API ratings and review counts, then update Supabase database.
-This script fetches all properties from sage-glamping-data and updates them with Google ratings.
+This script fetches all properties from all_glamping_properties and updates them with Google ratings.
 """
 
 import os
@@ -217,7 +217,7 @@ def update_supabase_with_ratings(supabase, api_key: str, delay=0.1, limit=None, 
     try:
         if skip_existing:
             # Only get properties without Google rating
-            query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address,google_rating,google_user_rating_total')
+            query = supabase.table('all_glamping_properties').select('id,property_name,city,state,address,google_rating,google_user_rating_total')
             response = query.execute()
             
             # Filter in Python for properties without Google rating
@@ -227,7 +227,7 @@ def update_supabase_with_ratings(supabase, api_key: str, delay=0.1, limit=None, 
             ]
         else:
             # Get all properties
-            query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address,google_rating,google_user_rating_total')
+            query = supabase.table('all_glamping_properties').select('id,property_name,city,state,address,google_rating,google_user_rating_total')
             if limit:
                 query = query.limit(limit)
             response = query.execute()
@@ -235,7 +235,7 @@ def update_supabase_with_ratings(supabase, api_key: str, delay=0.1, limit=None, 
     except requests.exceptions.HTTPError as e:
         # If columns don't exist, select all columns and filter in Python
         print("⚠ Rating columns may not exist yet. Fetching all properties...")
-        query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address')
+        query = supabase.table('all_glamping_properties').select('id,property_name,city,state,address')
         if limit:
             query = query.limit(limit)
         response = query.execute()
@@ -319,7 +319,7 @@ def update_supabase_with_ratings(supabase, api_key: str, delay=0.1, limit=None, 
         
         # Update in Supabase
         try:
-            result = supabase.table('sage-glamping-data').update(update_data).eq('id', prop_id).execute()
+            result = supabase.table('all_glamping_properties').update(update_data).eq('id', prop_id).execute()
             
             if result.data:
                 updated_count += 1

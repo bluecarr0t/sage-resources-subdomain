@@ -28,9 +28,9 @@ async function verifySlugMigration() {
 
   try {
     // Fetch all records
-    console.log('Fetching all records from sage-glamping-data...');
+    console.log('Fetching all records from all_glamping_properties...');
     const { data: allRecords, error: fetchError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id, property_name, slug')
       .limit(10000);
 

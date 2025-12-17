@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Compare glamping.com and US News glamping properties with existing sage-glamping-data
+Compare glamping.com and US News glamping properties with existing all_glamping_properties
 and create/update a CSV file with missing properties.
 """
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Reanalyze sage-glamping-data for Postcard Cabins and remove duplicates from CSV.
+Reanalyze all_glamping_properties for Postcard Cabins and remove duplicates from CSV.
 """
 
 import csv

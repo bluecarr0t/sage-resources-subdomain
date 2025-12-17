@@ -69,7 +69,7 @@ async function analyzeMapPropertyCount() {
 
   try {
     // Fetch all records
-    console.log('📥 Fetching all records from sage-glamping-data...');
+    console.log('📥 Fetching all records from all_glamping_properties...');
     
     let allData: Array<{
       id: number;
@@ -86,7 +86,7 @@ async function analyzeMapPropertyCount() {
 
     while (hasMore) {
       const { data, error, count } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, country, state, lat, lon', { count: 'exact' })
         .range(offset, offset + batchSize - 1);
 

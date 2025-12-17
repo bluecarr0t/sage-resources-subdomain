@@ -6,7 +6,7 @@
  * - Fetches content from AFAR article URL
  * - Uses OpenAI API to extract glamping property information
  * - Compares against existing CSV file
- * - Checks against sage-glamping-data database for duplicates
+ * - Checks against all_glamping_properties database for duplicates
  * - Uses OpenAI to enrich property data with detailed information
  * - Appends new unique properties to CSV file
  * 
@@ -44,7 +44,7 @@ if (!openaiApiKey) {
 
 const AFAR_URL = 'https://www.afar.com/hotels/best-places-to-go-glamping';
 const CSV_FILE = 'csv/glamping-com-north-america-missing-properties.csv';
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 const ARTICLE_TEXT_FILE = 'temp/afar-article-text.txt'; // Optional: manually saved article text
 
 // Initialize clients

@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Capitalize unit_type values in sage-glamping-data table
+ * Capitalize unit_type values in all_glamping_properties table
  * This script ensures all unit_type values are properly capitalized
  * Example: "tents" → "Tents", "TENTS" → "Tents", "tents, cabins" → "Tents, Cabins"
  */
@@ -44,7 +44,7 @@ function capitalizeWords(str: string): string {
 }
 
 async function capitalizeUnitTypes() {
-  console.log('🔄 Capitalizing unit_type values in sage-glamping-data...\n');
+  console.log('🔄 Capitalizing unit_type values in all_glamping_properties...\n');
 
   try {
     // Fetch all records with unit_type
@@ -55,7 +55,7 @@ async function capitalizeUnitTypes() {
 
     while (hasMore) {
       const { data, error } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, unit_type')
         .range(offset, offset + batchSize - 1);
 
@@ -90,7 +90,7 @@ async function capitalizeUnitTypes() {
       // Only update if different
       if (unitType !== capitalized) {
         const { error: updateError } = await supabase
-          .from('sage-glamping-data')
+          .from('all_glamping_properties')
           .update({ unit_type: capitalized })
           .eq('id', record.id);
 

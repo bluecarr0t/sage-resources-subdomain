@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 
 /**
- * Populate rate_category column in sage-glamping-data table
+ * Populate rate_category column in all_glamping_properties table
  * This script calculates the rate category for each property based on avg__rate__next_12_months_
  * and groups by property_name to assign a single category per property
  */
@@ -41,9 +41,9 @@ async function populateRateCategory() {
 
   try {
     // Fetch all records with property_name and seasonal rates
-    console.log('Fetching data from sage-glamping-data...');
+    console.log('Fetching data from all_glamping_properties...');
     const { data: allRecords, error: fetchError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id, property_name, avg__rate__next_12_months_, winter_weekday, winter_weekend, spring_weekday, spring_weekend, summer_weekday, summer_weekend, fall_weekday, fall_weekend')
       .limit(10000);
 
@@ -52,7 +52,7 @@ async function populateRateCategory() {
     }
 
     if (!allRecords || allRecords.length === 0) {
-      console.log('No records found in sage-glamping-data table.');
+      console.log('No records found in all_glamping_properties table.');
       return;
     }
 
@@ -118,7 +118,7 @@ async function populateRateCategory() {
 
     for (const [propertyName, category] of propertyCategories.entries()) {
       const { error: updateError } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .update({ rate_category: category })
         .eq('property_name', propertyName);
 

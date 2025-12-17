@@ -3,7 +3,7 @@
  * Generate property descriptions from websites
  * 
  * This script:
- * - Fetches all properties from sage-glamping-data table with google_website_uri
+ * - Fetches all properties from all_glamping_properties table with google_website_uri
  * - Fetches and analyzes each property's website
  * - Uses OpenAI API to generate 3-5 sentence descriptions
  * - Updates the description column in the database
@@ -39,7 +39,7 @@ if (!openaiApiKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 // Initialize clients
 const supabase = createClient(supabaseUrl, secretKey, {

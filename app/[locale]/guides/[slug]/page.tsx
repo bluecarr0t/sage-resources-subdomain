@@ -6,9 +6,8 @@ import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 
-// Render guides at request time to avoid build-time Supabase execution
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// ISR: Revalidate pages every 24 hours
+export const revalidate = 86400;
 
 interface PageProps {
   params: {

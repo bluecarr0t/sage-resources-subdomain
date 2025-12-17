@@ -70,7 +70,7 @@ async function auditPropertyPages(): Promise<AuditResult> {
   
   // Get total count first
   const { count: totalCount } = await supabase
-    .from('sage-glamping-data')
+    .from('all_glamping_properties')
     .select('*', { count: 'exact', head: true });
   
   console.log(`  Total records in database: ${totalCount || 0}`);
@@ -83,7 +83,7 @@ async function auditPropertyPages(): Promise<AuditResult> {
   
   while (hasMore) {
     const { data: page, error: pageError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id, property_name, slug')
       .range(from, from + pageSize - 1);
     
@@ -139,7 +139,7 @@ async function auditPropertyPages(): Promise<AuditResult> {
   
   while (hasMoreSlugs) {
     const { data: page, error: pageError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name, slug')
       .not('property_name', 'is', null)
       .not('slug', 'is', null)

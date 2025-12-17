@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Analyze sage-glamping-data table for data quality issues
+ * Analyze all_glamping_properties table for data quality issues
  * Identifies:
  * - URLs in description field
  * - Partial sentences in getting_there field
@@ -44,7 +44,7 @@ interface DataQualityIssue {
 }
 
 async function analyzeDataQuality() {
-  console.log('🔍 Analyzing sage-glamping-data for data quality issues...\n');
+  console.log('🔍 Analyzing all_glamping_properties for data quality issues...\n');
 
   try {
     // Fetch all records
@@ -56,7 +56,7 @@ async function analyzeDataQuality() {
 
     while (hasMore) {
       const { data, error } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, description, getting_there, url, google_website_uri')
         .range(offset, offset + batchSize - 1);
 

@@ -1,5 +1,5 @@
 /**
- * Analyze the sage-glamping-data table to find:
+ * Analyze the all_glamping_properties table to find:
  * - How many valid coordinates there are
  * - How many unique coordinates there are
  * - How many unique property names there are
@@ -43,11 +43,11 @@ interface PropertyRecord {
 }
 
 async function analyzeTable() {
-  console.log('🔍 Analyzing sage-glamping-data table...\n');
+  console.log('🔍 Analyzing all_glamping_properties table...\n');
 
   try {
     // Fetch all records (in batches if needed)
-    console.log('📥 Fetching all records from sage-glamping-data...');
+    console.log('📥 Fetching all records from all_glamping_properties...');
     
     let allData: PropertyRecord[] = [];
     let offset = 0;
@@ -57,7 +57,7 @@ async function analyzeTable() {
 
     while (hasMore) {
       const { data, error, count } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, lat, lon, state, country', { count: 'exact' })
         .range(offset, offset + batchSize - 1);
 

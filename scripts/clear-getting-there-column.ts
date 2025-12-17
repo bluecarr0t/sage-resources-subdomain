@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Clear the 'getting_there' column for all records in sage-glamping-data table
+ * Clear the 'getting_there' column for all records in all_glamping_properties table
  * Sets all values to NULL since the existing data is inaccurate
  */
 
@@ -33,7 +33,7 @@ async function clearGettingThereColumn() {
   try {
     // First, count how many records have getting_there data
     const { count: recordsWithData, error: countError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id', { count: 'exact', head: true })
       .not('getting_there', 'is', null)
       .neq('getting_there', '');
@@ -57,7 +57,7 @@ async function clearGettingThereColumn() {
     // Clear all getting_there values
     console.log('🔄 Clearing getting_there column...');
     const { data, error, count } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .update({ getting_there: null })
       .not('getting_there', 'is', null)
       .select('id', { count: 'exact' });
@@ -75,7 +75,7 @@ async function clearGettingThereColumn() {
 
     // Verify the update
     const { count: remainingCount } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id', { count: 'exact', head: true })
       .not('getting_there', 'is', null)
       .neq('getting_there', '');

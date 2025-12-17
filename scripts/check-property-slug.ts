@@ -17,7 +17,7 @@ async function checkProperty(searchTerm: string) {
     // Check 1: Search by property name (case-insensitive, partial match)
     console.log('1️⃣ Searching database for property names containing:', searchTerm);
     const { data: propertiesByName, error: nameError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name')
       .ilike('property_name', `%${searchTerm}%`)
       .limit(20);

@@ -1,5 +1,5 @@
 /**
- * Script to update geocoordinates for specific properties in sage-glamping-data table
+ * Script to update geocoordinates for specific properties in all_glamping_properties table
  * 
  * Usage:
  *   npx tsx scripts/update-property-coordinates.ts
@@ -29,7 +29,7 @@ if (!googleApiKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 interface PropertyUpdate {
   propertyName: string;

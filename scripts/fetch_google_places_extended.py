@@ -378,7 +378,7 @@ def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=No
     if update_all:
         # Get ALL properties - will update/overwrite existing data
         # Use pagination to fetch all records (Supabase REST API has default limit of 1000)
-        query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address')
+        query = supabase.table('all_glamping_properties').select('id,property_name,city,state,address')
         if limit:
             query = query.limit(limit)
             response = query.execute()
@@ -389,7 +389,7 @@ def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=No
             properties = response.data
     elif skip_existing:
         # Only get properties without Google data
-        query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address,google_phone_number,google_website_uri')
+        query = supabase.table('all_glamping_properties').select('id,property_name,city,state,address,google_phone_number,google_website_uri')
         # Filter for properties without Google data
         # Note: Supabase REST API doesn't support OR filters easily, so we'll filter in Python
         # Use pagination to fetch all records
@@ -402,7 +402,7 @@ def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=No
         ]
     else:
         # Get all properties
-        query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address')
+        query = supabase.table('all_glamping_properties').select('id,property_name,city,state,address')
         if limit:
             query = query.limit(limit)
             response = query.execute()
@@ -502,7 +502,7 @@ def update_supabase_with_google_data(supabase, api_key: str, delay=0.1, limit=No
         
         # Update in Supabase
         try:
-            result = supabase.table('sage-glamping-data').update(update_data).eq('id', prop_id).execute()
+            result = supabase.table('all_glamping_properties').update(update_data).eq('id', prop_id).execute()
             
             if result.data:
                 updated_count += 1

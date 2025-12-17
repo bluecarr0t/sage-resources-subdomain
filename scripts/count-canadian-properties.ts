@@ -1,5 +1,5 @@
 /**
- * Count unique property names in Canada from sage-glamping-data table
+ * Count unique property names in Canada from all_glamping_properties table
  * Uses the same logic as the map component to identify Canadian properties
  * 
  * Run with: npx tsx scripts/count-canadian-properties.ts
@@ -176,11 +176,11 @@ function isInUSAOrCanada(lat: number, lon: number): boolean {
 }
 
 async function countCanadianProperties() {
-  console.log('🔍 Counting unique Canadian properties in sage-glamping-data...\n');
+  console.log('🔍 Counting unique Canadian properties in all_glamping_properties...\n');
 
   try {
     // Fetch all records
-    console.log('📥 Fetching all records from sage-glamping-data...');
+    console.log('📥 Fetching all records from all_glamping_properties...');
     
     let allData: Array<{
       id: number;
@@ -197,7 +197,7 @@ async function countCanadianProperties() {
 
     while (hasMore) {
       const { data, error, count } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, country, state, lat, lon', { count: 'exact' })
         .range(offset, offset + batchSize - 1);
 

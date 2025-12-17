@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Analyze properties in sage-glamping-data to identify properties that are NOT glamping resorts
+ * Analyze properties in all_glamping_properties to identify properties that are NOT glamping resorts
  * 
  * Criteria for a glamping resort:
  * 1. 4 or more units on property
@@ -161,12 +161,12 @@ function parseUnitCount(value: string | null): number {
 }
 
 async function analyzeProperties() {
-  console.log('🔍 Analyzing properties in sage-glamping-data...\n');
+  console.log('🔍 Analyzing properties in all_glamping_properties...\n');
 
   try {
     
     // Fetch all records
-    console.log('📥 Fetching all records from sage-glamping-data...');
+    console.log('📥 Fetching all records from all_glamping_properties...');
     let allRecords: SageProperty[] = [];
     let offset = 0;
     const batchSize = 1000;
@@ -174,7 +174,7 @@ async function analyzeProperties() {
 
     while (hasMore) {
       const { data, error } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('*')
         .range(offset, offset + batchSize - 1);
 

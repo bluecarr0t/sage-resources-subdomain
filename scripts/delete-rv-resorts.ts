@@ -1,5 +1,5 @@
 /**
- * Script to delete all properties with "RV Resort" or "RV park" in the name from sage-glamping-data table
+ * Script to delete all properties with "RV Resort" or "RV park" in the name from all_glamping_properties table
  * 
  * Usage:
  *   npx tsx scripts/delete-rv-resorts.ts
@@ -22,7 +22,7 @@ if (!supabaseUrl || !secretKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 async function deleteRVResorts() {
   console.log(`🔌 Connecting to Supabase...`);

@@ -5,7 +5,7 @@
  * This script:
  * - Extracts glamping properties from provided AFAR article text
  * - Compares against existing CSV file
- * - Checks against sage-glamping-data database for duplicates
+ * - Checks against all_glamping_properties database for duplicates
  * - Uses OpenAI to enrich property data with detailed information
  * - Appends new unique properties to CSV file
  * 
@@ -41,7 +41,7 @@ if (!openaiApiKey) {
 }
 
 const CSV_FILE = 'csv/glamping-com-north-america-missing-properties.csv';
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 // AFAR article text (provided by user)
 // Note: The full article text will be passed via command line or environment variable

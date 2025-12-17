@@ -1,12 +1,12 @@
 /**
- * Script to upload CSV file to sage-glamping-data table and calculate rate categories
+ * Script to upload CSV file to all_glamping_properties table and calculate rate categories
  * 
  * Usage:
- *   npx tsx scripts/upload-to-sage-glamping-data.ts <path-to-csv-file> [--append]
+ *   npx tsx scripts/upload-to-all_glamping_properties.ts <path-to-csv-file> [--append]
  * 
  * Examples:
- *   npx tsx scripts/upload-to-sage-glamping-data.ts csv/data.csv
- *   npx tsx scripts/upload-to-sage-glamping-data.ts csv/data.csv --append
+ *   npx tsx scripts/upload-to-all_glamping_properties.ts csv/data.csv
+ *   npx tsx scripts/upload-to-all_glamping_properties.ts csv/data.csv --append
  * 
  * Options:
  *   --append    Skip clearing existing data and append new data instead
@@ -31,7 +31,7 @@ if (!supabaseUrl || !secretKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 interface CSVRow {
   [key: string]: string | number | null;
@@ -105,7 +105,7 @@ async function populateRateCategories(supabase: ReturnType<typeof createClient>)
 
   try {
     // Fetch all records with property_name and seasonal rates
-    console.log('Fetching data from sage-glamping-data...');
+    console.log('Fetching data from all_glamping_properties...');
     const { data: allRecords, error: fetchError } = await supabase
       .from(TABLE_NAME)
       .select('id, property_name, avg__rate__next_12_months_, winter_weekday, winter_weekend, spring_weekday, spring_weekend, summer_weekday, summer_weekend, fall_weekday, fall_weekend')
@@ -116,7 +116,7 @@ async function populateRateCategories(supabase: ReturnType<typeof createClient>)
     }
 
     if (!allRecords || allRecords.length === 0) {
-      console.log('No records found in sage-glamping-data table.');
+      console.log('No records found in all_glamping_properties table.');
       return;
     }
 
@@ -596,10 +596,10 @@ async function main() {
   if (!csvPath) {
     console.error('❌ Please provide a CSV file path');
     console.error('\nUsage:');
-    console.error('  npx tsx scripts/upload-to-sage-glamping-data.ts <path-to-csv-file> [--append]');
+    console.error('  npx tsx scripts/upload-to-all_glamping_properties.ts <path-to-csv-file> [--append]');
     console.error('\nExamples:');
-    console.error('  npx tsx scripts/upload-to-sage-glamping-data.ts csv/data.csv');
-    console.error('  npx tsx scripts/upload-to-sage-glamping-data.ts csv/data.csv --append');
+    console.error('  npx tsx scripts/upload-to-all_glamping_properties.ts csv/data.csv');
+    console.error('  npx tsx scripts/upload-to-all_glamping_properties.ts csv/data.csv --append');
     process.exit(1);
   }
   

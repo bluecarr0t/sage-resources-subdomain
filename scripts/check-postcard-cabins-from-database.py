@@ -44,7 +44,7 @@ def get_postcard_cabins_from_database() -> Set[str]:
         
         # Query for all Postcard Cabins properties
         # Get unique property names (ignoring site_name)
-        response = supabase.table('sage-glamping-data').select('property_name').ilike('property_name', '%Postcard Cabins%').execute()
+        response = supabase.table('all_glamping_properties').select('property_name').ilike('property_name', '%Postcard Cabins%').execute()
         
         if not response.data:
             print('No Postcard Cabins properties found in database')

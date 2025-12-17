@@ -60,7 +60,7 @@ def get_database_properties() -> Set[str]:
         has_more = True
         
         while has_more:
-            response = supabase.table('sage-glamping-data')\
+            response = supabase.table('all_glamping_properties')\
                 .select('property_name')\
                 .not_('property_name', 'is', None)\
                 .range(offset, offset + batch_size - 1)\

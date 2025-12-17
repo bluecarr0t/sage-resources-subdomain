@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Add missing websites to sage-glamping-data table from Google Places API.
+Add missing websites to all_glamping_properties table from Google Places API.
 Prioritizes google_website_uri, then fetches from Google Places API if needed.
 """
 
@@ -205,7 +205,7 @@ def add_missing_websites(supabase, api_key: str, delay=0.15):
     print("Fetching properties missing website data...")
     
     # Fetch all properties
-    query = supabase.table('sage-glamping-data').select('id,property_name,city,state,address,url,google_website_uri')
+    query = supabase.table('all_glamping_properties').select('id,property_name,city,state,address,url,google_website_uri')
     response = query.execute_with_pagination()
     all_properties = response.data
     
@@ -247,7 +247,7 @@ def add_missing_websites(supabase, api_key: str, delay=0.15):
         print(f"[{idx}/{len(properties_with_google_uri_only)}] {prop_name[:50]}...", end=' ', flush=True)
         
         try:
-            result = supabase.table('sage-glamping-data').update({'url': google_uri}).eq('id', prop_id).execute()
+            result = supabase.table('all_glamping_properties').update({'url': google_uri}).eq('id', prop_id).execute()
             if result.data:
                 updated_from_google_uri += 1
                 print(f"✓ Updated from google_website_uri")
@@ -303,7 +303,7 @@ def add_missing_websites(supabase, api_key: str, delay=0.15):
                 'url': website,
                 'google_website_uri': website  # Also update google_website_uri for consistency
             }
-            result = supabase.table('sage-glamping-data').update(update_data).eq('id', prop_id).execute()
+            result = supabase.table('all_glamping_properties').update(update_data).eq('id', prop_id).execute()
             
             if result.data:
                 updated_from_api += 1

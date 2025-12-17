@@ -1,5 +1,5 @@
 /**
- * Script to delete a specific property from sage-glamping-data table
+ * Script to delete a specific property from all_glamping_properties table
  * 
  * Usage:
  *   npx tsx scripts/delete-property.ts <property-name>
@@ -25,7 +25,7 @@ if (!supabaseUrl || !secretKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 async function deleteProperty(propertyName: string) {
   console.log(`🔌 Connecting to Supabase...`);

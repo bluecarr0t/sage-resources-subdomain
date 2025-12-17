@@ -12,7 +12,7 @@ async function generatePropertyPagesList() {
     
     // Fetch a sample of properties with various data
     const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name, city, state, country, property_type, google_rating, google_user_rating_total')
       .not('property_name', 'is', null)
       .limit(100);
@@ -47,7 +47,7 @@ async function generatePropertyPagesList() {
     const baseUrl = "https://resources.sageoutdooradvisory.com";
     const docContent = `# Individual Property Pages - Example Listings
 
-This document provides examples of individual property pages dynamically generated from the \`sage-glamping-data\` table.
+This document provides examples of individual property pages dynamically generated from the \`all_glamping_properties\` table.
 
 ## Overview
 
@@ -97,7 +97,7 @@ ${prop.google_rating ? `- **Google Rating:** ${prop.google_rating.toFixed(1)}${p
 ## How Property Pages Are Generated
 
 ### 1. Unique Property Names
-The system fetches all unique property names from the \`sage-glamping-data\` table:
+The system fetches all unique property names from the \`all_glamping_properties\` table:
 - Property names are trimmed and deduplicated
 - Null or empty property names are excluded
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 /**
- * Check for duplicates between new-glamping-properties.csv and sage-glamping-data database
+ * Check for duplicates between new-glamping-properties.csv and all_glamping_properties database
  */
 
 import { config } from 'dotenv';
@@ -41,7 +41,7 @@ async function getDatabaseProperties() {
 
   while (hasMore) {
     const { data, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name, url')
       .not('property_name', 'is', null)
       .range(offset, offset + batchSize - 1);
@@ -169,7 +169,7 @@ async function main() {
   const csvFile = 'csv/new-properties/new-glamping-properties.csv';
 
   console.log('='.repeat(70));
-  console.log('Checking for Duplicates: new-glamping-properties.csv vs sage-glamping-data');
+  console.log('Checking for Duplicates: new-glamping-properties.csv vs all_glamping_properties');
   console.log('='.repeat(70));
   console.log();
 

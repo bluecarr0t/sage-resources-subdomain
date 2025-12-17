@@ -30,7 +30,7 @@ async function verifyCapitalization() {
 
   try {
     const { data, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id, property_name, unit_type')
       .not('unit_type', 'is', null);
 

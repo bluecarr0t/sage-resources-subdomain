@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Clean data quality issues in sage-glamping-data table
+ * Clean data quality issues in all_glamping_properties table
  * - Extracts URLs from description and getting_there fields
  * - Moves URLs to url field if missing
  * - Cleans up partial sentences in getting_there
@@ -130,7 +130,7 @@ async function cleanDataQuality() {
     for (const [recordId, recordIssues] of issuesByRecord) {
       // Fetch current record data
       const { data: record, error: fetchError } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, description, getting_there, url, google_website_uri')
         .eq('id', recordId)
         .single();
@@ -190,7 +190,7 @@ async function cleanDataQuality() {
       // Apply updates
       if (hasUpdates) {
         const { error: updateError } = await supabase
-          .from('sage-glamping-data')
+          .from('all_glamping_properties')
           .update(recordUpdates)
           .eq('id', recordId);
 

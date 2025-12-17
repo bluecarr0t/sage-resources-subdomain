@@ -42,7 +42,7 @@ async function getDatabaseProperties() {
 
   while (hasMore) {
     const { data, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name')
       .not('property_name', 'is', null)
       .range(offset, offset + batchSize - 1);

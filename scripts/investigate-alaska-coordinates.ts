@@ -135,7 +135,7 @@ async function investigateInvalidCoordinates() {
 
     while (hasMore) {
       const { data, error, count } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, lat, lon, state, country, city, address')
         .range(offset, offset + batchSize - 1);
 

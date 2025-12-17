@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Calculate and populate quality scores for all properties in sage-glamping-data
+ * Calculate and populate quality scores for all properties in all_glamping_properties
  * 
  * This script:
  * - Fetches all properties from the database
@@ -31,7 +31,7 @@ if (!supabaseUrl || !secretKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 const BATCH_SIZE = 100; // Update in batches for performance
 
 // Initialize Supabase client

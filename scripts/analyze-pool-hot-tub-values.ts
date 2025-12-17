@@ -33,7 +33,7 @@ async function analyzeColumns() {
 
     while (hasMore) {
       const { data, error } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, pool, hot_tub___sauna')
         .range(offset, offset + batchSize - 1);
 

@@ -69,7 +69,7 @@ async function debugMapCount() {
 
   try {
     // Fetch all records (matching what the map does)
-    console.log('📥 Fetching all records from sage-glamping-data...');
+    console.log('📥 Fetching all records from all_glamping_properties...');
     
     let allData: any[] = [];
     let offset = 0;
@@ -78,7 +78,7 @@ async function debugMapCount() {
     
     while (hasMore) {
       const { data, error, count } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('*', { count: 'exact' })
         .range(offset, offset + batchSize - 1);
       

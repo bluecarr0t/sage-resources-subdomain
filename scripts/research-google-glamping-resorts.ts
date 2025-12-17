@@ -5,7 +5,7 @@
  * This script:
  * - Uses web search to find glamping resorts and retreats in North America
  * - Compares against existing CSV file
- * - Checks against sage-glamping-data database for duplicates
+ * - Checks against all_glamping_properties database for duplicates
  * - Uses OpenAI to extract and enrich property data
  * - Appends new unique properties to CSV file
  * 
@@ -41,7 +41,7 @@ if (!openaiApiKey) {
 }
 
 const CSV_FILE = 'csv/glamping-com-north-america-missing-properties.csv';
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 // Search queries to find glamping resorts
 const SEARCH_QUERIES = [

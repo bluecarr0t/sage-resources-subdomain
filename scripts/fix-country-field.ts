@@ -200,7 +200,7 @@ async function fixCountryField(dryRun: boolean = false) {
 
   try {
     // Fetch all records
-    console.log('📥 Fetching all records from sage-glamping-data...');
+    console.log('📥 Fetching all records from all_glamping_properties...');
     
     let allData: Array<{
       id: number;
@@ -217,7 +217,7 @@ async function fixCountryField(dryRun: boolean = false) {
 
     while (hasMore) {
       const { data, error, count } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, country, state, lat, lon', { count: 'exact' })
         .range(offset, offset + batchSize - 1);
 
@@ -328,7 +328,7 @@ async function fixCountryField(dryRun: boolean = false) {
     
     for (const record of recordsToFix) {
       const { error } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .update({ country: record.new_country })
         .eq('id', record.id);
 
@@ -352,7 +352,7 @@ async function fixCountryField(dryRun: boolean = false) {
     // Verify the fix
     console.log('\n🔍 Verifying fix...');
     const { data: verifyData, error: verifyError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id, country')
       .or('country.is.null,country.eq.,country.eq.78620');
 

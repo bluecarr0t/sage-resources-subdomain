@@ -6,7 +6,7 @@
  * - Fetches content from multiple article URLs about California glamping
  * - Uses OpenAI API to extract glamping property information from each article
  * - Compares against existing CSV file
- * - Checks against sage-glamping-data database for duplicates
+ * - Checks against all_glamping_properties database for duplicates
  * - Uses OpenAI to enrich property data with detailed information
  * - Appends new unique properties to CSV file
  * 
@@ -67,7 +67,7 @@ const ARTICLE_URLS = [
 ];
 
 const CSV_FILE = 'csv/glamping-com-north-america-missing-properties.csv';
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 // Initialize clients
 const supabase = createClient(supabaseUrl, secretKey, {

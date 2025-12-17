@@ -117,7 +117,7 @@ def fetch_google_data_from_supabase(supabase):
     ]
     
     try:
-        result = supabase.table('sage-glamping-data').select(','.join(google_fields)).execute()
+        result = supabase.table('all_glamping_properties').select(','.join(google_fields)).execute()
         print(f"  Fetched {len(result.data)} properties with Google data")
         return result.data
     except Exception as e:

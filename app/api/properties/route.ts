@@ -93,7 +93,7 @@ async function fetchPropertiesFromDatabase(
   
   // Start query - apply filters BEFORE limit for better performance
   // Filter to only show glamping properties FIRST (uses index)
-  let query = supabase.from('sage-glamping-data')
+  let query = supabase.from('all_glamping_properties')
     .select('*')
     .eq('is_glamping_property', 'Yes');
 

@@ -72,7 +72,7 @@ async function findMissingProperty() {
     console.log('📥 Fetching records (matching map query with limit 5000)...');
     
     const { data: allData, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('*')
       .limit(5000);
 

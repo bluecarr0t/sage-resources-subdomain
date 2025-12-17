@@ -31,7 +31,7 @@ export async function getUniquePropertyNames(): Promise<string[]> {
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name');
 
     if (error) {
@@ -66,7 +66,7 @@ export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
     // Get unique property names first, then get one slug per unique property
     // This ensures we only get 513 slugs (one per unique property) not 1,266 (one per record)
     const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name, slug')
       .not('property_name', 'is', null)
       .not('slug', 'is', null)
@@ -109,7 +109,7 @@ export async function getPropertiesByName(propertyName: string): Promise<SagePro
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('*')
       .eq('property_name', propertyName.trim());
 
@@ -134,7 +134,7 @@ export async function getPropertiesBySlug(slug: string): Promise<SageProperty[]>
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('*')
       .eq('slug', slug.trim());
 
@@ -159,7 +159,7 @@ export async function getPropertyNameToSlugMap(): Promise<Map<string, string>> {
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name, slug')
       .not('property_name', 'is', null)
       .not('slug', 'is', null)
@@ -233,7 +233,7 @@ export async function getNearbyProperties(
       // Only fetch necessary fields to reduce response size
       // This prevents JSON parsing errors with very large responses
       const { data: properties, error } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('slug, property_name, lat, lon, city, state, country, unit_type, rate_range, website, phone_number, image_url')
         .not('lat', 'is', null)
         .not('lon', 'is', null)

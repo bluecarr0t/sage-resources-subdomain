@@ -1,5 +1,5 @@
 /**
- * Script to delete properties from sage-glamping-data table based on a CSV file
+ * Script to delete properties from all_glamping_properties table based on a CSV file
  * 
  * Usage:
  *   npx tsx scripts/delete-properties-from-csv.ts <path-to-csv-file>
@@ -27,7 +27,7 @@ if (!supabaseUrl || !secretKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 interface CSVRow {
   [key: string]: string;

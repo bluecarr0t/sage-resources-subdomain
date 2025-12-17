@@ -1,5 +1,5 @@
 /**
- * Count unique property names in sage-glamping-data table
+ * Count unique property names in all_glamping_properties table
  * 
  * Run with: npx tsx scripts/count-unique-property-names.ts
  */
@@ -29,11 +29,11 @@ const supabase = createClient(supabaseUrl, secretKey, {
 });
 
 async function countUniquePropertyNames() {
-  console.log('🔍 Counting unique property names in sage-glamping-data...\n');
+  console.log('🔍 Counting unique property names in all_glamping_properties...\n');
 
   try {
     // Fetch all records with property_name
-    console.log('📥 Fetching all records from sage-glamping-data...');
+    console.log('📥 Fetching all records from all_glamping_properties...');
     
     let allData: Array<{
       property_name: string | null;
@@ -45,7 +45,7 @@ async function countUniquePropertyNames() {
 
     while (hasMore) {
       const { data, error, count } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('property_name', { count: 'exact' })
         .range(offset, offset + batchSize - 1);
 

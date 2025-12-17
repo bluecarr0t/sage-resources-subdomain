@@ -22,7 +22,7 @@ if (!supabaseUrl || !secretKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 async function clearTable() {
   console.log(`🔌 Connecting to Supabase...`);
@@ -79,6 +79,7 @@ async function main() {
 }
 
 main();
+
 
 
 

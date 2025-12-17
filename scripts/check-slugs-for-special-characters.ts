@@ -44,7 +44,7 @@ async function checkSlugsForSpecialCharacters() {
   try {
     // Fetch all slugs
     const { data: properties, error } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('property_name, slug')
       .not('slug', 'is', null)
       .neq('slug', '')

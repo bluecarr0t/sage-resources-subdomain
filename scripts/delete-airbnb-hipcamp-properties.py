@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Delete properties from sage-glamping-data that have Airbnb or Hipcamp in their website URLs.
+Delete properties from all_glamping_properties that have Airbnb or Hipcamp in their website URLs.
 Only keeps professional glamping resorts with their own websites.
 """
 
@@ -41,7 +41,7 @@ def find_properties_to_delete(supabase_url, supabase_key):
     
     # Search for properties with Airbnb or Hipcamp in URL or Google Website URI
     # Using ilike for case-insensitive search
-    url = f"{supabase_url}/rest/v1/sage-glamping-data"
+    url = f"{supabase_url}/rest/v1/all_glamping_properties"
     
     # Get all records and filter in Python (Supabase OR filter syntax can be tricky)
     params = {
@@ -85,7 +85,7 @@ def delete_properties(supabase_url, supabase_key, property_ids):
         # Build filter for this batch
         id_filter = ','.join(str(id) for id in batch_ids)
         
-        url = f"{supabase_url}/rest/v1/sage-glamping-data"
+        url = f"{supabase_url}/rest/v1/all_glamping_properties"
         params = {
             'id': f'in.({id_filter})'
         }

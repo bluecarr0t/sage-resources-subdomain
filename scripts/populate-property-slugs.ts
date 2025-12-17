@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 
 /**
- * Populate slug column in sage-glamping-data table
+ * Populate slug column in all_glamping_properties table
  * This script generates URL-safe slugs from property_name
  * All records with the same property_name get the same slug
  * Handles duplicate slugs by appending numbers
@@ -40,9 +40,9 @@ async function populatePropertySlugs() {
 
   try {
     // Fetch all records with property_name
-    console.log('Fetching data from sage-glamping-data...');
+    console.log('Fetching data from all_glamping_properties...');
     const { data: allRecords, error: fetchError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('id, property_name')
       .not('property_name', 'is', null)
       .limit(10000);
@@ -52,7 +52,7 @@ async function populatePropertySlugs() {
     }
 
     if (!allRecords || allRecords.length === 0) {
-      console.log('No records found in sage-glamping-data table.');
+      console.log('No records found in all_glamping_properties table.');
       return;
     }
 
@@ -171,7 +171,7 @@ async function populatePropertySlugs() {
         // Update each record individually (Supabase doesn't support bulk update by IDs easily)
         for (const id of batch) {
           const { error: updateError } = await supabase
-            .from('sage-glamping-data')
+            .from('all_glamping_properties')
             .update({ slug })
             .eq('id', id);
 
@@ -211,7 +211,7 @@ async function populatePropertySlugs() {
     // Verify no duplicates remain
     console.log('\n🔍 Verifying slug uniqueness...');
     const { data: verifyData, error: verifyError } = await supabase
-      .from('sage-glamping-data')
+      .from('all_glamping_properties')
       .select('slug, property_name')
       .not('slug', 'is', null)
       .limit(10000);

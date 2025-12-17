@@ -65,7 +65,7 @@ async function normalizeColumns() {
 
     while (hasMore) {
       const { data, error } = await supabase
-        .from('sage-glamping-data')
+        .from('all_glamping_properties')
         .select('id, property_name, pool, hot_tub___sauna')
         .range(offset, offset + batchSize - 1);
 
@@ -111,7 +111,7 @@ async function normalizeColumns() {
 
         // Update the record
         const { error: updateError } = await supabase
-          .from('sage-glamping-data')
+          .from('all_glamping_properties')
           .update(updateData)
           .eq('id', record.id);
 

@@ -1,5 +1,5 @@
 /**
- * Script to delete multiple properties from sage-glamping-data table
+ * Script to delete multiple properties from all_glamping_properties table
  * 
  * Usage:
  *   npx tsx scripts/delete-multiple-properties.ts
@@ -24,7 +24,7 @@ if (!supabaseUrl || !secretKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'sage-glamping-data';
+const TABLE_NAME = 'all_glamping_properties';
 
 // Properties to delete
 const PROPERTIES_TO_DELETE = [
