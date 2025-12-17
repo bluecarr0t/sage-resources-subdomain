@@ -25,10 +25,9 @@ export function getAvailableLocalesForContent(contentType: ContentType): Locale[
       return [...locales];
     
     case 'guide':
-      // Guides now have translations for priority guides in all locales (es, fr, de)
-      // Generate pages for all locales - translations exist for complete guides
-      // Note: Some guides may only have partial translations and will fall back to English sections
-      return [...locales];
+      // Temporarily disable multi-language guide pages due to build errors
+      // Only generate English guide pages until the Supabase issue is resolved
+      return ['en'];
     
     case 'glossary':
       // Glossary terms now have translations for priority terms in all locales (es, fr, de)
