@@ -82,6 +82,12 @@ export const supabase = new Proxy({} as SupabaseClient, {
 export function createServerClient(): SupabaseClient {
   const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 
+  if (!supabaseUrl) {
+    throw new Error(
+      'Missing NEXT_PUBLIC_SUPABASE_URL environment variable. This is required for server-side operations.'
+    );
+  }
+
   if (!supabaseSecretKey) {
     throw new Error(
       'Missing SUPABASE_SECRET_KEY environment variable. This is required for server-side operations.'
