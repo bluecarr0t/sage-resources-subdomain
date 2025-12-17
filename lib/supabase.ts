@@ -53,6 +53,9 @@ let _supabaseClient: SupabaseClient | null = null;
  * During build, we should never load the Supabase library to avoid initialization errors
  */
 function isBuildContext(): boolean {
+  // Always return true if we're server-side during build/static generation
+  // This prevents any Supabase library execution during build
+  
   // Check for Next.js build phase (most reliable indicator)
   if (process.env.NEXT_PHASE === 'phase-production-build') {
     return true;
@@ -61,24 +64,22 @@ function isBuildContext(): boolean {
   if (process.env.NEXT_PHASE === 'phase-export') {
     return true;
   }
-  // Check if we're in Vercel build environment
-  if (process.env.VERCEL === '1' && process.env.CI === '1') {
-    // During Vercel builds, we're in CI and building
-    // If we're server-side, assume build context (static generation happens server-side)
-    if (typeof window === 'undefined') {
+  
+  // If we're server-side (no window), we're either building or doing SSR
+  // During build, we should always use mock to prevent library execution
+  // During runtime SSR, credentials should be available, so this check is safe
+  if (typeof window === 'undefined') {
+    // If we're in Vercel CI/build environment, definitely building
+    if (process.env.VERCEL === '1') {
+      return true;
+    }
+    // If we don't have valid credentials, assume build context
+    // (during runtime SSR, credentials should be available)
+    if (!hasValidCredentials) {
       return true;
     }
   }
-  // If we're server-side and don't have valid credentials, assume build context
-  // This is a fallback - during actual runtime SSR, credentials should be available
-  if (typeof window === 'undefined' && !hasValidCredentials) {
-    return true;
-  }
-  // During Next.js build, if we're server-side and NEXT_PHASE is not set,
-  // but we're in production mode, assume we're building
-  if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && !hasValidCredentials) {
-    return true;
-  }
+  
   return false;
 }
 
@@ -140,21 +141,23 @@ function createMockQueryBuilder() {
   ];
   
   // Create a thenable object that can be chained and awaited
-  const builder: any = {
-    // Make it thenable so it can be awaited
-    then: (onResolve: any, onReject?: any) => {
-      const result = Promise.resolve({ data: [], error: null });
-      return result.then(onResolve, onReject);
-    },
-    // Support catch for error handling
-    catch: (onReject: any) => {
-      return Promise.resolve({ data: [], error: null }).catch(onReject);
-    }
+  // The builder must be a single instance that all methods return
+  const builder: any = {};
+  
+  // Make it thenable so it can be awaited
+  builder.then = function(onResolve: any, onReject?: any) {
+    const result = Promise.resolve({ data: [], error: null });
+    return result.then(onResolve, onReject);
+  };
+  
+  // Support catch for error handling
+  builder.catch = function(onReject: any) {
+    return Promise.resolve({ data: [], error: null }).catch(onReject);
   };
   
   // Create chainable methods that return the builder itself
   chainableMethods.forEach(method => {
-    builder[method] = (...args: any[]) => {
+    builder[method] = function(...args: any[]) {
       // All methods return the builder for chaining
       return builder;
     };
@@ -231,22 +234,32 @@ export const supabase = new Proxy({} as SupabaseClient, {
 export function createServerClient(): SupabaseClient {
   // During build time, ALWAYS return mock client to prevent Supabase library execution
   // Never call require('@supabase/supabase-js') during build, even if credentials are valid
-  if (isBuildContext()) {
+  const isBuild = isBuildContext();
+  if (isBuild) {
     return createMockClient();
   }
 
   const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseSecretKey) {
+    // During build, return mock instead of throwing
+    if (isBuild) {
+      return createMockClient();
+    }
     throw new Error(
       'Missing SUPABASE_SECRET_KEY environment variable. This is required for server-side operations.'
     );
   }
 
+  // Double-check we're not in build context before requiring
+  // This prevents webpack from bundling the module during build
+  if (isBuildContext()) {
+    return createMockClient();
+  }
+
   try {
-    // Use dynamic import for server-side to prevent webpack bundling during build
-    // Note: This needs to be synchronous for server-side usage, so we use require
-    // but only if we're not in build context (checked above)
+    // Use require for synchronous server-side usage
+    // This should only execute at runtime, not during build
     const supabaseModule = require('@supabase/supabase-js');
     return supabaseModule.createClient(supabaseUrl, supabaseSecretKey, {
       auth: {
