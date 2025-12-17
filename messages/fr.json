@@ -828,8 +828,9 @@
       "title": "Besoin d'Aide pour Votre Projet d'Hospitalité de Plein Air?",
       "description": "Nos experts ont réalisé plus de 350 études de faisabilité et évaluations. Obtenez des conseils personnalisés pour votre projet.",
       "button": "Planifier une Consultation Gratuite"
-    },
-    "feasibilityStudiesCompleteGuide": {
+    }
+  },
+  "feasibilityStudiesCompleteGuide": {
       "title": "Guide Complet des Études de Faisabilité | 2025 | Sage Outdoor Advisory",
       "metaDescription": "Guide complet des études de faisabilité pour les projets d'hospitalité de plein air. Découvrez ce que comprennent les études de faisabilité, leur fonctionnement, les délais et comment choisir un consultant. Lecture essentielle pour les promoteurs de glamping, de resorts pour camping-cars et de campings.",
       "hero": {
@@ -1045,8 +1046,9 @@
             "description": "Évaluations de campings professionnelles pour le financement et les décisions d'investissement."
           }
         ]
-      },
-    "glampingIndustryCompleteGuide": {
+      }
+    },
+  "glampingIndustryCompleteGuide": {
       "title": "Guide Complet de l'Industrie du Glamping | 2025 | Sage Outdoor Advisory",
       "metaDescription": "Guide complet de l'industrie du glamping. Découvrez les tendances du glamping, les modèles commerciaux, comment démarrer une entreprise de glamping, le financement, les réglementations et plus encore. Lecture essentielle pour les entrepreneurs et investisseurs en glamping.",
       "hero": {
@@ -1838,7 +1840,6 @@
         "description": "Planifiez une consultation pour discuter de votre projet de resort pour camping-cars",
         "buttonText": "Planifier une Consultation Gratuite"
       }
-    }
     }
   },
   "glossary": {
