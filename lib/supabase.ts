@@ -61,6 +61,15 @@ function isBuildContext(): boolean {
   if (process.env.NEXT_PHASE === 'phase-export') {
     return true;
   }
+  // Check if we're in Vercel build environment
+  if (process.env.VERCEL === '1' && process.env.CI === '1') {
+    // During Vercel builds, we're in CI and building
+    // But we need to distinguish between build and runtime
+    // If NEXT_PHASE is not set but we're in CI, check if we're server-side without credentials
+    if (typeof window === 'undefined' && !hasValidCredentials) {
+      return true;
+    }
+  }
   // If we're server-side and don't have valid credentials, assume build context
   // This is a fallback - during actual runtime SSR, credentials should be available
   if (typeof window === 'undefined' && !hasValidCredentials) {
@@ -92,16 +101,18 @@ function getSupabaseClient(): SupabaseClient {
       _supabaseClient = createMockClient();
     } else {
       // Only create real client in browser with valid credentials
-      try {
-        // Use Function constructor to prevent static analysis/bundling during build
-        // This ensures the require is truly dynamic and only executed at runtime
-        // Pass require as a parameter to ensure it's available in the function scope
-        const requireFn = typeof require !== 'undefined' ? require : (() => { throw new Error('require is not available'); });
-        const requireSupabase = new Function('require', 'moduleName', 'return require(moduleName)');
-        const supabaseModule = requireSupabase(requireFn, '@supabase/supabase-js');
-        _supabaseClient = supabaseModule.createClient(supabaseUrl, supabasePublishableKey);
-      } catch (error) {
-        console.warn('Failed to create Supabase client:', error);
+      // Double-check we're not in build context before requiring
+      if (!isBuildContext() && typeof window !== 'undefined') {
+        try {
+          // Use require for synchronous loading in browser
+          // This should only execute at runtime, not during build
+          const supabaseModule = require('@supabase/supabase-js');
+          _supabaseClient = supabaseModule.createClient(supabaseUrl, supabasePublishableKey);
+        } catch (error) {
+          console.warn('Failed to create Supabase client:', error);
+          _supabaseClient = createMockClient();
+        }
+      } else {
         _supabaseClient = createMockClient();
       }
     }
@@ -109,6 +120,36 @@ function getSupabaseClient(): SupabaseClient {
   
   // Always return a client (never null)
   return _supabaseClient || createMockClient();
+}
+
+/**
+ * Creates a mock query builder that supports chaining methods
+ * Returns empty data during build time to prevent errors
+ */
+function createMockQueryBuilder() {
+  const chainableMethods = [
+    'select', 'insert', 'update', 'delete', 'upsert',
+    'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'is', 'in', 'contains', 'containedBy', 'rangeGt', 'rangeGte', 'rangeLt', 'rangeLte', 'rangeAdjacent', 'overlaps', 'textSearch', 'match',
+    'not', 'or', 'filter',
+    'order', 'limit', 'range', 'abortSignal', 'single', 'maybeSingle', 'csv', 'geojson', 'explain',
+    'returns'
+  ];
+  
+  const builder: any = {};
+  
+  // Create chainable methods that return the builder itself
+  chainableMethods.forEach(method => {
+    builder[method] = (...args: any[]) => {
+      // If this is a terminal method (select, insert, update, delete, upsert), return a promise
+      if (['select', 'insert', 'update', 'delete', 'upsert'].includes(method)) {
+        return Promise.resolve({ data: [], error: null });
+      }
+      // Otherwise, return builder for chaining
+      return builder;
+    };
+  });
+  
+  return builder;
 }
 
 /**
@@ -124,13 +165,7 @@ function createMockClient(): SupabaseClient {
       signInWithPassword: async () => ({ data: { user: null, session: null }, error: null }),
       signUp: async () => ({ data: { user: null, session: null }, error: null }),
     },
-    from: () => ({
-      select: () => Promise.resolve({ data: null, error: null }),
-      insert: () => Promise.resolve({ data: null, error: null }),
-      update: () => Promise.resolve({ data: null, error: null }),
-      delete: () => Promise.resolve({ data: null, error: null }),
-      upsert: () => Promise.resolve({ data: null, error: null }),
-    }),
+    from: () => createMockQueryBuilder(),
     storage: {
       from: () => ({
         upload: async () => ({ data: null, error: null }),
@@ -149,6 +184,12 @@ function createMockClient(): SupabaseClient {
 // This ensures the client is only created when actually accessed, not during module initialization
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
+    // During build, always return mock client properties to prevent any Supabase library execution
+    if (isBuildContext()) {
+      const mockClient = createMockClient();
+      return mockClient[prop as keyof SupabaseClient];
+    }
+    
     try {
       const client = getSupabaseClient();
       // Always return a value from the client, even if it's undefined
@@ -192,12 +233,10 @@ export function createServerClient(): SupabaseClient {
   }
 
   try {
-    // Use Function constructor to prevent static analysis/bundling during build
-    // This ensures the require is truly dynamic and only executed at runtime
-    // Pass require as a parameter to ensure it's available in the function scope
-    const requireFn = typeof require !== 'undefined' ? require : (() => { throw new Error('require is not available'); });
-    const requireSupabase = new Function('require', 'moduleName', 'return require(moduleName)');
-    const supabaseModule = requireSupabase(requireFn, '@supabase/supabase-js');
+    // Use dynamic import for server-side to prevent webpack bundling during build
+    // Note: This needs to be synchronous for server-side usage, so we use require
+    // but only if we're not in build context (checked above)
+    const supabaseModule = require('@supabase/supabase-js');
     return supabaseModule.createClient(supabaseUrl, supabaseSecretKey, {
       auth: {
         persistSession: false,
