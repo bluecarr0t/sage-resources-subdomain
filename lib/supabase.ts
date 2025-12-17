@@ -64,15 +64,19 @@ function isBuildContext(): boolean {
   // Check if we're in Vercel build environment
   if (process.env.VERCEL === '1' && process.env.CI === '1') {
     // During Vercel builds, we're in CI and building
-    // But we need to distinguish between build and runtime
-    // If NEXT_PHASE is not set but we're in CI, check if we're server-side without credentials
-    if (typeof window === 'undefined' && !hasValidCredentials) {
+    // If we're server-side, assume build context (static generation happens server-side)
+    if (typeof window === 'undefined') {
       return true;
     }
   }
   // If we're server-side and don't have valid credentials, assume build context
   // This is a fallback - during actual runtime SSR, credentials should be available
   if (typeof window === 'undefined' && !hasValidCredentials) {
+    return true;
+  }
+  // During Next.js build, if we're server-side and NEXT_PHASE is not set,
+  // but we're in production mode, assume we're building
+  if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && !hasValidCredentials) {
     return true;
   }
   return false;
@@ -135,16 +139,23 @@ function createMockQueryBuilder() {
     'returns'
   ];
   
-  const builder: any = {};
+  // Create a thenable object that can be chained and awaited
+  const builder: any = {
+    // Make it thenable so it can be awaited
+    then: (onResolve: any, onReject?: any) => {
+      const result = Promise.resolve({ data: [], error: null });
+      return result.then(onResolve, onReject);
+    },
+    // Support catch for error handling
+    catch: (onReject: any) => {
+      return Promise.resolve({ data: [], error: null }).catch(onReject);
+    }
+  };
   
   // Create chainable methods that return the builder itself
   chainableMethods.forEach(method => {
     builder[method] = (...args: any[]) => {
-      // If this is a terminal method (select, insert, update, delete, upsert), return a promise
-      if (['select', 'insert', 'update', 'delete', 'upsert'].includes(method)) {
-        return Promise.resolve({ data: [], error: null });
-      }
-      // Otherwise, return builder for chaining
+      // All methods return the builder for chaining
       return builder;
     };
   });
