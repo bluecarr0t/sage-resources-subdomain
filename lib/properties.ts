@@ -41,7 +41,7 @@ export async function getUniquePropertyNames(): Promise<string[]> {
 
     // Get unique property names (non-null, non-empty, trimmed)
     const uniqueNames = new Set<string>();
-    properties?.forEach((prop) => {
+    properties?.forEach((prop: { property_name?: string | null }) => {
       if (prop.property_name && prop.property_name.trim()) {
         uniqueNames.add(prop.property_name.trim());
       }
@@ -79,7 +79,7 @@ export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
 
     // Map: property_name -> slug (ensures one slug per unique property name)
     const propertyNameToSlug = new Map<string, string>();
-    properties?.forEach((prop) => {
+    properties?.forEach((prop: { property_name?: string | null; slug?: string | null }) => {
       const propertyName = prop.property_name?.trim();
       const slug = prop.slug?.trim();
       if (propertyName && slug) {
