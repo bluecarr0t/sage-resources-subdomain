@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { getAllGuideSlugs, getGuideSync, getGuidesByCategory } from "@/lib/guides";
 import { getAllGlossaryTerms } from "@/lib/glossary/index";
 import { getAllLandingPageSlugs, getLandingPageSync } from "@/lib/landing-pages";
-import { generateOrganizationSchema, generateItemListSchemaWithUrls } from "@/lib/schema";
+import { generateOrganizationSchema, generateItemListSchemaWithUrls, generateFAQSchema, type FAQItem } from "@/lib/schema";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
 import { GoogleMapsProvider } from "@/components/GoogleMapsProvider";
@@ -68,11 +68,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     
     return {
       title: "Find Glamping Near You | 600+ Properties Across North America | Sage Outdoor Advisory",
-      description: "Discover 600+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
+      description: "Discover 600+ glamping properties across North America. Expert guides on feasibility studies, appraisals, and 57+ industry terms. Your complete resource for outdoor hospitality insights and property discovery.",
       keywords: "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business",
       openGraph: {
         title: "Find Glamping Near You | 600+ Properties Across North America | Sage Outdoor Advisory",
-        description: "Discover 600+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
+        description: "Discover 600+ glamping properties across North America. Expert guides on feasibility studies, appraisals, and 57+ industry terms. Your complete resource for outdoor hospitality insights and property discovery.",
         url,
         siteName: "Sage Outdoor Advisory",
         locale: openGraphLocale,
@@ -89,7 +89,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       twitter: {
         card: "summary_large_image",
         title: "Find Glamping Near You | 600+ Properties Across North America",
-        description: "Discover 600+ unique glamping properties near you. Search by location across the US and Canada. Find your perfect outdoor adventure today.",
+        description: "Discover 600+ glamping properties across North America. Expert guides on feasibility studies, appraisals, and 57+ industry terms. Your complete resource for outdoor hospitality insights and property discovery.",
         images: ["https://sageoutdooradvisory.com/og-image.jpg"],
       },
       alternates: {
@@ -180,6 +180,34 @@ export default async function HomePage({ params }: PageProps) {
       featuredLandingPages = [];
     }
 
+    // Homepage FAQs
+    const homepageFAQs: FAQItem[] = [
+      {
+        question: "What is a glamping feasibility study?",
+        answer: "A glamping feasibility study evaluates whether a proposed glamping property will be financially viable and operationally successful. It includes market analysis, financial projections, site assessment, and competitive analysis to help investors make informed decisions about their outdoor hospitality investment."
+      },
+      {
+        question: "How do I find glamping properties near me?",
+        answer: "Use our interactive map to search for glamping properties by location. We have 600+ verified properties across the United States and Canada. You can filter by location, property type, amenities, and price range to find the perfect glamping destination for your outdoor adventure."
+      },
+      {
+        question: "What's the difference between glamping and camping?",
+        answer: "Glamping (glamorous camping) combines the outdoor experience of camping with the comfort and amenities of a hotel. Unlike traditional camping, glamping accommodations typically include comfortable beds, electricity, heating, and often private bathrooms and kitchens. It offers nature immersion without sacrificing modern conveniences."
+      },
+      {
+        question: "How much does a glamping feasibility study cost?",
+        answer: "Glamping feasibility studies typically cost between $5,000 and $15,000, depending on the scope, property size, and complexity. Factors include market research depth, financial modeling requirements, and site assessment needs. More comprehensive studies with detailed analysis may cost $20,000 or more."
+      },
+      {
+        question: "What should I look for in a glamping property?",
+        answer: "Key factors include location and accessibility, unique accommodation types, quality amenities (wifi, bathrooms, kitchen facilities), safety features, and proximity to attractions. Our database includes detailed information on 600+ properties including ratings, amenities, and pricing to help you compare options."
+      },
+      {
+        question: "Are glamping properties profitable?",
+        answer: "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve 60-80% occupancy rates with strong seasonal demand."
+      }
+    ];
+
     // Generate schema markup
     const organizationSchema = generateOrganizationSchema();
     // Generate ItemList with URLs for carousel eligibility
@@ -192,6 +220,8 @@ export default async function HomePage({ params }: PageProps) {
         })),
       "Featured Guides"
     );
+    // Generate FAQPage schema
+    const faqSchema = generateFAQSchema(homepageFAQs);
 
     return (
     <>
@@ -203,6 +233,10 @@ export default async function HomePage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(guidesListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
       <GoogleMapsProvider>
@@ -477,6 +511,32 @@ export default async function HomePage({ params }: PageProps) {
             >
               Schedule Free Consultation
             </Link>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-16 bg-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-xl text-gray-600">
+                Common questions about glamping properties, feasibility studies, and outdoor hospitality
+              </p>
+            </div>
+            <div className="space-y-6">
+              {homepageFAQs.map((faq, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:border-[#00b6a6] transition-colors">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    {faq.question}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
