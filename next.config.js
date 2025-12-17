@@ -6,10 +6,6 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 const nextConfig = {
   reactStrictMode: true,
   
-  // Prevent Supabase from being bundled during server-side builds
-  // This ensures the library is only loaded at runtime, not during static generation
-  serverExternalPackages: ['@supabase/supabase-js'],
-  
   // Experimental features for faster builds
   experimental: {
     // Optimize package imports to reduce bundle size
@@ -40,11 +36,22 @@ const nextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
     };
+    
+    // Completely replace @supabase/supabase-js with an empty module during server-side builds
+    // This prevents the library from being bundled or executed during static generation
+    if (isServer) {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /@supabase\/supabase-js/,
+          require.resolve('./lib/supabase-server-stub.js')
+        )
+      );
+    }
     
     return config;
   },
