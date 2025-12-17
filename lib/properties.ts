@@ -171,7 +171,7 @@ export async function getPropertyNameToSlugMap(): Promise<Map<string, string>> {
     }
 
     const map = new Map<string, string>();
-    properties?.forEach((prop) => {
+    properties?.forEach((prop: { property_name?: string | null; slug?: string | null }) => {
       if (prop.property_name && prop.slug) {
         const propertyName = prop.property_name.trim();
         const slug = prop.slug.trim();

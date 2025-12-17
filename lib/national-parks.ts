@@ -28,7 +28,7 @@ export async function getAllNationalParkSlugs(): Promise<Array<{ slug: string }>
     const uniqueSlugs = Array.from(new Set(
       (parks || [])
         .map((park: { slug?: string | null; name?: string | null }) => park.slug?.trim())
-        .filter((slug): slug is string => slug !== undefined && slug !== '')
+        .filter((slug: string | undefined): slug is string => slug !== undefined && slug !== '')
     ));
 
     return uniqueSlugs.sort().map((slug) => ({ slug }));
