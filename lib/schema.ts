@@ -644,6 +644,76 @@ export function generatePropertyLocalBusinessSchema(property: {
     "description": `Information about ${propertyName} glamping property`,
   };
   
+  // Helper function to normalize country to ISO 3166-1 alpha-2 code
+  const normalizeCountryCode = (country: string | null | undefined): string | undefined => {
+    if (!country) return undefined;
+    const countryUpper = country.toUpperCase().trim();
+    
+    // Map common country names/variations to ISO codes
+    const countryMap: Record<string, string> = {
+      'UNITED STATES': 'US',
+      'USA': 'US',
+      'UNITED STATES OF AMERICA': 'US',
+      'CANADA': 'CA',
+      'GERMANY': 'DE',
+      'DEUTSCHLAND': 'DE',
+      'MEXICO': 'MX',
+      'MÉXICO': 'MX',
+      'FRANCE': 'FR',
+      'SPAIN': 'ES',
+      'ESPAÑA': 'ES',
+    };
+    
+    // Check if already an ISO code (2 letters)
+    if (countryUpper.length === 2 && /^[A-Z]{2}$/.test(countryUpper)) {
+      return countryUpper;
+    }
+    
+    // Check country map
+    return countryMap[countryUpper] || countryUpper;
+  };
+  
+  // Helper function to get full country name for areaServed
+  const getCountryName = (country: string | null | undefined): string | undefined => {
+    if (!country) return undefined;
+    const countryUpper = country.toUpperCase().trim();
+    
+    const countryNameMap: Record<string, string> = {
+      'US': 'United States',
+      'USA': 'United States',
+      'UNITED STATES': 'United States',
+      'UNITED STATES OF AMERICA': 'United States',
+      'CA': 'Canada',
+      'CANADA': 'Canada',
+      'DE': 'Germany',
+      'GERMANY': 'Germany',
+      'DEUTSCHLAND': 'Germany',
+      'MX': 'Mexico',
+      'MEXICO': 'Mexico',
+      'MÉXICO': 'Mexico',
+      'FR': 'France',
+      'FRANCE': 'France',
+      'ES': 'Spain',
+      'SPAIN': 'Spain',
+      'ESPAÑA': 'Spain',
+    };
+    
+    // If it's already a full name, return it
+    if (countryNameMap[countryUpper]) {
+      return countryNameMap[countryUpper];
+    }
+    
+    // If it's an ISO code, convert to name
+    if (countryUpper.length === 2) {
+      return countryNameMap[countryUpper] || country;
+    }
+    
+    return country;
+  };
+  
+  const countryCode = normalizeCountryCode(property.country);
+  const countryName = getCountryName(property.country);
+  
   // Add address
   if (addressParts.length > 0) {
     schema.address = {
@@ -652,7 +722,15 @@ export function generatePropertyLocalBusinessSchema(property: {
       "addressLocality": property.city || undefined,
       "addressRegion": property.state || undefined,
       "postalCode": property.zip_code || undefined,
-      "addressCountry": property.country || undefined,
+      "addressCountry": countryCode || property.country || undefined, // Use ISO code when available
+    };
+  }
+  
+  // Add areaServed for country-specific geo-targeting (important for international SEO)
+  if (countryName) {
+    schema.areaServed = {
+      "@type": "Country",
+      "name": countryName
     };
   }
   

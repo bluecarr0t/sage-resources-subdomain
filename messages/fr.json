@@ -936,7 +936,8 @@
             "description": "Études de faisabilité de campings complètes avec analyse de marché et projections financières."
           }
         ]
-      },
+      }
+    },
     "propertyAppraisalsCompleteGuide": {
       "title": "Guide Complet des Évaluations Immobilières | 2025 | Sage Outdoor Advisory",
       "metaDescription": "Guide complet des évaluations immobilières pour l'hospitalité de plein air. Découvrez les méthodes d'évaluation, les délais et comment choisir un évaluateur pour les propriétés de glamping, de resorts pour camping-cars et de campings.",
@@ -1869,4 +1870,5 @@
     "pageNotFound": "Page Non Trouvée",
     "pageNotFoundDescription": "La page que vous recherchez n'existe pas."
   }
+}
 }
