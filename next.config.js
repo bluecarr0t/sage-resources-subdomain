@@ -35,23 +35,11 @@ const nextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  webpack: (config, { isServer, dev }) => {
+  webpack: (config, { isServer }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
     };
-    
-    // During build (not dev), prevent Supabase from being bundled
-    // This prevents the library from executing during static generation
-    if (!dev && isServer) {
-      const webpack = require('webpack');
-      config.plugins.push(
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^@supabase\/supabase-js$/,
-          contextRegExp: /lib\/supabase/,
-        })
-      );
-    }
     
     // Handle chunk loading errors gracefully
     if (!isServer) {
