@@ -56,20 +56,29 @@ function getSupabaseClient(): SupabaseClient {
     if (supabaseUrl && supabasePublishableKey) {
       _supabaseClient = createClient(supabaseUrl, supabasePublishableKey);
     } else {
-      // During build time, create a properly initialized client with placeholder values
-      // This ensures all properties (including 'auth') are properly initialized
-      // The client won't work for actual queries, but it won't crash during build
-      _supabaseClient = createClient(
-        'https://placeholder.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTIwMDAsImV4cCI6MTk2MDc2ODAwMH0.placeholder',
-        {
-          auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-            detectSessionInUrl: false,
-          },
-        }
-      );
+      // During build time (when env vars are missing), try to create a minimal client
+      // If this fails, we'll catch and return a mock
+      try {
+        _supabaseClient = createClient(
+          'https://placeholder.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTIwMDAsImV4cCI6MTk2MDc2ODAwMH0.placeholder',
+          {
+            auth: {
+              persistSession: false,
+              autoRefreshToken: false,
+              detectSessionInUrl: false,
+            },
+            global: {
+              headers: {},
+            },
+          }
+        );
+      } catch (error) {
+        // If client creation fails during build, return null
+        // The proxy will handle this case
+        console.warn('Failed to create Supabase client during build:', error);
+        return null as any;
+      }
     }
   }
   
@@ -77,30 +86,45 @@ function getSupabaseClient(): SupabaseClient {
 }
 
 // Create a proxy that validates on first property access
-// During build time, return a safe mock to prevent initialization errors
-const isBuildTime = typeof window === 'undefined' && !process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-export const supabase = isBuildTime
-  ? ({
-      auth: {
-        getSession: async () => ({ data: { session: null }, error: null }),
-        getUser: async () => ({ data: { user: null }, error: null }),
-        signOut: async () => ({ error: null }),
-        onAuthStateChange: () => ({ data: { subscription: null }, error: null }),
-      },
-      from: () => ({
-        select: () => Promise.resolve({ data: null, error: null }),
-        insert: () => Promise.resolve({ data: null, error: null }),
-        update: () => Promise.resolve({ data: null, error: null }),
-        delete: () => Promise.resolve({ data: null, error: null }),
-      }),
-    } as any as SupabaseClient)
-  : new Proxy({} as SupabaseClient, {
-      get(_target, prop) {
-        const client = getSupabaseClient();
-        return (client as any)[prop];
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    try {
+      const client = getSupabaseClient();
+      if (!client) {
+        // Return mock during build time if client creation failed
+        if (prop === 'auth') {
+          return {
+            getSession: async () => ({ data: { session: null }, error: null }),
+            getUser: async () => ({ data: { user: null }, error: null }),
+            signOut: async () => ({ error: null }),
+            onAuthStateChange: () => ({ data: { subscription: null }, error: null }),
+          };
+        }
+        if (prop === 'from') {
+          return () => ({
+            select: () => Promise.resolve({ data: null, error: null }),
+            insert: () => Promise.resolve({ data: null, error: null }),
+            update: () => Promise.resolve({ data: null, error: null }),
+            delete: () => Promise.resolve({ data: null, error: null }),
+          });
+        }
+        return undefined;
       }
-    }) as SupabaseClient;
+      return (client as any)[prop];
+    } catch (error) {
+      // If accessing the client fails, return a safe fallback
+      console.warn('Supabase client access failed:', error);
+      if (prop === 'auth') {
+        return {
+          getSession: async () => ({ data: { session: null }, error: null }),
+          getUser: async () => ({ data: { user: null }, error: null }),
+          signOut: async () => ({ error: null }),
+        };
+      }
+      return undefined;
+    }
+  }
+}) as SupabaseClient;
 
 /**
  * Server-side Supabase client
