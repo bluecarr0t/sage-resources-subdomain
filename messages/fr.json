@@ -1867,7 +1867,273 @@
       "description": "Nos experts peuvent vous aider à comprendre comment ces termes de l'industrie s'appliquent à votre projet d'hospitalité de plein air.",
       "button": "Planifier une Consultation Gratuite"
     },
-    "terms": {}
+    "terms": {
+      "feasibilityStudy": {
+        "term": "Étude de Faisabilité",
+        "definition": "Une analyse complète qui évalue la viabilité, le potentiel du marché et les perspectives financières d'un projet proposé d'hospitalité en plein air, tel qu'un resort de glamping, un parc pour camping-cars ou un camping.",
+        "extendedDefinition": "Une étude de faisabilité est un outil d'analyse commerciale critique utilisé dans l'industrie de l'hospitalité en plein air pour déterminer si un projet proposé est viable, rentable et mérite d'être poursuivi. Pour les projets d'hospitalité en plein air comme les resorts de glamping, les parcs pour camping-cars et les campings, une étude de faisabilité examine plusieurs facteurs incluant la demande du marché, le paysage concurrentiel, les projections financières, l'adéquation du site, les exigences réglementaires et l'évaluation des risques.\n\nL'étude inclut généralement une analyse de marché pour comprendre la demande et la concurrence, une modélisation financière pour projeter les revenus et les dépenses, une analyse du site pour évaluer l'adéquation de l'emplacement, et des recommandations stratégiques pour le développement. Les études de faisabilité sont essentielles pour obtenir un financement, car les banques et les prêteurs les exigent pour évaluer le risque et la viabilité du projet.\n\nSage Outdoor Advisory se spécialise dans la création d'études de faisabilité complètes et approuvées par les banques pour les projets d'hospitalité en plein air. Nos études fournissent aux investisseurs, développeurs et prêteurs l'analyse détaillée nécessaire pour prendre des décisions éclairées sur le développement du projet et le financement.",
+        "examples": [
+          "Un développeur planifiant un resort de glamping de 30 unités dans la région montagneuse du Colorado commande une étude de faisabilité. L'étude analyse les données touristiques locales montrant 2,3M de visiteurs annuels aux attractions proches, identifie 8 propriétés concurrentes avec une occupation moyenne de 78% et un ADR de 285$, projette une occupation de première année de 65% atteignant 82% d'ici l'année 3, estime des coûts de développement de 1,2M$ et prévoit des revenus de l'année 1 de 650K$ atteignant 1,1M$ d'ici l'année 5. L'étude conclut que le projet est viable avec un TRI de 18% et recommande de procéder, aidant à sécuriser un financement bancaire de 800K$ basé sur l'analyse complète."
+        ],
+        "useCases": [
+          "Obtenir un financement bancaire pour les projets de développement",
+          "Évaluer les opportunités d'investissement",
+          "Prendre des décisions de poursuivre/arrêter sur les projets",
+          "Comprendre le potentiel du marché avant l'achat"
+        ],
+        "seoKeywords": ["étude de faisabilité", "analyse de faisabilité", "faisabilité de projet", "faisabilité commerciale", "rapport de faisabilité"],
+        "faqs": [
+          {
+            "question": "Combien de temps prend une étude de faisabilité?",
+            "answer": "Nos études de faisabilité prennent généralement entre 4 à 8 semaines, selon la taille et la complexité de la propriété. Ce délai nous permet d'examiner en profondeur les données du marché, d'inspecter la propriété et de préparer un rapport détaillé et précis."
+          },
+          {
+            "question": "Qu'est-ce qui est inclus dans une étude de faisabilité?",
+            "answer": "Une étude de faisabilité inclut l'analyse de marché, l'évaluation concurrentielle, les projections financières, l'évaluation du site et les recommandations stratégiques."
+          },
+          {
+            "question": "Les banques acceptent-elles les études de faisabilité?",
+            "answer": "Oui, les banques et les prêteurs exigent des études de faisabilité professionnelles pour évaluer la viabilité et le risque du projet avant d'approuver le financement."
+          }
+        ]
+      },
+      "appraisal": {
+        "term": "Évaluation",
+        "definition": "Une évaluation professionnelle de la valeur d'une propriété effectuée par un évaluateur certifié, utilisée pour le financement, les ventes, l'assurance et les décisions d'investissement dans l'industrie de l'hospitalité en plein air.",
+        "extendedDefinition": "Une évaluation est une évaluation formelle et impartiale de la valeur marchande d'une propriété effectuée par un évaluateur licencié ou certifié. Dans l'industrie de l'hospitalité en plein air, les évaluations sont essentielles pour les resorts de glamping, les parcs pour camping-cars, les campings et autres propriétés d'hébergement en plein air.\n\nLes évaluateurs utilisent trois approches principales pour déterminer la valeur : l'approche de comparaison des ventes (comparaison avec des propriétés similaires vendues), l'approche du revenu (évaluation basée sur le potentiel de revenu) et l'approche des coûts (estimation du coût de remplacement). Pour les propriétés d'hospitalité en plein air, l'approche du revenu est souvent la plus pertinente car ce sont des actifs générateurs de revenus.\n\nLes évaluations sont requises pour le financement bancaire, les ventes de propriétés, le refinancement, les fins d'assurance et l'analyse d'investissement. Sage Outdoor Advisory fournit des évaluations spécialisées pour les propriétés d'hospitalité en plein air, comprenant les caractéristiques uniques et les méthodes d'évaluation requises pour ces types d'actifs.",
+        "examples": [
+          "Une évaluation de propriété de glamping pour le financement bancaire",
+          "Une évaluation de resort pour camping-cars à des fins de vente",
+          "Une évaluation de camping pour le refinancement"
+        ],
+        "useCases": [
+          "Obtenir des prêts bancaires et le financement",
+          "Ventes et acquisitions de propriétés",
+          "Refinancement de propriétés existantes",
+          "Évaluation pour assurance",
+          "Analyse d'investissement"
+        ],
+        "seoKeywords": ["évaluation de propriété", "évaluation immobilière", "évaluation commerciale", "valorisation", "valeur évaluée"],
+        "faqs": [
+          {
+            "question": "Combien de temps prend une évaluation?",
+            "answer": "Une évaluation complète de propriété prend généralement 2 à 4 semaines à compléter."
+          },
+          {
+            "question": "Pourquoi ai-je besoin d'un évaluateur spécialisé pour l'hospitalité en plein air?",
+            "answer": "Les propriétés d'hospitalité en plein air ont des caractéristiques uniques, des modèles de revenus et des dynamiques de marché qui nécessitent une expertise d'évaluation spécialisée."
+          }
+        ]
+      },
+      "glamping": {
+        "term": "Glamping",
+        "definition": "Un mot-valise de 'glamour' et 'camping', le glamping fait référence à des hébergements de plein air de luxe qui combinent l'expérience du camping avec le confort et les équipements d'un hôtel.",
+        "extendedDefinition": "Le glamping, abréviation de 'glamorous camping' (camping glamour), est une forme d'hospitalité en plein air qui fusionne le cadre naturel et l'aventure du camping avec le luxe, le confort et les équipements généralement trouvés dans les hôtels haut de gamme. Contrairement au camping traditionnel, les hébergements de glamping comportent de vrais lits, l'électricité, le chauffage et la climatisation, des salles de bain privées, et incluent souvent des équipements premium comme des jacuzzis, des cuisines gastronomiques et des services de conciergerie.\n\nLes hébergements de glamping courants incluent les tentes safari, les yourtes, les maisons dans les arbres, les remorques Airstream, les petites maisons, les tentes en toile et les pods de glamping. Ces structures sont généralement situées dans des emplacements pittoresques comme les montagnes, les forêts, les déserts ou près des parcs nationaux, offrant aux invités une expérience de plein air immersive sans sacrifier le confort.\n\nL'industrie du glamping a connu une croissance significative alors que les voyageurs recherchent des hébergements uniques et expérientiels qui les connectent à la nature tout en maintenant les commodités modernes. Le glamping attire une large démographie, des couples cherchant des escapades romantiques aux familles voulant des aventures en plein air avec confort.\n\nSage Outdoor Advisory fournit des études de faisabilité et des évaluations spécifiquement pour les propriétés de glamping, comprenant les dynamiques de marché uniques, les modèles de revenus et les méthodes d'évaluation requises pour ces hébergements spécialisés.",
+        "examples": [
+          "Une tente safari de luxe avec lit king et salle de bain privée dans un cadre montagneux",
+          "Un hébergement de glamping en maison dans les arbres avec jacuzzi et cuisine complète",
+          "Une expérience de glamping en yourte près d'un parc national"
+        ],
+        "useCases": [
+          "Développer des resorts de glamping",
+          "Ajouter des unités de glamping aux propriétés existantes",
+          "Convertir des terres pour l'utilisation du glamping",
+          "Évaluer les propriétés de glamping"
+        ],
+        "seoKeywords": ["glamping", "camping glamour", "camping de luxe", "resort de glamping", "hébergement de glamping"],
+        "faqs": [
+          {
+            "question": "Quelle est la différence entre le glamping et le camping?",
+            "answer": "Le glamping fournit des équipements et un confort de luxe (vrais lits, salles de bain, électricité) tandis que le camping est plus basique avec des tentes et des équipements minimaux."
+          },
+          {
+            "question": "Combien coûte le démarrage d'une entreprise de glamping?",
+            "answer": "Les coûts de démarrage varient considérablement selon l'emplacement, le nombre d'unités et les équipements. Une étude de faisabilité peut aider à déterminer les coûts spécifiques pour votre projet."
+          },
+          {
+            "question": "Le glamping est-il rentable?",
+            "answer": "Le glamping peut être très rentable avec une planification appropriée, une sélection d'emplacement et une analyse de marché. Nos études de faisabilité aident à évaluer le potentiel de rentabilité."
+          }
+        ]
+      },
+      "marketAnalysis": {
+        "term": "Analyse de Marché",
+        "definition": "Une évaluation complète des conditions du marché, de la demande, de la concurrence et des tendances qui informe les décisions commerciales pour les projets d'hospitalité en plein air.",
+        "extendedDefinition": "L'analyse de marché est un composant critique des études de faisabilité et de la planification commerciale pour les propriétés d'hospitalité en plein air. Elle implique l'examen du marché local et régional pour comprendre les modèles de demande, le paysage concurrentiel, les dynamiques de prix et les tendances de croissance.\n\nUne analyse de marché approfondie inclut la recherche démographique, l'analyse des données touristiques, l'évaluation des propriétés concurrentes, la prévision de la demande et l'identification des opportunités et menaces du marché. Pour les resorts de glamping, les parcs pour camping-cars et les campings, l'analyse de marché aide à déterminer s'il y a suffisamment de demande pour soutenir une propriété nouvelle ou agrandie.\n\nSage Outdoor Advisory mène des analyses de marché détaillées dans le cadre de nos études de faisabilité, fournissant aux clients des informations exploitables sur le potentiel du marché, le positionnement concurrentiel et les recommandations stratégiques pour le succès.",
+        "examples": [
+          "Analyser la demande d'hébergements de glamping dans une région montagneuse",
+          "Évaluer la concurrence des parcs pour camping-cars dans une destination touristique",
+          "Évaluer la saturation du marché des campings dans une zone de parc d'État"
+        ],
+        "useCases": [
+          "Études de faisabilité",
+          "Analyse d'investissement",
+          "Positionnement concurrentiel",
+          "Développement de stratégie de prix"
+        ],
+        "seoKeywords": ["analyse de marché", "recherche de marché", "évaluation de marché", "analyse de marché", "analyse de demande"],
+        "faqs": [
+          {
+            "question": "Qu'est-ce qui est inclus dans une analyse de marché?",
+            "answer": "L'analyse de marché inclut généralement la recherche démographique, l'évaluation concurrentielle, la prévision de la demande, l'analyse des prix et l'identification des opportunités du marché."
+          },
+          {
+            "question": "Combien de temps prend une analyse de marché?",
+            "answer": "L'analyse de marché est généralement complétée dans le cadre d'une étude de faisabilité complète, qui prend 4 à 6 semaines."
+          }
+        ]
+      },
+      "rvResort": {
+        "term": "Resort pour Camping-Cars",
+        "definition": "Un parc pour camping-cars haut de gamme offrant des équipements, services et installations premium pour les voyageurs de véhicules récréatifs, généralement avec connexions complètes et caractéristiques style resort.",
+        "extendedDefinition": "Un resort pour camping-cars est un parc pour camping-cars haut de gamme qui fournit des équipements et services premium au-delà du stationnement de base pour camping-cars. Les resorts pour camping-cars comportent généralement des connexions complètes (eau, égout, électricité), des emplacements pavés, un aménagement paysager premium et des équipements style resort comme des piscines, des clubhouses, des centres de fitness, des restaurants et des activités organisées.\n\nLes resorts pour camping-cars sont positionnés comme destinations plutôt que comme simples arrêts nocturnes, souvent situés dans des emplacements désirables près d'attractions, de plages ou de zones pittoresques. Ils commandent des tarifs plus élevés que les parcs pour camping-cars de base et attirent les voyageurs recherchant une expérience de camping-car plus luxueuse.\n\nSage Outdoor Advisory fournit des études de faisabilité et des évaluations pour les resorts pour camping-cars, comprenant le positionnement premium, les équipements et le potentiel de revenus de ces propriétés.",
+        "examples": [
+          "Un resort pour camping-cars de 200 emplacements avec piscine, clubhouse et restaurant",
+          "Un resort pour camping-cars en bord de mer avec équipements premium et activités"
+        ],
+        "useCases": [
+          "Développer des resorts pour camping-cars",
+          "Améliorer les parcs pour camping-cars au statut de resort",
+          "Évaluer les propriétés de resorts pour camping-cars"
+        ],
+        "seoKeywords": ["resort pour camping-cars", "parc pour camping-cars de luxe", "équipements de resort pour camping-cars", "parc pour camping-cars premium"],
+        "faqs": [
+          {
+            "question": "Quelle est la différence entre un resort pour camping-cars et un parc pour camping-cars?",
+            "answer": "Les resorts pour camping-cars offrent des équipements, services et caractéristiques style resort premium, tandis que les parcs pour camping-cars sont plus basiques avec des installations essentielles."
+          }
+        ]
+      },
+      "campground": {
+        "term": "Camping",
+        "definition": "Une installation en plein air fournissant des espaces pour le camping sous tente et parfois des camping-cars, généralement avec des équipements de base comme des toilettes, de l'eau et des foyers.",
+        "extendedDefinition": "Un camping est une installation en plein air qui fournit des espaces désignés pour le camping sous tente et parfois des camping-cars. Les campings vont des emplacements primitifs avec installations minimales aux campings développés avec toilettes, douches, eau, connexions électriques et autres équipements.\n\nLes campings sont généralement situés dans des cadres naturels pittoresques comme les forêts, les montagnes ou près de lacs et de rivières. Ils attirent les campeurs recherchant une expérience de plein air authentique, souvent à des prix plus bas que le glamping ou les resorts pour camping-cars.\n\nSage Outdoor Advisory fournit des études de faisabilité et des évaluations pour les campings, comprenant la demande du marché, les exigences opérationnelles et le potentiel de revenus de ces propriétés d'hospitalité en plein air.",
+        "examples": [
+          "Un camping de 100 emplacements avec toilettes, douches et foyers",
+          "Un camping primitif avec installations minimales dans une forêt nationale"
+        ],
+        "useCases": [
+          "Développer de nouveaux campings",
+          "Agrandir les installations de camping",
+          "Évaluer les propriétés de camping"
+        ],
+        "seoKeywords": ["camping", "installation de camping", "camping sous tente", "développement de camping"],
+        "faqs": [
+          {
+            "question": "Quelle est la différence entre un camping et un parc pour camping-cars?",
+            "answer": "Les campings servent principalement les campeurs sous tente avec des équipements de base, tandis que les parcs pour camping-cars sont conçus pour les véhicules récréatifs avec connexions et installations spécifiques aux camping-cars."
+          }
+        ]
+      },
+      "adr": {
+        "term": "ADR (Tarif Journalier Moyen)",
+        "definition": "Le revenu moyen gagné par unité d'hébergement occupée par jour, calculé en divisant le revenu total des chambres par le nombre de chambres vendues.",
+        "extendedDefinition": "L'ADR, ou Tarif Journalier Moyen, est une métrique de performance clé dans l'industrie hôtelière, incluant les propriétés d'hospitalité en plein air comme les resorts de glamping, les parcs pour camping-cars et les campings. Il représente le revenu moyen généré par unité occupée par jour.\n\nL'ADR est calculé en divisant le revenu total des chambres par le nombre de chambres vendues (pas disponibles). Par exemple, si un resort de glamping a généré 10 000$ de revenus provenant de 20 unités occupées, l'ADR serait de 500$.\n\nL'ADR est crucial pour la gestion des revenus et la stratégie de tarification. Il aide les propriétaires de propriétés à comprendre leur efficacité de tarification, à comparer les performances aux concurrents et à optimiser les revenus. L'ADR peut varier considérablement selon la saisonnalité, l'emplacement, les équipements et les conditions du marché.\n\nDans l'hospitalité en plein air, l'ADR est souvent plus élevé pour les hébergements de glamping comparés aux campings traditionnels en raison du positionnement de luxe et des équipements. Comprendre les références ADR pour votre marché et type de propriété est essentiel pour la planification financière et l'analyse de faisabilité.\n\nSage Outdoor Advisory inclut l'analyse et les références ADR dans nos études de faisabilité, aidant les clients à comprendre les tarifs du marché et à optimiser les stratégies de tarification.",
+        "examples": [
+          "Un resort de glamping de 20 unités génère 180K$ de revenus mensuels de 600 nuits d'unités occupées (20 unités × 30 jours). ADR = 180K$ ÷ 600 = 300$ par nuit. Pendant la saison haute, les tarifs augmentent à 400$/nuit, tandis que les tarifs hors saison baissent à 200$/nuit, créant des variations saisonnières d'ADR."
+        ],
+        "useCases": [
+          "Développement de stratégie de tarification",
+          "Prévision des revenus",
+          "Analyse concurrentielle",
+          "Modélisation financière"
+        ],
+        "seoKeywords": ["ADR", "tarif journalier moyen", "tarif de chambre", "tarif journalier", "revenu par chambre"],
+        "faqs": [
+          {
+            "question": "Comment l'ADR est-il calculé?",
+            "answer": "ADR = Revenu Total des Chambres ÷ Nombre de Chambres Vendues. Il représente le revenu moyen par unité occupée par jour."
+          },
+          {
+            "question": "Quel est un bon ADR pour le glamping?",
+            "answer": "L'ADR varie selon l'emplacement et les équipements. Nos rapports de marché fournissent des références ADR par région et type de propriété."
+          },
+          {
+            "question": "Comment l'ADR se rapporte-t-il à la rentabilité?",
+            "answer": "L'ADR, combiné avec le taux d'occupation, détermine le RevPAR (Revenu par Chambre Disponible), qui impacte directement la rentabilité."
+          }
+        ]
+      },
+      "occupancyRate": {
+        "term": "Taux d'Occupation",
+        "definition": "Le pourcentage d'unités d'hébergement disponibles qui sont occupées pendant une période spécifique, calculé en divisant les unités occupées par les unités totales disponibles.",
+        "extendedDefinition": "Le taux d'occupation est une métrique de performance fondamentale dans l'industrie hôtelière, mesurant le pourcentage d'unités disponibles qui sont occupées pendant une période donnée. Il est calculé en divisant le nombre d'unités occupées par le nombre total d'unités disponibles, puis en multipliant par 100.\n\nPar exemple, si un resort de glamping a 20 unités et 16 sont occupées, le taux d'occupation est de 80%. Les taux d'occupation peuvent être mesurés quotidiennement, mensuellement ou annuellement, avec des taux annuels fournissant la vue la plus complète des performances.\n\nLe taux d'occupation est critique pour comprendre la demande, l'efficacité de la tarification et le potentiel de revenus. Des taux d'occupation élevés indiquent une forte demande mais peuvent suggérer que les prix sont trop bas. Des taux d'occupation faibles peuvent indiquer des problèmes de tarification, des défis de marketing ou une saturation du marché.\n\nDans l'hospitalité en plein air, les taux d'occupation varient souvent saisonnièrement. Par exemple, les propriétés près des parcs nationaux peuvent avoir une occupation de 90%+ en été mais 30% en hiver. Comprendre les modèles saisonniers est essentiel pour la planification financière et l'analyse de faisabilité.\n\nSage Outdoor Advisory inclut l'analyse et la prévision des taux d'occupation dans nos études de faisabilité, aidant les clients à comprendre les modèles de demande et à optimiser les stratégies de gestion des revenus.",
+        "examples": [
+          "Un resort de glamping de 25 unités fonctionne toute l'année. En janvier, 450 unités sont occupées sur 775 disponibles (25 unités × 31 jours), résultant en 58% d'occupation. Pendant les mois d'été de pointe (juin-août), l'occupation moyenne de 90% avec 2 090 occupées sur 2 325 unités disponibles."
+        ],
+        "useCases": [
+          "Prévision de la demande",
+          "Projections de revenus",
+          "Stratégie de tarification",
+          "Analyse de marché"
+        ],
+        "seoKeywords": ["taux d'occupation", "pourcentage d'occupation", "occupation des chambres", "métriques d'occupation"],
+        "faqs": [
+          {
+            "question": "Quel est un bon taux d'occupation?",
+            "answer": "Les taux d'occupation varient selon le type de propriété et l'emplacement. Généralement, 60-80% d'occupation annuelle est considéré comme sain pour les propriétés d'hospitalité en plein air."
+          },
+          {
+            "question": "Comment le taux d'occupation affecte-t-il les revenus?",
+            "answer": "Le taux d'occupation, combiné avec l'ADR, détermine le RevPAR (Revenu par Chambre Disponible), qui impacte directement les revenus totaux."
+          },
+          {
+            "question": "Comment améliorer le taux d'occupation?",
+            "answer": "Améliorer l'occupation peut impliquer des ajustements de tarification, des efforts de marketing, l'ajout d'équipements ou le ciblage de nouveaux segments de marché."
+          }
+        ]
+      },
+      "noi": {
+        "term": "NOI (Revenu d'Exploitation Net)",
+        "definition": "Le revenu généré d'une propriété après soustraction des dépenses d'exploitation mais avant déduction du service de la dette, des impôts et des dépenses en capital.",
+        "extendedDefinition": "Le Revenu d'Exploitation Net (NOI) est une métrique financière fondamentale pour les propriétés génératrices de revenus comme les resorts de glamping, les parcs pour camping-cars et les campings. Il représente la rentabilité de la propriété des opérations avant les coûts de financement et les impôts.\n\nLe NOI est calculé en soustrayant les dépenses d'exploitation des revenus d'exploitation bruts. Les dépenses d'exploitation incluent les services publics, la maintenance, l'assurance, la gestion de propriété, le marketing et d'autres coûts quotidiens, mais excluent le service de la dette, les impôts sur le revenu et les améliorations en capital.\n\nLe NOI est critique pour l'évaluation des propriétés, car il est utilisé dans l'approche du revenu pour déterminer la valeur de la propriété. Il est également utilisé pour calculer le taux de capitalisation (taux cap) et évaluer la capacité d'une propriété à servir la dette.\n\nSage Outdoor Advisory inclut les projections et analyses NOI dans nos études de faisabilité et évaluations, aidant les clients à comprendre la rentabilité et la valeur des propriétés.",
+        "examples": [
+          "Un resort de glamping génère 800K$ de revenus d'exploitation bruts des revenus des chambres. Les dépenses d'exploitation totalisent 500K$ incluant : services publics (95K$), maintenance de propriété (120K$), assurance (35K$), frais de gestion (120K$), marketing (40K$), coûts administratifs (25K$), impôts fonciers (35K$) et autres dépenses (30K$). NOI = 800K$ - 500K$ = 300K$."
+        ],
+        "useCases": [
+          "Évaluation des propriétés",
+          "Analyse d'investissement",
+          "Souscription de prêt",
+          "Planification financière"
+        ],
+        "seoKeywords": ["NOI", "revenu d'exploitation net", "revenu d'exploitation", "NOI de propriété"],
+        "faqs": [
+          {
+            "question": "Quelles dépenses sont incluses dans le NOI?",
+            "answer": "Le NOI inclut toutes les dépenses d'exploitation comme les services publics, la maintenance, l'assurance et la gestion, mais exclut le service de la dette, les impôts et les améliorations en capital."
+          },
+          {
+            "question": "Comment le NOI est-il utilisé dans l'évaluation des propriétés?",
+            "answer": "Le NOI est divisé par le taux de capitalisation pour déterminer la valeur de la propriété dans l'approche du revenu pour l'évaluation."
+          }
+        ]
+      },
+      "capRate": {
+        "term": "Taux de Capitalisation (Cap Rate)",
+        "definition": "Le taux de rendement d'un investissement immobilier basé sur les revenus attendus, calculé en divisant le revenu d'exploitation net par la valeur de la propriété.",
+        "extendedDefinition": "Le taux de capitalisation, ou cap rate, est une métrique clé utilisée pour évaluer et comparer les investissements immobiliers. Il est calculé en divisant le Revenu d'Exploitation Net (NOI) par la valeur de la propriété ou le prix d'achat.\n\nLes cap rates indiquent le taux de rendement attendu sur une propriété d'investissement, en supposant qu'elle est achetée en espèces (sans financement). Des cap rates plus élevés suggèrent des rendements plus élevés mais peuvent également indiquer un risque plus élevé. Des cap rates plus bas suggèrent des rendements plus bas mais peuvent indiquer des propriétés plus stables et désirables.\n\nPour les propriétés d'hospitalité en plein air, les cap rates varient selon le type de propriété, l'emplacement et les conditions du marché. Les resorts de glamping premium dans des emplacements désirables peuvent avoir des cap rates plus bas (5-7%), tandis que les campings de base peuvent avoir des cap rates plus élevés (8-12%).\n\nSage Outdoor Advisory utilise les cap rates dans nos évaluations et études de faisabilité pour aider les clients à comprendre les rendements d'investissement et les valeurs des propriétés.",
+        "examples": [
+          "Un parc pour camping-cars génère 300K$ de Revenu d'Exploitation Net. Les ventes comparables récentes et l'analyse de marché indiquent que la propriété devrait se négocier à un cap rate de 7,5% basé sur des propriétés similaires. Valeur de propriété = 300K$ ÷ 0,075 = 4M$."
+        ],
+        "useCases": [
+          "Évaluation des propriétés",
+          "Comparaison d'investissements",
+          "Analyse de rendement",
+          "Décisions d'achat"
+        ],
+        "seoKeywords": ["taux cap", "taux de capitalisation", "taux cap immobilier", "taux cap d'investissement"],
+        "faqs": [
+          {
+            "question": "Quel est un bon cap rate?",
+            "answer": "Les cap rates varient selon le type de propriété et le marché. Généralement, 6-10% est commun pour les propriétés d'hospitalité en plein air, avec les propriétés premium ayant des taux plus bas."
+          },
+          {
+            "question": "Comment le cap rate est-il calculé?",
+            "answer": "Cap Rate = Revenu d'Exploitation Net ÷ Valeur de Propriété (ou Prix d'Achat)."
+          }
+        ]
+      }
+    }
   },
   "errors": {
     "pageNotFound": "Page Non Trouvée",

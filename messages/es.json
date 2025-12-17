@@ -1607,7 +1607,277 @@
       "description": "Nuestros expertos pueden ayudarle a entender cómo estos términos de la industria se aplican a su proyecto de hospitalidad al aire libre.",
       "button": "Programar Consulta Gratuita"
     },
-    "terms": {}
+    "terms": {
+      "feasibilityStudy": {
+        "term": "Estudio de Viabilidad",
+        "definition": "Un análisis integral que evalúa la viabilidad, el potencial de mercado y las perspectivas financieras de un proyecto propuesto de hospitalidad al aire libre, como un resort de glamping, un parque para autocaravanas o un camping.",
+        "extendedDefinition": "Un estudio de viabilidad es una herramienta de análisis empresarial crítica utilizada en la industria de hospitalidad al aire libre para determinar si un proyecto propuesto es viable, rentable y vale la pena perseguir. Para proyectos de hospitalidad al aire libre como resorts de glamping, parques para autocaravanas y campings, un estudio de viabilidad examina múltiples factores que incluyen la demanda del mercado, el panorama competitivo, las proyecciones financieras, la idoneidad del sitio, los requisitos regulatorios y la evaluación de riesgos.\n\nEl estudio típicamente incluye análisis de mercado para entender la demanda y la competencia, modelado financiero para proyectar ingresos y gastos, análisis del sitio para evaluar la idoneidad de la ubicación, y recomendaciones estratégicas para el desarrollo. Los estudios de viabilidad son esenciales para obtener financiamiento, ya que los bancos y prestamistas los requieren para evaluar el riesgo y la viabilidad del proyecto.\n\nSage Outdoor Advisory se especializa en crear estudios de viabilidad integrales y aprobados por bancos para proyectos de hospitalidad al aire libre. Nuestros estudios proporcionan a inversores, desarrolladores y prestamistas el análisis detallado necesario para tomar decisiones informadas sobre el desarrollo del proyecto y el financiamiento.",
+        "examples": [
+          "Un desarrollador que planea un resort de glamping de 30 unidades en la región montañosa de Colorado encarga un estudio de viabilidad. El estudio analiza datos de turismo local que muestran 2.3M de visitantes anuales a atracciones cercanas, identifica 8 propiedades competidoras con ocupación promedio del 78% y ADR de $285, proyecta ocupación del 65% en el primer año creciendo al 82% para el año 3, estima costos de desarrollo de $1.2M, y pronostica ingresos del Año 1 de $650K creciendo a $1.1M para el Año 5. El estudio concluye que el proyecto es viable con un 18% de TIR y recomienda proceder, ayudando a asegurar financiamiento bancario de $800K basado en el análisis integral.",
+          "Un inversor que considera un parque para autocaravanas de 150 sitios cerca del Parque Nacional de las Grandes Montañas Humeantes necesita un estudio de viabilidad. El análisis examina la visita al parque nacional (12M+ anualmente), analiza 12 parques para autocaravanas competidores dentro de 15 millas mostrando fuerte demanda (ocupación promedio del 75%), evalúa requisitos locales de zonificación y servicios públicos ($850K de costos de desarrollo estimados), proyecta $920K de ingresos anuales al 70% de ocupación y tasa promedio de $60/noche, e identifica patrones estacionales con ocupación pico de verano al 95%. El estudio valida la fuerte demanda del mercado y proyecta flujo de efectivo positivo para el mes 8, apoyando la decisión de inversión y los requisitos del prestamista.",
+          "Un estudio de viabilidad de camping para una propiedad propuesta de 80 sitios evalúa patrones de demanda estacional analizando datos mensuales de visitantes de parques estatales cercanos, patrones climáticos que afectan la duración de la temporada de camping (marzo-octubre con pico junio-agosto), calendarios de eventos locales que impulsan la demanda de fin de semana, y análisis de precios competitivos. El estudio proyecta 55% de ocupación anual con picos de verano al 90% y temporadas intermedias al 40%, estima $380K de ingresos anuales, e identifica la necesidad de ingresos de almacenamiento invernal para compensar la ocupación de temporada baja."
+        ],
+        "useCases": [
+          "Obtener financiamiento bancario para proyectos de desarrollo",
+          "Evaluar oportunidades de inversión",
+          "Tomar decisiones de seguir/no seguir en proyectos",
+          "Comprender el potencial del mercado antes de la compra"
+        ],
+        "seoKeywords": ["estudio de viabilidad", "análisis de viabilidad", "viabilidad de proyecto", "viabilidad empresarial", "informe de viabilidad"],
+        "faqs": [
+          {
+            "question": "¿Cuánto tiempo toma un estudio de viabilidad?",
+            "answer": "Nuestros estudios de viabilidad generalmente toman entre 4 a 8 semanas, dependiendo del tamaño y la complejidad de la propiedad. Este período permite revisar exhaustivamente los datos del mercado, inspeccionar la propiedad y preparar un informe detallado y preciso. Para un cronograma más específico basado en su proyecto, por favor contacte a nuestro equipo—estamos felices de discutir sus necesidades de estudio de viabilidad."
+          },
+          {
+            "question": "¿Qué incluye un estudio de viabilidad?",
+            "answer": "Un estudio de viabilidad incluye análisis de mercado, evaluación competitiva, proyecciones financieras, evaluación del sitio y recomendaciones estratégicas."
+          },
+          {
+            "question": "¿Los bancos aceptan estudios de viabilidad?",
+            "answer": "Sí, los bancos y prestamistas requieren estudios de viabilidad profesionales para evaluar la viabilidad y el riesgo del proyecto antes de aprobar el financiamiento."
+          }
+        ]
+      },
+      "appraisal": {
+        "term": "Tasación",
+        "definition": "Una evaluación profesional del valor de una propiedad realizada por un tasador certificado, utilizada para financiamiento, ventas, seguros y decisiones de inversión en la industria de hospitalidad al aire libre.",
+        "extendedDefinition": "Una tasación es una evaluación formal e imparcial del valor de mercado de una propiedad realizada por un tasador licenciado o certificado. En la industria de hospitalidad al aire libre, las tasaciones son esenciales para resorts de glamping, parques para autocaravanas, campings y otras propiedades de alojamiento al aire libre.\n\nLos tasadores utilizan tres enfoques principales para determinar el valor: el enfoque de comparación de ventas (comparando con propiedades similares vendidas), el enfoque de ingresos (valorando basado en el potencial de ingresos), y el enfoque de costos (estimando el costo de reemplazo). Para propiedades de hospitalidad al aire libre, el enfoque de ingresos es a menudo el más relevante ya que estos son activos que generan ingresos.\n\nLas tasaciones son requeridas para financiamiento bancario, ventas de propiedades, refinanciamiento, propósitos de seguros y análisis de inversión. Sage Outdoor Advisory proporciona tasaciones especializadas para propiedades de hospitalidad al aire libre, entendiendo las características únicas y los métodos de valoración requeridos para estos tipos de activos.",
+        "examples": [
+          "Una tasación de propiedad de glamping para financiamiento bancario",
+          "Una tasación de resort para autocaravanas para propósitos de venta",
+          "Una tasación de camping para refinanciamiento"
+        ],
+        "useCases": [
+          "Obtener préstamos bancarios y financiamiento",
+          "Ventas y adquisiciones de propiedades",
+          "Refinanciamiento de propiedades existentes",
+          "Valoración para seguros",
+          "Análisis de inversión"
+        ],
+        "seoKeywords": ["tasación de propiedad", "tasación inmobiliaria", "tasación empresarial", "valoración", "valor tasado"],
+        "faqs": [
+          {
+            "question": "¿Cuánto tiempo toma una tasación?",
+            "answer": "Una tasación integral de propiedad típicamente toma de 2 a 4 semanas para completarse."
+          },
+          {
+            "question": "¿Por qué necesito un tasador especializado para hospitalidad al aire libre?",
+            "answer": "Las propiedades de hospitalidad al aire libre tienen características únicas, modelos de ingresos y dinámicas de mercado que requieren experiencia especializada en tasación."
+          }
+        ]
+      },
+      "glamping": {
+        "term": "Glamping",
+        "definition": "Un acrónimo de 'glamoroso' y 'camping', glamping se refiere a alojamientos al aire libre de lujo que combinan la experiencia del camping con la comodidad y las comodidades de un hotel.",
+        "extendedDefinition": "Glamping, abreviatura de 'glamorous camping' (camping glamoroso), es una forma de hospitalidad al aire libre que fusiona el entorno natural y la aventura del camping con el lujo, la comodidad y las comodidades típicamente encontradas en hoteles de alta gama. A diferencia del camping tradicional, los alojamientos de glamping cuentan con camas reales, electricidad, calefacción y aire acondicionado, baños privados, y a menudo incluyen comodidades premium como jacuzzis, cocinas gourmet y servicios de conserjería.\n\nLos alojamientos de glamping comunes incluyen tiendas safari, yurtas, casas en los árboles, remolques Airstream, casas pequeñas, tiendas de lona y pods de glamping. Estas estructuras típicamente están situadas en ubicaciones pintorescas como montañas, bosques, desiertos o cerca de parques nacionales, ofreciendo a los huéspedes una experiencia al aire libre inmersiva sin sacrificar la comodidad.\n\nLa industria del glamping ha experimentado un crecimiento significativo a medida que los viajeros buscan alojamientos únicos y experienciales que los conecten con la naturaleza mientras mantienen las comodidades modernas. El glamping atrae a una amplia demografía, desde parejas que buscan escapadas románticas hasta familias que desean aventuras al aire libre con comodidad.\n\nSage Outdoor Advisory proporciona estudios de viabilidad y tasaciones específicamente para propiedades de glamping, entendiendo las dinámicas de mercado únicas, modelos de ingresos y métodos de valoración requeridos para estos alojamientos especializados.",
+        "examples": [
+          "Una tienda safari de lujo con cama king y baño privado en un entorno montañoso",
+          "Un alojamiento de glamping en casa del árbol con jacuzzi y cocina completa",
+          "Una experiencia de glamping en yurta cerca de un parque nacional"
+        ],
+        "useCases": [
+          "Desarrollar resorts de glamping",
+          "Agregar unidades de glamping a propiedades existentes",
+          "Convertir terrenos para uso de glamping",
+          "Valorar propiedades de glamping"
+        ],
+        "seoKeywords": ["glamping", "camping glamoroso", "camping de lujo", "resort de glamping", "alojamiento de glamping"],
+        "faqs": [
+          {
+            "question": "¿Cuál es la diferencia entre glamping y camping?",
+            "answer": "El glamping proporciona comodidades y comodidad de lujo (camas reales, baños, electricidad) mientras que el camping es más básico con tiendas y comodidades mínimas."
+          },
+          {
+            "question": "¿Cuánto cuesta iniciar un negocio de glamping?",
+            "answer": "Los costos de inicio varían significativamente según la ubicación, el número de unidades y las comodidades. Un estudio de viabilidad puede ayudar a determinar costos específicos para su proyecto."
+          },
+          {
+            "question": "¿Es rentable el glamping?",
+            "answer": "El glamping puede ser muy rentable con una planificación adecuada, selección de ubicación y análisis de mercado. Nuestros estudios de viabilidad ayudan a evaluar el potencial de rentabilidad."
+          }
+        ]
+      },
+      "marketAnalysis": {
+        "term": "Análisis de Mercado",
+        "definition": "Una evaluación integral de las condiciones del mercado, la demanda, la competencia y las tendencias que informa las decisiones empresariales para proyectos de hospitalidad al aire libre.",
+        "extendedDefinition": "El análisis de mercado es un componente crítico de los estudios de viabilidad y la planificación empresarial para propiedades de hospitalidad al aire libre. Implica examinar el mercado local y regional para entender los patrones de demanda, el panorama competitivo, las dinámicas de precios y las tendencias de crecimiento.\n\nUn análisis de mercado exhaustivo incluye investigación demográfica, análisis de datos turísticos, evaluación de propiedades competitivas, pronóstico de demanda e identificación de oportunidades y amenazas del mercado. Para resorts de glamping, parques para autocaravanas y campings, el análisis de mercado ayuda a determinar si hay suficiente demanda para apoyar una propiedad nueva o expandida.\n\nSage Outdoor Advisory realiza análisis de mercado detallados como parte de nuestros estudios de viabilidad, proporcionando a los clientes información accionable sobre el potencial del mercado, el posicionamiento competitivo y las recomendaciones estratégicas para el éxito.",
+        "examples": [
+          "Analizar la demanda de alojamientos de glamping en una región montañosa",
+          "Evaluar la competencia de parques para autocaravanas en un destino turístico",
+          "Evaluar la saturación del mercado de campings en un área de parque estatal"
+        ],
+        "useCases": [
+          "Estudios de viabilidad",
+          "Análisis de inversión",
+          "Posicionamiento competitivo",
+          "Desarrollo de estrategia de precios"
+        ],
+        "seoKeywords": ["análisis de mercado", "investigación de mercado", "evaluación de mercado", "análisis de mercado", "análisis de demanda"],
+        "faqs": [
+          {
+            "question": "¿Qué incluye un análisis de mercado?",
+            "answer": "El análisis de mercado típicamente incluye investigación demográfica, evaluación competitiva, pronóstico de demanda, análisis de precios e identificación de oportunidades del mercado."
+          },
+          {
+            "question": "¿Cuánto tiempo toma un análisis de mercado?",
+            "answer": "El análisis de mercado típicamente se completa como parte de un estudio de viabilidad integral, que toma de 4 a 6 semanas."
+          }
+        ]
+      },
+      "rvResort": {
+        "term": "Resort para Autocaravanas",
+        "definition": "Un parque para autocaravanas de alta gama que ofrece comodidades, servicios e instalaciones premium para viajeros de vehículos recreativos, típicamente con conexiones completas y características estilo resort.",
+        "extendedDefinition": "Un resort para autocaravanas es un parque para autocaravanas de alta gama que proporciona comodidades y servicios premium más allá del estacionamiento básico para autocaravanas. Los resorts para autocaravanas típicamente cuentan con conexiones completas (agua, alcantarillado, electricidad), sitios pavimentados, paisajismo premium y comodidades estilo resort como piscinas, clubhouses, centros de fitness, restaurantes y actividades organizadas.\n\nLos resorts para autocaravanas están posicionados como destinos en lugar de solo paradas nocturnas, a menudo ubicados en ubicaciones deseables cerca de atracciones, playas o áreas pintorescas. Comandan tasas más altas que los parques para autocaravanas básicos y atraen a viajeros que buscan una experiencia de autocaravana más lujosa.\n\nSage Outdoor Advisory proporciona estudios de viabilidad y tasaciones para resorts para autocaravanas, entendiendo el posicionamiento premium, las comodidades y el potencial de ingresos de estas propiedades.",
+        "examples": [
+          "Un resort para autocaravanas de 200 sitios con piscina, clubhouse y restaurante",
+          "Un resort para autocaravanas frente a la playa con comodidades premium y actividades"
+        ],
+        "useCases": [
+          "Desarrollar resorts para autocaravanas",
+          "Mejorar parques para autocaravanas a estatus de resort",
+          "Valorar propiedades de resorts para autocaravanas"
+        ],
+        "seoKeywords": ["resort para autocaravanas", "parque para autocaravanas de lujo", "comodidades de resort para autocaravanas", "parque para autocaravanas premium"],
+        "faqs": [
+          {
+            "question": "¿Cuál es la diferencia entre un resort para autocaravanas y un parque para autocaravanas?",
+            "answer": "Los resorts para autocaravanas ofrecen comodidades, servicios y características estilo resort premium, mientras que los parques para autocaravanas son más básicos con instalaciones esenciales."
+          }
+        ]
+      },
+      "campground": {
+        "term": "Camping",
+        "definition": "Una instalación al aire libre que proporciona espacios para acampar en tiendas y a veces autocaravanas, típicamente con comodidades básicas como baños, agua y fogones.",
+        "extendedDefinition": "Un camping es una instalación al aire libre que proporciona espacios designados para acampar en tiendas y a veces autocaravanas. Los campings varían desde sitios primitivos con instalaciones mínimas hasta campings desarrollados con baños, duchas, agua, conexiones eléctricas y otras comodidades.\n\nLos campings típicamente están ubicados en entornos naturales pintorescos como bosques, montañas o cerca de lagos y ríos. Atraen a campistas que buscan una experiencia al aire libre auténtica, a menudo a precios más bajos que el glamping o los resorts para autocaravanas.\n\nSage Outdoor Advisory proporciona estudios de viabilidad y tasaciones para campings, entendiendo la demanda del mercado, los requisitos operativos y el potencial de ingresos de estas propiedades de hospitalidad al aire libre.",
+        "examples": [
+          "Un camping de 100 sitios con baños, duchas y fogones",
+          "Un camping primitivo con instalaciones mínimas en un bosque nacional"
+        ],
+        "useCases": [
+          "Desarrollar campings nuevos",
+          "Expandir instalaciones de camping",
+          "Valorar propiedades de camping"
+        ],
+        "seoKeywords": ["camping", "instalación de camping", "camping en tiendas", "desarrollo de camping"],
+        "faqs": [
+          {
+            "question": "¿Cuál es la diferencia entre un camping y un parque para autocaravanas?",
+            "answer": "Los campings sirven principalmente a campistas en tiendas con comodidades básicas, mientras que los parques para autocaravanas están diseñados para vehículos recreativos con conexiones e instalaciones específicas para autocaravanas."
+          }
+        ]
+      },
+      "adr": {
+        "term": "ADR (Tarifa Diaria Promedio)",
+        "definition": "El ingreso promedio ganado por unidad de alojamiento ocupada por día, calculado dividiendo el ingreso total de habitaciones por el número de habitaciones vendidas.",
+        "extendedDefinition": "ADR, o Tarifa Diaria Promedio, es una métrica clave de rendimiento en la industria hotelera, incluyendo propiedades de hospitalidad al aire libre como resorts de glamping, parques para autocaravanas y campings. Representa el ingreso promedio generado por unidad ocupada por día.\n\nEl ADR se calcula dividiendo el ingreso total de habitaciones por el número de habitaciones vendidas (no disponibles). Por ejemplo, si un resort de glamping generó $10,000 en ingresos de 20 unidades ocupadas, el ADR sería $500.\n\nEl ADR es crucial para la gestión de ingresos y la estrategia de precios. Ayuda a los propietarios de propiedades a entender su efectividad de precios, comparar el rendimiento con los competidores y optimizar los ingresos. El ADR puede variar significativamente según la estacionalidad, ubicación, comodidades y condiciones del mercado.\n\nEn hospitalidad al aire libre, el ADR a menudo es más alto para alojamientos de glamping en comparación con campings tradicionales debido al posicionamiento de lujo y las comodidades. Entender los puntos de referencia de ADR para su mercado y tipo de propiedad es esencial para la planificación financiera y el análisis de viabilidad.\n\nSage Outdoor Advisory incluye análisis y puntos de referencia de ADR en nuestros estudios de viabilidad, ayudando a los clientes a entender las tasas del mercado y optimizar las estrategias de precios.",
+        "examples": [
+          "Un resort de glamping de 20 unidades genera $180K en ingresos mensuales de 600 noches de unidad ocupadas (20 unidades × 30 días). ADR = $180K ÷ 600 = $300 por noche. Durante la temporada alta, las tasas aumentan a $400/noche, mientras que las tasas de temporada baja bajan a $200/noche, creando variaciones estacionales de ADR. Este ADR de $300 ayuda a los administradores de propiedades a rastrear la efectividad de los precios y comparar con competidores que promedian $280 ADR en el mismo mercado.",
+          "Un parque para autocaravanas con 80 sitios de conexión completa cobra $75/noche. En un mes con 1,680 noches de sitio ocupadas (70% de ocupación), el ingreso total es $126K. ADR = $126K ÷ 1,680 = $75. El parque también ofrece sitios premium frente al agua a $95/noche y sitios básicos a $55/noche. El ADR combinado de $75 refleja la mezcla de tipos de sitios, ayudando a los propietarios a entender su tasa promedio en diferentes ofertas y temporadas."
+        ],
+        "useCases": [
+          "Desarrollo de estrategia de precios",
+          "Pronóstico de ingresos",
+          "Análisis competitivo",
+          "Modelado financiero"
+        ],
+        "seoKeywords": ["ADR", "tarifa diaria promedio", "tarifa de habitación", "tarifa diaria", "ingreso por habitación"],
+        "faqs": [
+          {
+            "question": "¿Cómo se calcula el ADR?",
+            "answer": "ADR = Ingreso Total de Habitaciones ÷ Número de Habitaciones Vendidas. Representa el ingreso promedio por unidad ocupada por día."
+          },
+          {
+            "question": "¿Cuál es un buen ADR para glamping?",
+            "answer": "El ADR varía según la ubicación y las comodidades. Nuestros informes de mercado proporcionan puntos de referencia de ADR por región y tipo de propiedad."
+          },
+          {
+            "question": "¿Cómo se relaciona el ADR con la rentabilidad?",
+            "answer": "El ADR, combinado con la tasa de ocupación, determina RevPAR (Ingreso por Habitación Disponible), que impacta directamente la rentabilidad."
+          }
+        ]
+      },
+      "occupancyRate": {
+        "term": "Tasa de Ocupación",
+        "definition": "El porcentaje de unidades de alojamiento disponibles que están ocupadas durante un período específico, calculado dividiendo las unidades ocupadas por las unidades totales disponibles.",
+        "extendedDefinition": "La tasa de ocupación es una métrica de rendimiento fundamental en la industria hotelera, midiendo el porcentaje de unidades disponibles que están ocupadas durante un período determinado. Se calcula dividiendo el número de unidades ocupadas por el número total de unidades disponibles, luego multiplicando por 100.\n\nPor ejemplo, si un resort de glamping tiene 20 unidades y 16 están ocupadas, la tasa de ocupación es del 80%. Las tasas de ocupación pueden medirse diariamente, mensualmente o anualmente, con tasas anuales proporcionando la vista más integral del rendimiento.\n\nLa tasa de ocupación es crítica para entender la demanda, la efectividad de los precios y el potencial de ingresos. Las tasas de ocupación altas indican fuerte demanda pero pueden sugerir que los precios son demasiado bajos. Las tasas de ocupación bajas pueden indicar problemas de precios, desafíos de marketing o saturación del mercado.\n\nEn hospitalidad al aire libre, las tasas de ocupación a menudo varían estacionalmente. Por ejemplo, las propiedades cerca de parques nacionales pueden tener ocupación del 90%+ en verano pero 30% en invierno. Entender los patrones estacionales es esencial para la planificación financiera y el análisis de viabilidad.\n\nSage Outdoor Advisory incluye análisis y pronóstico de tasas de ocupación en nuestros estudios de viabilidad, ayudando a los clientes a entender los patrones de demanda y optimizar las estrategias de gestión de ingresos.",
+        "examples": [
+          "Un resort de glamping de 25 unidades opera durante todo el año. En enero, 450 unidades están ocupadas de 775 disponibles (25 unidades × 31 días), resultando en 58% de ocupación. Durante los meses pico de verano (junio-agosto), la ocupación promedia 90% con 2,090 ocupadas de 2,325 unidades disponibles. La tasa de ocupación anual del 75% (6,825 ocupadas de 9,125 noches de unidad disponibles) refleja variaciones estacionales y ayuda con la planificación financiera.",
+          "Un resort para autocaravanas en Florida experimenta fuerte estacionalidad. Durante la temporada de snowbirds (noviembre-abril), 180 de 200 sitios están consistentemente ocupados, logrando 90% de ocupación. Los meses de verano (mayo-octubre) caen al 60% de ocupación (120 de 200 sitios)."
+        ],
+        "useCases": [
+          "Pronóstico de demanda",
+          "Proyecciones de ingresos",
+          "Estrategia de precios",
+          "Análisis de mercado"
+        ],
+        "seoKeywords": ["tasa de ocupación", "porcentaje de ocupación", "ocupación de habitaciones", "métricas de ocupación"],
+        "faqs": [
+          {
+            "question": "¿Cuál es una buena tasa de ocupación?",
+            "answer": "Las tasas de ocupación varían según el tipo de propiedad y la ubicación. Generalmente, 60-80% de ocupación anual se considera saludable para propiedades de hospitalidad al aire libre."
+          },
+          {
+            "question": "¿Cómo afecta la tasa de ocupación a los ingresos?",
+            "answer": "La tasa de ocupación, combinada con ADR, determina RevPAR (Ingreso por Habitación Disponible), que impacta directamente los ingresos totales."
+          },
+          {
+            "question": "¿Cómo mejoro la tasa de ocupación?",
+            "answer": "Mejorar la ocupación puede involucrar ajustes de precios, esfuerzos de marketing, agregar comodidades o dirigirse a nuevos segmentos del mercado."
+          }
+        ]
+      },
+      "noi": {
+        "term": "NOI (Ingreso Operativo Neto)",
+        "definition": "El ingreso generado de una propiedad después de restar gastos operativos pero antes de deducir servicio de deuda, impuestos y gastos de capital.",
+        "extendedDefinition": "El Ingreso Operativo Neto (NOI) es una métrica financiera fundamental para propiedades que generan ingresos como resorts de glamping, parques para autocaravanas y campings. Representa la rentabilidad de la propiedad de las operaciones antes de los costos de financiamiento e impuestos.\n\nEl NOI se calcula restando los gastos operativos de los ingresos operativos brutos. Los gastos operativos incluyen servicios públicos, mantenimiento, seguros, gestión de propiedades, marketing y otros costos del día a día, pero excluyen el servicio de deuda, impuestos sobre la renta y mejoras de capital.\n\nEl NOI es crítico para la valoración de propiedades, ya que se utiliza en el enfoque de ingresos para determinar el valor de la propiedad. También se utiliza para calcular la tasa de capitalización (tasa cap) y evaluar la capacidad de una propiedad para servir la deuda.\n\nSage Outdoor Advisory incluye proyecciones y análisis de NOI en nuestros estudios de viabilidad y tasaciones, ayudando a los clientes a entender la rentabilidad y el valor de la propiedad.",
+        "examples": [
+          "Un resort de glamping genera $800K en ingresos operativos brutos de ingresos por habitaciones. Los gastos operativos totalizan $500K incluyendo: servicios públicos ($95K), mantenimiento de propiedad ($120K), seguros ($35K), tarifas de gestión ($120K), marketing ($40K), costos administrativos ($25K), impuestos sobre la propiedad ($35K) y otros gastos ($30K). NOI = $800K - $500K = $300K. Este NOI se utiliza entonces para la valoración de propiedad: a una tasa cap del 8%, el valor de la propiedad = $300K ÷ 0.08 = $3.75M."
+        ],
+        "useCases": [
+          "Valoración de propiedades",
+          "Análisis de inversión",
+          "Suscripción de préstamos",
+          "Planificación financiera"
+        ],
+        "seoKeywords": ["NOI", "ingreso operativo neto", "ingreso operativo", "NOI de propiedad"],
+        "faqs": [
+          {
+            "question": "¿Qué gastos se incluyen en el NOI?",
+            "answer": "El NOI incluye todos los gastos operativos como servicios públicos, mantenimiento, seguros y gestión, pero excluye el servicio de deuda, impuestos y mejoras de capital."
+          },
+          {
+            "question": "¿Cómo se utiliza el NOI en la valoración de propiedades?",
+            "answer": "El NOI se divide por la tasa de capitalización para determinar el valor de la propiedad en el enfoque de ingresos para la valoración."
+          }
+        ]
+      },
+      "capRate": {
+        "term": "Tasa de Capitalización (Cap Rate)",
+        "definition": "La tasa de retorno de una inversión inmobiliaria basada en ingresos esperados, calculada dividiendo el ingreso operativo neto por el valor de la propiedad.",
+        "extendedDefinition": "La tasa de capitalización, o cap rate, es una métrica clave utilizada para evaluar y comparar inversiones inmobiliarias. Se calcula dividiendo el Ingreso Operativo Neto (NOI) por el valor de la propiedad o precio de compra.\n\nLas tasas cap indican la tasa de retorno esperada en una propiedad de inversión, asumiendo que se compra con efectivo (sin financiamiento). Las tasas cap más altas sugieren retornos más altos pero también pueden indicar mayor riesgo. Las tasas cap más bajas sugieren retornos más bajos pero pueden indicar propiedades más estables y deseables.\n\nPara propiedades de hospitalidad al aire libre, las tasas cap varían según el tipo de propiedad, ubicación y condiciones del mercado. Los resorts de glamping premium en ubicaciones deseables pueden tener tasas cap más bajas (5-7%), mientras que los campings básicos pueden tener tasas cap más altas (8-12%).\n\nSage Outdoor Advisory utiliza tasas cap en nuestras tasaciones y estudios de viabilidad para ayudar a los clientes a entender los retornos de inversión y los valores de propiedades.",
+        "examples": [
+          "Un parque para autocaravanas genera $300K en Ingreso Operativo Neto. Las ventas comparables recientes y el análisis de mercado indican que la propiedad debería negociarse a una tasa cap del 7.5% basada en propiedades similares. Valor de propiedad = $300K ÷ 0.075 = $4M."
+        ],
+        "useCases": [
+          "Valoración de propiedades",
+          "Comparación de inversiones",
+          "Análisis de retorno",
+          "Decisiones de compra"
+        ],
+        "seoKeywords": ["tasa cap", "tasa de capitalización", "tasa cap inmobiliaria", "tasa cap de inversión"],
+        "faqs": [
+          {
+            "question": "¿Cuál es una buena tasa cap?",
+            "answer": "Las tasas cap varían según el tipo de propiedad y el mercado. Generalmente, 6-10% es común para propiedades de hospitalidad al aire libre, con propiedades premium teniendo tasas más bajas."
+          },
+          {
+            "question": "¿Cómo se calcula la tasa cap?",
+            "answer": "Tasa Cap = Ingreso Operativo Neto ÷ Valor de Propiedad (o Precio de Compra)."
+          }
+        ]
+      }
+    }
   },
   "errors": {
     "pageNotFound": "Página No Encontrada",

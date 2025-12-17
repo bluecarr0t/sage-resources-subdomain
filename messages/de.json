@@ -1607,7 +1607,273 @@
       "description": "Unsere Experten können Ihnen helfen zu verstehen, wie diese Branchenbegriffe auf Ihr Outdoor-Hospitality-Projekt zutreffen.",
       "button": "Kostenlose Beratung Vereinbaren"
     },
-    "terms": {}
+    "terms": {
+      "feasibilityStudy": {
+        "term": "Machbarkeitsstudie",
+        "definition": "Eine umfassende Analyse, die die Durchführbarkeit, das Marktpotenzial und die finanziellen Aussichten eines vorgeschlagenen Outdoor-Hospitality-Projekts bewertet, wie z. B. ein Glamping-Resort, ein Wohnmobil-Park oder ein Campingplatz.",
+        "extendedDefinition": "Eine Machbarkeitsstudie ist ein kritisches Geschäftsanalysetool, das in der Outdoor-Hospitality-Branche verwendet wird, um zu bestimmen, ob ein vorgeschlagenes Projekt durchführbar, profitabel und verfolgenswert ist. Für Outdoor-Hospitality-Projekte wie Glamping-Resorts, Wohnmobil-Parks und Campingplätze untersucht eine Machbarkeitsstudie mehrere Faktoren, einschließlich Marktnachfrage, Wettbewerbslandschaft, Finanzprognosen, Standorteignung, regulatorische Anforderungen und Risikobewertung.\n\nDie Studie umfasst typischerweise eine Marktanalyse zur Verständnis von Nachfrage und Wettbewerb, eine Finanzmodellierung zur Projektion von Einnahmen und Ausgaben, eine Standortanalyse zur Bewertung der Standorteignung und strategische Empfehlungen für die Entwicklung. Machbarkeitsstudien sind unerlässlich für die Beschaffung von Finanzierungen, da Banken und Kreditgeber sie benötigen, um Projektrisiken und Durchführbarkeit zu bewerten.\n\nSage Outdoor Advisory spezialisiert sich auf die Erstellung umfassender, bankzugelassener Machbarkeitsstudien für Outdoor-Hospitality-Projekte. Unsere Studien bieten Investoren, Entwicklern und Kreditgebern die detaillierte Analyse, die für fundierte Entscheidungen über Projekttwicklung und Finanzierung erforderlich ist.",
+        "examples": [
+          "Ein Entwickler, der ein 30-Einheiten-Glamping-Resort in Colorados Bergregion plant, beauftragt eine Machbarkeitsstudie. Die Studie analysiert lokale Tourismuszahlen mit 2,3 Mio. jährlichen Besuchern nahe gelegener Attraktionen, identifiziert 8 konkurrierende Immobilien mit durchschnittlich 78% Auslastung und 285$ ADR, projiziert 65% Auslastung im ersten Jahr, steigend auf 82% bis Jahr 3, schätzt 1,2 Mio. $ Entwicklungskosten und prognostiziert 650.000 $ Einnahmen im Jahr 1, steigend auf 1,1 Mio. $ bis Jahr 5. Die Studie kommt zu dem Schluss, dass das Projekt mit 18% IRR durchführbar ist und empfiehlt die Fortsetzung, was zur Sicherung von 800.000 $ Bankfinanzierung basierend auf der umfassenden Analyse beiträgt."
+        ],
+        "useCases": [
+          "Sicherung von Bankfinanzierung für Entwicklungsprojekte",
+          "Bewertung von Investitionsmöglichkeiten",
+          "Treffen von Go/No-Go-Entscheidungen bei Projekten",
+          "Verständnis des Marktpotenzials vor dem Kauf"
+        ],
+        "seoKeywords": ["Machbarkeitsstudie", "Machbarkeitsanalyse", "Projektmachbarkeit", "Geschäftsmachbarkeit", "Machbarkeitsbericht"],
+        "faqs": [
+          {
+            "question": "Wie lange dauert eine Machbarkeitsstudie?",
+            "answer": "Unsere Machbarkeitsstudien dauern typischerweise zwischen 4 und 8 Wochen, abhängig von Größe und Komplexität der Immobilie. Dieser Zeitrahmen ermöglicht es uns, Marktdaten gründlich zu überprüfen, die Immobilie zu inspizieren und einen detaillierten, genauen Bericht zu erstellen."
+          },
+          {
+            "question": "Was ist in einer Machbarkeitsstudie enthalten?",
+            "answer": "Eine Machbarkeitsstudie umfasst Marktanalyse, Wettbewerbsbewertung, Finanzprognosen, Standortbewertung und strategische Empfehlungen."
+          },
+          {
+            "question": "Akzeptieren Banken Machbarkeitsstudien?",
+            "answer": "Ja, Banken und Kreditgeber verlangen professionelle Machbarkeitsstudien, um Projektdurchführbarkeit und Risiko zu bewerten, bevor sie die Finanzierung genehmigen."
+          }
+        ]
+      },
+      "appraisal": {
+        "term": "Bewertung",
+        "definition": "Eine professionelle Bewertung des Wertes einer Immobilie, die von einem zertifizierten Gutachter durchgeführt wird, verwendet für Finanzierung, Verkäufe, Versicherung und Investitionsentscheidungen in der Outdoor-Hospitality-Branche.",
+        "extendedDefinition": "Eine Bewertung ist eine formelle, unparteiische Bewertung des Marktwertes einer Immobilie, die von einem lizenzierten oder zertifizierten Gutachter durchgeführt wird. In der Outdoor-Hospitality-Branche sind Bewertungen unerlässlich für Glamping-Resorts, Wohnmobil-Parks, Campingplätze und andere Outdoor-Unterkunftsimmobilien.\n\nGutachter verwenden drei Hauptansätze zur Wertermittlung: den Vergleichsverkaufsansatz (Vergleich mit ähnlichen verkauften Immobilien), den Ertragswertansatz (Bewertung basierend auf Ertragspotenzial) und den Sachwertansatz (Schätzung der Wiederbeschaffungskosten). Für Outdoor-Hospitality-Immobilien ist der Ertragswertansatz oft am relevantesten, da es sich um ertragsgenerierende Vermögenswerte handelt.\n\nBewertungen sind erforderlich für Bankfinanzierung, Immobilienverkäufe, Refinanzierung, Versicherungszwecke und Investitionsanalyse. Sage Outdoor Advisory bietet spezialisierte Bewertungen für Outdoor-Hospitality-Immobilien an und versteht die einzigartigen Eigenschaften und Bewertungsmethoden, die für diese Vermögenswerttypen erforderlich sind.",
+        "examples": [
+          "Eine Glamping-Immobilienbewertung für Bankfinanzierung",
+          "Eine Wohnmobil-Resort-Bewertung für Verkaufszwecke",
+          "Eine Campingplatz-Bewertung für Refinanzierung"
+        ],
+        "useCases": [
+          "Sicherung von Bankkrediten und Finanzierung",
+          "Immobilienverkäufe und -erwerb",
+          "Refinanzierung bestehender Immobilien",
+          "Versicherungsbewertung",
+          "Investitionsanalyse"
+        ],
+        "seoKeywords": ["Immobilienbewertung", "Immobilienbewertung", "Geschäftsbewertung", "Bewertung", "Bewerteter Wert"],
+        "faqs": [
+          {
+            "question": "Wie lange dauert eine Bewertung?",
+            "answer": "Eine umfassende Immobilienbewertung dauert typischerweise 2 bis 4 Wochen."
+          },
+          {
+            "question": "Warum brauche ich einen spezialisierten Gutachter für Outdoor-Hospitality?",
+            "answer": "Outdoor-Hospitality-Immobilien haben einzigartige Eigenschaften, Ertragsmodelle und Marktdynamiken, die spezialisierte Bewertungsexpertise erfordern."
+          }
+        ]
+      },
+      "glamping": {
+        "term": "Glamping",
+        "definition": "Ein Portmanteau aus 'glamourös' und 'Camping', Glamping bezieht sich auf luxuriöse Outdoor-Unterkünfte, die das Camping-Erlebnis mit dem Komfort und den Annehmlichkeiten eines Hotels kombinieren.",
+        "extendedDefinition": "Glamping, kurz für 'glamourous camping' (glamouröses Camping), ist eine Form der Outdoor-Hospitality, die die natürliche Umgebung und das Abenteuer des Campings mit dem Luxus, Komfort und den Annehmlichkeiten verbindet, die typischerweise in hochwertigen Hotels zu finden sind. Im Gegensatz zum traditionellen Camping verfügen Glamping-Unterkünfte über echte Betten, Strom, Heizung und Kühlung, private Badezimmer und umfassen oft Premium-Annehmlichkeiten wie Whirlpools, Gourmetküchen und Concierge-Services.\n\nHäufige Glamping-Unterkünfte umfassen Safari-Zelte, Jurten, Baumhäuser, Airstream-Anhänger, Tiny Houses, Leinwandzelte und Glamping-Pods. Diese Strukturen befinden sich typischerweise in malerischen Lagen wie Bergen, Wäldern, Wüsten oder in der Nähe von Nationalparks und bieten Gästen ein immersives Outdoor-Erlebnis ohne Komforteinbußen.\n\nDie Glamping-Branche hat ein erhebliches Wachstum erlebt, da Reisende einzigartige, erlebnisorientierte Unterkünfte suchen, die sie mit der Natur verbinden und gleichzeitig moderne Annehmlichkeiten bieten. Glamping spricht eine breite Demografie an, von Paaren, die romantische Auszeiten suchen, bis hin zu Familien, die Outdoor-Abenteuer mit Komfort wünschen.\n\nSage Outdoor Advisory bietet Machbarkeitsstudien und Bewertungen speziell für Glamping-Immobilien an und versteht die einzigartigen Marktdynamiken, Ertragsmodelle und Bewertungsmethoden, die für diese spezialisierten Unterkünfte erforderlich sind.",
+        "examples": [
+          "Ein luxuriöses Safari-Zelt mit Kingsize-Bett und privatem Badezimmer in einer Berglandschaft",
+          "Eine Baumhaus-Glamping-Unterkunft mit Whirlpool und voll ausgestatteter Küche",
+          "Eine Jurten-Glamping-Erfahrung in der Nähe eines Nationalparks"
+        ],
+        "useCases": [
+          "Entwicklung von Glamping-Resorts",
+          "Hinzufügen von Glamping-Einheiten zu bestehenden Immobilien",
+          "Umwandlung von Land für Glamping-Nutzung",
+          "Bewertung von Glamping-Immobilien"
+        ],
+        "seoKeywords": ["Glamping", "glamouröses Camping", "Luxus-Camping", "Glamping-Resort", "Glamping-Unterkunft"],
+        "faqs": [
+          {
+            "question": "Was ist der Unterschied zwischen Glamping und Camping?",
+            "answer": "Glamping bietet luxuriöse Annehmlichkeiten und Komfort (echte Betten, Badezimmer, Strom), während Camping grundlegender mit Zelten und minimalen Annehmlichkeiten ist."
+          },
+          {
+            "question": "Wie viel kostet es, ein Glamping-Geschäft zu starten?",
+            "answer": "Die Startkosten variieren erheblich je nach Standort, Anzahl der Einheiten und Annehmlichkeiten. Eine Machbarkeitsstudie kann helfen, spezifische Kosten für Ihr Projekt zu bestimmen."
+          },
+          {
+            "question": "Ist Glamping profitabel?",
+            "answer": "Glamping kann bei richtiger Planung, Standortauswahl und Marktanalyse sehr profitabel sein. Unsere Machbarkeitsstudien helfen bei der Bewertung des Profitabilitätspotenzials."
+          }
+        ]
+      },
+      "marketAnalysis": {
+        "term": "Marktanalyse",
+        "definition": "Eine umfassende Bewertung der Marktbedingungen, Nachfrage, Wettbewerb und Trends, die Geschäftsentscheidungen für Outdoor-Hospitality-Projekte informiert.",
+        "extendedDefinition": "Die Marktanalyse ist eine kritische Komponente von Machbarkeitsstudien und Geschäftsplanung für Outdoor-Hospitality-Immobilien. Sie umfasst die Untersuchung des lokalen und regionalen Marktes, um Nachfragemuster, Wettbewerbslandschaft, Preisdynamiken und Wachstumstrends zu verstehen.\n\nEine gründliche Marktanalyse umfasst demografische Forschung, Tourismuszatenanalyse, Bewertung konkurrierender Immobilien, Nachfrageprognose und Identifizierung von Marktchancen und -bedrohungen. Für Glamping-Resorts, Wohnmobil-Parks und Campingplätze hilft die Marktanalyse zu bestimmen, ob ausreichend Nachfrage besteht, um eine neue oder erweiterte Immobilie zu unterstützen.\n\nSage Outdoor Advisory führt detaillierte Marktanalysen im Rahmen unserer Machbarkeitsstudien durch und bietet Kunden umsetzbare Erkenntnisse über Marktpotenzial, Wettbewerbspositionierung und strategische Empfehlungen für den Erfolg.",
+        "examples": [
+          "Analyse der Nachfrage nach Glamping-Unterkünften in einer Bergregion",
+          "Bewertung des Wettbewerbs von Wohnmobil-Parks in einem Touristenziel",
+          "Bewertung der Marktsättigung von Campingplätzen in einem State-Park-Gebiet"
+        ],
+        "useCases": [
+          "Machbarkeitsstudien",
+          "Investitionsanalyse",
+          "Wettbewerbspositionierung",
+          "Entwicklung von Preisstrategien"
+        ],
+        "seoKeywords": ["Marktanalyse", "Marktforschung", "Marktbewertung", "Marktanalyse", "Nachfrageanalyse"],
+        "faqs": [
+          {
+            "question": "Was ist in einer Marktanalyse enthalten?",
+            "answer": "Die Marktanalyse umfasst typischerweise demografische Forschung, Wettbewerbsbewertung, Nachfrageprognose, Preisanalyse und Identifizierung von Marktchancen."
+          },
+          {
+            "question": "Wie lange dauert eine Marktanalyse?",
+            "answer": "Die Marktanalyse wird typischerweise im Rahmen einer umfassenden Machbarkeitsstudie durchgeführt, die 4 bis 6 Wochen dauert."
+          }
+        ]
+      },
+      "rvResort": {
+        "term": "Wohnmobil-Resort",
+        "definition": "Ein hochwertiger Wohnmobil-Park, der Premium-Annehmlichkeiten, Dienstleistungen und Einrichtungen für Wohnmobil-Reisende bietet, typischerweise mit Vollanschlüssen und Resort-artigen Merkmalen.",
+        "extendedDefinition": "Ein Wohnmobil-Resort ist ein hochwertiger Wohnmobil-Park, der Premium-Annehmlichkeiten und Dienstleistungen über das grundlegende Wohnmobil-Parken hinaus bietet. Wohnmobil-Resorts verfügen typischerweise über Vollanschlüsse (Wasser, Abwasser, Strom), asphaltierte Stellplätze, Premium-Landschaftsgestaltung und Resort-artige Annehmlichkeiten wie Pools, Clubhäuser, Fitnesszentren, Restaurants und organisierte Aktivitäten.\n\nWohnmobil-Resorts werden als Reiseziele positioniert und nicht nur als Übernachtungsstopps, oft in begehrten Lagen in der Nähe von Attraktionen, Stränden oder malerischen Gebieten gelegen. Sie erzielen höhere Preise als grundlegende Wohnmobil-Parks und sprechen Reisende an, die ein luxuriöseres Wohnmobil-Erlebnis suchen.\n\nSage Outdoor Advisory bietet Machbarkeitsstudien und Bewertungen für Wohnmobil-Resorts an und versteht die Premium-Positionierung, Annehmlichkeiten und Ertragspotenzial dieser Immobilien.",
+        "examples": [
+          "Ein Wohnmobil-Resort mit 200 Stellplätzen mit Pool, Clubhaus und Restaurant",
+          "Ein Strand-Wohnmobil-Resort mit Premium-Annehmlichkeiten und Aktivitäten"
+        ],
+        "useCases": [
+          "Entwicklung von Wohnmobil-Resorts",
+          "Aufwertung von Wohnmobil-Parks zum Resort-Status",
+          "Bewertung von Wohnmobil-Resort-Immobilien"
+        ],
+        "seoKeywords": ["Wohnmobil-Resort", "Luxus-Wohnmobil-Park", "Wohnmobil-Resort-Annehmlichkeiten", "Premium-Wohnmobil-Park"],
+        "faqs": [
+          {
+            "question": "Was ist der Unterschied zwischen einem Wohnmobil-Resort und einem Wohnmobil-Park?",
+            "answer": "Wohnmobil-Resorts bieten Premium-Annehmlichkeiten, Dienstleistungen und Resort-artige Merkmale, während Wohnmobil-Parks grundlegender mit wesentlichen Einrichtungen sind."
+          }
+        ]
+      },
+      "campground": {
+        "term": "Campingplatz",
+        "definition": "Eine Outdoor-Einrichtung, die Platz für Zeltcamping und manchmal Wohnmobile bietet, typischerweise mit grundlegenden Annehmlichkeiten wie Toiletten, Wasser und Feuerstellen.",
+        "extendedDefinition": "Ein Campingplatz ist eine Outdoor-Einrichtung, die ausgewiesene Bereiche für Zeltcamping und manchmal Wohnmobile bietet. Campingplätze reichen von primitiven Plätzen mit minimalen Einrichtungen bis zu entwickelten Campingplätzen mit Toiletten, Duschen, Wasser, Stromanschlüssen und anderen Annehmlichkeiten.\n\nCampingplätze befinden sich typischerweise in malerischen natürlichen Umgebungen wie Wäldern, Bergen oder in der Nähe von Seen und Flüssen. Sie sprechen Camper an, die ein authentisches Outdoor-Erlebnis suchen, oft zu niedrigeren Preisen als Glamping oder Wohnmobil-Resorts.\n\nSage Outdoor Advisory bietet Machbarkeitsstudien und Bewertungen für Campingplätze an und versteht die Marktnachfrage, Betriebsanforderungen und Ertragspotenzial dieser Outdoor-Hospitality-Immobilien.",
+        "examples": [
+          "Ein Campingplatz mit 100 Stellplätzen mit Toiletten, Duschen und Feuerstellen",
+          "Ein primitiver Campingplatz mit minimalen Einrichtungen in einem Nationalwald"
+        ],
+        "useCases": [
+          "Entwicklung neuer Campingplätze",
+          "Erweiterung von Campingeinrichtungen",
+          "Bewertung von Campingplatz-Immobilien"
+        ],
+        "seoKeywords": ["Campingplatz", "Camping-Einrichtung", "Zeltcamping", "Campingplatz-Entwicklung"],
+        "faqs": [
+          {
+            "question": "Was ist der Unterschied zwischen einem Campingplatz und einem Wohnmobil-Park?",
+            "answer": "Campingplätze dienen hauptsächlich Zeltcampern mit grundlegenden Annehmlichkeiten, während Wohnmobil-Parks für Freizeitfahrzeuge mit Anschlüssen und wohnmobilspezifischen Einrichtungen konzipiert sind."
+          }
+        ]
+      },
+      "adr": {
+        "term": "ADR (Durchschnittlicher Tagespreis)",
+        "definition": "Das durchschnittliche Einkommen, das pro belegter Unterkunftseinheit pro Tag erzielt wird, berechnet durch Division des Gesamt-Zimmerumsatzes durch die Anzahl der verkauften Zimmer.",
+        "extendedDefinition": "ADR oder Durchschnittlicher Tagespreis ist eine wichtige Leistungskennzahl in der Hotelindustrie, einschließlich Outdoor-Hospitality-Immobilien wie Glamping-Resorts, Wohnmobil-Parks und Campingplätzen. Es stellt das durchschnittliche Einkommen dar, das pro belegter Einheit pro Tag generiert wird.\n\nADR wird berechnet, indem der Gesamt-Zimmerumsatz durch die Anzahl der verkauften Zimmer (nicht verfügbare) dividiert wird. Zum Beispiel: Wenn ein Glamping-Resort 10.000 $ Umsatz aus 20 belegten Einheiten generiert hat, wäre der ADR 500 $.\n\nADR ist entscheidend für Umsatzmanagement und Preisstrategie. Es hilft Immobilieneigentümern, ihre Preiseffektivität zu verstehen, die Leistung mit Wettbewerbern zu vergleichen und den Umsatz zu optimieren. ADR kann erheblich variieren basierend auf Saisonalität, Standort, Annehmlichkeiten und Marktbedingungen.\n\nIn der Outdoor-Hospitality ist ADR oft höher für Glamping-Unterkünfte im Vergleich zu traditionellen Campingplätzen aufgrund der Luxus-Positionierung und Annehmlichkeiten. Das Verständnis von ADR-Benchmarks für Ihren Markt und Immobilientyp ist wesentlich für die Finanzplanung und Machbarkeitsanalyse.\n\nSage Outdoor Advisory schließt ADR-Analyse und -Benchmarking in unseren Machbarkeitsstudien ein und hilft Kunden, Marktpreise zu verstehen und Preisstrategien zu optimieren.",
+        "examples": [
+          "Ein Glamping-Resort mit 20 Einheiten generiert 180.000 $ monatlichen Umsatz aus 600 belegten Einheiten-Nächten (20 Einheiten × 30 Tage). ADR = 180.000 $ ÷ 600 = 300 $ pro Nacht. Während der Hauptsaison steigen die Preise auf 400 $/Nacht, während Nebensaison-Preise auf 200 $/Nacht sinken und saisonale ADR-Variationen schaffen."
+        ],
+        "useCases": [
+          "Entwicklung von Preisstrategien",
+          "Umsatzprognose",
+          "Wettbewerbsanalyse",
+          "Finanzmodellierung"
+        ],
+        "seoKeywords": ["ADR", "Durchschnittlicher Tagespreis", "Zimmerpreis", "Tagespreis", "Umsatz pro Zimmer"],
+        "faqs": [
+          {
+            "question": "Wie wird ADR berechnet?",
+            "answer": "ADR = Gesamt-Zimmerumsatz ÷ Anzahl der verkauften Zimmer. Es stellt das durchschnittliche Einkommen pro belegter Einheit pro Tag dar."
+          },
+          {
+            "question": "Was ist ein guter ADR für Glamping?",
+            "answer": "ADR variiert je nach Standort und Annehmlichkeiten. Unsere Marktberichte bieten ADR-Benchmarks nach Region und Immobilientyp."
+          },
+          {
+            "question": "Wie bezieht sich ADR auf Rentabilität?",
+            "answer": "ADR in Kombination mit Auslastungsrate bestimmt RevPAR (Umsatz pro verfügbares Zimmer), was sich direkt auf die Rentabilität auswirkt."
+          }
+        ]
+      },
+      "occupancyRate": {
+        "term": "Auslastungsrate",
+        "definition": "Der Prozentsatz der verfügbaren Unterkunftseinheiten, die während eines bestimmten Zeitraums belegt sind, berechnet durch Division der belegten Einheiten durch die insgesamt verfügbaren Einheiten.",
+        "extendedDefinition": "Die Auslastungsrate ist eine grundlegende Leistungskennzahl in der Hotelindustrie und misst den Prozentsatz der verfügbaren Einheiten, die während eines bestimmten Zeitraums belegt sind. Sie wird berechnet, indem die Anzahl der belegten Einheiten durch die Gesamtzahl der verfügbaren Einheiten dividiert und dann mit 100 multipliziert wird.\n\nZum Beispiel: Wenn ein Glamping-Resort 20 Einheiten hat und 16 belegt sind, beträgt die Auslastungsrate 80%. Auslastungsraten können täglich, monatlich oder jährlich gemessen werden, wobei jährliche Raten den umfassendsten Überblick über die Leistung bieten.\n\nDie Auslastungsrate ist entscheidend für das Verständnis von Nachfrage, Preiseffektivität und Umsatzpotenzial. Hohe Auslastungsraten weisen auf starke Nachfrage hin, können aber darauf hindeuten, dass die Preise zu niedrig sind. Niedrige Auslastungsraten können auf Preisprobleme, Marketing-Herausforderungen oder Marktsättigung hindeuten.\n\nIn der Outdoor-Hospitality variieren Auslastungsraten oft saisonal. Zum Beispiel können Immobilien in der Nähe von Nationalparks im Sommer 90%+ Auslastung haben, aber 30% im Winter. Das Verständnis saisonaler Muster ist wesentlich für die Finanzplanung und Machbarkeitsanalyse.\n\nSage Outdoor Advisory schließt Auslastungsratenanalyse und -prognose in unseren Machbarkeitsstudien ein und hilft Kunden, Nachfragemuster zu verstehen und Umsatzmanagementstrategien zu optimieren.",
+        "examples": [
+          "Ein Glamping-Resort mit 25 Einheiten betreibt ganzjährig. Im Januar sind 450 Einheiten von 775 verfügbaren belegt (25 Einheiten × 31 Tage), was zu 58% Auslastung führt. Während der Hauptsommermonate (Juni-August) beträgt die Auslastung durchschnittlich 90% mit 2.090 belegten von 2.325 verfügbaren Einheiten."
+        ],
+        "useCases": [
+          "Nachfrageprognose",
+          "Umsatzprognosen",
+          "Preisstrategie",
+          "Marktanalyse"
+        ],
+        "seoKeywords": ["Auslastungsrate", "Auslastungsprozentsatz", "Zimmerauslastung", "Auslastungskennzahlen"],
+        "faqs": [
+          {
+            "question": "Was ist eine gute Auslastungsrate?",
+            "answer": "Auslastungsraten variieren je nach Immobilientyp und Standort. Allgemein gelten 60-80% jährliche Auslastung als gesund für Outdoor-Hospitality-Immobilien."
+          },
+          {
+            "question": "Wie wirkt sich die Auslastungsrate auf den Umsatz aus?",
+            "answer": "Die Auslastungsrate in Kombination mit ADR bestimmt RevPAR (Umsatz pro verfügbares Zimmer), was sich direkt auf den Gesamtumsatz auswirkt."
+          },
+          {
+            "question": "Wie verbessere ich die Auslastungsrate?",
+            "answer": "Die Verbesserung der Auslastung kann Preisänderungen, Marketingmaßnahmen, das Hinzufügen von Annehmlichkeiten oder die Ausrichtung auf neue Marktsegmente umfassen."
+          }
+        ]
+      },
+      "noi": {
+        "term": "NOI (Netto-Betriebsergebnis)",
+        "definition": "Das Einkommen, das aus einer Immobilie generiert wird, nach Abzug der Betriebsausgaben, aber vor Abzug von Schuldendienst, Steuern und Kapitalausgaben.",
+        "extendedDefinition": "Das Netto-Betriebsergebnis (NOI) ist eine grundlegende Finanzkennzahl für ertragsgenerierende Immobilien wie Glamping-Resorts, Wohnmobil-Parks und Campingplätze. Es stellt die Rentabilität der Immobilie aus dem Betrieb dar, bevor Finanzierungskosten und Steuern berücksichtigt werden.\n\nNOI wird berechnet, indem Betriebsausgaben von Brutto-Betriebseinkommen abgezogen werden. Betriebsausgaben umfassen Versorgungsleistungen, Wartung, Versicherung, Immobilienverwaltung, Marketing und andere tägliche Kosten, schließen aber Schuldendienst, Einkommenssteuern und Kapitalverbesserungen aus.\n\nNOI ist kritisch für die Immobilienbewertung, da es im Ertragswertansatz zur Bestimmung des Immobilienwerts verwendet wird. Es wird auch zur Berechnung der Kapitalisierungsrate (Cap Rate) verwendet und zur Bewertung der Fähigkeit einer Immobilie, Schulden zu bedienen.\n\nSage Outdoor Advisory schließt NOI-Prognosen und -Analysen in unseren Machbarkeitsstudien und Bewertungen ein und hilft Kunden, Immobilienrentabilität und -wert zu verstehen.",
+        "examples": [
+          "Ein Glamping-Resort generiert 800.000 $ Brutto-Betriebseinkommen aus Zimmerumsätzen. Betriebsausgaben belaufen sich auf 500.000 $, einschließlich: Versorgungsleistungen (95.000 $), Immobilienwartung (120.000 $), Versicherung (35.000 $), Verwaltungsgebühren (120.000 $), Marketing (40.000 $), Verwaltungskosten (25.000 $), Grundsteuern (35.000 $) und andere Ausgaben (30.000 $). NOI = 800.000 $ - 500.000 $ = 300.000 $."
+        ],
+        "useCases": [
+          "Immobilienbewertung",
+          "Investitionsanalyse",
+          "Kreditprüfung",
+          "Finanzplanung"
+        ],
+        "seoKeywords": ["NOI", "Netto-Betriebsergebnis", "Betriebsergebnis", "Immobilien-NOI"],
+        "faqs": [
+          {
+            "question": "Welche Ausgaben sind im NOI enthalten?",
+            "answer": "NOI umfasst alle Betriebsausgaben wie Versorgungsleistungen, Wartung, Versicherung und Verwaltung, schließt aber Schuldendienst, Steuern und Kapitalverbesserungen aus."
+          },
+          {
+            "question": "Wie wird NOI in der Immobilienbewertung verwendet?",
+            "answer": "NOI wird durch die Kapitalisierungsrate dividiert, um den Immobilienwert im Ertragswertansatz zur Bewertung zu bestimmen."
+          }
+        ]
+      },
+      "capRate": {
+        "term": "Kapitalisierungsrate (Cap Rate)",
+        "definition": "Die Rendite einer Immobilieninvestition basierend auf erwarteten Einnahmen, berechnet durch Division des Netto-Betriebsergebnisses durch den Immobilienwert.",
+        "extendedDefinition": "Die Kapitalisierungsrate oder Cap Rate ist eine Schlüsselkennzahl zur Bewertung und zum Vergleich von Immobilieninvestitionen. Sie wird berechnet, indem das Netto-Betriebsergebnis (NOI) durch den Immobilienwert oder Kaufpreis dividiert wird.\n\nCap Rates zeigen die erwartete Rendite einer Investitionsimmobilie, vorausgesetzt, sie wird bar (ohne Finanzierung) gekauft. Höhere Cap Rates deuten auf höhere Renditen hin, können aber auch höheres Risiko anzeigen. Niedrigere Cap Rates deuten auf niedrigere Renditen hin, können aber stabilere, wünschenswertere Immobilien anzeigen.\n\nFür Outdoor-Hospitality-Immobilien variieren Cap Rates je nach Immobilientyp, Standort und Marktbedingungen. Premium Glamping-Resorts in begehrten Lagen können niedrigere Cap Rates (5-7%) haben, während grundlegende Campingplätze höhere Cap Rates (8-12%) haben können.\n\nSage Outdoor Advisory verwendet Cap Rates in unseren Bewertungen und Machbarkeitsstudien, um Kunden zu helfen, Investitionsrenditen und Immobilienwerte zu verstehen.",
+        "examples": [
+          "Ein Wohnmobil-Park generiert 300.000 $ Netto-Betriebsergebnis. Jüngste Vergleichsverkäufe und Marktanalyse zeigen, dass die Immobilie basierend auf ähnlichen Immobilien zu einer Cap Rate von 7,5% gehandelt werden sollte. Immobilienwert = 300.000 $ ÷ 0,075 = 4 Mio. $."
+        ],
+        "useCases": [
+          "Immobilienbewertung",
+          "Investitionsvergleich",
+          "Renditeanalyse",
+          "Kaufentscheidungen"
+        ],
+        "seoKeywords": ["Cap Rate", "Kapitalisierungsrate", "Immobilien-Cap-Rate", "Investitions-Cap-Rate"],
+        "faqs": [
+          {
+            "question": "Was ist eine gute Cap Rate?",
+            "answer": "Cap Rates variieren je nach Immobilientyp und Markt. Allgemein sind 6-10% üblich für Outdoor-Hospitality-Immobilien, wobei Premium-Immobilien niedrigere Raten haben."
+          },
+          {
+            "question": "Wie wird die Cap Rate berechnet?",
+            "answer": "Cap Rate = Netto-Betriebsergebnis ÷ Immobilienwert (oder Kaufpreis)."
+          }
+        ]
+      }
+    }
   },
   "errors": {
     "pageNotFound": "Seite Nicht Gefunden",

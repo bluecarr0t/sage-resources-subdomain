@@ -25,15 +25,16 @@ export function getAvailableLocalesForContent(contentType: ContentType): Locale[
       return [...locales];
     
     case 'guide':
-      // Guides don't have translations yet, only generate English pages
-      // TODO: Check messages/{locale}.json for guide translations and return locales with translations
-      return ['en'];
+      // Guides now have translations for priority guides in all locales (es, fr, de)
+      // Generate pages for all locales - translations exist for complete guides
+      // Note: Some guides may only have partial translations and will fall back to English sections
+      return [...locales];
     
     case 'glossary':
-      // Glossary terms might have some translations in the future
-      // For now, only generate English pages
-      // TODO: Check messages/{locale}.json for glossary translations
-      return ['en'];
+      // Glossary terms now have translations for priority terms in all locales (es, fr, de)
+      // Generate pages for all locales - translations exist for priority terms
+      // Note: Not all terms have translations yet, they will fall back to English
+      return [...locales];
     
     case 'property':
       // Property pages are data-driven and don't need localization
