@@ -14,7 +14,7 @@
  */
 
 import { createServerClient } from '@/lib/supabase';
-import { unstable_cache } from 'next/cache';
+import { getCache, setCache, deleteCachePattern, isRedisConnected } from '@/lib/redis';
 import fs from 'fs';
 import path from 'path';
 
@@ -23,7 +23,15 @@ interface PerformanceMetrics {
   timestamp: string;
   testUrl: string;
   apiResponseTime: number;
+  apiResponseTimeCached: number | null;
   databaseQueryTime: number;
+  redisCacheHit: boolean;
+  redisAvailable: boolean;
+  cacheImpact: {
+    cacheHitTime: number | null;
+    cacheMissTime: number | null;
+    improvementPercent: number | null;
+  };
   dataSize: {
     propertiesCount: number;
     responseSizeBytes: number;
@@ -50,7 +58,15 @@ describe('Map Page Performance Audit', () => {
     timestamp: new Date().toISOString(),
     testUrl,
     apiResponseTime: 0,
+    apiResponseTimeCached: null,
     databaseQueryTime: 0,
+    redisCacheHit: false,
+    redisAvailable: false,
+    cacheImpact: {
+      cacheHitTime: null,
+      cacheMissTime: null,
+      improvementPercent: null,
+    },
     dataSize: {
       propertiesCount: 0,
       responseSizeBytes: 0,
@@ -70,15 +86,27 @@ describe('Map Page Performance Audit', () => {
     jest.setTimeout(60000);
   });
 
-  test('should measure API response time for properties endpoint', async () => {
+  test('should measure API response time with Redis cache impact', async () => {
     const filterCountry = ['United States', 'Canada'];
-    const startTime = Date.now();
+    
+    // Check Redis availability
+    metrics.redisAvailable = isRedisConnected();
+    console.log(`\n=== Redis Status ===`);
+    console.log(`Redis Available: ${metrics.redisAvailable}`);
 
+    // Test 1: Cache Miss (first request - no cache)
+    console.log('\n=== Test 1: Cache Miss (First Request) ===');
+    
+    // Clear cache for this test
+    if (metrics.redisAvailable) {
+      const cacheKey = `properties:${JSON.stringify({ filterCountry, filterState: [], filterUnitType: [], filterRateRange: [], bounds: null, fields: null })}`;
+      await deleteCachePattern('properties:*');
+    }
+
+    const startTimeMiss = Date.now();
     try {
-      // Simulate the API call
       const supabase = createServerClient();
       
-      // Measure database query time
       const dbStartTime = Date.now();
       const { data: properties, error } = await supabase
         .from('all_glamping_properties')
@@ -94,8 +122,9 @@ describe('Map Page Performance Audit', () => {
         throw error;
       }
 
-      const endTime = Date.now();
-      metrics.apiResponseTime = endTime - startTime;
+      const endTimeMiss = Date.now();
+      metrics.apiResponseTime = endTimeMiss - startTimeMiss;
+      metrics.cacheImpact.cacheMissTime = metrics.apiResponseTime;
 
       // Calculate response size
       const responseJson = JSON.stringify(properties || []);
@@ -104,19 +133,60 @@ describe('Map Page Performance Audit', () => {
       metrics.dataSize.responseSizeMB = metrics.dataSize.responseSizeKB / 1024;
       metrics.dataSize.propertiesCount = properties?.length || 0;
 
-      console.log('\n=== API Performance Metrics ===');
-      console.log(`Response Time: ${metrics.apiResponseTime}ms`);
+      console.log(`Cache Miss Response Time: ${metrics.apiResponseTime}ms`);
       console.log(`Database Query Time: ${metrics.databaseQueryTime}ms`);
       console.log(`Properties Count: ${metrics.dataSize.propertiesCount}`);
       console.log(`Response Size: ${metrics.dataSize.responseSizeKB.toFixed(2)} KB (${metrics.dataSize.responseSizeMB.toFixed(2)} MB)`);
 
-      // Performance assertions
-      expect(metrics.apiResponseTime).toBeLessThan(5000); // Should complete in under 5 seconds
-      expect(metrics.databaseQueryTime).toBeLessThan(3000); // Database query should be under 3 seconds
-      expect(metrics.dataSize.propertiesCount).toBeGreaterThan(0);
+      // Cache the result for next test
+      if (metrics.redisAvailable && properties) {
+        const cacheKey = `properties:${JSON.stringify({ filterCountry, filterState: [], filterUnitType: [], filterRateRange: [], bounds: null, fields: null })}`;
+        await setCache(cacheKey, properties, 1209600);
+        console.log('✅ Cached result for next test');
+      }
     } catch (error) {
-      console.error('API Performance Test Error:', error);
+      console.error('Cache Miss Test Error:', error);
       throw error;
+    }
+
+    // Test 2: Cache Hit (second request - from cache)
+    if (metrics.redisAvailable) {
+      console.log('\n=== Test 2: Cache Hit (Second Request) ===');
+      
+      const startTimeHit = Date.now();
+      try {
+        const cacheKey = `properties:${JSON.stringify({ filterCountry, filterState: [], filterUnitType: [], filterRateRange: [], bounds: null, fields: null })}`;
+        const cachedProperties = await getCache<any[]>(cacheKey);
+        
+        const endTimeHit = Date.now();
+        const cacheHitTime = endTimeHit - startTimeHit;
+        
+        if (cachedProperties) {
+          metrics.redisCacheHit = true;
+          metrics.apiResponseTimeCached = cacheHitTime;
+          metrics.cacheImpact.cacheHitTime = cacheHitTime;
+          
+          const improvement = ((metrics.apiResponseTime - cacheHitTime) / metrics.apiResponseTime) * 100;
+          metrics.cacheImpact.improvementPercent = improvement;
+          
+          console.log(`Cache Hit Response Time: ${cacheHitTime}ms`);
+          console.log(`Improvement: ${improvement.toFixed(2)}% faster`);
+          console.log(`Time Saved: ${(metrics.apiResponseTime - cacheHitTime).toFixed(2)}ms`);
+        } else {
+          console.log('⚠️ Cache miss - cache may not be working correctly');
+        }
+      } catch (error) {
+        console.error('Cache Hit Test Error:', error);
+      }
+    }
+
+    // Performance assertions
+    expect(metrics.apiResponseTime).toBeLessThan(5000);
+    expect(metrics.databaseQueryTime).toBeLessThan(3000);
+    expect(metrics.dataSize.propertiesCount).toBeGreaterThan(0);
+    
+    if (metrics.redisAvailable && metrics.cacheImpact.cacheHitTime) {
+      expect(metrics.cacheImpact.cacheHitTime).toBeLessThan(metrics.apiResponseTime);
     }
   });
 
@@ -312,14 +382,34 @@ describe('Map Page Performance Audit', () => {
       metrics.recommendations.push('High ratio of client components - consider moving more logic to server components');
     }
 
+    // Redis cache recommendations
+    if (!metrics.redisAvailable) {
+      metrics.recommendations.push('Redis cache is not available - ensure Redis is configured and running for optimal performance');
+    } else if (metrics.cacheImpact.improvementPercent && metrics.cacheImpact.improvementPercent < 50) {
+      metrics.recommendations.push(`Cache improvement is only ${metrics.cacheImpact.improvementPercent.toFixed(2)}% - consider optimizing cache key strategy or increasing TTL`);
+    } else if (metrics.cacheImpact.improvementPercent && metrics.cacheImpact.improvementPercent > 80) {
+      metrics.recommendations.push(`Excellent cache performance (${metrics.cacheImpact.improvementPercent.toFixed(2)}% improvement) - Redis cache is working effectively`);
+    }
+
+    // Field selection recommendations
+    if (metrics.dataSize.responseSizeMB > 2) {
+      metrics.recommendations.push('Consider implementing field selection for initial map load to reduce payload size by 70-80%');
+    }
+
     // Save metrics to file for analysis
     const reportPath = path.join(process.cwd(), '__tests__', 'performance-metrics.json');
     fs.writeFileSync(reportPath, JSON.stringify(metrics, null, 2));
 
     console.log('\n=== Performance Audit Summary ===');
     console.log(`Test URL: ${metrics.testUrl}`);
-    console.log(`API Response Time: ${metrics.apiResponseTime}ms`);
+    console.log(`API Response Time (Cache Miss): ${metrics.apiResponseTime}ms`);
+    if (metrics.apiResponseTimeCached) {
+      console.log(`API Response Time (Cache Hit): ${metrics.apiResponseTimeCached}ms`);
+      console.log(`Cache Improvement: ${metrics.cacheImpact.improvementPercent?.toFixed(2)}%`);
+    }
     console.log(`Database Query Time: ${metrics.databaseQueryTime}ms`);
+    console.log(`Redis Available: ${metrics.redisAvailable}`);
+    console.log(`Redis Cache Hit: ${metrics.redisCacheHit}`);
     console.log(`Properties Count: ${metrics.dataSize.propertiesCount}`);
     console.log(`Response Size: ${metrics.dataSize.responseSizeMB.toFixed(2)} MB`);
     console.log(`Total Recommendations: ${metrics.recommendations.length}`);

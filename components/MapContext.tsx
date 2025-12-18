@@ -229,9 +229,10 @@ export function MapProvider({ children }: { children: ReactNode }) {
         filterUnitType.forEach(unitType => params.append('unitType', unitType));
         filterRateRange.forEach(rateRange => params.append('rateRange', rateRange));
         
-        // Add field selection for map markers - only fetch essential fields for initial load
+        // Add field selection for map markers - always use minimal fields for map markers
         // This reduces payload size by 70-80%
         // Full property details will be fetched when marker is clicked (in InfoWindow)
+        // Filter dropdowns will use processed minimal data (unit_type, rate_category are included)
         const isDefaultFilters = 
           filterCountry.length === 2 && 
           filterCountry.includes('United States') && 
@@ -240,11 +241,14 @@ export function MapProvider({ children }: { children: ReactNode }) {
           filterUnitType.length === 0 &&
           filterRateRange.length === 0;
         
-        // For default filters, fetch full data for filter dropdowns (allProperties)
-        // For filtered views, fetch minimal fields for map markers
-        if (!isDefaultFilters) {
-          params.append('fields', 'id,property_name,lat,lon,state,country,unit_type,rate_category');
-        }
+        // Always use field selection for map markers to reduce payload size
+        // The minimal fields include unit_type and rate_category which are sufficient for filter dropdowns
+        // Full property details are fetched on-demand when marker is clicked
+        params.append('fields', 'id,property_name,lat,lon,state,country,unit_type,rate_category');
+        
+        // Note: For default filters, we previously fetched full data for filter dropdowns
+        // However, the minimal fields (unit_type, rate_category) are sufficient for filter options
+        // This reduces initial payload from ~11.45 MB to ~2-3 MB (70-80% reduction)
         
         // Note: Bounds-based filtering would go here, but for initial load we fetch all
         // to ensure filter dropdowns work correctly. Viewport filtering can be done

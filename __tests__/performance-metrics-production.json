@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-12-18T17:57:05.588Z",
+  "testUrl": "https://resources.sageoutdooradvisory.com/en/map?country=United+States&country=Canada",
+  "apiUrl": "https://resources.sageoutdooradvisory.com/api/properties?country=United+States&country=Canada",
+  "cacheMiss": {
+    "responseTime": 2404,
+    "propertiesCount": 1334,
+    "responseSizeKB": 11722.4404296875,
+    "responseSizeMB": 11.4476957321167,
+    "headers": {
+      "age": "0",
+      "cache-control": "public",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Thu, 18 Dec 2025 17:57:07 GMT",
+      "server": "Vercel",
+      "strict-transport-security": "max-age=63072000",
+      "transfer-encoding": "chunked",
+      "vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch",
+      "x-matched-path": "/api/properties",
+      "x-vercel-cache": "MISS",
+      "x-vercel-id": "sfo1::iad1::mvgnc-1766080625697-e0525c88a991"
+    },
+    "databaseQueryTime": 2404
+  },
+  "cacheHit": {
+    "responseTime": 1933,
+    "propertiesCount": 1334,
+    "responseSizeKB": 11722.4404296875
+  },
+  "cacheImpact": {
+    "improvementPercent": 19.59234608985025,
+    "timeSaved": 471
+  },
+  "recommendations": [
+    "Response size is 11.45 MB - implement field selection to reduce payload by 70-80%",
+    "Cache improvement is only 19.59% - Redis cache may not be working optimally or response time is already fast",
+    "Field selection not detected in API URL - implement field selection for initial map load to reduce payload"
+  ]
+}
