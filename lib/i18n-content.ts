@@ -30,10 +30,10 @@ export function getAvailableLocalesForContent(contentType: ContentType): Locale[
       return ['en'];
     
     case 'glossary':
-      // Glossary terms now have translations for priority terms in all locales (es, fr, de)
-      // Generate pages for all locales - translations exist for priority terms
-      // Note: Not all terms have translations yet, they will fall back to English
-      return [...locales];
+      // Glossary terms are currently English-only
+      // Return only 'en' to avoid broken hreflang references
+      // TODO: Update when translations are added
+      return ['en'];
     
     case 'property':
       // Property pages are data-driven and don't need localization

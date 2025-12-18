@@ -227,6 +227,64 @@ export function generateHowToSchema(steps: string[], title: string, description?
   };
 }
 
+/**
+ * Extract HowTo steps from a guide content object
+ * First checks for explicit howToSteps field, then looks for sections with "Step X:" pattern
+ */
+export function extractHowToStepsFromGuide(guide: GuideContent): string[] | null {
+  // If guide has explicit howToSteps field, use that
+  if (guide.howToSteps && guide.howToSteps.length > 0) {
+    return guide.howToSteps;
+  }
+
+  // Look for sections with titles matching "Step X:" pattern
+  const stepSections = guide.sections.filter(section => {
+    const title = section.title.trim();
+    // Match patterns like "Step 1:", "Step 1:", "Step 7: Design and Construction", etc.
+    return /^Step\s+\d+:/i.test(title);
+  });
+
+  if (stepSections.length === 0) {
+    return null;
+  }
+
+  // Extract steps from section titles and content
+  const steps: string[] = stepSections.map(section => {
+    const title = section.title.trim();
+    // Extract step name (everything after "Step X:")
+    const stepNameMatch = title.match(/^Step\s+\d+:\s*(.+)$/i);
+    const stepName = stepNameMatch ? stepNameMatch[1].trim() : title;
+
+    // Extract a brief description from the content (first paragraph or first sentence)
+    let stepDescription = '';
+    if (section.content) {
+      // Remove HTML tags and get first sentence or first 200 characters
+      const textContent = section.content
+        .replace(/<[^>]*>/g, ' ') // Remove HTML tags
+        .replace(/\s+/g, ' ') // Normalize whitespace
+        .trim();
+      
+      // Get first sentence or first 200 characters
+      const firstSentence = textContent.match(/^[^.!?]+[.!?]/);
+      if (firstSentence) {
+        stepDescription = firstSentence[0].trim();
+      } else {
+        stepDescription = textContent.substring(0, 200).trim();
+        if (textContent.length > 200) {
+          stepDescription += '...';
+        }
+      }
+    }
+
+    // Format as "Step Name: Step description"
+    return stepDescription 
+      ? `${stepName}: ${stepDescription}`
+      : stepName;
+  });
+
+  return steps.length > 0 ? steps : null;
+}
+
 export function generateArticleSchema(content: GuideContent) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const url = `${baseUrl}/guides/${content.slug}`;
@@ -555,6 +613,105 @@ export function generateMapBreadcrumbSchema() {
         "item": "https://resources.sageoutdooradvisory.com/map"
       }
     ]
+  };
+}
+
+/**
+ * Generate Dataset schema for glamping properties database
+ * Enables dataset discovery in Google Dataset Search and data-rich results
+ */
+export function generateDatasetSchema(
+  propertyCount: number,
+  stats?: { states?: number; countries?: number; provinces?: number }
+) {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const currentDate = new Date().toISOString().split('T')[0];
+  
+  // Build spatial coverage description
+  const spatialCoverage: string[] = [];
+  if (stats?.countries) {
+    spatialCoverage.push(`${stats.countries} ${stats.countries === 1 ? 'country' : 'countries'}`);
+  }
+  if (stats?.states) {
+    spatialCoverage.push(`${stats.states} US ${stats.states === 1 ? 'state' : 'states'}`);
+  }
+  if (stats?.provinces) {
+    spatialCoverage.push(`${stats.provinces} Canadian ${stats.provinces === 1 ? 'province' : 'provinces'}`);
+  }
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Glamping Properties Database",
+    "description": `Comprehensive database of ${propertyCount}+ glamping properties across North America and Europe. Includes property details, locations, amenities, pricing, ratings, and operational information for glamping resorts, RV parks, and outdoor hospitality properties.`,
+    "keywords": [
+      "glamping properties",
+      "glamping resorts",
+      "outdoor hospitality",
+      "RV parks",
+      "campgrounds",
+      "glamping locations",
+      "glamping database",
+      "glamping data",
+      "outdoor recreation properties",
+      "tent camping",
+      "luxury camping"
+    ],
+    "creator": {
+      "@type": "Organization",
+      "name": "Sage Outdoor Advisory",
+      "url": "https://sageoutdooradvisory.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Sage Outdoor Advisory",
+      "url": "https://sageoutdooradvisory.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://sageoutdooradvisory.com/logo.png"
+      }
+    },
+    "datePublished": "2024-01-01",
+    "dateModified": currentDate,
+    "version": "1.0",
+    "distribution": {
+      "@type": "DataDownload",
+      "contentUrl": `${baseUrl}/map`,
+      "encodingFormat": "application/json",
+      "description": "Interactive map interface for exploring glamping properties"
+    },
+    "spatialCoverage": {
+      "@type": "Place",
+      "name": spatialCoverage.length > 0 
+        ? spatialCoverage.join(', ')
+        : "United States, Canada, Europe"
+    },
+    "temporalCoverage": "2024-01-01/..",
+    "numberOfItems": propertyCount,
+    "license": {
+      "@type": "CreativeWork",
+      "name": "All Rights Reserved",
+      "url": "https://resources.sageoutdooradvisory.com"
+    },
+    "includedInDataCatalog": {
+      "@type": "DataCatalog",
+      "name": "Sage Outdoor Advisory Resources",
+      "url": baseUrl
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Glamping Properties",
+      "numberOfItems": propertyCount,
+      "itemListElement": {
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@type": "LocalBusiness",
+          "name": "Glamping Properties Database",
+          "description": `Database containing ${propertyCount}+ glamping properties`
+        }
+      }
+    }
   };
 }
 

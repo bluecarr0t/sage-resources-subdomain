@@ -61,5 +61,6 @@ export interface GuideContent {
     buttonText: string;
     buttonLink: string;
   };
+  howToSteps?: string[]; // Steps for HowTo schema on process/instructional guides
 }
 

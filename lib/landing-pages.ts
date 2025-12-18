@@ -62,7 +62,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study": {
     slug: "glamping-feasibility-study",
     title: "Glamping Feasibility Study | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies to validate your outdoor hospitality project. Get comprehensive market analysis and financial projections.",
+    metaDescription: "Expert glamping feasibility studies for Texas, California & nationwide. Get comprehensive market analysis, financial projections & ROI estimates. Free consultation available.",
     hero: {
       headline: "Glamping Feasibility Study",
       subheadline: "In the rapidly growing glamping market, understanding nuances and market demands is key to success. Our feasibility studies provide a thorough examination of potential for upscale and unique outdoor accommodations.",
@@ -251,7 +251,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study": {
     slug: "rv-resort-feasibility-study",
     title: "RV Resort Feasibility Study | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies to guide your investment decisions. Expert market analysis and financial projections.",
+    metaDescription: "Professional RV resort feasibility studies nationwide. Expert market analysis, financial projections & ROI estimates. Trusted by investors & developers. Free consultation.",
     hero: {
       headline: "RV Resort Feasibility Study",
       subheadline: "Make informed investment decisions with comprehensive RV resort market analysis",
@@ -348,7 +348,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-feasibility-study": {
     slug: "campground-feasibility-study",
     title: "Campground Feasibility Study | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies with market analysis and financial projections. Trusted by investors and developers.",
+    metaDescription: "Professional campground feasibility studies nationwide. Expert market analysis, financial projections & ROI estimates. Trusted by investors & developers. Free consultation.",
     hero: {
       headline: "Campground Feasibility Study",
       subheadline: "Expert market analysis and financial projections for your campground project",
@@ -444,7 +444,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal": {
     slug: "glamping-appraisal",
     title: "Glamping Appraisal & Valuation | Sage Outdoor Advisory",
-    metaDescription: "Professional glamping property appraisals and valuations. Bank-approved appraisals for financing and investment decisions.",
+    metaDescription: "Professional glamping property appraisals nationwide. Bank-approved valuations for financing, acquisitions & investment decisions. Trusted by lenders. Free consultation.",
     hero: {
       headline: "Glamping Property Appraisal",
       subheadline: "Sage Outdoor Advisory offers specialized appraisal services for glamping resorts, ensuring that stakeholders receive accurate valuations that reflect the unique aspects and luxury offerings of these properties. Our appraisals are crucial for financing, selling, or expanding glamping operations, providing comprehensive assessments that consider market trends and revenue potential.",
@@ -639,7 +639,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-appraisal": {
     slug: "rv-resort-appraisal",
     title: "RV Resort Appraisal & Valuation | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort appraisals and valuations for financing, acquisitions, and investment decisions.",
+    metaDescription: "Professional RV resort appraisals nationwide. Bank-approved valuations for financing, acquisitions & investment decisions. Trusted by lenders. Free consultation.",
     hero: {
       headline: "RV Resort Appraisal & Valuation",
       subheadline: "Expert RV resort appraisals trusted by banks and investors",
@@ -732,7 +732,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-texas": {
     slug: "glamping-feasibility-study-texas",
     title: "Glamping Feasibility Study Texas | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Texas properties. Local market analysis and financial projections for Texas glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for Texas. Local market analysis, financial projections & ROI estimates for Texas glamping resorts. Free consultation available.",
     location: "Texas",
     hero: {
       headline: "Glamping Feasibility Study in Texas",
@@ -775,7 +775,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "how-to-finance-glamping-resort": {
     slug: "how-to-finance-glamping-resort",
     title: "How to Finance a Glamping Resort | Complete Guide | Sage Outdoor Advisory",
-    metaDescription: "Learn how to finance your glamping resort project. Expert guidance on bank loans, feasibility studies, and appraisal requirements for glamping financing.",
+    metaDescription: "Learn how to finance your glamping resort project. Expert guidance on bank loans, feasibility studies & appraisal requirements. Get financing help today. Free consultation.",
     hero: {
       headline: "How to Finance a Glamping Resort",
       subheadline: "Complete guide to securing financing for your glamping resort project. Learn what banks require and how to prepare.",
@@ -891,7 +891,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-appraisal-california": {
     slug: "rv-resort-appraisal-california",
     title: "RV Resort Appraisal California | Sage Outdoor Advisory",
-    metaDescription: "Expert RV resort appraisals in California. Bank-approved valuations for California RV parks and resorts. Trusted by lenders statewide.",
+    metaDescription: "Expert RV resort appraisals in California. Bank-approved valuations for California RV parks & resorts. Trusted by lenders statewide. Free consultation available.",
     location: "California",
     hero: {
       headline: "RV Resort Appraisal in California",
@@ -934,7 +934,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-florida": {
     slug: "glamping-feasibility-study-florida",
     title: "Glamping Feasibility Study Florida | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Florida properties. Market analysis and financial projections for Florida glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for Florida. Market analysis, financial projections & ROI estimates for Florida glamping resorts. Free consultation available.",
     location: "Florida",
     hero: {
       headline: "Glamping Feasibility Study in Florida",
@@ -977,7 +977,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-florida": {
     slug: "rv-resort-feasibility-study-florida",
     title: "RV Resort Feasibility Study Florida | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for Florida. Expert market analysis and financial projections for Florida RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for Florida. Expert market analysis, financial projections & ROI estimates for Florida RV resorts. Free consultation available.",
     location: "Florida",
     hero: {
       headline: "RV Resort Feasibility Study in Florida",
@@ -1020,7 +1020,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal-colorado": {
     slug: "glamping-appraisal-colorado",
     title: "Glamping Appraisal Colorado | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping property appraisals in Colorado. Bank-approved valuations for Colorado glamping resorts and properties.",
+    metaDescription: "Expert glamping property appraisals in Colorado. Bank-approved valuations for Colorado glamping resorts & properties. Trusted by Colorado lenders. Free consultation.",
     location: "Colorado",
     hero: {
       headline: "Glamping Property Appraisal in Colorado",
@@ -1062,7 +1062,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-arizona": {
     slug: "rv-resort-feasibility-study-arizona",
     title: "RV Resort Feasibility Study Arizona | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for Arizona. Expert market analysis and financial projections for Arizona RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for Arizona. Expert market analysis, financial projections & ROI estimates for Arizona RV resorts. Free consultation available.",
     location: "Arizona",
     hero: {
       headline: "RV Resort Feasibility Study in Arizona",
@@ -1104,7 +1104,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-feasibility-study-north-carolina": {
     slug: "campground-feasibility-study-north-carolina",
     title: "Campground Feasibility Study North Carolina | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies for North Carolina. Expert market analysis and financial projections for NC campgrounds.",
+    metaDescription: "Professional campground feasibility studies for North Carolina. Expert market analysis, financial projections & ROI estimates for NC campgrounds. Free consultation available.",
     location: "North Carolina",
     hero: {
       headline: "Campground Feasibility Study in North Carolina",
@@ -1146,7 +1146,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-utah": {
     slug: "glamping-feasibility-study-utah",
     title: "Glamping Feasibility Study Utah | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Utah properties. Market analysis and financial projections for Utah glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for Utah. Market analysis, financial projections & ROI estimates for Utah glamping resorts. Free consultation available.",
     location: "Utah",
     hero: {
       headline: "Glamping Feasibility Study in Utah",
@@ -1188,7 +1188,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-appraisal-texas": {
     slug: "rv-resort-appraisal-texas",
     title: "RV Resort Appraisal Texas | Sage Outdoor Advisory",
-    metaDescription: "Expert RV resort appraisals in Texas. Bank-approved valuations for Texas RV parks and resorts. Trusted by Texas lenders.",
+    metaDescription: "Expert RV resort appraisals in Texas. Bank-approved valuations for Texas RV parks & resorts. Trusted by Texas lenders statewide. Free consultation available.",
     location: "Texas",
     hero: {
       headline: "RV Resort Appraisal in Texas",
@@ -1230,7 +1230,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-appraisal-florida": {
     slug: "campground-appraisal-florida",
     title: "Campground Appraisal Florida | Sage Outdoor Advisory",
-    metaDescription: "Expert campground appraisals in Florida. Bank-approved valuations for Florida campgrounds. Trusted by Florida lenders.",
+    metaDescription: "Expert campground appraisals in Florida. Bank-approved valuations for Florida campgrounds. Trusted by Florida lenders statewide. Free consultation available.",
     location: "Florida",
     hero: {
       headline: "Campground Appraisal in Florida",
@@ -1272,7 +1272,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-oregon": {
     slug: "glamping-feasibility-study-oregon",
     title: "Glamping Feasibility Study Oregon | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Oregon properties. Market analysis and financial projections for Oregon glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for Oregon. Market analysis, financial projections & ROI estimates for Oregon glamping resorts. Free consultation available.",
     location: "Oregon",
     hero: {
       headline: "Glamping Feasibility Study in Oregon",
@@ -1314,7 +1314,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-tennessee": {
     slug: "rv-resort-feasibility-study-tennessee",
     title: "RV Resort Feasibility Study Tennessee | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for Tennessee. Expert market analysis and financial projections for Tennessee RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for Tennessee. Expert market analysis, financial projections & ROI estimates for Tennessee RV resorts. Free consultation available.",
     location: "Tennessee",
     hero: {
       headline: "RV Resort Feasibility Study in Tennessee",
@@ -1356,7 +1356,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-appraisal": {
     slug: "campground-appraisal",
     title: "Campground Appraisal & Valuation | Sage Outdoor Advisory",
-    metaDescription: "Professional campground appraisals and valuations for financing, acquisitions, and investment decisions. Bank-approved appraisals trusted by lenders.",
+    metaDescription: "Professional campground appraisals nationwide. Bank-approved valuations for financing, acquisitions & investment decisions. Trusted by lenders. Free consultation available.",
     hero: {
       headline: "Campground Property Appraisal",
       subheadline: "Get bank-approved appraisals for your campground property",
@@ -1434,7 +1434,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "feasibility-study-faq": {
     slug: "feasibility-study-faq",
     title: "Feasibility Study FAQ | Frequently Asked Questions | Sage Outdoor Advisory",
-    metaDescription: "Frequently asked questions about feasibility studies for outdoor hospitality projects. Get answers about timelines, requirements, and what to expect from a feasibility study.",
+    metaDescription: "FAQ about feasibility studies for outdoor hospitality projects. Get answers on timelines, requirements & what to expect. Expert guidance from Sage Outdoor Advisory.",
     hero: {
       headline: "Feasibility Study FAQ",
       subheadline: "Answers to common questions about feasibility studies for outdoor hospitality projects",
@@ -1522,7 +1522,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "appraisal-faq": {
     slug: "appraisal-faq",
     title: "Property Appraisal FAQ | Frequently Asked Questions | Sage Outdoor Advisory",
-    metaDescription: "Frequently asked questions about property appraisals for outdoor hospitality. Get answers about timelines, methods, and what to expect from an appraisal.",
+    metaDescription: "FAQ about property appraisals for outdoor hospitality. Get answers on timelines, methods & what to expect. Expert guidance from Sage Outdoor Advisory.",
     hero: {
       headline: "Property Appraisal FAQ",
       subheadline: "Answers to common questions about property appraisals for outdoor hospitality",
@@ -1615,7 +1615,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-california": {
     slug: "glamping-feasibility-study-california",
     title: "Glamping Feasibility Study California | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for California properties. Wine country, coastal, and mountain market analysis for California glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for California. Wine country, coastal & mountain market analysis for California glamping resorts. Free consultation available.",
     location: "California",
     hero: {
       headline: "Glamping Feasibility Study in California",
@@ -1721,7 +1721,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-colorado": {
     slug: "glamping-feasibility-study-colorado",
     title: "Glamping Feasibility Study Colorado | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Colorado properties. Mountain resort market analysis and financial projections for Colorado glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for Colorado. Mountain resort market analysis, financial projections & ROI estimates for Colorado glamping resorts. Free consultation.",
     location: "Colorado",
     hero: {
       headline: "Glamping Feasibility Study in Colorado",
@@ -1766,7 +1766,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-arizona": {
     slug: "glamping-feasibility-study-arizona",
     title: "Glamping Feasibility Study Arizona | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Arizona properties. Desert glamping market analysis for Sedona area and Arizona glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for Arizona. Desert glamping market analysis for Sedona area & Arizona glamping resorts. Free consultation available.",
     location: "Arizona",
     hero: {
       headline: "Glamping Feasibility Study in Arizona",
@@ -1811,7 +1811,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-north-carolina": {
     slug: "glamping-feasibility-study-north-carolina",
     title: "Glamping Feasibility Study North Carolina | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for North Carolina properties. Mountain and coastal market analysis for North Carolina glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for North Carolina. Mountain & coastal market analysis for North Carolina glamping resorts. Free consultation available.",
     location: "North Carolina",
     hero: {
       headline: "Glamping Feasibility Study in North Carolina",
@@ -1856,7 +1856,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-georgia": {
     slug: "glamping-feasibility-study-georgia",
     title: "Glamping Feasibility Study Georgia | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Georgia properties. Mountain and coastal market analysis for Georgia glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for Georgia. Mountain & coastal market analysis for Georgia glamping resorts. Free consultation available.",
     location: "Georgia",
     hero: {
       headline: "Glamping Feasibility Study in Georgia",
@@ -1901,7 +1901,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study-tennessee": {
     slug: "glamping-feasibility-study-tennessee",
     title: "Glamping Feasibility Study Tennessee | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Tennessee properties. Smoky Mountains and Nashville area market analysis for Tennessee glamping resorts.",
+    metaDescription: "Expert glamping feasibility studies for Tennessee. Smoky Mountains & Nashville area market analysis for Tennessee glamping resorts. Free consultation available.",
     location: "Tennessee",
     hero: {
       headline: "Glamping Feasibility Study in Tennessee",
@@ -1948,7 +1948,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal-california": {
     slug: "glamping-appraisal-california",
     title: "Glamping Appraisal California | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping property appraisals in California. Bank-approved valuations for California glamping resorts. Trusted by California lenders.",
+    metaDescription: "Expert glamping property appraisals in California. Bank-approved valuations for California glamping resorts. Trusted by California lenders. Free consultation.",
     location: "California",
     hero: {
       headline: "Glamping Property Appraisal in California",
@@ -1992,7 +1992,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal-texas": {
     slug: "glamping-appraisal-texas",
     title: "Glamping Appraisal Texas | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping property appraisals in Texas. Bank-approved valuations for Texas glamping resorts. Trusted by Texas lenders.",
+    metaDescription: "Expert glamping property appraisals in Texas. Bank-approved valuations for Texas glamping resorts. Trusted by Texas lenders statewide. Free consultation.",
     location: "Texas",
     hero: {
       headline: "Glamping Property Appraisal in Texas",
@@ -2036,7 +2036,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal-florida": {
     slug: "glamping-appraisal-florida",
     title: "Glamping Appraisal Florida | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping property appraisals in Florida. Bank-approved valuations for Florida glamping resorts. Trusted by Florida lenders.",
+    metaDescription: "Expert glamping property appraisals in Florida. Bank-approved valuations for Florida glamping resorts. Trusted by Florida lenders statewide. Free consultation.",
     location: "Florida",
     hero: {
       headline: "Glamping Property Appraisal in Florida",
@@ -2080,7 +2080,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal-utah": {
     slug: "glamping-appraisal-utah",
     title: "Glamping Appraisal Utah | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping property appraisals in Utah. Bank-approved valuations for Utah glamping resorts near national parks. Trusted by Utah lenders.",
+    metaDescription: "Expert glamping property appraisals in Utah. Bank-approved valuations for Utah glamping resorts near national parks. Trusted by Utah lenders. Free consultation.",
     location: "Utah",
     hero: {
       headline: "Glamping Property Appraisal in Utah",
@@ -2124,7 +2124,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal-oregon": {
     slug: "glamping-appraisal-oregon",
     title: "Glamping Appraisal Oregon | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping property appraisals in Oregon. Bank-approved valuations for Oregon glamping resorts. Trusted by Oregon lenders.",
+    metaDescription: "Expert glamping property appraisals in Oregon. Bank-approved valuations for Oregon glamping resorts. Trusted by Oregon lenders statewide. Free consultation.",
     location: "Oregon",
     hero: {
       headline: "Glamping Property Appraisal in Oregon",
@@ -2168,7 +2168,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal-arizona": {
     slug: "glamping-appraisal-arizona",
     title: "Glamping Appraisal Arizona | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping property appraisals in Arizona. Bank-approved valuations for Arizona glamping resorts in Sedona area. Trusted by Arizona lenders.",
+    metaDescription: "Expert glamping property appraisals in Arizona. Bank-approved valuations for Arizona glamping resorts in Sedona area. Trusted by Arizona lenders. Free consultation.",
     location: "Arizona",
     hero: {
       headline: "Glamping Property Appraisal in Arizona",
@@ -2212,7 +2212,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "glamping-appraisal-north-carolina": {
     slug: "glamping-appraisal-north-carolina",
     title: "Glamping Appraisal North Carolina | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping property appraisals in North Carolina. Bank-approved valuations for North Carolina glamping resorts. Trusted by NC lenders.",
+    metaDescription: "Expert glamping property appraisals in North Carolina. Bank-approved valuations for North Carolina glamping resorts. Trusted by NC lenders statewide. Free consultation.",
     location: "North Carolina",
     hero: {
       headline: "Glamping Property Appraisal in North Carolina",
@@ -2258,7 +2258,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-california": {
     slug: "rv-resort-feasibility-study-california",
     title: "RV Resort Feasibility Study California | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for California. Expert market analysis and financial projections for California RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for California. Expert market analysis, financial projections & ROI estimates for California RV resorts. Free consultation available.",
     location: "California",
     hero: {
       headline: "RV Resort Feasibility Study in California",
@@ -2303,7 +2303,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-texas": {
     slug: "rv-resort-feasibility-study-texas",
     title: "RV Resort Feasibility Study Texas | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for Texas. Expert market analysis and financial projections for Texas RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for Texas. Expert market analysis, financial projections & ROI estimates for Texas RV resorts. Free consultation available.",
     location: "Texas",
     hero: {
       headline: "RV Resort Feasibility Study in Texas",
@@ -2348,7 +2348,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-colorado": {
     slug: "rv-resort-feasibility-study-colorado",
     title: "RV Resort Feasibility Study Colorado | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for Colorado. Expert market analysis and financial projections for Colorado RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for Colorado. Expert market analysis, financial projections & ROI estimates for Colorado RV resorts. Free consultation available.",
     location: "Colorado",
     hero: {
       headline: "RV Resort Feasibility Study in Colorado",
@@ -2393,7 +2393,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-north-carolina": {
     slug: "rv-resort-feasibility-study-north-carolina",
     title: "RV Resort Feasibility Study North Carolina | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for North Carolina. Expert market analysis and financial projections for North Carolina RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for North Carolina. Expert market analysis, financial projections & ROI estimates for North Carolina RV resorts. Free consultation available.",
     location: "North Carolina",
     hero: {
       headline: "RV Resort Feasibility Study in North Carolina",
@@ -2438,7 +2438,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-georgia": {
     slug: "rv-resort-feasibility-study-georgia",
     title: "RV Resort Feasibility Study Georgia | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for Georgia. Expert market analysis and financial projections for Georgia RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for Georgia. Expert market analysis, financial projections & ROI estimates for Georgia RV resorts. Free consultation available.",
     location: "Georgia",
     hero: {
       headline: "RV Resort Feasibility Study in Georgia",
@@ -2483,7 +2483,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-utah": {
     slug: "rv-resort-feasibility-study-utah",
     title: "RV Resort Feasibility Study Utah | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for Utah. Expert market analysis and financial projections for Utah RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for Utah. Expert market analysis, financial projections & ROI estimates for Utah RV resorts. Free consultation available.",
     location: "Utah",
     hero: {
       headline: "RV Resort Feasibility Study in Utah",
@@ -2528,7 +2528,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-feasibility-study-oregon": {
     slug: "rv-resort-feasibility-study-oregon",
     title: "RV Resort Feasibility Study Oregon | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies for Oregon. Expert market analysis and financial projections for Oregon RV resorts.",
+    metaDescription: "Professional RV resort feasibility studies for Oregon. Expert market analysis, financial projections & ROI estimates for Oregon RV resorts. Free consultation available.",
     location: "Oregon",
     hero: {
       headline: "RV Resort Feasibility Study in Oregon",
@@ -2575,7 +2575,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-appraisal-florida": {
     slug: "rv-resort-appraisal-florida",
     title: "RV Resort Appraisal Florida | Sage Outdoor Advisory",
-    metaDescription: "Expert RV resort appraisals in Florida. Bank-approved valuations for Florida RV parks and resorts. Trusted by Florida lenders.",
+    metaDescription: "Expert RV resort appraisals in Florida. Bank-approved valuations for Florida RV parks & resorts. Trusted by Florida lenders statewide. Free consultation available.",
     location: "Florida",
     hero: {
       headline: "RV Resort Appraisal in Florida",
@@ -2619,7 +2619,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-appraisal-arizona": {
     slug: "rv-resort-appraisal-arizona",
     title: "RV Resort Appraisal Arizona | Sage Outdoor Advisory",
-    metaDescription: "Expert RV resort appraisals in Arizona. Bank-approved valuations for Arizona RV parks and resorts. Trusted by Arizona lenders.",
+    metaDescription: "Expert RV resort appraisals in Arizona. Bank-approved valuations for Arizona RV parks & resorts. Trusted by Arizona lenders statewide. Free consultation available.",
     location: "Arizona",
     hero: {
       headline: "RV Resort Appraisal in Arizona",
@@ -2663,7 +2663,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "rv-resort-appraisal-colorado": {
     slug: "rv-resort-appraisal-colorado",
     title: "RV Resort Appraisal Colorado | Sage Outdoor Advisory",
-    metaDescription: "Expert RV resort appraisals in Colorado. Bank-approved valuations for Colorado RV parks and resorts. Trusted by Colorado lenders.",
+    metaDescription: "Expert RV resort appraisals in Colorado. Bank-approved valuations for Colorado RV parks & resorts. Trusted by Colorado lenders statewide. Free consultation available.",
     location: "Colorado",
     hero: {
       headline: "RV Resort Appraisal in Colorado",
@@ -2709,7 +2709,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-feasibility-study-california": {
     slug: "campground-feasibility-study-california",
     title: "Campground Feasibility Study California | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies for California. Expert market analysis and financial projections for California campgrounds.",
+    metaDescription: "Professional campground feasibility studies for California. Expert market analysis, financial projections & ROI estimates for California campgrounds. Free consultation available.",
     location: "California",
     hero: {
       headline: "Campground Feasibility Study in California",
@@ -2754,7 +2754,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-feasibility-study-texas": {
     slug: "campground-feasibility-study-texas",
     title: "Campground Feasibility Study Texas | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies for Texas. Expert market analysis and financial projections for Texas campgrounds.",
+    metaDescription: "Professional campground feasibility studies for Texas. Expert market analysis, financial projections & ROI estimates for Texas campgrounds. Free consultation available.",
     location: "Texas",
     hero: {
       headline: "Campground Feasibility Study in Texas",
@@ -2799,7 +2799,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-feasibility-study-florida": {
     slug: "campground-feasibility-study-florida",
     title: "Campground Feasibility Study Florida | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies for Florida. Expert market analysis and financial projections for Florida campgrounds.",
+    metaDescription: "Professional campground feasibility studies for Florida. Expert market analysis, financial projections & ROI estimates for Florida campgrounds. Free consultation available.",
     location: "Florida",
     hero: {
       headline: "Campground Feasibility Study in Florida",
@@ -2844,7 +2844,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-feasibility-study-colorado": {
     slug: "campground-feasibility-study-colorado",
     title: "Campground Feasibility Study Colorado | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies for Colorado. Expert market analysis and financial projections for Colorado campgrounds.",
+    metaDescription: "Professional campground feasibility studies for Colorado. Expert market analysis, financial projections & ROI estimates for Colorado campgrounds. Free consultation available.",
     location: "Colorado",
     hero: {
       headline: "Campground Feasibility Study in Colorado",
@@ -2889,7 +2889,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-feasibility-study-arizona": {
     slug: "campground-feasibility-study-arizona",
     title: "Campground Feasibility Study Arizona | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies for Arizona. Expert market analysis and financial projections for Arizona campgrounds.",
+    metaDescription: "Professional campground feasibility studies for Arizona. Expert market analysis, financial projections & ROI estimates for Arizona campgrounds. Free consultation available.",
     location: "Arizona",
     hero: {
       headline: "Campground Feasibility Study in Arizona",
@@ -2934,7 +2934,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-feasibility-study-utah": {
     slug: "campground-feasibility-study-utah",
     title: "Campground Feasibility Study Utah | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies for Utah. Expert market analysis and financial projections for Utah campgrounds.",
+    metaDescription: "Professional campground feasibility studies for Utah. Expert market analysis, financial projections & ROI estimates for Utah campgrounds. Free consultation available.",
     location: "Utah",
     hero: {
       headline: "Campground Feasibility Study in Utah",
@@ -2981,7 +2981,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-appraisal-california": {
     slug: "campground-appraisal-california",
     title: "Campground Appraisal California | Sage Outdoor Advisory",
-    metaDescription: "Expert campground appraisals in California. Bank-approved valuations for California campgrounds. Trusted by California lenders.",
+    metaDescription: "Expert campground appraisals in California. Bank-approved valuations for California campgrounds. Trusted by California lenders statewide. Free consultation available.",
     location: "California",
     hero: {
       headline: "Campground Appraisal in California",
@@ -3025,7 +3025,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "campground-appraisal-texas": {
     slug: "campground-appraisal-texas",
     title: "Campground Appraisal Texas | Sage Outdoor Advisory",
-    metaDescription: "Expert campground appraisals in Texas. Bank-approved valuations for Texas campgrounds. Trusted by Texas lenders.",
+    metaDescription: "Expert campground appraisals in Texas. Bank-approved valuations for Texas campgrounds. Trusted by Texas lenders statewide. Free consultation available.",
     location: "Texas",
     hero: {
       headline: "Campground Appraisal in Texas",
@@ -3071,7 +3071,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "outdoor-resort-feasibility-study-california": {
     slug: "outdoor-resort-feasibility-study-california",
     title: "Outdoor Resort Feasibility Study California | Sage Outdoor Advisory",
-    metaDescription: "Professional outdoor resort feasibility studies for California. Expert market analysis and financial projections for California outdoor resorts.",
+    metaDescription: "Professional outdoor resort feasibility studies for California. Expert market analysis, financial projections & ROI estimates for California outdoor resorts. Free consultation.",
     location: "California",
     hero: {
       headline: "Outdoor Resort Feasibility Study in California",
@@ -3115,7 +3115,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "outdoor-resort-feasibility-study-florida": {
     slug: "outdoor-resort-feasibility-study-florida",
     title: "Outdoor Resort Feasibility Study Florida | Sage Outdoor Advisory",
-    metaDescription: "Professional outdoor resort feasibility studies for Florida. Expert market analysis and financial projections for Florida outdoor resorts.",
+    metaDescription: "Professional outdoor resort feasibility studies for Florida. Expert market analysis, financial projections & ROI estimates for Florida outdoor resorts. Free consultation.",
     location: "Florida",
     hero: {
       headline: "Outdoor Resort Feasibility Study in Florida",
@@ -3159,7 +3159,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "outdoor-resort-feasibility-study-texas": {
     slug: "outdoor-resort-feasibility-study-texas",
     title: "Outdoor Resort Feasibility Study Texas | Sage Outdoor Advisory",
-    metaDescription: "Professional outdoor resort feasibility studies for Texas. Expert market analysis and financial projections for Texas outdoor resorts.",
+    metaDescription: "Professional outdoor resort feasibility studies for Texas. Expert market analysis, financial projections & ROI estimates for Texas outdoor resorts. Free consultation.",
     location: "Texas",
     hero: {
       headline: "Outdoor Resort Feasibility Study in Texas",
@@ -3205,7 +3205,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "outdoor-resort-appraisal-california": {
     slug: "outdoor-resort-appraisal-california",
     title: "Outdoor Resort Appraisal California | Sage Outdoor Advisory",
-    metaDescription: "Expert outdoor resort appraisals in California. Bank-approved valuations for California outdoor resorts. Trusted by California lenders.",
+    metaDescription: "Expert outdoor resort appraisals in California. Bank-approved valuations for California outdoor resorts. Trusted by California lenders statewide. Free consultation.",
     location: "California",
     hero: {
       headline: "Outdoor Resort Appraisal in California",
@@ -3251,7 +3251,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "marina-feasibility-study-florida": {
     slug: "marina-feasibility-study-florida",
     title: "Marina Feasibility Study Florida | Sage Outdoor Advisory",
-    metaDescription: "Professional marina feasibility studies for Florida. Expert market analysis and financial projections for Florida marinas.",
+    metaDescription: "Professional marina feasibility studies for Florida. Expert market analysis, financial projections & ROI estimates for Florida marinas. Free consultation available.",
     location: "Florida",
     hero: {
       headline: "Marina Feasibility Study in Florida",
@@ -3319,7 +3319,7 @@ export const landingPages: Record<string, LandingPageContent> = {
   "marina-feasibility-study-california": {
     slug: "marina-feasibility-study-california",
     title: "Marina Feasibility Study California | Sage Outdoor Advisory",
-    metaDescription: "Professional marina feasibility studies for California. Expert market analysis and financial projections for California marinas.",
+    metaDescription: "Professional marina feasibility studies for California. Expert market analysis, financial projections & ROI estimates for California marinas. Free consultation available.",
     location: "California",
     hero: {
       headline: "Marina Feasibility Study in California",

@@ -11,6 +11,7 @@ import {
   generateMapItemListSchema,
   generateMapWebApplicationSchema,
   generateMapBreadcrumbSchema,
+  generateDatasetSchema,
 } from '@/lib/schema';
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
@@ -166,6 +167,10 @@ export default async function MapPage({ params }: PageProps) {
   const itemListSchema = generateMapItemListSchema(stats.uniqueProperties);
   const webApplicationSchema = generateMapWebApplicationSchema();
   const breadcrumbSchema = generateMapBreadcrumbSchema();
+  const datasetSchema = generateDatasetSchema(
+    stats.uniqueProperties,
+    { states: stats.states, countries: stats.countries, provinces: stats.provinces }
+  );
 
   return (
     <>
@@ -192,6 +197,10 @@ export default async function MapPage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }}
       />
 
       <GoogleMapsProvider>

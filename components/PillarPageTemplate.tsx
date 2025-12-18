@@ -11,6 +11,8 @@ import {
   generateArticleSchema,
   generateSpeakableSchema,
   generateCourseSchema,
+  generateHowToSchema,
+  extractHowToStepsFromGuide,
 } from "@/lib/schema";
 import RelatedGuides from "./RelatedGuides";
 import RelatedLandingPages from "./RelatedLandingPages";
@@ -37,6 +39,11 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
   // Add Course schema for comprehensive pillar guides
   const isComprehensiveGuide = content.slug.endsWith("-complete-guide");
   const courseSchema = isComprehensiveGuide ? generateCourseSchema(content) : null;
+  // Add HowTo schema for guides with step-by-step instructions
+  const howToSteps = content.howToSteps || extractHowToStepsFromGuide(content);
+  const howToSchema = howToSteps && howToSteps.length > 0
+    ? generateHowToSchema(howToSteps, content.hero.headline, content.metaDescription)
+    : null;
 
   // Track scroll position for active section highlighting
   useEffect(() => {
@@ -89,6 +96,12 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
+        />
+      )}
+      {howToSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
         />
       )}
 
