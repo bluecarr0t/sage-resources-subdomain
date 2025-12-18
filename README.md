@@ -116,7 +116,9 @@ In Vercel:
 
 ### Environment Variables
 
-Add the following environment variable in Vercel (Project Settings → Environment Variables):
+Add the following environment variables in Vercel (Project Settings → Environment Variables):
+
+#### Required
 
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID` - Your Google Analytics 4 Measurement ID (format: `G-XXXXXXXXXX`)
 
@@ -128,6 +130,15 @@ Add the following environment variable in Vercel (Project Settings → Environme
 5. Copy the Measurement ID (starts with `G-`)
 
 **Note:** The `NEXT_PUBLIC_` prefix makes this variable available to the client-side code, which is required for Google Analytics tracking.
+
+#### Optional (for Redis Caching)
+
+- `REDIS_URL` - Redis connection string (recommended)
+- OR separate variables: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
+
+Redis caching improves performance for the map page by caching property data. If not configured, the application will gracefully fall back to direct database queries.
+
+**See [REDIS_SETUP.md](./REDIS_SETUP.md) for detailed Redis Cloud setup instructions.**
 
 ## Customization
 

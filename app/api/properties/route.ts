@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
-import { unstable_cache } from 'next/cache';
+import { getCache, setCache } from '@/lib/redis';
 
 /**
  * API route for fetching glamping properties with caching
@@ -66,22 +66,26 @@ export async function GET(request: NextRequest) {
     const requestedFields = fieldsParam ? fieldsParam.split(',') : null;
     
     // Create a cache key based on filters, bounds, and fields
-    const cacheKey = `properties-${JSON.stringify({ filterCountry, filterState, filterUnitType, filterRateRange, bounds, fields: requestedFields })}`;
+    // Use a hash of the filter parameters for a cleaner cache key
+    const filterHash = JSON.stringify({ filterCountry, filterState, filterUnitType, filterRateRange, bounds, fields: requestedFields });
+    const cacheKey = `properties:${filterHash}`;
+    const ttlSeconds = 1209600; // 14 days
+
+    // Try to get from Redis cache first
+    const cachedProperties = await getCache<any[]>(cacheKey);
     
-    // Fetch properties with caching
-    // Cache tag: 'properties' - can be invalidated when properties are added
-    const cachedFetch = unstable_cache(
-      async () => {
-        return await fetchPropertiesFromDatabase(filterCountry, filterState, filterUnitType, filterRateRange, bounds, requestedFields);
-      },
-      [cacheKey],
-      {
-        tags: ['properties'],
-        revalidate: false, // Cache until manually invalidated
-      }
-    );
-    
-    const properties = await cachedFetch();
+    let properties: any[];
+    if (cachedProperties) {
+      properties = cachedProperties;
+    } else {
+      // Cache miss - fetch from database
+      properties = await fetchPropertiesFromDatabase(filterCountry, filterState, filterUnitType, filterRateRange, bounds, requestedFields);
+      
+      // Store in Redis cache (non-blocking - don't wait for it)
+      setCache(cacheKey, properties, ttlSeconds).catch((err) => {
+        console.error('Failed to cache properties:', err);
+      });
+    }
     
     return NextResponse.json({
       success: true,

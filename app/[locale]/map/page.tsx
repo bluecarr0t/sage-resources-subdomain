@@ -4,7 +4,7 @@ import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
 import MapLayout from '@/components/MapLayout';
 import ResourceHints from '@/components/ResourceHints';
 import { createServerClient } from '@/lib/supabase';
-import { unstable_cache } from 'next/cache';
+import { getCache, setCache } from '@/lib/redis';
 import {
   generateOrganizationSchema,
   generateMapSchema,
@@ -87,68 +87,79 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 async function getPropertyStatistics() {
-  // Use cached function - can be invalidated by revalidating 'properties' tag
-  const cachedStats = unstable_cache(
-    async () => {
-      try {
-        const supabase = createServerClient();
-        
-        // Get all glamping properties to count unique property names
-        const { data: properties, error } = await supabase
-          .from('all_glamping_properties')
-          .select('property_name, state, country')
-          .eq('is_glamping_property', 'Yes');
+  const cacheKey = 'property-statistics';
+  const ttlSeconds = 1209600; // 14 days
 
-        if (error) {
-          console.error('Error fetching property count:', error);
-          return { uniqueProperties: 1266, states: 43, provinces: 5, countries: 2 }; // Fallback values
-        }
+  // Try to get from Redis cache first
+  const cachedStats = await getCache<{
+    uniqueProperties: number;
+    states: number;
+    provinces: number;
+    countries: number;
+  }>(cacheKey);
 
-        // Count unique property names
-        const uniquePropertyNames = new Set<string>();
-        const uniqueStates = new Set<string>();
-        const uniqueProvinces = new Set<string>();
-        const uniqueCountries = new Set<string>();
+  if (cachedStats) {
+    return cachedStats;
+  }
 
-        properties?.forEach((prop: { property_name?: string | null; state?: string | null; country?: string | null }) => {
-          // Count unique property names (non-null, non-empty)
-          if (prop.property_name && prop.property_name.trim()) {
-            uniquePropertyNames.add(prop.property_name.trim());
-          }
-          
-          if (prop.country) {
-            uniqueCountries.add(prop.country);
-          }
-          if (prop.state) {
-            // Check if it's a Canadian province
-            const canadianProvinces = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-            if (canadianProvinces.includes(prop.state)) {
-              uniqueProvinces.add(prop.state);
-            } else {
-              uniqueStates.add(prop.state);
-            }
-          }
-        });
+  // Cache miss - fetch from database
+  try {
+    const supabase = createServerClient();
+    
+    // Get all glamping properties to count unique property names
+    const { data: properties, error } = await supabase
+      .from('all_glamping_properties')
+      .select('property_name, state, country')
+      .eq('is_glamping_property', 'Yes');
 
-        return {
-          uniqueProperties: uniquePropertyNames.size || 1266,
-          states: uniqueStates.size,
-          provinces: uniqueProvinces.size,
-          countries: uniqueCountries.size,
-        };
-      } catch (error) {
-        console.error('Error in getPropertyStatistics:', error);
-        return { uniqueProperties: 1266, states: 43, provinces: 5, countries: 2 }; // Fallback values
-      }
-    },
-    ['property-statistics'],
-    {
-      tags: ['properties'],
-      revalidate: false, // Cache until manually invalidated
+    if (error) {
+      console.error('Error fetching property count:', error);
+      return { uniqueProperties: 1266, states: 43, provinces: 5, countries: 2 }; // Fallback values
     }
-  );
-  
-  return await cachedStats();
+
+    // Count unique property names
+    const uniquePropertyNames = new Set<string>();
+    const uniqueStates = new Set<string>();
+    const uniqueProvinces = new Set<string>();
+    const uniqueCountries = new Set<string>();
+
+    properties?.forEach((prop: { property_name?: string | null; state?: string | null; country?: string | null }) => {
+      // Count unique property names (non-null, non-empty)
+      if (prop.property_name && prop.property_name.trim()) {
+        uniquePropertyNames.add(prop.property_name.trim());
+      }
+      
+      if (prop.country) {
+        uniqueCountries.add(prop.country);
+      }
+      if (prop.state) {
+        // Check if it's a Canadian province
+        const canadianProvinces = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
+        if (canadianProvinces.includes(prop.state)) {
+          uniqueProvinces.add(prop.state);
+        } else {
+          uniqueStates.add(prop.state);
+        }
+      }
+    });
+
+    const stats = {
+      uniqueProperties: uniquePropertyNames.size || 1266,
+      states: uniqueStates.size,
+      provinces: uniqueProvinces.size,
+      countries: uniqueCountries.size,
+    };
+
+    // Store in Redis cache (non-blocking - don't wait for it)
+    setCache(cacheKey, stats, ttlSeconds).catch((err) => {
+      console.error('Failed to cache property statistics:', err);
+    });
+
+    return stats;
+  } catch (error) {
+    console.error('Error in getPropertyStatistics:', error);
+    return { uniqueProperties: 1266, states: 43, provinces: 5, countries: 2 }; // Fallback values
+  }
 }
 
 export default async function MapPage({ params }: PageProps) {
