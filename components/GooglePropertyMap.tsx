@@ -14,19 +14,26 @@ async function getSupabaseClient() {
 }
 import { NationalPark, NationalParkWithCoords, filterParksWithCoordinates } from '@/lib/types/national-parks';
 import { useMapContext } from './MapContext';
-import MultiSelect from './MultiSelect';
 import { slugifyPropertyName } from '@/lib/properties';
-import { PopulationLookup } from '@/lib/population/parse-population-csv';
-import { fetchPopulationDataFromSupabase, PopulationDataByFIPS } from '@/lib/population/supabase-population';
-import { fetchGDPDataFromSupabase, GDPDataByFIPS } from '@/lib/gdp/supabase-gdp';
 import { getChangeRanges, getCorrelationZoneRanges } from '@/lib/maps/county-boundaries';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
+// Import extracted utilities and hooks
+import { STATE_ABBREVIATIONS, CANADIAN_PROVINCES, getFullStateName, createStateFilterSet, stateMatchesFilter } from './map/utils/stateUtils';
+import { usePropertyProcessing } from './map/hooks/usePropertyProcessing';
+import { useMapFilters } from './map/hooks/useMapFilters';
+import { useMapBounds } from './map/hooks/useMapBounds';
+import { useMapMarkers } from './map/hooks/useMapMarkers';
+import { useMapLayers } from './map/hooks/useMapLayers';
+import { PopulationLookup } from '@/lib/population/parse-population-csv';
+import { PopulationDataByFIPS } from '@/lib/population/supabase-population';
+import { GDPDataByFIPS } from '@/lib/gdp/supabase-gdp';
+
 // Dynamically import layer components to reduce initial bundle size
 const PopulationLayer = dynamic(() => import('./PopulationLayer'), {
   ssr: false,
-  loading: () => null, // No loading state needed - layer loads when visible
+  loading: () => null,
 });
 const GDPLayer = dynamic(() => import('./GDPLayer'), {
   ssr: false,
@@ -35,6 +42,12 @@ const GDPLayer = dynamic(() => import('./GDPLayer'), {
 const OpportunityZonesLayer = dynamic(() => import('./OpportunityZonesLayer'), {
   ssr: false,
   loading: () => null,
+});
+
+// Dynamically import MultiSelect to reduce initial bundle size
+const MultiSelect = dynamic(() => import('./MultiSelect'), {
+  ssr: false,
+  loading: () => <div className="animate-pulse bg-gray-200 h-10 rounded"></div>,
 });
 
 // Default center for lower 48 states (continental USA)
@@ -84,66 +97,8 @@ function getGooglePhotoUrl(photo: {
   return url;
 }
 
-// State abbreviation to full name mapping
-const STATE_ABBREVIATIONS: Record<string, string> = {
-  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
-  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
-  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
-  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
-  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
-  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
-  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
-  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
-  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
-  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
-  'DC': 'District of Columbia',
-  // Canadian provinces
-  'AB': 'Alberta', 'BC': 'British Columbia', 'MB': 'Manitoba', 'NB': 'New Brunswick',
-  'NL': 'Newfoundland and Labrador', 'NS': 'Nova Scotia', 'NT': 'Northwest Territories',
-  'NU': 'Nunavut', 'ON': 'Ontario', 'PE': 'Prince Edward Island', 'QC': 'Quebec',
-  'SK': 'Saskatchewan', 'YT': 'Yukon'
-};
-
-// Canadian provinces to exclude from state filter
-const CANADIAN_PROVINCES = [
-  'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick',
-  'Newfoundland and Labrador', 'Nova Scotia', 'Northwest Territories',
-  'Nunavut', 'Ontario', 'Prince Edward Island', 'Quebec',
-  'Saskatchewan', 'Yukon'
-];
-
-/**
- * Convert state abbreviation(s) to full state name(s)
- * Handles multiple states separated by commas, and preserves full names
- */
-function getFullStateName(state: string | null): string | null {
-  if (!state) return null;
-  
-  // Handle multiple states separated by commas or semicolons
-  const stateSeparator = state.includes(',') ? ',' : (state.includes(';') ? ';' : null);
-  
-  if (stateSeparator) {
-    const states = state.split(stateSeparator).map(s => s.trim()).filter(Boolean);
-    const fullNames = states.map(s => {
-      const upperState = s.toUpperCase();
-      return STATE_ABBREVIATIONS[upperState] || s;
-    });
-    return fullNames.join(', ');
-  }
-  
-  // Single state - check if it's an abbreviation
-  const upperState = state.toUpperCase();
-  return STATE_ABBREVIATIONS[upperState] || state;
-}
-
-/**
- * Normalize property name for consistent grouping and counting
- * Trims whitespace and converts to lowercase to prevent duplicates
- */
-function normalizePropertyName(name: string | null | undefined): string {
-  if (!name) return '';
-  return name.trim().toLowerCase();
-}
+// Import normalizePropertyName from utilities (will be used in filter calculations)
+import { normalizePropertyName } from './map/utils/propertyProcessing';
 
 /**
  * Convert exact rate to a rough range to avoid revealing precise scraped data
@@ -296,7 +251,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [displayedCount, setDisplayedCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [urlInitialized, setUrlInitialized] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false); // Collapsed by default on mobile
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(defaultCenter);
   // Initialize with mobile zoom if on mobile, otherwise desktop zoom
@@ -304,23 +258,84 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [mapZoom, setMapZoom] = useState<number>(defaultZoom);
   const [shouldFitBounds, setShouldFitBounds] = useState(false); // Disabled by default - use fixed zoom/center for lower 48 states
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
-  const [populationLookup, setPopulationLookup] = useState<PopulationLookup | null>(null);
-  const [populationFipsLookup, setPopulationFipsLookup] = useState<PopulationDataByFIPS | null>(null);
-  const [populationLoading, setPopulationLoading] = useState(false);
-  const [populationLayerKey, setPopulationLayerKey] = useState(0);
-  const [gdpLookup, setGdpLookup] = useState<GDPDataByFIPS | null>(null);
-  const [gdpLoading, setGdpLoading] = useState(false);
-  const [gdpLayerKey, setGdpLayerKey] = useState(0);
+  
+  // Use extracted hook for layer management
+  const {
+    populationLookup,
+    populationFipsLookup,
+    populationLoading,
+    populationLayerKey,
+    gdpLookup,
+    gdpLoading,
+    gdpLayerKey,
+  } = useMapLayers({
+    showPopulationLayer,
+    showGDPLayer,
+    populationYear,
+  });
 
   // URL parameter handling
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
+  // State for full property details (fetched when marker is clicked)
+  const [fullPropertyDetails, setFullPropertyDetails] = useState<any>(null);
+  const [loadingPropertyDetails, setLoadingPropertyDetails] = useState(false);
+
   // Reset photo index when selected property changes
   useEffect(() => {
     setCurrentPhotoIndex(0);
   }, [selectedProperty?.id]);
+
+  // Fetch full property details when marker is clicked (if we only have minimal fields)
+  useEffect(() => {
+    if (!selectedProperty || !selectedProperty.id) {
+      setFullPropertyDetails(null);
+      return;
+    }
+
+    // Check if we already have full details (check for fields that are only in full fetch)
+    const hasFullDetails = selectedProperty.google_photos !== undefined || 
+                           selectedProperty.address !== undefined ||
+                           selectedProperty.description !== undefined;
+
+    if (hasFullDetails) {
+      // Already have full details, use them
+      setFullPropertyDetails(selectedProperty);
+      return;
+    }
+
+    // Fetch full property details
+    async function fetchFullPropertyDetails() {
+      if (!selectedProperty?.id) return;
+      
+      setLoadingPropertyDetails(true);
+      try {
+        const response = await fetch(`/api/properties?id=${selectedProperty.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch property details');
+        }
+        const result = await response.json();
+        if (result.success && result.data) {
+          setFullPropertyDetails(result.data);
+        }
+      } catch (err) {
+        console.error('Error fetching property details:', err);
+        // Fallback to using selectedProperty even if fetch fails
+        if (selectedProperty) {
+          setFullPropertyDetails(selectedProperty);
+        }
+      } finally {
+        setLoadingPropertyDetails(false);
+      }
+    }
+
+    fetchFullPropertyDetails();
+  }, [selectedProperty]);
+
+  // Use full property details if available, otherwise use selectedProperty
+  const propertyForDisplay = fullPropertyDetails || selectedProperty;
 
   // Close property InfoWindow when park is selected
   useEffect(() => {
@@ -336,8 +351,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
   }, [selectedProperty]);
   const clustererRef = useRef<any | null>(null);
-  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
-  const parkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const hasCenteredFromUrlRef = useRef<boolean>(false);
   const hasJustFittedBoundsRef = useRef<boolean>(false);
   // Ref to track when a marker is clicked to prevent data layer from opening
@@ -349,206 +362,46 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     const checkMobile = () => {
       const isMobileCheck = window.innerWidth < 768;
       setIsMobile(isMobileCheck);
-      // Update zoom to mobile default if on mobile and no URL params
-      if (isMobileCheck && !urlInitialized) {
-        const urlLat = searchParams.get('lat');
-        const urlLon = searchParams.get('lon');
-        if (!urlLat || !urlLon) {
-          setMapZoom(defaultZoomMobile);
-        }
-      }
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, [urlInitialized, searchParams]);
+  }, []);
 
-  // Initialize filters and map position from URL parameters on mount
-  useEffect(() => {
-    if (!isClient || urlInitialized) return;
-
-    const urlState = searchParams.getAll('state');
-    const urlCountry = searchParams.getAll('country');
-    const urlUnitType = searchParams.getAll('unitType');
-    const urlRateRange = searchParams.getAll('rateRange');
-    
-    // Check for lat/lon/zoom parameters for map positioning
-    const urlLat = searchParams.get('lat');
-    const urlLon = searchParams.get('lon');
-    const urlZoom = searchParams.get('zoom');
-
-    if (urlState.length > 0 || urlCountry.length > 0 || urlUnitType.length > 0 || urlRateRange.length > 0) {
-      if (urlCountry.length > 0) {
-        setFilterCountry(urlCountry);
-      }
-      if (urlState.length > 0) {
-        setFilterState(urlState);
-      }
-      if (urlUnitType.length > 0) {
-        setFilterUnitType(urlUnitType);
-      }
-      if (urlRateRange.length > 0) {
-        setFilterRateRange(urlRateRange);
-      }
-    }
-    
-    // If lat/lon/zoom are provided, use them to center and zoom the map
-    if (urlLat && urlLon) {
-      const lat = parseFloat(urlLat);
-      const lon = parseFloat(urlLon);
-      if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-        setMapCenter({ lat, lng: lon });
-        setShouldFitBounds(false); // Don't fit bounds if we have specific coordinates
-        hasCenteredFromUrlRef.current = false; // Reset so we can center again with new coordinates
-        
-        // Set zoom if provided, otherwise use default zoom for single location
-        if (urlZoom) {
-          const zoom = parseFloat(urlZoom);
-          if (!isNaN(zoom) && isFinite(zoom) && zoom >= 1 && zoom <= 20) {
-            setMapZoom(zoom);
-          } else {
-            setMapZoom(15); // Default zoom for single location
-          }
-        } else {
-          setMapZoom(15); // Default zoom for single location
-        }
-      }
-    } else {
-      // No URL params, reset to defaults and use fixed zoom/center (don't fit bounds)
-      // Use mobile zoom on mobile devices, desktop zoom otherwise
-      const zoomToUse = isMobile ? defaultZoomMobile : defaultZoom;
-      setMapCenter(defaultCenter);
-      setMapZoom(zoomToUse);
-      setShouldFitBounds(false); // Keep fixed zoom/center for lower 48 states
-      hasCenteredFromUrlRef.current = false;
-    }
-    
-    setUrlInitialized(true);
-  }, [isClient, searchParams, urlInitialized, setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange, isMobile]);
-
-  // Update URL when filters change (preserve lat/lon/zoom if they exist)
-  useEffect(() => {
-    if (!isClient || !urlInitialized) return;
-
-    const params = new URLSearchParams();
-
-    if (filterCountry.length > 0) {
-      filterCountry.forEach(country => params.append('country', country));
-    }
-    if (filterState.length > 0) {
-      filterState.forEach(state => params.append('state', state));
-    }
-    if (filterUnitType.length > 0) {
-      filterUnitType.forEach(type => params.append('unitType', type));
-    }
-    if (filterRateRange.length > 0) {
-      filterRateRange.forEach(range => params.append('rateRange', range));
-    }
-    
-    // Preserve lat/lon/zoom parameters if they exist
-    const urlLat = searchParams.get('lat');
-    const urlLon = searchParams.get('lon');
-    const urlZoom = searchParams.get('zoom');
-    if (urlLat) params.set('lat', urlLat);
-    if (urlLon) params.set('lon', urlLon);
-    if (urlZoom) params.set('zoom', urlZoom);
-
-    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-    const currentUrl = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
-
-    if (newUrl !== currentUrl) {
-      router.replace(newUrl, { scroll: false });
-    }
-  }, [filterCountry, filterState, filterUnitType, filterRateRange, isClient, urlInitialized, pathname, router, searchParams]);
-
-  // Enable fitBounds when state filter is applied, disable when cleared
-  useEffect(() => {
-    if (!isClient || !urlInitialized) return;
-    
-    const urlLat = searchParams.get('lat');
-    const urlLon = searchParams.get('lon');
-    
-    // Don't enable fitBounds if there are URL coordinates (user has navigated to a specific location)
-    if (urlLat && urlLon) {
-      setShouldFitBounds(false);
-      hasJustFittedBoundsRef.current = false;
-      return;
-    }
-    
-    // Enable fitBounds when state filter is applied
-    if (filterState.length > 0) {
-      setShouldFitBounds(true);
-      // Reset the flag when enabling fitBounds
-      hasJustFittedBoundsRef.current = false;
-    } else {
-      // Disable fitBounds when state filter is cleared
-      // The default center/zoom effect will handle resetting the view
-      setShouldFitBounds(false);
-      hasJustFittedBoundsRef.current = false;
-    }
-  }, [filterState, isClient, urlInitialized, searchParams]);
-
-  // Watch for changes to lat/lon/zoom URL parameters and update map position
-  useEffect(() => {
-    if (!isClient || !urlInitialized) return;
-
-    const urlLat = searchParams.get('lat');
-    const urlLon = searchParams.get('lon');
-    const urlZoom = searchParams.get('zoom');
-
-    // If lat/lon/zoom are provided, use them to center and zoom the map
-    if (urlLat && urlLon) {
-      const lat = parseFloat(urlLat);
-      const lon = parseFloat(urlLon);
-      if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-        const newCenter = { lat, lng: lon };
-        // Always update mapCenter when URL params change (comparison prevents unnecessary re-renders in map effect)
-        setMapCenter(newCenter);
-        setShouldFitBounds(false); // Don't fit bounds if we have specific coordinates
-        hasCenteredFromUrlRef.current = false; // Reset so we can center again with new coordinates
-        
-        // Set zoom if provided, otherwise use default zoom for single location
-        if (urlZoom) {
-          const zoom = parseFloat(urlZoom);
-          if (!isNaN(zoom) && isFinite(zoom) && zoom >= 1 && zoom <= 20) {
-            setMapZoom(zoom);
-          } else {
-            setMapZoom(15); // Default zoom for single location
-          }
-        } else {
-          setMapZoom(15); // Default zoom for single location
-        }
-      }
-    } else {
-      // No lat/lon params, reset to defaults (use fixed zoom/center, don't fit bounds)
-      // Use mobile zoom on mobile devices, desktop zoom otherwise
-      const zoomToUse = isMobile ? defaultZoomMobile : defaultZoom;
-      setMapCenter(defaultCenter);
-      setMapZoom(zoomToUse);
-      setShouldFitBounds(false); // Keep fixed zoom/center for lower 48 states
-      hasCenteredFromUrlRef.current = false;
-    }
-  }, [isClient, urlInitialized, searchParams, isMobile]);
+  // Use extracted hook for filter and URL management
+  const { urlInitialized } = useMapFilters({
+    isClient,
+    isMobile,
+    filterCountry,
+    filterState,
+    filterUnitType,
+    filterRateRange,
+    setFilterCountry,
+    setFilterState,
+    setFilterUnitType,
+    setFilterRateRange,
+    setMapCenter,
+    setMapZoom,
+    setShouldFitBounds,
+    hasCenteredFromUrlRef,
+    hasJustFittedBoundsRef,
+  });
 
   // Use shared allProperties from context for filter option calculation
   // No need to fetch separately - context already provides this
   // The allProperties from context contains all properties without filters for filter dropdowns
 
-  // Fetch national parks only when the toggle is enabled
+  // Lazy load national parks only when the toggle is enabled
+  // This reduces initial bundle size and improves performance
   useEffect(() => {
-    // Only fetch when user enables the national parks layer
-    if (!showNationalParks) {
+    if (!showNationalParks || nationalParks.length > 0) {
       return;
     }
 
-    // If already loaded, don't reload
-    if (nationalParks.length > 0) {
-      return;
-    }
-
+    // Use dynamic import to lazy load Supabase client and fetch parks
     async function fetchNationalParks() {
       try {
-        console.log('Fetching national parks from Supabase...');
+        console.log('Lazy loading national parks from Supabase...');
         const supabaseClient = await getSupabaseClient();
         const { data, error: supabaseError } = await supabaseClient
           .from('national-parks')
@@ -567,483 +420,40 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         console.error('Error fetching national parks:', err);
       }
     }
-    fetchNationalParks();
+    
+    // Small delay to avoid blocking initial render
+    const timer = setTimeout(() => {
+      fetchNationalParks();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [showNationalParks, nationalParks.length]);
 
-  // Increment layer key when toggled on to force remount (ensures Data component re-initializes)
-  const prevShowPopulationLayerRef = useRef(showPopulationLayer);
-  useEffect(() => {
-    // Only increment when toggling from false to true
-    if (showPopulationLayer && !prevShowPopulationLayerRef.current) {
-      setPopulationLayerKey(prev => prev + 1);
-    }
-    prevShowPopulationLayerRef.current = showPopulationLayer;
-  }, [showPopulationLayer]);
+  // Layer management is now handled by useMapLayers hook (see above)
 
-  // Fetch population data from Supabase only when layer is enabled
-  useEffect(() => {
-    // Only load data when the layer is actually enabled
-    if (!showPopulationLayer) {
-      return;
-    }
-
-    // If already loaded, don't reload
-    if (populationLookup) {
-      return;
-    }
-
-    async function loadPopulationData() {
-      setPopulationLoading(true);
-      try {
-        console.log('Loading population data from Supabase...');
-        const { lookup, fipsLookup } = await fetchPopulationDataFromSupabase();
-        setPopulationLookup(lookup);
-        setPopulationFipsLookup(fipsLookup);
-      } catch (err) {
-        console.error('Error loading population data from Supabase:', err);
-      } finally {
-        setPopulationLoading(false);
-      }
-    }
-
-    loadPopulationData();
-  }, [showPopulationLayer, populationLookup]);
-
-  // Increment GDP layer key when toggled on to force remount
-  const prevShowGDPLayerRef = useRef(showGDPLayer);
-  useEffect(() => {
-    if (showGDPLayer && !prevShowGDPLayerRef.current) {
-      setGdpLayerKey(prev => prev + 1);
-    }
-    prevShowGDPLayerRef.current = showGDPLayer;
-  }, [showGDPLayer]);
-
-  // Fetch GDP data from Supabase only when layer is enabled
-  useEffect(() => {
-    if (!showGDPLayer) {
-      return;
-    }
-
-    // If already loaded, don't reload
-    if (gdpLookup) {
-      return;
-    }
-
-    async function loadGDPData() {
-      setGdpLoading(true);
-      try {
-        console.log('Loading GDP data from Supabase...');
-        const lookup = await fetchGDPDataFromSupabase();
-        setGdpLookup(lookup);
-      } catch (err) {
-        console.error('Error loading GDP data from Supabase:', err);
-      } finally {
-        setGdpLoading(false);
-      }
-    }
-
-    loadGDPData();
-  }, [showGDPLayer, gdpLookup]);
-
-  // Process shared properties from context (no fetching - that's done in context)
-  // The context fetches raw data, and this component processes it for display
-  const processedProperties = useMemo(() => {
-    if (!properties || properties.length === 0) {
-      return [];
-    }
-    
-    const transformedData = properties;
-        
-        // Create a set of all state variations we're filtering by (for use during grouping)
-        const filterStateSet = new Set<string>();
-        if (filterState.length > 0) {
-          filterState.forEach((state) => {
-            filterStateSet.add(state);
-            filterStateSet.add(state.toUpperCase());
-            filterStateSet.add(state.toLowerCase());
-            filterStateSet.add(state.charAt(0).toUpperCase() + state.slice(1).toLowerCase());
-            
-            // Add abbreviation if it's a full name
-            const abbreviation = Object.entries(STATE_ABBREVIATIONS).find(
-              ([_, fullName]) => fullName.toLowerCase() === state.toLowerCase()
-            );
-            if (abbreviation) {
-              filterStateSet.add(abbreviation[0]);
-              filterStateSet.add(abbreviation[0].toUpperCase());
-            }
-            
-            // Add full name if it's an abbreviation
-            if (STATE_ABBREVIATIONS[state.toUpperCase()]) {
-              const fullName = STATE_ABBREVIATIONS[state.toUpperCase()];
-              filterStateSet.add(fullName);
-              filterStateSet.add(fullName.toUpperCase());
-              filterStateSet.add(fullName.toLowerCase());
-            }
-          });
-        }
-        
-        // Helper function to check if a state matches the filter
-        const stateMatchesFilter = (state: string | null): boolean => {
-          if (!state) return false;
-          if (filterStateSet.size === 0) return true; // No filter = all match
-          const stateStr = String(state);
-          return filterStateSet.has(stateStr) || 
-                 filterStateSet.has(stateStr.toUpperCase()) ||
-                 filterStateSet.has(stateStr.toLowerCase()) ||
-                 filterStateSet.has(stateStr.charAt(0).toUpperCase() + stateStr.slice(1).toLowerCase());
-        };
-        
-        // Group by property_name and collect all unit types and rates for each property
-        const propertyMap = new Map<string, any>();
-        const unitTypesMap = new Map<string, Set<string>>(); // Track unit types per property
-        const ratesMap = new Map<string, number[]>(); // Track avg__rate__next_12_months_ per property
-        
-        transformedData.forEach((item: any) => {
-          const propertyName = item.property_name;
-          if (!propertyName) return; // Skip records without property_name
-          
-          // Normalize property name to prevent duplicates from whitespace/case differences
-          const normalizedName = normalizePropertyName(propertyName);
-          
-          // Collect unit types for this property
-          if (!unitTypesMap.has(normalizedName)) {
-            unitTypesMap.set(normalizedName, new Set());
-          }
-          if (item.unit_type) {
-            unitTypesMap.get(normalizedName)!.add(item.unit_type);
-          }
-          
-          // Collect rates for this property
-          if (!ratesMap.has(normalizedName)) {
-            ratesMap.set(normalizedName, []);
-          }
-          const rate = item.avg__rate__next_12_months_;
-          if (rate != null && !isNaN(Number(rate)) && isFinite(Number(rate))) {
-            ratesMap.get(normalizedName)!.push(Number(rate));
-          }
-          
-          // Check if we already have this property
-          if (!propertyMap.has(normalizedName)) {
-            // Use this record as the representative
-            propertyMap.set(normalizedName, item);
-          } else {
-            // If we already have this property, prefer one that matches the state filter and has valid coordinates
-            const existing = propertyMap.get(normalizedName);
-            const existingLat = typeof existing.lat === 'number' ? existing.lat : parseFloat(String(existing.lat));
-            const existingLon = typeof existing.lon === 'number' ? existing.lon : parseFloat(String(existing.lon));
-            const existingHasCoords = existing.lat != null && existing.lon != null && 
-                                     !isNaN(existingLat) && !isNaN(existingLon) &&
-                                     isFinite(existingLat) && isFinite(existingLon);
-            const existingMatchesState = stateMatchesFilter(existing.state);
-            
-            const currentLat = typeof item.lat === 'number' ? item.lat : parseFloat(String(item.lat));
-            const currentLon = typeof item.lon === 'number' ? item.lon : parseFloat(String(item.lon));
-            const currentHasCoords = item.lat != null && item.lon != null && 
-                                    !isNaN(currentLat) && !isNaN(currentLon) &&
-                                    isFinite(currentLat) && isFinite(currentLon);
-            const currentMatchesState = stateMatchesFilter(item.state);
-            
-            // Priority: 1) Matches state filter + has coords, 2) Matches state filter, 3) Has coords
-            if (currentMatchesState && currentHasCoords && (!existingMatchesState || !existingHasCoords)) {
-              propertyMap.set(normalizedName, item);
-            } else if (currentMatchesState && !existingMatchesState) {
-              propertyMap.set(normalizedName, item);
-            } else if (currentHasCoords && !existingHasCoords && existingMatchesState === currentMatchesState) {
-              propertyMap.set(normalizedName, item);
-            }
-          }
-        });
-        
-        // Convert map to array and add unit types and rate range to each property
-        let uniqueProperties = Array.from(propertyMap.entries()).map(([normalizedName, property]: [string, any]) => {
-          const unitTypes = unitTypesMap.get(normalizedName);
-          const rates = ratesMap.get(normalizedName) || [];
-          
-          // Calculate min and max rates
-          let rateRange: { min: number | null; max: number | null } = { min: null, max: null };
-          if (rates.length > 0) {
-            rateRange.min = Math.min(...rates);
-            rateRange.max = Math.max(...rates);
-          }
-          
-          // Use rate_category from database if available, otherwise calculate it
-          let rateCategory = property.rate_category;
-          if (!rateCategory) {
-            // Fallback: calculate the rate category from min/max rates
-            const avgRate = rateRange.min !== null && rateRange.max !== null 
-              ? (rateRange.min + rateRange.max) / 2 
-              : null;
-            rateCategory = getRateCategory(avgRate);
-          }
-          
-          return {
-            ...property,
-            all_unit_types: unitTypes ? Array.from(unitTypes).sort() : [],
-            rate_range: rateRange,
-            rate_category: rateCategory,
-          };
-        });
-        
-        // If state filter is applied, ensure we only show properties that match the filter
-        // This handles cases where the same property_name might have records in different states
-        if (filterState.length > 0) {
-          // Create a set of all state variations we're filtering by
-          const filterStateSet = new Set<string>();
-          filterState.forEach((state) => {
-            filterStateSet.add(state);
-            filterStateSet.add(state.toUpperCase());
-            filterStateSet.add(state.toLowerCase());
-            filterStateSet.add(state.charAt(0).toUpperCase() + state.slice(1).toLowerCase());
-            
-            // Add abbreviation if it's a full name
-            const abbreviation = Object.entries(STATE_ABBREVIATIONS).find(
-              ([_, fullName]) => fullName.toLowerCase() === state.toLowerCase()
-            );
-            if (abbreviation) {
-              filterStateSet.add(abbreviation[0]);
-              filterStateSet.add(abbreviation[0].toUpperCase());
-            }
-            
-            // Add full name if it's an abbreviation
-            if (STATE_ABBREVIATIONS[state.toUpperCase()]) {
-              const fullName = STATE_ABBREVIATIONS[state.toUpperCase()];
-              filterStateSet.add(fullName);
-              filterStateSet.add(fullName.toUpperCase());
-              filterStateSet.add(fullName.toLowerCase());
-            }
-          });
-          
-          // Filter properties to only include those whose state matches the filter
-          uniqueProperties = uniqueProperties.filter((property: any) => {
-            if (!property.state) return false;
-            const propertyState = String(property.state);
-            return filterStateSet.has(propertyState) || 
-                   filterStateSet.has(propertyState.toUpperCase()) ||
-                   filterStateSet.has(propertyState.toLowerCase()) ||
-                   filterStateSet.has(propertyState.charAt(0).toUpperCase() + propertyState.slice(1).toLowerCase());
-          });
-          
-          console.log(`After state filtering: ${uniqueProperties.length} properties match the state filter`);
-        }
-        
-        // Note: Rate category filtering is now done at the database level for better performance
-        // No need for client-side filtering here
-        
-        // Additional client-side country filtering to ensure accuracy
-        // This handles cases where country field might be missing or inconsistent
-        // Uses improved coordinate-based detection to catch properties with incorrect country data
-        
-        // Helper function to check if coordinates are likely in Canada (same as countryCounts)
-        const isLikelyCanadaByCoords = (lat: number, lon: number): boolean => {
-          if (lat < 41.7 || lat >= 85 || lon < -141 || lon > -52) {
-            return false;
-          }
-          if (lat >= 60) return true;
-          if (lat >= 41.7 && lat < 60 && lon >= -95 && lon <= -52) return true;
-          if (lat >= 48 && lat < 60 && lon >= -139 && lon <= -89) return true;
-          if (lat >= 49 && lat < 60) {
-            if (lon < -100) return true;
-            if (lon >= -100 && lon <= -89 && lat >= 50) return true;
-            if (lon >= -95 && lon <= -89 && lat >= 49) return true;
-          }
-          if (lat >= 45 && lat < 49) {
-            if (lon >= -75 && lon <= -52) return true;
-            if (lon >= -95 && lon < -75) {
-              if (lat >= 46) return true;
-              if (lon >= -80) return true;
-            }
-          }
-          if (lat >= 41.7 && lat < 45 && lon >= -95.2 && lon <= -74.3) return true;
-          return false;
-        };
-        
-        if (filterCountry.length === 1) {
-          if (filterCountry.includes('Canada')) {
-            // Strict filtering: only properties with country field set to Canada/CA
-            // Do NOT use coordinate-based detection - only trust the country field
-            uniqueProperties = uniqueProperties.filter((property: any) => {
-              const country = String(property.country || '').toUpperCase();
-              
-              // Only check country field - must be 'CA', 'CAN', or 'CANADA'
-              if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
-                return true;
-              }
-              
-              // Reject all others
-              return false;
-            });
-            console.log(`After client-side Canada filtering (country field only): ${uniqueProperties.length} properties`);
-          } else if (filterCountry.includes('United States')) {
-            // Strict filtering: only properties with country field set to United States/USA/US
-            // Do NOT use coordinate-based detection - only trust the country field
-            uniqueProperties = uniqueProperties.filter((property: any) => {
-              const country = String(property.country || '').toUpperCase();
-              
-              // Only check country field - must be 'US', 'USA', or 'UNITED STATES'
-              if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
-                return true;
-              }
-              
-              // Reject all others
-              return false;
-            });
-            console.log(`After client-side US filtering (country field only): ${uniqueProperties.length} properties`);
-          }
-        } else if (filterCountry.length === 2 && filterCountry.includes('Canada') && filterCountry.includes('United States')) {
-          // Both countries selected - database query returns all properties
-          // Apply permissive client-side filtering using coordinate-based detection to include ALL properties from both countries
-          // This catches properties with incorrect country field values
-          uniqueProperties = uniqueProperties.filter((property: any) => {
-            const country = String(property.country || '').toUpperCase();
-            const state = String(property.state || '').toUpperCase();
-            
-            // Helper functions
-            const isCanadianProperty = (): boolean => {
-              if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
-              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-              if (canadianProvinceCodes.includes(state)) return true;
-              if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
-              
-              // Check coordinates if available - prioritize coordinate-based detection
-              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
-              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
-              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-                if (isLikelyCanadaByCoords(lat, lon)) return true;
-              }
-              
-              return false;
-            };
-            
-            const isUSProperty = (): boolean => {
-              if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
-              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-              const isCanadianProvince = canadianProvinceCodes.includes(state) || 
-                CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
-              if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
-              if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
-              
-              // Check coordinates if available and not Canadian
-              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
-              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
-              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-                if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
-                  if (!isLikelyCanadaByCoords(lat, lon)) return true;
-                }
-              }
-              
-              return false;
-            };
-            
-            // Check if Canadian first (using coordinate-based detection)
-            if (isCanadianProperty()) {
-              return true;
-            }
-            
-            // Check if US
-            if (isUSProperty()) {
-              return true;
-            }
-            
-            // If we can't determine, check coordinates - include any property in North America
-            const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
-            const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
-            if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-              // Include any property with coordinates in North America (Canada or US)
-              if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
-                return true;
-              }
-            }
-            
-            // Include all other properties that don't have coordinates (database query already filtered)
-            return true;
-          });
-          console.log(`After client-side filtering (both countries): ${uniqueProperties.length} properties`);
-        } else {
-          // Fallback: apply filtering if needed
-          uniqueProperties = uniqueProperties.filter((property: any) => {
-            const country = String(property.country || '').toUpperCase();
-            const state = String(property.state || '').toUpperCase();
-            
-            // Helper functions
-            const isCanadianProperty = (): boolean => {
-              if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
-              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-              if (canadianProvinceCodes.includes(state)) return true;
-              if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
-              
-              // Check coordinates if available - prioritize coordinate-based detection
-              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
-              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
-              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-                if (isLikelyCanadaByCoords(lat, lon)) return true;
-              }
-              
-              return false;
-            };
-            
-            const isUSProperty = (): boolean => {
-              if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
-              const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-              const isCanadianProvince = canadianProvinceCodes.includes(state) || 
-                CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
-              if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
-              if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
-              
-              // Check coordinates if available and not Canadian
-              const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
-              const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
-              if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-                // If coordinates are in North America and not Canadian, likely US
-                if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
-                  if (!isLikelyCanadaByCoords(lat, lon)) return true;
-                }
-              }
-              
-              return false;
-            };
-            
-            // When both countries are selected, be very permissive
-            // Check if property is Canadian first (using coordinate-based detection to catch incorrect country data)
-            if (isCanadianProperty()) {
-              return true;
-            }
-            
-            // Then check if property is US
-            if (isUSProperty()) {
-              return true;
-            }
-            
-            // If we can't determine from country/state fields, check coordinates
-            // Include any property with coordinates in North America (Canada or US)
-            const lat = typeof property.lat === 'number' ? property.lat : parseFloat(String(property.lat));
-            const lon = typeof property.lon === 'number' ? property.lon : parseFloat(String(property.lon));
-            if (!isNaN(lat) && !isNaN(lon) && isFinite(lat) && isFinite(lon)) {
-              // If coordinates are in North America (Canada or US), include it
-              if (lat >= 18 && lat < 85 && lon >= -179 && lon <= -50) {
-                return true;
-              }
-            }
-            
-            // Include all other properties (database query already filtered by country)
-            // This ensures we don't accidentally exclude valid properties
-            return true;
-          });
-          console.log(`After client-side filtering (both countries): ${uniqueProperties.length} properties`);
-        }
-        
-    console.log(`Grouped ${transformedData.length} records into ${uniqueProperties.length} unique properties`);
-    
-    return uniqueProperties;
-  }, [properties, filterState, filterCountry]);
+  // Process shared properties from context using extracted hook
+  // This replaces the large useMemo with a cleaner hook-based approach
+  const processedProperties = usePropertyProcessing(properties, filterState, filterCountry);
   
   // Use processed properties for display
   const displayProperties = processedProperties;
-
-  // Filter properties by viewport bounds to reduce rendering overhead
-  // Show all properties with coordinates - don't filter by viewport to prevent marker flashing on zoom
+  
+  // Filter properties with coordinates for marker display
   const propertiesWithCoords = useMemo(() => {
     return filterPropertiesWithCoordinates(displayProperties);
   }, [displayProperties]);
+
+  // Use extracted hook for marker management
+  const { markersRef, parkMarkersRef } = useMapMarkers({
+    map,
+    isClient,
+    properties: displayProperties,
+    nationalParks,
+    showNationalParks,
+    setSelectedProperty,
+    setSelectedPark,
+    markerClickTimeRef,
+  });
 
   // Helper function to check if a lat/lng is near any marker (to prevent layer InfoWindow from opening on marker clicks)
   // Uses a slightly larger threshold (0.002 degrees ≈ 222 meters) to account for coordinate precision and marker size
@@ -1077,81 +487,25 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       }
     }
     return false;
-  }, [propertiesWithCoords, nationalParks, showNationalParks]);
+  }, [propertiesWithCoords, nationalParks, showNationalParks, markerClickTimeRef]);
 
 
-  // Set default center and zoom for lower 48 states when map loads (if no URL params)
-  // This overrides any fitBounds behavior to ensure consistent view
-  // BUT: Don't reset if we've just fitted bounds or if state filter is active (prevents zooming out immediately after fitting)
-  useEffect(() => {
-    if (map && !shouldFitBounds) {
-      // Don't reset if we just fitted bounds - give it time to settle
-      if (hasJustFittedBoundsRef.current) {
-        // Clear the flag after a delay to allow fitBounds to complete
-        const timer = setTimeout(() => {
-          hasJustFittedBoundsRef.current = false;
-        }, 1000);
-        return () => clearTimeout(timer);
-      }
-      
-      // Don't reset if state filter is active (even if shouldFitBounds is false, we might be transitioning)
-      if (filterState.length > 0) {
-        return;
-      }
-      
-      const urlLat = searchParams.get('lat');
-      const urlLon = searchParams.get('lon');
-      
-      // Only set default if no URL location parameters
-      if (!urlLat || !urlLon) {
-        // Ensure map is at default center and zoom for lower 48 states
-        const currentCenter = map.getCenter();
-        const currentZoom = map.getZoom();
-        
-        // Use mobile zoom on mobile devices, desktop zoom otherwise
-        const zoomToUse = isMobile ? defaultZoomMobile : defaultZoom;
-        
-        // Check if we need to update (only if significantly different)
-        const needsUpdate = !currentCenter || 
-          Math.abs(currentCenter.lat() - defaultCenter.lat) > 0.1 ||
-          Math.abs(currentCenter.lng() - defaultCenter.lng) > 0.1 ||
-          !currentZoom ||
-          Math.abs(currentZoom - zoomToUse) > 0.5;
-        
-        if (needsUpdate) {
-          map.setCenter(defaultCenter);
-          map.setZoom(zoomToUse);
-        }
-      }
-    }
-  }, [map, shouldFitBounds, searchParams, filterState, isMobile]);
-  
-  // Fit map bounds to show all glamping property markers (only if shouldFitBounds is true)
-  // NOTE: Only includes glamping properties, not national parks, so state filters zoom to properties only
-  // This is disabled by default to maintain fixed zoom/center for lower 48 states
-  useEffect(() => {
-    if (map && shouldFitBounds) {
-      // Only use glamping properties for bounds calculation, exclude national parks
-      // This ensures state filters zoom to show only the filtered properties
-      if (propertiesWithCoords.length > 0) {
-        const bounds = new google.maps.LatLngBounds();
-        propertiesWithCoords.forEach((item) => {
-          bounds.extend({
-            lat: item.coordinates[0],
-            lng: item.coordinates[1],
-          });
-        });
-        map.fitBounds(bounds);
-        // Mark that we've just fitted bounds to prevent immediate reset
-        hasJustFittedBoundsRef.current = true;
-        // Clear the flag after fitBounds completes (Google Maps fitBounds is async)
-        setTimeout(() => {
-          hasJustFittedBoundsRef.current = false;
-        }, 2000); // Give enough time for fitBounds animation to complete
-      }
-    }
-  }, [map, propertiesWithCoords, shouldFitBounds]);
-  
+  // Use extracted hook for bounds management
+  const { onIdle: onIdleFromHook } = useMapBounds({
+    map,
+    isClient,
+    isMobile,
+    shouldFitBounds,
+    filterState,
+    mapCenter,
+    mapZoom,
+    propertiesWithCoords,
+    setMapCenter,
+    setMapZoom,
+    setMapBounds,
+    hasJustFittedBoundsRef,
+  });
+
   // When map is loaded and we have specific coordinates from URL, center and zoom to that location
   useEffect(() => {
     if (map && !shouldFitBounds && mapCenter && mapZoom) {
@@ -1173,8 +527,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           map.setZoom(mapZoom);
           hasCenteredFromUrlRef.current = true;
           
-          // Update bounds after map finishes moving (onIdle will handle this)
-          // Also set a timeout as backup in case onIdle doesn't fire immediately
+          // Update bounds after map finishes moving
           setTimeout(() => {
             const bounds = map.getBounds();
             if (bounds) {
@@ -1186,7 +539,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           if (propertiesWithCoords.length > 0) {
             const targetProperty = propertiesWithCoords.find((property) => {
               const [lat, lon] = property.coordinates;
-              // Check if coordinates are close (within ~0.01 degrees, roughly 1km)
               const latDiff = Math.abs(lat - mapCenter.lat);
               const lonDiff = Math.abs(lon - mapCenter.lng);
               return latDiff < 0.01 && lonDiff < 0.01;
@@ -1199,46 +551,33 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         }
       }
     }
-  }, [map, mapCenter, mapZoom, shouldFitBounds, propertiesWithCoords]);
-
+  }, [map, mapCenter, mapZoom, shouldFitBounds, propertiesWithCoords, setMapBounds]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
-    
-    // Set default map type to terrain
     map.setMapTypeId('terrain');
     
-    // Set default center and zoom for lower 48 states if no URL params
     const urlLat = searchParams.get('lat');
     const urlLon = searchParams.get('lon');
-    const urlZoom = searchParams.get('zoom');
     
     if (!urlLat || !urlLon) {
-      // No URL params - use default center and zoom for lower 48 states
-      // Use mobile zoom on mobile devices, desktop zoom otherwise
       const isMobileCheck = window.innerWidth < 768;
       const zoomToUse = isMobileCheck ? defaultZoomMobile : defaultZoom;
       map.setCenter(defaultCenter);
       map.setZoom(zoomToUse);
     }
     
-    // Initialize bounds after a short delay to ensure map has rendered
     setTimeout(() => {
       const bounds = map.getBounds();
       if (bounds) {
         setMapBounds(bounds);
       }
     }, 200);
-  }, [searchParams]);
+  }, [searchParams, setMapBounds]);
 
   const onIdle = useCallback(() => {
-    if (map) {
-      const bounds = map.getBounds();
-      if (bounds) {
-        setMapBounds(bounds);
-      }
-    }
-  }, [map]);
+    onIdleFromHook();
+  }, [onIdleFromHook]);
 
   // Update bounds when map changes (center/zoom)
   useEffect(() => {
@@ -1260,9 +599,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       clustererRef.current.clearMarkers();
       clustererRef.current = null;
     }
-    markersRef.current = [];
+    if (markersRef.current) {
+      markersRef.current.forEach(marker => {
+        marker.map = null;
+      });
+      markersRef.current = [];
+    }
     setMap(null);
-  }, []);
+  }, [markersRef]);
 
   // Memoize map options to update gesture handling when fullscreen/mobile state changes
   const mapOptions = useMemo(() => ({
@@ -1338,217 +682,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     };
   }, [isClient, isFullscreen, toggleFullscreen]);
 
-  // Manage markers (no clustering - show all markers individually)
-  // Use a ref to track property IDs to avoid recreating markers unnecessarily
-  const propertyIdsRef = useRef<Set<string | number>>(new Set());
-  
-  useEffect(() => {
-    if (!map || !isClient) {
-      // Clean up if no map
-      if (clustererRef.current) {
-        clustererRef.current.clearMarkers();
-        clustererRef.current = null;
-      }
-      markersRef.current.forEach(marker => {
-        marker.map = null;
-      });
-      markersRef.current = [];
-      propertyIdsRef.current.clear();
-      return;
-    }
-
-    // If no properties, clear markers
-    if (propertiesWithCoords.length === 0) {
-      if (clustererRef.current) {
-        clustererRef.current.clearMarkers();
-        clustererRef.current = null;
-      }
-      markersRef.current.forEach(marker => {
-        marker.map = null;
-      });
-      markersRef.current = [];
-      propertyIdsRef.current.clear();
-      return;
-    }
-
-    // Create a set of current property IDs
-    const currentPropertyIds = new Set(propertiesWithCoords.map(p => p.id));
-    
-    // Check if property list has actually changed
-    const idsMatch = 
-      currentPropertyIds.size === propertyIdsRef.current.size &&
-      Array.from(currentPropertyIds).every(id => propertyIdsRef.current.has(id));
-    
-    // If property list hasn't changed, don't recreate markers
-    if (idsMatch && markersRef.current.length > 0) {
-      return;
-    }
-
-    // Property list has changed - recreate markers
-    // Clean up old markers first
-    markersRef.current.forEach(marker => {
-      marker.map = null;
-    });
-    markersRef.current = [];
-
-    // Clear clusterer if it exists
-    if (clustererRef.current) {
-      clustererRef.current.clearMarkers();
-      clustererRef.current = null;
-    }
-
-    // Update property IDs ref
-    propertyIdsRef.current = currentPropertyIds;
-
-    // Create markers using AdvancedMarkerElement
-    const createMarkers = async () => {
-      // Import the marker library
-      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
-
-      // Create native Google Maps markers and add them directly to the map
-      const markers = propertiesWithCoords.map((property) => {
-        // Create a blue pin element for each property marker
-        const bluePin = new PinElement({
-          background: '#3B82F6',
-          borderColor: '#FFFFFF',
-          glyphColor: '#FFFFFF',
-          scale: 1.0,
-        });
-        
-        const marker = new AdvancedMarkerElement({
-          map: map,
-          position: {
-            lat: property.coordinates[0],
-            lng: property.coordinates[1],
-          },
-          content: bluePin.element,
-        });
-
-        // Add click listener to open InfoWindow
-        marker.addEventListener('click', (event: any) => {
-          // Mark that a marker was clicked (use timestamp to track recent clicks)
-          markerClickTimeRef.current = Date.now();
-          
-          // Stop event propagation to prevent layer click handlers from firing
-          if (event.domEvent) {
-            event.domEvent.stopPropagation();
-            event.domEvent.stopImmediatePropagation();
-          }
-          // Also stop the Google Maps event propagation
-          if (event.stop) {
-            event.stop();
-          }
-          setSelectedProperty(property as PropertyWithCoords);
-          setSelectedPark(null); // Close park InfoWindow if open
-        });
-
-        return marker;
-      });
-
-      // Update markers ref
-      markersRef.current = markers;
-    };
-
-    createMarkers().catch(console.error);
-
-    // Cleanup function
-    return () => {
-      // Only clean up if component unmounts or map/client changes
-      // Don't clean up on property list changes to prevent flashing
-    };
-  }, [map, isClient, propertiesWithCoords]);
-
-  // Manage national park markers
-  useEffect(() => {
-    if (!map || !isClient) {
-      // Clean up if no map
-      parkMarkersRef.current.forEach(marker => {
-        marker.map = null;
-      });
-      parkMarkersRef.current = [];
-      return;
-    }
-
-    // If National Parks are hidden, clean up and return early
-    if (!showNationalParks) {
-      parkMarkersRef.current.forEach(marker => {
-        marker.map = null;
-      });
-      parkMarkersRef.current = [];
-      // Close park InfoWindow if open
-      setSelectedPark(null);
-      return;
-    }
-
-    // Filter parks with valid coordinates
-    const parksWithCoords = filterParksWithCoordinates(nationalParks);
-
-    // Clean up old park markers first
-    parkMarkersRef.current.forEach(marker => {
-      marker.map = null;
-    });
-    parkMarkersRef.current = [];
-
-    // Create markers using AdvancedMarkerElement
-    const createParkMarkers = async () => {
-      // Import the marker library
-      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
-
-      // Create markers for national parks
-      const parkMarkers = parksWithCoords.map((park) => {
-        // Create a green pin element for each park marker
-        const greenPin = new PinElement({
-          background: '#10B981',
-          borderColor: '#FFFFFF',
-          glyphColor: '#FFFFFF',
-          scale: 1.0,
-        });
-        
-        const marker = new AdvancedMarkerElement({
-          map: map,
-          position: {
-            lat: park.coordinates[0],
-            lng: park.coordinates[1],
-          },
-          content: greenPin.element,
-          title: park.name,
-        });
-
-        // Add click listener to open InfoWindow
-        marker.addEventListener('click', (event: any) => {
-          // Mark that a marker was clicked (use timestamp to track recent clicks)
-          markerClickTimeRef.current = Date.now();
-          
-          // Stop event propagation to prevent layer click handlers from firing
-          if (event.domEvent) {
-            event.domEvent.stopPropagation();
-            event.domEvent.stopImmediatePropagation();
-          }
-          // Also stop the Google Maps event propagation
-          if (event.stop) {
-            event.stop();
-          }
-          setSelectedPark(park);
-          setSelectedProperty(null); // Close property InfoWindow if open
-        });
-
-        return marker;
-      });
-
-      // Update park markers ref
-      parkMarkersRef.current = parkMarkers;
-    };
-
-    createParkMarkers().catch(console.error);
-
-    // Cleanup function
-    return () => {
-      // Clean up markers when dependencies change
-      parkMarkersRef.current.forEach(marker => {
-        marker.map = null;
-      });
-    };
-  }, [map, isClient, nationalParks, showNationalParks]);
+  // Marker management is now handled by useMapMarkers hook (see above)
 
   const uniqueStates = useMemo(() => {
     // Filter properties by country if only one country is selected
@@ -3074,7 +2208,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   </div>
                 </InfoWindow>
               )}
-              {selectedProperty && (
+              {selectedProperty && propertyForDisplay && (
                 <InfoWindow
                   key={selectedProperty.id}
                   position={{
@@ -3083,14 +2217,24 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   }}
                   onCloseClick={() => {
                     setSelectedProperty(null);
-                    setSelectedPark(null); // Close park InfoWindow if open
-                    setCurrentPhotoIndex(0); // Reset photo index when closing
+                    setSelectedPark(null);
+                    setCurrentPhotoIndex(0);
+                    setFullPropertyDetails(null);
+                  }}
+                  options={{
+                    pixelOffset: new google.maps.Size(0, -10),
                   }}
                 >
                   <div className="max-w-xs p-2">
-                    {/* Google Photos - Display at the top */}
-                    {(() => {
-                      let photos = selectedProperty.google_photos;
+                    {loadingPropertyDetails && (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                        <p className="text-sm text-gray-600">Loading details...</p>
+                      </div>
+                    )}
+                    {/* Google Photos - Lazy loaded when InfoWindow opens */}
+                    {!loadingPropertyDetails && (() => {
+                      let photos = propertyForDisplay.google_photos;
                       
                       // Parse photos if it's a string (JSONB from Supabase comes as string)
                       if (photos && typeof photos === 'string') {
@@ -3123,9 +2267,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       };
                       
                       // Generate descriptive alt text
-                      const propertyName = selectedProperty.property_name || t('infoWindow.property.default');
-                      const city = selectedProperty.city || '';
-                      const state = selectedProperty.state || '';
+                      const propertyName = propertyForDisplay.property_name || t('infoWindow.property.default');
+                      const city = propertyForDisplay.city || '';
+                      const state = propertyForDisplay.state || '';
                       const location = city && state ? ` in ${city}, ${state}` : state ? ` in ${state}` : '';
                       const altText = `Photo of ${propertyName} glamping property${location} - Image ${safeIndex + 1} of ${photos.length}`;
 
@@ -3140,7 +2284,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                               onError={(e) => {
                                 console.error('❌ Image failed to load:', {
                                   url: photoUrl,
-                                  property: selectedProperty.property_name,
+                                  property: propertyForDisplay.property_name,
                                   error: e
                                 });
                                 // Hide the entire photo container if image fails to load
@@ -3151,7 +2295,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                                 }
                               }}
                               onLoad={() => {
-                                console.log('✅ Image loaded successfully for', selectedProperty.property_name);
+                                console.log('✅ Image loaded successfully for', propertyForDisplay.property_name);
                               }}
                             />
                             
@@ -3195,18 +2339,18 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       );
                     })()}
                     <h3 className="font-bold text-lg mb-2 text-gray-900">
-                      {selectedProperty.property_name || t('infoWindow.property.unnamed')}
+                      {propertyForDisplay.property_name || t('infoWindow.property.unnamed')}
                     </h3>
                     {(() => {
                       const addressParts = [];
-                      if (selectedProperty.address) {
-                        addressParts.push(selectedProperty.address.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim());
+                      if (propertyForDisplay.address) {
+                        addressParts.push(propertyForDisplay.address.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim());
                       }
-                      if (selectedProperty.city) {
-                        addressParts.push(selectedProperty.city);
+                      if (propertyForDisplay.city) {
+                        addressParts.push(propertyForDisplay.city);
                       }
-                      if (selectedProperty.state) {
-                        addressParts.push(selectedProperty.state);
+                      if (propertyForDisplay.state) {
+                        addressParts.push(propertyForDisplay.state);
                       }
                       const fullAddress = addressParts.join(', ');
                       return fullAddress ? (
@@ -3215,41 +2359,41 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                         </p>
                       ) : null;
                     })()}
-                    {(selectedProperty as any).all_unit_types && (selectedProperty as any).all_unit_types.length > 0 && (
+                    {(propertyForDisplay as any).all_unit_types && (propertyForDisplay as any).all_unit_types.length > 0 && (
                       <p className="text-sm text-gray-700 mb-2">
                         <span className="font-semibold">{t('infoWindow.property.unitTypes')}:</span>{' '}
-                        {(selectedProperty as any).all_unit_types.join(', ')}
+                        {(propertyForDisplay as any).all_unit_types.join(', ')}
                       </p>
                     )}
-                    {(selectedProperty as any).rate_category && (
+                    {(propertyForDisplay as any).rate_category && (
                       <p className="text-sm text-gray-700 mb-2">
                         <span className="font-semibold">{t('infoWindow.property.avgRate')}:</span>{' '}
-                        {(selectedProperty as any).rate_category}
+                        {(propertyForDisplay as any).rate_category}
                       </p>
                     )}
-                    {((selectedProperty as any).google_rating || (selectedProperty as any).google_user_rating_total) && (
+                    {((propertyForDisplay as any).google_rating || (propertyForDisplay as any).google_user_rating_total) && (
                       <div className="flex items-center gap-2 mb-2">
-                        {(selectedProperty as any).google_rating && (
+                        {(propertyForDisplay as any).google_rating && (
                           <div className="flex items-center gap-1">
                             <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                               <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                             </svg>
                             <span className="text-sm font-semibold text-gray-900">
-                              {(selectedProperty as any).google_rating.toFixed(1)}
+                              {(propertyForDisplay as any).google_rating.toFixed(1)}
                             </span>
                           </div>
                         )}
-                        {(selectedProperty as any).google_user_rating_total && (
+                        {(propertyForDisplay as any).google_user_rating_total && (
                           <span className="text-sm text-gray-600">
-                            ({(selectedProperty as any).google_user_rating_total.toLocaleString()} {((selectedProperty as any).google_user_rating_total === 1) ? t('infoWindow.property.reviews.one') : t('infoWindow.property.reviews.other')})
+                            ({(propertyForDisplay as any).google_user_rating_total.toLocaleString()} {((propertyForDisplay as any).google_user_rating_total === 1) ? t('infoWindow.property.reviews.one') : t('infoWindow.property.reviews.other')})
                           </span>
                         )}
                       </div>
                     )}
                     {(() => {
                       // Generate or use property slug for "View more" link
-                      const propertySlug = selectedProperty.slug || 
-                        (selectedProperty.property_name ? slugifyPropertyName(selectedProperty.property_name) : null);
+                      const propertySlug = propertyForDisplay.slug || 
+                        (propertyForDisplay.property_name ? slugifyPropertyName(propertyForDisplay.property_name) : null);
                       
                       if (propertySlug) {
                         // Extract locale from pathname (e.g., "/en/map" -> "en")

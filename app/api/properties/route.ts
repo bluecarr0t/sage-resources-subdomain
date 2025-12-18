@@ -15,6 +15,34 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     
+    // Check if fetching single property by ID
+    const propertyId = searchParams.get('id');
+    if (propertyId) {
+      const supabase = createServerClient();
+      const { data: property, error } = await supabase
+        .from('all_glamping_properties')
+        .select('*')
+        .eq('id', propertyId)
+        .eq('is_glamping_property', 'Yes')
+        .single();
+      
+      if (error || !property) {
+        return NextResponse.json(
+          { success: false, error: 'Property not found' },
+          { status: 404 }
+        );
+      }
+      
+      return NextResponse.json({
+        success: true,
+        data: property,
+      }, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=31536000, stale-while-revalidate=86400',
+        },
+      });
+    }
+    
     // Extract filter parameters
     const filterCountry = searchParams.getAll('country');
     const filterState = searchParams.getAll('state');

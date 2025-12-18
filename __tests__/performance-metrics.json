@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-12-18T16:17:12.469Z",
+  "testUrl": "https://resources.sageoutdooradvisory.com/en/map?country=United+States&country=Canada",
+  "apiResponseTime": 0,
+  "databaseQueryTime": 5,
+  "dataSize": {
+    "propertiesCount": 0,
+    "responseSizeBytes": 0,
+    "responseSizeKB": 0,
+    "responseSizeMB": 0
+  },
+  "bundleAnalysis": {
+    "componentCount": 54,
+    "dynamicImports": 11,
+    "clientComponents": 30
+  },
+  "recommendations": [
+    "Map page has 6 structured data scripts - consider consolidating",
+    "Map page fetches statistics on every request - consider static generation",
+    "GooglePropertyMap component is very large (3339 lines) - consider splitting into smaller components",
+    "GooglePropertyMap component is large (147.55 KB) - consider code splitting",
+    "Selecting all fields is significantly slower - consider field selection for initial load",
+    "Field selection provides significant performance improvement - implement field selection for map markers"
+  ]
+}
