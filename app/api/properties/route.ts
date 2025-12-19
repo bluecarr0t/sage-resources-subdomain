@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
-import { getCache, setCache } from '@/lib/redis';
+import { getCache, setCache, hashCacheKey, logCacheMetrics } from '@/lib/redis';
 
 /**
  * API route for fetching glamping properties with caching
@@ -67,8 +67,9 @@ export async function GET(request: NextRequest) {
     const requestedFields = fieldsParam ? fieldsParam.split(',') : null;
     
     // Create a cache key based on filters, bounds, and fields
-    // Use a hash of the filter parameters for a cleaner cache key
-    const filterHash = JSON.stringify({ filterCountry, filterState, filterUnitType, filterRateRange, bounds, fields: requestedFields });
+    // Use SHA-256 hash of the filter parameters for shorter, faster cache keys
+    const filterParams = { filterCountry, filterState, filterUnitType, filterRateRange, bounds, fields: requestedFields };
+    const filterHash = hashCacheKey(filterParams);
     const cacheKey = `properties:${filterHash}`;
     const ttlSeconds = 1209600; // 14 days
 
@@ -76,8 +77,11 @@ export async function GET(request: NextRequest) {
     const cachedProperties = await getCache<any[]>(cacheKey);
     
     let properties: any[];
+    let cacheStatus: 'HIT' | 'MISS' = 'MISS';
+    
     if (cachedProperties) {
       properties = cachedProperties;
+      cacheStatus = 'HIT';
     } else {
       // Cache miss - fetch from database
       properties = await fetchPropertiesFromDatabase(filterCountry, filterState, filterUnitType, filterRateRange, bounds, requestedFields);
@@ -88,6 +92,9 @@ export async function GET(request: NextRequest) {
       });
     }
     
+    // Log cache metrics (controlled by environment variable)
+    logCacheMetrics();
+    
     return NextResponse.json({
       success: true,
       data: properties,
@@ -95,6 +102,7 @@ export async function GET(request: NextRequest) {
     }, {
       headers: {
         'Cache-Control': 'public, s-maxage=31536000, stale-while-revalidate=86400',
+        'X-Cache-Status': cacheStatus,
       },
     });
   } catch (error) {
