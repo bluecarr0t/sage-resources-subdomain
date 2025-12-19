@@ -341,6 +341,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   useEffect(() => {
     if (selectedPark) {
       setSelectedProperty(null);
+      setFullPropertyDetails(null);
     }
   }, [selectedPark]);
 

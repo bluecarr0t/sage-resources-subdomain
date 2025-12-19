@@ -32,6 +32,7 @@ export function useMapMarkers({
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const parkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const propertyIdsRef = useRef<Set<string | number>>(new Set());
+  const lastClickedMarkerRef = useRef<{ type: 'property' | 'park'; id: string | number; timestamp: number } | null>(null);
 
   // Filter properties with coordinates
   const propertiesWithCoords = filterPropertiesWithCoordinates(properties);
@@ -95,17 +96,50 @@ export function useMapMarkers({
         });
 
         marker.addEventListener('click', (event: any) => {
-          markerClickTimeRef.current = Date.now();
+          const clickTimestamp = Date.now();
           
+          // Check if another marker was clicked very recently (within 50ms)
+          // If so, and it's a different marker, ignore this click to prevent conflicts
+          if (lastClickedMarkerRef.current && 
+              clickTimestamp - lastClickedMarkerRef.current.timestamp < 50 &&
+              (lastClickedMarkerRef.current.type !== 'property' || lastClickedMarkerRef.current.id !== property.id)) {
+            // Another marker was clicked very recently, ignore this one
+            if (event.domEvent) {
+              event.domEvent.stopPropagation();
+              event.domEvent.stopImmediatePropagation();
+            }
+            if (event.stop) {
+              event.stop();
+            }
+            return;
+          }
+          
+          // Record this as the last clicked marker
+          lastClickedMarkerRef.current = {
+            type: 'property',
+            id: property.id,
+            timestamp: clickTimestamp,
+          };
+          
+          // Immediately stop all event propagation to prevent other markers from responding
           if (event.domEvent) {
             event.domEvent.stopPropagation();
             event.domEvent.stopImmediatePropagation();
+            event.domEvent.preventDefault();
           }
           if (event.stop) {
             event.stop();
           }
-          setSelectedProperty(property as PropertyWithCoords);
+          
+          // Update click time ref to prevent data layer clicks
+          markerClickTimeRef.current = clickTimestamp;
+          
+          // Clear any other selections first
           setSelectedPark(null);
+          
+          // Immediately set the selected property to the one that was actually clicked
+          // This ensures the correct info window is displayed
+          setSelectedProperty(property as PropertyWithCoords);
         });
 
         return marker;
@@ -165,17 +199,50 @@ export function useMapMarkers({
         });
 
         marker.addEventListener('click', (event: any) => {
-          markerClickTimeRef.current = Date.now();
+          const clickTimestamp = Date.now();
           
+          // Check if another marker was clicked very recently (within 50ms)
+          // If so, and it's a different marker, ignore this click to prevent conflicts
+          if (lastClickedMarkerRef.current && 
+              clickTimestamp - lastClickedMarkerRef.current.timestamp < 50 &&
+              (lastClickedMarkerRef.current.type !== 'park' || lastClickedMarkerRef.current.id !== park.id)) {
+            // Another marker was clicked very recently, ignore this one
+            if (event.domEvent) {
+              event.domEvent.stopPropagation();
+              event.domEvent.stopImmediatePropagation();
+            }
+            if (event.stop) {
+              event.stop();
+            }
+            return;
+          }
+          
+          // Record this as the last clicked marker
+          lastClickedMarkerRef.current = {
+            type: 'park',
+            id: park.id,
+            timestamp: clickTimestamp,
+          };
+          
+          // Immediately stop all event propagation to prevent other markers from responding
           if (event.domEvent) {
             event.domEvent.stopPropagation();
             event.domEvent.stopImmediatePropagation();
+            event.domEvent.preventDefault();
           }
           if (event.stop) {
             event.stop();
           }
-          setSelectedPark(park as NationalParkWithCoords);
+          
+          // Update click time ref to prevent data layer clicks
+          markerClickTimeRef.current = clickTimestamp;
+          
+          // Clear any other selections first
           setSelectedProperty(null);
+          
+          // Immediately set the selected park to the one that was actually clicked
+          // This ensures the correct info window is displayed
+          setSelectedPark(park as NationalParkWithCoords);
         });
 
         return marker;

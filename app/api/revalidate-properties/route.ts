@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidateTag } from 'next/cache';
+import { revalidatePropertiesCache } from '@/lib/revalidate-properties-cache';
+import { revalidatePath } from 'next/cache';
 
 /**
  * API route to revalidate the properties cache
  * 
  * Call this endpoint after adding new properties to force cache refresh
+ * This will:
+ * - Clear Redis cache for property statistics
+ * - Clear all property filter caches
+ * - Revalidate Next.js cache tags
+ * - Revalidate property pages
  * 
  * Usage:
  * POST /api/revalidate-properties
@@ -19,12 +25,19 @@ export async function POST(request: NextRequest) {
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     // }
 
-    // Revalidate the 'properties' tag
-    revalidateTag('properties');
+    // Revalidate all property-related caches (Redis + Next.js)
+    const result = await revalidatePropertiesCache();
+    
+    // Also revalidate property pages paths
+    revalidatePath('/', 'layout');
+    revalidatePath('/map', 'page');
+    revalidatePath('/[locale]/map', 'page');
+    revalidatePath('/[locale]/property', 'page');
     
     return NextResponse.json({
       success: true,
       message: 'Properties cache revalidated successfully',
+      redisKeysDeleted: result.redisKeysDeleted || 0,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
