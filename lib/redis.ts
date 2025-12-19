@@ -72,7 +72,8 @@ async function getRedisClient(): Promise<RedisClientType | null> {
   const redisUsername = process.env.REDIS_USERNAME || 'default';
 
   // Debug logging (only log presence, not values for security)
-  console.log('[Redis] Environment check:', {
+  // Use console.warn so it shows in production (console.log is removed in production builds)
+  console.warn('[Redis] Environment check:', {
     hasRedisUrl: !!redisUrl,
     hasRedisHost: !!redisHost,
     hasRedisPort: !!redisPort,
@@ -118,23 +119,23 @@ async function getRedisClient(): Promise<RedisClientType | null> {
     });
 
     client.on('connect', () => {
-      console.log('[Redis] Client connecting...');
+      console.warn('[Redis] Client connecting...');
     });
 
     client.on('ready', () => {
-      console.log('[Redis] Client ready - connection established');
+      console.warn('[Redis] Client ready - connection established');
       isRedisAvailable = true;
       isConnecting = false;
     });
 
     client.on('end', () => {
-      console.log('[Redis] Client connection ended');
+      console.warn('[Redis] Client connection ended');
       isRedisAvailable = false;
       isConnecting = false;
     });
 
     // Connect to Redis
-    console.log('[Redis] Attempting to connect...', {
+    console.warn('[Redis] Attempting to connect...', {
       host: redisHost || 'from URL',
       port: redisPort || 'from URL',
       hasPassword: !!redisPassword,

@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       setCache(cacheKey, properties, ttlSeconds)
         .then((success) => {
           if (success) {
-            console.log(`[Cache] Successfully cached properties with key: ${cacheKey.substring(0, 20)}...`);
+            console.warn(`[Cache] Successfully cached properties with key: ${cacheKey.substring(0, 20)}...`);
           } else {
             console.warn(`[Cache] Failed to cache properties (returned false) for key: ${cacheKey.substring(0, 20)}...`);
           }
