@@ -71,9 +71,20 @@ async function getRedisClient(): Promise<RedisClientType | null> {
   const redisPassword = process.env.REDIS_PASSWORD;
   const redisUsername = process.env.REDIS_USERNAME || 'default';
 
+  // Debug logging (only log presence, not values for security)
+  console.log('[Redis] Environment check:', {
+    hasRedisUrl: !!redisUrl,
+    hasRedisHost: !!redisHost,
+    hasRedisPort: !!redisPort,
+    hasRedisPassword: !!redisPassword,
+    hasRedisUsername: !!process.env.REDIS_USERNAME,
+    redisUsername: redisUsername,
+    environment: process.env.NODE_ENV,
+  });
+
   // If no Redis configuration, return null (graceful fallback)
   if (!redisUrl && !redisHost) {
-    console.warn('Redis not configured - falling back to direct database queries');
+    console.warn('[Redis] Not configured - falling back to direct database queries');
     return null;
   }
 
@@ -102,27 +113,33 @@ async function getRedisClient(): Promise<RedisClientType | null> {
 
     // Set up error handlers
     client.on('error', (err) => {
-      console.error('Redis client error:', err);
+      console.error('[Redis] Client error:', err);
       isRedisAvailable = false;
     });
 
     client.on('connect', () => {
-      console.log('Redis client connecting...');
+      console.log('[Redis] Client connecting...');
     });
 
     client.on('ready', () => {
-      console.log('Redis client ready');
+      console.log('[Redis] Client ready - connection established');
       isRedisAvailable = true;
       isConnecting = false;
     });
 
     client.on('end', () => {
-      console.log('Redis client connection ended');
+      console.log('[Redis] Client connection ended');
       isRedisAvailable = false;
       isConnecting = false;
     });
 
     // Connect to Redis
+    console.log('[Redis] Attempting to connect...', {
+      host: redisHost || 'from URL',
+      port: redisPort || 'from URL',
+      hasPassword: !!redisPassword,
+      username: redisUsername,
+    });
     await client.connect();
     
     redisClient = client;
@@ -131,7 +148,12 @@ async function getRedisClient(): Promise<RedisClientType | null> {
 
     return redisClient;
   } catch (error) {
-    console.error('Failed to create Redis client:', error);
+    console.error('[Redis] Failed to create Redis client:', error);
+    console.error('[Redis] Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
     isRedisAvailable = false;
     isConnecting = false;
     return null;

@@ -87,9 +87,21 @@ export async function GET(request: NextRequest) {
       properties = await fetchPropertiesFromDatabase(filterCountry, filterState, filterUnitType, filterRateRange, bounds, requestedFields);
       
       // Store in Redis cache (non-blocking - don't wait for it)
-      setCache(cacheKey, properties, ttlSeconds).catch((err) => {
-        console.error('Failed to cache properties:', err);
-      });
+      setCache(cacheKey, properties, ttlSeconds)
+        .then((success) => {
+          if (success) {
+            console.log(`[Cache] Successfully cached properties with key: ${cacheKey.substring(0, 20)}...`);
+          } else {
+            console.warn(`[Cache] Failed to cache properties (returned false) for key: ${cacheKey.substring(0, 20)}...`);
+          }
+        })
+        .catch((err) => {
+          console.error('[Cache] Failed to cache properties:', err);
+          console.error('[Cache] Error details:', {
+            message: err instanceof Error ? err.message : String(err),
+            cacheKey: cacheKey.substring(0, 20) + '...',
+          });
+        });
     }
     
     // Log cache metrics (controlled by environment variable)
