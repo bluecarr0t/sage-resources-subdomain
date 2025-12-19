@@ -101,7 +101,7 @@ export default function NationalParkDetailTemplate({
       <nav className="bg-gray-50 border-b border-gray-200 py-3 pt-32 md:pt-36">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="https://sageoutdooradvisory.com" className="hover:text-[#006b5f]">
+            <Link href="https://resources.sageoutdooradvisory.com/" className="hover:text-[#006b5f]">
               Home
             </Link>
             <span className="text-gray-400">/</span>
