@@ -20,6 +20,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Font display optimization - prevents layout shift during font load */
+/* When adding custom fonts, always use font-display: swap */
+/* Example:
+@font-face {
+  font-family: 'YourFont';
+  font-display: swap; 
+  src: url('/fonts/font.woff2') format('woff2');
+}
+*/
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

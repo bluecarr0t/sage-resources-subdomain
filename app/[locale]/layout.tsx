@@ -6,6 +6,11 @@ import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
 import { Analytics } from '@vercel/analytics/next';
 import dynamic from 'next/dynamic';
+// Next.js automatically optimizes CSS loading:
+// - Extracts CSS into separate files
+// - Defers non-critical CSS automatically
+// - Inlines critical CSS when possible
+// No manual deferring needed - Next.js handles this optimally
 import '../globals.css';
 
 // Dynamically import GoogleAnalytics to prevent SSR issues with useSearchParams

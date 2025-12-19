@@ -2117,9 +2117,37 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const shouldUseFullHeight = isFullscreen || !isMobile;
   
   return (
-    <div className="w-full h-full" style={shouldUseFullHeight ? { minHeight: '100vh', height: '100%' } : { height: '100%' }}>
+    <div 
+      className="w-full h-full" 
+      style={shouldUseFullHeight 
+        ? { 
+            minHeight: '100vh', 
+            height: '100%',
+            width: '100%',
+            aspectRatio: '16/9' // Prevent layout shift
+          } 
+        : { 
+            height: '100%',
+            width: '100%',
+            aspectRatio: '16/9' // Prevent layout shift
+          }
+      }
+    >
       {/* Map - Full Viewport Height */}
-      <div className="h-full w-full relative" style={shouldUseFullHeight ? { minHeight: '100vh' } : {}}>
+      <div 
+        className="h-full w-full relative" 
+        style={shouldUseFullHeight 
+          ? { 
+              minHeight: '100vh',
+              width: '100%',
+              aspectRatio: '16/9' // Prevent layout shift
+            } 
+          : {
+              width: '100%',
+              aspectRatio: '16/9' // Prevent layout shift
+            }
+        }
+      >
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-50 z-30">
             <div className="bg-white border border-red-200 rounded-lg p-6 m-4 max-w-md">
@@ -2129,7 +2157,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           </div>
         )}
         {!isLoaded && !error && (
-          <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
+          <div 
+            className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50"
+            style={{ 
+              width: '100%', 
+              height: '100%',
+              aspectRatio: '16/9' // Match map container dimensions to prevent layout shift
+            }}
+          >
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600">{t('errors.loadingScript')}</p>
@@ -2138,7 +2173,22 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           </div>
         )}
         {isLoaded && (
-          <div className="relative h-full w-full" style={shouldUseFullHeight ? { minHeight: '100vh', height: '100%' } : { height: '100%' }}>
+          <div 
+            className="relative h-full w-full" 
+            style={shouldUseFullHeight 
+              ? { 
+                  minHeight: '100vh', 
+                  height: '100%',
+                  width: '100%',
+                  aspectRatio: '16/9' // Prevent layout shift
+                } 
+              : { 
+                  height: '100%',
+                  width: '100%',
+                  aspectRatio: '16/9' // Prevent layout shift
+                }
+            }
+          >
             <GoogleMap
               key={`map-${filterState.join(',')}-${filterUnitType.join(',')}-${filterRateRange.join(',')}`}
               mapContainerStyle={{ width: '100%', height: '100%', ...(shouldUseFullHeight ? { minHeight: '100vh' } : {}) }}

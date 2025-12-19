@@ -101,7 +101,18 @@ export default function MapLayout({ locale }: MapLayoutProps) {
             ? 'min-h-screen h-screen' 
             : 'md:min-h-screen md:h-screen'
         }`}
-        style={isFullscreen ? { minHeight: '100vh', height: '100vh' } : undefined}
+        style={isFullscreen 
+          ? { 
+              minHeight: '100vh', 
+              height: '100vh',
+              width: '100%',
+              aspectRatio: '16/9' // Prevent layout shift
+            } 
+          : {
+              width: '100%',
+              aspectRatio: '16/9' // Prevent layout shift
+            }
+        }
       >
         <DynamicGooglePropertyMap showMap={true} />
         
