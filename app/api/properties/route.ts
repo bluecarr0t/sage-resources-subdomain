@@ -73,6 +73,8 @@ export async function GET(request: NextRequest) {
     const cacheKey = `properties:${filterHash}`;
     const ttlSeconds = 1209600; // 14 days
 
+    console.warn(`[Cache] Checking cache for key: ${cacheKey.substring(0, 30)}...`);
+    
     // Try to get from Redis cache first
     const cachedProperties = await getCache<any[]>(cacheKey);
     
@@ -80,11 +82,15 @@ export async function GET(request: NextRequest) {
     let cacheStatus: 'HIT' | 'MISS' = 'MISS';
     
     if (cachedProperties) {
+      console.warn(`[Cache] HIT for key: ${cacheKey.substring(0, 30)}... (found ${cachedProperties.length} properties)`);
       properties = cachedProperties;
       cacheStatus = 'HIT';
     } else {
+      console.warn(`[Cache] MISS for key: ${cacheKey.substring(0, 30)}... - fetching from database`);
       // Cache miss - fetch from database
       properties = await fetchPropertiesFromDatabase(filterCountry, filterState, filterUnitType, filterRateRange, bounds, requestedFields);
+      
+      console.warn(`[Cache] Fetched ${properties.length} properties, attempting to cache...`);
       
       // Store in Redis cache (non-blocking - don't wait for it)
       setCache(cacheKey, properties, ttlSeconds)
