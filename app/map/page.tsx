@@ -80,10 +80,12 @@ async function getPropertyStatistics() {
     const supabase = createServerClient();
     
     // Get all glamping properties to count unique property names
+    // Exclude closed properties
     const { data: properties, error } = await supabase
       .from('all_glamping_properties')
       .select('property_name, state, country')
-      .eq('is_glamping_property', 'Yes');
+      .eq('is_glamping_property', 'Yes')
+      .neq('is_closed', 'Yes');
 
     if (error) {
       console.error('Error fetching property count:', error);
