@@ -27,34 +27,53 @@ export async function GET() {
       environment: process.env.NODE_ENV,
     };
 
-    // Check Redis connection status
-    const isConnected = isRedisConnected();
-
     // Get cache metrics
     const metrics = getCacheMetrics();
 
+    // Try to actually connect to Redis (this will initialize the client)
+    let connectionTest = {
+      attempted: false,
+      connected: false,
+      error: null as string | null,
+    };
+    
     // Try a simple cache operation to test connection
+    // This is the real test - if this works, Redis is functional
     let cacheTestResult = 'not tested';
     try {
       const testKey = 'debug:test-connection';
-      const { setCache, getCache } = await import('@/lib/redis');
+      const { setCache, getCache, getRedisClient } = await import('@/lib/redis');
       
-      // Try to set a test value
-      const setResult = await setCache(testKey, { test: true, timestamp: Date.now() }, 10);
-      if (setResult) {
-        // Try to get it back
-        const getResult = await getCache(testKey);
-        if (getResult) {
-          cacheTestResult = 'success - cache read/write working';
-        } else {
-          cacheTestResult = 'set succeeded but get failed';
-        }
+      // First, try to get the Redis client (this will attempt connection)
+      const client = await getRedisClient();
+      connectionTest.attempted = true;
+      connectionTest.connected = client !== null;
+      
+      if (!client) {
+        connectionTest.error = 'getRedisClient returned null';
+        cacheTestResult = 'Redis client not available';
       } else {
-        cacheTestResult = 'set failed - Redis not available';
+        // Try to set a test value
+        const setResult = await setCache(testKey, { test: true, timestamp: Date.now() }, 10);
+        if (setResult) {
+          // Try to get it back
+          const getResult = await getCache(testKey);
+          if (getResult) {
+            cacheTestResult = 'success - cache read/write working';
+          } else {
+            cacheTestResult = 'set succeeded but get failed';
+          }
+        } else {
+          cacheTestResult = 'set failed - Redis not available';
+        }
       }
     } catch (error) {
-      cacheTestResult = `error: ${error instanceof Error ? error.message : String(error)}`;
+      connectionTest.error = error instanceof Error ? error.message : String(error);
+      cacheTestResult = `error: ${connectionTest.error}`;
     }
+    
+    // Check connection status after attempting connection
+    const isConnected = isRedisConnected();
 
     return NextResponse.json({
       success: true,
@@ -66,10 +85,17 @@ export async function GET() {
       redisConfig: envCheck,
       connectionStatus: {
         isConnected,
-        message: isConnected ? 'Redis is connected' : 'Redis is not connected',
+        message: isConnected ? 'Redis is connected' : 'Redis is not connected (state check)',
+        connectionTest: {
+          attempted: connectionTest.attempted,
+          connected: connectionTest.connected,
+          error: connectionTest.error,
+        },
+        note: 'In serverless, isConnected may be false until client is initialized. Cache test is the real indicator.',
       },
       cacheTest: {
         result: cacheTestResult,
+        isWorking: cacheTestResult === 'success - cache read/write working',
       },
       metrics: {
         totalRequests: metrics.totalRequests,
