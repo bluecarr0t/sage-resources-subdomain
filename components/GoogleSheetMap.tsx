@@ -239,14 +239,33 @@ export default function GoogleSheetMap({
         zoom={defaultZoom}
         onLoad={onLoad}
         onUnmount={onUnmount}
-        options={{
-          mapTypeControl: true,
-          streetViewControl: true,
-          fullscreenControl: true,
-          // Default to terrain map type
-          mapTypeId: 'terrain',
-          mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81', // Style Map ID for custom map styling
-        }}
+        options={(() => {
+          // Check for WebGL support before using vector maps
+          let hasWebGL = false;
+          if (typeof window !== 'undefined') {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            hasWebGL = !!gl;
+          }
+          
+          const baseOptions = {
+            mapTypeControl: true,
+            streetViewControl: true,
+            fullscreenControl: true,
+            // Default to terrain map type
+            mapTypeId: 'terrain' as const,
+          };
+          
+          // Only use mapId (vector maps) if WebGL is supported
+          if (hasWebGL) {
+            return {
+              ...baseOptions,
+              mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81',
+            };
+          }
+          
+          return baseOptions;
+        })()}
       >
         {filteredProperties.map((property) => (
           <Marker
