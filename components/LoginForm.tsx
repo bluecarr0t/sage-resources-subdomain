@@ -55,8 +55,9 @@ export default function LoginForm({ locale }: LoginFormProps) {
         }
 
         // User has passed both security checks - redirect them to admin page
-        const redirectTo = searchParams.get('redirect') || '/admin';
-        router.push(redirectTo);
+        // Always redirect to /admin after successful authentication
+        // (Supabase OAuth redirects to Site URL, so we handle redirect here)
+        router.push('/admin');
         router.refresh();
       } catch (err) {
         console.error('Error verifying user access:', err);
