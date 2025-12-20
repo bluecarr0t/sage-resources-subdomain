@@ -11,7 +11,7 @@ import { supabase } from './supabase';
  */
 export const ALLOWED_EMAIL_DOMAINS = [
   'sageoutdooradvisory.com',
-  'sagecommercial.com',
+  'sagecommercialadvisory.com',
 ] as const;
 
 /**

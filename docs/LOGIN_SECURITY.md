@@ -22,7 +22,7 @@ After a user successfully authenticates with Google OAuth, the application valid
 
 **Allowed Domains:**
 - `@sageoutdooradvisory.com`
-- `@sagecommercial.com`
+- `@sagecommercialadvisory.com`
 
 **Implementation:**
 - Domain validation occurs immediately after OAuth callback
@@ -58,7 +58,7 @@ Even if a user passes the domain check, they must also be explicitly added to th
    ↓
 4. OAuth callback returns to application
    ↓
-5. ✅ Domain Validation → Check if email is @sageoutdooradvisory.com OR @sagecommercial.com
+5. ✅ Domain Validation → Check if email is @sageoutdooradvisory.com OR @sagecommercialadvisory.com
    │   ❌ If fails → Sign out immediately, show error
    ↓
 6. ✅ Managed Users Check → Verify user exists in managed_users table with is_active=true
@@ -71,7 +71,7 @@ Even if a user passes the domain check, they must also be explicitly added to th
 
 ### Domain Validation Failure
 ```
-Access denied. Only users with @sageoutdooradvisory.com or @sagecommercial.com email addresses are authorized to access this application.
+Access denied. Only users with @sageoutdooradvisory.com or @sagecommercialadvisory.com email addresses are authorized to access this application.
 ```
 
 ### Managed Users Check Failure
@@ -106,7 +106,7 @@ To add a new allowed email domain:
    ```typescript
    export const ALLOWED_EMAIL_DOMAINS = [
      'sageoutdooradvisory.com',
-     'sagecommercial.com',
+     'sagecommercialadvisory.com',
      'newdomain.com', // Add new domain here
    ] as const;
    ```
@@ -125,7 +125,7 @@ To test the security implementation:
 
 1. **Test Allowed Domain (should succeed):**
    - Sign in with `@sageoutdooradvisory.com` email (must be in managed_users table)
-   - Sign in with `@sagecommercial.com` email (must be in managed_users table)
+   - Sign in with `@sagecommercialadvisory.com` email (must be in managed_users table)
 
 2. **Test Unauthorized Domain (should fail at domain check):**
    - Attempt to sign in with `@example.com` or any other domain
@@ -146,6 +146,6 @@ To test the security implementation:
 ## Important Notes
 
 - The `hd` parameter in Google OAuth restricts to `@sageoutdooradvisory.com` only
-- Additional domains (`@sagecommercial.com`) are validated after authentication
+- Additional domains (`@sagecommercialadvisory.com`) are validated after authentication
 - Users must pass BOTH domain validation AND managed_users check to gain access
 - All security checks happen automatically - no manual intervention required

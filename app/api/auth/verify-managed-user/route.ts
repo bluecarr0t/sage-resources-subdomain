@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           hasAccess: false,
-          error: 'Access denied. Only users with @sageoutdooradvisory.com or @sagecommercial.com email addresses are authorized to access this application.',
+          error: 'Access denied. Only users with @sageoutdooradvisory.com or @sagecommercialadvisory.com email addresses are authorized to access this application.',
         },
         { status: 403 }
       );

@@ -33,7 +33,7 @@ export default function LoginForm({ locale }: LoginFormProps) {
         if (!isAllowedEmailDomain(email)) {
           // User's email is not from an allowed domain - sign them out immediately
           await supabase.auth.signOut();
-          setError('Access denied. Only users with @sageoutdooradvisory.com or @sagecommercial.com email addresses are authorized to access this application.');
+          setError('Access denied. Only users with @sageoutdooradvisory.com or @sagecommercialadvisory.com email addresses are authorized to access this application.');
           setCheckingAuth(false);
           return;
         }
