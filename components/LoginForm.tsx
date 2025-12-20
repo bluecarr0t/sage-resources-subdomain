@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { isAllowedEmailDomain } from '@/lib/auth-helpers';
 
 interface LoginFormProps {
   locale: string;
@@ -19,9 +20,25 @@ export default function LoginForm({ locale }: LoginFormProps) {
   useEffect(() => {
     let subscription: { unsubscribe: () => void } | null = null;
 
-    const verifyUserAccess = async (userId: string) => {
+    const verifyUserAccess = async (userId: string, userEmail?: string | null) => {
       try {
-        // Verify user is in managed_users table
+        // Step 1: Get user email from session if not provided
+        let email = userEmail;
+        if (!email) {
+          const { data: { session } } = await supabase.auth.getSession();
+          email = session?.user?.email || null;
+        }
+
+        // Step 2: Validate email domain (CRITICAL SECURITY CHECK)
+        if (!isAllowedEmailDomain(email)) {
+          // User's email is not from an allowed domain - sign them out immediately
+          await supabase.auth.signOut();
+          setError('Access denied. Only users with @sageoutdooradvisory.com or @sagecommercial.com email addresses are authorized to access this application.');
+          setCheckingAuth(false);
+          return;
+        }
+
+        // Step 3: Verify user is in managed_users table (SECOND SECURITY CHECK)
         const { data: managedUser, error } = await supabase
           .from('managed_users')
           .select('id, is_active')
@@ -32,12 +49,12 @@ export default function LoginForm({ locale }: LoginFormProps) {
         if (error || !managedUser) {
           // User is not in managed_users - sign them out
           await supabase.auth.signOut();
-          setError('Access denied. Your account is not authorized to access this application. Please contact an administrator.');
+          setError('Access denied. Your account is not authorized to access this application. Please contact an administrator to be added to the system.');
           setCheckingAuth(false);
           return;
         }
 
-        // User has access - redirect them (default to English locale home)
+        // User has passed both security checks - redirect them (default to English locale home)
         const redirectTo = searchParams.get('redirect') || '/en';
         router.push(redirectTo);
         router.refresh();
@@ -54,7 +71,8 @@ export default function LoginForm({ locale }: LoginFormProps) {
         const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             if (event === 'SIGNED_IN' && session) {
-              await verifyUserAccess(session.user.id);
+              // Pass user email for domain validation
+              await verifyUserAccess(session.user.id, session.user.email);
             }
           }
         );
@@ -64,7 +82,8 @@ export default function LoginForm({ locale }: LoginFormProps) {
         // Check current session
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          await verifyUserAccess(session.user.id);
+          // Pass user email for domain validation
+          await verifyUserAccess(session.user.id, session.user.email);
         } else {
           setCheckingAuth(false);
         }
@@ -100,8 +119,9 @@ export default function LoginForm({ locale }: LoginFormProps) {
         options: {
           redirectTo: redirectTo,
           queryParams: {
-            // Restrict to your Google Workspace domain (optional - also configure in Supabase dashboard)
-            // hd: 'yourdomain.com', // Uncomment and replace with your domain
+            // Restrict to primary Google Workspace domain as first layer of security
+            // Note: hd parameter only supports one domain, so we also validate email domain after authentication
+            hd: 'sageoutdooradvisory.com', // Primary domain restriction
           },
         },
       });

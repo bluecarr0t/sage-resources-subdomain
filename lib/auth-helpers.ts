@@ -6,6 +6,26 @@
 import { createServerClient } from './supabase';
 import { supabase } from './supabase';
 
+/**
+ * Allowed email domains for authentication
+ */
+export const ALLOWED_EMAIL_DOMAINS = [
+  'sageoutdooradvisory.com',
+  'sagecommercial.com',
+] as const;
+
+/**
+ * Check if an email address is from an allowed domain
+ */
+export function isAllowedEmailDomain(email: string | null | undefined): boolean {
+  if (!email) {
+    return false;
+  }
+  
+  const domain = email.toLowerCase().split('@')[1];
+  return ALLOWED_EMAIL_DOMAINS.includes(domain as typeof ALLOWED_EMAIL_DOMAINS[number]);
+}
+
 export interface ManagedUser {
   id: number;
   user_id: string;

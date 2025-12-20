@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser } from '@/lib/auth-helpers';
+import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,17 +24,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user is in managed_users table
-    const hasAccess = await isManagedUser(session.user.id);
-
-    if (!hasAccess) {
-      // Sign out the user since they don't have access
+    // Step 1: Validate email domain (CRITICAL SECURITY CHECK)
+    const userEmail = session.user.email;
+    if (!isAllowedEmailDomain(userEmail)) {
+      // User's email is not from an allowed domain - sign them out immediately
       await supabase.auth.signOut();
       
       return NextResponse.json(
         {
           hasAccess: false,
-          error: 'Access denied. Your account is not authorized to access this application.',
+          error: 'Access denied. Only users with @sageoutdooradvisory.com or @sagecommercial.com email addresses are authorized to access this application.',
+        },
+        { status: 403 }
+      );
+    }
+
+    // Step 2: Check if user is in managed_users table (SECOND SECURITY CHECK)
+    const hasAccess = await isManagedUser(session.user.id);
+
+    if (!hasAccess) {
+      // User is not in managed_users - sign them out
+      await supabase.auth.signOut();
+      
+      return NextResponse.json(
+        {
+          hasAccess: false,
+          error: 'Access denied. Your account is not authorized to access this application. Please contact an administrator to be added to the system.',
         },
         { status: 403 }
       );
