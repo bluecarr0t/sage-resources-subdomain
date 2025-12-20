@@ -27,21 +27,21 @@ export default function TermsOfServicePage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Agreement to Terms</h2>
               <p className="text-gray-700 mb-4">
-                By accessing or using the services provided by Sage Outdoor Advisory ("we," "our," or "us"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, then you may not access the service.
+                By accessing or using the services provided by Sage Outdoor Advisory (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you disagree with any part of these terms, then you may not access the service.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Use License</h2>
               <p className="text-gray-700 mb-4">
-                Permission is granted to temporarily access the materials on Sage Outdoor Advisory's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+                Permission is granted to temporarily access the materials on Sage Outdoor Advisory&apos;s website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
                 <li>Modify or copy the materials</li>
                 <li>Use the materials for any commercial purpose or for any public display</li>
                 <li>Attempt to reverse engineer any software contained on the website</li>
                 <li>Remove any copyright or other proprietary notations from the materials</li>
-                <li>Transfer the materials to another person or "mirror" the materials on any other server</li>
+                <li>Transfer the materials to another person or &quot;mirror&quot; the materials on any other server</li>
               </ul>
             </section>
 
@@ -69,7 +69,7 @@ export default function TermsOfServicePage() {
                 <li>To transmit, or procure the sending of, any advertising or promotional material without our prior written consent</li>
                 <li>To impersonate or attempt to impersonate the company, a company employee, another user, or any other person or entity</li>
                 <li>In any way that infringes upon the rights of others, including intellectual property rights, or in any way is illegal, threatening, fraudulent, or harmful</li>
-                <li>To engage in any other conduct that restricts or inhibits anyone's use or enjoyment of the website</li>
+                <li>To engage in any other conduct that restricts or inhibits anyone&apos;s use or enjoyment of the website</li>
                 <li>To scrape, crawl, or use automated systems (including bots, spiders, or scrapers) to access, collect, or harvest data from our website without our express written permission</li>
                 <li>To reverse engineer, decompile, or disassemble any software or technology used on our website</li>
                 <li>To attempt to gain unauthorized access to our systems, networks, or accounts</li>
@@ -90,7 +90,7 @@ export default function TermsOfServicePage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Disclaimer</h2>
               <p className="text-gray-700 mb-4">
-                The information on this website is provided on an "as is" basis. To the fullest extent permitted by law, Sage Outdoor Advisory excludes all representations, warranties, conditions, and terms related to our website and the use of this website.
+                The information on this website is provided on an &quot;as is&quot; basis. To the fullest extent permitted by law, Sage Outdoor Advisory excludes all representations, warranties, conditions, and terms related to our website and the use of this website.
               </p>
               <p className="text-gray-700 mb-4">
                 We do not warrant that the website will be available at all times or that the information on this website is complete, true, accurate, or non-misleading.
@@ -113,7 +113,7 @@ export default function TermsOfServicePage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Indemnification</h2>
               <p className="text-gray-700 mb-4">
-                You agree to defend, indemnify, and hold harmless Sage Outdoor Advisory and its licensee and licensors, and their employees, contractors, agents, officers and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney's fees) arising out of or relating to:
+                You agree to defend, indemnify, and hold harmless Sage Outdoor Advisory and its licensee and licensors, and their employees, contractors, agents, officers and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney&apos;s fees) arising out of or relating to:
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
                 <li>Your use of or access to the service</li>

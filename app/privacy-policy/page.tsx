@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Introduction</h2>
               <p className="text-gray-700 mb-4">
-                Sage Outdoor Advisory ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
+                Sage Outdoor Advisory (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
               </p>
             </section>
 
@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
                 We collect personal information that you provide to us when you:
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
-                <li><strong>Sign in via Google OAuth:</strong> When you authenticate using Google, we receive your email address, name, and profile picture from Google's authentication service</li>
+                <li><strong>Sign in via Google OAuth:</strong> When you authenticate using Google, we receive your email address, name, and profile picture from Google&apos;s authentication service</li>
                 <li><strong>Create an account:</strong> We store your account information in our database, including your user ID, email address, and account status</li>
                 <li><strong>Contact us:</strong> If you contact us through our website, we collect the information you provide, such as your name and email address</li>
                 <li><strong>Use our services:</strong> We collect information about how you interact with our website and services</li>
@@ -85,8 +85,8 @@ export default function PrivacyPolicyPage() {
                 We use the following third-party services that collect, monitor, and analyze information:
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
-                <li><strong>Supabase:</strong> We use Supabase for data storage, database services, and user authentication. Your account information, including email address and account status, is stored securely in Supabase databases. Supabase's privacy policy applies to their handling of this data. <a href="https://supabase.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">View Supabase Privacy Policy</a></li>
-                <li><strong>Google OAuth:</strong> We use Google OAuth for user authentication. When you sign in with Google, Google provides us with your email address, name, and profile picture. Google's privacy policy applies to data collected by Google during the authentication process. <a href="https://policies.google.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">View Google Privacy Policy</a></li>
+                <li><strong>Supabase:</strong> We use Supabase for data storage, database services, and user authentication. Your account information, including email address and account status, is stored securely in Supabase databases. Supabase&apos;s privacy policy applies to their handling of this data. <a href="https://supabase.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">View Supabase Privacy Policy</a></li>
+                <li><strong>Google OAuth:</strong> We use Google OAuth for user authentication. When you sign in with Google, Google provides us with your email address, name, and profile picture. Google&apos;s privacy policy applies to data collected by Google during the authentication process. <a href="https://policies.google.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">View Google Privacy Policy</a></li>
                 <li><strong>Google Analytics:</strong> We use Google Analytics to analyze website traffic and usage patterns. Google Analytics collects information such as IP addresses, browser type, pages visited, and time spent on pages. <a href="https://policies.google.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">View Google Privacy Policy</a></li>
               </ul>
               <p className="text-gray-700 mb-4">
@@ -140,7 +140,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <p className="text-gray-700 mb-4">Specifically:</p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
-                <li><strong>Account information:</strong> Retained for the duration of your account's active use, and for up to 3 years after account inactivity or deletion request, except where we are required to retain it by law</li>
+                <li><strong>Account information:</strong> Retained for the duration of your account&apos;s active use, and for up to 3 years after account inactivity or deletion request, except where we are required to retain it by law</li>
                 <li><strong>Website analytics data:</strong> Retained for 26 months (Google Analytics default retention period)</li>
                 <li><strong>Communication records:</strong> Retained for 3 years from the date of last contact for customer service and legal compliance purposes</li>
                 <li><strong>Legal/regulatory requirements:</strong> Some information may be retained longer if required by applicable law, court order, or legal process</li>
@@ -180,7 +180,7 @@ export default function PrivacyPolicyPage() {
                 California residents have the right to:
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
-                <li>Know what personal information we collect and how it's used</li>
+                <li>Know what personal information we collect and how it&apos;s used</li>
                 <li>Request deletion of personal information</li>
                 <li>Opt-out of the sale or sharing of personal information (though we do not sell your information)</li>
                 <li>Non-discrimination for exercising privacy rights</li>
@@ -191,7 +191,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Children's Privacy</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Children&apos;s Privacy</h2>
               <p className="text-gray-700 mb-4">
                 Our service is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately at <a href="mailto:contact@sageoutdooradvisory.com" className="text-[#006b5f] hover:underline">contact@sageoutdooradvisory.com</a>. If we become aware that we have collected personal information from a child under 18, we will take steps to delete that information promptly.
               </p>
@@ -221,7 +221,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
                 <li>Posting the new Privacy Policy on this page</li>
-                <li>Updating the "Last updated" date</li>
+                <li>Updating the &quot;Last updated&quot; date</li>
                 <li>Sending you an email notification (if you have an account and we have your email address)</li>
                 <li>Displaying a notice on our website for significant changes</li>
               </ul>
