@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { createLocaleLinks } from '@/lib/locale-links';
 import { locales } from '@/i18n';
+import { supabase } from '@/lib/supabase';
 
 interface FloatingHeaderProps {
   locale?: string;
@@ -30,7 +31,10 @@ export default function FloatingHeader({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const resourcesDropdownRef = useRef<HTMLDivElement>(null);
   const servicesDropdownRef = useRef<HTMLDivElement>(null);
   const resourcesButtonRef = useRef<HTMLButtonElement>(null);
@@ -118,6 +122,38 @@ export default function FloatingHeader({
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
+
+  // Check authentication state
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+
+    checkAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await supabase.auth.signOut();
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Error signing out:', error);
+      setIsSigningOut(false);
+    }
+  };
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -375,6 +411,18 @@ export default function FloatingHeader({
                   </nav>
                 </>
               )}
+              
+              {/* Sign Out Button - Desktop */}
+              {isAuthenticated && (
+                <button
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="hidden lg:flex px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-all duration-200 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSigningOut ? 'Signing out...' : 'Sign Out'}
+                </button>
+              )}
+
               <Link
                 href="https://sageoutdooradvisory.com/contact-us/"
                 className="px-4 py-2 md:px-6 md:py-2.5 bg-[#006b5f] text-white text-sm font-semibold rounded-lg hover:bg-[#005a4f] transition-all duration-200 shadow-lg hover:shadow-xl flex-shrink-0"
@@ -547,6 +595,20 @@ export default function FloatingHeader({
                   </div>
                 )}
               </div>
+
+              {/* Sign Out Button - Mobile */}
+              {isAuthenticated && (
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  disabled={isSigningOut}
+                  className="w-full px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                >
+                  {isSigningOut ? 'Signing out...' : 'Sign Out'}
+                </button>
+              )}
             </nav>
           </div>
         )}
