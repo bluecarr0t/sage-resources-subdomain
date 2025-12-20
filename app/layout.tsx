@@ -1,19 +1,16 @@
 import { defaultLocale } from '@/i18n';
+import './globals.css';
 
 // Root layout - middleware handles locale routing
-// This layout should rarely be used since middleware redirects "/" to "/en"
-// But we provide a minimal structure as fallback
+// This layout is used for routes outside locale routing (like /login)
 // Next.js requires <html> and <body> tags in the root layout
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Minimal HTML structure required by Next.js
-  // The [locale]/layout.tsx provides the actual HTML structure with lang attribute
-  // suppressHydrationWarning prevents hydration mismatch warnings since locale layout handles lang
   return (
-    <html suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body>
         {children}
       </body>

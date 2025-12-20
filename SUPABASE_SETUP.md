@@ -79,7 +79,15 @@ SUPABASE_SECRET_KEY=sb_secret_your_key_here
 - Bypasses RLS - use with caution
 - Never exposed to the browser
 
-## Step 5: Using Supabase Clients
+## Step 5: Set Up Google OAuth (Recommended for Google Workspace Teams)
+
+If you're using Google Workspace and want team members to sign in with their Google accounts:
+
+👉 **See [SUPABASE_GOOGLE_OAUTH_SETUP.md](./docs/SUPABASE_GOOGLE_OAUTH_SETUP.md) for detailed instructions**
+
+This allows users to sign in with a single click using their existing Google accounts, and you can restrict sign-ins to your Google Workspace domain.
+
+## Step 6: Using Supabase Clients
 
 ### Client-Side Usage (Browser)
 
