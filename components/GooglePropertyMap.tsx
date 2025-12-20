@@ -72,18 +72,34 @@ type PropertyWithCoords = SageProperty & { coordinates: [number, number] };
 /**
  * Generate Google Places Photo URL from photo object
  * Uses API route to proxy the request (handles authentication securely)
+ * 
+ * @param photo - Photo object with name and optional dimensions
+ * @param fixedDimensions - Optional flag to use fixed dimensions for InfoWindow (standardized aspect ratio)
+ * @returns Photo URL for the proxied API route
  */
-function getGooglePhotoUrl(photo: {
-  name: string;
-  widthPx?: number;
-  heightPx?: number;
-}): string {
+function getGooglePhotoUrl(
+  photo: {
+    name: string;
+    widthPx?: number;
+    heightPx?: number;
+  },
+  fixedDimensions?: boolean
+): string {
   if (!photo?.name) {
     console.warn('No photo name provided');
     return '';
   }
   
-  // Use a reasonable size for the info window (max 800px width, 600px height)
+  // For InfoWindow images, use standardized dimensions (16:9 aspect ratio)
+  // This ensures consistent display across all markers
+  // Standard size: 400x225 (16:9) - optimal for info windows
+  if (fixedDimensions) {
+    const encodedPhotoName = encodeURIComponent(photo.name);
+    const url = `/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=400&maxHeightPx=225`;
+    return url;
+  }
+  
+  // For other uses (property detail pages, etc.), use reasonable max sizes
   const maxWidth = photo.widthPx ? Math.min(photo.widthPx, 800) : 800;
   const maxHeight = photo.heightPx ? Math.min(photo.heightPx, 600) : 600;
   
@@ -92,7 +108,6 @@ function getGooglePhotoUrl(photo: {
   
   // Use API route to proxy the photo request (handles authentication)
   const url = `/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=${maxWidth}&maxHeightPx=${maxHeight}`;
-  console.log('Generated photo URL:', url);
   
   return url;
 }
@@ -283,10 +298,28 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [fullPropertyDetails, setFullPropertyDetails] = useState<any>(null);
   const [loadingPropertyDetails, setLoadingPropertyDetails] = useState(false);
 
+  // State for National Park Google Places data (photos, rating, etc.)
+  const [parkGooglePlacesData, setParkGooglePlacesData] = useState<{
+    photos?: Array<{
+      name: string;
+      widthPx?: number;
+      heightPx?: number;
+    }>;
+    rating?: number;
+    userRatingCount?: number;
+  } | null>(null);
+  const [loadingParkPlacesData, setLoadingParkPlacesData] = useState(false);
+  const [currentParkPhotoIndex, setCurrentParkPhotoIndex] = useState(0);
+
   // Reset photo index when selected property changes
   useEffect(() => {
     setCurrentPhotoIndex(0);
   }, [selectedProperty?.id]);
+
+  // Reset park photo index when selected park changes
+  useEffect(() => {
+    setCurrentParkPhotoIndex(0);
+  }, [selectedPark?.id]);
 
   // Fetch full property details when marker is clicked (if we only have minimal fields)
   useEffect(() => {
@@ -336,6 +369,50 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
   // Use full property details if available, otherwise use selectedProperty
   const propertyForDisplay = fullPropertyDetails || selectedProperty;
+
+  // Fetch Google Places data for National Park when selected
+  useEffect(() => {
+    if (!selectedPark) {
+      setParkGooglePlacesData(null);
+      return;
+    }
+
+    async function fetchParkGooglePlacesData() {
+      if (!selectedPark?.name) return;
+      
+      setLoadingParkPlacesData(true);
+      try {
+        const params = new URLSearchParams({
+          propertyName: selectedPark.name.includes('National Park')
+            ? selectedPark.name
+            : `${selectedPark.name} National Park`,
+        });
+        
+        if (selectedPark.state) {
+          params.append('state', selectedPark.state);
+        }
+        
+        const response = await fetch(`/api/google-places?${params.toString()}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setParkGooglePlacesData(data);
+        } else {
+          // Silently fail - park info window will work without photos
+          console.warn('Failed to fetch Google Places data for park:', selectedPark.name);
+          setParkGooglePlacesData(null);
+        }
+      } catch (error) {
+        // Silently fail - park info window will work without photos
+        console.warn('Error fetching Google Places data for park:', error);
+        setParkGooglePlacesData(null);
+      } finally {
+        setLoadingParkPlacesData(false);
+      }
+    }
+
+    fetchParkGooglePlacesData();
+  }, [selectedPark]);
 
   // Close property InfoWindow when park is selected
   useEffect(() => {
@@ -1628,7 +1705,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   />
                 )}
               </span>
-              <span className={`text-sm font-medium text-gray-600 transition-opacity duration-300 truncate ${loading ? 'opacity-50' : 'opacity-100'}`}>
+              <span className={`text-sm font-medium text-gray-900 transition-opacity duration-300 truncate ${loading ? 'opacity-50' : 'opacity-100'}`}>
                 {t('stats.properties')}
               </span>
             </div>
@@ -1787,8 +1864,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
         {/* Filters - Collapsible on Mobile */}
         <div className="pt-5 md:border-t md:border-gray-200 md:pt-0">
-          {/* Desktop Filter Title - Hidden on Mobile (now in header) */}
-          <h2 className="hidden md:block text-lg font-semibold text-gray-900 mb-4 md:pt-6">
+          {/* Filter Title - Visible on Mobile for proper heading hierarchy */}
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 md:pt-6">
             {t('filters.title')}
           </h2>
 
@@ -2265,9 +2342,120 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   }}
                   onCloseClick={() => {
                     setSelectedPark(null);
+                    setCurrentParkPhotoIndex(0);
+                    setParkGooglePlacesData(null);
+                  }}
+                  options={{
+                    pixelOffset: new google.maps.Size(0, -10),
                   }}
                 >
                   <div className="max-w-xs p-2">
+                    {loadingParkPlacesData && (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+                        <p className="text-sm text-gray-600">Loading photos...</p>
+                      </div>
+                    )}
+                    {/* Google Places Photos - Lazy loaded when InfoWindow opens */}
+                    {!loadingParkPlacesData && (() => {
+                      const photos = parkGooglePlacesData?.photos;
+                      
+                      // Return null if no photos - don't show any placeholder
+                      if (!photos || !Array.isArray(photos) || photos.length === 0) {
+                        return null;
+                      }
+                      
+                      // Ensure currentParkPhotoIndex is within bounds
+                      const safeIndex = Math.max(0, Math.min(currentParkPhotoIndex, photos.length - 1));
+                      const currentPhoto = photos[safeIndex];
+                      // Use fixed dimensions for InfoWindow to ensure consistent aspect ratio (16:9)
+                      const photoUrl = getGooglePhotoUrl(currentPhoto, true);
+                      
+                      const goToPrevious = (e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        setCurrentParkPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+                      };
+                      
+                      const goToNext = (e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        setCurrentParkPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
+                      };
+                      
+                      // Generate descriptive alt text
+                      const parkName = selectedPark.name.includes('National Park')
+                        ? selectedPark.name
+                        : `${selectedPark.name} National Park`;
+                      const state = selectedPark.state ? ` in ${getFullStateName(selectedPark.state)}` : '';
+                      const altText = `Photo of ${parkName}${state} - Image ${safeIndex + 1} of ${photos.length}`;
+
+                      return (
+                        <div className="mb-3 -mx-2 -mt-2 relative">
+                          {/* Standardized image container: 192px height (h-48) with 16:9 aspect ratio */}
+                          <div className="relative w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 group" style={{ aspectRatio: '16/9' }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={photoUrl}
+                              alt={altText}
+                              className="w-full h-full object-cover"
+                              width={400}
+                              height={225}
+                              onError={(e) => {
+                                console.error('❌ Image failed to load for park:', {
+                                  url: photoUrl,
+                                  park: parkName,
+                                  error: e
+                                });
+                                // Hide the entire photo container if image fails to load
+                                const target = e.target as HTMLImageElement;
+                                const container = target.closest('.mb-3') as HTMLElement;
+                                if (container) {
+                                  container.style.display = 'none';
+                                }
+                              }}
+                              onLoad={() => {
+                                console.log('✅ Image loaded successfully for', parkName);
+                              }}
+                            />
+                            
+                            {/* Navigation Arrows - Only show if more than 1 photo */}
+                            {photos.length > 1 && (
+                              <>
+                                {/* Previous Arrow */}
+                                <button
+                                  onClick={goToPrevious}
+                                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100 z-20"
+                                  aria-label="Previous photo"
+                                  type="button"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                  </svg>
+                                </button>
+                                
+                                {/* Next Arrow */}
+                                <button
+                                  onClick={goToNext}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100 z-20"
+                                  aria-label="Next photo"
+                                  type="button"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </button>
+                              </>
+                            )}
+                            
+                            {/* Photo counter and total */}
+                            {photos.length > 1 && (
+                              <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded z-10">
+                                {safeIndex + 1} / {photos.length}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                     <h3 className="font-bold text-lg mb-2 text-gray-900">
                       {selectedPark.name.includes('National Park') 
                         ? selectedPark.name 
@@ -2362,7 +2550,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       // Ensure currentPhotoIndex is within bounds
                       const safeIndex = Math.max(0, Math.min(currentPhotoIndex, photos.length - 1));
                       const currentPhoto = photos[safeIndex];
-                      const photoUrl = getGooglePhotoUrl(currentPhoto);
+                      // Use fixed dimensions for InfoWindow to ensure consistent aspect ratio (16:9)
+                      const photoUrl = getGooglePhotoUrl(currentPhoto, true);
                       
                       const goToPrevious = (e: React.MouseEvent) => {
                         e.stopPropagation();
@@ -2383,12 +2572,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
                       return (
                         <div className="mb-3 -mx-2 -mt-2 relative">
-                          <div className="relative w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 group">
+                          {/* Standardized image container: 192px height (h-48) with 16:9 aspect ratio */}
+                          <div className="relative w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 group" style={{ aspectRatio: '16/9' }}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={photoUrl}
                               alt={altText}
                               className="w-full h-full object-cover"
+                              width={400}
+                              height={225}
                               onError={(e) => {
                                 console.error('❌ Image failed to load:', {
                                   url: photoUrl,

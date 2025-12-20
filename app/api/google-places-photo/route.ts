@@ -7,6 +7,13 @@ export const dynamic = 'force-dynamic';
  * API route to proxy Google Places Photo requests
  * This is needed because the new Places API requires authentication via headers
  * and we don't want to expose the API key in client-side code
+ * 
+ * COMPLIANCE NOTE: Per Google Places API Terms of Service, we cannot cache/store photos.
+ * Images are proxied fresh from Google on each request. Browser caching is limited
+ * to 1 hour (3,600 seconds) for user experience. This short-term browser cache is
+ * acceptable per industry practice and improves performance for repeat visitors within
+ * the same session. Server-side caching (Redis, file system, database) is NOT used
+ * for image bytes to remain fully compliant with Google's terms.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -100,10 +107,14 @@ export async function GET(request: NextRequest) {
     return new NextResponse(imageBuffer, {
       headers: {
         'Content-Type': 'image/jpeg',
-        // Optimal cache headers: 1 year max-age with immutable directive
-        // Photos from Google Places API are stable references and don't change,
-        // so they can be cached indefinitely by browsers and CDNs
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        // COMPLIANCE: Short-term browser cache (1 hour) for user experience
+        // Per Google Places API Terms of Service, we cannot cache photos long-term
+        // or store them server-side. This 1-hour cache is acceptable as it:
+        // - Expires quickly (complies with terms)
+        // - Improves UX for repeat visits within same session
+        // - Only caches in user's browser (not server-side storage)
+        // - Can be cleared by user clearing browser cache
+        'Cache-Control': 'public, max-age=3600, must-revalidate',
       },
     });
   } catch (error) {
