@@ -51,10 +51,53 @@ let cacheMetrics: CacheMetrics = {
 const MAX_TIMING_SAMPLES = 1000;
 
 /**
+ * Check if we're in a build context (static generation)
+ * During build time, we should skip Redis to avoid connection pool exhaustion
+ * 
+ * During static generation, Next.js generates hundreds of pages in parallel,
+ * which would create too many Redis connections and exhaust the connection pool.
+ * 
+ * Can be overridden with SKIP_REDIS_DURING_BUILD=false environment variable
+ */
+function isBuildContext(): boolean {
+  // Allow explicit override via environment variable
+  if (process.env.SKIP_REDIS_DURING_BUILD === 'false') {
+    return false;
+  }
+  
+  // Check for Next.js build phase (most reliable indicator)
+  // This is set during `next build` when generating static pages
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return true;
+  }
+  
+  // Check if we're running `next build` command
+  if (process.env.npm_lifecycle_event === 'build' || 
+      process.env.NEXT_BUILD === 'true') {
+    return true;
+  }
+  
+  // Check if we're in a static export context
+  if (process.env.NEXT_EXPORT === 'true') {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
  * Get or create Redis client instance
  * Returns null if Redis is not configured or unavailable
+ * Skips Redis during build time to prevent connection pool exhaustion
  */
 async function getRedisClient(): Promise<RedisClientType | null> {
+  // Skip Redis during build time to prevent connection pool exhaustion
+  // During static generation, hundreds of pages are generated in parallel
+  // which would create too many Redis connections
+  if (isBuildContext()) {
+    return null;
+  }
+
   if (redisClient && isRedisAvailable) {
     return redisClient;
   }
@@ -73,15 +116,18 @@ async function getRedisClient(): Promise<RedisClientType | null> {
 
   // Debug logging (only log presence, not values for security)
   // Use console.warn so it shows in production (console.log is removed in production builds)
-  console.warn('[Redis] Environment check:', {
-    hasRedisUrl: !!redisUrl,
-    hasRedisHost: !!redisHost,
-    hasRedisPort: !!redisPort,
-    hasRedisPassword: !!redisPassword,
-    hasRedisUsername: !!process.env.REDIS_USERNAME,
-    redisUsername: redisUsername,
-    environment: process.env.NODE_ENV,
-  });
+  // Skip verbose logging during build to reduce log noise
+  if (!isBuildContext()) {
+    console.warn('[Redis] Environment check:', {
+      hasRedisUrl: !!redisUrl,
+      hasRedisHost: !!redisHost,
+      hasRedisPort: !!redisPort,
+      hasRedisPassword: !!redisPassword,
+      hasRedisUsername: !!process.env.REDIS_USERNAME,
+      redisUsername: redisUsername,
+      environment: process.env.NODE_ENV,
+    });
+  }
 
   // If no Redis configuration, return null (graceful fallback)
   if (!redisUrl && !redisHost) {
@@ -119,28 +165,37 @@ async function getRedisClient(): Promise<RedisClientType | null> {
     });
 
     client.on('connect', () => {
-      console.warn('[Redis] Client connecting...');
+      if (!isBuildContext()) {
+        console.warn('[Redis] Client connecting...');
+      }
     });
 
     client.on('ready', () => {
-      console.warn('[Redis] Client ready - connection established');
+      if (!isBuildContext()) {
+        console.warn('[Redis] Client ready - connection established');
+      }
       isRedisAvailable = true;
       isConnecting = false;
     });
 
     client.on('end', () => {
-      console.warn('[Redis] Client connection ended');
+      if (!isBuildContext()) {
+        console.warn('[Redis] Client connection ended');
+      }
       isRedisAvailable = false;
       isConnecting = false;
     });
 
     // Connect to Redis
-    console.warn('[Redis] Attempting to connect...', {
-      host: redisHost || 'from URL',
-      port: redisPort || 'from URL',
-      hasPassword: !!redisPassword,
-      username: redisUsername,
-    });
+    // Skip verbose logging during build
+    if (!isBuildContext()) {
+      console.warn('[Redis] Attempting to connect...', {
+        host: redisHost || 'from URL',
+        port: redisPort || 'from URL',
+        hasPassword: !!redisPassword,
+        username: redisUsername,
+      });
+    }
     await client.connect();
     
     redisClient = client;
