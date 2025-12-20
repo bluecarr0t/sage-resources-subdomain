@@ -54,8 +54,8 @@ export default function LoginForm({ locale }: LoginFormProps) {
           return;
         }
 
-        // User has passed both security checks - redirect them (default to English locale home)
-        const redirectTo = searchParams.get('redirect') || '/en';
+        // User has passed both security checks - redirect them to admin page
+        const redirectTo = searchParams.get('redirect') || '/admin';
         router.push(redirectTo);
         router.refresh();
       } catch (err) {
@@ -108,11 +108,11 @@ export default function LoginForm({ locale }: LoginFormProps) {
     setError(null);
 
     try {
-      // Construct redirect URL - use query param or default to English home
-      const redirectPath = searchParams.get('redirect') || '/en';
+      // Construct redirect URL - use query param or default to admin page
+      const redirectPath = searchParams.get('redirect') || '/admin';
       const redirectTo = typeof window !== 'undefined' 
         ? `${window.location.origin}${redirectPath}`
-        : '/en';
+        : '/admin';
       
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: 'google',

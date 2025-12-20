@@ -151,6 +151,7 @@ const excludedRoutes = [
   'login',
   'privacy-policy',
   'terms-of-service',
+  'admin',
   'sitemap.xml',
   'sitemaps',
   'robots.txt',
@@ -231,10 +232,10 @@ export function middleware(request: NextRequest) {
       pathname.startsWith('/api') ||
       pathname.includes('.') // Skip static files (images, etc.)
     ) {
-      // For sitemap, robots.txt, login, and legal pages, skip i18n middleware entirely
-      if (pathname === '/sitemap.xml' || pathname.startsWith('/sitemaps/') || pathname === '/robots.txt' || pathname === '/login' || pathname === '/privacy-policy' || pathname === '/terms-of-service') {
-        return NextResponse.next();
-      }
+        // For sitemap, robots.txt, login, admin, and legal pages, skip i18n middleware entirely
+        if (pathname === '/sitemap.xml' || pathname.startsWith('/sitemaps/') || pathname === '/robots.txt' || pathname === '/login' || pathname === '/admin' || pathname === '/privacy-policy' || pathname === '/terms-of-service') {
+          return NextResponse.next();
+        }
       // Still apply i18n middleware for other excluded routes
       return intlMiddleware(request);
     }
