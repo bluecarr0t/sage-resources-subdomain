@@ -20,7 +20,7 @@ export default function LoginForm({ locale }: LoginFormProps) {
   useEffect(() => {
     let subscription: { unsubscribe: () => void } | null = null;
 
-    const verifyUserAccess = async (userId: string, userEmail?: string | null) => {
+    const verifyUserAccess = async (userId: string, userEmail?: string | null, shouldRedirect: boolean = true) => {
       try {
         // Step 1: Get user email from session if not provided
         let email = userEmail;
@@ -54,11 +54,16 @@ export default function LoginForm({ locale }: LoginFormProps) {
           return;
         }
 
-        // User has passed both security checks - redirect them to admin page
-        // Always redirect to /admin after successful authentication
-        // (Supabase OAuth redirects to Site URL, so we handle redirect here)
-        router.push('/admin');
-        router.refresh();
+        // User has passed both security checks
+        // Only redirect if this is coming from an OAuth callback (shouldRedirect = true)
+        // Don't redirect if user explicitly navigated to /login
+        if (shouldRedirect) {
+          router.push('/admin');
+          router.refresh();
+        } else {
+          // User is authenticated but explicitly on login page - allow them to stay
+          setCheckingAuth(false);
+        }
       } catch (err) {
         console.error('Error verifying user access:', err);
         setError('Error verifying access. Please try again.');
@@ -68,12 +73,15 @@ export default function LoginForm({ locale }: LoginFormProps) {
 
     const checkAuth = async () => {
       try {
+        // Check if this is an OAuth callback (has code or error in URL)
+        const isOAuthCallback = searchParams.has('code') || searchParams.has('error');
+        
         // Listen for auth state changes (handles OAuth redirect)
         const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             if (event === 'SIGNED_IN' && session) {
-              // Pass user email for domain validation
-              await verifyUserAccess(session.user.id, session.user.email);
+              // OAuth callback - redirect after verification
+              await verifyUserAccess(session.user.id, session.user.email, true);
             }
           }
         );
@@ -83,8 +91,9 @@ export default function LoginForm({ locale }: LoginFormProps) {
         // Check current session
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          // Pass user email for domain validation
-          await verifyUserAccess(session.user.id, session.user.email);
+          // Only auto-redirect if this is an OAuth callback
+          // If user explicitly navigated to /login, let them stay on the page
+          await verifyUserAccess(session.user.id, session.user.email, isOAuthCallback);
         } else {
           setCheckingAuth(false);
         }
