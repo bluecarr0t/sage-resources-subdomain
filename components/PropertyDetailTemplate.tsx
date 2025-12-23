@@ -414,7 +414,8 @@ export default function PropertyDetailTemplate({
                           {prop.unit_type && prop.site_name && prop.unit_type !== prop.site_name && (
                             <p className="text-sm text-gray-600 mb-2">Unit Type: {prop.unit_type}</p>
                           )}
-                          {prop.avg_retail_daily_rate_2024 && (
+                          {/* Rate Range - Hidden */}
+                          {false && prop.avg_retail_daily_rate_2024 && (
                             <p className="text-sm text-gray-700 mb-2">
                               <span className="font-semibold">Avg Rate:</span> ${prop.avg_retail_daily_rate_2024}
                             </p>

@@ -329,6 +329,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
 
     // Check if we already have full details (check for fields that are only in full fetch)
+    // Note: We check for these fields being defined (not just truthy) to distinguish
+    // between "field exists but is null/empty" vs "field doesn't exist"
     const hasFullDetails = selectedProperty.google_photos !== undefined || 
                            selectedProperty.address !== undefined ||
                            selectedProperty.description !== undefined;
@@ -337,6 +339,12 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       // Already have full details, use them
       setFullPropertyDetails(selectedProperty);
       return;
+    }
+
+    // If we have at least basic property info (name, coordinates), we can show the info window
+    // even while loading full details, so we set it immediately
+    if (selectedProperty.property_name || selectedProperty.site_name) {
+      setFullPropertyDetails(selectedProperty);
     }
 
     // Fetch full property details
@@ -351,14 +359,19 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         }
         const result = await response.json();
         if (result.success && result.data) {
-          setFullPropertyDetails(result.data);
+          // Merge with selectedProperty to ensure we have all fields
+          setFullPropertyDetails({
+            ...selectedProperty,
+            ...result.data,
+          });
+        } else {
+          // If API returns no data, use selectedProperty
+          setFullPropertyDetails(selectedProperty);
         }
       } catch (err) {
         console.error('Error fetching property details:', err);
         // Fallback to using selectedProperty even if fetch fails
-        if (selectedProperty) {
-          setFullPropertyDetails(selectedProperty);
-        }
+        setFullPropertyDetails(selectedProperty);
       } finally {
         setLoadingPropertyDetails(false);
       }
@@ -368,7 +381,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   }, [selectedProperty]);
 
   // Use full property details if available, otherwise use selectedProperty
-  const propertyForDisplay = fullPropertyDetails || selectedProperty;
+  // Merge both to ensure we always have at least the basic fields from selectedProperty
+  const propertyForDisplay = selectedProperty ? {
+    ...selectedProperty,
+    ...(fullPropertyDetails || {}),
+  } : null;
 
   // Fetch Google Places data for National Park when selected
   useEffect(() => {
@@ -1913,10 +1930,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   return count > 0;
                 })
                 .map((state) => {
-                  const count = stateCounts[state] ?? 0;
                   return {
                     value: state,
-                    label: `${state} (${count})`,
+                    label: state,
                   };
                 })}
               selectedValues={filterState}
@@ -1969,24 +1985,27 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               activeColor="orange"
             />
             
-            <MultiSelect
-              id="rate-range-filter"
-              label={t('filters.rateRange.label')}
-              placeholder={t('filters.rateRange.placeholder')}
-              options={availableRateCategories
-                .filter((category) => (rateCategoryCounts[category] || 0) > 0)
-                .map((category) => {
-                  const count = rateCategoryCounts[category] || 0;
-                  return {
-                  value: category,
-                    label: `${category} (${count})`,
-                  };
-                })}
-              selectedValues={filterRateRange}
-              onToggle={toggleRateRange}
-              onClear={() => setFilterRateRange([])}
-              activeColor="green"
-            />
+            {/* Rate Range Filter - Hidden */}
+            {false && (
+              <MultiSelect
+                id="rate-range-filter"
+                label={t('filters.rateRange.label')}
+                placeholder={t('filters.rateRange.placeholder')}
+                options={availableRateCategories
+                  .filter((category) => (rateCategoryCounts[category] || 0) > 0)
+                  .map((category) => {
+                    const count = rateCategoryCounts[category] || 0;
+                    return {
+                    value: category,
+                      label: `${category} (${count})`,
+                    };
+                  })}
+                selectedValues={filterRateRange}
+                onToggle={toggleRateRange}
+                onClear={() => setFilterRateRange([])}
+                activeColor="green"
+              />
+            )}
 
             {/* Map Layers */}
             <div className="space-y-2">
@@ -2506,7 +2525,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               )}
               {selectedProperty && propertyForDisplay && (
                 <InfoWindow
-                  key={selectedProperty.id}
+                  key={selectedProperty.id || `property-${selectedProperty.coordinates[0]}-${selectedProperty.coordinates[1]}`}
                   position={{
                     lat: selectedProperty.coordinates[0],
                     lng: selectedProperty.coordinates[1],
@@ -2522,14 +2541,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   }}
                 >
                   <div className="max-w-xs p-2">
-                    {loadingPropertyDetails && (
+                    {/* Only show loading spinner if we don't have basic property data to display */}
+                    {loadingPropertyDetails && (!propertyForDisplay || (!propertyForDisplay.property_name && !propertyForDisplay.site_name)) && (
                       <div className="text-center py-4">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
                         <p className="text-sm text-gray-600">Loading details...</p>
                       </div>
                     )}
                     {/* Google Photos - Lazy loaded when InfoWindow opens */}
-                    {!loadingPropertyDetails && (() => {
+                    {(!loadingPropertyDetails || (propertyForDisplay && (propertyForDisplay.property_name || propertyForDisplay.site_name))) && propertyForDisplay && (() => {
                       let photos = propertyForDisplay.google_photos;
                       
                       // Parse photos if it's a string (JSONB from Supabase comes as string)
@@ -2638,80 +2658,97 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                         </div>
                       );
                     })()}
-                    <h3 className="font-bold text-lg mb-2 text-gray-900">
-                      {propertyForDisplay.property_name || t('infoWindow.property.unnamed')}
-                    </h3>
-                    {(() => {
-                      const addressParts = [];
-                      if (propertyForDisplay.address) {
-                        addressParts.push(propertyForDisplay.address.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim());
-                      }
-                      if (propertyForDisplay.city) {
-                        addressParts.push(propertyForDisplay.city);
-                      }
-                      if (propertyForDisplay.state) {
-                        addressParts.push(propertyForDisplay.state);
-                      }
-                      const fullAddress = addressParts.join(', ');
-                      return fullAddress ? (
-                        <p className="text-sm text-gray-600 mb-2 truncate" title={fullAddress}>
-                          {fullAddress}
-                        </p>
-                      ) : null;
-                    })()}
-                    {(propertyForDisplay as any).all_unit_types && (propertyForDisplay as any).all_unit_types.length > 0 && (
-                      <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">{t('infoWindow.property.unitTypes')}:</span>{' '}
-                        {(propertyForDisplay as any).all_unit_types.join(', ')}
-                      </p>
+                    {propertyForDisplay && (
+                      <>
+                        <h3 className="font-bold text-lg mb-2 text-gray-900">
+                          {propertyForDisplay.property_name || propertyForDisplay.site_name || t('infoWindow.property.unnamed')}
+                        </h3>
+                        {(() => {
+                          const addressParts = [];
+                          if (propertyForDisplay.address) {
+                            addressParts.push(propertyForDisplay.address.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim());
+                          }
+                          if (propertyForDisplay.city) {
+                            addressParts.push(propertyForDisplay.city);
+                          }
+                          if (propertyForDisplay.state) {
+                            addressParts.push(propertyForDisplay.state);
+                          }
+                          const fullAddress = addressParts.join(', ');
+                          return fullAddress ? (
+                            <p className="text-sm text-gray-600 mb-2 truncate" title={fullAddress}>
+                              {fullAddress}
+                            </p>
+                          ) : null;
+                        })()}
+                      </>
                     )}
-                    {(propertyForDisplay as any).rate_category && (
-                      <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-semibold">{t('infoWindow.property.avgRate')}:</span>{' '}
-                        {(propertyForDisplay as any).rate_category}
-                      </p>
-                    )}
-                    {((propertyForDisplay as any).google_rating || (propertyForDisplay as any).google_user_rating_total) && (
-                      <div className="flex items-center gap-2 mb-2">
-                        {(propertyForDisplay as any).google_rating && (
-                          <div className="flex items-center gap-1">
-                            <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                              <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                            </svg>
-                            <span className="text-sm font-semibold text-gray-900">
-                              {(propertyForDisplay as any).google_rating.toFixed(1)}
-                            </span>
+                    {propertyForDisplay && (
+                      <>
+                        {(propertyForDisplay as any).all_unit_types && (propertyForDisplay as any).all_unit_types.length > 0 && (
+                          <p className="text-sm text-gray-700 mb-2">
+                            <span className="font-semibold">{t('infoWindow.property.unitTypes')}:</span>{' '}
+                            {(propertyForDisplay as any).all_unit_types.join(', ')}
+                          </p>
+                        )}
+                        {/* Show unit_type as fallback if all_unit_types is not available */}
+                        {(!(propertyForDisplay as any).all_unit_types || (propertyForDisplay as any).all_unit_types.length === 0) && propertyForDisplay.unit_type && (
+                          <p className="text-sm text-gray-700 mb-2">
+                            <span className="font-semibold">{t('infoWindow.property.unitTypes')}:</span>{' '}
+                            {propertyForDisplay.unit_type}
+                          </p>
+                        )}
+                        {/* Rate Category - Hidden */}
+                        {false && (propertyForDisplay as any).rate_category && (
+                          <p className="text-sm text-gray-700 mb-2">
+                            <span className="font-semibold">{t('infoWindow.property.avgRate')}:</span>{' '}
+                            {(propertyForDisplay as any).rate_category}
+                          </p>
+                        )}
+                        {((propertyForDisplay as any).google_rating || (propertyForDisplay as any).google_user_rating_total) && (
+                          <div className="flex items-center gap-2 mb-2">
+                            {(propertyForDisplay as any).google_rating && (
+                              <div className="flex items-center gap-1">
+                                <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                </svg>
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {(propertyForDisplay as any).google_rating.toFixed(1)}
+                                </span>
+                              </div>
+                            )}
+                            {(propertyForDisplay as any).google_user_rating_total && (
+                              <span className="text-sm text-gray-600">
+                                ({(propertyForDisplay as any).google_user_rating_total.toLocaleString()} {((propertyForDisplay as any).google_user_rating_total === 1) ? t('infoWindow.property.reviews.one') : t('infoWindow.property.reviews.other')})
+                              </span>
+                            )}
                           </div>
                         )}
-                        {(propertyForDisplay as any).google_user_rating_total && (
-                          <span className="text-sm text-gray-600">
-                            ({(propertyForDisplay as any).google_user_rating_total.toLocaleString()} {((propertyForDisplay as any).google_user_rating_total === 1) ? t('infoWindow.property.reviews.one') : t('infoWindow.property.reviews.other')})
-                          </span>
-                        )}
-                      </div>
+                        {(() => {
+                          // Generate or use property slug for "View more" link
+                          const propertySlug = propertyForDisplay.slug || 
+                            (propertyForDisplay.property_name ? slugifyPropertyName(propertyForDisplay.property_name) : 
+                             (propertyForDisplay.site_name ? slugifyPropertyName(propertyForDisplay.site_name) : null));
+                          
+                          if (propertySlug) {
+                            // Extract locale from pathname (e.g., "/en/map" -> "en")
+                            const pathSegments = pathname.split('/').filter(Boolean);
+                            const locale = pathSegments[0] || 'en';
+                            const propertyUrl = `/${locale}/property/${propertySlug}`;
+                            
+                            return (
+                              <Link
+                                href={propertyUrl}
+                                className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
+                              >
+                                {t('infoWindow.property.viewMore')}
+                              </Link>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </>
                     )}
-                    {(() => {
-                      // Generate or use property slug for "View more" link
-                      const propertySlug = propertyForDisplay.slug || 
-                        (propertyForDisplay.property_name ? slugifyPropertyName(propertyForDisplay.property_name) : null);
-                      
-                      if (propertySlug) {
-                        // Extract locale from pathname (e.g., "/en/map" -> "en")
-                        const pathSegments = pathname.split('/').filter(Boolean);
-                        const locale = pathSegments[0] || 'en';
-                        const propertyUrl = `/${locale}/property/${propertySlug}`;
-                        
-                        return (
-                          <Link
-                            href={propertyUrl}
-                            className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
-                          >
-                            {t('infoWindow.property.viewMore')}
-                          </Link>
-                        );
-                      }
-                      return null;
-                    })()}
                   </div>
                 </InfoWindow>
               )}
