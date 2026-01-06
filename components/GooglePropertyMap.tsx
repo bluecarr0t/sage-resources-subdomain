@@ -85,16 +85,30 @@ function getGooglePhotoUrl(
   },
   fixedDimensions?: boolean
 ): string {
-  if (!photo?.name) {
-    console.warn('No photo name provided');
+  // Validate photo object and name
+  if (!photo || !photo.name) {
+    console.warn('[GooglePropertyMap] No photo name provided', photo);
     return '';
+  }
+
+  // Validate photo name format - should be in format: places/PLACE_ID/photos/PHOTO_REFERENCE
+  const photoName = photo.name.trim();
+  if (photoName === '' || photoName === 'null' || photoName === 'undefined') {
+    console.warn('[GooglePropertyMap] Invalid photo name (empty or null string):', photoName);
+    return '';
+  }
+
+  // Basic format validation - should start with 'places/' and contain '/photos/'
+  if (!photoName.startsWith('places/') || !photoName.includes('/photos/')) {
+    console.warn('[GooglePropertyMap] Photo name does not match expected format:', photoName.substring(0, 100));
+    // Don't return empty - might be a valid legacy format, let the API handle it
   }
   
   // For InfoWindow images, use standardized dimensions (16:9 aspect ratio)
   // This ensures consistent display across all markers
   // Standard size: 400x225 (16:9) - optimal for info windows
   if (fixedDimensions) {
-    const encodedPhotoName = encodeURIComponent(photo.name);
+    const encodedPhotoName = encodeURIComponent(photoName);
     const url = `/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=400&maxHeightPx=225`;
     return url;
   }
@@ -104,7 +118,7 @@ function getGooglePhotoUrl(
   const maxHeight = photo.heightPx ? Math.min(photo.heightPx, 600) : 600;
   
   // Encode the photo name for URL
-  const encodedPhotoName = encodeURIComponent(photo.name);
+  const encodedPhotoName = encodeURIComponent(photoName);
   
   // Use API route to proxy the photo request (handles authentication)
   const url = `/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=${maxWidth}&maxHeightPx=${maxHeight}`;
@@ -386,6 +400,88 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     ...selectedProperty,
     ...(fullPropertyDetails || {}),
   } : null;
+
+  // Memoize parsed photos to prevent unnecessary re-parsing and URL recalculation
+  const parsedPhotos = useMemo(() => {
+    if (!propertyForDisplay?.google_photos) {
+      return null;
+    }
+    
+    let photos = propertyForDisplay.google_photos;
+    
+    // Parse photos if it's a string (JSONB from Supabase comes as string)
+    if (typeof photos === 'string') {
+      try {
+        photos = JSON.parse(photos);
+      } catch (e) {
+        console.error('[GooglePropertyMap] Failed to parse google_photos JSON:', e);
+        return null;
+      }
+    }
+    
+    // Return null if no photos or not an array
+    if (!photos || !Array.isArray(photos) || photos.length === 0) {
+      return null;
+    }
+    
+    // Filter out invalid photos (missing name or empty/invalid name)
+    const validPhotos = photos.filter((photo) => {
+      if (!photo || !photo.name) {
+        return false;
+      }
+      const photoName = String(photo.name).trim();
+      return photoName !== '' && photoName !== 'null' && photoName !== 'undefined';
+    });
+    
+    if (validPhotos.length === 0) {
+      console.warn('[GooglePropertyMap] No valid photos found after filtering:', {
+        property: propertyForDisplay.property_name,
+        originalCount: photos.length
+      });
+      return null;
+    }
+    
+    // Log if some photos were filtered out
+    if (validPhotos.length < photos.length) {
+      console.warn('[GooglePropertyMap] Filtered out invalid photos:', {
+        property: propertyForDisplay.property_name,
+        originalCount: photos.length,
+        validCount: validPhotos.length
+      });
+    }
+    
+    return validPhotos;
+  }, [propertyForDisplay?.google_photos, propertyForDisplay?.property_name]);
+
+  // Memoize the current photo URL to prevent it from changing on re-renders
+  const currentPhotoUrl = useMemo(() => {
+    if (!parsedPhotos || parsedPhotos.length === 0) {
+      return null;
+    }
+    
+    // Ensure currentPhotoIndex is within bounds
+    const safeIndex = Math.max(0, Math.min(currentPhotoIndex, parsedPhotos.length - 1));
+    const currentPhoto = parsedPhotos[safeIndex];
+    
+    // Validate photo object and name
+    if (!currentPhoto || !currentPhoto.name) {
+      console.warn('[GooglePropertyMap] Invalid photo at index', safeIndex, ':', currentPhoto);
+      return null;
+    }
+
+    // Validate photo name is not empty or invalid
+    const photoName = String(currentPhoto.name).trim();
+    if (photoName === '' || photoName === 'null' || photoName === 'undefined') {
+      console.warn('[GooglePropertyMap] Photo name is empty or invalid:', photoName);
+      return null;
+    }
+    
+    // Use fixed dimensions for InfoWindow to ensure consistent aspect ratio (16:9)
+    const photoUrl = getGooglePhotoUrl(currentPhoto, true);
+    
+    // Return null if getGooglePhotoUrl returned empty string (invalid photo)
+    return photoUrl || null;
+  }, [parsedPhotos, currentPhotoIndex]);
 
   // Fetch Google Places data for National Park when selected
   useEffect(() => {
@@ -2549,38 +2645,18 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       </div>
                     )}
                     {/* Google Photos - Lazy loaded when InfoWindow opens */}
-                    {(!loadingPropertyDetails || (propertyForDisplay && (propertyForDisplay.property_name || propertyForDisplay.site_name))) && propertyForDisplay && (() => {
-                      let photos = propertyForDisplay.google_photos;
-                      
-                      // Parse photos if it's a string (JSONB from Supabase comes as string)
-                      if (photos && typeof photos === 'string') {
-                        try {
-                          photos = JSON.parse(photos);
-                        } catch (e) {
-                          console.error('Failed to parse google_photos JSON:', e);
-                          photos = null;
-                        }
-                      }
-                      
-                      // Return null if no photos - don't show any placeholder
-                      if (!photos || !Array.isArray(photos) || photos.length === 0) {
-                        return null;
-                      }
-                      
+                    {(!loadingPropertyDetails || (propertyForDisplay && (propertyForDisplay.property_name || propertyForDisplay.site_name))) && propertyForDisplay && parsedPhotos && currentPhotoUrl && (() => {
                       // Ensure currentPhotoIndex is within bounds
-                      const safeIndex = Math.max(0, Math.min(currentPhotoIndex, photos.length - 1));
-                      const currentPhoto = photos[safeIndex];
-                      // Use fixed dimensions for InfoWindow to ensure consistent aspect ratio (16:9)
-                      const photoUrl = getGooglePhotoUrl(currentPhoto, true);
+                      const safeIndex = Math.max(0, Math.min(currentPhotoIndex, parsedPhotos.length - 1));
                       
                       const goToPrevious = (e: React.MouseEvent) => {
                         e.stopPropagation();
-                        setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+                        setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : parsedPhotos.length - 1));
                       };
                       
                       const goToNext = (e: React.MouseEvent) => {
                         e.stopPropagation();
-                        setCurrentPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
+                        setCurrentPhotoIndex((prev) => (prev < parsedPhotos.length - 1 ? prev + 1 : 0));
                       };
                       
                       // Generate descriptive alt text
@@ -2588,7 +2664,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       const city = propertyForDisplay.city || '';
                       const state = propertyForDisplay.state || '';
                       const location = city && state ? ` in ${city}, ${state}` : state ? ` in ${state}` : '';
-                      const altText = `Photo of ${propertyName} glamping property${location} - Image ${safeIndex + 1} of ${photos.length}`;
+                      const altText = `Photo of ${propertyName} glamping property${location} - Image ${safeIndex + 1} of ${parsedPhotos.length}`;
 
                       return (
                         <div className="mb-3 -mx-2 -mt-2 relative">
@@ -2596,19 +2672,26 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                           <div className="relative w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 group" style={{ aspectRatio: '16/9' }}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={photoUrl}
+                              key={currentPhotoUrl}
+                              src={currentPhotoUrl}
                               alt={altText}
                               className="w-full h-full object-cover"
                               width={400}
                               height={225}
                               onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const imgUrl = target.src;
+                                
                                 console.error('❌ Image failed to load:', {
-                                  url: photoUrl,
+                                  url: imgUrl,
                                   property: propertyForDisplay.property_name,
+                                  photoIndex: safeIndex,
+                                  totalPhotos: parsedPhotos.length,
+                                  photoName: parsedPhotos[safeIndex]?.name?.substring(0, 100),
                                   error: e
                                 });
+                                
                                 // Hide the entire photo container if image fails to load
-                                const target = e.target as HTMLImageElement;
                                 const container = target.closest('.mb-3') as HTMLElement;
                                 if (container) {
                                   container.style.display = 'none';
@@ -2620,7 +2703,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                             />
                             
                             {/* Navigation Arrows - Only show if more than 1 photo */}
-                            {photos.length > 1 && (
+                            {parsedPhotos.length > 1 && (
                               <>
                                 {/* Previous Arrow */}
                                 <button
@@ -2649,9 +2732,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                             )}
                             
                             {/* Photo counter and total */}
-                            {photos.length > 1 && (
+                            {parsedPhotos.length > 1 && (
                               <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded z-10">
-                                {safeIndex + 1} / {photos.length}
+                                {safeIndex + 1} / {parsedPhotos.length}
                               </div>
                             )}
                           </div>
