@@ -311,6 +311,19 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   // State for full property details (fetched when marker is clicked)
   const [fullPropertyDetails, setFullPropertyDetails] = useState<any>(null);
   const [loadingPropertyDetails, setLoadingPropertyDetails] = useState(false);
+  
+  // State for FRESH Google Places data for properties (photos, ratings, etc.)
+  // This fetches directly from Google API to ensure valid, non-expired photo references
+  const [freshGooglePlacesData, setFreshGooglePlacesData] = useState<{
+    photos?: Array<{
+      name: string;
+      widthPx?: number;
+      heightPx?: number;
+    }>;
+    rating?: number;
+    userRatingCount?: number;
+  } | null>(null);
+  const [loadingFreshPlacesData, setLoadingFreshPlacesData] = useState(false);
 
   // State for National Park Google Places data (photos, rating, etc.)
   const [parkGooglePlacesData, setParkGooglePlacesData] = useState<{
@@ -335,10 +348,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     setCurrentParkPhotoIndex(0);
   }, [selectedPark?.id]);
 
-  // Fetch full property details when marker is clicked (if we only have minimal fields)
+  // Fetch full property details AND fresh Google Places data when marker is clicked
   useEffect(() => {
     if (!selectedProperty || !selectedProperty.id) {
       setFullPropertyDetails(null);
+      setFreshGooglePlacesData(null);
       return;
     }
 
@@ -352,16 +366,16 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     if (hasFullDetails) {
       // Already have full details, use them
       setFullPropertyDetails(selectedProperty);
-      return;
+      // Still fetch fresh Google Places data for current photos
+    } else {
+      // If we have at least basic property info (name, coordinates), we can show the info window
+      // even while loading full details, so we set it immediately
+      if (selectedProperty.property_name || selectedProperty.site_name) {
+        setFullPropertyDetails(selectedProperty);
+      }
     }
 
-    // If we have at least basic property info (name, coordinates), we can show the info window
-    // even while loading full details, so we set it immediately
-    if (selectedProperty.property_name || selectedProperty.site_name) {
-      setFullPropertyDetails(selectedProperty);
-    }
-
-    // Fetch full property details
+    // Fetch full property details from database
     async function fetchFullPropertyDetails() {
       if (!selectedProperty?.id) return;
       
@@ -390,8 +404,47 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         setLoadingPropertyDetails(false);
       }
     }
+    
+    // Fetch FRESH Google Places data directly from Google API
+    // This is the same approach as PropertyDetailTemplate and ensures valid photo references
+    async function fetchFreshGooglePlacesData() {
+      if (!selectedProperty?.property_name) return;
+      
+      setLoadingFreshPlacesData(true);
+      try {
+        const params = new URLSearchParams({
+          propertyName: selectedProperty.property_name || '',
+        });
+        
+        if (selectedProperty.city) params.append('city', selectedProperty.city);
+        if (selectedProperty.state) params.append('state', selectedProperty.state);
+        if (selectedProperty.address) params.append('address', selectedProperty.address);
+        
+        const response = await fetch(`/api/google-places?${params.toString()}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[GooglePropertyMap] ✅ Fresh Google Places data fetched:', {
+            property: selectedProperty.property_name,
+            photos: data.photos?.length || 0,
+            rating: data.rating,
+            source: 'GOOGLE_API'
+          });
+          setFreshGooglePlacesData(data);
+        } else {
+          console.warn('[GooglePropertyMap] Failed to fetch fresh Google Places data:', response.statusText);
+          setFreshGooglePlacesData(null);
+        }
+      } catch (error) {
+        console.warn('[GooglePropertyMap] Error fetching fresh Google Places data:', error);
+        setFreshGooglePlacesData(null);
+      } finally {
+        setLoadingFreshPlacesData(false);
+      }
+    }
 
     fetchFullPropertyDetails();
+    fetchFreshGooglePlacesData(); // Fetch fresh photos from Google API
   }, [selectedProperty]);
 
   // Use full property details if available, otherwise use selectedProperty
@@ -402,19 +455,38 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   } : null;
 
   // Memoize parsed photos to prevent unnecessary re-parsing and URL recalculation
+  // Prioritize FRESH Google Places API photos over stale database photos
   const parsedPhotos = useMemo(() => {
-    if (!propertyForDisplay?.google_photos) {
+    // PRIORITY 1: Use fresh photos from Google Places API (these are always current and valid)
+    if (freshGooglePlacesData?.photos && freshGooglePlacesData.photos.length > 0) {
+      console.log('[GooglePropertyMap] Using FRESH Google Places API photos');
+      return freshGooglePlacesData.photos;
+    }
+    
+    // PRIORITY 2: Fallback to database photos if fresh fetch fails/is loading
+    // First check if we have photos in selectedProperty (initial data)
+    const initialPhotos = selectedProperty?.google_photos;
+    // Then check if we have photos in fullPropertyDetails (loaded data)
+    const loadedPhotos = fullPropertyDetails?.google_photos;
+    // Use loaded photos if available, otherwise use initial photos
+    const photosData = loadedPhotos || initialPhotos;
+    
+    if (!photosData) {
       return null;
     }
     
-    let photos = propertyForDisplay.google_photos;
+    let photos = photosData;
     
     // Parse photos if it's a string (JSONB from Supabase comes as string)
     if (typeof photos === 'string') {
       try {
         photos = JSON.parse(photos);
       } catch (e) {
-        console.error('[GooglePropertyMap] Failed to parse google_photos JSON:', e);
+        console.error('[GooglePropertyMap] Failed to parse google_photos JSON:', {
+          error: e,
+          photosString: photos.substring(0, 200),
+          property: selectedProperty?.property_name
+        });
         return null;
       }
     }
@@ -424,36 +496,48 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       return null;
     }
     
+    // Log the raw photo data for debugging
+    console.log('[GooglePropertyMap] Parsing photos:', {
+      property: selectedProperty?.property_name,
+      photoCount: photos.length,
+      firstPhoto: photos[0],
+      photoTypes: photos.map(p => typeof p),
+      photoNames: photos.map(p => p?.name?.substring(0, 50))
+    });
+    
     // Filter out invalid photos (missing name or empty/invalid name)
     const validPhotos = photos.filter((photo) => {
       if (!photo || !photo.name) {
+        console.warn('[GooglePropertyMap] Filtering out photo without name:', photo);
         return false;
       }
       const photoName = String(photo.name).trim();
-      return photoName !== '' && photoName !== 'null' && photoName !== 'undefined';
+      const isValid = photoName !== '' && photoName !== 'null' && photoName !== 'undefined';
+      if (!isValid) {
+        console.warn('[GooglePropertyMap] Filtering out invalid photo name:', photoName);
+      }
+      return isValid;
     });
     
     if (validPhotos.length === 0) {
-      console.warn('[GooglePropertyMap] No valid photos found after filtering:', {
-        property: propertyForDisplay.property_name,
+      console.warn('[GooglePropertyMap] No valid photos after filtering:', {
+        property: selectedProperty?.property_name,
         originalCount: photos.length
       });
       return null;
     }
     
-    // Log if some photos were filtered out
-    if (validPhotos.length < photos.length) {
-      console.warn('[GooglePropertyMap] Filtered out invalid photos:', {
-        property: propertyForDisplay.property_name,
-        originalCount: photos.length,
-        validCount: validPhotos.length
-      });
-    }
+    console.log('[GooglePropertyMap] Valid photos:', {
+      property: selectedProperty?.property_name,
+      validCount: validPhotos.length,
+      validPhotoNames: validPhotos.map(p => p.name?.substring(0, 80))
+    });
     
     return validPhotos;
-  }, [propertyForDisplay?.google_photos, propertyForDisplay?.property_name]);
+  }, [freshGooglePlacesData, selectedProperty?.id, selectedProperty?.google_photos, fullPropertyDetails?.google_photos]); // Stable based on property ID
 
   // Memoize the current photo URL to prevent it from changing on re-renders
+  // Use selectedProperty.id for stability to prevent URL recalculation when propertyForDisplay updates
   const currentPhotoUrl = useMemo(() => {
     if (!parsedPhotos || parsedPhotos.length === 0) {
       return null;
@@ -481,7 +565,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     
     // Return null if getGooglePhotoUrl returned empty string (invalid photo)
     return photoUrl || null;
-  }, [parsedPhotos, currentPhotoIndex]);
+  }, [parsedPhotos, currentPhotoIndex, selectedProperty?.id, freshGooglePlacesData]); // Track fresh Google data
 
   // Fetch Google Places data for National Park when selected
   useEffect(() => {
@@ -2645,7 +2729,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                       </div>
                     )}
                     {/* Google Photos - Lazy loaded when InfoWindow opens */}
-                    {(!loadingPropertyDetails || (propertyForDisplay && (propertyForDisplay.property_name || propertyForDisplay.site_name))) && propertyForDisplay && parsedPhotos && currentPhotoUrl && (() => {
+                    {/* Only hide photos if we're loading AND don't have any property data yet */}
+                    {/* Once we have property data, keep photos visible even during loading */}
+                    {propertyForDisplay && parsedPhotos && currentPhotoUrl && (() => {
                       // Ensure currentPhotoIndex is within bounds
                       const safeIndex = Math.max(0, Math.min(currentPhotoIndex, parsedPhotos.length - 1));
                       
@@ -2672,29 +2758,65 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                           <div className="relative w-full h-48 overflow-hidden rounded-t-lg bg-gray-100 group" style={{ aspectRatio: '16/9' }}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              key={currentPhotoUrl}
+                              key={`${selectedProperty?.id}-${currentPhotoIndex}-${currentPhotoUrl}`}
                               src={currentPhotoUrl}
                               alt={altText}
                               className="w-full h-full object-cover"
                               width={400}
                               height={225}
-                              onError={(e) => {
+                              loading="eager"
+                              onLoadStart={() => {
+                                console.log('[GooglePropertyMap] Image load started:', {
+                                  url: currentPhotoUrl,
+                                  property: propertyForDisplay.property_name,
+                                  photoIndex: safeIndex
+                                });
+                              }}
+                              onError={async (e) => {
                                 const target = e.target as HTMLImageElement;
                                 const imgUrl = target.src;
+                                const currentPhoto = parsedPhotos[safeIndex];
+                                
+                                // Try to fetch the error details from our API
+                                let apiErrorDetails = null;
+                                try {
+                                  const errorResponse = await fetch(imgUrl);
+                                  if (!errorResponse.ok) {
+                                    const errorData = await errorResponse.json().catch(() => null);
+                                    apiErrorDetails = errorData;
+                                  }
+                                } catch (fetchError) {
+                                  // Ignore fetch errors
+                                }
                                 
                                 console.error('❌ Image failed to load:', {
                                   url: imgUrl,
                                   property: propertyForDisplay.property_name,
                                   photoIndex: safeIndex,
                                   totalPhotos: parsedPhotos.length,
-                                  photoName: parsedPhotos[safeIndex]?.name?.substring(0, 100),
-                                  error: e
+                                  photoName: currentPhoto?.name,
+                                  photoObject: currentPhoto,
+                                  error: e,
+                                  // Extract photo name from URL for debugging
+                                  photoNameFromUrl: imgUrl.includes('photoName=') 
+                                    ? decodeURIComponent(imgUrl.split('photoName=')[1]?.split('&')[0] || '')
+                                    : 'N/A',
+                                  // Include API error details if available
+                                  apiError: apiErrorDetails
                                 });
                                 
-                                // Hide the entire photo container if image fails to load
-                                const container = target.closest('.mb-3') as HTMLElement;
-                                if (container) {
-                                  container.style.display = 'none';
+                                // Don't hide the container immediately - let user see there was an error
+                                // Only hide if it's clearly an invalid photo (empty or null name)
+                                const photoName = currentPhoto?.name;
+                                if (!photoName || photoName === 'null' || photoName === 'undefined' || photoName.trim() === '') {
+                                  const container = target.closest('.mb-3') as HTMLElement;
+                                  if (container) {
+                                    container.style.display = 'none';
+                                  }
+                                } else {
+                                  // Show error state instead of hiding
+                                  target.style.opacity = '0.3';
+                                  target.alt = 'Failed to load image';
                                 }
                               }}
                               onLoad={() => {

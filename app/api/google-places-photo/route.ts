@@ -57,61 +57,137 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Try the new Places API (New) format first with proper headers
-    // Use decoded photo name for the API call
-    const newApiUrl = `https://places.googleapis.com/v1/${decodedPhotoName}/media?maxWidthPx=${maxWidthPx}&maxHeightPx=${maxHeightPx}`;
+    // Extract photo reference from the name for legacy API (which was working before)
+    // Format: places/PLACE_ID/photos/PHOTO_REFERENCE
+    const photoRefMatch = decodedPhotoName.match(/photos\/(.+)$/);
     
-    console.log('[Google Places Photo] Attempting new Places API format for:', decodedPhotoName.substring(0, 80) + '...');
+    let response: Response | null = null;
     
-    let response = await fetch(newApiUrl, {
-      method: 'GET',
-      headers: {
-        'X-Goog-Api-Key': apiKey,
-        'Content-Type': 'image/jpeg',
-      },
-    });
-    
-    // If new API fails, try legacy format
-    if (!response.ok) {
-      console.log('[Google Places Photo] New API failed with status', response.status, '- trying legacy format...');
+    // Try legacy API first since it was working before
+    if (photoRefMatch && photoRefMatch[1]) {
+      const photoRef = photoRefMatch[1];
+      // URL encode the photo reference for the query parameter
+      const encodedPhotoRef = encodeURIComponent(photoRef);
+      const legacyUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidthPx}&photo_reference=${encodedPhotoRef}&key=${apiKey}`;
       
-      // Extract photo reference from the name for legacy API
-      // Format: places/PLACE_ID/photos/PHOTO_REFERENCE
-      const photoRefMatch = decodedPhotoName.match(/photos\/([^\/]+)/);
+      console.log('[Google Places Photo] Trying legacy API first (was working before):', {
+        photoRef: photoRef.substring(0, 50),
+        photoRefLength: photoRef.length,
+        url: legacyUrl.substring(0, 200)
+      });
       
-      if (photoRefMatch) {
-        const photoRef = photoRefMatch[1];
-        const legacyUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidthPx}&photo_reference=${photoRef}&key=${apiKey}`;
-        
-        console.log('[Google Places Photo] Trying legacy API with photo reference:', photoRef.substring(0, 20) + '...');
-        
-        response = await fetch(legacyUrl, {
-          method: 'GET',
-          headers: {
-            'User-Agent': 'Mozilla/5.0',
-          },
-        });
+      response = await fetch(legacyUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0',
+        },
+      });
+      
+      if (response.ok) {
+        console.log('[Google Places Photo] Legacy API succeeded!');
       } else {
-        console.error('[Google Places Photo] Could not extract photo reference from:', decodedPhotoName.substring(0, 100));
+        console.log('[Google Places Photo] Legacy API failed with status', response.status, '- trying new API format...');
       }
     }
     
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Could not read error response');
+    // If legacy API failed or photo reference couldn't be extracted, try new Places API
+    if (!response || !response.ok) {
+      // Google's API expects the resource name in the path
+      // According to Google docs, the photo name should be used as-is (they handle encoding internally)
+      // But we need to properly encode it for the URL path
+      const photoNameParts = decodedPhotoName.split('/');
+      
+      // Try multiple encoding strategies
+      // Strategy 1: Encode each segment separately (preserves slashes)
+      const encodedParts = photoNameParts.map(part => encodeURIComponent(part));
+      const encodedPhotoNameInPath = encodedParts.join('/');
+      
+      // Strategy 2: Use photo name as-is (Google might handle it)
+      const unencodedPhotoNameInPath = decodedPhotoName;
+      
+      // Try encoded version first
+      let newApiUrl = `https://places.googleapis.com/v1/${encodedPhotoNameInPath}/media?maxWidthPx=${maxWidthPx}&maxHeightPx=${maxHeightPx}`;
+      
+      console.log('[Google Places Photo] Attempting new Places API format (encoded):', {
+        photoName: decodedPhotoName,
+        photoNameLength: decodedPhotoName.length,
+        encodedPath: encodedPhotoNameInPath.substring(0, 150),
+        url: newApiUrl.substring(0, 300),
+        maxWidth: maxWidthPx,
+        maxHeight: maxHeightPx,
+        placeId: photoNameParts[1]?.substring(0, 30),
+        photoRef: photoNameParts[3]?.substring(0, 50),
+        parts: photoNameParts.length
+      });
+      
+      response = await fetch(newApiUrl, {
+        method: 'GET',
+        headers: {
+          'X-Goog-Api-Key': apiKey,
+          'Accept': 'image/jpeg',
+        },
+      });
+      
+      // If encoded fails with 400, try unencoded
+      if (!response.ok && response.status === 400) {
+        console.log('[Google Places Photo] Encoded version failed with 400, trying unencoded...');
+        newApiUrl = `https://places.googleapis.com/v1/${unencodedPhotoNameInPath}/media?maxWidthPx=${maxWidthPx}&maxHeightPx=${maxHeightPx}`;
+        
+        response = await fetch(newApiUrl, {
+          method: 'GET',
+          headers: {
+            'X-Goog-Api-Key': apiKey,
+            'Accept': 'image/jpeg',
+          },
+        });
+      }
+    }
+    
+    if (!response || !response.ok) {
+      const errorText = await response?.text().catch(() => 'Could not read error response') || 'No response received';
+      
+      // Try to parse error as JSON for better error details
+      let errorDetails = errorText;
+      let errorJson: any = null;
+      try {
+        errorJson = JSON.parse(errorText);
+        errorDetails = JSON.stringify(errorJson, null, 2);
+      } catch {
+        // Not JSON, use as-is
+      }
+      
+      // Extract photo reference for logging
+      const photoRefMatchForError = decodedPhotoName.match(/photos\/(.+)$/);
+      const photoRefForError = photoRefMatchForError?.[1] || 'N/A';
+      
       console.error('[Google Places Photo] Failed to fetch photo:', {
-        status: response.status,
-        statusText: response.statusText,
-        photoName: decodedPhotoName.substring(0, 100),
-        error: errorText.substring(0, 200),
+        status: response?.status || 'NO_RESPONSE',
+        statusText: response?.statusText || 'NO_RESPONSE',
+        photoName: decodedPhotoName,
+        photoNameLength: decodedPhotoName.length,
+        photoRef: photoRefForError.substring(0, 100),
+        photoRefLength: photoRefForError.length,
+        photoNameParts: {
+          startsWithPlaces: decodedPhotoName.startsWith('places/'),
+          hasPhotos: decodedPhotoName.includes('/photos/'),
+          placeId: decodedPhotoName.match(/places\/([^\/]+)/)?.[1]?.substring(0, 30),
+          photoRefPreview: photoRefForError.substring(0, 50),
+        },
+        googleError: errorJson || errorDetails.substring(0, 500),
+        errorText: errorText.substring(0, 500),
       });
       
       // If 400, provide helpful error message about invalid photo name
-      if (response.status === 400) {
+      // Include Google's actual error message for debugging
+      if (response?.status === 400) {
+        const googleError = errorJson?.error?.message || errorJson?.message || errorDetails;
         return NextResponse.json(
           { 
             error: 'Invalid photo name or format.',
             details: `The photo name "${decodedPhotoName.substring(0, 50)}..." is not valid. Photo names should be in format: places/PLACE_ID/photos/PHOTO_REFERENCE`,
+            googleError: googleError,
             photoName: decodedPhotoName.substring(0, 100),
+            photoRef: photoRefForError.substring(0, 100),
             status: 400
           },
           { status: 400 }
