@@ -65,11 +65,12 @@ export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
     
     // Get unique property names first, then get one slug per unique property
     // This ensures we only get 513 slugs (one per unique property) not 1,266 (one per record)
+    // Try to get slug column, but if it doesn't exist, we'll generate slugs from property names
+    // Note: We don't filter by slug being not null since the column may not exist
     const { data: properties, error } = await supabase
       .from('all_glamping_properties')
       .select('property_name, slug')
       .not('property_name', 'is', null)
-      .not('slug', 'is', null)
       .limit(10000);
 
     if (error) {
@@ -81,13 +82,15 @@ export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
     const propertyNameToSlug = new Map<string, string>();
     properties?.forEach((prop: { property_name?: string | null; slug?: string | null }) => {
       const propertyName = prop.property_name?.trim();
-      const slug = prop.slug?.trim();
-      if (propertyName && slug) {
-        // Only add if we haven't seen this property name before
-        // This ensures we get one slug per unique property, not per record
-        if (!propertyNameToSlug.has(propertyName)) {
-          propertyNameToSlug.set(propertyName, slug);
-        }
+      if (!propertyName) return;
+      
+      // Use slug from database if available, otherwise generate from property name
+      const slug = prop.slug?.trim() || slugifyPropertyName(propertyName);
+      
+      // Only add if we haven't seen this property name before
+      // This ensures we get one slug per unique property, not per record
+      if (!propertyNameToSlug.has(propertyName)) {
+        propertyNameToSlug.set(propertyName, slug);
       }
     });
 
@@ -126,24 +129,85 @@ export async function getPropertiesByName(propertyName: string): Promise<SagePro
 }
 
 /**
- * Get properties by slug (direct database query - much faster!)
+ * Get properties by slug
  * Returns all records with the same slug (same property_name group)
+ * 
+ * Since the slug column may not exist, this function:
+ * 1. First tries to query by slug column (if it exists)
+ * 2. Falls back to generating slugs from property names to find matches
+ * This ensures it works whether or not the slug column exists in the database
  */
 export async function getPropertiesBySlug(slug: string): Promise<SageProperty[]> {
   try {
     const supabase = createServerClient();
+    const trimmedSlug = slug.trim();
     
-    const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
-      .select('*')
-      .eq('slug', slug.trim());
+    // First, try direct lookup by slug field (if column exists)
+    // This will fail gracefully if the column doesn't exist
+    try {
+      const { data: properties, error } = await supabase
+        .from('all_glamping_properties')
+        .select('*')
+        .eq('slug', trimmedSlug);
 
-    if (error) {
-      console.error('Error fetching properties by slug:', error);
+      // If no error and we found properties, return them
+      if (!error && properties && properties.length > 0) {
+        return properties;
+      }
+      
+      // If error is about column not existing, that's fine - we'll use fallback
+      // Other errors we should log but continue to fallback
+      if (error && !error.message?.includes('column') && !error.message?.includes('does not exist')) {
+        console.warn('[getPropertiesBySlug] Error querying by slug column (will try fallback):', error.message);
+      }
+    } catch (columnError) {
+      // Column doesn't exist or other error - continue to fallback
+      console.log('[getPropertiesBySlug] Slug column may not exist, using fallback method...');
+    }
+
+    // Fallback: Generate slugs from property names to find matches
+    // This works whether or not the slug column exists
+    const { data: allProperties, error: allError } = await supabase
+      .from('all_glamping_properties')
+      .select('property_name')
+      .not('property_name', 'is', null)
+      .limit(10000);
+
+    if (allError) {
+      console.error('Error fetching all properties for fallback lookup:', allError);
       return [];
     }
 
-    return properties || [];
+    // Find property name(s) that generate this slug
+    const matchingPropertyNames = new Set<string>();
+    allProperties?.forEach((prop: { property_name?: string | null }) => {
+      if (prop.property_name) {
+        const generatedSlug = slugifyPropertyName(prop.property_name);
+        if (generatedSlug === trimmedSlug) {
+          matchingPropertyNames.add(prop.property_name.trim());
+        }
+      }
+    });
+
+    // If we found matching property names, fetch those properties
+    if (matchingPropertyNames.size > 0) {
+      const propertyNames = Array.from(matchingPropertyNames);
+      
+      const { data: fallbackProperties, error: fallbackError } = await supabase
+        .from('all_glamping_properties')
+        .select('*')
+        .in('property_name', propertyNames);
+
+      if (fallbackError) {
+        console.error('Error fetching properties by name in fallback:', fallbackError);
+        return [];
+      }
+
+      return fallbackProperties || [];
+    }
+
+    // No properties found
+    return [];
   } catch (error) {
     console.error('Error in getPropertiesBySlug:', error);
     return [];
