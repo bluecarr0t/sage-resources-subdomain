@@ -36,5 +36,5 @@ yarn-error.log*
 next-env.d.ts
 
 # csv files
-/csv
+# /csv - removed to allow tracking of glamping properties CSV files
 
