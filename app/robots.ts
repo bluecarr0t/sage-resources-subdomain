@@ -17,7 +17,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/"],
       },
       {
-        userAgent: "CCBot", // ChatGPT web crawler
+        userAgent: "CCBot", // Common Crawl (AI training datasets)
         allow: "/",
         disallow: ["/api/"],
       },
@@ -27,12 +27,27 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/"],
       },
       {
-        userAgent: "anthropic-ai", // Claude (Anthropic)
+        userAgent: "anthropic-ai", // Claude (Anthropic) training
+        allow: "/",
+        disallow: ["/api/"],
+      },
+      {
+        userAgent: "ClaudeBot", // Claude real-time web search
         allow: "/",
         disallow: ["/api/"],
       },
       {
         userAgent: "Google-Extended", // Google AI (for training)
+        allow: "/",
+        disallow: ["/api/"],
+      },
+      {
+        userAgent: "ChatGPT-User", // OpenAI real-time web browsing
+        allow: "/",
+        disallow: ["/api/"],
+      },
+      {
+        userAgent: "OAI-SearchBot", // OpenAI search citations
         allow: "/",
         disallow: ["/api/"],
       },
