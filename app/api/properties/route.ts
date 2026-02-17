@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache, hashCacheKey, logCacheMetrics } from '@/lib/redis';
+import { filterToPublicColumns, filterRequestedFieldsToPublic } from '@/lib/property-column-privacy';
 
 /**
  * API route for fetching glamping properties with caching
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
         .eq('id', propertyId)
         .eq('is_glamping_property', 'Yes')
         .neq('is_closed', 'Yes')
+        .eq('research_status', 'published')
         .single();
       
       if (error || !property) {
@@ -33,10 +35,13 @@ export async function GET(request: NextRequest) {
           { status: 404 }
         );
       }
+
+      // Strip private columns before returning to client
+      const publicProperty = filterToPublicColumns(property as Record<string, unknown>);
       
       return NextResponse.json({
         success: true,
-        data: property,
+        data: publicProperty,
       }, {
         headers: {
           'Cache-Control': 'public, s-maxage=31536000, stale-while-revalidate=86400',
@@ -63,8 +68,12 @@ export async function GET(request: NextRequest) {
     } : null;
     
     // Extract fields parameter (optional - for field selection to reduce payload)
+    // Filter to only public columns - private columns are never exposed
     const fieldsParam = searchParams.get('fields');
-    const requestedFields = fieldsParam ? fieldsParam.split(',') : null;
+    const rawRequestedFields = fieldsParam ? fieldsParam.split(',').map((f) => f.trim()) : null;
+    const requestedFields = rawRequestedFields
+      ? filterRequestedFieldsToPublic(rawRequestedFields)
+      : null;
     
     // Create a cache key based on filters, bounds, and fields
     // Use SHA-256 hash of the filter parameters for shorter, faster cache keys
@@ -83,7 +92,8 @@ export async function GET(request: NextRequest) {
     
     if (cachedProperties) {
       console.warn(`[Cache] HIT for key: ${cacheKey.substring(0, 30)}... (found ${cachedProperties.length} properties)`);
-      properties = cachedProperties;
+      // Always filter to public columns (stale cache may have pre-privacy data)
+      properties = cachedProperties.map((p: Record<string, unknown>) => filterToPublicColumns(p));
       cacheStatus = 'HIT';
     } else {
       console.warn(`[Cache] MISS for key: ${cacheKey.substring(0, 30)}... - fetching from database`);
@@ -156,7 +166,8 @@ async function fetchPropertiesFromDatabase(
   let query = supabase.from('all_glamping_properties')
     .select('*')
     .eq('is_glamping_property', 'Yes')
-    .neq('is_closed', 'Yes');
+    .neq('is_closed', 'Yes')
+    .eq('research_status', 'published');
 
   // Filter by country
   if (filterCountry.length === 0) {
@@ -298,25 +309,15 @@ async function fetchPropertiesFromDatabase(
     });
   }
   
-  // Transform data to map new column names to expected format
+  // Transform data - column names are now clean (v4 migration removed double underscores)
   let transformedData = filteredData.map((item: any) => {
     const transformed: any = {
       ...item,
-      // Map column names with double underscores to single underscores
-      avg_retail_daily_rate_2024: item.avg__retail_daily_rate_2024 ?? item.avg_retail_daily_rate_2024,
-      duplicate_note: item.duplicatenote ?? item.duplicate_note,
-      property_total_sites: item.property__total_sites ?? item.property_total_sites,
-      operating_season_months: item.operating_season__months_ ?? item.operating_season_months,
-      num_locations: item.__of_locations ?? item.num_locations,
-      retail_daily_rate_fees_2024: item.retail_daily_rate__fees__2024 ?? item.retail_daily_rate_fees_2024,
-      retail_daily_rate_fees_ytd: item.retail_daily_rate__fees__ytd ?? item.retail_daily_rate_fees_ytd,
-      avg_rate_next_12_months: item.avg__rate__next_12_months_ ?? item.avg_rate_next_12_months,
-      // Ensure lat and lon are accessible (they may be numbers from NUMERIC columns)
       lat: item.lat ?? null,
       lon: item.lon ?? null,
     };
     
-    // If specific fields requested, only include those fields
+    // If specific fields requested, only include those fields (already filtered to public columns)
     // Always include essential fields: id, property_name, lat, lon, state, country
     if (requestedFields && requestedFields.length > 0) {
       const essentialFields = ['id', 'property_name', 'lat', 'lon', 'state', 'country', 'unit_type', 'rate_category'];
@@ -331,7 +332,8 @@ async function fetchPropertiesFromDatabase(
       return filtered;
     }
     
-    return transformed;
+    // No field filter: strip private columns before returning
+    return filterToPublicColumns(transformed);
   });
   
   return transformedData;

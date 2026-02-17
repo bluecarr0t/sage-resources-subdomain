@@ -15,7 +15,7 @@ import {
 export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const url = `${baseUrl}/map`;
-  const imageUrl = `${baseUrl}/og-map-image.jpg`;
+  const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
   return {
     title: "Glamping Properties Map | 500+ Locations | Sage Outdoor Advisory",
@@ -85,7 +85,8 @@ async function getPropertyStatistics() {
       .from('all_glamping_properties')
       .select('property_name, state, country')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_closed', 'Yes');
+      .neq('is_closed', 'Yes')
+      .eq('research_status', 'published');
 
     if (error) {
       console.error('Error fetching property count:', error);
@@ -140,12 +141,12 @@ async function getPropertyStatistics() {
 export default async function MapPage() {
   const stats = await getPropertyStatistics();
 
-  // Generate structured data
+  // Generate structured data (use 'en' - non-locale map page)
   const organizationSchema = generateOrganizationSchema();
-  const mapSchema = generateMapSchema();
-  const itemListSchema = generateMapItemListSchema(stats.uniqueProperties);
-  const webApplicationSchema = generateMapWebApplicationSchema();
-  const breadcrumbSchema = generateMapBreadcrumbSchema();
+  const mapSchema = generateMapSchema('en');
+  const itemListSchema = generateMapItemListSchema(stats.uniqueProperties, 'en');
+  const webApplicationSchema = generateMapWebApplicationSchema('en');
+  const breadcrumbSchema = generateMapBreadcrumbSchema('en');
 
   return (
     <>

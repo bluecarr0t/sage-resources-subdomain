@@ -1,0 +1,423 @@
+[dotenv@17.2.3] injecting env (3) from .env.local -- tip: ⚙️  suppress all logs with { quiet: true }
+======================================================================
+Research Glamping Resorts in Portugal
+======================================================================
+Processing 18 search queries...
+
+
+[Search 1/18]
+🔍 Researching: "best glamping resorts Portugal 2024"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Bukubaki Eco Surf Resort
+  ✓ NEW: Soul Glamping
+  ✓ NEW: Cocoon Eco Design Lodges
+  ✓ NEW: Nomad Planet
+
+📊 From "best glamping resorts Portugal 2024": Found 4 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 2/18]
+🔍 Researching: "luxury glamping Portugal"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): Soul Glamping
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✓ NEW: Portugal Nature Lodge
+  ✓ NEW: Casa do Lago
+  ✓ NEW: Aterra
+
+📊 From "luxury glamping Portugal": Found 3 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 3/18]
+🔍 Researching: "glamping sites Algarve Portugal"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Casa Tuia
+  ✓ NEW: Quinta Alma
+  ✗ SKIP (duplicate): Soul Glamping
+  ✓ NEW: Monte da Vilarinha
+
+📊 From "glamping sites Algarve Portugal": Found 3 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 4/18]
+🔍 Researching: "glamping sites Lisbon Portugal"
+
+✅ Found 4 properties for this search
+
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✗ SKIP (duplicate): Soul Glamping
+  ✓ NEW: Glamping Hills
+  ✓ NEW: Nature Lodge
+
+📊 From "glamping sites Lisbon Portugal": Found 2 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 5/18]
+🔍 Researching: "glamping sites Porto Portugal"
+
+✅ Found 3 properties for this search
+
+  ✗ SKIP (duplicate): Glamping Hills
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✓ NEW: Oasis Nature Lodge
+
+📊 From "glamping sites Porto Portugal": Found 1 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 6/18]
+🔍 Researching: "glamping sites Alentejo Portugal"
+
+✅ Found 3 properties for this search
+
+  ✓ NEW: Reserva Alecrim EcoSuite & Glamping
+  ✗ SKIP (duplicate): Aterra
+  ✗ SKIP (duplicate): Cocoon Eco Design Lodges
+
+📊 From "glamping sites Alentejo Portugal": Found 1 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 7/18]
+🔍 Researching: "glamping sites Douro Valley Portugal"
+
+✅ Found 3 properties for this search
+
+  ✓ NEW: Quinta de Casaldronho Wine Hotel
+  ✓ NEW: Douro41 Hotel & Spa
+  ✓ NEW: Pedras Salgadas Spa & Nature Park
+
+📊 From "glamping sites Douro Valley Portugal": Found 3 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 8/18]
+🔍 Researching: "glamping sites Sintra Portugal"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Glamping Sintra
+  ✗ SKIP (duplicate): Soul Glamping
+  ✓ NEW: Quinta M
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+
+📊 From "glamping sites Sintra Portugal": Found 2 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 9/18]
+🔍 Researching: "glamping sites Madeira Portugal"
+
+✅ Found 3 properties for this search
+
+  ✗ SKIP (duplicate): Soul Glamping
+  ✓ NEW: Madeira Glamping
+  ✓ NEW: Nature Glamping
+
+📊 From "glamping sites Madeira Portugal": Found 2 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 10/18]
+🔍 Researching: "glamping sites Azores Portugal"
+
+✅ Found 3 properties for this search
+
+  ✓ NEW: Azul Singular
+  ✓ NEW: Furnas Lake Villas
+  ✓ NEW: Terra Nostra Garden Hotel
+
+📊 From "glamping sites Azores Portugal": Found 3 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 11/18]
+🔍 Researching: "treehouse glamping Portugal"
+
+✅ Found 4 properties for this search
+
+  ✗ SKIP (duplicate): Pedras Salgadas Spa & Nature Park
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✓ NEW: Natura Glamping
+  ✗ SKIP (duplicate): Glamping Hills
+
+📊 From "treehouse glamping Portugal": Found 1 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 12/18]
+🔍 Researching: "yurt glamping Portugal"
+
+✅ Found 4 properties for this search
+
+  ✗ SKIP (duplicate): Soul Glamping
+  ✗ SKIP (duplicate): Natura Glamping
+  ✓ NEW: O Homem Verde
+  ✗ SKIP (duplicate): Quinta Alma
+
+📊 From "yurt glamping Portugal": Found 1 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 13/18]
+🔍 Researching: "safari tent glamping Portugal"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Sublime Comporta
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✗ SKIP (duplicate): Soul Glamping
+  ✓ NEW: Nature Family Glamping
+
+📊 From "safari tent glamping Portugal": Found 2 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 14/18]
+🔍 Researching: "luxury camping Portugal"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): Soul Glamping
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✗ SKIP (duplicate): Aterra
+  ✗ SKIP (duplicate): Glamping Hills
+  ✗ SKIP (duplicate): Nature Lodge
+
+📊 From "luxury camping Portugal": Found 0 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 15/18]
+🔍 Researching: "glamping retreats Portugal"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): Soul Glamping
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✓ NEW: Zmar Eco Experience
+  ✗ SKIP (duplicate): Aterra
+  ✗ SKIP (duplicate): Nature Lodge
+
+📊 From "glamping retreats Portugal": Found 1 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 16/18]
+🔍 Researching: "eco glamping Portugal"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): Soul Glamping
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✓ NEW: Aterra Eco Camping
+  ✗ SKIP (duplicate): Natura Glamping
+  ✗ SKIP (duplicate): Quinta Alma
+
+📊 From "eco glamping Portugal": Found 1 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 17/18]
+🔍 Researching: "glamping near Lisbon Portugal"
+
+✅ Found 4 properties for this search
+
+  ✗ SKIP (duplicate): Glamping Sintra
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✗ SKIP (duplicate): Soul Glamping
+  ✓ NEW: Lisboa Camping & Bungalows
+
+📊 From "glamping near Lisbon Portugal": Found 1 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 18/18]
+🔍 Researching: "glamping near Porto Portugal"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Parque de Campismo de Foz do Arelho
+  ✗ SKIP (duplicate): Bukubaki Eco Surf Resort
+  ✗ SKIP (duplicate): Soul Glamping
+  ✓ NEW: Ohai Nazaré Outdoor Resort
+
+📊 From "glamping near Porto Portugal": Found 2 new properties out of 4 total
+
+
+======================================================================
+Found 33 total unique properties across all searches
+======================================================================
+
+🔍 Enriching property data with OpenAI...
+
+[1/33] Bukubaki Eco Surf Resort
+  🤖 Enriching data for: Bukubaki Eco Surf Resort
+    ✅ Enriched with 92 fields
+
+[2/33] Soul Glamping
+  🤖 Enriching data for: Soul Glamping
+    ✅ Enriched with 81 fields
+
+[3/33] Cocoon Eco Design Lodges
+  🤖 Enriching data for: Cocoon Eco Design Lodges
+    ✅ Enriched with 96 fields
+
+[4/33] Nomad Planet
+  🤖 Enriching data for: Nomad Planet
+    ✅ Enriched with 34 fields
+
+[5/33] Portugal Nature Lodge
+  🤖 Enriching data for: Portugal Nature Lodge
+    ✅ Enriched with 94 fields
+
+[6/33] Casa do Lago
+  🤖 Enriching data for: Casa do Lago
+    ✅ Enriched with 98 fields
+
+[7/33] Aterra
+  🤖 Enriching data for: Aterra
+    ✅ Enriched with 97 fields
+
+[8/33] Casa Tuia
+  🤖 Enriching data for: Casa Tuia
+    ✅ Enriched with 31 fields
+
+[9/33] Quinta Alma
+  🤖 Enriching data for: Quinta Alma
+    ✅ Enriched with 80 fields
+
+[10/33] Monte da Vilarinha
+  🤖 Enriching data for: Monte da Vilarinha
+    ✅ Enriched with 95 fields
+
+[11/33] Glamping Hills
+  🤖 Enriching data for: Glamping Hills
+    ✅ Enriched with 96 fields
+
+[12/33] Nature Lodge
+  🤖 Enriching data for: Nature Lodge
+    ✅ Enriched with 92 fields
+
+[13/33] Oasis Nature Lodge
+  🤖 Enriching data for: Oasis Nature Lodge
+    ✅ Enriched with 27 fields
+
+[14/33] Reserva Alecrim EcoSuite & Glamping
+  🤖 Enriching data for: Reserva Alecrim EcoSuite & Glamping
+    ✅ Enriched with 80 fields
+
+[15/33] Quinta de Casaldronho Wine Hotel
+  🤖 Enriching data for: Quinta de Casaldronho Wine Hotel
+    ✅ Enriched with 98 fields
+
+[16/33] Douro41 Hotel & Spa
+  🤖 Enriching data for: Douro41 Hotel & Spa
+    ✅ Enriched with 98 fields
+
+[17/33] Pedras Salgadas Spa & Nature Park
+  🤖 Enriching data for: Pedras Salgadas Spa & Nature Park
+    ✅ Enriched with 97 fields
+
+[18/33] Glamping Sintra
+  🤖 Enriching data for: Glamping Sintra
+    ✅ Enriched with 90 fields
+
+[19/33] Quinta M
+  🤖 Enriching data for: Quinta M
+    ✅ Enriched with 98 fields
+
+[20/33] Madeira Glamping
+  🤖 Enriching data for: Madeira Glamping
+    ✅ Enriched with 91 fields
+
+[21/33] Nature Glamping
+  🤖 Enriching data for: Nature Glamping
+    ✅ Enriched with 98 fields
+
+[22/33] Azul Singular
+  🤖 Enriching data for: Azul Singular
+    ✅ Enriched with 98 fields
+
+[23/33] Furnas Lake Villas
+  🤖 Enriching data for: Furnas Lake Villas
+    ✅ Enriched with 91 fields
+
+[24/33] Terra Nostra Garden Hotel
+  🤖 Enriching data for: Terra Nostra Garden Hotel
+    ✅ Enriched with 89 fields
+
+[25/33] Natura Glamping
+  🤖 Enriching data for: Natura Glamping
+    ✅ Enriched with 97 fields
+
+[26/33] O Homem Verde
+  🤖 Enriching data for: O Homem Verde
+    ✅ Enriched with 82 fields
+
+[27/33] Sublime Comporta
+  🤖 Enriching data for: Sublime Comporta
+    ✅ Enriched with 97 fields
+
+[28/33] Nature Family Glamping
+  🤖 Enriching data for: Nature Family Glamping
+    ✅ Enriched with 96 fields
+
+[29/33] Zmar Eco Experience
+  🤖 Enriching data for: Zmar Eco Experience
+    ✅ Enriched with 96 fields
+
+[30/33] Aterra Eco Camping
+  🤖 Enriching data for: Aterra Eco Camping
+    ✅ Enriched with 90 fields
+
+[31/33] Lisboa Camping & Bungalows
+  🤖 Enriching data for: Lisboa Camping & Bungalows
+    ✅ Enriched with 96 fields
+
+[32/33] Parque de Campismo de Foz do Arelho
+  🤖 Enriching data for: Parque de Campismo de Foz do Arelho
+    ✅ Enriched with 98 fields
+
+[33/33] Ohai Nazaré Outdoor Resort
+  🤖 Enriching data for: Ohai Nazaré Outdoor Resort
+    ✅ Enriched with 96 fields
+
+
+📝 Writing 33 properties to CSV file...
+
+✅ Successfully wrote 33 properties to csv/glamping-properties/europe/portugal-glamping-resorts.csv
+   File location: csv/glamping-properties/europe/portugal-glamping-resorts.csv
+
+======================================================================
+✅ Process complete!
+   Total properties saved: 33
+   CSV file: csv/glamping-properties/europe/portugal-glamping-resorts.csv
+======================================================================

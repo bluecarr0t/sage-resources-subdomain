@@ -25,13 +25,11 @@ export function generateStaticParams() {
 export const metadata: Metadata = {
   metadataBase: new URL("https://resources.sageoutdooradvisory.com"),
   verification: {
-    // Google Search Console verification code
-    // INSTRUCTIONS: Get your verification code from https://search.google.com/search-console
-    // 1. Add property: resources.sageoutdooradvisory.com
-    // 2. Choose "HTML tag" verification method
-    // 3. Copy the 'content' value from the meta tag (e.g., "abc123def456ghi789")
-    // 4. Replace the placeholder below with your actual code
-    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION_CODE || "REPLACE-WITH-YOUR-GOOGLE-VERIFICATION-CODE",
+    // Google Search Console: Set NEXT_PUBLIC_GOOGLE_VERIFICATION_CODE in Vercel env vars
+    // Get code from https://search.google.com/search-console → HTML tag method
+    ...(process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION_CODE && {
+      google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION_CODE,
+    }),
   },
   robots: {
     index: true,

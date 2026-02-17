@@ -58,7 +58,8 @@ export default function LoginForm({ locale }: LoginFormProps) {
         // Only redirect if this is coming from an OAuth callback (shouldRedirect = true)
         // Don't redirect if user explicitly navigated to /login
         if (shouldRedirect) {
-          router.push('/admin');
+          const destination = searchParams.get('redirect') || '/admin';
+          router.push(destination);
           router.refresh();
         } else {
           // User is authenticated but explicitly on login page - allow them to stay
@@ -73,14 +74,14 @@ export default function LoginForm({ locale }: LoginFormProps) {
 
     const checkAuth = async () => {
       try {
-        // Check if this is an OAuth callback (has code or error in URL)
-        const isOAuthCallback = searchParams.has('code') || searchParams.has('error');
-        
-        // Listen for auth state changes (handles OAuth redirect)
+        // With implicit flow, tokens arrive in the URL hash (#access_token=...)
+        // The Supabase client detects them automatically via detectSessionInUrl
+        const isOAuthCallback = typeof window !== 'undefined' && window.location.hash.includes('access_token');
+
+        // Listen for auth state changes (fires when Supabase detects hash tokens)
         const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             if (event === 'SIGNED_IN' && session) {
-              // OAuth callback - redirect after verification
               await verifyUserAccess(session.user.id, session.user.email, true);
             }
           }
@@ -88,17 +89,20 @@ export default function LoginForm({ locale }: LoginFormProps) {
 
         subscription = authSubscription;
 
-        // Check current session
-        const { data: { session } } = await supabase.auth.getSession();
+        // Check current session (with timeout to prevent indefinite loading)
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+        );
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+
         if (session) {
-          // Only auto-redirect if this is an OAuth callback
-          // If user explicitly navigated to /login, let them stay on the page
           await verifyUserAccess(session.user.id, session.user.email, isOAuthCallback);
         } else {
           setCheckingAuth(false);
         }
       } catch (err) {
-        console.error('Error checking auth:', err);
+        console.error('[Login] Error checking auth:', err);
         setCheckingAuth(false);
       }
     };
@@ -118,33 +122,55 @@ export default function LoginForm({ locale }: LoginFormProps) {
     setError(null);
 
     try {
-      // Construct redirect URL - use query param or default to admin page
+      // Debug: confirm handler runs (remove after fixing)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Login] Starting Google sign-in...');
+      }
+      // OAuth returns tokens in URL hash - must land on a client-rendered page to process them.
+      // Redirect to /login (which has LoginForm) so we can establish the session, then redirect to destination.
       const redirectPath = searchParams.get('redirect') || '/admin';
-      const redirectTo = typeof window !== 'undefined' 
-        ? `${window.location.origin}${redirectPath}`
-        : '/admin';
-      
-      const { error: signInError } = await supabase.auth.signInWithOAuth({
+      const redirectTo = typeof window !== 'undefined'
+        ? `${window.location.origin}/login${redirectPath !== '/admin' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`
+        : '/login';
+
+      const oauthPromise = supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectTo,
+          redirectTo,
           queryParams: {
-            // Restrict to primary Google Workspace domain as first layer of security
-            // Note: hd parameter only supports one domain, so we also validate email domain after authentication
-            hd: 'sageoutdooradvisory.com', // Primary domain restriction
+            hd: 'sageoutdooradvisory.com',
+            prompt: 'select_account',
           },
         },
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Sign-in request timed out')), 10000)
+      );
+      const { data, error: signInError } = await Promise.race([oauthPromise, timeoutPromise]);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Login] OAuth response:', { hasUrl: !!data?.url, error: signInError?.message });
+      }
 
       if (signInError) {
         setError(signInError.message);
         setLoading(false);
+        return;
       }
-      // Note: OAuth redirects to Google, so we won't see success message
-      // The redirectTo URL will handle the return
+
+      // Supabase returns the OAuth URL - we must redirect the user to it
+      if (data?.url) {
+        window.location.assign(data.url);
+      } else {
+        const msg = 'Unable to start sign-in. Google provider may not be configured in Supabase.';
+        setError(msg);
+        setLoading(false);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(message);
       setLoading(false);
+      console.error('[Login] Google sign-in error:', err);
     }
   };
 
@@ -167,7 +193,11 @@ export default function LoginForm({ locale }: LoginFormProps) {
 
       {/* Google Sign-In Button */}
       <button
-        onClick={handleGoogleSignIn}
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          handleGoogleSignIn();
+        }}
         disabled={loading}
         className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#006b5f] focus:ring-offset-2"
       >

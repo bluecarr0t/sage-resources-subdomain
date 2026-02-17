@@ -810,6 +810,15 @@
   "guides": {
     "title": "Outdoor-Hospitality-Leitfäden",
     "subtitle": "Umfassende, von Experten verfasste Leitfäden zu Machbarkeitsstudien, Immobilienbewertungen und der Outdoor-Hospitality-Branche",
+    "metadata": {
+      "title": "Outdoor-Hospitality-Leitfäden | Expertenressourcen | Sage Outdoor Advisory",
+      "description": "Expertenleitfäden zu Machbarkeitsstudien, Immobilienbewertungen und Outdoor-Hospitality. Wesentliche Lektüre für Glamping-, Wohnmobil-Resort- und Campingplatz-Entwickler und -Investoren.",
+      "keywords": "Machbarkeitsstudien-Leitfäden, Immobilienbewertungs-Leitfäden, Glamping-Leitfäden, Wohnmobil-Resort-Leitfäden, Outdoor-Hospitality-Ressourcen, Campingplatz-Entwicklungs-Leitfäden",
+      "openGraph": {
+        "title": "Outdoor-Hospitality-Leitfäden | Sage Outdoor Advisory",
+        "description": "Umfassende Leitfäden zu Machbarkeitsstudien, Immobilienbewertungen und der Outdoor-Hospitality-Branche"
+      }
+    },
     "categories": {
       "feasibility": {
         "name": "Machbarkeitsstudien",
@@ -1952,5 +1961,23 @@
         }
       ]
     }
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "homeLink": "Zurück zur Startseite",
+    "mapLink": "Glamping-Karte erkunden"
+  },
+  "sitemap": {
+    "title": "Sitemap",
+    "metaTitle": "Sitemap | Sage Outdoor Advisory Ressourcen",
+    "metaDescription": "Durchsuchen Sie alle Seiten und Ressourcen von Sage Outdoor Advisory. Finden Sie Leitfäden, Glossarbegriffe, Glamping-Immobilienkarte und mehr.",
+    "mainPages": "Hauptseiten",
+    "guides": "Leitfäden",
+    "mapLocations": "Kartenstandorte",
+    "glossary": "Glossar",
+    "exploreMap": "Auf der Karte erkunden",
+    "states": "Bundesstaaten",
+    "cities": "Städte"
   }
 }

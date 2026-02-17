@@ -529,15 +529,16 @@ export function generateAggregateRatingSchema(ratingValue: number, reviewCount: 
   };
 }
 
-export function generateMapSchema() {
+export function generateMapSchema(locale?: string) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const mapPath = `/${locale || 'en'}/map`;
   return {
     "@context": "https://schema.org",
     "@type": "Map",
     "name": "Glamping Properties Interactive Map",
     "description": "Interactive map showing glamping properties across the United States and Canada",
     "mapType": "InteractiveMap",
-    "url": `${baseUrl}/map`,
+    "url": `${baseUrl}${mapPath}`,
     "geo": {
       "@type": "GeoCoordinates",
       "latitude": 38.5,
@@ -546,36 +547,38 @@ export function generateMapSchema() {
   };
 }
 
-export function generateMapItemListSchema(propertyCount: number) {
+export function generateMapItemListSchema(propertyCount: number, locale?: string) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const mapPath = `/${locale || 'en'}/map`;
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Glamping Properties Map",
     "description": `Interactive map of ${propertyCount}+ glamping properties across the United States and Canada`,
     "numberOfItems": propertyCount,
-    "url": `${baseUrl}/map`,
+    "url": `${baseUrl}${mapPath}`,
     "itemListElement": [
       {
         "@type": "ListItem",
         "position": 1,
         "name": "Glamping Properties",
-        "item": `${baseUrl}/map`,
+        "item": `${baseUrl}${mapPath}`,
         "description": `Explore ${propertyCount}+ glamping properties on an interactive map`
       }
     ]
   };
 }
 
-export function generateMapWebApplicationSchema() {
+export function generateMapWebApplicationSchema(locale?: string) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const mapPath = `/${locale || 'en'}/map`;
   return {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Glamping Properties Map",
     "applicationCategory": "TravelApplication",
     "operatingSystem": "Web",
-    "url": `${baseUrl}/map`,
+    "url": `${baseUrl}${mapPath}`,
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -595,7 +598,9 @@ export function generateMapWebApplicationSchema() {
   };
 }
 
-export function generateMapBreadcrumbSchema() {
+export function generateMapBreadcrumbSchema(locale?: string) {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const mapPath = `/${locale || 'en'}/map`;
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -610,7 +615,7 @@ export function generateMapBreadcrumbSchema() {
         "@type": "ListItem",
         "position": 2,
         "name": "Glamping Properties Map",
-        "item": "https://resources.sageoutdooradvisory.com/map"
+        "item": `${baseUrl}${mapPath}`
       }
     ]
   };
@@ -622,9 +627,11 @@ export function generateMapBreadcrumbSchema() {
  */
 export function generateDatasetSchema(
   propertyCount: number,
-  stats?: { states?: number; countries?: number; provinces?: number }
+  stats?: { states?: number; countries?: number; provinces?: number },
+  locale?: string
 ) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const mapPath = `/${locale || 'en'}/map`;
   const currentDate = new Date().toISOString().split('T')[0];
   
   // Build spatial coverage description
@@ -676,7 +683,7 @@ export function generateDatasetSchema(
     "version": "1.0",
     "distribution": {
       "@type": "DataDownload",
-      "contentUrl": `${baseUrl}/map`,
+      "contentUrl": `${baseUrl}${mapPath}`,
       "encodingFormat": "application/json",
       "description": "Interactive map interface for exploring glamping properties"
     },
@@ -1009,7 +1016,7 @@ export function generatePropertyFAQSchema(property: {
   operating_season_months: string | null;
   minimum_nights: string | null;
   pets: string | null;
-  avg_retail_daily_rate_2024: string | null;
+  avg_retail_daily_rate_2024: string | number | null;
   google_rating: number | null;
   google_user_rating_total: number | null;
 }): any {
@@ -1106,14 +1113,12 @@ export function generatePropertyAmenitiesSchema(property: {
   hot_tub_sauna?: string | null;
   wifi?: string | null;
   pets?: string | null;
-  toilet?: string | null;
+  private_bathroom?: string | null;
   shower?: string | null;
   water?: string | null;
-  trash?: string | null;
-  cooking_equipment?: string | null;
   picnic_table?: string | null;
   laundry?: string | null;
-  campfires?: string | null;
+  unit_campfires?: string | null;
   playground?: string | null;
   sage_p_amenity_restaurant?: string | null;
   sage_p_amenity_waterfront?: string | null;
@@ -1121,19 +1126,16 @@ export function generatePropertyAmenitiesSchema(property: {
   const propertyName = property.property_name || 'this property';
   const amenities: string[] = [];
   
-  // Collect all available amenities
   if (hasAmenity(property.pool)) amenities.push('Pool');
   if (hasAmenity(property.hot_tub_sauna)) amenities.push('Hot Tub / Sauna');
   if (hasAmenity(property.wifi)) amenities.push('Wi-Fi');
   if (hasAmenity(property.pets)) amenities.push('Pets Allowed');
-  if (hasAmenity(property.toilet)) amenities.push('Restrooms');
+  if (hasAmenity(property.private_bathroom)) amenities.push('Private Bathroom');
   if (hasAmenity(property.shower)) amenities.push('Showers');
   if (hasAmenity(property.water)) amenities.push('Water Access');
-  if (hasAmenity(property.trash)) amenities.push('Trash Service');
-  if (hasAmenity(property.cooking_equipment)) amenities.push('Cooking Equipment');
   if (hasAmenity(property.picnic_table)) amenities.push('Picnic Tables');
   if (hasAmenity(property.laundry)) amenities.push('Laundry Facilities');
-  if (hasAmenity(property.campfires)) amenities.push('Campfires Allowed');
+  if (hasAmenity(property.unit_campfires)) amenities.push('Campfires Allowed');
   if (hasAmenity(property.playground)) amenities.push('Playground');
   if (hasAmenity(property.sage_p_amenity_restaurant)) amenities.push('Restaurant');
   if (hasAmenity(property.sage_p_amenity_waterfront)) amenities.push('Waterfront');
@@ -1153,3 +1155,318 @@ export function generatePropertyAmenitiesSchema(property: {
   };
 }
 
+/**
+ * Generate TouristAttraction schema for national parks
+ * Helps Google understand national parks as tourist attractions for rich results
+ */
+export function generateTouristAttractionSchema(parks: Array<{
+  name: string;
+  description?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  date_established?: string | null;
+  recreation_visitors_2023?: string | null;
+  recreation_visitors_2022?: string | null;
+  recreation_visitors_2021?: string | null;
+  operating_months?: string | null;
+  best_time_to_visit?: string | null;
+  state?: string | null;
+  slug?: string | null;
+}>): any {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  
+  // Generate schemas for each park
+  return parks.map((park) => {
+    const schema: any = {
+      "@context": "https://schema.org",
+      "@type": "TouristAttraction",
+      "name": park.name,
+    };
+    
+    // Add description
+    if (park.description) {
+      schema.description = park.description;
+    }
+    
+    // Add geo coordinates
+    if (park.latitude !== null && park.longitude !== null && 
+        !isNaN(Number(park.latitude)) && !isNaN(Number(park.longitude))) {
+      schema.geo = {
+        "@type": "GeoCoordinates",
+        "latitude": Number(park.latitude).toString(),
+        "longitude": Number(park.longitude).toString(),
+      };
+    }
+    
+    // Add address (state)
+    if (park.state) {
+      schema.address = {
+        "@type": "PostalAddress",
+        "addressRegion": park.state,
+        "addressCountry": "US",
+      };
+    }
+    
+    // Add URL if slug exists
+    if (park.slug) {
+      schema.url = `${baseUrl}/national-park/${park.slug}`;
+    }
+    
+    // Add date established
+    if (park.date_established) {
+      schema.openingDate = park.date_established;
+    }
+    
+    // Add visitor statistics (use most recent available)
+    const visitorCount = park.recreation_visitors_2023 || 
+                        park.recreation_visitors_2022 || 
+                        park.recreation_visitors_2021;
+    if (visitorCount) {
+      // Parse visitor count (may be in format like "1,234,567" or "1.2M")
+      const cleanedCount = visitorCount.toString().replace(/,/g, '').replace(/[^\d.]/g, '');
+      const numericCount = parseFloat(cleanedCount);
+      if (!isNaN(numericCount)) {
+        schema.aggregateRating = {
+          "@type": "AggregateRating",
+          "ratingValue": "5",
+          "bestRating": "5",
+          "worstRating": "1",
+        };
+        // Note: visitor count can't be directly added to TouristAttraction schema
+        // but we can add it as a note in description if needed
+      }
+    }
+    
+    // Add operating months
+    if (park.operating_months) {
+      schema.openingHoursSpecification = {
+        "@type": "OpeningHoursSpecification",
+        "description": park.operating_months,
+      };
+    }
+    
+    // Add best time to visit
+    if (park.best_time_to_visit) {
+      if (!schema.description) {
+        schema.description = '';
+      }
+      schema.description = `${schema.description} Best time to visit: ${park.best_time_to_visit}.`.trim();
+    }
+    
+    return schema;
+  });
+}
+
+/**
+ * Generate FAQPage schema for map pages
+ * Creates rich snippet opportunities for common map and location questions
+ */
+export function generateMapFAQSchema(
+  propertyCount: number,
+  location?: string
+): any {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  const locationText = location ? ` in ${location}` : '';
+  
+  const faqs: Array<{ question: string; answer: string }> = [];
+  
+  // General map FAQs
+  faqs.push({
+    question: "How do I use the glamping map?",
+    answer: "Use the interactive map to explore glamping properties across North America. Click on map markers to view property details, use filters to narrow down by location, unit type, or price range, and zoom in to see properties in specific areas."
+  });
+  
+  faqs.push({
+    question: "What filters are available on the map?",
+    answer: "You can filter glamping properties by country (United States, Canada), state or province, unit type (tents, yurts, treehouses, domes, etc.), and average daily rate range. Toggle overlays to see national parks, population data, and economic indicators."
+  });
+  
+  faqs.push({
+    question: `How many glamping properties${locationText ? ` are in ${location}` : ''} are on the map?`,
+    answer: location
+      ? `Our database contains ${propertyCount}+ glamping properties${locationText}. Explore the map to find luxury tents, yurts, treehouses, domes, and other unique accommodations.`
+      : `Our interactive map features ${propertyCount}+ glamping properties across the United States and Canada. Filter by location, unit type, or price to find your perfect glamping experience.`
+  });
+  
+  faqs.push({
+    question: "Can I filter by location?",
+    answer: "Yes! You can filter by country (United States or Canada) and by state or province. Select one or more states to see only properties in those locations."
+  });
+  
+  faqs.push({
+    question: "Can I filter by price range?",
+    answer: "Yes, you can filter properties by average daily rate range. Choose from budget-friendly options to luxury accommodations based on your preferred price point."
+  });
+  
+  faqs.push({
+    question: "Can I filter by unit type?",
+    answer: "Yes! Filter by unit types including safari tents, yurts, treehouses, domes, Airstream trailers, tiny houses, glamping pods, and more. Select multiple unit types to see all matching properties."
+  });
+  
+  faqs.push({
+    question: "How do I view property details?",
+    answer: "Click on any property marker on the map to see a property card with photos, description, amenities, rates, and links to the property's website. You can also click 'View Details' to see the full property page."
+  });
+  
+  faqs.push({
+    question: "Are all properties verified?",
+    answer: "Our database includes verified glamping properties with accurate location data, pricing information, and amenities. We regularly update our database to ensure information is current."
+  });
+  
+  // Location-specific FAQs
+  if (location) {
+    faqs.push({
+      question: `What are the best glamping properties in ${location}?`,
+      answer: `Explore the map to discover top-rated glamping properties in ${location}. Filter by unit type, price range, and amenities to find accommodations that match your preferences. Many properties feature ratings and reviews from previous guests.`
+    });
+    
+    faqs.push({
+      question: `What national parks are near glamping properties in ${location}?`,
+      answer: `Toggle the 'National Parks' overlay on the map to see nearby national parks. Many glamping properties in ${location} are located within driving distance of popular national parks, making them ideal bases for outdoor adventures.`
+    });
+  }
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map((faq) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+}
+
+/**
+ * Generate LocalBusiness schemas for a list of properties
+ * Used on location pages to provide rich results for featured properties
+ * Limits to top properties to avoid payload size issues
+ */
+export function generatePropertyListLocalBusinessSchema(
+  properties: Array<{
+    property_name: string | null;
+    slug?: string | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip_code?: string | null;
+    country?: string | null;
+    lat?: string | number | null;
+    lon?: string | number | null;
+    google_phone_number?: string | null;
+    google_website_uri?: string | null;
+    url?: string | null;
+    google_rating?: number | null;
+    google_user_rating_total?: number | null;
+    google_photos?: Array<{ name: string }> | null | string;
+    description?: string | null;
+  }>
+): any[] {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
+  
+  // Limit to top 20 properties to avoid payload size issues
+  const limitedProperties = properties.slice(0, 20);
+  
+  return limitedProperties
+    .filter((property) => property.property_name && property.property_name.trim())
+    .map((property) => {
+      const propertyName = property.property_name?.trim() || 'Unnamed Property';
+      const slug = property.slug?.trim();
+      const url = slug ? `${baseUrl}/property/${slug}` : null;
+      
+      const schema: any = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": propertyName,
+      };
+      
+      // Add URL
+      if (url) {
+        schema.url = url;
+      }
+      
+      // Add description
+      if (property.description) {
+        schema.description = property.description;
+      } else {
+        schema.description = `Information about ${propertyName} glamping property`;
+      }
+      
+      // Add address
+      const addressParts: string[] = [];
+      if (property.address) addressParts.push(property.address);
+      if (property.city) addressParts.push(property.city);
+      if (property.state) addressParts.push(property.state);
+      if (property.zip_code) addressParts.push(property.zip_code);
+      
+      if (addressParts.length > 0) {
+        schema.address = {
+          "@type": "PostalAddress",
+          "streetAddress": property.address || undefined,
+          "addressLocality": property.city || undefined,
+          "addressRegion": property.state || undefined,
+          "postalCode": property.zip_code || undefined,
+          "addressCountry": property.country || undefined,
+        };
+      }
+      
+      // Add geo coordinates
+      const lat = property.lat ? (typeof property.lat === 'string' ? parseFloat(property.lat) : property.lat) : null;
+      const lon = property.lon ? (typeof property.lon === 'string' ? parseFloat(property.lon) : property.lon) : null;
+      if (lat !== null && lon !== null && !isNaN(lat) && !isNaN(lon)) {
+        schema.geo = {
+          "@type": "GeoCoordinates",
+          "latitude": lat.toString(),
+          "longitude": lon.toString(),
+        };
+      }
+      
+      // Add phone
+      if (property.google_phone_number) {
+        schema.telephone = property.google_phone_number;
+      }
+      
+      // Add website
+      const websiteUrl = property.google_website_uri || property.url;
+      if (websiteUrl) {
+        schema.sameAs = [websiteUrl];
+      }
+      
+      // Add rating
+      if (property.google_rating !== null && property.google_rating !== undefined) {
+        schema.aggregateRating = {
+          "@type": "AggregateRating",
+          "ratingValue": property.google_rating.toString(),
+          "reviewCount": property.google_user_rating_total?.toString() || "0",
+          "bestRating": "5",
+          "worstRating": "1",
+        };
+      }
+      
+      // Add image if available
+      if (property.google_photos) {
+        let photos: Array<{ name: string }> = [];
+        if (typeof property.google_photos === 'string') {
+          try {
+            photos = JSON.parse(property.google_photos);
+          } catch (e) {
+            // Ignore parse errors
+          }
+        } else if (Array.isArray(property.google_photos)) {
+          photos = property.google_photos;
+        }
+        
+        if (photos.length > 0) {
+          const firstPhoto = photos[0];
+          const encodedPhotoName = encodeURIComponent(firstPhoto.name);
+          schema.image = `${baseUrl}/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=1200&maxHeightPx=630`;
+        }
+      }
+      
+      return schema;
+    })
+    .filter((schema) => schema !== null);
+}

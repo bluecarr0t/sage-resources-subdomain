@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAllPropertySlugs } from '@/lib/properties';
+import { getAllNationalParkSlugs } from '@/lib/national-parks';
 import { locales } from '@/i18n';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
@@ -18,9 +19,12 @@ function generateHreflangTags(path: string): string {
 }
 
 export async function GET() {
-  const propertySlugs = await getAllPropertySlugs();
+  const [propertySlugs, nationalParkSlugs] = await Promise.all([
+    getAllPropertySlugs(),
+    getAllNationalParkSlugs(),
+  ]);
   const urls: string[] = [];
-  const propertyDefaultDate = new Date().toISOString();
+  const defaultDate = new Date().toISOString();
 
   // Generate property pages for ALL locales (en, es, fr, de) with hreflang
   // This enables Google to discover and index all language versions
@@ -31,7 +35,23 @@ export async function GET() {
       
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
-    <lastmod>${propertyDefaultDate}</lastmod>
+    <lastmod>${defaultDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+${hreflangs}
+  </url>`);
+    }
+  }
+
+  // Generate national park pages for ALL locales (same /property/[slug] route)
+  for (const item of nationalParkSlugs) {
+    for (const locale of locales) {
+      const fullPath = `/${locale}/property/${item.slug}`;
+      const hreflangs = generateHreflangTags(fullPath);
+      
+      urls.push(`  <url>
+    <loc>${baseUrl}${fullPath}</loc>
+    <lastmod>${defaultDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
 ${hreflangs}

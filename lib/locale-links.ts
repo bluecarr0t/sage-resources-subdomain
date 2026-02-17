@@ -26,10 +26,12 @@ export function getLocalePath(locale: string, path: string): string {
  */
 export function createLocaleLinks(locale: string) {
   return {
+    home: getLocalePath(locale, ''),
     guides: getLocalePath(locale, '/guides'),
     glossary: getLocalePath(locale, '/glossary'),
     map: getLocalePath(locale, '/map'),
     partners: getLocalePath(locale, '/partners'),
+    sitemap: getLocalePath(locale, '/sitemap'),
     landing: (slug: string) => getLocalePath(locale, `/landing/${slug}`),
     property: (slug: string) => getLocalePath(locale, `/property/${slug}`),
     guide: (slug: string) => getLocalePath(locale, `/guides/${slug}`),

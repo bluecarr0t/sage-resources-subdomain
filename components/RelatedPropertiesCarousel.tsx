@@ -176,9 +176,9 @@ export default function RelatedPropertiesCarousel({
                   </p>
                 )}
                 
-                {property.avg_retail_daily_rate_2024 && (
+                {property.rate_avg_retail_daily_rate && (
                   <p className="text-sm text-gray-900 font-semibold mb-3">
-                    From ${property.avg_retail_daily_rate_2024}/night
+                    From ${property.rate_avg_retail_daily_rate}/night
                   </p>
                 )}
                 

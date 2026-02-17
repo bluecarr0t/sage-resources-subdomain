@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { locales } from '@/i18n';
+import { getTopStates, getTopCities, slugifyLocation, createCitySlug } from '@/lib/location-helpers';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
@@ -20,7 +21,7 @@ export async function GET() {
   const urls: string[] = [];
 
   // Generate main pages for all locales with hreflang
-  const mainPages = ['', '/guides', '/glossary', '/partners', '/map'];
+  const mainPages = ['', '/guides', '/glossary', '/partners', '/map', '/sitemap'];
   
   for (const pagePath of mainPages) {
     for (const locale of locales) {
@@ -38,6 +39,54 @@ export async function GET() {
 ${hreflangs}
   </url>`);
     }
+  }
+
+  // Add state pages (priority 0.8)
+  try {
+    const topStates = await getTopStates(50);
+    const lastmod = new Date().toISOString();
+    
+    for (const stateData of topStates) {
+      const stateSlug = slugifyLocation(stateData.state);
+      for (const locale of locales) {
+        const fullPath = `/${locale}/map/${stateSlug}`;
+        const hreflangs = generateHreflangTags(fullPath);
+        
+        urls.push(`  <url>
+    <loc>${baseUrl}${fullPath}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+${hreflangs}
+  </url>`);
+      }
+    }
+  } catch (error) {
+    console.error('Error generating state pages for sitemap:', error);
+  }
+
+  // Add city pages (priority 0.7)
+  try {
+    const topCities = await getTopCities(100);
+    const lastmod = new Date().toISOString();
+    
+    for (const cityData of topCities) {
+      const citySlug = createCitySlug(cityData.city, cityData.state);
+      for (const locale of locales) {
+        const fullPath = `/${locale}/map/${citySlug}`;
+        const hreflangs = generateHreflangTags(fullPath);
+        
+        urls.push(`  <url>
+    <loc>${baseUrl}${fullPath}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+${hreflangs}
+  </url>`);
+      }
+    }
+  } catch (error) {
+    console.error('Error generating city pages for sitemap:', error);
   }
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

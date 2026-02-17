@@ -33,9 +33,10 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
   const breadcrumbSchema = generateGuideBreadcrumbSchema(content.slug, content.hero.headline);
   const articleSchema = generateArticleSchema(content);
   const faqSchema = content.faqs ? generateFAQSchema(content.faqs) : null;
-  const speakableSchema = content.faqs && content.faqs.length > 0 
+  // Always include Speakable schema: FAQs when present, otherwise headings and main content
+  const speakableSchema = content.faqs && content.faqs.length > 0
     ? generateSpeakableSchema([".speakable-answer", "h1", "h2"])
-    : null;
+    : generateSpeakableSchema(["h1", "h2", "h3", ".prose p"]);
   // Add Course schema for comprehensive pillar guides
   const isComprehensiveGuide = content.slug.endsWith("-complete-guide");
   const courseSchema = isComprehensiveGuide ? generateCourseSchema(content) : null;
@@ -86,12 +87,10 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
-      {speakableSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
-        />
-      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
+      />
       {courseSchema && (
         <script
           type="application/ld+json"

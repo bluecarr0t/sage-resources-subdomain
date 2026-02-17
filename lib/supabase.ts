@@ -1,7 +1,10 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+const supabasePublishableKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  '';
 
 /**
  * Validates Supabase configuration and provides helpful error messages
@@ -54,7 +57,14 @@ function getSupabaseClient(): SupabaseClient {
   // Create client if it doesn't exist
   if (!_supabaseClient) {
     if (supabaseUrl && supabasePublishableKey) {
-      _supabaseClient = createClient(supabaseUrl, supabasePublishableKey);
+      _supabaseClient = createClient(supabaseUrl, supabasePublishableKey, {
+        auth: {
+          detectSessionInUrl: true,
+          flowType: 'implicit',
+          autoRefreshToken: true,
+          persistSession: true,
+        },
+      });
     } else {
       // For build time, create placeholder client
       // At runtime, this will never be reached due to validation above

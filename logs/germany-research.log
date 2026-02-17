@@ -1,0 +1,430 @@
+[dotenv@17.2.3] injecting env (3) from .env.local -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+======================================================================
+Research Glamping Resorts in Germany
+======================================================================
+Processing 16 search queries...
+
+
+[Search 1/16]
+🔍 Researching: "best glamping resorts Germany 2024"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: Glamping Resort Biosphäre Bliesgau
+  ✓ NEW: Baumhaushotel Seemühle
+  ✓ NEW: Camping Resort Allweglehen
+  ✓ NEW: Glamping Resort Zugspitze
+  ✓ NEW: Baumhaushotel Oberbayern
+
+📊 From "best glamping resorts Germany 2024": Found 5 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 2/16]
+🔍 Researching: "luxury glamping Deutschland"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): Baumhaushotel Seemühle
+  ✗ SKIP (duplicate): Glamping Resort Biosphäre Bliesgau
+  ✗ SKIP (duplicate): Baumhaushotel Oberbayern
+  ✓ NEW: Rügen Glamping
+  ✓ NEW: Camping Resort Zugspitze
+
+📊 From "luxury glamping Deutschland": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 3/16]
+🔍 Researching: "glamping sites Bavaria Germany"
+
+✅ Found 3 properties for this search
+
+  ✓ NEW: Bavarian Forest Glamping
+  ✓ NEW: Bavaria Glamping Resort
+  ✓ NEW: Allgäu Glamping
+
+📊 From "glamping sites Bavaria Germany": Found 3 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 4/16]
+🔍 Researching: "glamping sites Black Forest Germany"
+
+✅ Found 3 properties for this search
+
+  ✓ NEW: Glamping Schwarzwald
+  ✓ NEW: Baumhaushotel Schwarzwald
+  ✓ NEW: Tented Village Glamping Schwarzwald
+
+📊 From "glamping sites Black Forest Germany": Found 3 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 5/16]
+🔍 Researching: "glamping sites Rhine Valley Germany"
+
+✅ Found 4 properties for this search
+
+  ✗ SKIP (duplicate): Glamping Resort Biosphäre Bliesgau
+  ✗ SKIP (duplicate): Baumhaushotel Seemühle
+  ✓ NEW: Campotel Bad Rothenfelde
+  ✓ NEW: Campingpark Bad Liebenzell
+
+📊 From "glamping sites Rhine Valley Germany": Found 2 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 6/16]
+🔍 Researching: "glamping sites Mosel Valley Germany"
+
+✅ Found 3 properties for this search
+
+  ✓ NEW: Mosel Glamping
+  ✓ NEW: Nature Resort Mosel
+  ✓ NEW: Mosel Yurt Village
+
+📊 From "glamping sites Mosel Valley Germany": Found 3 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 7/16]
+🔍 Researching: "glamping sites Baltic Sea Germany"
+
+✅ Found 3 properties for this search
+
+  ✓ NEW: Ostsee Glamping Resort
+  ✓ NEW: Glamping Village Wulfener Hals
+  ✓ NEW: Camping- und Ferienpark Wulfener Hals
+
+📊 From "glamping sites Baltic Sea Germany": Found 3 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 8/16]
+🔍 Researching: "glamping sites North Sea Germany"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Nordsee Glamping
+  ✗ SKIP (duplicate): Glamping Resort Biosphäre Bliesgau
+  ✓ NEW: Baumhaushotel Otterndorf
+  ✓ NEW: Campingplatz Am Nordseestrand
+
+📊 From "glamping sites North Sea Germany": Found 3 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 9/16]
+🔍 Researching: "treehouse glamping Germany"
+
+✅ Found 4 properties for this search
+
+  ✗ SKIP (duplicate): Baumhaushotel Seemühle
+  ✓ NEW: Baumhaushotel Solling
+  ✗ SKIP (duplicate): Baumhaushotel Oberbayern
+  ✓ NEW: Tree Inn
+
+📊 From "treehouse glamping Germany": Found 2 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 10/16]
+🔍 Researching: "yurt glamping Germany"
+
+✅ Found 3 properties for this search
+
+  ✓ NEW: Rundlingsdorf Sagasfeld
+  ✓ NEW: Camping am Bauernhof
+  ✗ SKIP (duplicate): Baumhaushotel Seemühle
+
+📊 From "yurt glamping Germany": Found 2 new properties out of 3 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 11/16]
+🔍 Researching: "safari tent glamping Germany"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Abenteuerland
+  ✗ SKIP (duplicate): Baumhaushotel Solling
+  ✗ SKIP (duplicate): Glamping Resort Biosphäre Bliesgau
+  ✓ NEW: Campingpark Gitzenweiler Hof
+
+📊 From "safari tent glamping Germany": Found 2 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 12/16]
+🔍 Researching: "luxury camping Germany"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: Schlosspark Bad Saarow
+  ✗ SKIP (duplicate): Baumhaushotel Solling
+  ✓ NEW: Allgäu Hütten
+  ✗ SKIP (duplicate): Camping Resort Zugspitze
+  ✗ SKIP (duplicate): Glamping Resort Biosphäre Bliesgau
+
+📊 From "luxury camping Germany": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 13/16]
+🔍 Researching: "glamping retreats Germany"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): Glamping Resort Biosphäre Bliesgau
+  ✗ SKIP (duplicate): Baumhaushotel Seemühle
+  ✓ NEW: Campingpark Havelberge
+  ✗ SKIP (duplicate): Baumhaushotel Oberbayern
+  ✓ NEW: Naturcamping Zwei Seen
+
+📊 From "glamping retreats Germany": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 14/16]
+🔍 Researching: "eco glamping Germany"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): Glamping Resort Biosphäre Bliesgau
+  ✗ SKIP (duplicate): Baumhaushotel Seemühle
+  ✓ NEW: Camping & Glamping Allweglehen
+  ✗ SKIP (duplicate): Schlosspark Bad Saarow
+  ✓ NEW: Natur-Resort Tripsdrill
+
+📊 From "eco glamping Germany": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 15/16]
+🔍 Researching: "glamping near Berlin Germany"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Scube Park Berlin
+  ✓ NEW: Campingplatz am Mahlower See
+  ✓ NEW: Ferienpark Rübezahl
+  ✓ NEW: Naturcampingplatz am Springsee
+
+📊 From "glamping near Berlin Germany": Found 4 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 16/16]
+🔍 Researching: "glamping near Munich Germany"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Schlossgut Oberambach
+  ✗ SKIP (duplicate): Camping Resort Zugspitze
+  ✓ NEW: Bavarian Forest Holidays
+  ✗ SKIP (duplicate): Baumhaushotel Oberbayern
+
+📊 From "glamping near Munich Germany": Found 2 new properties out of 4 total
+
+
+======================================================================
+Found 42 total unique properties across all searches
+======================================================================
+
+🔍 Enriching property data with OpenAI...
+
+[1/42] Glamping Resort Biosphäre Bliesgau
+  🤖 Enriching data for: Glamping Resort Biosphäre Bliesgau
+    ✅ Enriched with 98 fields
+
+[2/42] Baumhaushotel Seemühle
+  🤖 Enriching data for: Baumhaushotel Seemühle
+    ✅ Enriched with 98 fields
+
+[3/42] Camping Resort Allweglehen
+  🤖 Enriching data for: Camping Resort Allweglehen
+    ✅ Enriched with 42 fields
+
+[4/42] Glamping Resort Zugspitze
+  🤖 Enriching data for: Glamping Resort Zugspitze
+    ✅ Enriched with 98 fields
+
+[5/42] Baumhaushotel Oberbayern
+  🤖 Enriching data for: Baumhaushotel Oberbayern
+    ✅ Enriched with 98 fields
+
+[6/42] Rügen Glamping
+  🤖 Enriching data for: Rügen Glamping
+    ✅ Enriched with 98 fields
+
+[7/42] Camping Resort Zugspitze
+  🤖 Enriching data for: Camping Resort Zugspitze
+    ✅ Enriched with 98 fields
+
+[8/42] Bavarian Forest Glamping
+  🤖 Enriching data for: Bavarian Forest Glamping
+    ✅ Enriched with 97 fields
+
+[9/42] Bavaria Glamping Resort
+  🤖 Enriching data for: Bavaria Glamping Resort
+    ✅ Enriched with 98 fields
+
+[10/42] Allgäu Glamping
+  🤖 Enriching data for: Allgäu Glamping
+    ✅ Enriched with 92 fields
+
+[11/42] Glamping Schwarzwald
+  🤖 Enriching data for: Glamping Schwarzwald
+    ✅ Enriched with 90 fields
+
+[12/42] Baumhaushotel Schwarzwald
+  🤖 Enriching data for: Baumhaushotel Schwarzwald
+    ✅ Enriched with 82 fields
+
+[13/42] Tented Village Glamping Schwarzwald
+  🤖 Enriching data for: Tented Village Glamping Schwarzwald
+    ✅ Enriched with 91 fields
+
+[14/42] Campotel Bad Rothenfelde
+  🤖 Enriching data for: Campotel Bad Rothenfelde
+    ✅ Enriched with 52 fields
+
+[15/42] Campingpark Bad Liebenzell
+  🤖 Enriching data for: Campingpark Bad Liebenzell
+    ✅ Enriched with 92 fields
+
+[16/42] Mosel Glamping
+  🤖 Enriching data for: Mosel Glamping
+    ✅ Enriched with 92 fields
+
+[17/42] Nature Resort Mosel
+  🤖 Enriching data for: Nature Resort Mosel
+    ✅ Enriched with 92 fields
+
+[18/42] Mosel Yurt Village
+  🤖 Enriching data for: Mosel Yurt Village
+    ✅ Enriched with 98 fields
+
+[19/42] Ostsee Glamping Resort
+  🤖 Enriching data for: Ostsee Glamping Resort
+    ✅ Enriched with 92 fields
+
+[20/42] Glamping Village Wulfener Hals
+  🤖 Enriching data for: Glamping Village Wulfener Hals
+    ✅ Enriched with 92 fields
+
+[21/42] Camping- und Ferienpark Wulfener Hals
+  🤖 Enriching data for: Camping- und Ferienpark Wulfener Hals
+    ✅ Enriched with 98 fields
+
+[22/42] Nordsee Glamping
+  🤖 Enriching data for: Nordsee Glamping
+    ✅ Enriched with 98 fields
+
+[23/42] Baumhaushotel Otterndorf
+  🤖 Enriching data for: Baumhaushotel Otterndorf
+    ✅ Enriched with 80 fields
+
+[24/42] Campingplatz Am Nordseestrand
+  🤖 Enriching data for: Campingplatz Am Nordseestrand
+    ✅ Enriched with 92 fields
+
+[25/42] Baumhaushotel Solling
+  🤖 Enriching data for: Baumhaushotel Solling
+    ✅ Enriched with 98 fields
+
+[26/42] Tree Inn
+  🤖 Enriching data for: Tree Inn
+    ✅ Enriched with 98 fields
+
+[27/42] Rundlingsdorf Sagasfeld
+  🤖 Enriching data for: Rundlingsdorf Sagasfeld
+    ✅ Enriched with 98 fields
+
+[28/42] Camping am Bauernhof
+  🤖 Enriching data for: Camping am Bauernhof
+    ✅ Enriched with 98 fields
+
+[29/42] Abenteuerland
+  🤖 Enriching data for: Abenteuerland
+    ✅ Enriched with 97 fields
+
+[30/42] Campingpark Gitzenweiler Hof
+  🤖 Enriching data for: Campingpark Gitzenweiler Hof
+    ✅ Enriched with 98 fields
+
+[31/42] Schlosspark Bad Saarow
+  🤖 Enriching data for: Schlosspark Bad Saarow
+    ✅ Enriched with 91 fields
+
+[32/42] Allgäu Hütten
+  🤖 Enriching data for: Allgäu Hütten
+    ✅ Enriched with 82 fields
+
+[33/42] Campingpark Havelberge
+  🤖 Enriching data for: Campingpark Havelberge
+    ✅ Enriched with 93 fields
+
+[34/42] Naturcamping Zwei Seen
+  🤖 Enriching data for: Naturcamping Zwei Seen
+    ✅ Enriched with 98 fields
+
+[35/42] Camping & Glamping Allweglehen
+  🤖 Enriching data for: Camping & Glamping Allweglehen
+    ✅ Enriched with 98 fields
+
+[36/42] Natur-Resort Tripsdrill
+  🤖 Enriching data for: Natur-Resort Tripsdrill
+    ✅ Enriched with 98 fields
+
+[37/42] Scube Park Berlin
+  🤖 Enriching data for: Scube Park Berlin
+    ✅ Enriched with 98 fields
+
+[38/42] Campingplatz am Mahlower See
+  🤖 Enriching data for: Campingplatz am Mahlower See
+    ✅ Enriched with 92 fields
+
+[39/42] Ferienpark Rübezahl
+  🤖 Enriching data for: Ferienpark Rübezahl
+    ✅ Enriched with 92 fields
+
+[40/42] Naturcampingplatz am Springsee
+  🤖 Enriching data for: Naturcampingplatz am Springsee
+    ✅ Enriched with 92 fields
+
+[41/42] Schlossgut Oberambach
+  🤖 Enriching data for: Schlossgut Oberambach
+    ✅ Enriched with 98 fields
+
+[42/42] Bavarian Forest Holidays
+  🤖 Enriching data for: Bavarian Forest Holidays
+    ✅ Enriched with 98 fields
+
+
+📝 Writing 42 properties to CSV file...
+
+✅ Successfully wrote 42 properties to csv/glamping-properties/europe/germany-glamping-resorts.csv
+   File location: csv/glamping-properties/europe/germany-glamping-resorts.csv
+
+======================================================================
+✅ Process complete!
+   Total properties saved: 42
+   CSV file: csv/glamping-properties/europe/germany-glamping-resorts.csv
+======================================================================

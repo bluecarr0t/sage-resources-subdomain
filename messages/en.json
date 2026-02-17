@@ -152,6 +152,63 @@
         "title": "Glamping Properties Map | 500+ Locations",
         "description": "Explore 500+ glamping properties and compare with population growth data to identify high-growth markets"
       }
+    },
+    "location": {
+      "state": {
+        "title": "Glamping Properties in {state}",
+        "description": "Discover {count}+ glamping properties in {state}. Find luxury tents, yurts, treehouses, domes, and more on our interactive map.",
+        "statistics": {
+          "title": "Statistics",
+          "properties": "Properties",
+          "averageRate": "Average Rate",
+          "highRate": "High Rate",
+          "lowRate": "Low Rate",
+          "averageOccupancy": "Average Occupancy",
+          "unitTypes": "Popular Unit Types"
+        },
+        "featuredProperties": {
+          "title": "Featured Properties",
+          "description": "Top-rated glamping properties in {state}"
+        },
+        "nearbyParks": {
+          "title": "Nearby National Parks",
+          "description": "National parks near glamping properties in {state}"
+        }
+      },
+      "city": {
+        "title": "Glamping Near {city}, {state}",
+        "description": "Find {count}+ glamping properties within 25 miles of {city}, {state}. Explore luxury tents, yurts, treehouses, and more.",
+        "statistics": {
+          "title": "Statistics",
+          "properties": "Properties",
+          "averageRate": "Average Rate",
+          "highRate": "High Rate",
+          "lowRate": "Low Rate",
+          "averageOccupancy": "Average Occupancy",
+          "unitTypes": "Popular Unit Types",
+          "within": "Within 25 miles"
+        },
+        "featuredProperties": {
+          "title": "Featured Properties",
+          "description": "Top-rated glamping properties near {city}, {state}"
+        },
+        "nearbyParks": {
+          "title": "Nearby National Parks",
+          "description": "National parks within driving distance of {city}, {state}"
+        }
+      },
+      "faq": {
+        "mapUsage": "How do I use the glamping map?",
+        "filtersAvailable": "What filters are available on the map?",
+        "propertyCount": "How many glamping properties are on the map?",
+        "filterByLocation": "Can I filter by location?",
+        "filterByPrice": "Can I filter by price range?",
+        "filterByUnitType": "Can I filter by unit type?",
+        "viewPropertyDetails": "How do I view property details?",
+        "propertiesVerified": "Are all properties verified?",
+        "bestProperties": "What are the best glamping properties in {location}?",
+        "nationalParksNearby": "What national parks are near glamping properties in {location}?"
+      }
     }
   },
   "locationSearch": {
@@ -167,6 +224,15 @@
   "guides": {
     "title": "Outdoor Hospitality Guides",
     "subtitle": "Comprehensive, expert-written guides covering feasibility studies, property appraisals, and the outdoor hospitality industry",
+    "metadata": {
+      "title": "Outdoor Hospitality Guides | Expert Resources | Sage Outdoor Advisory",
+      "description": "Expert guides on feasibility studies, property appraisals, and outdoor hospitality. Essential reading for glamping, RV resort, and campground developers and investors.",
+      "keywords": "feasibility study guides, property appraisal guides, glamping guides, RV resort guides, outdoor hospitality resources, campground development guides",
+      "openGraph": {
+        "title": "Outdoor Hospitality Guides | Sage Outdoor Advisory",
+        "description": "Comprehensive guides covering feasibility studies, property appraisals, and the outdoor hospitality industry"
+      }
+    },
     "categories": {
       "feasibility": {
         "name": "Feasibility Studies",
@@ -291,5 +357,23 @@
         }
       ]
     }
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "homeLink": "Back to Home",
+    "mapLink": "Explore Glamping Map"
+  },
+  "sitemap": {
+    "title": "Sitemap",
+    "metaTitle": "Sitemap | Sage Outdoor Advisory Resources",
+    "metaDescription": "Browse all pages and resources on Sage Outdoor Advisory. Find guides, glossary terms, glamping properties map, and more.",
+    "mainPages": "Main Pages",
+    "guides": "Guides",
+    "mapLocations": "Map Locations",
+    "glossary": "Glossary",
+    "exploreMap": "Explore on Map",
+    "states": "States",
+    "cities": "Cities"
   }
 }

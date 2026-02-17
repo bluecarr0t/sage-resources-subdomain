@@ -23,22 +23,22 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = params;
-  
-  // Validate locale
+
   if (!locales.includes(locale as Locale)) {
     notFound();
   }
-  
+
+  const t = await getTranslations({ locale, namespace: "guides.metadata" });
   const pathname = `/${locale}/guides`;
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
-  
+
   return {
-    title: "Outdoor Hospitality Guides | Expert Resources | Sage Outdoor Advisory",
-    description: "Expert guides on feasibility studies, property appraisals, and outdoor hospitality. Essential reading for glamping, RV resort, and campground developers and investors.",
-    keywords: "feasibility study guides, property appraisal guides, glamping guides, RV resort guides, outdoor hospitality resources, campground development guides",
+    title: t("title"),
+    description: t("description"),
+    keywords: t("keywords"),
     openGraph: {
-      title: "Outdoor Hospitality Guides | Sage Outdoor Advisory",
-      description: "Comprehensive guides covering feasibility studies, property appraisals, and the outdoor hospitality industry",
+      title: t("openGraph.title"),
+      description: t("openGraph.description"),
       url,
       siteName: "Sage Outdoor Advisory",
       locale: getOpenGraphLocale(locale as Locale),

@@ -244,7 +244,7 @@ async function uploadData(
     // Map CSV column names (as they appear in the file) to table column names
     // null means skip this column
     const csvToTableMapping: Record<string, string | null> = {
-      'DuplicateNote': 'duplicatenote',
+      'DuplicateNote': null, // Column removed from table
       'Source': 'source',
       'Date Added': 'date_added',
       'Date Updated': 'date_updated',

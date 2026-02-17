@@ -94,7 +94,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
     
     // Use fallback OG image (Google Places photos fetched client-side)
-    const imageUrl = `${baseUrl}/og-map-image.jpg`;
+    const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
     
     return {
       title: `${parkName} | National Park | Sage Outdoor Advisory`,
@@ -168,15 +168,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
   
   // Add price range if available
-  if (firstProperty.avg_retail_daily_rate_2024) {
-    descriptionParts.push(`from $${firstProperty.avg_retail_daily_rate_2024}/night`);
+  if (firstProperty.rate_avg_retail_daily_rate) {
+    descriptionParts.push(`from $${firstProperty.rate_avg_retail_daily_rate}/night`);
   }
   
   // Add key amenities (currently hidden)
   // const topAmenities: string[] = [];
-  // if (firstProperty.pool === 'yes' || firstProperty.pool === 'Yes' || firstProperty.pool === 'Y') topAmenities.push('pool');
-  // if (firstProperty.hot_tub_sauna === 'yes' || firstProperty.hot_tub_sauna === 'Yes' || firstProperty.hot_tub_sauna === 'Y') topAmenities.push('hot tub');
-  // if (firstProperty.wifi === 'yes' || firstProperty.wifi === 'Yes' || firstProperty.wifi === 'Y') topAmenities.push('WiFi');
+  // if (firstProperty.property_pool === 'yes' || firstProperty.property_pool === 'Yes' || firstProperty.property_pool === 'Y') topAmenities.push('pool');
+  // if (firstProperty.unit_hot_tub_or_sauna === 'yes' || firstProperty.unit_hot_tub_or_sauna === 'Yes' || firstProperty.unit_hot_tub_or_sauna === 'Y') topAmenities.push('hot tub');
+  // if (firstProperty.unit_wifi === 'yes' || firstProperty.unit_wifi === 'Yes' || firstProperty.unit_wifi === 'Y') topAmenities.push('WiFi');
   // if (topAmenities.length > 0 && topAmenities.length <= 2) {
   //   descriptionParts.push(`with ${topAmenities.join(' & ')}`);
   // }
@@ -233,7 +233,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const url = `${baseUrl}${pathname}`;
   
   // Use fallback OG image (Google Places photos fetched client-side)
-  const imageUrl = `${baseUrl}/og-map-image.jpg`;
+  const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
   return {
     title,
@@ -356,29 +356,27 @@ export default async function PropertyPage({ params }: PageProps) {
     state: firstProperty.state,
     operating_season_months: firstProperty.operating_season_months,
     minimum_nights: firstProperty.minimum_nights,
-    pets: firstProperty.pets,
-    avg_retail_daily_rate_2024: firstProperty.avg_retail_daily_rate_2024,
-    google_rating: null, // Not available at build time
-    google_user_rating_total: null, // Not available at build time
+    pets: firstProperty.unit_pets,
+    avg_retail_daily_rate_2024: firstProperty.rate_avg_retail_daily_rate ? String(firstProperty.rate_avg_retail_daily_rate) : null,
+    google_rating: null,
+    google_user_rating_total: null,
   });
   
   const amenitiesSchema = generatePropertyAmenitiesSchema({
     property_name: firstProperty.property_name,
-    pool: firstProperty.pool,
-    hot_tub_sauna: firstProperty.hot_tub_sauna,
-    wifi: firstProperty.wifi,
-    pets: firstProperty.pets,
-    toilet: firstProperty.toilet,
-    shower: firstProperty.shower,
-    water: firstProperty.water,
-    trash: firstProperty.trash,
-    cooking_equipment: firstProperty.cooking_equipment,
-    picnic_table: firstProperty.picnic_table,
-    laundry: firstProperty.laundry,
-    campfires: firstProperty.campfires,
-    playground: firstProperty.playground,
-    sage_p_amenity_restaurant: firstProperty.sage_p_amenity_restaurant,
-    sage_p_amenity_waterfront: firstProperty.sage_p_amenity_waterfront,
+    pool: firstProperty.property_pool,
+    hot_tub_sauna: firstProperty.unit_hot_tub_or_sauna,
+    wifi: firstProperty.unit_wifi,
+    pets: firstProperty.unit_pets,
+    private_bathroom: firstProperty.unit_private_bathroom,
+    shower: firstProperty.unit_shower,
+    water: firstProperty.unit_water,
+    picnic_table: firstProperty.unit_picnic_table,
+    laundry: firstProperty.property_laundry,
+    unit_campfires: firstProperty.unit_campfires,
+    playground: firstProperty.property_playground,
+    sage_p_amenity_restaurant: firstProperty.property_restaurant,
+    sage_p_amenity_waterfront: firstProperty.property_waterfront,
   });
 
   return (

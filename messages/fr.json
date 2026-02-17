@@ -810,6 +810,15 @@
   "guides": {
     "title": "Guides d'Hospitalité de Plein Air",
     "subtitle": "Guides complets rédigés par des experts couvrant les études de faisabilité, les évaluations immobilières et l'industrie de l'hospitalité de plein air",
+    "metadata": {
+      "title": "Guides d'Hospitalité de Plein Air | Ressources Expertes | Sage Outdoor Advisory",
+      "description": "Guides experts sur les études de faisabilité, les évaluations immobilières et l'hospitalité de plein air. Lecture essentielle pour les développeurs et investisseurs de glamping, resorts pour camping-cars et terrains de camping.",
+      "keywords": "guides études de faisabilité, guides évaluation immobilière, guides glamping, guides resorts camping-cars, ressources hospitalité plein air, guides développement terrains de camping",
+      "openGraph": {
+        "title": "Guides d'Hospitalité de Plein Air | Sage Outdoor Advisory",
+        "description": "Guides complets couvrant les études de faisabilité, les évaluations immobilières et l'industrie de l'hospitalité de plein air"
+      }
+    },
     "categories": {
       "feasibility": {
         "name": "Études de Faisabilité",
@@ -2212,5 +2221,23 @@
         }
       ]
     }
+  },
+  "notFound": {
+    "title": "Page non trouvée",
+    "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "homeLink": "Retour à l'accueil",
+    "mapLink": "Explorer la carte de glamping"
+  },
+  "sitemap": {
+    "title": "Plan du site",
+    "metaTitle": "Plan du site | Ressources Sage Outdoor Advisory",
+    "metaDescription": "Parcourez toutes les pages et ressources de Sage Outdoor Advisory. Trouvez des guides, des termes du glossaire, la carte des propriétés de glamping et plus.",
+    "mainPages": "Pages principales",
+    "guides": "Guides",
+    "mapLocations": "Emplacements sur la carte",
+    "glossary": "Glossaire",
+    "exploreMap": "Explorer sur la carte",
+    "states": "États",
+    "cities": "Villes"
   }
 }

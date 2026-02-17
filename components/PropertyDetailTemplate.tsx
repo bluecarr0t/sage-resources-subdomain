@@ -187,22 +187,20 @@ export default function PropertyDetailTemplate({
     )
   ).sort();
 
-  // Collect all amenities from database columns ONLY (from toilet to water_hookup)
+  // Collect all amenities from database columns ONLY
   // Do NOT use Google Places API for amenities - only use all_glamping_properties columns
   const amenities = {
-    toilet: properties.some(p => hasAmenity(p.toilet)),
-    hotTub: properties.some(p => hasAmenity(p.hot_tub_sauna)),
-    pool: properties.some(p => hasAmenity(p.pool)),
-    pets: properties.some(p => hasAmenity(p.pets)),
-    water: properties.some(p => hasAmenity(p.water)),
-    shower: properties.some(p => hasAmenity(p.shower)),
-    trash: properties.some(p => hasAmenity(p.trash)),
-    cooking: properties.some(p => hasAmenity(p.cooking_equipment)),
-    picnicTable: properties.some(p => hasAmenity(p.picnic_table)),
-    wifi: properties.some(p => hasAmenity(p.wifi)),
-    laundry: properties.some(p => hasAmenity(p.laundry)),
-    campfires: properties.some(p => hasAmenity(p.campfires)),
-    playground: properties.some(p => hasAmenity(p.playground)),
+    privateBathroom: properties.some(p => hasAmenity(p.unit_private_bathroom)),
+    hotTub: properties.some(p => hasAmenity(p.unit_hot_tub_or_sauna)),
+    pool: properties.some(p => hasAmenity(p.property_pool)),
+    pets: properties.some(p => hasAmenity(p.unit_pets)),
+    water: properties.some(p => hasAmenity(p.unit_water)),
+    shower: properties.some(p => hasAmenity(p.unit_shower)),
+    picnicTable: properties.some(p => hasAmenity(p.unit_picnic_table)),
+    wifi: properties.some(p => hasAmenity(p.unit_wifi)),
+    laundry: properties.some(p => hasAmenity(p.property_laundry)),
+    campfires: properties.some(p => hasAmenity(p.unit_campfires)),
+    playground: properties.some(p => hasAmenity(p.property_playground)),
     rvVehicleLength: properties.some(p => hasAmenity(p.rv_vehicle_length)),
     rvParking: properties.some(p => hasAmenity(p.rv_parking)),
     rvAccommodatesSlideout: properties.some(p => hasAmenity(p.rv_accommodates_slideout)),
@@ -213,12 +211,12 @@ export default function PropertyDetailTemplate({
     rvVehiclesClassB: properties.some(p => hasAmenity(p.rv_vehicles_class_b_rvs)),
     rvVehiclesClassC: properties.some(p => hasAmenity(p.rv_vehicles_class_c_rvs)),
     rvVehiclesToyHauler: properties.some(p => hasAmenity(p.rv_vehicles_toy_hauler)),
-    electricity: properties.some(p => hasAmenity(p.electricity)),
-    charcoalGrill: properties.some(p => hasAmenity(p.charcoal_grill)),
-    sewerHookUp: properties.some(p => hasAmenity(p.sewer_hook_up)),
-    electricalHookUp: properties.some(p => hasAmenity(p.electrical_hook_up)),
-    generatorsAllowed: properties.some(p => hasAmenity(p.generators_allowed)),
-    waterHookup: properties.some(p => hasAmenity(p.water_hookup)),
+    electricity: properties.some(p => hasAmenity(p.unit_electricity)),
+    charcoalGrill: properties.some(p => hasAmenity(p.unit_charcoal_grill)),
+    sewerHookUp: properties.some(p => hasAmenity(p.rv_sewer_hook_up)),
+    electricalHookUp: properties.some(p => hasAmenity(p.rv_electrical_hook_up)),
+    generatorsAllowed: properties.some(p => hasAmenity(p.rv_generators_allowed)),
+    waterHookup: properties.some(p => hasAmenity(p.rv_water_hookup)),
   };
   
   // Check if any amenities are present
@@ -415,9 +413,9 @@ export default function PropertyDetailTemplate({
                             <p className="text-sm text-gray-600 mb-2">Unit Type: {prop.unit_type}</p>
                           )}
                           {/* Rate Range - Hidden */}
-                          {false && prop.avg_retail_daily_rate_2024 && (
+                          {false && prop.rate_avg_retail_daily_rate && (
                             <p className="text-sm text-gray-700 mb-2">
-                              <span className="font-semibold">Avg Rate:</span> ${prop.avg_retail_daily_rate_2024}
+                              <span className="font-semibold">Avg Rate:</span> ${prop.rate_avg_retail_daily_rate}
                             </p>
                           )}
                           {propCoords && (
@@ -591,20 +589,13 @@ export default function PropertyDetailTemplate({
                     <span className="text-gray-700">Laundry</span>
                   </li>
                 )}
-                {amenities.cooking && (
+                {/* Cooking Equipment column removed in v4 */}
+                {amenities.privateBathroom && (
                   <li className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-gray-700">Cooking Equipment</span>
-                  </li>
-                )}
-                {amenities.toilet && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Restrooms</span>
+                    <span className="text-gray-700">Private Bathroom</span>
                   </li>
                 )}
                 {amenities.water && (
@@ -615,14 +606,7 @@ export default function PropertyDetailTemplate({
                     <span className="text-gray-700">Water Access</span>
                   </li>
                 )}
-                {amenities.trash && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Trash Service</span>
-                  </li>
-                )}
+                {/* Trash Service column removed in v4 */}
                 {amenities.picnicTable && (
                   <li className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">

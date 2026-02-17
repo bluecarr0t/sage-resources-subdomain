@@ -12,6 +12,8 @@ import {
   generateMapWebApplicationSchema,
   generateMapBreadcrumbSchema,
   generateDatasetSchema,
+  generateMapFAQSchema,
+  generateTouristAttractionSchema,
 } from '@/lib/schema';
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
@@ -41,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const pathname = `/${locale}/map`;
   const url = `${baseUrl}${pathname}`;
-  const imageUrl = `${baseUrl}/og-map-image.jpg`;
+  const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
   return {
     title: t('title'),
@@ -112,7 +114,8 @@ async function getPropertyStatistics() {
       .from('all_glamping_properties')
       .select('property_name, state, country')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_closed', 'Yes');
+      .neq('is_closed', 'Yes')
+      .eq('research_status', 'published');
 
     if (error) {
       console.error('Error fetching property count:', error);
@@ -176,14 +179,36 @@ export default async function MapPage({ params }: PageProps) {
 
   // Generate structured data
   const organizationSchema = generateOrganizationSchema();
-  const mapSchema = generateMapSchema();
-  const itemListSchema = generateMapItemListSchema(stats.uniqueProperties);
-  const webApplicationSchema = generateMapWebApplicationSchema();
-  const breadcrumbSchema = generateMapBreadcrumbSchema();
+  const mapSchema = generateMapSchema(locale);
+  const itemListSchema = generateMapItemListSchema(stats.uniqueProperties, locale);
+  const webApplicationSchema = generateMapWebApplicationSchema(locale);
+  const breadcrumbSchema = generateMapBreadcrumbSchema(locale);
   const datasetSchema = generateDatasetSchema(
     stats.uniqueProperties,
-    { states: stats.states, countries: stats.countries, provinces: stats.provinces }
+    { states: stats.states, countries: stats.countries, provinces: stats.provinces },
+    locale
   );
+  const faqSchema = generateMapFAQSchema(stats.uniqueProperties);
+  
+  // Optionally fetch national parks for TouristAttraction schema
+  // Limit to top 10 to avoid payload size issues
+  let touristAttractionSchemas: any[] = [];
+  try {
+    const supabase = createServerClient();
+    const { data: parks } = await supabase
+      .from('national-parks')
+      .select('*')
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
+      .limit(10);
+    
+    if (parks && parks.length > 0) {
+      touristAttractionSchemas = generateTouristAttractionSchema(parks);
+    }
+  } catch (error) {
+    // Silently fail - tourist attraction schema is optional
+    console.error('Error fetching parks for schema:', error);
+  }
 
   return (
     <>
@@ -215,6 +240,17 @@ export default async function MapPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      {touristAttractionSchemas.map((schema, index) => (
+        <script
+          key={`tourist-attraction-${index}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
 
       <GoogleMapsProvider>
         <MapProvider>

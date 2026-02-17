@@ -1,72 +1,109 @@
 /**
- * Type definitions for the sage table from Supabase
+ * Type definitions for the all_glamping_properties table from Supabase
+ * Updated to match v4 column rename/reorder (unit_/property_/activities_/setting_ prefixes)
  */
 export interface SageProperty {
+  // CORE IDENTITY
   id: number;
-  duplicate_note: string | null;
-  u_source: string | null;
+  property_name: string | null;
+  site_name: string | null;
+  slug: string | null;
+  property_type: string | null;
+  research_status: string | null;
+  is_glamping_property: string | null;
+  is_closed: string | null;
+
+  // SOURCE & TRACKING
   source: string | null;
+  discovery_source: string | null;
   date_added: string | null;
   date_updated: string | null;
-  property_name: string | null;
-  slug: string | null;
-  site_name: string | null;
-  unit_type: string | null;
-  property_type: string | null;
-  property_total_sites: string | null;
-  quantity_of_units: string | null;
-  unit_capacity: string | null;
-  year_site_opened: string | null;
-  operating_season_months: string | null;
-  num_locations: string | null;
+
+  // LOCATION
   address: string | null;
   city: string | null;
   state: string | null;
   zip_code: string | null;
   country: string | null;
-  occupancy_rate_2024: string | null;
-  avg_retail_daily_rate_2024: string | null;
-  high_rate_2024: string | null;
-  low_rate_2024: string | null;
-  retail_daily_rate_fees_2024: string | null;
-  revpar_2024: string | null;
-  occupancy_rate_2025: string | null;
-  retail_daily_rate_ytd: string | null;
-  retail_daily_rate_fees_ytd: string | null;
-  high_rate_2025: string | null;
-  low_rate_2025: string | null;
-  revpar_2025: string | null;
-  avg_rate_next_12_months: string | null;
-  high_rate_next_12_months: string | null;
-  low_rate_next_12_months: string | null;
-  winter_weekday: string | null;
-  winter_weekend: string | null;
-  spring_weekday: string | null;
-  spring_weekend: string | null;
-  summer_weekday: string | null;
-  summer_weekend: string | null;
-  fall_weekday: string | null;
-  fall_weekend: string | null;
+  lat: string | number | null;
+  lon: string | number | null;
+
+  // OPERATIONAL
+  property_total_sites: string | number | null;
+  quantity_of_units: string | number | null;
+  year_site_opened: string | number | null;
+  operating_season_months: string | null;
+  number_of_locations: string | number | null;
+
+  // UNIT DETAILS (unit_ group)
+  unit_type: string | null;
+  unit_capacity: string | null;
+  unit_sq_ft: string | number | null;
+  unit_description: string | null;
+  unit_bed: string | null;
+  unit_shower: string | null;
+  unit_water: string | null;
+  unit_electricity: string | null;
+  unit_picnic_table: string | null;
+  unit_wifi: string | null;
+  unit_pets: string | null;
+  unit_private_bathroom: string | null;
+  unit_full_kitchen: string | null;
+  unit_kitchenette: string | null;
+  unit_ada_accessibility: string | null;
+  unit_patio: string | null;
+  unit_air_conditioning: string | null;
+  unit_gas_fireplace: string | null;
+  unit_hot_tub_or_sauna: string | null;
+  unit_hot_tub: string | null;
+  unit_sauna: string | null;
+  unit_cable: string | null;
+  rate_unit_rates_by_year: Record<string, unknown> | null;
+
+  // PRICING
+  rate_avg_retail_daily_rate: string | number | null;
+  rate_winter_weekday: string | number | null;
+  rate_winter_weekend: string | number | null;
+  rate_spring_weekday: string | number | null;
+  rate_spring_weekend: string | number | null;
+  rate_summer_weekday: string | number | null;
+  rate_summer_weekend: string | number | null;
+  rate_fall_weekday: string | number | null;
+  rate_fall_weekend: string | number | null;
+  rate_category: string | null;
+
+  // PROPERTY AMENITIES (property_ group)
+  property_laundry: string | null;
+  property_playground: string | null;
+  property_pool: string | null;
+  property_food_on_site: string | null;
+  property_sauna: string | null;
+  property_hot_tub: string | null;
+  property_restaurant: string | null;
+  property_dog_park: string | null;
+  property_clubhouse: string | null;
+  property_alcohol_available: string | null;
+  property_golf_cart_rental: string | null;
+  property_waterpark: string | null;
+  property_general_store: string | null;
+  property_waterfront: string | null;
+  property_extended_stay: string | null;
+  property_family_friendly: string | null;
+  property_remote_work_friendly: string | null;
+  property_fitness_room: string | null;
+  property_propane_refilling_station: string | null;
+
+  // CONTACT & INFO
   url: string | null;
+  phone_number: string | null;
   description: string | null;
   minimum_nights: string | null;
-  getting_there: string | null;
-  phone_number: string | null;
-  lon: string | null;
-  lat: string | null;
-  toilet: string | null;
-  hot_tub_sauna: string | null;
-  pool: string | null;
-  pets: string | null;
-  water: string | null;
-  shower: string | null;
-  trash: string | null;
-  cooking_equipment: string | null;
-  picnic_table: string | null;
-  wifi: string | null;
-  laundry: string | null;
-  campfires: string | null;
-  playground: string | null;
+
+  // OTHER AMENITIES
+  unit_campfires: string | null;
+  unit_charcoal_grill: string | null;
+
+  // RV-SPECIFIC (rv_ group)
   rv_vehicle_length: string | null;
   rv_parking: string | null;
   rv_accommodates_slideout: string | null;
@@ -77,82 +114,79 @@ export interface SageProperty {
   rv_vehicles_class_b_rvs: string | null;
   rv_vehicles_class_c_rvs: string | null;
   rv_vehicles_toy_hauler: string | null;
-  fishing: string | null;
-  surfing: string | null;
-  horseback_riding: string | null;
-  paddling: string | null;
-  climbing: string | null;
-  off_roading_ohv: string | null;
-  boating: string | null;
-  swimming: string | null;
-  wind_sports: string | null;
-  snow_sports: string | null;
-  whitewater_paddling: string | null;
-  fall_fun: string | null;
-  hiking: string | null;
-  wildlife_watching: string | null;
-  biking: string | null;
-  ranch: string | null;
-  beach: string | null;
-  coastal: string | null;
-  suburban: string | null;
-  forest: string | null;
-  field: string | null;
-  wetlands: string | null;
-  hot_spring: string | null;
-  desert: string | null;
-  canyon: string | null;
-  waterfall: string | null;
-  swimming_hole: string | null;
-  lake: string | null;
-  cave: string | null;
-  redwoods: string | null;
-  farm: string | null;
-  river_stream_creek: string | null;
-  mountainous: string | null;
-  sage_p_amenity_food_on_site: string | null;
-  sage_p_amenity_waterfront: string | null;
-  sage_p_amenity_restaurant: string | null;
-  sage_s_amenity_private_bathroom: string | null;
-  dog_park: string | null;
-  clubhouse: string | null;
-  canoeing_kayaking: string | null;
-  alcohol_available: string | null;
-  golf_cart_rental: string | null;
-  private_bathroom: string | null;
-  waterpark: string | null;
-  kitchen: string | null;
-  patio: string | null;
-  electricity: string | null;
-  general_store: string | null;
-  cable: string | null;
-  charcoal_grill: string | null;
-  sewer_hook_up: string | null;
-  electrical_hook_up: string | null;
-  generators_allowed: string | null;
-  water_hookup: string | null;
-  data_date: string | null;
+  rv_sewer_hook_up: string | null;
+  rv_electrical_hook_up: string | null;
+  rv_generators_allowed: string | null;
+  rv_water_hookup: string | null;
+
+  // ACTIVITIES (activities_ group)
+  activities_fishing: string | null;
+  activities_surfing: string | null;
+  activities_horseback_riding: string | null;
+  activities_paddling: string | null;
+  activities_climbing: string | null;
+  activities_off_roading_ohv: string | null;
+  activities_boating: string | null;
+  activities_swimming: string | null;
+  activities_wind_sports: string | null;
+  activities_snow_sports: string | null;
+  activities_whitewater_paddling: string | null;
+  activities_fall_fun: string | null;
+  activities_hiking: string | null;
+  activities_wildlife_watching: string | null;
+  activities_biking: string | null;
+  activities_canoeing_kayaking: string | null;
+  activities_hunting: string | null;
+  activities_golf: string | null;
+  activities_backpacking: string | null;
+  activities_historic_sightseeing: string | null;
+  activities_scenic_drives: string | null;
+  activities_stargazing: string | null;
+
+  // SETTINGS (setting_ group)
+  setting_ranch: string | null;
+  setting_beach: string | null;
+  setting_coastal: string | null;
+  setting_suburban: string | null;
+  setting_forest: string | null;
+  setting_field: string | null;
+  setting_wetlands: string | null;
+  setting_hot_spring: string | null;
+  setting_desert: string | null;
+  setting_canyon: string | null;
+  setting_waterfall: string | null;
+  setting_swimming_hole: string | null;
+  setting_lake: string | null;
+  setting_cave: string | null;
+  setting_redwoods: string | null;
+  setting_farm: string | null;
+  river_stream_or_creek: string | null;
+  setting_mountainous: string | null;
+
+  // SYSTEM METADATA
+  quality_score: number | null;
   created_at: string | null;
   updated_at: string | null;
-  // Google Places API fields
-  google_place_id: string | null;
-  google_phone_number: string | null;
-  google_website_uri: string | null;
-  google_description: string | null;
-  google_dine_in: boolean | null;
-  google_takeout: boolean | null;
-  google_delivery: boolean | null;
-  google_serves_breakfast: boolean | null;
-  google_serves_lunch: boolean | null;
-  google_serves_dinner: boolean | null;
-  google_serves_brunch: boolean | null;
-  google_outdoor_seating: boolean | null;
-  google_live_music: boolean | null;
-  google_menu_uri: string | null;
-  google_place_types: string[] | null;
-  google_primary_type: string | null;
-  google_primary_type_display_name: string | null;
-  google_photos: Array<{
+
+  // Google Places API fields (from google_places_data table, joined or fetched separately)
+  google_place_id?: string | null;
+  google_phone_number?: string | null;
+  google_website_uri?: string | null;
+  google_description?: string | null;
+  google_dine_in?: boolean | null;
+  google_takeout?: boolean | null;
+  google_delivery?: boolean | null;
+  google_serves_breakfast?: boolean | null;
+  google_serves_lunch?: boolean | null;
+  google_serves_dinner?: boolean | null;
+  google_serves_brunch?: boolean | null;
+  google_outdoor_seating?: boolean | null;
+  google_live_music?: boolean | null;
+  google_menu_uri?: string | null;
+  google_place_types?: string[] | null;
+  google_primary_type?: string | null;
+  google_primary_type_display_name?: string | null;
+  google_photos?: Array<{
     name: string;
     widthPx?: number;
     heightPx?: number;
@@ -162,14 +196,13 @@ export interface SageProperty {
       photoUri?: string;
     }>;
   }> | null;
-  google_icon_uri: string | null;
-  google_icon_background_color: string | null;
-  google_reservable: boolean | null;
-  google_rating: number | null;
-  google_user_rating_total: number | null;
-  // Additional Google Places API fields
-  google_business_status: string | null;
-  google_opening_hours: {
+  google_icon_uri?: string | null;
+  google_icon_background_color?: string | null;
+  google_reservable?: boolean | null;
+  google_rating?: number | null;
+  google_user_rating_total?: number | null;
+  google_business_status?: string | null;
+  google_opening_hours?: {
     openNow?: boolean;
     weekdayDescriptions?: string[];
     periods?: Array<{
@@ -177,7 +210,7 @@ export interface SageProperty {
       close?: { day: number; hour: number; minute: number };
     }>;
   } | null;
-  google_current_opening_hours: {
+  google_current_opening_hours?: {
     openNow?: boolean;
     weekdayDescriptions?: string[];
     periods?: Array<{
@@ -185,7 +218,7 @@ export interface SageProperty {
       close?: { day: number; hour: number; minute: number };
     }>;
   } | null;
-  google_parking_options: {
+  google_parking_options?: {
     parkingLot?: boolean;
     parkingValet?: boolean;
     parkingGarage?: boolean;
@@ -193,20 +226,18 @@ export interface SageProperty {
     parkingFree?: boolean;
     parkingPaid?: boolean;
   } | null;
-  google_price_level: number | null; // 0-4: FREE, INEXPENSIVE, MODERATE, EXPENSIVE, VERY_EXPENSIVE
-  google_payment_options: {
+  google_price_level?: number | null;
+  google_payment_options?: {
     acceptsCreditCards?: boolean;
     acceptsDebitCards?: boolean;
     acceptsCashOnly?: boolean;
     acceptsNfc?: boolean;
   } | null;
-  google_wheelchair_accessible_parking: boolean | null;
-  google_wheelchair_accessible_entrance: boolean | null;
-  google_wheelchair_accessible_restroom: boolean | null;
-  google_wheelchair_accessible_seating: boolean | null;
-  google_allows_dogs: boolean | null;
-  // Quality score
-  quality_score: number | null;
+  google_wheelchair_accessible_parking?: boolean | null;
+  google_wheelchair_accessible_entrance?: boolean | null;
+  google_wheelchair_accessible_restroom?: boolean | null;
+  google_wheelchair_accessible_seating?: boolean | null;
+  google_allows_dogs?: boolean | null;
 }
 
 /**
@@ -218,11 +249,9 @@ export function parseCoordinates(
 ): [number, number] | null {
   if (lat === null || lat === undefined || lon === null || lon === undefined) return null;
 
-  // Handle both string and number types
   const latitude = typeof lat === 'number' ? lat : parseFloat(String(lat));
   const longitude = typeof lon === 'number' ? lon : parseFloat(String(lon));
 
-  // Validate coordinates
   if (isNaN(latitude) || isNaN(longitude)) return null;
   if (latitude < -90 || latitude > 90) return null;
   if (longitude < -180 || longitude > 180) return null;
@@ -232,19 +261,10 @@ export function parseCoordinates(
 
 /**
  * Check if coordinates are within USA or Canada bounds
- * USA (mainland): approximately 24°N to 49°N, -125°W to -66°W
- * Alaska: 51°N to 71°N, -179°W to -130°W
- * Hawaii: 18°N to 22°N, -160°W to -154°W
- * Canada: approximately 41°N to 83°N, -141°W to -52°W (mainland)
- * Combined bounds: 18°N to 85°N, -179°W to -50°W (includes Alaska and Hawaii)
  */
 export function isInUSAOrCanada(lat: number, lon: number): boolean {
-  // Latitude bounds (18°N to 85°N) - includes Hawaii (starts at ~18°N)
   if (lat < 18 || lat > 85) return false;
-  
-  // Longitude bounds (-179°W to -50°W) - includes all of Alaska (extends to -179°W)
   if (lon < -179 || lon > -50) return false;
-  
   return true;
 }
 
@@ -258,12 +278,8 @@ export function filterPropertiesWithCoordinates(
     .map((prop) => {
       const coords = parseCoordinates(prop.lat, prop.lon);
       if (!coords) return null;
-      
-      // Filter to only USA and Canada
       if (!isInUSAOrCanada(coords[0], coords[1])) return null;
-      
       return { ...prop, coordinates: coords };
     })
     .filter((prop): prop is SageProperty & { coordinates: [number, number] } => prop !== null);
 }
-

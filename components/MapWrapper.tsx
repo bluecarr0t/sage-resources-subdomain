@@ -56,10 +56,10 @@ export default function MapWrapper({
                   <span className="font-semibold">Unit Type:</span> {property.unit_type}
                 </p>
               )}
-              {property.avg_retail_daily_rate_2024 && (
+              {property.rate_avg_retail_daily_rate && (
                 <p className="text-sm text-gray-700 mb-2">
-                  <span className="font-semibold">Avg Rate (2024):</span> $
-                  {property.avg_retail_daily_rate_2024}
+                  <span className="font-semibold">Avg Rate:</span> $
+                  {property.rate_avg_retail_daily_rate}
                 </p>
               )}
               {(property.google_rating || property.google_user_rating_total) && (

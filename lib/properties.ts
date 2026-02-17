@@ -299,7 +299,7 @@ export async function getNearbyProperties(
       // Exclude closed properties
       const { data: properties, error } = await supabase
         .from('all_glamping_properties')
-        .select('slug, property_name, lat, lon, city, state, country, unit_type, rate_range, website, phone_number, image_url')
+        .select('slug, property_name, lat, lon, city, state, country, unit_type, rate_category, url, phone_number')
         .not('lat', 'is', null)
         .not('lon', 'is', null)
         .not('slug', 'is', null)

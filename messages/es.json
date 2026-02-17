@@ -810,6 +810,15 @@
   "guides": {
     "title": "Guías de Hospitalidad al Aire Libre",
     "subtitle": "Guías completas escritas por expertos que cubren estudios de viabilidad, valoraciones de propiedades y la industria de hospitalidad al aire libre",
+    "metadata": {
+      "title": "Guías de Hospitalidad al Aire Libre | Recursos Expertos | Sage Outdoor Advisory",
+      "description": "Guías expertas sobre estudios de viabilidad, valoraciones de propiedades y hospitalidad al aire libre. Lectura esencial para desarrolladores e inversores de glamping, resorts para autocaravanas y campamentos.",
+      "keywords": "guías de estudios de viabilidad, guías de valoración de propiedades, guías de glamping, guías de resorts para autocaravanas, recursos de hospitalidad al aire libre, guías de desarrollo de campamentos",
+      "openGraph": {
+        "title": "Guías de Hospitalidad al Aire Libre | Sage Outdoor Advisory",
+        "description": "Guías completas que cubren estudios de viabilidad, valoraciones de propiedades y la industria de hospitalidad al aire libre"
+      }
+    },
     "categories": {
       "feasibility": {
         "name": "Estudios de Viabilidad",
@@ -1956,5 +1965,23 @@
         }
       ]
     }
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "description": "La página que buscas no existe o ha sido movida.",
+    "homeLink": "Volver al inicio",
+    "mapLink": "Explorar mapa de glamping"
+  },
+  "sitemap": {
+    "title": "Mapa del sitio",
+    "metaTitle": "Mapa del sitio | Recursos Sage Outdoor Advisory",
+    "metaDescription": "Explore todas las páginas y recursos de Sage Outdoor Advisory. Encuentre guías, términos del glosario, mapa de propiedades de glamping y más.",
+    "mainPages": "Páginas principales",
+    "guides": "Guías",
+    "mapLocations": "Ubicaciones del mapa",
+    "glossary": "Glosario",
+    "exploreMap": "Explorar en el mapa",
+    "states": "Estados",
+    "cities": "Ciudades"
   }
 }

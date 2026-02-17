@@ -1,0 +1,551 @@
+[dotenv@17.2.3] injecting env (3) from .env.local -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+======================================================================
+Research Glamping Resorts in United Kingdom
+======================================================================
+Processing 18 search queries...
+
+
+[Search 1/18]
+🔍 Researching: "best glamping resorts UK 2024"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: The Yurt Retreat
+  ✓ NEW: Glampingly
+  ✓ NEW: The Treehouse at Harptree Court
+  ✓ NEW: The Dome Garden
+  ✓ NEW: Loch Ken Eco Bothies
+
+📊 From "best glamping resorts UK 2024": Found 5 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 2/18]
+🔍 Researching: "luxury glamping United Kingdom"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): The Yurt Retreat
+  ✗ SKIP (duplicate): Glampingly
+  ✓ NEW: Eco Retreats
+  ✗ SKIP (duplicate): The Treehouse at Harptree Court
+  ✓ NEW: Loch Tay Highland Lodges
+
+📊 From "luxury glamping United Kingdom": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 3/18]
+🔍 Researching: "glamping sites Cornwall UK"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: The Park at Mawgan Porth
+  ✓ NEW: Wildflower Wood Yurts
+  ✓ NEW: Cornish Tipi Holidays
+  ✓ NEW: Kudhva
+  ✓ NEW: YHA Eden Project
+
+📊 From "glamping sites Cornwall UK": Found 5 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 4/18]
+🔍 Researching: "glamping sites Lake District UK"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: The Quiet Site
+  ✓ NEW: Long Valley Yurts
+  ✓ NEW: Another Place, The Lake
+  ✓ NEW: Inside Out Camping
+  ✓ NEW: Glampotel Bracks Farm
+
+📊 From "glamping sites Lake District UK": Found 5 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 5/18]
+🔍 Researching: "glamping sites Cotswolds UK"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: The Fish Hotel
+  ✓ NEW: Campden Yurts
+  ✓ NEW: Cotswold Farm Park
+  ✓ NEW: The Wildings
+  ✓ NEW: Log House Holidays
+
+📊 From "glamping sites Cotswolds UK": Found 5 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 6/18]
+🔍 Researching: "glamping sites Scotland UK"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Ecocamp Glenshee
+  ✗ SKIP (duplicate): Loch Tay Highland Lodges
+  ✓ NEW: Harvest Moon Holidays
+  ✓ NEW: The Tree Howf
+
+📊 From "glamping sites Scotland UK": Found 3 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 7/18]
+🔍 Researching: "glamping sites Wales UK"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: Fforest Farm
+  ✓ NEW: Under the Oak Glamping
+  ✓ NEW: Glamping at Hollybush
+  ✓ NEW: Wild Wellingtons Glamping
+  ✓ NEW: Graig Wen
+
+📊 From "glamping sites Wales UK": Found 5 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 8/18]
+🔍 Researching: "glamping sites Yorkshire UK"
+
+✅ Found 4 properties for this search
+
+  ✓ NEW: Swinton Bivouac
+  ✓ NEW: Jollydays Glamping
+  ✓ NEW: Camp Kátur
+  ✓ NEW: Little Seed Field
+
+📊 From "glamping sites Yorkshire UK": Found 4 new properties out of 4 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 9/18]
+🔍 Researching: "glamping sites Devon UK"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: Longlands
+  ✓ NEW: Loveland Farm
+  ✓ NEW: Cuckoo Down Farm
+  ✓ NEW: Yurtcamp Devon
+  ✓ NEW: Hedgerow Luxury Glamping
+
+📊 From "glamping sites Devon UK": Found 5 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 10/18]
+🔍 Researching: "glamping sites Norfolk UK"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: Wild Luxury
+  ✓ NEW: Kelling Heath Holiday Park
+  ✓ NEW: Norfolk Coast B&B Cottages & Camping
+  ✓ NEW: West Lexham
+  ✓ NEW: Happy Valley Norfolk
+
+📊 From "glamping sites Norfolk UK": Found 5 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 11/18]
+🔍 Researching: "treehouse glamping UK"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): The Treehouse at Harptree Court
+  ✓ NEW: Living Room Treehouses
+  ✓ NEW: Treehouse Retreats
+  ✓ NEW: The Treehouse at Lanrick
+  ✓ NEW: Canopy & Stars at Crane 29
+
+📊 From "treehouse glamping UK": Found 4 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 12/18]
+🔍 Researching: "yurt glamping UK"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): The Yurt Retreat
+  ✗ SKIP (duplicate): Eco Retreats
+  ✓ NEW: Cornish Yurt Holidays
+  ✗ SKIP (duplicate): Camp Kátur
+  ✓ NEW: Forest Garden Shovelstrode
+
+📊 From "yurt glamping UK": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 13/18]
+🔍 Researching: "safari tent glamping UK"
+
+✅ Found 5 properties for this search
+
+  ✓ NEW: Longlands Glamping
+  ✗ SKIP (duplicate): Camp Kátur
+  ✓ NEW: Safari Cornwall
+  ✓ NEW: Glampotel Dundas Castle
+  ✗ SKIP (duplicate): Harvest Moon Holidays
+
+📊 From "safari tent glamping UK": Found 3 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 14/18]
+🔍 Researching: "luxury camping UK"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): The Yurt Retreat
+  ✓ NEW: Glamping at Long Valley Yurts
+  ✗ SKIP (duplicate): Canopy & Stars at Crane 29
+  ✓ NEW: The Secret Yurts
+  ✗ SKIP (duplicate): Loch Ken Eco Bothies
+
+📊 From "luxury camping UK": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 15/18]
+🔍 Researching: "glamping retreats UK"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): The Yurt Retreat
+  ✗ SKIP (duplicate): Canopy & Stars at Crane 29
+  ✓ NEW: Glamping at the Fir Hill
+  ✗ SKIP (duplicate): Loch Tay Highland Lodges
+  ✓ NEW: Fforest
+
+📊 From "glamping retreats UK": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 16/18]
+🔍 Researching: "eco glamping UK"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): The Yurt Retreat
+  ✗ SKIP (duplicate): Eco Retreats
+  ✗ SKIP (duplicate): Camp Kátur
+  ✗ SKIP (duplicate): Fforest
+  ✗ SKIP (duplicate): The Treehouse at Harptree Court
+
+📊 From "eco glamping UK": Found 0 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 17/18]
+🔍 Researching: "glamping near London UK"
+
+✅ Found 5 properties for this search
+
+  ✗ SKIP (duplicate): Canopy & Stars at Crane 29
+  ✗ SKIP (duplicate): The Yurt Retreat
+  ✓ NEW: Glamping at Longlands
+  ✗ SKIP (duplicate): The Treehouse at Harptree Court
+  ✓ NEW: The Secret Campsite
+
+📊 From "glamping near London UK": Found 2 new properties out of 5 total
+
+⏳ Waiting 3 seconds before next search...
+
+
+[Search 18/18]
+🔍 Researching: "glamping near Edinburgh UK"
+
+✅ Found 4 properties for this search
+
+  ✗ SKIP (duplicate): Harvest Moon Holidays
+  ✗ SKIP (duplicate): Glampotel Dundas Castle
+  ✓ NEW: Bamff Ecotourism
+  ✓ NEW: Roulotte Retreat
+
+📊 From "glamping near Edinburgh UK": Found 2 new properties out of 4 total
+
+
+======================================================================
+Found 61 total unique properties across all searches
+======================================================================
+
+🔍 Enriching property data with OpenAI...
+
+[1/61] The Yurt Retreat
+  🤖 Enriching data for: The Yurt Retreat
+    ✅ Enriched with 94 fields
+
+[2/61] Glampingly
+  🤖 Enriching data for: Glampingly
+    ✅ Enriched with 98 fields
+
+[3/61] The Treehouse at Harptree Court
+  🤖 Enriching data for: The Treehouse at Harptree Court
+    ✅ Enriched with 91 fields
+
+[4/61] The Dome Garden
+  🤖 Enriching data for: The Dome Garden
+    ✅ Enriched with 90 fields
+
+[5/61] Loch Ken Eco Bothies
+  🤖 Enriching data for: Loch Ken Eco Bothies
+    ✅ Enriched with 81 fields
+
+[6/61] Eco Retreats
+  🤖 Enriching data for: Eco Retreats
+    ✅ Enriched with 94 fields
+
+[7/61] Loch Tay Highland Lodges
+  🤖 Enriching data for: Loch Tay Highland Lodges
+    ✅ Enriched with 98 fields
+
+[8/61] The Park at Mawgan Porth
+  🤖 Enriching data for: The Park at Mawgan Porth
+    ✅ Enriched with 98 fields
+
+[9/61] Wildflower Wood Yurts
+  🤖 Enriching data for: Wildflower Wood Yurts
+    ✅ Enriched with 81 fields
+
+[10/61] Cornish Tipi Holidays
+  🤖 Enriching data for: Cornish Tipi Holidays
+    ✅ Enriched with 95 fields
+
+[11/61] Kudhva
+  🤖 Enriching data for: Kudhva
+    ✅ Enriched with 83 fields
+
+[12/61] YHA Eden Project
+  🤖 Enriching data for: YHA Eden Project
+    ✅ Enriched with 98 fields
+
+[13/61] The Quiet Site
+  🤖 Enriching data for: The Quiet Site
+    ✅ Enriched with 92 fields
+
+[14/61] Long Valley Yurts
+  🤖 Enriching data for: Long Valley Yurts
+    ✅ Enriched with 81 fields
+
+[15/61] Another Place, The Lake
+  🤖 Enriching data for: Another Place, The Lake
+    ✅ Enriched with 98 fields
+
+[16/61] Inside Out Camping
+  🤖 Enriching data for: Inside Out Camping
+    ✅ Enriched with 98 fields
+
+[17/61] Glampotel Bracks Farm
+  🤖 Enriching data for: Glampotel Bracks Farm
+    ✅ Enriched with 81 fields
+
+[18/61] The Fish Hotel
+  🤖 Enriching data for: The Fish Hotel
+    ✅ Enriched with 92 fields
+
+[19/61] Campden Yurts
+  🤖 Enriching data for: Campden Yurts
+    ✅ Enriched with 80 fields
+
+[20/61] Cotswold Farm Park
+  🤖 Enriching data for: Cotswold Farm Park
+    ✅ Enriched with 91 fields
+
+[21/61] The Wildings
+  🤖 Enriching data for: The Wildings
+    ✅ Enriched with 92 fields
+
+[22/61] Log House Holidays
+  🤖 Enriching data for: Log House Holidays
+    ✅ Enriched with 98 fields
+
+[23/61] Ecocamp Glenshee
+  🤖 Enriching data for: Ecocamp Glenshee
+    ✅ Enriched with 81 fields
+
+[24/61] Harvest Moon Holidays
+  🤖 Enriching data for: Harvest Moon Holidays
+    ✅ Enriched with 98 fields
+
+[25/61] The Tree Howf
+  🤖 Enriching data for: The Tree Howf
+    ✅ Enriched with 98 fields
+
+[26/61] Fforest Farm
+  🤖 Enriching data for: Fforest Farm
+    ✅ Enriched with 98 fields
+
+[27/61] Under the Oak Glamping
+  🤖 Enriching data for: Under the Oak Glamping
+    ✅ Enriched with 90 fields
+
+[28/61] Glamping at Hollybush
+  🤖 Enriching data for: Glamping at Hollybush
+    ✅ Enriched with 90 fields
+
+[29/61] Wild Wellingtons Glamping
+  🤖 Enriching data for: Wild Wellingtons Glamping
+    ✅ Enriched with 98 fields
+
+[30/61] Graig Wen
+  🤖 Enriching data for: Graig Wen
+    ✅ Enriched with 91 fields
+
+[31/61] Swinton Bivouac
+  🤖 Enriching data for: Swinton Bivouac
+    ✅ Enriched with 98 fields
+
+[32/61] Jollydays Glamping
+  🤖 Enriching data for: Jollydays Glamping
+    ✅ Enriched with 97 fields
+
+[33/61] Camp Kátur
+  🤖 Enriching data for: Camp Kátur
+    ✅ Enriched with 98 fields
+
+[34/61] Little Seed Field
+  🤖 Enriching data for: Little Seed Field
+    ✅ Enriched with 81 fields
+
+[35/61] Longlands
+  🤖 Enriching data for: Longlands
+    ✅ Enriched with 98 fields
+
+[36/61] Loveland Farm
+  🤖 Enriching data for: Loveland Farm
+    ✅ Enriched with 82 fields
+
+[37/61] Cuckoo Down Farm
+  🤖 Enriching data for: Cuckoo Down Farm
+    ✅ Enriched with 82 fields
+
+[38/61] Yurtcamp Devon
+  🤖 Enriching data for: Yurtcamp Devon
+    ✅ Enriched with 98 fields
+
+[39/61] Hedgerow Luxury Glamping
+  🤖 Enriching data for: Hedgerow Luxury Glamping
+    ✅ Enriched with 98 fields
+
+[40/61] Wild Luxury
+  🤖 Enriching data for: Wild Luxury
+    ✅ Enriched with 98 fields
+
+[41/61] Kelling Heath Holiday Park
+  🤖 Enriching data for: Kelling Heath Holiday Park
+    ✅ Enriched with 97 fields
+
+[42/61] Norfolk Coast B&B Cottages & Camping
+  🤖 Enriching data for: Norfolk Coast B&B Cottages & Camping
+    ✅ Enriched with 30 fields
+
+[43/61] West Lexham
+  🤖 Enriching data for: West Lexham
+    ✅ Enriched with 96 fields
+
+[44/61] Happy Valley Norfolk
+  🤖 Enriching data for: Happy Valley Norfolk
+    ✅ Enriched with 90 fields
+
+[45/61] Living Room Treehouses
+  🤖 Enriching data for: Living Room Treehouses
+    ✅ Enriched with 85 fields
+
+[46/61] Treehouse Retreats
+  🤖 Enriching data for: Treehouse Retreats
+    ✅ Enriched with 80 fields
+
+[47/61] The Treehouse at Lanrick
+  🤖 Enriching data for: The Treehouse at Lanrick
+    ✅ Enriched with 95 fields
+
+[48/61] Canopy & Stars at Crane 29
+  🤖 Enriching data for: Canopy & Stars at Crane 29
+    ✅ Enriched with 81 fields
+
+[49/61] Cornish Yurt Holidays
+  🤖 Enriching data for: Cornish Yurt Holidays
+    ✅ Enriched with 92 fields
+
+[50/61] Forest Garden Shovelstrode
+  🤖 Enriching data for: Forest Garden Shovelstrode
+    ✅ Enriched with 38 fields
+
+[51/61] Longlands Glamping
+  🤖 Enriching data for: Longlands Glamping
+    ✅ Enriched with 88 fields
+
+[52/61] Safari Cornwall
+  🤖 Enriching data for: Safari Cornwall
+    ✅ Enriched with 90 fields
+
+[53/61] Glampotel Dundas Castle
+  🤖 Enriching data for: Glampotel Dundas Castle
+    ✅ Enriched with 82 fields
+
+[54/61] Glamping at Long Valley Yurts
+  🤖 Enriching data for: Glamping at Long Valley Yurts
+    ✅ Enriched with 98 fields
+
+[55/61] The Secret Yurts
+  🤖 Enriching data for: The Secret Yurts
+    ✅ Enriched with 80 fields
+
+[56/61] Glamping at the Fir Hill
+  🤖 Enriching data for: Glamping at the Fir Hill
+    ✅ Enriched with 98 fields
+
+[57/61] Fforest
+  🤖 Enriching data for: Fforest
+    ✅ Enriched with 98 fields
+
+[58/61] Glamping at Longlands
+  🤖 Enriching data for: Glamping at Longlands
+    ✅ Enriched with 98 fields
+
+[59/61] The Secret Campsite
+  🤖 Enriching data for: The Secret Campsite
+    ✅ Enriched with 94 fields
+
+[60/61] Bamff Ecotourism
+  🤖 Enriching data for: Bamff Ecotourism
+    ✅ Enriched with 82 fields
+
+[61/61] Roulotte Retreat
+  🤖 Enriching data for: Roulotte Retreat
+    ✅ Enriched with 86 fields
+
+
+📝 Writing 61 properties to CSV file...
+
+✅ Successfully wrote 61 properties to csv/glamping-properties/europe/uk-glamping-resorts.csv
+   File location: csv/glamping-properties/europe/uk-glamping-resorts.csv
+
+======================================================================
+✅ Process complete!
+   Total properties saved: 61
+   CSV file: csv/glamping-properties/europe/uk-glamping-resorts.csv
+======================================================================

@@ -215,7 +215,7 @@ export default function PropertyMap() {
               ${ratingHtml}
               ${property.property_type ? `<p style="font-size: 0.875rem; color: #374151; margin-bottom: 0.5rem;"><strong>Type:</strong> ${escapeHtml(property.property_type)}</p>` : ''}
               ${property.unit_type ? `<p style="font-size: 0.875rem; color: #374151; margin-bottom: 0.5rem;"><strong>Unit Type:</strong> ${escapeHtml(property.unit_type)}</p>` : ''}
-              ${property.avg_retail_daily_rate_2024 ? `<p style="font-size: 0.875rem; color: #374151; margin-bottom: 0.5rem;"><strong>Avg Rate (2024):</strong> $${escapeHtml(property.avg_retail_daily_rate_2024)}</p>` : ''}
+              ${property.rate_avg_retail_daily_rate ? `<p style="font-size: 0.875rem; color: #374151; margin-bottom: 0.5rem;"><strong>Avg Rate:</strong> $${escapeHtml(String(property.rate_avg_retail_daily_rate))}</p>` : ''}
               ${property.url ? `<a href="${escapeHtml(property.url)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.875rem; color: #2563eb; text-decoration: underline;">Visit Website →</a>` : ''}
             </div>
           `;
