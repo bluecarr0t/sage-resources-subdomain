@@ -460,22 +460,10 @@ export default function PropertyDetailTemplate({
                     <dd className="text-gray-700">{unitTypes.join(', ')}</dd>
                   </div>
                 )}
-                {firstProperty.operating_season_months && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="font-semibold text-gray-900">Operating Season:</dt>
-                    <dd className="text-gray-700">{firstProperty.operating_season_months}</dd>
-                  </div>
-                )}
                 {firstProperty.year_site_opened && (
                   <div className="flex items-baseline gap-2">
                     <dt className="font-semibold text-gray-900">Year Opened:</dt>
                     <dd className="text-gray-700">{firstProperty.year_site_opened}</dd>
-                  </div>
-                )}
-                {firstProperty.property_total_sites && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="font-semibold text-gray-900">Total Sites:</dt>
-                    <dd className="text-gray-700">{firstProperty.property_total_sites}</dd>
                   </div>
                 )}
                 {firstProperty.minimum_nights && (
