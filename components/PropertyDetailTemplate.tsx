@@ -193,6 +193,7 @@ export default function PropertyDetailTemplate({
     privateBathroom: properties.some(p => hasAmenity(p.unit_private_bathroom)),
     hotTub: properties.some(p => hasAmenity(p.unit_hot_tub_or_sauna)),
     pool: properties.some(p => hasAmenity(p.property_pool)),
+    pickballCourts: properties.some(p => hasAmenity(p.property_pickball_courts)),
     pets: properties.some(p => hasAmenity(p.unit_pets)),
     water: properties.some(p => hasAmenity(p.unit_water)),
     shower: properties.some(p => hasAmenity(p.unit_shower)),
@@ -213,6 +214,9 @@ export default function PropertyDetailTemplate({
     rvVehiclesToyHauler: properties.some(p => hasAmenity(p.rv_vehicles_toy_hauler)),
     electricity: properties.some(p => hasAmenity(p.unit_electricity)),
     charcoalGrill: properties.some(p => hasAmenity(p.unit_charcoal_grill)),
+    miniFridge: properties.some(p => hasAmenity(p.unit_mini_fridge)),
+    bathtub: properties.some(p => hasAmenity(p.unit_bathtub)),
+    woodBurningStove: properties.some(p => hasAmenity(p.unit_wood_burning_stove)),
     sewerHookUp: properties.some(p => hasAmenity(p.rv_sewer_hook_up)),
     electricalHookUp: properties.some(p => hasAmenity(p.rv_electrical_hook_up)),
     generatorsAllowed: properties.some(p => hasAmenity(p.rv_generators_allowed)),
@@ -619,6 +623,14 @@ export default function PropertyDetailTemplate({
                     <span className="text-gray-700">Playground</span>
                   </li>
                 )}
+                {amenities.pickballCourts && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Pickleball Courts</span>
+                  </li>
+                )}
                 {amenities.electricity && (
                   <li className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -633,6 +645,30 @@ export default function PropertyDetailTemplate({
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     <span className="text-gray-700">Charcoal Grill</span>
+                  </li>
+                )}
+                {amenities.miniFridge && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Mini Fridge</span>
+                  </li>
+                )}
+                {amenities.bathtub && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Bathtub</span>
+                  </li>
+                )}
+                {amenities.woodBurningStove && (
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Wood Burning Stove</span>
                   </li>
                 )}
                 {amenities.sewerHookUp && (

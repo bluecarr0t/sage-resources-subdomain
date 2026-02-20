@@ -498,6 +498,103 @@ export async function getNearbyNationalParks(
 }
 
 /**
+ * Get glamping properties within a radius of a national park
+ * Uses bounding box to reduce dataset, then Haversine for precise filtering
+ */
+export async function getPropertiesNearNationalPark(
+  parkLat: number,
+  parkLon: number,
+  parkSlug: string,
+  radiusMiles: number = 75,
+  limit: number = 20
+): Promise<Array<SageProperty & { distance: number }>> {
+  const cacheKey = `props-near-park:${parkSlug}:${radiusMiles}:${limit}`;
+  const ttlSeconds = 86400 * 7; // 7 days
+
+  const cached = await getCache<Array<SageProperty & { distance: number }>>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const supabase = createServerClient();
+
+    // Bounding box: ~69 miles per degree lat; lon varies by latitude
+    const degPerMileLat = 1 / 69;
+    const degPerMileLon = 1 / (69 * Math.max(0.1, Math.cos((parkLat * Math.PI) / 180)));
+    const deltaLat = radiusMiles * degPerMileLat;
+    const deltaLon = radiusMiles * degPerMileLon;
+
+    const minLat = parkLat - deltaLat;
+    const maxLat = parkLat + deltaLat;
+    const minLon = parkLon - deltaLon;
+    const maxLon = parkLon + deltaLon;
+
+    const { data: properties, error } = await supabase
+      .from('all_glamping_properties')
+      .select('*')
+      .eq('is_glamping_property', 'Yes')
+      .neq('is_closed', 'Yes')
+      .eq('research_status', 'published')
+      .not('lat', 'is', null)
+      .not('lon', 'is', null)
+      .not('property_name', 'is', null)
+      .gte('lat', minLat)
+      .lte('lat', maxLat)
+      .gte('lon', minLon)
+      .lte('lon', maxLon);
+
+    if (error || !properties) {
+      console.error('Error fetching properties near national park:', error);
+      return [];
+    }
+
+    const propertyMap = new Map<string, { property: any; distance: number }>();
+
+    properties.forEach((prop: any) => {
+      const lat = Number(prop.lat);
+      const lon = Number(prop.lon);
+      const propertyName = prop.property_name?.trim();
+
+      if (isNaN(lat) || isNaN(lon) || !propertyName) return;
+
+      const distance = calculateDistance(parkLat, parkLon, lat, lon);
+
+      if (distance <= radiusMiles) {
+        const existing = propertyMap.get(propertyName);
+        if (
+          !existing ||
+          distance < existing.distance ||
+          (prop.google_rating &&
+            (!existing.property.google_rating || prop.google_rating > existing.property.google_rating))
+        ) {
+          propertyMap.set(propertyName, { property: prop, distance });
+        }
+      }
+    });
+
+    const result = Array.from(propertyMap.values())
+      .map(({ property, distance }) => ({ ...property, distance }))
+      .sort((a, b) => {
+        if (Math.abs(a.distance - b.distance) > 0.1) {
+          return a.distance - b.distance;
+        }
+        const ratingA = a.google_rating || 0;
+        const ratingB = b.google_rating || 0;
+        return ratingB - ratingA;
+      })
+      .slice(0, limit) as Array<SageProperty & { distance: number }>;
+
+    setCache(cacheKey, result, ttlSeconds).catch(() => {});
+
+    return result;
+  } catch (error) {
+    console.error('Error in getPropertiesNearNationalPark:', error);
+    return [];
+  }
+}
+
+/**
  * Get all properties for a state (for map display)
  */
 export async function getStateProperties(

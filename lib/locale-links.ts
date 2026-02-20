@@ -36,5 +36,7 @@ export function createLocaleLinks(locale: string) {
     property: (slug: string) => getLocalePath(locale, `/property/${slug}`),
     guide: (slug: string) => getLocalePath(locale, `/guides/${slug}`),
     glossaryTerm: (slug: string) => getLocalePath(locale, `/glossary/${slug}`),
+    glampingNearNationalParks: getLocalePath(locale, '/glamping/near-national-parks'),
+    glampingByUnitType: (slug: string) => getLocalePath(locale, `/glamping/${slug}`),
   };
 }

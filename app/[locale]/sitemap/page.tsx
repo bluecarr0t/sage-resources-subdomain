@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { getAllGuideSlugs, getGuideSync } from "@/lib/guides";
 import { getAllGlossaryTerms } from "@/lib/glossary/index";
+import { getAllUnitTypeSlugs, getUnitTypeConfigBySlug } from "@/lib/unit-type-config";
 import { getTopStates, getTopCities, slugifyLocation, createCitySlug } from "@/lib/location-helpers";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
@@ -131,6 +132,35 @@ export default async function SitemapPage({ params }: PageProps) {
                 </Link>
               </li>
             ))}
+          </ul>
+        </section>
+
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+            {t("glampingDiscovery")}
+          </h2>
+          <ul className="space-y-2 mb-4">
+            <li>
+              <Link
+                href={links.glampingNearNationalParks}
+                className="text-[#006b5f] hover:underline"
+              >
+                {t("glampingNearNationalParks")}
+              </Link>
+            </li>
+            {getAllUnitTypeSlugs().map((slug) => {
+              const config = getUnitTypeConfigBySlug(slug);
+              return config ? (
+                <li key={slug}>
+                  <Link
+                    href={links.glampingByUnitType(slug)}
+                    className="text-[#006b5f] hover:underline"
+                  >
+                    Glamping {config.displayName}
+                  </Link>
+                </li>
+              ) : null;
+            })}
           </ul>
         </section>
 

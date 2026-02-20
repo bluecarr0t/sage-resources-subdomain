@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { locales } from '@/i18n';
 import { getTopStates, getTopCities, slugifyLocation, createCitySlug } from '@/lib/location-helpers';
+import { getNationalParksWithCoordinates } from '@/lib/national-parks';
+import { getAllUnitTypeSlugs } from '@/lib/unit-type-config';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
@@ -87,6 +89,66 @@ ${hreflangs}
     }
   } catch (error) {
     console.error('Error generating city pages for sitemap:', error);
+  }
+
+  // Add glamping near national parks index (priority 0.8)
+  for (const locale of locales) {
+    const fullPath = `/${locale}/glamping/near-national-parks`;
+    const hreflangs = generateHreflangTags(fullPath);
+    urls.push(`  <url>
+    <loc>${baseUrl}${fullPath}</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+${hreflangs}
+  </url>`);
+  }
+
+  // Add glamping near national parks individual pages (priority 0.7)
+  try {
+    const parks = await getNationalParksWithCoordinates();
+    const lastmod = new Date().toISOString();
+
+    for (const park of parks) {
+      if (!park.slug) continue;
+      for (const locale of locales) {
+        const fullPath = `/${locale}/glamping/near-national-parks/${park.slug}`;
+        const hreflangs = generateHreflangTags(fullPath);
+
+        urls.push(`  <url>
+    <loc>${baseUrl}${fullPath}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+${hreflangs}
+  </url>`);
+      }
+    }
+  } catch (error) {
+    console.error('Error generating glamping near national parks pages for sitemap:', error);
+  }
+
+  // Add glamping by unit type pages (priority 0.8)
+  try {
+    const unitTypeSlugs = getAllUnitTypeSlugs();
+    const lastmod = new Date().toISOString();
+
+    for (const slug of unitTypeSlugs) {
+      for (const locale of locales) {
+        const fullPath = `/${locale}/glamping/${slug}`;
+        const hreflangs = generateHreflangTags(fullPath);
+
+        urls.push(`  <url>
+    <loc>${baseUrl}${fullPath}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+${hreflangs}
+  </url>`);
+      }
+    }
+  } catch (error) {
+    console.error('Error generating glamping unit type pages for sitemap:', error);
   }
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

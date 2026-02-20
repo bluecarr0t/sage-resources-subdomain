@@ -219,6 +219,13 @@ export default function NationalParkDetailTemplate({
               
               {/* Contact Links */}
               <div className="flex flex-wrap gap-4 mt-6" role="group" aria-label="Park action links">
+                <Link
+                  href={`/${locale || 'en'}/glamping/near-national-parks/${slug}`}
+                  className="px-6 py-2 bg-[#007a6e] text-white rounded-lg hover:bg-[#006b5f] transition-colors focus:outline-none focus:ring-2 focus:ring-[#007a6e] focus:ring-offset-2"
+                  aria-label={`Find glamping near ${parkName}`}
+                >
+                  Glamping Near {parkName}
+                </Link>
                 {websiteUrl && (
                   <a
                     href={websiteUrl}

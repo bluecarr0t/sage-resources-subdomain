@@ -1,19 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 import { config } from 'dotenv';
 import { resolve } from 'path';
+import { slugifyPropertyName } from '@/lib/properties';
 
 /**
  * Populate slug column in all_glamping_properties table
  * This script generates URL-safe slugs from property_name
  * All records with the same property_name get the same slug
  * Handles duplicate slugs by appending numbers
+ *
+ * Usage: npx tsx scripts/populate-property-slugs.ts
  */
 
-// Load environment variables from .env.local
 config({ path: resolve(process.cwd(), '.env.local') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('Missing Supabase credentials. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY in .env.local');
@@ -22,36 +24,32 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-/**
- * Convert property name to URL-safe slug
- * Must match the function in lib/properties.ts
- */
-function slugifyPropertyName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "") // Remove special characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
-    .trim();
-}
-
 async function populatePropertySlugs() {
   console.log('📝 Starting property slug population...\n');
 
   try {
-    // Fetch all records with property_name
+    // Fetch all records with property_name (paginated)
     console.log('Fetching data from all_glamping_properties...');
-    const { data: allRecords, error: fetchError } = await supabase
-      .from('all_glamping_properties')
-      .select('id, property_name')
-      .not('property_name', 'is', null)
-      .limit(10000);
+    const allRecords: { id: number; property_name: string }[] = [];
+    const PAGE = 1000; // Supabase default max rows per request
+    let offset = 0;
+    let hasMore = true;
 
-    if (fetchError) {
-      throw fetchError;
+    while (hasMore) {
+      const { data, error: fetchError } = await supabase
+        .from('all_glamping_properties')
+        .select('id, property_name')
+        .not('property_name', 'is', null)
+        .range(offset, offset + PAGE - 1);
+
+      if (fetchError) throw fetchError;
+      if (!data?.length) break;
+      allRecords.push(...(data as { id: number; property_name: string }[]));
+      hasMore = data.length === PAGE;
+      offset += PAGE;
     }
 
-    if (!allRecords || allRecords.length === 0) {
+    if (allRecords.length === 0) {
       console.log('No records found in all_glamping_properties table.');
       return;
     }

@@ -58,6 +58,9 @@ export interface SageProperty {
   unit_hot_tub: string | null;
   unit_sauna: string | null;
   unit_cable: string | null;
+  unit_mini_fridge: string | null;
+  unit_bathtub: string | null;
+  unit_wood_burning_stove: string | null;
   rate_unit_rates_by_year: Record<string, unknown> | null;
 
   // PRICING
@@ -92,6 +95,7 @@ export interface SageProperty {
   property_remote_work_friendly: string | null;
   property_fitness_room: string | null;
   property_propane_refilling_station: string | null;
+  property_pickball_courts: string | null;
 
   // CONTACT & INFO
   url: string | null;

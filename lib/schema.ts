@@ -1037,9 +1037,11 @@ export function generatePropertyFAQSchema(property: {
   
   // Question 2: When is the property open?
   if (property.operating_season_months) {
+    const months = String(property.operating_season_months).trim();
+    const seasonText = months === '12' ? 'year-round' : `${months} months per year`;
     faqs.push({
       question: `When is ${propertyName} open for bookings?`,
-      answer: `${propertyName} operates during ${property.operating_season_months}. Check availability and book directly through the property's website.`
+      answer: `${propertyName} operates ${seasonText}. Check availability and book directly through the property's website.`
     });
   }
   

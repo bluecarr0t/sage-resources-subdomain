@@ -6,6 +6,34 @@ import { NationalPark } from '@/lib/types/national-parks';
 import { slugifyPropertyName } from '@/lib/properties';
 
 /**
+ * Get national parks that have valid coordinates (for index pages)
+ */
+export async function getNationalParksWithCoordinates(): Promise<NationalPark[]> {
+  try {
+    const supabase = createServerClient();
+
+    const { data: parks, error } = await supabase
+      .from('national-parks')
+      .select('*')
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
+      .not('slug', 'is', null)
+      .not('name', 'is', null)
+      .limit(1000);
+
+    if (error) {
+      console.error('Error fetching national parks with coordinates:', error);
+      return [];
+    }
+
+    return (parks || []) as NationalPark[];
+  } catch (error) {
+    console.error('Error in getNationalParksWithCoordinates:', error);
+    return [];
+  }
+}
+
+/**
  * Get all unique national park slugs for generateStaticParams
  */
 export async function getAllNationalParkSlugs(): Promise<Array<{ slug: string }>> {
