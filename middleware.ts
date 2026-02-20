@@ -123,6 +123,32 @@ function getLocaleFromPathname(pathname: string): Locale | null {
 }
 
 /**
+ * Detect if the request is from a crawler/bot.
+ * Crawlers should receive the actual page for the URL they request (no geo redirect),
+ * so sitemap URLs don't appear as "redirect" in SEO audits.
+ */
+function isCrawlerBot(request: NextRequest): boolean {
+  const ua = request.headers.get('user-agent') || '';
+  const botPatterns = [
+    /SemrushBot/i,
+    /SiteAuditBot/i,
+    /Googlebot/i,
+    /bingbot/i,
+    /Slurp/i, // Yahoo
+    /DuckDuckBot/i,
+    /Baiduspider/i,
+    /YandexBot/i,
+    /facebookexternalhit/i,
+    /Twitterbot/i,
+    /LinkedInBot/i,
+    /AhrefsBot/i,
+    /MJ12bot/i,
+    /DotBot/i,
+  ];
+  return botPatterns.some((pattern) => pattern.test(ua));
+}
+
+/**
  * Remove locale prefix from pathname
  * e.g., /fr/guides/test -> /guides/test
  */
@@ -193,7 +219,8 @@ export function middleware(request: NextRequest) {
 
     // Check if pathname has a locale prefix and redirect based on geo location
     // Only redirect if we have geo information and it doesn't match the path locale
-    if (!shouldSkipGeoRedirect) {
+    // Skip geo redirect for crawlers/bots so sitemap URLs return the actual page (no redirect)
+    if (!shouldSkipGeoRedirect && !isCrawlerBot(request)) {
       const pathLocale = getLocaleFromPathname(pathname);
       if (pathLocale) {
         const geoLocale = getGeoLocale(request);
