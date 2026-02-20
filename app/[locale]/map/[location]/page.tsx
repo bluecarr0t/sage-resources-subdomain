@@ -297,7 +297,10 @@ export default async function LocationMapPage({ params }: PageProps) {
         }
       ]
     };
-    faqSchema = generateMapFAQSchema(stats.uniqueProperties, `${normalizedCity}, ${normalizedState}`);
+    faqSchema = generateMapFAQSchema(stats.uniqueProperties, `${normalizedCity}, ${normalizedState}`, {
+      averageRate: stats.averageRate,
+      unitTypes: stats.unitTypes,
+    });
     localBusinessSchemas = generatePropertyListLocalBusinessSchema(featuredProperties);
     touristAttractionSchemas = nearbyParks.length > 0
       ? generateTouristAttractionSchema(nearbyParks.slice(0, 10))
@@ -339,7 +342,10 @@ export default async function LocationMapPage({ params }: PageProps) {
         }
       ]
     };
-    faqSchema = generateMapFAQSchema(stats.uniqueProperties, normalizedState);
+    faqSchema = generateMapFAQSchema(stats.uniqueProperties, normalizedState, {
+      averageRate: stats.averageRate,
+      unitTypes: stats.unitTypes,
+    });
     localBusinessSchemas = generatePropertyListLocalBusinessSchema(featuredProperties);
     
     // Get nearby parks using a sample property's coordinates

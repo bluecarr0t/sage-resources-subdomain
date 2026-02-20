@@ -4,28 +4,25 @@ import { processProperties } from '../utils/propertyProcessing';
 
 /**
  * Hook to process and deduplicate properties with caching
- * Groups by property name, aggregates unit types and rates, applies filters
- * Caches results by filter combination to avoid reprocessing
+ * Groups by property name, aggregates unit types and rates, applies all filters
+ * Single source of truth for client-side filtering (B3)
  */
 export function usePropertyProcessing(
   properties: SageProperty[],
   filterState: string[],
-  filterCountry: string[]
+  filterCountry: string[],
+  filterUnitType: string[] = [],
+  filterRateRange: string[] = []
 ) {
-  // Cache processed results by filter combination
   const cacheRef = useRef<Map<string, any[]>>(new Map());
   const lastFiltersRef = useRef<string>('');
   
   return useMemo(() => {
-    // Create cache key from filters
-    const cacheKey = JSON.stringify({ filterState, filterCountry });
+    const cacheKey = JSON.stringify({ filterState, filterCountry, filterUnitType, filterRateRange });
     
-    // Check if we have cached result for this filter combination
     if (cacheKey === lastFiltersRef.current && cacheRef.current.has(cacheKey)) {
       const cachedResult = cacheRef.current.get(cacheKey);
-      // Verify cached result matches current properties (in case properties updated)
       if (cachedResult && cachedResult.length > 0) {
-        // Quick check: if first property ID matches, likely same dataset
         const firstCachedId = cachedResult[0]?.id;
         const firstCurrentId = properties[0]?.id;
         if (firstCachedId === firstCurrentId) {
@@ -34,14 +31,11 @@ export function usePropertyProcessing(
       }
     }
     
-    // Process properties
-    const processed = processProperties(properties, filterState, filterCountry);
+    const processed = processProperties(properties, filterState, filterCountry, filterUnitType, filterRateRange);
     
-    // Cache the result
     cacheRef.current.set(cacheKey, processed);
     lastFiltersRef.current = cacheKey;
     
-    // Limit cache size to prevent memory issues (keep last 5 filter combinations)
     if (cacheRef.current.size > 5) {
       const firstKey = cacheRef.current.keys().next().value;
       if (firstKey) {
@@ -50,5 +44,5 @@ export function usePropertyProcessing(
     }
     
     return processed;
-  }, [properties, filterState, filterCountry]);
+  }, [properties, filterState, filterCountry, filterUnitType, filterRateRange]);
 }

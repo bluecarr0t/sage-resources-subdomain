@@ -38,20 +38,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     notFound();
   }
   
-  const t = await getTranslations({ locale, namespace: 'map.metadata' });
+  const stats = await getPropertyStatistics();
+  const count = stats.uniqueProperties;
   
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const pathname = `/${locale}/map`;
   const url = `${baseUrl}${pathname}`;
   const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
+  const title = `Glamping Properties Map | ${count}+ Locations | Sage Outdoor Advisory`;
+  const description = `Explore ${count}+ glamping properties across the US, Canada, and Europe on our interactive map. Compare glamping locations with population growth data to identify high-growth markets. Filter by location, unit type, and price range.`;
+
   return {
-    title: t('title'),
-    description: t('description'),
-    keywords: t('keywords'),
+    title,
+    description,
+    keywords: "glamping properties map, glamping locations, glamping sites by state, interactive glamping map, glamping near me, glamping properties USA, glamping properties Canada, glamping map North America",
     openGraph: {
-      title: t('openGraph.title'),
-      description: t('openGraph.description'),
+      title: `Glamping Properties Map | ${count}+ Locations | Sage`,
+      description,
       url,
       siteName: "Sage Outdoor Advisory",
       images: [
@@ -59,7 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: t('openGraph.imageAlt'),
+          alt: "Interactive glamping properties map showing locations across USA and Canada",
         },
       ],
       locale: getOpenGraphLocale(locale as Locale),
@@ -67,8 +71,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: t('twitter.title'),
-      description: t('twitter.description'),
+      title: `Glamping Properties Map | ${count}+ Locations`,
+      description: `Explore ${count}+ glamping properties and compare with population growth data to identify high-growth markets`,
       images: [imageUrl],
     },
     alternates: {

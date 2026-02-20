@@ -357,7 +357,8 @@ export default async function PropertyPage({ params }: PageProps) {
     operating_season_months: firstProperty.operating_season_months,
     minimum_nights: firstProperty.minimum_nights,
     pets: firstProperty.unit_pets,
-    avg_retail_daily_rate_2024: firstProperty.rate_avg_retail_daily_rate ? String(firstProperty.rate_avg_retail_daily_rate) : null,
+    rate_avg_retail_daily_rate: firstProperty.rate_avg_retail_daily_rate ?? null,
+    // Google Places data lives in a separate table; fetched client-side, unavailable at SSG build time
     google_rating: null,
     google_user_rating_total: null,
   });

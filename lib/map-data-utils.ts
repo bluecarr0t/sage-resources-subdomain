@@ -61,7 +61,7 @@ export async function getStatePropertyStatistics(
     
     const { data: properties, error } = await supabase
       .from('all_glamping_properties')
-      .select('property_name, avg__retail_daily_rate_2024, high_rate_2024, low_rate_2024, occupancy_rate_2024, unit_type')
+      .select('property_name, rate_avg_retail_daily_rate, rate_unit_rates_by_year, unit_type')
       .eq('is_glamping_property', 'Yes')
       .neq('is_closed', 'Yes')
       .eq('research_status', 'published')
@@ -83,7 +83,6 @@ export async function getStatePropertyStatistics(
     // Count unique properties
     const uniquePropertyNames = new Set<string>();
     const rates: number[] = [];
-    const occupancies: number[] = [];
     const unitTypeCounts = new Map<string, number>();
     
     properties.forEach((prop: any) => {
@@ -92,20 +91,12 @@ export async function getStatePropertyStatistics(
         uniquePropertyNames.add(propertyName);
       }
       
-      // Collect rates
-      const rate = prop.avg__retail_daily_rate_2024 
-        ? Number(prop.avg__retail_daily_rate_2024) 
+      // Collect rates (rate_avg_retail_daily_rate; high/low derived from rates array)
+      const rate = prop.rate_avg_retail_daily_rate
+        ? Number(prop.rate_avg_retail_daily_rate)
         : null;
       if (rate !== null && !isNaN(rate)) {
         rates.push(rate);
-      }
-      
-      // Collect occupancies
-      const occupancy = prop.occupancy_rate_2024 
-        ? Number(prop.occupancy_rate_2024) 
-        : null;
-      if (occupancy !== null && !isNaN(occupancy)) {
-        occupancies.push(occupancy);
       }
       
       // Count unit types
@@ -115,7 +106,7 @@ export async function getStatePropertyStatistics(
       }
     });
     
-    // Calculate statistics
+    // Calculate statistics (occupancy column removed in schema; high/low from rates)
     const stats: LocationStatistics = {
       propertyCount: properties.length,
       uniqueProperties: uniquePropertyNames.size,
@@ -124,9 +115,7 @@ export async function getStatePropertyStatistics(
         : null,
       highRate: rates.length > 0 ? Math.max(...rates) : null,
       lowRate: rates.length > 0 ? Math.min(...rates) : null,
-      averageOccupancy: occupancies.length > 0
-        ? Math.round((occupancies.reduce((a, b) => a + b, 0) / occupancies.length) * 10) / 10
-        : null,
+      averageOccupancy: null,
       unitTypes: Array.from(unitTypeCounts.entries())
         .map(([type, count]) => ({ type, count }))
         .sort((a, b) => b.count - a.count),
@@ -176,7 +165,7 @@ export async function getCityPropertyStatistics(
     
     const { data: properties, error } = await supabase
       .from('all_glamping_properties')
-      .select('property_name, avg__retail_daily_rate_2024, high_rate_2024, low_rate_2024, occupancy_rate_2024, unit_type')
+      .select('property_name, rate_avg_retail_daily_rate, rate_unit_rates_by_year, unit_type')
       .eq('is_glamping_property', 'Yes')
       .neq('is_closed', 'Yes')
       .eq('research_status', 'published')
@@ -199,7 +188,6 @@ export async function getCityPropertyStatistics(
     // Count unique properties
     const uniquePropertyNames = new Set<string>();
     const rates: number[] = [];
-    const occupancies: number[] = [];
     const unitTypeCounts = new Map<string, number>();
     
     properties.forEach((prop: any) => {
@@ -208,20 +196,12 @@ export async function getCityPropertyStatistics(
         uniquePropertyNames.add(propertyName);
       }
       
-      // Collect rates
-      const rate = prop.avg__retail_daily_rate_2024 
-        ? Number(prop.avg__retail_daily_rate_2024) 
+      // Collect rates (rate_avg_retail_daily_rate; high/low derived from rates array)
+      const rate = prop.rate_avg_retail_daily_rate
+        ? Number(prop.rate_avg_retail_daily_rate)
         : null;
       if (rate !== null && !isNaN(rate)) {
         rates.push(rate);
-      }
-      
-      // Collect occupancies
-      const occupancy = prop.occupancy_rate_2024 
-        ? Number(prop.occupancy_rate_2024) 
-        : null;
-      if (occupancy !== null && !isNaN(occupancy)) {
-        occupancies.push(occupancy);
       }
       
       // Count unit types
@@ -231,7 +211,7 @@ export async function getCityPropertyStatistics(
       }
     });
     
-    // Calculate statistics
+    // Calculate statistics (occupancy column removed in schema; high/low from rates)
     const stats: LocationStatistics = {
       propertyCount: properties.length,
       uniqueProperties: uniquePropertyNames.size,
@@ -240,9 +220,7 @@ export async function getCityPropertyStatistics(
         : null,
       highRate: rates.length > 0 ? Math.max(...rates) : null,
       lowRate: rates.length > 0 ? Math.min(...rates) : null,
-      averageOccupancy: occupancies.length > 0
-        ? Math.round((occupancies.reduce((a, b) => a + b, 0) / occupancies.length) * 10) / 10
-        : null,
+      averageOccupancy: null,
       unitTypes: Array.from(unitTypeCounts.entries())
         .map(([type, count]) => ({ type, count }))
         .sort((a, b) => b.count - a.count),
@@ -296,7 +274,7 @@ export async function getFeaturedPropertiesForState(
       .eq('research_status', 'published')
       .eq('state', normalizedState)
       .not('property_name', 'is', null)
-      .order('google_rating', { ascending: false })
+      .order('quality_score', { ascending: false })
       .limit(limit * 2); // Get more to filter duplicates
     
     if (error || !properties) {
@@ -304,7 +282,7 @@ export async function getFeaturedPropertiesForState(
       return [];
     }
     
-    // Get unique properties (by property_name) with best ratings
+    // Get unique properties (by property_name), prefer higher quality_score
     const propertyMap = new Map<string, any>();
     
     properties.forEach((prop: any) => {
@@ -312,19 +290,20 @@ export async function getFeaturedPropertiesForState(
       if (!propertyName) return;
       
       const existing = propertyMap.get(propertyName);
-      if (!existing || 
-          (prop.google_rating && (!existing.google_rating || prop.google_rating > existing.google_rating))) {
+      const qs = prop.quality_score != null ? Number(prop.quality_score) : 0;
+      const existingQs = existing?.quality_score != null ? Number(existing.quality_score) : 0;
+      if (!existing || qs > existingQs) {
         propertyMap.set(propertyName, prop);
       }
     });
     
     const uniqueProperties = Array.from(propertyMap.values())
       .sort((a, b) => {
-        // Sort by rating (highest first), then by property name
-        const ratingA = a.google_rating || 0;
-        const ratingB = b.google_rating || 0;
-        if (ratingB !== ratingA) {
-          return ratingB - ratingA;
+        // Sort by quality_score (highest first), then by property name
+        const qsA = a.quality_score != null ? Number(a.quality_score) : 0;
+        const qsB = b.quality_score != null ? Number(b.quality_score) : 0;
+        if (qsB !== qsA) {
+          return qsB - qsA;
         }
         return (a.property_name || '').localeCompare(b.property_name || '');
       })
@@ -400,13 +379,14 @@ export async function getFeaturedPropertiesForCity(
       if (distance <= radiusMiles) {
         const existing = propertyMap.get(propertyName);
         if (!existing || distance < existing.distance ||
-            (prop.google_rating && (!existing.property.google_rating || prop.google_rating > existing.property.google_rating))) {
+            ((prop.quality_score != null ? Number(prop.quality_score) : 0) >
+             (existing.property.quality_score != null ? Number(existing.property.quality_score) : 0))) {
           propertyMap.set(propertyName, { property: prop, distance });
         }
       }
     });
     
-    // Sort by distance, then rating, and limit
+    // Sort by distance, then quality_score, and limit
     const result = Array.from(propertyMap.values())
       .map(({ property, distance }) => ({ ...property, distance }))
       .sort((a, b) => {
@@ -414,10 +394,10 @@ export async function getFeaturedPropertiesForCity(
         if (Math.abs(a.distance - b.distance) > 0.1) {
           return a.distance - b.distance;
         }
-        // Then by rating
-        const ratingA = a.google_rating || 0;
-        const ratingB = b.google_rating || 0;
-        return ratingB - ratingA;
+        // Then by quality_score
+        const qsA = a.quality_score != null ? Number(a.quality_score) : 0;
+        const qsB = b.quality_score != null ? Number(b.quality_score) : 0;
+        return qsB - qsA;
       })
       .slice(0, limit) as Array<SageProperty & { distance: number }>;
     
@@ -562,11 +542,12 @@ export async function getPropertiesNearNationalPark(
 
       if (distance <= radiusMiles) {
         const existing = propertyMap.get(propertyName);
+        const qs = prop.quality_score != null ? Number(prop.quality_score) : 0;
+        const existingQs = existing?.property?.quality_score != null ? Number(existing.property.quality_score) : 0;
         if (
           !existing ||
           distance < existing.distance ||
-          (prop.google_rating &&
-            (!existing.property.google_rating || prop.google_rating > existing.property.google_rating))
+          qs > existingQs
         ) {
           propertyMap.set(propertyName, { property: prop, distance });
         }
@@ -579,9 +560,9 @@ export async function getPropertiesNearNationalPark(
         if (Math.abs(a.distance - b.distance) > 0.1) {
           return a.distance - b.distance;
         }
-        const ratingA = a.google_rating || 0;
-        const ratingB = b.google_rating || 0;
-        return ratingB - ratingA;
+        const qsA = a.quality_score != null ? Number(a.quality_score) : 0;
+        const qsB = b.quality_score != null ? Number(b.quality_score) : 0;
+        return qsB - qsA;
       })
       .slice(0, limit) as Array<SageProperty & { distance: number }>;
 

@@ -82,12 +82,15 @@ function isUSProperty(property: any): boolean {
 
 /**
  * Process and deduplicate properties
- * Groups by property name, aggregates unit types and rates, applies filters
+ * Groups by property name, aggregates unit types and rates, applies all filters
+ * Single source of truth for client-side filtering (B3)
  */
 export function processProperties(
   properties: SageProperty[],
   filterState: string[],
-  filterCountry: string[]
+  filterCountry: string[],
+  filterUnitType: string[] = [],
+  filterRateRange: string[] = []
 ): any[] {
   if (!properties || properties.length === 0) {
     return [];
@@ -265,7 +268,22 @@ export function processProperties(
     console.log(`After client-side filtering (both countries): ${uniqueProperties.length} properties`);
   }
   
-  console.log(`Grouped ${properties.length} records into ${uniqueProperties.length} unique properties`);
-  
+  // Apply unit type filter (client-side single source of truth)
+  if (filterUnitType.length > 0) {
+    uniqueProperties = uniqueProperties.filter((property: any) => {
+      if (property.all_unit_types && Array.isArray(property.all_unit_types)) {
+        return property.all_unit_types.some((ut: string) => filterUnitType.includes(ut));
+      }
+      return property.unit_type && filterUnitType.includes(property.unit_type);
+    });
+  }
+
+  // Apply rate range filter (client-side single source of truth)
+  if (filterRateRange.length > 0) {
+    uniqueProperties = uniqueProperties.filter((property: any) => {
+      return property.rate_category && filterRateRange.includes(property.rate_category);
+    });
+  }
+
   return uniqueProperties;
 }

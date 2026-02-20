@@ -1016,7 +1016,7 @@ export function generatePropertyFAQSchema(property: {
   operating_season_months: string | null;
   minimum_nights: string | null;
   pets: string | null;
-  avg_retail_daily_rate_2024: string | number | null;
+  rate_avg_retail_daily_rate: string | number | null;
   google_rating: number | null;
   google_user_rating_total: number | null;
 }): any {
@@ -1065,10 +1065,10 @@ export function generatePropertyFAQSchema(property: {
   }
   
   // Question 5: What are the rates?
-  if (property.avg_retail_daily_rate_2024) {
+  if (property.rate_avg_retail_daily_rate) {
     faqs.push({
       question: `What are the rates at ${propertyName}?`,
-      answer: `Rates at ${propertyName} start from $${property.avg_retail_daily_rate_2024} per night. Rates may vary by season and unit type. Check the property's website for current pricing and availability.`
+      answer: `Rates at ${propertyName} start from $${property.rate_avg_retail_daily_rate} per night. Rates may vary by season and unit type. Check the property's website for current pricing and availability.`
     });
   }
   
@@ -1265,69 +1265,68 @@ export function generateTouristAttractionSchema(parks: Array<{
  */
 export function generateMapFAQSchema(
   propertyCount: number,
-  location?: string
+  location?: string,
+  locationStats?: {
+    averageRate?: number | null;
+    unitTypes?: Array<{ type: string; count: number }>;
+  }
 ): any {
-  const baseUrl = "https://resources.sageoutdooradvisory.com";
-  const locationText = location ? ` in ${location}` : '';
-  
   const faqs: Array<{ question: string; answer: string }> = [];
-  
-  // General map FAQs
+
+  if (location) {
+    // Location-specific FAQs first (more valuable for rich snippets)
+    faqs.push({
+      question: `How many glamping properties are in ${location}?`,
+      answer: `Our database contains ${propertyCount}+ glamping properties in ${location}. Explore the interactive map to find luxury tents, yurts, treehouses, domes, and other unique accommodations.`
+    });
+
+    if (locationStats?.unitTypes && locationStats.unitTypes.length > 0) {
+      const topTypes = locationStats.unitTypes.slice(0, 5).map(t => t.type).join(', ');
+      faqs.push({
+        question: `What types of glamping are available in ${location}?`,
+        answer: `Glamping properties in ${location} offer a variety of accommodation types including ${topTypes}. Use the unit type filter on the map to narrow your search.`
+      });
+    }
+
+    if (locationStats?.averageRate) {
+      faqs.push({
+        question: `What do glamping properties cost in ${location}?`,
+        answer: `The average nightly rate for glamping in ${location} is approximately $${locationStats.averageRate}. Rates vary by season, unit type, and amenities. Use the rate filter on the map to find options within your budget.`
+      });
+    }
+
+    faqs.push({
+      question: `What are the best glamping properties in ${location}?`,
+      answer: `Explore the map to discover top-rated glamping properties in ${location}. Filter by unit type, price range, and amenities to find accommodations that match your preferences.`
+    });
+
+    faqs.push({
+      question: `What national parks are near glamping in ${location}?`,
+      answer: `Toggle the 'National Parks' overlay on the map to see nearby parks. Many glamping properties in ${location} are within driving distance of popular national parks, making them ideal bases for outdoor adventures.`
+    });
+  } else {
+    // Generic map FAQs for the main /map page
+    faqs.push({
+      question: `How many glamping properties are on the map?`,
+      answer: `Our interactive map features ${propertyCount}+ glamping properties across the United States, Canada, and Europe. Filter by location, unit type, or price to find your perfect glamping experience.`
+    });
+  }
+
   faqs.push({
     question: "How do I use the glamping map?",
     answer: "Use the interactive map to explore glamping properties across North America. Click on map markers to view property details, use filters to narrow down by location, unit type, or price range, and zoom in to see properties in specific areas."
   });
-  
+
   faqs.push({
     question: "What filters are available on the map?",
     answer: "You can filter glamping properties by country (United States, Canada), state or province, unit type (tents, yurts, treehouses, domes, etc.), and average daily rate range. Toggle overlays to see national parks, population data, and economic indicators."
   });
-  
-  faqs.push({
-    question: `How many glamping properties${locationText ? ` are in ${location}` : ''} are on the map?`,
-    answer: location
-      ? `Our database contains ${propertyCount}+ glamping properties${locationText}. Explore the map to find luxury tents, yurts, treehouses, domes, and other unique accommodations.`
-      : `Our interactive map features ${propertyCount}+ glamping properties across the United States and Canada. Filter by location, unit type, or price to find your perfect glamping experience.`
-  });
-  
-  faqs.push({
-    question: "Can I filter by location?",
-    answer: "Yes! You can filter by country (United States or Canada) and by state or province. Select one or more states to see only properties in those locations."
-  });
-  
-  faqs.push({
-    question: "Can I filter by price range?",
-    answer: "Yes, you can filter properties by average daily rate range. Choose from budget-friendly options to luxury accommodations based on your preferred price point."
-  });
-  
-  faqs.push({
-    question: "Can I filter by unit type?",
-    answer: "Yes! Filter by unit types including safari tents, yurts, treehouses, domes, Airstream trailers, tiny houses, glamping pods, and more. Select multiple unit types to see all matching properties."
-  });
-  
+
   faqs.push({
     question: "How do I view property details?",
     answer: "Click on any property marker on the map to see a property card with photos, description, amenities, rates, and links to the property's website. You can also click 'View Details' to see the full property page."
   });
-  
-  faqs.push({
-    question: "Are all properties verified?",
-    answer: "Our database includes verified glamping properties with accurate location data, pricing information, and amenities. We regularly update our database to ensure information is current."
-  });
-  
-  // Location-specific FAQs
-  if (location) {
-    faqs.push({
-      question: `What are the best glamping properties in ${location}?`,
-      answer: `Explore the map to discover top-rated glamping properties in ${location}. Filter by unit type, price range, and amenities to find accommodations that match your preferences. Many properties feature ratings and reviews from previous guests.`
-    });
-    
-    faqs.push({
-      question: `What national parks are near glamping properties in ${location}?`,
-      answer: `Toggle the 'National Parks' overlay on the map to see nearby national parks. Many glamping properties in ${location} are located within driving distance of popular national parks, making them ideal bases for outdoor adventures.`
-    });
-  }
-  
+
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",

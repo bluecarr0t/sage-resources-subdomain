@@ -61,7 +61,7 @@ export async function getPropertiesByUnitType(
     }
 
     // Deduplicate by property_name - keep one record per property
-    // Prefer: has slug, has coordinates, higher google_rating
+    // Prefer: has slug, has coordinates, higher quality_score
     const propertyMap = new Map<string, any>();
     for (const row of rows) {
       const name = (row.property_name as string)?.trim();
@@ -74,7 +74,7 @@ export async function getPropertiesByUnitType(
         row.lon != null &&
         !isNaN(Number(row.lat)) &&
         !isNaN(Number(row.lon));
-      const rating = row.google_rating ? Number(row.google_rating) : 0;
+      const qs = row.quality_score != null ? Number(row.quality_score) : 0;
 
       if (!existing) {
         propertyMap.set(name, row);
@@ -85,14 +85,12 @@ export async function getPropertiesByUnitType(
           existing.lon != null &&
           !isNaN(Number(existing.lat)) &&
           !isNaN(Number(existing.lon));
-        const exRating = existing.google_rating
-          ? Number(existing.google_rating)
-          : 0;
+        const exQs = existing.quality_score != null ? Number(existing.quality_score) : 0;
 
         const replace =
           (hasSlug && !exHasSlug) ||
           (hasCoords && !exHasCoords && hasSlug === exHasSlug) ||
-          (rating > exRating && hasCoords === exHasCoords && hasSlug === exHasSlug);
+          (qs > exQs && hasCoords === exHasCoords && hasSlug === exHasSlug);
 
         if (replace) {
           propertyMap.set(name, row);
@@ -102,9 +100,9 @@ export async function getPropertiesByUnitType(
 
     const unique = Array.from(propertyMap.values())
       .sort((a, b) => {
-        const ratingA = a.google_rating ? Number(a.google_rating) : 0;
-        const ratingB = b.google_rating ? Number(b.google_rating) : 0;
-        if (ratingB !== ratingA) return ratingB - ratingA;
+        const qsA = a.quality_score != null ? Number(a.quality_score) : 0;
+        const qsB = b.quality_score != null ? Number(b.quality_score) : 0;
+        if (qsB !== qsA) return qsB - qsA;
         return (a.property_name || '').localeCompare(b.property_name || '');
       })
       .slice(0, limit) as SageProperty[];

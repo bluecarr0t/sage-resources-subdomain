@@ -86,12 +86,18 @@ export function useMapMarkers({
           scale: 1.0,
         });
         
+        const markerTitle = property.property_name || 'Glamping property';
+        bluePin.element.setAttribute('aria-label', markerTitle);
+        bluePin.element.setAttribute('role', 'button');
+        bluePin.element.setAttribute('tabindex', '0');
+        
         const marker = new AdvancedMarkerElement({
           map: map,
           position: {
             lat: property.coordinates[0],
             lng: property.coordinates[1],
           },
+          title: markerTitle,
           content: bluePin.element,
         });
 
@@ -189,12 +195,18 @@ export function useMapMarkers({
           scale: 0.8,
         });
         
+        const parkTitle = park.name || 'National Park';
+        greenPin.element.setAttribute('aria-label', parkTitle);
+        greenPin.element.setAttribute('role', 'button');
+        greenPin.element.setAttribute('tabindex', '0');
+        
         const marker = new AdvancedMarkerElement({
           map: map,
           position: {
             lat: park.coordinates[0],
             lng: park.coordinates[1],
           },
+          title: parkTitle,
           content: greenPin.element,
         });
 
