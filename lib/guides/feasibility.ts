@@ -671,7 +671,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/",
           description: "Expert glamping feasibility studies to validate your project and secure financing."
         },
         {
@@ -947,7 +947,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/",
           description: "Expert glamping feasibility studies with clear, actionable insights."
         },
         {

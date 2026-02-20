@@ -380,12 +380,12 @@ export const industryGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "Glamping Feasibility Studies",
-          url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/",
           description: "Expert glamping feasibility studies to validate your project."
         },
         {
           name: "Glamping Property Appraisals",
-          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/",
           description: "Bank-approved glamping appraisals for financing."
         }
       ]

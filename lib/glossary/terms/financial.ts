@@ -30,7 +30,7 @@ Sage Outdoor Advisory includes ADR analysis and benchmarking in our feasibility 
     seoKeywords: ["ADR", "average daily rate", "room rate", "daily rate", "revenue per room"],
     internalLinks: [
       { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
-      { text: "Data Insights", url: "https://sageoutdooradvisory.com/data-insights/" }
+      { text: "Data Insights", url: "https://sageoutdooradvisory.com/shop/" }
     ],
     faqs: [
       {
@@ -77,7 +77,7 @@ Sage Outdoor Advisory uses ARDR analysis in market research and feasibility stud
     seoKeywords: ["ARDR", "average retail daily rate", "listed price", "advertised rate", "marketplace pricing", "booking platform rates"],
     internalLinks: [
       { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
-      { text: "Data Insights", url: "https://sageoutdooradvisory.com/data-insights/" },
+      { text: "Data Insights", url: "https://sageoutdooradvisory.com/shop/" },
       { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [

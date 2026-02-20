@@ -28,9 +28,9 @@ Sage Outdoor Advisory specializes in creating comprehensive, bank-approved feasi
       { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
       { text: "RV Resort Feasibility Study", url: "/landing/rv-resort-feasibility-study" },
       { text: "Campground Feasibility Study", url: "/landing/campground-feasibility-study" },
-      { text: "Glamping Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/glamping-resorts/" },
-      { text: "RV Resort Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/rv-resorts/" },
-      { text: "Campground Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/feasibility-studies/campgrounds/" },
+      { text: "Glamping Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/" },
+      { text: "RV Resort Feasibility Study Services", url: "https://sageoutdooradvisory.com/feasibility-study-rv-parks/" },
+      { text: "Campground Feasibility Study Services", url: "https://sageoutdooradvisory.com/feasibility-study-campgrounds/" },
       { text: "All Feasibility Study Services", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],
     faqs: [
@@ -75,7 +75,7 @@ Appraisals are required for bank financing, property sales, refinancing, insuran
     internalLinks: [
       { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
       { text: "RV Resort Appraisal", url: "/landing/rv-resort-appraisal" },
-      { text: "Glamping Property Appraisal Services", url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/" },
+      { text: "Glamping Property Appraisal Services", url: "https://sageoutdooradvisory.com/services-overview/" },
       { text: "RV Resort Appraisal Services", url: "https://sageoutdooradvisory.com/appraisal-rv-parks/" },
       { text: "All Appraisal Services", url: "https://sageoutdooradvisory.com/services-overview/" }
     ],

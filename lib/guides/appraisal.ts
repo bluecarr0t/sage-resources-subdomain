@@ -390,7 +390,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
       services: [
         {
           name: "Glamping Property Appraisals",
-          url: "https://sageoutdooradvisory.com/services-overview/appraisals/glamping-resorts/",
+          url: "https://sageoutdooradvisory.com/services-overview/",
           description: "Bank-approved glamping property appraisals for financing and transactions."
         },
         {

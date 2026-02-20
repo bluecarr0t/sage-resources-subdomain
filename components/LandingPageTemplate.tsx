@@ -510,7 +510,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 <Link
-                  href="https://sageoutdooradvisory.com/data-insights/"
+                  href="https://sageoutdooradvisory.com/shop/"
                   className="text-[#006b5f] hover:text-[#005a4f]"
                 >
                   Data & Insights
@@ -520,7 +520,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                 Access comprehensive market data and insights for the outdoor hospitality industry.
               </p>
               <Link
-                href="https://sageoutdooradvisory.com/data-insights/"
+                href="https://sageoutdooradvisory.com/shop/"
                 className="text-[#006b5f] hover:text-[#005a4f] font-medium text-sm"
               >
                 Explore Data →
