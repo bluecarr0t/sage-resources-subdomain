@@ -83,8 +83,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
   
   // Always include current locale for self-referencing hreflang (fixes SEMrush "No self-referencing hreflang" errors)
-  if (!hreflangAlternates.languages![locale]) {
-    hreflangAlternates.languages![locale] = url;
+  const localeKey = locale as Locale;
+  if (!hreflangAlternates.languages![localeKey]) {
+    hreflangAlternates.languages![localeKey] = url;
   }
   
   // Add x-default pointing to default locale
