@@ -3,6 +3,7 @@
 import { GuideContent } from "@/lib/guides";
 import Link from "next/link";
 import { useState } from "react";
+import { createLocaleLinks } from "@/lib/locale-links";
 
 interface Category {
   id: string;
@@ -16,12 +17,15 @@ interface Category {
 interface GuidesIndexProps {
   allGuides: GuideContent[];
   categories: Category[];
+  locale?: string;
 }
 
 export default function GuidesIndex({
   allGuides,
   categories,
+  locale = "en",
 }: GuidesIndexProps) {
+  const links = createLocaleLinks(locale);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -108,7 +112,7 @@ export default function GuidesIndex({
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredGuides.map((guide) => (
-              <GuideCard key={guide.slug} guide={guide} />
+              <GuideCard key={guide.slug} guide={guide} guideLink={links.guide} />
             ))}
           </div>
         </div>
@@ -141,6 +145,7 @@ export default function GuidesIndex({
                         key={guide.slug}
                         guide={guide}
                         isPillar={true}
+                        guideLink={links.guide}
                       />
                     ))}
                   </div>
@@ -155,7 +160,7 @@ export default function GuidesIndex({
                   </h3>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {category.clusterPages.map((guide) => (
-                      <GuideCard key={guide.slug} guide={guide} />
+                      <GuideCard key={guide.slug} guide={guide} guideLink={links.guide} />
                     ))}
                   </div>
                 </div>
@@ -185,9 +190,11 @@ export default function GuidesIndex({
 function GuideCard({
   guide,
   isPillar = false,
+  guideLink,
 }: {
   guide: GuideContent;
   isPillar?: boolean;
+  guideLink: (slug: string) => string;
 }) {
   const categoryLabels: Record<string, string> = {
     feasibility: "Feasibility",
@@ -197,7 +204,7 @@ function GuideCard({
 
   return (
     <Link
-      href={`/guides/${guide.slug}`}
+      href={guideLink(guide.slug)}
       className={`block bg-white border-2 rounded-lg p-6 hover:shadow-lg transition-all ${
         isPillar
           ? "border-[#006b5f] hover:border-[#005a4f]"

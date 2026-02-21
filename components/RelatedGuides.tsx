@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GuideContent, getGuideSync, getGuidesByCategory } from "@/lib/guides";
+import { createLocaleLinks } from "@/lib/locale-links";
 
 interface RelatedGuidesProps {
   currentGuide: GuideContent;
@@ -12,6 +13,8 @@ export default function RelatedGuides({
   maxGuides = 6,
   locale = "en"
 }: RelatedGuidesProps) {
+  // Guides are English-only - use content-aware links to avoid broken de/es/fr URLs
+  const links = createLocaleLinks(locale);
   // Get related guides from the current guide's relatedGuides field if available
   const explicitRelated: GuideContent[] = [];
   if (currentGuide.relatedGuides && currentGuide.relatedGuides.length > 0) {
@@ -41,8 +44,6 @@ export default function RelatedGuides({
     return null;
   }
 
-  const localePrefix = locale !== "en" ? `/${locale}` : "";
-
   return (
     <section className="py-12 bg-gray-50 border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,7 +54,7 @@ export default function RelatedGuides({
           {relatedGuides.map((guide) => (
             <Link
               key={guide.slug}
-              href={`${localePrefix}/guides/${guide.slug}`}
+              href={links.guide(guide.slug)}
               className="block bg-white p-6 rounded-lg border-2 border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all group"
             >
               <div className="inline-block px-3 py-1 bg-[#00b6a6]/10 text-[#006b5f] text-sm font-semibold rounded-full mb-3">

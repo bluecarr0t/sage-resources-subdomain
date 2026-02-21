@@ -139,7 +139,8 @@ describe('Locale Links', () => {
       expect(links.map).toBe('/es/map');
       expect(links.landing('test-slug')).toBe('/es/landing/test-slug');
       expect(links.property('test-property')).toBe('/es/property/test-property');
-      expect(links.guide('test-guide')).toBe('/es/guides/test-guide');
+      // Guides are English-only - non-en locales link to /en/guides/ to avoid broken links
+      expect(links.guide('test-guide')).toBe('/en/guides/test-guide');
       expect(links.glossaryTerm('test-term')).toBe('/es/glossary/test-term');
     });
 

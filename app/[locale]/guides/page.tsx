@@ -168,7 +168,7 @@ export default async function GuidesPage({ params }: PageProps) {
 
       <main>
         {/* Guides Index Component */}
-        <GuidesIndex allGuides={allGuides} categories={categories} />
+        <GuidesIndex allGuides={allGuides} categories={categories} locale={locale} />
 
         {/* CTA Section */}
         <section className="bg-[#006b5f] py-16">

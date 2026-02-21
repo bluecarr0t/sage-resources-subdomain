@@ -196,6 +196,14 @@ export function middleware(request: NextRequest) {
       (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
     );
 
+    // Redirect de/es/fr guide URLs to en - guides are English-only, these return 500
+    const guideRedirectMatch = pathname.match(/^\/(de|es|fr)\/guides\/(.+)$/);
+    if (guideRedirectMatch) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/en/guides/${guideRedirectMatch[2]}`;
+      return NextResponse.redirect(url, 301);
+    }
+
     // Handle root path - redirect to detected locale based on geo location
     if (pathname === '/') {
       const detectedLocale = detectLocale(request);

@@ -1,6 +1,7 @@
 "use client";
 
 import { GuideContent, getGuideSync } from "@/lib/guides";
+import { createLocaleLinks } from "@/lib/locale-links";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -10,7 +11,6 @@ import {
   generateFAQSchema,
   generateArticleSchema,
   generateSpeakableSchema,
-  generateCourseSchema,
   generateHowToSchema,
   extractHowToStepsFromGuide,
 } from "@/lib/schema";
@@ -26,6 +26,7 @@ interface PillarPageTemplateProps {
 export default function PillarPageTemplate({ content }: PillarPageTemplateProps) {
   const [activeSection, setActiveSection] = useState<string>("");
   const [showTOC, setShowTOC] = useState(false);
+  const links = createLocaleLinks("en"); // Guides are English-only
 
   // Generate structured data
   const organizationSchema = generateOrganizationSchema();
@@ -37,9 +38,6 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
   const speakableSchema = content.faqs && content.faqs.length > 0
     ? generateSpeakableSchema([".speakable-answer", "h1", "h2"])
     : generateSpeakableSchema(["h1", "h2", "h3", ".prose p"]);
-  // Add Course schema for comprehensive pillar guides
-  const isComprehensiveGuide = content.slug.endsWith("-complete-guide");
-  const courseSchema = isComprehensiveGuide ? generateCourseSchema(content) : null;
   // Add HowTo schema for guides with step-by-step instructions
   const howToSteps = content.howToSteps || extractHowToStepsFromGuide(content);
   const howToSchema = howToSteps && howToSteps.length > 0
@@ -91,12 +89,6 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
       />
-      {courseSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
-        />
-      )}
       {howToSchema && (
         <script
           type="application/ld+json"
@@ -294,7 +286,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                       return (
                         <Link
                           key={guideSlug}
-                          href={`/guides/${guideSlug}`}
+                          href={links.guide(guideSlug)}
                           className="block bg-white p-6 rounded-lg border-2 border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
                         >
                           <h3 className="text-xl font-semibold text-gray-900 mb-2">

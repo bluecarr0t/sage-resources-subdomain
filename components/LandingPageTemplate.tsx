@@ -1,5 +1,6 @@
 import { LandingPageContent, getLandingPageSync } from "@/lib/landing-pages";
 import { getGuideSync } from "@/lib/guides";
+import { createLocaleLinks } from "@/lib/locale-links";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -13,7 +14,6 @@ import {
   generateItemListSchema,
   generateSpeakableSchema,
   generateReviewSchema,
-  generateAggregateRatingSchema,
 } from "@/lib/schema";
 import TableOfContents from "@/components/TableOfContents";
 import RelatedLandingPages from "@/components/RelatedLandingPages";
@@ -36,6 +36,7 @@ interface LandingPageTemplateProps {
 }
 
 export default function LandingPageTemplate({ content }: LandingPageTemplateProps) {
+  const links = createLocaleLinks("en"); // Guides are English-only
   // Generate structured data
   const organizationSchema = generateOrganizationSchema();
   const localBusinessSchema = generateLocalBusinessSchema();
@@ -252,11 +253,6 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               datePublished: "2024-06-01"
             })) }}
           />
-          {/* Aggregate Rating Schema */}
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(generateAggregateRatingSchema(4.9, 127)) }}
-          />
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
               Trusted by Industry Leaders
@@ -369,7 +365,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                 return (
                   <Link
                     key={guideSlug}
-                    href={`/guides/${guideSlug}`}
+                    href={links.guide(guideSlug)}
                     className="block bg-white p-6 rounded-lg shadow-lg border-2 border-gray-200 hover:shadow-xl hover:border-[#006b5f] transition-all"
                   >
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">

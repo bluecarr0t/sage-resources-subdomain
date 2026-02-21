@@ -3,7 +3,7 @@ import { getGuide, getAllGuideSlugs } from "@/lib/guides";
 import { notFound } from "next/navigation";
 import PillarPageTemplate from "@/components/PillarPageTemplate";
 import { locales, type Locale } from "@/i18n";
-import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { getOpenGraphLocale } from "@/lib/i18n-utils";
 import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 
 // ISR: Revalidate pages every 24 hours
@@ -90,7 +90,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: url,
-      ...generateHreflangAlternates(pathname),
+      // Guides are English-only - only include en in hreflang to avoid broken alternate links (500 on de/es/fr)
+      languages: {
+        en: `https://resources.sageoutdooradvisory.com/en/guides/${guide.slug}`,
+        'x-default': `https://resources.sageoutdooradvisory.com/en/guides/${guide.slug}`,
+      },
     },
     robots: {
       index: true,

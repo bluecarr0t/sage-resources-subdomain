@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAllGuideSlugs, getGuideSync } from '@/lib/guides';
 import { getAllGlossaryTerms } from '@/lib/glossary/index';
 import { locales } from '@/i18n';
+import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 const blobBase = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units";
@@ -63,7 +64,7 @@ ${imageElements}
   </url>`);
   }
 
-  // Guides page images (all locales)
+  // Guides page images (guides index exists for all locales)
   for (const locale of locales) {
     const pageUrl = `/${locale}/guides`;
     const imageElements = KEY_IMAGES.slice(0, 4).map(
@@ -79,8 +80,10 @@ ${imageElements}
   }
 
   // Individual guide pages with images (limit to first 15 guides)
+  // Guides are English-only - only include en URLs to avoid broken links
   const guideSlugs = getAllGuideSlugs().slice(0, 15);
-  for (const locale of locales) {
+  const guideLocales = getAvailableLocalesForContent('guide');
+  for (const locale of guideLocales) {
     for (const slug of guideSlugs) {
       const guide = getGuideSync(slug);
       if (!guide) continue;
@@ -104,8 +107,10 @@ ${imageElements}
   }
 
   // Glossary terms with images (limit to first 20)
+  // Glossary is English-only - only include en URLs to avoid broken links
   const glossaryTerms = getAllGlossaryTerms().filter((t) => t.image).slice(0, 20);
-  for (const locale of locales) {
+  const glossaryLocales = getAvailableLocalesForContent('glossary');
+  for (const locale of glossaryLocales) {
     for (const term of glossaryTerms) {
       const imageUrl = term.image!.startsWith('http') ? term.image! : `${baseUrl}${term.image}`;
       const pageUrl = `/${locale}/glossary/${term.slug}`;
