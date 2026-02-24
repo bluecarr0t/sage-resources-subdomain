@@ -1,6 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale, type Locale } from './i18n';
 import { NextRequest, NextResponse } from 'next/server';
+import { createSupabaseMiddlewareClient } from '@/lib/supabase-middleware';
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware({
@@ -175,6 +176,7 @@ const excludedRoutes = [
   'landing',
   'property',
   'login',
+  'auth',
   'privacy-policy',
   'terms-of-service',
   'admin',
@@ -187,9 +189,20 @@ const excludedRoutes = [
   '_next',
 ];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
+
+    // Protect /admin routes - require valid session
+    if (pathname.startsWith('/admin')) {
+      const response = NextResponse.next({ request });
+      const supabase = createSupabaseMiddlewareClient(request, response);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return NextResponse.redirect(new URL('/login', request.url));
+      }
+      return response;
+    }
 
     // Check if pathname already has a locale prefix (needed early for sitemap logic)
     const pathnameHasLocale = locales.some(
@@ -270,17 +283,17 @@ export function middleware(request: NextRequest) {
       pathname.includes('.') // Skip static files (images, etc.)
     ) {
         // For sitemap, robots.txt, login, admin, and legal pages, skip i18n middleware entirely
-        if (pathname === '/sitemap.xml' || pathname.startsWith('/sitemaps/') || pathname === '/robots.txt' || pathname === '/llms.txt' || pathname === '/login' || pathname === '/admin' || pathname === '/privacy-policy' || pathname === '/terms-of-service') {
+        if (pathname === '/sitemap.xml' || pathname.startsWith('/sitemaps/') || pathname === '/robots.txt' || pathname === '/llms.txt' || pathname === '/login' || pathname.startsWith('/auth') || pathname.startsWith('/admin') || pathname === '/privacy-policy' || pathname === '/terms-of-service') {
           return NextResponse.next();
         }
       // Still apply i18n middleware for other excluded routes
-      return intlMiddleware(request);
+      return await intlMiddleware(request);
     }
 
     // If pathname is just a locale (e.g., /en), let i18n middleware handle it
     // This allows the locale-only route to work properly
     if (isLocaleOnly) {
-      return intlMiddleware(request);
+      return await intlMiddleware(request);
     }
 
     // If pathname has multiple segments, let Next.js handle it
@@ -302,7 +315,7 @@ export function middleware(request: NextRequest) {
     }
 
     // Apply i18n middleware for all other routes
-    return intlMiddleware(request);
+    return await intlMiddleware(request);
   } catch (error) {
     // Fallback: if anything goes wrong, redirect to default locale
     console.error('Middleware error:', error);

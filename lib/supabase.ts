@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabasePublishableKey =
@@ -37,7 +38,8 @@ function getSupabaseConfigError(): string | null {
 /**
  * Client-side Supabase client
  * Safe to use in browser/client components
- * Uses the publishable key and respects Row Level Security (RLS)
+ * Uses PKCE flow and secure cookie storage via @supabase/ssr
+ * Respects Row Level Security (RLS)
  * 
  * Note: If environment variables are missing, the client will throw a helpful
  * error when first used (not on module load), allowing the app to load without
@@ -57,10 +59,9 @@ function getSupabaseClient(): SupabaseClient {
   // Create client if it doesn't exist
   if (!_supabaseClient) {
     if (supabaseUrl && supabasePublishableKey) {
-      _supabaseClient = createClient(supabaseUrl, supabasePublishableKey, {
+      _supabaseClient = createBrowserClient(supabaseUrl, supabasePublishableKey, {
         auth: {
           detectSessionInUrl: true,
-          flowType: 'implicit',
           autoRefreshToken: true,
           persistSession: true,
         },

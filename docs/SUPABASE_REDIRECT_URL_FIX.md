@@ -23,7 +23,12 @@ Supabase uses the **Site URL** setting to determine where OAuth callbacks should
    ```
    http://localhost:3001/**
    ```
-   (This allows redirects to any path on localhost)
+   Or specifically for the auth callback:
+   ```
+   http://localhost:3001/auth/callback
+   http://localhost:3003/auth/callback
+   ```
+   (Add the port your dev server uses)
 
 6. Click **Save**
 

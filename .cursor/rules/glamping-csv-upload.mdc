@@ -1,0 +1,13 @@
+---
+description: CSV upload rules for all_glamping_properties table
+globs: scripts/upload-glamping-csv.ts
+alwaysApply: false
+---
+
+# Glamping CSV Upload Rules
+
+When uploading CSV data to `all_glamping_properties`:
+
+1. **Match by ID**: Rows with an `id` update the existing record; rows without `id` insert new records.
+2. **Delete on remove**: Rows with `research_status` = `"remove"` must be **deleted** from the database (not uploaded). Exclude these from updates/inserts and delete them by ID before applying other changes.
+3. **Order of operations**: Delete records with `research_status=remove` first, then update existing records, then insert new records.

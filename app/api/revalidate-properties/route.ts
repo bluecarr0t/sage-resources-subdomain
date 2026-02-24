@@ -14,16 +14,15 @@ import { revalidatePath } from 'next/cache';
  * 
  * Usage:
  * POST /api/revalidate-properties
- * 
- * Optional: Add authentication/authorization if needed
+ * Authorization: Bearer <REVALIDATE_SECRET>
  */
 export async function POST(request: NextRequest) {
   try {
-    // Optional: Add authentication check here
-    // const authHeader = request.headers.get('authorization');
-    // if (authHeader !== `Bearer ${process.env.REVALIDATE_SECRET}`) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    const authHeader = request.headers.get('authorization');
+    const secret = process.env.REVALIDATE_SECRET;
+    if (!secret || authHeader !== `Bearer ${secret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     // Revalidate all property-related caches (Redis + Next.js)
     const result = await revalidatePropertiesCache();

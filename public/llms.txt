@@ -1,0 +1,33 @@
+# Sage Outdoor Advisory – Resources
+
+> Sage Outdoor Advisory's resources subdomain provides outdoor hospitality industry data, expert guides, and marketing landing pages. It hosts an interactive Glamping Map with 600+ properties across North America, 21+ guides on feasibility studies and appraisals, a glossary of 57+ industry terms, and service landing pages for glamping, RV resort, and campground feasibility studies and appraisals.
+
+## Key Pages
+
+- [Glamping Map](/map): Interactive map of glamping properties with filters by unit type, rate category, and location
+- [Guides](/guides): Expert guides on feasibility studies, appraisals, and outdoor hospitality
+- [Glossary](/glossary): Industry terms and definitions
+- [Partners](/partners): Partner organizations and resources
+- [Landing Pages](/landing/glamping-feasibility-study): Service landing pages for feasibility studies and appraisals
+
+## Services
+
+- Glamping feasibility studies
+- RV resort feasibility studies
+- Campground feasibility studies
+- Glamping appraisals
+- RV resort and campground appraisals
+
+## Contact
+
+- Website: https://sageoutdooradvisory.com
+- Contact: https://sageoutdooradvisory.com/contact-us
+
+## Tech Stack
+
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- Supabase (property data)
+- Google Maps (map display)
+- Vercel (hosting)

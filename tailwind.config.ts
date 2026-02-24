@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -12,6 +13,16 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         sage: {
+          50: "#f6f7f6",
+          100: "#e3e7e3",
+          200: "#c7d2c7",
+          300: "#a3b5a3",
+          400: "#7a927a",
+          500: "#5c7a5c",
+          600: "#4a624a",
+          700: "#3d503d",
+          800: "#334033",
+          900: "#2c362c",
           teal: "#00b6a6",
           "teal-dark": "#009688",
           "teal-text": "#006b5f", // WCAG AA compliant for text on white

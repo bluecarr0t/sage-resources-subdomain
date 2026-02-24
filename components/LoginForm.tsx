@@ -9,6 +9,14 @@ interface LoginFormProps {
   locale: string;
 }
 
+function getSafeRedirect(redirect: string | null): string {
+  if (!redirect) return '/admin/dashboard';
+  if (redirect.startsWith('/') && !redirect.startsWith('//') && !redirect.includes(':')) {
+    return redirect;
+  }
+  return '/admin/dashboard';
+}
+
 export default function LoginForm({ locale }: LoginFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +27,21 @@ export default function LoginForm({ locale }: LoginFormProps) {
   // Check if user is already authenticated and has access
   useEffect(() => {
     let subscription: { unsubscribe: () => void } | null = null;
+
+    // Show error from OAuth callback if present (e.g. code exchange failed)
+    const errorParam = searchParams.get('error');
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+      setCheckingAuth(false);
+      // Clear error from URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('error');
+      const cleanPath = url.pathname + (url.search || '');
+      if (cleanPath !== window.location.pathname + window.location.search) {
+        router.replace(cleanPath);
+      }
+      return;
+    }
 
     const verifyUserAccess = async (userId: string, userEmail?: string | null, shouldRedirect: boolean = true) => {
       try {
@@ -58,7 +81,7 @@ export default function LoginForm({ locale }: LoginFormProps) {
         // Only redirect if this is coming from an OAuth callback (shouldRedirect = true)
         // Don't redirect if user explicitly navigated to /login
         if (shouldRedirect) {
-          const destination = searchParams.get('redirect') || '/admin';
+          const destination = getSafeRedirect(searchParams.get('redirect'));
           router.push(destination);
           router.refresh();
         } else {
@@ -74,11 +97,10 @@ export default function LoginForm({ locale }: LoginFormProps) {
 
     const checkAuth = async () => {
       try {
-        // With implicit flow, tokens arrive in the URL hash (#access_token=...)
-        // The Supabase client detects them automatically via detectSessionInUrl
+        // PKCE flow uses /auth/callback for code exchange; we only see hash tokens here for implicit flow
         const isOAuthCallback = typeof window !== 'undefined' && window.location.hash.includes('access_token');
 
-        // Listen for auth state changes (fires when Supabase detects hash tokens)
+        // Listen for auth state changes (fires when Supabase detects hash tokens for implicit flow)
         const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             if (event === 'SIGNED_IN' && session) {
@@ -92,7 +114,7 @@ export default function LoginForm({ locale }: LoginFormProps) {
         // Check current session (with timeout to prevent indefinite loading)
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+          setTimeout(() => reject(new Error('Auth check timeout')), 10000)
         );
         const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
 
@@ -126,12 +148,12 @@ export default function LoginForm({ locale }: LoginFormProps) {
       if (process.env.NODE_ENV === 'development') {
         console.log('[Login] Starting Google sign-in...');
       }
-      // OAuth returns tokens in URL hash - must land on a client-rendered page to process them.
-      // Redirect to /login (which has LoginForm) so we can establish the session, then redirect to destination.
-      const redirectPath = searchParams.get('redirect') || '/admin';
+      // OAuth callback goes to server route /auth/callback which has access to the code_verifier cookie.
+      // The server exchanges the code for a session, then redirects to the destination.
+      const redirectPath = getSafeRedirect(searchParams.get('redirect'));
       const redirectTo = typeof window !== 'undefined'
-        ? `${window.location.origin}/login${redirectPath !== '/admin' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`
-        : '/login';
+        ? `${window.location.origin}/auth/callback${redirectPath !== '/admin/dashboard' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`
+        : '/auth/callback';
 
       const oauthPromise = supabase.auth.signInWithOAuth({
         provider: 'google',

@@ -1,5 +1,5 @@
-import { defaultLocale } from '@/i18n';
 import './globals.css';
+import ThemeProvider from '@/components/ThemeProvider';
 
 // Root layout - middleware handles locale routing
 // This layout is used for routes outside locale routing (like /login)
@@ -12,7 +12,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

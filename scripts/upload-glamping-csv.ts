@@ -4,6 +4,7 @@
  *
  * - Rows WITH id: UPDATE existing record (override all columns from CSV)
  * - Rows WITHOUT id (blank): INSERT new record (Postgres generates id)
+ * - Rows with research_status = "remove": DELETE from DB (not uploaded)
  *
  * Usage:
  *   npx tsx scripts/upload-glamping-csv.ts "/path/to/Sage Glamping Data 2026 - 2.18.26.csv"
@@ -123,17 +124,27 @@ async function main() {
 
   const toUpdate: { id: number; row: Record<string, unknown> }[] = [];
   const toInsert: Record<string, unknown>[] = [];
+  const toDelete: number[] = [];
 
   for (const row of rows) {
-    const dbRow = csvRowToDbRow(row);
+    const researchStatus = String(row.research_status ?? '').trim().toLowerCase();
     const idVal = row.id?.trim();
-    if (idVal && !isNaN(parseInt(idVal, 10))) {
-      toUpdate.push({ id: parseInt(idVal, 10), row: dbRow });
+    const id = idVal && !isNaN(parseInt(idVal, 10)) ? parseInt(idVal, 10) : null;
+
+    if (researchStatus === 'remove') {
+      if (id) toDelete.push(id);
+      continue;
+    }
+
+    const dbRow = csvRowToDbRow(row);
+    if (id) {
+      toUpdate.push({ id, row: dbRow });
     } else {
       toInsert.push(dbRow);
     }
   }
 
+  console.log(`Rows with research_status=remove (delete): ${toDelete.length}`);
   console.log(`Rows with id (update): ${toUpdate.length}`);
   console.log(`Rows without id (insert): ${toInsert.length}`);
 
@@ -148,7 +159,30 @@ async function main() {
 
   let updated = 0;
   let inserted = 0;
+  let deleted = 0;
   let errors = 0;
+
+  // Deletes: remove records with research_status=remove
+  for (let i = 0; i < toDelete.length; i += BATCH_SIZE) {
+    const batch = toDelete.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map((id) => supabase.from(TABLE).delete().eq('id', id))
+    );
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value.error) {
+        errors++;
+      } else if (r.status === 'fulfilled') {
+        deleted++;
+      } else {
+        errors++;
+      }
+    }
+    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(toDelete.length / BATCH_SIZE);
+    if (toDelete.length > 0) {
+      console.log(`Deletes batch ${batchNum}/${totalBatches} (${deleted} deleted, ${errors} errors)`);
+    }
+  }
 
   // Updates: run in parallel batches
   for (let i = 0; i < toUpdate.length; i += BATCH_SIZE) {
@@ -185,7 +219,7 @@ async function main() {
     }
   }
 
-  console.log(`\nDone. Updated: ${updated}, Inserted: ${inserted}, Errors: ${errors}`);
+  console.log(`\nDone. Deleted: ${deleted}, Updated: ${updated}, Inserted: ${inserted}, Errors: ${errors}`);
   if (errors > 0) process.exit(1);
 }
 

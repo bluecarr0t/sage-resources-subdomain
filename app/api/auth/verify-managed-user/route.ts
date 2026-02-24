@@ -4,12 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
+import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClientWithCookies();
     
     // Get the current session
     const {

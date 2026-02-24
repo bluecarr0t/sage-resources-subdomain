@@ -276,14 +276,14 @@ export default function AdminColumnsView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Loading columns...</div>
+        <div className="text-gray-600 dark:text-gray-400">Loading columns...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+      <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
         Error: {error}
       </div>
     );
@@ -296,12 +296,12 @@ export default function AdminColumnsView() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
         <div className="mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Table Columns ({allColumns.length} total)
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Click on a group to expand/collapse and view the columns
           </p>
         </div>
@@ -316,13 +316,13 @@ export default function AdminColumnsView() {
             return (
               <div
                 key={group.title}
-                className="border border-gray-200 rounded-lg overflow-hidden"
+                className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
               >
                 <button
                   onClick={() => toggleGroup(group.title)}
-                  className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 flex items-center justify-between text-left transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between text-left transition-colors"
                 >
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {group.title} ({groupColumns.length})
                   </span>
                   <svg
@@ -341,12 +341,12 @@ export default function AdminColumnsView() {
                 </button>
                 
                 {isOpen && (
-                  <div className="p-4 bg-white border-t border-gray-200">
+                  <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       {groupColumns.map((column) => (
                         <div
                           key={column}
-                          className="px-3 py-2 bg-gray-50 rounded text-sm font-mono text-gray-800 hover:bg-gray-100 transition-colors"
+                          className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded text-sm font-mono text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         >
                           {column}
                         </div>
@@ -359,12 +359,12 @@ export default function AdminColumnsView() {
           })}
 
           {ungroupedColumns.length > 0 && (
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <button
                 onClick={() => toggleGroup('Other Columns')}
-                className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 flex items-center justify-between text-left transition-colors"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between text-left transition-colors"
               >
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-gray-900 dark:text-gray-100">
                   Other Columns ({ungroupedColumns.length})
                 </span>
                 <svg
@@ -383,12 +383,12 @@ export default function AdminColumnsView() {
               </button>
               
               {openGroups.has('Other Columns') && (
-                <div className="p-4 bg-white border-t border-gray-200">
+                <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {ungroupedColumns.map((column) => (
                       <div
                         key={column}
-                        className="px-3 py-2 bg-gray-50 rounded text-sm font-mono text-gray-800 hover:bg-gray-100 transition-colors"
+                        className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded text-sm font-mono text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         {column}
                       </div>

@@ -14,7 +14,7 @@ import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils
 import { createLocaleLinks } from "@/lib/locale-links";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { createServerClient } from "@/lib/supabase";
+import { createServerClientWithCookies } from "@/lib/supabase-server";
 
 // Dynamically import LocationSearch to prevent SSR issues
 const DynamicLocationSearch = dynamic(() => import('@/components/LocationSearch'), {
@@ -139,14 +139,14 @@ export default async function HomePage({ params }: PageProps) {
   
   // Check if user is authenticated and redirect to admin if so
   // This handles OAuth redirects that land on home page instead of /admin
-  const supabase = createServerClient();
+  const supabase = await createServerClientWithCookies();
   const { data: { session } } = await supabase.auth.getSession();
   
   if (session?.user) {
     // Check if user has access (domain + managed_users)
     const { isManagedUser, isAllowedEmailDomain } = await import('@/lib/auth-helpers');
     if (isAllowedEmailDomain(session.user.email) && await isManagedUser(session.user.id)) {
-      redirect('/admin');
+      redirect('/admin/dashboard');
     }
   }
   
