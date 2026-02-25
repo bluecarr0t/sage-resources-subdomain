@@ -7,6 +7,7 @@ interface ColumnGroup {
   title: string;
   columns: string[];
   defaultOpen?: boolean;
+  hidden?: boolean;
 }
 
 const COLUMN_GROUPS: ColumnGroup[] = [
@@ -25,16 +26,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
     defaultOpen: true,
   },
   {
-    title: 'Source & Tracking',
-    columns: [
-      'source',
-      'discovery_source',
-      'date_added',
-      'date_updated',
-    ],
-  },
-  {
-    title: 'Location',
+    title: 'Location & Basic Info',
     columns: [
       'address',
       'city',
@@ -43,6 +35,9 @@ const COLUMN_GROUPS: ColumnGroup[] = [
       'country',
       'lat',
       'lon',
+      'url',
+      'phone_number',
+      'description',
     ],
   },
   {
@@ -53,6 +48,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
       'year_site_opened',
       'operating_season_months',
       'number_of_locations',
+      'minimum_nights',
     ],
   },
   {
@@ -83,12 +79,14 @@ const COLUMN_GROUPS: ColumnGroup[] = [
       'unit_mini_fridge',
       'unit_bathtub',
       'unit_wood_burning_stove',
-      'rate_unit_rates_by_year',
+      'unit_campfires',
+      'unit_charcoal_grill',
     ],
   },
   {
-    title: 'Pricing',
+    title: 'Rates',
     columns: [
+      'rate_unit_rates_by_year',
       'rate_avg_retail_daily_rate',
       'rate_winter_weekday',
       'rate_winter_weekend',
@@ -126,22 +124,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
       'property_propane_refilling_station',
     ],
   },
-  {
-    title: 'Contact & Info',
-    columns: [
-      'url',
-      'phone_number',
-      'description',
-      'minimum_nights',
-    ],
-  },
-  {
-    title: 'Other Amenities',
-    columns: [
-      'unit_campfires',
-      'unit_charcoal_grill',
-    ],
-  },
+  // RV-Specific (rv_) - hidden from UI per design
   {
     title: 'RV-Specific (rv_)',
     columns: [
@@ -160,6 +143,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
       'rv_generators_allowed',
       'rv_water_hookup',
     ],
+    hidden: true,
   },
   {
     title: 'Activities (activities_)',
@@ -209,6 +193,15 @@ const COLUMN_GROUPS: ColumnGroup[] = [
       'setting_farm',
       'river_stream_or_creek',
       'setting_mountainous',
+    ],
+  },
+  {
+    title: 'Source & Tracking',
+    columns: [
+      'source',
+      'discovery_source',
+      'date_added',
+      'date_updated',
     ],
   },
   {
@@ -289,17 +282,18 @@ export default function AdminColumnsView() {
     );
   }
 
+  const visibleGroups = COLUMN_GROUPS.filter(g => !g.hidden);
   const groupedColumns = new Set(
-    COLUMN_GROUPS.flatMap(g => getGroupColumns(g))
+    visibleGroups.flatMap(g => getGroupColumns(g))
   );
-  const ungroupedColumns = allColumns.filter(col => !groupedColumns.has(col));
+  const displayedColumnCount = groupedColumns.size;
 
   return (
     <div className="space-y-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Table Columns ({allColumns.length} total)
+            Table Columns ({displayedColumnCount} total)
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Click on a group to expand/collapse and view the columns
@@ -307,7 +301,7 @@ export default function AdminColumnsView() {
         </div>
 
         <div className="space-y-2">
-          {COLUMN_GROUPS.map((group) => {
+          {visibleGroups.map((group) => {
             const groupColumns = getGroupColumns(group);
             if (groupColumns.length === 0) return null;
 
@@ -357,47 +351,6 @@ export default function AdminColumnsView() {
               </div>
             );
           })}
-
-          {ungroupedColumns.length > 0 && (
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-              <button
-                onClick={() => toggleGroup('Other Columns')}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between text-left transition-colors"
-              >
-                <span className="font-semibold text-gray-900 dark:text-gray-100">
-                  Other Columns ({ungroupedColumns.length})
-                </span>
-                <svg
-                  className={`w-5 h-5 text-gray-500 transition-transform ${
-                    openGroups.has('Other Columns') ? 'transform rotate-180' : ''
-                  }`}
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {openGroups.has('Other Columns') && (
-                <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {ungroupedColumns.map((column) => (
-                      <div
-                        key={column}
-                        className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded text-sm font-mono text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        {column}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

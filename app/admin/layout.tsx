@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import AdminAuthGuard from '@/components/AdminAuthGuard';
 import AdminSidebar from '@/components/AdminSidebar';
+import AdminMainContent from '@/components/AdminMainContent';
+import { SidebarProvider } from '@/lib/sidebar-context';
 
 export const metadata: Metadata = {
   title: 'Admin - Sage Outdoor Advisory',
@@ -18,13 +20,10 @@ export default function AdminLayout({
 }) {
   return (
     <AdminAuthGuard>
-      <AdminSidebar />
-      <div
-        id="mainContent"
-        className="min-h-screen bg-gray-50 dark:bg-gray-950 lg:ml-64 pt-16 lg:pt-8 transition-all duration-300 ease-in-out"
-      >
-        {children}
-      </div>
+      <SidebarProvider>
+        <AdminSidebar />
+        <AdminMainContent>{children}</AdminMainContent>
+      </SidebarProvider>
     </AdminAuthGuard>
   );
 }

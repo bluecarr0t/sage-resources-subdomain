@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import AdminColumnsView from '@/components/AdminColumnsView';
 import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
+import AdminMissingFieldsBreakdown from '@/components/AdminMissingFieldsBreakdown';
 
 export const metadata: Metadata = {
   title: 'Sage Glamping Data Breakdown - Sage Admin',
@@ -22,6 +23,10 @@ export default function SageGlampingDataBreakdownPage() {
         </div>
 
         <AdminGlampingMetrics />
+
+        <div className="mt-8 mb-8">
+          <AdminMissingFieldsBreakdown />
+        </div>
 
         <AdminColumnsView />
       </div>

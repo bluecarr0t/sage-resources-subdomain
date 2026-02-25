@@ -15,9 +15,13 @@ import {
   X,
   Menu,
   Database,
+  Globe,
   Sun,
   Moon,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react';
+import { useSidebar } from '@/lib/sidebar-context';
 import { supabase } from '@/lib/supabase';
 
 const LOGO_LIGHT =
@@ -42,18 +46,22 @@ function NavLink({
   icon: Icon,
   pageId,
   isActive,
+  isCollapsed,
 }: {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   pageId: string;
   isActive: boolean;
+  isCollapsed?: boolean;
 }) {
+  const collapsed = isCollapsed ?? false;
   return (
     <Link
       href={href}
       data-page={pageId}
-      className={`nav-item flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out group ${
+      title={collapsed ? label : undefined}
+      className={`nav-item flex items-center ${collapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-lg transition-all duration-200 ease-in-out group ${
         isActive
           ? 'bg-sage-50 dark:bg-white/10 text-sage-700 dark:text-sage-300 font-medium'
           : 'text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-gray-200'
@@ -61,10 +69,10 @@ function NavLink({
     >
       <Icon
         className={`w-5 h-5 flex-shrink-0 ${
-          isActive ? 'text-sage-600 dark:text-sage-400' : 'group-hover:text-slate-600 dark:group-hover:text-gray-300'
+          isActive ? 'text-sage-600 dark:text-sage-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300'
         }`}
       />
-      <span className="sidebar-text">{label}</span>
+      {!collapsed && <span className="sidebar-text">{label}</span>}
     </Link>
   );
 }
@@ -72,11 +80,22 @@ function NavLink({
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { setTheme, resolvedTheme } = useTheme();
+  const { isCollapsed, toggleCollapsed } = useSidebar();
   const [userEmail, setUserEmail] = useState<string>('Loading...');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(true);
 
   const activePageId = getActivePageId(pathname || '');
+  const showCollapsed = isDesktop && isCollapsed;
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const handler = () => setIsDesktop(mq.matches);
+    handler(); // set initial
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => setMounted(true), []);
 
@@ -125,20 +144,23 @@ export default function AdminSidebar() {
 
       <aside
         id="sidebar"
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-900/50 transition-all duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-900/50 transition-all duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } w-64 ${isCollapsed ? 'lg:w-20' : ''}`}
       >
         <div className="flex flex-col h-full">
           {/* Header - Logo area */}
-          <div className="flex items-center justify-center border-b border-gray-200 dark:border-gray-900/50 relative py-4">
-            <Link href="/admin/dashboard" className="flex items-center justify-center w-40 h-40">
+          <div className={`flex items-center justify-center border-b border-gray-200 dark:border-gray-900/50 relative ${showCollapsed ? 'py-4 pt-8' : 'py-4'}`}>
+            <Link
+              href="/admin/dashboard"
+              className={`flex items-center justify-center ${showCollapsed ? 'w-12 h-12' : 'w-40 h-40'}`}
+            >
               <Image
                 src={isDark ? LOGO_DARK : LOGO_LIGHT}
                 alt="Sage Outdoor Advisory"
-                width={160}
-                height={160}
-                className="w-40 h-40 object-contain"
+                width={showCollapsed ? 48 : 160}
+                height={showCollapsed ? 48 : 160}
+                className={`object-contain ${showCollapsed ? 'w-12 h-12' : 'w-40 h-40'}`}
               />
             </Link>
             <button
@@ -147,6 +169,18 @@ export default function AdminSidebar() {
               aria-label="Close sidebar"
             >
               <X className="w-5 h-5" />
+            </button>
+            <button
+              onClick={toggleCollapsed}
+              className="absolute top-1 right-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 hidden lg:flex items-center justify-center"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isCollapsed ? (
+                <ChevronsRight className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              ) : (
+                <ChevronsLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              )}
             </button>
           </div>
 
@@ -160,21 +194,38 @@ export default function AdminSidebar() {
                 icon={BarChart2}
                 pageId="dashboard"
                 isActive={activePageId === 'dashboard'}
+                isCollapsed={showCollapsed}
               />
             </div>
 
             {/* INTERNAL section */}
             <div className="py-2">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Internal
-              </div>
-              <div className="space-y-1 ml-4">
+              {!showCollapsed && (
+                <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Internal
+                </div>
+              )}
+              <div className={`space-y-1 ${showCollapsed ? '' : 'ml-4'}`}>
+                <a
+                  href="https://data.sageoutdooradvisory.com/camp/login"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-page="web-scraper"
+                  title={showCollapsed ? 'Web Scraper' : undefined}
+                  className={`nav-item flex items-center ${showCollapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-lg transition-all duration-200 ease-in-out group text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-gray-200`}
+                >
+                  <Globe
+                    className="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300"
+                  />
+                  {!showCollapsed && <span className="sidebar-text">Web Scraper</span>}
+                </a>
                 <NavLink
                   href="/admin/client-map"
                   label="Client Map"
                   icon={Map}
                   pageId="client-map"
                   isActive={activePageId === 'client-map'}
+                  isCollapsed={showCollapsed}
                 />
                 <NavLink
                   href="/admin/past-reports"
@@ -182,6 +233,7 @@ export default function AdminSidebar() {
                   icon={FileText}
                   pageId="past-reports"
                   isActive={activePageId === 'past-reports'}
+                  isCollapsed={showCollapsed}
                 />
                 <NavLink
                   href="/admin/upload-reports"
@@ -189,6 +241,7 @@ export default function AdminSidebar() {
                   icon={UploadCloud}
                   pageId="upload-reports"
                   isActive={activePageId === 'upload-reports'}
+                  isCollapsed={showCollapsed}
                 />
                 <NavLink
                   href="/admin/sage-glamping-data-breakdown"
@@ -196,22 +249,26 @@ export default function AdminSidebar() {
                   icon={Database}
                   pageId="sage-glamping-data-breakdown"
                   isActive={activePageId === 'sage-glamping-data-breakdown'}
+                  isCollapsed={showCollapsed}
                 />
               </div>
             </div>
 
             {/* EXTERNAL section */}
             <div className="py-2">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                External
-              </div>
-              <div className="space-y-1 ml-4">
+              {!showCollapsed && (
+                <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  External
+                </div>
+              )}
+              <div className={`space-y-1 ${showCollapsed ? '' : 'ml-4'}`}>
                 <Link
                   href="/map"
                   target="_blank"
                   rel="noopener noreferrer"
                   data-page="map"
-                  className={`nav-item flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out group ${
+                  title={showCollapsed ? 'Glamping Map' : undefined}
+                  className={`nav-item flex items-center ${showCollapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-lg transition-all duration-200 ease-in-out group ${
                     activePageId === 'map'
                       ? 'bg-sage-50 dark:bg-white/10 text-sage-700 dark:text-sage-300 font-medium'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-gray-200'
@@ -219,19 +276,21 @@ export default function AdminSidebar() {
                 >
                   <Map
                     className={`w-5 h-5 flex-shrink-0 ${
-                      activePageId === 'map' ? 'text-sage-600 dark:text-sage-400' : 'group-hover:text-slate-600 dark:group-hover:text-gray-300'
+                      activePageId === 'map' ? 'text-sage-600 dark:text-sage-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300'
                     }`}
                   />
-                  <span className="sidebar-text">Glamping Map</span>
+                  {!showCollapsed && <span className="sidebar-text">Glamping Map</span>}
                 </Link>
               </div>
             </div>
           </nav>
 
           {/* Footer - theme toggle + user profile (modern CPO placement) */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-900/50 bg-white dark:bg-black space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Appearance</span>
+          <div className={`absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-900/50 bg-white dark:bg-black space-y-3 ${showCollapsed ? 'p-2' : 'p-4'}`}>
+            <div className={`flex items-center ${showCollapsed ? 'justify-center' : 'justify-between'}`}>
+              {!showCollapsed && (
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Appearance</span>
+              )}
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
@@ -241,22 +300,29 @@ export default function AdminSidebar() {
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
             </div>
-            <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-200 dark:border-gray-900/50">
-              <div className="flex items-center space-x-3 flex-1 min-w-0">
+            <div className={`flex items-center ${showCollapsed ? 'justify-center gap-1' : 'justify-between gap-2'} pt-3 border-t border-gray-200 dark:border-gray-900/50`}>
+              {!showCollapsed && (
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <div className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-sage-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      id="userEmail"
+                      className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
+                      title={userEmail}
+                    >
+                      {userEmail}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Administrator</p>
+                  </div>
+                </div>
+              )}
+              {showCollapsed && (
                 <div className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-sage-600" />
+                  <User className="w-4 h-4 text-sage-600" title={userEmail} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p
-                    id="userEmail"
-                    className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
-                    title={userEmail}
-                  >
-                    {userEmail}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Administrator</p>
-                </div>
-              </div>
+              )}
               <button
                 onClick={handleLogout}
                 className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"

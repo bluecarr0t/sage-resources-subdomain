@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Card } from '@/components/ui';
+import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
 
 export const metadata: Metadata = {
   title: 'Dashboard - Sage Admin',
@@ -14,14 +14,13 @@ export default function DashboardPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <Card className="flex flex-col items-center justify-center min-h-[60vh]">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Coming soon
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+            Dashboard
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
-            Dashboard metrics and charts will be available here.
-          </p>
-        </Card>
+        </div>
+
+        <AdminGlampingMetrics />
       </div>
     </main>
   );
