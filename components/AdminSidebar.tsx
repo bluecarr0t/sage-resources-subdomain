@@ -319,8 +319,11 @@ export default function AdminSidebar() {
                 </div>
               )}
               {showCollapsed && (
-                <div className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-sage-600" title={userEmail} />
+                <div
+                  className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0"
+                  title={userEmail}
+                >
+                  <User className="w-4 h-4 text-sage-600" />
                 </div>
               )}
               <button
