@@ -193,7 +193,7 @@ export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
 
-    // Protect /admin routes - require valid session
+    // Protect /admin routes - require valid session (Google OAuth)
     if (pathname.startsWith('/admin')) {
       const response = NextResponse.next({ request });
       const supabase = createSupabaseMiddlewareClient(request, response);
@@ -201,6 +201,7 @@ export async function middleware(request: NextRequest) {
       if (!session) {
         return NextResponse.redirect(new URL('/login', request.url));
       }
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       return response;
     }
 

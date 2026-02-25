@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { GoogleMapsProvider, useGoogleMaps } from '@/components/GoogleMapsProvider';
-import { Card } from '@/components/ui';
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 
 interface ReportMarker {
   id: string;
+  studyId: string | null;
   propertyName: string;
   reportNumber: string;
   address: string;
@@ -86,16 +87,6 @@ function ClientMapContent() {
 
   return (
     <div className="space-y-4">
-      <Card padding="sm">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-          Client Reports Map
-        </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {reports.length} report{reports.length !== 1 ? 's' : ''} with location
-          data
-        </p>
-      </Card>
-
       <div className="w-full">
         <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
           <GoogleMap
@@ -141,16 +132,26 @@ function ClientMapContent() {
                       Approximate location (state center)
                     </p>
                   )}
-                  {selectedReport.dropboxLink && selectedReport.dropboxLink !== '#' && (
-                    <a
-                      href={selectedReport.dropboxLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-[#4a624a] hover:underline"
-                    >
-                      View Report
-                    </a>
-                  )}
+                  <div className="flex flex-col gap-1">
+                    {selectedReport.studyId && (
+                      <Link
+                        href={`/admin/reports/${selectedReport.studyId}`}
+                        className="text-sm text-[#4a624a] hover:underline font-medium"
+                      >
+                        View Details
+                      </Link>
+                    )}
+                    {selectedReport.dropboxLink && selectedReport.dropboxLink !== '#' && (
+                      <a
+                        href={selectedReport.dropboxLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-[#4a624a] hover:underline"
+                      >
+                        View Report (Dropbox)
+                      </a>
+                    )}
+                  </div>
                 </div>
               </InfoWindow>
             )}

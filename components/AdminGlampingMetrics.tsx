@@ -71,17 +71,13 @@ export default function AdminGlampingMetrics() {
 
   if (loading) {
     return (
-      <div className="space-y-6 mb-8">
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 p-5 animate-pulse">
-          <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3 mb-3" />
-          <div className="h-8 bg-gray-200 dark:bg-gray-600 rounded w-2/3 mb-4" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded" />
-        </div>
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 p-6 animate-pulse">
-          <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3 mb-4" />
-          <div className="h-10 bg-gray-200 dark:bg-gray-600 rounded" />
-        </div>
-      </div>
+      <section className="rounded-xl border-2 border-blue-200 dark:border-blue-900 bg-white dark:bg-gray-900 p-5 animate-pulse mb-10">
+        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3 mb-3" />
+        <div className="h-8 bg-gray-200 dark:bg-gray-600 rounded w-2/3 mb-4" />
+        <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded mb-6" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4 mb-4" />
+        <div className="h-10 bg-gray-200 dark:bg-gray-600 rounded" />
+      </section>
     );
   }
 
@@ -126,101 +122,106 @@ export default function AdminGlampingMetrics() {
       : 0;
 
   return (
-    <div className="space-y-6 mb-8">
-      <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-3 tracking-tight">
-        Sage Glamping Database
-      </h2>
-      <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/30 shadow-sm p-5">
-        <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
-          Database size
-        </h3>
-        <p className="text-2xl font-semibold tabular-nums text-slate-900 dark:text-slate-100 mb-3">
-          {metrics.totalPropertyCount.toLocaleString()} properties
-          <span className="text-slate-500 dark:text-slate-400 font-normal">
-            {' '}({metrics.totalUnitCount.toLocaleString()} units)
-          </span>
-        </p>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-300">
-          <span>
-            <span className="font-medium">USA:</span>{' '}
-            {metrics.usaPropertyCount.toLocaleString()} ({usaPct}%)
-          </span>
-          <span className="text-slate-400 dark:text-slate-500">|</span>
-          <span>
-            <span className="font-medium">Other:</span>{' '}
-            {otherPropertyCount.toLocaleString()} ({otherPct}%)
-          </span>
-        </div>
-        {/* Stacked bar */}
-        <div className="mt-3 flex h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700">
-          <div
-            className="bg-blue-500 dark:bg-blue-500 transition-all duration-300"
-            style={{ width: `${usaPct}%` }}
-            title={`USA: ${metrics.usaPropertyCount.toLocaleString()} (${usaPct}%)`}
-          />
-          <div
-            className="bg-slate-400 dark:bg-slate-500 transition-all duration-300"
-            style={{ width: `${otherPct}%` }}
-            title={`Other: ${otherPropertyCount.toLocaleString()} (${otherPct}%)`}
-          />
-        </div>
+    <section className="rounded-xl border-2 border-blue-200 dark:border-blue-900 bg-white dark:bg-gray-900 shadow-sm overflow-hidden mb-10">
+      <div className="border-b border-blue-200 dark:border-blue-900 bg-blue-50/80 dark:bg-blue-950/40 px-5 py-3">
+        <h2 className="text-base font-semibold text-blue-800 dark:text-blue-200 tracking-tight">
+          Sage Glamping Database
+        </h2>
       </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">
-            Research Pipeline
+      <div className="p-5 space-y-6">
+        {/* Database size */}
+        <div>
+          <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
+            Database size
           </h3>
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 tabular-nums">
-            {completionRate}% published
-          </span>
+          <p className="text-2xl font-semibold tabular-nums text-slate-900 dark:text-slate-100 mb-3">
+            {metrics.totalPropertyCount.toLocaleString()} properties
+            <span className="text-slate-500 dark:text-slate-400 font-normal">
+              {' '}({metrics.totalUnitCount.toLocaleString()} units)
+            </span>
+          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-300">
+            <span>
+              <span className="font-medium">USA:</span>{' '}
+              {metrics.usaPropertyCount.toLocaleString()} ({usaPct}%)
+            </span>
+            <span className="text-slate-400 dark:text-slate-500">|</span>
+            <span>
+              <span className="font-medium">Other:</span>{' '}
+              {otherPropertyCount.toLocaleString()} ({otherPct}%)
+            </span>
+          </div>
+          <div className="mt-3 flex h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700">
+            <div
+              className="bg-blue-500 dark:bg-blue-500 transition-all duration-300"
+              style={{ width: `${usaPct}%` }}
+              title={`USA: ${metrics.usaPropertyCount.toLocaleString()} (${usaPct}%)`}
+            />
+            <div
+              className="bg-slate-400 dark:bg-slate-500 transition-all duration-300"
+              style={{ width: `${otherPct}%` }}
+              title={`Other: ${otherPropertyCount.toLocaleString()} (${otherPct}%)`}
+            />
+          </div>
         </div>
-        <div className="flex flex-nowrap items-stretch gap-2 overflow-x-auto">
-          {FUNNEL_STAGES.map((stage, i) => {
-            const value = researchValues[stage.key];
-            const pct = researchPcts[stage.key];
-            const isInProgress = stage.key === 'inProgress';
-            return (
-              <div key={stage.key} className="flex flex-1 min-w-0 items-stretch gap-0 sm:gap-2">
-                <div
-                  className={`flex flex-1 min-w-0 flex-col items-center justify-center rounded-lg border-2 px-4 py-4 text-center ${stage.cardClass}`}
-                  title={`${stage.label}: ${value.toLocaleString()} (${pct}%)`}
-                >
-                  <p
-                    className={`text-xs font-medium uppercase tracking-wide mb-1 ${stage.labelClass}`}
+
+        {/* Research Pipeline - subsection */}
+        <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">
+              Research Pipeline
+            </h3>
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 tabular-nums">
+              {completionRate}% published
+            </span>
+          </div>
+          <div className="flex flex-nowrap items-stretch gap-2 overflow-x-auto">
+            {FUNNEL_STAGES.map((stage, i) => {
+              const value = researchValues[stage.key];
+              const pct = researchPcts[stage.key];
+              const isInProgress = stage.key === 'inProgress';
+              return (
+                <div key={stage.key} className="flex flex-1 min-w-0 items-stretch gap-0 sm:gap-2">
+                  <div
+                    className={`flex flex-1 min-w-0 flex-col items-center justify-center rounded-lg border-2 px-4 py-4 text-center ${stage.cardClass}`}
+                    title={`${stage.label}: ${value.toLocaleString()} (${pct}%)`}
                   >
-                    {stage.label}
-                    {isInProgress && (
-                      <span className="ml-1.5 font-semibold">· Work queue</span>
-                    )}
-                  </p>
-                  <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-                    {value.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{pct}%</p>
-                </div>
-                {i < FUNNEL_STAGES.length - 1 && (
-                  <div className="hidden sm:flex flex-shrink-0 items-center justify-center text-slate-300 dark:text-slate-600 px-1">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    <p
+                      className={`text-xs font-medium uppercase tracking-wide mb-1 ${stage.labelClass}`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+                      {stage.label}
+                      {isInProgress && (
+                        <span className="ml-1.5 font-semibold">· Work queue</span>
+                      )}
+                    </p>
+                    <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                      {value.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{pct}%</p>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                  {i < FUNNEL_STAGES.length - 1 && (
+                    <div className="hidden sm:flex flex-shrink-0 items-center justify-center text-slate-300 dark:text-slate-600 px-1">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

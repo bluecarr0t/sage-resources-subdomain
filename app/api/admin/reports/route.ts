@@ -76,12 +76,17 @@ export async function GET(request: NextRequest) {
         state: r.state,
         market_type: r.market_type,
         total_sites: r.total_sites,
-        status: r.status,
+        status: 'completed',
         created_at: r.created_at,
         dropbox_url: r.dropbox_url,
         client_id: r.client_id ?? null,
         client_name: client?.name ?? null,
         client_company: client?.company ?? null,
+        study_id: r.study_id ?? null,
+        executive_summary: r.executive_summary ?? null,
+        has_docx: r.has_docx ?? false,
+        has_comparables: r.has_comparables ?? false,
+        report_date: r.report_date ?? null,
       };
     });
 

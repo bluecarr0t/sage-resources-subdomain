@@ -33,7 +33,9 @@
     "react-dom": "^18.3.0",
     "react-leaflet": "^4.2.1",
     "recharts": "^3.7.0",
-    "redis": "^4.7.0"
+    "redis": "^4.7.0",
+    "word-extractor": "^1.0.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.0.8",

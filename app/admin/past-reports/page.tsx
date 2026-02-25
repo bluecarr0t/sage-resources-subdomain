@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { MoreHorizontal, ExternalLink, FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { MoreHorizontal, FileText } from 'lucide-react';
 import { Button, Input, Modal, ModalContent, Select } from '@/components/ui';
 
 interface Report {
@@ -20,6 +21,11 @@ interface Report {
   client_id?: string | null;
   client_name?: string | null;
   client_company?: string | null;
+  study_id?: string | null;
+  executive_summary?: string | null;
+  has_docx?: boolean;
+  has_comparables?: boolean;
+  report_date?: string | null;
 }
 
 interface Client {
@@ -61,6 +67,17 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+/** Known template/census dates — do not display as report date */
+const TEMPLATE_DATE_ISO = new Set(['2010-12-01', '2010-01-01', '2000-01-01']);
+
+function isDisplayableReportDate(dateStr: string | null | undefined): boolean {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return false;
+  const iso = d.toISOString().split('T')[0];
+  return !TEMPLATE_DATE_ISO.has(iso);
+}
+
 function formatDate(dateStr: string) {
   if (!dateStr) return '-';
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -82,7 +99,18 @@ function formatMarketType(type: string | null | undefined) {
   return map[(type || '').toLowerCase()] || type || 'Mixed';
 }
 
+function formatStatus(status: string | null | undefined) {
+  const map: Record<string, string> = {
+    completed: 'Completed',
+    draft: 'Draft',
+    'in-review': 'In Review',
+    processing: 'Processing',
+  };
+  return map[(status || '').toLowerCase()] || status || 'Draft';
+}
+
 export default function PastReportsPage() {
+  const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -378,73 +406,56 @@ export default function PastReportsPage() {
                         Property Info
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        AI Insights
+                        Location
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Status
+                        Date
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Links
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Actions
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <span className="sr-only">Actions</span>
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                     {paginatedReports.map((report) => (
-                      <tr key={report.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <tr
+                        key={report.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
+                        onClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          if (target.closest('button') || target.closest('a') || target.closest('.dropdown-container')) return;
+                          if (report.study_id) {
+                            router.push(`/admin/reports/${report.study_id}`);
+                          }
+                        }}
+                      >
                         <td className="px-6 py-4">
                           <div className="font-medium text-gray-900 dark:text-gray-100">
                             {report.title || 'Untitled'}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {formatDate(report.created_at)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-gray-900 dark:text-gray-100">
-                            {report.property_name || '-'}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {report.location || [report.city, report.state].filter(Boolean).join(', ') || '-'}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {report.total_sites ?? 'N/A'} sites • {formatMarketType(report.market_type)}
-                          </div>
-                          {(report.client_name || report.client_company) && (
-                            <div className="text-xs text-sage-600 dark:text-sage-400 mt-1">
-                              {[report.client_name, report.client_company].filter(Boolean).join(' • ')}
+                          {report.study_id && (
+                            <div className="text-xs text-sage-600 dark:text-sage-400 font-mono mt-0.5">
+                              {report.study_id}
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-400 dark:text-gray-500 italic">
-                          Coming soon
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
+                            {report.total_sites ?? 'N/A'} sites • {formatMarketType(report.market_type)}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusStyle(report.status)}`}
-                          >
-                            {report.status || 'draft'}
-                          </span>
+                          <div className="text-sm text-gray-900 dark:text-gray-100">
+                            {[report.city, report.state].filter(Boolean).join(', ') || report.location || '-'}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
-                          {report.dropbox_url ? (
-                            <a
-                              href={report.dropbox_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-sage-600 dark:text-sage-400 hover:underline"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              Dropbox
-                            </a>
-                          ) : (
-                            <span className="text-sm text-gray-400 dark:text-gray-500">No link available</span>
-                          )}
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
+                            {isDisplayableReportDate(report.report_date) ? formatDate(report.report_date) : '-'}
+                          </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="dropdown-container relative">
+                        <td className="px-6 py-4 text-right">
+                          <div className="dropdown-container relative inline-block">
                             <button
                               onClick={() => openDropdownMenu(report.id)}
                               className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"

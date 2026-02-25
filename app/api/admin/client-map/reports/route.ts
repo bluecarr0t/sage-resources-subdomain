@@ -71,8 +71,10 @@ function formatAddress(report: Record<string, unknown>): string {
   if (report.address_1) parts.push(String(report.address_1));
   if (report.city) parts.push(String(report.city));
   if (report.state) parts.push(String(report.state));
-  if (report.location && parts.length === 0) parts.push(String(report.location));
-  return parts.length ? parts.join(', ') : 'Address not specified';
+  if (report.zip_code) parts.push(String(report.zip_code));
+  if (parts.length > 0) return parts.join(', ');
+  if (report.location) return String(report.location);
+  return 'Address not specified';
 }
 
 function formatMarketType(marketType: string | null | undefined): string {
@@ -137,7 +139,7 @@ export async function GET() {
       throw error;
     }
 
-    const reports = (data || []).map((r) => {
+    const rawReports = (data || []).map((r) => {
       const hasCoords = r.latitude != null && r.longitude != null;
       let lat: number;
       let lng: number;
@@ -154,6 +156,7 @@ export async function GET() {
 
       return {
         id: r.id,
+        studyId: r.study_id ?? null,
         propertyName: r.property_name || 'Unnamed Property',
         reportNumber: r.title || `Report-${String(r.id).slice(0, 8)}`,
         address: formatAddress(r),
@@ -168,6 +171,25 @@ export async function GET() {
         clientName: client?.name ?? null,
         clientCompany: client?.company ?? null,
       };
+    });
+
+    // Add small offsets for reports that share the same lat/lng (e.g. no coords + same state center)
+    // so all markers are visible instead of stacking on top of each other
+    const posCount = new Map<string, number>();
+    const reports = rawReports.map((r, idx) => {
+      const key = `${r.lat.toFixed(4)},${r.lng.toFixed(4)}`;
+      const count = posCount.get(key) ?? 0;
+      posCount.set(key, count + 1);
+      if (count > 0) {
+        const offset = 0.03 * count; // ~3 km per stacked report
+        const angle = (idx * 137.5) * (Math.PI / 180); // golden angle for even spread
+        return {
+          ...r,
+          lat: r.lat + Math.cos(angle) * offset,
+          lng: r.lng + Math.sin(angle) * offset,
+        };
+      }
+      return r;
     });
 
     return NextResponse.json({ success: true, reports });

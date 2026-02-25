@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
+import AdminPastReportsStats from '@/components/AdminPastReportsStats';
 
 export const metadata: Metadata = {
   title: 'Dashboard - Sage Admin',
@@ -20,6 +21,7 @@ export default function DashboardPage() {
           </h1>
         </div>
 
+        <AdminPastReportsStats />
         <AdminGlampingMetrics />
       </div>
     </main>

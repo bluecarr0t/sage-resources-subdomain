@@ -20,6 +20,7 @@ import {
   Moon,
   ChevronsLeft,
   ChevronsRight,
+  Tent,
 } from 'lucide-react';
 import { useSidebar } from '@/lib/sidebar-context';
 import { supabase } from '@/lib/supabase';
@@ -37,6 +38,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
   if (pathname.startsWith('/admin/upload-reports')) return 'upload-reports';
+  if (pathname.startsWith('/admin/comparables')) return 'comparables';
   return '';
 }
 
@@ -225,6 +227,14 @@ export default function AdminSidebar() {
                   icon={Map}
                   pageId="client-map"
                   isActive={activePageId === 'client-map'}
+                  isCollapsed={showCollapsed}
+                />
+                <NavLink
+                  href="/admin/comparables"
+                  label="Comparables"
+                  icon={Tent}
+                  pageId="comparables"
+                  isActive={activePageId === 'comparables'}
                   isCollapsed={showCollapsed}
                 />
                 <NavLink
