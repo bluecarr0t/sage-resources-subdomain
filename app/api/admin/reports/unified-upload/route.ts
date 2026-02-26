@@ -45,6 +45,10 @@ interface UnifiedUploadResult {
   xlsx_result?: Record<string, unknown>;
 }
 
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: { Allow: 'POST, OPTIONS' } });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const rlKey = `unified-upload:${getRateLimitKey(request)}`;

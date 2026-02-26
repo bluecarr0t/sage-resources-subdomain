@@ -210,6 +210,7 @@ export default function UploadReportsPage() {
       const presignRes = await fetch('/api/admin/reports/presign-upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           files: queuedFiles.map((qf) => ({ name: qf.file.name, size: qf.file.size })),
         }),
@@ -248,6 +249,7 @@ export default function UploadReportsPage() {
       const processRes = await fetch('/api/admin/reports/unified-upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           files: uploads.map((u) => ({ name: u.name, storagePath: u.storagePath })),
         }),

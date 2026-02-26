@@ -8,6 +8,10 @@ export const dynamic = 'force-dynamic';
 const BUCKET_NAME = 'report-uploads';
 const MAX_FILES = 20;
 
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: { Allow: 'POST, OPTIONS' } });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabaseAuth = await createServerClientWithCookies();

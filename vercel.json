@@ -3,6 +3,14 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
+  "functions": {
+    "app/api/admin/reports/unified-upload/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/admin/reports/presign-upload/route.ts": {
+      "maxDuration": 30
+    }
+  },
   "redirects": [
     {
       "source": "/(.*)",
