@@ -397,7 +397,7 @@ export default function StudyDetailPage() {
     { id: 'property-comparables', label: 'Property Comparables', visible: true },
     { id: 'valuation', label: 'Valuation', visible: valuations.length > 0 },
     { id: 'pro-forma', label: 'Pro Forma Units', visible: proFormaUnits.length > 0 },
-    { id: 'financing', label: 'Financing', visible: financing.length > 0 },
+    { id: 'financing', label: 'Financing', visible: !!financing },
     { id: 'development-costs', label: 'Development Costs', visible: developmentCosts.length > 0 },
     { id: 'rate-projections', label: 'Rate Projections', visible: rateProjections.length > 0 },
     { id: 'occupancy-projections', label: 'Occupancy Projections', visible: occupancyProjections.length > 0 },

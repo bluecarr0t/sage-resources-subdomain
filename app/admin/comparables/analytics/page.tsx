@@ -277,7 +277,7 @@ export default function AnalyticsPage() {
                     tick={{ fontSize: 11 }}
                   />
                   <Tooltip
-                    formatter={(value: number) => [`$${value}`, '']}
+                    formatter={(value: number | undefined) => [value != null ? `$${value}` : '-', '']}
                     labelStyle={{ fontWeight: 600 }}
                   />
                   <Legend verticalAlign="top" />
@@ -309,7 +309,7 @@ export default function AnalyticsPage() {
                       innerRadius={40}
                       dataKey="value"
                       label={({ name, percent }) =>
-                        `${name} ${(percent * 100).toFixed(0)}%`
+                        `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
                       }
                       labelLine={false}
                     >
@@ -428,7 +428,7 @@ export default function AnalyticsPage() {
                   tick={{ fontSize: 11 }}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`$${value}`, '']}
+                  formatter={(value: number | undefined) => [value != null ? `$${value}` : '-', '']}
                 />
                 <Legend verticalAlign="top" />
                 <Bar dataKey="avg_low_adr" name="Avg Low ADR" fill="#94a3b8" radius={[4, 4, 0, 0]} />

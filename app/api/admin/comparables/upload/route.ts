@@ -114,6 +114,7 @@ async function ensureReportUploadsBucket(supabase: ReturnType<typeof createServe
 
   if (exists) {
     const { error: updateError } = await supabase.storage.updateBucket(BUCKET_NAME, {
+      public: false,
       fileSizeLimit: 52428800, // 50MB
       allowedMimeTypes: mimeTypes,
     });
@@ -405,15 +406,25 @@ export async function POST(request: NextRequest) {
           occupancy_notes: s.occupancy_notes,
         }));
 
-        const pfInserts: FeasibilityProFormaUnitInsert[] = parsed.pro_forma_units.map((u) => ({
-          report_id: reportId,
-          study_id: parsed.study_id,
-          unit_type: u.unit_type,
-          unit_category: u.unit_category,
-          unit_count: clampInt(u.unit_count),
-          adr_growth_rate: clampPercent(u.adr_growth_rate),
-          yearly_data: clampYearlyData(u.yearly_data) ?? u.yearly_data,
-        }));
+        const pfInserts: FeasibilityProFormaUnitInsert[] = parsed.pro_forma_units.map((u) => {
+          const clamped = clampYearlyData(u.yearly_data) ?? u.yearly_data ?? [];
+          const yearly_data = clamped.map((d, i) => ({
+            year: d.year ?? i + 1,
+            adr: clampAdr(d.adr),
+            occupancy: clampPercent4(d.occupancy),
+            site_nights: clampInt(d.site_nights),
+            revenue: clampCurrency(d.revenue),
+          }));
+          return {
+            report_id: reportId,
+            study_id: parsed.study_id,
+            unit_type: u.unit_type,
+            unit_category: u.unit_category,
+            unit_count: clampInt(u.unit_count),
+            adr_growth_rate: clampPercent(u.adr_growth_rate),
+            yearly_data,
+          };
+        });
 
         let valInsert: FeasibilityValuationInsert | null = null;
         if (parsed.valuation) {
@@ -487,7 +498,16 @@ export async function POST(request: NextRequest) {
             total_project_cost: clampCurrency(f.total_project_cost),
             payback_period_years: clampInt(f.payback_period_years),
             irr_on_equity: clampPercent4(f.irr_on_equity),
-            yearly_returns: clampYearlyReturns(f.yearly_returns) ?? f.yearly_returns,
+            yearly_returns: (() => {
+              const raw = clampYearlyReturns(f.yearly_returns) ?? f.yearly_returns ?? [];
+              return raw.map((r, i) => ({
+                year: r.year ?? i + 1,
+                noi: clampCurrency(r.noi),
+                net_income_to_equity: clampCurrency(r.net_income_to_equity),
+                cash_on_cash: clampPercent4(r.cash_on_cash),
+                dcr: clampAdr(r.dcr),
+              }));
+            })(),
           };
         }
 

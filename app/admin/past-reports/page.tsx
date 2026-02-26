@@ -451,7 +451,7 @@ export default function PastReportsPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-700 dark:text-gray-300">
-                            {isDisplayableReportDate(report.report_date) ? formatDate(report.report_date) : '-'}
+                            {isDisplayableReportDate(report.report_date) ? formatDate(report.report_date!) : '-'}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-right">
