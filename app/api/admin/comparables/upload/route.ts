@@ -224,11 +224,37 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const formData = await request.formData();
+    const supabaseAdmin = createServerClient();
     const files: File[] = [];
-    for (const [, value] of formData.entries()) {
-      if (value instanceof File && value.name.toLowerCase().endsWith('.xlsx')) {
-        files.push(value);
+    const contentType = request.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      // Storage-path mode: download from Supabase (avoids Vercel 4.5MB body limit on internal calls)
+      const body = await request.json();
+      const filePaths: Array<{ name: string; storagePath: string }> = body.files || [];
+
+      for (const fp of filePaths) {
+        if (!fp.name.toLowerCase().endsWith('.xlsx')) continue;
+
+        const { data: blob, error: dlError } = await supabaseAdmin.storage
+          .from(BUCKET_NAME)
+          .download(fp.storagePath);
+
+        if (dlError || !blob) {
+          return NextResponse.json(
+            { success: false, message: `Failed to retrieve ${fp.name}: ${dlError?.message || 'Unknown error'}` },
+            { status: 500 }
+          );
+        }
+
+        files.push(new File([blob], fp.name));
+      }
+    } else {
+      const formData = await request.formData();
+      for (const [, value] of formData.entries()) {
+        if (value instanceof File && value.name.toLowerCase().endsWith('.xlsx')) {
+          files.push(value);
+        }
       }
     }
 
@@ -246,7 +272,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabaseAdmin = createServerClient();
     const results: UploadResult[] = [];
 
     try {

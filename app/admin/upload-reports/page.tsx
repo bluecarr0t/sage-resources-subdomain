@@ -253,7 +253,18 @@ export default function UploadReportsPage() {
         }),
       });
 
-      const data = await processRes.json();
+      const text = await processRes.text();
+      let data: { results?: UploadResult[]; message?: string };
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          processRes.status === 413
+            ? 'Request too large. Please try uploading fewer or smaller files.'
+            : `Invalid response: ${text.slice(0, 60)}...`
+        );
+      }
+
       if (!processRes.ok && !data.results) {
         throw new Error(data.message || 'Processing failed');
       }

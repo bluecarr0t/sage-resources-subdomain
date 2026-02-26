@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
     const docxFiles: File[] = [];
     const oversized: string[] = [];
     const tempStoragePaths: string[] = [];
+    const xlsxStoragePathByFilename = new Map<string, string>();
 
     const contentType = request.headers.get('content-type') || '';
 
@@ -114,8 +115,10 @@ export async function POST(request: NextRequest) {
         const file = new File([blob], fp.name);
 
         if (name.endsWith('.xlsx')) {
-          if (file.size <= MAX_XLSX_SIZE_BYTES) xlsxFiles.push(file);
-          else oversized.push(`${fp.name} (${(file.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_XLSX_SIZE_MB}MB)`);
+          if (file.size <= MAX_XLSX_SIZE_BYTES) {
+            xlsxFiles.push(file);
+            xlsxStoragePathByFilename.set(fp.name, fp.storagePath);
+          } else oversized.push(`${fp.name} (${(file.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_XLSX_SIZE_MB}MB)`);
         } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
           if (file.size <= MAX_DOCX_SIZE_BYTES) docxFiles.push(file);
           else oversized.push(`${fp.name} (${(file.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_DOCX_SIZE_MB}MB)`);
@@ -192,9 +195,6 @@ export async function POST(request: NextRequest) {
       try {
         // Step 1: Process XLSX via internal API call
         if (pair.xlsx) {
-          const xlsxFormData = new FormData();
-          xlsxFormData.append('files', pair.xlsx);
-
           const origin =
             (typeof request.url === 'string' ? new URL(request.url).origin : null) ||
             (request.headers.get('x-forwarded-host')
@@ -210,13 +210,30 @@ export async function POST(request: NextRequest) {
             headers['Cookie'] = request.headers.get('cookie') || '';
           }
 
+          const xlsxStoragePath = xlsxStoragePathByFilename.get(pair.xlsx.name);
+          const useStoragePath = !!xlsxStoragePath;
+
+          if (useStoragePath) headers['Content-Type'] = 'application/json';
+
           const uploadRes = await fetch(`${origin}/api/admin/comparables/upload`, {
             method: 'POST',
-            body: xlsxFormData,
+            body: useStoragePath
+              ? JSON.stringify({ files: [{ name: pair.xlsx.name, storagePath: xlsxStoragePath }] })
+              : (() => {
+                  const fd = new FormData();
+                  fd.append('files', pair.xlsx!);
+                  return fd;
+                })(),
             headers,
           });
 
-          const uploadJson = await uploadRes.json();
+          const text = await uploadRes.text();
+          let uploadJson: { results?: Array<{ success?: boolean; error?: string; warnings?: string[]; report_id?: string }>; message?: string };
+          try {
+            uploadJson = JSON.parse(text);
+          } catch {
+            throw new Error(uploadRes.status === 413 ? 'File too large for processing. Try compressing.' : `Invalid response: ${text.slice(0, 80)}`);
+          }
           const xlsxResult = uploadJson.results?.[0];
           if (xlsxResult?.success) {
             result.xlsx_processed = true;
