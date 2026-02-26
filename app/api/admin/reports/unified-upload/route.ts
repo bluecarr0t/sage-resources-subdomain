@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
@@ -83,22 +84,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const formData = await request.formData();
-
+    const supabaseAdmin = createServerClient();
     const xlsxFiles: File[] = [];
     const docxFiles: File[] = [];
     const oversized: string[] = [];
+    const tempStoragePaths: string[] = [];
 
-    for (const [, value] of formData.entries()) {
-      if (!(value instanceof File) || !value.name) continue;
+    const contentType = request.headers.get('content-type') || '';
 
-      const name = value.name.toLowerCase();
-      if (name.endsWith('.xlsx')) {
-        if (value.size <= MAX_XLSX_SIZE_BYTES) xlsxFiles.push(value);
-        else oversized.push(`${value.name} (${(value.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_XLSX_SIZE_MB}MB)`);
-      } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
-        if (value.size <= MAX_DOCX_SIZE_BYTES) docxFiles.push(value);
-        else oversized.push(`${value.name} (${(value.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_DOCX_SIZE_MB}MB)`);
+    if (contentType.includes('application/json')) {
+      // Storage-path mode: files were uploaded directly to Supabase Storage
+      const body = await request.json();
+      const filePaths: Array<{ name: string; storagePath: string }> = body.files || [];
+
+      for (const fp of filePaths) {
+        tempStoragePaths.push(fp.storagePath);
+        const { data: blob, error: dlError } = await supabaseAdmin.storage
+          .from(BUCKET_NAME)
+          .download(fp.storagePath);
+
+        if (dlError || !blob) {
+          return NextResponse.json(
+            { success: false, message: `Failed to retrieve ${fp.name} from storage: ${dlError?.message || 'Unknown error'}` },
+            { status: 500 }
+          );
+        }
+
+        const name = fp.name.toLowerCase();
+        const file = new File([blob], fp.name);
+
+        if (name.endsWith('.xlsx')) {
+          if (file.size <= MAX_XLSX_SIZE_BYTES) xlsxFiles.push(file);
+          else oversized.push(`${fp.name} (${(file.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_XLSX_SIZE_MB}MB)`);
+        } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
+          if (file.size <= MAX_DOCX_SIZE_BYTES) docxFiles.push(file);
+          else oversized.push(`${fp.name} (${(file.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_DOCX_SIZE_MB}MB)`);
+        }
+      }
+    } else {
+      // FormData mode: files sent directly in the request body (local dev)
+      const formData = await request.formData();
+
+      for (const [, value] of formData.entries()) {
+        if (!(value instanceof File) || !value.name) continue;
+
+        const name = value.name.toLowerCase();
+        if (name.endsWith('.xlsx')) {
+          if (value.size <= MAX_XLSX_SIZE_BYTES) xlsxFiles.push(value);
+          else oversized.push(`${value.name} (${(value.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_XLSX_SIZE_MB}MB)`);
+        } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
+          if (value.size <= MAX_DOCX_SIZE_BYTES) docxFiles.push(value);
+          else oversized.push(`${value.name} (${(value.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_DOCX_SIZE_MB}MB)`);
+        }
       }
     }
 
@@ -142,8 +179,6 @@ export async function POST(request: NextRequest) {
       pair.docx = file;
       studyMap.set(studyId, pair);
     }
-
-    const supabaseAdmin = createServerClient();
     const results: UnifiedUploadResult[] = [];
 
     for (const [, pair] of studyMap) {
@@ -350,6 +385,10 @@ export async function POST(request: NextRequest) {
 
     const anySuccess = results.some((r) => r.success);
     const allSuccess = results.every((r) => r.success);
+
+    if (tempStoragePaths.length > 0) {
+      await supabaseAdmin.storage.from(BUCKET_NAME).remove(tempStoragePaths).catch(() => {});
+    }
 
     return NextResponse.json({
       success: anySuccess,

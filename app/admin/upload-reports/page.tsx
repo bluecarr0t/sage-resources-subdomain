@@ -63,6 +63,32 @@ function getFileType(name: string): 'xlsx' | 'docx' | null {
   return null;
 }
 
+function uploadFileToStorage(
+  signedUrl: string,
+  file: File,
+  onProgress: (loaded: number) => void
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', signedUrl);
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) onProgress(e.loaded);
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`Storage upload failed (${xhr.status})`));
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('Storage upload failed')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+
+    xhr.send(file);
+  });
+}
+
 export default function UploadReportsPage() {
   const [queuedFiles, setQueuedFiles] = useState<QueuedFile[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -180,59 +206,68 @@ export default function UploadReportsPage() {
     setResults(null);
 
     try {
-      const fd = new FormData();
-      queuedFiles.forEach((qf) => fd.append('files', qf.file));
-
-      const data = await new Promise<{ results?: UploadResult[]; message?: string }>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener('progress', (e) => {
-          if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 70);
-            setUploadProgress(pct);
-          } else {
-            setUploadProgress((prev) => Math.min(70, prev + 5));
-          }
-        });
-
-        xhr.addEventListener('load', () => {
-          setProcessingPhase(true);
-          let p = 70;
-          const interval = setInterval(() => {
-            p = Math.min(95, p + 2);
-            setUploadProgress(p);
-          }, 200);
-          setTimeout(() => {
-            clearInterval(interval);
-            setUploadProgress(100);
-          }, 1500);
-          try {
-            const json = JSON.parse(xhr.responseText || '{}');
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(json);
-            } else {
-              reject(new Error(json.message || 'Upload failed'));
-            }
-          } catch {
-            reject(new Error('Invalid response'));
-          }
-        });
-
-        xhr.addEventListener('error', () => reject(new Error('Upload failed')));
-        xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
-
-        xhr.open('POST', '/api/admin/reports/unified-upload');
-        xhr.send(fd);
+      // Phase 1: Get signed upload URLs (small JSON request)
+      const presignRes = await fetch('/api/admin/reports/presign-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          files: queuedFiles.map((qf) => ({ name: qf.file.name, size: qf.file.size })),
+        }),
       });
 
+      const presignData = await presignRes.json();
+      if (!presignRes.ok || !presignData.success) {
+        throw new Error(presignData.message || 'Failed to prepare upload');
+      }
+
+      const { uploads } = presignData as {
+        batchId: string;
+        uploads: Array<{ name: string; storagePath: string; signedUrl: string; token: string }>;
+      };
+
+      // Phase 2: Upload files directly to Supabase Storage (bypasses Vercel 4.5MB limit)
+      const totalBytes = queuedFiles.reduce((sum, qf) => sum + qf.file.size, 0);
+      let completedBytes = 0;
+
+      for (const upload of uploads) {
+        const qf = queuedFiles.find((f) => f.file.name === upload.name);
+        if (!qf) continue;
+
+        await uploadFileToStorage(upload.signedUrl, qf.file, (loaded) => {
+          const pct = Math.round(((completedBytes + loaded) / totalBytes) * 75);
+          setUploadProgress(pct);
+        });
+
+        completedBytes += qf.file.size;
+      }
+
+      setUploadProgress(75);
+      setProcessingPhase(true);
+
+      // Phase 3: Process uploaded files (small JSON request, no file data)
+      const processRes = await fetch('/api/admin/reports/unified-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          files: uploads.map((u) => ({ name: u.name, storagePath: u.storagePath })),
+        }),
+      });
+
+      const data = await processRes.json();
+      if (!processRes.ok && !data.results) {
+        throw new Error(data.message || 'Processing failed');
+      }
+
+      setUploadProgress(100);
       setResults(data.results || []);
-      if (data.results?.every((r) => r.success)) {
+
+      if (data.results?.every((r: UploadResult) => r.success)) {
         setQueuedFiles([]);
         if (xlsxInputRef.current) xlsxInputRef.current.value = '';
         if (docxInputRef.current) docxInputRef.current.value = '';
       } else if (data.results) {
         const failedStudyIds = new Set(
-          data.results.filter((r) => !r.success).map((r) => r.study_id)
+          data.results.filter((r: UploadResult) => !r.success).map((r: UploadResult) => r.study_id)
         );
         setQueuedFiles((prev) => prev.filter((qf) => failedStudyIds.has(qf.studyId)));
       }
@@ -541,7 +576,7 @@ export default function UploadReportsPage() {
           <div className="mb-6 space-y-2">
             <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>
-                {uploadProgress < 70
+                {uploadProgress < 75
                   ? 'Uploading files...'
                   : uploadProgress < 100
                   ? 'Processing & extracting data...'
