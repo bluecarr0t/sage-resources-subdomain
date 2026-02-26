@@ -37,7 +37,7 @@ async function main() {
 
   if (exists) {
     const { error: updateError } = await supabase.storage.updateBucket(BUCKET_NAME, {
-      fileSizeLimit: 52428800, // 50MB
+      fileSizeLimit: 104857600, // 100MB (Pro plan)
       allowedMimeTypes: ALLOWED_MIME_TYPES,
     });
     if (updateError) {
@@ -50,7 +50,7 @@ async function main() {
 
   const { data, error } = await supabase.storage.createBucket(BUCKET_NAME, {
     public: false,
-    fileSizeLimit: 52428800, // 50MB
+    fileSizeLimit: 104857600, // 100MB (Pro plan)
     allowedMimeTypes: ALLOWED_MIME_TYPES,
   });
 

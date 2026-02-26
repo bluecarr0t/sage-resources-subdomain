@@ -67,20 +67,27 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-/** Known template/census dates — do not display as report date */
-const TEMPLATE_DATE_ISO = new Set(['2010-12-01', '2010-01-01', '2000-01-01']);
+/** Parse date string as local midnight to avoid timezone shift */
+function parseLocalDate(dateStr: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  return new Date(dateStr + 'T00:00:00');
+}
 
 function isDisplayableReportDate(dateStr: string | null | undefined): boolean {
   if (!dateStr) return false;
-  const d = new Date(dateStr);
+  const d = parseLocalDate(dateStr);
   if (isNaN(d.getTime())) return false;
-  const iso = d.toISOString().split('T')[0];
-  return !TEMPLATE_DATE_ISO.has(iso);
+  const year = d.getFullYear();
+  if (year < 2015 || year > 2035) return false;
+  return true;
 }
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '-';
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return parseLocalDate(dateStr).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

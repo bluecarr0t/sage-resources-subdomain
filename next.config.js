@@ -11,6 +11,10 @@ const nextConfig = {
     // Optimize package imports to reduce bundle size
     // Note: Do NOT optimize @supabase/supabase-js as it causes build issues
     optimizePackageImports: ['next-intl'],
+    // Allow large file uploads (DOCX) - default is 1MB
+    serverActions: {
+      bodySizeLimit: '110mb',
+    },
   },
   
   images: {

@@ -511,8 +511,10 @@ export interface AnalyticsRegionalRate {
 export interface UploadResult {
   filename: string;
   study_id: string;
+  report_id?: string;
   success: boolean;
   error?: string;
+  warnings?: string[];
   sheets_processed?: number;
   comparables_count?: number;
   units_count?: number;
@@ -629,6 +631,7 @@ export interface ParsedWorkbook {
   study_id: string;
   filename: string;
   sheets_found: string[];
+  warnings: string[];
   project_info: ParsedProjectInfo | null;
   comparables: ParsedComparable[];
   comp_units: ParsedCompUnit[];
@@ -643,4 +646,37 @@ export interface ParsedWorkbook {
   market_data: ParsedMarketData[];
   assumptions: ParsedAssumption[];
   pro_forma_expenses: ParsedExpenseItem[];
+}
+
+/** Schema for heuristic column role inference. Used by sheet-layout-detector. */
+export interface ColumnRoleSchema {
+  role: string;
+  keywords: string[];
+  dataType?: 'string' | 'currency' | 'percent' | 'integer';
+  required?: boolean;
+}
+
+/** Result of heuristic layout detection for a sheet section. */
+export interface DetectedLayout {
+  headerRowIndex: number;
+  confidence: number;
+  columnMap: Record<string, number>;
+}
+
+/** Configurable sheet name aliases. Keys match sheet roles; values are alternate names to try. */
+export interface SheetAliasConfig {
+  comps_summary?: string[];
+  comps_grid?: string[];
+  best_comps?: string[];
+  ten_yr_pf?: string[];
+  intake_form?: string[];
+  financing?: string[];
+  irr?: string[];
+  total_project_cost?: string[];
+  unit_costs?: string[];
+  rates_projection?: string[];
+  occupancy_projection?: string[];
+  misc_expenses?: string[];
+  market_profile?: string[];
+  assumptions?: string[];
 }

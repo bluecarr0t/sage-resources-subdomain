@@ -17,15 +17,19 @@ interface ComparableRow {
   quality_score: number | null;
   property_type: string | null;
   created_at: string;
-  reports: {
-    id: string;
-    property_name: string;
-    location: string | null;
-    state: string | null;
-    city: string | null;
-    study_id: string | null;
-    created_at: string;
-  };
+  reports:
+    | {
+        id: string;
+        property_name: string;
+        location: string | null;
+        state: string | null;
+        city: string | null;
+        study_id: string | null;
+        created_at: string;
+      }
+    | { _grouped: true; studies: Array<{ study_id: string | null; location: string | null; state: string | null }> };
+  _studyIds?: string[];
+  _studyCount?: number;
   feasibility_comp_units: Array<{
     id: string;
     unit_type: string;
@@ -40,7 +44,7 @@ interface ComparableRow {
   }>;
 }
 
-const PER_PAGE = 20;
+const PER_PAGE = 50;
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -75,6 +79,23 @@ function deriveState(location: string | null, state: string | null): string | nu
   return match ? match[1].toUpperCase() : null;
 }
 
+function getPrimaryReport(comp: ComparableRow) {
+  const r = comp.reports;
+  if (r && '_grouped' in r && r._grouped && r.studies?.length) {
+    return r.studies[0];
+  }
+  return r as { study_id: string | null; location: string | null; state: string | null } | undefined;
+}
+
+function getStudyDisplay(comp: ComparableRow): { text: string; firstStudyId: string | null } {
+  const studyIds = comp._studyIds?.filter(Boolean) || [];
+  const firstStudyId = studyIds[0] || (comp.reports && !('_grouped' in comp.reports) ? (comp.reports as { study_id?: string }).study_id : null) || null;
+  if ((comp._studyCount ?? 0) > 1 && studyIds.length > 1) {
+    return { text: `In ${comp._studyCount} jobs: ${studyIds.join(' · ')}`, firstStudyId };
+  }
+  return { text: firstStudyId || '-', firstStudyId };
+}
+
 function QualityStars({ score }: { score: number | null }) {
   const display = qualityScoreToDisplay(score);
   if (display === null) return <span className="text-gray-400 text-xs">-</span>;
@@ -88,7 +109,7 @@ function QualityStars({ score }: { score: number | null }) {
 
 const SORTABLE_COLUMNS: Array<{ key: string; label: string; align: 'left' | 'center' | 'right' }> = [
   { key: 'comp_name', label: 'Property', align: 'left' },
-  { key: 'study', label: 'Study', align: 'left' },
+  { key: 'study', label: 'Job Number', align: 'left' },
   { key: 'state', label: 'State', align: 'left' },
   { key: 'total_sites', label: 'Sites', align: 'center' },
   { key: 'quality_score', label: 'Quality', align: 'center' },
@@ -307,14 +328,16 @@ export default function ComparablesPage() {
                       );
                       const avgLowOcc = units.filter((u) => u.low_occupancy !== null);
                       const avgPeakOcc = units.filter((u) => u.peak_occupancy !== null);
+                      const primaryReport = getPrimaryReport(comp);
+                      const studyDisplay = getStudyDisplay(comp);
 
                       return (
                         <tr
                           key={comp.id}
                           className="hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer transition-colors"
                           onClick={() => {
-                            if (comp.reports?.study_id) {
-                              router.push(`/admin/comparables/${comp.reports.study_id}`);
+                            if (studyDisplay.firstStudyId) {
+                              router.push(`/admin/comparables/${studyDisplay.firstStudyId}`);
                             }
                           }}
                         >
@@ -336,17 +359,19 @@ export default function ComparablesPage() {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                              <MapPin className="w-3 h-3" />
-                              <span>{comp.reports?.study_id || '-'}</span>
+                              <MapPin className="w-3 h-3 shrink-0" />
+                              <span title={studyDisplay.text}>{studyDisplay.text}</span>
                             </div>
-                            {comp.reports?.location && (
+                            {primaryReport?.location && (comp._studyCount ?? 0) <= 1 && (
                               <p className="text-xs text-gray-400 dark:text-gray-500">
-                                {comp.reports.location}
+                                {primaryReport.location}
                               </p>
                             )}
                           </td>
                           <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">
-                            {deriveState(comp.reports?.location ?? null, comp.reports?.state ?? null) || '-'}
+                            {(comp._studyCount ?? 0) > 1
+                              ? 'Multiple'
+                              : deriveState(primaryReport?.location ?? null, primaryReport?.state ?? null) || '-'}
                           </td>
                           <td className="px-4 py-3 text-center text-gray-700 dark:text-gray-300">
                             {comp.total_sites ?? '-'}
@@ -404,10 +429,10 @@ export default function ComparablesPage() {
               </div>
 
               {/* Pagination */}
-              {totalPages > 1 && (
+              {total > 0 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Page {page} of {totalPages} ({total.toLocaleString()} results)
+                    Page {page} of {totalPages} ({Math.min(PER_PAGE, Math.max(0, total - (page - 1) * PER_PAGE))} out of {total.toLocaleString()})
                   </p>
                   <div className="flex gap-2">
                     <Button

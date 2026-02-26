@@ -41,6 +41,7 @@ interface UploadResult {
   xlsx_processed: boolean;
   docx_processed: boolean;
   error?: string;
+  warnings?: string[];
 }
 
 function extractStudyIdPreview(filename: string): string {
@@ -256,7 +257,7 @@ export default function UploadReportsPage() {
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Upload paired .xlsx workbooks and .docx report files per feasibility study.
-            Files are automatically matched by study ID from the filename.
+            Files are automatically matched by job number from the filename.
           </p>
         </div>
 
@@ -292,45 +293,57 @@ export default function UploadReportsPage() {
             </div>
             <div className="space-y-2">
               {results.map((r, i) => (
-                <div key={i} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    {r.success ? (
-                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0" />
-                    )}
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {r.study_id}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {r.success ? (
-                      <>
-                        <span className="text-gray-600 dark:text-gray-400 text-xs flex items-center gap-2">
-                          {r.xlsx_processed && (
-                            <span className="px-1.5 py-0.5 bg-sage-100 dark:bg-sage-800 rounded text-[10px] font-medium">
-                              XLSX
-                            </span>
-                          )}
-                          {r.docx_processed && (
-                            <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 rounded text-[10px] font-medium">
-                              DOCX
-                            </span>
-                          )}
-                        </span>
-                        <Link
-                          href={`/admin/reports/${r.study_id}`}
-                          className="text-sage-600 dark:text-sage-400 hover:underline text-xs flex items-center gap-1"
-                        >
-                          <LinkIcon className="w-3 h-3" /> View
-                        </Link>
-                      </>
-                    ) : (
-                      <span className="text-red-600 dark:text-red-400 text-xs max-w-md truncate" title={r.error}>
-                        {r.error}
+                <div key={i} className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      {r.success ? (
+                        <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+                      )}
+                      <span className="font-medium text-gray-800 dark:text-gray-200">
+                        {r.study_id}
                       </span>
-                    )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {r.success ? (
+                        <>
+                          <span className="text-gray-600 dark:text-gray-400 text-xs flex items-center gap-2">
+                            {r.xlsx_processed && (
+                              <span className="px-1.5 py-0.5 bg-sage-100 dark:bg-sage-800 rounded text-[10px] font-medium">
+                                XLSX
+                              </span>
+                            )}
+                            {r.docx_processed && (
+                              <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 rounded text-[10px] font-medium">
+                                DOCX
+                              </span>
+                            )}
+                          </span>
+                          <Link
+                            href={`/admin/reports/${r.study_id}`}
+                            className="text-sage-600 dark:text-sage-400 hover:underline text-xs flex items-center gap-1"
+                          >
+                            <LinkIcon className="w-3 h-3" /> View
+                          </Link>
+                        </>
+                      ) : (
+                        <span className="text-red-600 dark:text-red-400 text-xs max-w-md truncate" title={r.error}>
+                          {r.error}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {r.warnings && r.warnings.length > 0 && (
+                    <ul className="text-amber-700 dark:text-amber-400 text-xs pl-6 space-y-0.5" title="Extraction warnings">
+                      {r.warnings.slice(0, 3).map((w, wi) => (
+                        <li key={wi} className="truncate max-w-md" title={w}>{w}</li>
+                      ))}
+                      {r.warnings.length > 3 && (
+                        <li className="text-amber-600 dark:text-amber-500">+{r.warnings.length - 3} more</li>
+                      )}
+                    </ul>
+                  )}
                 </div>
               ))}
             </div>
@@ -348,12 +361,12 @@ export default function UploadReportsPage() {
               onClick={() => xlsxInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
                 dragActiveXlsx
-                  ? 'border-sage-500 bg-sage-50 dark:bg-sage-900/20'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-sage-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                  : 'border-amber-400 dark:border-amber-500 bg-amber-50/50 dark:bg-amber-900/10 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
               }`}
             >
               <FileSpreadsheet className={`w-10 h-10 mx-auto mb-3 ${
-                dragActiveXlsx ? 'text-sage-500' : 'text-green-500 dark:text-green-400'
+                dragActiveXlsx ? 'text-amber-600 dark:text-amber-400' : 'text-amber-600 dark:text-amber-400'
               }`} />
               <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {dragActiveXlsx ? 'Drop .xlsx files here' : '.xlsx Workbooks'}
@@ -383,12 +396,12 @@ export default function UploadReportsPage() {
               onClick={() => docxInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
                 dragActiveDocx
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                  : 'border-amber-400 dark:border-amber-500 bg-amber-50/50 dark:bg-amber-900/10 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
               }`}
             >
               <FileText className={`w-10 h-10 mx-auto mb-3 ${
-                dragActiveDocx ? 'text-blue-500' : 'text-blue-500 dark:text-blue-400'
+                dragActiveDocx ? 'text-amber-600 dark:text-amber-400' : 'text-amber-600 dark:text-amber-400'
               }`} />
               <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {dragActiveDocx ? 'Drop .docx files here' : '.docx/.doc Reports'}
@@ -415,7 +428,7 @@ export default function UploadReportsPage() {
           <Card className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Paired Studies ({studyPairs.length})
+                Paired Jobs ({studyPairs.length})
               </h3>
               <button
                 onClick={clearAll}
@@ -430,7 +443,7 @@ export default function UploadReportsPage() {
                 <thead className="bg-gray-50 dark:bg-gray-700/50">
                   <tr>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                      Study ID
+                      Job Number
                     </th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                       XLSX
@@ -557,10 +570,10 @@ export default function UploadReportsPage() {
           {uploading ? (
             <span className="flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" />
-              Processing {studyPairs.length} {studyPairs.length === 1 ? 'study' : 'studies'}...
+              Processing {studyPairs.length} {studyPairs.length === 1 ? 'job' : 'jobs'}...
             </span>
           ) : (
-            `Upload ${studyPairs.length} ${studyPairs.length === 1 ? 'study' : 'studies'} (${queuedFiles.length} ${queuedFiles.length === 1 ? 'file' : 'files'})`
+            `Upload ${studyPairs.length} ${studyPairs.length === 1 ? 'job' : 'jobs'} (${queuedFiles.length} ${queuedFiles.length === 1 ? 'file' : 'files'})`
           )}
         </Button>
       </div>

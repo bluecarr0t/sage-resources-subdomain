@@ -52,9 +52,11 @@ export async function GET(
 
     const { data: report, error: queryError } = await supabaseAdmin
       .from('reports')
-      .select('id, docx_file_path, study_id')
+      .select('id, docx_file_path, narrative_file_path, study_id')
       .eq('study_id', studyId)
       .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (queryError) {
@@ -65,30 +67,81 @@ export async function GET(
       );
     }
 
-    if (!report?.docx_file_path) {
+    const docxPath = report?.docx_file_path;
+    const narrativePath = report?.narrative_file_path;
+    const hasAnyPath = docxPath || (narrativePath && /\.(docx|doc)$/i.test(narrativePath));
+
+    if (!hasAnyPath) {
       return NextResponse.json(
         { success: false, error: 'No DOCX file found for this report' },
         { status: 404 }
       );
     }
 
-    const filePath = report.docx_file_path;
-
-    if (filePath.includes('..') || filePath.startsWith('/') || /[<>"|?*]/.test(filePath)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid file path' },
-        { status: 400 }
-      );
+    const pathsToTry: string[] = [];
+    if (docxPath) pathsToTry.push(docxPath);
+    if (narrativePath && /\.(docx|doc)$/i.test(narrativePath) && !pathsToTry.includes(narrativePath)) {
+      pathsToTry.push(narrativePath);
+    }
+    if (docxPath?.endsWith('/report.docx') && !pathsToTry.includes(docxPath.replace(/\/report\.docx$/i, '/narrative.docx'))) {
+      pathsToTry.push(docxPath.replace(/\/report\.docx$/i, '/narrative.docx'));
     }
 
-    // Try direct download first
-    const { data: fileData, error: downloadError } = await supabaseAdmin.storage
-      .from(BUCKET_NAME)
-      .download(filePath);
+    const isValidPath = (p: string) =>
+      !p.includes('..') && !p.startsWith('/') && !/[<>"|?*]/.test(p);
 
-    if (!downloadError && fileData) {
+    let fileData: Blob | null = null;
+    let usedPath: string | null = null;
+
+    for (const filePath of pathsToTry) {
+      if (!isValidPath(filePath)) continue;
+      const { data, error } = await supabaseAdmin.storage.from(BUCKET_NAME).download(filePath);
+      if (!error && data) {
+        fileData = data;
+        usedPath = filePath;
+        break;
+      }
+    }
+
+    if (!fileData && pathsToTry.length > 0 && pathsToTry[0].includes('/')) {
+      const folder = pathsToTry[0].split('/').slice(0, -1).join('/');
+      if (isValidPath(folder)) {
+        const { data: list } = await supabaseAdmin.storage.from(BUCKET_NAME).list(folder, { limit: 50 });
+        const docFile = list?.find(
+          (f) =>
+            !f.name?.startsWith('.') &&
+            (f.name?.toLowerCase().endsWith('.docx') || f.name?.toLowerCase().endsWith('.doc'))
+        );
+        if (docFile) {
+          const foundPath = `${folder}/${docFile.name}`;
+          const { data, error } = await supabaseAdmin.storage.from(BUCKET_NAME).download(foundPath);
+          if (!error && data) {
+            fileData = data;
+            usedPath = foundPath;
+          }
+        }
+        if (!fileData && report?.id) {
+          const { data: wbList } = await supabaseAdmin.storage.from(BUCKET_NAME).list(`${folder}/workbooks`, { limit: 50 });
+          const wbDoc = wbList?.find(
+            (f) =>
+              !f.name?.startsWith('.') &&
+              (f.name?.toLowerCase().endsWith('.docx') || f.name?.toLowerCase().endsWith('.doc'))
+          );
+          if (wbDoc) {
+            const wbPath = `${folder}/workbooks/${wbDoc.name}`;
+            const { data, error } = await supabaseAdmin.storage.from(BUCKET_NAME).download(wbPath);
+            if (!error && data) {
+              fileData = data;
+              usedPath = wbPath;
+            }
+          }
+        }
+      }
+    }
+
+    if (fileData && usedPath) {
       const arrayBuffer = await fileData.arrayBuffer();
-      const filename = `${report.study_id}-report.docx`;
+      const filename = `${report!.study_id}-report.docx`;
 
       return new NextResponse(arrayBuffer, {
         headers: {
@@ -99,26 +152,12 @@ export async function GET(
       });
     }
 
-    console.error(`[download-docx] Storage download failed for path "${filePath}":`, downloadError);
-
-    // Fallback: try a signed URL redirect
-    const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
-      .from(BUCKET_NAME)
-      .createSignedUrl(filePath, 60);
-
-    if (!signedUrlError && signedUrlData?.signedUrl) {
-      return NextResponse.redirect(signedUrlData.signedUrl);
-    }
-
-    console.error(`[download-docx] Signed URL also failed for path "${filePath}":`, signedUrlError);
-
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to download file. The file may not exist in storage.',
-        detail: downloadError?.message || 'Unknown storage error',
+        error: 'No DOCX file found in storage. This report may have been uploaded without a Word document.',
       },
-      { status: 500 }
+      { status: 404 }
     );
   } catch (error) {
     console.error('[download-docx] Error:', error);

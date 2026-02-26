@@ -5,16 +5,28 @@
  * - .doc: Uses word-extractor (legacy binary format) with plain-text section parsing
  *
  * Extracts key facts: property info, client info, executive summary, SWOT highlights.
+ * Shared extraction (extractRawContentFromDocx) used by both parseDocxReport and reports/upload.
  */
 
 import mammoth from 'mammoth';
 import * as cheerio from 'cheerio';
 import WordExtractor from 'word-extractor';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
+import { fillMissingFieldsWithLLM } from './docx-llm-extractor';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+export interface RawDocxContent {
+  fullText: string;
+  paragraphs: string[];
+  tables: Array<{ table_id: string; rows: string[][] }>;
+  /** Section structure (heading + content) for structured extraction */
+  sections: Array<{ heading: string; headingLevel: number; content: string; paragraphs: string[] }>;
+  /** Mammoth conversion messages (e.g. unsupported images) */
+  messages: string[];
+}
 
 export interface UnitMixEntry {
   type: string;
@@ -29,6 +41,8 @@ export interface FinancialAssumption {
 
 export interface ParsedDocxReport {
   study_id: string;
+  /** Full document title from first page (e.g. "Sojourner Glamping Resort Feasibility Study Update") */
+  document_title: string | null;
   resort_name: string | null;
   client_name: string | null;
   client_entity: string | null;
@@ -56,6 +70,13 @@ export interface ParsedDocxReport {
   unit_mix: UnitMixEntry[] | null;
   financial_assumptions: FinancialAssumption[] | null;
   recommendations: string[] | null;
+  /** Mammoth conversion messages (e.g. unsupported images) */
+  extraction_messages?: string[];
+}
+
+export interface ParseDocxReportOptions {
+  /** When true, use OpenAI to fill missing resort_name, address, client fields when heuristics return null */
+  useLLMForMissing?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -132,6 +153,18 @@ function extractSectionsFromPlainText(fullText: string): DocSection[] {
     'Recommendations',
     'Conclusion',
     'Table of Contents',
+    'Key Findings',
+    'Transmittal',
+    'Cover Letter',
+    'Limiting Conditions',
+    'Valuation',
+    'Appraisal',
+    'Summary',
+    'Background',
+    'Property Information',
+    'Subject Property',
+    'Location',
+    'Demographics',
   ];
 
   const sections: DocSection[] = [];
@@ -143,11 +176,12 @@ function extractSectionsFromPlainText(fullText: string): DocSection[] {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // Match against known headers — require a close match, not just any word
+    // Match against known headers — use includes() for fuzzy matching of non-standard headers
     const isHeader = trimmed.length < 60 && knownHeaders.some(
       (h) =>
         trimmed.toLowerCase() === h.toLowerCase() ||
-        trimmed.toLowerCase().startsWith(h.toLowerCase())
+        trimmed.toLowerCase().startsWith(h.toLowerCase()) ||
+        trimmed.toLowerCase().includes(h.toLowerCase())
     );
 
     // Also detect ALL-CAPS short lines as section headers
@@ -212,11 +246,44 @@ function isValidUSState(code: string): boolean {
 
 const HEADING_BLACKLIST = /^(project\s+overview|property\s+overview|executive\s+summary|scope\s+of\s+work|project\s+description|property\s+description|site\s+analysis|introduction|purpose|overview|certification|qualifications|property\s+is\s+(intended|located)|project\s+is\s+(intended|located))$/i;
 
+/** Phrases that appear in metadata blocks or amenity lists but are not resort/property names */
+const RESORT_NAME_BLACKLIST = /^(located\s+(?:at|in|near)|the\s+(?:subject|property|project|site)|subject\s+property|feasibility\s+study|glamping\s+feasibility|rv\s+resort\s+feasibility|campground\s+feasibility|a\s+vending\s+area|a\s+community\s+fire\s+pit|a\s+walking\s+trail|a\s+natural\s+swimming\s+pool|a\s+communal\s+(?:sauna|grill)|an\s+event\s+space|a\s+pavilion|giant\s+yard\s+games|ev\s+charging\s+stations?)$/i;
+
+/** Phrases starting with "a/an" + amenity/descriptive words (common in amenity lists) */
+const AMENITY_PHRASE_PATTERN = /^(a|an)\s+[\w\s]+(?:area|space|trail|pool|sauna|grill|pit|pavilion|station|games?)$/i;
+
 function isValidResortName(name: string): boolean {
   const trimmed = name.trim();
   if (trimmed.length < 3 || trimmed.length > 50) return false;
   if (HEADING_BLACKLIST.test(trimmed)) return false;
+  if (RESORT_NAME_BLACKLIST.test(trimmed)) return false;
+  if (AMENITY_PHRASE_PATTERN.test(trimmed)) return false;
   if (/^\d+$/.test(trimmed)) return false;
+  return true;
+}
+
+/** Words that never appear as standalone US city names */
+const INVALID_CITY_WORDS = new Set([
+  'hot tubs', 'hot tub', 'swimming pool', 'pools', 'pool', 'fire pit', 'fire pits',
+  'sauna', 'cold plunge', 'spa', 'kitchen', 'kitchenette', 'grill', 'bbq',
+  'bathroom', 'shower', 'deck', 'patio', 'terrace', 'balcony', 'hiking', 'trails',
+  'fishing', 'kayaking', 'wellness', 'dining', 'restaurant', 'event', 'venue',
+  'accommodations', 'amenities', 'units', 'sites', 'acres',
+]);
+
+/** Words/phrases that signal descriptive text, not a city name */
+const DESCRIPTIVE_WORDS = /\b(including|such\s+as|featuring|offering|with|major|minor|various|multiple|numerous|several|tourism|hubs?|attractions?|destinations?|recreational|nearby|surrounding|adjacent|approximately|within|between|throughout|across)\b/i;
+
+function isValidCityName(city: string): boolean {
+  const trimmed = city.trim();
+  const lower = trimmed.toLowerCase();
+  if (trimmed.length < 2 || trimmed.length > 35) return false;
+  const wordCount = trimmed.split(/\s+/).length;
+  if (wordCount > 4) return false;
+  if (INVALID_CITY_WORDS.has(lower)) return false;
+  if (DESCRIPTIVE_WORDS.test(trimmed)) return false;
+  if (/^\d+\s*(acres?|units?|sites?|hot\s+tubs?|pools?)/i.test(lower)) return false;
+  if (/\b(the|a|an)\s/i.test(trimmed) && wordCount > 2) return false;
   return true;
 }
 
@@ -248,13 +315,88 @@ function extractResortName(sections: DocSection[], fullText: string): string | n
     if (m && isValidResortName(m[1])) return m[1].trim();
   }
 
-  // 4. Title line fallback
+  // 4. "the project, [Name]," or "Property: [Name]"
+  const projectCommaPattern = /(?:the\s+)?(?:project|property)\s*,\s*["']?([A-Z][A-Za-z\s&'.-]{2,45})["']?\s*,/i;
+  for (const sec of searchSections) {
+    const m = sec.content.match(projectCommaPattern);
+    if (m && isValidResortName(m[1])) return m[1].trim();
+  }
+  const propertyLabelPattern = /(?:^|\n)\s*Property\s*:?\s*["']?([A-Z][A-Za-z\s&'.-]{2,45})["']?(?:\s|$|\n)/i;
+  for (const sec of searchSections) {
+    const m = sec.content.match(propertyLabelPattern);
+    if (m && isValidResortName(m[1])) return m[1].trim();
+  }
+
+  // 5. Title line fallback
   const titleMatch = fullText.match(/(?:Feasibility Study|FS)\s+[-\u2013\u2014]\s+(.+?)(?:\n|$)/i);
   if (titleMatch && isValidResortName(titleMatch[1])) return titleMatch[1].trim();
 
-  // 5. Metadata block: first line before a study ID
+  // 6. Metadata block: first line before a study ID
   const metaName = fullText.match(/^([A-Z][A-Za-z\s&'.-]{3,50})\s*\n\s*\d{2}-\d{3}[A-Z]?-\d{2}/m);
   if (metaName && isValidResortName(metaName[1])) return metaName[1].trim();
+
+  return null;
+}
+
+/** Skip patterns for first-page header/footer text */
+const FIRST_PAGE_SKIP = /^(Sage Outdoor Advisory|Confidential|Prepared for|Dear\s|Property\s*:?\s*$|\d{1,2}\/\d{1,2}\/\d{2,4})/i;
+
+/**
+ * Extract the full document title from the first page of the DOCX.
+ * Typical format: "Property Name" + newline + "Feasibility Study" or "Feasibility Study Update"
+ * Returns e.g. "Sojourner Glamping Resort Feasibility Study Update"
+ */
+function extractFirstPageTitle(fullText: string): string | null {
+  const firstPage = fullText.slice(0, 2500);
+  const lines = firstPage.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+  // 1. Two-line pattern: "Property Name" \n "Feasibility Study" or "Feasibility Study Update"
+  for (let i = 0; i < lines.length - 1; i++) {
+    const curr = lines[i];
+    const next = lines[i + 1];
+    if (FIRST_PAGE_SKIP.test(curr)) continue;
+    const fsMatch = next.match(/^(Feasibility\s+Study(?:\s+Update)?)(?:\s+[-–—]\s*[^\n]+)?\s*$/i);
+    if (fsMatch && (isValidResortName(curr) || (curr.length >= 4 && curr.length <= 60))) {
+      const combined = `${curr} ${fsMatch[1].trim()}`.trim();
+      if (combined.length <= 100) return combined;
+    }
+  }
+
+  // 2. Single-line: "Property Name Feasibility Study Update"
+  const oneLine = firstPage.match(/([A-Z][A-Za-z\s&'.-]{3,55})\s+(Feasibility\s+Study(?:\s+Update)?)(?:\s|$|\n)/i);
+  if (oneLine) {
+    const combined = `${oneLine[1].trim()} ${oneLine[2].trim()}`.trim();
+    if (combined.length >= 15 && combined.length <= 100 && !RESORT_NAME_BLACKLIST.test(oneLine[1].trim())) {
+      return combined;
+    }
+  }
+
+  // 3. "Feasibility Study - Property Name" format
+  const dashFormat = firstPage.match(/(?:Feasibility\s+Study(?:\s+Update)?)\s*[-–—]\s*([A-Z][A-Za-z\s&'.-]{3,50})(?:\s|$|\n)/i);
+  if (dashFormat && isValidResortName(dashFormat[1])) {
+    return `${dashFormat[1].trim()} Feasibility Study`.trim();
+  }
+
+  // 4. First 2-3 meaningful lines before body text (before "Letter of Transmittal", "Executive Summary", etc.)
+  const bodyStart = firstPage.search(/(?:Letter of Transmittal|Executive Summary|Dear\s|Project Overview)/i);
+  const scanLen = bodyStart > 0 ? Math.min(bodyStart, 1200) : 1200;
+  const scanText = firstPage.slice(0, scanLen);
+  const scanLines = scanText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const titleParts: string[] = [];
+  for (const line of scanLines) {
+    if (FIRST_PAGE_SKIP.test(line)) continue;
+    if (/^\d{2}-\d{3}[A-Z]?-\d{2}$/.test(line)) continue;
+    if (/^[A-Za-z\s.'-]+,\s*[A-Z]{2}\s*$/.test(line) && line.length < 50) continue;
+    if (line.length < 3 || line.length > 70) continue;
+    titleParts.push(line);
+    if (titleParts.length >= 3) break;
+  }
+  if (titleParts.length >= 1) {
+    const combined = titleParts.join(' ').replace(/\s+/g, ' ').trim();
+    if (combined.length >= 10 && combined.length <= 100 && /feasibility\s+study/i.test(combined)) {
+      return combined;
+    }
+  }
 
   return null;
 }
@@ -267,6 +409,17 @@ function extractAddress(sections: DocSection[], fullText: string): {
 } {
   const result = { address: null as string | null, city: null as string | null, state: null as string | null, zip_code: null as string | null };
 
+  // 0. Metadata block: StudyID followed by "City, ST" on the next line
+  //    e.g. "25-107A-01\nNewport, TN\nCocke County"
+  const metaLocMatch = fullText.match(
+    /\d{2}-\d{3}[A-Z]?-\d{2}\s*\n\s*([A-Z][A-Za-z\s.'-]{1,30}),\s*([A-Z]{2})\s*\n/
+  );
+  if (metaLocMatch && isValidUSState(metaLocMatch[2]) && isValidCityName(metaLocMatch[1])) {
+    result.city = metaLocMatch[1].trim();
+    result.state = metaLocMatch[2].trim().toUpperCase();
+    return result;
+  }
+
   // Build a search corpus that favours subject-property sections over comparables
   const subjectSections = [
     findSection(sections, 'Letter of Transmittal', 'Transmittal'),
@@ -278,7 +431,9 @@ function extractAddress(sections: DocSection[], fullText: string): {
   const sectionText = subjectSections.map((s) => s.content).join('\n');
   const page1 = fullText.slice(0, 3500);
 
-  // Search order: subject sections first, then page 1, then full text
+  // City capture: 1-4 words, each starting with a letter, max ~35 chars
+  const CITY_RE = '([A-Za-z][A-Za-z.\'-]*(?:\\s+[A-Za-z][A-Za-z.\'-]*){0,3})';
+
   const searchOrder = [sectionText, page1, fullText];
 
   for (const text of searchOrder) {
@@ -286,12 +441,12 @@ function extractAddress(sections: DocSection[], fullText: string): {
 
     // Labeled address patterns — "subject property: ...", "property address: ..."
     const labeledPatterns = [
-      /(?:subject\s+property|property\s+address|street\s+address|site\s+address|address)\s*:?\s*[\r\n]?\s*(\d{1,5}\s+[A-Za-z0-9\s.,#'-]+?),\s*([A-Za-z\s]+),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)/i,
-      /(?:subject\s+property|property\s+address|address)\s*:?\s*[\r\n]?\s*(\d{1,5}\s+[A-Za-z0-9\s.,#'-]+)[\r\n]+\s*([A-Za-z\s]+),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)/i,
+      new RegExp(`(?:subject\\s+property|property\\s+address|street\\s+address|site\\s+address|address)\\s*:?\\s*[\\r\\n]?\\s*(\\d{1,5}\\s+[A-Za-z0-9\\s.,#'-]+?),\\s*${CITY_RE},\\s*([A-Z]{2})\\s+(\\d{5}(?:-\\d{4})?)`, 'i'),
+      new RegExp(`(?:subject\\s+property|property\\s+address|address)\\s*:?\\s*[\\r\\n]?\\s*(\\d{1,5}\\s+[A-Za-z0-9\\s.,#'-]+)[\\r\\n]+\\s*${CITY_RE},\\s*([A-Z]{2})\\s+(\\d{5}(?:-\\d{4})?)`, 'i'),
     ];
     for (const pat of labeledPatterns) {
       const m = text.match(pat);
-      if (m && isValidUSState(m[3])) {
+      if (m && isValidUSState(m[3]) && isValidCityName(m[2])) {
         result.address = m[1].trim();
         result.city = m[2].trim();
         result.state = m[3].trim().toUpperCase();
@@ -301,10 +456,11 @@ function extractAddress(sections: DocSection[], fullText: string): {
     }
 
     // Full address pattern: street, city, state zip (no label)
-    const fullAddrMatch = text.match(
-      /(\d{1,5}\s+[A-Za-z0-9\s.,#'-]+?),\s*([A-Za-z\s]+),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)/
+    const fullAddrRe = new RegExp(
+      `(\\d{1,5}\\s+[A-Za-z0-9\\s.,#'-]+?),\\s*${CITY_RE},\\s*([A-Z]{2})\\s+(\\d{5}(?:-\\d{4})?)`, ''
     );
-    if (fullAddrMatch && isValidUSState(fullAddrMatch[3])) {
+    const fullAddrMatch = text.match(fullAddrRe);
+    if (fullAddrMatch && isValidUSState(fullAddrMatch[3]) && isValidCityName(fullAddrMatch[2])) {
       result.address = fullAddrMatch[1].trim();
       result.city = fullAddrMatch[2].trim();
       result.state = fullAddrMatch[3].trim().toUpperCase();
@@ -312,11 +468,12 @@ function extractAddress(sections: DocSection[], fullText: string): {
       return result;
     }
 
-    // City, state only — require contextual keywords to avoid matching amenity lists
-    const cityStateMatch = text.match(
-      /(?:located\s+(?:in|at|near)|(?:city|town)\s+of|subject\s+(?:property|site)\s+(?:is\s+)?(?:in|at|near)|(?:near|outside)\s+(?:of\s+)?)([A-Za-z\s]+),\s*([A-Z]{2})(?:\s+(\d{5}(?:-\d{4})?))?/i
+    // City, state only — require contextual keywords
+    const cityStateRe = new RegExp(
+      `(?:located\\s+(?:in|at|near)|(?:city|town)\\s+of|subject\\s+(?:property|site)\\s+(?:is\\s+)?(?:in|at|near)|(?:near|outside)\\s+(?:of\\s+)?)${CITY_RE},\\s*([A-Z]{2})(?:\\s+(\\d{5}(?:-\\d{4})?))?`, 'i'
     );
-    if (cityStateMatch && isValidUSState(cityStateMatch[2])) {
+    const cityStateMatch = text.match(cityStateRe);
+    if (cityStateMatch && isValidUSState(cityStateMatch[2]) && isValidCityName(cityStateMatch[1])) {
       result.city = cityStateMatch[1].trim();
       result.state = cityStateMatch[2].trim().toUpperCase();
       if (cityStateMatch[3]) result.zip_code = cityStateMatch[3].trim();
@@ -332,7 +489,7 @@ function extractCityStateFromFilename(filename: string): { city: string | null; 
   const studyIdMatch = base.match(/^(\d{2}-\d{3}[A-Z]?-\d{2})\s*/);
   const afterStudyId = studyIdMatch ? base.slice(studyIdMatch[0].length).trim() : base;
   const cityStateMatch = afterStudyId.match(/^([A-Za-z\s]+),\s*([A-Z]{2})/i);
-  if (cityStateMatch) {
+  if (cityStateMatch && isValidCityName(cityStateMatch[1])) {
     return { city: cityStateMatch[1].trim(), state: cityStateMatch[2].trim() };
   }
   return { city: null, state: null };
@@ -433,8 +590,11 @@ function extractCounty(sections: DocSection[], fullText: string): string | null 
 }
 
 function extractParcel(fullText: string): string | null {
-  const match = fullText.match(/(?:parcel\s*(?:number|#|no\.?)|APN)\s*:?\s*([\d\-./A-Za-z]+)/i);
-  return match ? match[1].trim() : null;
+  const match = fullText.match(/(?:parcel\s*(?:number|#|no\.?)|APN)\s*:?\s*([\d][\d\-./A-Za-z]{2,})/i);
+  if (!match) return null;
+  const val = match[1].trim();
+  if (val.length < 3) return null;
+  return val;
 }
 
 function extractAcreage(sections: DocSection[], fullText: string): number | null {
@@ -477,24 +637,26 @@ function extractAcreage(sections: DocSection[], fullText: string): number | null
 }
 
 function extractTotalUnits(sections: DocSection[], fullText: string): number | null {
-  // Only search subject-property sections — not comparables sections
+  // Only search subject-property sections — NOT comparables/tables (which have "13 Total Units" etc.)
   const subjectSections = [
     findSection(sections, 'Executive Summary'),
     findSection(sections, 'Project Overview', 'Property Overview'),
+    findSection(sections, 'Property Details'),
   ].filter(Boolean) as DocSection[];
 
   const subjectText = subjectSections.map((s) => s.content).join('\n');
+  if (!subjectText.trim()) return null;
 
-  // Patterns requiring "subject" or "total" context to avoid comparable counts
-  const contextualPatterns = [
-    /(?:subject\s+(?:property|project|site)\s+)?(?:will\s+)?(?:consist|contain|include|feature|have|offer|accommodate)s?\s+(?:(?:a\s+total\s+of|up\s+to|approximately)\s+)?(\d+)\s+(?:total\s+)?(?:units?|keys?|sites?|accommodations?|spaces?)/i,
+  // Prefer explicit subject/project unit counts (e.g. "There will be 50 luxurious tented glamping units")
+  const subjectPatterns = [
+    /(?:will\s+be|consist|contain|include|feature|have|offer|accommodate)s?\s+(?:(?:a\s+total\s+of|up\s+to|approximately)\s+)?(\d+)\s+(?:\w+\s+)*(?:units?|keys?|sites?|accommodations?|spaces?)\b/i,
+    /(\d+)\s+(?:luxurious|luxury|tented|glamping|proposed|subject)\s+(?:\w+\s+)*(?:units?|keys?|sites?)\b/i,
     /(?:total\s+(?:of\s+)?)(\d+)\s+(?:units?|keys?|sites?|spaces?)/i,
     /(\d+)\s+(?:total\s+)(?:units?|keys?|sites?|spaces?)/i,
     /approved\s+for\s+(\d+)\s+(?:dwelling\s+)?(?:units?|keys?|sites?)/i,
   ];
 
-  // Search subject sections first
-  for (const pat of contextualPatterns) {
+  for (const pat of subjectPatterns) {
     const match = subjectText.match(pat);
     if (match) {
       const val = parseInt(match[1], 10);
@@ -502,11 +664,11 @@ function extractTotalUnits(sections: DocSection[], fullText: string): number | n
     }
   }
 
-  // Broader match in first 5000 chars as fallback
-  const broadPattern = /(\d+)\s+(?:total\s+)?(?:units?|keys?|sites?|accommodations?)/i;
-  const earlyMatch = fullText.slice(0, 5000).match(broadPattern);
-  if (earlyMatch) {
-    const val = parseInt(earlyMatch[1], 10);
+  // Fallback: number + optional adjectives + units (only in subject sections to avoid comp table counts)
+  const broadInSubject = /(\d+)\s+(?:\w+\s+)*(?:units?|keys?|sites?|accommodations?)\b/i;
+  const fallbackMatch = subjectText.match(broadInSubject);
+  if (fallbackMatch) {
+    const val = parseInt(fallbackMatch[1], 10);
     if (val > 0 && val < 10000) return val;
   }
 
@@ -524,23 +686,34 @@ function extractMarketType(fullText: string): string | null {
 
 /** Known template/census dates that appear in feasibility docs but are not report dates */
 const TEMPLATE_DATE_BLACKLIST = new Set([
-  '2010-12-01', // December 1, 2010 - census reference date
-  '2010-01-01', // January 1, 2010
-  '2000-01-01', // January 1, 2000
+  '1990-01-01',
+  '2000-01-01', '2000-04-01',
+  '2010-01-01', '2010-04-01',
+  '2010-12-01', '2010-12-02', // Census "December 2010" reference
+  '2020-01-01', '2020-04-01',
 ]);
+
+/** Reject any date before 2015 as very likely a census/template date, not a report date */
+function isPlausibleReportDate(iso: string): boolean {
+  const year = parseInt(iso.slice(0, 4), 10);
+  if (year < 2015 || year > 2035) return false;
+  return !TEMPLATE_DATE_BLACKLIST.has(iso);
+}
 
 function extractReportDate(fullText: string): string | null {
   const parseAndValidate = (dateStr: string): string | null => {
-    const d = new Date(dateStr);
+    const normalized = dateStr.replace(/\b(\d{1,2})(st|nd|rd|th)\b/i, '$1');
+    const d = new Date(normalized + 'T00:00:00');
     if (isNaN(d.getTime())) return null;
-    const iso = d.toISOString().split('T')[0];
-    if (TEMPLATE_DATE_BLACKLIST.has(iso)) return null;
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (!isPlausibleReportDate(iso)) return null;
     return iso;
   };
 
   // 1. Prefer date from the metadata block: Property / Study ID / County / Date / Glamping
+  // Allow ordinals (1st, 2nd, etc.) which appear in some templates
   const metadataBlock = fullText.match(
-    /[^\n]*County[^\n]*\n\s*([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})\s*\n\s*(?:Glamping|Rv|Campground|Mixed)/i
+    /[^\n]*County[^\n]*\n\s*([A-Z][a-z]+\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})\s*\n\s*(?:Glamping|Rv|Campground|Mixed)/i
   );
   if (metadataBlock) {
     const result = parseAndValidate(metadataBlock[1]);
@@ -549,7 +722,7 @@ function extractReportDate(fullText: string): string | null {
 
   // 2. Explicit date labels (dated, as of, effective date)
   const explicitMatch = fullText.slice(0, 5000).match(
-    /(?:dated?|as\s+of|effective\s+date)\s*:?\s*([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/i
+    /(?:dated?|as\s+of|effective\s+date)\s*:?\s*([A-Z][a-z]+\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})/i
   );
   if (explicitMatch) {
     const result = parseAndValidate(explicitMatch[1]);
@@ -850,54 +1023,130 @@ function extractRecommendations(sections: DocSection[]): string[] | null {
 }
 
 // ---------------------------------------------------------------------------
+// Shared raw extraction (used by parseDocxReport and reports/upload)
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract raw content from DOCX/DOC files. Shared by parseDocxReport and reports/upload
+ * so both paths use the same extraction logic (paragraphs, tables, sections, messages).
+ */
+/** OLE compound document magic (legacy .doc) */
+const OLE_MAGIC = Buffer.from([0xd0, 0xcf, 0x11, 0xe0]);
+
+export async function extractRawContentFromDocx(
+  buffer: Buffer,
+  filename?: string
+): Promise<RawDocxContent> {
+  const extIsDoc = filename?.toLowerCase().endsWith('.doc') ?? false;
+  const isOleFormat = buffer.length >= 8 && buffer.subarray(0, 4).equals(OLE_MAGIC);
+  const isLegacyDoc = extIsDoc || isOleFormat;
+
+  if (isLegacyDoc) {
+    const extractor = new WordExtractor();
+    const doc = await extractor.extract(buffer);
+    let fullText = doc.getBody() || '';
+    if (!fullText || fullText.trim().length < 10) {
+      fullText = (doc.getHeaders?.() || '') + '\n' + fullText;
+    }
+    const paragraphs = fullText.split(/\r?\n/).map((p) => p.trim()).filter(Boolean);
+    const sections = extractSectionsFromPlainText(fullText);
+    return {
+      fullText,
+      paragraphs,
+      tables: [],
+      sections: sections.map((s) => ({
+        heading: s.heading,
+        headingLevel: s.headingLevel,
+        content: s.content,
+        paragraphs: s.paragraphs,
+      })),
+      messages: [],
+    };
+  }
+
+  const result = await mammoth.convertToHtml({ buffer });
+  const html = result.value;
+  const messages = (result.messages || []).map((m) => m.message || String(m));
+  const $ = cheerio.load(html);
+
+  const sections = extractSections($);
+  const paragraphs: string[] = [];
+  $('body').children().each((_, el) => {
+    const t = $(el).text().trim();
+    if (t) paragraphs.push(t);
+  });
+  const fullText = paragraphs.join('\n');
+
+  const tables: Array<{ table_id: string; rows: string[][] }> = [];
+  $('table').each((i, table) => {
+    const rows: string[][] = [];
+    $(table)
+      .find('tr')
+      .each((_, tr) => {
+        const rowData: string[] = [];
+        $(tr)
+          .find('td, th')
+          .each((_, cell) => {
+            rowData.push($(cell).text().trim());
+          });
+        if (rowData.length) rows.push(rowData);
+      });
+    tables.push({ table_id: `table_${i + 1}`, rows });
+  });
+
+  return {
+    fullText,
+    paragraphs,
+    tables,
+    sections: sections.map((s) => ({
+      heading: s.heading,
+      headingLevel: s.headingLevel,
+      content: s.content,
+      paragraphs: s.paragraphs,
+    })),
+    messages,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
 
 export async function parseDocxReport(
   buffer: Buffer,
-  filename: string
+  filename: string,
+  options?: ParseDocxReportOptions
 ): Promise<ParsedDocxReport> {
   const studyId = extractStudyId(filename);
-  const isLegacyDoc = filename.toLowerCase().endsWith('.doc');
 
-  let sections: DocSection[];
-  let fullText: string;
-
-  if (isLegacyDoc) {
-    try {
-      const extractor = new WordExtractor();
-      const doc = await extractor.extract(buffer);
-      fullText = doc.getBody() || '';
-      if (!fullText || fullText.trim().length < 10) {
-        fullText = (doc.getHeaders?.() || '') + '\n' + fullText;
-      }
-      sections = extractSectionsFromPlainText(fullText);
-    } catch (err) {
-      throw new Error(
-        `Failed to read "${filename}" as a Word document. Legacy .doc files are supported; the file may be corrupted. (${(err as Error).message})`
-      );
-    }
-  } else {
-    let html: string;
-    try {
-      const result = await mammoth.convertToHtml({ buffer });
-      html = result.value;
-    } catch (err) {
-      throw new Error(
-        `Failed to read "${filename}" as a Word document. The file may be corrupted or not a valid .docx file. (${(err as Error).message})`
-      );
-    }
-    const $ = cheerio.load(html);
-    sections = extractSections($);
-    fullText = $('body').text();
+  let raw: RawDocxContent;
+  try {
+    raw = await extractRawContentFromDocx(buffer, filename);
+  } catch (err) {
+    const isLegacyDoc = filename.toLowerCase().endsWith('.doc');
+    throw new Error(
+      isLegacyDoc
+        ? `Failed to read "${filename}" as a Word document. Legacy .doc files are supported; the file may be corrupted. (${(err as Error).message})`
+        : `Failed to read "${filename}" as a Word document. The file may be corrupted or not a valid .docx file. (${(err as Error).message})`
+    );
   }
+
+  const sections: DocSection[] = raw.sections.map((s) => ({
+    heading: s.heading,
+    headingLevel: s.headingLevel,
+    content: s.content,
+    paragraphs: s.paragraphs,
+  }));
+  const fullText = raw.fullText;
 
   const addressData = extractAddress(sections, fullText);
   const filenameParts = extractCityStateFromFilename(filename);
   const clientData = extractClient(sections, fullText);
 
-  return {
+  const documentTitle = extractFirstPageTitle(fullText);
+  let parsed: ParsedDocxReport = {
     study_id: studyId,
+    document_title: documentTitle,
     resort_name: extractResortName(sections, fullText),
     client_name: clientData.name,
     client_entity: clientData.entity,
@@ -920,5 +1169,12 @@ export async function parseDocxReport(
     unit_mix: extractUnitMix(sections, fullText),
     financial_assumptions: extractFinancialAssumptions(sections, fullText),
     recommendations: extractRecommendations(sections),
+    extraction_messages: raw.messages.length > 0 ? raw.messages : undefined,
   };
+
+  if (options?.useLLMForMissing) {
+    parsed = await fillMissingFieldsWithLLM(parsed, raw);
+  }
+
+  return parsed;
 }

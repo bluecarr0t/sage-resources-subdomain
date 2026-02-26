@@ -10,56 +10,42 @@ import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
 import { geocodeAddress } from '@/lib/geocode';
-import mammoth from 'mammoth';
-import * as cheerio from 'cheerio';
+import { extractRawContentFromDocx } from '@/lib/parsers/feasibility-docx-parser';
 import { randomUUID } from 'crypto';
 
-async function extractFromDocx(buffer: Buffer): Promise<{
+async function extractFromDocx(buffer: Buffer, filename?: string): Promise<{
   raw_content: Record<string, unknown>;
   extracted_data: Record<string, unknown>;
 }> {
-  const raw_content: Record<string, unknown> = {};
-  const extracted_data: Record<string, unknown> = {};
+  const raw = await extractRawContentFromDocx(buffer, filename);
 
-  const result = await mammoth.convertToHtml({ buffer });
-  const html = result.value;
-  const $ = cheerio.load(html);
-
-  const paragraphs: string[] = [];
-  $('p').each((_, el) => {
-    const text = $(el).text().trim();
-    if (text) paragraphs.push(text);
-  });
-  const fullText = paragraphs.join('\n');
-
-  const tables_data: Array<{ table_id: string; rows: string[][] }> = [];
-  $('table').each((i, table) => {
-    const rows: string[][] = [];
-    $(table)
-      .find('tr')
-      .each((_, tr) => {
-        const rowData: string[] = [];
-        $(tr)
-          .find('td, th')
-          .each((_, cell) => {
-            rowData.push($(cell).text().trim());
-          });
-        if (rowData.length) rows.push(rowData);
-      });
-    tables_data.push({ table_id: `table_${i + 1}`, rows });
-  });
-
-  raw_content.full_text = fullText;
-  raw_content.paragraphs = paragraphs;
-  raw_content.extracted_at = new Date().toISOString();
-
-  extracted_data.sections = { full_text: fullText };
-  extracted_data.tables = tables_data;
-  extracted_data.metadata = {
-    total_paragraphs: paragraphs.length,
-    total_tables: tables_data.length,
-    processed_at: new Date().toISOString(),
+  const raw_content: Record<string, unknown> = {
+    full_text: raw.fullText,
+    paragraphs: raw.paragraphs,
+    extracted_at: new Date().toISOString(),
   };
+  if (raw.messages.length) raw_content.messages = raw.messages;
+
+  const imageMessages = raw.messages.filter((m) =>
+    /image|picture|photo|figure/i.test(m)
+  );
+  const extracted_data: Record<string, unknown> = {
+    sections: { full_text: raw.fullText },
+    tables: raw.tables,
+    metadata: {
+      total_paragraphs: raw.paragraphs.length,
+      total_tables: raw.tables.length,
+      processed_at: new Date().toISOString(),
+    },
+  };
+  if (raw.messages.length) extracted_data.messages = raw.messages;
+  if (imageMessages.length) {
+    extracted_data.image_placeholders = imageMessages.map((msg, i) => ({
+      index: i + 1,
+      message: msg,
+      note: 'Image was present in document but not extracted',
+    }));
+  }
 
   return { raw_content, extracted_data };
 }
@@ -125,7 +111,7 @@ export async function POST(request: NextRequest) {
     // Upload files to Supabase Storage and extract content
     if (narrative_file?.size && narrative_file.name?.toLowerCase().endsWith('.docx')) {
       const buf = Buffer.from(await narrative_file.arrayBuffer());
-      const { raw_content: rc, extracted_data: ed } = await extractFromDocx(buf);
+      const { raw_content: rc, extracted_data: ed } = await extractFromDocx(buf, narrative_file.name);
       raw_content.narrative = { ...rc, file_type: 'narrative', filename: narrative_file.name };
       extracted_data.narrative = { ...ed, file_type: 'narrative', filename: narrative_file.name };
 
@@ -147,7 +133,7 @@ export async function POST(request: NextRequest) {
 
     if (financial_file?.size && financial_file.name?.toLowerCase().endsWith('.docx')) {
       const buf = Buffer.from(await financial_file.arrayBuffer());
-      const { raw_content: rc, extracted_data: ed } = await extractFromDocx(buf);
+      const { raw_content: rc, extracted_data: ed } = await extractFromDocx(buf, financial_file.name);
       raw_content.financial = { ...rc, file_type: 'financial', filename: financial_file.name };
       extracted_data.financial = { ...ed, file_type: 'financial', filename: financial_file.name };
 

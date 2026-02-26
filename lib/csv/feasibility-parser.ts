@@ -79,11 +79,27 @@ function clean(val: string | undefined | null): string {
 // Study ID extraction from filename
 // ---------------------------------------------------------------------------
 
+/** Study ID patterns (most specific first). Supports NN-NNN[A]?-NN and variants. */
+const STUDY_ID_PATTERNS = [
+  /^(\d{2}-\d{3}[A-Z]?-\d{2})\b/,           // 25-107A-01
+  /^(\d{2}-\d{3}-\d{2})\b/,                 // 25-107-01 (no letter)
+  /\b(\d{2}-\d{3}[A-Z]?-\d{2})\b/,          // anywhere in filename
+  /^([A-Z]{2,4}-\d{3,6}[A-Z]?-\d{1,3})\b/i, // ALPHA-NNN-N (e.g. FS-101-1)
+  /^(\d{6,10}[A-Z]?)\b/,                    // numeric-only IDs
+];
+
 export function extractStudyId(filename: string): string {
-  const base = filename.replace(/\.[^.]+$/, '');
-  const match = base.match(/^(\d{2}-\d{3}[A-Z]?-\d{2})/);
-  if (match) return match[1];
-  return base.slice(0, 40);
+  const base = filename.replace(/\.[^.]+$/, '').trim();
+  for (const re of STUDY_ID_PATTERNS) {
+    const match = base.match(re);
+    if (match && match[1].length >= 4 && match[1].length <= 40) {
+      return match[1];
+    }
+  }
+  // Fallback: use first "word" (alphanumeric + hyphens) or first 40 chars
+  const wordMatch = base.match(/^([A-Za-z0-9][A-Za-z0-9\-_.]*)/);
+  if (wordMatch) return wordMatch[1].slice(0, 40);
+  return base.slice(0, 40) || 'unknown';
 }
 
 // ---------------------------------------------------------------------------

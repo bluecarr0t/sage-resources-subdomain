@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button, Card } from '@/components/ui';
 import {
@@ -20,6 +20,7 @@ import {
   Lightbulb,
   RefreshCw,
   CheckCircle,
+  Upload,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -64,20 +65,27 @@ interface ReportDetail {
   longitude: number | null;
 }
 
-/** Known template/census dates — do not display as report date */
-const TEMPLATE_DATE_ISO = new Set(['2010-12-01', '2010-01-01', '2000-01-01']);
+/** Parse date string as local midnight to avoid timezone shift */
+function parseLocalDate(dateStr: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  return new Date(dateStr + 'T00:00:00');
+}
 
 function isDisplayableReportDate(dateStr: string | null | undefined): boolean {
   if (!dateStr) return false;
-  const d = new Date(dateStr);
+  const d = parseLocalDate(dateStr);
   if (isNaN(d.getTime())) return false;
-  const iso = d.toISOString().split('T')[0];
-  return !TEMPLATE_DATE_ISO.has(iso);
+  const year = d.getFullYear();
+  if (year < 2015 || year > 2035) return false;
+  return true;
 }
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '-';
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return parseLocalDate(dateStr).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -106,6 +114,8 @@ export default function ReportDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [reExtracting, setReExtracting] = useState(false);
   const [reExtractSuccess, setReExtractSuccess] = useState(false);
+  const [uploadingDocx, setUploadingDocx] = useState(false);
+  const [uploadDocxSuccess, setUploadDocxSuccess] = useState(false);
 
   const loadReport = async () => {
     try {
@@ -130,6 +140,50 @@ export default function ReportDetailPage() {
   }, [studyId]);
 
   const hasAnyFile = report?.csv_file_path || report?.docx_file_path;
+
+  const uploadDocxInputRef = useRef<HTMLInputElement>(null);
+
+  const MAX_DOCX_MB = 100;
+
+  const handleUploadDocx = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !studyId) return;
+    e.target.value = '';
+    const base = file.name.replace(/\.[^.]+$/, '').trim();
+    const match = base.match(/^(\d{2}-\d{3}[A-Z]?-\d{2})\b/i) || base.match(/\b(\d{2}-\d{3}[A-Z]?-\d{2})\b/i);
+    const fileStudyId = match ? match[1] : '';
+    if (fileStudyId.toUpperCase() !== studyId.toUpperCase()) {
+      setError(`Filename job number (${fileStudyId || 'not found'}) does not match this report (${studyId}). Use a DOCX file whose filename contains the job number.`);
+      return;
+    }
+    if (file.size > MAX_DOCX_MB * 1024 * 1024) {
+      setError(`File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max ${MAX_DOCX_MB}MB. Try compressing the DOCX or reducing embedded images.`);
+      return;
+    }
+    setUploadingDocx(true);
+    setError(null);
+    setUploadDocxSuccess(false);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`/api/admin/reports/study/${studyId}/upload-docx`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setError(data.error || 'Upload failed');
+        return;
+      }
+      await loadReport();
+      setUploadDocxSuccess(true);
+      setTimeout(() => setUploadDocxSuccess(false), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploadingDocx(false);
+    }
+  };
 
   const handleReExtract = async () => {
     if (!hasAnyFile || !studyId) return;
@@ -175,9 +229,16 @@ export default function ReportDetailPage() {
           </Button>
           <div className="p-8 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-center">
             <p className="text-red-700 dark:text-red-300 font-medium">{error || 'Report not found'}</p>
-            <Button variant="secondary" className="mt-4" onClick={() => router.push('/admin/past-reports')}>
-              Go to Past Reports
-            </Button>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {report && (
+                <Button variant="secondary" onClick={() => setError(null)}>
+                  Try again
+                </Button>
+              )}
+              <Button variant="secondary" onClick={() => router.push('/admin/past-reports')}>
+                Go to Past Reports
+              </Button>
+            </div>
           </div>
         </div>
       </main>
@@ -194,10 +255,12 @@ export default function ReportDetailPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        {reExtractSuccess && (
+        {(reExtractSuccess || uploadDocxSuccess) && (
           <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-2">
             <CheckCircle className="w-5 h-5 flex-shrink-0" />
-            <span>Re-extraction completed successfully. Data has been refreshed.</span>
+            <span>
+              {uploadDocxSuccess ? 'DOCX uploaded successfully. Download DOCX should now work.' : 'Re-extraction completed successfully. Data has been refreshed.'}
+            </span>
           </div>
         )}
         {/* Header */}
@@ -209,7 +272,7 @@ export default function ReportDetailPage() {
           <div className="space-y-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                {report.property_name || report.title || 'Untitled Report'}
+                {report.title || report.property_name || 'Untitled Report'}
               </h1>
               <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {report.study_id && (
@@ -241,11 +304,51 @@ export default function ReportDetailPage() {
             <div className="flex flex-wrap gap-2">
               {report.has_comparables && (
                 <Link href={`/admin/comparables/${report.study_id}`}>
-                  <Button variant="primary" size="sm">
-                    <BarChart3 className="w-4 h-4 mr-1.5" />
-                    View Comps & Financial Data
+                  <Button variant="primary" size="sm" className="flex flex-col items-start gap-1">
+                    <BarChart3 className="w-4 h-4" />
+                    <span>View Comps & Financial Data</span>
                   </Button>
                 </Link>
+              )}
+              {report.csv_file_path && (
+                <a href={`/api/admin/comparables/${report.study_id}/download`}>
+                  <Button variant="secondary" size="sm" className="flex flex-col items-start gap-1">
+                    <FileSpreadsheet className="w-4 h-4" />
+                    <span>Download XLSX</span>
+                  </Button>
+                </a>
+              )}
+              {report.has_docx && report.docx_file_path ? (
+                <a href={`/api/admin/reports/study/${report.study_id}/download-docx`}>
+                  <Button variant="secondary" size="sm" className="flex flex-col items-start gap-1">
+                    <Download className="w-4 h-4" />
+                    <span>Download DOCX</span>
+                  </Button>
+                </a>
+              ) : (
+                <>
+                  <input
+                    ref={uploadDocxInputRef}
+                    type="file"
+                    accept=".docx,.doc"
+                    className="hidden"
+                    onChange={handleUploadDocx}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => uploadDocxInputRef.current?.click()}
+                    disabled={uploadingDocx}
+                    className="flex flex-col items-start gap-1 border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50 border-2"
+                  >
+                    {uploadingDocx ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    <span>{uploadingDocx ? 'Uploading...' : 'Upload DOCX'}</span>
+                  </Button>
+                </>
               )}
               {(report.csv_file_path || report.docx_file_path) && (
                 <Button
@@ -253,31 +356,15 @@ export default function ReportDetailPage() {
                   size="sm"
                   onClick={handleReExtract}
                   disabled={reExtracting}
-                  className="flex items-center gap-1.5"
+                  className="flex flex-col items-start gap-1"
                 >
                   {reExtracting ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   ) : (
                     <RefreshCw className="w-4 h-4" />
                   )}
-                  {reExtracting ? 'Re-extracting...' : 'Re-extract'}
+                  <span>{reExtracting ? 'Re-extracting...' : 'Re-extract'}</span>
                 </Button>
-              )}
-              {report.csv_file_path && (
-                <a href={`/api/admin/comparables/${report.study_id}/download`}>
-                  <Button variant="secondary" size="sm">
-                    <FileSpreadsheet className="w-4 h-4 mr-1.5" />
-                    Download XLSX
-                  </Button>
-                </a>
-              )}
-              {report.has_docx && report.docx_file_path && (
-                <a href={`/api/admin/reports/study/${report.study_id}/download-docx`}>
-                  <Button variant="secondary" size="sm">
-                    <Download className="w-4 h-4 mr-1.5" />
-                    Download DOCX
-                  </Button>
-                </a>
               )}
             </div>
           </div>

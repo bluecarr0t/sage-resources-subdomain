@@ -1,9 +1,9 @@
 {
-  "timestamp": "2025-12-18T17:54:16.471Z",
+  "timestamp": "2026-02-26T05:43:30.492Z",
   "testUrl": "https://resources.sageoutdooradvisory.com/en/map?country=United+States&country=Canada",
   "apiResponseTime": 0,
   "apiResponseTimeCached": null,
-  "databaseQueryTime": 7,
+  "databaseQueryTime": 4,
   "redisCacheHit": false,
   "redisAvailable": false,
   "cacheImpact": {
@@ -18,13 +18,15 @@
     "responseSizeMB": 0
   },
   "bundleAnalysis": {
-    "componentCount": 55,
-    "dynamicImports": 11,
-    "clientComponents": 31
+    "componentCount": 93,
+    "dynamicImports": 12,
+    "clientComponents": 54
   },
   "recommendations": [
-    "Map page has 6 structured data scripts - consider consolidating",
+    "Map page has 8 structured data scripts - consider consolidating",
     "Map page fetches statistics on every request - consider static generation",
-    "GooglePropertyMap component is large (109.28 KB) - consider code splitting"
+    "Selecting all fields is significantly slower - consider field selection for initial load",
+    "Field selection provides significant performance improvement - implement field selection for map markers",
+    "Redis cache is not available - ensure Redis is configured and running for optimal performance"
   ]
 }

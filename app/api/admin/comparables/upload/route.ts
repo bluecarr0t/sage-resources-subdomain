@@ -17,6 +17,7 @@ import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
 import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit';
 import { parseWorkbook } from '@/lib/parsers/feasibility-xlsx-parser';
+import { normalizeReportTitle } from '@/lib/normalize-report-title';
 import type {
   FeasibilityComparableInsert,
   FeasibilityCompUnitInsert,
@@ -115,7 +116,7 @@ async function ensureReportUploadsBucket(supabase: ReturnType<typeof createServe
   if (exists) {
     const { error: updateError } = await supabase.storage.updateBucket(BUCKET_NAME, {
       public: false,
-      fileSizeLimit: 52428800, // 50MB
+      fileSizeLimit: 104857600, // 100MB (Pro plan)
       allowedMimeTypes: mimeTypes,
     });
     if (updateError) {
@@ -127,7 +128,7 @@ async function ensureReportUploadsBucket(supabase: ReturnType<typeof createServe
   let createError: { message?: string } | null = null;
   const { error: e1 } = await supabase.storage.createBucket(BUCKET_NAME, {
     public: false,
-    fileSizeLimit: 52428800, // 50MB
+    fileSizeLimit: 104857600, // 100MB (Pro plan)
     allowedMimeTypes: mimeTypes,
   });
   createError = e1;
@@ -135,7 +136,7 @@ async function ensureReportUploadsBucket(supabase: ReturnType<typeof createServe
   if (createError && !createError.message?.includes('already exists')) {
     const { error: e2 } = await supabase.storage.createBucket(BUCKET_NAME, {
       public: false,
-      fileSizeLimit: 52428800, // 50MB
+      fileSizeLimit: 104857600, // 100MB (Pro plan)
     });
     if (e2 && !e2.message?.includes('already exists')) {
       throw new Error(`Failed to create storage bucket: ${createError.message}`);
@@ -166,6 +167,12 @@ function deriveLocation(
 function deriveStateFromLocation(location: string): string | null {
   const match = location.match(/,\s*([A-Z]{2})(?:\s|$)/i);
   return match ? match[1].toUpperCase() : null;
+}
+
+/** Derive city from location string (e.g. "Newport, TN" -> "Newport") */
+function deriveCityFromLocation(location: string): string | null {
+  const match = location.match(/^([^,]+),\s*[A-Z]{2}(?:\s|$)/i);
+  return match ? match[1].trim() : null;
 }
 
 const INTERNAL_API_KEY = process.env.ADMIN_INTERNAL_API_KEY;
@@ -273,6 +280,7 @@ export async function POST(request: NextRequest) {
             study_id: parsed.study_id,
             success: false,
             error: `No parseable data found. Sheets detected: ${parsed.sheets_found.join(', ') || 'none'}`,
+            warnings: parsed.warnings?.length ? parsed.warnings : undefined,
           });
           continue;
         }
@@ -284,9 +292,13 @@ export async function POST(request: NextRequest) {
           .eq('study_id', parsed.study_id)
           .maybeSingle();
 
-        const title = parsed.project_info?.resort_name
-          ? `${parsed.project_info.resort_name} - ${parsed.study_id}`
-          : `Feasibility Study ${parsed.study_id}`;
+        const { title, propertyName } = await normalizeReportTitle({
+          rawTitle: parsed.project_info?.resort_name
+            ? `${parsed.project_info.resort_name} - ${parsed.study_id}`
+            : null,
+          propertyName: parsed.project_info?.resort_name,
+          studyId: parsed.study_id,
+        });
 
         const location = deriveLocation(file.name, parsed.project_info);
         const state = deriveStateFromLocation(location);
@@ -300,7 +312,7 @@ export async function POST(request: NextRequest) {
             .insert({
               user_id: session.user.id,
               title,
-              property_name: parsed.project_info?.resort_name || parsed.study_id,
+              property_name: propertyName,
               location,
               state,
               study_id: parsed.study_id,
@@ -315,7 +327,6 @@ export async function POST(request: NextRequest) {
           reportId = newReport.id;
         }
 
-        // Store raw XLSX in Supabase Storage (must succeed before we save csv_file_path)
         const storagePath = `${reportId}/workbooks/${file.name}`;
         let uploadError: { message?: string } | null = null;
         let uploadResult = await supabaseAdmin.storage
@@ -688,6 +699,7 @@ export async function POST(request: NextRequest) {
           if (marketError) throw new Error(`Insert failed (market): ${marketError.message}. Use "Re-extract" to retry.`);
         }
 
+        const city = deriveCityFromLocation(location);
         const reportUpdate: Record<string, unknown> = {
           has_comparables: true,
           comp_count: parsed.comparables.length || undefined,
@@ -698,6 +710,7 @@ export async function POST(request: NextRequest) {
           property_name: parsed.project_info?.resort_name || parsed.study_id,
           location,
           state,
+          ...(city && { city }),
         };
 
         if (parsed.project_info) {
@@ -732,7 +745,9 @@ export async function POST(request: NextRequest) {
         results.push({
           filename: file.name,
           study_id: parsed.study_id,
+          report_id: reportId,
           success: true,
+          warnings: parsed.warnings?.length ? parsed.warnings : undefined,
           sheets_processed: parsed.sheets_found.length,
           comparables_count: parsed.comparables.length,
           units_count: parsed.comp_units.length,

@@ -28,7 +28,7 @@ function isMisExtractedTitle(title: string | null): boolean {
 
 function displayTitle(report: { title: string | null; study_id: string | null }): string {
   if (report.title && !isMisExtractedTitle(report.title)) return report.title;
-  return report.study_id ? `Study ${report.study_id}` : 'Feasibility Study';
+  return report.study_id ? `Job ${report.study_id}` : 'Feasibility Study';
 }
 
 interface Report {
@@ -331,7 +331,7 @@ export default function StudyDetailPage() {
       const res = await fetch(`/api/admin/comparables/${studyId}`);
       const data = await res.json();
       if (!data.success) {
-        setError(data.message || 'Failed to load study');
+        setError(data.message || 'Failed to load job');
         return;
       }
       setReport(data.study.report);
@@ -347,7 +347,7 @@ export default function StudyDetailPage() {
       setOccupancyProjections(data.study.occupancy_projections || []);
       setMarketData(data.study.market_data || []);
     } catch {
-      setError('Failed to load study');
+      setError('Failed to load job');
     } finally {
       setLoading(false);
     }
@@ -356,7 +356,7 @@ export default function StudyDetailPage() {
   useEffect(() => {
     if (!studyId) {
       setLoading(false);
-      setError('Study ID is missing');
+      setError('Job Number is missing');
       return;
     }
     loadStudy();
@@ -367,7 +367,7 @@ export default function StudyDetailPage() {
       <main className="pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto py-20 text-center">
           <div className="animate-spin w-8 h-8 border-2 border-sage-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">Loading study...</p>
+          <p className="text-gray-500 dark:text-gray-400">Loading job...</p>
         </div>
       </main>
     );
@@ -378,7 +378,7 @@ export default function StudyDetailPage() {
       <main className="pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto py-20 text-center">
           <p className="text-red-600 dark:text-red-400 text-lg mb-4">
-            {error || 'Study not found'}
+            {error || 'Job not found'}
           </p>
           <Button variant="secondary" onClick={() => router.push('/admin/comparables')}>
             Back to Comparables

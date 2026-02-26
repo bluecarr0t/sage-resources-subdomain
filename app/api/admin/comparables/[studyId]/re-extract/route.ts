@@ -14,6 +14,7 @@ import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
 import { parseDocxReport } from '@/lib/parsers/feasibility-docx-parser';
+import { normalizeReportTitle } from '@/lib/normalize-report-title';
 import { geocodeAddress } from '@/lib/geocode';
 
 const BUCKET_NAME = 'report-uploads';
@@ -147,7 +148,9 @@ export async function POST(
         } else {
           const docxFilename = report.docx_file_path.split('/').pop() || `${studyId}.docx`;
           const docxBuffer = Buffer.from(await docxData.arrayBuffer());
-          const parsed = await parseDocxReport(docxBuffer, docxFilename);
+          const parsed = await parseDocxReport(docxBuffer, docxFilename, {
+            useLLMForMissing: true,
+          });
 
           let latitude: number | null = null;
           let longitude: number | null = null;
@@ -171,23 +174,29 @@ export async function POST(
             status: 'completed',
           };
 
-          if (parsed.resort_name) {
-            reportUpdate.property_name = parsed.resort_name;
-            reportUpdate.title = `${parsed.resort_name} - ${studyId}`;
-          }
-          if (parsed.city) reportUpdate.city = parsed.city;
-          if (parsed.state) reportUpdate.state = parsed.state;
-          if (parsed.address) reportUpdate.address_1 = parsed.address;
-          if (parsed.zip_code) reportUpdate.zip_code = parsed.zip_code;
-          if (parsed.county) reportUpdate.county = parsed.county;
-          if (parsed.parcel_number) reportUpdate.parcel_number = parsed.parcel_number;
-          if (parsed.lot_size_acres) reportUpdate.lot_size_acres = parsed.lot_size_acres;
-          if (parsed.total_units) reportUpdate.total_sites = parsed.total_units;
-          if (parsed.market_type) reportUpdate.market_type = parsed.market_type;
+          const { title: normalizedTitle, propertyName: normalizedPropertyName } =
+            await normalizeReportTitle({
+              documentTitle: parsed.document_title,
+              rawTitle: parsed.resort_name ? `${parsed.resort_name} - ${studyId}` : null,
+              resortName: parsed.resort_name,
+              studyId,
+            });
+          reportUpdate.property_name = normalizedPropertyName;
+          reportUpdate.title = normalizedTitle;
+          reportUpdate.city = parsed.city ?? null;
+          reportUpdate.state = parsed.state ?? null;
+          reportUpdate.address_1 = parsed.address ?? null;
+          reportUpdate.zip_code = parsed.zip_code ?? null;
+          reportUpdate.county = parsed.county ?? null;
+          reportUpdate.parcel_number = parsed.parcel_number ?? null;
+          reportUpdate.lot_size_acres = parsed.lot_size_acres ?? null;
+          reportUpdate.total_sites = parsed.total_units ?? null;
+          reportUpdate.market_type = parsed.market_type ?? null;
+          reportUpdate.report_date = parsed.report_date ?? null;
           if (parsed.executive_summary) reportUpdate.executive_summary = parsed.executive_summary;
           if (parsed.swot) reportUpdate.swot = parsed.swot;
           if (parsed.authors) reportUpdate.authors = parsed.authors;
-          reportUpdate.report_date = parsed.report_date ?? null;
+          if (parsed.client_name) reportUpdate.client_name = parsed.client_name;
           if (parsed.client_entity) reportUpdate.client_entity = parsed.client_entity;
           if (parsed.report_purpose) reportUpdate.report_purpose = parsed.report_purpose;
           if (parsed.development_phase) reportUpdate.development_phase = parsed.development_phase;
@@ -195,13 +204,12 @@ export async function POST(
           if (parsed.unit_mix) reportUpdate.unit_mix = parsed.unit_mix;
           if (parsed.financial_assumptions) reportUpdate.financial_assumptions = parsed.financial_assumptions;
           if (parsed.recommendations) reportUpdate.recommendations = parsed.recommendations;
+          if (parsed.extraction_messages?.length) reportUpdate.docx_extraction_messages = parsed.extraction_messages;
           if (latitude !== null) reportUpdate.latitude = latitude;
           if (longitude !== null) reportUpdate.longitude = longitude;
 
           const locationParts = [parsed.city, parsed.state].filter(Boolean);
-          if (locationParts.length > 0) {
-            reportUpdate.location = locationParts.join(', ');
-          }
+          reportUpdate.location = locationParts.length > 0 ? locationParts.join(', ') : null;
 
           await supabaseAdmin
             .from('reports')

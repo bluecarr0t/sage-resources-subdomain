@@ -11,7 +11,7 @@
  *   sort_by      - comp_name | quality_score | low_adr | peak_adr | created_at
  *   sort_dir     - asc | desc
  *   page         - 1-indexed page number
- *   per_page     - results per page (default 20)
+ *   per_page     - results per page (default 50)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -22,7 +22,7 @@ import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
 
-const DEFAULT_PER_PAGE = 20;
+const DEFAULT_PER_PAGE = 50;
 
 /** Maps state abbreviations ↔ full names so "GA" finds "Georgia" and vice versa */
 const STATE_ALIASES: Record<string, string[]> = Object.fromEntries(
@@ -126,11 +126,11 @@ export async function GET(request: NextRequest) {
       query = query.order(sortColumn, { ascending: sortDir });
     }
 
-    if (!needsPostFilter) {
-      query = query.range((page - 1) * perPage, page * perPage - 1);
-    }
+    // Always fetch all for grouping (dedupes same comp across multiple reports)
+    const MAX_FETCH = 5000;
+    query = query.limit(MAX_FETCH);
 
-    const { data, error, count } = await query;
+    const { data, error } = await query;
 
     if (error) {
       console.error('[comparables] Query error:', error);
@@ -198,17 +198,101 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const totalFiltered = needsPostFilter ? filteredData.length : (count || 0);
-    const totalPages = Math.ceil(totalFiltered / perPage);
+    /** Exclude comparables with invalid comp_names (notes, subject rows, numeric-only) */
+    const isValidCompName = (name: string): boolean => {
+      const t = name.trim();
+      if (!t || t.length > 80) return false;
+      if (/^\d+(\.\d+)?$/.test(t)) return false;
+      if (/^(subject\s+projection|subject\s+property)$/i.test(t)) return false;
+      if (/\b(resort\s+fee|charges\s+a|incl\.|including|on\s+site\s+activit)/i.test(t)) return false;
+      if (/^[\d.\s]+$/.test(t)) return false;
+      if (t.split(/\s+/).length > 15) return false;
+      return true;
+    };
 
-    if (needsPostFilter) {
-      const start = (page - 1) * perPage;
-      filteredData = filteredData.slice(start, start + perPage);
+    const validData = filteredData.filter((c) => isValidCompName(String(c.comp_name || '')));
+
+    // Group by comp_name (same property in multiple reports → one row)
+    const groupKey = (c: Record<string, unknown>) =>
+      String(c.comp_name || '').trim().toLowerCase();
+    const groups = new Map<string, Record<string, unknown>[]>();
+    for (const comp of validData) {
+      const key = groupKey(comp);
+      if (!key) continue;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(comp);
     }
+
+    const groupedData: Record<string, unknown>[] = [];
+    for (const rows of groups.values()) {
+      const first = rows[0] as Record<string, unknown>;
+      const reports = rows.map((r) => {
+        const rep = (r.reports as Record<string, unknown> | Record<string, unknown>[] | null);
+        return Array.isArray(rep) ? rep[0] : rep;
+      }).filter(Boolean) as Record<string, unknown>[];
+
+      const allUnits = rows.flatMap((r) => (r.feasibility_comp_units as unknown[]) || []);
+      const seenUnit = new Set<string>();
+      const mergedUnits = allUnits.filter((u) => {
+        const uRecord = u as Record<string, unknown>;
+        const k = `${uRecord.unit_type || ''}:${uRecord.unit_category || ''}`;
+        if (seenUnit.has(k)) return false;
+        seenUnit.add(k);
+        return true;
+      });
+
+      // Sanitize overview: if it looks like "Location: 291.51. Unit types: 0.07" (numeric), clear it
+      const overview = first.overview as string | null | undefined;
+      const hasBadOverview = overview && (
+        /Location:\s*\d+(\.\d+)?/i.test(overview) ||
+        /Unit types:\s*\d+(\.\d+)?/i.test(overview)
+      );
+      const sanitizedFirst = hasBadOverview ? { ...first, overview: null } : first;
+
+      groupedData.push({
+        ...sanitizedFirst,
+        id: first.id,
+        reports: reports.length > 1 ? { _grouped: true, studies: reports } : reports[0],
+        feasibility_comp_units: mergedUnits,
+        _studyIds: reports.map((r) => r.study_id).filter(Boolean),
+        _studyCount: reports.length,
+      });
+    }
+
+    // Sort grouped data
+    const sortCol = validSortColumns[sortBy] || 'created_at';
+    groupedData.sort((a, b) => {
+      let va: unknown = a[sortCol];
+      let vb: unknown = b[sortCol];
+      if (sortCol === 'reports.state' || sortBy === 'state') {
+        const ra = (a.reports as Record<string, unknown>)?._grouped
+          ? (a.reports as { studies: Record<string, unknown>[] }).studies[0]
+          : a.reports;
+        const rb = (b.reports as Record<string, unknown>)?._grouped
+          ? (b.reports as { studies: Record<string, unknown>[] }).studies[0]
+          : b.reports;
+        va = (ra as Record<string, unknown>)?.state ?? '';
+        vb = (rb as Record<string, unknown>)?.state ?? '';
+      }
+      let cmp: number;
+      if (typeof va === 'number' && typeof vb === 'number') {
+        cmp = va - vb;
+      } else if (va != null && vb != null && typeof va === 'string' && typeof vb === 'string') {
+        cmp = va.localeCompare(vb, undefined, { numeric: true });
+      } else {
+        cmp = String(va ?? '').localeCompare(String(vb ?? ''), undefined, { numeric: true });
+      }
+      return sortDir ? cmp : -cmp;
+    });
+
+    const totalFiltered = groupedData.length;
+    const totalPages = Math.ceil(totalFiltered / perPage);
+    const start = (page - 1) * perPage;
+    const paginatedData = groupedData.slice(start, start + perPage);
 
     return NextResponse.json({
       success: true,
-      comparables: filteredData,
+      comparables: paginatedData,
       pagination: {
         page,
         per_page: perPage,
