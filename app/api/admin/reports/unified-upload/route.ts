@@ -275,7 +275,7 @@ export async function POST(request: NextRequest) {
               .select('id')
               .single();
 
-            if (reportError) throw reportError;
+            if (reportError) throw new Error(`Failed to create report: ${reportError.message} (${reportError.code})`);
             reportId = newReport.id;
           }
 
@@ -284,18 +284,27 @@ export async function POST(request: NextRequest) {
             let docxStored = false;
 
             if (pair.docxStoragePath) {
-              // Production: move file in storage (zero memory, instant)
-              const { error: moveError } = await supabaseAdmin.storage
+              // Production: copy file in storage (server-side, no client memory needed)
+              const { error: copyError } = await supabaseAdmin.storage
                 .from(BUCKET_NAME)
-                .move(pair.docxStoragePath, docxStoragePath);
+                .copy(pair.docxStoragePath, docxStoragePath);
 
-              if (moveError) {
-                console.error(`[unified-upload] DOCX move failed for ${pair.studyId}:`, moveError);
-                result.error = result.error || `Failed to save DOCX: ${moveError.message}`;
+              if (copyError) {
+                // Fallback: try move instead
+                const { error: moveError } = await supabaseAdmin.storage
+                  .from(BUCKET_NAME)
+                  .move(pair.docxStoragePath, docxStoragePath);
+
+                if (moveError) {
+                  console.error(`[unified-upload] DOCX storage failed for ${pair.studyId}: copy=${copyError.message}, move=${moveError.message}`);
+                  result.error = result.error || `Failed to save DOCX: ${copyError.message}`;
+                } else {
+                  docxStored = true;
+                  const idx = tempStoragePaths.indexOf(pair.docxStoragePath);
+                  if (idx >= 0) tempStoragePaths.splice(idx, 1);
+                }
               } else {
                 docxStored = true;
-                const idx = tempStoragePaths.indexOf(pair.docxStoragePath);
-                if (idx >= 0) tempStoragePaths.splice(idx, 1);
               }
             } else {
               // Local dev (FormData): upload from memory
@@ -398,8 +407,9 @@ export async function POST(request: NextRequest) {
           result.error = 'No files could be processed for this study';
         }
       } catch (err) {
-        console.error(`[unified-upload] Error processing study ${pair.studyId}:`, err);
-        result.error = err instanceof Error ? err.message : 'Processing failed';
+        const errMsg = err instanceof Error ? err.message : typeof err === 'object' && err !== null ? JSON.stringify(err) : 'Processing failed';
+        console.error(`[unified-upload] Error processing study ${pair.studyId}:`, errMsg);
+        result.error = errMsg;
       }
 
       results.push(result);
