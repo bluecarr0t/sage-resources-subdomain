@@ -9,15 +9,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-
-export const dynamic = 'force-dynamic';
-
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
 import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit';
 import { parseWorkbook } from '@/lib/parsers/feasibility-xlsx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
+
+export const dynamic = 'force-dynamic';
 import type {
   FeasibilityComparableInsert,
   FeasibilityCompUnitInsert,

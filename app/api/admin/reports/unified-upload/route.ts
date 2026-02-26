@@ -9,10 +9,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-
-export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
-
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
@@ -21,6 +17,9 @@ import { parseDocxReport } from '@/lib/parsers/feasibility-docx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
 import { geocodeAddress } from '@/lib/geocode';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
+
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 const MAX_FILES = 20;
 const MAX_XLSX_SIZE_MB = 50;
