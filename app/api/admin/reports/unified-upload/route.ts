@@ -32,6 +32,7 @@ interface StudyPair {
   studyId: string;
   xlsx: File | null;
   docx: File | null;
+  docxStoragePath: string | null;
 }
 
 interface UnifiedUploadResult {
@@ -89,46 +90,45 @@ export async function POST(request: NextRequest) {
 
     const supabaseAdmin = createServerClient();
     const xlsxFiles: File[] = [];
-    const docxFiles: File[] = [];
-    const oversized: string[] = [];
+    const docxEntries: Array<{ name: string; storagePath: string }> = [];
     const tempStoragePaths: string[] = [];
     const xlsxStoragePathByFilename = new Map<string, string>();
+    let totalFileCount = 0;
+    const formDataDocxFiles = new Map<string, File>();
 
     const contentType = request.headers.get('content-type') || '';
 
     if (contentType.includes('application/json')) {
-      // Storage-path mode: files were uploaded directly to Supabase Storage
       const body = await request.json();
       const filePaths: Array<{ name: string; storagePath: string }> = body.files || [];
 
       for (const fp of filePaths) {
         tempStoragePaths.push(fp.storagePath);
-        const { data: blob, error: dlError } = await supabaseAdmin.storage
-          .from(BUCKET_NAME)
-          .download(fp.storagePath);
-
-        if (dlError || !blob) {
-          return NextResponse.json(
-            { success: false, message: `Failed to retrieve ${fp.name} from storage: ${dlError?.message || 'Unknown error'}` },
-            { status: 500 }
-          );
-        }
-
         const name = fp.name.toLowerCase();
-        const file = new File([blob], fp.name);
 
         if (name.endsWith('.xlsx')) {
-          if (file.size <= MAX_XLSX_SIZE_BYTES) {
-            xlsxFiles.push(file);
-            xlsxStoragePathByFilename.set(fp.name, fp.storagePath);
-          } else oversized.push(`${fp.name} (${(file.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_XLSX_SIZE_MB}MB)`);
+          // Download XLSX immediately (small enough, needed for comparables/upload)
+          const { data: blob, error: dlError } = await supabaseAdmin.storage
+            .from(BUCKET_NAME)
+            .download(fp.storagePath);
+
+          if (dlError || !blob) {
+            return NextResponse.json(
+              { success: false, message: `Failed to retrieve ${fp.name}: ${dlError?.message || 'Unknown error'}` },
+              { status: 500 }
+            );
+          }
+
+          xlsxFiles.push(new File([blob], fp.name));
+          xlsxStoragePathByFilename.set(fp.name, fp.storagePath);
+          totalFileCount++;
         } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
-          if (file.size <= MAX_DOCX_SIZE_BYTES) docxFiles.push(file);
-          else oversized.push(`${fp.name} (${(file.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_DOCX_SIZE_MB}MB)`);
+          // DOCXes: defer download until processing to avoid timeout
+          docxEntries.push(fp);
+          totalFileCount++;
         }
       }
     } else {
-      // FormData mode: files sent directly in the request body (local dev)
       const formData = await request.formData();
 
       for (const [, value] of formData.entries()) {
@@ -137,32 +137,25 @@ export async function POST(request: NextRequest) {
         const name = value.name.toLowerCase();
         if (name.endsWith('.xlsx')) {
           if (value.size <= MAX_XLSX_SIZE_BYTES) xlsxFiles.push(value);
-          else oversized.push(`${value.name} (${(value.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_XLSX_SIZE_MB}MB)`);
         } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
-          if (value.size <= MAX_DOCX_SIZE_BYTES) docxFiles.push(value);
-          else oversized.push(`${value.name} (${(value.size / 1024 / 1024).toFixed(1)}MB, max ${MAX_DOCX_SIZE_MB}MB)`);
+          if (value.size <= MAX_DOCX_SIZE_BYTES) {
+            docxEntries.push({ name: value.name, storagePath: '' });
+            // Store File reference for FormData mode (local dev)
+            formDataDocxFiles.set(value.name, value);
+          }
         }
+        totalFileCount++;
       }
     }
 
-    if (oversized.length > 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `File(s) too large: ${oversized.join('; ')}. Try compressing DOCX files or reducing embedded images.`,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (xlsxFiles.length === 0 && docxFiles.length === 0) {
+    if (totalFileCount === 0) {
       return NextResponse.json(
         { success: false, message: 'No valid files provided. Please upload .xlsx and/or .docx files.' },
         { status: 400 }
       );
     }
 
-    if (xlsxFiles.length + docxFiles.length > MAX_FILES) {
+    if (totalFileCount > MAX_FILES) {
       return NextResponse.json(
         { success: false, message: `Maximum ${MAX_FILES} total files per upload.` },
         { status: 400 }
@@ -174,15 +167,17 @@ export async function POST(request: NextRequest) {
 
     for (const file of xlsxFiles) {
       const studyId = extractStudyId(file.name);
-      const pair = studyMap.get(studyId) || { studyId, xlsx: null, docx: null };
+      const pair = studyMap.get(studyId) || { studyId, xlsx: null, docx: null, docxStoragePath: null };
       pair.xlsx = file;
       studyMap.set(studyId, pair);
     }
 
-    for (const file of docxFiles) {
-      const studyId = extractStudyId(file.name);
-      const pair = studyMap.get(studyId) || { studyId, xlsx: null, docx: null };
-      pair.docx = file;
+    for (const entry of docxEntries) {
+      const studyId = extractStudyId(entry.name);
+      const pair = studyMap.get(studyId) || { studyId, xlsx: null, docx: null, docxStoragePath: null };
+      pair.docxStoragePath = entry.storagePath || null;
+      // Create a placeholder File for pairing (no data loaded yet)
+      pair.docx = new File([], entry.name);
       studyMap.set(studyId, pair);
     }
     const results: UnifiedUploadResult[] = [];
@@ -249,10 +244,32 @@ export async function POST(request: NextRequest) {
         }
 
         // Step 2: Process DOCX
-        if (pair.docx) {
-          const docxBuffer = Buffer.from(await pair.docx.arrayBuffer());
+        if (pair.docx && pair.docx.name) {
+          // Lazily download DOCX from storage (or use FormData file for local dev)
+          let docxBuffer: Buffer;
+          if (pair.docxStoragePath) {
+            const { data: blob, error: dlError } = await supabaseAdmin.storage
+              .from(BUCKET_NAME)
+              .download(pair.docxStoragePath);
+
+            if (dlError || !blob) {
+              result.error = `Failed to retrieve DOCX: ${dlError?.message || 'Unknown error'}`;
+              results.push(result);
+              continue;
+            }
+            docxBuffer = Buffer.from(await blob.arrayBuffer());
+          } else {
+            const formFile = formDataDocxFiles.get(pair.docx.name);
+            if (!formFile) {
+              result.error = 'DOCX file data not available';
+              results.push(result);
+              continue;
+            }
+            docxBuffer = Buffer.from(await formFile.arrayBuffer());
+          }
+
           const parsed = await parseDocxReport(docxBuffer, pair.docx.name, {
-            useLLMForMissing: true,
+            useLLMForMissing: false,
           });
 
           // Find the report record: prefer report_id from XLSX result when both in same batch
@@ -302,22 +319,51 @@ export async function POST(request: NextRequest) {
 
           if (reportId) {
             const docxStoragePath = `${reportId}/report.docx`;
-            const { error: uploadError } = await supabaseAdmin.storage
-              .from(BUCKET_NAME)
-              .upload(docxStoragePath, docxBuffer, {
-                contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                upsert: true,
-              });
+            let docxStored = false;
 
-            if (uploadError) {
-              console.error(`[unified-upload] DOCX storage upload failed for ${pair.studyId}:`, uploadError);
-              const isSizeError = /exceeded.*maximum|too large|size limit/i.test(uploadError.message);
-              result.error =
-                result.error ||
-                (isSizeError
-                  ? 'File exceeds 100MB limit. Try compressing the DOCX or reducing embedded images.'
-                  : `Failed to save DOCX to storage: ${uploadError.message}`);
+            if (pair.docxStoragePath) {
+              // Move file in storage (no re-upload needed -- saves ~10s for large files)
+              const { error: moveError } = await supabaseAdmin.storage
+                .from(BUCKET_NAME)
+                .move(pair.docxStoragePath, docxStoragePath);
+
+              if (moveError) {
+                // Fallback: copy by uploading if move fails
+                const { error: uploadError } = await supabaseAdmin.storage
+                  .from(BUCKET_NAME)
+                  .upload(docxStoragePath, docxBuffer, {
+                    contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    upsert: true,
+                  });
+                if (uploadError) {
+                  console.error(`[unified-upload] DOCX storage failed for ${pair.studyId}:`, uploadError);
+                  result.error = result.error || `Failed to save DOCX: ${uploadError.message}`;
+                } else {
+                  docxStored = true;
+                }
+              } else {
+                docxStored = true;
+                // Remove from temp cleanup list since move already handled it
+                const idx = tempStoragePaths.indexOf(pair.docxStoragePath);
+                if (idx >= 0) tempStoragePaths.splice(idx, 1);
+              }
             } else {
+              // FormData mode (local dev): upload directly
+              const { error: uploadError } = await supabaseAdmin.storage
+                .from(BUCKET_NAME)
+                .upload(docxStoragePath, docxBuffer, {
+                  contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                  upsert: true,
+                });
+              if (uploadError) {
+                console.error(`[unified-upload] DOCX storage failed for ${pair.studyId}:`, uploadError);
+                result.error = result.error || `Failed to save DOCX: ${uploadError.message}`;
+              } else {
+                docxStored = true;
+              }
+            }
+
+            if (docxStored) {
               // Geocode the address
               let latitude: number | null = null;
               let longitude: number | null = null;
