@@ -245,33 +245,6 @@ export async function POST(request: NextRequest) {
 
         // Step 2: Process DOCX
         if (pair.docx && pair.docx.name) {
-          // Lazily download DOCX from storage (or use FormData file for local dev)
-          let docxBuffer: Buffer;
-          if (pair.docxStoragePath) {
-            const { data: blob, error: dlError } = await supabaseAdmin.storage
-              .from(BUCKET_NAME)
-              .download(pair.docxStoragePath);
-
-            if (dlError || !blob) {
-              result.error = `Failed to retrieve DOCX: ${dlError?.message || 'Unknown error'}`;
-              results.push(result);
-              continue;
-            }
-            docxBuffer = Buffer.from(await blob.arrayBuffer());
-          } else {
-            const formFile = formDataDocxFiles.get(pair.docx.name);
-            if (!formFile) {
-              result.error = 'DOCX file data not available';
-              results.push(result);
-              continue;
-            }
-            docxBuffer = Buffer.from(await formFile.arrayBuffer());
-          }
-
-          const parsed = await parseDocxReport(docxBuffer, pair.docx.name, {
-            useLLMForMissing: false,
-          });
-
           // Find the report record: prefer report_id from XLSX result when both in same batch
           let reportId: string | null = null;
           if (result.xlsx_result?.report_id && typeof result.xlsx_result.report_id === 'string') {
@@ -289,26 +262,15 @@ export async function POST(request: NextRequest) {
             if (existingReport) reportId = existingReport.id;
           }
           if (!reportId && !pair.xlsx) {
-            // No XLSX was uploaded — create the report from DOCX data
-            const { title, propertyName } = await normalizeReportTitle({
-              documentTitle: parsed.document_title,
-              rawTitle: parsed.resort_name ? `${parsed.resort_name} - ${pair.studyId}` : null,
-              resortName: parsed.resort_name,
-              studyId: pair.studyId,
-            });
-            const location = [parsed.city, parsed.state].filter(Boolean).join(', ') || null;
             const { data: newReport, error: reportError } = await supabaseAdmin
               .from('reports')
               .insert({
                 user_id: session.user.id,
-                title,
-                property_name: propertyName,
-                location,
-                city: parsed.city,
-                state: parsed.state,
+                title: pair.studyId,
+                property_name: pair.studyId,
                 study_id: pair.studyId,
                 status: 'completed',
-                market_type: parsed.market_type || 'outdoor_hospitality',
+                market_type: 'outdoor_hospitality',
               })
               .select('id')
               .single();
@@ -322,13 +284,24 @@ export async function POST(request: NextRequest) {
             let docxStored = false;
 
             if (pair.docxStoragePath) {
-              // Move file in storage (no re-upload needed -- saves ~10s for large files)
+              // Production: move file in storage (zero memory, instant)
               const { error: moveError } = await supabaseAdmin.storage
                 .from(BUCKET_NAME)
                 .move(pair.docxStoragePath, docxStoragePath);
 
               if (moveError) {
-                // Fallback: copy by uploading if move fails
+                console.error(`[unified-upload] DOCX move failed for ${pair.studyId}:`, moveError);
+                result.error = result.error || `Failed to save DOCX: ${moveError.message}`;
+              } else {
+                docxStored = true;
+                const idx = tempStoragePaths.indexOf(pair.docxStoragePath);
+                if (idx >= 0) tempStoragePaths.splice(idx, 1);
+              }
+            } else {
+              // Local dev (FormData): upload from memory
+              const formFile = formDataDocxFiles.get(pair.docx.name);
+              if (formFile) {
+                const docxBuffer = Buffer.from(await formFile.arrayBuffer());
                 const { error: uploadError } = await supabaseAdmin.storage
                   .from(BUCKET_NAME)
                   .upload(docxStoragePath, docxBuffer, {
@@ -336,52 +309,18 @@ export async function POST(request: NextRequest) {
                     upsert: true,
                   });
                 if (uploadError) {
-                  console.error(`[unified-upload] DOCX storage failed for ${pair.studyId}:`, uploadError);
+                  console.error(`[unified-upload] DOCX upload failed for ${pair.studyId}:`, uploadError);
                   result.error = result.error || `Failed to save DOCX: ${uploadError.message}`;
                 } else {
                   docxStored = true;
                 }
-              } else {
-                docxStored = true;
-                // Remove from temp cleanup list since move already handled it
-                const idx = tempStoragePaths.indexOf(pair.docxStoragePath);
-                if (idx >= 0) tempStoragePaths.splice(idx, 1);
-              }
-            } else {
-              // FormData mode (local dev): upload directly
-              const { error: uploadError } = await supabaseAdmin.storage
-                .from(BUCKET_NAME)
-                .upload(docxStoragePath, docxBuffer, {
-                  contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                  upsert: true,
-                });
-              if (uploadError) {
-                console.error(`[unified-upload] DOCX storage failed for ${pair.studyId}:`, uploadError);
-                result.error = result.error || `Failed to save DOCX: ${uploadError.message}`;
-              } else {
-                docxStored = true;
               }
             }
 
             if (docxStored) {
-              // Geocode the address
-              let latitude: number | null = null;
-              let longitude: number | null = null;
-              if (parsed.city || parsed.address) {
-                const coords = await geocodeAddress(
-                  parsed.address || '',
-                  parsed.city || '',
-                  parsed.state || '',
-                  parsed.zip_code || '',
-                  'USA'
-                );
-                if (coords) {
-                  latitude = coords.lat;
-                  longitude = coords.lng;
-                }
-              }
-
-              // Update report with DOCX data (DOCX wins for address/city/state)
+              // Parse DOCX content only in local dev (FormData mode) where memory is not constrained.
+              // In production (storage-path mode), skip parsing to avoid OOM.
+              // Content extraction can be triggered later via the upload-docx endpoint.
               const reportUpdate: Record<string, unknown> = {
                 has_docx: true,
                 docx_file_path: docxStoragePath,
@@ -390,42 +329,59 @@ export async function POST(request: NextRequest) {
                 status: 'completed',
               };
 
-              const { title: normalizedTitle, propertyName: normalizedPropertyName } =
-                await normalizeReportTitle({
-                  documentTitle: parsed.document_title,
-                  rawTitle: parsed.resort_name ? `${parsed.resort_name} - ${pair.studyId}` : null,
-                  resortName: parsed.resort_name,
-                  studyId: pair.studyId,
-                });
-              reportUpdate.property_name = normalizedPropertyName;
-              reportUpdate.title = normalizedTitle;
-              reportUpdate.city = parsed.city ?? null;
-              reportUpdate.state = parsed.state ?? null;
-              reportUpdate.address_1 = parsed.address ?? null;
-              reportUpdate.zip_code = parsed.zip_code ?? null;
-              reportUpdate.county = parsed.county ?? null;
-              reportUpdate.parcel_number = parsed.parcel_number ?? null;
-              reportUpdate.lot_size_acres = parsed.lot_size_acres ?? null;
-              reportUpdate.total_sites = parsed.total_units ?? null;
-              reportUpdate.market_type = parsed.market_type ?? null;
-              reportUpdate.report_date = parsed.report_date ?? null;
-              if (parsed.executive_summary) reportUpdate.executive_summary = parsed.executive_summary;
-              if (parsed.swot) reportUpdate.swot = parsed.swot;
-              if (parsed.authors) reportUpdate.authors = parsed.authors;
-              if (parsed.client_name) reportUpdate.client_name = parsed.client_name;
-              if (parsed.client_entity) reportUpdate.client_entity = parsed.client_entity;
-              if (parsed.report_purpose) reportUpdate.report_purpose = parsed.report_purpose;
-              if (parsed.development_phase) reportUpdate.development_phase = parsed.development_phase;
-              if (parsed.zoning) reportUpdate.zoning = parsed.zoning;
-              if (parsed.unit_mix) reportUpdate.unit_mix = parsed.unit_mix;
-              if (parsed.financial_assumptions) reportUpdate.financial_assumptions = parsed.financial_assumptions;
-              if (parsed.recommendations) reportUpdate.recommendations = parsed.recommendations;
-              if (parsed.extraction_messages?.length) reportUpdate.docx_extraction_messages = parsed.extraction_messages;
-              if (latitude !== null) reportUpdate.latitude = latitude;
-              if (longitude !== null) reportUpdate.longitude = longitude;
+              if (!pair.docxStoragePath) {
+                // Local dev: parse DOCX content (enough memory available)
+                const formFile = formDataDocxFiles.get(pair.docx.name);
+                if (formFile) {
+                  const docxBuffer = Buffer.from(await formFile.arrayBuffer());
+                  const parsed = await parseDocxReport(docxBuffer, pair.docx.name, {
+                    useLLMForMissing: false,
+                  });
 
-              const locationParts = [parsed.city, parsed.state].filter(Boolean);
-              reportUpdate.location = locationParts.length > 0 ? locationParts.join(', ') : null;
+                  const { title: normalizedTitle, propertyName: normalizedPropertyName } =
+                    await normalizeReportTitle({
+                      documentTitle: parsed.document_title,
+                      rawTitle: parsed.resort_name ? `${parsed.resort_name} - ${pair.studyId}` : null,
+                      resortName: parsed.resort_name,
+                      studyId: pair.studyId,
+                    });
+                  reportUpdate.property_name = normalizedPropertyName;
+                  reportUpdate.title = normalizedTitle;
+                  reportUpdate.city = parsed.city ?? null;
+                  reportUpdate.state = parsed.state ?? null;
+                  reportUpdate.address_1 = parsed.address ?? null;
+                  reportUpdate.zip_code = parsed.zip_code ?? null;
+                  reportUpdate.county = parsed.county ?? null;
+                  reportUpdate.parcel_number = parsed.parcel_number ?? null;
+                  reportUpdate.lot_size_acres = parsed.lot_size_acres ?? null;
+                  reportUpdate.total_sites = parsed.total_units ?? null;
+                  reportUpdate.market_type = parsed.market_type ?? null;
+                  reportUpdate.report_date = parsed.report_date ?? null;
+                  if (parsed.executive_summary) reportUpdate.executive_summary = parsed.executive_summary;
+                  if (parsed.swot) reportUpdate.swot = parsed.swot;
+                  if (parsed.authors) reportUpdate.authors = parsed.authors;
+                  if (parsed.client_name) reportUpdate.client_name = parsed.client_name;
+                  if (parsed.client_entity) reportUpdate.client_entity = parsed.client_entity;
+                  if (parsed.report_purpose) reportUpdate.report_purpose = parsed.report_purpose;
+                  if (parsed.development_phase) reportUpdate.development_phase = parsed.development_phase;
+                  if (parsed.zoning) reportUpdate.zoning = parsed.zoning;
+                  if (parsed.unit_mix) reportUpdate.unit_mix = parsed.unit_mix;
+                  if (parsed.financial_assumptions) reportUpdate.financial_assumptions = parsed.financial_assumptions;
+                  if (parsed.recommendations) reportUpdate.recommendations = parsed.recommendations;
+                  if (parsed.extraction_messages?.length) reportUpdate.docx_extraction_messages = parsed.extraction_messages;
+                  reportUpdate.location = [parsed.city, parsed.state].filter(Boolean).join(', ') || null;
+
+                  if (parsed.city || parsed.address) {
+                    const coords = await geocodeAddress(
+                      parsed.address || '', parsed.city || '', parsed.state || '', parsed.zip_code || '', 'USA'
+                    );
+                    if (coords) {
+                      reportUpdate.latitude = coords.lat;
+                      reportUpdate.longitude = coords.lng;
+                    }
+                  }
+                }
+              }
 
               await supabaseAdmin
                 .from('reports')
