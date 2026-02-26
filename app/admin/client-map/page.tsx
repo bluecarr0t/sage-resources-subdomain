@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { GoogleMapsProvider, useGoogleMaps } from '@/components/GoogleMapsProvider';
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { Button } from '@/components/ui';
+import MultiSelect from '@/components/MultiSelect';
 
 interface ReportMarker {
   id: string;
@@ -14,6 +17,9 @@ interface ReportMarker {
   lat: number;
   lng: number;
   type: string;
+  marketType: string | null;
+  reportYear: string | null;
+  unitTypes: string[];
   totalSites: string | number;
   dropboxLink: string;
   status: string;
@@ -21,6 +27,29 @@ interface ReportMarker {
   clientName?: string | null;
   clientCompany?: string | null;
 }
+
+const RESORT_TYPE_OPTIONS = [
+  { value: 'glamping', label: 'Glamping Only' },
+  { value: 'rv', label: 'RV Only' },
+  { value: 'rv_glamping', label: 'Glamping & RV' },
+];
+
+const YEAR_OPTIONS = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'];
+
+const UNIT_TYPE_OPTIONS = [
+  'Treehouse',
+  'Dome',
+  'Cabin',
+  'RV Site',
+  'Lodge',
+  'Safari Tent',
+  'Yurt',
+  'Tiny Home',
+  'A-Frame',
+  'Glamping Pod',
+  'Vintage Trailer',
+  'Bell Tent',
+];
 
 const mapContainerStyle = {
   width: '100%',
@@ -31,10 +60,45 @@ const defaultCenter = { lat: 39.8283, lng: -98.5795 };
 
 function ClientMapContent() {
   const { isLoaded, loadError } = useGoogleMaps();
+  const searchParams = useSearchParams();
+  const studyIdParam = searchParams.get('studyId');
   const [reports, setReports] = useState<ReportMarker[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<ReportMarker | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [resortTypeFilter, setResortTypeFilter] = useState<string[]>([]);
+  const [unitTypeFilter, setUnitTypeFilter] = useState<string[]>([]);
+  const [yearFilter, setYearFilter] = useState<string[]>([]);
+
+  const filteredReports = useMemo(() => {
+    return reports.filter((r) => {
+      if (resortTypeFilter.length > 0 && !resortTypeFilter.includes(r.marketType || '')) return false;
+      if (unitTypeFilter.length > 0) {
+        const reportUnitTypes = (r.unitTypes || []).map((u) => u.toLowerCase().trim());
+        const filterSet = new Set(unitTypeFilter.map((f) => f.toLowerCase()));
+        const hasMatch = reportUnitTypes.some((u) => filterSet.has(u));
+        if (!hasMatch) return false;
+      }
+      if (yearFilter.length > 0 && !yearFilter.includes(r.reportYear || '')) return false;
+      return true;
+    });
+  }, [reports, resortTypeFilter, unitTypeFilter, yearFilter]);
+
+  const reportToFocus = useMemo(
+    () =>
+      studyIdParam
+        ? reports.find((r) => r.studyId?.toUpperCase() === studyIdParam.toUpperCase()) ?? null
+        : null,
+    [reports, studyIdParam]
+  );
+
+  const reportsToShow = useMemo(() => {
+    const ids = new Set(filteredReports.map((r) => r.id));
+    if (reportToFocus && !ids.has(reportToFocus.id)) {
+      return [reportToFocus, ...filteredReports];
+    }
+    return filteredReports;
+  }, [filteredReports, reportToFocus]);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -53,9 +117,20 @@ function ClientMapContent() {
     fetchReports();
   }, []);
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    setMap(map);
-  }, []);
+  const onLoad = useCallback(
+    (mapInstance: google.maps.Map) => {
+      setMap(mapInstance);
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (map && reportToFocus) {
+      map.panTo({ lat: reportToFocus.lat, lng: reportToFocus.lng });
+      map.setZoom(12);
+      setSelectedReport(reportToFocus);
+    }
+  }, [map, reportToFocus]);
 
   const onUnmount = useCallback(() => {
     setMap(null);
@@ -85,22 +160,100 @@ function ClientMapContent() {
     );
   }
 
+  const hasActiveFilters = resortTypeFilter.length > 0 || unitTypeFilter.length > 0 || yearFilter.length > 0;
+  const clearFilters = () => {
+    setResortTypeFilter([]);
+    setUnitTypeFilter([]);
+    setYearFilter([]);
+  };
+
   return (
     <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 items-end p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="min-w-[200px]">
+          <MultiSelect
+            id="resort-type-filter"
+            label="Resort Type"
+            placeholder="All types"
+            options={RESORT_TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+            selectedValues={resortTypeFilter}
+            onToggle={(v) =>
+              setResortTypeFilter((prev) =>
+                prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+              )
+            }
+            onClear={() => setResortTypeFilter([])}
+            activeColor="indigo"
+          />
+        </div>
+        <div className="min-w-[200px]">
+          <MultiSelect
+            id="unit-type-filter"
+            label="Unit Type"
+            placeholder="All unit types"
+            options={UNIT_TYPE_OPTIONS.map((ut) => ({ value: ut, label: ut }))}
+            selectedValues={unitTypeFilter}
+            onToggle={(v) =>
+              setUnitTypeFilter((prev) =>
+                prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+              )
+            }
+            onClear={() => setUnitTypeFilter([])}
+            activeColor="green"
+          />
+        </div>
+        <div className="min-w-[200px]">
+          <MultiSelect
+            id="year-filter"
+            label="Year Report Completed"
+            placeholder="All years"
+            options={YEAR_OPTIONS.map((y) => ({ value: y, label: y }))}
+            selectedValues={yearFilter}
+            onToggle={(v) =>
+              setYearFilter((prev) =>
+                prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+              )
+            }
+            onClear={() => setYearFilter([])}
+            activeColor="blue"
+          />
+        </div>
+        {hasActiveFilters && (
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
+            Clear Filters
+          </Button>
+        )}
+        <div className="ml-auto text-sm font-medium text-gray-700 dark:text-gray-300 self-center">
+          {hasActiveFilters ? (
+            <span>
+              <span id="filtered-marker-count">{reportsToShow.length}</span> of{' '}
+              <span id="total-marker-count">{reports.length}</span> markers
+            </span>
+          ) : (
+            <span>
+              <span id="total-marker-count">{reports.length}</span> markers on map
+            </span>
+          )}
+        </div>
+      </div>
+
       <div className="w-full">
         <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={
-              reports.length > 0
-                ? { lat: reports[0].lat, lng: reports[0].lng }
-                : defaultCenter
+              reportToFocus
+                ? { lat: reportToFocus.lat, lng: reportToFocus.lng }
+                : reportsToShow.length > 0
+                  ? { lat: reportsToShow[0].lat, lng: reportsToShow[0].lng }
+                  : defaultCenter
             }
-            zoom={reports.length > 0 ? 4 : 3}
+            zoom={reportToFocus ? 12 : reportsToShow.length > 0 ? 4 : 3}
             onLoad={onLoad}
             onUnmount={onUnmount}
           >
-            {reports.map((report) => (
+            {reportsToShow.map((report) => (
               <Marker
                 key={report.id}
                 position={{ lat: report.lat, lng: report.lng }}

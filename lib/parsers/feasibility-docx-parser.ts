@@ -70,6 +70,8 @@ export interface ParsedDocxReport {
   unit_mix: UnitMixEntry[] | null;
   financial_assumptions: FinancialAssumption[] | null;
   recommendations: string[] | null;
+  /** Key amenities extracted from document (e.g. Pool, Hot Tub, Clubhouse) */
+  key_amenities: string[] | null;
   /** Mammoth conversion messages (e.g. unsupported images) */
   extraction_messages?: string[];
 }
@@ -998,6 +1000,70 @@ function extractFinancialAssumptions(sections: DocSection[], fullText: string): 
   return assumptions.length > 0 ? assumptions : null;
 }
 
+function extractKeyAmenities(sections: DocSection[], fullText: string): string[] | null {
+  const amenitySection = findSection(
+    sections,
+    'Key Amenities',
+    'Amenities',
+    'Property Amenities',
+    'Proposed Amenities',
+    'Site Amenities'
+  );
+  const searchSections = amenitySection
+    ? [amenitySection]
+    : [
+        findSection(sections, 'Executive Summary'),
+        findSection(sections, 'Project Overview', 'Property Overview'),
+      ].filter(Boolean) as DocSection[];
+
+  const sectionText = searchSections.map((s) => s.content).join('\n');
+  const searchText = sectionText || fullText.slice(0, 12000);
+
+  const amenities: string[] = [];
+  const seen = new Set<string>();
+
+  const knownAmenities = [
+    'pool', 'hot tub', 'sauna', 'clubhouse', 'wifi', 'wi-fi', 'restaurant', 'dog park',
+    'laundry', 'playground', 'fire pit', 'ev charging', 'general store', 'bathhouse',
+    'fitness center', 'game room', 'lodge', 'pavilion', 'grill', 'picnic area',
+    'hiking trails', 'fishing', 'boat ramp', 'marina', 'beach', 'waterfront',
+    'basketball', 'volleyball', 'tennis', 'golf', 'mini golf', 'arcade',
+    'camp store', 'propane', 'dump station', 'full hookups', 'sewer', 'water', 'electric',
+  ];
+
+  const lowerText = searchText.toLowerCase();
+  for (const known of knownAmenities) {
+    if (lowerText.includes(known.toLowerCase())) {
+      const normalized = known
+        .split(' ')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+      if (!seen.has(normalized.toLowerCase())) {
+        seen.add(normalized.toLowerCase());
+        amenities.push(normalized);
+      }
+    }
+  }
+
+  const bulletPattern = /(?:^|\n)\s*[•\-*]\s*([A-Za-z][A-Za-z\s&'-]{2,50})(?=\s*\n|$|,)/gm;
+  let match;
+  while ((match = bulletPattern.exec(searchText)) !== null) {
+    const item = match[1].trim().replace(/\s+/g, ' ');
+    if (item.length >= 3 && item.length <= 50 && !/^(the|a|an|and|or|with|including)\s/i.test(item)) {
+      const normalized = item
+        .split(' ')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+      if (!seen.has(normalized.toLowerCase())) {
+        seen.add(normalized.toLowerCase());
+        amenities.push(normalized);
+      }
+    }
+  }
+
+  return amenities.length > 0 ? amenities.sort() : null;
+}
+
 function extractRecommendations(sections: DocSection[]): string[] | null {
   const recSection = findSection(sections, 'Recommendations', 'Conclusion', 'Key Findings');
   if (!recSection) return null;
@@ -1169,6 +1235,7 @@ export async function parseDocxReport(
     unit_mix: extractUnitMix(sections, fullText),
     financial_assumptions: extractFinancialAssumptions(sections, fullText),
     recommendations: extractRecommendations(sections),
+    key_amenities: extractKeyAmenities(sections, fullText),
     extraction_messages: raw.messages.length > 0 ? raw.messages : undefined,
   };
 

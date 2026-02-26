@@ -24,6 +24,7 @@ interface Report {
   study_id?: string | null;
   executive_summary?: string | null;
   has_docx?: boolean;
+  service?: string | null;
   has_comparables?: boolean;
   report_date?: string | null;
 }
@@ -43,10 +44,11 @@ const STATUS_STYLES: Record<string, string> = {
 
 const MARKET_TYPE_OPTIONS = [
   { value: '', label: 'All Types' },
+  { value: 'rv', label: 'RV' },
+  { value: 'rv_glamping', label: 'RV & Glamping' },
   { value: 'glamping', label: 'Glamping' },
-  { value: 'rv-park', label: 'RV Park' },
-  { value: 'campground', label: 'Campground' },
-  { value: 'mixed', label: 'Mixed Use' },
+  { value: 'marina', label: 'Marina' },
+  { value: 'landscape_hotel', label: 'Landscape Hotel' },
 ];
 
 const DATE_OPTIONS = [
@@ -96,14 +98,24 @@ function formatDate(dateStr: string) {
 
 function formatMarketType(type: string | null | undefined) {
   const map: Record<string, string> = {
-    rv: 'RV Park',
-    'rv-park': 'RV Park',
-    campground: 'Campground',
+    rv: 'RV',
+    rv_glamping: 'RV & Glamping',
     glamping: 'Glamping',
-    mixed: 'Mixed Use',
-    outdoor_hospitality: 'Outdoor Hospitality',
+    marina: 'Marina',
+    landscape_hotel: 'Landscape Hotel',
   };
-  return map[(type || '').toLowerCase()] || type || 'Mixed';
+  return map[(type || '').toLowerCase()] || type || '-';
+}
+
+function formatService(service: string | null | undefined) {
+  const map: Record<string, string> = {
+    feasibility_study: 'Feasibility Study',
+    appraisal: 'Appraisal',
+    revenue_projection: 'Revenue Projection',
+    market_study: 'Market Study',
+    update: 'Update',
+  };
+  return map[(service || '').toLowerCase()] || service || '-';
 }
 
 function formatStatus(status: string | null | undefined) {
@@ -410,6 +422,9 @@ export default function PastReportsPage() {
                         Report Details
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Service
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Property Info
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -445,6 +460,11 @@ export default function PastReportsPage() {
                               {report.study_id}
                             </div>
                           )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
+                            {formatService(report.service)}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-700 dark:text-gray-300">
@@ -567,14 +587,15 @@ export default function PastReportsPage() {
                 />
                 <Select
                   id="editMarketType"
-                  label="Market Type"
+                  label="Type"
                   value={editForm.market_type || ''}
                   onChange={(e) => setEditForm((f) => ({ ...f, market_type: e.target.value }))}
                 >
+                  <option value="rv">RV</option>
+                  <option value="rv_glamping">RV & Glamping</option>
                   <option value="glamping">Glamping</option>
-                  <option value="rv-park">RV Park</option>
-                  <option value="campground">Campground</option>
-                  <option value="mixed">Mixed Use</option>
+                  <option value="marina">Marina</option>
+                  <option value="landscape_hotel">Landscape Hotel</option>
                 </Select>
                 <Input
                   id="editTotalSites"

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, Modal, ModalContent, Input, Select } from '@/components/ui';
 import {
   ArrowLeft,
   MapPin,
@@ -21,8 +21,12 @@ import {
   RefreshCw,
   CheckCircle,
   Upload,
+  Pencil,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
+import { UNIT_TYPES } from '@/lib/unit-types';
+import { AMENITIES } from '@/lib/amenities';
 
 interface ReportDetail {
   id: string;
@@ -55,6 +59,9 @@ interface ReportDetail {
   client_entity: string | null;
   client_name: string | null;
   client_company: string | null;
+  service: string | null;
+  unit_descriptions: Array<{ type: string; quantity: number | null; description: string | null }> | null;
+  key_amenities: string[] | null;
   has_docx: boolean;
   has_comparables: boolean;
   docx_file_path: string | null;
@@ -94,14 +101,24 @@ function formatDate(dateStr: string | null) {
 
 function formatMarketType(type: string | null | undefined) {
   const map: Record<string, string> = {
-    rv: 'RV Park',
-    'rv-park': 'RV Park',
-    campground: 'Campground',
+    rv: 'RV',
+    rv_glamping: 'RV & Glamping',
     glamping: 'Glamping',
-    mixed: 'Mixed Use',
-    outdoor_hospitality: 'Outdoor Hospitality',
+    marina: 'Marina',
+    landscape_hotel: 'Landscape Hotel',
   };
   return map[(type || '').toLowerCase()] || type || 'N/A';
+}
+
+function formatService(service: string | null | undefined) {
+  const map: Record<string, string> = {
+    feasibility_study: 'Feasibility Study',
+    appraisal: 'Appraisal',
+    revenue_projection: 'Revenue Projection',
+    market_study: 'Market Study',
+    update: 'Update',
+  };
+  return map[(service || '').toLowerCase()] || service || 'N/A';
 }
 
 export default function ReportDetailPage() {
@@ -116,6 +133,12 @@ export default function ReportDetailPage() {
   const [reExtractSuccess, setReExtractSuccess] = useState(false);
   const [uploadingDocx, setUploadingDocx] = useState(false);
   const [uploadDocxSuccess, setUploadDocxSuccess] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [selectedUnitTypes, setSelectedUnitTypes] = useState<string[]>([]);
+  const [customUnitTypeInput, setCustomUnitTypeInput] = useState('');
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [customAmenityInput, setCustomAmenityInput] = useState('');
 
   const loadReport = async () => {
     try {
@@ -138,6 +161,16 @@ export default function ReportDetailPage() {
   useEffect(() => {
     if (studyId) loadReport();
   }, [studyId]);
+
+  useEffect(() => {
+    if (editModalOpen && report) {
+      const types = (report.unit_descriptions || [])
+        .map((d) => d.type?.trim())
+        .filter(Boolean);
+      setSelectedUnitTypes(types);
+      setSelectedAmenities((report.key_amenities || []).filter(Boolean));
+    }
+  }, [editModalOpen, report]);
 
   const hasAnyFile = report?.csv_file_path || report?.docx_file_path;
 
@@ -206,6 +239,54 @@ export default function ReportDetailPage() {
       setError('Re-extraction failed');
     } finally {
       setReExtracting(false);
+    }
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!studyId || !report) return;
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const title = (formData.get('title') as string)?.trim() || null;
+    const location = (formData.get('location') as string)?.trim() || null;
+    const reportDate = (formData.get('report_date') as string)?.trim() || null;
+    const clientEntity = (formData.get('client_entity') as string)?.trim() || null;
+    const marketType = (formData.get('market_type') as string) || null;
+    const service = (formData.get('service') as string) || null;
+    const unitTypes = selectedUnitTypes.filter(Boolean);
+    const amenities = selectedAmenities.filter(Boolean);
+    const totalSitesRaw = (formData.get('total_sites') as string)?.trim();
+    const totalSites = totalSitesRaw ? parseInt(totalSitesRaw, 10) : null;
+
+    setEditSaving(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/reports/study/${studyId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          location,
+          report_date: reportDate || null,
+          client_entity: clientEntity,
+          market_type: marketType,
+          service: service || null,
+          unit_types: unitTypes,
+          amenities,
+          total_sites: Number.isNaN(totalSites) ? null : totalSites,
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setError(data.error || 'Failed to update report');
+        return;
+      }
+      await loadReport();
+      setEditModalOpen(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update report');
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -366,6 +447,15 @@ export default function ReportDetailPage() {
                   <span>{reExtracting ? 'Re-extracting...' : 'Re-extract'}</span>
                 </Button>
               )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setEditModalOpen(true)}
+                className="flex flex-col items-start gap-1"
+              >
+                <Pencil className="w-4 h-4" />
+                <span>Edit</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -519,7 +609,29 @@ export default function ReportDetailPage() {
               </h2>
               <div className="space-y-3 text-sm">
                 {report.address_1 && (
-                  <DetailRow label="Address" value={report.address_1} />
+                  <div>
+                    <DetailRow label="Address" value={report.address_1} />
+                    {report.study_id && (
+                      <Link
+                        href={`/admin/client-map?studyId=${encodeURIComponent(report.study_id)}`}
+                        className="text-sage-600 dark:text-sage-400 hover:underline text-xs mt-1 inline-flex items-center gap-1"
+                      >
+                        <MapPin className="w-3.5 h-3.5" />
+                        View on Map
+                      </Link>
+                    )}
+                  </div>
+                )}
+                {!report.address_1 && report.study_id && (
+                  <div>
+                    <Link
+                      href={`/admin/client-map?studyId=${encodeURIComponent(report.study_id)}`}
+                      className="text-sage-600 dark:text-sage-400 hover:underline text-xs inline-flex items-center gap-1"
+                    >
+                      <MapPin className="w-3.5 h-3.5" />
+                      View on Map
+                    </Link>
+                  </div>
                 )}
                 {(report.city || report.state) && (
                   <DetailRow
@@ -541,6 +653,21 @@ export default function ReportDetailPage() {
                 )}
                 {report.market_type && (
                   <DetailRow label="Market Type" value={formatMarketType(report.market_type)} />
+                )}
+                {report.service && (
+                  <DetailRow label="Service" value={formatService(report.service)} />
+                )}
+                {report.unit_descriptions && report.unit_descriptions.length > 0 && (
+                  <DetailRow
+                    label="Unit Type"
+                    value={report.unit_descriptions.map((d) => d.type).filter(Boolean).join(', ')}
+                  />
+                )}
+                {report.key_amenities && report.key_amenities.length > 0 && (
+                  <DetailRow
+                    label="Key Amenities"
+                    value={report.key_amenities.join(', ')}
+                  />
                 )}
                 {report.resort_type && (
                   <DetailRow label="Resort Type" value={report.resort_type} />
@@ -600,6 +727,238 @@ export default function ReportDetailPage() {
             )}
           </div>
         </div>
+
+        {/* Edit Report Modal */}
+        <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)} className="max-w-xl">
+          <ModalContent className="p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+              Edit Report
+            </h2>
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <Input
+                label="Title"
+                name="title"
+                defaultValue={report.title || report.property_name || ''}
+                placeholder="Report title"
+              />
+              <Input
+                label="Location"
+                name="location"
+                defaultValue={[report.city, report.state, report.zip_code].filter(Boolean).join(', ')}
+                placeholder="City, State ZIP"
+              />
+              <Input
+                label="Date Completed"
+                name="report_date"
+                type="date"
+                defaultValue={report.report_date || ''}
+              />
+              <Input
+                label="Entity"
+                name="client_entity"
+                defaultValue={report.client_entity || ''}
+                placeholder="Client entity"
+              />
+              <div className="flex gap-4">
+                <div className="flex-1 min-w-0">
+                  <Select
+                    label="Type"
+                    name="market_type"
+                    defaultValue={report.market_type || 'glamping'}
+                  >
+                    <option value="rv">RV</option>
+                    <option value="rv_glamping">RV & Glamping</option>
+                    <option value="glamping">Glamping</option>
+                    <option value="marina">Marina</option>
+                    <option value="landscape_hotel">Landscape Hotel</option>
+                  </Select>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <Select
+                    label="Service"
+                    name="service"
+                    defaultValue={report.service || ''}
+                  >
+                    <option value="">—</option>
+                    <option value="feasibility_study">Feasibility Study</option>
+                    <option value="appraisal">Appraisal</option>
+                    <option value="revenue_projection">Revenue Projection</option>
+                    <option value="market_study">Market Study</option>
+                    <option value="update">Update</option>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Unit Type
+                </label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedUnitTypes.map((ut) => (
+                    <span
+                      key={ut}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-sage-100 dark:bg-sage-800/50 text-sage-800 dark:text-sage-200 text-sm"
+                    >
+                      {ut}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedUnitTypes((prev) => prev.filter((x) => x !== ut))}
+                        className="hover:bg-sage-200 dark:hover:bg-sage-700 rounded p-0.5"
+                        aria-label={`Remove ${ut}`}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none"
+                    value=""
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v && !selectedUnitTypes.includes(v)) {
+                        setSelectedUnitTypes((prev) => [...prev, v]);
+                      }
+                      e.target.value = '';
+                    }}
+                  >
+                    <option value="">Add from list...</option>
+                    {UNIT_TYPES.filter((ut) => !selectedUnitTypes.includes(ut)).map((ut) => (
+                      <option key={ut} value={ut}>
+                        {ut}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Or type custom..."
+                    value={customUnitTypeInput}
+                    onChange={(e) => setCustomUnitTypeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const v = customUnitTypeInput.trim();
+                        if (v && !selectedUnitTypes.includes(v)) {
+                          setSelectedUnitTypes((prev) => [...prev, v]);
+                          setCustomUnitTypeInput('');
+                        }
+                      }
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      const v = customUnitTypeInput.trim();
+                      if (v && !selectedUnitTypes.includes(v)) {
+                        setSelectedUnitTypes((prev) => [...prev, v]);
+                        setCustomUnitTypeInput('');
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Amenities
+                </label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedAmenities.map((a) => (
+                    <span
+                      key={a}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-sage-100 dark:bg-sage-800/50 text-sage-800 dark:text-sage-200 text-sm"
+                    >
+                      {a}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedAmenities((prev) => prev.filter((x) => x !== a))}
+                        className="hover:bg-sage-200 dark:hover:bg-sage-700 rounded p-0.5"
+                        aria-label={`Remove ${a}`}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none"
+                    value=""
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v && !selectedAmenities.includes(v)) {
+                        setSelectedAmenities((prev) => [...prev, v]);
+                      }
+                      e.target.value = '';
+                    }}
+                  >
+                    <option value="">Add from list...</option>
+                    {AMENITIES.filter((a) => !selectedAmenities.includes(a)).map((a) => (
+                      <option key={a} value={a}>
+                        {a}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Or type custom..."
+                    value={customAmenityInput}
+                    onChange={(e) => setCustomAmenityInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const v = customAmenityInput.trim();
+                        if (v && !selectedAmenities.includes(v)) {
+                          setSelectedAmenities((prev) => [...prev, v]);
+                          setCustomAmenityInput('');
+                        }
+                      }
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      const v = customAmenityInput.trim();
+                      if (v && !selectedAmenities.includes(v)) {
+                        setSelectedAmenities((prev) => [...prev, v]);
+                        setCustomAmenityInput('');
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+              <Input
+                label="Total Units/Sites"
+                name="total_sites"
+                type="number"
+                min={0}
+                defaultValue={report.total_sites ?? ''}
+                placeholder="e.g. 150"
+              />
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setEditModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" disabled={editSaving}>
+                  {editSaving ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            </form>
+          </ModalContent>
+        </Modal>
 
         {/* No DOCX content message */}
         {!report.executive_summary && !hasSWOT && !report.report_purpose && (

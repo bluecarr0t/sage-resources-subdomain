@@ -79,14 +79,13 @@ function formatAddress(report: Record<string, unknown>): string {
 
 function formatMarketType(marketType: string | null | undefined): string {
   const map: Record<string, string> = {
-    rv: 'RV Park',
-    'rv-park': 'RV Park',
-    campground: 'Campground',
+    rv: 'RV',
+    rv_glamping: 'RV & Glamping',
     glamping: 'Glamping',
-    mixed: 'Mixed Use',
-    outdoor_hospitality: 'Outdoor Hospitality',
+    marina: 'Marina',
+    landscape_hotel: 'Landscape Hotel',
   };
-  return map[(marketType || '').toLowerCase()] || 'Mixed Use';
+  return map[(marketType || '').toLowerCase()] || 'Glamping';
 }
 
 export async function GET() {
@@ -139,6 +138,34 @@ export async function GET() {
       throw error;
     }
 
+    const reportIds = (data || []).map((r) => r.id);
+    const unitTypesByReport = new Map<string, string[]>();
+    if (reportIds.length > 0) {
+      const { data: unitsData } = await supabase
+        .from('feasibility_comp_units')
+        .select('report_id, unit_type')
+        .in('report_id', reportIds);
+      if (unitsData) {
+        for (const u of unitsData) {
+          const types = unitTypesByReport.get(u.report_id) || [];
+          const t = String(u.unit_type || '').trim();
+          if (t && !types.includes(t)) types.push(t);
+          unitTypesByReport.set(u.report_id, types);
+        }
+      }
+      for (const r of data || []) {
+        const ud = r.unit_descriptions as Array<{ type?: string }> | null;
+        if (ud && Array.isArray(ud)) {
+          const types = unitTypesByReport.get(r.id) || [];
+          for (const d of ud) {
+            const t = String(d.type || '').trim();
+            if (t && !types.includes(t)) types.push(t);
+          }
+          if (types.length > 0) unitTypesByReport.set(r.id, types);
+        }
+      }
+    }
+
     const rawReports = (data || []).map((r) => {
       const hasCoords = r.latitude != null && r.longitude != null;
       let lat: number;
@@ -163,6 +190,10 @@ export async function GET() {
         lat,
         lng,
         type: formatMarketType(r.market_type),
+        marketType: (r.market_type || '').toLowerCase() || null,
+        reportDate: r.report_date ?? null,
+        reportYear: r.report_date ? String(r.report_date).slice(0, 4) : null,
+        unitTypes: unitTypesByReport.get(r.id) || [],
         totalSites: r.total_sites ?? 'N/A',
         dropboxLink: r.dropbox_url || '#',
         status: r.status || 'draft',

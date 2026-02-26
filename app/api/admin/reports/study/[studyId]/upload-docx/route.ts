@@ -179,6 +179,7 @@ export async function POST(
       unit_mix: parsed.unit_mix ?? null,
       financial_assumptions: parsed.financial_assumptions ?? null,
       recommendations: parsed.recommendations ?? null,
+      key_amenities: parsed.key_amenities ?? null,
       docx_extraction_messages: parsed.extraction_messages ?? null,
       latitude: latitude ?? null,
       longitude: longitude ?? null,

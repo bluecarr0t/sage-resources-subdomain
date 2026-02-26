@@ -204,6 +204,7 @@ export async function POST(
           if (parsed.unit_mix) reportUpdate.unit_mix = parsed.unit_mix;
           if (parsed.financial_assumptions) reportUpdate.financial_assumptions = parsed.financial_assumptions;
           if (parsed.recommendations) reportUpdate.recommendations = parsed.recommendations;
+          reportUpdate.key_amenities = parsed.key_amenities ?? null;
           if (parsed.extraction_messages?.length) reportUpdate.docx_extraction_messages = parsed.extraction_messages;
           if (latitude !== null) reportUpdate.latitude = latitude;
           if (longitude !== null) reportUpdate.longitude = longitude;

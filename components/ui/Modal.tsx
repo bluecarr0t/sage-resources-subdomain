@@ -8,6 +8,8 @@ export interface ModalProps {
   children: ReactNode;
   /** Optional: prevent closing on overlay click */
   closeOnOverlayClick?: boolean;
+  /** Optional: additional classes for the modal wrapper (e.g. max-w-xl for wider modals) */
+  className?: string;
 }
 
 export function Modal({
@@ -15,6 +17,7 @@ export function Modal({
   onClose,
   children,
   closeOnOverlayClick = true,
+  className = '',
 }: ModalProps) {
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
@@ -43,7 +46,7 @@ export function Modal({
         aria-hidden="true"
         onClick={closeOnOverlayClick ? onClose : undefined}
       />
-      <div className="relative z-10 w-full max-w-md" role="dialog" aria-modal="true">
+      <div className={`relative z-10 w-full ${className || 'max-w-md'}`.trim()} role="dialog" aria-modal="true">
         {children}
       </div>
     </div>

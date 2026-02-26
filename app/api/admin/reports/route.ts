@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
         has_docx: r.has_docx ?? false,
         has_comparables: r.has_comparables ?? false,
         report_date: r.report_date ?? null,
+        service: r.service ?? null,
       };
     });
 
