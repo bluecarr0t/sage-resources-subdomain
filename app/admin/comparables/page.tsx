@@ -306,7 +306,7 @@ function ComparablesPageContent() {
                   .join(' ');
                 return { value: c, label };
               })
-              .sort((a, b) => a.label.localeCompare(b.label))
+              .sort((a: { value: string; label: string }, b: { value: string; label: string }) => a.label.localeCompare(b.label))
           );
           setStateOptions(
             (data.states || []).map((s: string) => {
