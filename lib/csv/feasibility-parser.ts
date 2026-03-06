@@ -14,6 +14,7 @@
  */
 
 import { parse } from 'csv-parse/sync';
+import { parseLocationAndState, getStateFromText } from '@/lib/feasibility-utils';
 import type {
   ParsedComparable,
   ParsedCompUnit,
@@ -224,9 +225,29 @@ function parseOverviewRow(cells: string[], offset: number): ParsedComparable | n
     return null;
   }
 
+  // Parse overview for location/state; ensure "Location: City, ST" format when source has it
+  let finalOverview = overview;
+  let state: string | null = null;
+  const parsedLoc = parseLocationAndState(overview || '');
+  if (parsedLoc) {
+    state = parsedLoc.state;
+    if (!overview?.match(/Location:\s*/i)) {
+      const rest = overview?.replace(/^[^.]*\.?\s*/, '').trim();
+      finalOverview = rest ? `Location: ${parsedLoc.locationFormatted}. ${rest}` : `Location: ${parsedLoc.locationFormatted}`;
+    }
+  } else if (overview) {
+    const locMatch = overview.match(/Location:\s*([^.]+)/i);
+    if (locMatch) {
+      const locParsed = parseLocationAndState(locMatch[1].trim());
+      if (locParsed) state = locParsed.state;
+    }
+  }
+  if (!state) state = getStateFromText(name);
+
   return {
     comp_name: name,
-    overview,
+    overview: finalOverview,
+    state,
     amenities,
     amenity_keywords: extractAmenityKeywords(amenities),
     distance_miles: distance,

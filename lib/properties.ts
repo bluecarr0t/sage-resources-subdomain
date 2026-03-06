@@ -104,6 +104,27 @@ export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
 }
 
 /**
+ * Get the most recent updated_at timestamp from properties.
+ * Used for sitemap lastmod. Returns ISO string or null if unavailable.
+ */
+export async function getMaxPropertyUpdatedAt(): Promise<string | null> {
+  try {
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+      .from('all_glamping_properties')
+      .select('updated_at')
+      .not('updated_at', 'is', null)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+
+    if (error || !data?.[0]?.updated_at) return null;
+    return new Date(data[0].updated_at).toISOString();
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Fetch all properties matching a property name
  * Returns all locations/units for a given property name
  */

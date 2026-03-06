@@ -1,5 +1,5 @@
 /**
- * API Route: List clients for current user
+ * API Route: List all clients (org-wide for internal Sage users)
  * GET /api/admin/clients
  */
 
@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 
 export async function GET() {
   try {
@@ -17,32 +18,14 @@ export async function GET() {
       error: sessionError,
     } = await supabase.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const { data, error } = await supabase
       .from('clients')
       .select('id, name, company')
-      .eq('user_id', session.user.id)
       .order('name', { ascending: true });
 
     if (error) {

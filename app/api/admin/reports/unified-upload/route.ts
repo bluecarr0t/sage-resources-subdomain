@@ -12,11 +12,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { parseDocxReport } from '@/lib/parsers/feasibility-docx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
 import { geocodeAddress } from '@/lib/geocode';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
+import { isValidTempUploadPath } from '@/lib/sanitize-filename';
+import { logAdminAudit } from '@/lib/admin-audit';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -49,10 +52,19 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: { Allow: 'POST, OPTIONS' } });
 }
 
+/** Never log or expose ADMIN_INTERNAL_API_KEY. Rotate if compromised. */
+const INTERNAL_API_KEY = process.env.ADMIN_INTERNAL_API_KEY;
+
 export async function POST(request: NextRequest) {
   try {
-    const rlKey = `unified-upload:${getRateLimitKey(request)}`;
-    const { allowed } = checkRateLimit(rlKey, 10, 60_000);
+    const internalKey = request.headers.get('x-internal-api-key');
+    const isInternalCall = INTERNAL_API_KEY && internalKey && internalKey === INTERNAL_API_KEY;
+
+    const rlKey = isInternalCall
+      ? `unified-upload-internal:${getRateLimitKey(request)}`
+      : `unified-upload:${getRateLimitKey(request)}`;
+    const rlLimit = isInternalCall ? 30 : 10;
+    const { allowed } = await checkRateLimitAsync(rlKey, rlLimit, 60_000);
     if (!allowed) {
       return NextResponse.json(
         { success: false, message: 'Too many upload requests. Please try again later.' },
@@ -60,32 +72,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
+    let userId: string;
+    let userEmail: string | null = null;
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, message: 'Authentication required' },
-        { status: 401 }
-      );
-    }
+    if (isInternalCall) {
+      const supabaseAdmin = createServerClient();
+      const { data: managed } = await supabaseAdmin
+        .from('managed_users')
+        .select('user_id')
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+      if (!managed?.user_id) {
+        return NextResponse.json(
+          { success: false, message: 'No managed user found for bulk upload. Add a user to managed_users.' },
+          { status: 500 }
+        );
+      }
+      userId = managed.user_id;
+    } else {
+      const supabaseAuth = await createServerClientWithCookies();
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabaseAuth.auth.getSession();
 
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, message: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, message: 'Access denied' },
-        { status: 403 }
-      );
+      if (sessionError || !session?.user) return unauthorizedResponse();
+      if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
+      const hasAccess = await isManagedUser(session.user.id);
+      if (!hasAccess) return forbiddenResponse();
+      userId = session.user.id;
+      userEmail = session.user.email ?? null;
     }
 
     const supabaseAdmin = createServerClient();
@@ -103,11 +120,17 @@ export async function POST(request: NextRequest) {
       const filePaths: Array<{ name: string; storagePath: string }> = body.files || [];
 
       for (const fp of filePaths) {
+        if (!isValidTempUploadPath(fp.storagePath)) {
+          return NextResponse.json(
+            { success: false, message: `Invalid storage path for ${fp.name || 'file'}` },
+            { status: 400 }
+          );
+        }
         tempStoragePaths.push(fp.storagePath);
         const name = fp.name.toLowerCase();
 
-        if (name.endsWith('.xlsx')) {
-          // Download XLSX immediately (small enough, needed for comparables/upload)
+        if (name.endsWith('.xlsx') || name.endsWith('.xlsm') || name.endsWith('.xlsxm')) {
+          // Download XLSX/XLSM/XLSXM immediately (small enough, needed for comparables/upload)
           const { data: blob, error: dlError } = await supabaseAdmin.storage
             .from(BUCKET_NAME)
             .download(fp.storagePath);
@@ -135,7 +158,7 @@ export async function POST(request: NextRequest) {
         if (!(value instanceof File) || !value.name) continue;
 
         const name = value.name.toLowerCase();
-        if (name.endsWith('.xlsx')) {
+        if (name.endsWith('.xlsx') || name.endsWith('.xlsm') || name.endsWith('.xlsxm')) {
           if (value.size <= MAX_XLSX_SIZE_BYTES) xlsxFiles.push(value);
         } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
           if (value.size <= MAX_DOCX_SIZE_BYTES) {
@@ -150,7 +173,7 @@ export async function POST(request: NextRequest) {
 
     if (totalFileCount === 0) {
       return NextResponse.json(
-        { success: false, message: 'No valid files provided. Please upload .xlsx and/or .docx files.' },
+        { success: false, message: 'No valid files provided. Please upload .xlsx/.xlsm/.xlsxm and/or .docx files.' },
         { status: 400 }
       );
     }
@@ -265,10 +288,11 @@ export async function POST(request: NextRequest) {
             const { data: newReport, error: reportError } = await supabaseAdmin
               .from('reports')
               .insert({
-                user_id: session.user.id,
+                user_id: userId,
                 title: pair.studyId,
                 property_name: pair.studyId,
                 study_id: pair.studyId,
+                location: pair.studyId,
                 status: 'completed',
                 market_type: 'outdoor_hospitality',
               })
@@ -327,9 +351,6 @@ export async function POST(request: NextRequest) {
             }
 
             if (docxStored) {
-              // Parse DOCX content only in local dev (FormData mode) where memory is not constrained.
-              // In production (storage-path mode), skip parsing to avoid OOM.
-              // Content extraction can be triggered later via the upload-docx endpoint.
               const reportUpdate: Record<string, unknown> = {
                 has_docx: true,
                 docx_file_path: docxStoragePath,
@@ -338,56 +359,64 @@ export async function POST(request: NextRequest) {
                 status: 'completed',
               };
 
+              let docxBuffer: Buffer | null = null;
               if (!pair.docxStoragePath) {
-                // Local dev: parse DOCX content (enough memory available)
+                // Local dev (FormData): file is in memory
                 const formFile = formDataDocxFiles.get(pair.docx.name);
-                if (formFile) {
-                  const docxBuffer = Buffer.from(await formFile.arrayBuffer());
-                  const parsed = await parseDocxReport(docxBuffer, pair.docx.name, {
-                    useLLMForMissing: false,
+                if (formFile) docxBuffer = Buffer.from(await formFile.arrayBuffer());
+              } else {
+                // Production (storage-path): download from storage to parse
+                const { data: blob, error: dlError } = await supabaseAdmin.storage
+                  .from(BUCKET_NAME)
+                  .download(docxStoragePath);
+                if (!dlError && blob) docxBuffer = Buffer.from(await blob.arrayBuffer());
+              }
+
+              if (docxBuffer && docxBuffer.length <= MAX_DOCX_SIZE_BYTES) {
+                const parsed = await parseDocxReport(docxBuffer, pair.docx.name, {
+                  useLLMForMissing: false,
+                });
+
+                const { title: normalizedTitle, propertyName: normalizedPropertyName } =
+                  await normalizeReportTitle({
+                    documentTitle: parsed.document_title,
+                    rawTitle: parsed.resort_name ? `${parsed.resort_name} - ${pair.studyId}` : null,
+                    resortName: parsed.resort_name,
+                    studyId: pair.studyId,
                   });
+                reportUpdate.property_name = normalizedPropertyName;
+                reportUpdate.title = normalizedTitle;
+                reportUpdate.city = parsed.city ?? null;
+                reportUpdate.state = parsed.state ?? null;
+                reportUpdate.address_1 = parsed.address ?? null;
+                reportUpdate.zip_code = parsed.zip_code ?? null;
+                reportUpdate.county = parsed.county ?? null;
+                reportUpdate.parcel_number = parsed.parcel_number ?? null;
+                reportUpdate.lot_size_acres = parsed.lot_size_acres ?? null;
+                reportUpdate.total_sites = parsed.total_units ?? null;
+                reportUpdate.market_type = parsed.market_type ?? null;
+                reportUpdate.report_date = parsed.report_date ?? null;
+                if (parsed.executive_summary) reportUpdate.executive_summary = parsed.executive_summary;
+                if (parsed.swot) reportUpdate.swot = parsed.swot;
+                if (parsed.authors) reportUpdate.authors = parsed.authors;
+                if (parsed.client_name) reportUpdate.client_name = parsed.client_name;
+                if (parsed.client_entity) reportUpdate.client_entity = parsed.client_entity;
+                if (parsed.report_purpose) reportUpdate.report_purpose = parsed.report_purpose;
+                if (parsed.development_phase) reportUpdate.development_phase = parsed.development_phase;
+                if (parsed.zoning) reportUpdate.zoning = parsed.zoning;
+                if (parsed.unit_mix) reportUpdate.unit_mix = parsed.unit_mix;
+                if (parsed.financial_assumptions) reportUpdate.financial_assumptions = parsed.financial_assumptions;
+                if (parsed.recommendations) reportUpdate.recommendations = parsed.recommendations;
+                if (parsed.extraction_messages?.length) reportUpdate.docx_extraction_messages = parsed.extraction_messages;
+                reportUpdate.location = [parsed.city, parsed.state].filter(Boolean).join(', ') || null;
 
-                  const { title: normalizedTitle, propertyName: normalizedPropertyName } =
-                    await normalizeReportTitle({
-                      documentTitle: parsed.document_title,
-                      rawTitle: parsed.resort_name ? `${parsed.resort_name} - ${pair.studyId}` : null,
-                      resortName: parsed.resort_name,
-                      studyId: pair.studyId,
-                    });
-                  reportUpdate.property_name = normalizedPropertyName;
-                  reportUpdate.title = normalizedTitle;
-                  reportUpdate.city = parsed.city ?? null;
-                  reportUpdate.state = parsed.state ?? null;
-                  reportUpdate.address_1 = parsed.address ?? null;
-                  reportUpdate.zip_code = parsed.zip_code ?? null;
-                  reportUpdate.county = parsed.county ?? null;
-                  reportUpdate.parcel_number = parsed.parcel_number ?? null;
-                  reportUpdate.lot_size_acres = parsed.lot_size_acres ?? null;
-                  reportUpdate.total_sites = parsed.total_units ?? null;
-                  reportUpdate.market_type = parsed.market_type ?? null;
-                  reportUpdate.report_date = parsed.report_date ?? null;
-                  if (parsed.executive_summary) reportUpdate.executive_summary = parsed.executive_summary;
-                  if (parsed.swot) reportUpdate.swot = parsed.swot;
-                  if (parsed.authors) reportUpdate.authors = parsed.authors;
-                  if (parsed.client_name) reportUpdate.client_name = parsed.client_name;
-                  if (parsed.client_entity) reportUpdate.client_entity = parsed.client_entity;
-                  if (parsed.report_purpose) reportUpdate.report_purpose = parsed.report_purpose;
-                  if (parsed.development_phase) reportUpdate.development_phase = parsed.development_phase;
-                  if (parsed.zoning) reportUpdate.zoning = parsed.zoning;
-                  if (parsed.unit_mix) reportUpdate.unit_mix = parsed.unit_mix;
-                  if (parsed.financial_assumptions) reportUpdate.financial_assumptions = parsed.financial_assumptions;
-                  if (parsed.recommendations) reportUpdate.recommendations = parsed.recommendations;
-                  if (parsed.extraction_messages?.length) reportUpdate.docx_extraction_messages = parsed.extraction_messages;
-                  reportUpdate.location = [parsed.city, parsed.state].filter(Boolean).join(', ') || null;
-
-                  if (parsed.city || parsed.address) {
-                    const coords = await geocodeAddress(
-                      parsed.address || '', parsed.city || '', parsed.state || '', parsed.zip_code || '', 'USA'
-                    );
-                    if (coords) {
-                      reportUpdate.latitude = coords.lat;
-                      reportUpdate.longitude = coords.lng;
-                    }
+                if (parsed.city || parsed.address) {
+                  const coords = await geocodeAddress(
+                    parsed.address || '', parsed.city || '', parsed.state || '', parsed.zip_code || '', 'USA'
+                  );
+                  if (coords) {
+                    reportUpdate.latitude = coords.lat;
+                    reportUpdate.longitude = coords.lng;
                   }
                 }
               }
@@ -410,6 +439,29 @@ export async function POST(request: NextRequest) {
         const errMsg = err instanceof Error ? err.message : typeof err === 'object' && err !== null ? JSON.stringify(err) : 'Processing failed';
         console.error(`[unified-upload] Error processing study ${pair.studyId}:`, errMsg);
         result.error = errMsg;
+      }
+
+      if (result.success) {
+        const reportIdForAudit = result.xlsx_result?.report_id as string | undefined;
+        const reportId = reportIdForAudit ?? (await supabaseAdmin.from('reports').select('id').eq('study_id', pair.studyId).maybeSingle()).data?.id;
+        if (reportId) {
+          await logAdminAudit(
+            {
+              user_id: userId,
+              user_email: userEmail ?? undefined,
+              action: 'upload',
+              resource_type: 'report',
+              resource_id: reportId,
+              study_id: pair.studyId,
+              details: {
+                xlsx_processed: result.xlsx_processed,
+                docx_processed: result.docx_processed,
+              },
+              source: isInternalCall ? 'internal_api' : 'session',
+            },
+            request
+          );
+        }
       }
 
       results.push(result);

@@ -7,6 +7,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     slug: "feasibility-studies-complete-guide",
     title: "Feasibility Studies Complete Guide | 2025 | Sage Outdoor Advisory",
     metaDescription: "Comprehensive guide to feasibility studies for outdoor hospitality projects. Learn what feasibility studies include, how they work, timeline, and how to choose a consultant. Essential reading for glamping, RV resort, and campground developers.",
+    quickAnswer: "A feasibility study is a comprehensive analysis that evaluates the viability, market potential, and financial prospects of a proposed outdoor hospitality project. It examines market demand, competition, revenue projections, site suitability, and risks to help developers and lenders decide whether to pursue a glamping resort, RV park, or campground. Key outputs include occupancy and rate forecasts, operating expense projections, and a 10-year pro forma. Unlike a market analysis, a feasibility study is site-specific and ties findings to a particular property. Lenders typically require bank-approved feasibility studies before financing. The process usually takes 4–8 weeks and costs $15,000–$50,000 depending on project scope.",
     category: "feasibility",
     hero: {
       headline: "Feasibility Studies Complete Guide",
@@ -55,7 +56,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <p>This complete guide covers everything you need to know about feasibility studies for outdoor hospitality projects. From understanding what a feasibility study is to choosing the right consultant, we'll walk you through every aspect of the process.</p>
         
-        <p>Sage Outdoor Advisory has completed over 350 feasibility studies and appraisals in the outdoor hospitality industry. Our expertise spans glamping resorts, RV parks, campgrounds, and related properties across the United States. This guide draws from our extensive experience to provide you with comprehensive, actionable information. For current industry trends and market insights that inform feasibility studies, see our <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" class="text-[#006b5f] hover:text-[#005a4f] underline">2025 Outdoor Hospitality Industry Overview</a> blog post.</p>`
+        <p>Sage Outdoor Advisory has completed over 350 feasibility studies and appraisals in the outdoor hospitality industry. Our expertise spans glamping resorts, RV parks, campgrounds, and related properties across the United States. This guide draws from our extensive experience to provide you with comprehensive, actionable information. For current industry trends and market insights that inform feasibility studies, see our <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" class="text-[#006b5f] hover:text-[#005a4f] underline">2025 Outdoor Hospitality Industry Overview</a><sup><a href="#ref-1" class="text-[#006b5f] no-underline" aria-label="Reference 1">[1]</a></sup> blog post.</p>`
       },
       {
         id: "what-is-feasibility-study",
@@ -664,7 +665,24 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p>The strategic recommendations section of your feasibility study will provide specific, actionable guidance tailored to your project.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "A feasibility study evaluates viability, market potential, and financial prospects of a proposed outdoor hospitality project.",
+      "Lenders typically require bank-approved feasibility studies before financing glamping, RV resort, or campground projects.",
+      "Key components include market analysis, revenue projections, operating expenses, site suitability, and a 10-year pro forma.",
+      "Feasibility studies are site-specific; market analyses are broader and not tied to a particular property.",
+      "The process usually takes 4–8 weeks and costs $15,000–$50,000 depending on project scope.",
+      "Choose a consultant with outdoor hospitality experience and proprietary data on comparable properties.",
+    ],
+    changeLog: [
+      { date: "2025-03-04", changes: ["Added Key Takeaways and References sections", "Added Quick Answer for GSO optimization"] },
+      { date: "2025-01-15", changes: ["Comprehensive guide update", "Expanded FAQ section"] },
+    ],
+    citations: [
+      { id: 1, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "March 2025" },
+      { id: 2, title: "Uniform Standards of Professional Appraisal Practice (USPAP)", url: "https://www.appraisalfoundation.org/imis/TAF/Standards/Appraisal_Standards/USPAP/USPAP.aspx", accessed: "March 2025" },
+      { id: 3, title: "KOA North American Camping Report", url: "https://koa.com/north-american-camping-report/", accessed: "March 2025" },
+    ],
+    lastModified: "2025-03-04",
     keywords: ["feasibility study", "outdoor hospitality feasibility study", "glamping feasibility study guide", "RV resort feasibility", "campground feasibility"],
     relatedServices: {
       title: "Feasibility Study Services",

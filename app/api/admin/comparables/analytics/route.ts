@@ -17,7 +17,8 @@ export const dynamic = 'force-dynamic';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 
 const ANALYTICS_RATE_LIMIT = 60; // requests per window
 const ANALYTICS_RATE_WINDOW_MS = 60 * 1000; // 1 minute
@@ -25,7 +26,7 @@ const ANALYTICS_RATE_WINDOW_MS = 60 * 1000; // 1 minute
 export async function GET(request: NextRequest) {
   try {
     const rlKey = `analytics:${getRateLimitKey(request)}`;
-    const { allowed } = checkRateLimit(rlKey, ANALYTICS_RATE_LIMIT, ANALYTICS_RATE_WINDOW_MS);
+    const { allowed } = await checkRateLimitAsync(rlKey, ANALYTICS_RATE_LIMIT, ANALYTICS_RATE_WINDOW_MS);
     if (!allowed) {
       return NextResponse.json(
         { success: false, message: 'Too many requests. Please try again later.' },
@@ -38,27 +39,10 @@ export async function GET(request: NextRequest) {
       error: sessionError,
     } = await supabaseAuth.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, message: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, message: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, message: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const supabaseAdmin = createServerClient();
 

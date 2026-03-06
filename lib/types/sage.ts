@@ -96,6 +96,15 @@ export interface SageProperty {
   property_fitness_room: string | null;
   property_propane_refilling_station: string | null;
   property_pickball_courts: string | null;
+  property_age_restricted_55_plus: string | null;
+  property_has_rentals: string | null;
+  property_lgbtiq_friendly: string | null;
+  property_gasoline_nearby: string | null;
+  property_basketball: string | null;
+  property_volleyball: string | null;
+  property_jet_skiing: string | null;
+  property_mobile_home_community: string | null;
+  property_tennis: string | null;
 
   // CONTACT & INFO
   url: string | null;

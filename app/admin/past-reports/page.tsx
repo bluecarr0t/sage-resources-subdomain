@@ -58,7 +58,7 @@ const DATE_OPTIONS = [
   { value: 'last-year', label: 'Last Year' },
 ];
 
-const REPORTS_PER_PAGE = 10;
+const REPORTS_PER_PAGE = 25;
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -238,6 +238,7 @@ export default function PastReportsPage() {
       status: report.status || 'draft',
       dropbox_url: report.dropbox_url || '',
       client_id: report.client_id || '',
+      service: report.service || 'feasibility_study',
     });
     setEditModalOpen(true);
     setOpenDropdown(null);
@@ -278,6 +279,7 @@ export default function PastReportsPage() {
           status: editForm.status || null,
           dropbox_url: editForm.dropbox_url || null,
           client_id: editForm.client_id || null,
+          service: editForm.service || null,
         }),
       });
       if (!res.ok) throw new Error('Failed to save');
@@ -619,6 +621,18 @@ export default function PastReportsPage() {
                   <option value="draft">Draft</option>
                   <option value="in-review">In Review</option>
                   <option value="completed">Completed</option>
+                </Select>
+                <Select
+                  id="editService"
+                  label="Service"
+                  value={editForm.service || 'feasibility_study'}
+                  onChange={(e) => setEditForm((f) => ({ ...f, service: e.target.value }))}
+                >
+                  <option value="feasibility_study">Feasibility Study</option>
+                  <option value="appraisal">Appraisal</option>
+                  <option value="revenue_projection">Revenue Projection</option>
+                  <option value="market_study">Market Study</option>
+                  <option value="update">Update</option>
                 </Select>
                 <Input
                   id="editDropboxUrl"

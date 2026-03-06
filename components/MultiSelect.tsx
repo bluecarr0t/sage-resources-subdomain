@@ -17,7 +17,7 @@ interface MultiSelectProps {
   allSelectedText?: string;
   label: string;
   id: string;
-  activeColor?: 'blue' | 'purple' | 'orange' | 'green' | 'indigo';
+  activeColor?: 'blue' | 'purple' | 'orange' | 'green' | 'indigo' | 'sage';
 }
 
 export default function MultiSelect({
@@ -129,12 +129,14 @@ export default function MultiSelect({
     ? 'border-green-300 bg-green-50/50'
     : activeColor === 'indigo'
     ? 'border-indigo-300 bg-indigo-50/50'
+    : activeColor === 'sage'
+    ? 'border-sage-300 bg-sage-50/50 dark:border-sage-600 dark:bg-sage-900/30'
     : 'border-purple-300 bg-purple-50/50';
 
   return (
     <div className={`relative ${isOpen ? 'z-50' : 'z-auto'}`} ref={containerRef}>
-      <div className="flex items-center justify-between mb-2">
-        <label htmlFor={id} className="block text-sm font-semibold text-gray-700">
+      <div className="flex items-center justify-between mb-1">
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
         </label>
       </div>
@@ -150,7 +152,7 @@ export default function MultiSelect({
           e.preventDefault();
           e.stopPropagation();
         }}
-        className={`w-full px-4 py-3 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all text-left flex items-center justify-between cursor-pointer ${
+        className={`w-full px-3 py-2 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all text-left flex items-center justify-between cursor-pointer ${
           isActive 
             ? `${colorClasses} text-gray-900 font-medium` 
             : 'border-gray-300 text-gray-600'

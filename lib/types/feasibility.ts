@@ -14,6 +14,7 @@ export interface FeasibilityComparable {
   study_id: string | null;
   comp_name: string;
   overview: string | null;
+  state: string | null;
   amenities: string | null;
   amenity_keywords: string[] | null;
   distance_miles: number | null;
@@ -90,6 +91,7 @@ export type FeasibilityStudySummaryInsert = Omit<FeasibilityStudySummary, 'id' |
 export interface ParsedComparable {
   comp_name: string;
   overview: string | null;
+  state: string | null;
   amenities: string | null;
   amenity_keywords: string[];
   distance_miles: number | null;

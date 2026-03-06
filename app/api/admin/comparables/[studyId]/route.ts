@@ -13,6 +13,8 @@ export const dynamic = 'force-dynamic';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { filterValidCompUnits } from '@/lib/feasibility-utils';
 
 export async function GET(
   request: NextRequest,
@@ -25,27 +27,10 @@ export async function GET(
       error: sessionError,
     } = await supabaseAuth.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, message: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, message: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, message: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const { studyId } = await params;
 
@@ -68,7 +53,7 @@ export async function GET(
     }
 
     // Get comparables with their units
-    const { data: comparables, error: compError } = await supabaseAdmin
+    const { data: comparablesRaw, error: compError } = await supabaseAdmin
       .from('feasibility_comparables')
       .select(`
         *,
@@ -78,6 +63,19 @@ export async function GET(
       .order('quality_score', { ascending: false });
 
     if (compError) throw compError;
+
+    // Exclude empty asterisk duplicates (e.g. "Ranch at Rock Creek*" with no units/data)
+    const isEmptyAsteriskDuplicate = (c: { comp_name?: string | null; quality_score?: number | null; total_sites?: number | null; feasibility_comp_units?: unknown[] }) => {
+      const name = String(c.comp_name || '').trim();
+      if (!name.endsWith('*')) return false;
+      const units = c.feasibility_comp_units || [];
+      return units.length === 0 && c.quality_score == null && c.total_sites == null;
+    };
+    const comparablesRawFiltered = (comparablesRaw || []).filter((c) => !isEmptyAsteriskDuplicate(c));
+    const comparables = comparablesRawFiltered.map((c) => ({
+      ...c,
+      feasibility_comp_units: filterValidCompUnits((c.feasibility_comp_units || []) as Array<{ unit_type?: string | null; num_units?: number | null }>),
+    }));
 
     // Get summaries
     const { data: summaries, error: summError } = await supabaseAdmin
@@ -97,6 +95,8 @@ export async function GET(
       .order('unit_type');
 
     if (unitsError) throw unitsError;
+
+    const filteredAllUnits = filterValidCompUnits((allUnits || []) as Array<{ unit_type?: string | null; num_units?: number | null }>);
 
     // Get property scores (Best Comps)
     const { data: propertyScores, error: scoresError } = await supabaseAdmin
@@ -177,7 +177,7 @@ export async function GET(
         report,
         comparables: comparables || [],
         summaries: summaries || [],
-        all_units: allUnits || [],
+        all_units: filteredAllUnits || [],
         property_scores: propertyScores || [],
         pro_forma_units: proFormaUnits || [],
         valuations: valuations || [],

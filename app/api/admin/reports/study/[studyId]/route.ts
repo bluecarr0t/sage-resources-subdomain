@@ -9,6 +9,8 @@ export const dynamic = 'force-dynamic';
 
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { logAdminAudit } from '@/lib/admin-audit';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 
 export async function GET(
   request: NextRequest,
@@ -23,27 +25,10 @@ export async function GET(
       error: sessionError,
     } = await supabase.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const { data: report, error: fetchError } = await supabase
       .from('reports')
@@ -110,27 +95,10 @@ export async function PATCH(
       error: sessionError,
     } = await supabase.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const body = await request.json();
     const updates: Record<string, unknown> = {};
@@ -207,6 +175,20 @@ export async function PATCH(
         { status: 404 }
       );
     }
+
+    await logAdminAudit(
+      {
+        user_id: session.user.id,
+        user_email: session.user.email ?? undefined,
+        action: 'edit',
+        resource_type: 'report',
+        resource_id: data.id,
+        study_id: studyId,
+        details: { fields: Object.keys(updates) },
+        source: 'session',
+      },
+      request
+    );
 
     return NextResponse.json({ success: true, report: data });
   } catch (error) {

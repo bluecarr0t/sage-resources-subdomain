@@ -1,0 +1,153 @@
+all_glamping_properties_column,sites_upload_column
+id,
+research_status,
+is_glamping_property,
+is_closed,
+property_name,Property Name
+site_name,Site Name
+slug,
+property_type,Property Type
+source,Source
+discovery_source,
+date_added,Date Added
+date_updated,Date Updated
+address,Address
+city,City
+state,State
+zip_code,Zip Code
+country,Country
+lat,lat
+lon,lon
+property_total_sites,Property: Total Sites
+quantity_of_units,Quantity of Units
+year_site_opened,Year Site Opened
+operating_season_months,Operating Season (Months)
+number_of_locations,# of Locations
+unit_type,Unit Type
+unit_capacity,Unit Capacity
+unit_sq_ft,
+unit_description,
+unit_bed,
+unit_shower,Shower
+unit_water,Water
+unit_electricity,Electricity
+unit_picnic_table,Picnic table
+unit_wifi,Wifi
+unit_pets,Pets
+unit_private_bathroom,Private Bathroom
+unit_full_kitchen,Kitchen
+unit_kitchenette,
+unit_ada_accessibility,
+unit_patio,Patio
+unit_air_conditioning,
+unit_gas_fireplace,
+unit_hot_tub_or_sauna,Hot Tub / Sauna
+unit_hot_tub,
+unit_sauna,
+unit_cable,Cable
+unit_campfires,Campfires
+unit_charcoal_grill,Charcoal Grill
+unit_mini_fridge,
+unit_bathtub,
+unit_wood_burning_stove,
+rate_unit_rates_by_year,
+rate_avg_retail_daily_rate,
+rate_winter_weekday,Winter Weekday
+rate_winter_weekend,Winter Weekend
+rate_spring_weekday,Spring Weekday
+rate_spring_weekend,Spring Weekend
+rate_summer_weekday,Summer Weekday
+rate_summer_weekend,Summer Weekend
+rate_fall_weekday,Fall Weekday
+rate_fall_weekend,Fall Weekend
+rate_category,
+property_laundry,Laundry
+property_playground,Playground
+property_pool,Pool
+property_food_on_site,Sage - P. Amenity: Food On Site
+property_sauna,
+property_hot_tub,
+property_restaurant,Restaurant
+property_dog_park,Dog Park
+property_clubhouse,Clubhouse
+property_alcohol_available,Alcohol Available
+property_golf_cart_rental,Golf Cart Rental
+property_waterpark,Waterpark
+property_general_store,General Store
+property_waterfront,Waterfront
+property_extended_stay,
+property_family_friendly,
+property_remote_work_friendly,
+property_fitness_room,
+property_propane_refilling_station,
+property_pickball_courts,
+property_age_restricted_55_plus,
+property_has_rentals,
+property_lgbtiq_friendly,
+property_gasoline_nearby,
+property_basketball,
+property_volleyball,
+property_jet_skiing,
+property_mobile_home_community,
+property_tennis,
+url,Url
+phone_number,
+description,Description
+minimum_nights,Minimum nights
+rv_vehicle_length,RV - Vehicle Length
+rv_parking,RV - Parking
+rv_accommodates_slideout,RV - Accommodates Slideout
+rv_surface_type,RV - Surface Type
+rv_surface_level,RV - Surface Level
+rv_vehicles_fifth_wheels,RV - Vehicles: Fifth Wheels
+rv_vehicles_class_a_rvs,RV - Vehicles: Class A RVs
+rv_vehicles_class_b_rvs,RV - Vehicles: Class B RVs
+rv_vehicles_class_c_rvs,RV - Vehicles: Class C RVs
+rv_vehicles_toy_hauler,RV - Vehicles: Toy Hauler
+rv_sewer_hook_up,Sewer Hook-Up
+rv_electrical_hook_up,Electrical Hook-Up
+rv_generators_allowed,Generators Allowed
+rv_water_hookup,Water Hookup
+activities_fishing,Fishing
+activities_surfing,Surfing
+activities_horseback_riding,Horseback riding
+activities_paddling,Paddling
+activities_climbing,Climbing
+activities_off_roading_ohv,Off-roading (OHV)
+activities_boating,Boating
+activities_swimming,Swimming
+activities_wind_sports,Wind sports
+activities_snow_sports,Snow sports
+activities_whitewater_paddling,Whitewater paddling
+activities_fall_fun,Fall Fun
+activities_hiking,Hiking
+activities_wildlife_watching,Wildlife watching
+activities_biking,Biking
+activities_canoeing_kayaking,Canoeing / Kayaking
+activities_hunting,
+activities_golf,
+activities_backpacking,
+activities_historic_sightseeing,
+activities_scenic_drives,
+activities_stargazing,
+setting_ranch,Ranch
+setting_beach,Beach
+setting_coastal,Coastal
+setting_suburban,Suburban
+setting_forest,Forest
+setting_field,Field
+setting_wetlands,Wetlands
+setting_hot_spring,Hot spring
+setting_desert,Desert
+setting_canyon,Canyon
+setting_waterfall,Waterfall
+setting_swimming_hole,Swimming hole
+setting_lake,Lake
+setting_cave,Cave
+setting_redwoods,Redwoods
+setting_farm,Farm
+river_stream_or_creek,"River, stream, or creek"
+setting_mountainous,Mountainous
+quality_score,
+created_at,
+updated_at,

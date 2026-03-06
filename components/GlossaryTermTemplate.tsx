@@ -112,7 +112,8 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                 )}
 
                 <div className="bg-[#00b6a6]/10 border-l-4 border-[#00b6a6] p-6 rounded-2xl shadow-sm">
-                  <p className="text-lg text-gray-800 leading-relaxed">
+                  <h2 className="text-lg font-bold text-[#006b5f] mb-2">Quick Answer</h2>
+                  <p className="text-lg text-gray-800 leading-relaxed speakable-answer">
                     {term.definition}
                   </p>
                 </div>

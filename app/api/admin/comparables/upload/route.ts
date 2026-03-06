@@ -12,9 +12,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { parseWorkbook } from '@/lib/parsers/feasibility-xlsx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
+import { sanitizeFilename } from '@/lib/sanitize-filename';
+import { logAdminAudit } from '@/lib/admin-audit';
 
 export const dynamic = 'force-dynamic';
 import type {
@@ -107,7 +110,9 @@ async function ensureReportUploadsBucket(supabase: ReturnType<typeof createServe
   const { data: buckets } = await supabase.storage.listBuckets();
   const exists = buckets?.some((b) => b.name === BUCKET_NAME);
   const mimeTypes = [
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-excel.sheet.macroEnabled.12', // .xlsm
+    'application/octet-stream', // .xlsxm
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/pdf',
   ];
@@ -174,6 +179,7 @@ function deriveCityFromLocation(location: string): string | null {
   return match ? match[1].trim() : null;
 }
 
+/** Never log or expose ADMIN_INTERNAL_API_KEY. Rotate if compromised. */
 const INTERNAL_API_KEY = process.env.ADMIN_INTERNAL_API_KEY;
 
 const UPLOAD_RATE_LIMIT = 20; // requests per window
@@ -182,7 +188,7 @@ const UPLOAD_RATE_WINDOW_MS = 60 * 1000; // 1 minute
 export async function POST(request: NextRequest) {
   try {
     const rlKey = `upload:${getRateLimitKey(request)}`;
-    const { allowed } = checkRateLimit(rlKey, UPLOAD_RATE_LIMIT, UPLOAD_RATE_WINDOW_MS);
+    const { allowed } = await checkRateLimitAsync(rlKey, UPLOAD_RATE_LIMIT, UPLOAD_RATE_WINDOW_MS);
     if (!allowed) {
       return NextResponse.json(
         { success: false, message: 'Too many upload requests. Please try again later.' },
@@ -193,34 +199,37 @@ export async function POST(request: NextRequest) {
     const internalKey = request.headers.get('x-internal-api-key');
     const isInternalCall = INTERNAL_API_KEY && internalKey && internalKey === INTERNAL_API_KEY;
 
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
+    let userId: string;
+    let userEmail: string | null = null;
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, message: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isInternalCall) {
-      if (!isAllowedEmailDomain(session.user.email)) {
+    if (isInternalCall) {
+      const supabaseAdmin = createServerClient();
+      const { data: managed } = await supabaseAdmin
+        .from('managed_users')
+        .select('user_id')
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+      if (!managed?.user_id) {
         return NextResponse.json(
-          { success: false, message: 'Access denied' },
-          { status: 403 }
+          { success: false, message: 'No managed user found for internal upload. Add a user to managed_users.' },
+          { status: 500 }
         );
       }
+      userId = managed.user_id;
+    } else {
+      const supabaseAuth = await createServerClientWithCookies();
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabaseAuth.auth.getSession();
 
+      if (sessionError || !session?.user) return unauthorizedResponse();
+      if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
       const hasAccess = await isManagedUser(session.user.id);
-      if (!hasAccess) {
-        return NextResponse.json(
-          { success: false, message: 'Access denied' },
-          { status: 403 }
-        );
-      }
+      if (!hasAccess) return forbiddenResponse();
+      userId = session.user.id;
+      userEmail = session.user.email ?? null;
     }
 
     const supabaseAdmin = createServerClient();
@@ -233,7 +242,8 @@ export async function POST(request: NextRequest) {
       const filePaths: Array<{ name: string; storagePath: string }> = body.files || [];
 
       for (const fp of filePaths) {
-        if (!fp.name.toLowerCase().endsWith('.xlsx')) continue;
+        const fn = fp.name.toLowerCase();
+        if (!fn.endsWith('.xlsx') && !fn.endsWith('.xlsm') && !fn.endsWith('.xlsxm')) continue;
 
         const { data: blob, error: dlError } = await supabaseAdmin.storage
           .from(BUCKET_NAME)
@@ -251,15 +261,18 @@ export async function POST(request: NextRequest) {
     } else {
       const formData = await request.formData();
       for (const [, value] of formData.entries()) {
-        if (value instanceof File && value.name.toLowerCase().endsWith('.xlsx')) {
-          files.push(value);
+        if (value instanceof File) {
+          const name = value.name.toLowerCase();
+          if (name.endsWith('.xlsx') || name.endsWith('.xlsm') || name.endsWith('.xlsxm')) {
+            files.push(value);
+          }
         }
       }
     }
 
     if (files.length === 0) {
       return NextResponse.json(
-        { success: false, message: 'No .xlsx files provided' },
+        { success: false, message: 'No .xlsx/.xlsm/.xlsxm files provided' },
         { status: 400 }
       );
     }
@@ -334,7 +347,7 @@ export async function POST(request: NextRequest) {
           const { data: newReport, error: reportError } = await supabaseAdmin
             .from('reports')
             .insert({
-              user_id: session.user.id,
+              user_id: userId,
               title,
               property_name: propertyName,
               location,
@@ -351,7 +364,8 @@ export async function POST(request: NextRequest) {
           reportId = newReport.id;
         }
 
-        const storagePath = `${reportId}/workbooks/${file.name}`;
+        const safeFilename = sanitizeFilename(file.name);
+        const storagePath = `${reportId}/workbooks/${safeFilename}`;
         let uploadError: { message?: string } | null = null;
         let uploadResult = await supabaseAdmin.storage
           .from(BUCKET_NAME)
@@ -382,18 +396,30 @@ export async function POST(request: NextRequest) {
           }
           throw new Error(
             uploadError.message?.includes('Bucket') || uploadError.message?.includes('MIME')
-              ? `Storage bucket "report-uploads" may not exist or may reject .xlsx files. ${uploadError.message}`
+              ? `Storage bucket "report-uploads" may not exist or may reject .xlsx/.xlsm/.xlsxm files. ${uploadError.message}`
               : `Failed to save file to storage: ${uploadError.message}`
           );
         }
 
         // ---- Build all insert payloads before any DB mutations ----
 
-        const compInserts: FeasibilityComparableInsert[] = parsed.comparables.map((c) => ({
+        // Dedupe comparables by normalized name (strip trailing asterisk); keep row with most data
+        const normalizeCompName = (n: string) => String(n || '').trim().replace(/\*+$/, '').trim() || n;
+        const compDeduped = new Map<string, (typeof parsed.comparables)[0]>();
+        for (const c of parsed.comparables) {
+          const key = normalizeCompName(c.comp_name).toLowerCase();
+          const existing = compDeduped.get(key);
+          const score = (x: (typeof parsed.comparables)[0]) =>
+            (x.overview ? 4 : 0) + (x.state ? 2 : 0) + (x.total_sites != null ? 2 : 0) + (x.quality_score != null ? 2 : 0) + ((x.amenity_keywords?.length ?? 0) > 0 ? 1 : 0);
+          if (!existing || score(c) > score(existing)) compDeduped.set(key, c);
+        }
+
+        const compInserts: FeasibilityComparableInsert[] = [...compDeduped.values()].map((c) => ({
           report_id: reportId,
           study_id: parsed.study_id,
           comp_name: c.comp_name,
           overview: c.overview,
+          state: c.state ?? null,
           amenities: c.amenities,
           amenity_keywords: c.amenity_keywords,
           distance_miles: clampAdr(c.distance_miles),
@@ -633,7 +659,7 @@ export async function POST(request: NextRequest) {
         if (parsed.comp_units.length > 0) {
           const unitInserts: FeasibilityCompUnitInsert[] = parsed.comp_units.map((u) => ({
             report_id: reportId,
-            comparable_id: compIdMap.get(u.property_name.toLowerCase()) || null,
+            comparable_id: compIdMap.get(normalizeCompName(u.property_name).toLowerCase()) || null,
             study_id: parsed.study_id,
             property_name: u.property_name,
             unit_type: u.unit_type,
@@ -765,6 +791,24 @@ export async function POST(request: NextRequest) {
           .from('reports')
           .update(reportUpdate)
           .eq('id', reportId);
+
+        await logAdminAudit(
+          {
+            user_id: userId,
+            user_email: userEmail ?? undefined,
+            action: 'upload',
+            resource_type: 'report',
+            resource_id: reportId,
+            study_id: parsed.study_id,
+            details: {
+              filename: file.name,
+              comparables_count: parsed.comparables.length,
+              units_count: parsed.comp_units.length,
+            },
+            source: isInternalCall ? 'internal_api' : 'session',
+          },
+          request
+        );
 
         results.push({
           filename: file.name,

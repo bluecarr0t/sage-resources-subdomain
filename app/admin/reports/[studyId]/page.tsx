@@ -133,6 +133,8 @@ export default function ReportDetailPage() {
   const [reExtractSuccess, setReExtractSuccess] = useState(false);
   const [uploadingDocx, setUploadingDocx] = useState(false);
   const [uploadDocxSuccess, setUploadDocxSuccess] = useState(false);
+  const [uploadingXlsx, setUploadingXlsx] = useState(false);
+  const [uploadXlsxSuccess, setUploadXlsxSuccess] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
   const [selectedUnitTypes, setSelectedUnitTypes] = useState<string[]>([]);
@@ -175,8 +177,10 @@ export default function ReportDetailPage() {
   const hasAnyFile = report?.csv_file_path || report?.docx_file_path;
 
   const uploadDocxInputRef = useRef<HTMLInputElement>(null);
+  const uploadXlsxInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_DOCX_MB = 100;
+  const MAX_XLSX_MB = 50;
 
   const handleUploadDocx = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -215,6 +219,52 @@ export default function ReportDetailPage() {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setUploadingDocx(false);
+    }
+  };
+
+  const handleUploadXlsx = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !studyId) return;
+    e.target.value = '';
+    const base = file.name.replace(/\.[^.]+$/, '').trim();
+    const match = base.match(/^(\d{2}-\d{3}[A-Z]?-\d{2})\b/i) || base.match(/\b(\d{2}-\d{3}[A-Z]?-\d{2})\b/i);
+    const fileStudyId = match ? match[1] : '';
+    if (fileStudyId.toUpperCase() !== studyId.toUpperCase()) {
+      setError(`Filename job number (${fileStudyId || 'not found'}) does not match this report (${studyId}). Use an XLSX file whose filename contains the job number.`);
+      return;
+    }
+    if (file.size > MAX_XLSX_MB * 1024 * 1024) {
+      setError(`File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max ${MAX_XLSX_MB}MB.`);
+      return;
+    }
+    setUploadingXlsx(true);
+    setError(null);
+    setUploadXlsxSuccess(false);
+    try {
+      const formData = new FormData();
+      formData.append('files', file);
+      const res = await fetch('/api/admin/comparables/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setError(data.message || data.error || 'Upload failed');
+        return;
+      }
+      const results = data.results as Array<{ success?: boolean; error?: string }> | undefined;
+      const firstResult = results?.[0];
+      if (firstResult && !firstResult.success) {
+        setError(firstResult.error || 'Upload failed');
+        return;
+      }
+      await loadReport();
+      setUploadXlsxSuccess(true);
+      setTimeout(() => setUploadXlsxSuccess(false), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploadingXlsx(false);
     }
   };
 
@@ -336,11 +386,11 @@ export default function ReportDetailPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        {(reExtractSuccess || uploadDocxSuccess) && (
+        {(reExtractSuccess || uploadDocxSuccess || uploadXlsxSuccess) && (
           <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-2">
             <CheckCircle className="w-5 h-5 flex-shrink-0" />
             <span>
-              {uploadDocxSuccess ? 'DOCX uploaded successfully. Download DOCX should now work.' : 'Re-extraction completed successfully. Data has been refreshed.'}
+              {uploadDocxSuccess ? 'DOCX uploaded successfully. Download DOCX should now work.' : uploadXlsxSuccess ? 'XLSX uploaded successfully. Download XLSX should now work.' : 'Re-extraction completed successfully. Data has been refreshed.'}
             </span>
           </div>
         )}
@@ -398,6 +448,31 @@ export default function ReportDetailPage() {
                     <span>Download XLSX</span>
                   </Button>
                 </a>
+              )}
+              {!report.csv_file_path && (
+                <>
+                  <input
+                    ref={uploadXlsxInputRef}
+                    type="file"
+                    accept=".xlsx,.xlsm,.xlsxm"
+                    className="hidden"
+                    onChange={handleUploadXlsx}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => uploadXlsxInputRef.current?.click()}
+                    disabled={uploadingXlsx}
+                    className="flex flex-col items-start gap-1 border-2 border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+                  >
+                    {uploadingXlsx ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    <span>{uploadingXlsx ? 'Uploading...' : 'Upload .XLSX'}</span>
+                  </Button>
+                </>
               )}
               {report.has_docx && report.docx_file_path ? (
                 <a href={`/api/admin/reports/study/${report.study_id}/download-docx`}>
@@ -461,9 +536,9 @@ export default function ReportDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main content - 2/3 width */}
+          {/* Main content - 2/3 width (column 1) */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Executive Summary */}
+            {/* Executive Summary - above Scope of Work in column 1 */}
             {report.executive_summary && (
               <Card>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
@@ -475,7 +550,17 @@ export default function ReportDetailPage() {
                 </div>
               </Card>
             )}
-
+            {report.has_docx && !report.executive_summary && (
+              <Card>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-sage-500" />
+                  Executive Summary
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Re-extract the DOCX to populate the executive summary.
+                </p>
+              </Card>
+            )}
             {/* SWOT Analysis */}
             {hasSWOT && (
               <Card>
@@ -569,7 +654,7 @@ export default function ReportDetailPage() {
             )}
           </div>
 
-          {/* Sidebar - 1/3 width */}
+          {/* Sidebar - 1/3 width (column 2) */}
           <div className="space-y-6">
             {/* Client Info */}
             {(report.client_name || report.client_entity || report.client_company) && (

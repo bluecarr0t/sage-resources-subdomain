@@ -68,9 +68,26 @@ describe('comparables extraction', () => {
       const first = parsed.comparables[0];
       expect(first).toHaveProperty('comp_name');
       expect(first).toHaveProperty('overview');
+      expect(first).toHaveProperty('state');
       expect(first).toHaveProperty('distance_miles');
       expect(first).toHaveProperty('total_sites');
       expect(first).toHaveProperty('quality_score');
+    });
+
+    it('extracts state and formats overview when overview contains location', () => {
+      const ws = XLSX.utils.aoa_to_sheet([
+        ['Name', 'Overview', 'Amenities', 'Distance', 'Total Sites', 'Quality'],
+        ['Onera Wimberley', 'Wimberley, TX. Luxury cabins', 'Pool', 5, 20, 8],
+      ]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Comps Summ.');
+      const buffer = Buffer.from(XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
+      const parsed = parseWorkbook(buffer, '25-175A-04.xlsx');
+
+      expect(parsed.comparables.length).toBe(1);
+      const comp = parsed.comparables[0];
+      expect(comp.state).toBe('TX');
+      expect(comp.overview).toMatch(/Location:\s*Wimberley,\s*TX/);
     });
 
     it('parses Best Comps and 10 yr PF when present', () => {

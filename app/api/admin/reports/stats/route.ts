@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 
 export async function GET() {
   try {
@@ -19,34 +20,16 @@ export async function GET() {
       error: sessionError,
     } = await supabaseAuth.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const supabaseAdmin = createServerClient();
 
     const { data: reports, error: reportsError } = await supabaseAdmin
       .from('reports')
       .select('id, state')
-      .eq('user_id', session.user.id)
       .is('deleted_at', null);
 
     if (reportsError) {

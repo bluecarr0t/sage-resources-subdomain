@@ -32,6 +32,8 @@ export interface GuideContent {
   slug: string;
   title: string;
   metaDescription: string;
+  /** 50-150 word direct answer for GSO/AI extraction. Displayed as Quick Answer near top. */
+  quickAnswer?: string;
   category: GuideCategory;
   hero: {
     headline: string;
@@ -62,5 +64,11 @@ export interface GuideContent {
     buttonLink: string;
   };
   howToSteps?: string[]; // Steps for HowTo schema on process/instructional guides
+  /** Scannable highlights for GSO/AI extraction. Displayed as Key Takeaways section. */
+  keyTakeaways?: string[];
+  /** Change log for transparency. Displayed as "Last updated" and optional change history. */
+  changeLog?: Array<{ date: string; changes: string[] }>;
+  /** Primary source citations. Displayed in References section. Use [1], [2] in content to cite. */
+  citations?: Array<{ id: number; title: string; url: string; accessed?: string }>;
 }
 

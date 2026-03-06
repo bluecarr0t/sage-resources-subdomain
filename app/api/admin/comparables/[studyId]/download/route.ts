@@ -12,6 +12,8 @@ export const dynamic = 'force-dynamic';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { logAdminAudit } from '@/lib/admin-audit';
 
 const BUCKET_NAME = 'report-uploads';
 
@@ -26,27 +28,10 @@ export async function GET(
       error: sessionError,
     } = await supabaseAuth.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, message: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, message: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, message: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const { studyId } = await params;
 
@@ -91,6 +76,20 @@ export async function GET(
     }
 
     const filename = path.split('/').pop() || `${studyId}.xlsx`;
+
+    await logAdminAudit(
+      {
+        user_id: session.user.id,
+        user_email: session.user.email ?? undefined,
+        action: 'download',
+        resource_type: 'study',
+        resource_id: report.id,
+        study_id: studyId,
+        details: { file_type: 'xlsx', filename },
+        source: 'session',
+      },
+      request
+    );
 
     return new NextResponse(fileData, {
       status: 200,

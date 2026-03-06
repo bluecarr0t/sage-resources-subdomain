@@ -7,6 +7,8 @@ export interface LandingPageContent {
   slug: string;
   title: string;
   metaDescription: string;
+  /** 50-150 word direct answer for GSO/AI extraction. Displayed as Quick Answer near top. */
+  quickAnswer?: string;
   hero: {
     headline: string;
     subheadline: string;
@@ -55,6 +57,10 @@ export interface LandingPageContent {
     ctaLink?: string;
   };
   keyTakeaways?: string[]; // Key takeaways for ItemList schema and display
+  /** Change log for transparency. Displayed as "Last updated" and optional change history. */
+  changeLog?: Array<{ date: string; changes: string[] }>;
+  /** Primary source citations. Displayed in References section. Use [1], [2] in content to cite. */
+  citations?: Array<{ id: number; title: string; url: string; accessed?: string }>;
 }
 
 // Centralized content management for all landing pages
@@ -63,6 +69,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     slug: "glamping-feasibility-study",
     title: "Glamping Feasibility Study | Sage Outdoor Advisory",
     metaDescription: "Expert glamping feasibility studies for Texas, California & nationwide. Get comprehensive market analysis, financial projections & ROI estimates. Free consultation available.",
+    quickAnswer: "A glamping feasibility study is a professional analysis that validates whether a glamping or outdoor hospitality project is financially viable. It includes market demand research, competitive analysis of nearby glamping and RV properties, revenue projections by unit type, capital requirements, and ROI timelines. Key components are industry overview, area analysis, market analysis, revenue and expense projections, and a 10-year pro forma. Sage uses proprietary data on 600+ glamping properties across North America. Typical deliverables help secure financing, guide development decisions, and identify market gaps. Core failure points include underestimating seasonality, ignoring local permitting, and overestimating demand. Studies typically take 4–8 weeks.",
     hero: {
       headline: "Glamping Feasibility Study",
       subheadline: "In the rapidly growing glamping market, understanding nuances and market demands is key to success. Our feasibility studies provide a thorough examination of potential for upscale and unique outdoor accommodations.",
@@ -241,7 +248,22 @@ export const landingPages: Record<string, LandingPageContent> = {
         }
       ]
     },
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Glamping feasibility studies validate financial viability before you invest in development.",
+      "Key components include industry overview, area analysis, market analysis, revenue and expense projections, and a 10-year pro forma.",
+      "Sage uses proprietary data on 600+ glamping properties across North America for benchmarking.",
+      "Studies typically take 4–8 weeks and help secure financing from banks and lenders.",
+      "Core failure points: underestimating seasonality, ignoring local permitting, overestimating demand.",
+    ],
+    changeLog: [
+      { date: "2025-03-04", changes: ["Added Key Takeaways and References", "Added Quick Answer for GSO"] },
+      { date: "2025-01-15", changes: ["Content refresh", "Expanded market analysis section"] },
+    ],
+    citations: [
+      { id: 1, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "March 2025" },
+      { id: 2, title: "KOA North American Camping Report", url: "https://koa.com/north-american-camping-report/", accessed: "March 2025" },
+    ],
+    lastModified: "2025-03-04",
     testimonials: {
       showSection: true,
       ctaText: "View All Client Testimonials",

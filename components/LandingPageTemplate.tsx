@@ -123,6 +123,14 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
             <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
               {content.hero.subheadline}
             </p>
+            {(content.quickAnswer ?? content.metaDescription) && (
+              <div className="mb-8 p-6 rounded-xl bg-[#006b5f]/5 border-l-4 border-[#006b5f] max-w-3xl mx-auto text-left">
+                <h2 className="text-lg font-bold text-[#006b5f] mb-2">Quick Answer</h2>
+                <p className="text-base leading-relaxed speakable-answer">
+                  {content.quickAnswer ?? content.metaDescription}
+                </p>
+              </div>
+            )}
             <Link
               href={content.hero.ctaLink}
               className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
@@ -145,6 +153,29 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {/* Last Updated & Change Log */}
+      {(content.lastModified || content.changeLog) && (
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 mb-8">
+          <div className="text-sm text-gray-500">
+            {content.lastModified && (
+              <p>Last updated: {new Date(content.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            )}
+            {content.changeLog && content.changeLog.length > 0 && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-[#006b5f] hover:underline">Change log</summary>
+                <ul className="mt-2 space-y-1 list-disc list-inside text-gray-600">
+                  {content.changeLog.map((entry, i) => (
+                    <li key={i}>
+                      <strong>{new Date(entry.date).toLocaleDateString('en-US')}:</strong> {entry.changes.join('; ')}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
         </section>
       )}
 
@@ -606,6 +637,32 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                 Schedule Your Free Consultation
               </Link>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* References / Citations */}
+      {content.citations && content.citations.length > 0 && (
+        <section id="references" className="py-16 bg-white border-t border-gray-200">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">References</h2>
+            <ol className="space-y-2 text-gray-700 list-decimal list-inside">
+              {content.citations.map((cite) => (
+                <li key={cite.id} id={`ref-${cite.id}`}>
+                  <a
+                    href={cite.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#006b5f] hover:text-[#005a4f] underline break-all"
+                  >
+                    {cite.title}
+                  </a>
+                  {cite.accessed && (
+                    <span className="text-gray-500 text-sm ml-1">(accessed {cite.accessed})</span>
+                  )}
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
       )}

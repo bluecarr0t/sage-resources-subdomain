@@ -13,10 +13,12 @@ export const dynamic = 'force-dynamic';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 import { parseDocxReport } from '@/lib/parsers/feasibility-docx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
 import { geocodeAddress } from '@/lib/geocode';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
+import { logAdminAudit } from '@/lib/admin-audit';
 
 const BUCKET_NAME = 'report-uploads';
 const MAX_DOCX_SIZE_BYTES = 100 * 1024 * 1024; // 100MB (Supabase Free: 50MB; Pro: 500GB)
@@ -34,27 +36,10 @@ export async function POST(
       error: sessionError,
     } = await supabaseAuth.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -207,6 +192,20 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    await logAdminAudit(
+      {
+        user_id: session.user.id,
+        user_email: session.user.email ?? undefined,
+        action: 'upload',
+        resource_type: 'report',
+        resource_id: report.id,
+        study_id: studyId,
+        details: { file_type: 'docx', filename: file.name },
+        source: 'session',
+      },
+      request
+    );
 
     return NextResponse.json({
       success: true,

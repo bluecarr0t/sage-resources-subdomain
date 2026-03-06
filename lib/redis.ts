@@ -464,6 +464,45 @@ export async function deleteCachePattern(pattern: string): Promise<number> {
 }
 
 /**
+ * Atomic rate limit check using Redis INCR + EXPIRE.
+ * Use for serverless/multi-instance deployments where in-memory limits don't work.
+ * Returns null if Redis is unavailable (caller should fall back to in-memory).
+ *
+ * @param key Rate limit key (e.g. "ratelimit:upload:1.2.3.4")
+ * @param limit Max requests per window
+ * @param windowMs Window size in milliseconds
+ * @returns { allowed, count, resetAt } or null if Redis unavailable
+ */
+export async function checkRateLimitRedis(
+  key: string,
+  limit: number,
+  windowMs: number
+): Promise<{ allowed: boolean; count: number; resetAt: number } | null> {
+  const client = await getRedisClient();
+  if (!client) return null;
+
+  const redisKey = `ratelimit:${key}`;
+  const windowSec = Math.ceil(windowMs / 1000);
+
+  try {
+    const count = await client.incr(redisKey);
+    if (count === 1) {
+      await client.expire(redisKey, windowSec);
+    }
+    const ttl = await client.ttl(redisKey);
+    const resetAt = Date.now() + (ttl > 0 ? ttl * 1000 : windowMs);
+    return {
+      allowed: count <= limit,
+      count,
+      resetAt,
+    };
+  } catch (error) {
+    console.error('[Redis] Rate limit error:', error);
+    return null;
+  }
+}
+
+/**
  * Check if Redis is available and connected
  * @returns true if Redis is available, false otherwise
  */

@@ -13,6 +13,7 @@ import {
   generateSpeakableSchema,
   generateHowToSchema,
   extractHowToStepsFromGuide,
+  generateItemListSchema,
 } from "@/lib/schema";
 import RelatedGuides from "./RelatedGuides";
 import RelatedLandingPages from "./RelatedLandingPages";
@@ -43,11 +44,17 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
   const howToSchema = howToSteps && howToSteps.length > 0
     ? generateHowToSchema(howToSteps, content.hero.headline, content.metaDescription)
     : null;
+  const keyTakeawaysSchema = content.keyTakeaways && content.keyTakeaways.length > 0
+    ? generateItemListSchema(content.keyTakeaways, `Key Takeaways: ${content.hero.headline}`)
+    : null;
 
   // Track scroll position for active section highlighting
   useEffect(() => {
     const handleScroll = () => {
-      const sections = content.sections.map((s) => s.id);
+      const sections = [
+        ...content.sections.map((s) => s.id),
+        ...(content.citations && content.citations.length > 0 ? ['references'] : []),
+      ];
       const scrollPosition = window.scrollY + 150;
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -93,6 +100,12 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        />
+      )}
+      {keyTakeawaysSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(keyTakeawaysSchema) }}
         />
       )}
 
@@ -164,6 +177,16 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
               <p className={`text-xl mb-8 ${content.hero.backgroundImage ? 'text-white/95 drop-shadow-md' : 'text-gray-700'}`}>
                 {content.hero.subheadline}
               </p>
+              {(content.quickAnswer ?? content.metaDescription) && (
+                <div className={`mb-8 p-6 rounded-xl text-left max-w-3xl mx-auto ${
+                  content.hero.backgroundImage ? 'bg-white/95 backdrop-blur-sm text-gray-800' : 'bg-[#006b5f]/5 border-l-4 border-[#006b5f]'
+                }`}>
+                  <h2 className="text-lg font-bold text-[#006b5f] mb-2">Quick Answer</h2>
+                  <p className="text-base leading-relaxed speakable-answer">
+                    {content.quickAnswer ?? content.metaDescription}
+                  </p>
+                </div>
+              )}
               {content.hero.ctaText && content.hero.ctaLink && (
                 <Link
                   href={content.hero.ctaLink}
@@ -175,6 +198,46 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
             </div>
           </div>
         </section>
+
+        {/* Key Takeaways */}
+        {content.keyTakeaways && content.keyTakeaways.length > 0 && (
+          <section className="my-8 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto bg-[#006b5f]/5 border-l-4 border-[#006b5f] p-6 rounded-lg">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Key Takeaways</h2>
+            <ul className="space-y-2">
+              {content.keyTakeaways.map((takeaway, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-[#006b5f] mr-2 font-bold">{index + 1}.</span>
+                  <span className="text-gray-700">{takeaway}</span>
+                </li>
+              ))}
+            </ul>
+            </div>
+          </section>
+        )}
+
+        {/* Last Updated & Change Log */}
+        {(content.lastModified || content.changeLog) && (
+          <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 mb-8">
+            <div className="text-sm text-gray-500">
+              {content.lastModified && (
+                <p>Last updated: {new Date(content.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              )}
+              {content.changeLog && content.changeLog.length > 0 && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-[#006b5f] hover:underline">Change log</summary>
+                  <ul className="mt-2 space-y-1 list-disc list-inside text-gray-600">
+                    {content.changeLog.map((entry, i) => (
+                      <li key={i}>
+                        <strong>{new Date(entry.date).toLocaleDateString('en-US')}:</strong> {entry.changes.join('; ')}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Main Content Area with TOC */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -188,7 +251,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
               <div className="sticky top-24">
                 <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                   <h2 className="text-lg font-bold text-gray-900 mb-4">Table of Contents</h2>
-                  <nav className="space-y-2">
+                    <nav className="space-y-2">
                     {content.tableOfContents.map((item, index) => (
                       <Link
                         key={index}
@@ -204,6 +267,18 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                         {item.title}
                       </Link>
                     ))}
+                    {content.citations && content.citations.length > 0 && (
+                      <Link
+                        href="#references"
+                        className={`block text-sm py-2 px-3 rounded transition-colors ${
+                          activeSection === "references"
+                            ? "bg-[#006b5f] text-white font-semibold"
+                            : "text-gray-700 hover:bg-gray-100 hover:text-[#006b5f]"
+                        }`}
+                      >
+                        References
+                      </Link>
+                    )}
                   </nav>
                 </div>
               </div>
@@ -243,6 +318,30 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                   </section>
                 ))}
               </article>
+
+              {/* References / Citations */}
+              {content.citations && content.citations.length > 0 && (
+                <section id="references" className="mt-16 pt-12 border-t border-gray-200 scroll-mt-24">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">References</h2>
+                  <ol className="space-y-2 text-gray-700 list-decimal list-inside">
+                    {content.citations.map((cite) => (
+                      <li key={cite.id} id={`ref-${cite.id}`}>
+                        <a
+                          href={cite.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#006b5f] hover:text-[#005a4f] underline break-all"
+                        >
+                          {cite.title}
+                        </a>
+                        {cite.accessed && (
+                          <span className="text-gray-500 text-sm ml-1">(accessed {cite.accessed})</span>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
 
               {/* Cluster Pages Section */}
               {content.clusterPages && content.clusterPages.length > 0 && (

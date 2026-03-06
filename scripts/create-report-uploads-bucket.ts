@@ -28,7 +28,10 @@ async function main() {
   const BUCKET_NAME = 'report-uploads';
   const ALLOWED_MIME_TYPES = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-excel.sheet.macroEnabled.12', // .xlsm
+    'application/octet-stream', // .xlsxm (browsers may send this for non-standard extensions)
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/msword', // .doc (Word 97-2003)
     'application/pdf',
   ];
 

@@ -35,6 +35,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# csv files
-# /csv - removed to allow tracking of glamping properties CSV files
+# csv files (large upload CSVs exceed GitHub 100MB limit)
+/csv
+
+# reports (doc/docx, xlsx/xlsm uploads)
+/reports
 

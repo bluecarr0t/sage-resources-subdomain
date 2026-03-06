@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { Button, Card } from '@/components/ui';
+
 import {
   UploadCloud,
   FileText,
@@ -58,7 +59,7 @@ function formatBytes(bytes: number): string {
 
 function getFileType(name: string): 'xlsx' | 'docx' | null {
   const lower = name.toLowerCase();
-  if (lower.endsWith('.xlsx')) return 'xlsx';
+  if (lower.endsWith('.xlsx') || lower.endsWith('.xlsm') || lower.endsWith('.xlsxm')) return 'xlsx';
   if (lower.endsWith('.docx') || lower.endsWith('.doc')) return 'docx';
   return null;
 }
@@ -66,26 +67,36 @@ function getFileType(name: string): 'xlsx' | 'docx' | null {
 function uploadFileToStorage(
   signedUrl: string,
   file: File,
+  contentType: string,
   onProgress: (loaded: number) => void
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', signedUrl);
-    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.setRequestHeader('x-upsert', 'true');
+    xhr.setRequestHeader('Content-Type', contentType);
+    xhr.setRequestHeader('Cache-Control', 'max-age=3600');
 
     xhr.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable) onProgress(e.loaded);
     });
 
     xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve();
-      else reject(new Error(`Storage upload failed (${xhr.status})`));
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else {
+        const body = xhr.responseText;
+        console.error(`[upload] ${xhr.status} for ${file.name}:`, body);
+        reject(new Error(`Storage upload failed (${xhr.status}): ${body}`));
+      }
     });
 
-    xhr.addEventListener('error', () => reject(new Error('Storage upload failed')));
+    xhr.addEventListener('error', () => reject(new Error('Storage upload network error')));
     xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
 
-    xhr.send(file);
+    // Use Blob with explicit type - browser may override Content-Type when sending raw File
+    const blob = new Blob([file], { type: contentType });
+    xhr.send(blob);
   });
 }
 
@@ -132,7 +143,7 @@ export default function UploadReportsPage() {
     }
 
     if (rejected.length > 0) {
-      setError(`Unsupported file(s): ${rejected.join(', ')}. Only .xlsx and .docx files are accepted.`);
+      setError(`Unsupported file(s): ${rejected.join(', ')}. Only .xlsx, .xlsm, .xlsxm and .docx files are accepted.`);
       return;
     }
     if (oversized.length > 0) {
@@ -223,7 +234,7 @@ export default function UploadReportsPage() {
 
       const { uploads } = presignData as {
         batchId: string;
-        uploads: Array<{ name: string; storagePath: string; signedUrl: string; token: string }>;
+        uploads: Array<{ name: string; storagePath: string; signedUrl: string; token: string; contentType: string }>;
       };
 
       // Phase 2: Upload files directly to Supabase Storage (bypasses Vercel 4.5MB limit)
@@ -234,7 +245,7 @@ export default function UploadReportsPage() {
         const qf = queuedFiles.find((f) => f.file.name === upload.name);
         if (!qf) continue;
 
-        await uploadFileToStorage(upload.signedUrl, qf.file, (loaded) => {
+        await uploadFileToStorage(upload.signedUrl, qf.file, upload.contentType, (loaded) => {
           const pct = Math.round(((completedBytes + loaded) / totalBytes) * 75);
           setUploadProgress(pct);
         });
@@ -304,7 +315,7 @@ export default function UploadReportsPage() {
             Upload Reports
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Upload paired .xlsx workbooks and .docx report files per feasibility study.
+            Upload paired .xlsx/.xlsm/.xlsxm workbooks and .docx report files per feasibility study.
             Files are automatically matched by job number from the filename.
           </p>
         </div>
@@ -417,7 +428,7 @@ export default function UploadReportsPage() {
                 dragActiveXlsx ? 'text-amber-600 dark:text-amber-400' : 'text-amber-600 dark:text-amber-400'
               }`} />
               <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {dragActiveXlsx ? 'Drop .xlsx files here' : '.xlsx Workbooks'}
+                {dragActiveXlsx ? 'Drop .xlsx/.xlsm files here' : '.xlsx/.xlsm Workbooks'}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Financial data, comparables, pro forma
@@ -425,7 +436,7 @@ export default function UploadReportsPage() {
               <input
                 ref={xlsxInputRef}
                 type="file"
-                accept=".xlsx"
+                accept=".xlsx,.xlsm,.xlsxm"
                 multiple
                 className="hidden"
                 onChange={(e) => {

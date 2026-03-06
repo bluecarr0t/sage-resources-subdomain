@@ -1,6 +1,7 @@
 /**
  * API Route: Logout
- * Signs out the user and returns redirect URL
+ * Signs out the user and clears server-side session cookies.
+ * Supabase SSR signOut() clears auth cookies via the cookie middleware.
  */
 
 import { NextResponse } from 'next/server';

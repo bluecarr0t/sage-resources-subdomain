@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAllGlossaryTerms } from '@/lib/glossary/index';
+import { getMostRecentContentDate } from '@/lib/sitemap-dates';
 import { locales } from '@/i18n';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
@@ -20,7 +21,7 @@ function generateHreflangTags(path: string): string {
 export async function GET() {
   const glossaryTerms = getAllGlossaryTerms();
   const urls: string[] = [];
-  const glossaryDefaultDate = new Date("2025-01-15").toISOString();
+  const glossaryDefaultDate = getMostRecentContentDate();
 
   // Generate glossary term pages for all locales with hreflang
   for (const term of glossaryTerms) {

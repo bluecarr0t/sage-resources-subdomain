@@ -1,5 +1,5 @@
 /**
- * API Route: Get, Update, or Delete a single report
+ * API Route: Get, Update, or Delete a single report (org-wide for internal Sage users)
  * GET /api/admin/reports/[id]
  * PUT /api/admin/reports/[id]
  * DELETE /api/admin/reports/[id]
@@ -10,8 +10,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { logAdminAudit } from '@/lib/admin-audit';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 
-async function getAuthContext() {
+async function getAuthContext(request?: NextRequest) {
   const supabase = await createServerClientWithCookies();
   const {
     data: { session },
@@ -19,19 +21,19 @@ async function getAuthContext() {
   } = await supabase.auth.getSession();
 
   if (sessionError || !session?.user) {
-    return { error: 'Authentication required', status: 401 };
+    return { response: unauthorizedResponse(), status: 401 };
   }
 
   if (!isAllowedEmailDomain(session.user.email)) {
-    return { error: 'Access denied', status: 403 };
+    return { response: forbiddenResponse(), status: 403 };
   }
 
   const hasAccess = await isManagedUser(session.user.id);
   if (!hasAccess) {
-    return { error: 'Access denied', status: 403 };
+    return { response: forbiddenResponse(), status: 403 };
   }
 
-  return { supabase, userId: session.user.id };
+  return { supabase, session, request };
 }
 
 export async function GET(
@@ -39,17 +41,16 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { supabase, userId, error, status } = await getAuthContext();
-
-  if (error) {
-    return NextResponse.json({ success: false, error }, { status: status! });
+  const ctx = await getAuthContext(request);
+  if ('response' in ctx) {
+    return ctx.response;
   }
+  const { supabase } = ctx;
 
   const { data, error: fetchError } = await supabase!
     .from('reports')
     .select('*')
     .eq('id', id)
-    .eq('user_id', userId!)
     .is('deleted_at', null)
     .single();
 
@@ -68,17 +69,15 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { supabase, userId, error, status } = await getAuthContext();
-
-  if (error) {
-    return NextResponse.json({ success: false, error }, { status: status! });
-  }
+  const ctx = await getAuthContext(request);
+  if ('response' in ctx) return ctx.response;
+  const { supabase, session } = ctx;
 
   const body = await request.json();
   const allowedFields = [
     'title', 'property_name', 'location', 'market_type', 'total_sites',
     'status', 'dropbox_url', 'address_1', 'address_2', 'city', 'state', 'zip_code', 'country',
-    'client_id'
+    'client_id', 'service'
   ];
   const updateData: Record<string, unknown> = {};
   for (const key of allowedFields) {
@@ -88,7 +87,7 @@ export async function PUT(
     .from('reports')
     .update(updateData)
     .eq('id', id)
-    .eq('user_id', userId!)
+    .is('deleted_at', null)
     .select()
     .single();
 
@@ -99,6 +98,20 @@ export async function PUT(
     );
   }
 
+  await logAdminAudit(
+    {
+      user_id: session!.user.id,
+      user_email: session!.user.email ?? undefined,
+      action: 'edit',
+      resource_type: 'report',
+      resource_id: id,
+      study_id: data?.study_id ?? undefined,
+      details: { fields: Object.keys(updateData) },
+      source: 'session',
+    },
+    request
+  );
+
   return NextResponse.json({ success: true, report: data });
 }
 
@@ -107,17 +120,22 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { supabase, userId, error, status } = await getAuthContext();
+  const ctx = await getAuthContext(request);
+  if ('response' in ctx) return ctx.response;
+  const { supabase, session } = ctx;
 
-  if (error) {
-    return NextResponse.json({ success: false, error }, { status: status! });
-  }
+  const { data: report } = await supabase!
+    .from('reports')
+    .select('study_id')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .single();
 
   const { error: deleteError } = await supabase!
     .from('reports')
     .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)
-    .eq('user_id', userId!);
+    .is('deleted_at', null);
 
   if (deleteError) {
     return NextResponse.json(
@@ -125,6 +143,19 @@ export async function DELETE(
       { status: 400 }
     );
   }
+
+  await logAdminAudit(
+    {
+      user_id: session!.user.id,
+      user_email: session!.user.email ?? undefined,
+      action: 'delete',
+      resource_type: 'report',
+      resource_id: id,
+      study_id: report?.study_id ?? undefined,
+      source: 'session',
+    },
+    request
+  );
 
   return NextResponse.json({ success: true });
 }

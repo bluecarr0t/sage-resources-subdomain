@@ -1,5 +1,5 @@
 /**
- * API Route: Get reports with location for client map
+ * API Route: Get all reports with location for client map (org-wide for internal Sage users)
  * GET /api/admin/client-map/reports
  */
 
@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 
 // Geographic centers for all US states + DC (fallback when report has no coordinates)
 const STATE_CENTERS: Record<string, [number, number]> = {
@@ -96,27 +97,10 @@ export async function GET() {
       error: sessionError,
     } = await supabase.auth.getSession();
 
-    if (sessionError || !session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
-
+    if (sessionError || !session?.user) return unauthorizedResponse();
+    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
     const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
-    }
+    if (!hasAccess) return forbiddenResponse();
 
     const { data, error } = await supabase
       .from('reports')
@@ -128,7 +112,6 @@ export async function GET() {
           company
         )
       `)
-      .eq('user_id', session.user.id)
       .is('deleted_at', null);
 
     if (error) {
@@ -138,32 +121,25 @@ export async function GET() {
       throw error;
     }
 
-    const reportIds = (data || []).map((r) => r.id);
+    // Use only Past Report uploaded Report details (unit_descriptions, unit_mix) — not comparables
     const unitTypesByReport = new Map<string, string[]>();
-    if (reportIds.length > 0) {
-      const { data: unitsData } = await supabase
-        .from('feasibility_comp_units')
-        .select('report_id, unit_type')
-        .in('report_id', reportIds);
-      if (unitsData) {
-        for (const u of unitsData) {
-          const types = unitTypesByReport.get(u.report_id) || [];
-          const t = String(u.unit_type || '').trim();
+    for (const r of data || []) {
+      const types: string[] = [];
+      const ud = r.unit_descriptions as Array<{ type?: string }> | null;
+      if (ud && Array.isArray(ud)) {
+        for (const d of ud) {
+          const t = String(d.type || '').trim();
           if (t && !types.includes(t)) types.push(t);
-          unitTypesByReport.set(u.report_id, types);
         }
       }
-      for (const r of data || []) {
-        const ud = r.unit_descriptions as Array<{ type?: string }> | null;
-        if (ud && Array.isArray(ud)) {
-          const types = unitTypesByReport.get(r.id) || [];
-          for (const d of ud) {
-            const t = String(d.type || '').trim();
-            if (t && !types.includes(t)) types.push(t);
-          }
-          if (types.length > 0) unitTypesByReport.set(r.id, types);
+      const um = r.unit_mix as Array<{ type?: string }> | null;
+      if (um && Array.isArray(um)) {
+        for (const m of um) {
+          const t = String(m.type || '').trim();
+          if (t && !types.includes(t)) types.push(t);
         }
       }
+      if (types.length > 0) unitTypesByReport.set(r.id, types);
     }
 
     const rawReports = (data || []).map((r) => {

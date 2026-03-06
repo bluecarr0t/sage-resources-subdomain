@@ -1,0 +1,229 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Search } from 'lucide-react';
+
+interface SearchableMultiSelectOption {
+  value: string;
+  label: string;
+}
+
+interface SearchableMultiSelectProps {
+  options: SearchableMultiSelectOption[];
+  selectedValues: string[];
+  onToggle: (value: string) => void;
+  placeholder?: string;
+  allSelectedText?: string;
+  label: string;
+  id: string;
+  searchPlaceholder?: string;
+  activeColor?: 'blue' | 'purple' | 'orange' | 'green' | 'indigo' | 'sage';
+}
+
+export default function SearchableMultiSelect({
+  options,
+  selectedValues,
+  onToggle,
+  placeholder = 'Select options...',
+  allSelectedText,
+  label,
+  id,
+  searchPlaceholder = 'Search...',
+  activeColor = 'sage',
+}: SearchableMultiSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 240 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const filteredOptions = searchQuery.trim()
+    ? options.filter((opt) =>
+        opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        opt.value.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : options;
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current?.contains(target) ||
+        containerRef.current?.contains(target) ||
+        buttonRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setIsOpen(false);
+      setSearchQuery('');
+    }
+
+    if (isOpen) {
+      const positionTimeout = setTimeout(() => updateDropdownPosition(), 0);
+      const clickTimeout = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+      return () => {
+        clearTimeout(positionTimeout);
+        clearTimeout(clickTimeout);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      updateDropdownPosition();
+      window.addEventListener('scroll', updateDropdownPosition, true);
+      window.addEventListener('resize', updateDropdownPosition);
+      return () => {
+        window.removeEventListener('scroll', updateDropdownPosition, true);
+        window.removeEventListener('resize', updateDropdownPosition);
+      };
+    }
+  }, [isOpen]);
+
+  const updateDropdownPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      const spaceBelow = viewportHeight - rect.bottom - 4;
+      const defaultMaxHeight = 280;
+      const maxHeight = Math.max(Math.min(spaceBelow, defaultMaxHeight), 100);
+      const left = Math.max(4, Math.min(rect.left, viewportWidth - rect.width - 4));
+      setDropdownPosition({
+        top: rect.bottom + 4,
+        left,
+        width: rect.width,
+        maxHeight,
+      });
+    }
+  };
+
+  const isActive = selectedValues.length > 0;
+  const colorClasses =
+    activeColor === 'blue'
+      ? 'border-blue-300 bg-blue-50/50'
+      : activeColor === 'orange'
+        ? 'border-orange-300 bg-orange-50/50'
+        : activeColor === 'green'
+          ? 'border-green-300 bg-green-50/50'
+          : activeColor === 'indigo'
+            ? 'border-indigo-300 bg-indigo-50/50'
+            : activeColor === 'purple'
+              ? 'border-purple-300 bg-purple-50/50'
+              : 'border-sage-300 bg-sage-50/50 dark:border-sage-600 dark:bg-sage-900/30';
+
+  return (
+    <div className={`relative ${isOpen ? 'z-50' : 'z-auto'}`} ref={containerRef}>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        {label}
+      </label>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:border-sage-500 text-sm transition-all text-left flex items-center justify-between cursor-pointer ${
+          isActive ? `${colorClasses} font-medium` : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+        }`}
+      >
+        <span className="truncate flex-1">
+          {selectedValues.length === 0
+            ? placeholder
+            : selectedValues.length === 1
+              ? options.find((o) => o.value === selectedValues[0])?.label ?? selectedValues[0]
+              : allSelectedText && selectedValues.length === options.length
+                ? allSelectedText
+                : `${selectedValues.length} selected`}
+        </span>
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform ml-2 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && isMounted &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl overflow-hidden"
+            style={{
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
+              maxHeight: `${dropdownPosition.maxHeight}px`,
+              zIndex: 99999,
+              position: 'fixed',
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+            <div className="overflow-y-auto p-2 space-y-0.5" style={{ maxHeight: dropdownPosition.maxHeight - 60 }}>
+              {filteredOptions.length === 0 ? (
+                <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">No matches</div>
+              ) : (
+                filteredOptions.map((option) => {
+                  const isSelected = selectedValues.includes(option.value);
+                  return (
+                    <label
+                      key={option.value}
+                      className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-md cursor-pointer transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onToggle(option.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        className="w-4 h-4 text-sage-600 border-gray-300 dark:border-gray-600 rounded focus:ring-sage-500 cursor-pointer"
+                      />
+                      <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
+                    </label>
+                  );
+                })
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
+    </div>
+  );
+}

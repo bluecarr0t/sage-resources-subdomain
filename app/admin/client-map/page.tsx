@@ -34,8 +34,6 @@ const RESORT_TYPE_OPTIONS = [
   { value: 'rv_glamping', label: 'Glamping & RV' },
 ];
 
-const YEAR_OPTIONS = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019'];
-
 const UNIT_TYPE_OPTIONS = [
   'Treehouse',
   'Dome',
@@ -69,6 +67,15 @@ function ClientMapContent() {
   const [resortTypeFilter, setResortTypeFilter] = useState<string[]>([]);
   const [unitTypeFilter, setUnitTypeFilter] = useState<string[]>([]);
   const [yearFilter, setYearFilter] = useState<string[]>([]);
+
+  const yearOptions = useMemo(() => {
+    const years = new Set<string>();
+    for (const r of reports) {
+      const y = r.reportYear?.trim();
+      if (y) years.add(y);
+    }
+    return Array.from(years).sort((a, b) => b.localeCompare(a));
+  }, [reports]);
 
   const filteredReports = useMemo(() => {
     return reports.filter((r) => {
@@ -208,7 +215,7 @@ function ClientMapContent() {
             id="year-filter"
             label="Year Report Completed"
             placeholder="All years"
-            options={YEAR_OPTIONS.map((y) => ({ value: y, label: y }))}
+            options={yearOptions.map((y) => ({ value: y, label: y }))}
             selectedValues={yearFilter}
             onToggle={(v) =>
               setYearFilter((prev) =>

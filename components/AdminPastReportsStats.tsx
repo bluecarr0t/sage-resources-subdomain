@@ -18,16 +18,24 @@ export default function AdminPastReportsStats() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const res = await fetch('/api/admin/reports/stats');
-        const data = await res.json();
-        if (!res.ok || !data.success) {
-          throw new Error(data.error || 'Failed to load stats');
+        const [statsRes, comparablesRes] = await Promise.all([
+          fetch('/api/admin/reports/stats'),
+          fetch('/api/admin/comparables?per_page=1&page=1'),
+        ]);
+        const statsData = await statsRes.json();
+        const comparablesData = await comparablesRes.json();
+        if (!statsRes.ok || !statsData.success) {
+          throw new Error(statsData.error || 'Failed to load stats');
         }
+        const comparablesCount =
+          comparablesData.success && comparablesData.pagination
+            ? comparablesData.pagination.total ?? 0
+            : statsData.comparables ?? 0;
         setStats({
-          studies: data.studies ?? 0,
-          comparables: data.comparables ?? 0,
-          unit_records: data.unit_records ?? 0,
-          states_covered: data.states_covered ?? 0,
+          studies: statsData.studies ?? 0,
+          comparables: comparablesCount,
+          unit_records: statsData.unit_records ?? 0,
+          states_covered: statsData.states_covered ?? 0,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load stats');

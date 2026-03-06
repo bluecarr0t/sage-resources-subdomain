@@ -397,7 +397,7 @@ export default async function PropertyPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
-      {false && amenitiesSchema && (
+      {amenitiesSchema && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(amenitiesSchema) }}

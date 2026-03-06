@@ -3,6 +3,7 @@ import { locales } from '@/i18n';
 import { getTopStates, getTopCities, slugifyLocation, createCitySlug } from '@/lib/location-helpers';
 import { getNationalParksWithCoordinates } from '@/lib/national-parks';
 import { getAllUnitTypeSlugs } from '@/lib/unit-type-config';
+import { getMostRecentContentDate } from '@/lib/sitemap-dates';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
@@ -21,6 +22,7 @@ function generateHreflangTags(path: string): string {
 
 export async function GET() {
   const urls: string[] = [];
+  const contentLastmod = getMostRecentContentDate();
 
   // Generate main pages for all locales with hreflang
   const mainPages = ['', '/guides', '/glossary', '/partners', '/map', '/sitemap'];
@@ -29,7 +31,7 @@ export async function GET() {
     for (const locale of locales) {
       const fullPath = `/${locale}${pagePath}`;
       const hreflangs = generateHreflangTags(fullPath);
-      const lastmod = new Date().toISOString();
+      const lastmod = contentLastmod;
       const priority = pagePath === '' ? '1.0' : pagePath === '/partners' ? '0.8' : '0.9';
       const changefreq = pagePath === '/partners' ? 'monthly' : 'weekly';
       
@@ -46,7 +48,7 @@ ${hreflangs}
   // Add state pages (priority 0.8)
   try {
     const topStates = await getTopStates(50);
-    const lastmod = new Date().toISOString();
+    const lastmod = contentLastmod;
     
     for (const stateData of topStates) {
       const stateSlug = slugifyLocation(stateData.state);
@@ -70,7 +72,7 @@ ${hreflangs}
   // Add city pages (priority 0.7)
   try {
     const topCities = await getTopCities(100);
-    const lastmod = new Date().toISOString();
+    const lastmod = contentLastmod;
     
     for (const cityData of topCities) {
       const citySlug = createCitySlug(cityData.city, cityData.state);
@@ -97,7 +99,7 @@ ${hreflangs}
     const hreflangs = generateHreflangTags(fullPath);
     urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${contentLastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
 ${hreflangs}
@@ -107,7 +109,7 @@ ${hreflangs}
   // Add glamping near national parks individual pages (priority 0.7)
   try {
     const parks = await getNationalParksWithCoordinates();
-    const lastmod = new Date().toISOString();
+    const lastmod = contentLastmod;
 
     for (const park of parks) {
       if (!park.slug) continue;
@@ -131,7 +133,7 @@ ${hreflangs}
   // Add glamping by unit type pages (priority 0.8)
   try {
     const unitTypeSlugs = getAllUnitTypeSlugs();
-    const lastmod = new Date().toISOString();
+    const lastmod = contentLastmod;
 
     for (const slug of unitTypeSlugs) {
       for (const locale of locales) {

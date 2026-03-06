@@ -9,6 +9,7 @@
 
 import * as XLSX from 'xlsx';
 import { extractStudyId, normaliseUnitCategory } from '@/lib/csv/feasibility-parser';
+import { parseLocationAndState, getStateFromText } from '@/lib/feasibility-utils';
 import type {
   ParsedWorkbook,
   ParsedProjectInfo,
@@ -150,6 +151,11 @@ function isBlank(row: Row): boolean {
 function safeCell(row: Row, col: number): CellValue {
   if (col < 0 || !Array.isArray(row)) return '';
   return row[col] ?? '';
+}
+
+/** Normalize comp name for dedup: strip trailing asterisk (e.g. "Ranch at Rock Creek*" → "Ranch at Rock Creek") */
+function normalizeCompName(name: string): string {
+  return String(name || '').trim().replace(/\*+$/, '').trim() || name;
 }
 
 /** Reject comp names that are notes, subject rows, or invalid (numeric-only, too long, etc.) */
@@ -378,7 +384,38 @@ function parseCompsSummSheet(rows: Row[], warnings: string[]): {
         if (patterns.some((p) => amenLower.includes(p))) amenityKeywords.push(kw);
       }
 
-      comparables.push({ comp_name: name, overview, amenities: amenities || null, amenity_keywords: amenityKeywords, distance_miles: distance, total_sites: totalSites, quality_score: qualityScore, property_type: null });
+      // Parse overview for location/state; ensure "Location: City, ST" format when source has it
+      let finalOverview = overview;
+      let state: string | null = null;
+      const parsedLoc = parseLocationAndState(overview || '');
+      if (parsedLoc) {
+        state = parsedLoc.state;
+        // If overview doesn't already have "Location: ...", prepend it
+        if (!overview?.match(/Location:\s*/i)) {
+          const rest = overview?.replace(/^[^.]*\.?\s*/, '').trim();
+          finalOverview = rest ? `Location: ${parsedLoc.locationFormatted}. ${rest}` : `Location: ${parsedLoc.locationFormatted}`;
+        }
+      } else if (overview) {
+        // Try extracting state from existing "Location: ..." in overview
+        const locMatch = overview.match(/Location:\s*([^.]+)/i);
+        if (locMatch) {
+          const locParsed = parseLocationAndState(locMatch[1].trim());
+          if (locParsed) state = locParsed.state;
+        }
+      }
+      if (!state) state = getStateFromText(name);
+
+      comparables.push({
+        comp_name: normalizeCompName(name),
+        overview: finalOverview || null,
+        state,
+        amenities: amenities || null,
+        amenity_keywords: amenityKeywords,
+        distance_miles: distance,
+        total_sites: totalSites,
+        quality_score: qualityScore,
+        property_type: null,
+      });
     }
 
     if (section === 'units' && unitHeaderCols) {
@@ -428,7 +465,7 @@ function parseCompsSummSheet(rows: Row[], warnings: string[]): {
       if (lowAdr === null && peakAdr === null) continue;
 
       comp_units.push({
-        property_name: propName || 'Unknown',
+        property_name: normalizeCompName(propName) || 'Unknown',
         unit_type: unitType,
         unit_category: normaliseUnitCategory(unitType),
         num_units: int(safeCell(row, cols.units)),
@@ -568,9 +605,15 @@ function parseCompsGridSheet(rows: Row[], warnings: string[]): {
     const overview = location ? `Location: ${location}${unitTypes ? `. Unit types: ${unitTypes}` : ''}` : (unitTypes ? `Unit types: ${unitTypes}` : null);
     const amenities = amenityKeywords.length > 0 ? amenityKeywords.join(', ') : null;
 
+    // Extract state from location for the state column
+    const parsedLoc = location ? parseLocationAndState(location) : null;
+    const state = parsedLoc?.state ?? getStateFromText(name);
+
+    const normalizedName = normalizeCompName(name);
     comparables.push({
-      comp_name: name,
+      comp_name: normalizedName,
       overview,
+      state,
       amenities,
       amenity_keywords: amenityKeywords,
       distance_miles: null,
@@ -584,7 +627,7 @@ function parseCompsGridSheet(rows: Row[], warnings: string[]): {
     const avgAdr = avgCol >= 0 ? num(safeCell(row, avgCol)) : null;
     if (lowAdr !== null || peakAdr !== null || avgAdr !== null) {
       comp_units.push({
-        property_name: name,
+        property_name: normalizedName,
         unit_type: unitTypes || 'Unknown',
         unit_category: normaliseUnitCategory(unitTypes || ''),
         num_units: totalSites,
@@ -1697,15 +1740,19 @@ export function parseWorkbook(buffer: Buffer, filename: string, options?: ParseW
       result.comparables = gridParsed.comparables;
       result.comp_units.push(...gridParsed.comp_units);
     } else if (gridParsed.comparables.length > 0) {
-      const byName = new Map(result.comparables.map((c) => [c.comp_name.toLowerCase(), c]));
+      const byName = new Map(result.comparables.map((c) => [normalizeCompName(c.comp_name).toLowerCase(), c]));
       for (const g of gridParsed.comparables) {
-        const existing = byName.get(g.comp_name.toLowerCase());
-        if (existing && g.amenity_keywords.length > 0) {
-          existing.amenity_keywords = [...new Set([...existing.amenity_keywords, ...g.amenity_keywords])];
-          if (g.amenities) existing.amenities = existing.amenities ? `${existing.amenities}; ${g.amenities}` : g.amenities;
-        } else if (!existing) {
+        const key = normalizeCompName(g.comp_name).toLowerCase();
+        const existing = byName.get(key);
+        if (existing) {
+          if (g.amenity_keywords.length > 0) {
+            existing.amenity_keywords = [...new Set([...existing.amenity_keywords, ...g.amenity_keywords])];
+            if (g.amenities) existing.amenities = existing.amenities ? `${existing.amenities}; ${g.amenities}` : g.amenities;
+          }
+          if (g.state && !existing.state) existing.state = g.state;
+        } else {
           result.comparables.push(g);
-          byName.set(g.comp_name.toLowerCase(), g);
+          byName.set(key, g);
         }
       }
       if (result.comp_units.length === 0) {
