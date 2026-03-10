@@ -47,16 +47,24 @@ export function isValidLocale(locale: string): locale is Locale {
 
 // Get locale from request
 export default getRequestConfig(async ({ requestLocale }) => {
-  // Get the locale from the request
-  const locale = await requestLocale;
-  
-  // Validate that the incoming `locale` parameter is valid
-  if (!locale || !isValidLocale(locale)) {
+  const requested = await requestLocale;
+
+  // For routes outside [locale] (e.g. /admin, /login), requestLocale is undefined.
+  // Use defaultLocale so those routes work instead of triggering 404.
+  if (!requested) {
+    return {
+      locale: defaultLocale,
+      messages: (await import(`./messages/${defaultLocale}.json`)).default,
+    };
+  }
+
+  // Invalid locale (e.g. /xx/...) should 404
+  if (!isValidLocale(requested)) {
     notFound();
   }
 
   return {
-    locale,
-    messages: (await import(`./messages/${locale}.json`)).default,
+    locale: requested,
+    messages: (await import(`./messages/${requested}.json`)).default,
   };
 });

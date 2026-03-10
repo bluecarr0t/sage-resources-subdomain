@@ -40,7 +40,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
   if (pathname.startsWith('/admin/upload-reports')) return 'upload-reports';
   if (pathname.startsWith('/admin/comparables')) return 'comparables';
-  if (pathname.startsWith('/admin/anchor-point-insights')) return 'anchor-point-insights';
+  if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/audit-log')) return 'audit-log';
   return '';
 }
@@ -260,19 +260,19 @@ export default function AdminSidebar() {
                   isCollapsed={showCollapsed}
                 />
                 <NavLink
+                  href="/admin/proximity-insights"
+                  label="Proximity Insights"
+                  icon={MapPin}
+                  pageId="proximity-insights"
+                  isActive={activePageId === 'proximity-insights'}
+                  isCollapsed={showCollapsed}
+                />
+                <NavLink
                   href="/admin/sage-glamping-data-breakdown"
                   label="Sage Glamping Data"
                   icon={Database}
                   pageId="sage-glamping-data-breakdown"
                   isActive={activePageId === 'sage-glamping-data-breakdown'}
-                  isCollapsed={showCollapsed}
-                />
-                <NavLink
-                  href="/admin/anchor-point-insights"
-                  label="Anchor Point Insights"
-                  icon={MapPin}
-                  pageId="anchor-point-insights"
-                  isActive={activePageId === 'anchor-point-insights'}
                   isCollapsed={showCollapsed}
                 />
               </div>

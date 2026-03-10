@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Anchor Point Insights compares glamping/camping properties from four data sources (Hipcamp, Campspot, Sage Glamping, RoverPass) against anchor points (ski resorts or national parks). It provides distance-band analytics, winter rates, trends, and county population/GDP context. The feature is functional but has several issues, improvement opportunities, and clear paths for future enhancement.
+Anchor Point Insights compares glamping/camping properties from two data sources (Hipcamp, Sage Glamping) against anchor points (ski resorts or national parks). It provides distance-band analytics, winter rates, trends, and county population/GDP context. The feature is functional but has several issues, improvement opportunities, and clear paths for future enhancement.
 
 ---
 

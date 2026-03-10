@@ -1,10 +1,13 @@
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { NextIntlClientProvider } from 'next-intl';
 import AdminAuthGuard from '@/components/AdminAuthGuard';
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminMainContent from '@/components/AdminMainContent';
 import { SidebarProvider } from '@/lib/sidebar-context';
 import { getAdminAuthServer } from '@/lib/admin-auth-server';
+import enMessages from '@/messages/en.json';
+import type { AbstractIntlMessages } from 'next-intl';
 
 export const metadata: Metadata = {
   title: 'Admin - Sage Outdoor Advisory',
@@ -26,11 +29,13 @@ export default async function AdminLayout({
   }
 
   return (
-    <AdminAuthGuard>
-      <SidebarProvider>
-        <AdminSidebar />
-        <AdminMainContent>{children}</AdminMainContent>
-      </SidebarProvider>
-    </AdminAuthGuard>
+    <NextIntlClientProvider locale="en" messages={enMessages as unknown as AbstractIntlMessages}>
+      <AdminAuthGuard>
+        <SidebarProvider>
+          <AdminSidebar />
+          <AdminMainContent>{children}</AdminMainContent>
+        </SidebarProvider>
+      </AdminAuthGuard>
+    </NextIntlClientProvider>
   );
 }

@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, useRef, ReactNode } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { isAllowedEmailDomain } from '@/lib/auth-helpers';
+
+const AUTH_CHECK_TIMEOUT_MS = 12_000;
 
 interface AdminAuthGuardProps {
   children: ReactNode;
@@ -12,21 +15,37 @@ interface AdminAuthGuardProps {
 export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [timedOut, setTimedOut] = useState(false);
   const router = useRouter();
+  const mountedRef = useRef(true);
+  const completedRef = useRef(false);
 
   useEffect(() => {
+    mountedRef.current = true;
+    completedRef.current = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const redirectToLogin = () => {
+      completedRef.current = true;
+      if (mountedRef.current) {
+        router.replace('/login');
+      }
+    };
+
     const checkAccess = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
 
+        if (!mountedRef.current) return;
+
         if (!session?.user) {
-          router.replace('/login');
+          redirectToLogin();
           return;
         }
 
         if (!isAllowedEmailDomain(session.user.email)) {
           await supabase.auth.signOut();
-          router.replace('/login');
+          redirectToLogin();
           return;
         }
 
@@ -37,28 +56,65 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
           .eq('is_active', true)
           .single();
 
+        if (!mountedRef.current) return;
+
         if (error || !managedUser) {
           await supabase.auth.signOut();
-          router.replace('/login');
+          redirectToLogin();
           return;
         }
 
         setAuthorized(true);
       } catch (err) {
         console.error('[Admin] Auth check error:', err);
-        router.replace('/login');
+        redirectToLogin();
       } finally {
-        setChecking(false);
+        completedRef.current = true;
+        if (mountedRef.current) {
+          setChecking(false);
+          setTimedOut(false);
+        }
       }
     };
 
+    // Timeout: after deploy, session/cookie sync can hang. Show re-login prompt instead of infinite "Verifying access...".
+    timeoutId = setTimeout(() => {
+      if (mountedRef.current && !completedRef.current) {
+        setTimedOut(true);
+        setChecking(false);
+      }
+    }, AUTH_CHECK_TIMEOUT_MS);
+
     checkAccess();
+
+    return () => {
+      mountedRef.current = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [router]);
+
+  if (timedOut) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Session verification timed out. This can happen after a deployment — please log in again.
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex px-4 py-2 rounded-lg bg-sage-600 text-white font-medium hover:bg-sage-700 transition-colors"
+          >
+            Log in
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Verifying access...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="text-gray-500 dark:text-gray-400">Verifying access...</div>
       </div>
     );
   }

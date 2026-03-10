@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui';
 import { MapPin, Mountain, DollarSign, Database, TrendingUp, Users, Building2, RefreshCw, RotateCcw } from 'lucide-react';
 import { STATE_ABBREVIATIONS } from '@/components/map/utils/stateUtils';
@@ -96,7 +97,7 @@ interface InsightsData {
     winter_weekday: number | null;
     winter_weekend: number | null;
   }>;
-  map_anchors?: Array<{ id: number; name: string; lat: number; lon: number }>;
+  map_anchors?: Array<{ id: number; name: string; lat: number; lon: number; slug?: string }>;
   selected_anchor?: { id: number; name: string; lat: number; lon: number; slug?: string };
 }
 
@@ -125,6 +126,7 @@ function StatCard({
 }
 
 export default function AnchorPointInsightsPage() {
+  const t = useTranslations('anchorPointInsights');
   const searchParams = useSearchParams();
   const [anchorType, setAnchorType] = useState<AnchorType>('ski');
   const [stateFilter, setStateFilter] = useState<string | null>(null);
@@ -187,11 +189,11 @@ export default function AnchorPointInsightsPage() {
         setError(json.message || json.error || 'Failed to load insights');
       }
     } catch (e) {
-      setError('Network error. Please try again.');
+      setError(t('networkError'));
     } finally {
       setLoading(false);
     }
-  }, [anchorType, stateFilter, anchorFilter]);
+  }, [anchorType, stateFilter, anchorFilter, t]);
 
   useEffect(() => {
     load();
@@ -200,9 +202,49 @@ export default function AnchorPointInsightsPage() {
   if (loading) {
     return (
       <main className="pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto py-20 text-center">
-          <div className="animate-spin w-8 h-8 border-2 border-sage-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">Loading anchor point insights...</p>
+        <div className="max-w-7xl mx-auto">
+          {/* Skeleton: Header */}
+          <div className="mb-8">
+            <div className="h-9 w-80 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mb-2" />
+            <div className="h-5 w-full max-w-2xl bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+            <div className="flex flex-wrap gap-3">
+              <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+              <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+              <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+              <div className="h-10 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+            </div>
+          </div>
+          {/* Skeleton: Stat cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl"
+              >
+                <div className="p-2 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-9 h-9" />
+                <div className="flex-1">
+                  <div className="h-7 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1" />
+                  <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Skeleton: Chart */}
+          <div className="mb-6 p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+            <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+            <div className="h-80 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
+          </div>
+          {/* Skeleton: Two charts row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+              <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+              <div className="h-72 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
+            </div>
+            <div className="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+              <div className="h-6 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+              <div className="h-72 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
+            </div>
+          </div>
         </div>
       </main>
     );
@@ -213,13 +255,11 @@ export default function AnchorPointInsightsPage() {
       <main className="pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto py-20 text-center">
           <p className="text-gray-500 dark:text-gray-400">
-            {error
-              ? error
-              : 'No insights data available. Ensure anchor tables (ski_resorts or national-parks) and property tables are populated.'}
+            {error ?? t('noInsightsData')}
           </p>
           {error === 'Unauthorized' && (
             <p className="mt-2 text-sm text-gray-400">
-              <a href="/admin" className="text-sage-600 hover:underline">Sign in to admin</a>
+              <a href="/admin" className="text-sage-600 hover:underline">{t('signInToAdmin')}</a>
             </p>
           )}
           {error && (
@@ -228,7 +268,7 @@ export default function AnchorPointInsightsPage() {
               className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-sage-600 text-white rounded-lg text-sm font-medium hover:bg-sage-700 transition-colors"
             >
               <RotateCcw className="w-4 h-4" />
-              Retry
+              {t('retry')}
             </button>
           )}
         </div>
@@ -237,10 +277,10 @@ export default function AnchorPointInsightsPage() {
   }
 
   const seasonLabels: Record<Season, string> = {
-    winter: 'Winter',
-    spring: 'Spring',
-    summer: 'Summer',
-    fall: 'Fall',
+    winter: t('winter'),
+    spring: t('spring'),
+    summer: t('summer'),
+    fall: t('fall'),
   };
   const getWeekdayKey = (s: Season) =>
     `avg_${s}_weekday` as keyof (typeof data.by_band)[0];
@@ -271,13 +311,13 @@ export default function AnchorPointInsightsPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {data.selected_anchor
-              ? `${data.selected_anchor.name} — Anchor Point Insights`
-              : 'Anchor Point Insights'}
+              ? t('titleWithAnchor', { anchorName: data.selected_anchor.name })
+              : t('title')}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {data.selected_anchor
-              ? `Properties near ${data.selected_anchor.name} — rates by distance, occupancy, and seasonal data.`
-              : 'Glamping and camping properties compared to anchors — winter rates, distance bands, drive-time estimates, and county population/GDP context.'}
+              ? t('subtitleWithAnchor', { anchorName: data.selected_anchor.name })
+              : t('subtitle')}
           </p>
           {/* Filters and actions */}
           <div className="flex flex-wrap items-center gap-3">
@@ -296,7 +336,7 @@ export default function AnchorPointInsightsPage() {
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
-                Ski Resorts
+                {t('skiResorts')}
               </button>
               <button
                 onClick={() => {
@@ -312,7 +352,7 @@ export default function AnchorPointInsightsPage() {
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
-                National Parks
+                {t('nationalParks')}
               </button>
             </div>
             <select
@@ -328,9 +368,9 @@ export default function AnchorPointInsightsPage() {
                 router.replace(`${pathname}?${p.toString()}`, { scroll: false });
               }}
               className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
-              aria-label="Filter by state"
+              aria-label={t('filterByState')}
             >
-              <option value="">All states</option>
+              <option value="">{t('allStates')}</option>
               {US_STATE_OPTIONS.map(({ code, name }) => (
                 <option key={code} value={code}>
                   {name}
@@ -378,10 +418,10 @@ export default function AnchorPointInsightsPage() {
                 }
               }}
               className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent min-w-[200px]"
-              aria-label="Filter by anchor"
+              aria-label={t('filterByAnchor')}
             >
               <option value="">
-                All {anchorType === 'national-parks' ? 'National Parks' : 'Ski Resorts'}
+                {t('allAnchors')} {anchorType === 'national-parks' ? t('nationalParks') : t('skiResorts')}
               </option>
               {data.anchors_with_property_counts
                 .filter(
@@ -411,7 +451,7 @@ export default function AnchorPointInsightsPage() {
               title="Refresh data"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
+              {t('refresh')}
             </button>
           </div>
         </div>
@@ -420,37 +460,50 @@ export default function AnchorPointInsightsPage() {
         {(data.map_properties?.length ?? 0) > 0 || (data.map_anchors?.length ?? 0) > 0 ? (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              Properties and {anchorType === 'national-parks' ? 'National Parks' : 'Ski Resorts'}
+              {t('propertiesAndAnchors', {
+                type: anchorType === 'national-parks' ? t('nationalParks') : t('skiResorts'),
+              })}
             </h2>
             <AnchorPointMap
               mapProperties={data.map_properties ?? []}
               mapAnchors={data.map_anchors ?? []}
               anchorsWithCounts={data.anchors_with_property_counts}
+              onAnchorClick={(anchor) => {
+                const p = new URLSearchParams();
+                p.set('anchor_type', anchorType);
+                if (stateFilter) p.set('state', stateFilter);
+                if (anchorType === 'national-parks' && anchor.slug) {
+                  p.set('anchor_slug', anchor.slug);
+                } else if (anchorType === 'ski') {
+                  p.set('anchor_id', String(anchor.id));
+                }
+                router.replace(`${pathname}?${p.toString()}`, { scroll: false });
+              }}
             />
           </div>
         ) : null}
 
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
-          <StatCard label="Total Properties" value={data.summary.total_properties} icon={MapPin} />
+          <StatCard label={t('totalProperties')} value={data.summary.total_properties} icon={MapPin} />
           <StatCard
-            label={`Within 30 mi of ${anchorType === 'national-parks' ? 'Parks' : 'Ski'}`}
+            label={t('within30Mi', { type: anchorType === 'national-parks' ? t('parks') : t('ski') })}
             value={data.summary.properties_within_30_mi}
             icon={Mountain}
           />
           <StatCard
-            label={anchorType === 'national-parks' ? 'National Parks' : 'Ski Resorts'}
+            label={anchorType === 'national-parks' ? t('nationalParks') : t('skiResorts')}
             value={data.summary.anchors_count}
             icon={Mountain}
           />
           <StatCard
-            label="Avg Winter Rate"
+            label={t('avgWinterRate')}
             value={data.summary.avg_winter_rate != null ? `$${data.summary.avg_winter_rate}` : '—'}
             icon={DollarSign}
           />
-          <StatCard label="Data Sources" value={data.summary.data_sources} icon={Database} />
+          <StatCard label={t('dataSources')} value={data.summary.data_sources} icon={Database} />
           <StatCard
-            label="Mean State Pop (2020)"
+            label={t('meanStatePop')}
             value={
               data.summary.avg_state_population_2020 != null
                 ? data.summary.avg_state_population_2020.toLocaleString()
@@ -459,7 +512,7 @@ export default function AnchorPointInsightsPage() {
             icon={Users}
           />
           <StatCard
-            label="Combined State GDP 2023 (Arts/Rec)"
+            label={t('combinedStateGDP')}
             value={
               data.summary.combined_state_gdp_2023 != null
                 ? data.summary.combined_state_gdp_2023 >= 1_000_000
@@ -475,7 +528,9 @@ export default function AnchorPointInsightsPage() {
         <Card className="mb-6">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Avg Rates by Distance to {anchorType === 'national-parks' ? 'National Park' : 'Ski Resort'}
+              {t('avgRatesByDistance', {
+                type: anchorType === 'national-parks' ? t('nationalPark') : t('skiResort'),
+              })}
             </h2>
             <div className="flex gap-2">
               {(['winter', 'spring', 'summer', 'fall'] as const).map((s) => (
@@ -494,9 +549,15 @@ export default function AnchorPointInsightsPage() {
             </div>
           </div>
           {bandChartData.length === 0 ? (
-            <p className="text-gray-400 text-sm py-8 text-center">No data yet</p>
+            <p className="text-gray-400 text-sm py-8 text-center">{t('noDataYet')}</p>
           ) : (
-            <ResponsiveContainer width="100%" height={320}>
+            <div
+              role="img"
+              aria-label={t('avgRatesByDistance', {
+                type: anchorType === 'national-parks' ? t('nationalPark') : t('skiResort'),
+              })}
+            >
+              <ResponsiveContainer width="100%" height={320}>
               <BarChart
                 data={bandChartData}
                 margin={{ top: 5, right: 20, left: 20, bottom: 40 }}
@@ -525,6 +586,7 @@ export default function AnchorPointInsightsPage() {
                 />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           )}
         </Card>
 
@@ -532,8 +594,16 @@ export default function AnchorPointInsightsPage() {
         {hasOccupancyData && (
           <Card className="mb-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              Avg Occupancy by Distance to {anchorType === 'national-parks' ? 'National Park' : 'Ski Resort'}
+              {t('avgOccupancyByDistance', {
+                type: anchorType === 'national-parks' ? t('nationalPark') : t('skiResort'),
+              })}
             </h2>
+            <div
+              role="img"
+              aria-label={t('avgOccupancyByDistance', {
+                type: anchorType === 'national-parks' ? t('nationalPark') : t('skiResort'),
+              })}
+            >
             <ResponsiveContainer width="100%" height={320}>
               <BarChart
                 data={occupancyChartData}
@@ -552,6 +622,7 @@ export default function AnchorPointInsightsPage() {
                 <Bar dataKey="Avg Occupancy %" name="Avg Occupancy %" fill="#0891b2" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           </Card>
         )}
 
@@ -559,11 +630,12 @@ export default function AnchorPointInsightsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <Card>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              Property Count by Data Source
+              {t('propertyCountBySource')}
             </h2>
             {data.by_source.length === 0 ? (
-              <p className="text-gray-400 text-sm py-8 text-center">No data yet</p>
+              <p className="text-gray-400 text-sm py-8 text-center">{t('noDataYet')}</p>
             ) : (
+              <div role="img" aria-label={t('propertyCountBySource')}>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart
                   data={data.by_source}
@@ -582,16 +654,18 @@ export default function AnchorPointInsightsPage() {
                   <Bar dataKey="count" name="Properties" fill="#2563eb" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             )}
           </Card>
 
           <Card>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              Avg Winter Rate by State (Top 10)
+              {t('avgWinterRateByState')}
             </h2>
             {data.by_state.length === 0 ? (
-              <p className="text-gray-400 text-sm py-8 text-center">No data yet</p>
+              <p className="text-gray-400 text-sm py-8 text-center">{t('noDataYet')}</p>
             ) : (
+              <div role="img" aria-label={t('avgWinterRateByState')}>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart
                   data={data.by_state.slice(0, 10)}
@@ -609,6 +683,7 @@ export default function AnchorPointInsightsPage() {
                   <Bar dataKey="avg_winter_rate" name="Avg Winter Rate" fill="#0891b2" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             )}
           </Card>
         </div>
@@ -617,32 +692,32 @@ export default function AnchorPointInsightsPage() {
         {data.by_state.length > 0 && (
           <Card className="mb-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              State Metrics (Population and GDP)
+              {t('stateMetrics')}
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      State
+                      {t('state')}
                     </th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Properties
+                      {t('properties')}
                     </th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Avg Winter Rate
+                      {t('avgWinterRate')}
                     </th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Population 2020
+                      {t('population2020')}
                     </th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      GDP 2023 (Arts/Rec)
+                      {t('gdp2023')}
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {data.by_state.slice(0, 15).map((s, i) => (
-                    <tr key={i}>
+                  {data.by_state.slice(0, 15).map((s) => (
+                    <tr key={s.state}>
                       <td className="px-3 py-2 font-medium text-gray-800 dark:text-gray-200">
                         {s.state}
                       </td>
@@ -677,8 +752,9 @@ export default function AnchorPointInsightsPage() {
           <Card className="mb-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-sage-600" />
-              Year-over-Year Avg Rate Trend
+              {t('yearOverYearTrend')}
             </h2>
+            <div role="img" aria-label={t('yearOverYearTrend')}>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart
                 data={data.trends}
@@ -701,6 +777,7 @@ export default function AnchorPointInsightsPage() {
                 />
               </LineChart>
             </ResponsiveContainer>
+            </div>
           </Card>
         )}
 
@@ -708,26 +785,26 @@ export default function AnchorPointInsightsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <Card>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              Top Properties by Winter Rate (Within 30 mi)
+              {t('topProperties')}
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Property
+                      {t('property')}
                     </th>
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Source
+                      {t('source')}
                     </th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Dist (mi)
+                      {t('distMi')}
                     </th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Winter Rate
+                      {t('winterRate')}
                     </th>
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Nearest Anchor
+                      {t('nearestAnchor')}
                     </th>
                   </tr>
                 </thead>
@@ -735,12 +812,12 @@ export default function AnchorPointInsightsPage() {
                   {data.property_sample.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
-                        No properties with winter rates within 30 mi
+                        {t('noPropertiesWithin30')}
                       </td>
                     </tr>
                   ) : (
-                    data.property_sample.map((p, i) => (
-                      <tr key={i}>
+                    data.property_sample.map((p) => (
+                      <tr key={`${p.property_name}-${p.source}-${p.distance_miles}-${p.nearest_anchor}`}>
                         <td className="px-3 py-2 font-medium text-gray-800 dark:text-gray-200 truncate max-w-[140px]">
                           {p.property_name}
                         </td>
@@ -766,17 +843,19 @@ export default function AnchorPointInsightsPage() {
 
           <Card>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              {anchorType === 'national-parks' ? 'National Parks' : 'Ski Resorts'} with Properties Within 15 mi
+              {t('anchorsWithProperties', {
+                type: anchorType === 'national-parks' ? t('nationalParks') : t('skiResorts'),
+              })}
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      {anchorType === 'national-parks' ? 'National Park' : 'Ski Resort'}
+                      {anchorType === 'national-parks' ? t('nationalPark') : t('skiResort')}
                     </th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                      Properties (15 mi)
+                      {t('properties15Mi')}
                     </th>
                   </tr>
                 </thead>
@@ -784,7 +863,9 @@ export default function AnchorPointInsightsPage() {
                   {data.anchors_with_property_counts.length === 0 ? (
                     <tr>
                       <td colSpan={2} className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
-                        No {anchorType === 'national-parks' ? 'national parks' : 'ski resorts'} with nearby properties
+                        {t('noAnchorsWithProperties', {
+                          type: anchorType === 'national-parks' ? t('nationalParks').toLowerCase() : t('skiResorts').toLowerCase(),
+                        })}
                       </td>
                     </tr>
                   ) : (

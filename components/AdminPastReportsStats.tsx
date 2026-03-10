@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 
 interface PastReportsStats {
   studies: number;
@@ -10,10 +11,28 @@ interface PastReportsStats {
   states_covered: number;
 }
 
+const STAT_CARDS = [
+  { key: 'studies' as const, label: 'Studies' },
+  { key: 'comparables' as const, label: 'Comparables' },
+  { key: 'unit_records' as const, label: 'Unit Records' },
+  { key: 'states_covered' as const, label: 'States Covered' },
+] as const;
+
+function formatRelativeTime(ms: number): string {
+  if (ms < 60_000) return 'Just now';
+  if (ms < 120_000) return '1 min ago';
+  const mins = Math.floor(ms / 60_000);
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs === 1) return '1 hr ago';
+  return `${hrs} hrs ago`;
+}
+
 export default function AdminPastReportsStats() {
   const [stats, setStats] = useState<PastReportsStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastFetched, setLastFetched] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchStats() {
@@ -37,6 +56,7 @@ export default function AdminPastReportsStats() {
           unit_records: statsData.unit_records ?? 0,
           states_covered: statsData.states_covered ?? 0,
         });
+        setLastFetched(Date.now());
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load stats');
       } finally {
@@ -48,12 +68,20 @@ export default function AdminPastReportsStats() {
 
   if (loading) {
     return (
-      <section className="mb-10 rounded-xl border-2 border-sage-200 dark:border-sage-800 bg-white dark:bg-gray-900 p-5 animate-pulse">
-        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3 mb-4" />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-16 bg-gray-200 dark:bg-gray-600 rounded" />
-          ))}
+      <section
+        className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden"
+        aria-label="Past Reports loading"
+      >
+        <div className="p-6 sm:p-8">
+          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-6 animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse"
+              />
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -61,44 +89,59 @@ export default function AdminPastReportsStats() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 dark:border-red-800 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300">
-        {error}
-      </div>
+      <section
+        className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-6"
+        role="alert"
+      >
+        <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
+      </section>
     );
   }
 
   if (!stats) return null;
 
-  const statCards = [
-    { value: stats.studies, label: 'Studies' },
-    { value: stats.comparables, label: 'Comparables' },
-    { value: stats.unit_records, label: 'Unit Records' },
-    { value: stats.states_covered, label: 'States Covered' },
-  ];
-
   return (
-    <section className="mb-10 rounded-xl border-2 border-sage-200 dark:border-sage-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-      <div className="border-b border-sage-200 dark:border-sage-800 bg-sage-50/80 dark:bg-sage-950/40 px-5 py-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-sage-800 dark:text-sage-200 tracking-tight">
+    <section
+      className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+      aria-labelledby="past-reports-heading"
+    >
+      <div className="p-6 sm:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h2
+            id="past-reports-heading"
+            className="text-lg font-semibold text-gray-900 dark:text-gray-100"
+          >
             Past Reports
           </h2>
-          <Link
-            href="/admin/past-reports"
-            className="text-sm font-medium text-sage-600 dark:text-sage-400 hover:underline"
-          >
-            View all
-          </Link>
+          <div className="flex items-center gap-4">
+            {lastFetched != null && (
+              <span
+                className="text-xs text-gray-500 dark:text-gray-400 tabular-nums"
+                title={`Data fetched ${new Date(lastFetched).toLocaleString()}`}
+              >
+                Updated {formatRelativeTime(Date.now() - lastFetched)}
+              </span>
+            )}
+            <Link
+              href="/admin/past-reports"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md"
+            >
+              View all
+              <ChevronRight className="w-4 h-4" aria-hidden />
+            </Link>
+          </div>
         </div>
-      </div>
-      <div className="p-5">
+
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {statCards.map(({ value, label }) => (
-            <div key={label} className="text-center">
-              <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-                {value.toLocaleString()}
+          {STAT_CARDS.map(({ key, label }) => (
+            <div
+              key={key}
+              className="flex flex-col p-4 sm:p-5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800"
+            >
+              <p className="text-2xl sm:text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
+                {stats[key].toLocaleString()}
               </p>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 {label}
               </p>
             </div>
