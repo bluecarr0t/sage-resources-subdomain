@@ -68,7 +68,9 @@ function buildReportInsertPayload(params: {
     status: 'draft',
     has_docx: true,
     docx_file_path: null,
-    market_type: input.market_type ?? 'outdoor_hospitality',
+    has_xlsx: false,
+    xlsx_file_path: null,
+    market_type: input.market_type ?? 'glamping',
     latitude: enriched.latitude ?? null,
     longitude: enriched.longitude ?? null,
     enrichment_metadata: enriched.enrichment_metadata ?? null,
@@ -157,7 +159,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error:
-            'Study ID must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01)',
+            'Job number must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01)',
         },
         { status: 400 }
       );
@@ -178,7 +180,7 @@ export async function POST(request: NextRequest) {
       parcel_number,
       amenities_description,
       study_id: study_id || generateStudyId(),
-      market_type: market_type || 'outdoor_hospitality',
+      market_type: market_type || 'glamping',
       include_web_research,
     };
 
@@ -214,11 +216,14 @@ export async function POST(request: NextRequest) {
       executive_summary = executive_summary + disclaimer;
     }
 
-    const docxBuffer = await assembleDraftDocx(
-      enriched,
-      { executive_summary, citations, letter_of_transmittal, swot_analysis },
-      { marketType: input.market_type }
-    );
+    const [docxBuffer, xlsxBuffer] = await Promise.all([
+      assembleDraftDocx(
+        enriched,
+        { executive_summary, citations, letter_of_transmittal, swot_analysis },
+        { marketType: input.market_type }
+      ),
+      assembleDraftXlsx(enriched, { marketType: input.market_type }),
+    ]);
 
     const supabaseAdmin = createServerClient();
 
@@ -244,39 +249,56 @@ export async function POST(request: NextRequest) {
     }
 
     const docxStoragePath = `${newReport.id}/report.docx`;
-    const { error: uploadError } = await supabaseAdmin.storage
-      .from(BUCKET_NAME)
-      .upload(docxStoragePath, docxBuffer, {
+    const xlsxStoragePath = `${newReport.id}/template.xlsx`;
+
+    const [docxUpload, xlsxUpload] = await Promise.all([
+      supabaseAdmin.storage.from(BUCKET_NAME).upload(docxStoragePath, docxBuffer, {
         contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         upsert: true,
-      });
+      }),
+      supabaseAdmin.storage.from(BUCKET_NAME).upload(xlsxStoragePath, xlsxBuffer, {
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        upsert: true,
+      }),
+    ]);
 
-    if (uploadError) {
-      console.error('[generate-draft] Storage error:', uploadError);
+    if (docxUpload.error) {
+      console.error('[generate-draft] DOCX storage error:', docxUpload.error);
       await supabaseAdmin.from('reports').delete().eq('id', newReport.id);
       return NextResponse.json(
-        { success: false, error: `Failed to save DOCX: ${uploadError.message}` },
+        { success: false, error: `Failed to save DOCX: ${docxUpload.error.message}` },
         { status: 500 }
       );
     }
 
-    // Update report with docx path; retry once on failure to avoid orphaned records
+    if (xlsxUpload.error) {
+      console.warn('[generate-draft] XLSX storage error (non-fatal):', xlsxUpload.error.message);
+    }
+
+    const updatePayload: Record<string, string | boolean> = {
+      docx_file_path: docxStoragePath,
+    };
+    if (!xlsxUpload.error) {
+      updatePayload.xlsx_file_path = xlsxStoragePath;
+      updatePayload.has_xlsx = true;
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from('reports')
-      .update({ docx_file_path: docxStoragePath })
+      .update(updatePayload)
       .eq('id', newReport.id);
 
     if (updateError) {
-      console.error('[generate-draft] Update docx_file_path error:', updateError);
+      console.error('[generate-draft] Update file paths error:', updateError);
       const { error: retryError } = await supabaseAdmin
         .from('reports')
-        .update({ docx_file_path: docxStoragePath })
+        .update(updatePayload)
         .eq('id', newReport.id);
       if (retryError) {
         console.error('[generate-draft] Retry update failed:', retryError);
         await supabaseAdmin.from('reports').delete().eq('id', newReport.id);
         return NextResponse.json(
-          { success: false, error: 'Failed to link DOCX to report. Please try again.' },
+          { success: false, error: 'Failed to link files to report. Please try again.' },
           { status: 500 }
         );
       }

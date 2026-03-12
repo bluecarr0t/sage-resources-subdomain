@@ -45,6 +45,66 @@ function buildBenchmarksString(enriched: EnrichedInput): string {
   );
 }
 
+function buildDetailedCompsString(enriched: EnrichedInput): string {
+  if (!enriched.nearby_comps?.length) return '';
+
+  const sections: string[] = [];
+
+  const dbComps = enriched.nearby_comps.filter(
+    (c) => !['past_reports', 'tavily_web_research'].includes(c.source_table),
+  );
+  const pastComps = enriched.nearby_comps.filter((c) => c.source_table === 'past_reports');
+  const webComps = enriched.nearby_comps.filter((c) => c.source_table === 'tavily_web_research');
+
+  if (dbComps.length > 0) {
+    sections.push(
+      'Market database comparables (Hipcamp, RoverPass, Campspot, Glamping DB):',
+      ...dbComps.slice(0, 6).map((c) => {
+        const parts = [`  - ${c.property_name} (${c.city}, ${c.state} – ${c.distance_miles} mi)`];
+        if (c.avg_retail_daily_rate) parts.push(`ADR: $${Math.round(c.avg_retail_daily_rate)}`);
+        if (c.property_total_sites) parts.push(`Sites: ${c.property_total_sites}`);
+        if (c.unit_type) parts.push(`Type: ${c.unit_type}`);
+        return parts.join(', ');
+      }),
+    );
+  }
+
+  if (pastComps.length > 0) {
+    sections.push(
+      '',
+      'Comparables from past Sage reports (curated, verified data):',
+      ...pastComps.slice(0, 5).map((c) => {
+        const parts = [`  - ${c.property_name} (${c.state})`];
+        if (c.avg_retail_daily_rate) parts.push(`ADR: $${Math.round(c.avg_retail_daily_rate)}`);
+        if (c.high_rate) parts.push(`Peak: $${Math.round(c.high_rate)}`);
+        if (c.low_rate) parts.push(`Low: $${Math.round(c.low_rate)}`);
+        if (c.low_occupancy || c.peak_occupancy) {
+          parts.push(`Occ: ${c.low_occupancy ?? '?'}%–${c.peak_occupancy ?? '?'}%`);
+        }
+        if (c.property_total_sites) parts.push(`Sites: ${c.property_total_sites}`);
+        if (c.quality_score) parts.push(`Quality: ${c.quality_score}/10`);
+        return parts.join(', ');
+      }),
+    );
+  }
+
+  if (webComps.length > 0) {
+    sections.push(
+      '',
+      'Additional comparables from web research:',
+      ...webComps.slice(0, 4).map((c) => {
+        const parts = [`  - ${c.property_name}`];
+        if (c.city && c.state) parts.push(`(${c.city}, ${c.state})`);
+        if (c.avg_retail_daily_rate) parts.push(`ADR: ~$${Math.round(c.avg_retail_daily_rate)}`);
+        if (c.description) parts.push(`– ${c.description.slice(0, 150)}`);
+        return parts.join(' ');
+      }),
+    );
+  }
+
+  return sections.join('\n');
+}
+
 export async function generateExecutiveSummary(
   enriched: EnrichedInput
 ): Promise<{ executive_summary: string; citations: Citation[] }> {
@@ -76,7 +136,7 @@ Write an Executive Summary section for this feasibility study. Return a JSON obj
 - demand_indicators: One paragraph for Overall Demand Indicators (e.g. "Overall, the demand indicators for the subject are positive...").
 - pro_forma_reference: Brief reference: "The ten-year income and expense projection is as follows:" (tables inserted separately).
 - feasibility_conclusion: Standard conclusion: "Based on the projected income and expenses compared to costs, the project is deemed feasible, with an adequate internal rate of return on equity if the business is sold in Year 10."
-- citations: Array of { claim: string, source: string }. For EVERY numeric claim (ADR, occupancy, population, etc.), add an entry. source must be one of: feasibility_comp_units, county-population, county-gdp, web_research. Every statistic must have a citation. Do not invent numbers.
+- citations: Array of { claim: string, source: string }. For EVERY numeric claim (ADR, occupancy, population, etc.), add an entry. source must be one of: feasibility_comp_units, county-population, county-gdp, past_reports, web_research. Every statistic must have a citation. Do not invent numbers.
 
 Property: ${enriched.property_name}
 Location: ${location}
@@ -93,7 +153,7 @@ ${enriched.census_population != null || enriched.census_median_household_income 
   ? `\nCensus API (ACS 5-Year): ${enriched.census_population != null ? `State population ${enriched.census_population.toLocaleString()}` : ''}${enriched.census_median_household_income != null ? `${enriched.census_population != null ? ', ' : ''}median household income $${enriched.census_median_household_income.toLocaleString()}` : ''}`
   : ''}
 
-${enriched.comparables_summary ? `Sample comparables in this region: ${enriched.comparables_summary}` : ''}
+${buildDetailedCompsString(enriched)}
 ${enriched.web_context ? `\n\nSupplementary web research (use only to support; do not contradict benchmarks):\n${enriched.web_context.slice(0, 4000)}\n` : ''}
 
 Return ONLY valid JSON. No markdown code blocks.`;
@@ -225,7 +285,7 @@ Unit Mix: ${enriched.unit_mix.map(u => u.type + ': ' + u.count).join('; ') || 'N
 Benchmarks:
 ${benchmarksStr}
 
-${enriched.comparables_summary ? `Nearby comparables: ${enriched.comparables_summary}` : ''}
+${buildDetailedCompsString(enriched)}
 
 Write in professional consulting language. Each strength/weakness should be 1-2 sentences. Use the template phrasing patterns like "positive demand indicator", "This is well above average", "robust future demand".`;
 

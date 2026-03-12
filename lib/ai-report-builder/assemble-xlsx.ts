@@ -7,7 +7,7 @@
 import * as XLSX from 'xlsx';
 import { createServerClient } from '@/lib/supabase';
 import { getTemplateKeyForMarketType } from './assemble-docx';
-import type { EnrichedInput } from './types';
+import type { EnrichedInput, ComparableProperty } from './types';
 
 const BUCKET_NAME = 'report-templates';
 const TOT_SHEET_NAME = 'ToT (Intake Form)';
@@ -181,6 +181,124 @@ function writeUnitMix(
   }
 }
 
+const COMPS_SHEET_NAME = 'Comparables';
+
+const COMPS_HEADERS = [
+  '#',
+  'Property Name',
+  'City',
+  'State',
+  'Distance (mi)',
+  'Unit Type',
+  'Total Sites',
+  'Units',
+  'Avg Daily Rate',
+  'High Rate',
+  'Low Rate',
+  'Low Occupancy %',
+  'Peak Occupancy %',
+  'Winter Weekday',
+  'Winter Weekend',
+  'Spring Weekday',
+  'Spring Weekend',
+  'Summer Weekday',
+  'Summer Weekend',
+  'Fall Weekday',
+  'Fall Weekend',
+  'Operating Season',
+  'Quality Score',
+  'Amenities',
+  'Description',
+  'URL',
+  'Source',
+  'Past Report ID',
+];
+
+function sourceLabel(s: string): string {
+  switch (s) {
+    case 'all_glamping_properties': return 'Glamping DB';
+    case 'hipcamp': return 'Hipcamp';
+    case 'all_roverpass_data_new': return 'RoverPass';
+    case 'campspot': return 'Campspot';
+    case 'past_reports': return 'Past Sage Report';
+    case 'tavily_web_research': return 'Web Research';
+    default: return s;
+  }
+}
+
+function writeCompsSheet(wb: XLSX.WorkBook, comps: ComparableProperty[]): void {
+  const rows: (string | number | null)[][] = [COMPS_HEADERS];
+
+  for (let i = 0; i < comps.length; i++) {
+    const c = comps[i];
+    rows.push([
+      i + 1,
+      c.property_name,
+      c.city,
+      c.state,
+      c.distance_miles >= 0 ? c.distance_miles : null,
+      c.unit_type,
+      c.property_total_sites,
+      c.quantity_of_units,
+      c.avg_retail_daily_rate,
+      c.high_rate,
+      c.low_rate,
+      c.low_occupancy ?? null,
+      c.peak_occupancy ?? null,
+      c.seasonal_rates.winter_weekday,
+      c.seasonal_rates.winter_weekend,
+      c.seasonal_rates.spring_weekday,
+      c.seasonal_rates.spring_weekend,
+      c.seasonal_rates.summer_weekday,
+      c.seasonal_rates.summer_weekend,
+      c.seasonal_rates.fall_weekday,
+      c.seasonal_rates.fall_weekend,
+      c.operating_season_months,
+      c.quality_score ?? null,
+      c.amenities ?? null,
+      c.description ? c.description.slice(0, 500) : null,
+      c.url,
+      sourceLabel(c.source_table),
+      c.past_report_study_id ?? null,
+    ]);
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  ws['!cols'] = [
+    { wch: 4 },   // #
+    { wch: 30 },  // Property Name
+    { wch: 18 },  // City
+    { wch: 8 },   // State
+    { wch: 12 },  // Distance
+    { wch: 15 },  // Unit Type
+    { wch: 10 },  // Total Sites
+    { wch: 8 },   // Units
+    { wch: 14 },  // Avg Rate
+    { wch: 10 },  // High
+    { wch: 10 },  // Low
+    { wch: 14 },  // Low Occ %
+    { wch: 14 },  // Peak Occ %
+    { wch: 14 },  // Winter WD
+    { wch: 14 },  // Winter WE
+    { wch: 14 },  // Spring WD
+    { wch: 14 },  // Spring WE
+    { wch: 14 },  // Summer WD
+    { wch: 14 },  // Summer WE
+    { wch: 14 },  // Fall WD
+    { wch: 14 },  // Fall WE
+    { wch: 16 },  // Season
+    { wch: 10 },  // Quality
+    { wch: 30 },  // Amenities
+    { wch: 40 },  // Description
+    { wch: 40 },  // URL
+    { wch: 20 },  // Source
+    { wch: 16 },  // Past Report ID
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, COMPS_SHEET_NAME);
+}
+
 export interface AssembleDraftXlsxOptions {
   marketType?: string | null;
 }
@@ -215,6 +333,10 @@ export async function assembleDraftXlsx(
   }
 
   writeUnitMix(targetSheet, input, templateKey);
+
+  if (input.nearby_comps?.length) {
+    writeCompsSheet(wb, input.nearby_comps);
+  }
 
   const outBuffer = XLSX.write(wb, {
     type: 'buffer',

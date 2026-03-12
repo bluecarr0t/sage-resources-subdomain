@@ -43,9 +43,48 @@ export interface EnrichmentMetadata {
   data_sources: string[];
 }
 
+export interface SeasonalRates {
+  winter_weekday: number | null;
+  winter_weekend: number | null;
+  spring_weekday: number | null;
+  spring_weekend: number | null;
+  summer_weekday: number | null;
+  summer_weekend: number | null;
+  fall_weekday: number | null;
+  fall_weekend: number | null;
+}
+
+export interface ComparableProperty {
+  property_name: string;
+  city: string;
+  state: string;
+  unit_type: string | null;
+  property_total_sites: number | null;
+  quantity_of_units: number | null;
+  avg_retail_daily_rate: number | null;
+  high_rate: number | null;
+  low_rate: number | null;
+  seasonal_rates: SeasonalRates;
+  operating_season_months: string | null;
+  url: string | null;
+  description: string | null;
+  distance_miles: number;
+  source_table: string;
+  /** Amenities list (from past reports or web research) */
+  amenities?: string | null;
+  /** Quality score from past report analysis (0-10) */
+  quality_score?: number | null;
+  /** Study ID linking to the past report this comp came from */
+  past_report_study_id?: string | null;
+  /** Occupancy data from past reports */
+  low_occupancy?: number | null;
+  peak_occupancy?: number | null;
+}
+
 export interface EnrichedInput extends ReportDraftInput {
   benchmarks?: BenchmarkRow[];
   comparables_summary?: string;
+  nearby_comps?: ComparableProperty[];
   latitude?: number;
   longitude?: number;
   web_context?: string;

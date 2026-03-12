@@ -204,7 +204,7 @@ async function main() {
   console.log(`\nParsing ${source.filename}...`);
   const parsed = parseWorkbook(source.buffer, source.filename);
 
-  console.log(`\nStudy ID: ${parsed.study_id}`);
+  console.log(`\nJob Number: ${parsed.study_id}`);
   console.log(`Sheets found: ${parsed.sheets_found.join(', ')}`);
   if (parsed.warnings.length > 0) {
     console.log('Warnings:', parsed.warnings);

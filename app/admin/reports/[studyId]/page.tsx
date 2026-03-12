@@ -63,8 +63,10 @@ interface ReportDetail {
   unit_descriptions: Array<{ type: string; quantity: number | null; description: string | null }> | null;
   key_amenities: string[] | null;
   has_docx: boolean;
+  has_xlsx: boolean;
   has_comparables: boolean;
   docx_file_path: string | null;
+  xlsx_file_path: string | null;
   csv_file_path: string | null;
   comp_count: number | null;
   comp_unit_count: number | null;
@@ -407,8 +409,11 @@ export default function ReportDetailPage() {
               </h1>
               <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {report.study_id && (
-                  <span className="px-2 py-0.5 bg-sage-100 dark:bg-sage-800 text-sage-700 dark:text-sage-300 rounded font-mono text-xs">
-                    {report.study_id}
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="text-gray-500 dark:text-gray-400 text-xs">Job #</span>
+                    <span className="px-2 py-0.5 bg-sage-100 dark:bg-sage-800 text-sage-700 dark:text-sage-300 rounded font-mono text-xs">
+                      {report.study_id}
+                    </span>
                   </span>
                 )}
                 {(report.city || report.state) && (
@@ -505,6 +510,14 @@ export default function ReportDetailPage() {
                     <span>{uploadingDocx ? 'Uploading...' : 'Upload DOCX'}</span>
                   </Button>
                 </>
+              )}
+              {report.has_xlsx && report.xlsx_file_path && (
+                <a href={`/api/admin/reports/study/${report.study_id}/download-xlsx`}>
+                  <Button variant="secondary" size="sm" className="flex flex-col items-start gap-1">
+                    <FileSpreadsheet className="w-4 h-4" />
+                    <span>Download XLSX</span>
+                  </Button>
+                </a>
               )}
               {(report.csv_file_path || report.docx_file_path) && (
                 <Button
@@ -769,7 +782,7 @@ export default function ReportDetailPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600 dark:text-gray-400">XLSX Workbook</span>
-                  {report.csv_file_path ? (
+                  {report.csv_file_path || report.has_xlsx ? (
                     <span className="text-green-600 dark:text-green-400 text-xs font-medium">Uploaded</span>
                   ) : (
                     <span className="text-gray-400 dark:text-gray-500 text-xs">Not uploaded</span>

@@ -3,19 +3,48 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input, Select } from '@/components/ui';
-import { FilePlus, FileSpreadsheet, Loader2, Plus, Trash2, X } from 'lucide-react';
+import { FilePlus, Loader2, Plus, Trash2, X, Clock, CheckCircle2, FileText, FileSpreadsheet } from 'lucide-react';
 import { UNIT_TYPES } from '@/lib/unit-types';
 import { US_STATES, isValidUsZip } from '@/lib/us-states';
 import { REPORT_MARKET_TYPE_OPTIONS, isValidStudyIdFormat } from '@/lib/report-constants';
 import { generateUniqueId } from '@/lib/random-id';
 
-const REQUEST_TIMEOUT_MS = 90_000;
+const REQUEST_TIMEOUT_MS = 180_000;
 
-const PROGRESS_STEPS = [
-  'Enriching data…',
-  'Generating summary…',
-  'Assembling document…',
-] as const;
+interface ProgressStep {
+  label: string;
+  /** Estimated duration in seconds */
+  duration: number;
+}
+
+const PROGRESS_STEPS_BASE: ProgressStep[] = [
+  { label: 'Enriching property data & benchmarks', duration: 8 },
+  { label: 'Fetching comparable properties', duration: 10 },
+  { label: 'Generating executive summary', duration: 15 },
+  { label: 'Generating letter of transmittal', duration: 8 },
+  { label: 'Generating SWOT analysis', duration: 8 },
+  { label: 'Assembling DOCX & XLSX', duration: 6 },
+  { label: 'Uploading to storage', duration: 5 },
+];
+
+const PROGRESS_STEPS_WEB: ProgressStep[] = [
+  { label: 'Enriching property data & benchmarks', duration: 8 },
+  { label: 'Searching web for market context', duration: 12 },
+  { label: 'Researching comparable properties', duration: 15 },
+  { label: 'Querying past Sage reports', duration: 5 },
+  { label: 'Generating executive summary', duration: 15 },
+  { label: 'Generating letter of transmittal', duration: 8 },
+  { label: 'Generating SWOT analysis', duration: 8 },
+  { label: 'Assembling DOCX & XLSX', duration: 6 },
+  { label: 'Uploading to storage', duration: 5 },
+];
+
+function formatElapsed(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+}
 
 interface UnitMixRow {
   id: string;
@@ -38,8 +67,8 @@ export default function CreateReportDraftClient() {
   const [state, setState] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [acres, setAcres] = useState<string>('');
-  const [marketType, setMarketType] = useState('outdoor_hospitality');
-  const [includeWebResearch, setIncludeWebResearch] = useState(false);
+  const [marketType, setMarketType] = useState('glamping');
+  const [includeWebResearch, setIncludeWebResearch] = useState(true);
   const [clientEntity, setClientEntity] = useState('');
   const [clientContactName, setClientContactName] = useState('');
   const [clientAddress, setClientAddress] = useState('');
@@ -48,30 +77,45 @@ export default function CreateReportDraftClient() {
   const [amenitiesDescription, setAmenitiesDescription] = useState('');
   const [studyId, setStudyId] = useState('');
   const [unitMix, setUnitMix] = useState<UnitMixRow[]>([createUnitRow()]);
+  const [addUnitMixLater, setAddUnitMixLater] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [exportingXlsx, setExportingXlsx] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
+  const [elapsedMs, setElapsedMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ message: string; studyId?: string } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const errorRef = useRef<HTMLDivElement>(null);
   const progressStartRef = useRef<number | null>(null);
 
-  // Multi-step progress indicator: cycle steps every 15s
+  const steps = includeWebResearch ? PROGRESS_STEPS_WEB : PROGRESS_STEPS_BASE;
+  const totalEstimatedSec = steps.reduce((sum, s) => sum + s.duration, 0);
+
   useEffect(() => {
     if (!loading) {
       setProgressStep(0);
+      setElapsedMs(0);
       progressStartRef.current = null;
       return;
     }
     progressStartRef.current = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - (progressStartRef.current ?? 0);
-      const step = Math.min(Math.floor(elapsed / 15_000), PROGRESS_STEPS.length - 1);
+      setElapsedMs(elapsed);
+
+      let cumulative = 0;
+      let step = 0;
+      for (let i = 0; i < steps.length; i++) {
+        cumulative += steps[i].duration * 1000;
+        if (elapsed < cumulative) {
+          step = i;
+          break;
+        }
+        step = i;
+      }
       setProgressStep(step);
-    }, 2000);
+    }, 500);
     return () => clearInterval(interval);
-  }, [loading]);
+  }, [loading, steps]);
 
   // Focus error region when error is set (accessibility)
   useEffect(() => {
@@ -107,15 +151,17 @@ export default function CreateReportDraftClient() {
   }, []);
 
   const buildPayload = useCallback(
-    (format: 'docx' | 'xlsx') => {
+    () => {
       const trimmedName = propertyName.trim();
       const trimmedCity = city.trim();
       const trimmedState = state.trim();
       const trimmedZip = zipCode.trim();
       const trimmedStudyId = studyId.trim();
-      const validUnitMix = unitMix
-        .filter((r) => r.type && r.count > 0)
-        .map((r) => ({ type: r.type, count: r.count }));
+      const validUnitMix = addUnitMixLater
+        ? []
+        : unitMix
+            .filter((r) => r.type && r.count > 0)
+            .map((r) => ({ type: r.type, count: r.count }));
       const acresNum = acres ? parseFloat(acres) : undefined;
       return {
         property_name: trimmedName,
@@ -133,8 +179,8 @@ export default function CreateReportDraftClient() {
         amenities_description: amenitiesDescription.trim() || undefined,
         study_id: trimmedStudyId || undefined,
         market_type: marketType,
-        include_web_research: format === 'docx' ? includeWebResearch : false,
-        format,
+        include_web_research: includeWebResearch,
+        format: 'docx',
       };
     },
     [
@@ -145,6 +191,7 @@ export default function CreateReportDraftClient() {
       zipCode,
       acres,
       unitMix,
+      addUnitMixLater,
       clientEntity,
       clientContactName,
       clientAddress,
@@ -175,53 +222,21 @@ export default function CreateReportDraftClient() {
       return 'Acres must be a non-negative number.';
     }
     if (trimmedStudyId && !isValidStudyIdFormat(trimmedStudyId)) {
-      return 'Study ID must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01).';
+      return 'Job number must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01).';
     }
     return null;
   }, [propertyName, city, state, zipCode, acres, studyId]);
 
-  const handleExportXlsx = useCallback(async () => {
-    const err = validateForm();
-    if (err) {
-      setError(err);
-      return;
-    }
-    setError(null);
-    setExportingXlsx(true);
-    try {
-      const payload = buildPayload('xlsx');
-      const res = await fetch('/api/admin/reports/generate-draft', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const data = await res.json();
-          throw new Error(data.error || 'Export failed');
-        }
-        throw new Error(await res.text() || 'Export failed');
-      }
-      const blob = await res.blob();
-      const disposition = res.headers.get('content-disposition');
-      const match = disposition?.match(/filename="?([^";]+)"?/);
-      const filename = match?.[1] ?? 'report-template.xlsx';
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Export failed');
-    } finally {
-      setExportingXlsx(false);
-    }
-  }, [validateForm, buildPayload]);
+  function triggerDownload(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,7 +253,7 @@ export default function CreateReportDraftClient() {
     setLoading(true);
 
     try {
-      const payload = buildPayload('docx');
+      const payload = buildPayload();
       const res = await fetch('/api/admin/reports/generate-draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -260,23 +275,35 @@ export default function CreateReportDraftClient() {
         throw new Error(text || `Request failed (${res.status})`);
       }
 
-      const blob = await res.blob();
+      const docxBlob = await res.blob();
       const disposition = res.headers.get('content-disposition');
       const match = disposition?.match(/filename="?([^";]+)"?/);
-      const filename = match?.[1] ?? 'report-draft.docx';
+      const docxFilename = match?.[1] ?? 'report-draft.docx';
       const studyIdFromHeader = res.headers.get('X-Study-Id');
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      triggerDownload(docxBlob, docxFilename);
+
+      // Download the XLSX file too (generated alongside the DOCX)
+      if (studyIdFromHeader) {
+        try {
+          const xlsxRes = await fetch(
+            `/api/admin/reports/study/${encodeURIComponent(studyIdFromHeader)}/download-xlsx`,
+            { credentials: 'include' },
+          );
+          if (xlsxRes.ok) {
+            const xlsxBlob = await xlsxRes.blob();
+            const xlsxDisp = xlsxRes.headers.get('content-disposition');
+            const xlsxMatch = xlsxDisp?.match(/filename="?([^";]+)"?/);
+            const xlsxFilename = xlsxMatch?.[1] ?? `${studyIdFromHeader}-template.xlsx`;
+            setTimeout(() => triggerDownload(xlsxBlob, xlsxFilename), 500);
+          }
+        } catch {
+          // XLSX download is best-effort; DOCX is the primary output
+        }
+      }
 
       setSuccess({
-        message: 'Report draft generated and downloaded successfully.',
+        message: 'Report draft generated — DOCX and XLSX downloaded.',
         studyId: studyIdFromHeader ?? undefined,
       });
       setError(null);
@@ -298,7 +325,7 @@ export default function CreateReportDraftClient() {
       setSuccess(null);
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
-          setError('Request timed out. Generation can take 30–60 seconds. Please try again.');
+          setError('Request timed out. Generation can take 60–120 seconds with web research. Please try again.');
         } else {
           setError(err.message);
         }
@@ -319,7 +346,7 @@ export default function CreateReportDraftClient() {
         aria-live="polite"
         aria-atomic="true"
       >
-        {loading ? PROGRESS_STEPS[progressStep] : ''}
+        {loading ? steps[progressStep]?.label : ''}
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -329,7 +356,7 @@ export default function CreateReportDraftClient() {
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Enter property details to generate an AI-assisted feasibility study draft. The system
-            will enrich with regional benchmarks and produce a downloadable DOCX.
+            will enrich with regional benchmarks and produce a downloadable DOCX and XLSX.
           </p>
         </div>
 
@@ -434,132 +461,160 @@ export default function CreateReportDraftClient() {
               />
             </div>
 
-            <Input
-              label="Acres"
-              name="acres"
-              type="number"
-              min={0}
-              step={0.1}
-              value={acres}
-              onChange={(e) => setAcres(e.target.value)}
-              placeholder="e.g. 25"
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="Acres"
+                name="acres"
+                type="number"
+                min={0}
+                step={0.1}
+                value={acres}
+                onChange={(e) => setAcres(e.target.value)}
+                placeholder="e.g. 25"
+              />
 
-            <Select
-              label="Market Type"
-              value={marketType}
-              onChange={(e) => setMarketType(e.target.value)}
-            >
-              {REPORT_MARKET_TYPE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </Select>
+              <Select
+                label="Market Type"
+                value={marketType}
+                onChange={(e) => setMarketType(e.target.value)}
+              >
+                {REPORT_MARKET_TYPE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Unit Mix
-                </label>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={addUnitRow}
-                  className="flex items-center gap-1.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add unit type
-                </Button>
+                <div className="flex items-center gap-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Unit Mix
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={addUnitMixLater}
+                      onChange={(e) => setAddUnitMixLater(e.target.checked)}
+                      className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                    />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Add it later
+                    </span>
+                  </label>
+                </div>
+                {!addUnitMixLater && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={addUnitRow}
+                    className="flex items-center gap-1.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add unit type
+                  </Button>
+                )}
               </div>
-              <div className="space-y-3">
-                {unitMix.map((row, idx) => (
-                  <div key={row.id} className="flex gap-3 items-end">
-                    <div className="flex-1 min-w-0">
-                      <Select
-                        id={`unit-type-${row.id}`}
-                        value={row.type}
-                        onChange={(e) => updateUnitRow(row.id, 'type', e.target.value)}
-                        aria-label={`Unit type for row ${idx + 1}`}
-                      >
-                        {UNIT_TYPES.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      </Select>
-                    </div>
-                    <div className="w-24">
-                      <Input
-                        id={`unit-count-${row.id}`}
-                        type="number"
-                        min={0}
-                        value={row.count}
-                        onChange={(e) =>
-                          updateUnitRow(row.id, 'count', parseInt(e.target.value, 10) || 0)
-                        }
-                        placeholder="Count"
-                        aria-label={`Unit count for row ${idx + 1}, ${row.type}`}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => removeUnitRow(row.id)}
-                      disabled={unitMix.length === 1}
-                      aria-label={`Remove row ${idx + 1}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+              {!addUnitMixLater && (
+                <>
+                  <div className="space-y-3">
+                    {unitMix.map((row, idx) => (
+                      <div key={row.id} className="flex gap-3 items-end">
+                        <div className="flex-1 min-w-0">
+                          <Select
+                            id={`unit-type-${row.id}`}
+                            value={row.type}
+                            onChange={(e) => updateUnitRow(row.id, 'type', e.target.value)}
+                            aria-label={`Unit type for row ${idx + 1}`}
+                          >
+                            {UNIT_TYPES.map((t) => (
+                              <option key={t} value={t}>
+                                {t}
+                              </option>
+                            ))}
+                          </Select>
+                        </div>
+                        <div className="w-24">
+                          <Input
+                            id={`unit-count-${row.id}`}
+                            type="number"
+                            min={0}
+                            value={row.count}
+                            onChange={(e) =>
+                              updateUnitRow(row.id, 'count', parseInt(e.target.value, 10) || 0)
+                            }
+                            placeholder="Count"
+                            aria-label={`Unit count for row ${idx + 1}, ${row.type}`}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => removeUnitRow(row.id)}
+                          disabled={unitMix.length === 1}
+                          aria-label={`Remove row ${idx + 1}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Total units: {totalUnits}
-              </p>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Total units: {totalUnits}
+                  </p>
+                </>
+              )}
+              {addUnitMixLater && (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Unit mix will be added later.
+                </p>
+              )}
             </div>
 
-            <Input
-              label="Client Entity"
-              name="client_entity"
-              value={clientEntity}
-              onChange={(e) => setClientEntity(e.target.value)}
-              placeholder="e.g. ABC Development LLC"
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="Client Entity (optional)"
+                name="client_entity"
+                value={clientEntity}
+                onChange={(e) => setClientEntity(e.target.value)}
+                placeholder="e.g. ABC Development LLC"
+              />
 
-            <Input
-              label="Client Contact Name (optional)"
-              name="client_contact_name"
-              value={clientContactName}
-              onChange={(e) => setClientContactName(e.target.value)}
-              placeholder="e.g. Mr. John Smith"
-            />
+              <Input
+                label="Client Contact Name (optional)"
+                name="client_contact_name"
+                value={clientContactName}
+                onChange={(e) => setClientContactName(e.target.value)}
+                placeholder="e.g. Mr. John Smith"
+              />
 
-            <Input
-              label="Client Address (optional)"
-              name="client_address"
-              value={clientAddress}
-              onChange={(e) => setClientAddress(e.target.value)}
-              placeholder="e.g. 123 Main St, Suite 200"
-            />
+              <Input
+                label="Client Address (optional)"
+                name="client_address"
+                value={clientAddress}
+                onChange={(e) => setClientAddress(e.target.value)}
+                placeholder="e.g. 123 Main St, Suite 200"
+              />
 
-            <Input
-              label="Client City, State, ZIP (optional)"
-              name="client_city_state_zip"
-              value={clientCityStateZip}
-              onChange={(e) => setClientCityStateZip(e.target.value)}
-              placeholder="e.g. Chicago, IL 60615"
-            />
+              <Input
+                label="Client City, State, ZIP (optional)"
+                name="client_city_state_zip"
+                value={clientCityStateZip}
+                onChange={(e) => setClientCityStateZip(e.target.value)}
+                placeholder="e.g. Chicago, IL 60615"
+              />
 
-            <Input
-              label="Parcel Number (optional)"
-              name="parcel_number"
-              value={parcelNumber}
-              onChange={(e) => setParcelNumber(e.target.value)}
-              placeholder="e.g. 144 009.00"
-            />
+              <Input
+                label="Parcel Number (optional)"
+                name="parcel_number"
+                value={parcelNumber}
+                onChange={(e) => setParcelNumber(e.target.value)}
+                placeholder="e.g. 144 009.00"
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -576,7 +631,7 @@ export default function CreateReportDraftClient() {
             </div>
 
             <Input
-              label="Study ID (optional)"
+              label="Job Number (Optional)"
               name="study_id"
               value={studyId}
               onChange={(e) => setStudyId(e.target.value)}
@@ -589,7 +644,7 @@ export default function CreateReportDraftClient() {
                 type="checkbox"
                 checked={includeWebResearch}
                 onChange={(e) => setIncludeWebResearch(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                 aria-describedby="include-web-research-description"
               />
               <div>
@@ -604,12 +659,12 @@ export default function CreateReportDraftClient() {
                   className="text-sm text-gray-500 dark:text-gray-400"
                 >
                   Fetch tourism and market context from the web to supplement benchmarks. Adds ~10–20
-                  seconds. Requires TAVILY_API_KEY.
+                  seconds.
                 </p>
               </div>
             </div>
 
-            <div className="pt-4 flex flex-wrap gap-3">
+            <div className="pt-4 space-y-4">
               <Button
                 type="submit"
                 disabled={loading}
@@ -618,7 +673,7 @@ export default function CreateReportDraftClient() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
-                    {PROGRESS_STEPS[progressStep]}
+                    Generating…
                   </>
                 ) : (
                   <>
@@ -627,20 +682,70 @@ export default function CreateReportDraftClient() {
                   </>
                 )}
               </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={loading || exportingXlsx}
-                onClick={handleExportXlsx}
-                className="flex items-center justify-center gap-2"
-              >
-                {exportingXlsx ? (
-                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
-                ) : (
-                  <FileSpreadsheet className="w-5 h-5" aria-hidden />
-                )}
-                {exportingXlsx ? 'Exporting…' : 'Export XLSX'}
-              </Button>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Generates both DOCX report and XLSX workbook for download.
+              </p>
+
+              {loading && (
+                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 space-y-3">
+                  {/* Elapsed / Estimated */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+                      <Clock className="w-4 h-4" aria-hidden />
+                      Elapsed: <span className="font-mono font-medium text-gray-900 dark:text-gray-100">{formatElapsed(elapsedMs)}</span>
+                    </span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      Est. ~{totalEstimatedSec > 60 ? `${Math.ceil(totalEstimatedSec / 60)} min` : `${totalEstimatedSec}s`}
+                    </span>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-blue-500 dark:bg-blue-400 h-2 rounded-full transition-all duration-500 ease-out"
+                      style={{
+                        width: `${Math.min(95, (elapsedMs / (totalEstimatedSec * 1000)) * 100)}%`,
+                      }}
+                    />
+                  </div>
+
+                  {/* Step list */}
+                  <div className="space-y-1.5">
+                    {steps.map((step, i) => {
+                      const isActive = i === progressStep;
+                      const isDone = i < progressStep;
+                      return (
+                        <div
+                          key={i}
+                          className={`flex items-center gap-2 text-xs transition-colors ${
+                            isActive
+                              ? 'text-blue-700 dark:text-blue-300 font-medium'
+                              : isDone
+                              ? 'text-green-600 dark:text-green-400'
+                              : 'text-gray-400 dark:text-gray-500'
+                          }`}
+                        >
+                          {isDone ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                          ) : isActive ? (
+                            <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" />
+                          ) : (
+                            <span className="w-3.5 h-3.5 shrink-0 rounded-full border border-current" />
+                          )}
+                          {step.label}
+                          {isActive && <span className="text-gray-400 dark:text-gray-500 ml-auto">~{step.duration}s</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Output files indicator */}
+                  <div className="pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> DOCX report</span>
+                    <span className="flex items-center gap-1"><FileSpreadsheet className="w-3.5 h-3.5" /> XLSX workbook</span>
+                  </div>
+                </div>
+              )}
             </div>
           </form>
         </Card>

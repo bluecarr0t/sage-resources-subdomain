@@ -361,7 +361,7 @@ export default function UploadComparablesPage() {
                             {qf.file.name}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Study ID: {qf.studyId} &middot; {formatBytes(qf.file.size)}
+                            Job Number: {qf.studyId} &middot; {formatBytes(qf.file.size)}
                           </p>
                         </div>
                       </div>

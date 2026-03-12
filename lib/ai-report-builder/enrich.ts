@@ -1,6 +1,10 @@
 /**
- * Enrich report draft input with DB benchmarks, geocoding, Census/GDP, and optional web research
- * Runs benchmarks, comparables, geocode, county lookups (and optionally Tavily) in parallel for performance
+ * Enrich report draft input with DB benchmarks, geocoding, Census/GDP, web research,
+ * and comparables from all sources (Supabase market tables, past reports, Tavily).
+ *
+ * Phase 1 (parallel): benchmarks, geocoding, county data, Census API, web context,
+ *                      past report comps, Tavily comp research
+ * Phase 2 (sequential, needs geocode): merge all comp sources via fetchNearbyComps
  */
 
 import { createServerClient } from '@/lib/supabase';
@@ -9,7 +13,25 @@ import { normaliseUnitCategory } from '@/lib/csv/feasibility-parser';
 import { fetchCountyLookups } from '@/lib/anchor-point-insights/fetch-county-data';
 import { fetchCensusStateDemographics } from './census-api';
 import { fetchWebContextForReport } from './tavily-context';
-import type { ReportDraftInput, EnrichedInput, BenchmarkRow } from './types';
+import { fetchNearbyComps } from './fetch-comps';
+import { fetchPastReportComps } from './fetch-past-report-comps';
+import { fetchTavilyComps } from './tavily-comp-research';
+import type { ReportDraftInput, EnrichedInput, BenchmarkRow, ComparableProperty } from './types';
+
+function buildComparablesSummary(comps: ComparableProperty[]): string {
+  return comps
+    .slice(0, 8)
+    .map((c) => {
+      const loc = [c.city, c.state].filter(Boolean).join(', ');
+      const dist = c.distance_miles >= 0 ? ` – ${c.distance_miles} mi` : '';
+      const rate = c.avg_retail_daily_rate ? ` $${Math.round(c.avg_retail_daily_rate)}/night` : '';
+      const src = c.source_table === 'past_reports' ? ' [past report]'
+        : c.source_table === 'tavily_web_research' ? ' [web]'
+        : '';
+      return `${c.property_name} (${loc}${dist}${rate})${src}`;
+    })
+    .join('; ');
+}
 
 export async function enrichReportInput(input: ReportDraftInput): Promise<EnrichedInput> {
   const enriched: EnrichedInput = { ...input };
@@ -21,45 +43,52 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
 
   const state = input.state?.trim();
 
-  // Run benchmarks, comparables, geocode, county lookups, optional Census API, and optional web research in parallel
-  const [benchResult, compsResult, coords, countyLookups, censusData, webContext] = await Promise.all([
-    // Benchmarks: aggregate feasibility_comp_units by unit_category
-    unitCategories.length > 0
-      ? supabase
-          .from('feasibility_comp_units')
-          .select('unit_category, low_adr, peak_adr')
-          .in('unit_category', unitCategories)
-          .not('low_adr', 'is', null)
-          .not('peak_adr', 'is', null)
-          .limit(5000)
-      : Promise.resolve({ data: [] }),
-    // Comparables from same state
-    state
-      ? supabase
-          .from('feasibility_comparables')
-          .select('comp_name')
-          .eq('state', state)
-          .not('comp_name', 'is', null)
-          .limit(5)
-      : Promise.resolve({ data: [] }),
-    // Geocode (includes address_1 for better accuracy)
-    geocodeAddress(
-      input.address_1 || '',
-      input.city,
-      input.state,
-      input.zip_code || '',
-      'USA'
-    ),
-    // State-level Census population + BEA GDP (county-population, county-gdp)
-    fetchCountyLookups(supabase),
-    // Optional Census API (fresh ACS data when include_web_research)
-    input.include_web_research && state
-      ? fetchCensusStateDemographics(state)
-      : Promise.resolve({ population: null, median_household_income: null }),
-    // Optional web research via Tavily (tourism, market context)
-    input.include_web_research ? fetchWebContextForReport(input) : Promise.resolve(null),
-  ]);
+  // Phase 1: run all independent data fetches in parallel
+  const [benchResult, coords, countyLookups, censusData, webContext, pastReportComps, tavilyComps] =
+    await Promise.all([
+      // Benchmarks: aggregate feasibility_comp_units by unit_category
+      unitCategories.length > 0
+        ? supabase
+            .from('feasibility_comp_units')
+            .select('unit_category, low_adr, peak_adr')
+            .in('unit_category', unitCategories)
+            .not('low_adr', 'is', null)
+            .not('peak_adr', 'is', null)
+            .limit(5000)
+        : Promise.resolve({ data: [] }),
+      // Geocode
+      geocodeAddress(
+        input.address_1 || '',
+        input.city,
+        input.state,
+        input.zip_code || '',
+        'USA',
+      ),
+      // State-level Census population + BEA GDP
+      fetchCountyLookups(supabase),
+      // Optional Census API (fresh ACS data)
+      input.include_web_research && state
+        ? fetchCensusStateDemographics(state)
+        : Promise.resolve({ population: null, median_household_income: null }),
+      // General web context via Tavily (tourism, market overview)
+      input.include_web_research ? fetchWebContextForReport(input) : Promise.resolve(null),
+      // Past Sage report comps (feasibility_comparables + feasibility_comp_units)
+      state
+        ? fetchPastReportComps(supabase, state, input.market_type, input.study_id).catch((err) => {
+            console.warn('[enrich] Past report comps failed:', err);
+            return [] as ComparableProperty[];
+          })
+        : Promise.resolve([] as ComparableProperty[]),
+      // Tavily comp-specific web research
+      input.include_web_research && state
+        ? fetchTavilyComps(input.city, state, input.market_type).catch((err) => {
+            console.warn('[enrich] Tavily comp research failed:', err);
+            return [] as ComparableProperty[];
+          })
+        : Promise.resolve([] as ComparableProperty[]),
+    ]);
 
+  // Process benchmarks
   const benchData = benchResult.data;
   if (benchData && benchData.length > 0) {
     const byCategory = new Map<string, { low: number[]; peak: number[] }>();
@@ -76,21 +105,41 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
         avg_low_adr: low.length ? low.reduce((a, b) => a + b, 0) / low.length : 0,
         avg_peak_adr: peak.length ? peak.reduce((a, b) => a + b, 0) / peak.length : 0,
         sample_count: Math.max(low.length, peak.length),
-      })
+      }),
     ) as BenchmarkRow[];
   }
 
-  const comps = compsResult.data;
-  if (comps && comps.length > 0) {
-    enriched.comparables_summary = comps
-      .map((c) => c.comp_name)
-      .filter(Boolean)
-      .join(', ');
-  }
-
+  // Phase 2: merge all comp sources (DB tables need geocode for lat/lng)
   if (coords) {
     enriched.latitude = coords.lat;
     enriched.longitude = coords.lng;
+
+    try {
+      const nearbyComps = await fetchNearbyComps(
+        supabase,
+        coords.lat,
+        coords.lng,
+        state ?? '',
+        input.market_type,
+        { pastReportComps, tavilyComps },
+      );
+      if (nearbyComps.length > 0) {
+        enriched.nearby_comps = nearbyComps;
+        enriched.comparables_summary = buildComparablesSummary(nearbyComps);
+      }
+    } catch (err) {
+      console.warn('[enrich] Nearby comps fetch failed:', err);
+      // If DB query fails, still use past reports + Tavily
+      const fallbackComps = [...pastReportComps, ...tavilyComps];
+      if (fallbackComps.length > 0) {
+        enriched.nearby_comps = fallbackComps;
+        enriched.comparables_summary = buildComparablesSummary(fallbackComps);
+      }
+    }
+  } else if (pastReportComps.length > 0 || tavilyComps.length > 0) {
+    // No geocode but still have comps from other sources
+    enriched.nearby_comps = [...pastReportComps, ...tavilyComps];
+    enriched.comparables_summary = buildComparablesSummary(enriched.nearby_comps);
   }
 
   if (webContext) {
@@ -122,13 +171,17 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
     enriched.census_median_household_income = censusData.median_household_income;
   }
 
-  const dataSources: string[] = ['feasibility_comp_units', 'feasibility_comparables', 'geocode'];
+  // Build enrichment metadata with all data sources
+  const dataSources: string[] = ['feasibility_comp_units', 'geocode'];
+  if (enriched.nearby_comps?.length) {
+    const compSources = [...new Set(enriched.nearby_comps.map((c) => c.source_table))];
+    dataSources.push(...compSources);
+  }
   if (state && countyLookups) {
-    dataSources.push('county-population');
-    dataSources.push('county-gdp');
+    dataSources.push('county-population', 'county-gdp');
   }
   if (censusData?.population != null) dataSources.push('census_api');
-  if (webContext) dataSources.push('tavily');
+  if (webContext) dataSources.push('tavily_market_context');
 
   enriched.enrichment_metadata = {
     benchmark_sample_count: enriched.benchmarks?.reduce((sum, b) => sum + b.sample_count, 0) ?? 0,

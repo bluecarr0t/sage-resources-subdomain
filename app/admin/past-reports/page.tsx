@@ -469,7 +469,7 @@ export default function PastReportsPage() {
                           </div>
                           {report.study_id && (
                             <div className="text-xs text-sage-600 dark:text-sage-400 font-mono mt-0.5">
-                              {report.study_id}
+                              Job # {report.study_id}
                             </div>
                           )}
                         </td>

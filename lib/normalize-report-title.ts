@@ -1,6 +1,6 @@
 /**
  * OpenAI-assisted report title normalization.
- * Produces uniform, readable titles like "Property Name - Study ID" or "Study ID".
+ * Produces uniform, readable titles like "Property Name - Job Number" or "Job Number".
  */
 
 import { OpenAI } from 'openai';
@@ -38,12 +38,12 @@ export interface NormalizeReportTitleInput {
   propertyName?: string | null;
   /** Resort name from DOCX parser (alias for propertyName) */
   resortName?: string | null;
-  /** Study ID (e.g. "25-102A-01") */
+  /** Job number (e.g. "25-102A-01") */
   studyId: string;
 }
 
 export interface NormalizeReportTitleResult {
-  /** Clean display title: "Property Name - Study ID" or "Study ID" */
+  /** Clean display title: "Property Name - Job Number" or "Job Number" */
   title: string;
   /** Clean property name for display, or studyId if none */
   propertyName: string;
@@ -124,7 +124,7 @@ export async function normalizeReportTitle(
 The following text was extracted from a document but may be garbage (truncated descriptions, amenity phrases, or random sentence fragments):
 
 Raw text: "${rawName}"
-Study ID: ${studyId}
+Job Number: ${studyId}
 
 Examples of BAD extractions (reject these):
 - "with nearby access to various types of ou" (truncated sentence)
