@@ -6,10 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { geocodeAddress } from '@/lib/geocode';
 import { extractRawContentFromDocx } from '@/lib/parsers/feasibility-docx-parser';
 import { randomUUID } from 'crypto';
@@ -51,20 +49,8 @@ async function extractFromDocx(buffer: Buffer, filename?: string): Promise<{
   return { raw_content, extracted_data };
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withAdminAuth(async (request: NextRequest, auth) => {
   try {
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
-
-
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const property_name = formData.get('property_name') as string;
@@ -172,7 +158,7 @@ export async function POST(request: NextRequest) {
 
     const report_data = {
       id: report_id,
-      user_id: session.user.id,
+      user_id: auth.session.user.id,
       title: title.trim(),
       property_name: property_name.trim(),
       location: location || null,
@@ -226,4 +212,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+}, { requireRole: 'admin' });

@@ -7,30 +7,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-import { createServerClientWithCookies } from '@/lib/supabase-server';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { logAdminAudit } from '@/lib/admin-audit';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ studyId: string }> }
-) {
-  const { studyId } = await params;
+type ParamsContext = { params: Promise<{ studyId: string }> };
+
+export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) => {
+  const { studyId } = await context!.params;
 
   try {
-    const supabase = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
-
-    const { data: report, error: fetchError } = await supabase
+    const { data: report, error: fetchError } = await auth.supabase
       .from('reports')
       .select(`
         *,
@@ -76,30 +62,16 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * PATCH /api/admin/reports/study/[studyId]
  * Update report fields: title, location, report_date, client_entity, market_type, total_sites
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ studyId: string }> }
-) {
-  const { studyId } = await params;
+export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context) => {
+  const { studyId } = await context!.params;
 
   try {
-    const supabase = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
-
     const body = await request.json();
     const updates: Record<string, unknown> = {};
 
@@ -153,7 +125,7 @@ export async function PATCH(
       );
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await auth.supabase
       .from('reports')
       .update(updates)
       .eq('study_id', studyId)
@@ -178,8 +150,8 @@ export async function PATCH(
 
     await logAdminAudit(
       {
-        user_id: session.user.id,
-        user_email: session.user.email ?? undefined,
+        user_id: auth.session.user.id,
+        user_email: auth.session.user.email ?? undefined,
         action: 'edit',
         resource_type: 'report',
         resource_id: data.id,
@@ -198,4 +170,4 @@ export async function PATCH(
       { status: 500 }
     );
   }
-}
+});

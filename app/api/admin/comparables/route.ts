@@ -18,11 +18,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
-import { parsePaginationParams } from '@/lib/validate-pagination';
+import { withAdminAuth } from '@/lib/require-admin-auth';
+import { parsePaginationParams, validateFilterValues, validateSearchTerms } from '@/lib/validate-pagination';
 import { filterValidCompUnits } from '@/lib/feasibility-utils';
 
 const DEFAULT_PER_PAGE = 50;
@@ -51,31 +49,25 @@ const STATE_ALIASES: Record<string, string[]> = Object.fromEntries(
   ])
 );
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (request, _auth) => {
   try {
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
-
+    const supabaseAdmin = createServerClient();
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const stateParam = searchParams.get('state') || '';
     const unitCategoryParam = searchParams.get('unit_category') || '';
-    const states = stateParam
-      .split(',')
-      .map((s) => s.trim().toUpperCase())
-      .filter(Boolean);
-    const unitCategories = unitCategoryParam
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const states = validateFilterValues(
+      stateParam
+        .split(',')
+        .map((s) => s.trim().toUpperCase())
+        .filter(Boolean)
+    );
+    const unitCategories = validateFilterValues(
+      unitCategoryParam
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    );
     const minAdr = searchParams.get('min_adr');
     const maxAdr = searchParams.get('max_adr');
     const sortBy = searchParams.get('sort_by') || 'created_at';
@@ -84,19 +76,19 @@ export async function GET(request: NextRequest) {
       defaultPerPage: DEFAULT_PER_PAGE,
     });
 
-    const supabaseAdmin = createServerClient();
-
     // When filtering by unit_category, ADR, or search, we fetch all rows and filter in app.
     const hasStateFilter = states.length > 0;
     const hasUnitCategoryFilter = unitCategories.length > 0;
     // PostgREST .or() with embedded resources causes 500 errors; keyword search requires
     // array overlap which also fails in or(). App-side filtering is reliable.
     const needsPostFilter = !!(hasUnitCategoryFilter || minAdr || maxAdr || search);
-    const searchTerms = search
-      .trim()
-      .split(/[\s,]+/)
-      .filter(Boolean)
-      .map((t) => t.toLowerCase());
+    const searchTerms = validateSearchTerms(
+      search
+        .trim()
+        .split(/[\s,]+/)
+        .filter(Boolean)
+        .map((t) => t.toLowerCase())
+    );
 
     /** Escape % and _ for use in ilike patterns */
     const escapeIlike = (s: string) => s.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
@@ -443,4 +435,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

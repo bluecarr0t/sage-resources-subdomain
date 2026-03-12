@@ -11,7 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { isManagedUser, isAllowedEmailDomain, getManagedUser } from '@/lib/auth-helpers';
 import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { parseWorkbook } from '@/lib/parsers/feasibility-xlsx-parser';
@@ -228,6 +228,9 @@ export async function POST(request: NextRequest) {
       if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
       const hasAccess = await isManagedUser(session.user.id);
       if (!hasAccess) return forbiddenResponse();
+      // RBAC: only admins can upload comparables via session (internal key used for bulk/CI)
+      const user = await getManagedUser(session.user.id);
+      if (!user || user.role !== 'admin') return forbiddenResponse();
       userId = session.user.id;
       userEmail = session.user.email ?? null;
     }

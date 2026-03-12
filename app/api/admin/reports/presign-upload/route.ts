@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { sanitizeFilename } from '@/lib/sanitize-filename';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,19 +21,8 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: { Allow: 'POST, OPTIONS' } });
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withAdminAuth(async (request: NextRequest) => {
   try {
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
-
     const { files } = (await request.json()) as {
       files: Array<{ name: string; size: number }>;
     };
@@ -99,4 +86,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+}, { requireRole: 'admin' });

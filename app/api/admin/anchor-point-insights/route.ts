@@ -17,10 +17,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { getCache, setCache } from '@/lib/redis';
 import { computeAnchorPointInsights } from '@/lib/anchor-point-insights';
@@ -28,29 +26,21 @@ import { CACHE_TTL_SECONDS } from '@/lib/anchor-point-insights/constants';
 import { parseDistanceBandsParam } from '@/lib/proximity-utils';
 
 const RATE_LIMIT = 30;
+const RATE_LIMIT_PREVIEW = 120; // Higher limit for demo/preview (shared IP testing)
 const RATE_WINDOW_MS = 60 * 1000;
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
+    const isPreview = process.env.VERCEL_ENV === 'preview';
+    const limit = isPreview ? RATE_LIMIT_PREVIEW : RATE_LIMIT;
     const rlKey = `anchor-insights:${getRateLimitKey(request)}`;
-    const { allowed } = await checkRateLimitAsync(rlKey, RATE_LIMIT, RATE_WINDOW_MS);
+    const { allowed } = await checkRateLimitAsync(rlKey, limit, RATE_WINDOW_MS);
     if (!allowed) {
       return NextResponse.json(
         { success: false, message: 'Too many requests. Please try again later.' },
         { status: 429 }
       );
     }
-
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
 
     const { searchParams } = new URL(request.url);
     const stateFilter = searchParams.get('state')?.trim().toUpperCase() || null;
@@ -145,4 +135,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

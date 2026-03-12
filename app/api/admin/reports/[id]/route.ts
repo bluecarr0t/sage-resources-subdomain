@@ -8,46 +8,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-import { createServerClientWithCookies } from '@/lib/supabase-server';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { logAdminAudit } from '@/lib/admin-audit';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 
-async function getAuthContext(request?: NextRequest) {
-  const supabase = await createServerClientWithCookies();
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
+type ParamsContext = { params: Promise<{ id: string }> };
 
-  if (sessionError || !session?.user) {
-    return { response: unauthorizedResponse(), status: 401 };
-  }
-
-  if (!isAllowedEmailDomain(session.user.email)) {
-    return { response: forbiddenResponse(), status: 403 };
-  }
-
-  const hasAccess = await isManagedUser(session.user.id);
-  if (!hasAccess) {
-    return { response: forbiddenResponse(), status: 403 };
-  }
-
-  return { supabase, session, request };
-}
-
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const ctx = await getAuthContext(request);
-  if ('response' in ctx) {
-    return ctx.response;
-  }
-  const { supabase } = ctx;
-
-  const { data, error: fetchError } = await supabase!
+export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) => {
+  const { id } = await context!.params;
+  const { data, error: fetchError } = await auth.supabase
     .from('reports')
     .select('*')
     .eq('id', id)
@@ -62,17 +30,10 @@ export async function GET(
   }
 
   return NextResponse.json({ success: true, report: data });
-}
+});
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const ctx = await getAuthContext(request);
-  if ('response' in ctx) return ctx.response;
-  const { supabase, session } = ctx;
-
+export const PUT = withAdminAuth<ParamsContext>(async (request, auth, context) => {
+  const { id } = await context!.params;
   const body = await request.json();
   const allowedFields = [
     'title', 'property_name', 'location', 'market_type', 'total_sites',
@@ -83,7 +44,7 @@ export async function PUT(
   for (const key of allowedFields) {
     if (key in body) updateData[key] = body[key];
   }
-  const { data, error: updateError } = await supabase!
+  const { data, error: updateError } = await auth.supabase
     .from('reports')
     .update(updateData)
     .eq('id', id)
@@ -100,8 +61,8 @@ export async function PUT(
 
   await logAdminAudit(
     {
-      user_id: session!.user.id,
-      user_email: session!.user.email ?? undefined,
+      user_id: auth.session.user.id,
+      user_email: auth.session.user.email ?? undefined,
       action: 'edit',
       resource_type: 'report',
       resource_id: id,
@@ -113,25 +74,18 @@ export async function PUT(
   );
 
   return NextResponse.json({ success: true, report: data });
-}
+});
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const ctx = await getAuthContext(request);
-  if ('response' in ctx) return ctx.response;
-  const { supabase, session } = ctx;
-
-  const { data: report } = await supabase!
+export const DELETE = withAdminAuth<ParamsContext>(async (request, auth, context) => {
+  const { id } = await context!.params;
+  const { data: report } = await auth.supabase
     .from('reports')
     .select('study_id')
     .eq('id', id)
     .is('deleted_at', null)
     .single();
 
-  const { error: deleteError } = await supabase!
+  const { error: deleteError } = await auth.supabase
     .from('reports')
     .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)
@@ -146,8 +100,8 @@ export async function DELETE(
 
   await logAdminAudit(
     {
-      user_id: session!.user.id,
-      user_email: session!.user.email ?? undefined,
+      user_id: auth.session.user.id,
+      user_email: auth.session.user.email ?? undefined,
       action: 'delete',
       resource_type: 'report',
       resource_id: id,
@@ -158,4 +112,4 @@ export async function DELETE(
   );
 
   return NextResponse.json({ success: true });
-}
+});

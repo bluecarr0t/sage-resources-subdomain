@@ -9,25 +9,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { parsePaginationParams } from '@/lib/validate-pagination';
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
-
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
     const resourceType = searchParams.get('resource_type');
@@ -78,4 +65,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

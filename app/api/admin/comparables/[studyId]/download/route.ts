@@ -9,32 +9,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { logAdminAudit } from '@/lib/admin-audit';
 
 const BUCKET_NAME = 'report-uploads';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ studyId: string }> }
-) {
+type ParamsContext = { params: Promise<{ studyId: string }> };
+
+export const GET = withAdminAuth<ParamsContext>(async (request, auth, context) => {
   try {
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
-
-    const { studyId } = await params;
-
+    const { studyId } = await context!.params;
     const supabaseAdmin = createServerClient();
 
     const { data: report, error: reportError } = await supabaseAdmin
@@ -79,8 +64,8 @@ export async function GET(
 
     await logAdminAudit(
       {
-        user_id: session.user.id,
-        user_email: session.user.email ?? undefined,
+        user_id: auth.session.user.id,
+        user_email: auth.session.user.email ?? undefined,
         action: 'download',
         resource_type: 'study',
         resource_id: report.id,
@@ -106,4 +91,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});

@@ -2,6 +2,9 @@
  * API Route: Bulk upload feasibility reports from local reports/ directory
  * POST /api/admin/reports/bulk-upload
  *
+ * RBAC: Admin-only. Uses x-internal-api-key (server-to-server/CI). The internal key
+ * serves as the admin credential for bulk operations—only deploy keys to admin environments.
+ *
  * Body: { sourceDir?: string; batchIndex?: number }  - subdir (default "2025"), optional batch index for chunked processing
  * Header: x-internal-api-key (required)
  *

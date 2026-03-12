@@ -14,16 +14,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 
 const ANALYTICS_RATE_LIMIT = 60; // requests per window
 const ANALYTICS_RATE_WINDOW_MS = 60 * 1000; // 1 minute
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
     const rlKey = `analytics:${getRateLimitKey(request)}`;
     const { allowed } = await checkRateLimitAsync(rlKey, ANALYTICS_RATE_LIMIT, ANALYTICS_RATE_WINDOW_MS);
@@ -33,17 +31,6 @@ export async function GET(request: NextRequest) {
         { status: 429 }
       );
     }
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
-
     const supabaseAdmin = createServerClient();
 
     // Fetch units for aggregation (bounded to prevent memory exhaustion)
@@ -400,4 +387,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

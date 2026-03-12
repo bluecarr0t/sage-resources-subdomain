@@ -6,32 +6,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-import { createServerClientWithCookies } from '@/lib/supabase-server';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (_request, auth) => {
   try {
-    const supabase = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session?.user) {
-      return unauthorizedResponse();
-    }
-
-    if (!isAllowedEmailDomain(session.user.email)) {
-      return forbiddenResponse();
-    }
-
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) {
-      return forbiddenResponse();
-    }
-
-    const { data, error } = await supabase
+    const { data, error } = await auth.supabase
       .from('reports')
       .select(`
         *,
@@ -90,4 +69,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

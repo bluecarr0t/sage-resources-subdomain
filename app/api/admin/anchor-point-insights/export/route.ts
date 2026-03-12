@@ -11,38 +11,28 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
+import { withAdminAuth } from '@/lib/require-admin-auth';
 import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { exportAnchorPointInsightsRaw } from '@/lib/anchor-point-insights/export';
 import { parseDistanceBandsParam } from '@/lib/proximity-utils';
 
 const RATE_LIMIT = 5;
+const RATE_LIMIT_PREVIEW = 30; // Higher limit for demo/preview
 const RATE_WINDOW_MS = 60 * 1000;
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
+    const isPreview = process.env.VERCEL_ENV === 'preview';
+    const limit = isPreview ? RATE_LIMIT_PREVIEW : RATE_LIMIT;
     const rlKey = `anchor-insights-export:${getRateLimitKey(request)}`;
-    const { allowed } = await checkRateLimitAsync(rlKey, RATE_LIMIT, RATE_WINDOW_MS);
+    const { allowed } = await checkRateLimitAsync(rlKey, limit, RATE_WINDOW_MS);
     if (!allowed) {
       return NextResponse.json(
         { success: false, message: 'Too many export requests. Please try again later.' },
         { status: 429 }
       );
     }
-
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
 
     const { searchParams } = new URL(request.url);
     const stateFilter = searchParams.get('state')?.trim().toUpperCase() || null;
@@ -57,7 +47,7 @@ export async function GET(request: NextRequest) {
     const propertyTypeFilter = (typeParam === 'rv' || typeParam === 'all' ? typeParam : 'glamping') as 'glamping' | 'rv' | 'all';
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const limitParam = parseInt(searchParams.get('limit') || '5000', 10);
-    const limit = Math.min(Math.max(1, limitParam), 10000);
+    const pageLimit = Math.min(Math.max(1, limitParam), 10000);
 
     const supabaseAdmin = createServerClient();
     const result = await exportAnchorPointInsightsRaw(supabaseAdmin, {
@@ -68,7 +58,7 @@ export async function GET(request: NextRequest) {
       propertyTypeFilter,
       distanceBandThresholds: distanceBandThresholds ?? undefined,
       page,
-      limit,
+      limit: pageLimit,
     });
 
     return NextResponse.json({
@@ -86,4 +76,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
