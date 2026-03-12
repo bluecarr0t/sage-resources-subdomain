@@ -41,3 +41,6 @@ next-env.d.ts
 # reports (doc/docx, xlsx/xlsm uploads)
 /reports
 
+# migration export data (large, regeneratable)
+/scripts/migrate-legacy-to-supabase/data/
+

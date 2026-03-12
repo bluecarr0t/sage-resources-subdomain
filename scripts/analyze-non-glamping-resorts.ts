@@ -422,7 +422,7 @@ async function analyzeProperties() {
 
     // Write report to file
     const fs = require('fs');
-    const reportPath = 'docs/NON_GLAMPING_RESORTS_ANALYSIS.md';
+    const reportPath = 'docs/data/NON_GLAMPING_RESORTS_ANALYSIS.md';
     fs.writeFileSync(reportPath, reportLines.join('\n'));
     
     console.log('='.repeat(80));

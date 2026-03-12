@@ -510,6 +510,7 @@
     "exporting": "Exporting...",
     "resetToDefaults": "Reset to defaults",
     "loadPreset": "Load preset",
+    "selectPreset": "Select preset",
     "presetStandard": "Standard RV Park",
     "presetGoldenValley": "Golden Valley AZ",
     "presetBigRig": "Big-Rig Focus",

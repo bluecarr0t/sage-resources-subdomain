@@ -110,7 +110,7 @@ npx tsx scripts/verify-api-key-restrictions.ts
 ### 5. ✅ Updated Documentation
 
 **Files Updated:**
-- `docs/GOOGLE_MAPS_API_KEY_SECURITY.md` - Added verification steps
+- `docs/google/GOOGLE_MAPS_API_KEY_SECURITY.md` - Added verification steps
 - `docs/audit/GOOGLE_API_COMPLIANCE_AUDIT.md` - Updated security status
 
 **Changes:**
@@ -222,7 +222,7 @@ npm run dev
 1. ✅ `components/LocationSearch.tsx` - Added security validation
 2. ✅ `components/GooglePropertyMap.tsx` - Added security validation
 3. ✅ `package.json` - Added `verify:api-key` script
-4. ✅ `docs/GOOGLE_MAPS_API_KEY_SECURITY.md` - Updated with verification steps
+4. ✅ `docs/google/GOOGLE_MAPS_API_KEY_SECURITY.md` - Updated with verification steps
 5. ✅ `docs/audit/GOOGLE_API_COMPLIANCE_AUDIT.md` - Updated security status
 
 ---
@@ -284,7 +284,7 @@ npm run dev
 
 ### Documentation
 - Setup Guide: `docs/audit/API_KEY_SECURITY_SETUP_GUIDE.md`
-- Security Guide: `docs/GOOGLE_MAPS_API_KEY_SECURITY.md`
+- Security Guide: `docs/google/GOOGLE_MAPS_API_KEY_SECURITY.md`
 - Compliance Audit: `docs/audit/GOOGLE_API_COMPLIANCE_AUDIT.md`
 
 ### Tools

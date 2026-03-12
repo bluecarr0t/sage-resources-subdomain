@@ -83,7 +83,7 @@ SUPABASE_SECRET_KEY=sb_secret_your_key_here
 
 If you're using Google Workspace and want team members to sign in with their Google accounts:
 
-👉 **See [SUPABASE_GOOGLE_OAUTH_SETUP.md](./docs/SUPABASE_GOOGLE_OAUTH_SETUP.md) for detailed instructions**
+👉 **See [SUPABASE_GOOGLE_OAUTH_SETUP.md](./docs/admin/SUPABASE_GOOGLE_OAUTH_SETUP.md) for detailed instructions**
 
 This allows users to sign in with a single click using their existing Google accounts, and you can restrict sign-ins to your Google Workspace domain.
 

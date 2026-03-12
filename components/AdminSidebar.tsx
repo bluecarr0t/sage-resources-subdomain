@@ -10,12 +10,10 @@ import {
   Map,
   FileText,
   FilePlus,
-  UploadCloud,
   User,
   LogOut,
   X,
   Menu,
-  Database,
   Globe,
   Sun,
   Moon,
@@ -36,11 +34,9 @@ const LOGO_DARK =
 function getActivePageId(pathname: string): string {
   if (!pathname) return '';
   if (pathname.startsWith('/admin/dashboard')) return 'dashboard';
-  if (pathname.startsWith('/admin/sage-glamping-data-breakdown')) return 'sage-glamping-data-breakdown';
   if (pathname === '/map' || pathname.startsWith('/en/map')) return 'map';
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
-  if (pathname.startsWith('/admin/upload-reports')) return 'upload-reports';
   if (pathname.startsWith('/admin/create-report-draft')) return 'create-report-draft';
   if (pathname.startsWith('/admin/comparables')) return 'comparables';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
@@ -256,14 +252,6 @@ export default function AdminSidebar() {
                   isCollapsed={showCollapsed}
                 />
                 <NavLink
-                  href="/admin/upload-reports"
-                  label="Upload Report"
-                  icon={UploadCloud}
-                  pageId="upload-reports"
-                  isActive={activePageId === 'upload-reports'}
-                  isCollapsed={showCollapsed}
-                />
-                <NavLink
                   href="/admin/create-report-draft"
                   label="Create Report Draft"
                   icon={FilePlus}
@@ -285,14 +273,6 @@ export default function AdminSidebar() {
                   icon={LayoutGrid}
                   pageId="site-design"
                   isActive={activePageId === 'site-design'}
-                  isCollapsed={showCollapsed}
-                />
-                <NavLink
-                  href="/admin/sage-glamping-data-breakdown"
-                  label="Sage Glamping Data"
-                  icon={Database}
-                  pageId="sage-glamping-data-breakdown"
-                  isActive={activePageId === 'sage-glamping-data-breakdown'}
                   isCollapsed={showCollapsed}
                 />
               </div>

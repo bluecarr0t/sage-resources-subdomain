@@ -423,7 +423,7 @@ if (status === google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
 
 **Action Required:**
 - Verify restrictions in Google Cloud Console
-- Reference: `docs/GOOGLE_MAPS_API_KEY_SECURITY.md`
+- Reference: `docs/google/GOOGLE_MAPS_API_KEY_SECURITY.md`
 
 ### 7.2 Server-Side Proxying ✅ **IMPLEMENTED**
 
@@ -481,7 +481,7 @@ if (status === google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
    - Verify only required APIs are enabled
    - Remove any unnecessary API access
 
-**Reference:** `docs/GOOGLE_MAPS_API_KEY_SECURITY.md`
+**Reference:** `docs/google/GOOGLE_MAPS_API_KEY_SECURITY.md`
 
 ### Priority 2: Error Monitoring ⚠️
 
@@ -547,9 +547,9 @@ The application demonstrates **strong compliance** with Google Maps Platform Ter
 
 ### Documentation
 
-- `docs/GOOGLE_API_COMPLIANT_CACHING.md` - Caching implementation details
-- `docs/GOOGLE_API_USAGE_AUDIT.md` - Usage and cost analysis
-- `docs/GOOGLE_MAPS_API_KEY_SECURITY.md` - Security recommendations
+- `docs/google/GOOGLE_API_COMPLIANT_CACHING.md` - Caching implementation details
+- `docs/google/GOOGLE_API_USAGE_AUDIT.md` - Usage and cost analysis
+- `docs/google/GOOGLE_MAPS_API_KEY_SECURITY.md` - Security recommendations
 - `docs/GOOGLE_API_COST_ESTIMATE_100_USERS.md` - Cost projections
 
 ### Code Files

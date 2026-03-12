@@ -85,8 +85,8 @@ export function generateOrganizationSchema() {
 ## Files Created/Modified
 
 ### New Files:
-- ✅ `docs/ROOT_DOMAIN_IMPLEMENTATION_GUIDE.md` - Complete implementation guide
-- ✅ `docs/ROOT_DOMAIN_LINKS_IMPLEMENTATION_SUMMARY.md` - This file
+- ✅ `docs/domain/ROOT_DOMAIN_IMPLEMENTATION_GUIDE.md` - Complete implementation guide
+- ✅ `docs/domain/ROOT_DOMAIN_LINKS_IMPLEMENTATION_SUMMARY.md` - This file
 
 ### Modified Files:
 - ✅ `lib/schema.ts` - Added `generateOrganizationSchema()` function
@@ -119,7 +119,7 @@ export function generateOrganizationSchema() {
 ## Next Steps
 
 1. **Share implementation guide with root domain team**
-   - File: `docs/ROOT_DOMAIN_IMPLEMENTATION_GUIDE.md`
+   - File: `docs/domain/ROOT_DOMAIN_IMPLEMENTATION_GUIDE.md`
    - Contains all code snippets and instructions needed
 
 2. **Root domain team implements:**

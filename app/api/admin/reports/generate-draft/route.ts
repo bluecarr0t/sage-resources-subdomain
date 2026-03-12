@@ -17,7 +17,11 @@ import { isValidStudyIdFormat } from '@/lib/report-constants';
 import {
   enrichReportInput,
   generateExecutiveSummary,
+  generateLetterOfTransmittal,
+  generateSWOTAnalysis,
   assembleDraftDocx,
+  assembleDraftXlsx,
+  factCheckExecutiveSummary,
 } from '@/lib/ai-report-builder';
 import type { ReportDraftInput } from '@/lib/ai-report-builder';
 
@@ -37,7 +41,7 @@ function generateStudyId(): string {
 function buildReportInsertPayload(params: {
   userId: string;
   input: ReportDraftInput;
-  enriched: { latitude?: number; longitude?: number };
+  enriched: { latitude?: number; longitude?: number; enrichment_metadata?: unknown };
   executive_summary: string;
 }) {
   const { userId, input, enriched, executive_summary } = params;
@@ -67,6 +71,7 @@ function buildReportInsertPayload(params: {
     market_type: input.market_type ?? 'outdoor_hospitality',
     latitude: enriched.latitude ?? null,
     longitude: enriched.longitude ?? null,
+    enrichment_metadata: enriched.enrichment_metadata ?? null,
   };
 }
 
@@ -101,8 +106,18 @@ export async function POST(request: NextRequest) {
     const address_1 = typeof raw.address_1 === 'string' ? raw.address_1.trim() : undefined;
     const acres = typeof raw.acres === 'number' ? raw.acres : typeof raw.acres === 'string' ? parseFloat(raw.acres) : undefined;
     const client_entity = typeof raw.client_entity === 'string' ? raw.client_entity.trim() : undefined;
+    const client_contact_name = typeof raw.client_contact_name === 'string' ? raw.client_contact_name.trim() : undefined;
+    const client_address = typeof raw.client_address === 'string' ? raw.client_address.trim() : undefined;
+    const client_city_state_zip = typeof raw.client_city_state_zip === 'string' ? raw.client_city_state_zip.trim() : undefined;
+    const parcel_number = typeof raw.parcel_number === 'string' ? raw.parcel_number.trim() : undefined;
+    const amenities_description = typeof raw.amenities_description === 'string' ? raw.amenities_description.trim() : undefined;
     const study_id = typeof raw.study_id === 'string' ? raw.study_id.trim() || undefined : undefined;
     const market_type = typeof raw.market_type === 'string' ? raw.market_type.trim() : undefined;
+    const format = typeof raw.format === 'string' ? raw.format.trim().toLowerCase() : 'docx';
+    const include_web_research =
+      format === 'docx' && typeof raw.include_web_research === 'boolean'
+        ? raw.include_web_research
+        : false;
 
     let unit_mix: Array<{ type: string; count: number }> = [];
     if (Array.isArray(raw.unit_mix)) {
@@ -157,13 +172,53 @@ export async function POST(request: NextRequest) {
       acres: acresNum,
       unit_mix,
       client_entity,
+      client_contact_name,
+      client_address,
+      client_city_state_zip,
+      parcel_number,
+      amenities_description,
       study_id: study_id || generateStudyId(),
       market_type: market_type || 'outdoor_hospitality',
+      include_web_research,
     };
 
     const enriched = await enrichReportInput(input);
-    const executive_summary = await generateExecutiveSummary(enriched);
-    const docxBuffer = await assembleDraftDocx(enriched, { executive_summary });
+
+    if (format === 'xlsx') {
+      const xlsxBuffer = await assembleDraftXlsx(enriched, { marketType: input.market_type });
+      const filename = `${input.study_id}-template.xlsx`;
+      const blob = new Blob([new Uint8Array(xlsxBuffer)], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      return new NextResponse(blob, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Length': blob.size.toString(),
+        },
+      });
+    }
+
+    const [execSummaryResult, letter_of_transmittal, swot_analysis] = await Promise.all([
+      generateExecutiveSummary(enriched),
+      generateLetterOfTransmittal(enriched),
+      generateSWOTAnalysis(enriched),
+    ]);
+    let executive_summary = execSummaryResult.executive_summary;
+    const citations = execSummaryResult.citations;
+
+    const factCheck = factCheckExecutiveSummary(executive_summary, enriched);
+    if (!factCheck.passed && factCheck.flags.length > 0) {
+      const disclaimer = `\n\n[Note: AI-generated draft. Some figures may require verification: ${factCheck.flags.map((f) => f.claim).join('; ')}.]`;
+      executive_summary = executive_summary + disclaimer;
+    }
+
+    const docxBuffer = await assembleDraftDocx(
+      enriched,
+      { executive_summary, citations, letter_of_transmittal, swot_analysis },
+      { marketType: input.market_type }
+    );
 
     const supabaseAdmin = createServerClient();
 

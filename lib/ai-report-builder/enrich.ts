@@ -1,11 +1,14 @@
 /**
- * Enrich report draft input with DB benchmarks and geocoding
- * Runs benchmarks, comparables, and geocode in parallel for performance
+ * Enrich report draft input with DB benchmarks, geocoding, Census/GDP, and optional web research
+ * Runs benchmarks, comparables, geocode, county lookups (and optionally Tavily) in parallel for performance
  */
 
 import { createServerClient } from '@/lib/supabase';
 import { geocodeAddress } from '@/lib/geocode';
 import { normaliseUnitCategory } from '@/lib/csv/feasibility-parser';
+import { fetchCountyLookups } from '@/lib/anchor-point-insights/fetch-county-data';
+import { fetchCensusStateDemographics } from './census-api';
+import { fetchWebContextForReport } from './tavily-context';
 import type { ReportDraftInput, EnrichedInput, BenchmarkRow } from './types';
 
 export async function enrichReportInput(input: ReportDraftInput): Promise<EnrichedInput> {
@@ -18,8 +21,8 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
 
   const state = input.state?.trim();
 
-  // Run benchmarks, comparables, and geocode in parallel
-  const [benchResult, compsResult, coords] = await Promise.all([
+  // Run benchmarks, comparables, geocode, county lookups, optional Census API, and optional web research in parallel
+  const [benchResult, compsResult, coords, countyLookups, censusData, webContext] = await Promise.all([
     // Benchmarks: aggregate feasibility_comp_units by unit_category
     unitCategories.length > 0
       ? supabase
@@ -47,6 +50,14 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
       input.zip_code || '',
       'USA'
     ),
+    // State-level Census population + BEA GDP (county-population, county-gdp)
+    fetchCountyLookups(supabase),
+    // Optional Census API (fresh ACS data when include_web_research)
+    input.include_web_research && state
+      ? fetchCensusStateDemographics(state)
+      : Promise.resolve({ population: null, median_household_income: null }),
+    // Optional web research via Tavily (tourism, market context)
+    input.include_web_research ? fetchWebContextForReport(input) : Promise.resolve(null),
   ]);
 
   const benchData = benchResult.data;
@@ -81,6 +92,50 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
     enriched.latitude = coords.lat;
     enriched.longitude = coords.lng;
   }
+
+  if (webContext) {
+    enriched.web_context = webContext;
+  }
+
+  if (state && countyLookups) {
+    const stateAbbr = state.toUpperCase().slice(0, 2);
+    const pop = countyLookups.statePopulationLookup[stateAbbr];
+    const gdp = countyLookups.stateGDPLookup[stateAbbr];
+    if (pop) {
+      enriched.population_2010 = pop.population_2010;
+      enriched.population_2020 = pop.population_2020;
+      if (pop.population_2010 > 0) {
+        enriched.population_change_pct =
+          ((pop.population_2020 - pop.population_2010) / pop.population_2010) * 100;
+      }
+    }
+    if (gdp) {
+      enriched.gdp_2022 = gdp.gdp_2022;
+      enriched.gdp_2023 = gdp.gdp_2023;
+    }
+  }
+
+  if (censusData?.population != null) {
+    enriched.census_population = censusData.population;
+  }
+  if (censusData?.median_household_income != null) {
+    enriched.census_median_household_income = censusData.median_household_income;
+  }
+
+  const dataSources: string[] = ['feasibility_comp_units', 'feasibility_comparables', 'geocode'];
+  if (state && countyLookups) {
+    dataSources.push('county-population');
+    dataSources.push('county-gdp');
+  }
+  if (censusData?.population != null) dataSources.push('census_api');
+  if (webContext) dataSources.push('tavily');
+
+  enriched.enrichment_metadata = {
+    benchmark_sample_count: enriched.benchmarks?.reduce((sum, b) => sum + b.sample_count, 0) ?? 0,
+    benchmark_categories: enriched.benchmarks?.map((b) => b.unit_category) ?? [],
+    enrichment_date: new Date().toISOString(),
+    data_sources: dataSources,
+  };
 
   return enriched;
 }

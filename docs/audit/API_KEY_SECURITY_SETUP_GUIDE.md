@@ -398,7 +398,7 @@ curl -X POST \
 - [Google Maps Platform API Key Best Practices](https://developers.google.com/maps/api-security-best-practices)
 - [Restricting API Keys](https://cloud.google.com/docs/authentication/api-keys#restricting_keys)
 - [API Key Security Guide](https://cloud.google.com/docs/authentication/api-keys#securing_api_keys)
-- Project Documentation: `docs/GOOGLE_MAPS_API_KEY_SECURITY.md`
+- Project Documentation: `docs/google/GOOGLE_MAPS_API_KEY_SECURITY.md`
 - Compliance Audit: `docs/audit/GOOGLE_API_COMPLIANCE_AUDIT.md`
 
 ---

@@ -165,9 +165,9 @@ To see the total count of property pages, check:
 
     // Write to file
     const fs = await import('fs/promises');
-    await fs.writeFile('docs/PROPERTY_PAGES_EXAMPLES.md', docContent, 'utf-8');
+    await fs.writeFile('docs/content/PROPERTY_PAGES_EXAMPLES.md', docContent, 'utf-8');
     
-    console.log('✅ Documentation file generated: docs/PROPERTY_PAGES_EXAMPLES.md');
+    console.log('✅ Documentation file generated: docs/content/PROPERTY_PAGES_EXAMPLES.md');
     console.log(`📄 Listed ${selectedProperties.length} example property pages`);
     
   } catch (error) {

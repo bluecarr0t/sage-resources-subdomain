@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input, Select } from '@/components/ui';
-import { FilePlus, Loader2, Plus, Trash2, X } from 'lucide-react';
+import { FilePlus, FileSpreadsheet, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { UNIT_TYPES } from '@/lib/unit-types';
 import { US_STATES, isValidUsZip } from '@/lib/us-states';
 import { REPORT_MARKET_TYPE_OPTIONS, isValidStudyIdFormat } from '@/lib/report-constants';
@@ -39,10 +39,17 @@ export default function CreateReportDraftClient() {
   const [zipCode, setZipCode] = useState('');
   const [acres, setAcres] = useState<string>('');
   const [marketType, setMarketType] = useState('outdoor_hospitality');
+  const [includeWebResearch, setIncludeWebResearch] = useState(false);
   const [clientEntity, setClientEntity] = useState('');
+  const [clientContactName, setClientContactName] = useState('');
+  const [clientAddress, setClientAddress] = useState('');
+  const [clientCityStateZip, setClientCityStateZip] = useState('');
+  const [parcelNumber, setParcelNumber] = useState('');
+  const [amenitiesDescription, setAmenitiesDescription] = useState('');
   const [studyId, setStudyId] = useState('');
   const [unitMix, setUnitMix] = useState<UnitMixRow[]>([createUnitRow()]);
   const [loading, setLoading] = useState(false);
+  const [exportingXlsx, setExportingXlsx] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ message: string; studyId?: string } | null>(null);
@@ -99,10 +106,58 @@ export default function CreateReportDraftClient() {
     );
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const buildPayload = useCallback(
+    (format: 'docx' | 'xlsx') => {
+      const trimmedName = propertyName.trim();
+      const trimmedCity = city.trim();
+      const trimmedState = state.trim();
+      const trimmedZip = zipCode.trim();
+      const trimmedStudyId = studyId.trim();
+      const validUnitMix = unitMix
+        .filter((r) => r.type && r.count > 0)
+        .map((r) => ({ type: r.type, count: r.count }));
+      const acresNum = acres ? parseFloat(acres) : undefined;
+      return {
+        property_name: trimmedName,
+        address_1: address1.trim() || undefined,
+        city: trimmedCity,
+        state: trimmedState,
+        zip_code: trimmedZip || undefined,
+        acres: acresNum,
+        unit_mix: validUnitMix,
+        client_entity: clientEntity.trim() || undefined,
+        client_contact_name: clientContactName.trim() || undefined,
+        client_address: clientAddress.trim() || undefined,
+        client_city_state_zip: clientCityStateZip.trim() || undefined,
+        parcel_number: parcelNumber.trim() || undefined,
+        amenities_description: amenitiesDescription.trim() || undefined,
+        study_id: trimmedStudyId || undefined,
+        market_type: marketType,
+        include_web_research: format === 'docx' ? includeWebResearch : false,
+        format,
+      };
+    },
+    [
+      propertyName,
+      address1,
+      city,
+      state,
+      zipCode,
+      acres,
+      unitMix,
+      clientEntity,
+      clientContactName,
+      clientAddress,
+      clientCityStateZip,
+      parcelNumber,
+      amenitiesDescription,
+      studyId,
+      marketType,
+      includeWebResearch,
+    ]
+  );
 
+  const validateForm = useCallback((): string | null => {
     const trimmedName = propertyName.trim();
     const trimmedCity = city.trim();
     const trimmedState = state.trim();
@@ -110,54 +165,86 @@ export default function CreateReportDraftClient() {
     const trimmedStudyId = studyId.trim();
 
     if (!trimmedName || !trimmedCity || !trimmedState) {
-      setError('Property name, city, and state are required.');
-      return;
+      return 'Property name, city, and state are required.';
     }
-
     if (trimmedZip && !isValidUsZip(trimmedZip)) {
-      setError('ZIP code must be 5 digits or 5+4 format (e.g. 12345 or 12345-6789).');
-      return;
+      return 'ZIP code must be 5 digits or 5+4 format (e.g. 12345 or 12345-6789).';
     }
-
     const acresNum = acres ? parseFloat(acres) : undefined;
     if (acresNum != null && (Number.isNaN(acresNum) || acresNum < 0)) {
-      setError('Acres must be a non-negative number.');
-      return;
+      return 'Acres must be a non-negative number.';
     }
-
     if (trimmedStudyId && !isValidStudyIdFormat(trimmedStudyId)) {
-      setError(
-        'Study ID must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01).'
-      );
+      return 'Study ID must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01).';
+    }
+    return null;
+  }, [propertyName, city, state, zipCode, acres, studyId]);
+
+  const handleExportXlsx = useCallback(async () => {
+    const err = validateForm();
+    if (err) {
+      setError(err);
       return;
     }
+    setError(null);
+    setExportingXlsx(true);
+    try {
+      const payload = buildPayload('xlsx');
+      const res = await fetch('/api/admin/reports/generate-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          throw new Error(data.error || 'Export failed');
+        }
+        throw new Error(await res.text() || 'Export failed');
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get('content-disposition');
+      const match = disposition?.match(/filename="?([^";]+)"?/);
+      const filename = match?.[1] ?? 'report-template.xlsx';
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Export failed');
+    } finally {
+      setExportingXlsx(false);
+    }
+  }, [validateForm, buildPayload]);
 
-    const validUnitMix = unitMix
-      .filter((r) => r.type && r.count > 0)
-      .map((r) => ({ type: r.type, count: r.count }));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const err = validateForm();
+    if (err) {
+      setError(err);
+      return;
+    }
 
     abortRef.current = new AbortController();
     const timeoutId = setTimeout(() => abortRef.current?.abort(), REQUEST_TIMEOUT_MS);
     setLoading(true);
 
     try {
+      const payload = buildPayload('docx');
       const res = await fetch('/api/admin/reports/generate-draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         signal: abortRef.current.signal,
-        body: JSON.stringify({
-          property_name: trimmedName,
-          address_1: address1.trim() || undefined,
-          city: trimmedCity,
-          state: trimmedState,
-          zip_code: trimmedZip || undefined,
-          acres: acresNum,
-          unit_mix: validUnitMix,
-          client_entity: clientEntity.trim() || undefined,
-          study_id: trimmedStudyId || undefined,
-          market_type: marketType,
-        }),
+        body: JSON.stringify(payload),
       });
 
       clearTimeout(timeoutId);
@@ -200,6 +287,11 @@ export default function CreateReportDraftClient() {
       setZipCode('');
       setAcres('');
       setClientEntity('');
+      setClientContactName('');
+      setClientAddress('');
+      setClientCityStateZip('');
+      setParcelNumber('');
+      setAmenitiesDescription('');
       setStudyId('');
       setUnitMix([createUnitRow()]);
     } catch (err) {
@@ -438,6 +530,52 @@ export default function CreateReportDraftClient() {
             />
 
             <Input
+              label="Client Contact Name (optional)"
+              name="client_contact_name"
+              value={clientContactName}
+              onChange={(e) => setClientContactName(e.target.value)}
+              placeholder="e.g. Mr. John Smith"
+            />
+
+            <Input
+              label="Client Address (optional)"
+              name="client_address"
+              value={clientAddress}
+              onChange={(e) => setClientAddress(e.target.value)}
+              placeholder="e.g. 123 Main St, Suite 200"
+            />
+
+            <Input
+              label="Client City, State, ZIP (optional)"
+              name="client_city_state_zip"
+              value={clientCityStateZip}
+              onChange={(e) => setClientCityStateZip(e.target.value)}
+              placeholder="e.g. Chicago, IL 60615"
+            />
+
+            <Input
+              label="Parcel Number (optional)"
+              name="parcel_number"
+              value={parcelNumber}
+              onChange={(e) => setParcelNumber(e.target.value)}
+              placeholder="e.g. 144 009.00"
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Amenities Description (optional)
+              </label>
+              <textarea
+                name="amenities_description"
+                value={amenitiesDescription}
+                onChange={(e) => setAmenitiesDescription(e.target.value)}
+                placeholder="e.g. clubhouse, general store, pool, hiking trails"
+                rows={3}
+                className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
+              />
+            </div>
+
+            <Input
               label="Study ID (optional)"
               name="study_id"
               value={studyId}
@@ -445,11 +583,37 @@ export default function CreateReportDraftClient() {
               placeholder="e.g. 25-100A-01 (leave blank to auto-generate DRAFT-YYYYMMDD-xxxx)"
             />
 
-            <div className="pt-4">
+            <div className="flex items-start gap-3">
+              <input
+                id="include-web-research"
+                type="checkbox"
+                checked={includeWebResearch}
+                onChange={(e) => setIncludeWebResearch(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                aria-describedby="include-web-research-description"
+              />
+              <div>
+                <label
+                  htmlFor="include-web-research"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Include web research
+                </label>
+                <p
+                  id="include-web-research-description"
+                  className="text-sm text-gray-500 dark:text-gray-400"
+                >
+                  Fetch tourism and market context from the web to supplement benchmarks. Adds ~10–20
+                  seconds. Requires TAVILY_API_KEY.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 flex flex-wrap gap-3">
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto flex items-center justify-center gap-2"
+                className="flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -462,6 +626,20 @@ export default function CreateReportDraftClient() {
                     Generate Draft
                   </>
                 )}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={loading || exportingXlsx}
+                onClick={handleExportXlsx}
+                className="flex items-center justify-center gap-2"
+              >
+                {exportingXlsx ? (
+                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
+                ) : (
+                  <FileSpreadsheet className="w-5 h-5" aria-hidden />
+                )}
+                {exportingXlsx ? 'Exporting…' : 'Export XLSX'}
               </Button>
             </div>
           </form>

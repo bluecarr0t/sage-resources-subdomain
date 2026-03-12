@@ -8,11 +8,6 @@ import { LayoutGrid, Plus, Trash2, RotateCcw, Download, FileText } from 'lucide-
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { STATE_ABBREVIATIONS } from '@/components/map/utils/stateUtils';
-
-const US_STATE_CODES = Object.keys(STATE_ABBREVIATIONS).filter(
-  (code) => !['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'].includes(code)
-);
 
 const SQFT_PER_ACRE = 43_560;
 
@@ -318,9 +313,6 @@ export default function SiteDesignClient() {
   );
   const [activePreset, setActivePreset] = useState<keyof typeof PRESETS | ''>('standard');
   const [exporting, setExporting] = useState(false);
-  const [campspotState, setCampspotState] = useState<string>('');
-  const [campspotLoading, setCampspotLoading] = useState(false);
-  const [campspotMessage, setCampspotMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const results = useMemo(
     () =>
@@ -548,55 +540,6 @@ export default function SiteDesignClient() {
     activePreset,
   ]);
 
-  const handleApplyCampspot = useCallback(async () => {
-    setCampspotLoading(true);
-    setCampspotMessage(null);
-    try {
-      const params = new URLSearchParams();
-      if (campspotState?.trim()) params.set('state', campspotState.trim().toUpperCase());
-      const res = await fetch(`/api/admin/site-design/campspot-premiums?${params}`);
-      const json = await res.json();
-      if (!json.success || (!json.pullThru?.count && !json.backIn?.count)) {
-        setCampspotMessage({ type: 'error', text: t('campspotNoData') });
-        return;
-      }
-      const isPullThru = (name: string) =>
-        /pull/i.test(name) || /pull-thru/i.test(name) || /pullthrough/i.test(name);
-      setSiteTypes((prev) =>
-        prev.map((st) => {
-          if (isPullThru(st.name) && json.pullThru?.count > 0) {
-            return {
-              ...st,
-              adr: Math.round(json.pullThru.adr),
-              occupancy: Math.round(json.pullThru.occupancy),
-            };
-          }
-          if (!isPullThru(st.name) && json.backIn?.count > 0) {
-            return {
-              ...st,
-              adr: Math.round(json.backIn.adr),
-              occupancy: Math.round(json.backIn.occupancy),
-            };
-          }
-          return st;
-        })
-      );
-      setActivePreset('');
-      const stateLabel = campspotState?.trim()
-        ? STATE_ABBREVIATIONS[campspotState.trim().toUpperCase()] || campspotState.trim()
-        : 'all states';
-      setCampspotMessage({
-        type: 'success',
-        text: t('campspotApplied', { state: stateLabel }),
-      });
-      setTimeout(() => setCampspotMessage(null), 4000);
-    } catch {
-      setCampspotMessage({ type: 'error', text: t('campspotError') });
-    } finally {
-      setCampspotLoading(false);
-    }
-  }, [campspotState, t]);
-
   const handleExport = useCallback(async () => {
     setExporting(true);
     try {
@@ -707,9 +650,9 @@ export default function SiteDesignClient() {
                   else setActivePreset('');
                 }}
                 className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
-                aria-label={t('loadPreset')}
+                aria-label={t('selectPreset')}
               >
-                <option value="">{t('loadPreset')}</option>
+                <option value="">{t('selectPreset')}</option>
                 <option value="standard">{t('presetStandard')}</option>
                 <option value="goldenValley">{t('presetGoldenValley')}</option>
                 <option value="bigRig">{t('presetBigRig')}</option>
@@ -738,7 +681,7 @@ export default function SiteDesignClient() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {t('parcelAndRoad')}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-2xl">
               <Input
                 type="number"
                 label={t('grossAcreage')}
@@ -844,41 +787,6 @@ export default function SiteDesignClient() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 pt-4">
               {t('siteTypes')}
             </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                value={campspotState}
-                onChange={(e) => setCampspotState(e.target.value)}
-                className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
-                aria-label={t('campspotState')}
-              >
-                <option value="">{t('campspotState')}</option>
-                {US_STATE_CODES.map((code) => (
-                  <option key={code} value={code}>
-                    {code} – {STATE_ABBREVIATIONS[code]}
-                  </option>
-                ))}
-              </select>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleApplyCampspot}
-                disabled={campspotLoading}
-              >
-                {campspotLoading ? '...' : t('applyCampspotData')}
-              </Button>
-            </div>
-            {campspotMessage && (
-              <div
-                role="status"
-                className={`text-sm px-3 py-2 rounded-lg ${
-                  campspotMessage.type === 'success'
-                    ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200'
-                    : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'
-                }`}
-              >
-                {campspotMessage.text}
-              </div>
-            )}
             <div className="space-y-4">
               {siteTypes.map((st) => (
                 <div

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import AdminColumnsView from '@/components/AdminColumnsView';
+import AdminDiscoveryPipelineStats from '@/components/AdminDiscoveryPipelineStats';
 import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
 import AdminMissingFieldsBreakdown from '@/components/AdminMissingFieldsBreakdown';
 
@@ -23,6 +24,10 @@ export default function SageGlampingDataBreakdownPage() {
         </div>
 
         <AdminGlampingMetrics />
+
+        <div className="mt-8">
+          <AdminDiscoveryPipelineStats />
+        </div>
 
         <div className="mt-8 mb-8">
           <AdminMissingFieldsBreakdown />
