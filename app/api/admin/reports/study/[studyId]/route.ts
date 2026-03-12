@@ -28,6 +28,8 @@ export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) 
       `)
       .eq('study_id', studyId)
       .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (fetchError) {
@@ -125,26 +127,34 @@ export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context)
       );
     }
 
+    const { data: existing } = await auth.supabase
+      .from('reports')
+      .select('id')
+      .eq('study_id', studyId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, error: 'Report not found' },
+        { status: 404 }
+      );
+    }
+
     const { data, error } = await auth.supabase
       .from('reports')
       .update(updates)
-      .eq('study_id', studyId)
-      .is('deleted_at', null)
+      .eq('id', existing.id)
       .select()
-      .maybeSingle();
+      .single();
 
     if (error) {
       console.error('[reports/study] PATCH error:', error);
       return NextResponse.json(
         { success: false, error: 'Failed to update report' },
         { status: 500 }
-      );
-    }
-
-    if (!data) {
-      return NextResponse.json(
-        { success: false, error: 'Report not found' },
-        { status: 404 }
       );
     }
 

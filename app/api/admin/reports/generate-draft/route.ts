@@ -19,6 +19,7 @@ import {
   generateExecutiveSummary,
   generateLetterOfTransmittal,
   generateSWOTAnalysis,
+  generateSiteAnalysis,
   assembleDraftDocx,
   assembleDraftXlsx,
   factCheckExecutiveSummary,
@@ -71,6 +72,7 @@ function buildReportInsertPayload(params: {
     has_xlsx: false,
     xlsx_file_path: null,
     market_type: input.market_type ?? 'glamping',
+    service: input.service ?? null,
     latitude: enriched.latitude ?? null,
     longitude: enriched.longitude ?? null,
     enrichment_metadata: enriched.enrichment_metadata ?? null,
@@ -115,6 +117,7 @@ export async function POST(request: NextRequest) {
     const amenities_description = typeof raw.amenities_description === 'string' ? raw.amenities_description.trim() : undefined;
     const study_id = typeof raw.study_id === 'string' ? raw.study_id.trim() || undefined : undefined;
     const market_type = typeof raw.market_type === 'string' ? raw.market_type.trim() : undefined;
+    const service = typeof raw.service === 'string' ? raw.service.trim() || undefined : undefined;
     const format = typeof raw.format === 'string' ? raw.format.trim().toLowerCase() : 'docx';
     const include_web_research =
       format === 'docx' && typeof raw.include_web_research === 'boolean'
@@ -182,6 +185,7 @@ export async function POST(request: NextRequest) {
       study_id: study_id || generateStudyId(),
       market_type: market_type || 'glamping',
       include_web_research,
+      service,
     };
 
     const enriched = await enrichReportInput(input);
@@ -202,10 +206,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const [execSummaryResult, letter_of_transmittal, swot_analysis] = await Promise.all([
+    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis] = await Promise.all([
       generateExecutiveSummary(enriched),
       generateLetterOfTransmittal(enriched),
       generateSWOTAnalysis(enriched),
+      generateSiteAnalysis(enriched),
     ]);
     let executive_summary = execSummaryResult.executive_summary;
     const citations = execSummaryResult.citations;
@@ -219,7 +224,7 @@ export async function POST(request: NextRequest) {
     const [docxBuffer, xlsxBuffer] = await Promise.all([
       assembleDraftDocx(
         enriched,
-        { executive_summary, citations, letter_of_transmittal, swot_analysis },
+        { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis },
         { marketType: input.market_type }
       ),
       assembleDraftXlsx(enriched, { marketType: input.market_type }),

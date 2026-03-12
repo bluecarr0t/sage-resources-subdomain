@@ -270,25 +270,25 @@ export default function ReportDetailPage() {
     }
   };
 
-  const handleReExtract = async () => {
-    if (!hasAnyFile || !studyId) return;
+  const handleRegenerate = async () => {
+    if (!studyId) return;
     setReExtracting(true);
     setError(null);
     setReExtractSuccess(false);
     try {
-      const res = await fetch(`/api/admin/comparables/${studyId}/re-extract`, {
+      const res = await fetch(`/api/admin/reports/study/${studyId}/regenerate`, {
         method: 'POST',
       });
       const data = await res.json();
       if (!data.success) {
-        setError(data.message || 'Re-extraction failed');
+        setError(data.error || 'Regeneration failed');
         return;
       }
       await loadReport();
       setReExtractSuccess(true);
       setTimeout(() => setReExtractSuccess(false), 4000);
     } catch {
-      setError('Re-extraction failed');
+      setError('Regeneration failed');
     } finally {
       setReExtracting(false);
     }
@@ -392,7 +392,7 @@ export default function ReportDetailPage() {
           <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-2">
             <CheckCircle className="w-5 h-5 flex-shrink-0" />
             <span>
-              {uploadDocxSuccess ? 'DOCX uploaded successfully. Download DOCX should now work.' : uploadXlsxSuccess ? 'XLSX uploaded successfully. Download XLSX should now work.' : 'Re-extraction completed successfully. Data has been refreshed.'}
+              {uploadDocxSuccess ? 'DOCX uploaded successfully. Download DOCX should now work.' : uploadXlsxSuccess ? 'XLSX uploaded successfully. Download XLSX should now work.' : 'Report regenerated successfully. DOCX and XLSX have been updated.'}
             </span>
           </div>
         )}
@@ -519,22 +519,20 @@ export default function ReportDetailPage() {
                   </Button>
                 </a>
               )}
-              {(report.csv_file_path || report.docx_file_path) && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleReExtract}
-                  disabled={reExtracting}
-                  className="flex flex-col items-start gap-1"
-                >
-                  {reExtracting ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4" />
-                  )}
-                  <span>{reExtracting ? 'Re-extracting...' : 'Re-extract'}</span>
-                </Button>
-              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleRegenerate}
+                disabled={reExtracting}
+                className="flex flex-col items-start gap-1"
+              >
+                {reExtracting ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                <span>{reExtracting ? 'Re-generating...' : 'Re-generate'}</span>
+              </Button>
               <Button
                 variant="secondary"
                 size="sm"

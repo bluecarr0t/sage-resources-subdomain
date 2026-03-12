@@ -37,7 +37,7 @@ function getActivePageId(pathname: string): string {
   if (pathname === '/map' || pathname.startsWith('/en/map')) return 'map';
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
-  if (pathname.startsWith('/admin/create-report-draft')) return 'create-report-draft';
+  if (pathname.startsWith('/admin/report-builder')) return 'report-builder';
   if (pathname.startsWith('/admin/comparables')) return 'comparables';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/site-design')) return 'site-design';
@@ -252,11 +252,11 @@ export default function AdminSidebar() {
                   isCollapsed={showCollapsed}
                 />
                 <NavLink
-                  href="/admin/create-report-draft"
-                  label="Create Report Draft"
+                  href="/admin/report-builder"
+                  label="Report Builder"
                   icon={FilePlus}
-                  pageId="create-report-draft"
-                  isActive={activePageId === 'create-report-draft'}
+                  pageId="report-builder"
+                  isActive={activePageId === 'report-builder'}
                   isCollapsed={showCollapsed}
                 />
                 <NavLink

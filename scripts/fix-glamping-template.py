@@ -76,13 +76,26 @@ def find_paragraph_containing(body, substring):
     return None
 
 
-def find_section_content_range(body, heading_text, next_section_indicators):
+def find_section_content_range(body, heading_text, next_section_indicators, start_after_text=None):
     """Find paragraphs between a heading and the next section.
-    Returns (heading_para, [content_paras_to_replace])."""
+    Returns (heading_para, [content_paras_to_replace]).
+
+    start_after_text: optional anchor paragraph text that must appear before heading.
+    This avoids matching similarly named entries in the Table of Contents.
+    """
     all_paras = list(body.findall(f'{W}p'))
     heading_idx = None
+    start_idx = 0
 
-    for i, p in enumerate(all_paras):
+    if start_after_text:
+        for i, p in enumerate(all_paras):
+            text = get_paragraph_text(p).strip()
+            if text == start_after_text:
+                start_idx = i + 1
+                break
+
+    for i in range(start_idx, len(all_paras)):
+        p = all_paras[i]
         text = get_paragraph_text(p).strip()
         if text == heading_text:
             heading_idx = i
@@ -107,7 +120,7 @@ def find_section_content_range(body, heading_text, next_section_indicators):
     return all_paras[heading_idx], content_paras
 
 
-def insert_paragraph_after(body, ref_para, text, style_id=None):
+def insert_paragraph_after(body, ref_para, text, style_id='Normal'):
     """Insert a new paragraph with given text after ref_para."""
     new_p = etree.Element(f'{W}p')
 
@@ -206,7 +219,8 @@ def fix_template(doc_xml_path):
     exec_heading, exec_content = find_section_content_range(
         body,
         'Executive Summary',
-        ['SWOT Analysis', 'Project Overview', 'Site Analysis', 'Development Costs']
+        ['SWOT Analysis', 'Project Overview', 'Site Analysis', 'Development Costs'],
+        start_after_text='Scope of Work',
     )
     if exec_heading is not None and exec_content:
         for p in exec_content:
@@ -218,7 +232,8 @@ def fix_template(doc_xml_path):
     swot_heading, swot_content = find_section_content_range(
         body,
         'SWOT Analysis',
-        ['Project Overview', 'Site Analysis', 'Development Costs', 'Industry Overview']
+        ['Project Overview', 'Site Analysis', 'Development Costs', 'Industry Overview'],
+        start_after_text='Executive Summary',
     )
     if swot_heading is not None and swot_content:
         for p in swot_content:

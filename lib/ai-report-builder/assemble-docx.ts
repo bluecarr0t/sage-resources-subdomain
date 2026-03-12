@@ -185,6 +185,291 @@ function buildComparablesAnalysis(input: EnrichedInput): string {
   return lines.join('\n');
 }
 
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function buildProjectOverviewRows(input: EnrichedInput): Array<[string, string]> {
+  const location = [input.address_1, input.city, input.state, input.zip_code]
+    .filter(Boolean)
+    .join(', ');
+  const totalSites = input.unit_mix.reduce((sum, u) => sum + (u.count || 0), 0);
+  const unitMixText = input.unit_mix.length > 0
+    ? input.unit_mix.map((u) => `${u.type}: ${u.count}`).join('; ')
+    : 'Not specified';
+  const resortType = (input.market_type || 'rv').toLowerCase() === 'glamping'
+    ? 'Glamping Resort'
+    : 'RV Resort';
+
+  return [
+    ['Resort Name', input.property_name || 'Not specified'],
+    ['Resort Type', resortType],
+    ['Resort Full Address', location || 'Not specified'],
+    ['Lot Size (Acres)', input.acres != null ? String(input.acres) : 'Not specified'],
+    ['Parcel Number(s)', input.parcel_number || 'Not specified'],
+    ['Units / Sites', totalSites > 0 ? `${totalSites}` : 'Not specified'],
+    ['Unit Mix', unitMixText],
+    ['Total Units / Sites', totalSites > 0 ? `${totalSites}` : 'Not specified'],
+    [
+      'Additional Development, Improvements, Amenities',
+      input.amenities_description || 'Not specified',
+    ],
+    [
+      'What amenities are planned for the property / guest experience?',
+      input.amenities_description || 'Not specified',
+    ],
+  ];
+}
+
+function buildProjectOverviewTableXml(input: EnrichedInput): string {
+  const rows = buildProjectOverviewRows(input).map(([label, value]) => `
+<w:tr>
+  <w:tc>
+    <w:tcPr><w:tcW w:w="4300" w:type="dxa"/></w:tcPr>
+    <w:p><w:pPr><w:pStyle w:val="TableParagraph"/></w:pPr><w:r><w:t>${escapeXml(label)}</w:t></w:r></w:p>
+  </w:tc>
+  <w:tc>
+    <w:tcPr><w:tcW w:w="4300" w:type="dxa"/></w:tcPr>
+    <w:p><w:pPr><w:pStyle w:val="TableParagraph"/></w:pPr><w:r><w:t>${escapeXml(value)}</w:t></w:r></w:p>
+  </w:tc>
+</w:tr>`).join('');
+
+  return `<w:tbl>
+  <w:tblPr>
+    <w:tblStyle w:val="TableGrid"/>
+    <w:tblW w:w="0" w:type="auto"/>
+    <w:tblLook w:val="04A0"/>
+  </w:tblPr>
+  <w:tblGrid>
+    <w:gridCol w:w="4300"/>
+    <w:gridCol w:w="4300"/>
+  </w:tblGrid>
+  ${rows}
+</w:tbl>`;
+}
+
+/**
+ * Older RV templates include a static linked Excel object for the Project Overview intake table.
+ * Replace that object with a runtime table populated from current report input.
+ */
+function replaceLinkedProjectOverviewTable(zip: PizZip, input: EnrichedInput): void {
+  const xmlPath = 'word/document.xml';
+  const file = zip.file(xmlPath);
+  if (!file) return;
+
+  const xml = file.asText();
+  const linkedExcelParaPattern =
+    /<w:p>(?:(?!<\/w:p>).)*?<w:instrText[^>]*>(?:(?!<\/w:p>).)*?ToT \(Intake Form\)!R22C2:R48C3(?:(?!<\/w:p>).)*?<\/w:instrText>(?:(?!<\/w:p>).)*?<\/w:p>/s;
+
+  if (!linkedExcelParaPattern.test(xml)) return;
+
+  const replacement = `${buildProjectOverviewTableXml(input)}<w:p/>`;
+  zip.file(xmlPath, xml.replace(linkedExcelParaPattern, replacement));
+}
+
+/**
+ * Replace static template image blocks with explicit placeholders for author review.
+ * This prevents stale template photos/maps/comparable screenshots from leaking into
+ * generated reports.
+ */
+function replaceTemplateImagesWithPlaceholders(zip: PizZip): void {
+  const xmlPath = 'word/document.xml';
+  const file = zip.file(xmlPath);
+  if (!file) return;
+
+  const xml = file.asText();
+  const projectOverviewAnchor = xml.indexOf('<w:t>Project Overview</w:t>');
+  if (projectOverviewAnchor < 0) return;
+
+  const prefix = xml.slice(0, projectOverviewAnchor);
+  const suffix = xml.slice(projectOverviewAnchor);
+  const placeholder =
+    '<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r><w:t>[Image placeholder - add author-selected image]</w:t></w:r></w:p>';
+
+  const updated = suffix.replace(/<w:p\b[\s\S]*?<\/w:p>/g, (para) => {
+    if (/<w:drawing[\s>]/.test(para) || /<mc:AlternateContent[\s>][\s\S]*?<w:drawing/.test(para)) {
+      return placeholder;
+    }
+    return para;
+  });
+
+  zip.file(xmlPath, prefix + updated);
+}
+
+/**
+ * After image references are removed from document.xml, the actual media
+ * binaries (word/media/image*.png, etc.) still sit in the zip archive.
+ * This function:
+ *  1. Scans all XML parts for relationship IDs still in use (r:embed, r:link, r:id)
+ *  2. Reads each .rels file and identifies image targets no longer referenced
+ *  3. Removes the orphaned media files from the zip
+ *  4. Rewrites the .rels file without the orphaned entries
+ */
+function stripUnreferencedMedia(zip: PizZip): { removed: number; bytesFreed: number } {
+  const allXmlParts = [
+    'word/document.xml',
+    'word/header1.xml', 'word/header2.xml', 'word/header3.xml',
+    'word/footer1.xml', 'word/footer2.xml', 'word/footer3.xml',
+    'word/footnotes.xml', 'word/endnotes.xml',
+  ];
+
+  const referencedRIds = new Set<string>();
+
+  const rIdPattern = /r:(?:embed|link|id)="(rId\d+)"/g;
+  for (const xmlPath of allXmlParts) {
+    const f = zip.file(xmlPath);
+    if (!f) continue;
+    const content = f.asText();
+    for (const m of content.matchAll(rIdPattern)) {
+      referencedRIds.add(m[1]);
+    }
+  }
+
+  const relsFiles = [
+    'word/_rels/document.xml.rels',
+    'word/_rels/header1.xml.rels', 'word/_rels/header2.xml.rels', 'word/_rels/header3.xml.rels',
+    'word/_rels/footer1.xml.rels', 'word/_rels/footer2.xml.rels', 'word/_rels/footer3.xml.rels',
+  ];
+
+  let totalRemoved = 0;
+  let totalBytesFreed = 0;
+
+  for (const relsPath of relsFiles) {
+    const relsFile = zip.file(relsPath);
+    if (!relsFile) continue;
+
+    const relsXml = relsFile.asText();
+
+    const relEntryPattern = /<Relationship\s[^>]*\/?>(?:<\/Relationship>)?/g;
+    const entries: Array<{ full: string; id: string; target: string; type: string }> = [];
+    for (const m of relsXml.matchAll(relEntryPattern)) {
+      const el = m[0];
+      const idMatch = el.match(/Id="([^"]*)"/);
+      const targetMatch = el.match(/Target="([^"]*)"/);
+      const typeMatch = el.match(/Type="([^"]*)"/);
+      if (idMatch && targetMatch && typeMatch) {
+        entries.push({ full: el, id: idMatch[1], target: targetMatch[1], type: typeMatch[1] });
+      }
+    }
+
+    const imageType = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image';
+    const toRemove: typeof entries = [];
+
+    for (const entry of entries) {
+      if (entry.type !== imageType) continue;
+      if (referencedRIds.has(entry.id)) continue;
+      toRemove.push(entry);
+    }
+
+    if (toRemove.length === 0) continue;
+
+    let updatedRels = relsXml;
+    for (const entry of toRemove) {
+      updatedRels = updatedRels.replace(entry.full, '');
+
+      const mediaPath = entry.target.startsWith('/')
+        ? entry.target.slice(1)
+        : `word/${entry.target}`;
+      const mediaFile = zip.file(mediaPath);
+      if (mediaFile) {
+        const raw = mediaFile.asBinary();
+        totalBytesFreed += raw.length;
+        zip.remove(mediaPath);
+      }
+      totalRemoved++;
+    }
+
+    updatedRels = updatedRels.replace(/\n\s*\n/g, '\n');
+    zip.file(relsPath, updatedRels);
+  }
+
+  return { removed: totalRemoved, bytesFreed: totalBytesFreed };
+}
+
+function buildSiteAnalysisParagraphsXml(siteAnalysisText: string): string {
+  const lines = siteAnalysisText
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  return lines
+    .map((line) => {
+      const colonIdx = line.indexOf(':');
+      if (colonIdx > 0) {
+        const label = line.slice(0, colonIdx).trim();
+        const value = line.slice(colonIdx + 1).trim();
+        return `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>${escapeXml(label)}:</w:t></w:r><w:r><w:t xml:space="preserve"> ${escapeXml(value)}</w:t></w:r></w:p>`;
+      }
+      return `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r><w:t>${escapeXml(line)}</w:t></w:r></w:p>`;
+    })
+    .join('');
+}
+
+/**
+ * Replace template's static "Site Analysis" narrative with generated content.
+ * Keeps subsequent maps/images/figures in place (or placeholders after image pass).
+ */
+function replaceStaticSiteAnalysisSection(zip: PizZip, siteAnalysisText: string): void {
+  const xmlPath = 'word/document.xml';
+  const file = zip.file(xmlPath);
+  if (!file) return;
+
+  const xml = file.asText();
+  const headingPattern = /<w:p\b[\s\S]*?<w:t>Site Analysis<\/w:t>[\s\S]*?<\/w:p>/;
+  const headingMatch = xml.match(headingPattern);
+  if (!headingMatch || headingMatch.index == null) return;
+
+  const startIdx = headingMatch.index + headingMatch[0].length;
+  const suffix = xml.slice(startIdx);
+  const paragraphPattern = /<w:p\b[\s\S]*?<\/w:p>/g;
+
+  let removeUntil = 0;
+  let foundTextParagraph = false;
+  for (const m of suffix.matchAll(paragraphPattern)) {
+    const para = m[0];
+    const idx = m.index ?? 0;
+
+    if (
+      para.includes('<w:drawing') ||
+      para.includes('<w:t>Development Costs</w:t>') ||
+      /<w:pStyle w:val="Heading1"\s*\/>/.test(para)
+    ) {
+      break;
+    }
+
+    const plain = para.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (!plain) {
+      if (foundTextParagraph) removeUntil = idx + para.length;
+      continue;
+    }
+
+    foundTextParagraph = true;
+    removeUntil = idx + para.length;
+  }
+
+  if (!foundTextParagraph || removeUntil === 0) return;
+
+  const fallback =
+    'Shape: Not yet verified; analyst to confirm.\n' +
+    'Frontage: Not yet verified; analyst to confirm.\n' +
+    'Surrounding Uses: Not yet verified; analyst to confirm.\n' +
+    'Apparent Easements, Encroachments, or Restrictions: Not yet verified; analyst to confirm.\n' +
+    'Topography and Drainage: Not yet verified; analyst to confirm.\n' +
+    'Soil and Subsoil Condition: Not yet verified; analyst to confirm.\n' +
+    'Street Improvements and Access: Not yet verified; analyst to confirm.\n' +
+    'Utilities: Not yet verified; analyst to confirm.\n' +
+    'Relationship to its Surroundings: Not yet verified; analyst to confirm.\n' +
+    'Zoning: Not yet verified; analyst to confirm.';
+
+  const replacement = buildSiteAnalysisParagraphsXml(siteAnalysisText || fallback) + '<w:p/>';
+  zip.file(xmlPath, xml.slice(0, startIdx) + replacement + suffix.slice(removeUntil));
+}
+
 export async function assembleDraftDocx(
   input: EnrichedInput,
   sections: GeneratedSections,
@@ -257,6 +542,7 @@ export async function assembleDraftDocx(
     executive_summary: sections.executive_summary,
     letter_of_transmittal: sections.letter_of_transmittal || '',
     swot_analysis: sections.swot_analysis || '',
+    site_analysis: sections.site_analysis || '',
     comparables_analysis: buildComparablesAnalysis(input),
     data_sources_appendix: data_sources_appendix || '',
   };
@@ -288,6 +574,16 @@ export async function assembleDraftDocx(
   }
 
   stripHighlightsFromFormValues(doc.getZip(), formValues);
+  replaceLinkedProjectOverviewTable(doc.getZip(), input);
+  replaceStaticSiteAnalysisSection(doc.getZip(), sections.site_analysis || '');
+  replaceTemplateImagesWithPlaceholders(doc.getZip());
+
+  const { removed, bytesFreed } = stripUnreferencedMedia(doc.getZip());
+  if (removed > 0) {
+    console.log(
+      `[assemble-docx] Stripped ${removed} unreferenced media files (~${(bytesFreed / 1024 / 1024).toFixed(1)} MB freed)`
+    );
+  }
 
   const buf = doc.getZip().generate({
     type: 'nodebuffer',

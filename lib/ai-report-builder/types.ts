@@ -23,10 +23,12 @@ export interface ReportDraftInput {
   market_type?: string;
   /** Property parcel number */
   parcel_number?: string;
-  /** Description of planned amenities */
+  /** Open property & client brief: parcel, amenities, client goals, and any context for AI research and report generation */
   amenities_description?: string;
   /** Whether to include web research in enrichment */
   include_web_research?: boolean;
+  /** Report service type (e.g. Feasibility Study, Appraisal) */
+  service?: string;
 }
 
 export interface BenchmarkRow {
@@ -119,4 +121,5 @@ export interface GeneratedSections {
   citations?: Citation[];
   letter_of_transmittal?: string;
   swot_analysis?: string;
+  site_analysis?: string;
 }

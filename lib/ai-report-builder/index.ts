@@ -8,6 +8,7 @@ export {
   generateExecutiveSummary,
   generateLetterOfTransmittal,
   generateSWOTAnalysis,
+  generateSiteAnalysis,
 } from './generate';
 export { assembleDraftDocx, getTemplateKeyForMarketType } from './assemble-docx';
 export { assembleDraftXlsx } from './assemble-xlsx';

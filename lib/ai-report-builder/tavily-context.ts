@@ -22,7 +22,7 @@ export async function fetchWebContextForReport(
   if (!apiKey) return null;
 
   const client = tavily({ apiKey });
-  const { city, state, property_name } = input;
+  const { city, state, property_name, amenities_description } = input;
 
   const queries = [
     `${city} ${state} tourism statistics outdoor hospitality`,
@@ -31,6 +31,12 @@ export async function fetchWebContextForReport(
 
   if (property_name) {
     queries.push(`${property_name} ${city} ${state} development`);
+  }
+
+  // Use author-provided brief to target initial web research (first ~80 chars of meaningful terms)
+  if (amenities_description?.trim()) {
+    const brief = amenities_description.trim().slice(0, 120).replace(/\s+/g, ' ');
+    queries.push(`${city} ${state} ${brief}`);
   }
 
   const allResults: Array<{ content: string; score: number }> = [];

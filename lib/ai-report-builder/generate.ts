@@ -144,6 +144,7 @@ Acres: ${enriched.acres ?? 'Not specified'}
 Unit Mix: ${unitMixStr}
 Total Sites/Units: ${totalSites || 'Not specified'}
 Client: ${enriched.client_entity ?? 'Not specified'}
+${enriched.amenities_description?.trim() ? `\nAuthor-provided property & client brief (use this to shape project overview, planned amenities, and property condition):\n${enriched.amenities_description.trim()}\n` : ''}
 
 Regional benchmarks from past studies (ADR in dollars):
 ${benchmarksStr}
@@ -239,6 +240,7 @@ Then include the standard USPAP conformance paragraph and extraordinary assumpti
 Property: ${enriched.property_name}
 Client: ${enriched.client_entity ?? 'Not specified'}
 Unit Mix: ${enriched.unit_mix.map(u => u.type + ': ' + u.count).join('; ') || 'Not specified'}
+${enriched.amenities_description?.trim() ? `\nAuthor-provided brief (use to fill [amenities] and [condition] in the template):\n${enriched.amenities_description.trim()}\n` : ''}
 
 Write only the body paragraphs (not the header/address block or signature). Use formal, professional consulting language.`;
 
@@ -281,6 +283,7 @@ Property: ${enriched.property_name}
 Location: ${location}
 Acres: ${enriched.acres ?? 'Not specified'}
 Unit Mix: ${enriched.unit_mix.map(u => u.type + ': ' + u.count).join('; ') || 'Not specified'}
+${enriched.amenities_description?.trim() ? `\nAuthor-provided property & client brief:\n${enriched.amenities_description.trim()}\n` : ''}
 
 Benchmarks:
 ${benchmarksStr}
@@ -295,4 +298,54 @@ Write in professional consulting language. Each strength/weakness should be 1-2 
   });
   if (!content) throw new Error('LLM returned empty SWOT analysis');
   return normalizeTerminology(content);
+}
+
+export async function generateSiteAnalysis(
+  enriched: EnrichedInput
+): Promise<string> {
+  const location = buildLocationString(enriched);
+  const marketContext = getMarketTypeContext(enriched.market_type);
+
+  const systemMsg =
+    'You write professional site analysis sections for feasibility studies at Sage Outdoor Advisory. Be factual and concise. If a detail is unknown, clearly state assumptions.';
+
+  const userMsg = `Write a Site Analysis section for a feasibility study.
+
+${marketContext}
+${STYLE_GUIDE_PROMPT}
+
+Use this EXACT label structure with one concise sentence per label:
+- Shape:
+- Frontage:
+- Surrounding Uses:
+- Apparent Easements, Encroachments, or Restrictions:
+- Topography and Drainage:
+- Soil and Subsoil Condition:
+- Street Improvements and Access:
+- Utilities:
+- Relationship to its Surroundings:
+- Zoning:
+
+Rules:
+- Only use known facts from inputs.
+- If data is not available, say "Not yet verified; analyst to confirm."
+- Do not invent parcel-specific legal details.
+- Avoid markdown bullets, numbering, or headings; return plain text lines only.
+
+Property: ${enriched.property_name}
+Location: ${location}
+Parcel Number: ${enriched.parcel_number ?? 'Not provided'}
+Acreage: ${enriched.acres ?? 'Not provided'}
+Amenities / Development Notes: ${enriched.amenities_description ?? 'Not provided'}
+
+Supplementary context (may include zoning/area clues):
+${(enriched.web_context || '').slice(0, 3500)}
+`;
+
+  const content = await chatCompletion(systemMsg, userMsg, {
+    temperature: 0.2,
+    maxTokens: 900,
+  });
+  if (!content) throw new Error('LLM returned empty site analysis');
+  return normalizeTerminology(content.trim());
 }
