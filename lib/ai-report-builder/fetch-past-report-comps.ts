@@ -7,8 +7,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ComparableProperty, SeasonalRates } from './types';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 const MAX_PAST_REPORT_COMPS = 10;
 
 const EMPTY_SEASONAL: SeasonalRates = {

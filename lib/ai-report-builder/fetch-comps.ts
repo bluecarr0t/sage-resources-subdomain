@@ -10,8 +10,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ComparableProperty, SeasonalRates } from './types';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-type AnyRow = Record<string, any>;
+type AnyRow = Record<string, unknown>;
 
 const SEARCH_RADIUS_MILES = 150;
 const MAX_COMPS = 10;
@@ -104,7 +103,7 @@ async function fetchGlampingPropsNumeric(
     return [];
   }
 
-  return (data as AnyRow[])
+  return (data as unknown as AnyRow[])
     .map((r) => {
       const rLat = parseNum(r.lat);
       const rLon = parseNum(r.lon);
@@ -168,7 +167,7 @@ async function fetchHipcampComps(
     return [];
   }
 
-  return (data as AnyRow[])
+  return (data as unknown as AnyRow[])
     .map((r) => {
       const rLat = parseNum(r.lat);
       const rLon = parseNum(r.lon);
@@ -237,7 +236,7 @@ async function fetchRoverpassComps(
     return [];
   }
 
-  return (data as AnyRow[])
+  return (data as unknown as AnyRow[])
     .map((r) => {
       const rLat = parseNum(r.lat);
       const rLon = parseNum(r.lon);
@@ -301,7 +300,7 @@ async function fetchCampspotComps(
     return [];
   }
 
-  return (data as AnyRow[])
+  return (data as unknown as AnyRow[])
     .map((r) => {
       const rLat = parseNum(r.lat);
       const rLon = parseNum(r.lon);
