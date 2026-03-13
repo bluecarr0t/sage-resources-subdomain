@@ -53,17 +53,33 @@ npm run migrate:legacy-import
 - **hipcamp.propertys** (11M rows): Excluded by default.
 - Smaller tables (propertydetails, imports, scrapings, etc.) are exported and imported.
 
+## Public views (Option 1)
+
+Tables live in `hipcamp` and `campspot` schemas. For visibility in the Supabase Table Editor, public views are created automatically:
+
+- `public.hipcamp_imports` → `hipcamp.imports`
+- `public.hipcamp_propertydetails` → `hipcamp.propertydetails`
+- ... (one view per table)
+
+Use the `public.*` views for browsing; use `hipcamp.*` / `campspot.*` in SQL when you need the canonical tables.
+
+## RLS policies
+
+`03-create-rls-policies.sql` enables Row Level Security on all hipcamp and campspot tables with policies that allow `SELECT` for authenticated users. The service_role bypasses RLS by default (for migrations and backend).
+
 ## File structure
 
 ```
 scripts/migrate-legacy-to-supabase/
-├── 01-enable-postgis.sql    # Run in Supabase first
-├── export-legacy-schema.ts   # Generate schema DDL
-├── schema-hipcamp.sql        # Generated
-├── schema-campspot.sql       # Generated
-├── export-data.ts            # Export to CSV
-├── import-data.ts            # Import from CSV
-├── run-migration.ts          # Orchestrator
+├── 01-enable-postgis.sql       # Run in Supabase first
+├── 02-create-public-views.sql   # Public views for Table Editor
+├── 03-create-rls-policies.sql   # RLS policies (authenticated read)
+├── export-legacy-schema.ts      # Generate schema DDL
+├── schema-hipcamp.sql           # Generated
+├── schema-campspot.sql          # Generated
+├── export-data.ts               # Export to CSV
+├── import-data.ts               # Import from CSV
+├── run-migration.ts             # Orchestrator
 ├── README.md
-└── data/                     # Exported CSVs (gitignored)
+└── data/                        # Exported CSVs (gitignored)
 ```

@@ -144,10 +144,6 @@ export default function AdminGlampingMetrics() {
           published: Math.round((metrics.researchStatusPublished / researchTotal) * 100),
         }
       : { new: 0, inProgress: 0, published: 0 };
-  const completionRate =
-    metrics.totalPropertyCount > 0
-      ? Math.round((metrics.researchStatusPublished / metrics.totalPropertyCount) * 100)
-      : 0;
 
   return (
     <section
@@ -187,80 +183,63 @@ export default function AdminGlampingMetrics() {
           </Link>
         </div>
 
-        {/* Database size */}
-        <div>
-          <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
-            Database size
-          </h3>
-          <p className="text-2xl sm:text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
-            {metrics.totalPropertyCount.toLocaleString()}{' '}
-            <span className="font-semibold text-sage-600 dark:text-sage-400">properties</span>
-            <span className="text-lg font-normal text-gray-500 dark:text-gray-400 ml-1">
-              ({metrics.totalUnitCount.toLocaleString()} units)
-            </span>
-          </p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-sm text-gray-600 dark:text-gray-300">
-            <span>
-              <span className="font-medium">USA:</span>{' '}
-              {metrics.usaPropertyCount.toLocaleString()} ({usaPct}%)
-            </span>
-            <span className="text-gray-400 dark:text-gray-500">|</span>
-            <span>
-              <span className="font-medium">Other:</span>{' '}
+        {/* Total Properties & Total Units — primary stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-5">
+            <p className="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+              Total Properties
+            </p>
+            <p className="text-3xl sm:text-4xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
+              {metrics.totalPropertyCount.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              USA: {metrics.usaPropertyCount.toLocaleString()} ({usaPct}%) · Other:{' '}
               {otherPropertyCount.toLocaleString()} ({otherPct}%)
-            </span>
+            </p>
           </div>
-          <div
-            className="mt-3 flex h-2.5 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700"
-            role="img"
-            aria-label={`USA ${usaPct}%, Other ${otherPct}%`}
-          >
-            <div
-              className="bg-sage-500 dark:bg-sage-500 transition-all duration-300"
-              style={{ width: `${usaPct}%` }}
-              title={`USA: ${metrics.usaPropertyCount.toLocaleString()} (${usaPct}%)`}
-            />
-            <div
-              className="bg-gray-400 dark:bg-gray-500 transition-all duration-300"
-              style={{ width: `${otherPct}%` }}
-              title={`Other: ${otherPropertyCount.toLocaleString()} (${otherPct}%)`}
-            />
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-5">
+            <p className="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+              Total Units
+            </p>
+            <p className="text-3xl sm:text-4xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
+              {metrics.totalUnitCount.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Across all properties
+            </p>
           </div>
         </div>
 
-        {/* Research Pipeline - clickable stages */}
-        <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Research Pipeline
-            </h3>
-            <span className="text-sm font-medium text-sage-600 dark:text-sage-400 tabular-nums">
-              {completionRate}% published
-            </span>
-          </div>
+        {/* Research pipeline — three phases */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+            Research pipeline
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {FUNNEL_STAGES.map((stage, i) => {
+            {FUNNEL_STAGES.map((stage) => {
               const value = researchValues[stage.key];
               const pct = researchPcts[stage.key];
               return (
                 <Link
                   key={stage.key}
                   href={stage.href}
-                  className={`group flex flex-col items-center justify-center rounded-xl border-2 px-4 py-3 text-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${stage.cardClass}`}
+                  className={`group flex flex-col items-center justify-center rounded-xl border-2 px-4 py-4 text-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${stage.cardClass}`}
                   title={`${stage.label}: ${value.toLocaleString()} (${pct}%) — View in breakdown`}
                 >
-                  <p className={`text-xs font-medium uppercase tracking-wide mb-0.5 ${stage.labelClass}`}>
+                  <p
+                    className={`text-xs font-medium uppercase tracking-wide mb-1 ${stage.labelClass}`}
+                  >
                     {stage.label}
                     {stage.sublabel && (
-                      <span className="ml-1.5 font-semibold">· {stage.sublabel}</span>
+                      <span className="ml-1 font-normal">· {stage.sublabel}</span>
                     )}
                   </p>
-                  <p className="text-xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
+                  <p className="text-2xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
                     {value.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{pct}%</p>
                   <ChevronRight
-                    className="mt-1 w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-sage-500 group-hover:translate-x-0.5 transition-all opacity-0 group-hover:opacity-100 sm:opacity-100"
+                    className="mt-2 w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-sage-500 group-hover:translate-x-0.5 transition-all opacity-0 group-hover:opacity-100 sm:opacity-100"
                     aria-hidden
                   />
                 </Link>

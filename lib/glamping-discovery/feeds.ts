@@ -22,4 +22,16 @@ export const GLAMPING_RSS_FEEDS: RssFeedConfig[] = [
     url: 'https://news.google.com/rss/search?q=glamping+opening+2025&hl=en-US&gl=US&ceid=US:en',
     discoverySource: 'Google News RSS',
   },
+  {
+    id: 'google-news-luxury-camping',
+    name: 'Google News - Luxury Camping',
+    url: 'https://news.google.com/rss/search?q=luxury+camping+resort+opening&hl=en-US&gl=US&ceid=US:en',
+    discoverySource: 'Google News RSS',
+  },
+  {
+    id: 'google-news-glamping-north-america',
+    name: 'Google News - Glamping North America',
+    url: 'https://news.google.com/rss/search?q=glamping+USA+Canada+resort&hl=en-US&gl=US&ceid=US:en',
+    discoverySource: 'Google News RSS',
+  },
 ];

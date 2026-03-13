@@ -4,10 +4,11 @@ import { resolve } from 'path';
 
 /**
  * Cron endpoint for glamping discovery pipeline
- * Runs RSS-based discovery with limit 1 to stay within serverless timeout
+ * Runs Tavily-based discovery with limit 1 to stay within serverless timeout.
+ * Tavily is preferred over RSS because Google News RSS URLs frequently fail to fetch.
  *
  * Schedule: Weekly (e.g. "0 12 * * 0" = Sundays at noon UTC)
- * Set CRON_SECRET in Vercel for auth
+ * Set CRON_SECRET in Vercel for auth; TAVILY_API_KEY is required for discovery.
  *
  * For full runs, use: npm run discover:glamping (or GitHub Actions)
  */
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
   const scriptPath = resolve(process.cwd(), 'scripts/discover-glamping-from-news.ts');
 
   try {
-    const result = spawnSync('npx', ['tsx', scriptPath, '--rss', '--limit', '1'], {
+    const result = spawnSync('npx', ['tsx', scriptPath, '--tavily', '--limit', '1'], {
       cwd: process.cwd(),
       encoding: 'utf-8',
       timeout: 90000, // 90s max
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Discovery run completed (limit 1 article)',
+      message: 'Discovery run completed (Tavily, limit 1 article)',
       output: output.slice(-1000),
     });
   } catch (err) {

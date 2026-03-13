@@ -714,7 +714,8 @@ Include only properties that:
 - Offer standalone glamping units with beds and linens provided
 - Are currently operating (not permanently closed)
 - Have a professional/commercial operation (not individual Airbnb hosts renting a single unit)
-- Have at least 2 ${unitType.toLowerCase()} units
+- Have at least 4 ${unitType.toLowerCase()} units (minimum 4 glamping units; exclude tent campgrounds, RV parks, and hotels)
+- Are glamping-focused: not a traditional campground, not an RV park, not a hotel
 
 Include a mix of: well-known destinations, regional favorites, and newer boutique properties.
 

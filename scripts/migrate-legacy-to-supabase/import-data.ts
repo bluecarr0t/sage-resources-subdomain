@@ -129,8 +129,10 @@ async function main() {
   const files = readdirSync(DATA_DIR, { withFileTypes: true })
     .filter((f) => f.isFile() && f.name.endsWith('.csv'))
     .map((f) => {
-      const m = f.name.match(/^(.+)_(.+)\.csv$/);
-      return m ? { schema: m[1], table: m[2] } : null;
+      const base = f.name.slice(0, -4);
+      const idx = base.indexOf('_');
+      if (idx <= 0) return null;
+      return { schema: base.slice(0, idx), table: base.slice(idx + 1) };
     })
     .filter((x): x is { schema: string; table: string } => x !== null);
 

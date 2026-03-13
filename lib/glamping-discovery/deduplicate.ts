@@ -59,8 +59,12 @@ export async function getDatabasePropertyNames(
   return propertyNames;
 }
 
+/** Minimum length ratio (shorter/longer) for substring match to avoid false positives */
+const MIN_SUBSTRING_RATIO = 0.6;
+
 /**
  * Check if property already exists in database
+ * Uses exact match first, then conservative substring match (avoids "Riverside" matching "Riverside Glamping Resort")
  */
 export function propertyExistsInDb(
   property: ExtractedProperty,
@@ -68,8 +72,13 @@ export function propertyExistsInDb(
 ): boolean {
   const normalizedName = normalizePropertyName(property.property_name);
   if (dbProperties.has(normalizedName)) return true;
+  if (normalizedName.length <= 5) return false;
+
   for (const dbName of dbProperties) {
-    if (normalizedName.length > 5 && (dbName.includes(normalizedName) || normalizedName.includes(dbName))) {
+    const shorter = normalizedName.length <= dbName.length ? normalizedName : dbName;
+    const longer = normalizedName.length > dbName.length ? normalizedName : dbName;
+    const ratio = shorter.length / longer.length;
+    if (ratio >= MIN_SUBSTRING_RATIO && (dbName.includes(normalizedName) || normalizedName.includes(dbName))) {
       return true;
     }
   }

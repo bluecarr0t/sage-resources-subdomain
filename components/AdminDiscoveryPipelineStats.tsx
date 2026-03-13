@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Rss, FileText, Globe, Search } from 'lucide-react';
+import Link from 'next/link';
+import { Rss, FileText, Globe, Search, ChevronRight, Clock } from 'lucide-react';
 
 interface DiscoveryStats {
   totalFromPipeline: number;
@@ -12,6 +13,21 @@ interface DiscoveryStats {
     last6Months: number;
     allTime: number;
   };
+}
+
+interface DiscoveryRun {
+  id: string;
+  mode: string;
+  dry_run: boolean;
+  started_at: string;
+  completed_at: string | null;
+  articles_found: number;
+  articles_fetched: number;
+  articles_failed: number;
+  properties_extracted: number;
+  properties_new: number;
+  properties_inserted: number;
+  error: string | null;
 }
 
 const PERIOD_CONFIG: { key: keyof DiscoveryStats['byPeriod']; label: string }[] = [
@@ -30,25 +46,31 @@ const SOURCE_CONFIG: { key: string; label: string; icon: typeof Rss }[] = [
 
 export default function AdminDiscoveryPipelineStats() {
   const [stats, setStats] = useState<DiscoveryStats | null>(null);
+  const [runs, setRuns] = useState<DiscoveryRun[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/admin/sage-glamping-data/discovery-stats');
-        const json = await res.json();
-        if (!res.ok || !json.success) {
-          throw new Error(json.error || 'Failed to fetch');
+        const [statsRes, runsRes] = await Promise.all([
+          fetch('/api/admin/sage-glamping-data/discovery-stats'),
+          fetch('/api/admin/sage-glamping-data/discovery-runs?limit=10'),
+        ]);
+        const statsJson = await statsRes.json();
+        const runsJson = await runsRes.json();
+        if (!statsRes.ok || !statsJson.success) {
+          throw new Error(statsJson.error || 'Failed to fetch stats');
         }
-        setStats(json.stats);
+        setStats(statsJson.stats);
+        setRuns(runsJson.success ? runsJson.runs || [] : []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load discovery stats');
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -85,17 +107,35 @@ export default function AdminDiscoveryPipelineStats() {
       aria-labelledby="discovery-pipeline-heading"
     >
       <div className="p-6 sm:p-8 space-y-6">
-        <div>
-          <h2
-            id="discovery-pipeline-heading"
-            className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2"
-          >
-            <Rss className="w-5 h-5 text-sage-600 dark:text-sage-400" aria-hidden />
-            Discovery Pipeline (RSS & News)
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            New glamping resorts found and added from RSS feeds, Tavily search, and article processing
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h2
+              id="discovery-pipeline-heading"
+              className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2"
+            >
+              <Rss className="w-5 h-5 text-sage-600 dark:text-sage-400" aria-hidden />
+              Discovery Pipeline (RSS & News)
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              New glamping resorts found and added from RSS feeds, Tavily search, and article processing
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin/discovery-candidates"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md shrink-0"
+            >
+              Review candidates
+              <ChevronRight className="w-4 h-4" aria-hidden />
+            </Link>
+            <Link
+              href="/admin/discovery-pipeline-automation"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md shrink-0"
+            >
+              Automation Docs
+              <ChevronRight className="w-4 h-4" aria-hidden />
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -147,6 +187,56 @@ export default function AdminDiscoveryPipelineStats() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {runs.length > 0 && (
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Run history
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">Started</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">Mode</th>
+                    <th className="text-right py-2 px-2 font-medium text-gray-500 dark:text-gray-400">Fetched</th>
+                    <th className="text-right py-2 px-2 font-medium text-gray-500 dark:text-gray-400">Inserted</th>
+                    <th className="text-left py-2 pl-4 font-medium text-gray-500 dark:text-gray-400">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {runs.map((r) => (
+                    <tr key={r.id} className="border-b border-gray-100 dark:border-gray-800">
+                      <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">
+                        {new Date(r.started_at).toLocaleString()}
+                      </td>
+                      <td className="py-2 pr-4">
+                        <span className="font-medium">{r.mode}</span>
+                        {r.dry_run && (
+                          <span className="ml-1 text-xs text-amber-600 dark:text-amber-400">(dry)</span>
+                        )}
+                      </td>
+                      <td className="text-right py-2 px-2 tabular-nums">{r.articles_fetched}</td>
+                      <td className="text-right py-2 px-2 tabular-nums text-sage-600 dark:text-sage-400">
+                        {r.properties_inserted}
+                      </td>
+                      <td className="py-2 pl-4">
+                        {r.error ? (
+                          <span className="text-red-600 dark:text-red-400 truncate max-w-[200px] block" title={r.error}>
+                            Error
+                          </span>
+                        ) : (
+                          <span className="text-green-600 dark:text-green-400">OK</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

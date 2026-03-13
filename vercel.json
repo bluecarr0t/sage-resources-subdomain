@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/discover-glamping",
-      "schedule": "0 12 * * 0"
+      "schedule": "0 15 * * *"
     }
   ],
   "redirects": [

@@ -32,7 +32,9 @@ const EXTRACTION_PROMPT = `Extract all glamping resort/campground/property infor
 
 Focus ONLY on properties located in North America (United States and Canada). Ignore properties in other countries.
 
-Return a JSON object with a "properties" array containing one object for each North American glamping property mentioned in the article. Each property object should have:
+Only include properties with at least 4 glamping units (standalone accommodations with beds and linens). Exclude: RV parks, tent campgrounds (basic tent sites), hotels, motels, and inns. We target glamping-first operations, not traditional campgrounds with a few cabins.
+
+Return a JSON object with a "properties" array containing one object for each qualifying North American glamping property mentioned in the article. Each property object should have:
 - property_name (required): The exact name of the property/resort as mentioned in the article
 - city (optional): City where it's located
 - state (optional): State/province abbreviation (2 letters for US, full for Canadian provinces)

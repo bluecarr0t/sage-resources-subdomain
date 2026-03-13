@@ -14,7 +14,7 @@
  *   - Set SUPABASE_DB_URL in .env.local
  *
  * Usage:
- *   npx tsx scripts/migrate-legacy-to-supabase/run-migration.ts [--schema-only] [--skip-export] [--skip-import]
+ *   npx tsx scripts/migrate-legacy-to-supabase/run-migration.ts [--schema-only] [--skip-export] [--skip-import] [--tables=table1,table2]
  *
  * Run: npx tsx scripts/migrate-legacy-to-supabase/run-migration.ts
  */
@@ -29,12 +29,14 @@ config({ path: resolve(process.cwd(), '.env.local') });
 
 const SCRIPT_DIR = resolve(process.cwd(), 'scripts/migrate-legacy-to-supabase');
 
-function parseArgs(): { schemaOnly: boolean; skipExport: boolean; skipImport: boolean } {
+function parseArgs(): { schemaOnly: boolean; skipExport: boolean; skipImport: boolean; tables?: string } {
   const args = process.argv.slice(2);
+  const tablesArg = args.find((a) => a.startsWith('--tables='));
   return {
     schemaOnly: args.includes('--schema-only'),
     skipExport: args.includes('--skip-export'),
     skipImport: args.includes('--skip-import'),
+    tables: tablesArg ? tablesArg.slice(9) : undefined,
   };
 }
 
@@ -61,7 +63,8 @@ async function runSchemaInSupabase(pool: Pool, schemaPath: string): Promise<void
 }
 
 async function main() {
-  const { schemaOnly, skipExport, skipImport } = parseArgs();
+  const { schemaOnly, skipExport, skipImport, tables } = parseArgs();
+  const tablesArg = tables ? ` --tables=${tables}` : '';
 
   console.log('=== Legacy Campings DB to Supabase Migration ===\n');
   validateEnv();
@@ -97,6 +100,16 @@ async function main() {
         await runSchemaInSupabase(pool, campspotPath);
         console.log('  Created campspot schema and tables.');
       }
+      const viewsPath = resolve(SCRIPT_DIR, '02-create-public-views.sql');
+      if (existsSync(viewsPath)) {
+        await pool.query(readFileSync(viewsPath, 'utf-8'));
+        console.log('  Created public views for Table Editor visibility.');
+      }
+      const rlsPath = resolve(SCRIPT_DIR, '03-create-rls-policies.sql');
+      if (existsSync(rlsPath)) {
+        await pool.query(readFileSync(rlsPath, 'utf-8'));
+        console.log('  Created RLS policies on hipcamp and campspot tables.');
+      }
       await pool.end();
     } catch (err) {
       console.error('Schema creation failed:', err instanceof Error ? err.message : err);
@@ -112,7 +125,7 @@ async function main() {
 
   if (!skipExport) {
     console.log('Step 3: Export data (--exclude-large)...');
-    execSync('npx tsx scripts/migrate-legacy-to-supabase/export-data.ts --exclude-large', {
+    execSync(`npx tsx scripts/migrate-legacy-to-supabase/export-data.ts --exclude-large${tablesArg}`, {
       stdio: 'inherit',
       cwd: process.cwd(),
     });
@@ -121,7 +134,7 @@ async function main() {
 
   if (hasSupabase && !skipImport) {
     console.log('Step 4: Import data to Supabase...');
-    execSync('npx tsx scripts/migrate-legacy-to-supabase/import-data.ts', {
+    execSync(`npx tsx scripts/migrate-legacy-to-supabase/import-data.ts${tablesArg}`, {
       stdio: 'inherit',
       cwd: process.cwd(),
     });

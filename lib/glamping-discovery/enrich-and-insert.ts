@@ -33,10 +33,10 @@ function sleep(ms: number): Promise<void> {
 
 const ENRICHMENT_PROMPT = `Research and provide detailed information about this glamping property:
 
-Property Name: ${0}
-City: ${1}
-State: ${2}
-Country: ${3}
+Property Name: {{0}}
+City: {{1}}
+State: {{2}}
+Country: {{3}}
 
 Provide a JSON object with as much detail as possible:
 - property_name: Keep the original name
@@ -63,10 +63,10 @@ export async function enrichProperty(
   openai: OpenAI
 ): Promise<ExtractedProperty> {
   const prompt = ENRICHMENT_PROMPT
-    .replace('${0}', property.property_name)
-    .replace('${1}', property.city || 'Unknown')
-    .replace('${2}', property.state || 'Unknown')
-    .replace('${3}', property.country || 'Unknown');
+    .replace('{{0}}', property.property_name || '')
+    .replace('{{1}}', property.city || 'Unknown')
+    .replace('{{2}}', property.state || 'Unknown')
+    .replace('{{3}}', property.country || 'Unknown');
 
   await sleep(DELAY_MS);
 

@@ -21,6 +21,7 @@ export const GET = withAdminAuth(async (_request, auth) => {
         )
       `)
       .is('deleted_at', null)
+      .is('enrichment_metadata', null)
       .order('created_at', { ascending: false });
 
     if (error) {
