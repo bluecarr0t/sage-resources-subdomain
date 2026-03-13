@@ -9,6 +9,7 @@ import {
   Filter,
   Database,
   ChevronDown,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -69,9 +70,18 @@ const STEPS = [
     title: 'Insert into database',
     subtitle: 'Save with discovery source',
     description:
-      'Enriched records are inserted into all_glamping_properties. Each row is tagged with its discovery source (e.g. "Google News RSS", "Tavily Search", "Manual Article") so we can see where new properties came from. Processed article URLs are stored so we don’t re-run them.',
+      'Enriched records are inserted into all_glamping_properties with research_status = "new". Each row is tagged with its discovery source (e.g. "Google News RSS", "Tavily Search", "Manual Article") so we can see where new properties came from. Processed article URLs are stored so we don’t re-run them. New properties do not appear on the public map until they are approved.',
     icon: Database,
     color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200',
+  },
+  {
+    id: 7,
+    title: 'Approval & publish',
+    subtitle: 'Review and make live on the map',
+    description:
+      'Newly inserted properties stay in "New" (or move to "In progress" during enrichment). The team reviews them in the Sage Glamping Data Breakdown and can run enrichment scripts to fill in more detail. When a property is approved, research_status is set to "Published". Only published properties appear on the public map. This step ensures quality control before new discoveries go live.',
+    icon: CheckCircle2,
+    color: 'bg-sage-100 dark:bg-sage-900/40 text-sage-800 dark:text-sage-200',
   },
 ];
 
@@ -137,7 +147,7 @@ export default function DiscoveryPipelineAutomationPage() {
               Pipeline steps
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              From article URLs to new rows in the database: six steps.
+              From article URLs to live on the map: seven steps (including approval).
             </p>
           </div>
           <div className="p-6 sm:p-8">
@@ -180,6 +190,40 @@ export default function DiscoveryPipelineAutomationPage() {
                 );
               })}
             </div>
+          </div>
+        </section>
+
+        {/* Research status (approval workflow) */}
+        <section className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Research status (approval workflow)
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              Each property has a research_status that controls whether it appears on the map.
+            </p>
+          </div>
+          <div className="p-6 sm:p-8">
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-3">
+                <span className="font-medium text-slate-600 dark:text-slate-400 shrink-0">New</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Just added by the discovery pipeline. Not yet reviewed; not shown on the map.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="font-medium text-amber-600 dark:text-amber-400 shrink-0">In progress</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Being enriched or reviewed. Not shown on the map until approved.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="font-medium text-emerald-600 dark:text-emerald-400 shrink-0">Published</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Approved and visible on the public map. Set research_status to &quot;published&quot; after review.
+                </span>
+              </li>
+            </ul>
           </div>
         </section>
 

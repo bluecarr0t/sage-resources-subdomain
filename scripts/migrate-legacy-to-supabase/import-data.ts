@@ -10,7 +10,7 @@
  *   4. Set SUPABASE_DB_URL in .env.local
  *
  * Usage:
- *   npx tsx scripts/migrate-legacy-to-supabase/import-data.ts [--tables=table1,table2]
+ *   npx tsx scripts/migrate-legacy-to-supabase/import-data.ts [--tables=table1,table2] [--truncate]
  *
  * Run: npx tsx scripts/migrate-legacy-to-supabase/import-data.ts
  */
@@ -24,7 +24,7 @@ import { Pool } from 'pg';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 const DATA_DIR = resolve(process.cwd(), 'scripts/migrate-legacy-to-supabase/data');
-const BATCH_SIZE = 500;
+const BATCH_SIZE = 1000;
 
 function getSupabasePool(): Pool {
   const url = process.env.SUPABASE_DB_URL;
@@ -34,15 +34,18 @@ function getSupabasePool(): Pool {
   return new Pool({ connectionString: url });
 }
 
-function parseArgs(): { tables?: string[] } {
+function parseArgs(): { tables?: string[]; truncate?: boolean } {
   const args = process.argv.slice(2);
   let tables: string[] | undefined;
+  let truncate = false;
   for (const a of args) {
     if (a.startsWith('--tables=')) {
       tables = a.slice(9).split(',').map((t) => t.trim());
+    } else if (a === '--truncate') {
+      truncate = true;
     }
   }
-  return { tables };
+  return { tables, truncate };
 }
 
 function parseCsvValue(val: string, col: string): unknown {
@@ -76,7 +79,7 @@ function parseCsvValue(val: string, col: string): unknown {
   return val;
 }
 
-async function importTable(pool: Pool, schema: string, table: string): Promise<number> {
+async function importTable(pool: Pool, schema: string, table: string, truncateFirst: boolean): Promise<number> {
   const filePath = resolve(DATA_DIR, `${schema}_${table}.csv`);
   let content: string;
   try {
@@ -84,6 +87,17 @@ async function importTable(pool: Pool, schema: string, table: string): Promise<n
   } catch {
     console.log(`  ${schema}.${table}: file not found, skipping.`);
     return 0;
+  }
+
+  const fullTable = `${schema}.${table}`;
+  if (truncateFirst) {
+    const client = await pool.connect();
+    try {
+      await client.query(`TRUNCATE TABLE ${fullTable}`);
+      console.log(`  ${fullTable}: truncated.`);
+    } finally {
+      client.release();
+    }
   }
 
   const records = parse(content, { columns: true, skip_empty_lines: true, trim: true, relax_column_count: true }) as Record<string, string>[];
@@ -95,33 +109,39 @@ async function importTable(pool: Pool, schema: string, table: string): Promise<n
   const columns = Object.keys(records[0]);
   const geomCols = columns.filter((c) => c === 'coordinates');
   const colList = columns.join(', ');
-  const placeholders = columns.map((c, i) => (geomCols.includes(c) ? `ST_GeomFromText($${i + 1}, 4326)::geometry` : `$${i + 1}`)).join(', ');
-  const fullTable = `${schema}.${table}`;
 
   let imported = 0;
-  for (let i = 0; i < records.length; i += BATCH_SIZE) {
-    const batch = records.slice(i, i + BATCH_SIZE);
-    const client = await pool.connect();
-    try {
-      for (const row of batch) {
-        const values = columns.map((c) => parseCsvValue(row[c] ?? '', c));
-        await client.query(
-          `INSERT INTO ${fullTable} (${colList}) VALUES (${placeholders})`,
-          values
-        );
-        imported++;
-      }
-    } finally {
-      client.release();
+  const client = await pool.connect();
+  try {
+    for (let i = 0; i < records.length; i += BATCH_SIZE) {
+      const batch = records.slice(i, i + BATCH_SIZE);
+      const values: unknown[] = [];
+      const rowPlaceholders: string[] = [];
+
+      batch.forEach((row, rowIdx) => {
+        const base = rowIdx * columns.length;
+        const ph = columns.map((c, colIdx) => {
+          const paramNum = base + colIdx + 1;
+          values.push(parseCsvValue(row[c] ?? '', c));
+          return geomCols.includes(c) ? `ST_GeomFromText($${paramNum}, 4326)::geometry` : `$${paramNum}`;
+        }).join(', ');
+        rowPlaceholders.push(`(${ph})`);
+      });
+
+      const sql = `INSERT INTO ${fullTable} (${colList}) VALUES ${rowPlaceholders.join(', ')}`;
+      await client.query(sql, values);
+      imported += batch.length;
+      process.stdout.write(`\r  ${fullTable}: ${imported}/${records.length} rows...`);
     }
-    process.stdout.write(`\r  ${fullTable}: ${imported}/${records.length} rows...`);
+  } finally {
+    client.release();
   }
   console.log(`\r  ${fullTable}: ${imported} rows imported.`);
   return imported;
 }
 
 async function main() {
-  const { tables: filterTables } = parseArgs();
+  const { tables: filterTables, truncate } = parseArgs();
   const pool = getSupabasePool();
 
   console.log('Importing data to Supabase...\n');
@@ -151,7 +171,7 @@ async function main() {
   let total = 0;
   for (const { schema, table } of toImport) {
     try {
-      const n = await importTable(pool, schema, table);
+      const n = await importTable(pool, schema, table, truncate ?? false);
       total += n;
     } catch (err) {
       console.error(`Failed to import ${schema}.${table}:`, err instanceof Error ? err.message : err);
