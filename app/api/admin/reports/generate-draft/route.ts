@@ -20,6 +20,7 @@ import {
   generateLetterOfTransmittal,
   generateSWOTAnalysis,
   generateSiteAnalysis,
+  generateDemandIndicators,
   assembleDraftDocx,
   assembleDraftXlsx,
   factCheckExecutiveSummary,
@@ -113,6 +114,7 @@ export async function POST(request: NextRequest) {
     const client_contact_name = typeof raw.client_contact_name === 'string' ? raw.client_contact_name.trim() : undefined;
     const client_address = typeof raw.client_address === 'string' ? raw.client_address.trim() : undefined;
     const client_city_state_zip = typeof raw.client_city_state_zip === 'string' ? raw.client_city_state_zip.trim() : undefined;
+    const client_salutation = typeof raw.client_salutation === 'string' ? raw.client_salutation.trim() : undefined;
     const parcel_number = typeof raw.parcel_number === 'string' ? raw.parcel_number.trim() : undefined;
     const amenities_description = typeof raw.amenities_description === 'string' ? raw.amenities_description.trim() : undefined;
     const study_id = typeof raw.study_id === 'string' ? raw.study_id.trim() || undefined : undefined;
@@ -180,6 +182,7 @@ export async function POST(request: NextRequest) {
       client_contact_name,
       client_address,
       client_city_state_zip,
+      client_salutation,
       parcel_number,
       amenities_description,
       study_id: study_id || generateStudyId(),
@@ -206,11 +209,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis] = await Promise.all([
+    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators] = await Promise.all([
       generateExecutiveSummary(enriched),
       generateLetterOfTransmittal(enriched),
       generateSWOTAnalysis(enriched),
       generateSiteAnalysis(enriched),
+      generateDemandIndicators(enriched),
     ]);
     let executive_summary = execSummaryResult.executive_summary;
     const citations = execSummaryResult.citations;
@@ -224,7 +228,7 @@ export async function POST(request: NextRequest) {
     const [docxBuffer, xlsxBuffer] = await Promise.all([
       assembleDraftDocx(
         enriched,
-        { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis },
+        { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators },
         { marketType: input.market_type }
       ),
       assembleDraftXlsx(enriched, { marketType: input.market_type }),

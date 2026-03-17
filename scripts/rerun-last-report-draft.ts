@@ -75,7 +75,14 @@ async function main() {
       .filter((u: { type?: string; quantity?: number | null }) => u?.type)
       .map((u: { type?: string; quantity?: number | null }) => ({ type: String(u.type), count: Number(u.quantity) || 1 }));
   } else {
-    unit_mix = [];
+    const totalSites = report.total_sites ?? (report as { total_sites?: number }).total_sites;
+    if (typeof totalSites === 'number' && totalSites > 0) {
+      const marketType = (report.market_type ?? 'rv') as string;
+      const defaultType = marketType.toLowerCase().includes('glamping') ? 'Cabin' : 'RV Site';
+      unit_mix = [{ type: defaultType, count: totalSites }];
+    } else {
+      unit_mix = [];
+    }
   }
 
   const keyAmenities = (report.key_amenities as string[] | null) ?? [];
@@ -92,9 +99,13 @@ async function main() {
     acres: report.lot_size_acres != null ? Number(report.lot_size_acres) : undefined,
     parcel_number: report.parcel_number ?? undefined,
     client_entity: report.client_entity ?? undefined,
-    client_contact_name: (report as { client_contact_name?: string }).client_contact_name ?? undefined,
+    client_contact_name:
+      (report as { client_contact_name?: string }).client_contact_name ??
+      (report as { client_name?: string }).client_name ??
+      undefined,
     client_address: (report as { client_address?: string }).client_address ?? undefined,
     client_city_state_zip: (report as { client_city_state_zip?: string }).client_city_state_zip ?? undefined,
+    client_salutation: (report as { client_salutation?: string }).client_salutation ?? undefined,
     unit_mix,
     amenities_description: amenities_description || undefined,
     study_id: (() => {
@@ -123,6 +134,7 @@ async function main() {
     generateLetterOfTransmittal,
     generateSWOTAnalysis,
     generateSiteAnalysis,
+    generateDemandIndicators,
   } = await import('@/lib/ai-report-builder/generate');
   const { factCheckExecutiveSummary } = await import('@/lib/ai-report-builder/fact-check');
   const { assembleDraftDocx, assembleDraftXlsx } = await import('@/lib/ai-report-builder');
@@ -130,11 +142,12 @@ async function main() {
   const enriched = await enrichReportInput(input);
   console.log('✓ Enriched');
 
-  const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis] = await Promise.all([
+  const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators] = await Promise.all([
     generateExecutiveSummary(enriched),
     generateLetterOfTransmittal(enriched),
     generateSWOTAnalysis(enriched),
     generateSiteAnalysis(enriched),
+    generateDemandIndicators(enriched),
   ]);
   let executive_summary = execSummaryResult.executive_summary;
   const citations = execSummaryResult.citations ?? [];
@@ -148,7 +161,7 @@ async function main() {
   const [docxBuffer, xlsxBuffer] = await Promise.all([
     assembleDraftDocx(
       enriched,
-      { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis },
+      { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators },
       { marketType: input.market_type }
     ),
     assembleDraftXlsx(enriched, { marketType: input.market_type }),

@@ -17,6 +17,7 @@ import {
   generateLetterOfTransmittal,
   generateSWOTAnalysis,
   generateSiteAnalysis,
+  generateDemandIndicators,
   assembleDraftDocx,
   assembleDraftXlsx,
   factCheckExecutiveSummary,
@@ -88,7 +89,14 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
           count: Number(u.quantity) || 1,
         }));
     } else {
-      unit_mix = [];
+      const totalSites = report.total_sites;
+      if (typeof totalSites === 'number' && totalSites > 0) {
+        const marketType = (report.market_type ?? 'rv') as string;
+        const defaultType = marketType.toLowerCase().includes('glamping') ? 'Cabin' : 'RV Site';
+        unit_mix = [{ type: defaultType, count: totalSites }];
+      } else {
+        unit_mix = [];
+      }
     }
 
     const keyAmenities = (report.key_amenities as string[] | null) ?? [];
@@ -103,6 +111,7 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
       parcel_number: report.parcel_number ?? undefined,
       client_entity: report.client_entity ?? undefined,
       client_contact_name: report.client_contact_name ?? undefined,
+      client_salutation: report.client_salutation ?? undefined,
       client_address: report.client_address ?? undefined,
       client_city_state_zip: report.client_city_state_zip ?? undefined,
       unit_mix,
@@ -115,12 +124,13 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
 
     const enriched = await enrichReportInput(input);
 
-    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis] =
+    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators] =
       await Promise.all([
         generateExecutiveSummary(enriched),
         generateLetterOfTransmittal(enriched),
         generateSWOTAnalysis(enriched),
         generateSiteAnalysis(enriched),
+        generateDemandIndicators(enriched),
       ]);
 
     let executive_summary = execSummaryResult.executive_summary;
@@ -134,7 +144,7 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
     const [docxBuffer, xlsxBuffer] = await Promise.all([
       assembleDraftDocx(
         enriched,
-        { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis },
+        { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators },
         { marketType: input.market_type }
       ),
       assembleDraftXlsx(enriched, { marketType: input.market_type }),

@@ -14,14 +14,15 @@
 
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, createWriteStream } from 'fs';
 import { stringify } from 'csv-stringify/sync';
-import { query, getClient, closeLegacyCampingPool } from '../../lib/legacy-camping-db';
+import { query, closeLegacyCampingPool } from '../../lib/legacy-camping-db';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
 const DATA_DIR = resolve(process.cwd(), 'scripts/migrate-legacy-to-supabase/data');
 const BATCH_SIZE = 10000;
+const EXPORT_BATCH_SIZE = 50000;
 
 const LARGE_TABLES = ['hipcamp.sites', 'campspot.sites', 'hipcamp.propertys'];
 
@@ -69,6 +70,11 @@ async function exportTable(schema: string, table: string): Promise<number> {
 
   const fullTable = `${schema}.${table}`;
   const selectList = selectCols.join(', ');
+  const isLarge = LARGE_TABLES.includes(fullTable);
+
+  if (isLarge) {
+    return exportTableBatched(schema, table, fullTable, selectList, columns, geomCols);
+  }
 
   const { rows } = await query<Record<string, unknown>>(`SELECT ${selectList} FROM ${fullTable}`);
   const count = rows?.length ?? 0;
@@ -88,6 +94,45 @@ async function exportTable(schema: string, table: string): Promise<number> {
     console.log(`  ${fullTable}: ${count} rows exported.`);
   }
   return count;
+}
+
+async function exportTableBatched(schema: string, table: string, fullTable: string, selectList: string, columns: string[]): Promise<number> {
+  const outPath = resolve(DATA_DIR, `${schema}_${table}.csv`);
+  mkdirSync(DATA_DIR, { recursive: true });
+  const stream = createWriteStream(outPath, { flags: 'w' });
+
+  let offset = 0;
+  let total = 0;
+  let firstBatch = true;
+
+  while (true) {
+    const { rows } = await query<Record<string, unknown>>(
+      `SELECT ${selectList} FROM ${fullTable} ORDER BY id LIMIT ${EXPORT_BATCH_SIZE} OFFSET ${offset}`
+    );
+    const count = rows?.length ?? 0;
+    if (count === 0) break;
+
+    const outRows = (rows || []).map((row) => {
+      const out: Record<string, string> = {};
+      for (const col of columns) {
+        out[col] = toCsvValue(row[col]);
+      }
+      return out;
+    });
+    const csv = stringify(outRows, { header: firstBatch, columns });
+    stream.write(csv);
+
+    total += count;
+    offset += count;
+    firstBatch = false;
+    process.stdout.write(`\r  ${fullTable}: ${total} rows exported...`);
+    if (count < EXPORT_BATCH_SIZE) break;
+  }
+
+  stream.end();
+  await new Promise((resolve) => stream.on('finish', resolve));
+  console.log(`\r  ${fullTable}: ${total} rows exported.`);
+  return total;
 }
 
 async function main() {

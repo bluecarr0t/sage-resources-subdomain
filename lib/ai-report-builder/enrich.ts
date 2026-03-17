@@ -16,7 +16,9 @@ import { fetchWebContextForReport } from './tavily-context';
 import { fetchNearbyComps } from './fetch-comps';
 import { fetchPastReportComps } from './fetch-past-report-comps';
 import { fetchTavilyComps } from './tavily-comp-research';
+import { fetchWeatherSparkData } from './weatherspark';
 import type { ReportDraftInput, EnrichedInput, BenchmarkRow, ComparableProperty } from './types';
+import type { WeatherSparkData } from './weatherspark';
 
 function buildComparablesSummary(comps: ComparableProperty[]): string {
   return comps
@@ -44,7 +46,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
   const state = input.state?.trim();
 
   // Phase 1: run all independent data fetches in parallel
-  const [benchResult, coords, countyLookups, censusData, webContext, pastReportComps, tavilyComps] =
+  const [benchResult, coords, countyLookups, censusData, webContext, pastReportComps, tavilyComps, weatherSparkResult] =
     await Promise.all([
       // Benchmarks: aggregate feasibility_comp_units by unit_category
       unitCategories.length > 0
@@ -86,6 +88,13 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
             return [] as ComparableProperty[];
           })
         : Promise.resolve([] as ComparableProperty[]),
+      // WeatherSpark climate data for Demand Indicators
+      input.include_web_research && state
+        ? fetchWeatherSparkData(input.city, state).catch((err) => {
+            console.warn('[enrich] WeatherSpark fetch failed:', err);
+            return null as WeatherSparkData | null;
+          })
+        : Promise.resolve(null as WeatherSparkData | null),
     ]);
 
   // Process benchmarks
@@ -171,6 +180,16 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
     enriched.census_median_household_income = censusData.median_household_income;
   }
 
+  if (weatherSparkResult) {
+    enriched.weather_data = {
+      url: weatherSparkResult.url,
+      climate_text: weatherSparkResult.climate_text,
+      image_urls: weatherSparkResult.image_urls,
+      city: weatherSparkResult.city,
+      state: weatherSparkResult.state,
+    };
+  }
+
   // Build enrichment metadata with all data sources
   const dataSources: string[] = ['feasibility_comp_units', 'geocode'];
   if (enriched.nearby_comps?.length) {
@@ -182,6 +201,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
   }
   if (censusData?.population != null) dataSources.push('census_api');
   if (webContext) dataSources.push('tavily_market_context');
+  if (weatherSparkResult) dataSources.push('weatherspark');
 
   enriched.enrichment_metadata = {
     benchmark_sample_count: enriched.benchmarks?.reduce((sum, b) => sum + b.sample_count, 0) ?? 0,

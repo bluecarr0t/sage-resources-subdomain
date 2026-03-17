@@ -83,6 +83,17 @@ export interface ComparableProperty {
   peak_occupancy?: number | null;
 }
 
+export interface WeatherData {
+  /** Resolved weatherspark.com URL */
+  url: string;
+  /** Extracted climate prose (temperature, precipitation, comfort, tourism score) */
+  climate_text: string;
+  /** Image URLs extracted from the page (may be empty for Canvas-rendered charts) */
+  image_urls: string[];
+  city: string;
+  state: string;
+}
+
 export interface EnrichedInput extends ReportDraftInput {
   benchmarks?: BenchmarkRow[];
   comparables_summary?: string;
@@ -101,6 +112,8 @@ export interface EnrichedInput extends ReportDraftInput {
   /** From Census API (when CENSUS_API_KEY set) */
   census_population?: number;
   census_median_household_income?: number;
+  /** WeatherSpark climate data for Demand Indicators section */
+  weather_data?: WeatherData;
 }
 
 export interface Citation {
@@ -122,4 +135,6 @@ export interface GeneratedSections {
   letter_of_transmittal?: string;
   swot_analysis?: string;
   site_analysis?: string;
+  /** Expanded Demand Indicators writeup (multi-paragraph, weather-enriched) */
+  demand_indicators?: string;
 }

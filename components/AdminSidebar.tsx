@@ -161,14 +161,14 @@ export default function AdminSidebar() {
           <div className={`flex items-center justify-center border-b border-gray-200 dark:border-gray-900/50 relative ${showCollapsed ? 'py-4 pt-8' : 'py-4'}`}>
             <Link
               href="/admin/dashboard"
-              className={`flex items-center justify-center ${showCollapsed ? 'w-12 h-12' : 'w-40 h-40'}`}
+              className={`flex items-center justify-center ${showCollapsed ? 'w-11 h-11' : 'w-36 h-36'}`}
             >
               <Image
                 src={isDark ? LOGO_DARK : LOGO_LIGHT}
                 alt="Sage Outdoor Advisory"
-                width={showCollapsed ? 48 : 160}
-                height={showCollapsed ? 48 : 160}
-                className={`object-contain ${showCollapsed ? 'w-12 h-12' : 'w-40 h-40'}`}
+                width={showCollapsed ? 44 : 144}
+                height={showCollapsed ? 44 : 144}
+                className={`object-contain ${showCollapsed ? 'w-11 h-11' : 'w-36 h-36'}`}
               />
             </Link>
             <button

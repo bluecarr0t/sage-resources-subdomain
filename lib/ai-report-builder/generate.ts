@@ -60,7 +60,7 @@ function buildDetailedCompsString(enriched: EnrichedInput): string {
     sections.push(
       'Market database comparables (Hipcamp, RoverPass, Campspot, Glamping DB):',
       ...dbComps.slice(0, 6).map((c) => {
-        const parts = [`  - ${c.property_name} (${c.city}, ${c.state} – ${c.distance_miles} mi)`];
+        const parts = [`  - ${c.property_name} (${c.city}, ${c.state} - ${c.distance_miles} mi)`];
         if (c.avg_retail_daily_rate) parts.push(`ADR: $${Math.round(c.avg_retail_daily_rate)}`);
         if (c.property_total_sites) parts.push(`Sites: ${c.property_total_sites}`);
         if (c.unit_type) parts.push(`Type: ${c.unit_type}`);
@@ -79,7 +79,7 @@ function buildDetailedCompsString(enriched: EnrichedInput): string {
         if (c.high_rate) parts.push(`Peak: $${Math.round(c.high_rate)}`);
         if (c.low_rate) parts.push(`Low: $${Math.round(c.low_rate)}`);
         if (c.low_occupancy || c.peak_occupancy) {
-          parts.push(`Occ: ${c.low_occupancy ?? '?'}%–${c.peak_occupancy ?? '?'}%`);
+          parts.push(`Occ: ${c.low_occupancy ?? '?'}%-${c.peak_occupancy ?? '?'}%`);
         }
         if (c.property_total_sites) parts.push(`Sites: ${c.property_total_sites}`);
         if (c.quality_score) parts.push(`Quality: ${c.quality_score}/10`);
@@ -95,8 +95,8 @@ function buildDetailedCompsString(enriched: EnrichedInput): string {
       ...webComps.slice(0, 4).map((c) => {
         const parts = [`  - ${c.property_name}`];
         if (c.city && c.state) parts.push(`(${c.city}, ${c.state})`);
-        if (c.avg_retail_daily_rate) parts.push(`ADR: ~$${Math.round(c.avg_retail_daily_rate)}`);
-        if (c.description) parts.push(`– ${c.description.slice(0, 150)}`);
+        if (c.avg_retail_daily_rate) parts.push(`ADR: $${Math.round(c.avg_retail_daily_rate)}`);
+        if (c.description) parts.push(`- ${c.description.slice(0, 150)}`);
         return parts.join(' ');
       }),
     );
@@ -160,7 +160,7 @@ ${enriched.web_context ? `\n\nSupplementary web research (use only to support; d
 Return ONLY valid JSON. No markdown code blocks.`;
 
   const content = await chatCompletion(
-    'You write professional feasibility study executive summaries for Sage Outdoor Advisory. Match the exact tone, structure, and terminology of their existing reports. Be concise, data-driven, and avoid fabrication. Use the exact numbers provided when available. Every statistic must have a citation in the citations array. Do not invent numbers.',
+    'You write professional feasibility study executive summaries for Sage Outdoor Advisory. Match the exact tone, structure, and terminology of their existing reports. Be concise, data-driven, and avoid fabrication. Use the exact numbers provided when available. Every statistic must have a citation in the citations array. Do not invent numbers. Do not place URLs or citation callouts in narrative prose.',
     prompt,
     { temperature: 0.3, maxTokens: 1200, responseFormat: 'json_object' }
   ).then((s) => s.trim());
@@ -347,5 +347,64 @@ ${(enriched.web_context || '').slice(0, 3500)}
     maxTokens: 900,
   });
   if (!content) throw new Error('LLM returned empty site analysis');
+  return normalizeTerminology(content.trim());
+}
+
+/**
+ * Generate an expanded Demand Indicators section using WeatherSpark climate
+ * data (when available) plus enriched market/demographic inputs.
+ * Produces multiple paragraphs covering temperature, precipitation,
+ * tourism score, comfort index, and overall demand assessment.
+ */
+export async function generateDemandIndicators(
+  enriched: EnrichedInput
+): Promise<string> {
+  const location = buildLocationString(enriched);
+  const marketContext = getMarketTypeContext(enriched.market_type);
+  const weatherData = enriched.weather_data;
+
+  const systemMsg =
+    'You write professional Demand Indicators sections for Sage Outdoor Advisory feasibility studies. Be data-driven and concise. Use the exact data provided. Do not invent statistics.';
+
+  const weatherBlock = weatherData?.climate_text
+    ? `\nWeatherSpark climate data for ${weatherData.city}, ${weatherData.state} (SOURCE: WEATHERSPARK.COM - ${weatherData.url}):\n${weatherData.climate_text.slice(0, 4000)}\n`
+    : '';
+
+  const userMsg = `Write a Demand Indicators section for a Sage Outdoor Advisory feasibility study.
+
+${marketContext}
+${STYLE_GUIDE_PROMPT}
+
+Write 3-5 paragraphs covering the following subsections in order:
+
+1. **Overall Demand Assessment**: Open with "Overall, the demand indicators for the subject are positive." Summarize market conditions, population growth, and tourism trends that support demand.
+
+2. **Climate and Weather Overview**: Describe the year-round weather patterns for ${enriched.city}, ${enriched.state}. Cover average high/low temperatures by season, precipitation patterns, and the comfortable outdoor season length. Reference WeatherSpark as the source when climate data is available.
+
+3. **Tourism Score and Best Season**: Describe the tourism score and best time to visit. Identify peak season, shoulder seasons, and off-season. Relate this to expected occupancy patterns for outdoor hospitality.
+
+4. **Comfort Index and Operating Season**: Describe the comfort index (humidity, dew point, wind). Determine the viable operating season length and any weather-related risks (extreme heat, cold snaps, hurricanes, etc.).
+
+Rules:
+- Use only the data provided below. Do not fabricate statistics.
+- Write in plain prose paragraphs, no markdown headings or bullet points.
+- Attribute climate data to "WeatherSpark.com" when referencing weather statistics.
+- Each paragraph should be 2-4 sentences.
+- Use professional consulting language consistent with Sage Outdoor Advisory reports.
+
+Property: ${enriched.property_name}
+Location: ${location}
+${enriched.population_2020 != null ? `State population (Census): 2010 ${enriched.population_2010?.toLocaleString() ?? 'N/A'}, 2020 ${enriched.population_2020.toLocaleString()}, change ${enriched.population_change_pct?.toFixed(1) ?? 'N/A'}%` : ''}
+${enriched.gdp_2023 != null ? `State GDP (BEA): 2022 $${(enriched.gdp_2022 ?? 0).toLocaleString()}M, 2023 $${enriched.gdp_2023.toLocaleString()}M` : ''}
+${weatherBlock}
+${enriched.web_context ? `\nSupplementary web research:\n${enriched.web_context.slice(0, 2000)}\n` : ''}
+
+Write plain text paragraphs only. No markdown formatting, no headings, no bullets.`;
+
+  const content = await chatCompletion(systemMsg, userMsg, {
+    temperature: 0.3,
+    maxTokens: 1500,
+  });
+  if (!content) throw new Error('LLM returned empty demand indicators');
   return normalizeTerminology(content.trim());
 }

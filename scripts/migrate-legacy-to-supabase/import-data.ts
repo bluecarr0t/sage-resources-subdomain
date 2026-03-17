@@ -17,14 +17,24 @@
 
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, createReadStream, statSync } from 'fs';
 import { parse } from 'csv-parse/sync';
+import { parse as parseStream } from 'csv-parse';
 import { Pool } from 'pg';
+
+const LARGE_FILE_THRESHOLD_BYTES = 400 * 1024 * 1024;
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
 const DATA_DIR = resolve(process.cwd(), 'scripts/migrate-legacy-to-supabase/data');
 const BATCH_SIZE = 1000;
+
+const JSON_COLUMNS = new Set([
+  'recommends', 'sites_count', 'core_amenities', 'activities', 'basic_amenities',
+  'policies', 'rv_types', 'categories', 'discounts', 'seasonal_rates',
+  'config', 'amenities', 'terrain', 'rv_details', 'rv_amenities',
+  'category_list', 'capacity', 'rates', 'season_rates',
+]);
 
 function getSupabasePool(): Pool {
   const url = process.env.SUPABASE_DB_URL;
@@ -50,7 +60,20 @@ function parseArgs(): { tables?: string[]; truncate?: boolean } {
 
 function parseCsvValue(val: string, col: string): unknown {
   if (val === '' || val === 'null') return null;
-  if (col.includes('_id') || col === 'id' || col === 'scraping_id' || col === 'import_id') {
+  if (JSON_COLUMNS.has(col)) {
+    if (!val || val.trim() === '') return null;
+    try {
+      JSON.parse(val);
+      return val;
+    } catch {
+      return null;
+    }
+  }
+  if (col === 'scraping_id' || col === 'import_id') {
+    const n = parseInt(val, 10);
+    return isNaN(n) ? val : n;
+  }
+  if ((col.includes('_id') || col === 'id') && !val.includes('-')) {
     const n = parseInt(val, 10);
     return isNaN(n) ? val : n;
   }
@@ -69,6 +92,10 @@ function parseCsvValue(val: string, col: string): unknown {
   if (col === 'coordinates' && val && val.startsWith('POINT')) {
     return val;
   }
+  if ((col === 'created_at' || col === 'updated_at') && val) {
+    const trimmed = val.replace(/^"+|"+$/g, '');
+    if (/^\d{4}-\d{2}-\d{2}T/.test(trimmed)) return trimmed;
+  }
   if (val.startsWith('{') || val.startsWith('[')) {
     try {
       return JSON.parse(val);
@@ -81,9 +108,9 @@ function parseCsvValue(val: string, col: string): unknown {
 
 async function importTable(pool: Pool, schema: string, table: string, truncateFirst: boolean): Promise<number> {
   const filePath = resolve(DATA_DIR, `${schema}_${table}.csv`);
-  let content: string;
+  let stat: { size: number };
   try {
-    content = readFileSync(filePath, 'utf-8');
+    stat = statSync(filePath);
   } catch {
     console.log(`  ${schema}.${table}: file not found, skipping.`);
     return 0;
@@ -100,9 +127,21 @@ async function importTable(pool: Pool, schema: string, table: string, truncateFi
     }
   }
 
+  if (stat.size > LARGE_FILE_THRESHOLD_BYTES) {
+    return importTableStreaming(pool, schema, table, filePath, fullTable);
+  }
+
+  let content: string;
+  try {
+    content = readFileSync(filePath, 'utf-8');
+  } catch (err) {
+    console.error(`  ${fullTable}: read failed:`, err instanceof Error ? err.message : err);
+    return 0;
+  }
+
   const records = parse(content, { columns: true, skip_empty_lines: true, trim: true, relax_column_count: true }) as Record<string, string>[];
   if (records.length === 0) {
-    console.log(`  ${schema}.${table}: 0 rows (empty file).`);
+    console.log(`  ${fullTable}: 0 rows (empty file).`);
     return 0;
   }
 
@@ -138,6 +177,88 @@ async function importTable(pool: Pool, schema: string, table: string, truncateFi
   }
   console.log(`\r  ${fullTable}: ${imported} rows imported.`);
   return imported;
+}
+
+async function importTableStreaming(pool: Pool, schema: string, table: string, filePath: string, fullTable: string): Promise<number> {
+  return new Promise((resolveImport, rejectImport) => {
+    const parser = createReadStream(filePath, { encoding: 'utf-8' }).pipe(
+      parseStream({ columns: true, skip_empty_lines: true, trim: true, relax_column_count: true })
+    );
+
+    let columns: string[] = [];
+    let geomCols: string[] = [];
+    let colList = '';
+    let batch: Record<string, string>[] = [];
+    let imported = 0;
+    let client: Awaited<ReturnType<Pool['connect']>> | null = null;
+
+    parser.on('readable', async function () {
+      let record: Record<string, string> | null;
+      while ((record = parser.read() as Record<string, string> | null) !== null) {
+        if (columns.length === 0) {
+          columns = Object.keys(record);
+          geomCols = columns.filter((c) => c === 'coordinates');
+          colList = columns.join(', ');
+        }
+        batch.push(record);
+        if (batch.length >= BATCH_SIZE) {
+          parser.pause();
+          if (!client) client = await pool.connect();
+          const values: unknown[] = [];
+          const rowPlaceholders: string[] = [];
+          batch.forEach((row, rowIdx) => {
+            const base = rowIdx * columns.length;
+            const ph = columns.map((c, colIdx) => {
+              const paramNum = base + colIdx + 1;
+              values.push(parseCsvValue(row[c] ?? '', c));
+              return geomCols.includes(c) ? `ST_GeomFromText($${paramNum}, 4326)::geometry` : `$${paramNum}`;
+            }).join(', ');
+            rowPlaceholders.push(`(${ph})`);
+          });
+          try {
+            await pool.query(`INSERT INTO ${fullTable} (${colList}) VALUES ${rowPlaceholders.join(', ')}`, values);
+            imported += batch.length;
+            process.stdout.write(`\r  ${fullTable}: ${imported} rows...`);
+          } catch (err) {
+            parser.destroy(err as Error);
+            return;
+          }
+          batch = [];
+          parser.resume();
+        }
+      }
+    });
+
+    parser.on('end', async () => {
+      try {
+        if (batch.length > 0 && client) {
+          const values: unknown[] = [];
+          const rowPlaceholders: string[] = [];
+          batch.forEach((row, rowIdx) => {
+            const base = rowIdx * columns.length;
+            const ph = columns.map((c, colIdx) => {
+              const paramNum = base + colIdx + 1;
+              values.push(parseCsvValue(row[c] ?? '', c));
+              return geomCols.includes(c) ? `ST_GeomFromText($${paramNum}, 4326)::geometry` : `$${paramNum}`;
+            }).join(', ');
+            rowPlaceholders.push(`(${ph})`);
+          });
+          await pool.query(`INSERT INTO ${fullTable} (${colList}) VALUES ${rowPlaceholders.join(', ')}`, values);
+          imported += batch.length;
+        }
+        if (client) client.release();
+        console.log(`\r  ${fullTable}: ${imported} rows imported.`);
+        resolveImport(imported);
+      } catch (err) {
+        rejectImport(err);
+      }
+    });
+
+    parser.on('error', (err) => {
+      if (client) client.release();
+      rejectImport(err);
+    });
+  });
 }
 
 async function main() {

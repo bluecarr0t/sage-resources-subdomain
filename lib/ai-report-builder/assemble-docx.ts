@@ -8,11 +8,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
+import sharp from 'sharp';
 import { createServerClient } from '@/lib/supabase';
 import type { EnrichedInput } from './types';
 import type { GeneratedSections } from './types';
 
 const BUCKET_NAME = 'report-templates';
+const INCLUDE_CITATIONS_IN_DOCX =
+  process.env.REPORT_BUILDER_INCLUDE_CITATIONS_IN_DOCX === 'true';
 
 /** Map market_type to template key in storage (rv/template.docx, glamping/template.docx) */
 export function getTemplateKeyForMarketType(marketType?: string | null): string {
@@ -163,10 +166,10 @@ function buildComparablesAnalysis(input: EnrichedInput): string {
     if (c.unit_type) details.push(`Unit type: ${c.unit_type}`);
     if (c.avg_retail_daily_rate) details.push(`Avg daily rate: $${Math.round(c.avg_retail_daily_rate)}`);
     if (c.high_rate && c.low_rate) {
-      details.push(`Rate range: $${Math.round(c.low_rate)}–$${Math.round(c.high_rate)}`);
+      details.push(`Rate range: $${Math.round(c.low_rate)}-$${Math.round(c.high_rate)}`);
     }
     if (c.low_occupancy != null && c.peak_occupancy != null) {
-      details.push(`Occupancy: ${c.low_occupancy}%–${c.peak_occupancy}%`);
+      details.push(`Occupancy: ${c.low_occupancy}%-${c.peak_occupancy}%`);
     }
 
     const sourceMap: Record<string, string> = {
@@ -268,37 +271,161 @@ function replaceLinkedProjectOverviewTable(zip: PizZip, input: EnrichedInput): v
 
   if (!linkedExcelParaPattern.test(xml)) return;
 
-  const replacement = `${buildProjectOverviewTableXml(input)}<w:p/>`;
+  const relinkNote =
+    '<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>' +
+    '<w:r><w:rPr><w:i/><w:color w:val="808080"/><w:sz w:val="18"/></w:rPr>' +
+    '<w:t>[Linked table: To re-link this table to the companion .xlsx file, right-click the table in Word, ' +
+    'select "Linked Worksheet Object" &gt; "Links", then update the source to point to the downloaded .xlsx ' +
+    '(ToT Intake Form sheet, rows 22-48).]</w:t></w:r></w:p>';
+
+  const replacement = `${buildProjectOverviewTableXml(input)}${relinkNote}<w:p/>`;
   zip.file(xmlPath, xml.replace(linkedExcelParaPattern, replacement));
 }
 
+const SECTION_HEADINGS = [
+  'Project Overview',
+  'Industry Overview',
+  'Demand Indicators',
+  'Site Analysis',
+  'Development Costs',
+  'Comparables',
+  'SWOT',
+  'Pro Forma',
+  'Addenda',
+];
+
+const SECTION_IMAGE_DESCRIPTIONS: Record<string, string> = {
+  'Project Overview': 'project site photo or aerial view',
+  'Demand Indicators': 'WeatherSpark climate/weather chart',
+  'Site Analysis': 'aerial/site photo or map',
+  'Development Costs': 'development cost illustration',
+  'Comparables': 'comparable property photo',
+  'SWOT': 'SWOT analysis visual',
+  'Pro Forma': 'financial projection chart',
+  'Addenda': 'appendix figure',
+};
+
+function extractParagraphPlainText(paraXml: string): string {
+  return paraXml.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function detectSectionHeading(paraXml: string): string | null {
+  const isHeading = /<w:pStyle\s+w:val="Heading[12]"/.test(paraXml);
+  if (!isHeading) return null;
+  const plain = extractParagraphPlainText(paraXml);
+  for (const heading of SECTION_HEADINGS) {
+    if (plain.toLowerCase().includes(heading.toLowerCase())) return heading;
+  }
+  return null;
+}
+
 /**
- * Replace static template image blocks with explicit placeholders for author review.
- * This prevents stale template photos/maps/comparable screenshots from leaking into
- * generated reports.
+ * Find the start of the actual "Project Overview" section heading paragraph,
+ * not the TOC entry. The TOC lists "Project Overview" first; we need the
+ * real section heading (which has Heading1/2 style in the same paragraph).
+ * Skip TOC entries (usually inside hyperlinks) and find the first Heading
+ * paragraph containing "Project Overview".
  */
-function replaceTemplateImagesWithPlaceholders(zip: PizZip): void {
+function findProjectOverviewSectionAnchor(xml: string): number {
+  const paraPattern = /<w:p\b[\s\S]*?<\/w:p>/g;
+  let match;
+  while ((match = paraPattern.exec(xml)) !== null) {
+    const para = match[0];
+    const plain = para.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (!plain.toLowerCase().includes('project overview')) continue;
+    if (/<w:hyperlink\b/.test(para)) continue;
+    if (/<w:pStyle\s+w:val="Heading[12]"/.test(para)) {
+      return match.index;
+    }
+  }
+  return xml.indexOf('<w:t>Project Overview</w:t>');
+}
+
+/**
+ * Replace template images selectively: preserve images inside the
+ * "Industry Overview" section while replacing images in other sections
+ * with descriptive placeholders that tell the author what to add.
+ */
+function replaceTemplateImagesSelectively(zip: PizZip): void {
   const xmlPath = 'word/document.xml';
   const file = zip.file(xmlPath);
   if (!file) return;
 
   const xml = file.asText();
-  const projectOverviewAnchor = xml.indexOf('<w:t>Project Overview</w:t>');
+  const projectOverviewAnchor = findProjectOverviewSectionAnchor(xml);
   if (projectOverviewAnchor < 0) return;
 
   const prefix = xml.slice(0, projectOverviewAnchor);
   const suffix = xml.slice(projectOverviewAnchor);
-  const placeholder =
-    '<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r><w:t>[Image placeholder - add author-selected image]</w:t></w:r></w:p>';
+
+  let currentSection = 'Project Overview';
+  const imageCountBySection: Record<string, number> = {};
 
   const updated = suffix.replace(/<w:p\b[\s\S]*?<\/w:p>/g, (para) => {
-    if (/<w:drawing[\s>]/.test(para) || /<mc:AlternateContent[\s>][\s\S]*?<w:drawing/.test(para)) {
-      return placeholder;
-    }
-    return para;
+    const heading = detectSectionHeading(para);
+    if (heading) currentSection = heading;
+
+    const hasImage =
+      /<w:drawing[\s>]/.test(para) ||
+      /<mc:AlternateContent[\s>][\s\S]*?<w:drawing/.test(para);
+    if (!hasImage) return para;
+
+    if (currentSection === 'Industry Overview') return para;
+
+    imageCountBySection[currentSection] = (imageCountBySection[currentSection] || 0) + 1;
+    const imgNum = imageCountBySection[currentSection];
+    const desc = SECTION_IMAGE_DESCRIPTIONS[currentSection] || 'relevant image';
+
+    return `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r><w:t>[Image placeholder ${imgNum}: Add ${desc} for ${escapeXml(currentSection)} section]</w:t></w:r></w:p>`;
   });
 
   zip.file(xmlPath, prefix + updated);
+}
+
+/** Max dimension for compressed images; JPEG quality */
+const IMAGE_MAX_DIM = 1200;
+const IMAGE_JPEG_QUALITY = 85;
+
+/**
+ * Compress images in the zip to reduce DOCX size. Resizes to max 1200px, re-encodes JPEG at 85%.
+ */
+async function compressImagesInZip(zip: PizZip): Promise<{ compressed: number; bytesSaved: number }> {
+  const mediaFiles = Object.keys(zip.files).filter(
+    (p) => p.startsWith('word/media/') && /\.(png|jpg|jpeg|webp)$/i.test(p),
+  );
+  let compressed = 0;
+  let bytesSaved = 0;
+
+  for (const mediaPath of mediaFiles) {
+    const file = zip.file(mediaPath);
+    if (!file) continue;
+    const orig = Buffer.from(file.asBinary(), 'binary');
+    if (!orig || orig.length < 2000) continue;
+
+    try {
+      let pipeline = sharp(orig);
+      const meta = await pipeline.metadata();
+      const w = meta.width ?? 0;
+      const h = meta.height ?? 0;
+      if (w > IMAGE_MAX_DIM || h > IMAGE_MAX_DIM) {
+        pipeline = pipeline.resize(IMAGE_MAX_DIM, IMAGE_MAX_DIM, { fit: 'inside' });
+      }
+      const ext = path.extname(mediaPath).toLowerCase();
+      const out =
+        ext === '.png'
+          ? await pipeline.png({ compressionLevel: 6 }).toBuffer()
+          : await pipeline.jpeg({ quality: IMAGE_JPEG_QUALITY }).toBuffer();
+
+      if (out.length < orig.length) {
+        zip.file(mediaPath, out, { binary: true });
+        compressed++;
+        bytesSaved += orig.length - out.length;
+      }
+    } catch {
+      /* skip on error */
+    }
+  }
+  return { compressed, bytesSaved };
 }
 
 /**
@@ -391,6 +518,29 @@ function stripUnreferencedMedia(zip: PizZip): { removed: number; bytesFreed: num
   return { removed: totalRemoved, bytesFreed: totalBytesFreed };
 }
 
+/**
+ * Collapse 2+ consecutive empty paragraphs to 1 to prevent blank white pages.
+ * Handles: <w:p/>, <w:p></w:p>, and <w:p><w:pPr>...</w:pPr></w:p> (no text, no sectPr).
+ * Does not touch paragraphs containing w:sectPr (section breaks).
+ */
+function collapseExcessiveEmptyParagraphs(zip: PizZip): void {
+  const xmlPath = 'word/document.xml';
+  const file = zip.file(xmlPath);
+  if (!file) return;
+
+  let xml = file.asText();
+
+  const emptyPara =
+    /<w:p\s*\/>|<w:p>\s*<\/w:p>|<w:p>(?![\s\S]*?<w:sectPr)(?:<w:pPr[\s\S]*?<\/w:pPr>)\s*<\/w:p>/;
+  const emptySeq = new RegExp(
+    `((?:${emptyPara.source})\\s*){2,}`,
+    'g',
+  );
+
+  xml = xml.replace(emptySeq, '<w:p/>\n');
+  zip.file(xmlPath, xml);
+}
+
 function buildSiteAnalysisParagraphsXml(siteAnalysisText: string): string {
   const lines = siteAnalysisText
     .split('\n')
@@ -411,8 +561,9 @@ function buildSiteAnalysisParagraphsXml(siteAnalysisText: string): string {
 }
 
 /**
- * Replace template's static "Site Analysis" narrative with generated content.
- * Keeps subsequent maps/images/figures in place (or placeholders after image pass).
+ * Replace only the initial static text paragraphs of the "Site Analysis"
+ * section with generated content. Stops at first table, linked object,
+ * image, or next section heading to preserve template structure.
  */
 function replaceStaticSiteAnalysisSection(zip: PizZip, siteAnalysisText: string): void {
   const xmlPath = 'word/document.xml';
@@ -434,13 +585,11 @@ function replaceStaticSiteAnalysisSection(zip: PizZip, siteAnalysisText: string)
     const para = m[0];
     const idx = m.index ?? 0;
 
-    if (
-      para.includes('<w:drawing') ||
-      para.includes('<w:t>Development Costs</w:t>') ||
-      /<w:pStyle w:val="Heading1"\s*\/>/.test(para)
-    ) {
-      break;
-    }
+    if (para.includes('<w:t>Development Costs</w:t>')) break;
+    if (/<w:pStyle\s+w:val="Heading[12]"/.test(para)) break;
+    if (para.includes('<w:tbl>')) break;
+    if (/<w:instrText[^>]*>/.test(para)) break;
+    if (para.includes('<w:drawing') || /<mc:AlternateContent[\s>][\s\S]*?<w:drawing/.test(para)) break;
 
     const plain = para.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     if (!plain) {
@@ -467,6 +616,240 @@ function replaceStaticSiteAnalysisSection(zip: PizZip, siteAnalysisText: string)
     'Zoning: Not yet verified; analyst to confirm.';
 
   const replacement = buildSiteAnalysisParagraphsXml(siteAnalysisText || fallback) + '<w:p/>';
+  zip.file(xmlPath, xml.slice(0, startIdx) + replacement + suffix.slice(removeUntil));
+}
+
+function buildDemandIndicatorsParagraphsXml(text: string): string {
+  return text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map(
+      (line) =>
+        `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r><w:t>${escapeXml(line)}</w:t></w:r></w:p>`,
+    )
+    .join('');
+}
+
+/** Skip URLs that are spinners, thumbnails, or non-chart assets */
+function isEmbeddableWeatherSparkUrl(url: string): boolean {
+  const lower = url.toLowerCase();
+  if (lower.includes('spinner') || lower.includes('thumbnail')) return false;
+  if (lower.includes('anyclip.com') || lower.includes('_1000x650_')) return false;
+  return /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(url) || lower.includes('cloudfront.net');
+}
+
+/** Fetch image from URL; returns buffer and extension or null on failure */
+async function fetchImageFromUrl(
+  url: string,
+): Promise<{ buffer: Buffer; ext: string } | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 500 || buf.length > 5 * 1024 * 1024) return null;
+    const ct = res.headers.get('content-type') ?? '';
+    const ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : 'jpg';
+    return { buffer: buf, ext };
+  } catch {
+    return null;
+  }
+}
+
+/** Build OOXML inline drawing for an embedded image (EMU: 3657600 x 2286000 ≈ 4" x 2.5") */
+function buildInlineImageDrawingXml(rId: string): string {
+  return (
+    `<w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ` +
+    `xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" ` +
+    `xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ` +
+    `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">` +
+    `<wp:inline distT="0" distB="0" distL="0" distR="0">` +
+    `<wp:extent cx="3657600" cy="2286000"/>` +
+    `<wp:docPr id="${Math.floor(Math.random() * 100000) + 1}" name="WeatherSpark Chart"/>` +
+    `<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">` +
+    `<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">` +
+    `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">` +
+    `<pic:nvPicPr><pic:cNvPr id="0" name="chart"/><pic:cNvPicPr/></pic:nvPicPr>` +
+    `<pic:blipFill><a:blip r:embed="${rId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
+    `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="3657600" cy="2286000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>` +
+    `</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`
+  );
+}
+
+/** Build WeatherSpark image blocks: embed when URLs are fetchable, else placeholders */
+async function buildWeatherSparkImageXml(
+  zip: PizZip,
+  city: string,
+  state: string,
+  weatherSparkUrl: string,
+  imageUrls: string[],
+): Promise<string> {
+  const chartTypes = [
+    'average temperature',
+    'precipitation',
+    'tourism score',
+    'comfort level (humidity/dew point)',
+  ];
+  const embeddable = imageUrls.filter(isEmbeddableWeatherSparkUrl).slice(0, 4);
+  const relsPath = 'word/_rels/document.xml.rels';
+  const relsFile = zip.file(relsPath);
+  if (!relsFile) {
+    return buildWeatherSparkImagePlaceholderXml(city, state, weatherSparkUrl, imageUrls);
+  }
+
+  let relsXml = relsFile.asText();
+  const maxRId = Math.max(
+    0,
+    ...Array.from(relsXml.matchAll(/rId(\d+)/g)).map((m) => parseInt(m[1], 10)),
+  );
+
+  const parts: string[] = [];
+  let nextRId = maxRId + 1;
+
+  for (let i = 0; i < 4; i++) {
+    const url = embeddable[i];
+    if (url) {
+      const fetched = await fetchImageFromUrl(url);
+      if (fetched) {
+        let buf = fetched.buffer;
+        let ext = fetched.ext;
+        if (ext === 'webp') {
+          try {
+            buf = await sharp(buf).jpeg({ quality: IMAGE_JPEG_QUALITY }).toBuffer();
+            ext = 'jpg';
+          } catch {
+            continue;
+          }
+        }
+        const mediaName = `imageWeatherSpark${i + 1}.${ext}`;
+        const mediaPath = `word/media/${mediaName}`;
+        zip.file(mediaPath, buf, { binary: true });
+        const rId = `rId${nextRId++}`;
+        const rel =
+          `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${mediaName}"/>`;
+        relsXml = relsXml.replace('</Relationships>', `${rel}\n</Relationships>`);
+        parts.push(
+          `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r>${buildInlineImageDrawingXml(rId)}</w:r></w:p>`,
+        );
+        continue;
+      }
+    }
+    parts.push(
+      `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>` +
+        `<w:r><w:t>[Image placeholder ${i + 1}: Add WeatherSpark ${chartTypes[i]} chart for ${escapeXml(city)}, ${escapeXml(state)}${url ? ` - ${escapeXml(url)}` : ''}]</w:t></w:r></w:p>`,
+    );
+  }
+
+  zip.file(relsPath, relsXml);
+  parts.push(
+    `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>` +
+      `<w:r><w:rPr><w:i/><w:color w:val="808080"/><w:sz w:val="18"/></w:rPr>` +
+      `<w:t>SOURCE: WEATHERSPARK.COM - ${escapeXml(weatherSparkUrl)}</w:t></w:r></w:p>`,
+  );
+  return parts.join('');
+}
+
+function buildWeatherSparkImagePlaceholderXml(
+  city: string,
+  state: string,
+  weatherSparkUrl: string,
+  imageUrls: string[],
+): string {
+  const parts: string[] = [];
+  const chartTypes = [
+    'average temperature',
+    'precipitation',
+    'tourism score',
+    'comfort level (humidity/dew point)',
+  ];
+  if (imageUrls.length > 0) {
+    for (let i = 0; i < imageUrls.length && i < 4; i++) {
+      parts.push(
+        `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>` +
+          `<w:r><w:t>[Image placeholder ${i + 1}: Download and insert WeatherSpark ${chartTypes[i] || 'climate'} chart from: ${escapeXml(imageUrls[i])}]</w:t></w:r></w:p>`,
+      );
+    }
+  } else {
+    for (let i = 0; i < chartTypes.length; i++) {
+      parts.push(
+        `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>` +
+          `<w:r><w:t>[Image placeholder ${i + 1}: Add WeatherSpark ${chartTypes[i]} chart for ${escapeXml(city)}, ${escapeXml(state)} - Source: ${escapeXml(weatherSparkUrl)}]</w:t></w:r></w:p>`,
+      );
+    }
+  }
+  parts.push(
+    `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>` +
+      `<w:r><w:rPr><w:i/><w:color w:val="808080"/><w:sz w:val="18"/></w:rPr>` +
+      `<w:t>SOURCE: WEATHERSPARK.COM - ${escapeXml(weatherSparkUrl)}</w:t></w:r></w:p>`,
+  );
+  return parts.join('');
+}
+
+/**
+ * Replace only the initial static text paragraphs of the "Demand Indicators"
+ * section with generated content. Stops at first table, linked object,
+ * image, or next section heading to preserve template structure.
+ * Embeds WeatherSpark images when URLs are fetchable.
+ */
+async function replaceDemandIndicatorsSection(
+  zip: PizZip,
+  demandIndicatorsText: string,
+  input: EnrichedInput,
+): Promise<void> {
+  const xmlPath = 'word/document.xml';
+  const file = zip.file(xmlPath);
+  if (!file) return;
+
+  const xml = file.asText();
+
+  const headingPattern = /<w:p\b[\s\S]*?<w:t[^>]*>(?:[^<]*)?Demand Indicators(?:[^<]*)?<\/w:t>[\s\S]*?<\/w:p>/;
+  const headingMatch = xml.match(headingPattern);
+  if (!headingMatch || headingMatch.index == null) return;
+
+  const startIdx = headingMatch.index + headingMatch[0].length;
+  const suffix = xml.slice(startIdx);
+  const paragraphPattern = /<w:p\b[\s\S]*?<\/w:p>/g;
+
+  let removeUntil = 0;
+  let foundTextParagraph = false;
+  for (const m of suffix.matchAll(paragraphPattern)) {
+    const para = m[0];
+    const idx = m.index ?? 0;
+
+    if (/<w:pStyle\s+w:val="Heading[12]"/.test(para)) break;
+    if (para.includes('<w:t>Site Analysis</w:t>')) break;
+    if (para.includes('<w:t>Development Costs</w:t>')) break;
+    if (para.includes('<w:t>Supply and Competition</w:t>')) break;
+    if (para.includes('<w:tbl>')) break;
+    if (/<w:instrText[^>]*>/.test(para)) break;
+    if (/<w:drawing[\s>]/.test(para) || /<mc:AlternateContent[\s>][\s\S]*?<w:drawing/.test(para)) break;
+
+    const plain = para.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (!plain) {
+      if (foundTextParagraph) removeUntil = idx + para.length;
+      continue;
+    }
+
+    foundTextParagraph = true;
+    removeUntil = idx + para.length;
+  }
+
+  if (!foundTextParagraph || removeUntil === 0) return;
+
+  let replacement = buildDemandIndicatorsParagraphsXml(demandIndicatorsText);
+
+  const weatherData = input.weather_data;
+  if (weatherData) {
+    replacement += await buildWeatherSparkImageXml(
+      zip,
+      weatherData.city || input.city,
+      weatherData.state || input.state,
+      weatherData.url,
+      weatherData.image_urls,
+    );
+  }
+
+  replacement += '<w:p/>';
   zip.file(xmlPath, xml.slice(0, startIdx) + replacement + suffix.slice(removeUntil));
 }
 
@@ -512,7 +895,7 @@ export async function assembleDraftDocx(
     }
     appendixParts.push(`Generated on ${meta.enrichment_date}.`);
   }
-  if ((sections.citations?.length ?? 0) > 0) {
+  if (INCLUDE_CITATIONS_IN_DOCX && (sections.citations?.length ?? 0) > 0) {
     appendixParts.push(
       '',
       'Citations:',
@@ -576,7 +959,17 @@ export async function assembleDraftDocx(
   stripHighlightsFromFormValues(doc.getZip(), formValues);
   replaceLinkedProjectOverviewTable(doc.getZip(), input);
   replaceStaticSiteAnalysisSection(doc.getZip(), sections.site_analysis || '');
-  replaceTemplateImagesWithPlaceholders(doc.getZip());
+  if (sections.demand_indicators) {
+    await replaceDemandIndicatorsSection(doc.getZip(), sections.demand_indicators, input);
+  }
+  replaceTemplateImagesSelectively(doc.getZip());
+
+  const { compressed, bytesSaved } = await compressImagesInZip(doc.getZip());
+  if (compressed > 0) {
+    console.log(
+      `[assemble-docx] Compressed ${compressed} images (~${(bytesSaved / 1024).toFixed(0)} KB saved)`,
+    );
+  }
 
   const { removed, bytesFreed } = stripUnreferencedMedia(doc.getZip());
   if (removed > 0) {
@@ -584,6 +977,8 @@ export async function assembleDraftDocx(
       `[assemble-docx] Stripped ${removed} unreferenced media files (~${(bytesFreed / 1024 / 1024).toFixed(1)} MB freed)`
     );
   }
+
+  collapseExcessiveEmptyParagraphs(doc.getZip());
 
   const buf = doc.getZip().generate({
     type: 'nodebuffer',
