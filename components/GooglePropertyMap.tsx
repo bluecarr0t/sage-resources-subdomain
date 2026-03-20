@@ -48,10 +48,34 @@ const defaultCenter = { lat: 39.5, lng: -98.5 };
 const defaultZoom = 4;
 const defaultZoomMobile = 3.25;
 
-/** After centering on a marker, pan the map down slightly so tall InfoWindows are not clipped at the top. */
-function infoWindowPanOffsetY(map: google.maps.Map): number {
-  const h = map.getDiv()?.clientHeight ?? 400;
-  return Math.round(Math.min(280, Math.max(120, h * 0.2)));
+/**
+ * Pan so the marker sits far enough below the top of the map pane for a tall InfoWindow
+ * (photo ~192px + chrome + text ≈ 400–450px above the pin). Uses meters/px at the
+ * current zoom so the offset scales with viewport size and zoom level.
+ */
+function centerMapLeavingRoomAboveInfoWindow(
+  map: google.maps.Map,
+  marker: google.maps.LatLngLiteral
+): google.maps.LatLngLiteral {
+  const mapDiv = map.getDiv();
+  const h = mapDiv?.clientHeight ?? 500;
+  const zoom = map.getZoom() ?? 10;
+  const { lat, lng } = marker;
+
+  const estimatedCardAbovePinPx = 460;
+  const topPaddingPx = 28;
+  const bottomHeadroomPx = 72;
+  const minMarkerYFromTop = Math.min(
+    h - bottomHeadroomPx,
+    estimatedCardAbovePinPx + topPaddingPx
+  );
+  const shiftMarkerDownPx = Math.max(0, minMarkerYFromTop - h / 2);
+
+  const metersPerPixel =
+    (156543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom);
+  const deltaLat = (shiftMarkerDownPx * metersPerPixel) / 111_320;
+
+  return { lat: lat + deltaLat, lng };
 }
 
 type PropertyWithCoords = SageProperty & { coordinates: [number, number] };
@@ -314,11 +338,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     markerClickTimeRef,
   });
 
-  // Center map on opened InfoWindow anchor and offset so the popup stays fully visible (not clipped at top).
+  // Center map so the InfoWindow (tall card above the pin) stays inside the map pane, not clipped at the top.
   useEffect(() => {
     if (!map) return;
 
-    const target =
+    const marker =
       selectedClientWork != null
         ? { lat: selectedClientWork.lat, lng: selectedClientWork.lng }
         : selectedPark != null
@@ -327,42 +351,49 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             ? { lat: selectedProperty.coordinates[0], lng: selectedProperty.coordinates[1] }
             : null;
 
-    if (!target) return;
+    if (!marker) return;
+
+    const newCenter = centerMapLeavingRoomAboveInfoWindow(map, marker);
+    setMapCenter(newCenter);
 
     let idleListener: google.maps.MapsEventListener | null = null;
     let syncTimeout: number | null = null;
-    let fallbackTimeout: number | null = null;
+    let imageLayoutTimeout: number | null = null;
     let cancelled = false;
-    let nudged = false;
 
-    const nudgeAndSyncCenter = () => {
-      if (cancelled || nudged) return;
-      nudged = true;
-      if (fallbackTimeout !== null) {
-        clearTimeout(fallbackTimeout);
-        fallbackTimeout = null;
-      }
-      if (idleListener !== null) {
-        google.maps.event.removeListener(idleListener);
-        idleListener = null;
-      }
-      map.panBy(0, infoWindowPanOffsetY(map));
-      syncTimeout = window.setTimeout(() => {
-        if (cancelled) return;
-        const c = map.getCenter();
-        if (c) setMapCenter({ lat: c.lat(), lng: c.lng() });
-      }, 150);
+    const syncFromMap = () => {
+      if (cancelled) return;
+      const c = map.getCenter();
+      if (c) setMapCenter({ lat: c.lat(), lng: c.lng() });
     };
 
-    map.panTo(target);
-    idleListener = google.maps.event.addListenerOnce(map, 'idle', nudgeAndSyncCenter);
-    fallbackTimeout = window.setTimeout(() => nudgeAndSyncCenter(), 600);
+    map.panTo(newCenter);
+    idleListener = google.maps.event.addListenerOnce(map, 'idle', () => {
+      syncTimeout = window.setTimeout(syncFromMap, 50);
+    });
+
+    // Photo loading can grow the InfoWindow after first layout — add one small northward nudge.
+    imageLayoutTimeout = window.setTimeout(() => {
+      if (cancelled) return;
+      const c = map.getCenter();
+      if (!c) return;
+      const z = map.getZoom() ?? 10;
+      const lat0 = c.lat();
+      const mpp =
+        (156543.03392 * Math.cos((lat0 * Math.PI) / 180)) / Math.pow(2, z);
+      const extraPx = Math.min(100, Math.round((map.getDiv()?.clientHeight ?? 500) * 0.06));
+      const extraDeltaLat = (extraPx * mpp) / 111_320;
+      map.panTo({ lat: lat0 + extraDeltaLat, lng: c.lng() });
+      google.maps.event.addListenerOnce(map, 'idle', () => {
+        syncTimeout = window.setTimeout(syncFromMap, 50);
+      });
+    }, 700);
 
     return () => {
       cancelled = true;
       if (idleListener) google.maps.event.removeListener(idleListener);
-      if (fallbackTimeout) clearTimeout(fallbackTimeout);
       if (syncTimeout) clearTimeout(syncTimeout);
+      if (imageLayoutTimeout) clearTimeout(imageLayoutTimeout);
     };
   }, [map, selectedProperty, selectedPark, selectedClientWork, setMapCenter]);
 
