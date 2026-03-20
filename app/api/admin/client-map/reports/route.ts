@@ -18,10 +18,7 @@ import {
 } from '@/lib/us-state-centers';
 
 /** Prefer `state` column; else parse `location` so OR centroids match rows with empty state. */
-function stateHintForReport(report: {
-  state: string | null | undefined;
-  location: string | null | undefined;
-}): string | null {
+function stateHintForReport(report: { state?: unknown; location?: unknown }): string | null {
   const s = String(report.state ?? '').trim();
   if (s) return s;
   const p = parseLocationStringField(String(report.location ?? '').trim());
@@ -186,6 +183,7 @@ export const GET = withAdminAuth(async (_request, auth) => {
     // Use only Past Report uploaded Report details (unit_descriptions, unit_mix) — not comparables
     const unitTypesByReport = new Map<string, string[]>();
     for (const r of rows) {
+      const reportId = String(r.id ?? '');
       const types: string[] = [];
       const ud = r.unit_descriptions as Array<{ type?: string }> | null;
       if (ud && Array.isArray(ud)) {
@@ -201,7 +199,7 @@ export const GET = withAdminAuth(async (_request, auth) => {
           if (t && !types.includes(t)) types.push(t);
         }
       }
-      if (types.length > 0) unitTypesByReport.set(r.id, types);
+      if (types.length > 0 && reportId) unitTypesByReport.set(reportId, types);
     }
 
     const rawReports = rows.map((r) => {
@@ -226,20 +224,20 @@ export const GET = withAdminAuth(async (_request, auth) => {
       const client = Array.isArray(r.clients) ? r.clients[0] : r.clients;
 
       return {
-        id: r.id,
+        id: String(r.id ?? ''),
         studyId: r.study_id ?? null,
         propertyName: r.property_name || 'Unnamed Property',
         reportNumber: r.title || `Report-${String(r.id).slice(0, 8)}`,
         address: formatAddress(r),
         lat,
         lng,
-        type: formatMarketType(r.market_type),
-        marketType: (r.market_type || '').toLowerCase() || null,
+        type: formatMarketType(r.market_type as string | null | undefined),
+        marketType: String(r.market_type ?? '').toLowerCase() || null,
         reportDate: r.report_date ?? null,
         reportYear:
           reportYearFromStudyId(r.study_id as string | null | undefined) ??
           (r.report_date ? String(r.report_date).slice(0, 4) : null),
-        unitTypes: unitTypesByReport.get(r.id) || [],
+        unitTypes: unitTypesByReport.get(String(r.id ?? '')) || [],
         totalSites: r.total_sites ?? 'N/A',
         dropboxLink: r.dropbox_url || '#',
         status: r.status || 'draft',

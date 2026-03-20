@@ -13,10 +13,7 @@ import {
 } from '@/lib/us-state-centers';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
 
-function stateHintForReport(report: {
-  state: string | null | undefined;
-  location: string | null | undefined;
-}): string | null {
+function stateHintForReport(report: { state?: unknown; location?: unknown }): string | null {
   const s = String(report.state ?? '').trim();
   if (s) return s;
   const p = parseLocationStringField(String(report.location ?? '').trim());

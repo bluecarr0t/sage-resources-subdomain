@@ -24,7 +24,7 @@ export const GET = withAdminAuth(
     context?: { params?: Promise<{ month: string }> }
   ) => {
     try {
-      const params = await (context?.params ?? Promise.resolve({}));
+      const params = await (context?.params ?? Promise.resolve({ month: '' }));
       let month = params.month;
       if (!month) {
         const segments = request.nextUrl.pathname.split('/').filter(Boolean);
