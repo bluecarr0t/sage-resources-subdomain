@@ -74,7 +74,7 @@
       "title": "Map Layers",
       "clientWork": {
         "label": "Client Work",
-        "description": "Selected Sage client projects on the map, including glamping, RV Resorts, Campgrounds, Marinas, Landscape Hotels, and other outdoor hospitality projects.",
+        "description": "Selected Sage client projects on the map, including glamping, RV resorts, campgrounds, marinas, landscape hotels, and other outdoor hospitality projects.",
         "hide": "Hide Client Work",
         "show": "Show Client Work"
       },
