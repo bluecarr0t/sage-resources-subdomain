@@ -4,6 +4,8 @@
 
 export * from './types';
 export { enrichReportInput } from './enrich';
+export { deriveDevelopmentCosts } from './development-costs';
+export { unitMixToCostConfigs } from './unit-mix-to-cost-config';
 export {
   generateExecutiveSummary,
   generateLetterOfTransmittal,

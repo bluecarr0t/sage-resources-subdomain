@@ -32,6 +32,9 @@ export default function FilterSidebar({
     filterUnitType,
     filterRateRange,
     showNationalParks,
+    showClientWork,
+    clientWorkPoints,
+    clientWorkPointsLoading,
     selectedMapLayer,
     hasActiveFilters,
     propertiesLoading: loading,
@@ -45,6 +48,7 @@ export default function FilterSidebar({
     toggleUnitType,
     toggleRateRange,
     toggleNationalParks,
+    toggleClientWork,
     setMapLayer,
     clearFilters,
   } = useMapContext();
@@ -367,6 +371,37 @@ export default function FilterSidebar({
           {/* Map Layers */}
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-900">{t('layers.title')}</label>
+
+            {/* Client Work Toggle */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-900">{t('layers.clientWork.label')}</span>
+                  <span className="text-xs text-gray-500">
+                    (
+                    {clientWorkPointsLoading ? '…' : clientWorkPoints.length})
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 mt-0.5">{t('layers.clientWork.description')}</p>
+              </div>
+              <button
+                id="client-work-toggle"
+                type="button"
+                role="switch"
+                aria-checked={showClientWork}
+                aria-label={showClientWork ? t('layers.clientWork.hide') : t('layers.clientWork.show')}
+                onClick={toggleClientWork}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2 ${
+                  showClientWork ? 'bg-[#CA8A04]' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    showClientWork ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
 
             {/* National Parks Toggle */}
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">

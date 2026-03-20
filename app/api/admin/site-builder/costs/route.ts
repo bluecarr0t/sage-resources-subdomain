@@ -1,0 +1,88 @@
+/**
+ * API Route: Site Builder cost calculation
+ * POST /api/admin/site-builder/costs
+ *
+ * Body: { configs: SiteBuilderConfig[] }
+ * Returns cost per unit, subtotal per config, and total site build.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
+
+import { withAdminAuth } from '@/lib/require-admin-auth';
+import { calculateSiteBuilderCosts } from '@/lib/site-builder/cost-calculator';
+import type { SiteBuilderConfig } from '@/lib/site-builder/cost-calculator';
+
+function parseConfigs(body: unknown): SiteBuilderConfig[] | null {
+  if (!body || typeof body !== 'object' || !('configs' in body)) return null;
+  const arr = (body as { configs: unknown }).configs;
+  if (!Array.isArray(arr)) return null;
+
+  const result: SiteBuilderConfig[] = [];
+  for (const c of arr) {
+    if (!c || typeof c !== 'object') continue;
+    const type = (c as { type?: string }).type;
+    if (type === 'glamping') {
+      const slug = (c as { unitTypeSlug?: string }).unitTypeSlug;
+      const quantity = Number((c as { quantity?: number }).quantity) || 0;
+      const sqft = Number((c as { sqft?: number }).sqft) || 0;
+      const qualityType = String((c as { qualityType?: string }).qualityType || 'Premium');
+      const amenitySlugs = Array.isArray((c as { amenitySlugs?: unknown }).amenitySlugs)
+        ? ((c as { amenitySlugs: unknown[] }).amenitySlugs).filter((s): s is string => typeof s === 'string')
+        : [];
+      const catalogUnitId = (c as { catalogUnitId?: string | null }).catalogUnitId;
+      const hasCatalogUnit = catalogUnitId && typeof catalogUnitId === 'string';
+      const validForCatalog = hasCatalogUnit && slug && quantity > 0;
+      const validForGeneric = !hasCatalogUnit && slug && quantity > 0 && sqft > 0;
+      if (validForCatalog || validForGeneric) {
+        result.push({
+          type: 'glamping',
+          unitTypeSlug: slug,
+          quantity,
+          sqft: sqft || 0,
+          qualityType,
+          amenitySlugs,
+          catalogUnitId: hasCatalogUnit ? catalogUnitId : null,
+        });
+      }
+    } else if (type === 'rv') {
+      const slug = (c as { siteTypeSlug?: string }).siteTypeSlug;
+      const quantity = Number((c as { quantity?: number }).quantity) || 0;
+      const qualityType = String((c as { qualityType?: string }).qualityType || 'Premium');
+      const amenitySlugs = Array.isArray((c as { amenitySlugs?: unknown }).amenitySlugs)
+        ? ((c as { amenitySlugs: unknown[] }).amenitySlugs).filter((s): s is string => typeof s === 'string')
+        : [];
+      if (slug && quantity > 0) {
+        result.push({ type: 'rv', siteTypeSlug: slug, quantity, qualityType, amenitySlugs });
+      }
+    }
+  }
+  return result;
+}
+
+export const POST = withAdminAuth(async (request: NextRequest, auth) => {
+  try {
+    const body = await request.json().catch(() => null);
+    const configs = parseConfigs(body);
+    if (!configs || configs.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or empty configs' },
+        { status: 400 }
+      );
+    }
+
+    const result = await calculateSiteBuilderCosts(auth.supabase, configs);
+
+    return NextResponse.json({
+      success: true,
+      ...result,
+    });
+  } catch (err) {
+    console.error('[api/admin/site-builder/costs] Error:', err);
+    return NextResponse.json(
+      { success: false, error: 'Failed to calculate costs' },
+      { status: 500 }
+    );
+  }
+});

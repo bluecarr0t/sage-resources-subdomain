@@ -4,8 +4,8 @@ import { ChevronLeft } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
 export const metadata: Metadata = {
-  title: 'Calculator Methodology - Site Design | Sage Admin',
-  description: 'Methodology and calculations for the Site Design RV park yield and economics calculator',
+  title: 'Calculator Methodology - RV Site Setup | Sage Admin',
+  description: 'Methodology and calculations for the RV Site Setup yield and economics calculator',
   robots: {
     index: false,
     follow: false,
@@ -80,21 +80,21 @@ export default function SiteDesignMethodologyPage() {
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Link
-          href="/admin/site-design"
+          href="/admin/rv-site-setup"
           className="inline-flex items-center gap-1 text-sm text-sage-600 dark:text-sage-400 hover:underline mb-6"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to Site Design
+          Back to RV Site Setup
         </Link>
 
         <header className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-            Site Design Calculator — Methodology & Calculations
+            RV Site Setup — Methodology & Calculations
           </h1>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
-            <span>Tool: Site Design (RV Park Yield & Economics)</span>
+            <span>Tool: RV Site Setup (Yield & Economics)</span>
             <span>·</span>
-            <span>Location: /admin/site-design</span>
+            <span>Location: /admin/rv-site-setup</span>
             <span>·</span>
             <span>Version: March 2026</span>
           </div>
@@ -120,7 +120,7 @@ export default function SiteDesignMethodologyPage() {
         <article className="space-y-8">
           <Section id="purpose" num={1} title="Purpose & Scope">
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              The Site Design calculator estimates site count, annual revenue, NOI,
+              The RV Site Setup calculator estimates site count, annual revenue, NOI,
               and estimated value for RV park development based on parcel
               characteristics and site-type configurations.
             </p>

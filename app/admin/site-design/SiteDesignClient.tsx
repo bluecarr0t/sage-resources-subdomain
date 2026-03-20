@@ -4,23 +4,14 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { LayoutGrid, Plus, Trash2, RotateCcw, Download, FileText } from 'lucide-react';
+import { LayoutGrid, Plus, Trash2, Download, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-
-const SQFT_PER_ACRE = 43_560;
-
-export interface SiteTypeConfig {
-  id: string;
-  name: string;
-  width: number;
-  depth: number;
-  adr: number;
-  occupancy: number;
-  count: number | '';
-  devCost: number;
-}
+import { SQFT_PER_ACRE, computeResults } from '@/lib/site-design/calculator';
+import { buildSiteDesignExportData } from '@/lib/site-design/export';
+import { buildSiteDesignUrlParams, parseSitesFromUrl } from '@/lib/site-design/url-state';
+import type { SiteTypeConfig } from '@/lib/site-design/types';
 
 const PRESETS = {
   standard: {
@@ -67,231 +58,17 @@ const PRESETS = {
   },
 };
 
-function roadAllocationPct(roadWidthFt: number): number {
-  const pct = 0.12 + (roadWidthFt - 18) * 0.008;
-  return Math.max(0.10, Math.min(0.30, pct));
-}
-
-function computeResults(
-  grossAcres: number,
-  usablePct: number,
-  roadWidth: number,
-  blockEfficiency: number,
-  operatingNights: number,
-  operatingExpenseRatio: number,
-  capRate: number | null,
-  siteTypes: SiteTypeConfig[]
-) {
-  const netUsableAcres = grossAcres * (usablePct / 100);
-  const netUsableSqft = netUsableAcres * SQFT_PER_ACRE;
-  const roadPct = roadAllocationPct(roadWidth);
-  const usableForSites = netUsableSqft * (1 - roadPct);
-
-  if (siteTypes.length === 0) {
-    const noi = 0;
-    return {
-      netUsableAcres,
-      netUsableSqft,
-      usableForSites,
-      roadPct,
-      siteCalcs: [],
-      siteCountBreakdown: [],
-      bestTypeName: null,
-      bestTypeRevenuePerSqFt: null,
-      partialFillTypeName: null,
-      totalSites: 0,
-      totalLandUsed: 0,
-      annualRevenue: 0,
-      revenuePerAcre: 0,
-      noi,
-      noiPerAcre: 0,
-      totalDevCost: 0,
-      estimatedValue: capRate != null && capRate > 0 ? 0 : null,
-      hasCounts: false,
-      hasPartialFill: false,
-      overCapacity: false,
-      overCapacitySqft: 0,
-      overCapacityAcres: 0,
-    };
-  }
-
-  const siteCalcs = siteTypes.map((st) => {
-    const padSqft = st.width * st.depth;
-    const effectiveSqftPerSite = padSqft / blockEfficiency;
-    const maxSites = Math.floor(usableForSites / effectiveSqftPerSite);
-    const revenuePerSqft =
-      effectiveSqftPerSite > 0
-        ? (st.adr * (st.occupancy / 100) * operatingNights) / effectiveSqftPerSite
-        : 0;
-    return {
-      ...st,
-      effectiveSqftPerSite,
-      maxSites,
-      revenuePerSqft,
-    };
-  });
-
-  const hasAnyCount = siteTypes.some((st) => st.count !== '' && Number(st.count) > 0);
-  let totalSites = 0;
-  let totalLandUsed = 0;
-  let annualRevenue = 0;
-  let hasPartialFill = false;
-  let bestTypeName: string | null = null;
-  let bestTypeRevenuePerSqFt: number | null = null;
-  let partialFillTypeName: string | null = null;
-  const siteCountBreakdown: { id: string; name: string; count: number; isAutoFilled: boolean }[] = [];
-
-  if (hasAnyCount) {
-    for (const st of siteCalcs) {
-      const c = typeof st.count === 'number' ? st.count : parseInt(String(st.count), 10) || 0;
-      totalSites += c;
-      totalLandUsed += c * st.effectiveSqftPerSite;
-      annualRevenue += c * st.adr * (st.occupancy / 100) * operatingNights;
-      siteCountBreakdown.push({ id: st.id, name: st.name, count: c, isAutoFilled: false });
-    }
-    const remainingLand = usableForSites - totalLandUsed;
-    const typesWithNoCount = siteCalcs.filter(
-      (sc) => sc.count === '' || (typeof sc.count === 'number' && sc.count === 0)
-    );
-    if (remainingLand > 0 && typesWithNoCount.length > 0) {
-      const bestRemaining = typesWithNoCount.reduce((a, b) =>
-        b.revenuePerSqft > a.revenuePerSqft ? b : a
-      );
-      const autoFillCount = Math.floor(remainingLand / bestRemaining.effectiveSqftPerSite);
-      if (autoFillCount > 0) {
-        totalSites += autoFillCount;
-        totalLandUsed += autoFillCount * bestRemaining.effectiveSqftPerSite;
-        annualRevenue += autoFillCount * bestRemaining.adr * (bestRemaining.occupancy / 100) * operatingNights;
-        hasPartialFill = true;
-        partialFillTypeName = bestRemaining.name;
-        const entry = siteCountBreakdown.find((e) => e.id === bestRemaining.id);
-        if (entry) {
-          entry.count += autoFillCount;
-          entry.isAutoFilled = true;
-        } else {
-          siteCountBreakdown.push({
-            id: bestRemaining.id,
-            name: bestRemaining.name,
-            count: autoFillCount,
-            isAutoFilled: true,
-          });
-        }
-      }
-    }
-  } else {
-    const best = siteCalcs.reduce((a, b) => (b.revenuePerSqft > a.revenuePerSqft ? b : a));
-    totalSites = best.maxSites;
-    totalLandUsed = totalSites * best.effectiveSqftPerSite;
-    annualRevenue = totalSites * best.adr * (best.occupancy / 100) * operatingNights;
-    bestTypeName = best.name;
-    bestTypeRevenuePerSqFt = best.revenuePerSqft;
-    for (const sc of siteCalcs) {
-      siteCountBreakdown.push({
-        id: sc.id,
-        name: sc.name,
-        count: sc.id === best.id ? totalSites : 0,
-        isAutoFilled: sc.id === best.id,
-      });
-    }
-  }
-
-  const revenuePerAcre = netUsableAcres > 0 ? annualRevenue / netUsableAcres : 0;
-  const overCapacity = totalLandUsed > usableForSites;
-  const overCapacitySqft = overCapacity ? totalLandUsed - usableForSites : 0;
-  const overCapacityAcres = overCapacitySqft / SQFT_PER_ACRE;
-
-  const operatingExpenses = annualRevenue * (operatingExpenseRatio / 100);
-  const noi = annualRevenue - operatingExpenses;
-  const noiPerAcre = netUsableAcres > 0 ? noi / netUsableAcres : 0;
-
-  let totalDevCost = 0;
-  if (hasAnyCount) {
-    const enteredCountSum = siteCalcs.reduce(
-      (sum, sc) => sum + (typeof sc.count === 'number' ? sc.count : parseInt(String(sc.count), 10) || 0),
-      0
-    );
-    for (const sc of siteCalcs) {
-      const c = typeof sc.count === 'number' ? sc.count : parseInt(String(sc.count), 10) || 0;
-      totalDevCost += c * sc.devCost;
-    }
-    if (hasPartialFill) {
-      const autoFillCount = totalSites - enteredCountSum;
-      const typesWithNoCount = siteCalcs.filter(
-        (sc) => sc.count === '' || (typeof sc.count === 'number' && sc.count === 0)
-      );
-      const bestRemaining = typesWithNoCount.reduce((a, b) =>
-        b.revenuePerSqft > a.revenuePerSqft ? b : a
-      );
-      totalDevCost += autoFillCount * bestRemaining.devCost;
-    }
-  } else {
-    const best = siteCalcs.reduce((a, b) => (b.revenuePerSqft > a.revenuePerSqft ? b : a));
-    totalDevCost = totalSites * best.devCost;
-  }
-
-  const estimatedValue =
-    capRate != null && capRate > 0 ? noi / (capRate / 100) : null;
-
-  return {
-    netUsableAcres,
-    netUsableSqft,
-    usableForSites,
-    roadPct,
-    siteCalcs,
-    siteCountBreakdown,
-    bestTypeName,
-    bestTypeRevenuePerSqFt,
-    partialFillTypeName,
-    totalSites,
-    totalLandUsed,
-    annualRevenue,
-    revenuePerAcre,
-    noi,
-    noiPerAcre,
-    totalDevCost,
-    estimatedValue,
-    hasCounts: hasAnyCount,
-    hasPartialFill,
-    overCapacity,
-    overCapacitySqft,
-    overCapacityAcres,
-  };
-}
-
-const DEFAULT_PRESET = PRESETS.standard;
-
-function parseSitesFromUrl(s: string | null): SiteTypeConfig[] | null {
-  if (!s?.trim()) return null;
-  try {
-    const parsed = JSON.parse(s) as unknown;
-    if (!Array.isArray(parsed)) return null;
-    return parsed
-      .filter(
-        (row): row is Record<string, unknown> =>
-          row != null &&
-          typeof row === 'object' &&
-          typeof row.id === 'string' &&
-          typeof row.name === 'string' &&
-          typeof row.width === 'number' &&
-          typeof row.depth === 'number' &&
-          typeof row.adr === 'number' &&
-          typeof row.occupancy === 'number' &&
-          typeof row.devCost === 'number'
-      )
-      .map((row) => ({
-        id: String(row.id),
-        name: String(row.name),
-        width: Number(row.width),
-        depth: Number(row.depth),
-        adr: Number(row.adr),
-        occupancy: Number(row.occupancy),
-        count: row.count === '' || row.count == null ? '' : Math.max(0, Math.round(Number(row.count))),
-        devCost: Number(row.devCost),
-      }));
-  } catch {
-    return null;
-  }
-}
+const EMPTY_STATE = {
+  grossAcres: '' as number | '',
+  usablePct: '' as number | '',
+  roadWidth: '' as number | '',
+  blockEfficiency: '' as number | '',
+  operatingNights: '' as number | '',
+  operatingExpenseRatio: '' as number | '',
+  capRate: '' as number | '',
+  autoFillRemainingLand: true,
+  siteTypes: [] as SiteTypeConfig[],
+};
 
 export default function SiteDesignClient() {
   const t = useTranslations('siteDesign');
@@ -301,30 +78,34 @@ export default function SiteDesignClient() {
   const urlWriteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialMountRef = useRef(true);
 
-  const [grossAcres, setGrossAcres] = useState(DEFAULT_PRESET.grossAcres);
-  const [usablePct, setUsablePct] = useState(DEFAULT_PRESET.usablePct);
-  const [roadWidth, setRoadWidth] = useState(DEFAULT_PRESET.roadWidth);
-  const [blockEfficiency, setBlockEfficiency] = useState(DEFAULT_PRESET.blockEfficiency);
-  const [operatingNights, setOperatingNights] = useState(DEFAULT_PRESET.operatingNights);
-  const [operatingExpenseRatio, setOperatingExpenseRatio] = useState(DEFAULT_PRESET.operatingExpenseRatio);
-  const [capRate, setCapRate] = useState<number | ''>(DEFAULT_PRESET.capRate);
-  const [siteTypes, setSiteTypes] = useState<SiteTypeConfig[]>(() =>
-    DEFAULT_PRESET.siteTypes.map((s) => ({ ...s }))
+  const [grossAcres, setGrossAcres] = useState<number | ''>(EMPTY_STATE.grossAcres);
+  const [usablePct, setUsablePct] = useState<number | ''>(EMPTY_STATE.usablePct);
+  const [roadWidth, setRoadWidth] = useState<number | ''>(EMPTY_STATE.roadWidth);
+  const [blockEfficiency, setBlockEfficiency] = useState<number | ''>(EMPTY_STATE.blockEfficiency);
+  const [operatingNights, setOperatingNights] = useState<number | ''>(EMPTY_STATE.operatingNights);
+  const [operatingExpenseRatio, setOperatingExpenseRatio] = useState<number | ''>(EMPTY_STATE.operatingExpenseRatio);
+  const [capRate, setCapRate] = useState<number | ''>(EMPTY_STATE.capRate);
+  const [autoFillRemainingLand, setAutoFillRemainingLand] = useState<boolean>(
+    EMPTY_STATE.autoFillRemainingLand
   );
-  const [activePreset, setActivePreset] = useState<keyof typeof PRESETS | ''>('standard');
+  const [siteTypes, setSiteTypes] = useState<SiteTypeConfig[]>(EMPTY_STATE.siteTypes);
+  const [activePreset, setActivePreset] = useState<keyof typeof PRESETS | ''>('');
   const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [shareWarning, setShareWarning] = useState<string | null>(null);
 
   const results = useMemo(
     () =>
       computeResults(
-        grossAcres,
-        usablePct,
-        roadWidth,
-        blockEfficiency,
-        operatingNights,
-        operatingExpenseRatio,
+        grossAcres === '' ? 0 : grossAcres,
+        usablePct === '' ? 0 : usablePct,
+        roadWidth === '' ? 18 : roadWidth,
+        blockEfficiency === '' ? 0.9 : blockEfficiency,
+        operatingNights === '' ? 365 : operatingNights,
+        operatingExpenseRatio === '' ? 0 : operatingExpenseRatio,
         capRate === '' ? null : capRate,
-        siteTypes
+        siteTypes,
+        { autoFillRemainingLand }
       ),
     [
       grossAcres,
@@ -335,6 +116,7 @@ export default function SiteDesignClient() {
       operatingExpenseRatio,
       capRate,
       siteTypes,
+      autoFillRemainingLand,
     ]
   );
 
@@ -380,18 +162,19 @@ export default function SiteDesignClient() {
     setActivePreset('');
   };
 
-  const resetToDefaults = () => {
-    const p = DEFAULT_PRESET;
-    setGrossAcres(p.grossAcres);
-    setUsablePct(p.usablePct);
-    setRoadWidth(p.roadWidth);
-    setBlockEfficiency(p.blockEfficiency);
-    setOperatingNights(p.operatingNights);
-    setOperatingExpenseRatio(p.operatingExpenseRatio);
-    setCapRate(p.capRate);
-    setSiteTypes(p.siteTypes.map((s) => ({ ...s })));
-    setActivePreset('standard');
-  };
+  const clearToEmpty = useCallback(() => {
+    setGrossAcres(EMPTY_STATE.grossAcres);
+    setUsablePct(EMPTY_STATE.usablePct);
+    setRoadWidth(EMPTY_STATE.roadWidth);
+    setBlockEfficiency(EMPTY_STATE.blockEfficiency);
+    setOperatingNights(EMPTY_STATE.operatingNights);
+    setOperatingExpenseRatio(EMPTY_STATE.operatingExpenseRatio);
+    setCapRate(EMPTY_STATE.capRate);
+    setAutoFillRemainingLand(EMPTY_STATE.autoFillRemainingLand);
+    setSiteTypes(EMPTY_STATE.siteTypes);
+    setShareWarning(null);
+    setActivePreset('');
+  }, []);
 
   const loadPreset = useCallback((key: keyof typeof PRESETS) => {
     const p = PRESETS[key];
@@ -402,54 +185,11 @@ export default function SiteDesignClient() {
     setOperatingNights(p.operatingNights);
     setOperatingExpenseRatio(p.operatingExpenseRatio);
     setCapRate(p.capRate);
+    setAutoFillRemainingLand(true);
     setSiteTypes(p.siteTypes.map((s) => ({ ...s })));
+    setShareWarning(null);
     setActivePreset(key);
   }, []);
-
-  const buildUrlParams = useCallback(() => {
-    const p = new URLSearchParams();
-    if (activePreset) {
-      p.set('preset', activePreset);
-      return p;
-    }
-    const def = DEFAULT_PRESET;
-    if (grossAcres !== def.grossAcres) p.set('acres', String(grossAcres));
-    if (usablePct !== def.usablePct) p.set('usable', String(usablePct));
-    if (roadWidth !== def.roadWidth) p.set('road', String(roadWidth));
-    if (blockEfficiency !== def.blockEfficiency) p.set('efficiency', String(blockEfficiency));
-    if (operatingNights !== def.operatingNights) p.set('nights', String(operatingNights));
-    if (operatingExpenseRatio !== def.operatingExpenseRatio) p.set('opex', String(operatingExpenseRatio));
-    if (capRate !== def.capRate) {
-      if (capRate === '') p.set('cap', '');
-      else p.set('cap', String(capRate));
-    }
-    const sitesJson = JSON.stringify(
-      siteTypes.map((s) => ({
-        id: s.id,
-        name: s.name,
-        width: s.width,
-        depth: s.depth,
-        adr: s.adr,
-        occupancy: s.occupancy,
-        count: s.count,
-        devCost: s.devCost,
-      }))
-    );
-    if (sitesJson !== JSON.stringify(def.siteTypes.map((s) => ({ ...s })))) {
-      p.set('sites', sitesJson);
-    }
-    return p;
-  }, [
-    activePreset,
-    grossAcres,
-    usablePct,
-    roadWidth,
-    blockEfficiency,
-    operatingNights,
-    operatingExpenseRatio,
-    capRate,
-    siteTypes,
-  ]);
 
   useEffect(() => {
     const preset = searchParams.get('preset')?.toLowerCase();
@@ -466,9 +206,10 @@ export default function SiteDesignClient() {
     const nights = searchParams.get('nights');
     const opex = searchParams.get('opex');
     const cap = searchParams.get('cap');
+    const autoFill = searchParams.get('autofill');
     const sitesParam = searchParams.get('sites');
 
-    const hasParams = acres || usable || road || efficiency || nights || opex || cap || sitesParam;
+    const hasParams = acres || usable || road || efficiency || nights || opex || cap || autoFill || sitesParam;
     if (!hasParams) {
       isInitialMountRef.current = false;
       return;
@@ -502,8 +243,13 @@ export default function SiteDesignClient() {
       if (cap === '') setCapRate('');
       else {
         const n = parseFloat(cap);
-        if (!isNaN(n) && n >= 0 && n <= 20) setCapRate(n);
+        if (!isNaN(n) && n >= 1 && n <= 20) setCapRate(n);
       }
+    }
+    if (autoFill === '0') {
+      setAutoFillRemainingLand(false);
+    } else if (autoFill === '1') {
+      setAutoFillRemainingLand(true);
     }
     const parsedSites = parseSitesFromUrl(sitesParam);
     if (parsedSites && parsedSites.length > 0) {
@@ -517,8 +263,20 @@ export default function SiteDesignClient() {
     if (isInitialMountRef.current) return;
     if (urlWriteTimeoutRef.current) clearTimeout(urlWriteTimeoutRef.current);
     urlWriteTimeoutRef.current = setTimeout(() => {
-      const p = buildUrlParams();
-      const qs = p.toString();
+      const { params, didOmitSites } = buildSiteDesignUrlParams({
+        activePreset,
+        grossAcres,
+        usablePct,
+        roadWidth,
+        blockEfficiency,
+        operatingNights,
+        operatingExpenseRatio,
+        capRate,
+        autoFillRemainingLand,
+        siteTypes,
+      });
+      setShareWarning(didOmitSites ? t('shareWarningSitesOmitted') : null);
+      const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
       urlWriteTimeoutRef.current = null;
     }, 300);
@@ -528,7 +286,6 @@ export default function SiteDesignClient() {
   }, [
     pathname,
     router,
-    buildUrlParams,
     grossAcres,
     usablePct,
     roadWidth,
@@ -536,11 +293,14 @@ export default function SiteDesignClient() {
     operatingNights,
     operatingExpenseRatio,
     capRate,
+    autoFillRemainingLand,
     siteTypes,
     activePreset,
+    t,
   ]);
 
   const handleExport = useCallback(async () => {
+    setExportError(null);
     setExporting(true);
     try {
       const xlsxModule = await import('xlsx');
@@ -548,45 +308,28 @@ export default function SiteDesignClient() {
       if (!XLSX?.utils) {
         throw new Error('xlsx library failed to load');
       }
-      const inputsRows = [
-        { param: 'Gross acres', value: grossAcres },
-        { param: 'Usable %', value: usablePct },
-        { param: 'Road width (ft)', value: roadWidth },
-        { param: 'Block efficiency', value: blockEfficiency },
-        { param: 'Operating nights/year', value: operatingNights },
-        { param: 'Operating expense ratio %', value: operatingExpenseRatio },
-        { param: 'Cap rate %', value: capRate === '' ? '' : capRate },
-      ];
-      const siteTypeRows = siteTypes.map((st) => ({
-        name: st.name,
-        width: st.width,
-        depth: st.depth,
-        adr: st.adr,
-        occupancy: st.occupancy,
-        count: st.count === '' ? '' : st.count,
-        devCost: st.devCost,
-      }));
-      const resultsRows = [
-        { metric: 'Net usable acres', value: results.netUsableAcres.toFixed(2) },
-        { metric: 'Total sites', value: results.totalSites },
-        { metric: 'Annual revenue', value: results.annualRevenue },
-        { metric: 'Revenue per acre', value: results.revenuePerAcre.toFixed(0) },
-        { metric: 'Land used (acres)', value: (results.totalLandUsed / SQFT_PER_ACRE).toFixed(2) },
-        { metric: 'NOI', value: results.noi.toFixed(0) },
-        { metric: 'NOI per acre', value: results.noiPerAcre.toFixed(0) },
-        { metric: 'Total dev cost', value: results.totalDevCost },
-        { metric: 'Est. value', value: results.estimatedValue != null ? results.estimatedValue.toFixed(0) : '' },
-      ];
-      const breakdownRows = results.siteCountBreakdown
-        .filter((b) => b.count > 0)
-        .map((b) => ({ type: b.name, count: b.count, autoFilled: b.isAutoFilled }));
+      const { inputsRows, siteTypeRows, resultsRows, breakdownRows, fileName } =
+        buildSiteDesignExportData({
+          grossAcres,
+          usablePct,
+          roadWidth,
+          blockEfficiency,
+          operatingNights,
+          operatingExpenseRatio,
+          capRate,
+          autoFillRemainingLand,
+          siteTypes,
+          results,
+        });
 
       const wsInputs = XLSX.utils.json_to_sheet([...inputsRows, {}, ...siteTypeRows]);
       const wsResults = XLSX.utils.json_to_sheet([...resultsRows, {}, ...breakdownRows]);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, wsInputs, 'Inputs');
       XLSX.utils.book_append_sheet(wb, wsResults, 'Results');
-      XLSX.writeFile(wb, `site-design-${new Date().toISOString().slice(0, 10)}.xlsx`);
+      XLSX.writeFile(wb, fileName);
+    } catch {
+      setExportError(t('exportFailed'));
     } finally {
       setExporting(false);
     }
@@ -598,8 +341,10 @@ export default function SiteDesignClient() {
     operatingNights,
     operatingExpenseRatio,
     capRate,
+    autoFillRemainingLand,
     siteTypes,
     results,
+    t,
   ]);
 
   const resultsLiveRef = useRef<HTMLDivElement>(null);
@@ -613,10 +358,10 @@ export default function SiteDesignClient() {
   }, [results.totalSites, results.annualRevenue, t]);
 
   const validation = useMemo(() => ({
-    grossAcres: grossAcres < 1,
-    usablePct: usablePct < 0 || usablePct > 100,
-    operatingNights: operatingNights < 1 || operatingNights > 365,
-    operatingExpenseRatio: operatingExpenseRatio < 0 || operatingExpenseRatio > 100,
+    grossAcres: grossAcres !== '' && grossAcres < 1,
+    usablePct: usablePct !== '' && (usablePct < 0 || usablePct > 100),
+    operatingNights: operatingNights !== '' && (operatingNights < 1 || operatingNights > 365),
+    operatingExpenseRatio: operatingExpenseRatio !== '' && (operatingExpenseRatio < 0 || operatingExpenseRatio > 100),
     capRate: capRate !== '' && (capRate < 1 || capRate > 20),
   }), [grossAcres, usablePct, operatingNights, operatingExpenseRatio, capRate]);
 
@@ -634,7 +379,7 @@ export default function SiteDesignClient() {
                 {t('subtitle')}
               </p>
               <Link
-                href="/admin/site-design/methodology"
+                href="/admin/rv-site-setup/methodology"
                 className="inline-flex items-center gap-1.5 mt-2 text-sm text-sage-600 dark:text-sage-400 hover:underline"
               >
                 <FileText className="w-4 h-4 shrink-0" />
@@ -647,9 +392,9 @@ export default function SiteDesignClient() {
                 onChange={(e) => {
                   const v = e.target.value as keyof typeof PRESETS | '';
                   if (v) loadPreset(v);
-                  else setActivePreset('');
+                  else clearToEmpty();
                 }}
-                className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                className="w-[10rem] pl-3 pr-5 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
                 aria-label={t('selectPreset')}
               >
                 <option value="">{t('selectPreset')}</option>
@@ -662,18 +407,31 @@ export default function SiteDesignClient() {
                 size="sm"
                 onClick={handleExport}
                 disabled={exporting}
-                className="whitespace-nowrap"
+                className="inline-flex items-center whitespace-nowrap shrink-0 min-w-[7rem]"
               >
                 <Download className="w-4 h-4 mr-2 shrink-0" />
                 {exporting ? t('exporting') : t('export')}
               </Button>
-              <Button variant="secondary" size="sm" onClick={resetToDefaults} className="whitespace-nowrap">
-                <RotateCcw className="w-4 h-4 mr-2 shrink-0" />
-                {t('resetToDefaults')}
-              </Button>
             </div>
           </div>
         </header>
+
+        {exportError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
+          >
+            {exportError}
+          </div>
+        )}
+        {shareWarning && (
+          <div
+            role="status"
+            className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+          >
+            {shareWarning}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Inputs */}
@@ -681,16 +439,17 @@ export default function SiteDesignClient() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {t('parcelAndRoad')}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,10rem)_1fr] lg:grid-cols-[minmax(0,10rem)_1fr_1fr] gap-4 max-w-3xl">
               <Input
                 type="number"
                 label={t('grossAcreage')}
                 min={1}
                 max={1000}
-                value={grossAcres}
+                value={grossAcres === '' ? '' : grossAcres}
                 error={validation.grossAcres ? t('validationGrossAcreage') : undefined}
                 onChange={(e) => {
-                  setGrossAcres(Math.max(0, parseFloat(e.target.value) || 0));
+                  const v = e.target.value;
+                  setGrossAcres(v === '' ? '' : Math.max(0, parseFloat(v) || 0));
                   setActivePreset('');
                 }}
               />
@@ -700,10 +459,11 @@ export default function SiteDesignClient() {
                 min={0}
                 max={100}
                 step={1}
-                value={usablePct}
+                value={usablePct === '' ? '' : usablePct}
                 error={validation.usablePct ? t('validationUsablePercent') : undefined}
                 onChange={(e) => {
-                  setUsablePct(Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)));
+                  const v = e.target.value;
+                  setUsablePct(v === '' ? '' : Math.max(0, Math.min(100, parseFloat(v) || 0)));
                   setActivePreset('');
                 }}
               />
@@ -713,9 +473,10 @@ export default function SiteDesignClient() {
                 tooltip={t('roadWidthHelp')}
                 min={18}
                 max={40}
-                value={roadWidth}
+                value={roadWidth === '' ? '' : roadWidth}
                 onChange={(e) => {
-                  setRoadWidth(Math.max(18, Math.min(40, parseFloat(e.target.value) || 18)));
+                  const v = e.target.value;
+                  setRoadWidth(v === '' ? '' : Math.max(18, Math.min(40, parseFloat(v) || 18)));
                   setActivePreset('');
                 }}
               />
@@ -726,10 +487,11 @@ export default function SiteDesignClient() {
                 min={0.7}
                 max={1}
                 step={0.05}
-                value={blockEfficiency}
+                value={blockEfficiency === '' ? '' : blockEfficiency}
                 onChange={(e) => {
+                  const v = e.target.value;
                   setBlockEfficiency(
-                    Math.max(0.7, Math.min(1, parseFloat(e.target.value) || 0.9))
+                    v === '' ? '' : Math.max(0.7, Math.min(1, parseFloat(v) || 0.9))
                   );
                   setActivePreset('');
                 }}
@@ -740,11 +502,12 @@ export default function SiteDesignClient() {
                 tooltip={t('operatingNightsHelp')}
                 min={1}
                 max={365}
-                value={operatingNights}
+                value={operatingNights === '' ? '' : operatingNights}
                 error={validation.operatingNights ? t('validationOperatingNights') : undefined}
                 onChange={(e) => {
+                  const v = e.target.value;
                   setOperatingNights(
-                    Math.max(1, Math.min(365, parseInt(String(e.target.value), 10) || 365))
+                    v === '' ? '' : Math.max(1, Math.min(365, parseInt(v, 10) || 365))
                   );
                   setActivePreset('');
                 }}
@@ -755,11 +518,12 @@ export default function SiteDesignClient() {
                 tooltip={t('operatingExpenseRatioHelp')}
                 min={0}
                 max={100}
-                value={operatingExpenseRatio}
+                value={operatingExpenseRatio === '' ? '' : operatingExpenseRatio}
                 error={validation.operatingExpenseRatio ? t('validationOperatingExpenseRatio') : undefined}
                 onChange={(e) => {
+                  const v = e.target.value;
                   setOperatingExpenseRatio(
-                    Math.max(0, Math.min(100, parseFloat(e.target.value) || 0))
+                    v === '' ? '' : Math.max(0, Math.min(100, parseFloat(v) || 0))
                   );
                   setActivePreset('');
                 }}
@@ -777,7 +541,7 @@ export default function SiteDesignClient() {
                 onChange={(e) => {
                   const v = e.target.value;
                   setCapRate(
-                    v === '' ? '' : Math.max(0, Math.min(20, parseFloat(v) || 0))
+                    v === '' ? '' : Math.max(1, Math.min(20, parseFloat(v) || 1))
                   );
                   setActivePreset('');
                 }}
@@ -787,6 +551,21 @@ export default function SiteDesignClient() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 pt-4">
               {t('siteTypes')}
             </h2>
+            <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <input
+                type="checkbox"
+                checked={autoFillRemainingLand}
+                onChange={(e) => {
+                  setAutoFillRemainingLand(e.target.checked);
+                  setActivePreset('');
+                }}
+                className="h-4 w-4 rounded border-gray-300 text-sage-600 focus:ring-sage-500 dark:border-gray-600 dark:bg-gray-900"
+              />
+              {t('autoFillRemainingLand')}
+            </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400 -mt-3">
+              {t('autoFillRemainingLandHelp')}
+            </p>
             <div className="space-y-4">
               {siteTypes.map((st) => (
                 <div

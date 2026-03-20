@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
 import { SageProperty } from '@/lib/types/sage';
+import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
 
 let globalFetchInProgress = false;
 let globalAbortController: AbortController | null = null;
@@ -14,6 +15,7 @@ interface MapContextType {
   filterUnitType: string[];
   filterRateRange: string[];
   showNationalParks: boolean;
+  showClientWork: boolean;
   selectedMapLayer: MapLayer;
   showPopulationLayer: boolean;
   showGDPLayer: boolean;
@@ -29,6 +31,7 @@ interface MapContextType {
   toggleUnitType: (unitType: string) => void;
   toggleRateRange: (rateRange: string) => void;
   toggleNationalParks: () => void;
+  toggleClientWork: () => void;
   setMapLayer: (layer: MapLayer) => void;
   setPopulationYear: (year: '2010' | '2020') => void;
   toggleFullscreen: () => void;
@@ -39,6 +42,8 @@ interface MapContextType {
   propertiesLoading: boolean;
   propertiesError: string | null;
   hasLoadedOnce: boolean;
+  clientWorkPoints: ClientWorkMapPoint[];
+  clientWorkPointsLoading: boolean;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -49,6 +54,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const [filterUnitType, setFilterUnitType] = useState<string[]>([]);
   const [filterRateRange, setFilterRateRange] = useState<string[]>([]);
   const [showNationalParks, setShowNationalParks] = useState<boolean>(true);
+  const [showClientWork, setShowClientWork] = useState<boolean>(true);
   const [selectedMapLayer, setSelectedMapLayer] = useState<MapLayer>('none');
   const [populationYear, setPopulationYear] = useState<'2010' | '2020'>('2020');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -64,6 +70,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const [hasLoadedOnce, setHasLoadedOnce] = useState<boolean>(false);
   const fetchInProgressRef = useRef<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const [clientWorkPoints, setClientWorkPoints] = useState<ClientWorkMapPoint[]>([]);
+  const [clientWorkPointsLoading, setClientWorkPointsLoading] = useState<boolean>(true);
 
   const toggleCountry = (country: string) => {
     setFilterCountry((prev) => 
@@ -90,6 +99,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleNationalParks = () => setShowNationalParks((prev) => !prev);
+  const toggleClientWork = () => setShowClientWork((prev) => !prev);
   const setMapLayer = (layer: MapLayer) => setSelectedMapLayer(layer);
   const toggleFullscreen = () => setIsFullscreen((prev) => !prev);
 
@@ -186,21 +196,47 @@ export function MapProvider({ children }: { children: ReactNode }) {
     };
   }, []); // Fetch once on mount - no filter dependencies
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadClientWork() {
+      try {
+        const response = await fetch('/api/map/client-work');
+        const result = await response.json();
+        if (cancelled) return;
+        if (result.success && Array.isArray(result.points)) {
+          setClientWorkPoints(result.points as ClientWorkMapPoint[]);
+        }
+      } catch (err) {
+        console.error('Error fetching client work map points:', err);
+      } finally {
+        if (!cancelled) {
+          setClientWorkPointsLoading(false);
+        }
+      }
+    }
+    loadClientWork();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <MapContext.Provider 
       value={{ 
         filterCountry, filterState, filterUnitType, filterRateRange,
-        showNationalParks, selectedMapLayer,
+        showNationalParks, showClientWork, selectedMapLayer,
         showPopulationLayer, showGDPLayer, showOpportunityZones,
         populationYear, isFullscreen,
         setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange,
         toggleCountry, toggleState, toggleUnitType, toggleRateRange,
-        toggleNationalParks, setMapLayer, setPopulationYear, toggleFullscreen,
+        toggleNationalParks, toggleClientWork, setMapLayer, setPopulationYear, toggleFullscreen,
         clearFilters, hasActiveFilters,
         // allProperties serves as both the complete dataset AND the "properties" for processing
         properties: allProperties,
         allProperties,
         propertiesLoading, propertiesError, hasLoadedOnce,
+        clientWorkPoints,
+        clientWorkPointsLoading,
       }}
     >
       {children}

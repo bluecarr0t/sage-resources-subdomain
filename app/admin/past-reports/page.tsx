@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MoreHorizontal, FileText, UploadCloud } from 'lucide-react';
 import { Button, Input, Modal, ModalContent, Select } from '@/components/ui';
+import { reportServiceLabel } from '@/lib/report-service-display';
 
 interface Report {
   id: string;
@@ -106,17 +107,6 @@ function formatMarketType(type: string | null | undefined) {
     landscape_hotel: 'Landscape Hotel',
   };
   return map[(type || '').toLowerCase()] || type || '-';
-}
-
-function formatService(service: string | null | undefined) {
-  const map: Record<string, string> = {
-    feasibility_study: 'Feasibility Study',
-    appraisal: 'Appraisal',
-    revenue_projection: 'Revenue Projection',
-    market_study: 'Market Study',
-    update: 'Update',
-  };
-  return map[(service || '').toLowerCase()] || service || '-';
 }
 
 function formatStatus(status: string | null | undefined) {
@@ -475,7 +465,7 @@ export default function PastReportsPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-700 dark:text-gray-300">
-                            {formatService(report.service)}
+                            {reportServiceLabel(report.service, '-')}
                           </div>
                         </td>
                         <td className="px-6 py-4">

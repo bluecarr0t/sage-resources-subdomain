@@ -730,6 +730,12 @@
     },
     "layers": {
       "title": "Kartenebenen",
+      "clientWork": {
+        "label": "Kundenprojekte",
+        "description": "Ausgewählte Sage-Kundenprojekte auf der Karte, darunter Glamping, RV-Resorts, Campingplätze, Marinas, Landscape Hotels und weitere Outdoor-Hospitality-Projekte.",
+        "hide": "Kundenprojekte ausblenden",
+        "show": "Kundenprojekte anzeigen"
+      },
       "nationalParks": {
         "label": "Nationalparks Anzeigen",
         "description": "Nationalpark-Markierungen auf der Karte anzeigen",
@@ -766,6 +772,10 @@
         "acres": "Morgen",
         "visitors": "Besucher (2021)",
         "viewMore": "Mehr Anzeigen →"
+      },
+      "clientWork": {
+        "resortType": "Resort-Typ",
+        "service": "Leistung"
       },
       "photo": {
         "previous": "Vorheriges Foto",

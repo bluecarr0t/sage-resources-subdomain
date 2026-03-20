@@ -730,6 +730,12 @@
     },
     "layers": {
       "title": "Capas del Mapa",
+      "clientWork": {
+        "label": "Trabajos con clientes",
+        "description": "Proyectos seleccionados de Sage en el mapa, entre ellos glamping, resorts para RV, campings, marinas, hoteles paisajísticos y otros proyectos de hospitalidad al aire libre.",
+        "hide": "Ocultar trabajos con clientes",
+        "show": "Mostrar trabajos con clientes"
+      },
       "nationalParks": {
         "label": "Mostrar Parques Nacionales",
         "description": "Mostrar marcadores de Parques Nacionales en el mapa",
@@ -766,6 +772,10 @@
         "acres": "acres",
         "visitors": "Visitantes (2021)",
         "viewMore": "Ver Más →"
+      },
+      "clientWork": {
+        "resortType": "Tipo de resort",
+        "service": "Servicio"
       },
       "photo": {
         "previous": "Foto anterior",

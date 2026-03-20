@@ -1,0 +1,25 @@
+{
+  "edition_id": "march_2026",
+  "comment": "Copy to march_2026.json and tune per PDF; layout_list_pages example for golden pages",
+  "list_line_strategy": "auto",
+  "page_rules": {
+    "skip_pages": [],
+    "layout_list_pages": [27, 540]
+  },
+  "layout": {
+    "enabled": false,
+    "_comment_enable": "Set true and list layout_list_pages to trial bbox parsing on those pages only",
+    "x_numeric_min_ratio": 0.5,
+    "y_tolerance": 3.5
+  },
+  "section_aliases": {
+    "ELECTRICAL SYSTEMS": "ELECTRICAL"
+  },
+  "truncated_and_junk_headers_extra": [],
+  "short_section_denylist_extra": [],
+  "component_table": {
+    "header_substrings_exclude": [],
+    "optional_page_text_exclude": false,
+    "allow_numeric_fallback": false
+  }
+}

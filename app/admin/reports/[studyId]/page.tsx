@@ -67,6 +67,7 @@ interface ReportDetail {
   has_comparables: boolean;
   docx_file_path: string | null;
   xlsx_file_path: string | null;
+  cost_analysis_file_path?: string | null;
   csv_file_path: string | null;
   comp_count: number | null;
   comp_unit_count: number | null;
@@ -516,6 +517,14 @@ export default function ReportDetailPage() {
                   <Button variant="secondary" size="sm" className="flex flex-col items-start gap-1">
                     <FileSpreadsheet className="w-4 h-4" />
                     <span>Download XLSX</span>
+                  </Button>
+                </a>
+              )}
+              {report.cost_analysis_file_path && (
+                <a href={`/api/admin/reports/study/${report.study_id}/download-cost-analysis`}>
+                  <Button variant="secondary" size="sm" className="flex flex-col items-start gap-1">
+                    <FileSpreadsheet className="w-4 h-4" />
+                    <span>Cost Analysis</span>
                   </Button>
                 </a>
               )}

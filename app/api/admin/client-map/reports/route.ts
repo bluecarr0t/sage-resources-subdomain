@@ -7,63 +7,26 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 import { withAdminAuth } from '@/lib/require-admin-auth';
+import { parseLocationStringField } from '@/lib/parse-csv-location';
+import { reportYearFromStudyId } from '@/lib/report-year-from-study-id';
+import { canonicalReportService } from '@/lib/report-service-display';
+import {
+  DEFAULT_CENTER,
+  STATE_CENTERS,
+  isLikelyStateCenterPlaceholder,
+  resolveUsStateAbbr,
+} from '@/lib/us-state-centers';
 
-// Geographic centers for all US states + DC (fallback when report has no coordinates)
-const STATE_CENTERS: Record<string, [number, number]> = {
-  AL: [32.3182, -86.9023],
-  AK: [61.3707, -152.4044],
-  AZ: [34.0489, -111.0937],
-  AR: [34.9697, -92.3731],
-  CA: [36.7783, -119.4179],
-  CO: [39.113, -105.3119],
-  CT: [41.6032, -73.0877],
-  DE: [38.9108, -75.5277],
-  DC: [38.9072, -77.0369],
-  FL: [27.7663, -82.6404],
-  GA: [32.1574, -82.9071],
-  HI: [19.8968, -155.5828],
-  ID: [44.0682, -114.742],
-  IL: [40.6331, -89.3985],
-  IN: [40.2672, -86.1349],
-  IA: [41.878, -93.0977],
-  KS: [38.5266, -96.7265],
-  KY: [37.6681, -84.6701],
-  LA: [31.1695, -91.8678],
-  ME: [45.2538, -69.4455],
-  MD: [39.0458, -76.6413],
-  MA: [42.4072, -71.3824],
-  MI: [43.3266, -84.5361],
-  MN: [46.7296, -94.6859],
-  MS: [32.3547, -89.3985],
-  MO: [37.9643, -91.8318],
-  MT: [46.8797, -110.3626],
-  NE: [41.4925, -99.9018],
-  NV: [38.8026, -116.4194],
-  NH: [43.1939, -71.5724],
-  NJ: [40.0583, -74.4057],
-  NM: [34.5199, -105.8701],
-  NY: [43.2994, -74.2179],
-  NC: [35.7596, -79.0193],
-  ND: [47.5515, -101.002],
-  OH: [40.4173, -82.9071],
-  OK: [35.0078, -97.0929],
-  OR: [43.8041, -120.5542],
-  PA: [41.2033, -77.1945],
-  RI: [41.5801, -71.4774],
-  SC: [33.8361, -81.1637],
-  SD: [43.9695, -99.9018],
-  TN: [35.5175, -86.5804],
-  TX: [31.9686, -99.9018],
-  UT: [39.321, -111.0937],
-  VT: [44.5588, -72.5778],
-  VA: [37.4316, -78.6569],
-  WA: [47.7511, -120.7401],
-  WV: [38.5976, -80.4549],
-  WI: [43.7844, -89.6165],
-  WY: [43.076, -107.2903],
-};
-
-const DEFAULT_CENTER: [number, number] = [39.8283, -98.5795];
+/** Prefer `state` column; else parse `location` so OR centroids match rows with empty state. */
+function stateHintForReport(report: {
+  state: string | null | undefined;
+  location: string | null | undefined;
+}): string | null {
+  const s = String(report.state ?? '').trim();
+  if (s) return s;
+  const p = parseLocationStringField(String(report.location ?? '').trim());
+  return p?.stateRaw ?? null;
+}
 
 function formatAddress(report: Record<string, unknown>): string {
   const parts: string[] = [];
@@ -74,6 +37,116 @@ function formatAddress(report: Record<string, unknown>): string {
   if (parts.length > 0) return parts.join(', ');
   if (report.location) return String(report.location);
   return 'Address not specified';
+}
+
+/** Bucket precision: identical geocode results (same city center) land in one bucket. */
+const COORD_BUCKET_DECIMALS = 5;
+
+/**
+ * Spread markers that share the same coordinates (common for "City, ST" geocoding).
+ * Uses a meter-based spiral so separation is meaningful when zoomed to metro/state level.
+ */
+function jitterDuplicateMarkerPositions<
+  T extends { id: string; lat: number; lng: number },
+>(items: T[]): T[] {
+  const indexInBucket = new Map<string, number>();
+  return items.map((r) => {
+    const key = `${r.lat.toFixed(COORD_BUCKET_DECIMALS)},${r.lng.toFixed(COORD_BUCKET_DECIMALS)}`;
+    const i = indexInBucket.get(key) ?? 0;
+    indexInBucket.set(key, i + 1);
+    if (i === 0) return r;
+
+    const golden = ((i * 137.508) * Math.PI) / 180;
+    let h = 0;
+    for (let k = 0; k < r.id.length; k++) h = (h * 31 + r.id.charCodeAt(k)) >>> 0;
+    const angle = golden + ((h % 360) * Math.PI) / 180;
+
+    const meters = 650 + 420 * Math.sqrt(i);
+    const cosLat = Math.cos((r.lat * Math.PI) / 180);
+    const dLat = (meters * Math.cos(angle)) / 111_320;
+    const dLng = (meters * Math.sin(angle)) / (111_320 * Math.max(0.25, Math.abs(cosLat)));
+
+    return {
+      ...r,
+      lat: r.lat + dLat,
+      lng: r.lng + dLng,
+    };
+  });
+}
+
+/**
+ * One map pin per logical job number. CSV import uses study_id suffixes like JOB__2 for
+ * duplicate rows; strip those so they share a key with JOB.
+ */
+function studyIdMapDedupeKey(studyId: string | null | undefined): string {
+  const s = String(studyId ?? '').trim();
+  if (!s) return '';
+  const u = s.toUpperCase();
+  const stripped = u.replace(/__\d+$/, '');
+  return stripped;
+}
+
+function reportRowScore(r: Record<string, unknown>): number {
+  let s = 0;
+  if (r.has_docx) s += 100;
+  if (r.has_xlsx) s += 100;
+  const um = r.unit_mix;
+  if (um != null && JSON.stringify(um) !== '[]') s += 50;
+  const du = r.dropbox_url;
+  if (du && String(du) !== '' && String(du) !== '#') s += 50;
+  if (r.narrative_file_path) s += 30;
+
+  const lat = r.latitude != null ? Number(r.latitude) : null;
+  const lng = r.longitude != null ? Number(r.longitude) : null;
+  if (lat != null && lng != null && !Number.isNaN(lat) && !Number.isNaN(lng)) {
+    if (
+      !isLikelyStateCenterPlaceholder(
+        lat,
+        lng,
+        stateHintForReport({
+          state: r.state as string | null | undefined,
+          location: r.location as string | null | undefined,
+        })
+      )
+    ) {
+      s += 25;
+    }
+  }
+
+  if (r.report_date) s += 5;
+  return s;
+}
+
+function pickRicherReport(
+  a: Record<string, unknown>,
+  b: Record<string, unknown>
+): Record<string, unknown> {
+  const sa = reportRowScore(a);
+  const sb = reportRowScore(b);
+  if (sb !== sa) return sb > sa ? b : a;
+  const ta = String(a.updated_at ?? a.created_at ?? a.processed_at ?? '');
+  const tb = String(b.updated_at ?? b.created_at ?? b.processed_at ?? '');
+  if (tb !== ta) return tb > ta ? b : a;
+  return String(a.id) <= String(b.id) ? a : b;
+}
+
+/** Collapse multiple DB rows that share the same job / study (after normalizing __N suffixes). */
+function dedupeReportsForClientMap(rows: Record<string, unknown>[]): Record<string, unknown>[] {
+  const byKey = new Map<string, Record<string, unknown>>();
+
+  for (const r of rows) {
+    const jobKey = studyIdMapDedupeKey(r.study_id as string | null | undefined);
+    const key = jobKey ? jobKey : `__row:${String(r.id)}`;
+
+    const prev = byKey.get(key);
+    if (!prev) {
+      byKey.set(key, r);
+      continue;
+    }
+    byKey.set(key, pickRicherReport(prev, r));
+  }
+
+  return Array.from(byKey.values());
 }
 
 function formatMarketType(marketType: string | null | undefined): string {
@@ -108,9 +181,11 @@ export const GET = withAdminAuth(async (_request, auth) => {
       throw error;
     }
 
+    const rows = dedupeReportsForClientMap((data || []) as Record<string, unknown>[]);
+
     // Use only Past Report uploaded Report details (unit_descriptions, unit_mix) — not comparables
     const unitTypesByReport = new Map<string, string[]>();
-    for (const r of data || []) {
+    for (const r of rows) {
       const types: string[] = [];
       const ud = r.unit_descriptions as Array<{ type?: string }> | null;
       if (ud && Array.isArray(ud)) {
@@ -129,18 +204,24 @@ export const GET = withAdminAuth(async (_request, auth) => {
       if (types.length > 0) unitTypesByReport.set(r.id, types);
     }
 
-    const rawReports = (data || []).map((r) => {
-      const hasCoords = r.latitude != null && r.longitude != null;
+    const rawReports = rows.map((r) => {
+      const stateAbbr =
+        resolveUsStateAbbr(r.state as string | null | undefined) ??
+        resolveUsStateAbbr(stateHintForReport(r));
+      const hasStoredCoords = r.latitude != null && r.longitude != null;
       let lat: number;
       let lng: number;
 
-      if (hasCoords) {
+      if (hasStoredCoords) {
         lat = Number(r.latitude);
         lng = Number(r.longitude);
       } else {
-        const state = (r.state || '').toString().toUpperCase();
-        [lat, lng] = STATE_CENTERS[state] || DEFAULT_CENTER;
+        [lat, lng] = (stateAbbr && STATE_CENTERS[stateAbbr]) || DEFAULT_CENTER;
       }
+
+      const coordsArePlaceholder =
+        hasStoredCoords &&
+        isLikelyStateCenterPlaceholder(lat, lng, stateHintForReport(r));
 
       const client = Array.isArray(r.clients) ? r.clients[0] : r.clients;
 
@@ -155,36 +236,24 @@ export const GET = withAdminAuth(async (_request, auth) => {
         type: formatMarketType(r.market_type),
         marketType: (r.market_type || '').toLowerCase() || null,
         reportDate: r.report_date ?? null,
-        reportYear: r.report_date ? String(r.report_date).slice(0, 4) : null,
+        reportYear:
+          reportYearFromStudyId(r.study_id as string | null | undefined) ??
+          (r.report_date ? String(r.report_date).slice(0, 4) : null),
         unitTypes: unitTypesByReport.get(r.id) || [],
         totalSites: r.total_sites ?? 'N/A',
         dropboxLink: r.dropbox_url || '#',
         status: r.status || 'draft',
-        hasExactCoordinates: hasCoords,
+        hasExactCoordinates: hasStoredCoords && !coordsArePlaceholder,
         clientId: r.client_id ?? null,
         clientName: client?.name ?? null,
         clientCompany: client?.company ?? null,
+        service: canonicalReportService(r.service as string | null | undefined),
+        hasDocx: Boolean(r.has_docx),
+        hasXlsx: Boolean(r.has_xlsx),
       };
     });
 
-    // Add small offsets for reports that share the same lat/lng (e.g. no coords + same state center)
-    // so all markers are visible instead of stacking on top of each other
-    const posCount = new Map<string, number>();
-    const reports = rawReports.map((r, idx) => {
-      const key = `${r.lat.toFixed(4)},${r.lng.toFixed(4)}`;
-      const count = posCount.get(key) ?? 0;
-      posCount.set(key, count + 1);
-      if (count > 0) {
-        const offset = 0.03 * count; // ~3 km per stacked report
-        const angle = (idx * 137.5) * (Math.PI / 180); // golden angle for even spread
-        return {
-          ...r,
-          lat: r.lat + Math.cos(angle) * offset,
-          lng: r.lng + Math.sin(angle) * offset,
-        };
-      }
-      return r;
-    });
+    const reports = jitterDuplicateMarkerPositions(rawReports);
 
     return NextResponse.json({ success: true, reports });
   } catch (err) {

@@ -28,6 +28,8 @@ import { parseGooglePhotos } from './map/utils/photoUtils';
 import FilterSidebar from './map/FilterSidebar';
 import PropertyInfoWindow from './map/PropertyInfoWindow';
 import ParkInfoWindow from './map/ParkInfoWindow';
+import ClientWorkInfoWindow from './map/ClientWorkInfoWindow';
+import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
 
 const PopulationLayer = dynamic(() => import('./PopulationLayer'), {
   ssr: false,
@@ -55,7 +57,13 @@ interface GooglePropertyMapProps {
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
   const {
     filterCountry, filterState, filterUnitType, filterRateRange,
-    showNationalParks, selectedMapLayer, showPopulationLayer, showGDPLayer, showOpportunityZones,
+    showNationalParks,
+    showClientWork,
+    clientWorkPoints,
+    selectedMapLayer,
+    showPopulationLayer,
+    showGDPLayer,
+    showOpportunityZones,
     populationYear, toggleNationalParks, setMapLayer, setPopulationYear,
     clearFilters, hasActiveFilters,
     properties: sharedProperties, allProperties: sharedAllProperties,
@@ -73,6 +81,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const error = sharedPropertiesError;
   const [selectedProperty, setSelectedProperty] = useState<PropertyWithCoords | null>(null);
   const [selectedPark, setSelectedPark] = useState<NationalParkWithCoords | null>(null);
+  const [selectedClientWork, setSelectedClientWork] = useState<ClientWorkMapPoint | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -223,9 +232,27 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     fetchParkGooglePlacesData();
   }, [selectedPark]);
 
-  // Mutual exclusion between property and park selection
-  useEffect(() => { if (selectedPark) { setSelectedProperty(null); setFullPropertyDetails(null); } }, [selectedPark]);
-  useEffect(() => { if (selectedProperty) { setSelectedPark(null); } }, [selectedProperty]);
+  // Mutual exclusion between property, park, and client-work selection
+  useEffect(() => {
+    if (selectedPark) {
+      setSelectedProperty(null);
+      setFullPropertyDetails(null);
+      setSelectedClientWork(null);
+    }
+  }, [selectedPark]);
+  useEffect(() => {
+    if (selectedProperty) {
+      setSelectedPark(null);
+      setSelectedClientWork(null);
+    }
+  }, [selectedProperty]);
+  useEffect(() => {
+    if (selectedClientWork) {
+      setSelectedProperty(null);
+      setSelectedPark(null);
+      setFullPropertyDetails(null);
+    }
+  }, [selectedClientWork]);
 
   const clustererRef = useRef<any | null>(null);
   const hasCenteredFromUrlRef = useRef<boolean>(false);
@@ -267,10 +294,18 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const displayProperties = processedProperties;
   const propertiesWithCoords = useMemo(() => filterPropertiesWithCoordinates(displayProperties), [displayProperties]);
 
-  const { markersRef, parkMarkersRef } = useMapMarkers({
-    map, isClient,
-    properties: displayProperties, nationalParks, showNationalParks,
-    setSelectedProperty, setSelectedPark, markerClickTimeRef,
+  const { markersRef, parkMarkersRef, clientWorkMarkersRef } = useMapMarkers({
+    map,
+    isClient,
+    properties: displayProperties,
+    nationalParks,
+    showNationalParks,
+    clientWorkPoints,
+    showClientWork,
+    setSelectedProperty,
+    setSelectedPark,
+    setSelectedClientWork,
+    markerClickTimeRef,
   });
 
   const isNearMarker = useCallback((lat: number, lng: number, threshold: number = 0.002): boolean => {
@@ -286,8 +321,13 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
         if (Math.abs(lat - markerLat) < threshold && Math.abs(lng - markerLng) < threshold) return true;
       }
     }
+    if (showClientWork) {
+      for (const p of clientWorkPoints) {
+        if (Math.abs(lat - p.lat) < threshold && Math.abs(lng - p.lng) < threshold) return true;
+      }
+    }
     return false;
-  }, [propertiesWithCoords, nationalParks, showNationalParks, markerClickTimeRef]);
+  }, [propertiesWithCoords, nationalParks, showNationalParks, showClientWork, clientWorkPoints, markerClickTimeRef]);
 
   const { onIdle: onIdleFromHook } = useMapBounds({
     map, isClient, isMobile, shouldFitBounds, filterState,
@@ -346,8 +386,20 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const onUnmount = useCallback(() => {
     if (clustererRef.current) { clustererRef.current.clearMarkers(); clustererRef.current = null; }
     if (markersRef.current) { markersRef.current.forEach((marker) => { marker.map = null; }); markersRef.current = []; }
+    if (parkMarkersRef.current) {
+      parkMarkersRef.current.forEach((marker) => {
+        marker.map = null;
+      });
+      parkMarkersRef.current = [];
+    }
+    if (clientWorkMarkersRef.current) {
+      clientWorkMarkersRef.current.forEach((marker) => {
+        marker.map = null;
+      });
+      clientWorkMarkersRef.current = [];
+    }
     setMap(null);
-  }, [markersRef]);
+  }, [markersRef, parkMarkersRef, clientWorkMarkersRef]);
 
   const checkWebGLSupport = useCallback(() => {
     if (typeof window === 'undefined') return false;
@@ -577,13 +629,25 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               onUnmount={onUnmount}
               options={mapOptions}
             >
-              {/* National Park InfoWindow */}
-              {selectedPark && (
+              {/* Client Work InfoWindow (exclusive with park/property below) */}
+              {selectedClientWork && (
+                <InfoWindow
+                  key={selectedClientWork.id}
+                  position={{ lat: selectedClientWork.lat, lng: selectedClientWork.lng }}
+                  onCloseClick={() => setSelectedClientWork(null)}
+                  options={{ pixelOffset: new google.maps.Size(0, -10) }}
+                >
+                  <ClientWorkInfoWindow point={selectedClientWork} />
+                </InfoWindow>
+              )}
+
+              {selectedPark && !selectedClientWork && (
                 <InfoWindow
                   key={selectedPark.id}
                   position={{ lat: selectedPark.coordinates[0], lng: selectedPark.coordinates[1] }}
                   onCloseClick={() => {
                     setSelectedPark(null);
+                    setSelectedClientWork(null);
                     setCurrentParkPhotoIndex(0);
                     setParkGooglePlacesData(null);
                   }}
@@ -597,6 +661,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     setCurrentParkPhotoIndex={setCurrentParkPhotoIndex}
                     onClose={() => {
                       setSelectedPark(null);
+                      setSelectedClientWork(null);
                       setCurrentParkPhotoIndex(0);
                       setParkGooglePlacesData(null);
                     }}
@@ -605,13 +670,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               )}
 
               {/* Property InfoWindow */}
-              {selectedProperty && propertyForDisplay && (
+              {selectedProperty && propertyForDisplay && !selectedClientWork && !selectedPark && (
                 <InfoWindow
                   key={selectedProperty.id || `property-${selectedProperty.coordinates[0]}-${selectedProperty.coordinates[1]}`}
                   position={{ lat: selectedProperty.coordinates[0], lng: selectedProperty.coordinates[1] }}
                   onCloseClick={() => {
                     setSelectedProperty(null);
                     setSelectedPark(null);
+                    setSelectedClientWork(null);
                     setCurrentPhotoIndex(0);
                     setFullPropertyDetails(null);
                   }}
@@ -628,6 +694,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     onClose={() => {
                       setSelectedProperty(null);
                       setSelectedPark(null);
+                      setSelectedClientWork(null);
                       setCurrentPhotoIndex(0);
                       setFullPropertyDetails(null);
                     }}

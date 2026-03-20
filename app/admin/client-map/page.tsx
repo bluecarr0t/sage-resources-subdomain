@@ -3,10 +3,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { GoogleMapsProvider, useGoogleMaps } from '@/components/GoogleMapsProvider';
-import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, InfoWindow, Marker } from '@react-google-maps/api';
 import { Button } from '@/components/ui';
 import MultiSelect from '@/components/MultiSelect';
+import { canonicalReportService, reportServiceLabel } from '@/lib/report-service-display';
 
 interface ReportMarker {
   id: string;
@@ -19,13 +21,15 @@ interface ReportMarker {
   type: string;
   marketType: string | null;
   reportYear: string | null;
-  unitTypes: string[];
   totalSites: string | number;
   dropboxLink: string;
   status: string;
   hasExactCoordinates: boolean;
   clientName?: string | null;
   clientCompany?: string | null;
+  service: string | null;
+  hasDocx: boolean;
+  hasXlsx: boolean;
 }
 
 const RESORT_TYPE_OPTIONS = [
@@ -34,29 +38,20 @@ const RESORT_TYPE_OPTIONS = [
   { value: 'rv_glamping', label: 'Glamping & RV' },
 ];
 
-const UNIT_TYPE_OPTIONS = [
-  'Treehouse',
-  'Dome',
-  'Cabin',
-  'RV Site',
-  'Lodge',
-  'Safari Tent',
-  'Yurt',
-  'Tiny Home',
-  'A-Frame',
-  'Glamping Pod',
-  'Vintage Trailer',
-  'Bell Tent',
-];
+const MAP_HEIGHT_PX = 550;
 
 const mapContainerStyle = {
   width: '100%',
-  height: '600px',
+  height: `${MAP_HEIGHT_PX}px`,
 };
 
-const defaultCenter = { lat: 39.8283, lng: -98.5795 };
+/** Geographic center of the contiguous US (lower 48); default overview when not focusing a job. */
+const CONTIGUOUS_US_CENTER = { lat: 39.8283, lng: -98.5795 };
+/** Frames the lower 48 with moderate padding in a typical admin map (~550px tall). */
+const CONTIGUOUS_US_OVERVIEW_ZOOM = 4;
 
 function ClientMapContent() {
+  const t = useTranslations('admin.clientMap');
   const { isLoaded, loadError } = useGoogleMaps();
   const searchParams = useSearchParams();
   const studyIdParam = searchParams.get('studyId');
@@ -65,31 +60,66 @@ function ClientMapContent() {
   const [selectedReport, setSelectedReport] = useState<ReportMarker | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [resortTypeFilter, setResortTypeFilter] = useState<string[]>([]);
-  const [unitTypeFilter, setUnitTypeFilter] = useState<string[]>([]);
   const [yearFilter, setYearFilter] = useState<string[]>([]);
+  const [serviceFilter, setServiceFilter] = useState<string[]>([]);
+
+  const resortTypeOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const r of reports) {
+      const m = (r.marketType || '').toLowerCase();
+      counts.set(m, (counts.get(m) ?? 0) + 1);
+    }
+    return RESORT_TYPE_OPTIONS.map((opt) => ({
+      value: opt.value,
+      label: opt.label,
+      count: counts.get(opt.value) ?? 0,
+    }));
+  }, [reports]);
 
   const yearOptions = useMemo(() => {
-    const years = new Set<string>();
+    const counts = new Map<string, number>();
     for (const r of reports) {
       const y = r.reportYear?.trim();
-      if (y) years.add(y);
+      if (!y) continue;
+      counts.set(y, (counts.get(y) ?? 0) + 1);
     }
-    return Array.from(years).sort((a, b) => b.localeCompare(a));
+    return Array.from(counts.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([year, count]) => ({ value: year, label: year, count }));
   }, [reports]);
+
+  const serviceOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const r of reports) {
+      const c = canonicalReportService(r.service) ?? '';
+      counts.set(c, (counts.get(c) ?? 0) + 1);
+    }
+    const notSet = t('serviceNotSet');
+    return Array.from(counts.entries())
+      .sort(([keyA, countA], [keyB, countB]) => {
+        if (countB !== countA) return countB - countA;
+        return reportServiceLabel(keyA || null, notSet).localeCompare(
+          reportServiceLabel(keyB || null, notSet)
+        );
+      })
+      .map(([k, count]) => ({
+        value: k,
+        label: reportServiceLabel(k || null, notSet),
+        count,
+      }));
+  }, [reports, t]);
 
   const filteredReports = useMemo(() => {
     return reports.filter((r) => {
       if (resortTypeFilter.length > 0 && !resortTypeFilter.includes(r.marketType || '')) return false;
-      if (unitTypeFilter.length > 0) {
-        const reportUnitTypes = (r.unitTypes || []).map((u) => u.toLowerCase().trim());
-        const filterSet = new Set(unitTypeFilter.map((f) => f.toLowerCase()));
-        const hasMatch = reportUnitTypes.some((u) => filterSet.has(u));
-        if (!hasMatch) return false;
-      }
       if (yearFilter.length > 0 && !yearFilter.includes(r.reportYear || '')) return false;
+      if (serviceFilter.length > 0) {
+        const key = canonicalReportService(r.service) ?? '';
+        if (!serviceFilter.includes(key)) return false;
+      }
       return true;
     });
-  }, [reports, resortTypeFilter, unitTypeFilter, yearFilter]);
+  }, [reports, resortTypeFilter, yearFilter, serviceFilter]);
 
   const reportToFocus = useMemo(
     () =>
@@ -124,6 +154,16 @@ function ClientMapContent() {
     fetchReports();
   }, []);
 
+  /** Collapse legacy filter tokens (e.g. "feasibility study") to canonical keys so checkboxes match options. */
+  useEffect(() => {
+    if (reports.length === 0) return;
+    setServiceFilter((prev) => {
+      if (prev.length === 0) return prev;
+      const next = [...new Set(prev.map((v) => (v === '' ? '' : canonicalReportService(v) ?? v)))];
+      return next.length === prev.length && next.every((x, i) => x === prev[i]) ? prev : next;
+    });
+  }, [reports]);
+
   const onLoad = useCallback(
     (mapInstance: google.maps.Map) => {
       setMap(mapInstance);
@@ -131,11 +171,28 @@ function ClientMapContent() {
     []
   );
 
+  /** Pan to marker when opening its InfoWindow; keep current zoom (no jump to street level). */
+  const focusMapOnReport = useCallback(
+    (report: ReportMarker) => {
+      if (!map) return;
+      map.panTo({ lat: report.lat, lng: report.lng });
+    },
+    [map]
+  );
+
+  const handleMarkerClick = useCallback(
+    (report: ReportMarker) => {
+      setSelectedReport(report);
+      focusMapOnReport(report);
+    },
+    [focusMapOnReport]
+  );
+
   useEffect(() => {
     if (map && reportToFocus) {
+      setSelectedReport(reportToFocus);
       map.panTo({ lat: reportToFocus.lat, lng: reportToFocus.lng });
       map.setZoom(12);
-      setSelectedReport(reportToFocus);
     }
   }, [map, reportToFocus]);
 
@@ -145,7 +202,10 @@ function ClientMapContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[600px] bg-gray-100 dark:bg-gray-800 rounded-lg">
+      <div
+        className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg"
+        style={{ height: MAP_HEIGHT_PX }}
+      >
         <span className="text-gray-500 dark:text-gray-400">Loading reports...</span>
       </div>
     );
@@ -153,7 +213,10 @@ function ClientMapContent() {
 
   if (loadError) {
     return (
-      <div className="flex items-center justify-center h-[600px] bg-red-50 dark:bg-red-900/30 rounded-lg">
+      <div
+        className="flex items-center justify-center bg-red-50 dark:bg-red-900/30 rounded-lg"
+        style={{ height: MAP_HEIGHT_PX }}
+      >
         <span className="text-red-600 dark:text-red-400">Failed to load map. Check Google Maps API key.</span>
       </div>
     );
@@ -161,17 +224,21 @@ function ClientMapContent() {
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center h-[600px] bg-gray-100 dark:bg-gray-800 rounded-lg">
+      <div
+        className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg"
+        style={{ height: MAP_HEIGHT_PX }}
+      >
         <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
       </div>
     );
   }
 
-  const hasActiveFilters = resortTypeFilter.length > 0 || unitTypeFilter.length > 0 || yearFilter.length > 0;
+  const hasActiveFilters =
+    resortTypeFilter.length > 0 || yearFilter.length > 0 || serviceFilter.length > 0;
   const clearFilters = () => {
     setResortTypeFilter([]);
-    setUnitTypeFilter([]);
     setYearFilter([]);
+    setServiceFilter([]);
   };
 
   return (
@@ -183,7 +250,7 @@ function ClientMapContent() {
             id="resort-type-filter"
             label="Resort Type"
             placeholder="All types"
-            options={RESORT_TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+            options={resortTypeOptions}
             selectedValues={resortTypeFilter}
             onToggle={(v) =>
               setResortTypeFilter((prev) =>
@@ -196,26 +263,10 @@ function ClientMapContent() {
         </div>
         <div className="min-w-[200px]">
           <MultiSelect
-            id="unit-type-filter"
-            label="Unit Type"
-            placeholder="All unit types"
-            options={UNIT_TYPE_OPTIONS.map((ut) => ({ value: ut, label: ut }))}
-            selectedValues={unitTypeFilter}
-            onToggle={(v) =>
-              setUnitTypeFilter((prev) =>
-                prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
-              )
-            }
-            onClear={() => setUnitTypeFilter([])}
-            activeColor="green"
-          />
-        </div>
-        <div className="min-w-[200px]">
-          <MultiSelect
             id="year-filter"
-            label="Year Report Completed"
-            placeholder="All years"
-            options={yearOptions.map((y) => ({ value: y, label: y }))}
+            label={t('yearFilterLabel')}
+            placeholder={t('yearFilterPlaceholder')}
+            options={yearOptions}
             selectedValues={yearFilter}
             onToggle={(v) =>
               setYearFilter((prev) =>
@@ -224,6 +275,22 @@ function ClientMapContent() {
             }
             onClear={() => setYearFilter([])}
             activeColor="blue"
+          />
+        </div>
+        <div className="min-w-[280px]">
+          <MultiSelect
+            id="service-filter"
+            label={t('serviceFilterLabel')}
+            placeholder={t('serviceFilterPlaceholder')}
+            options={serviceOptions}
+            selectedValues={serviceFilter}
+            onToggle={(v) =>
+              setServiceFilter((prev) =>
+                prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+              )
+            }
+            onClear={() => setServiceFilter([])}
+            activeColor="orange"
           />
         </div>
         {hasActiveFilters && (
@@ -252,11 +319,11 @@ function ClientMapContent() {
             center={
               reportToFocus
                 ? { lat: reportToFocus.lat, lng: reportToFocus.lng }
-                : reportsToShow.length > 0
-                  ? { lat: reportsToShow[0].lat, lng: reportsToShow[0].lng }
-                  : defaultCenter
+                : CONTIGUOUS_US_CENTER
             }
-            zoom={reportToFocus ? 12 : reportsToShow.length > 0 ? 4 : 3}
+            zoom={
+              reportToFocus ? 12 : CONTIGUOUS_US_OVERVIEW_ZOOM
+            }
             onLoad={onLoad}
             onUnmount={onUnmount}
           >
@@ -264,57 +331,57 @@ function ClientMapContent() {
               <Marker
                 key={report.id}
                 position={{ lat: report.lat, lng: report.lng }}
-                onClick={() => setSelectedReport(report)}
+                onClick={() => handleMarkerClick(report)}
                 title={report.propertyName}
-              />
-            ))}
-
-            {selectedReport && (
-              <InfoWindow
-                position={{ lat: selectedReport.lat, lng: selectedReport.lng }}
-                onCloseClick={() => setSelectedReport(null)}
               >
-                <div className="p-2 min-w-[200px]">
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    {selectedReport.propertyName}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-1">
-                    {selectedReport.reportNumber}
-                  </p>
-                  <p className="text-sm text-gray-500 mb-2">
-                    {selectedReport.address}
-                  </p>
-                  <p className="text-xs text-gray-500 mb-2">
-                    {selectedReport.type} • {selectedReport.totalSites} sites
-                  </p>
-                  {!selectedReport.hasExactCoordinates && (
-                    <p className="text-xs text-amber-600 mb-2">
-                      Approximate location (state center)
-                    </p>
-                  )}
-                  <div className="flex flex-col gap-1">
-                    {selectedReport.studyId && (
-                      <Link
-                        href={`/admin/reports/${selectedReport.studyId}`}
-                        className="text-sm text-[#4a624a] hover:underline font-medium"
-                      >
-                        View Details
-                      </Link>
-                    )}
-                    {selectedReport.dropboxLink && selectedReport.dropboxLink !== '#' && (
-                      <a
-                        href={selectedReport.dropboxLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-[#4a624a] hover:underline"
-                      >
-                        View Report (Dropbox)
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </InfoWindow>
-            )}
+                {/* Anchor InfoWindow to this marker only — avoids Google/React desync from a standalone InfoWindow */}
+                {selectedReport?.id === report.id && (
+                  <InfoWindow
+                    key={report.id}
+                    onCloseClick={() => setSelectedReport(null)}
+                  >
+                    <div className="p-2 min-w-[200px]">
+                      {!(report.hasDocx ?? false) && !(report.hasXlsx ?? false) && (
+                        <span className="inline-flex w-fit items-center rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-semibold leading-none text-white mb-1">
+                          {t('noReportFilesPill')}
+                        </span>
+                      )}
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        {report.propertyName}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-1">{report.reportNumber}</p>
+                      <p className="text-sm text-gray-500 mb-2">{report.address}</p>
+                      <p className="text-sm text-gray-500 mb-2">
+                        {report.type} • {report.totalSites} sites
+                      </p>
+                      {!report.hasExactCoordinates && (
+                        <p className="text-xs text-amber-600 mb-2">{t('approximatePinNotice')}</p>
+                      )}
+                      <div className="flex flex-col gap-1">
+                        {report.studyId && (
+                          <Link
+                            href={`/admin/reports/${report.studyId}`}
+                            className="text-sm text-[#4a624a] hover:underline font-medium"
+                          >
+                            View Details
+                          </Link>
+                        )}
+                        {report.dropboxLink && report.dropboxLink !== '#' && (
+                          <a
+                            href={report.dropboxLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-[#4a624a] hover:underline"
+                          >
+                            View Report (Dropbox)
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </InfoWindow>
+                )}
+              </Marker>
+            ))}
           </GoogleMap>
         </div>
       </div>
@@ -324,7 +391,7 @@ function ClientMapContent() {
 
 export default function ClientMapPage() {
   return (
-    <main className="pb-16 px-4 sm:px-6 lg:px-8">
+    <main className="pb-2 sm:pb-3 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">

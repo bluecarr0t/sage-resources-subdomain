@@ -22,6 +22,8 @@ import {
   TentTree,
   MapPin,
   LayoutGrid,
+  Calculator,
+  Home,
 } from 'lucide-react';
 import { useSidebar } from '@/lib/sidebar-context';
 import { supabase } from '@/lib/supabase';
@@ -40,8 +42,10 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/report-builder')) return 'report-builder';
   if (pathname.startsWith('/admin/comparables')) return 'comparables';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
-  if (pathname.startsWith('/admin/site-design')) return 'site-design';
+  if (pathname.startsWith('/admin/rv-site-setup') || pathname.startsWith('/admin/site-design')) return 'site-design';
+  if (pathname.startsWith('/admin/site-builder')) return 'site-builder';
   if (pathname.startsWith('/admin/audit-log')) return 'audit-log';
+  if (pathname.startsWith('/admin/cost-explorer')) return 'cost-explorer';
   return '';
 }
 
@@ -158,7 +162,7 @@ export default function AdminSidebar() {
       >
         <div className="flex flex-col h-full">
           {/* Header - Logo area */}
-          <div className={`flex items-center justify-center border-b border-gray-200 dark:border-gray-900/50 relative ${showCollapsed ? 'py-4 pt-8' : 'py-4'}`}>
+          <div className={`flex items-center justify-center border-b border-gray-200 dark:border-gray-900/50 relative py-0 ${showCollapsed ? 'pt-8' : ''}`}>
             <Link
               href="/admin/dashboard"
               className={`flex items-center justify-center ${showCollapsed ? 'w-11 h-11' : 'w-36 h-36'}`}
@@ -193,7 +197,7 @@ export default function AdminSidebar() {
           </div>
 
           {/* Navigation - pb-24 to clear absolute footer */}
-          <nav className="p-4 space-y-1 flex-1 overflow-y-auto pb-24">
+          <nav className="pt-2 px-4 pb-24 space-y-1 flex-1 overflow-y-auto">
             {/* Dashboard - top-level */}
             <div className="py-2">
               <NavLink
@@ -268,11 +272,27 @@ export default function AdminSidebar() {
                   isCollapsed={showCollapsed}
                 />
                 <NavLink
-                  href="/admin/site-design"
-                  label="Site Design"
+                  href="/admin/rv-site-setup"
+                  label="RV Site Setup"
                   icon={LayoutGrid}
                   pageId="site-design"
                   isActive={activePageId === 'site-design'}
+                  isCollapsed={showCollapsed}
+                />
+                <NavLink
+                  href="/admin/site-builder"
+                  label="Site Builder"
+                  icon={Home}
+                  pageId="site-builder"
+                  isActive={activePageId === 'site-builder'}
+                  isCollapsed={showCollapsed}
+                />
+                <NavLink
+                  href="/admin/cost-explorer"
+                  label="Cost Explorer"
+                  icon={Calculator}
+                  pageId="cost-explorer"
+                  isActive={activePageId === 'cost-explorer'}
                   isCollapsed={showCollapsed}
                 />
               </div>

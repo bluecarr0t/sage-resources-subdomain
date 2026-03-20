@@ -913,7 +913,7 @@ In glamping feasibility studies and appraisals, inflatable tents are valued for 
 
 Sage Outdoor Advisory includes inflatable tent accommodations in our glamping property analyses, understanding their unique appeal, operational requirements, maintenance needs, and revenue potential for outdoor hospitality properties.`,
     category: "Glamping",
-    relatedTerms: ["glamping", "glamping-resort", "dome", "canvas-tent"],
+    relatedTerms: ["glamping", "glamping-resort", "dome", "canvas-tent", "bubble-tent"],
     examples: [
       "A transparent inflatable tent positioned for optimal stargazing with comfortable bed, climate control, and 360-degree views of the night sky in a desert glamping resort",
       "A luxury inflatable tent featuring separate sleeping and living areas, premium furnishings, and panoramic mountain views in a high-altitude glamping destination",
@@ -1129,7 +1129,7 @@ In glamping feasibility studies and appraisals, floating cabins are valued for t
 
 Sage Outdoor Advisory includes floating cabin accommodations in our glamping property analyses, understanding their construction costs, engineering requirements, market appeal, maintenance needs, and revenue potential for outdoor hospitality properties.`,
     category: "Glamping",
-    relatedTerms: ["glamping", "glamping-resort", "cabin"],
+    relatedTerms: ["glamping", "glamping-resort", "cabin", "marina-slip", "houseboat"],
     examples: [
       "A floating cabin on a lake with full amenities, large windows overlooking the water, private dock, and outdoor deck area in a lakeside glamping resort",
       "A simple floating cabin with basic amenities, positioned on a river for optimal views and water access in a riverfront glamping destination",
@@ -1158,6 +1158,168 @@ Sage Outdoor Advisory includes floating cabin accommodations in our glamping pro
       {
         question: "What amenities can floating cabin glamping units include?",
         answer: "Floating cabin glamping units can include full kitchens, bathrooms, comfortable sleeping areas, heating and cooling systems, electricity, and premium furnishings. Many feature large windows for water views, outdoor decks, and sometimes private docks or water access. The level of amenities depends on the property's positioning and target market, ranging from basic to luxury configurations."
+      }
+    ]
+  },
+  "landscape-hotel": {
+    slug: "landscape-hotel",
+    term: "Landscape Hotel",
+    definition: "A hospitality concept where buildings and guest structures are designed to blend into the natural terrain—often partially buried, terraced, or vegetated—so architecture recedes visually and the setting dominates the guest experience.",
+    extendedDefinition: `A landscape hotel (sometimes discussed alongside "landscape architecture hospitality") emphasizes minimal visual intrusion and strong integration with topography, vegetation, and views. Guest rooms or suites may be arranged as low-profile wings, earth-bermed pods, or scattered pavilions connected by paths rather than a single dominant building mass. The goal is to foreground nature—ridgelines, forests, water, or desert—while still delivering hotel-level comfort.
+
+This approach differs from a standard resort where a central lodge is the visual anchor. In a landscape-forward property, screening, rooflines, materials, and siting are chosen to read as part of the environment. That can affect development costs (civil work, retaining walls, longer utility runs), operations (dispersed housekeeping and maintenance), and marketing (premium positioning for "immersive" stays).
+
+For outdoor hospitality, the idea overlaps with high-end glamping and boutique eco-resorts: standalone units with privacy, views, and a light footprint. Feasibility and appraisal work must still tie back to market-supported ADR, occupancy, and operating expenses—unique design does not automatically imply higher revenue.
+
+Sage Outdoor Advisory analyzes landscape-integrated and design-led outdoor hospitality projects with the same rigor as conventional resorts, connecting concept, capital cost, and achievable financial performance.`,
+    category: "Glamping",
+    relatedTerms: ["glamping-resort", "mirror-cabin", "glamping", "amenities"],
+    examples: [
+      "A desert property with suite pods tucked into a hillside, each with a private deck and uninterrupted horizon views",
+      "A forest retreat with low, green-roofed structures linked by boardwalks to reduce clearing and preserve tree canopy",
+      "A lakeside development where guest volumes are stepped down the slope so roofs and terraces follow the natural grade"
+    ],
+    useCases: [
+      "Positioning a property as low-impact or nature-first luxury",
+      "Planning dispersed unit layouts and utility routing on sloped or sensitive sites",
+      "Explaining premium ADR strategy tied to privacy and views"
+    ],
+    seoKeywords: ["landscape hotel", "landscape architecture hotel", "eco integrated resort", "low impact hotel design", "nature integrated lodging"],
+    internalLinks: [
+      { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
+      { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" }
+    ],
+    faqs: [
+      {
+        question: "Is a landscape hotel the same as glamping?",
+        answer: "Not exactly. Glamping usually refers to distinct outdoor accommodation types (tents, yurts, cabins, etc.). A landscape hotel is more about design philosophy—buildings that merge with the land—which can apply to glamping-style units, suites, or hybrid resorts."
+      },
+      {
+        question: "Why does layout matter for feasibility?",
+        answer: "Dispersed or terraced layouts can increase infrastructure, staffing, and maintenance costs compared with a compact site plan. A feasibility study tests whether the expected rate premium and occupancy justify those costs."
+      }
+    ]
+  },
+  "hobbit-house": {
+    slug: "hobbit-house",
+    term: "Hobbit House",
+    definition: "A compact, often earth-sheltered or bermed guest structure with a rounded door and organic, hillside-integrated styling—popularized by fantasy-inspired design and used as a distinctive glamping or boutique lodging unit.",
+    extendedDefinition: `A hobbit house, in the outdoor hospitality context, is a themed or storybook-style accommodation inspired by rounded, earth-hugging dwellings—often with a prominent round entry, soft curves, and sometimes partial berming or sod roofs. The term is colloquial (derived from popular fantasy fiction) but appears frequently in guest-facing marketing for unique stays.
+
+Structurally, these units may be built as reinforced concrete shells, timber frames with exterior earth berming, modular pods, or hybrid systems. Engineering, waterproofing, drainage, and ventilation are critical when soil contacts the building envelope. Like other specialty unit types, they attract social media and OTA attention but require realistic capex, maintenance, and insurance assumptions in a pro forma.
+
+Hobbit-style units are typically offered as one-off or small clusters within a broader glamping or campground setting. They can command a rate premium when well executed and scarce in the comp set, but market support must be demonstrated with comparable properties and channel performance.
+
+Sage Outdoor Advisory includes specialty unit types in glamping feasibility studies and appraisals, treating distinctive architecture as both a marketing asset and a cost and operations factor.`,
+    category: "Glamping",
+    relatedTerms: ["glamping", "glamping-resort", "dome", "glamping-pod", "cabin"],
+    examples: [
+      "A grass-roofed, bermed one-bedroom unit with a round wooden door and curved interior walls at a hillside glamping resort",
+      "A pair of fantasy-themed earthen lodges marketed as honeymoon suites with private patios",
+      "A small cluster of pod-style earth-sheltered cabins sharing a parking and check-in area with a larger glamping property"
+    ],
+    useCases: [
+      "Adding a flagship \"instagrammable\" unit type to diversify ADR",
+      "Evaluating construction and waterproofing costs for bermed or partially underground shells",
+      "Comparing performance to conventional cabins or safari tents in the same market"
+    ],
+    seoKeywords: ["hobbit house glamping", "hobbit house rental", "earth sheltered cabin", "bermed glamping unit", "round door cabin"],
+    internalLinks: [
+      { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
+      { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
+      { text: "Dome", url: "/glossary/dome" }
+    ],
+    faqs: [
+      {
+        question: "Are hobbit houses the same as tiny homes?",
+        answer: "They can overlap in size, but hobbit houses usually emphasize earth integration, curved forms, and themed design. Tiny homes are a broader category and may be on wheels or built to different codes."
+      },
+      {
+        question: "What should developers watch for?",
+        answer: "Drainage, structural loads on berms, moisture management, code compliance, and realistic maintenance costs. Specialty builds often cost more per square foot than a simple cabin or deck-mounted tent."
+      }
+    ]
+  },
+  "bubble-tent": {
+    slug: "bubble-tent",
+    term: "Bubble Tent",
+    definition: "A spherical or pod-shaped transparent glamping shelter—usually air-supported PVC or similar—with clear walls and ceiling for panoramic views and stargazing; often marketed as a \"bubble\" stay distinct from pole tents and from solid geodesic domes.",
+    extendedDefinition: `Bubble tent is the guest-facing name for a family of clear or mostly clear accommodations: single spheres, connected bubble rooms, or tunnel-linked sleeping pods. They are typically kept inflated with continuous or monitored air pressure, rest on a deck or platform, and trade privacy for immersion in the landscape and night sky.
+
+The category overlaps strongly with inflatable tent structures in materials and operations (blowers, backup power, anchoring, puncture risk, wind and snow limits). It differs in positioning from dome glamping when the dome is a rigid geodesic frame with fabric or panels: bubble products emphasize all-around transparency and a soft, organic shape rather than a metal or wood lattice.
+
+For feasibility work, bubble units often support premium ADR when the market values novelty and astro-tourism, but they carry distinct operating costs (power for inflation, cleaning of clear surfaces, weather closures) and may be seasonal in harsh climates. Insurance and fire-safety expectations should be reviewed for the specific manufacturer and local code.
+
+Sage Outdoor Advisory treats bubble tents like other specialty glamping inventory: unique demand drivers, realistic maintenance and utility loads, and comparables chosen from similar experiential units—not generic cabin sets.`,
+    category: "Glamping",
+    relatedTerms: ["inflatable-tent", "dome", "glamping", "glamping-resort", "canvas-tent"],
+    examples: [
+      "A single clear sphere on a private deck with a queen bed, separate bath module nearby, and minimal light pollution for stargazing",
+      "Two connected bubbles—living bubble and bedroom bubble—at a vineyard glamping property",
+      "A row of small overnight bubbles operated seasonally with daytime cleaning and nightly turndown"
+    ],
+    useCases: [
+      "Marketing a flagship \"bubble\" experience on OTAs and social channels",
+      "Budgeting power, backup systems, and maintenance for air-supported structures",
+      "Selecting comps that reflect novelty premiums and weather-driven downtime"
+    ],
+    seoKeywords: ["bubble tent", "bubble tent glamping", "bubble hotel", "clear bubble accommodation", "stargazing bubble", "transparent bubble tent"],
+    internalLinks: [
+      { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
+      { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
+      { text: "Inflatable Tent", url: "/glossary/inflatable-tent" },
+      { text: "Dome", url: "/glossary/dome" }
+    ],
+    faqs: [
+      {
+        question: "Is a bubble tent the same as an inflatable tent?",
+        answer: "In practice, most bubble tents are a type of air-supported, often transparent inflatable structure. The name \"bubble tent\" is how guests and marketers usually describe them; the engineering and operations are the same family as other inflatable glamping shells."
+      },
+      {
+        question: "How is a bubble tent different from a geodesic dome?",
+        answer: "Domes in glamping are often rigid framed structures with panels or fabric. Bubble tents are usually soft, air-held, and maximally transparent. Both can offer stargazing, but cost, durability, and wind performance differ by product and installation."
+      }
+    ]
+  },
+  "houseboat": {
+    slug: "houseboat",
+    term: "Houseboat",
+    definition: "A floating lodging unit built on a hull or pontoons—designed or adapted for overnight stays—moored at a dock, marina, or on-water site; distinct from a cabin on a static floating platform when the vessel itself is the rentable accommodation.",
+    extendedDefinition: `A houseboat used as outdoor hospitality is the rentable structure and the flotation system combined: guests stay aboard a craft that may be moved for service, seasonal relocation, or regulatory reasons, or kept long-term on a dedicated slip. Amenities range from compact studio layouts to multi-bedroom units with full galleys, baths, and rooftop decks.
+
+Compared to a floating cabin on pontoons, a houseboat is more likely to be regulated as a vessel or floating structure, with implications for coast guard or state boating rules, marina agreements, pump-out, electrical service from shore (shore power), and insurance (hull, liability, pollution). Slip rent, winterization, and haul-out may appear in the operating budget.
+
+Revenue models include nightly lodging like a waterfront hotel room, seasonal leases, or hybrid packages with marina slip fees itemized. Feasibility and appraisal require clarity on who owns the hull, whether the unit is real or personal property, and how income is documented.
+
+Sage Outdoor Advisory analyzes houseboat and other on-water lodging within the project's legal and operational frame, aligning projections with marina economics, maintenance, and comparable waterfront or specialty accommodations.`,
+    category: "Glamping",
+    relatedTerms: ["floating-cabin", "marina-slip", "glamping-resort", "shore-power", "amenities"],
+    examples: [
+      "A marina-based houseboat rented nightly with shore power, pump-out access, and parking included",
+      "A small fleet of identical houseboats in a calm bay, each tied to a private slip with a waterfront deck",
+      "A stationary \"floating lodge\" hull permanently moored and marketed as a glamping suite"
+    ],
+    useCases: [
+      "Adding on-water inventory next to land-based glamping or RV sites",
+      "Structuring slip leases, utilities, and housekeeping for vessel lodging",
+      "Separating hull and slip economics for lenders and investors"
+    ],
+    seoKeywords: ["houseboat rental", "houseboat glamping", "floating accommodation", "marina houseboat stay", "on water lodging"],
+    internalLinks: [
+      { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
+      { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
+      { text: "Floating Cabin", url: "/glossary/floating-cabin" },
+      { text: "Slip / Marina Berth", url: "/glossary/marina-slip" },
+      { text: "Shore Power", url: "/glossary/shore-power" }
+    ],
+    faqs: [
+      {
+        question: "Is a houseboat the same as a floating cabin?",
+        answer: "Not always. Floating cabins are often fixed platforms with a cabin above the water. Houseboats emphasize a hull or boat-like structure as the guest space. Rules, insurance, and slip contracts often differ; the distinction matters for feasibility and valuation."
+      },
+      {
+        question: "Can houseboat income be compared to hotel rooms?",
+        answer: "Sometimes, if the guest experience and booking channel are similar. Often, comps blend waterfront hotels, specialty floating lodging, and high-end RV or tiny-home rentals. The comp narrative should match legal use and quality level."
       }
     ]
   },

@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useSidebar } from '@/lib/sidebar-context';
 
 export default function AdminMainContent({
@@ -8,6 +9,11 @@ export default function AdminMainContent({
   children: React.ReactNode;
 }) {
   const { isCollapsed } = useSidebar();
+  const pathname = usePathname();
+  const isClientMap = pathname === '/admin/client-map';
+  const contentPadding = isClientMap
+    ? 'pt-6 lg:pt-8 pb-2 lg:pb-3'
+    : 'py-6 lg:py-8';
 
   return (
     <div
@@ -16,7 +22,9 @@ export default function AdminMainContent({
         isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
       }`}
     >
-      {children}
+      <div className={`px-4 sm:px-6 lg:px-8 ${contentPadding}`}>
+        {children}
+      </div>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { logAdminAudit } from '@/lib/admin-audit';
 import { isValidStudyIdFormat } from '@/lib/report-constants';
 import {
   enrichReportInput,
+  deriveDevelopmentCosts,
   generateExecutiveSummary,
   generateLetterOfTransmittal,
   generateSWOTAnalysis,
@@ -25,6 +26,7 @@ import {
   assembleDraftXlsx,
   factCheckExecutiveSummary,
 } from '@/lib/ai-report-builder';
+import { exportCostAnalysisToXlsx } from '@/lib/site-builder/export-cost-analysis-xlsx';
 import type { ReportDraftInput } from '@/lib/ai-report-builder';
 
 export const dynamic = 'force-dynamic';
@@ -209,13 +211,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators] = await Promise.all([
-      generateExecutiveSummary(enriched),
-      generateLetterOfTransmittal(enriched),
-      generateSWOTAnalysis(enriched),
-      generateSiteAnalysis(enriched),
-      generateDemandIndicators(enriched),
-    ]);
+    const supabaseAdmin = createServerClient();
+    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators, devCostsResult] =
+      await Promise.all([
+        generateExecutiveSummary(enriched),
+        generateLetterOfTransmittal(enriched),
+        generateSWOTAnalysis(enriched),
+        generateSiteAnalysis(enriched),
+        generateDemandIndicators(enriched),
+        deriveDevelopmentCosts(supabaseAdmin, enriched),
+      ]);
     let executive_summary = execSummaryResult.executive_summary;
     const citations = execSummaryResult.citations;
 
@@ -228,13 +233,19 @@ export async function POST(request: NextRequest) {
     const [docxBuffer, xlsxBuffer] = await Promise.all([
       assembleDraftDocx(
         enriched,
-        { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators },
+        {
+          executive_summary,
+          citations,
+          letter_of_transmittal,
+          swot_analysis,
+          site_analysis,
+          demand_indicators,
+          development_costs_data: devCostsResult.data,
+        },
         { marketType: input.market_type }
       ),
       assembleDraftXlsx(enriched, { marketType: input.market_type }),
     ]);
-
-    const supabaseAdmin = createServerClient();
 
     const insertPayload = buildReportInsertPayload({
       userId: session.user.id,
@@ -259,17 +270,41 @@ export async function POST(request: NextRequest) {
 
     const docxStoragePath = `${newReport.id}/report.docx`;
     const xlsxStoragePath = `${newReport.id}/template.xlsx`;
+    const costAnalysisStoragePath = `${newReport.id}/cost-analysis.xlsx`;
 
-    const [docxUpload, xlsxUpload] = await Promise.all([
+    const uploads: Promise<{ error: { message: string } | null }>[] = [
       supabaseAdmin.storage.from(BUCKET_NAME).upload(docxStoragePath, docxBuffer, {
         contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         upsert: true,
-      }),
+      }).then((r) => ({ error: r.error })),
       supabaseAdmin.storage.from(BUCKET_NAME).upload(xlsxStoragePath, xlsxBuffer, {
         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         upsert: true,
-      }),
-    ]);
+      }).then((r) => ({ error: r.error })),
+    ];
+
+    if (devCostsResult.configs.length > 0) {
+      try {
+        const costAnalysisBuffer = exportCostAnalysisToXlsx({
+          configs: devCostsResult.configs,
+          costResult: devCostsResult.costResult,
+          amenityBreakdown: [],
+        });
+        uploads.push(
+          supabaseAdmin.storage.from(BUCKET_NAME).upload(costAnalysisStoragePath, costAnalysisBuffer, {
+            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            upsert: true,
+          }).then((r) => ({ error: r.error }))
+        );
+      } catch (costErr) {
+        console.warn('[generate-draft] Cost Analysis XLSX export failed (non-fatal):', costErr);
+      }
+    }
+
+    const uploadResults = await Promise.all(uploads);
+    const docxUpload = uploadResults[0];
+    const xlsxUpload = uploadResults[1];
+    const costAnalysisUpload = uploadResults[2];
 
     if (docxUpload.error) {
       console.error('[generate-draft] DOCX storage error:', docxUpload.error);
@@ -284,12 +319,15 @@ export async function POST(request: NextRequest) {
       console.warn('[generate-draft] XLSX storage error (non-fatal):', xlsxUpload.error.message);
     }
 
-    const updatePayload: Record<string, string | boolean> = {
+    const updatePayload: Record<string, string | boolean | null> = {
       docx_file_path: docxStoragePath,
     };
     if (!xlsxUpload.error) {
       updatePayload.xlsx_file_path = xlsxStoragePath;
       updatePayload.has_xlsx = true;
+    }
+    if (costAnalysisUpload && !costAnalysisUpload.error) {
+      updatePayload.cost_analysis_file_path = costAnalysisStoragePath;
     }
 
     const { error: updateError } = await supabaseAdmin

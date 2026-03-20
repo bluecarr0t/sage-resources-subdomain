@@ -129,6 +129,34 @@ export interface ExecutiveSummaryStructured {
   citations: Citation[];
 }
 
+/** Development Costs data for Report Builder DOCX/XLSX sections */
+export interface DevelopmentCostsData {
+  siteDevCosts: {
+    totalRVSites: number;
+    totalGlampingUnits: number;
+    rvTotal: number;
+    glampingTotal: number;
+    lineItems: Array<{ name: string; quantity: number; costPerUnit: number; subtotal: number }>;
+  };
+  unitCosts: {
+    items: Array<{ name: string; qty: number; costPerUnit: number; subtotal: number }>;
+    total: number;
+  };
+  addBldgImprovements: {
+    items: Array<{ name: string; sf?: number; costPerSf?: number; total: number }>;
+    total: number;
+  };
+  totalProjectCost: {
+    siteDev: number;
+    unitCosts: number;
+    addBldg: number;
+    hardCosts: number;
+    softCosts: number;
+    land: number;
+    total: number;
+  };
+}
+
 export interface GeneratedSections {
   executive_summary: string;
   citations?: Citation[];
@@ -137,4 +165,6 @@ export interface GeneratedSections {
   site_analysis?: string;
   /** Expanded Demand Indicators writeup (multi-paragraph, weather-enriched) */
   demand_indicators?: string;
+  /** Development Costs tables for DOCX section and Cost Analysis XLSX */
+  development_costs_data?: DevelopmentCostsData;
 }

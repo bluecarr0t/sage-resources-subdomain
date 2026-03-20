@@ -10,7 +10,7 @@ import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 import sharp from 'sharp';
 import { createServerClient } from '@/lib/supabase';
-import type { EnrichedInput } from './types';
+import type { DevelopmentCostsData, EnrichedInput } from './types';
 import type { GeneratedSections } from './types';
 
 const BUCKET_NAME = 'report-templates';
@@ -619,6 +619,142 @@ function replaceStaticSiteAnalysisSection(zip: PizZip, siteAnalysisText: string)
   zip.file(xmlPath, xml.slice(0, startIdx) + replacement + suffix.slice(removeUntil));
 }
 
+/** Build a simple cost table: header row + data rows (Item, Qty, Cost/Unit, Total) */
+function buildCostTableXml(
+  headers: string[],
+  rows: Array<Record<string, string | number>>
+): string {
+  const fmt = (v: string | number) =>
+    typeof v === 'number' ? (v === 0 ? '0' : v.toLocaleString('en-US', { maximumFractionDigits: 0 })) : String(v);
+  const cell = (val: string | number, bold = false) => {
+    const rPr = bold ? '<w:rPr><w:b/></w:rPr>' : '';
+    return `<w:tc><w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:pStyle w:val="TableParagraph"/></w:pPr><w:r>${rPr}<w:t>${escapeXml(fmt(val))}</w:t></w:r></w:p></w:tc>`;
+  };
+  const headerRow = `<w:tr>${headers.map((h) => cell(h, true)).join('')}</w:tr>`;
+  const dataRows = rows
+    .map((r) => `<w:tr>${headers.map((h) => cell(r[h] ?? '')).join('')}</w:tr>`)
+    .join('');
+  const colCount = headers.length;
+  const gridCols = Array(colCount).fill('<w:gridCol w:w="2000"/>').join('');
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="0" w:type="auto"/><w:tblLook w:val="04A0"/></w:tblPr><w:tblGrid>${gridCols}</w:tblGrid>${headerRow}${dataRows}</w:tbl>`;
+}
+
+/** Build Development Costs section content: intro + tables */
+function buildDevelopmentCostsSectionXml(data: DevelopmentCostsData): string {
+  const intro =
+    'Development costs are estimated using Marshall & Swift (MVS) Section 63 for manufactured housing parks and Section 66 for site improvements. Quality level and local multipliers are applied per MVS guidelines.';
+  const introPara = `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r><w:t>${escapeXml(intro)}</w:t></w:r></w:p>`;
+
+  const siteDevRows: Array<Record<string, string | number>> = data.siteDevCosts.lineItems
+    .filter((r) => r.quantity > 0 || r.name.includes('confirm'))
+    .map((r) => ({
+      Item: r.name,
+      Qty: r.quantity,
+      'Cost/Unit': r.costPerUnit,
+      Total: r.subtotal,
+    }));
+  if (siteDevRows.length === 0 && data.siteDevCosts.rvTotal + data.siteDevCosts.glampingTotal > 0) {
+    siteDevRows.push({
+      Item: 'Site Development (horizontal + units)',
+      Qty: data.siteDevCosts.totalRVSites + data.siteDevCosts.totalGlampingUnits,
+      'Cost/Unit': 0,
+      Total: data.siteDevCosts.rvTotal + data.siteDevCosts.glampingTotal,
+    });
+  }
+  const siteDevTable = buildCostTableXml(['Item', 'Qty', 'Cost/Unit', 'Total'], siteDevRows);
+
+  const unitRows = data.unitCosts.items
+    .filter((r) => r.qty > 0 || r.name.includes('confirm'))
+    .map((r) => ({ Item: r.name, Qty: r.qty, 'Cost/Unit': r.costPerUnit, Total: r.subtotal }));
+  const unitTable = buildCostTableXml(['Item', 'Qty', 'Cost/Unit', 'Total'], unitRows);
+
+  const addBldgRows: Array<Record<string, string | number>> = data.addBldgImprovements.items.map((r) => ({
+    Item: r.name,
+    SF: r.sf ?? '-',
+    '$/SF': r.costPerSf ?? '-',
+    Total: r.total,
+  }));
+  if (addBldgRows.length === 0 && data.addBldgImprovements.total > 0) {
+    addBldgRows.push({ Item: 'Additional structures', SF: '-', '$/SF': '-', Total: data.addBldgImprovements.total });
+  }
+  const addBldgTable = buildCostTableXml(['Item', 'SF', '$/SF', 'Total'], addBldgRows);
+
+  const totalRows = [
+    { Line: 'Site Development', Amount: data.totalProjectCost.siteDev },
+    { Line: 'Unit Costs', Amount: data.totalProjectCost.unitCosts },
+    { Line: 'Additional Structures', Amount: data.totalProjectCost.addBldg },
+    { Line: 'Hard Costs Subtotal', Amount: data.totalProjectCost.hardCosts },
+    { Line: 'Soft Costs (est.)', Amount: data.totalProjectCost.softCosts },
+    { Line: 'Land', Amount: data.totalProjectCost.land },
+    { Line: 'Total Project Cost', Amount: data.totalProjectCost.total },
+  ];
+  const totalTable = buildCostTableXml(['Line', 'Amount'], totalRows);
+
+  const subhead = (text: string) =>
+    `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>${escapeXml(text)}</w:t></w:r></w:p>`;
+
+  return (
+    introPara +
+    '<w:p/>' +
+    subhead('Site Development Costs') +
+    siteDevTable +
+    '<w:p/>' +
+    subhead('Unit Costs (Glamping / Lodging)') +
+    unitTable +
+    '<w:p/>' +
+    subhead('Additional Structures and Site Improvements') +
+    addBldgTable +
+    '<w:p/>' +
+    subhead('Total Project Cost') +
+    totalTable +
+    '<w:p/>'
+  );
+}
+
+/**
+ * Replace the Development Costs section content with generated tables.
+ * Finds the "Development Costs" heading and replaces content until the next section.
+ */
+function replaceDevelopmentCostsSection(
+  zip: PizZip,
+  developmentCostsData: DevelopmentCostsData | undefined
+): void {
+  if (!developmentCostsData) return;
+
+  const xmlPath = 'word/document.xml';
+  const file = zip.file(xmlPath);
+  if (!file) return;
+
+  const xml = file.asText();
+  const headingPattern = /<w:p\b[\s\S]*?<w:t[^>]*>(?:[^<]*)?Development Costs(?:[^<]*)?<\/w:t>[\s\S]*?<\/w:p>/;
+  const headingMatch = xml.match(headingPattern);
+  if (!headingMatch || headingMatch.index == null) return;
+
+  const startIdx = headingMatch.index + headingMatch[0].length;
+  const suffix = xml.slice(startIdx);
+  const paragraphPattern = /<w:p\b[\s\S]*?<\/w:p>/g;
+
+  let removeUntil = 0;
+  for (const m of suffix.matchAll(paragraphPattern)) {
+    const para = m[0];
+    const idx = m.index ?? 0;
+
+    if (/<w:pStyle\s+w:val="Heading[12]"/.test(para)) {
+      removeUntil = idx;
+      break;
+    }
+    if (para.includes('<w:t>Comparables</w:t>') || para.includes('<w:t>Supply and Competition</w:t>') ||
+        para.includes('<w:t>SWOT</w:t>') || para.includes('<w:t>Pro Forma</w:t>') || para.includes('<w:t>Addenda</w:t>')) {
+      removeUntil = idx;
+      break;
+    }
+    removeUntil = idx + para.length;
+  }
+
+  const replacement = buildDevelopmentCostsSectionXml(developmentCostsData);
+  zip.file(xmlPath, xml.slice(0, startIdx) + replacement + suffix.slice(removeUntil));
+}
+
 function buildDemandIndicatorsParagraphsXml(text: string): string {
   return text
     .split('\n')
@@ -962,6 +1098,7 @@ export async function assembleDraftDocx(
   if (sections.demand_indicators) {
     await replaceDemandIndicatorsSection(doc.getZip(), sections.demand_indicators, input);
   }
+  replaceDevelopmentCostsSection(doc.getZip(), sections.development_costs_data);
   replaceTemplateImagesSelectively(doc.getZip());
 
   const { compressed, bytesSaved } = await compressImagesInZip(doc.getZip());

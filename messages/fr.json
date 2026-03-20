@@ -730,6 +730,12 @@
     },
     "layers": {
       "title": "Couches de Carte",
+      "clientWork": {
+        "label": "Projets clients",
+        "description": "Projets clients Sage sur la carte, dont le glamping, les resorts pour camping-cars, les terrains de camping, les marinas, les hôtels paysagers et d’autres projets d’hospitalité de plein air.",
+        "hide": "Masquer les projets clients",
+        "show": "Afficher les projets clients"
+      },
       "nationalParks": {
         "label": "Afficher les Parcs Nationaux",
         "description": "Afficher les marqueurs des Parcs Nationaux sur la carte",
@@ -766,6 +772,10 @@
         "acres": "acres",
         "visitors": "Visiteurs (2021)",
         "viewMore": "Voir Plus →"
+      },
+      "clientWork": {
+        "resortType": "Type de resort",
+        "service": "Service"
       },
       "photo": {
         "previous": "Photo précédente",

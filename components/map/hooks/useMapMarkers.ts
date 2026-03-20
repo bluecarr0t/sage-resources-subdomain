@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
 import { NationalPark, filterParksWithCoordinates } from '@/lib/types/national-parks';
+import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
 
 type PropertyWithCoords = SageProperty & { coordinates: [number, number] };
 type NationalParkWithCoords = NationalPark & { coordinates: [number, number] };
@@ -11,8 +12,11 @@ interface UseMapMarkersProps {
   properties: SageProperty[];
   nationalParks: NationalPark[];
   showNationalParks: boolean;
+  clientWorkPoints: ClientWorkMapPoint[];
+  showClientWork: boolean;
   setSelectedProperty: (property: PropertyWithCoords | null) => void;
   setSelectedPark: (park: NationalParkWithCoords | null) => void;
+  setSelectedClientWork: (point: ClientWorkMapPoint | null) => void;
   markerClickTimeRef: React.MutableRefObject<number>;
 }
 
@@ -25,14 +29,22 @@ export function useMapMarkers({
   properties,
   nationalParks,
   showNationalParks,
+  clientWorkPoints,
+  showClientWork,
   setSelectedProperty,
   setSelectedPark,
+  setSelectedClientWork,
   markerClickTimeRef,
 }: UseMapMarkersProps) {
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const parkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const clientWorkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const propertyIdsRef = useRef<Set<string | number>>(new Set());
-  const lastClickedMarkerRef = useRef<{ type: 'property' | 'park'; id: string | number; timestamp: number } | null>(null);
+  const lastClickedMarkerRef = useRef<{
+    type: 'property' | 'park' | 'clientWork';
+    id: string | number;
+    timestamp: number;
+  } | null>(null);
 
   // Filter properties with coordinates
   const propertiesWithCoords = filterPropertiesWithCoordinates(properties);
@@ -142,7 +154,8 @@ export function useMapMarkers({
           
           // Clear any other selections first
           setSelectedPark(null);
-          
+          setSelectedClientWork(null);
+
           // Immediately set the selected property to the one that was actually clicked
           // This ensures the correct info window is displayed
           setSelectedProperty(property as PropertyWithCoords);
@@ -155,7 +168,7 @@ export function useMapMarkers({
     };
 
     createMarkers().catch(console.error);
-  }, [map, isClient, propertiesWithCoords, setSelectedProperty, setSelectedPark, markerClickTimeRef]);
+  }, [map, isClient, propertiesWithCoords, setSelectedProperty, setSelectedPark, setSelectedClientWork, markerClickTimeRef]);
 
   // Manage national park markers
   useEffect(() => {
@@ -251,7 +264,8 @@ export function useMapMarkers({
           
           // Clear any other selections first
           setSelectedProperty(null);
-          
+          setSelectedClientWork(null);
+
           // Immediately set the selected park to the one that was actually clicked
           // This ensures the correct info window is displayed
           setSelectedPark(park as NationalParkWithCoords);
@@ -264,7 +278,114 @@ export function useMapMarkers({
     };
 
     createParkMarkers().catch(console.error);
-  }, [map, isClient, nationalParks, showNationalParks, setSelectedProperty, setSelectedPark, markerClickTimeRef]);
+  }, [map, isClient, nationalParks, showNationalParks, setSelectedProperty, setSelectedPark, setSelectedClientWork, markerClickTimeRef]);
 
-  return { markersRef, parkMarkersRef };
+  // Client Work markers (static gold pins)
+  useEffect(() => {
+    if (!map || !isClient) {
+      clientWorkMarkersRef.current.forEach((marker) => {
+        marker.map = null;
+      });
+      clientWorkMarkersRef.current = [];
+      return;
+    }
+
+    if (!showClientWork) {
+      clientWorkMarkersRef.current.forEach((marker) => {
+        marker.map = null;
+      });
+      clientWorkMarkersRef.current = [];
+      setSelectedClientWork(null);
+      return;
+    }
+
+    clientWorkMarkersRef.current.forEach((marker) => {
+      marker.map = null;
+    });
+    clientWorkMarkersRef.current = [];
+
+    const createClientWorkMarkers = async () => {
+      const { AdvancedMarkerElement, PinElement } = (await google.maps.importLibrary(
+        'marker'
+      )) as google.maps.MarkerLibrary;
+
+      const cwMarkers = clientWorkPoints.map((point) => {
+        const goldPin = new PinElement({
+          background: '#CA8A04',
+          borderColor: '#FFFFFF',
+          glyphColor: '#FFFFFF',
+          scale: 0.8,
+        });
+
+        const title = point.location;
+        goldPin.element.setAttribute('aria-label', title);
+        goldPin.element.setAttribute('role', 'button');
+        goldPin.element.setAttribute('tabindex', '0');
+
+        const marker = new AdvancedMarkerElement({
+          map,
+          position: { lat: point.lat, lng: point.lng },
+          title,
+          content: goldPin.element,
+        });
+
+        marker.addEventListener('click', (event: any) => {
+          const clickTimestamp = Date.now();
+
+          if (
+            lastClickedMarkerRef.current &&
+            clickTimestamp - lastClickedMarkerRef.current.timestamp < 50 &&
+            (lastClickedMarkerRef.current.type !== 'clientWork' ||
+              lastClickedMarkerRef.current.id !== point.id)
+          ) {
+            if (event.domEvent) {
+              event.domEvent.stopPropagation();
+              event.domEvent.stopImmediatePropagation();
+            }
+            if (event.stop) {
+              event.stop();
+            }
+            return;
+          }
+
+          lastClickedMarkerRef.current = {
+            type: 'clientWork',
+            id: point.id,
+            timestamp: clickTimestamp,
+          };
+
+          if (event.domEvent) {
+            event.domEvent.stopPropagation();
+            event.domEvent.stopImmediatePropagation();
+            event.domEvent.preventDefault();
+          }
+          if (event.stop) {
+            event.stop();
+          }
+
+          markerClickTimeRef.current = clickTimestamp;
+          setSelectedProperty(null);
+          setSelectedPark(null);
+          setSelectedClientWork(point);
+        });
+
+        return marker;
+      });
+
+      clientWorkMarkersRef.current = cwMarkers;
+    };
+
+    createClientWorkMarkers().catch(console.error);
+  }, [
+    map,
+    isClient,
+    clientWorkPoints,
+    showClientWork,
+    setSelectedProperty,
+    setSelectedPark,
+    setSelectedClientWork,
+    markerClickTimeRef,
+  ]);
+
+  return { markersRef, parkMarkersRef, clientWorkMarkersRef };
 }

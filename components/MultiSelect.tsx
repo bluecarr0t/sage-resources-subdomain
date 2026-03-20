@@ -3,9 +3,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-interface MultiSelectOption {
+export interface MultiSelectOption {
   value: string;
   label: string;
+  /** When set, shown right-aligned in the dropdown row (e.g. report counts). */
+  count?: number;
 }
 
 interface MultiSelectProps {
@@ -121,6 +123,19 @@ export default function MultiSelect({
   };
 
   const isActive = selectedValues.length > 0;
+
+  const labelForValue = (value: string) =>
+    options.find((o) => o.value === value)?.label ?? value;
+
+  const selectedSummary =
+    selectedValues.length === 0
+      ? placeholder
+      : selectedValues.length === 1
+        ? labelForValue(selectedValues[0])
+        : allSelectedText && selectedValues.length === options.length
+          ? allSelectedText
+          : `${selectedValues.length} selected`;
+
   const colorClasses = activeColor === 'blue' 
     ? 'border-blue-300 bg-blue-50/50' 
     : activeColor === 'orange'
@@ -158,15 +173,7 @@ export default function MultiSelect({
             : 'border-gray-300 text-gray-600'
         }`}
       >
-        <span className="truncate flex-1">
-          {selectedValues.length === 0
-            ? placeholder
-            : selectedValues.length === 1
-            ? selectedValues[0]
-            : allSelectedText && selectedValues.length === options.length
-            ? allSelectedText
-            : `${selectedValues.length} selected`}
-        </span>
+        <span className="truncate flex-1">{selectedSummary}</span>
         <svg
           className={`w-5 h-5 text-gray-400 transition-transform ml-2 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
@@ -180,7 +187,7 @@ export default function MultiSelect({
       {isOpen && isMounted && createPortal(
         <div 
           ref={dropdownRef}
-          className="fixed z-[9999] bg-white border border-gray-300 rounded-lg shadow-2xl overflow-y-auto"
+          className="fixed z-[9999] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl overflow-y-auto"
           style={{ 
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,
@@ -194,14 +201,14 @@ export default function MultiSelect({
         >
           <div className="p-2 space-y-1">
             {options.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500">No options available</div>
+              <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">No options available</div>
             ) : (
               options.map((option) => {
               const isSelected = selectedValues.includes(option.value);
               return (
                 <label
                   key={option.value}
-                  className="flex items-center px-3 py-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+                  className="flex items-start gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/80 rounded-md cursor-pointer transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
@@ -222,9 +229,16 @@ export default function MultiSelect({
                     onMouseDown={(e) => {
                       e.stopPropagation();
                     }}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                    className="w-4 h-4 shrink-0 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
                   />
-                  <span className="ml-3 text-sm text-gray-700">{option.label}</span>
+                  <span className="min-w-0 flex-1 ml-1 text-sm text-gray-700 dark:text-gray-200 break-words">
+                    {option.label}
+                  </span>
+                  {option.count != null && (
+                    <span className="shrink-0 mt-0.5 text-xs font-medium tabular-nums text-gray-500 dark:text-gray-400">
+                      {option.count}
+                    </span>
+                  )}
                 </label>
               );
             }))}

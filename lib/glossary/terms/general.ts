@@ -369,4 +369,124 @@ Sage Outdoor Advisory includes property management analysis in our feasibility s
       }
     ]
   },
+  "ota": {
+    slug: "ota",
+    term: "OTA (Online Travel Agency)",
+    definition: "Third-party booking platforms such as Booking.com, Expedia, or Airbnb that list accommodations, process reservations, and charge commissions or fees—central to distribution, ADR visibility, and RevPAR for many outdoor hospitality properties.",
+    extendedDefinition: `OTAs aggregate demand and traveler trust, making them a major acquisition channel for glamping, short-term rentals, and some RV parks. Listings expose properties to national and international guests but typically come with commission rates, cancellation policies, and ranking dynamics that affect net revenue.
+
+For financial analysis, the retail rate shown on an OTA is related to concepts like ARDR (advertised rate), while realized revenue after commissions and adjustments feeds ADR and RevPAR. Properties often balance OTA volume with direct bookings to reduce acquisition cost.
+
+Channel mix affects operations: OTAs may require instant booking, strict response times, and standardized content. A feasibility study should reflect realistic commission assumptions and the cost of channel management software or revenue managers.
+
+Sage Outdoor Advisory incorporates distribution assumptions where they materially affect revenue and expenses, aligning projections with how outdoor hospitality properties actually capture demand in today's market.`,
+    category: "General",
+    relatedTerms: ["adr", "revpar", "ardr", "revenue-management", "short-term-rental"],
+    examples: [
+      "A glamping resort derives 55% of room nights from Airbnb and Vrbo with blended commission near 15%",
+      "An RV park uses a campground-specific OTA plus its own website for direct bookings",
+      "A property shifts share from OTAs to direct over three years as brand awareness grows"
+    ],
+    useCases: [
+      "Modeling net revenue after OTA commissions in a pro forma",
+      "Explaining ARDR vs realized ADR to investors",
+      "Planning marketing spend alongside channel mix"
+    ],
+    seoKeywords: ["OTA", "online travel agency", "Airbnb commission", "Booking.com fees", "glamping distribution"],
+    internalLinks: [
+      { text: "ADR (Average Daily Rate)", url: "/glossary/adr" },
+      { text: "RevPAR", url: "/glossary/revpar" },
+      { text: "Revenue Management", url: "/glossary/revenue-management" }
+    ],
+    faqs: [
+      {
+        question: "Should we assume zero OTA use in a feasibility study?",
+        answer: "Only if the business plan truly excludes third-party channels. Most new properties rely on OTAs for initial demand; projections should state commission rates and expected mix."
+      },
+      {
+        question: "Are Airbnb and Booking.com the same economically?",
+        answer: "Both are OTAs but fee structures, guest expectations, and stay patterns differ. Use assumptions that match your actual listing strategy and market."
+      }
+    ]
+  },
+  "short-term-rental": {
+    slug: "short-term-rental",
+    term: "Short-Term Rental (STR)",
+    definition: "A furnished accommodation rented for short stays—often defined by local ordinance as under 30 days—frequently listed on OTAs; regulatory treatment overlaps with glamping, cabins, and RV park \"rental\" sites in many markets.",
+    extendedDefinition: `Short-term rental (STR) describes a use and booking pattern more than a single building type. Cities and counties often define STR by maximum stay length, owner occupancy requirements, licensing, taxes, and zoning. Glamping units, tiny cabins, park models, and accessory dwellings can all be regulated as STRs depending on jurisdiction.
+
+For developers and investors, STR rules affect what is permitted, neighbor opposition, parking and noise standards, and transient occupancy tax collection. A property marketed like a hotel may need different approvals than a traditional campground even if the guest experience is similar.
+
+Feasibility analysis should align the operating model with entitlements: nightly rentals where allowed, longer stays where STR caps exist, or hybrid approaches. Comparable selection should also be consistent—mixing hotel comps with whole-home STR comps without adjustment can skew conclusions.
+
+Sage Outdoor Advisory ties market and financial analysis to the intended operating structure, including STR-sensitive revenue and compliance considerations when they affect viability or value.`,
+    category: "General",
+    relatedTerms: ["ota", "transient-occupancy-tax", "zoning", "permitting", "glamping-resort"],
+    examples: [
+      "A county requires a short-term rental permit and caps non-owner-occupied nights for accessory dwellings",
+      "A glamping operator lists each unit on OTAs under a single management brand with unified housekeeping",
+      "A rural ordinance allows campground cabins for stays under 14 days only with a commercial permit"
+    ],
+    useCases: [
+      "Checking alignment between business plan and local STR definitions",
+      "Building comparable sets that match permitted use and stay length",
+      "Explaining regulatory risk to lenders and equity partners"
+    ],
+    seoKeywords: ["short term rental", "STR regulations", "vacation rental zoning", "nightly rental permit", "glamping STR"],
+    internalLinks: [
+      { text: "OTA (Online Travel Agency)", url: "/glossary/ota" },
+      { text: "Transient Occupancy Tax (TOT)", url: "/glossary/transient-occupancy-tax" },
+      { text: "Zoning", url: "/glossary/zoning" }
+    ],
+    faqs: [
+      {
+        question: "Is every glamping property an STR?",
+        answer: "Not always. Some operate under campground, resort, or commercial lodging frameworks. The label depends on local code and how stays are sold—not marketing language alone."
+      },
+      {
+        question: "Why does this matter for appraisals?",
+        answer: "If legally permitted use differs from how a property operates, value conclusions can be misleading. Appraisers consider legally permissible highest and best use and actual operations."
+      }
+    ]
+  },
+  "transient-occupancy-tax": {
+    slug: "transient-occupancy-tax",
+    term: "Transient Occupancy Tax (TOT) / Lodging Tax",
+    definition: "A local tax on short-stay lodging collected from guests (or remitted by operators), known as TOT, bed tax, hotel tax, or lodging tax depending on jurisdiction—material to net revenue and pro forma cash flow.",
+    extendedDefinition: `Transient occupancy taxes are levied by cities, counties, special districts, or states on accommodations for stays below a defined threshold (commonly 30 days or less, but rules vary). Rates are often a percentage of rent and may apply per night with caps. Exemptions can exist for long-term stays, certain employee housing, or specific property types—though outdoor hospitality is increasingly included as jurisdictions broaden definitions.
+
+Operators must register, collect, file, and remit; failure to comply creates liability and can disrupt financing diligence. For glamping, RV parks, and campgrounds, whether a stay is taxable may depend on how the unit is classified and length of stay.
+
+In financial modeling, TOT is usually shown as a pass-through collected from guests rather than an operating expense, but it still affects the guest's all-in price and therefore demand elasticity. Some markets publish separate line items on receipts; others bundle taxes into OTA payouts with settlement complexity.
+
+Sage Outdoor Advisory reflects lodging tax assumptions consistent with the project's location and operating structure, avoiding overstated net revenue when taxes are legally required to be collected and remitted.`,
+    category: "General",
+    relatedTerms: ["gross-revenue", "adr", "operating-expenses", "pro-forma", "short-term-rental"],
+    examples: [
+      "A city imposes 12% TOT on short stays; stays over 28 consecutive nights are exempt",
+      "A county adds a special district assessment on top of base lodging tax for tourism marketing",
+      "An OTA collects and remits some taxes while the operator must file local TOT separately"
+    ],
+    useCases: [
+      "Separating guest-facing taxes from owner net in projections",
+      "Supporting lender questions on compliance and escrows",
+      "Comparing markets with different total tax burdens on lodging"
+    ],
+    seoKeywords: ["transient occupancy tax", "TOT", "lodging tax", "hotel tax", "bed tax", "campground lodging tax"],
+    internalLinks: [
+      { text: "Gross Revenue", url: "/glossary/gross-revenue" },
+      { text: "Pro Forma", url: "/glossary/pro-forma" },
+      { text: "Short-Term Rental (STR)", url: "/glossary/short-term-rental" }
+    ],
+    faqs: [
+      {
+        question: "Is TOT the same as sales tax?",
+        answer: "Sometimes both apply. Lodging tax is often a separate levy with its own rate and filing. Always verify rules for the specific city, county, and state."
+      },
+      {
+        question: "Do seasonal RV sites pay TOT?",
+        answer: "It depends on stay length and local definitions. Long-term or annual leases may be excluded where statutes only tax transient stays."
+      }
+    ]
+  },
 };

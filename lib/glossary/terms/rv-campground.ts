@@ -674,5 +674,125 @@ Sage Outdoor Advisory includes primitive camping considerations in our campgroun
         answer: "Some primitive camping areas are free, particularly on BLM land and in some national forests. However, many primitive sites in state parks or private properties charge fees, though typically lower than developed campgrounds. Always check regulations and fees for your specific location."
       }
     ]
+  },
+  "park-model-rv": {
+    slug: "park-model-rv",
+    term: "Park Model RV",
+    definition: "A recreational vehicle–style unit built on a chassis but typically intended for long-term or seasonal placement in an RV park or outdoor hospitality setting, often distinguished from transient travel trailers by size, HUD or local housing rules, and how the site is rented or sold.",
+    extendedDefinition: `Park model RVs (PMRVs) look like small cabins or large travel trailers but are usually parked semi-permanently on a dedicated site. They are popular in seasonal RV communities, snowbird destinations, and some resorts that offer "owned" or long-term leased sites with a factory-built unit.
+
+Legally and operationally, park models differ from typical transient RV sites in important ways. Jurisdictions may treat them as RVs, manufactured housing, or something in between depending on size, wheels, tie-downs, foundations, and how long they remain on site. That affects permits, utility connections, property tax, lending, and whether the unit is personal property or becomes part of the real estate interest.
+
+For revenue modeling, park models often support monthly or seasonal revenue rather than nightly turnover—changing occupancy patterns, utility use, and management intensity compared with a travel-stop RV park. Some properties mix nightly RV sites with seasonal park model sites to stabilize cash flow.
+
+Sage Outdoor Advisory accounts for unit type, stay length, and regulatory context when analyzing RV parks and hybrid outdoor hospitality properties, so park model strategies are reflected accurately in feasibility studies and appraisals.`,
+    category: "RV & Campground",
+    relatedTerms: ["rv-park", "rv-resort", "seasonal-site", "campground", "zoning"],
+    examples: [
+      "A resort section with 40 park model sites leased seasonally while the front of the property offers nightly pull-through sites",
+      "A snowbird park where guests own their park model but rent the underlying site annually",
+      "A hybrid property marketing \"tiny cabin\" park models as furnished long-stay accommodations next to traditional RV hookups"
+    ],
+    useCases: [
+      "Planning seasonal or annual revenue alongside transient sites",
+      "Navigating permits for long-term placement of factory-built units",
+      "Explaining personal property vs real property considerations to lenders"
+    ],
+    seoKeywords: ["park model RV", "park model trailer", "park model cabin", "seasonal RV park model", "PMRV"],
+    internalLinks: [
+      { text: "RV Resort Feasibility Study", url: "/landing/rv-resort-feasibility-study" },
+      { text: "Seasonal Site / Annual Site", url: "/glossary/seasonal-site" },
+      { text: "RV Park", url: "/glossary/rv-park" }
+    ],
+    faqs: [
+      {
+        question: "Is a park model the same as a motorhome?",
+        answer: "No. Motorhomes are self-propelled. Park models are towable or delivered units usually intended to stay on one site for extended periods, more like a small cabin on a chassis than a touring RV."
+      },
+      {
+        question: "Why do lenders care about park models?",
+        answer: "Financing and collateral treatment can differ from transient RV operations. Long-term occupancy may resemble housing or seasonal leasing, which affects underwriting, insurance, and sometimes regulatory oversight."
+      }
+    ]
+  },
+  "seasonal-site": {
+    slug: "seasonal-site",
+    term: "Seasonal Site / Annual Site",
+    definition: "An RV or outdoor hospitality site rented for an extended period—commonly a full season or year—rather than by the night, producing different occupancy, revenue, and operational patterns than transient stays.",
+    extendedDefinition: `Seasonal and annual sites are leased to guests for weeks, months, an entire season, or a full year. Guests may leave a park model, fifth wheel, or travel trailer on site, or the operator may provide a fixed unit. This contrasts with transient sites, where turnover is frequent and stays are short.
+
+Financially, seasonal and annual sites often provide more predictable base revenue and lower reservation friction, but they may cap peak-night pricing upside and require different utility, maintenance, and rule enforcement (storage, landscaping, subleasing, guests). Occupancy metrics are usually expressed differently—contracted site count and renewal rates matter as much as nightly occupancy percentage.
+
+Operators may combine seasonal blocks with transient inventory: for example, annual sites along the perimeter and premium nightly pull-throughs near the entrance. Market analysis should segment demand for snowbirds, workers, locals, and tourists.
+
+Sage Outdoor Advisory models stay-length mix explicitly when appropriate, tying seasonal and annual contracts to revenue stability, capital plans, and comparable properties in feasibility studies and appraisals.`,
+    category: "RV & Campground",
+    relatedTerms: ["rv-park", "rv-resort", "park-model-rv", "seasonality", "occupancy-rate"],
+    examples: [
+      "A northern campground offering May–October seasonal contracts for 120 sites at a flat seasonal rate",
+      "A Sun Belt RV resort with annual site leases and automatic renewal",
+      "A property that reserves 30% of sites for nightly guests and 70% for seasonal snowbirds"
+    ],
+    useCases: [
+      "Forecasting revenue when most income is contracted rather than nightly",
+      "Explaining utility and maintenance loads for long-stay guests",
+      "Benchmarking against parks with similar seasonal vs transient mix"
+    ],
+    seoKeywords: ["seasonal RV site", "annual RV site", "long term RV site lease", "seasonal campground site", "annual campsite"],
+    internalLinks: [
+      { text: "RV Resort Feasibility Study", url: "/landing/rv-resort-feasibility-study" },
+      { text: "Seasonality", url: "/glossary/seasonality" },
+      { text: "Park Model RV", url: "/glossary/park-model-rv" }
+    ],
+    faqs: [
+      {
+        question: "How is seasonal revenue different from hotel ADR?",
+        answer: "Seasonal sites are often priced as a package rate for weeks or months, not a nightly ADR. Feasibility work may show effective daily revenue, but the contract structure is the economic reality."
+      },
+      {
+        question: "Can a property mix seasonal and transient sites?",
+        answer: "Yes. Many successful parks do. The key is whether road layout, amenities, and management can serve both guest types without conflict, and whether the market supports the mix."
+      }
+    ]
+  },
+  "marina-slip": {
+    slug: "marina-slip",
+    term: "Slip / Marina Berth",
+    definition: "A designated mooring space at a dock or marina where a boat is kept—rented nightly, seasonally, or annually—often relevant when waterfront outdoor hospitality includes boating access or floating accommodations.",
+    extendedDefinition: `A slip (berth) is the water analogue of an RV site: a defined space along a dock, pier, or marina finger where a vessel is moored. Slips may be rented to guests, tenants, or members, and rates vary by length, depth, utilities (shore power, water), and season.
+
+For outdoor hospitality near water, slips can be a secondary revenue line—boat storage for cabin or glamping guests, seasonal contracts for locals, or transient dockage for travelers. Operating considerations include liability, dock maintenance, pump-out access, ice/wind loads in cold climates, and staffing for dock assistance.
+
+Appraisal and feasibility analysis treats slip income as a distinct income stream when material, with its own comparables (marina lease rates, occupancy, waitlists) rather than assuming it behaves like lodging ADR.
+
+Sage Outdoor Advisory incorporates accessory marina or dock income where it is part of the business plan, including properties with floating cabins or waterfront RV and campground offerings.`,
+    category: "RV & Campground",
+    relatedTerms: ["floating-cabin", "houseboat", "rv-resort", "shore-power", "amenities", "gross-revenue"],
+    examples: [
+      "A lakeside resort charging nightly dock fees for guests renting floating cabins and private boat slips",
+      "A marina-adjacent RV park offering annual slip leases to seasonal residents",
+      "A waterfront glamping property with a small dock and six transient slips for weekend visitors"
+    ],
+    useCases: [
+      "Adding dock or slip revenue to a waterfront feasibility model",
+      "Separating boating income from lodging for lender clarity",
+      "Planning utilities and insurance for dock operations"
+    ],
+    seoKeywords: ["marina slip", "boat slip rental", "marina berth", "dock slip", "transient dockage"],
+    internalLinks: [
+      { text: "Floating Cabin", url: "/glossary/floating-cabin" },
+      { text: "Shore Power", url: "/glossary/shore-power" },
+      { text: "Gross Revenue", url: "/glossary/gross-revenue" }
+    ],
+    faqs: [
+      {
+        question: "Is slip income the same as room revenue?",
+        answer: "Usually no. Slip rental is often tracked separately for operations, insurance, and valuation. It may have different seasonality and competitors than lodging."
+      },
+      {
+        question: "Do I need a full marina to offer slips?",
+        answer: "Not necessarily. Some properties offer limited guest dockage. Scale, permits, and safety requirements still apply based on local regulations and insurer expectations."
+      }
+    ]
   }
 };

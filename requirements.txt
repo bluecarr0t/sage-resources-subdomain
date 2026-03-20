@@ -1,0 +1,5 @@
+# Python dependencies for CCE PDF extraction
+# Install: pip install -r requirements.txt
+pdfplumber>=0.10.0
+supabase>=2.0.0
+python-dotenv>=1.0.0
