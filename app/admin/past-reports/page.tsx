@@ -171,11 +171,17 @@ export default function PastReportsPage() {
     loadClients();
   }, [loadClients]);
 
+  /** Past Reports list only shows studies with an uploaded .docx (has_docx from API). */
+  const reportsWithDocx = useMemo(
+    () => reports.filter((r) => r.has_docx === true),
+    [reports]
+  );
+
   const filteredReports = useMemo(() => {
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
 
-    return reports.filter((r) => {
+    return reportsWithDocx.filter((r) => {
       if (debouncedSearch) {
         const q = debouncedSearch.toLowerCase();
         const matches =
@@ -195,7 +201,7 @@ export default function PastReportsPage() {
       }
       return true;
     });
-  }, [reports, debouncedSearch, marketFilter, dateFilter]);
+  }, [reportsWithDocx, debouncedSearch, marketFilter, dateFilter]);
 
   const paginatedReports = useMemo(() => {
     const start = (currentPage - 1) * REPORTS_PER_PAGE;
@@ -400,15 +406,35 @@ export default function PastReportsPage() {
         {/* Report count */}
         <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
           Showing <span id="filteredCount" className="font-medium">{filteredReports.length}</span> of{' '}
-          <span id="totalReports" className="font-medium">{reports.length}</span> reports
+          <span id="totalReports" className="font-medium">{reportsWithDocx.length}</span> reports
+          {reports.length > reportsWithDocx.length ? (
+            <span className="text-gray-500 dark:text-gray-400">
+              {' '}
+              ({reports.length - reportsWithDocx.length} without a .docx file are hidden)
+            </span>
+          ) : null}
         </p>
 
         {/* Empty state */}
         {filteredReports.length === 0 && (
           <div id="emptyState" className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center border border-gray-200 dark:border-gray-700">
             <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-300 font-medium">No reports found</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search criteria</p>
+            {reports.length > 0 && reportsWithDocx.length === 0 ? (
+              <>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">No reports with a .docx file</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
+                  Only studies with an uploaded Word document (.docx) appear here.{' '}
+                  {reports.length === 1
+                    ? 'One report is hidden until a .docx is attached.'
+                    : `All ${reports.length} reports are hidden until each has a .docx uploaded.`}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">No reports found</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search criteria</p>
+              </>
+            )}
           </div>
         )}
 
