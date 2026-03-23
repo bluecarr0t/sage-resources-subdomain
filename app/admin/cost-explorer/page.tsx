@@ -673,7 +673,12 @@ export default function CostExplorerPage() {
                 }`}
               >
                 <Wrench className="w-4 h-4" />
-                {t('componentTab')}
+                <span className="inline-flex items-center gap-1.5">
+                  {t('componentTab')}
+                  <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-200">
+                    {t('beta')}
+                  </span>
+                </span>
               </button>
               <button
                 type="button"
@@ -694,7 +699,12 @@ export default function CostExplorerPage() {
                 }`}
               >
                 <Ruler className="w-4 h-4" />
-                Cost per Sq.Ft
+                <span className="inline-flex items-center gap-1.5">
+                  {t('costPerSqFtTab')}
+                  <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-200">
+                    {t('beta')}
+                  </span>
+                </span>
               </button>
               {tab === 'percent' && (
                 <button

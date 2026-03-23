@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3003",
     "prebuild": "node scripts/ensure-indexnow-key.js && node scripts/ensure-feasibility-template.js",
     "build": "next build",
     "indexnow:submit": "tsx scripts/submit-indexnow.ts",

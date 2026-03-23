@@ -598,6 +598,9 @@
     "noCatalogUnits": "No catalog units found. Run extraction from Cost Explorer."
   },
   "admin": {
+    "sidebar": {
+      "beta": "Beta"
+    },
     "cceCosts": {
       "title": "Cost Explorer",
       "subtitle": "Marshall & Swift Commercial Cost Explorer data – search and filter cost estimates",
@@ -637,6 +640,8 @@
         "fileLabel": "File",
         "extractionEstimate": "Estimated processing time: 2–5 minutes"
       },
+      "beta": "Beta",
+      "costPerSqFtTab": "Cost per Sq.Ft",
       "componentTab": "Component Costs",
       "catalogTab": "Glamping Units",
       "catalogSearchPlaceholder": "Manufacturer, product model...",

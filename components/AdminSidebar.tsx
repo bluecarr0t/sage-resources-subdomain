@@ -25,6 +25,7 @@ import {
   Calculator,
   Home,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useSidebar } from '@/lib/sidebar-context';
 import { supabase } from '@/lib/supabase';
 
@@ -56,6 +57,7 @@ function NavLink({
   pageId,
   isActive,
   isCollapsed,
+  showBeta,
 }: {
   href: string;
   label: string;
@@ -63,13 +65,17 @@ function NavLink({
   pageId: string;
   isActive: boolean;
   isCollapsed?: boolean;
+  showBeta?: boolean;
 }) {
+  const tSidebar = useTranslations('admin.sidebar');
   const collapsed = isCollapsed ?? false;
+  const collapsedTitle =
+    collapsed && showBeta ? `${label} (${tSidebar('beta')})` : collapsed ? label : undefined;
   return (
     <Link
       href={href}
       data-page={pageId}
-      title={collapsed ? label : undefined}
+      title={collapsedTitle}
       className={`nav-item flex items-center ${collapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-lg transition-all duration-200 ease-in-out group ${
         isActive
           ? 'bg-sage-50 dark:bg-white/10 text-sage-700 dark:text-sage-300 font-medium'
@@ -81,7 +87,16 @@ function NavLink({
           isActive ? 'text-sage-600 dark:text-sage-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300'
         }`}
       />
-      {!collapsed && <span className="sidebar-text">{label}</span>}
+      {!collapsed && (
+        <span className="text-sm inline-flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="truncate">{label}</span>
+          {showBeta ? (
+            <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-1 py-px text-[8px] font-semibold uppercase leading-none tracking-wide text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-200">
+              {tSidebar('beta')}
+            </span>
+          ) : null}
+        </span>
+      )}
     </Link>
   );
 }
@@ -229,7 +244,7 @@ export default function AdminSidebar() {
                   <Globe
                     className="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300"
                   />
-                  {!showCollapsed && <span className="sidebar-text">Web Scraper</span>}
+                  {!showCollapsed && <span className="text-sm">Web Scraper</span>}
                 </a>
                 <NavLink
                   href="/admin/client-map"
@@ -262,6 +277,7 @@ export default function AdminSidebar() {
                   pageId="report-builder"
                   isActive={activePageId === 'report-builder'}
                   isCollapsed={showCollapsed}
+                  showBeta
                 />
                 <NavLink
                   href="/admin/proximity-insights"
@@ -270,6 +286,7 @@ export default function AdminSidebar() {
                   pageId="proximity-insights"
                   isActive={activePageId === 'proximity-insights'}
                   isCollapsed={showCollapsed}
+                  showBeta
                 />
                 <NavLink
                   href="/admin/rv-site-setup"
@@ -278,6 +295,7 @@ export default function AdminSidebar() {
                   pageId="site-design"
                   isActive={activePageId === 'site-design'}
                   isCollapsed={showCollapsed}
+                  showBeta
                 />
                 <NavLink
                   href="/admin/site-builder"
@@ -286,6 +304,7 @@ export default function AdminSidebar() {
                   pageId="site-builder"
                   isActive={activePageId === 'site-builder'}
                   isCollapsed={showCollapsed}
+                  showBeta
                 />
                 <NavLink
                   href="/admin/cost-explorer"
@@ -323,7 +342,7 @@ export default function AdminSidebar() {
                       activePageId === 'map' ? 'text-sage-600 dark:text-sage-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300'
                     }`}
                   />
-                  {!showCollapsed && <span className="sidebar-text">Glamping Map</span>}
+                  {!showCollapsed && <span className="text-sm">Glamping Map</span>}
                 </Link>
               </div>
             </div>
