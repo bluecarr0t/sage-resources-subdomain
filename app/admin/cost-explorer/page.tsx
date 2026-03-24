@@ -1247,7 +1247,7 @@ export default function CostExplorerPage() {
                             </a>
                           ) : row.source_page ? (
                             <a
-                              href={`/api/admin/cce-pdf?pdf=walden#page=${row.source_page}`}
+                              href={`/api/admin/walden-pdf#page=${row.source_page}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-sage-600 dark:text-sage-400 hover:underline"
@@ -1279,7 +1279,7 @@ export default function CostExplorerPage() {
                         <td className="px-4 py-3 text-sm text-right">
                           {row.source_page ? (
                             <a
-                              href={`/api/admin/cce-pdf?pdf=walden#page=${row.source_page}`}
+                              href={`/api/admin/walden-pdf#page=${row.source_page}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-sage-600 dark:text-sage-400 hover:underline"

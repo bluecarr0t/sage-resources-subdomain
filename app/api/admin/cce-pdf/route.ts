@@ -1,13 +1,14 @@
 /**
- * API Route: Serve CCE PDF for admin (walden/catalog/upload) or redirect to month route
+ * API Route: Serve CCE PDF uploads or redirect to default month edition
  * GET /api/admin/cce-pdf
  *
  * Query:
- *   pdf=walden|catalog - serve Walden catalog
+ *   pdf=walden|catalog - redirect to /api/admin/walden-pdf (Walden is not a CCE file)
  *   file=<name> - serve from CCE_uploads
  *   (none) - redirect to /api/admin/cce-pdf/March_2026
  *
- * For CCE reports by month, use GET /api/admin/cce-pdf/[month] (e.g. March_2026)
+ * CCE reports by month: GET /api/admin/cce-pdf/[month]
+ * Walden Buyers Guide: GET /api/admin/walden-pdf
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,12 +16,10 @@ import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 
-import { loadCcePdfFromLocalOrBlob } from '@/lib/cce-pdf-from-storage';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 
 export const dynamic = 'force-dynamic';
 
-const WALDEN_PDF = 'Walden_2025_Unique_Accommodation_Buyers_Guide_1.1 (2).pdf';
 const DEFAULT_MONTH = 'March_2026';
 
 export const GET = withAdminAuth(async (request: NextRequest) => {
@@ -30,23 +29,10 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     const pdfParam = request.nextUrl.searchParams.get('pdf');
 
     if (pdfParam === 'walden' || pdfParam === 'catalog') {
-      const loaded = await loadCcePdfFromLocalOrBlob(WALDEN_PDF, base);
-      if (!loaded) {
-        return NextResponse.json(
-          {
-            error:
-              'Walden PDF not found in local_data/ or blob storage. Upload with: npx tsx scripts/upload-cce-pdfs-to-blob.ts',
-          },
-          { status: 404 }
-        );
-      }
-      return new NextResponse(new Uint8Array(loaded.buffer), {
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `inline; filename="${WALDEN_PDF}"`,
-          'Cache-Control': 'private, max-age=3600',
-        },
-      });
+      return NextResponse.redirect(
+        new URL('/api/admin/walden-pdf', request.url),
+        307
+      );
     }
 
     if (fileParam) {

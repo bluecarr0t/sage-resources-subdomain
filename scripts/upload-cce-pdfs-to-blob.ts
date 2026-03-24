@@ -5,8 +5,8 @@
  *
  * Requires BLOB_READ_WRITE_TOKEN in .env.local
  *
- * Production serves from the same store via lib/cce-pdf-from-storage.ts (optional
- * CCE_PDF_BLOB_BASE_URL if PDFs are on a different blob host).
+ * Blob paths: cce-pdfs/<CCE_*.pdf>, walden-pdfs/<Walden_*.pdf>.
+ * Production: lib/cce-pdf-from-storage.ts (optional CCE_PDF_BLOB_BASE_URL).
  */
 
 import { put } from '@vercel/blob';
@@ -15,11 +15,15 @@ import * as path from 'path';
 
 require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
 
-const BLOB_PREFIX = 'cce-pdfs';
+const CCE_BLOB_PREFIX = 'cce-pdfs';
+const WALDEN_BLOB_PREFIX = 'walden-pdfs';
 
-const PDFS = [
-  'CCE_March_2026.pdf',
-  'Walden_2025_Unique_Accommodation_Buyers_Guide_1.1 (2).pdf',
+const PDFS: { filename: string; prefix: string }[] = [
+  { filename: 'CCE_March_2026.pdf', prefix: CCE_BLOB_PREFIX },
+  {
+    filename: 'Walden_2025_Unique_Accommodation_Buyers_Guide_1.1 (2).pdf',
+    prefix: WALDEN_BLOB_PREFIX,
+  },
 ];
 
 interface UploadResult {
@@ -31,10 +35,14 @@ interface UploadResult {
   error?: string;
 }
 
-async function uploadPdf(filePath: string, filename: string): Promise<UploadResult> {
+async function uploadPdf(
+  filePath: string,
+  filename: string,
+  prefix: string
+): Promise<UploadResult> {
   try {
     const fileBuffer = fs.readFileSync(filePath);
-    const blobPath = `${BLOB_PREFIX}/${filename}`;
+    const blobPath = `${prefix}/${filename}`;
 
     console.log(`  📤 Uploading ${filename}...`);
 
@@ -76,7 +84,7 @@ async function main() {
   const localDataDir = path.join(__dirname, '../local_data');
   const results: UploadResult[] = [];
 
-  for (const filename of PDFS) {
+  for (const { filename, prefix } of PDFS) {
     const filePath = path.join(localDataDir, filename);
 
     if (!fs.existsSync(filePath)) {
@@ -92,7 +100,7 @@ async function main() {
       continue;
     }
 
-    const result = await uploadPdf(filePath, filename);
+    const result = await uploadPdf(filePath, filename, prefix);
     results.push(result);
 
     if (result.success) {

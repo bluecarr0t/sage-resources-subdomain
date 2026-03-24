@@ -2,10 +2,14 @@ import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
 
-/**
- * Vercel Blob path prefix used by scripts/upload-cce-pdfs-to-blob.ts
- */
+/** CCE report PDFs (e.g. CCE_March_2026.pdf) — scripts/upload-cce-pdfs-to-blob.ts */
 export const CCE_PDF_BLOB_PATH_PREFIX = 'cce-pdfs';
+
+/** Walden Buyers Guide — separate from CCE; scripts/upload-cce-pdfs-to-blob.ts */
+export const WALDEN_PDF_BLOB_PATH_PREFIX = 'walden-pdfs';
+
+export const WALDEN_PDF_FILENAME =
+  'Walden_2025_Unique_Accommodation_Buyers_Guide_1.1 (2).pdf';
 
 /**
  * Default store matches glamping-units / admin-logos in this repo.
@@ -20,9 +24,18 @@ function blobBaseUrl(): string {
   return DEFAULT_BLOB_BASE;
 }
 
-/** Public GET URL for a PDF uploaded under cce-pdfs/<filename> */
+function pdfPublicBlobUrl(prefix: string, filename: string): string {
+  return `${blobBaseUrl()}/${prefix}/${encodeURIComponent(filename)}`;
+}
+
+/** Public GET URL for a CCE PDF under cce-pdfs/<filename> */
 export function ccePdfPublicBlobUrl(filename: string): string {
-  return `${blobBaseUrl()}/${CCE_PDF_BLOB_PATH_PREFIX}/${encodeURIComponent(filename)}`;
+  return pdfPublicBlobUrl(CCE_PDF_BLOB_PATH_PREFIX, filename);
+}
+
+/** Public GET URL for Walden PDF under walden-pdfs/<filename> */
+export function waldenPdfPublicBlobUrl(filename: string): string {
+  return pdfPublicBlobUrl(WALDEN_PDF_BLOB_PATH_PREFIX, filename);
 }
 
 /**
@@ -46,4 +59,31 @@ export async function loadCcePdfFromLocalOrBlob(
   }
   const ab = await res.arrayBuffer();
   return { buffer: Buffer.from(ab), source: 'blob' };
+}
+
+/**
+ * Walden catalog PDF: local_data first, then blob at walden-pdfs/, then legacy cce-pdfs/ (older uploads).
+ */
+export async function loadWaldenPdfFromLocalOrBlob(
+  projectRoot: string
+): Promise<{ buffer: Buffer; source: 'local' | 'blob' } | null> {
+  const filename = WALDEN_PDF_FILENAME;
+  const localPath = resolve(projectRoot, 'local_data', filename);
+  if (existsSync(localPath)) {
+    const buffer = await readFile(localPath);
+    return { buffer, source: 'local' };
+  }
+
+  const urls = [
+    waldenPdfPublicBlobUrl(filename),
+    ccePdfPublicBlobUrl(filename),
+  ];
+  for (const url of urls) {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      const ab = await res.arrayBuffer();
+      return { buffer: Buffer.from(ab), source: 'blob' };
+    }
+  }
+  return null;
 }
