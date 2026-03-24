@@ -228,7 +228,7 @@ export const GET = withAdminAuth(async (request, _auth) => {
       });
     }
 
-    const applyCompNameOverviewSwap = (c: Record<string, unknown>) => {
+    const applyCompNameOverviewSwap = (c: Record<string, unknown>): Record<string, unknown> => {
       const swapped = maybeSwapCompNameAndOverview(
         String(c.comp_name || ''),
         (c.overview as string | null | undefined) ?? null
