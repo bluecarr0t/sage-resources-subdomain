@@ -9,7 +9,7 @@
 
 import * as XLSX from 'xlsx';
 import { extractStudyId, normaliseUnitCategory } from '@/lib/csv/feasibility-parser';
-import { parseLocationAndState, getStateFromText } from '@/lib/feasibility-utils';
+import { parseLocationAndState, getStateFromText, maybeSwapCompNameAndOverview } from '@/lib/feasibility-utils';
 import type {
   ParsedWorkbook,
   ParsedProjectInfo,
@@ -38,6 +38,7 @@ import {
   detectHeaderRow,
   inferLabelValueLayout,
 } from '@/lib/parsers/sheet-layout-detector';
+import { syntheticComparablesFromPropertyScores } from '@/lib/parsers/best-comps-to-comparables';
 
 const LAYOUT_CONFIDENCE_THRESHOLD = 0.8;
 
@@ -352,6 +353,10 @@ function parseCompsSummSheet(rows: Row[], warnings: string[]): {
       let distance = num(safeCell(row, c.distance));
       let totalSites = int(safeCell(row, c.totalSites));
       let qualityScore = num(safeCell(row, c.quality));
+
+      const swapped = maybeSwapCompNameAndOverview(name, overview);
+      name = swapped.comp_name;
+      overview = swapped.overview;
 
       if (!name || name.toLowerCase() === 'name') continue;
       if (/^(minimum|average|max)/i.test(name)) continue;
@@ -1849,6 +1854,12 @@ export function parseWorkbook(buffer: Buffer, filename: string, options?: ParseW
   if (assumptionsWs) {
     result.sheets_found.push('Assumptions');
     result.assumptions = parseAssumptionsSheet(sheetToRows(assumptionsWs));
+  }
+
+  // Legacy workbooks (e.g. 2023): Best Comps only — no Comps Summ/Grid comparables
+  if (result.comparables.length === 0 && result.property_scores.length > 0) {
+    const synthetic = syntheticComparablesFromPropertyScores(result.property_scores, warnings);
+    if (synthetic.length > 0) result.comparables = synthetic;
   }
 
   // Warn if no meaningful data extracted

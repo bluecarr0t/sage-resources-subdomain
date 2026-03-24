@@ -15,26 +15,11 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import { Client } from 'pg';
+import { SITE_BUILDER_GLAMPING_TYPE_SEED_ROWS } from '../lib/site-builder/glamping-types-defaults';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
-// Glamping unit types (alphabetically sorted for dropdown display)
-const GLAMPING_TYPES = [
-  { slug: 'a-frame', name: 'A-Frame', default_sqft: 350, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Premium' },
-  { slug: 'airstream', name: 'Airstream', default_sqft: 200, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Luxury' },
-  { slug: 'bell-tent', name: 'Bell Tent', default_sqft: 200, default_diameter_ft: 16, cce_occupancy_code: null, default_quality_type: 'Premium' },
-  { slug: 'cabin', name: 'Cabin', default_sqft: 500, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Luxury' },
-  { slug: 'canvas-tent', name: 'Canvas Tent', default_sqft: 250, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Premium' },
-  { slug: 'dome', name: 'Dome', default_sqft: 700, default_diameter_ft: 30, cce_occupancy_code: null, default_quality_type: 'Ultra Luxury' },
-  { slug: 'pod', name: 'Pod', default_sqft: 300, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Luxury' },
-  { slug: 'mirror-cabin', name: 'Mirror Cabin', default_sqft: 450, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Ultra Luxury' },
-  { slug: 'safari-tent', name: 'Safari Tent', default_sqft: 400, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Premium' },
-  { slug: 'tiny-home', name: 'Tiny Home', default_sqft: 400, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Luxury' },
-  { slug: 'treehouse', name: 'Treehouse', default_sqft: 450, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Luxury' },
-  { slug: 'vintage-trailer', name: 'Vintage Trailer', default_sqft: 200, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Premium' },
-  { slug: 'wagon', name: 'Wagon', default_sqft: 300, default_diameter_ft: null, cce_occupancy_code: null, default_quality_type: 'Premium' },
-  { slug: 'yurt', name: 'Yurt', default_sqft: 350, default_diameter_ft: 20, cce_occupancy_code: null, default_quality_type: 'Luxury' },
-];
+const GLAMPING_TYPES = SITE_BUILDER_GLAMPING_TYPE_SEED_ROWS;
 
 // base_cost_per_site = 0; costs come only from feasibility_development_costs
 const RV_SITE_TYPES = [
@@ -47,7 +32,8 @@ const RV_SITE_TYPES = [
 // Default amenities (fallback when sync-feasibility-amenities.ts hasn't run).
 // Sync overwrites with real costs from feasibility studies when available.
 const DEFAULT_AMENITY_COSTS: { slug: string; name: string; cost_per_unit: number; applies_to: string }[] = [
-  { slug: 'deck-patio', name: 'Deck / patio', cost_per_unit: 40500, applies_to: 'both' },
+  // Per-site deck or patio add (typical wood/composite platform), not whole-building shell—was 40500 in error
+  { slug: 'deck-patio', name: 'Deck / patio', cost_per_unit: 6500, applies_to: 'both' },
   { slug: 'fire-pit', name: 'Fire pit', cost_per_unit: 400, applies_to: 'both' },
   { slug: 'patio-furniture', name: 'Patio furniture', cost_per_unit: 750, applies_to: 'both' },
   { slug: 'shade-structure', name: 'Shade structure / pergola', cost_per_unit: 500, applies_to: 'both' },

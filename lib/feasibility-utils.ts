@@ -106,6 +106,57 @@ export function getStateFromText(text: string | null): string | null {
 }
 
 /**
+ * True when the string reads as travel copy, review stats, or unit inventory — not a property title.
+ * Used to fix sheets where the Name column was filled with overview-style text.
+ */
+export function looksLikeMarketingOrInventoryCompName(text: string): boolean {
+  const t = text.trim();
+  if (!t) return false;
+  if (/^\d+(\.\d+)?\s+hours?\s+from\b/i.test(t)) return true;
+  if (/^\d+(\.\d+)?\s+miles?\s+from\b/i.test(t)) return true;
+  if (/^\d+(\.\d+)?\s+stars?\s+of\b/i.test(t)) return true;
+  if (/\bstars?\s+of\s+\d+.*\bGoogle\b/i.test(t)) return true;
+  if (/\bGoogle\s+reviews?\b/i.test(t)) return true;
+  if (
+    /^\d+\s+/.test(t) &&
+    /\b(cabins?|campers?|trailers?|yurts?|tents?|cottages?|units?|airstreams?|airstream|tiny\s+homes?|hom(es)?)\b/i.test(t)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function isPlausibleShortPropertyLabel(text: string): boolean {
+  const t = text.trim();
+  if (!t || t.length > 80) return false;
+  if (looksLikeMarketingOrInventoryCompName(t)) return false;
+  const words = t.split(/\s+/).filter(Boolean).length;
+  if (words > 15) return false;
+  if (parseLocationAndState(t)) return true;
+  if (/\b[A-Z]{2}\b/.test(t) && /,/.test(t) && words <= 14) return true;
+  return words <= 8;
+}
+
+/**
+ * When the name column holds marketing/overview text and overview holds a short property label, swap them.
+ * Preserves both strings; moves the blurb into overview.
+ */
+export function maybeSwapCompNameAndOverview(
+  name: string,
+  overview: string | null | undefined
+): { comp_name: string; overview: string | null } {
+  const n = String(name || '').trim();
+  const oRaw = overview?.trim() ? String(overview).trim() : '';
+  if (!looksLikeMarketingOrInventoryCompName(n) || !oRaw) {
+    return { comp_name: n, overview: oRaw || null };
+  }
+  if (looksLikeMarketingOrInventoryCompName(oRaw) || !isPlausibleShortPropertyLabel(oRaw)) {
+    return { comp_name: n, overview: oRaw || null };
+  }
+  return { comp_name: oRaw, overview: n };
+}
+
+/**
  * Returns true if a comp unit has a valid displayable unit type and site count.
  * Filters out: num_units = 0, empty unit_type, "0", or unit_type that is only digits.
  */

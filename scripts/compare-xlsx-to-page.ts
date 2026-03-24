@@ -241,7 +241,7 @@ async function main() {
     .select('property_name, unit_type, num_units')
     .eq('report_id', report.id);
 
-  console.log('\n========== Comparison: XLSX vs /admin/comparables page data ==========');
+  console.log('\n========== Comparison: XLSX vs /admin/comps page data ==========');
   diffComparables(parsed, comparables || []);
   diffPropertyScores(parsed, propertyScores || []);
   diffCompUnits(parsed, compUnits || []);

@@ -4,6 +4,9 @@
  * Usage: npx tsx scripts/upload-cce-pdfs-to-blob.ts
  *
  * Requires BLOB_READ_WRITE_TOKEN in .env.local
+ *
+ * Production serves from the same store via lib/cce-pdf-from-storage.ts (optional
+ * CCE_PDF_BLOB_BASE_URL if PDFs are on a different blob host).
  */
 
 import { put } from '@vercel/blob';
@@ -39,6 +42,7 @@ async function uploadPdf(filePath: string, filename: string): Promise<UploadResu
       access: 'public',
       contentType: 'application/pdf',
       multipart: true, // Required for large files (137MB, 71MB)
+      allowOverwrite: true,
     });
 
     return {

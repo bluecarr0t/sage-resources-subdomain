@@ -9,10 +9,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
 import { resolve } from 'path';
 
+import { loadCcePdfFromLocalOrBlob } from '@/lib/cce-pdf-from-storage';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -42,19 +41,18 @@ export const GET = withAdminAuth(
       }
 
       const filename = `CCE_${sanitized}.pdf`;
-      const pdfPath = resolve(base, 'local_data', filename);
+      const loaded = await loadCcePdfFromLocalOrBlob(filename, base);
 
-      if (!existsSync(pdfPath)) {
+      if (!loaded) {
         return NextResponse.json(
           {
-            error: `CCE PDF not found. Set CCE_PDF_PATH or add ${filename} to local_data/`,
+            error: `CCE PDF not found for ${filename} in local_data/ or blob storage. Upload with: npx tsx scripts/upload-cce-pdfs-to-blob.ts`,
           },
           { status: 404 }
         );
       }
 
-      const buffer = await readFile(pdfPath);
-      return new NextResponse(buffer, {
+      return new NextResponse(new Uint8Array(loaded.buffer), {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `inline; filename="${filename}"`,

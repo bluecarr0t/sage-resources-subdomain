@@ -11,10 +11,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 
+import { loadCcePdfFromLocalOrBlob } from '@/lib/cce-pdf-from-storage';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 
 export const dynamic = 'force-dynamic';
@@ -29,15 +30,17 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     const pdfParam = request.nextUrl.searchParams.get('pdf');
 
     if (pdfParam === 'walden' || pdfParam === 'catalog') {
-      const pdfPath = resolve(base, 'local_data', WALDEN_PDF);
-      if (!existsSync(pdfPath)) {
+      const loaded = await loadCcePdfFromLocalOrBlob(WALDEN_PDF, base);
+      if (!loaded) {
         return NextResponse.json(
-          { error: 'Walden PDF not found in local_data/' },
+          {
+            error:
+              'Walden PDF not found in local_data/ or blob storage. Upload with: npx tsx scripts/upload-cce-pdfs-to-blob.ts',
+          },
           { status: 404 }
         );
       }
-      const buffer = await readFile(pdfPath);
-      return new NextResponse(buffer, {
+      return new NextResponse(new Uint8Array(loaded.buffer), {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `inline; filename="${WALDEN_PDF}"`,
@@ -57,7 +60,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
         );
       }
       const buffer = await readFile(pdfPath);
-      return new NextResponse(buffer, {
+      return new NextResponse(new Uint8Array(buffer), {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `inline; filename="${sanitized}"`,

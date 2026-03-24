@@ -8,6 +8,7 @@ import { OpenAI } from 'openai';
 /** Phrases that indicate mis-extracted text (descriptions, not property names) */
 const GARBAGE_PATTERNS = [
   /^(with|the|a|an)\s/i,
+  /^in\s+(a|an|the)\s/i,
   /\bthe proposed\b/i,
   /^(located|situated|featuring)\s/i,
   /^(a|an)\s+[\w\s]+(?:area|space|trail|pool|sauna|grill|pit|pavilion|station|games?)$/i,

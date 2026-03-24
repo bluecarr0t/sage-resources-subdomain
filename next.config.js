@@ -5,7 +5,14 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  
+
+  async redirects() {
+    return [
+      { source: '/admin/comparables', destination: '/admin/comps', permanent: false },
+      { source: '/admin/comparables/:path+', destination: '/admin/comps/:path+', permanent: false },
+    ];
+  },
+
   // Experimental features for faster builds
   experimental: {
     // Optimize package imports to reduce bundle size

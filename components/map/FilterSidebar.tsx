@@ -382,7 +382,20 @@ export default function FilterSidebar({
                     {clientWorkPointsLoading ? '…' : clientWorkPoints.length})
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 mt-0.5">{t('layers.clientWork.description')}</p>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  {t.rich('layers.clientWork.description', {
+                    sage: (chunks) => (
+                      <a
+                        href="https://sageoutdooradvisory.com/"
+                        className="text-blue-600 hover:text-blue-800 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </p>
               </div>
               <button
                 id="client-work-toggle"

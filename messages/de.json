@@ -732,7 +732,7 @@
       "title": "Kartenebenen",
       "clientWork": {
         "label": "Kundenprojekte",
-        "description": "Ausgewählte Sage-Kundenprojekte auf der Karte, darunter Glamping, RV-Resorts, Campingplätze, Marinas, Landscape Hotels und weitere Outdoor-Hospitality-Projekte.",
+        "description": "Ausgewählte <sage>Sage Outdoor Advisory</sage>-Kundenprojekte auf der Karte, darunter Glamping, RV-Resorts, Campingplätze, Marinas, Landscape Hotels und weitere Outdoor-Hospitality-Projekte.",
         "hide": "Kundenprojekte ausblenden",
         "show": "Kundenprojekte anzeigen"
       },

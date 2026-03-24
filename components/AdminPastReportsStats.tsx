@@ -13,7 +13,7 @@ interface PastReportsStats {
 
 const STAT_CARDS = [
   { key: 'studies' as const, label: 'Studies' },
-  { key: 'comparables' as const, label: 'Comparables' },
+  { key: 'comparables' as const, label: 'Comps' },
   { key: 'unit_records' as const, label: 'Unit Records' },
   { key: 'states_covered' as const, label: 'States Covered' },
 ] as const;

@@ -56,10 +56,14 @@ function getLocalFallbackTemplate(templateKey: string): string {
   if (fs.existsSync(specificPath)) {
     return fs.readFileSync(specificPath, 'binary');
   }
+  const developmentCostsPath = path.join(process.cwd(), 'templates', 'Development Costs.docx');
+  if (fs.existsSync(developmentCostsPath)) {
+    return fs.readFileSync(developmentCostsPath, 'binary');
+  }
   const genericPath = path.join(process.cwd(), 'templates', 'feasibility-draft.docx');
   if (!fs.existsSync(genericPath)) {
     throw new Error(
-      `Template not found at ${specificPath} or ${genericPath}. Run: npx tsx scripts/create-feasibility-draft-template.ts`
+      `Template not found at ${specificPath}, ${developmentCostsPath}, or ${genericPath}. Add templates/Development Costs.docx (Vercel) or run: npx tsx scripts/create-feasibility-draft-template.ts`
     );
   }
   return fs.readFileSync(genericPath, 'binary');

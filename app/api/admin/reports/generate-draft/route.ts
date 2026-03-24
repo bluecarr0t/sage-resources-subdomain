@@ -285,7 +285,7 @@ export async function POST(request: NextRequest) {
 
     if (devCostsResult.configs.length > 0) {
       try {
-        const costAnalysisBuffer = exportCostAnalysisToXlsx({
+        const costAnalysisBuffer = await exportCostAnalysisToXlsx({
           configs: devCostsResult.configs,
           costResult: devCostsResult.costResult,
           amenityBreakdown: [],

@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-03-20T19:46:50.895Z",
+  "timestamp": "2026-03-23T22:39:01.580Z",
   "testUrl": "https://resources.sageoutdooradvisory.com/en/map?country=United+States&country=Canada",
   "apiResponseTime": 0,
   "apiResponseTimeCached": null,
-  "databaseQueryTime": 7,
+  "databaseQueryTime": 5,
   "redisCacheHit": false,
   "redisAvailable": false,
   "cacheImpact": {
@@ -18,9 +18,9 @@
     "responseSizeMB": 0
   },
   "bundleAnalysis": {
-    "componentCount": 121,
+    "componentCount": 122,
     "dynamicImports": 15,
-    "clientComponents": 75
+    "clientComponents": 76
   },
   "recommendations": [
     "Map page has 8 structured data scripts - consider consolidating",

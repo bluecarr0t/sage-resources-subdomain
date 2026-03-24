@@ -1,30 +1,54 @@
 /**
  * Export Site Builder cost analysis to XLSX using Cost Analysis Section template.
  * Populates Site Dev Cost, Add. Bldg Improv., and Total Proj. Cost sheets.
+ *
+ * Uses ExcelJS (not SheetJS) so fonts, fills, borders, and number formats from the
+ * template round-trip. Keep the committed template in sync with branded Excel files.
+ * Override path: SITE_BUILDER_COST_ANALYSIS_TEMPLATE_PATH, or place a copy at
+ * local_data/Cost Analysis Section.xlsx for local edits (takes precedence when present).
+ * Default committed template: templates/Cost Analysis Section.xlsx (deployed on Vercel).
  */
 
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { resolve } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConfigCostResult, SiteBuilderConfig } from './cost-calculator';
 import { calculateSiteBuilderCosts } from './cost-calculator';
+import { effectiveAmenityCostPerUnit } from './effective-amenity-cost';
 
-const TEMPLATE_PATH = resolve(process.cwd(), 'local_data', 'Cost Analysis Section.xlsx');
+const TEMPLATES_DIR_XLSX = resolve(process.cwd(), 'templates', 'Cost Analysis Section.xlsx');
+const LEGACY_LOCAL_TEMPLATE_PATH = resolve(process.cwd(), 'local_data', 'Cost Analysis Section.xlsx');
 
 const SITE_DEV_SHEET = 'Site Dev Cost';
 const ADD_BLDG_SHEET = 'Add. Bldg Improv.';
 const TOTAL_PROJ_SHEET = 'Total Proj. Cost';
 
-/** Unit costs section starts at row 39 (0-based: 38) */
-const UNIT_COSTS_START_ROW = 38;
+/** Unit costs section: first data row in Excel (1-based), matches template row 39 */
+const UNIT_COSTS_FIRST_EXCEL_ROW = 39;
 const MAX_GLAMPING_CONFIGS = 7;
 
-function setCell(ws: XLSX.WorkSheet, addr: string, value: string | number): void {
-  ws[addr] = {
-    t: typeof value === 'number' ? 'n' : 's',
-    v: value,
-  };
+function resolveCostAnalysisTemplatePath(): string {
+  const envPath = process.env.SITE_BUILDER_COST_ANALYSIS_TEMPLATE_PATH?.trim();
+  if (envPath && existsSync(envPath)) return envPath;
+  if (existsSync(LEGACY_LOCAL_TEMPLATE_PATH)) return LEGACY_LOCAL_TEMPLATE_PATH;
+  if (existsSync(TEMPLATES_DIR_XLSX)) return TEMPLATES_DIR_XLSX;
+  return TEMPLATES_DIR_XLSX;
+}
+
+function getNumericCellValue(cell: ExcelJS.Cell): number {
+  const v = cell.value;
+  if (v == null) return 0;
+  if (typeof v === 'number') return v;
+  if (typeof v === 'object' && v !== null && 'result' in v) {
+    const r = (v as { result?: unknown }).result;
+    return typeof r === 'number' ? r : 0;
+  }
+  return 0;
+}
+
+function setCellValue(ws: ExcelJS.Worksheet, address: string, value: string | number): void {
+  ws.getCell(address).value = value;
 }
 
 /**
@@ -50,7 +74,7 @@ async function getAmenityBreakdown(
       .in('applies_to', applies);
 
     for (const a of amenities ?? []) {
-      const cost = Number(a.cost_per_unit);
+      const cost = effectiveAmenityCostPerUnit(a.slug, a.cost_per_unit);
       if (!bySlug[a.slug]) {
         bySlug[a.slug] = { totalQty: 0, costPerUnit: cost };
       }
@@ -67,7 +91,9 @@ async function getAmenityBreakdown(
     .in('slug', slugs);
 
   const nameMap = new Map((names ?? []).map((n) => [n.slug, n.name]));
-  const costMap = new Map((names ?? []).map((n) => [n.slug, Number(n.cost_per_unit)]));
+  const costMap = new Map(
+    (names ?? []).map((n) => [n.slug, effectiveAmenityCostPerUnit(n.slug, n.cost_per_unit)])
+  );
 
   return slugs.map((slug) => {
     const d = bySlug[slug];
@@ -88,8 +114,8 @@ export interface ExportCostAnalysisInput {
   amenityBreakdown: { name: string; totalQty: number; costPerUnit: number; total: number }[];
 }
 
-export function exportCostAnalysisToXlsx(input: ExportCostAnalysisInput): Buffer {
-  const { configs, costResult, amenityBreakdown } = input;
+export async function exportCostAnalysisToXlsx(input: ExportCostAnalysisInput): Promise<Buffer> {
+  const { costResult, amenityBreakdown } = input;
   const glampingConfigs = costResult.configs.filter((c) => c.type === 'glamping');
   const rvConfigs = costResult.configs.filter((c) => c.type === 'rv');
 
@@ -101,65 +127,52 @@ export function exportCostAnalysisToXlsx(input: ExportCostAnalysisInput): Buffer
 
   const totalSitesForTemplate = Math.max(totalRVSites + totalGlampingUnits, 1);
 
-  if (!existsSync(TEMPLATE_PATH)) {
+  const templatePath = resolveCostAnalysisTemplatePath();
+  if (!existsSync(templatePath)) {
     throw new Error(
-      `Cost Analysis template not found at ${TEMPLATE_PATH}. Add local_data/Cost Analysis Section.xlsx to enable export.`
+      `Cost Analysis template not found. Add templates/Cost Analysis Section.xlsx, or set SITE_BUILDER_COST_ANALYSIS_TEMPLATE_PATH, or add local_data/Cost Analysis Section.xlsx.`
     );
   }
 
-  const buffer = readFileSync(TEMPLATE_PATH);
-  const wb = XLSX.read(buffer, { type: 'buffer' });
+  const fileBuffer = readFileSync(templatePath);
+  const wb = new ExcelJS.Workbook();
+  // exceljs typings lag Node 22+ `Buffer` / `readFileSync` types — runtime Buffer is valid
+  await wb.xlsx.load(fileBuffer as never);
 
-  const siteDev = wb.Sheets[SITE_DEV_SHEET];
-  const addBldg = wb.Sheets[ADD_BLDG_SHEET];
-  const totalProj = wb.Sheets[TOTAL_PROJ_SHEET];
+  const siteDev = wb.getWorksheet(SITE_DEV_SHEET);
+  const addBldg = wb.getWorksheet(ADD_BLDG_SHEET);
+  const totalProj = wb.getWorksheet(TOTAL_PROJ_SHEET);
 
   if (!siteDev || !addBldg || !totalProj) {
     throw new Error('Cost Analysis template missing required sheets');
   }
 
-  // Site Dev Cost: C4 = Number of Units/Sites (RV + glamping for template compatibility)
-  setCell(siteDev, 'C4', totalSitesForTemplate);
+  setCellValue(siteDev, 'C4', totalSitesForTemplate);
 
-  // Site Dev Cost: Unit Costs section (rows 39-42)
   for (let i = 0; i < Math.min(glampingConfigs.length, MAX_GLAMPING_CONFIGS); i++) {
     const c = glampingConfigs[i];
-    const row = UNIT_COSTS_START_ROW + i;
-    const rowB = XLSX.utils.encode_cell({ r: row, c: 1 });
-    const rowC = XLSX.utils.encode_cell({ r: row, c: 2 });
-    const rowD = XLSX.utils.encode_cell({ r: row, c: 3 });
-    const rowE = XLSX.utils.encode_cell({ r: row, c: 4 });
-    setCell(siteDev, rowB, c.name);
-    setCell(siteDev, rowC, c.quantity);
-    setCell(siteDev, rowD, Math.round(c.costPerUnit));
-    setCell(siteDev, rowE, Math.round(c.subtotal));
+    const excelRow = UNIT_COSTS_FIRST_EXCEL_ROW + i;
+    setCellValue(siteDev, `B${excelRow}`, c.name);
+    setCellValue(siteDev, `C${excelRow}`, c.quantity);
+    setCellValue(siteDev, `D${excelRow}`, Math.round(c.costPerUnit));
+    setCellValue(siteDev, `E${excelRow}`, Math.round(c.subtotal));
   }
 
-  // Site Dev Cost: E36 = Total Site Dev (overwrite - use RV total for horizontal)
-  setCell(siteDev, 'E36', Math.round(totalRVCost));
+  setCellValue(siteDev, 'E36', Math.round(totalRVCost));
+  setCellValue(siteDev, 'E42', Math.round(totalGlampingCost));
 
-  // Site Dev Cost: E42 = Total Unit Costs (glamping)
-  setCell(siteDev, 'E42', Math.round(totalGlampingCost));
-
-  // Add. Bldg Improv.: Add unit-level amenities row at 14, extend total formula to E15
-  // Template rows 2-13 = shared facilities, row 14 = last item, row 15 = total (SUM(E2:E13))
-  const templateAddBldgTotal = typeof addBldg['E15']?.v === 'number' ? addBldg['E15'].v : 0;
+  const templateAddBldgTotal = getNumericCellValue(addBldg.getCell('E15'));
   let addBldgTotal: number;
 
   if (amenityBreakdown.length > 0) {
-    const row14 = 13;
-    const rowB = XLSX.utils.encode_cell({ r: row14, c: 1 });
-    const rowC = XLSX.utils.encode_cell({ r: row14, c: 2 });
-    const rowD = XLSX.utils.encode_cell({ r: row14, c: 3 });
-    const rowE = XLSX.utils.encode_cell({ r: row14, c: 4 });
-    const rowF = XLSX.utils.encode_cell({ r: row14, c: 5 });
     const amenityList = amenityBreakdown.map((a) => `${a.name} (×${a.totalQty})`).join(', ');
-    setCell(addBldg, rowB, `Unit-level amenities (Site Builder): ${amenityList}`);
-    setCell(addBldg, rowC, amenityBreakdown.reduce((s, a) => s + a.totalQty, 0));
-    setCell(addBldg, rowD, Math.round(totalAmenityCost / Math.max(amenityBreakdown.reduce((s, a) => s + a.totalQty, 0), 1)));
-    setCell(addBldg, rowE, Math.round(totalAmenityCost));
-    setCell(addBldg, rowF, 'Site Builder');
-    addBldg['E15'] = { t: 'n', f: 'SUM(E2:E14)' };
+    const qtySum = amenityBreakdown.reduce((s, a) => s + a.totalQty, 0);
+    setCellValue(addBldg, 'B14', `Unit-level amenities (Site Builder): ${amenityList}`);
+    setCellValue(addBldg, 'C14', qtySum);
+    setCellValue(addBldg, 'D14', Math.round(totalAmenityCost / Math.max(qtySum, 1)));
+    setCellValue(addBldg, 'E14', Math.round(totalAmenityCost));
+    setCellValue(addBldg, 'F14', 'Site Builder');
+    addBldg.getCell('E15').value = { formula: 'SUM(E2:E14)', result: templateAddBldgTotal + totalAmenityCost };
     addBldgTotal = templateAddBldgTotal + totalAmenityCost;
   } else {
     addBldgTotal = templateAddBldgTotal;
@@ -167,21 +180,15 @@ export function exportCostAnalysisToXlsx(input: ExportCostAnalysisInput): Buffer
 
   const hardCostTotal = totalRVCost + totalGlampingCost + addBldgTotal;
 
-  // Total Proj. Cost: Overwrite cells that reference missing ToT/Excel Input sheets
-  setCell(totalProj, 'C3', totalSitesForTemplate);
-  setCell(totalProj, 'C5', totalGlampingUnits);
-  setCell(totalProj, 'D4', Math.round(totalRVCost));
-  setCell(totalProj, 'D6', Math.round(totalGlampingCost));
-  setCell(totalProj, 'D7', Math.round(addBldgTotal));
-  setCell(totalProj, 'D8', Math.round(hardCostTotal));
-  setCell(totalProj, 'D15', 0);
+  setCellValue(totalProj, 'C3', totalSitesForTemplate);
+  setCellValue(totalProj, 'C5', totalGlampingUnits);
+  setCellValue(totalProj, 'D4', Math.round(totalRVCost));
+  setCellValue(totalProj, 'D6', Math.round(totalGlampingCost));
+  setCellValue(totalProj, 'D7', Math.round(addBldgTotal));
+  setCellValue(totalProj, 'D8', Math.round(hardCostTotal));
+  setCellValue(totalProj, 'D15', 0);
 
-  const outBuffer = XLSX.write(wb, {
-    type: 'buffer',
-    bookType: 'xlsx',
-    compression: true,
-  });
-
+  const outBuffer = await wb.xlsx.writeBuffer();
   return Buffer.from(outBuffer);
 }
 

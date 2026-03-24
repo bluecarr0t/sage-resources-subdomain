@@ -301,6 +301,7 @@ export async function POST(request: NextRequest) {
         const buffer = Buffer.from(arrayBuf);
         const parsed = parseWorkbook(buffer, file.name);
 
+        // Any parsed workbook section worth storing (financials, best comps scores, etc.)
         const hasData =
           parsed.comparables.length > 0 ||
           parsed.comp_units.length > 0 ||
@@ -358,7 +359,7 @@ export async function POST(request: NextRequest) {
               study_id: parsed.study_id,
               status: 'draft',
               market_type: 'outdoor_hospitality',
-              has_comparables: true,
+              has_comparables: false,
             })
             .select('id')
             .single();
@@ -646,6 +647,7 @@ export async function POST(request: NextRequest) {
         }
 
         const compIdMap = new Map<string, string>();
+        let insertedComparableCount = 0;
 
         if (compInserts.length > 0) {
           const { data: insertedComps, error: compError } = await supabaseAdmin
@@ -654,6 +656,7 @@ export async function POST(request: NextRequest) {
             .select('id, comp_name');
 
           if (compError) throw new Error(`Insert failed (comparables): ${compError.message}. Use "Re-extract" to retry.`);
+          insertedComparableCount = insertedComps?.length ?? 0;
           insertedComps?.forEach((c: { id: string; comp_name: string }) => {
             compIdMap.set(c.comp_name.toLowerCase(), c.id);
           });
@@ -753,10 +756,12 @@ export async function POST(request: NextRequest) {
         }
 
         const city = deriveCityFromLocation(location);
+        const persistedCompUnits = parsed.comp_units.length;
         const reportUpdate: Record<string, unknown> = {
-          has_comparables: true,
-          comp_count: parsed.comparables.length || undefined,
-          comp_unit_count: parsed.comp_units.length || undefined,
+          // Best Comps / property_scores alone do not create feasibility_comparables rows (older 2023 templates).
+          has_comparables: insertedComparableCount > 0 || persistedCompUnits > 0,
+          comp_count: insertedComparableCount > 0 ? insertedComparableCount : 0,
+          comp_unit_count: persistedCompUnits > 0 ? persistedCompUnits : 0,
           csv_file_path: storagePath,
           csv_file_types: parsed.sheets_found,
           title,

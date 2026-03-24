@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
-import { filterValidCompUnits } from '@/lib/feasibility-utils';
+import { filterValidCompUnits, maybeSwapCompNameAndOverview } from '@/lib/feasibility-utils';
 
 type ParamsContext = { params: Promise<{ studyId: string }> };
 
@@ -57,10 +57,15 @@ export const GET = withAdminAuth<ParamsContext>(async (_request, _auth, context)
       return units.length === 0 && c.quality_score == null && c.total_sites == null;
     };
     const comparablesRawFiltered = (comparablesRaw || []).filter((c) => !isEmptyAsteriskDuplicate(c));
-    const comparables = comparablesRawFiltered.map((c) => ({
-      ...c,
-      feasibility_comp_units: filterValidCompUnits((c.feasibility_comp_units || []) as Array<{ unit_type?: string | null; num_units?: number | null }>),
-    }));
+    const comparables = comparablesRawFiltered.map((c) => {
+      const swapped = maybeSwapCompNameAndOverview(String(c.comp_name || ''), c.overview ?? null);
+      return {
+        ...c,
+        comp_name: swapped.comp_name,
+        overview: swapped.overview,
+        feasibility_comp_units: filterValidCompUnits((c.feasibility_comp_units || []) as Array<{ unit_type?: string | null; num_units?: number | null }>),
+      };
+    });
 
     // Get summaries
     const { data: summaries, error: summError } = await supabaseAdmin

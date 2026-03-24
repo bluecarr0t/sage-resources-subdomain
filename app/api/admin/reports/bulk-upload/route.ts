@@ -1,15 +1,20 @@
 /**
- * API Route: Bulk upload feasibility reports from local reports/ directory
+ * API Route: Bulk upload feasibility reports from disk
  * POST /api/admin/reports/bulk-upload
  *
  * RBAC: Admin-only. Uses x-internal-api-key (server-to-server/CI). The internal key
  * serves as the admin credential for bulk operations—only deploy keys to admin environments.
  *
- * Body: { sourceDir?: string; batchIndex?: number }  - subdir (default "2025"), optional batch index for chunked processing
+ * Body:
+ *   - Default: { sourceDir?: string; batchIndex?: number } — reads reports/{sourceDir} (default "2025")
+ *   - Local past reports: { fromLocalData: true; relativePath: string; batchIndex?: number }
+ *     e.g. relativePath "past_reports/2023" → local_data/past_reports/2023 (gitignored).
+ *     Skips filenames that do not look like a Sage study id (avoids misc spreadsheets).
+ *
  * Header: x-internal-api-key (required)
  *
- * Reads .xlsx, .xlsm, .xlsxm, .docx, .doc from reports/{sourceDir},
- * pairs by study ID, and processes via unified-upload in batches.
+ * Reads .xlsx, .xlsm, .xlsxm, .docx, .doc, pairs by study ID, processes via unified-upload.
+ * PDF-only deliverables are ignored (same as the web uploader).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -44,6 +49,26 @@ function isDocx(name: string): boolean {
   return DOCX_EXT.includes(getExt(name));
 }
 
+/** Safe subpath under local_data (no .., no absolute). */
+function sanitizeLocalDataRelativePath(rel: string): string | null {
+  const trimmed = rel.replace(/^\/+/u, '').trim();
+  if (!trimmed) return null;
+  const segments = trimmed.split('/').filter((s) => s.length > 0);
+  if (segments.some((s) => s === '..' || s.includes('..'))) return null;
+  return segments.join('/');
+}
+
+/**
+ * Filename appears to reference a feasibility study id (not e.g. "RV Site Rates.xlsx").
+ * Allows standard NN-NNN[A]-NN and longer numeric segments (e.g. 23-6304A-12).
+ */
+function looksLikePastReportStudyFilename(name: string): boolean {
+  const base = name.replace(/\.[^.]+$/u, '');
+  if (/\b\d{2}-\d{3}[A-Z]?-\d{2}\b/u.test(base)) return true;
+  if (/(?:^|\b)\d{2}-\d{4,}[A-Z]?-\d{2}\b/u.test(base)) return true;
+  return false;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const internalKey = request.headers.get('x-internal-api-key');
@@ -66,6 +91,8 @@ export async function POST(request: NextRequest) {
 
     let sourceDir = '2025';
     let batchIndex: number | undefined;
+    let fromLocalData = false;
+    let localRelativePath: string | null = null;
     try {
       const body = await request.json().catch(() => ({}));
       if (body?.sourceDir && typeof body.sourceDir === 'string') {
@@ -74,18 +101,44 @@ export async function POST(request: NextRequest) {
       if (typeof body?.batchIndex === 'number' && body.batchIndex >= 0) {
         batchIndex = body.batchIndex;
       }
+      if (body?.fromLocalData === true && typeof body?.relativePath === 'string') {
+        fromLocalData = true;
+        localRelativePath = sanitizeLocalDataRelativePath(body.relativePath);
+      }
     } catch {
       // use default
     }
 
     const reportsRoot = resolve(process.cwd(), 'reports');
-    const dirPath = resolve(reportsRoot, sourceDir);
+    const localDataRoot = resolve(process.cwd(), 'local_data');
 
-    if (!dirPath.startsWith(reportsRoot)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid sourceDir: must be under reports/' },
-        { status: 400 }
-      );
+    let dirPath: string;
+    let pathLabel: string;
+
+    if (fromLocalData) {
+      if (!localRelativePath) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid relativePath: use a safe path like past_reports/2023' },
+          { status: 400 }
+        );
+      }
+      dirPath = resolve(localDataRoot, localRelativePath);
+      pathLabel = `local_data/${localRelativePath}`;
+      if (!dirPath.startsWith(localDataRoot)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid relativePath: must stay under local_data/' },
+          { status: 400 }
+        );
+      }
+    } else {
+      dirPath = resolve(reportsRoot, sourceDir);
+      pathLabel = `reports/${sourceDir}`;
+      if (!dirPath.startsWith(reportsRoot)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid sourceDir: must be under reports/' },
+          { status: 400 }
+        );
+      }
     }
 
     let entries: Dirent[];
@@ -94,7 +147,7 @@ export async function POST(request: NextRequest) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to read directory';
       return NextResponse.json(
-        { success: false, message: `Cannot read reports/${sourceDir}: ${msg}` },
+        { success: false, message: `Cannot read ${pathLabel}: ${msg}` },
         { status: 400 }
       );
     }
@@ -104,6 +157,7 @@ export async function POST(request: NextRequest) {
 
     for (const e of entries) {
       if (!e.isFile()) continue;
+      if (fromLocalData && !looksLikePastReportStudyFilename(e.name)) continue;
       const p = join(dirPath, e.name);
       if (isXlsx(e.name)) xlsxFiles.push({ name: e.name, path: p });
       else if (isDocx(e.name)) docxFiles.push({ name: e.name, path: p });
@@ -146,7 +200,12 @@ export async function POST(request: NextRequest) {
 
     if (pairs.length === 0) {
       return NextResponse.json(
-        { success: false, message: `No .xlsx/.xlsm/.xlsxm or .docx/.doc files found in reports/${sourceDir}` },
+        {
+          success: false,
+          message: `No pairable .xlsx/.xlsm/.xlsxm or .docx/.doc files in ${pathLabel}${
+            fromLocalData ? ' (non-study filenames are skipped)' : ''
+          }`,
+        },
         { status: 400 }
       );
     }

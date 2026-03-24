@@ -25,3 +25,5 @@ npm test -- __tests__/comparables-extraction.test.ts
 ```
 
 Tests will parse any `.xlsx` files in this directory and validate structure.
+
+For **2023-style** workbooks (Best Comps only), `comparables-extraction.test.ts` also runs an integration case when `local_data/past_reports/2023/23-6304A-12 Robbinsville, NC RV FS.xlsx` exists (gitignored).

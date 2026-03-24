@@ -14,6 +14,8 @@ export const dynamic = 'force-dynamic';
 
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
+import { effectiveAmenityCostPerUnit } from '@/lib/site-builder/effective-amenity-cost';
+import { SITE_BUILDER_GLAMPING_TYPE_SEED_ROWS } from '@/lib/site-builder/glamping-types-defaults';
 import { getFeasibilityDerivedRVCosts } from '@/lib/site-builder/feasibility-costs';
 
 export const GET = withAdminAuth(async (_request: NextRequest) => {
@@ -54,11 +56,34 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
       };
     });
 
+    const amenityCosts = (amenityRes.data ?? []).map((row) => ({
+      ...row,
+      cost_per_unit: effectiveAmenityCostPerUnit(row.slug, row.cost_per_unit),
+    }));
+
+    const glampingFromDb = glampingRes.data ?? [];
+    const glampingBySlug = new Map(glampingFromDb.map((g) => [g.slug, g]));
+    for (const row of SITE_BUILDER_GLAMPING_TYPE_SEED_ROWS) {
+      if (!glampingBySlug.has(row.slug)) {
+        const merged = {
+          slug: row.slug,
+          name: row.name,
+          default_sqft: row.default_sqft,
+          default_diameter_ft: row.default_diameter_ft,
+          default_quality_type: row.default_quality_type,
+        };
+        glampingBySlug.set(row.slug, merged);
+      }
+    }
+    const glampingTypes = [...glampingBySlug.values()].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    );
+
     return NextResponse.json({
       success: true,
-      glampingTypes: glampingRes.data ?? [],
+      glampingTypes,
       rvSiteTypes: rvSiteTypesWithCosts,
-      amenityCosts: amenityRes.data ?? [],
+      amenityCosts,
     });
   } catch (err) {
     console.error('[api/admin/site-builder/reference-data] Error:', err);

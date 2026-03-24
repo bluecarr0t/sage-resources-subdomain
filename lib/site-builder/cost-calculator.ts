@@ -7,6 +7,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { expandQualityTypeForFilter, mapSiteBuilderQualityToCce } from '@/lib/cce-quality-types';
 import { getLatestCceExtractionDate } from '@/lib/cce-latest-extraction';
 import { getCatalogDerivedGlampingCosts } from '@/lib/site-builder/catalog-unit-costs';
+import { effectiveAmenityCostPerUnit } from '@/lib/site-builder/effective-amenity-cost';
+import { SITE_BUILDER_GLAMPING_TYPE_SEED_ROWS } from '@/lib/site-builder/glamping-types-defaults';
 import { getFeasibilityDerivedRVCosts } from '@/lib/site-builder/feasibility-costs';
 
 
@@ -137,7 +139,8 @@ async function calculateGlampingCost(
     .eq('slug', config.unitTypeSlug)
     .maybeSingle();
 
-  const name = glampingType?.name ?? config.unitTypeSlug;
+  const seedGlamping = SITE_BUILDER_GLAMPING_TYPE_SEED_ROWS.find((r) => r.slug === config.unitTypeSlug);
+  const name = glampingType?.name ?? seedGlamping?.name ?? config.unitTypeSlug;
 
   // 2. Prefer catalog-derived cost (Walden) by unit type + quality tier
   const catalogKey = `${config.unitTypeSlug}:${config.qualityType}`;
@@ -292,5 +295,8 @@ async function getAmenityCost(
     .in('applies_to', appliesFilter);
 
   if (!amenities?.length) return 0;
-  return amenities.reduce((sum, a) => sum + Number(a.cost_per_unit), 0);
+  return amenities.reduce(
+    (sum, a) => sum + effectiveAmenityCostPerUnit(a.slug, a.cost_per_unit),
+    0
+  );
 }

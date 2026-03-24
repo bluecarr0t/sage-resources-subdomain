@@ -10,6 +10,7 @@ import { withAdminAuth } from '@/lib/require-admin-auth';
 import { parseLocationStringField } from '@/lib/parse-csv-location';
 import { reportYearFromStudyId } from '@/lib/report-year-from-study-id';
 import { canonicalReportService } from '@/lib/report-service-display';
+import { deriveClientMapPropertyHeadline } from '@/lib/client-map-display-name';
 import {
   DEFAULT_CENTER,
   STATE_CENTERS,
@@ -222,12 +223,18 @@ export const GET = withAdminAuth(async (_request, auth) => {
         isLikelyStateCenterPlaceholder(lat, lng, stateHintForReport(r));
 
       const client = Array.isArray(r.clients) ? r.clients[0] : r.clients;
+      const reportTitle = r.title ? String(r.title) : '';
+      const studyIdVal = (r.study_id as string | null | undefined) ?? null;
 
       return {
         id: String(r.id ?? ''),
-        studyId: r.study_id ?? null,
-        propertyName: r.property_name || 'Unnamed Property',
-        reportNumber: r.title || `Report-${String(r.id).slice(0, 8)}`,
+        studyId: studyIdVal,
+        propertyName: deriveClientMapPropertyHeadline(
+          r.property_name as string | null | undefined,
+          reportTitle || null,
+          studyIdVal
+        ),
+        reportNumber: reportTitle || `Report-${String(r.id).slice(0, 8)}`,
         address: formatAddress(r),
         lat,
         lng,

@@ -261,6 +261,11 @@ function isValidResortName(name: string): boolean {
   if (RESORT_NAME_BLACKLIST.test(trimmed)) return false;
   if (AMENITY_PHRASE_PATTERN.test(trimmed)) return false;
   if (/^\d+$/.test(trimmed)) return false;
+  // Marketing / location prose (not a property title), e.g. "in a world-class dual waterfront access s"
+  if (/^in\s+(a|an|the)\s/i.test(trimmed)) return false;
+  if (/\bworld-class\b/i.test(trimmed) && /\b(access|waterfront|views?)\b/i.test(trimmed)) return false;
+  // Truncated word at end (e.g. "... access s" from a cut-off "site")
+  if (trimmed.length > 18 && /\s[a-z]$/.test(trimmed)) return false;
   return true;
 }
 
@@ -358,7 +363,12 @@ function extractFirstPageTitle(fullText: string): string | null {
     const next = lines[i + 1];
     if (FIRST_PAGE_SKIP.test(curr)) continue;
     const fsMatch = next.match(/^(Feasibility\s+Study(?:\s+Update)?)(?:\s+[-–—]\s*[^\n]+)?\s*$/i);
-    if (fsMatch && (isValidResortName(curr) || (curr.length >= 4 && curr.length <= 60))) {
+    const plausibleCoverLine =
+      /^[A-Z0-9]/.test(curr) &&
+      curr.length >= 4 &&
+      curr.length <= 60 &&
+      !/^in\s+(a|an|the)\s/i.test(curr);
+    if (fsMatch && (isValidResortName(curr) || plausibleCoverLine)) {
       const combined = `${curr} ${fsMatch[1].trim()}`.trim();
       if (combined.length <= 100) return combined;
     }

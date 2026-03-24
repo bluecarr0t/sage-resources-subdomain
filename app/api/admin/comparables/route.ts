@@ -6,6 +6,7 @@
  *   search       - fuzzy text search on comp_name, overview, job number (study_id), city, state, country, unit type/category, amenity keywords
  *   state        - filter by report state (comma-separated for multi-select, e.g. state=TX,CA,MT)
  *   unit_category - filter comp_units by unit_category (comma-separated for multi-select)
+ *   keywords     - filter by amenity_keywords overlap (comma-separated; OR: any selected keyword matches)
  *   min_adr / max_adr - ADR range filter
  *   (amenity keyword search is included in main search param)
  *   sort_by      - comp_name | quality_score | low_adr | peak_adr | created_at
@@ -21,7 +22,7 @@ export const dynamic = 'force-dynamic';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { parsePaginationParams, validateFilterValues, validateSearchTerms } from '@/lib/validate-pagination';
-import { filterValidCompUnits } from '@/lib/feasibility-utils';
+import { filterValidCompUnits, maybeSwapCompNameAndOverview } from '@/lib/feasibility-utils';
 
 const DEFAULT_PER_PAGE = 50;
 const FUZZY_SIMILARITY_THRESHOLD = 0.4;
@@ -56,6 +57,7 @@ export const GET = withAdminAuth(async (request, _auth) => {
     const search = searchParams.get('search') || '';
     const stateParam = searchParams.get('state') || '';
     const unitCategoryParam = searchParams.get('unit_category') || '';
+    const keywordsParam = searchParams.get('keywords') || '';
     const states = validateFilterValues(
       stateParam
         .split(',')
@@ -64,6 +66,12 @@ export const GET = withAdminAuth(async (request, _auth) => {
     );
     const unitCategories = validateFilterValues(
       unitCategoryParam
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    );
+    const keywordFilters = validateFilterValues(
+      keywordsParam
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean)
@@ -79,9 +87,10 @@ export const GET = withAdminAuth(async (request, _auth) => {
     // When filtering by unit_category, ADR, or search, we fetch all rows and filter in app.
     const hasStateFilter = states.length > 0;
     const hasUnitCategoryFilter = unitCategories.length > 0;
+    const hasKeywordFilter = keywordFilters.length > 0;
     // PostgREST .or() with embedded resources causes 500 errors; keyword search requires
     // array overlap which also fails in or(). App-side filtering is reliable.
-    const needsPostFilter = !!(hasUnitCategoryFilter || minAdr || maxAdr || search);
+    const needsPostFilter = !!(hasUnitCategoryFilter || hasKeywordFilter || minAdr || maxAdr || search);
     const searchTerms = validateSearchTerms(
       search
         .trim()
@@ -157,6 +166,13 @@ export const GET = withAdminAuth(async (request, _auth) => {
       filteredData = filteredData.filter((comp: Record<string, unknown>) => {
         // Search filter: all terms must match (AND). Each term matches if it appears in
         // comp_name, overview, reports fields, unit types, or amenity_keywords.
+        if (hasKeywordFilter) {
+          const compKw = (comp.amenity_keywords || []) as string[];
+          const compKwSet = new Set(compKw.map((k) => String(k).trim()).filter(Boolean));
+          const anyMatch = keywordFilters.some((f) => compKwSet.has(f));
+          if (!anyMatch) return false;
+        }
+
         if (searchTerms.length > 0) {
           const reports = comp.reports as { city?: string; state?: string; country?: string; location?: string } | null;
           const reportsObj = Array.isArray(reports) ? reports[0] : reports;
@@ -211,6 +227,15 @@ export const GET = withAdminAuth(async (request, _auth) => {
         return true;
       });
     }
+
+    const applyCompNameOverviewSwap = (c: Record<string, unknown>) => {
+      const swapped = maybeSwapCompNameAndOverview(
+        String(c.comp_name || ''),
+        (c.overview as string | null | undefined) ?? null
+      );
+      return { ...c, comp_name: swapped.comp_name, overview: swapped.overview };
+    };
+    filteredData = filteredData.map(applyCompNameOverviewSwap);
 
     /** Exclude comparables with invalid comp_names (notes, subject rows, numeric-only) */
     const isValidCompName = (name: string): boolean => {
@@ -269,7 +294,7 @@ export const GET = withAdminAuth(async (request, _auth) => {
           const parsedMinAdr = minAdr ? parseFloat(minAdr) : null;
           const parsedMaxAdr = maxAdr ? parseFloat(maxAdr) : null;
 
-          let fuzzyFiltered = fuzzyRows as Record<string, unknown>[];
+          let fuzzyFiltered = (fuzzyRows as Record<string, unknown>[]).map(applyCompNameOverviewSwap);
 
           // Apply state filter
           if (hasStateFilter) {
@@ -296,6 +321,14 @@ export const GET = withAdminAuth(async (request, _auth) => {
                 if (parsedMaxAdr !== null && (u.peak_adr === null || u.peak_adr > parsedMaxAdr)) return false;
                 return true;
               });
+            });
+          }
+
+          if (hasKeywordFilter) {
+            fuzzyFiltered = fuzzyFiltered.filter((comp) => {
+              const compKw = (comp.amenity_keywords || []) as string[];
+              const compKwSet = new Set(compKw.map((k) => String(k).trim()).filter(Boolean));
+              return keywordFilters.some((f) => compKwSet.has(f));
             });
           }
 

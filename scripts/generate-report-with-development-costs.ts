@@ -124,7 +124,7 @@ async function main() {
   let costAnalysisBuf: Buffer | null = null;
   if (devCostsResult.configs.length > 0) {
     console.log('Exporting Cost Analysis XLSX...');
-    costAnalysisBuf = exportCostAnalysisToXlsx({
+    costAnalysisBuf = await exportCostAnalysisToXlsx({
       configs: devCostsResult.configs,
       costResult: devCostsResult.costResult,
       amenityBreakdown: [],

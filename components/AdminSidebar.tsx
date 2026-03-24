@@ -41,7 +41,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
   if (pathname.startsWith('/admin/report-builder')) return 'report-builder';
-  if (pathname.startsWith('/admin/comparables')) return 'comparables';
+  if (pathname.startsWith('/admin/comps')) return 'comps';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/rv-site-setup') || pathname.startsWith('/admin/site-design')) return 'site-design';
   if (pathname.startsWith('/admin/site-builder')) return 'site-builder';
@@ -255,11 +255,11 @@ export default function AdminSidebar() {
                   isCollapsed={showCollapsed}
                 />
                 <NavLink
-                  href="/admin/comparables"
-                  label="Comparables"
+                  href="/admin/comps"
+                  label="Comps"
                   icon={TentTree}
-                  pageId="comparables"
-                  isActive={activePageId === 'comparables'}
+                  pageId="comps"
+                  isActive={activePageId === 'comps'}
                   isCollapsed={showCollapsed}
                 />
                 <NavLink

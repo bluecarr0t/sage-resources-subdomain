@@ -1,10 +1,36 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, Button, Input, Select } from '@/components/ui';
-import { Plus, Trash2, Tent, Car, ImageIcon, Loader2, Download, FileSpreadsheet, FileText, ExternalLink, Search, X } from 'lucide-react';
+import { Card, Button, Input, Select, Modal, ModalContent } from '@/components/ui';
+import {
+  Plus,
+  Trash2,
+  Tent,
+  Car,
+  ImageIcon,
+  Loader2,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  ExternalLink,
+  Search,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import Link from 'next/link';
+import {
+  resolveAmenityNamesForPrompt,
+  resolveGlampingUnitTypeNameForPrompt,
+  resolveRvSiteTypeNameForPrompt,
+} from '@/lib/site-builder/prompt-display-names';
+import { SITE_BUILDER_IMAGE_MODEL_DISPLAY_NAME } from '@/lib/site-builder/site-builder-image-model';
+import {
+  SCENE_FRAMING_IDS,
+  resolveSceneFramingToArchetype,
+  type SceneFramingChoice,
+} from '@/lib/site-builder/property-scene-archetype';
 
 interface GlampingType {
   slug: string;
@@ -68,6 +94,80 @@ const CATALOG_SECTION_TO_UNIT_SLUG: Record<string, string> = {
   Yurts: 'yurt',
 };
 
+function glampingSlugExists(slug: string, glampingTypes: GlampingType[]): boolean {
+  return glampingTypes.some((g) => g.slug === slug);
+}
+
+function resolveGlampingSlugFromCatalogSection(
+  catalogSection: string | null | undefined,
+  glampingTypes: GlampingType[]
+): string | null {
+  if (!catalogSection?.trim()) return null;
+  const section = catalogSection.trim();
+  const direct = CATALOG_SECTION_TO_UNIT_SLUG[section];
+  if (direct && glampingSlugExists(direct, glampingTypes)) return direct;
+  const lower = section.toLowerCase();
+  for (const [key, slug] of Object.entries(CATALOG_SECTION_TO_UNIT_SLUG)) {
+    if (key.toLowerCase() === lower && glampingSlugExists(slug, glampingTypes)) return slug;
+  }
+  for (const g of glampingTypes) {
+    const gn = g.name.trim().toLowerCase();
+    if (gn === lower) return g.slug;
+    const sectionSingular = lower.replace(/s$/i, '');
+    const nameSingular = gn.replace(/s$/i, '');
+    if (sectionSingular === nameSingular) return g.slug;
+  }
+  return null;
+}
+
+/**
+ * Walden often files yurts and other units under catalog_section "Tents", which would
+ * map only to safari-tent. Prefer manufacturer / product_model / section text hints first.
+ */
+function resolveGlampingSlugForCatalogUnit(
+  u: CatalogUnit,
+  glampingTypes: GlampingType[]
+): string | null {
+  if (!glampingTypes.length) return null;
+  const h = `${u.manufacturer ?? ''} ${u.product_model ?? ''} ${u.catalog_section ?? ''}`.toLowerCase();
+
+  const trySlug = (slug: string): string | null =>
+    glampingSlugExists(slug, glampingTypes) ? slug : null;
+
+  const hints: { test: (text: string) => boolean; slug: string }[] = [
+    { test: (x) => x.includes('vintage trailer'), slug: 'vintage-trailer' },
+    { test: (x) => x.includes('mirror cabin'), slug: 'mirror-cabin' },
+    { test: (x) => x.includes('bell tent'), slug: 'bell-tent' },
+    { test: (x) => x.includes('canvas tent'), slug: 'canvas-tent' },
+    { test: (x) => x.includes('safari tent'), slug: 'safari-tent' },
+    { test: (x) => x.includes('tiny home') || x.includes('tiny house'), slug: 'tiny-home' },
+    { test: (x) => x.includes('shipping container'), slug: 'tiny-home' },
+    { test: (x) => x.includes('tree house') || x.includes('treehouse'), slug: 'treehouse' },
+    { test: (x) => x.includes('a-frame') || x.includes('a frame'), slug: 'a-frame' },
+    { test: (x) => /yurt/i.test(x), slug: 'yurt' },
+    { test: (x) => /\bairstream\b/i.test(x), slug: 'airstream' },
+    { test: (x) => /\bwagon\b/i.test(x), slug: 'wagon' },
+    { test: (x) => x.includes('geodesic'), slug: 'dome' },
+    { test: (x) => /\bdome\b/i.test(x), slug: 'dome' },
+    { test: (x) => /house\s*boat|houseboat/i.test(x), slug: 'house-boat' },
+    { test: (x) => /\bpod\b/i.test(x), slug: 'pod' },
+    {
+      test: (x) => /\bcabin\b/i.test(x) && !x.includes('mirror cabin'),
+      slug: 'cabin',
+    },
+    { test: (x) => /\btipi\b/i.test(x) || /\bteepee\b/i.test(x), slug: 'bell-tent' },
+  ];
+
+  for (const { test, slug } of hints) {
+    if (test(h)) {
+      const s = trySlug(slug);
+      if (s) return s;
+    }
+  }
+
+  return resolveGlampingSlugFromCatalogSection(u.catalog_section, glampingTypes);
+}
+
 interface GlampingConfigState {
   id: string;
   type: 'glamping';
@@ -90,7 +190,6 @@ interface RVConfigState {
 }
 
 type ConfigState = GlampingConfigState | RVConfigState;
-type RoadSurface = 'dirt' | 'gravel' | 'paved';
 
 interface ConfigCostResult {
   configIndex: number;
@@ -217,6 +316,23 @@ function buildSharedLandscapeContext(location: string, imageDescription: string)
 
 export default function SiteBuilderClient() {
   const t = useTranslations('siteBuilder');
+  const imageBatchStyleHintRaw = t.raw('imageBatchStyleHint') as {
+    summary?: string;
+    moreInfoLabel?: string;
+    intro?: string;
+    bullets?: string[];
+  };
+  const imageBatchStyleHintSummary =
+    typeof imageBatchStyleHintRaw?.summary === 'string' ? imageBatchStyleHintRaw.summary.trim() : '';
+  const imageBatchStyleHintMoreInfoLabel =
+    typeof imageBatchStyleHintRaw?.moreInfoLabel === 'string'
+      ? imageBatchStyleHintRaw.moreInfoLabel.trim()
+      : '';
+  const imageBatchStyleHintIntro =
+    typeof imageBatchStyleHintRaw?.intro === 'string' ? imageBatchStyleHintRaw.intro : '';
+  const imageBatchStyleHintBullets = Array.isArray(imageBatchStyleHintRaw?.bullets)
+    ? imageBatchStyleHintRaw.bullets.filter((b): b is string => typeof b === 'string' && b.trim().length > 0)
+    : [];
   const [referenceData, setReferenceData] = useState<ReferenceData | null>(null);
   const [configs, setConfigs] = useState<ConfigState[]>([]);
   const [costResult, setCostResult] = useState<{ configs: ConfigCostResult[]; totalSiteBuild: number } | null>(null);
@@ -224,10 +340,18 @@ export default function SiteBuilderClient() {
   const [loadingCosts, setLoadingCosts] = useState(false);
   const [location, setLocation] = useState('');
   const [imageDescription, setImageDescription] = useState('');
-  const [roadSurface, setRoadSurface] = useState<RoadSurface>('paved');
+  const [sceneFramingChoice, setSceneFramingChoice] = useState<SceneFramingChoice>('auto');
   const [generatedImages, setGeneratedImages] = useState<{ configName: string; imageBase64: string; mediaType: string }[]>([]);
   const [generatingImages, setGeneratingImages] = useState(false);
+  const [imageGenerationNotice, setImageGenerationNotice] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<{
+    configName: string;
+    imageBase64: string;
+    mediaType: string;
+  } | null>(null);
   const [exportingXlsx, setExportingXlsx] = useState(false);
+  const [exportingDocx, setExportingDocx] = useState(false);
+  const [docxExportError, setDocxExportError] = useState<string | null>(null);
   const [catalogSearchOpen, setCatalogSearchOpen] = useState<string | null>(null);
   const [catalogSearchTerm, setCatalogSearchTerm] = useState('');
   const [catalogSearchResults, setCatalogSearchResults] = useState<CatalogUnit[]>([]);
@@ -248,6 +372,48 @@ export default function SiteBuilderClient() {
       .catch(console.error)
       .finally(() => setLoadingRef(false));
   }, []);
+
+  /** Re-resolve unit type when reference data loads (e.g. yurt under Walden "Tents" section). */
+  useEffect(() => {
+    const types = referenceData?.glampingTypes;
+    if (!types?.length) return;
+    setConfigs((prev) => {
+      let changed = false;
+      const next = prev.map((c) => {
+        if (c.type !== 'glamping' || !c.catalogUnit) return c;
+        const resolved = resolveGlampingSlugForCatalogUnit(c.catalogUnit, types);
+        if (resolved && resolved !== c.unitTypeSlug) {
+          changed = true;
+          return { ...c, unitTypeSlug: resolved };
+        }
+        return c;
+      });
+      return changed ? next : prev;
+    });
+  }, [referenceData]);
+
+  const resolvedPropertySceneArchetype = useMemo(
+    () =>
+      resolveSceneFramingToArchetype(
+        sceneFramingChoice,
+        configs.map((c) => ({ type: c.type }))
+      ),
+    [sceneFramingChoice, configs]
+  );
+
+  const hasCatalogLinkedRow = useMemo(
+    () =>
+      configs.some((c) => c.type === 'glamping' && Boolean(c.catalogUnitId && c.catalogUnit)),
+    [configs]
+  );
+
+  /** Feasibility .docx shell: glamping-only rows use glamping template; RV-only or mixed use RV. */
+  const docxTemplateKey = useMemo((): 'rv' | 'glamping' => {
+    const hasG = configs.some((c) => c.type === 'glamping');
+    const hasR = configs.some((c) => c.type === 'rv');
+    if (hasG && !hasR) return 'glamping';
+    return 'rv';
+  }, [configs]);
 
   const fetchCatalogUnits = useCallback(async (search: string) => {
     setCatalogSearchLoading(true);
@@ -389,6 +555,29 @@ export default function SiteBuilderClient() {
     );
   }, []);
 
+  const applyCatalogUnitToGlampingConfig = useCallback(
+    (configId: string, u: CatalogUnit) => {
+      const types = referenceData?.glampingTypes ?? [];
+      setConfigs((prev) =>
+        prev.map((c) => {
+          if (c.id !== configId || c.type !== 'glamping') return c;
+          const fromCatalog = resolveGlampingSlugForCatalogUnit(u, types);
+          const unitTypeSlug = fromCatalog ?? c.unitTypeSlug;
+          return {
+            ...c,
+            catalogUnitId: u.id,
+            catalogUnit: u,
+            sqft: u.floor_area_sqft != null ? u.floor_area_sqft : c.sqft,
+            unitTypeSlug,
+          };
+        })
+      );
+      setCatalogSearchOpen(null);
+      setCatalogSearchTerm('');
+    },
+    [referenceData?.glampingTypes]
+  );
+
   const updateRVConfig = useCallback((id: string, field: keyof RVConfigState, value: string | number | string[]) => {
     setConfigs((prev) =>
       prev.map((c) =>
@@ -400,17 +589,36 @@ export default function SiteBuilderClient() {
   }, []);
 
   const buildConfigForPrompt = useCallback(
-    (config: ConfigState): { config: { type: 'glamping' | 'rv'; unitTypeName?: string; siteTypeName?: string; sqft?: number; diameterFt?: number; qualityType?: string; amenityNames: string[]; productLink?: string }; configName: string } | null => {
+    (
+      config: ConfigState
+    ): {
+      config: {
+        type: 'glamping' | 'rv';
+        unitTypeName?: string;
+        siteTypeName?: string;
+        sqft?: number;
+        diameterFt?: number;
+        qualityType?: string;
+        amenityNames: string[];
+        productLink?: string;
+      };
+      configName: string;
+      catalogUnitId?: string;
+    } | null => {
       if (config.type === 'glamping') {
         const catalogUnit = config.catalogUnit;
-        const unitName = catalogUnit
-          ? [catalogUnit.manufacturer, catalogUnit.product_model].filter(Boolean).join(' ') || config.unitTypeSlug
-          : (referenceData?.glampingTypes.find((g) => g.slug === config.unitTypeSlug)?.name ?? config.unitTypeSlug);
         const gt = referenceData?.glampingTypes.find((g) => g.slug === config.unitTypeSlug);
-        const amenityNames = (config.amenitySlugs || [])
-          .map((s) => referenceData?.amenityCosts.find((a) => a.slug === s)?.name)
-          .filter((n): n is string => !!n);
+        const unitName = resolveGlampingUnitTypeNameForPrompt({
+          unitTypeSlug: config.unitTypeSlug,
+          catalogUnit,
+          glampingTypes: referenceData?.glampingTypes ?? [],
+        });
+        const amenityNames = resolveAmenityNamesForPrompt(
+          config.amenitySlugs || [],
+          referenceData?.amenityCosts ?? []
+        );
         const qualityForDisplay = normalizeQualityForDisplay(config.qualityType);
+        if (!unitName.trim()) return null;
         return {
           config: {
             type: 'glamping',
@@ -422,20 +630,27 @@ export default function SiteBuilderClient() {
             productLink: catalogUnit?.unit_link ?? undefined,
           },
           configName: unitName,
+          ...(catalogUnit?.id ? { catalogUnitId: catalogUnit.id } : {}),
         };
       }
-      const rt = referenceData?.rvSiteTypes.find((r) => r.slug === config.siteTypeSlug);
-      const amenityNames = (config.amenitySlugs || [])
-        .map((s) => referenceData?.amenityCosts.find((a) => a.slug === s)?.name)
-        .filter((n): n is string => !!n);
+      const siteTypeName = resolveRvSiteTypeNameForPrompt(
+        config.siteTypeSlug,
+        referenceData?.rvSiteTypes ?? []
+      );
+      if (!String(siteTypeName).trim()) return null;
+      const amenityNames = resolveAmenityNamesForPrompt(
+        config.amenitySlugs || [],
+        referenceData?.amenityCosts ?? []
+      );
       return {
         config: {
           type: 'rv',
-          siteTypeName: rt?.name ?? config.siteTypeSlug,
+          siteTypeName,
           qualityType: normalizeQualityForDisplay(config.qualityType),
           amenityNames,
         },
-        configName: rt?.name ?? config.siteTypeSlug,
+        configName: siteTypeName,
+        catalogUnitId: undefined,
       };
     },
     [referenceData]
@@ -445,9 +660,15 @@ export default function SiteBuilderClient() {
     if (configs.length === 0) return;
     setGeneratingImages(true);
     setGeneratedImages([]);
+    setImageGenerationNotice(null);
+    setDocxExportError(null);
     try {
-      const builtConfigs = configs
-        .map((config) => buildConfigForPrompt(config))
+      const paired = configs.map((config) => ({ config, built: buildConfigForPrompt(config) }));
+      const skippedRows = paired
+        .map((p, index) => ({ index: index + 1, config: p.config, built: p.built }))
+        .filter((p) => p.built == null);
+      const builtConfigs = paired
+        .map((p) => p.built)
         .filter(
           (
             built
@@ -463,41 +684,136 @@ export default function SiteBuilderClient() {
               productLink?: string;
             };
             configName: string;
+            catalogUnitId?: string;
           } => built != null
         );
+      const noticeParts: string[] = [];
+      if (skippedRows.length > 0) {
+        noticeParts.push(
+          `Skipped ${skippedRows.length} row(s) with no unit/site type selected (row #${skippedRows.map((s) => s.index).join(', #')}).`
+        );
+      }
+      if (builtConfigs.length === 0) {
+        if (noticeParts.length) setImageGenerationNotice(noticeParts.join(' '));
+        return;
+      }
       const batchTotal = builtConfigs.length;
       const sharedLandscapeContext =
         batchTotal > 1 ? buildSharedLandscapeContext(location, imageDescription) : undefined;
 
-      const results = await Promise.all(
-        builtConfigs.map(async (built, batchPosition) => {
-          const res = await fetch('/api/admin/site-builder/generate-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              config: built.config,
-              location: location.trim() || undefined,
-              imageDescription: imageDescription.trim() || undefined,
-              sharedLandscapeContext,
-              batchPosition,
-              batchTotal,
-              roadSurface,
-            }),
+      /** Sequential generation so each image after the first can use the prior render as a visual reference. */
+      const results: { configName: string; imageBase64: string; mediaType: string }[] = [];
+      const generationFailures: string[] = [];
+      let referenceImageBase64: string | undefined;
+      let referenceMediaType: string | undefined;
+      let batchContinuityBroken = false;
+
+      for (let batchPosition = 0; batchPosition < builtConfigs.length; batchPosition++) {
+        const built = builtConfigs[batchPosition]!;
+        const body: Record<string, unknown> = {
+          config: built.config,
+          location: location.trim() || undefined,
+          imageDescription: imageDescription.trim() || undefined,
+          sharedLandscapeContext,
+          batchPosition,
+          batchTotal,
+          aspectRatio: '4:3',
+          timeOfDay: 'midday',
+          propertySceneArchetype: resolvedPropertySceneArchetype,
+        };
+        if (batchTotal > 1 && batchPosition > 0 && referenceImageBase64) {
+          body.referenceImageBase64 = referenceImageBase64;
+          body.referenceMediaType = referenceMediaType;
+        }
+        if (built.catalogUnitId) {
+          body.catalogUnitId = built.catalogUnitId;
+        }
+        const res = await fetch('/api/admin/site-builder/generate-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.success && data.imageBase64) {
+          const mediaType: string = data.mediaType ?? 'image/png';
+          referenceImageBase64 = data.imageBase64;
+          referenceMediaType = mediaType;
+          results.push({
+            configName: built.configName,
+            imageBase64: data.imageBase64,
+            mediaType,
           });
-          const data = await res.json();
-          if (data.success && data.imageBase64) {
-            return { configName: built.configName, imageBase64: data.imageBase64, mediaType: data.mediaType ?? 'image/png' };
-          }
-          return null;
-        })
-      );
-      setGeneratedImages(results.filter((r): r is { configName: string; imageBase64: string; mediaType: string } => r != null));
+        } else {
+          referenceImageBase64 = undefined;
+          referenceMediaType = undefined;
+          batchContinuityBroken = true;
+          const errMsg = typeof data.error === 'string' ? data.error : res.ok ? 'No image returned' : 'Request failed';
+          generationFailures.push(`${built.configName}: ${errMsg}`);
+        }
+      }
+      if (generationFailures.length > 0) {
+        noticeParts.push(
+          `${generationFailures.length} image(s) failed: ${generationFailures.join('; ')}.`
+        );
+      } else if (results.length < builtConfigs.length) {
+        noticeParts.push(`Only ${results.length} of ${builtConfigs.length} images were generated.`);
+      }
+      if (batchContinuityBroken && batchTotal > 1) {
+        noticeParts.push(t('imageBatchContinuityResetNote'));
+      }
+      if (noticeParts.length) setImageGenerationNotice(noticeParts.join(' '));
+      setGeneratedImages(results);
     } catch (err) {
       console.error('Image generation failed:', err);
     } finally {
       setGeneratingImages(false);
     }
-  }, [configs, buildConfigForPrompt, location, imageDescription, roadSurface]);
+  }, [
+    configs,
+    buildConfigForPrompt,
+    location,
+    imageDescription,
+    resolvedPropertySceneArchetype,
+    t,
+  ]);
+
+  const handleExportImagesDocx = useCallback(async () => {
+    if (generatedImages.length === 0) return;
+    setExportingDocx(true);
+    setDocxExportError(null);
+    try {
+      const res = await fetch('/api/admin/site-builder/export-images-docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateKey: docxTemplateKey,
+          images: generatedImages.map((img) => ({
+            configName: img.configName,
+            imageBase64: img.imageBase64,
+            mediaType: img.mediaType,
+          })),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(typeof data.error === 'string' ? data.error : res.statusText);
+      }
+      const blob = await res.blob();
+      const disp = res.headers.get('content-disposition');
+      const match = disp?.match(/filename="?([^";]+)"?/);
+      const filename = match?.[1] ?? `site-builder-images-${docxTemplateKey}.docx`;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (err) {
+      console.error('DOCX export failed:', err);
+      setDocxExportError(t('exportImagesDocxError'));
+    } finally {
+      setExportingDocx(false);
+    }
+  }, [generatedImages, docxTemplateKey, t]);
 
   const handleExportXlsx = useCallback(async () => {
     if (configs.length === 0) return;
@@ -564,6 +880,16 @@ export default function SiteBuilderClient() {
     );
   }, [referenceData]);
 
+  const canGenerateImages = useMemo(() => {
+    if (configs.length === 0) return false;
+    return configs.some((c) => {
+      if (c.type === 'glamping') {
+        return Boolean((c.catalogUnitId && c.catalogUnit) || c.unitTypeSlug?.trim());
+      }
+      return Boolean(c.siteTypeSlug?.trim());
+    });
+  }, [configs]);
+
   if (loadingRef) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
@@ -622,9 +948,13 @@ export default function SiteBuilderClient() {
                     label={t('unitType')}
                     value={config.unitTypeSlug}
                     onChange={(e) => updateGlampingConfig(config.id, 'unitTypeSlug', e.target.value)}
-                    disabled={!!config.catalogUnitId}
-                    className={config.catalogUnitId ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : undefined}
-                    title={config.catalogUnitId ? t('unitTypeFromCatalog') : undefined}
+                    disabled={config.catalogUnit != null}
+                    className={
+                      config.catalogUnit != null
+                        ? 'cursor-not-allowed disabled:!opacity-100 disabled:bg-white dark:disabled:bg-gray-700 disabled:text-gray-900 dark:disabled:text-gray-100'
+                        : undefined
+                    }
+                    title={config.catalogUnit ? t('unitTypeFromCatalog') : undefined}
                   >
                     <option value="">{t('selectUnitType')}</option>
                     {referenceData?.glampingTypes.map((g) => (
@@ -651,6 +981,11 @@ export default function SiteBuilderClient() {
                     value={config.catalogUnit?.floor_area_sqft ?? config.sqft}
                     onChange={(e) => updateGlampingConfig(config.id, 'sqft', parseInt(e.target.value, 10) || 0)}
                     disabled={config.catalogUnit != null && config.catalogUnit.floor_area_sqft != null}
+                    className={
+                      config.catalogUnit != null && config.catalogUnit.floor_area_sqft != null
+                        ? 'disabled:!opacity-100'
+                        : undefined
+                    }
                     tooltip={
                       config.catalogUnit?.floor_area_sqft != null
                         ? t('sqftFromCatalog')
@@ -663,6 +998,13 @@ export default function SiteBuilderClient() {
                     label={t('qualityType')}
                     value={normalizeQualityForDisplay(config.qualityType)}
                     onChange={(e) => updateGlampingConfig(config.id, 'qualityType', e.target.value)}
+                    disabled={config.catalogUnit != null}
+                    className={
+                      config.catalogUnit != null
+                        ? 'cursor-not-allowed disabled:!opacity-100 disabled:bg-white dark:disabled:bg-gray-700 disabled:text-gray-900 dark:disabled:text-gray-100'
+                        : undefined
+                    }
+                    title={config.catalogUnit ? t('qualityTierFromCatalog') : undefined}
                   >
                     {QUALITY_OPTIONS.map((q) => (
                       <option key={q} value={q}>
@@ -753,19 +1095,7 @@ export default function SiteBuilderClient() {
                                 <button
                                   type="button"
                                   className="w-full text-left px-3 py-2 hover:bg-sage-50 dark:hover:bg-sage-900/30 flex items-center justify-between gap-2"
-                                  onClick={() => {
-                                    updateGlampingConfig(config.id, 'catalogUnitId', u.id);
-                                    updateGlampingConfig(config.id, 'catalogUnit', u);
-                                    if (u.floor_area_sqft != null) {
-                                      updateGlampingConfig(config.id, 'sqft', u.floor_area_sqft);
-                                    }
-                                    const unitSlug = u.catalog_section ? CATALOG_SECTION_TO_UNIT_SLUG[u.catalog_section] : null;
-                                    if (unitSlug) {
-                                      updateGlampingConfig(config.id, 'unitTypeSlug', unitSlug);
-                                    }
-                                    setCatalogSearchOpen(null);
-                                    setCatalogSearchTerm('');
-                                  }}
+                                  onClick={() => applyCatalogUnitToGlampingConfig(config.id, u)}
                                 >
                                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                                     {[u.manufacturer, u.product_model].filter(Boolean).join(' ') || u.id}
@@ -1019,15 +1349,30 @@ export default function SiteBuilderClient() {
       {configs.length > 0 && (
         <Card padding="md">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('generateImages')}</h2>
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
             <div className="space-y-4 flex-1 min-w-0">
-              <div className="max-w-md">
+              <div className="max-w-md space-y-1">
                 <Input
                   label={t('location')}
                   placeholder={t('locationPlaceholder')}
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('imageLocationHelp')}</p>
+              </div>
+              <div className="max-w-md space-y-1">
+                <Select
+                  label={t('sceneFramingLabel')}
+                  value={sceneFramingChoice}
+                  onChange={(e) => setSceneFramingChoice(e.target.value as SceneFramingChoice)}
+                >
+                  {SCENE_FRAMING_IDS.map((id) => (
+                    <option key={id} value={id}>
+                      {t(`sceneFraming_${id}`)}
+                    </option>
+                  ))}
+                </Select>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('sceneFramingHelp')}</p>
               </div>
               <div className="max-w-md">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -1041,22 +1386,50 @@ export default function SiteBuilderClient() {
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-y"
                 />
               </div>
-              <div className="max-w-[14rem]">
-                <Select
-                  label={t('roadSurface')}
-                  value={roadSurface}
-                  onChange={(e) => setRoadSurface(e.target.value as RoadSurface)}
-                >
-                  <option value="dirt">{t('roadSurfaceDirt')}</option>
-                  <option value="gravel">{t('roadSurfaceGravel')}</option>
-                  <option value="paved">{t('roadSurfacePaved')}</option>
-                </Select>
-              </div>
+              {imageBatchStyleHintSummary || imageBatchStyleHintIntro || imageBatchStyleHintBullets.length > 0 ? (
+                <div className="max-w-xl text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                  {imageBatchStyleHintSummary ? <p>{imageBatchStyleHintSummary}</p> : null}
+                  {imageBatchStyleHintMoreInfoLabel ? (
+                    <details className="group rounded-md border border-gray-200 bg-gray-50/80 px-3 py-2 dark:border-gray-600 dark:bg-gray-800/40">
+                      <summary className="cursor-pointer list-none text-sage-700 underline-offset-2 hover:underline dark:text-sage-400 [&::-webkit-details-marker]:hidden">
+                        <span className="inline-flex items-center gap-1">
+                          {imageBatchStyleHintMoreInfoLabel}
+                          <ChevronDown
+                            className="h-3.5 w-3.5 shrink-0 text-gray-400 group-open:hidden dark:text-gray-500"
+                            aria-hidden
+                          />
+                          <ChevronUp
+                            className="hidden h-3.5 w-3.5 shrink-0 text-gray-400 group-open:inline dark:text-gray-500"
+                            aria-hidden
+                          />
+                        </span>
+                      </summary>
+                      <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 dark:border-gray-600">
+                        {imageBatchStyleHintIntro ? <p>{imageBatchStyleHintIntro}</p> : null}
+                        {imageBatchStyleHintBullets.length > 0 ? (
+                          <ul className="list-disc list-outside space-y-1.5 pl-5 marker:text-gray-500 dark:marker:text-gray-400">
+                            {imageBatchStyleHintBullets.map((line, idx) => (
+                              <li key={idx}>{line}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        <p>{t('imageReproducibilityNote')}</p>
+                        <p className="font-medium text-gray-800 dark:text-gray-200">
+                          {t('imageModelLine', { model: SITE_BUILDER_IMAGE_MODEL_DISPLAY_NAME })}
+                        </p>
+                      </div>
+                    </details>
+                  ) : null}
+                </div>
+              ) : null}
+              {hasCatalogLinkedRow ? (
+                <p className="max-w-xl text-sm text-gray-600 dark:text-gray-400">{t('imageCatalogIllustrativeNote')}</p>
+              ) : null}
               <p className="text-sm text-gray-500 dark:text-gray-400">{t('generateImagesDescription')}</p>
               <Button
                 type="button"
                 onClick={handleGenerateImages}
-                disabled={generatingImages}
+                disabled={generatingImages || !canGenerateImages}
                 className="inline-flex items-center gap-2"
               >
                 {generatingImages ? (
@@ -1071,47 +1444,126 @@ export default function SiteBuilderClient() {
                   </>
                 )}
               </Button>
+              {imageGenerationNotice ? (
+                <div
+                  className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800/60 dark:bg-amber-950/40"
+                  role="alert"
+                >
+                  <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                    {t('imageGenerationIssuesTitle')}
+                  </p>
+                  <p className="mt-1 text-sm text-amber-800 dark:text-amber-200">{imageGenerationNotice}</p>
+                </div>
+              ) : null}
             </div>
             {generatedImages.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 flex-1 min-w-0">
-                {generatedImages.map((img, i) => (
-                  <div key={i} className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`data:${img.mediaType};base64,${img.imageBase64}`}
-                      alt={img.configName}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-2 flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800">
-                      <div className="w-full flex flex-col items-start gap-2">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-normal break-words leading-snug">
-                          {img.configName}
-                        </p>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          className="shrink-0"
-                          onClick={() => {
-                            const ext = img.mediaType?.includes('png') ? 'png' : 'jpg';
-                            const a = document.createElement('a');
-                            a.href = `data:${img.mediaType};base64,${img.imageBase64}`;
-                            a.download = `${img.configName.replace(/\s+/g, '-')}.${ext}`;
-                            a.click();
-                          }}
-                        >
-                          <Download className="w-4 h-4" />
-                          {t('downloadImage')}
-                        </Button>
+              <div className="relative min-w-0 flex-1 pb-16 sm:pb-14">
+                <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {generatedImages.map((img, i) => (
+                    <div
+                      key={i}
+                      className="flex h-fit flex-col rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setImagePreview(img)}
+                        className="relative block w-full h-48 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+                        aria-label={t('viewImageFullSize')}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`data:${img.mediaType};base64,${img.imageBase64}`}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      </button>
+                      <div className="p-2 flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800">
+                        <div className="w-full flex flex-col items-start gap-2">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-normal break-words leading-snug">
+                            {img.configName}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            className="shrink-0"
+                            onClick={() => {
+                              const ext = img.mediaType?.includes('png') ? 'png' : 'jpg';
+                              const a = document.createElement('a');
+                              a.href = `data:${img.mediaType};base64,${img.imageBase64}`;
+                              a.download = `${img.configName.replace(/\s+/g, '-')}.${ext}`;
+                              a.click();
+                            }}
+                          >
+                            <Download className="w-4 h-4" />
+                            {t('downloadImage')}
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <div className="absolute bottom-0 right-0 flex flex-col items-end gap-1">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="inline-flex items-center gap-2 shadow-sm"
+                    disabled={exportingDocx}
+                    onClick={() => void handleExportImagesDocx()}
+                  >
+                    {exportingDocx ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        {t('exportingDocx')}
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-4 h-4" />
+                        {t('exportImagesDocx')}
+                      </>
+                    )}
+                  </Button>
+                  {docxExportError ? (
+                    <p className="max-w-xs text-right text-xs text-red-600 dark:text-red-400">{docxExportError}</p>
+                  ) : null}
+                </div>
               </div>
             )}
           </div>
         </Card>
       )}
+
+      <Modal open={imagePreview != null} onClose={() => setImagePreview(null)} className="max-w-5xl">
+        <ModalContent className="max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          {imagePreview ? (
+            <>
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-2">
+                  {imagePreview.configName}
+                </h3>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => setImagePreview(null)}
+                  aria-label={t('closeImagePreview')}
+                >
+                  <X className="h-4 w-4" aria-hidden />
+                  {t('closeImagePreview')}
+                </Button>
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`data:${imagePreview.mediaType};base64,${imagePreview.imageBase64}`}
+                alt={imagePreview.configName}
+                className="mx-auto max-h-[min(75vh,880px)] w-full rounded-md object-contain bg-gray-100 dark:bg-gray-900"
+              />
+            </>
+          ) : null}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

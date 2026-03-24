@@ -25,6 +25,8 @@ const UNIT_SLUG_TO_CATALOG_SECTIONS: Record<string, string[]> = {
   'canvas-tent': ['Tents'],
   dome: ['Domes'],
   pod: ['Pods'],
+  /** No dedicated Walden section; approximate with small alternative dwellings */
+  'house-boat': ['Converted Containers'],
   'mirror-cabin': ['Mirror Cabins', 'Converted Containers'],
   'safari-tent': ['Tents'],
   'tiny-home': ['Converted Containers'],
@@ -44,6 +46,7 @@ const UNIT_SLUG_TO_MULTIPLIER: Record<string, number> = {
   cabin: 1.05,
   airstream: 0.95,
   'mirror-cabin': 1.2,
+  'house-boat': 1.05,
   'vintage-trailer': 0.85,
 };
 

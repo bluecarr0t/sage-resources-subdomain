@@ -440,7 +440,7 @@ export default function ReportDetailPage() {
             {/* Action Buttons - below report details */}
             <div className="flex flex-wrap gap-2">
               {report.has_comparables && (
-                <Link href={`/admin/comparables/${report.study_id}`}>
+                <Link href={`/admin/comps/${report.study_id}`}>
                   <Button variant="primary" size="sm" className="flex flex-col items-start gap-1">
                     <BarChart3 className="w-4 h-4" />
                     <span>View Comps & Financial Data</span>
@@ -805,7 +805,7 @@ export default function ReportDetailPage() {
                 </div>
                 {report.comp_count != null && report.comp_count > 0 && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Comparables</span>
+                    <span className="text-gray-600 dark:text-gray-400">Comps</span>
                     <span className="text-gray-900 dark:text-gray-100 text-xs font-medium">{report.comp_count}</span>
                   </div>
                 )}

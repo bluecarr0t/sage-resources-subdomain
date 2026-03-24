@@ -142,6 +142,9 @@ export function extractFromFeasibilityRows(
     const mapping = matchAmenity(lineItem);
     if (!mapping) continue;
 
+    // Deck/patio lines in studies are often totals or mis-scoped; exclude extreme "per unit" outliers
+    if (mapping.slug === 'deck-patio' && val > 12_000) continue;
+
     if (!bySlug[mapping.slug]) {
       bySlug[mapping.slug] = {
         values: [],
@@ -171,7 +174,10 @@ export function extractFromFeasibilityRows(
   const result: ExtractedAmenity[] = [];
   for (const [slug, data] of Object.entries(bySlug)) {
     if (data.values.length < MIN_SAMPLES) continue;
-    const cost = Math.round(median(data.values));
+    let cost = Math.round(median(data.values));
+    if (slug === 'deck-patio') {
+      cost = Math.min(cost, 12_000);
+    }
     result.push({
       slug,
       name: data.name,

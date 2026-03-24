@@ -1,6 +1,6 @@
 /**
  * Tests for comparables extraction: parse XLSX files and validate structure
- * against what the /admin/comparables/[studyId] page displays.
+ * against what the /admin/comps/[studyId] page displays.
  *
  * Add real XLSX fixtures to __tests__/fixtures/ (e.g. 25-175A-04.xlsx) to
  * validate extraction from actual feasibility studies.
@@ -10,7 +10,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as XLSX from 'xlsx';
 import { parseWorkbook } from '@/lib/parsers/feasibility-xlsx-parser';
-import type { ParsedWorkbook } from '@/lib/types/feasibility';
+import { syntheticComparablesFromPropertyScores } from '@/lib/parsers/best-comps-to-comparables';
+import type { ParsedPropertyScore, ParsedWorkbook } from '@/lib/types/feasibility';
 
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 
@@ -51,6 +52,126 @@ function createFullMinimalXlsx(studyId: string): Buffer {
 }
 
 describe('comparables extraction', () => {
+  describe('syntheticComparablesFromPropertyScores', () => {
+    it('maps non-subject scores to ParsedComparable with overview and state', () => {
+      const scores: ParsedPropertyScore[] = [
+        {
+          property_name: 'Subject Property',
+          overall_score: 9,
+          is_subject: true,
+          unit_types_score: null,
+          unit_types_description: null,
+          unit_amenities_score: null,
+          unit_amenities_description: null,
+          property_score: null,
+          property_description: null,
+          property_amenities_score: null,
+          property_amenities_description: null,
+          location_score: null,
+          location_description: null,
+          brand_strength_score: null,
+          brand_strength_description: null,
+          occupancy_notes: null,
+        },
+        {
+          property_name: 'Hidden Waters RV Park',
+          overall_score: 8.5,
+          is_subject: false,
+          unit_types_score: null,
+          unit_types_description: 'Full hookup',
+          unit_amenities_score: null,
+          unit_amenities_description: null,
+          property_score: null,
+          property_description: null,
+          property_amenities_score: null,
+          property_amenities_description: null,
+          location_score: null,
+          location_description: 'Robbinsville, NC',
+          brand_strength_score: null,
+          brand_strength_description: null,
+          occupancy_notes: null,
+        },
+      ];
+      const warnings: string[] = [];
+      const comps = syntheticComparablesFromPropertyScores(scores, warnings);
+      expect(comps).toHaveLength(1);
+      expect(comps[0].comp_name).toBe('Hidden Waters RV Park');
+      expect(comps[0].quality_score).toBe(8.5);
+      expect(comps[0].state).toBe('NC');
+      expect(comps[0].overview).toContain('Robbinsville');
+      expect(warnings.length).toBeGreaterThan(0);
+    });
+
+    it('dedupes by normalized property name', () => {
+      const scores: ParsedPropertyScore[] = [
+        {
+          property_name: 'Same Park',
+          overall_score: 7,
+          is_subject: false,
+          unit_types_score: null,
+          unit_types_description: 'Short',
+          unit_amenities_score: null,
+          unit_amenities_description: null,
+          property_score: null,
+          property_description: null,
+          property_amenities_score: null,
+          property_amenities_description: null,
+          location_score: null,
+          location_description: null,
+          brand_strength_score: null,
+          brand_strength_description: null,
+          occupancy_notes: null,
+        },
+        {
+          property_name: 'Same Park*',
+          overall_score: 8,
+          is_subject: false,
+          unit_types_score: null,
+          unit_types_description: 'Longer description wins richness',
+          unit_amenities_score: null,
+          unit_amenities_description: null,
+          property_score: null,
+          property_description: 'Extra',
+          property_amenities_description: null,
+          property_amenities_score: null,
+          location_score: null,
+          location_description: null,
+          brand_strength_score: null,
+          brand_strength_description: null,
+          occupancy_notes: null,
+        },
+      ];
+      const comps = syntheticComparablesFromPropertyScores(scores);
+      expect(comps).toHaveLength(1);
+      expect(comps[0].quality_score).toBe(8);
+    });
+  });
+
+  /** Real 2023-style workbooks (Best Comps, no Comps Summ.) live under local_data/ (gitignored). */
+  const LOCAL_2023_XLSX = path.join(
+    process.cwd(),
+    'local_data/past_reports/2023/23-6304A-12 Robbinsville, NC RV FS.xlsx'
+  );
+
+  describe('parseWorkbook legacy 2023-style (local_data)', () => {
+    if (!fs.existsSync(LOCAL_2023_XLSX)) {
+      it('skips when local_data 2023 XLSX is absent (add file to run integration check)', () => {
+        expect(fs.existsSync(LOCAL_2023_XLSX)).toBe(false);
+      });
+    } else {
+      it('synthesizes comparables from Best Comps for real 2023 workbook', () => {
+        const buffer = fs.readFileSync(LOCAL_2023_XLSX);
+        const parsed = parseWorkbook(buffer, '23-6304A-12 Robbinsville, NC RV FS.xlsx');
+
+        expect(parsed.sheets_found).toContain('Best Comps');
+        expect(parsed.property_scores.length).toBeGreaterThan(0);
+        expect(parsed.comparables.length).toBeGreaterThan(0);
+        expect(parsed.comparables.every((c) => !/^subject/i.test(c.comp_name))).toBe(true);
+        expect(parsed.warnings.some((w) => /Best Comps/i.test(w) && /Comps Summ/i.test(w))).toBe(true);
+      });
+    }
+  });
+
   describe('parseWorkbook with minimal fixture', () => {
     it('extracts study_id from filename', () => {
       const buffer = createMinimalCompsSummXlsx('25-175A-04');
