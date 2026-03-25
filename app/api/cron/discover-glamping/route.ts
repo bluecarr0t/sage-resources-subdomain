@@ -7,12 +7,13 @@ import { resolve } from 'path';
  * Runs Tavily-based discovery with limit 1 to stay within serverless timeout.
  * Tavily is preferred over RSS because Google News RSS URLs frequently fail to fetch.
  *
- * Schedule: Weekly (e.g. "0 12 * * 0" = Sundays at noon UTC)
+ * Schedule: Daily at 15:00 UTC — see vercel.json (`0 15 * * *`).
+ * Vercel Cron invokes this route with HTTP GET (and POST is supported for manual triggers).
  * Set CRON_SECRET in Vercel for auth; TAVILY_API_KEY is required for discovery.
  *
  * For full runs, use: npm run discover:glamping (or GitHub Actions)
  */
-export async function POST(request: NextRequest) {
+function runDiscovery(request: NextRequest): NextResponse {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
@@ -52,4 +53,14 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/** Vercel Cron uses GET */
+export async function GET(request: NextRequest) {
+  return runDiscovery(request);
+}
+
+/** Manual / integration triggers */
+export async function POST(request: NextRequest) {
+  return runDiscovery(request);
 }

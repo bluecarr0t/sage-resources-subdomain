@@ -52,7 +52,7 @@ async function submitToIndexNow(
   return { ok: true, count: urls.length };
 }
 
-export async function POST(request: NextRequest) {
+async function runIndexNowCron(request: NextRequest): Promise<NextResponse> {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   const indexNowKey = process.env.INDEXNOW_KEY;
@@ -97,3 +97,13 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+/** Vercel Cron (vercel.json) uses GET */
+export async function GET(request: NextRequest) {
+  return runIndexNowCron(request);
+}
+
+export async function POST(request: NextRequest) {
+  return runIndexNowCron(request);
+}
+

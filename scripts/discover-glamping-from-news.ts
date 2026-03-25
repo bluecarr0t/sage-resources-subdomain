@@ -41,6 +41,19 @@ import {
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
+/** Minimum combined RSS text to pass as fallback when the article page cannot be scraped */
+const MIN_RSS_SNIPPET_CHARS = 80;
+
+function buildRssItemFallbackText(item: Parser.Item): string | undefined {
+  const parts: string[] = [];
+  if (item.title?.trim()) parts.push(item.title.trim());
+  const encoded = (item as Record<string, string | undefined>)['content:encoded'];
+  const body = item.content ?? encoded ?? item.summary ?? item.contentSnippet;
+  if (body?.trim()) parts.push(body.trim());
+  const combined = parts.join('\n\n').trim();
+  return combined.length >= MIN_RSS_SNIPPET_CHARS ? combined : undefined;
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
 const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -143,9 +156,11 @@ async function markUrlProcessed(url: string, propertiesExtracted: number): Promi
   );
 }
 
-async function getRssArticleUrls(limit?: number): Promise<{ url: string; discoverySource: string }[]> {
+async function getRssArticleTasks(
+  limit?: number
+): Promise<{ url: string; discoverySource: string; rssFallbackText?: string }[]> {
   const parser = new Parser();
-  const results: { url: string; discoverySource: string }[] = [];
+  const results: { url: string; discoverySource: string; rssFallbackText?: string }[] = [];
 
   for (const feed of GLAMPING_RSS_FEEDS) {
     try {
@@ -153,7 +168,8 @@ async function getRssArticleUrls(limit?: number): Promise<{ url: string; discove
       for (const item of parsed.items || []) {
         const link = item.link;
         if (link && link.startsWith('http')) {
-          results.push({ url: link, discoverySource: feed.discoverySource });
+          const rssFallbackText = buildRssItemFallbackText(item);
+          results.push({ url: link, discoverySource: feed.discoverySource, rssFallbackText });
         }
       }
     } catch (err) {
@@ -257,17 +273,22 @@ async function main(): Promise<void> {
   let articleTasks: { content: string; url?: string; discoverySource: string }[] = [];
 
   if (mode === 'rss') {
-    const urls = await getRssArticleUrls(limit);
-    metrics.articlesFound = urls.length;
+    const rssTasks = await getRssArticleTasks(limit);
+    metrics.articlesFound = rssTasks.length;
     const processed = await getProcessedUrls();
     metrics.processedUrlsCount = processed.size;
-    const toProcess = urls.filter((u) => !processed.has(u.url));
+    const toProcess = rssTasks.filter((u) => !processed.has(u.url));
 
-    console.log(`RSS: ${urls.length} articles, ${toProcess.length} new (${processed.size} already processed)\n`);
+    console.log(
+      `RSS: ${rssTasks.length} articles, ${toProcess.length} new (${processed.size} already processed)\n`
+    );
 
-    for (const { url: articleUrl, discoverySource } of toProcess) {
+    for (const { url: articleUrl, discoverySource, rssFallbackText } of toProcess) {
       try {
-        const content = await fetchArticleContent(articleUrl, fetchOptions);
+        const content = await fetchArticleContent(articleUrl, {
+          ...fetchOptions,
+          ...(rssFallbackText ? { rssFallbackText } : {}),
+        });
         articleTasks.push({ content, url: articleUrl, discoverySource });
         metrics.articlesFetched++;
       } catch (err) {
