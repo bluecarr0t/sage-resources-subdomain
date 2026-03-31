@@ -12,6 +12,10 @@
  *
  * **Reliability:** Chat completions retry on 429 and 5xx (`COMPS_V2_LLM_MAX_RETRIES`, default 2).
  * **Gateway-only:** `COMPS_V2_GATEWAY_MODEL_FALLBACKS`, `COMPS_V2_GATEWAY_PROMPT_CACHING=auto` — see `vercel-gateway-chat-extras.ts`.
+ *
+ * **Structured output:** Direct OpenAI uses `response_format: json_object`. Vercel AI Gateway routes
+ * non-OpenAI models (e.g. `anthropic/claude-*`) that reject `json_object`; extraction uses
+ * `response_format: json_schema` when `baseURL` points at the gateway.
  */
 
 import pLimit from 'p-limit';
@@ -28,6 +32,7 @@ import { logCompsV2DeepEnrichGatewayUsage } from '@/lib/comps-v2/log-comps-v2-ai
 import { createChatCompletionWithRetry } from '@/lib/comps-v2/openai-chat-completion-with-retry';
 import type { CompsV2EnrichCorrelationSource } from '@/lib/comps-v2/resolve-enrich-correlation-id';
 import { buildVercelGatewayChatExtras } from '@/lib/comps-v2/vercel-gateway-chat-extras';
+import type { ChatCompletionParams } from '@/lib/comps-v2/openai-chat-completion-with-retry';
 
 export interface DeepEnrichUsageLogContext {
   userId: string;
@@ -92,6 +97,67 @@ Rules:
 - For rates and unit_type_rates, only state what is explicitly supported by the provided context (booking widgets, official rate tables, OTA snippets, Google nightly price text). Never invent prices.
 - If multiple unit types have rates, list each separately in unit_type_rates and keep rates_notes as a short overview or empty.
 - JSON only, no markdown outside the JSON.`;
+
+/** Gateway structured-output schema (OpenAI-compat `json_schema`); avoids `json_object`, which many gateway-backed models reject with 400. */
+const DEEP_ENRICH_OUTPUT_JSON_SCHEMA: Record<string, unknown> = {
+  type: 'object',
+  properties: {
+    summary: { type: 'string', description: '2–4 sentence factual summary from context.' },
+    amenities: {
+      type: 'array',
+      items: { type: 'string' },
+      description: 'Short amenity labels supported by context.',
+    },
+    rates_notes: { type: 'string', description: 'General pricing overview or empty if unknown.' },
+    unit_type_rates: {
+      type: 'array',
+      description: 'Named unit types with concrete rate language when context supports it.',
+      items: {
+        type: 'object',
+        properties: {
+          unit_type: { type: 'string' },
+          rate_note: { type: 'string' },
+        },
+        required: ['unit_type', 'rate_note'],
+        additionalProperties: false,
+      },
+    },
+    review_highlights: { type: 'string', description: 'Guest review themes from context.' },
+    google_business_notes: {
+      type: 'string',
+      description: 'GBP / Maps facts: rating, reviews, address, phone, hours, Maps URL.',
+    },
+    sources_cited: {
+      type: 'array',
+      items: { type: 'string' },
+      description: 'URLs or titles relied on.',
+    },
+  },
+  required: [
+    'summary',
+    'amenities',
+    'rates_notes',
+    'unit_type_rates',
+    'review_highlights',
+    'google_business_notes',
+    'sources_cited',
+  ],
+  additionalProperties: false,
+};
+
+function extractionResponseFormat(useGateway: boolean): NonNullable<ChatCompletionParams['response_format']> {
+  if (!useGateway) {
+    return { type: 'json_object' };
+  }
+  return {
+    type: 'json_schema',
+    json_schema: {
+      name: 'comps_v2_deep_enrich',
+      description: 'Hospitality comp deep-enrichment extraction output.',
+      schema: DEEP_ENRICH_OUTPUT_JSON_SCHEMA,
+    },
+  };
+}
 
 const TAVILY_PER_RESULT_CHARS = 3400;
 const TAVILY_SECTION_CAP = 42000;
@@ -300,7 +366,7 @@ export async function enrichCompDeep(
     const completion = await createChatCompletionWithRetry(openai, {
       model: extractLlm.model,
       temperature: 0.1,
-      response_format: { type: 'json_object' },
+      response_format: extractionResponseFormat(useGatewayExtensions),
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userContent },

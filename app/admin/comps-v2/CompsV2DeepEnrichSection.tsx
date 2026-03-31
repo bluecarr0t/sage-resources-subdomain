@@ -1,6 +1,8 @@
 'use client';
 
 import { Button, Card } from '@/components/ui';
+import { CompsV2DeepEnrichRichText } from '@/components/CompsV2DeepEnrichRichText';
+import { formatGbpNotesWithLineBreaks } from '@/lib/comps-v2/format-gbp-notes-lines';
 import CompsV2DeepEnrichProgress from '@/components/CompsV2DeepEnrichProgress';
 import type { DeepEnrichResult } from '@/lib/comps-v2/deep-enrich';
 
@@ -93,16 +95,25 @@ export default function CompsV2DeepEnrichSection({
             <div key={i} className="border rounded-md p-3 dark:border-gray-700 text-sm space-y-2">
               <p className="font-semibold">{r.property_name}</p>
               {r.error && <p className="text-red-600">{r.error}</p>}
-              <p>{r.structured.summary}</p>
+              <p>
+                <CompsV2DeepEnrichRichText text={r.structured.summary} t={t} />
+              </p>
               {r.structured.amenities.length > 0 && (
                 <ul className="list-disc list-inside">
                   {r.structured.amenities.map((a, j) => (
-                    <li key={j}>{a}</li>
+                    <li key={j}>
+                      <CompsV2DeepEnrichRichText text={a} t={t} />
+                    </li>
                   ))}
                 </ul>
               )}
               <p className="text-gray-600 dark:text-gray-400">
-                <strong>{t('deepRatesOverview')}</strong> {r.structured.rates_notes || '—'}
+                <strong>{t('deepRatesOverview')}</strong>{' '}
+                {r.structured.rates_notes ? (
+                  <CompsV2DeepEnrichRichText text={r.structured.rates_notes} t={t} />
+                ) : (
+                  '—'
+                )}
               </p>
               {r.structured.unit_type_rates && r.structured.unit_type_rates.length > 0 ? (
                 <div className="text-gray-600 dark:text-gray-400">
@@ -111,17 +122,30 @@ export default function CompsV2DeepEnrichSection({
                     {r.structured.unit_type_rates.map((ur, j) => (
                       <li key={j}>
                         <span className="font-medium text-gray-800 dark:text-gray-200">{ur.unit_type}:</span>{' '}
-                        {ur.rate_note}
+                        <CompsV2DeepEnrichRichText text={ur.rate_note} t={t} />
                       </li>
                     ))}
                   </ul>
                 </div>
               ) : null}
               <p className="text-gray-600 dark:text-gray-400">
-                <strong>{t('deepReviews')}</strong> {r.structured.review_highlights || '—'}
+                <strong>{t('deepReviews')}</strong>{' '}
+                {r.structured.review_highlights ? (
+                  <CompsV2DeepEnrichRichText text={r.structured.review_highlights} t={t} />
+                ) : (
+                  '—'
+                )}
               </p>
-              <p className="text-gray-600 dark:text-gray-400">
-                <strong>{t('deepGbp')}</strong> {r.structured.google_business_notes || '—'}
+              <p className="text-gray-600 dark:text-gray-400 whitespace-pre-line">
+                <strong className="whitespace-normal">{t('deepGbp')}</strong>{' '}
+                {r.structured.google_business_notes ? (
+                  <CompsV2DeepEnrichRichText
+                    text={formatGbpNotesWithLineBreaks(r.structured.google_business_notes)}
+                    t={t}
+                  />
+                ) : (
+                  '—'
+                )}
               </p>
             </div>
           ))}

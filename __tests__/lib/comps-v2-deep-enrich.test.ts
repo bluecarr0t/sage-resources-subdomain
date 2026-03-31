@@ -52,7 +52,8 @@ describe('enrichCompDeep multi-step LLM', () => {
 
     completionCreate.mockImplementation(
       async (req: { response_format?: { type: string }; model?: string }) => {
-        if (req.response_format?.type === 'json_object') {
+        const rf = req.response_format?.type;
+        if (rf === 'json_object' || rf === 'json_schema') {
           return {
             choices: [
               {
@@ -94,7 +95,10 @@ describe('enrichCompDeep multi-step LLM', () => {
     expect(completionCreate).toHaveBeenCalledTimes(1);
     expect(completionCreate.mock.calls[0][0]).toMatchObject({
       model: EXTRACTION_MODEL,
-      response_format: { type: 'json_object' },
+      response_format: { type: 'json_schema' },
+    });
+    expect(completionCreate.mock.calls[0][0].response_format).toMatchObject({
+      json_schema: { name: 'comps_v2_deep_enrich' },
     });
   });
 
@@ -119,7 +123,10 @@ describe('enrichCompDeep multi-step LLM', () => {
     expect(completionCreate.mock.calls[0][0].model).toBe(CONDENSE_MODEL);
     expect(completionCreate.mock.calls[0][0].response_format).toBeUndefined();
     expect(completionCreate.mock.calls[1][0].model).toBe('openai/gpt-5.4');
-    expect(completionCreate.mock.calls[1][0].response_format).toEqual({ type: 'json_object' });
+    expect(completionCreate.mock.calls[1][0].response_format).toMatchObject({
+      type: 'json_schema',
+      json_schema: { name: 'comps_v2_deep_enrich' },
+    });
   });
 
   it('skips condense when bundle is below threshold even if COMPS_V2_DEEP_ENRICH_CONDENSE_MODEL is set', async () => {
@@ -139,5 +146,24 @@ describe('enrichCompDeep multi-step LLM', () => {
 
     expect(completionCreate).toHaveBeenCalledTimes(1);
     expect(completionCreate.mock.calls[0][0].model).toBe(EXTRACTION_MODEL);
+  });
+
+  it('uses json_object when only OPENAI_API_KEY (direct API, no gateway)', async () => {
+    delete process.env.AI_GATEWAY_API_KEY;
+    process.env.OPENAI_API_KEY = 'sk-test';
+    process.env.COMPS_V2_DEEP_ENRICH_MODEL = 'gpt-4o';
+
+    await enrichCompDeep({
+      property_name: 'OpenAI Only',
+      city: 'Austin',
+      state: 'TX',
+      url: null,
+    });
+
+    expect(completionCreate).toHaveBeenCalledTimes(1);
+    expect(completionCreate.mock.calls[0][0]).toMatchObject({
+      model: 'gpt-4o',
+      response_format: { type: 'json_object' },
+    });
   });
 });
