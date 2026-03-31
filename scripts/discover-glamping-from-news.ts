@@ -15,6 +15,8 @@
  *   npx tsx scripts/discover-glamping-from-news.ts --firecrawl-primary  (try Firecrawl before Cheerio)
  *   npx tsx scripts/discover-glamping-from-news.ts --batch-size 5       (process max 5 articles; useful for cron)
  *
+ * Production one-article run (no --dry-run): npm run discover:glamping:once
+ *
  * First run: npx tsx scripts/apply-discovery-processed-urls-migration.ts
  * (or run scripts/migrations/create-glamping-discovery-processed-urls.sql in Supabase SQL Editor)
  */

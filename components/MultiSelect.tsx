@@ -229,7 +229,7 @@ export default function MultiSelect({
                     onMouseDown={(e) => {
                       e.stopPropagation();
                     }}
-                    className="w-4 h-4 shrink-0 mt-0.5 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                    className="h-5 w-5 shrink-0 mt-0.5 accent-blue-600 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
                   />
                   <span className="min-w-0 flex-1 ml-1 text-sm text-gray-700 dark:text-gray-200 break-words">
                     {option.label}

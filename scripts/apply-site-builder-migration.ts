@@ -17,6 +17,9 @@ config({ path: resolve(process.cwd(), '.env.local') });
 const MIGRATIONS = [
   'scripts/migrations/create-site-builder-tables.sql',
   'scripts/migrations/add-amenity-source-references.sql',
+  'scripts/migrations/add-site-builder-amenity-cost-basis.sql',
+  'scripts/migrations/add-site-builder-amenity-sort-order.sql',
+  'scripts/migrations/create-amenities-table.sql',
 ];
 
 async function main() {
@@ -33,7 +36,9 @@ async function main() {
       const sql = readFileSync(resolve(process.cwd(), path), 'utf-8');
       await client.query(sql);
     }
-    console.log('✓ Site Builder tables created (site_builder_glamping_types, site_builder_rv_site_types, site_builder_amenity_costs)');
+    console.log(
+      '✓ Site Builder migrations applied (including amenities unified table). Run: npx tsx scripts/populate-amenities-glamping-metadata.ts if catalog rows exist without glamping_fields.'
+    );
   } catch (err) {
     console.error('Migration failed:', err instanceof Error ? err.message : err);
     process.exit(1);

@@ -62,7 +62,7 @@ The pipeline expects this table for tracking processed URLs. Migration exists (`
 
 **Cause:** Google News RSS returns redirect URLs (`news.google.com/rss/articles/CBMi...`). `fetch-article.ts` fetches the Google News page, tries to extract a canonical URL, and fetches the source article. The canonical extraction or source fetch frequently fails or yields too little content (paywalls, JS-heavy pages, anti-scraping).
 
-**Impact:** RSS mode is ineffective for production use. The cron job (`/api/cron/discover-glamping`) uses `--rss`, so it will always fail.
+**Impact:** RSS mode is ineffective for production use. The **Vercel cron** job (`/api/cron/discover-glamping`) uses **`--tavily --limit 1`**, not RSS (see `app/api/cron/discover-glamping/route.ts` and `vercel.json`).
 
 ---
 
@@ -76,13 +76,15 @@ The pipeline expects this table for tracking processed URLs. Migration exists (`
 
 ---
 
-### 1.5 Cron Job Uses Broken RSS Mode
+### 1.5 Cron Job (resolved — Tavily)
 
 **File:** `app/api/cron/discover-glamping/route.ts`
 
-The cron endpoint runs `--rss --limit 1`. Given RSS failures, each run is likely to process zero articles.
+The cron endpoint runs **`npx tsx …/discover-glamping-from-news.ts --tavily --limit 1`** (no `--dry-run`). **Schedule:** daily `0 15 * * *` UTC in `vercel.json`.
 
-**Recommendation:** Switch cron to Tavily (`--tavily --limit 1`) if `TAVILY_API_KEY` is available, or add a mode flag.
+**Requirements on Vercel:** `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SECRET_KEY`), `OPENAI_API_KEY`, `TAVILY_API_KEY`. If `CRON_SECRET` is set, Vercel sends `Authorization: Bearer <CRON_SECRET>` on cron invocations; the route returns 401 when the header does not match.
+
+**Note:** This repository has **no GitHub Actions workflow** for glamping discovery. Run history rows with **`dry_run: true`** come from **manual or external** invocations that included **`--dry-run`** (e.g. smoke tests). Production ingestion must omit that flag.
 
 ---
 

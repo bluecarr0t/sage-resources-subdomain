@@ -165,7 +165,9 @@ function buildComparablesAnalysis(input: EnrichedInput): string {
     else if (c.state) parts[0] += ` (${c.state})`;
 
     const details: string[] = [];
-    if (c.distance_miles >= 0) details.push(`${c.distance_miles} miles from subject`);
+    if (c.distance_miles != null && c.distance_miles >= 0) {
+      details.push(`${c.distance_miles} miles from subject`);
+    }
     if (c.property_total_sites) details.push(`${c.property_total_sites} total sites`);
     if (c.unit_type) details.push(`Unit type: ${c.unit_type}`);
     if (c.avg_retail_daily_rate) details.push(`Avg daily rate: $${Math.round(c.avg_retail_daily_rate)}`);

@@ -20,6 +20,7 @@ export const dynamic = 'force-dynamic';
 import { generateText } from 'ai';
 import { createGateway } from 'ai';
 import { withAdminAuth } from '@/lib/require-admin-auth';
+import type { AdminAuthContext } from '@/lib/require-admin-auth';
 import { createServerClient } from '@/lib/supabase';
 import { downscaleReferenceImageBase64, prepareReferenceImageForVision } from '@/lib/site-builder/downscale-reference-image';
 import { fetchCatalogProductImageFromPageUrl } from '@/lib/site-builder/fetch-catalog-product-image';
@@ -206,7 +207,7 @@ type VisionContentPart =
   | { type: 'text'; text: string }
   | { type: 'image'; image: string; mediaType?: string };
 
-export const POST = withAdminAuth(async (request: NextRequest) => {
+export const POST = withAdminAuth(async (request: NextRequest, auth: AdminAuthContext) => {
   try {
     const apiKey = process.env.AI_GATEWAY_API_KEY;
     if (!apiKey) {
@@ -334,6 +335,31 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         messages: [{ role: 'user' as const, content: parts }],
         seed: SITE_BUILDER_IMAGE_SEED,
       });
+    }
+
+    try {
+      const usage = result.totalUsage ?? result.usage;
+      const supabase = createServerClient();
+      await supabase.from('admin_ai_usage_events' as never).insert({
+        user_id: auth.session.user.id,
+        user_email: auth.session.user.email ?? null,
+        feature: 'site_builder_image',
+        provider: 'vercel_ai_gateway',
+        model: SITE_BUILDER_GATEWAY_MODEL_ID,
+        input_tokens: usage?.inputTokens ?? null,
+        output_tokens: usage?.outputTokens ?? null,
+        total_tokens: usage?.totalTokens ?? null,
+        raw_usage: usage?.raw ?? null,
+        request_meta: {
+          hasCatalog,
+          hasBatch,
+          aspectRatio: parsed.aspectRatio ?? null,
+          batchPosition: parsed.batchPosition ?? null,
+          batchTotal: parsed.batchTotal ?? null,
+        },
+      } as never);
+    } catch (logErr) {
+      console.warn('[api/admin/site-builder/generate-image] admin_ai_usage_events insert failed:', logErr);
     }
 
     const imageFiles = result.files?.filter((f) => f.mediaType?.startsWith('image/')) ?? [];

@@ -136,7 +136,7 @@ function buildCompFromResult(result: TavilyResult): ComparableProperty | null {
     operating_season_months: null,
     url: result.url,
     description: descSnippet || null,
-    distance_miles: -1, // unknown from web search
+    distance_miles: null,
     source_table: 'tavily_web_research',
   };
 }

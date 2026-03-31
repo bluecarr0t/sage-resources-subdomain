@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import SiteBuilderConfigAmenities from '@/components/SiteBuilderConfigAmenities';
 import Link from 'next/link';
 import {
   resolveAmenityNamesForPrompt,
@@ -31,6 +32,7 @@ import {
   resolveSceneFramingToArchetype,
   type SceneFramingChoice,
 } from '@/lib/site-builder/property-scene-archetype';
+import { SITE_BUILDER_AMENITY_OVERRIDE_MAX } from '@/lib/site-builder/amenity-cost-resolve';
 
 interface GlampingType {
   slug: string;
@@ -62,6 +64,8 @@ interface AmenityCost {
   cost_per_unit: number;
   applies_to: string;
   sources?: AmenitySource[];
+  default_cost_basis?: string | null;
+  default_cost_source_url?: string | null;
 }
 
 interface ReferenceData {
@@ -205,69 +209,6 @@ interface ConfigCostResult {
 
 const QUALITY_OPTIONS = ['Ultra Luxury', 'Luxury', 'Premium', 'Mid-Range', 'Economy', 'Budget'] as const;
 
-function AmenityLabel({
-  amenity,
-  formatCurrency,
-  t,
-}: {
-  amenity: AmenityCost;
-  formatCurrency: (n: number) => string;
-  t: (key: string) => string;
-}) {
-  const hasSources = amenity.sources && amenity.sources.length > 0;
-  const sourcesWithStudy = hasSources ? amenity.sources!.filter((s) => s.study_id) : [];
-
-  if (!hasSources || sourcesWithStudy.length === 0) {
-    return (
-      <span className="text-sm text-gray-700 dark:text-gray-300">
-        {amenity.name} ({formatCurrency(amenity.cost_per_unit)})
-      </span>
-    );
-  }
-
-  return (
-    <span className="group relative inline-block">
-      <span className="text-sm text-gray-700 dark:text-gray-300 cursor-help underline decoration-dotted decoration-sage-400/60 underline-offset-1">
-        {amenity.name} ({formatCurrency(amenity.cost_per_unit)})
-      </span>
-      <span
-        role="tooltip"
-        className="absolute left-0 bottom-full z-50 mb-1 hidden w-max max-w-[320px] rounded-lg border border-gray-200 bg-white py-2.5 text-left text-xs shadow-lg dark:border-gray-600 dark:bg-gray-800 group-hover:block"
-      >
-        <div className="px-3 pb-2 border-b border-gray-100 dark:border-gray-700">
-          <p className="font-semibold text-gray-900 dark:text-gray-100">{amenity.name}</p>
-          <p className="text-gray-500 dark:text-gray-400 mt-0.5">{t('sourceReports')} — {formatCurrency(amenity.cost_per_unit)}</p>
-        </div>
-        <ul className="mt-2 space-y-0 max-h-[260px] overflow-y-auto">
-          {sourcesWithStudy.map((s, i) => (
-            <li
-              key={`${s.report_id}-${s.line_item}-${i}`}
-              className="border-b border-gray-50 dark:border-gray-700/50 last:border-0"
-            >
-              <Link
-                href={`/admin/reports/${encodeURIComponent(s.study_id!)}`}
-                className="block px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <p className="font-medium text-gray-900 dark:text-gray-100 truncate" title={s.report_title ?? undefined}>
-                  {s.report_title || t('unnamedReport')}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400 mt-0.5 text-[11px]">
-                  {s.line_item}
-                </p>
-                <span className="inline-flex items-center gap-1 mt-1 text-sage-600 dark:text-sage-400 text-[11px] font-medium">
-                  <FileText className="w-3 h-3" aria-hidden />
-                  {t('viewStudy')}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </span>
-    </span>
-  );
-}
-
 /** Map legacy CCE quality values to new display tiers for backward compatibility */
 const LEGACY_TO_DISPLAY: Record<string, string> = {
   Excellent: 'Ultra Luxury',
@@ -356,6 +297,69 @@ export default function SiteBuilderClient() {
   const [catalogSearchTerm, setCatalogSearchTerm] = useState('');
   const [catalogSearchResults, setCatalogSearchResults] = useState<CatalogUnit[]>([]);
   const [catalogSearchLoading, setCatalogSearchLoading] = useState(false);
+  const [amenityCostOverridesByConfigId, setAmenityCostOverridesByConfigId] = useState<
+    Record<string, Record<string, number>>
+  >({});
+  const [amenityInlineEdit, setAmenityInlineEdit] = useState<{ configId: string; slug: string } | null>(null);
+  const [amenityEditDraft, setAmenityEditDraft] = useState('');
+
+  const clearAmenityOverrideForConfig = useCallback((configId: string, slug: string) => {
+    setAmenityCostOverridesByConfigId((prev) => {
+      const row = prev[configId];
+      if (!row || row[slug] === undefined) return prev;
+      const nextRow = { ...row };
+      delete nextRow[slug];
+      const next = { ...prev };
+      if (Object.keys(nextRow).length === 0) delete next[configId];
+      else next[configId] = nextRow;
+      return next;
+    });
+  }, []);
+
+  const effectiveAmenityUnitCost = useCallback(
+    (configId: string, slug: string, refFromApi: number) => {
+      const row = amenityCostOverridesByConfigId[configId];
+      return row?.[slug] !== undefined ? row[slug]! : refFromApi;
+    },
+    [amenityCostOverridesByConfigId]
+  );
+
+  const applyAmenityCostEdit = useCallback((configId: string, slug: string, raw: string) => {
+    const n = Math.round(Number(raw));
+    if (!Number.isFinite(n) || n < 0) return;
+    setAmenityCostOverridesByConfigId((prev) => ({
+      ...prev,
+      [configId]: {
+        ...(prev[configId] ?? {}),
+        [slug]: Math.min(n, SITE_BUILDER_AMENITY_OVERRIDE_MAX),
+      },
+    }));
+    setAmenityInlineEdit(null);
+  }, []);
+
+  const revertAmenityCostEdit = useCallback((configId: string, slug: string) => {
+    clearAmenityOverrideForConfig(configId, slug);
+    setAmenityInlineEdit(null);
+  }, [clearAmenityOverrideForConfig]);
+
+  useEffect(() => {
+    if (!amenityInlineEdit) return;
+    const onMouseDown = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      if (t.closest('[data-site-builder-amenity-cost-popover]')) return;
+      setAmenityInlineEdit(null);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAmenityInlineEdit(null);
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [amenityInlineEdit]);
 
   useEffect(() => {
     fetch('/api/admin/site-builder/reference-data')
@@ -477,11 +481,15 @@ export default function SiteBuilderClient() {
         };
       }),
     };
+    const bodyPayload: Record<string, unknown> = {
+      ...payload,
+      amenityCostOverridesPerConfig: configs.map((c) => amenityCostOverridesByConfigId[c.id] ?? {}),
+    };
     setLoadingCosts(true);
     fetch('/api/admin/site-builder/costs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(bodyPayload),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -493,7 +501,7 @@ export default function SiteBuilderClient() {
       })
       .catch(() => setCostResult(null))
       .finally(() => setLoadingCosts(false));
-  }, [configs]);
+  }, [configs, amenityCostOverridesByConfigId]);
 
   const addGlampingConfig = useCallback(() => {
     const first = referenceData?.glampingTypes[0];
@@ -530,6 +538,13 @@ export default function SiteBuilderClient() {
 
   const removeConfig = useCallback((id: string) => {
     setConfigs((prev) => prev.filter((c) => c.id !== id));
+    setAmenityCostOverridesByConfigId((prev) => {
+      if (!prev[id]) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    setAmenityInlineEdit((cur) => (cur?.configId === id ? null : cur));
   }, []);
 
   const updateGlampingConfig = useCallback(
@@ -819,7 +834,7 @@ export default function SiteBuilderClient() {
     if (configs.length === 0) return;
     setExportingXlsx(true);
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         configs: configs.map((c) => {
           if (c.type === 'glamping') {
             return {
@@ -841,6 +856,7 @@ export default function SiteBuilderClient() {
           };
         }),
       };
+      payload.amenityCostOverridesPerConfig = configs.map((c) => amenityCostOverridesByConfigId[c.id] ?? {});
       const res = await fetch('/api/admin/site-builder/export-xlsx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -864,9 +880,10 @@ export default function SiteBuilderClient() {
     } finally {
       setExportingXlsx(false);
     }
-  }, [configs]);
+  }, [configs, amenityCostOverridesByConfigId]);
 
   const toggleAmenity = useCallback((configId: string, configType: 'glamping' | 'rv', slug: string) => {
+    let removed = false;
     setConfigs((prev) =>
       prev.map((c) => {
         if (c.id !== configId) return c;
@@ -874,11 +891,30 @@ export default function SiteBuilderClient() {
         const amenity = referenceData?.amenityCosts.find((a) => a.slug === slug);
         if (!amenity || !applies.includes(amenity.applies_to)) return c;
         const current = c.amenitySlugs;
-        const next = current.includes(slug) ? current.filter((s) => s !== slug) : [...current, slug];
-        return { ...c, amenitySlugs: next };
+        if (current.includes(slug)) {
+          removed = true;
+          return { ...c, amenitySlugs: current.filter((s) => s !== slug) };
+        }
+        return { ...c, amenitySlugs: [...current, slug] };
       })
     );
-  }, [referenceData]);
+    if (removed) clearAmenityOverrideForConfig(configId, slug);
+  }, [referenceData, clearAmenityOverrideForConfig]);
+
+  const removeAmenityFromConfig = useCallback(
+    (configId: string, configType: 'glamping' | 'rv', slug: string) => {
+      setConfigs((prev) =>
+        prev.map((c) => {
+          if (c.id !== configId) return c;
+          if (!c.amenitySlugs.includes(slug)) return c;
+          return { ...c, amenitySlugs: c.amenitySlugs.filter((s) => s !== slug) };
+        })
+      );
+      clearAmenityOverrideForConfig(configId, slug);
+      setAmenityInlineEdit((cur) => (cur?.configId === configId && cur.slug === slug ? null : cur));
+    },
+    [clearAmenityOverrideForConfig]
+  );
 
   const canGenerateImages = useMemo(() => {
     if (configs.length === 0) return false;
@@ -906,6 +942,14 @@ export default function SiteBuilderClient() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{t('title')}</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('subtitle')}</p>
+        <p className="mt-2">
+          <Link
+            href="/admin/site-builder/amenities"
+            className="text-sm font-medium text-sage-600 hover:text-sage-700 dark:text-sage-400 dark:hover:text-sage-300"
+          >
+            {t('viewAmenities')}
+          </Link>
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -1142,39 +1186,31 @@ export default function SiteBuilderClient() {
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('amenities')}</p>
-                <div className="flex flex-wrap gap-3">
-                  {glampingAmenities.map((a) => (
-                    <label key={a.slug} className="inline-flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={config.amenitySlugs.includes(a.slug)}
-                        onChange={() => toggleAmenity(config.id, 'glamping', a.slug)}
-                        className="rounded border-gray-300 dark:border-gray-600 text-sage-600 focus:ring-sage-500"
-                      />
-                      <AmenityLabel amenity={a} formatCurrency={formatCurrency} t={t} />
-                      {a.sources?.length ? (
-                        <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                          {a.sources
-                            .filter((s) => s.study_id)
-                            .map((s, i) => (
-                              <Link
-                                key={`${s.report_id}-${s.line_item}-${i}`}
-                                href={`/admin/reports/${encodeURIComponent(s.study_id!)}`}
-                                className="inline-flex text-sage-600 hover:text-sage-700 dark:text-sage-400 dark:hover:text-sage-300"
-                                title={s.report_title ? `${s.report_title} — ${s.line_item}` : s.line_item}
-                                aria-label={t('viewStudy')}
-                              >
-                                <FileText className="w-3.5 h-3.5" aria-hidden />
-                              </Link>
-                            ))}
-                        </span>
-                      ) : null}
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <SiteBuilderConfigAmenities
+                amenities={glampingAmenities}
+                selectedSlugs={config.amenitySlugs}
+                costOverrides={amenityCostOverridesByConfigId[config.id] ?? {}}
+                editingConfigSlug={
+                  amenityInlineEdit?.configId === config.id ? amenityInlineEdit.slug : null
+                }
+                editDraft={amenityEditDraft}
+                onEditDraftChange={setAmenityEditDraft}
+                onOpenEditCost={(slug) => {
+                  const ref =
+                    glampingAmenities.find((a) => a.slug === slug)?.cost_per_unit ?? 0;
+                  setAmenityEditDraft(
+                    String(effectiveAmenityUnitCost(config.id, slug, ref))
+                  );
+                  setAmenityInlineEdit({ configId: config.id, slug });
+                }}
+                onCloseEditCost={() => setAmenityInlineEdit(null)}
+                onApplyCost={(slug, raw) => applyAmenityCostEdit(config.id, slug, raw)}
+                onRevertCost={(slug) => revertAmenityCostEdit(config.id, slug)}
+                onToggleSlug={(slug) => toggleAmenity(config.id, 'glamping', slug)}
+                onRemoveSlug={(slug) => removeAmenityFromConfig(config.id, 'glamping', slug)}
+                formatCurrency={formatCurrency}
+                getRefCost={(slug) => glampingAmenities.find((a) => a.slug === slug)?.cost_per_unit ?? 0}
+              />
             </Card>
             </div>
           ) : (
@@ -1242,39 +1278,30 @@ export default function SiteBuilderClient() {
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('amenities')}</p>
-                <div className="flex flex-wrap gap-3">
-                  {rvAmenities.map((a) => (
-                    <label key={a.slug} className="inline-flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={config.amenitySlugs.includes(a.slug)}
-                        onChange={() => toggleAmenity(config.id, 'rv', a.slug)}
-                        className="rounded border-gray-300 dark:border-gray-600 text-sage-600 focus:ring-sage-500"
-                      />
-                      <AmenityLabel amenity={a} formatCurrency={formatCurrency} t={t} />
-                      {a.sources?.length ? (
-                        <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                          {a.sources
-                            .filter((s) => s.study_id)
-                            .map((s, i) => (
-                              <Link
-                                key={`${s.report_id}-${s.line_item}-${i}`}
-                                href={`/admin/reports/${encodeURIComponent(s.study_id!)}`}
-                                className="inline-flex text-sage-600 hover:text-sage-700 dark:text-sage-400 dark:hover:text-sage-300"
-                                title={s.report_title ? `${s.report_title} — ${s.line_item}` : s.line_item}
-                                aria-label={t('viewStudy')}
-                              >
-                                <FileText className="w-3.5 h-3.5" aria-hidden />
-                              </Link>
-                            ))}
-                        </span>
-                      ) : null}
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <SiteBuilderConfigAmenities
+                amenities={rvAmenities}
+                selectedSlugs={config.amenitySlugs}
+                costOverrides={amenityCostOverridesByConfigId[config.id] ?? {}}
+                editingConfigSlug={
+                  amenityInlineEdit?.configId === config.id ? amenityInlineEdit.slug : null
+                }
+                editDraft={amenityEditDraft}
+                onEditDraftChange={setAmenityEditDraft}
+                onOpenEditCost={(slug) => {
+                  const ref = rvAmenities.find((a) => a.slug === slug)?.cost_per_unit ?? 0;
+                  setAmenityEditDraft(
+                    String(effectiveAmenityUnitCost(config.id, slug, ref))
+                  );
+                  setAmenityInlineEdit({ configId: config.id, slug });
+                }}
+                onCloseEditCost={() => setAmenityInlineEdit(null)}
+                onApplyCost={(slug, raw) => applyAmenityCostEdit(config.id, slug, raw)}
+                onRevertCost={(slug) => revertAmenityCostEdit(config.id, slug)}
+                onToggleSlug={(slug) => toggleAmenity(config.id, 'rv', slug)}
+                onRemoveSlug={(slug) => removeAmenityFromConfig(config.id, 'rv', slug)}
+                formatCurrency={formatCurrency}
+                getRefCost={(slug) => rvAmenities.find((a) => a.slug === slug)?.cost_per_unit ?? 0}
+              />
             </Card>
             </div>
           )

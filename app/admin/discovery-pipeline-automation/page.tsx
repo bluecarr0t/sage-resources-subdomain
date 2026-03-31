@@ -252,6 +252,47 @@ export default function DiscoveryPipelineAutomationPage() {
           </div>
         </section>
 
+        {/* Production runs & cron */}
+        <section className="mt-8 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/80 dark:bg-emerald-950/30">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Production runs (writes to the database)
+            </h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              The admin dashboard shows <span className="text-amber-700 dark:text-amber-400">(dry)</span> when a run used{' '}
+              <code className="rounded bg-gray-100 dark:bg-gray-800 px-1 py-0.5 text-xs">--dry-run</code>. That flag is{' '}
+              <strong>not</strong> set by Vercel cron or <code className="text-xs">npm run discover:glamping</code>. Dry
+              history usually means someone ran the script manually with <code className="text-xs">--dry-run</code> or an
+              external job did. There is no glamping discovery workflow under <code className="text-xs">.github/</code> in
+              this repo—check other automation if you still see only dry runs.
+            </p>
+          </div>
+          <div className="p-6 sm:p-8 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+            <div>
+              <p className="font-medium text-gray-900 dark:text-gray-100">Manual (one Tavily article, real insert)</p>
+              <pre className="mt-2 overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-xs">
+                {`npm run discover:glamping:once
+# same as: npx tsx scripts/discover-glamping-from-news.ts --tavily --limit 1`}
+              </pre>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">
+                Needs <code className="text-xs">NEXT_PUBLIC_SUPABASE_URL</code>,{' '}
+                <code className="text-xs">SUPABASE_SERVICE_ROLE_KEY</code> (or <code className="text-xs">SUPABASE_SECRET_KEY</code>),{' '}
+                <code className="text-xs">OPENAI_API_KEY</code>, <code className="text-xs">TAVILY_API_KEY</code> in{' '}
+                <code className="text-xs">.env.local</code> (or your shell).
+              </p>
+            </div>
+            <div>
+              <p className="font-medium text-gray-900 dark:text-gray-100">Vercel cron</p>
+              <p className="mt-1 text-gray-600 dark:text-gray-400">
+                Path <code className="text-xs">/api/cron/discover-glamping</code>, schedule <code className="text-xs">0 15 * * *</code> UTC (
+                <code className="text-xs">vercel.json</code>). Same env vars on the project. If <code className="text-xs">CRON_SECRET</code> is
+                set, only requests with <code className="text-xs">Authorization: Bearer &lt;CRON_SECRET&gt;</code> succeed; Vercel is expected to
+                send that header for cron invocations.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Tech stack */}
         <section className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">

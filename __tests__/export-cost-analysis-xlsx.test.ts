@@ -75,4 +75,55 @@ describe('exportCostAnalysisToXlsx', () => {
     expect(fontFingerprint(outSheet!.getCell('C4').font)).toEqual(tmplC4Font);
     expect(fontFingerprint(outSheet!.getCell('B39').font)).toEqual(tmplB39Font);
   });
+
+  it('writes one Add. Bldg row per amenity with per-unit cost in column D', async () => {
+    if (!existsSync(TEMPLATE_PATH)) {
+      throw new Error(`Missing template at ${TEMPLATE_PATH}`);
+    }
+
+    const configs: SiteBuilderConfig[] = [
+      {
+        type: 'glamping',
+        unitTypeSlug: 'yurt',
+        quantity: 2,
+        sqft: 300,
+        qualityType: 'Premium',
+        amenitySlugs: [],
+        catalogUnitId: null,
+      },
+    ];
+    const costResults: ConfigCostResult[] = [
+      {
+        configIndex: 0,
+        type: 'glamping',
+        name: 'Yurt',
+        qualityTier: 'Premium',
+        quantity: 2,
+        costPerUnit: 1000,
+        subtotal: 2000,
+        baseCost: 900,
+        amenityCost: 100,
+      },
+    ];
+
+    const outBuf = await exportCostAnalysisToXlsx({
+      configs,
+      costResult: { configs: costResults, totalSiteBuild: 2000 },
+      amenityBreakdown: [
+        { name: 'WiFi access', totalQty: 2, costPerUnit: 500, total: 1000 },
+        { name: 'Fire pit', totalQty: 2, costPerUnit: 400, total: 800 },
+      ],
+    });
+
+    const outWb = new ExcelJS.Workbook();
+    await outWb.xlsx.load(outBuf as never);
+    const add = outWb.getWorksheet('Add. Bldg Improv.');
+    expect(add).toBeTruthy();
+    expect(String(add!.getCell('B14').value)).toContain('WiFi');
+    expect(add!.getCell('D14').value).toBe(500);
+    expect(add!.getCell('C14').value).toBe(2);
+    expect(add!.getCell('E14').value).toBe(1000);
+    expect(String(add!.getCell('B15').value)).toContain('Fire pit');
+    expect(add!.getCell('D15').value).toBe(400);
+  });
 });

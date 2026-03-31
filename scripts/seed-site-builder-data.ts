@@ -16,6 +16,8 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 import { Client } from 'pg';
 import { SITE_BUILDER_GLAMPING_TYPE_SEED_ROWS } from '../lib/site-builder/glamping-types-defaults';
+import { SITE_BUILDER_AMENITY_RESEARCH_ROWS } from '../lib/site-builder/amenity-research-defaults';
+import { syncAmenitiesGlampingMetadata } from '../lib/site-builder/amenities-glamping-metadata-sync';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
@@ -27,24 +29,6 @@ const RV_SITE_TYPES = [
   { slug: 'full-hookup-back-in', name: 'Full hookup back-in', width_ft: 40, depth_ft: 80, base_cost_per_site: 0, hookup_type: 'full' },
   { slug: 'back-in-standard', name: 'Back-in standard', width_ft: 35, depth_ft: 70, base_cost_per_site: 0, hookup_type: 'full' },
   { slug: 'back-in-deluxe', name: 'Back-in deluxe', width_ft: 40, depth_ft: 80, base_cost_per_site: 0, hookup_type: 'full' },
-];
-
-// Default amenities (fallback when sync-feasibility-amenities.ts hasn't run).
-// Sync overwrites with real costs from feasibility studies when available.
-const DEFAULT_AMENITY_COSTS: { slug: string; name: string; cost_per_unit: number; applies_to: string }[] = [
-  // Per-site deck or patio add (typical wood/composite platform), not whole-building shell—was 40500 in error
-  { slug: 'deck-patio', name: 'Deck / patio', cost_per_unit: 6500, applies_to: 'both' },
-  { slug: 'fire-pit', name: 'Fire pit', cost_per_unit: 400, applies_to: 'both' },
-  { slug: 'patio-furniture', name: 'Patio furniture', cost_per_unit: 750, applies_to: 'both' },
-  { slug: 'shade-structure', name: 'Shade structure / pergola', cost_per_unit: 500, applies_to: 'both' },
-  { slug: 'picnic-table', name: 'Picnic table', cost_per_unit: 350, applies_to: 'both' },
-  { slug: 'outdoor-kitchen', name: 'Outdoor kitchen / grill', cost_per_unit: 8500, applies_to: 'glamping' },
-  { slug: 'private-bathroom', name: 'Private bathroom', cost_per_unit: 25000, applies_to: 'glamping' },
-  { slug: 'private-hot-tub', name: 'Private hot tub', cost_per_unit: 12000, applies_to: 'glamping' },
-  { slug: 'concrete-pad', name: 'Concrete pad', cost_per_unit: 2500, applies_to: 'rv' },
-  { slug: 'water-hookup', name: 'Water hookup', cost_per_unit: 1500, applies_to: 'rv' },
-  { slug: 'sewer-hookup', name: 'Sewer hookup', cost_per_unit: 2000, applies_to: 'rv' },
-  { slug: 'wifi', name: 'WiFi access', cost_per_unit: 500, applies_to: 'both' },
 ];
 
 async function main() {
@@ -98,23 +82,34 @@ async function main() {
     );
     console.log(`✓ Upserted ${RV_SITE_TYPES.length} RV site types`);
 
-    // Upsert default amenities (fallback when sync hasn't run; sync overwrites with real data)
-    for (const row of DEFAULT_AMENITY_COSTS) {
+    const amenitySlugs = SITE_BUILDER_AMENITY_RESEARCH_ROWS.map((a) => a.slug);
+    for (const row of SITE_BUILDER_AMENITY_RESEARCH_ROWS) {
       await client.query(
-        `INSERT INTO site_builder_amenity_costs (slug, name, cost_per_unit, applies_to)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO amenities (slug, glamping_property_column, name, cost_per_unit, applies_to, default_cost_basis, default_cost_source_url, glamping_fields)
+         VALUES ($1, NULL, $2, $3, $4, $5, $6, '[]'::jsonb)
          ON CONFLICT (slug) DO UPDATE SET
            name = EXCLUDED.name,
            cost_per_unit = EXCLUDED.cost_per_unit,
-           applies_to = EXCLUDED.applies_to`,
-        [row.slug, row.name, row.cost_per_unit, row.applies_to]
+           applies_to = EXCLUDED.applies_to,
+           default_cost_basis = EXCLUDED.default_cost_basis,
+           default_cost_source_url = EXCLUDED.default_cost_source_url`,
+        [
+          row.slug,
+          row.name,
+          row.cost_per_unit,
+          row.applies_to,
+          row.default_cost_basis,
+          row.default_cost_source_url ?? null,
+        ]
       );
     }
-    await client.query(
-      `DELETE FROM site_builder_amenity_costs WHERE NOT (slug = ANY($1::text[]))`,
-      [DEFAULT_AMENITY_COSTS.map((a) => a.slug)]
+    await client.query(`DELETE FROM amenities WHERE slug IS NOT NULL AND NOT (slug = ANY($1::text[]))`, [
+      amenitySlugs,
+    ]);
+    await syncAmenitiesGlampingMetadata(client);
+    console.log(
+      `✓ Upserted ${SITE_BUILDER_AMENITY_RESEARCH_ROWS.length} catalog amenities + glamping dataset rows (run sync-feasibility-amenities.ts for feasibility costs)`
     );
-    console.log(`✓ Upserted ${DEFAULT_AMENITY_COSTS.length} default amenities (run sync-feasibility-amenities.ts to replace with feasibility study data)`);
   } catch (err) {
     console.error('Seed failed:', err instanceof Error ? err.message : err);
     process.exit(1);

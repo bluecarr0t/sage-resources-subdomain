@@ -25,7 +25,8 @@ function buildComparablesSummary(comps: ComparableProperty[]): string {
     .slice(0, 8)
     .map((c) => {
       const loc = [c.city, c.state].filter(Boolean).join(', ');
-      const dist = c.distance_miles >= 0 ? ` – ${c.distance_miles} mi` : '';
+      const dist =
+        c.distance_miles != null && Number.isFinite(c.distance_miles) ? ` – ${c.distance_miles} mi` : '';
       const rate = c.avg_retail_daily_rate ? ` $${Math.round(c.avg_retail_daily_rate)}/night` : '';
       const src = c.source_table === 'past_reports' ? ' [past report]'
         : c.source_table === 'tavily_web_research' ? ' [web]'

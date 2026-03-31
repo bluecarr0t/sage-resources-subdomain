@@ -236,7 +236,7 @@ function writeCompsSheet(wb: XLSX.WorkBook, comps: ComparableProperty[]): void {
       c.property_name,
       c.city,
       c.state,
-      c.distance_miles >= 0 ? c.distance_miles : null,
+      c.distance_miles != null && c.distance_miles >= 0 ? c.distance_miles : null,
       c.unit_type,
       c.property_total_sites,
       c.quantity_of_units,

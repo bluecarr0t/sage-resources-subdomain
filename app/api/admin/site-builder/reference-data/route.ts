@@ -5,7 +5,7 @@
  * Cost data sources only (no mock/fallback):
  * - Glamping: Marshall & Swift CCE (cce_cost_rows)
  * - RV: feasibility_development_costs (uploaded .xlsx/.docx)
- * - Amenities: site_builder_amenity_costs (from sync-feasibility-amenities.ts)
+ * - Amenities: amenities catalog rows (slug not null; from seed + sync-feasibility-amenities.ts)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -32,14 +32,32 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
         .select('slug, name, width_ft, depth_ft, base_cost_per_site, hookup_type')
         .order('name'),
       supabase
-        .from('site_builder_amenity_costs')
-        .select('slug, name, cost_per_unit, applies_to, sources')
+        .from('amenities')
+        .select('slug, name, cost_per_unit, applies_to, sources, default_cost_basis, default_cost_source_url')
+        .not('slug', 'is', null)
         .order('name', { ascending: true }),
     ]);
 
     if (glampingRes.error && glampingRes.error.code !== '42P01') throw glampingRes.error;
     if (rvRes.error && rvRes.error.code !== '42P01') throw rvRes.error;
-    if (amenityRes.error && amenityRes.error.code !== '42P01') throw amenityRes.error;
+
+    let amenityRows = amenityRes.data ?? [];
+    if (amenityRes.error && amenityRes.error.code !== '42P01') {
+      const msg = amenityRes.error.message ?? '';
+      const missingBasisCol = /default_cost_basis|column .* does not exist/i.test(msg);
+      if (!missingBasisCol) throw amenityRes.error;
+      const retry = await supabase
+        .from('amenities')
+        .select('slug, name, cost_per_unit, applies_to, sources')
+        .not('slug', 'is', null)
+        .order('name', { ascending: true });
+      if (retry.error && retry.error.code !== '42P01') throw retry.error;
+      amenityRows = (retry.data ?? []).map((r) => ({
+        ...r,
+        default_cost_basis: null as string | null,
+        default_cost_source_url: null as string | null,
+      }));
+    }
 
     const rvSiteTypes = rvRes.data ?? [];
     const feasibilityCosts = await getFeasibilityDerivedRVCosts(
@@ -56,10 +74,18 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
       };
     });
 
-    const amenityCosts = (amenityRes.data ?? []).map((row) => ({
-      ...row,
-      cost_per_unit: effectiveAmenityCostPerUnit(row.slug, row.cost_per_unit),
-    }));
+    const amenityCosts = amenityRows.map((row) => {
+      const r = row as typeof row & {
+        default_cost_basis?: string | null;
+        default_cost_source_url?: string | null;
+      };
+      return {
+        ...r,
+        default_cost_basis: r.default_cost_basis ?? null,
+        default_cost_source_url: r.default_cost_source_url ?? null,
+        cost_per_unit: effectiveAmenityCostPerUnit(r.slug, r.cost_per_unit),
+      };
+    });
 
     const glampingFromDb = glampingRes.data ?? [];
     const glampingBySlug = new Map(glampingFromDb.map((g) => [g.slug, g]));

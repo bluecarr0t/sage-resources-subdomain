@@ -7,7 +7,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { expandQualityTypeForFilter, mapSiteBuilderQualityToCce } from '@/lib/cce-quality-types';
 import { getLatestCceExtractionDate } from '@/lib/cce-latest-extraction';
 import { getCatalogDerivedGlampingCosts } from '@/lib/site-builder/catalog-unit-costs';
-import { effectiveAmenityCostPerUnit } from '@/lib/site-builder/effective-amenity-cost';
+import { pickAmenityOverridesForConfig, resolveAmenityUnitCost } from '@/lib/site-builder/amenity-cost-resolve';
 import { SITE_BUILDER_GLAMPING_TYPE_SEED_ROWS } from '@/lib/site-builder/glamping-types-defaults';
 import { getFeasibilityDerivedRVCosts } from '@/lib/site-builder/feasibility-costs';
 
@@ -33,6 +33,13 @@ export interface RVConfig {
 
 export type SiteBuilderConfig = GlampingConfig | RVConfig;
 
+export interface SiteBuilderCostOptions {
+  /** Legacy: same overrides applied to every config row. Ignored when `amenityCostOverridesPerConfig` is set. */
+  amenityCostOverrides?: Record<string, number>;
+  /** One map per config (same order as `configs`). */
+  amenityCostOverridesPerConfig?: Record<string, number>[];
+}
+
 export interface ConfigCostResult {
   configIndex: number;
   type: 'glamping' | 'rv';
@@ -52,11 +59,11 @@ export interface CostCalculationResult {
 
 export async function calculateSiteBuilderCosts(
   supabase: SupabaseClient,
-  configs: SiteBuilderConfig[]
+  configs: SiteBuilderConfig[],
+  options?: SiteBuilderCostOptions
 ): Promise<CostCalculationResult> {
   const results: ConfigCostResult[] = [];
   let totalSiteBuild = 0;
-
   const glampingConfigs = configs.filter((c): c is GlampingConfig => c.type === 'glamping');
   const rvSlugs = configs.filter((c): c is RVConfig => c.type === 'rv').map((c) => c.siteTypeSlug);
 
@@ -83,12 +90,13 @@ export async function calculateSiteBuilderCosts(
 
   for (let i = 0; i < configs.length; i++) {
     const config = configs[i];
+    const amenityCostOverrides = pickAmenityOverridesForConfig(options, i);
     if (config.type === 'glamping') {
-      const result = await calculateGlampingCost(supabase, config, i, catalogCosts);
+      const result = await calculateGlampingCost(supabase, config, i, catalogCosts, amenityCostOverrides);
       results.push(result);
       totalSiteBuild += result.subtotal;
     } else {
-      const result = await calculateRVCost(supabase, config, i, feasibilityCosts);
+      const result = await calculateRVCost(supabase, config, i, feasibilityCosts, amenityCostOverrides);
       results.push(result);
       totalSiteBuild += result.subtotal;
     }
@@ -101,7 +109,8 @@ async function calculateGlampingCost(
   supabase: SupabaseClient,
   config: GlampingConfig,
   configIndex: number,
-  catalogCosts: { bySlugAndQuality: Record<string, number> }
+  catalogCosts: { bySlugAndQuality: Record<string, number> },
+  amenityCostOverrides?: Record<string, number>
 ): Promise<ConfigCostResult> {
   // When catalog unit is selected, use its price as base cost (Walden Insights PDF data)
   if (config.catalogUnitId) {
@@ -115,7 +124,7 @@ async function calculateGlampingCost(
       ? [catalogUnit.manufacturer, catalogUnit.product_model].filter(Boolean).join(' ') || config.unitTypeSlug
       : config.unitTypeSlug;
     const baseCost = catalogUnit?.price != null ? Number(catalogUnit.price) : 0;
-    const amenityCost = await getAmenityCost(supabase, config.amenitySlugs, 'glamping');
+    const amenityCost = await getAmenityCost(supabase, config.amenitySlugs, 'glamping', amenityCostOverrides);
     const costPerUnit = baseCost + amenityCost;
     const subtotal = costPerUnit * config.quantity;
 
@@ -146,7 +155,7 @@ async function calculateGlampingCost(
   const catalogKey = `${config.unitTypeSlug}:${config.qualityType}`;
   const catalogBaseCost = catalogCosts.bySlugAndQuality[catalogKey];
   if (catalogBaseCost != null && catalogBaseCost > 0) {
-    const amenityCost = await getAmenityCost(supabase, config.amenitySlugs, 'glamping');
+    const amenityCost = await getAmenityCost(supabase, config.amenitySlugs, 'glamping', amenityCostOverrides);
     const costPerUnit = catalogBaseCost + amenityCost;
     const subtotal = costPerUnit * config.quantity;
     return {
@@ -206,7 +215,7 @@ async function calculateGlampingCost(
   const baseCost = (costSqFt ?? 0) * config.sqft;
 
   // 4. Amenity add-ons (glamping or both)
-  const amenityCost = await getAmenityCost(supabase, config.amenitySlugs, 'glamping');
+  const amenityCost = await getAmenityCost(supabase, config.amenitySlugs, 'glamping', amenityCostOverrides);
 
   const costPerUnit = baseCost + amenityCost;
   const subtotal = costPerUnit * config.quantity;
@@ -246,7 +255,8 @@ async function calculateRVCost(
   supabase: SupabaseClient,
   config: RVConfig,
   configIndex: number,
-  feasibilityCosts: { bySlug: Record<string, number> }
+  feasibilityCosts: { bySlug: Record<string, number> },
+  amenityCostOverrides?: Record<string, number>
 ): Promise<ConfigCostResult> {
   // 1. Get RV site type base cost (prefer feasibility-derived, else fallback by site type)
   const { data: rvType } = await supabase
@@ -262,7 +272,7 @@ async function calculateRVCost(
   const baseCost = Math.round(rawBaseCost * qualityMultiplier);
 
   // 2. Amenity add-ons (rv or both)
-  const amenityCost = await getAmenityCost(supabase, config.amenitySlugs, 'rv');
+  const amenityCost = await getAmenityCost(supabase, config.amenitySlugs, 'rv', amenityCostOverrides);
 
   const costPerUnit = baseCost + amenityCost;
   const subtotal = costPerUnit * config.quantity;
@@ -283,20 +293,21 @@ async function calculateRVCost(
 async function getAmenityCost(
   supabase: SupabaseClient,
   slugs: string[],
-  configType: 'glamping' | 'rv'
+  configType: 'glamping' | 'rv',
+  amenityCostOverrides?: Record<string, number>
 ): Promise<number> {
   if (slugs.length === 0) return 0;
 
   const appliesFilter = configType === 'glamping' ? ['glamping', 'both'] : ['rv', 'both'];
   const { data: amenities } = await supabase
-    .from('site_builder_amenity_costs')
+    .from('amenities')
     .select('slug, cost_per_unit, applies_to')
     .in('slug', slugs)
     .in('applies_to', appliesFilter);
 
   if (!amenities?.length) return 0;
   return amenities.reduce(
-    (sum, a) => sum + effectiveAmenityCostPerUnit(a.slug, a.cost_per_unit),
+    (sum, a) => sum + resolveAmenityUnitCost(a.slug, a.cost_per_unit, amenityCostOverrides),
     0
   );
 }

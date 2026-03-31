@@ -1,10 +1,10 @@
 #!/usr/bin/env npx tsx
 /**
- * Sync amenity costs from feasibility_development_costs into site_builder_amenity_costs.
+ * Sync amenity costs from feasibility_development_costs into amenities.
  * Run: npx tsx scripts/sync-feasibility-amenities.ts
  *
  * Extracts amenity line items from unit_detail (uploaded .xlsx/.docx feasibility studies),
- * maps to slugs, computes median per_unit_cost, and upserts into site_builder_amenity_costs.
+ * maps to slugs, computes median per_unit_cost, and upserts into amenities.
  * NO mock or fallback data—only real feasibility study data.
  */
 
@@ -12,6 +12,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 import { Client } from 'pg';
 import { extractFromFeasibilityRows } from '@/lib/site-builder/feasibility-amenity-sync';
+import { syncAmenitiesGlampingMetadata } from '../lib/site-builder/amenities-glamping-metadata-sync';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
@@ -65,8 +66,8 @@ async function main() {
     for (const a of extracted) {
       const sourcesJson = JSON.stringify(a.sources);
       await client.query(
-        `INSERT INTO site_builder_amenity_costs (slug, name, cost_per_unit, applies_to, sources)
-         VALUES ($1, $2, $3, $4, $5::jsonb)
+        `INSERT INTO amenities (slug, glamping_property_column, name, cost_per_unit, applies_to, sources, glamping_fields)
+         VALUES ($1, NULL, $2, $3, $4, $5::jsonb, '[]'::jsonb)
          ON CONFLICT (slug) DO UPDATE SET
            name = EXCLUDED.name,
            cost_per_unit = EXCLUDED.cost_per_unit,
@@ -76,7 +77,8 @@ async function main() {
       );
     }
 
-    console.log(`\n✓ Upserted ${extracted.length} amenities into site_builder_amenity_costs`);
+    await syncAmenitiesGlampingMetadata(client);
+    console.log(`\n✓ Upserted ${extracted.length} amenities into amenities`);
   } catch (err) {
     console.error(err);
     process.exit(1);

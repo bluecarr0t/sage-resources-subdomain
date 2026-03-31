@@ -4,3 +4,8 @@ UPDATE site_builder_amenity_costs
 SET cost_per_unit = 6500
 WHERE slug = 'deck-patio'
   AND cost_per_unit > 12000;
+
+UPDATE amenities
+SET cost_per_unit = 6500
+WHERE slug = 'deck-patio'
+  AND cost_per_unit > 12000;

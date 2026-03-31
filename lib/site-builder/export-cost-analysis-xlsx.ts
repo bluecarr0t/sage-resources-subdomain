@@ -13,9 +13,9 @@ import ExcelJS from 'exceljs';
 import { resolve } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { ConfigCostResult, SiteBuilderConfig } from './cost-calculator';
+import type { ConfigCostResult, SiteBuilderConfig, SiteBuilderCostOptions } from './cost-calculator';
 import { calculateSiteBuilderCosts } from './cost-calculator';
-import { effectiveAmenityCostPerUnit } from './effective-amenity-cost';
+import { pickAmenityOverridesForConfig, resolveAmenityUnitCost } from '@/lib/site-builder/amenity-cost-resolve';
 
 const TEMPLATES_DIR_XLSX = resolve(process.cwd(), 'templates', 'Cost Analysis Section.xlsx');
 const LEGACY_LOCAL_TEMPLATE_PATH = resolve(process.cwd(), 'local_data', 'Cost Analysis Section.xlsx');
@@ -24,9 +24,8 @@ const SITE_DEV_SHEET = 'Site Dev Cost';
 const ADD_BLDG_SHEET = 'Add. Bldg Improv.';
 const TOTAL_PROJ_SHEET = 'Total Proj. Cost';
 
-/** Unit costs section: first data row in Excel (1-based), matches template row 39 */
+/** First data row for unit/site line items */
 const UNIT_COSTS_FIRST_EXCEL_ROW = 39;
-const MAX_GLAMPING_CONFIGS = 7;
 
 function resolveCostAnalysisTemplatePath(): string {
   const envPath = process.env.SITE_BUILDER_COST_ANALYSIS_TEMPLATE_PATH?.trim();
@@ -51,61 +50,103 @@ function setCellValue(ws: ExcelJS.Worksheet, address: string, value: string | nu
   ws.getCell(address).value = value;
 }
 
+function cellBString(ws: ExcelJS.Worksheet, row: number): string {
+  const v = ws.getRow(row).getCell(2).value;
+  if (typeof v === 'string') return v;
+  if (v != null && typeof v === 'object' && 'richText' in (v as object)) return '';
+  return v != null ? String(v) : '';
+}
+
+/** Sum template Add. Bldg line-item totals in column E for fixed rows 2–13 (before Site Builder amenity block). */
+function sumTemplateAddBldgBaseRows(addBldg: ExcelJS.Worksheet): number {
+  let s = 0;
+  for (let r = 2; r <= 13; r++) {
+    s += getNumericCellValue(addBldg.getRow(r).getCell(5));
+  }
+  return s;
+}
+
+function findTotalUnitCostsRow(ws: ExcelJS.Worksheet): number {
+  for (let r = UNIT_COSTS_FIRST_EXCEL_ROW; r <= UNIT_COSTS_FIRST_EXCEL_ROW + 30; r++) {
+    if (cellBString(ws, r).includes('Total Unit Costs')) return r;
+  }
+  return UNIT_COSTS_FIRST_EXCEL_ROW + 3;
+}
+
+function findCombinedSiteDevTotalRow(ws: ExcelJS.Worksheet): number {
+  for (let r = 36; r <= 70; r++) {
+    const t = cellBString(ws, r);
+    if (t.includes('Total Site Development Costs + Unit Costs')) return r;
+  }
+  return 44;
+}
+
+function findAddBldgTotalRow(ws: ExcelJS.Worksheet): number {
+  for (let r = 2; r <= 40; r++) {
+    if (cellBString(ws, r).includes('Total Add. Bldg')) return r;
+  }
+  return 15;
+}
+
 /**
  * Aggregate amenity costs by slug across all configs.
- * Returns { slug -> { name, totalQty, costPerUnit, total } }
+ * Returns { name, totalQty, costPerUnit, total } per slug.
  */
-async function getAmenityBreakdown(
+export async function getAmenityBreakdown(
   supabase: SupabaseClient,
-  configs: SiteBuilderConfig[]
+  configs: SiteBuilderConfig[],
+  options?: SiteBuilderCostOptions
 ): Promise<{ name: string; totalQty: number; costPerUnit: number; total: number }[]> {
-  const bySlug: Record<string, { totalQty: number; costPerUnit: number }> = {};
+  /** Key = slug + resolved unit cost so the same slug with different per-row overrides becomes separate lines. */
+  const byKey: Record<string, { slug: string; totalQty: number; costPerUnit: number }> = {};
 
-  for (const config of configs) {
-    const amenitySlugs = config.type === 'glamping' ? config.amenitySlugs : config.amenitySlugs;
+  for (let ci = 0; ci < configs.length; ci++) {
+    const config = configs[ci];
+    const amenitySlugs = config.amenitySlugs;
     const quantity = config.quantity;
     if (amenitySlugs.length === 0) continue;
 
+    const overrides = pickAmenityOverridesForConfig(options, ci);
     const applies = config.type === 'glamping' ? ['glamping', 'both'] : ['rv', 'both'];
     const { data: amenities } = await supabase
-      .from('site_builder_amenity_costs')
+      .from('amenities')
       .select('slug, name, cost_per_unit, applies_to')
       .in('slug', amenitySlugs)
       .in('applies_to', applies);
 
     for (const a of amenities ?? []) {
-      const cost = effectiveAmenityCostPerUnit(a.slug, a.cost_per_unit);
-      if (!bySlug[a.slug]) {
-        bySlug[a.slug] = { totalQty: 0, costPerUnit: cost };
+      const cost = resolveAmenityUnitCost(a.slug, a.cost_per_unit, overrides);
+      const key = `${a.slug}\x1e${cost}`;
+      if (!byKey[key]) {
+        byKey[key] = { slug: a.slug, totalQty: 0, costPerUnit: cost };
       }
-      bySlug[a.slug].totalQty += quantity;
+      byKey[key].totalQty += quantity;
     }
   }
 
-  const slugs = Object.keys(bySlug);
-  if (slugs.length === 0) return [];
+  const keys = Object.keys(byKey);
+  if (keys.length === 0) return [];
 
+  const slugs = [...new Set(Object.values(byKey).map((v) => v.slug))];
   const { data: names } = await supabase
-    .from('site_builder_amenity_costs')
+    .from('amenities')
     .select('slug, name, cost_per_unit')
     .in('slug', slugs);
 
   const nameMap = new Map((names ?? []).map((n) => [n.slug, n.name]));
-  const costMap = new Map(
-    (names ?? []).map((n) => [n.slug, effectiveAmenityCostPerUnit(n.slug, n.cost_per_unit)])
-  );
 
-  return slugs.map((slug) => {
-    const d = bySlug[slug];
-    const costPerUnit = costMap.get(slug) ?? d.costPerUnit;
-    const total = d.totalQty * costPerUnit;
-    return {
-      name: nameMap.get(slug) ?? slug,
-      totalQty: d.totalQty,
-      costPerUnit,
-      total,
-    };
-  });
+  return keys
+    .map((k) => {
+      const d = byKey[k]!;
+      const total = d.totalQty * d.costPerUnit;
+      return {
+        name: nameMap.get(d.slug) ?? d.slug,
+        totalQty: d.totalQty,
+        costPerUnit: d.costPerUnit,
+        total,
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name) || a.costPerUnit - b.costPerUnit);
 }
 
 export interface ExportCostAnalysisInput {
@@ -136,7 +177,6 @@ export async function exportCostAnalysisToXlsx(input: ExportCostAnalysisInput): 
 
   const fileBuffer = readFileSync(templatePath);
   const wb = new ExcelJS.Workbook();
-  // exceljs typings lag Node 22+ `Buffer` / `readFileSync` types — runtime Buffer is valid
   await wb.xlsx.load(fileBuffer as never);
 
   const siteDev = wb.getWorksheet(SITE_DEV_SHEET);
@@ -149,33 +189,91 @@ export async function exportCostAnalysisToXlsx(input: ExportCostAnalysisInput): 
 
   setCellValue(siteDev, 'C4', totalSitesForTemplate);
 
-  for (let i = 0; i < Math.min(glampingConfigs.length, MAX_GLAMPING_CONFIGS); i++) {
-    const c = glampingConfigs[i];
-    const excelRow = UNIT_COSTS_FIRST_EXCEL_ROW + i;
+  const unitRows = costResult.configs;
+  let totalUnitRow = findTotalUnitCostsRow(siteDev);
+  const firstDataRow = UNIT_COSTS_FIRST_EXCEL_ROW;
+  const templateSlots = totalUnitRow - firstDataRow;
+  const needed = unitRows.length;
+  const toInsert = Math.max(0, needed - templateSlots);
+  if (toInsert > 0) {
+    siteDev.spliceRows(totalUnitRow, 0, ...Array.from({ length: toInsert }, () => []));
+    totalUnitRow += toInsert;
+  }
+
+  const lastUnitDataRow = firstDataRow + unitRows.length - 1;
+  for (let i = 0; i < unitRows.length; i++) {
+    const c = unitRows[i];
+    const excelRow = firstDataRow + i;
     setCellValue(siteDev, `B${excelRow}`, c.name);
     setCellValue(siteDev, `C${excelRow}`, c.quantity);
     setCellValue(siteDev, `D${excelRow}`, Math.round(c.costPerUnit));
     setCellValue(siteDev, `E${excelRow}`, Math.round(c.subtotal));
   }
+  for (let r = firstDataRow + unitRows.length; r < totalUnitRow; r++) {
+    setCellValue(siteDev, `B${r}`, '');
+    siteDev.getRow(r).getCell(3).value = null;
+    siteDev.getRow(r).getCell(4).value = null;
+    siteDev.getRow(r).getCell(5).value = null;
+  }
 
-  setCellValue(siteDev, 'E36', Math.round(totalRVCost));
-  setCellValue(siteDev, 'E42', Math.round(totalGlampingCost));
+  const sumC = `SUM(C${firstDataRow}:C${lastUnitDataRow})`;
+  const sumE = `SUM(E${firstDataRow}:E${lastUnitDataRow})`;
+  siteDev.getCell(`C${totalUnitRow}`).value = { formula: sumC, result: unitRows.reduce((s, c) => s + c.quantity, 0) };
+  siteDev.getCell(`E${totalUnitRow}`).value = {
+    formula: sumE,
+    result: unitRows.reduce((s, c) => s + c.subtotal, 0),
+  };
 
-  const templateAddBldgTotal = getNumericCellValue(addBldg.getCell('E15'));
+  const combinedRow = findCombinedSiteDevTotalRow(siteDev);
+  const e36Result = getNumericCellValue(siteDev.getCell('E36'));
+  siteDev.getCell(`E${combinedRow}`).value = {
+    formula: `SUM(E36,E${firstDataRow}:E${lastUnitDataRow})`,
+    result: e36Result + unitRows.reduce((s, c) => s + c.subtotal, 0),
+  };
+
+  const templateAddBldgBaseSum = sumTemplateAddBldgBaseRows(addBldg);
+  let addBldgTotalRow = findAddBldgTotalRow(addBldg);
   let addBldgTotal: number;
 
   if (amenityBreakdown.length > 0) {
-    const amenityList = amenityBreakdown.map((a) => `${a.name} (×${a.totalQty})`).join(', ');
-    const qtySum = amenityBreakdown.reduce((s, a) => s + a.totalQty, 0);
-    setCellValue(addBldg, 'B14', `Unit-level amenities (Site Builder): ${amenityList}`);
-    setCellValue(addBldg, 'C14', qtySum);
-    setCellValue(addBldg, 'D14', Math.round(totalAmenityCost / Math.max(qtySum, 1)));
-    setCellValue(addBldg, 'E14', Math.round(totalAmenityCost));
-    setCellValue(addBldg, 'F14', 'Site Builder');
-    addBldg.getCell('E15').value = { formula: 'SUM(E2:E14)', result: templateAddBldgTotal + totalAmenityCost };
-    addBldgTotal = templateAddBldgTotal + totalAmenityCost;
+    const k = amenityBreakdown.length;
+    const insertBeforeTotal = k - 1;
+    if (insertBeforeTotal > 0) {
+      addBldg.spliceRows(addBldgTotalRow, 0, ...Array.from({ length: insertBeforeTotal }, () => []));
+      addBldgTotalRow += insertBeforeTotal;
+    }
+    const firstAmenityRow = 14;
+    for (let i = 0; i < k; i++) {
+      const a = amenityBreakdown[i];
+      const r = firstAmenityRow + i;
+      setCellValue(addBldg, `B${r}`, `Site Builder: ${a.name}`);
+      setCellValue(addBldg, `C${r}`, a.totalQty);
+      setCellValue(addBldg, `D${r}`, Math.round(a.costPerUnit));
+      setCellValue(addBldg, `E${r}`, Math.round(a.total));
+      setCellValue(addBldg, `F${r}`, 'Site Builder');
+    }
+    for (let r = firstAmenityRow + k; r < addBldgTotalRow; r++) {
+      setCellValue(addBldg, `B${r}`, '');
+      addBldg.getRow(r).getCell(3).value = null;
+      addBldg.getRow(r).getCell(4).value = null;
+      addBldg.getRow(r).getCell(5).value = null;
+      addBldg.getRow(r).getCell(6).value = null;
+    }
+    const lastDataRow = firstAmenityRow + k - 1;
+    const sumERange = `SUM(E2:E${lastDataRow})`;
+    const sumCRange = `SUM(C2:C${lastDataRow})`;
+    const amenityPlusBase = templateAddBldgBaseSum + totalAmenityCost;
+    addBldg.getCell(`C${addBldgTotalRow}`).value = { formula: sumCRange };
+    addBldg.getCell(`D${addBldgTotalRow}`).value = {
+      formula: `IF(C${addBldgTotalRow}>0,E${addBldgTotalRow}/C${addBldgTotalRow},0)`,
+    };
+    addBldg.getCell(`E${addBldgTotalRow}`).value = {
+      formula: sumERange,
+      result: amenityPlusBase,
+    };
+    addBldgTotal = amenityPlusBase;
   } else {
-    addBldgTotal = templateAddBldgTotal;
+    addBldgTotal = getNumericCellValue(addBldg.getCell(`E${addBldgTotalRow}`));
   }
 
   const hardCostTotal = totalRVCost + totalGlampingCost + addBldgTotal;
@@ -194,10 +292,11 @@ export async function exportCostAnalysisToXlsx(input: ExportCostAnalysisInput): 
 
 export async function buildAndExportCostAnalysisXlsx(
   supabase: SupabaseClient,
-  configs: SiteBuilderConfig[]
+  configs: SiteBuilderConfig[],
+  options?: SiteBuilderCostOptions
 ): Promise<Buffer> {
-  const costResult = await calculateSiteBuilderCosts(supabase, configs);
-  const amenityBreakdown = await getAmenityBreakdown(supabase, configs);
+  const costResult = await calculateSiteBuilderCosts(supabase, configs, options);
+  const amenityBreakdown = await getAmenityBreakdown(supabase, configs, options);
 
   return exportCostAnalysisToXlsx({
     configs,

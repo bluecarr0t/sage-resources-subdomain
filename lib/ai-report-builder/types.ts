@@ -70,8 +70,20 @@ export interface ComparableProperty {
   operating_season_months: string | null;
   url: string | null;
   description: string | null;
-  distance_miles: number;
+  /** Street / place line parsed from web research (optional). */
+  location_detail?: string | null;
+  /** Miles from search anchor; null when unknown (e.g. web gap-fill before geocode). */
+  distance_miles: number | null;
   source_table: string;
+  /** WGS84 when known (e.g. comps map markers). */
+  geo_lat?: number | null;
+  geo_lng?: number | null;
+  /**
+   * After merge dedupe: true when any merged row was Tavily/Firecrawl gap-fill (map + filters use Web Research styling).
+   */
+  web_research_supplement?: boolean;
+  /** Occupancy rate from Hipcamp / Campspot / RoverPass when present (decimal or percent per source). */
+  market_occupancy_rate?: number | null;
   /** Amenities list (from past reports or web research) */
   amenities?: string | null;
   /** Quality score from past report analysis (0-10) */

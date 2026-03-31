@@ -41,7 +41,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
   if (pathname.startsWith('/admin/report-builder')) return 'report-builder';
-  if (pathname.startsWith('/admin/comps')) return 'comps';
+  if (pathname.startsWith('/admin/comps') && !pathname.startsWith('/admin/comps-v2')) return 'comps';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/rv-site-setup') || pathname.startsWith('/admin/site-design')) return 'site-design';
   if (pathname.startsWith('/admin/site-builder')) return 'site-builder';
@@ -112,6 +112,7 @@ export default function AdminSidebar() {
 
   const activePageId = getActivePageId(pathname || '');
   const showCollapsed = isDesktop && isCollapsed;
+  const tSidebar = useTranslations('admin.sidebar');
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)');

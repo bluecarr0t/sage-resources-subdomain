@@ -60,7 +60,11 @@ function buildDetailedCompsString(enriched: EnrichedInput): string {
     sections.push(
       'Market database comparables (Hipcamp, RoverPass, Campspot, Glamping DB):',
       ...dbComps.slice(0, 6).map((c) => {
-        const parts = [`  - ${c.property_name} (${c.city}, ${c.state} - ${c.distance_miles} mi)`];
+        const dist =
+          c.distance_miles != null && Number.isFinite(c.distance_miles)
+            ? ` - ${c.distance_miles} mi`
+            : '';
+        const parts = [`  - ${c.property_name} (${c.city}, ${c.state}${dist})`];
         if (c.avg_retail_daily_rate) parts.push(`ADR: $${Math.round(c.avg_retail_daily_rate)}`);
         if (c.property_total_sites) parts.push(`Sites: ${c.property_total_sites}`);
         if (c.unit_type) parts.push(`Type: ${c.unit_type}`);

@@ -13,6 +13,17 @@ export const dynamic = 'force-dynamic';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { calculateSiteBuilderCosts } from '@/lib/site-builder/cost-calculator';
 import type { SiteBuilderConfig } from '@/lib/site-builder/cost-calculator';
+import {
+  parseAmenityCostOverridesFromBody,
+  parseAmenityCostOverridesPerConfigFromBody,
+} from '@/lib/site-builder/amenity-cost-resolve';
+import type { SiteBuilderCostOptions } from '@/lib/site-builder/cost-calculator';
+
+function parseCostOptions(body: unknown, configCount: number): SiteBuilderCostOptions {
+  const perConfig = parseAmenityCostOverridesPerConfigFromBody(body, configCount);
+  if (perConfig) return { amenityCostOverridesPerConfig: perConfig };
+  return { amenityCostOverrides: parseAmenityCostOverridesFromBody(body) };
+}
 
 function parseConfigs(body: unknown): SiteBuilderConfig[] | null {
   if (!body || typeof body !== 'object' || !('configs' in body)) return null;
@@ -72,7 +83,7 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
       );
     }
 
-    const result = await calculateSiteBuilderCosts(auth.supabase, configs);
+    const result = await calculateSiteBuilderCosts(auth.supabase, configs, parseCostOptions(body, configs.length));
 
     return NextResponse.json({
       success: true,

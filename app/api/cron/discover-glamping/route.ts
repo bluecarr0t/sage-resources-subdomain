@@ -9,7 +9,8 @@ import { resolve } from 'path';
  *
  * Schedule: Daily at 15:00 UTC — see vercel.json (`0 15 * * *`).
  * Vercel Cron invokes this route with HTTP GET (and POST is supported for manual triggers).
- * Set CRON_SECRET in Vercel for auth; TAVILY_API_KEY is required for discovery.
+ * Set CRON_SECRET in Vercel for auth. Required env: NEXT_PUBLIC_SUPABASE_URL,
+ * SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY), OPENAI_API_KEY, TAVILY_API_KEY.
  *
  * For full runs, use: npm run discover:glamping (or GitHub Actions)
  */

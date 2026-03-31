@@ -1,5 +1,5 @@
 /**
- * Extract amenity costs from feasibility_development_costs (unit_detail) and map to site_builder_amenity_costs.
+ * Extract amenity costs from feasibility_development_costs (unit_detail) and map to amenities.
  * Uses real data from uploaded feasibility studies.
  */
 
@@ -40,9 +40,27 @@ const AMENITY_PATTERNS: Array<[RegExp, string, string, 'glamping' | 'rv' | 'both
   [/outdoor\s*shower|exterior\s*shower/i, 'outdoor-shower', 'Outdoor shower', 'glamping'],
   [/sauna|wood-fired\s*sauna/i, 'wood-fired-sauna', 'Wood-fired sauna', 'glamping'],
   [/\bhammock\b/i, 'hammock', 'Hammock', 'glamping'],
-  [/adirondack|adk\s*chairs/i, 'adirondack-chairs', 'Adirondack chairs', 'glamping'],
   [/ac\s*\/\s*mini|mini\s*split|a\/c|hvac/i, 'ac-mini-split', 'AC / mini-split', 'glamping'],
   [/cold\s*plunge|plunge\s*pool/i, 'cold-plunge', 'Cold plunge / plunge pool', 'glamping'],
+  [/ev\s*charg|electric\s*vehicle|level\s*2\s*ev|car\s*charg/i, 'ev-charging', 'EV charging (Level 2)', 'both'],
+  [/gazebo|pavilion\s*kit|ramada/i, 'gazebo', 'Gazebo / pavilion', 'both'],
+  [/outdoor\s*fireplace|exterior\s*fireplace|masonry\s*fireplace/i, 'outdoor-fireplace', 'Outdoor fireplace', 'glamping'],
+  [
+    /privacy\s*(screen|planting|landscape)|landscape\s*buffer|screen\s*planting/i,
+    'privacy-landscaping',
+    'Privacy screening / landscaping',
+    'glamping',
+  ],
+  [/outdoor\s*tv|exterior\s*tv|weather\s*tv/i, 'outdoor-tv', 'Outdoor TV (weather enclosure)', 'glamping'],
+  [/patio\s*heater|outdoor\s*heater|tower\s*heater/i, 'patio-heater', 'Patio heater', 'both'],
+  [/bistro\s*light|string\s*light|festoon/i, 'string-lights-site', 'String lights (bistro)', 'both'],
+  [/outdoor\s*rug|deck\s*mat/i, 'outdoor-rug-mat', 'Outdoor rug / deck mat', 'glamping'],
+  [
+    /dining\s*set|dining\s*table\s*\+\s*chairs|6[\s-]*person\s*table/i,
+    'outdoor-dining-set',
+    'Outdoor dining set (6+)',
+    'glamping',
+  ],
   [/fire\s*ring|fire\s*pit\s*ring/i, 'fire-ring', 'Fire ring', 'rv'],
   [/propane\s*campfire|campfire|fire\s*pit|gas\s*fire\s*pit/i, 'fire-pit', 'Fire pit', 'both'],
   [/chairs?\s*\+\s*table|deck\s*chairs|patio\s*furniture|table\s*\+\s*chairs|outdoor\s*furniture/i, 'patio-furniture', 'Patio furniture', 'both'],
@@ -51,6 +69,17 @@ const AMENITY_PATTERNS: Array<[RegExp, string, string, 'glamping' | 'rv' | 'both
   [/\bdeck\b|\bpatio\b|deck\s*\/\s*patio|patio\s*\/\s*deck/i, 'deck-patio', 'Deck / patio', 'both'],
   [/picnic\s*table/i, 'picnic-table', 'Picnic table', 'both'],
   [/concrete\s*pad|paved\s*pad/i, 'concrete-pad', 'Concrete pad', 'rv'],
+  [/gravel\s*pad|aggregate\s*pad|crushed\s*stone\s*pad/i, 'gravel-pad', 'Gravel / aggregate pad', 'rv'],
+  [/synthetic\s*turf|artificial\s*turf|astro\s*turf/i, 'synthetic-turf-patio', 'Synthetic turf patio strip', 'rv'],
+  [
+    /black\s*tank\s*rinse|sewer\s*rinse|tank\s*flush\s*hook/i,
+    'sewer-rinse-hookup',
+    'Sewer rinse / black tank flush',
+    'rv',
+  ],
+  [/propane\s*quick|propane\s*outlet|lp\s*outlet\s*site/i, 'propane-outlet-site', 'Propane quick-connect at site', 'rv'],
+  [/oversized\s*pad|big\s*rig|class\s*a\s*pad|super\s*slide\s*pad/i, 'oversized-rv-pad', 'Oversized RV pad (big rig)', 'rv'],
+  [/covered\s*picnic|picnic\s*shelter|site\s*shelter/i, 'covered-picnic-shelter', 'Covered picnic shelter', 'rv'],
   [/50\s*amp|50-amp|electrical\s*upgrade/i, '50-amp-upgrade', '50-amp electrical upgrade', 'rv'],
   [/30\s*amp|30-amp/i, '30-amp-electrical', '30-amp electrical', 'rv'],
   [/sewer\s*hookup|sewer\s*connection/i, 'sewer-hookup', 'Sewer hookup', 'rv'],
@@ -58,6 +87,7 @@ const AMENITY_PATTERNS: Array<[RegExp, string, string, 'glamping' | 'rv' | 'both
   [/cable\s*tv|tv\s*hookup/i, 'cable-tv', 'Cable TV', 'rv'],
   [/storage\s*shed|shed\s*per\s*site/i, 'storage-shed', 'Storage shed', 'rv'],
   [/wifi|wi-fi|internet/i, 'wifi', 'WiFi access', 'both'],
+  [/fiber\s*internet|fiber\s*to\s*the|fiber\s*drop|gigabit\s*drop|ftth|fiber\s*optic/i, 'fiber-internet-drop', 'Fiber / high-speed internet drop', 'rv'],
   [/pet\s*station|dog\s*run|dog\s*park/i, 'pet-station', 'Pet station / dog run', 'both'],
   [/outdoor\s*lighting|site\s*lighting|landscape\s*light/i, 'outdoor-lighting', 'Outdoor lighting', 'both'],
   [/bike\s*rack|bicycle\s*rack/i, 'bike-rack', 'Bike rack', 'both'],
