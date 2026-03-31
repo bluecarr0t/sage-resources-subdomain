@@ -494,13 +494,14 @@ export async function fetchTavilyGapComps(
         if (rows.length >= maxGap) break;
         const title = r.title || '';
         const raw = r.rawContent ?? r.content ?? '';
+        const url = r.url ?? '';
         if (!isRelevant(title, raw)) continue;
-        if (isLikelyAggregateWebResult(title, r.url)) {
+        if (isLikelyAggregateWebResult(title, url)) {
           stats.skippedAggregatePages += 1;
           continue;
         }
         stats.afterRelevanceRows += 1;
-        const name = normalizeWebResearchPropertyTitle(title, r.url);
+        const name = normalizeWebResearchPropertyTitle(title, url);
         const snippet = raw.length > 400 ? raw.slice(0, 400) + '…' : raw;
         const cityHint = extractCityHint(title, raw, stateAbbr);
         const cityFromName =
@@ -521,7 +522,7 @@ export async function fetchTavilyGapComps(
           low_rate: null,
           seasonal_rates: { ...EMPTY_SEASONAL },
           operating_season_months: null,
-          url: r.url,
+          url: r.url ?? null,
           description: snippet || null,
           distance_miles: null,
           source_table: 'tavily_gap_fill',

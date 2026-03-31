@@ -64,19 +64,20 @@ export async function persistCompsV2WebResearch(
 
     const runId = (runRow as { id: string }).id;
 
-    const webRows = candidates
-      .map((c) => {
-        const pipeline = webPipelineSourceForCandidate(c);
-        if (!pipeline) return null;
-        const base = compsV2WebCandidateToGlampingRow(c);
-        return {
-          ...base,
-          run_id: runId,
-          comps_stable_id: c.stable_id,
-          pipeline_source: pipeline,
-        };
-      })
-      .filter((r): r is Record<string, unknown> => r != null);
+    const mappedRows = candidates.map((c) => {
+      const pipeline = webPipelineSourceForCandidate(c);
+      if (!pipeline) return null;
+      const base = compsV2WebCandidateToGlampingRow(c);
+      return {
+        ...base,
+        run_id: runId,
+        comps_stable_id: c.stable_id,
+        pipeline_source: pipeline,
+      };
+    });
+    const webRows = mappedRows.filter(
+      (r): r is NonNullable<(typeof mappedRows)[number]> => r != null
+    );
 
     for (let i = 0; i < webRows.length; i += BATCH) {
       const chunk = webRows.slice(i, i + BATCH);
