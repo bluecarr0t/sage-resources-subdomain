@@ -41,12 +41,12 @@ describe('siteCountForPropertyExport (sites export sources)', () => {
     ).toBe(5);
   });
 
-  it('falls back to property_total_sites', () => {
+  it('campspot does not multiply rows by property_total_sites when quantity is missing', () => {
     expect(
       siteCountForPropertyExport(
-        baseCandidate({ source_table: 'campspot', quantity_of_units: null, property_total_sites: 3 })
+        baseCandidate({ source_table: 'campspot', quantity_of_units: null, property_total_sites: 486 })
       )
-    ).toBe(3);
+    ).toBe(1);
   });
 
   it('is 1 for roverpass', () => {

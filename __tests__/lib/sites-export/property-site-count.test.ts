@@ -18,4 +18,13 @@ describe('siteCountForPropertyExportFromRaw', () => {
       })
     ).toBe(1);
   });
+
+  it('campspot ignores property_total_sites for expansion when quantity_of_units unset', () => {
+    expect(
+      siteCountForPropertyExportFromRaw('campspot', {
+        quantity_of_units: '',
+        property_total_sites: '486',
+      })
+    ).toBe(1);
+  });
 });

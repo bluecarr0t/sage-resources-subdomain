@@ -20,12 +20,20 @@ export type CompsV2ExportRow = CompsV2Candidate & {
 
 /**
  * How many site-level export rows to emit for this candidate.
- * Uses quantity_of_units when set (units of this row’s unit type); otherwise property_total_sites; else 1.
+ *
+ * - **Hipcamp / Campspot:** Each DB row is already one site (or site-type) line. Use `quantity_of_units`
+ *   only when it counts identical units for that line. Do **not** fall back to `property_total_sites`—that
+ *   is the whole-property total and would repeat the same row hundreds of times per line item.
+ * - **Sage glamping (`all_glamping_properties`):** Rows are often property-level; fall back to
+ *   `property_total_sites` when quantity is missing.
  */
 export function siteCountForPropertyExport(c: CompsV2Candidate): number {
   if (!SOURCES_ONE_ROW_PER_SITE.has(c.source_table)) return 1;
   const q = c.quantity_of_units;
   if (q != null && q > 0) return Math.min(MAX_SITES_PER_CANDIDATE, Math.floor(q));
+  if (c.source_table === 'hipcamp' || c.source_table === 'campspot') {
+    return 1;
+  }
   const t = c.property_total_sites;
   if (t != null && t > 0) return Math.min(MAX_SITES_PER_CANDIDATE, Math.floor(t));
   return 1;

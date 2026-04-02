@@ -49,10 +49,22 @@ describe('siteCountForPropertyExport', () => {
     ).toBe(4);
   });
 
-  it('falls back to property_total_sites when quantity missing', () => {
+  it('hipcamp/campspot: one row per DB record when quantity missing (ignore property_total_sites)', () => {
     expect(
       siteCountForPropertyExport(
-        baseCandidate({ source_table: 'campspot', quantity_of_units: null, property_total_sites: 3 })
+        baseCandidate({ source_table: 'campspot', quantity_of_units: null, property_total_sites: 486 })
+      )
+    ).toBe(1);
+  });
+
+  it('glamping: falls back to property_total_sites when quantity missing', () => {
+    expect(
+      siteCountForPropertyExport(
+        baseCandidate({
+          source_table: 'all_glamping_properties',
+          quantity_of_units: null,
+          property_total_sites: 3,
+        })
       )
     ).toBe(3);
   });
