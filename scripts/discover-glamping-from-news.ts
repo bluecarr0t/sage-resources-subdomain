@@ -30,14 +30,8 @@ import Parser from 'rss-parser';
 import {
   GLAMPING_RSS_FEEDS,
   fetchArticleContent,
-  extractPropertiesFromArticle,
   getDatabasePropertyNames,
-  normalizePropertyName,
-  filterNewProperties,
-  passesInclusionCriteria,
-  enrichProperty,
-  toInsertRow,
-  insertProperties,
+  processDiscoveryArticle,
   searchGlampingNews,
 } from '../lib/glamping-discovery';
 
@@ -76,40 +70,6 @@ const openai = new OpenAI({ apiKey: openaiApiKey });
 
 const PROCESSED_URLS_TABLE = 'glamping_discovery_processed_urls';
 const RUNS_TABLE = 'glamping_discovery_runs';
-const CANDIDATES_TABLE = 'glamping_discovery_candidates';
-
-async function routeFailuresToCandidates(
-  sb: ReturnType<typeof createClient>,
-  failedProps: { p: { property_name?: string; city?: string; state?: string; country?: string; url?: string; description?: string; unit_type?: string; property_type?: string; number_of_units?: number }; reason: string }[],
-  articleUrl: string | undefined,
-  discoverySource: string
-): Promise<void> {
-  if (failedProps.length === 0) return;
-  try {
-    const rows = failedProps.map(({ p, reason }) => ({
-      property_name: p.property_name || 'Unknown',
-      city: p.city ?? null,
-      state: p.state ?? null,
-      country: p.country ?? null,
-      url: p.url ?? null,
-      description: p.description ?? null,
-      unit_type: p.unit_type ?? null,
-      property_type: p.property_type ?? null,
-      number_of_units: p.number_of_units ?? null,
-      article_url: articleUrl ?? null,
-      discovery_source: discoverySource,
-      status: 'pending',
-      rejection_reason: reason,
-      confidence: 'low',
-    }));
-    const { error } = await sb.from(CANDIDATES_TABLE).insert(rows);
-    if (error) throw error;
-  } catch (err) {
-    if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code !== '42P01') {
-      console.warn('Could not route failures to candidates:', err instanceof Error ? err.message : err);
-    }
-  }
-}
 
 async function persistRunMetrics(
   sb: ReturnType<typeof createClient>,
@@ -149,13 +109,6 @@ async function getProcessedUrls(): Promise<Set<string>> {
   }
 
   return new Set((data || []).map((r: { url: string }) => r.url));
-}
-
-async function markUrlProcessed(url: string, propertiesExtracted: number): Promise<void> {
-  await supabase.from(PROCESSED_URLS_TABLE).upsert(
-    { url, processed_at: new Date().toISOString(), properties_extracted: propertiesExtracted },
-    { onConflict: 'url' }
-  );
 }
 
 async function getRssArticleTasks(
@@ -361,52 +314,29 @@ async function main(): Promise<void> {
   for (const { content, url: articleUrl, discoverySource } of articleTasks) {
     console.log(`\n--- Processing ${articleUrl || 'local file'} ---`);
 
-    const extracted = await extractPropertiesFromArticle(content, openai);
-    metrics.propertiesExtracted += extracted.length;
-    console.log(`Extracted ${extracted.length} properties`);
+    const result = await processDiscoveryArticle({
+      content,
+      articleUrl,
+      discoverySource,
+      dryRun,
+      openai,
+      supabase,
+      dbPropertyNames: dbProperties,
+    });
 
-    const newProps = filterNewProperties(extracted, dbProperties);
-    metrics.propertiesNew += newProps.length;
-    console.log(`${newProps.length} new after dedup`);
-
-    const passingProps: typeof newProps = [];
-    const failedProps: { p: (typeof newProps)[0]; reason: string }[] = [];
-    for (const p of newProps) {
-      const { pass, reason } = passesInclusionCriteria(p);
-      if (!pass) {
-        console.log(`  Excluded: ${p.property_name} (${reason ?? 'unknown'})`);
-        failedProps.push({ p, reason: reason ?? 'unknown' });
-      } else {
-        passingProps.push(p);
-      }
-    }
-    if (failedProps.length > 0) {
-      console.log(`${failedProps.length} excluded by inclusion criteria, ${passingProps.length} proceeding`);
-      await routeFailuresToCandidates(supabase, failedProps, articleUrl, discoverySource);
-    }
-
-    if (passingProps.length === 0) {
-      if (articleUrl) await markUrlProcessed(articleUrl, extracted.length);
-      continue;
-    }
-
-    const rows = [];
-    for (let i = 0; i < passingProps.length; i++) {
-      console.log(`  Enriching [${i + 1}/${passingProps.length}]: ${passingProps[i].property_name}`);
-      const enriched = await enrichProperty(passingProps[i], openai);
-      rows.push(toInsertRow(enriched, discoverySource));
-      dbProperties.add(normalizePropertyName(enriched.property_name || ''));
-    }
-
-    if (dryRun) {
+    metrics.propertiesExtracted += result.propertiesExtracted;
+    metrics.propertiesNew += result.propertiesNew;
+    metrics.propertiesInserted += result.propertiesInserted;
+    console.log(`Extracted ${result.propertiesExtracted} properties`);
+    console.log(`${result.propertiesNew} new after dedup`);
+    if (dryRun && result.queuedInsertRows.length > 0) {
       console.log('\n[DRY RUN] Would insert:');
-      rows.forEach((r, i) => console.log(`  ${i + 1}. ${r.property_name} (${r.city}, ${r.state})`));
-    } else {
-      const inserted = await insertProperties(rows, supabase);
-      totalInserted += inserted;
-      metrics.propertiesInserted += inserted;
-      console.log(`Inserted ${inserted} properties`);
-      if (articleUrl) await markUrlProcessed(articleUrl, extracted.length);
+      result.queuedInsertRows.forEach((r, i) =>
+        console.log(`  ${i + 1}. ${r.property_name} (${r.city}, ${r.state})`)
+      );
+    } else if (!dryRun) {
+      console.log(`Inserted ${result.propertiesInserted} properties`);
+      totalInserted += result.propertiesInserted;
     }
   }
 

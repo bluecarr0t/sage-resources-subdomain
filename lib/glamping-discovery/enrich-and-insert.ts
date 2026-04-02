@@ -31,6 +31,13 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function coerceNumberOfUnits(val: unknown): number | undefined {
+  if (val === null || val === undefined) return undefined;
+  if (typeof val === 'number' && !Number.isNaN(val)) return val;
+  const parsed = parseInt(String(val).trim(), 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
+
 const ENRICHMENT_PROMPT = `Research and provide detailed information about this glamping property:
 
 Property Name: {{0}}
@@ -49,6 +56,7 @@ Provide a JSON object with as much detail as possible:
 - description: 3-5 sentence description of the property, amenities, and what makes it special
 - unit_type: Types of accommodations (comma-separated, e.g., "tents, yurts, cabins")
 - property_type: Type of property (e.g., "Glamping Resort", "Luxury Campground")
+- number_of_units: Integer — total glamping accommodations (tents, yurts, domes, cabins, etc.). Use a number only when you can support it from the property website, press, or other reliable sources; omit or null if unknown. Do not guess.
 - phone_number: Phone number if available
 - latitude: Approximate latitude if known (number)
 - longitude: Approximate longitude if known (number)
@@ -84,10 +92,13 @@ export async function enrichProperty(
   }
 
   try {
-    const enriched = JSON.parse(content);
+    const enriched = JSON.parse(content) as Record<string, unknown>;
+    const fromModel = coerceNumberOfUnits(enriched.number_of_units);
     return {
+      ...property,
       ...enriched,
-      property_name: property.property_name || enriched.property_name,
+      property_name: property.property_name || String(enriched.property_name ?? ''),
+      number_of_units: fromModel ?? property.number_of_units,
     } as ExtractedProperty;
   } catch {
     return property;

@@ -30,16 +30,50 @@ export const GET = withAdminAuth(async () => {
   try {
     const supabase = createServerClient();
 
-    const { data: rows, error } = await supabase
-      .from('all_glamping_properties')
-      .select('discovery_source, created_at, date_added')
-      .in('discovery_source', DISCOVERY_SOURCES);
+    const [propsResult, pendingCandidatesResult, totalCandidatesResult] = await Promise.all([
+      supabase
+        .from('all_glamping_properties')
+        .select('discovery_source, created_at, date_added')
+        .in('discovery_source', DISCOVERY_SOURCES),
+      supabase
+        .from('glamping_discovery_candidates')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending'),
+      supabase.from('glamping_discovery_candidates').select('id', { count: 'exact', head: true }),
+    ]);
+
+    const { data: rows, error } = propsResult;
 
     if (error) {
       console.error('[api/admin/sage-glamping-data/discovery-stats] Error:', error);
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 500 }
+      );
+    }
+
+    let candidatesPending = 0;
+    let candidatesTotal = 0;
+    if (!pendingCandidatesResult.error && pendingCandidatesResult.count != null) {
+      candidatesPending = pendingCandidatesResult.count;
+    } else if (
+      pendingCandidatesResult.error &&
+      pendingCandidatesResult.error.code !== '42P01'
+    ) {
+      console.warn(
+        '[api/admin/sage-glamping-data/discovery-stats] Candidates pending count:',
+        pendingCandidatesResult.error.message
+      );
+    }
+    if (!totalCandidatesResult.error && totalCandidatesResult.count != null) {
+      candidatesTotal = totalCandidatesResult.count;
+    } else if (
+      totalCandidatesResult.error &&
+      totalCandidatesResult.error.code !== '42P01'
+    ) {
+      console.warn(
+        '[api/admin/sage-glamping-data/discovery-stats] Candidates total count:',
+        totalCandidatesResult.error.message
       );
     }
 
@@ -85,6 +119,8 @@ export const GET = withAdminAuth(async () => {
           last6Months: last6mo,
           allTime: total,
         },
+        candidatesPending,
+        candidatesTotal,
       },
     });
   } catch (err) {

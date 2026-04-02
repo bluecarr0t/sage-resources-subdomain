@@ -2,8 +2,10 @@
  * Unit tests for discovery pipeline inclusion filter
  */
 
-import { passesInclusionCriteria } from '../inclusion-filter';
-import type { ExtractedProperty } from '../extract-properties';
+import {
+  passesInclusionCriteria,
+  passesPostEnrichmentUnitCriteria,
+} from '../inclusion-filter';
 
 describe('passesInclusionCriteria', () => {
   it('rejects RV in name', () => {
@@ -13,11 +15,29 @@ describe('passesInclusionCriteria', () => {
     });
   });
 
-  it('rejects unknown units', () => {
+  it('rejects unknown units when no glamping type signal', () => {
     expect(passesInclusionCriteria({ property_name: 'Sweet Glamping' })).toEqual({
       pass: false,
       reason: 'unknown_units',
     });
+  });
+
+  it('allows null units when unit_type signals glamping (unit count verified after enrichment)', () => {
+    expect(
+      passesInclusionCriteria({
+        property_name: 'Ridge Yurts',
+        unit_type: 'yurts',
+      })
+    ).toEqual({ pass: true });
+  });
+
+  it('allows null units when property_type signals glamping', () => {
+    expect(
+      passesInclusionCriteria({
+        property_name: 'Alpine Retreat',
+        property_type: 'Glamping Resort',
+      })
+    ).toEqual({ pass: true });
   });
 
   it('rejects fewer than 4 units', () => {
@@ -66,6 +86,36 @@ describe('passesInclusionCriteria', () => {
         property_name: 'Boutique Glamping',
         number_of_units: 4,
         unit_type: 'yurts',
+      })
+    ).toEqual({ pass: true });
+  });
+});
+
+describe('passesPostEnrichmentUnitCriteria', () => {
+  it('rejects when unit count still unknown', () => {
+    expect(
+      passesPostEnrichmentUnitCriteria({
+        property_name: 'Test',
+        unit_type: 'yurts',
+      })
+    ).toEqual({ pass: false, reason: 'post_enrich_unknown_units' });
+  });
+
+  it('rejects when enriched count is below minimum', () => {
+    expect(
+      passesPostEnrichmentUnitCriteria({
+        property_name: 'Test',
+        number_of_units: 3,
+        unit_type: 'cabins',
+      })
+    ).toEqual({ pass: false, reason: 'post_enrich_insufficient_units' });
+  });
+
+  it('accepts when enriched count meets minimum', () => {
+    expect(
+      passesPostEnrichmentUnitCriteria({
+        property_name: 'Test',
+        number_of_units: 6,
       })
     ).toEqual({ pass: true });
   });

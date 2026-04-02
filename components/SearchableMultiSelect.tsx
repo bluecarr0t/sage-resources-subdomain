@@ -19,6 +19,9 @@ interface SearchableMultiSelectProps {
   id: string;
   searchPlaceholder?: string;
   activeColor?: 'blue' | 'purple' | 'orange' | 'green' | 'indigo' | 'sage';
+  disabled?: boolean;
+  /** Shown as native tooltip when disabled (e.g. why the control is inactive). */
+  disabledTitle?: string;
 }
 
 export default function SearchableMultiSelect({
@@ -31,6 +34,8 @@ export default function SearchableMultiSelect({
   id,
   searchPlaceholder = 'Search...',
   activeColor = 'sage',
+  disabled = false,
+  disabledTitle,
 }: SearchableMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,6 +49,13 @@ export default function SearchableMultiSelect({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (disabled) {
+      setIsOpen(false);
+      setSearchQuery('');
+    }
+  }, [disabled]);
 
   const filteredOptions = searchQuery.trim()
     ? options.filter((opt) =>
@@ -124,25 +136,43 @@ export default function SearchableMultiSelect({
               ? 'border-purple-300 bg-purple-50/50'
               : 'border-sage-300 bg-sage-50/50 dark:border-sage-600 dark:bg-sage-900/30';
 
+  const disabledClasses = disabled
+    ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-900/50 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-500'
+    : '';
+
   return (
-    <div className={`relative ${isOpen ? 'z-50' : 'z-auto'}`} ref={containerRef}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <div className={`relative ${isOpen && !disabled ? 'z-50' : 'z-auto'}`} ref={containerRef}>
+      <label
+        htmlFor={id}
+        className={`block text-sm font-medium mb-1 ${
+          disabled
+            ? 'text-gray-400 dark:text-gray-500'
+            : 'text-gray-700 dark:text-gray-300'
+        }`}
+      >
         {label}
       </label>
       <button
         ref={buttonRef}
         type="button"
+        disabled={disabled}
+        title={disabled && disabledTitle ? disabledTitle : undefined}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (disabled) return;
           setIsOpen(!isOpen);
         }}
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
         }}
-        className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:border-sage-500 text-sm transition-all text-left flex items-center justify-between cursor-pointer ${
-          isActive ? `${colorClasses} font-medium` : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+        className={`w-full px-3 py-2 border rounded-lg text-sm transition-all text-left flex items-center justify-between ${
+          disabled
+            ? disabledClasses
+            : `cursor-pointer bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:border-sage-500 ${
+                isActive ? `${colorClasses} font-medium` : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+              }`
         }`}
       >
         <span className="truncate flex-1">
@@ -164,7 +194,7 @@ export default function SearchableMultiSelect({
         </svg>
       </button>
 
-      {isOpen && isMounted &&
+      {isOpen && isMounted && !disabled &&
         createPortal(
           <div
             ref={dropdownRef}

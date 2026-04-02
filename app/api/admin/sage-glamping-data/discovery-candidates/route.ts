@@ -1,6 +1,6 @@
 /**
  * API Route: Discovery candidates (review queue)
- * GET: List pending candidates
+ * GET: List candidates — query `status=pending` (default) or `status=approved`
  * POST: Approve or reject a candidate (body: { id, action: 'approve' | 'reject', rejectionReason?: string })
  */
 
@@ -12,14 +12,19 @@ export const dynamic = 'force-dynamic';
 
 const CANDIDATES_TABLE = 'glamping_discovery_candidates';
 
-export const GET = withAdminAuth(async () => {
+export const GET = withAdminAuth(async (request) => {
   try {
+    const raw = request.nextUrl.searchParams.get('status');
+    const status = raw === 'approved' ? 'approved' : 'pending';
+
     const supabase = createServerClient();
-    const { data, error } = await supabase
-      .from(CANDIDATES_TABLE)
-      .select('*')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
+    let query = supabase.from(CANDIDATES_TABLE).select('*').eq('status', status);
+    query =
+      status === 'approved'
+        ? query.order('reviewed_at', { ascending: false, nullsFirst: false })
+        : query.order('created_at', { ascending: false });
+
+    const { data, error } = await query;
 
     if (error) {
       if (error.code === '42P01') {

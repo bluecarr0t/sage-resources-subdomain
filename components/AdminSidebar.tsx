@@ -47,6 +47,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/site-builder')) return 'site-builder';
   if (pathname.startsWith('/admin/audit-log')) return 'audit-log';
   if (pathname.startsWith('/admin/cost-explorer')) return 'cost-explorer';
+  if (pathname.startsWith('/admin/sites-export')) return 'sites-export';
   return '';
 }
 
@@ -189,6 +190,7 @@ export default function AdminSidebar() {
                 width={showCollapsed ? 44 : 144}
                 height={showCollapsed ? 44 : 144}
                 className={`object-contain ${showCollapsed ? 'w-11 h-11' : 'w-36 h-36'}`}
+                priority
               />
             </Link>
             <button
@@ -315,6 +317,7 @@ export default function AdminSidebar() {
                   isActive={activePageId === 'cost-explorer'}
                   isCollapsed={showCollapsed}
                 />
+                {/* Sites Export hidden from menu — page still accessible via direct URL */}
               </div>
             </div>
 

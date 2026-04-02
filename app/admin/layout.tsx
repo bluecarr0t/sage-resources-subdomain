@@ -30,7 +30,7 @@ export default async function AdminLayout({
 
   return (
     <NextIntlClientProvider locale="en" messages={enMessages as unknown as AbstractIntlMessages}>
-      <AdminAuthGuard>
+      <AdminAuthGuard trustServerAuth>
         <SidebarProvider>
           <AdminSidebar />
           <AdminMainContent>{children}</AdminMainContent>

@@ -10,11 +10,19 @@ const AUTH_CHECK_TIMEOUT_MS = 12_000;
 
 interface AdminAuthGuardProps {
   children: ReactNode;
+  /**
+   * When true, render children immediately. The admin layout must only set this after
+   * `getAdminAuthServer()` succeeds. Client still re-verifies session + managed_users.
+   */
+  trustServerAuth?: boolean;
 }
 
-export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
-  const [authorized, setAuthorized] = useState(false);
-  const [checking, setChecking] = useState(true);
+export default function AdminAuthGuard({
+  children,
+  trustServerAuth = false,
+}: AdminAuthGuardProps) {
+  const [authorized, setAuthorized] = useState(trustServerAuth);
+  const [checking, setChecking] = useState(!trustServerAuth);
   const [timedOut, setTimedOut] = useState(false);
   const router = useRouter();
   const mountedRef = useRef(true);
@@ -28,6 +36,7 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
     const redirectToLogin = () => {
       completedRef.current = true;
       if (mountedRef.current) {
+        setAuthorized(false);
         router.replace('/login');
       }
     };

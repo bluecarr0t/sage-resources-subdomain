@@ -105,17 +105,37 @@ export function passesInclusionCriteria(p: ExtractedProperty): InclusionResult {
 
   const units = p.number_of_units ?? null;
   const n = typeof units === 'number' ? units : parseUnits(units);
+  const hasGlamping =
+    hasGlampingUnitType(unitType) || hasGlampingUnitType(propertyType);
+
   if (n != null && n < MIN_GLAMPING_UNITS) {
     return { pass: false, reason: '< 4 units' };
   }
 
-  if (n == null) {
-    return { pass: false, reason: 'unknown_units' };
-  }
-
-  if (!hasGlampingUnitType(unitType) && !hasGlampingUnitType(propertyType)) {
+  if (n != null && !hasGlamping) {
     return { pass: false, reason: 'no_glamping_unit_type' };
   }
 
+  // Missing unit count: allow through only when unit/property type clearly signals glamping;
+  // post-enrichment must then supply a verified count ≥ MIN_GLAMPING_UNITS.
+  if (n == null && !hasGlamping) {
+    return { pass: false, reason: 'unknown_units' };
+  }
+
+  return { pass: true };
+}
+
+/**
+ * After web enrichment, require a numeric unit count ≥ MIN_GLAMPING_UNITS before insert.
+ */
+export function passesPostEnrichmentUnitCriteria(p: ExtractedProperty): InclusionResult {
+  const units = p.number_of_units ?? null;
+  const n = typeof units === 'number' ? units : parseUnits(units);
+  if (n == null) {
+    return { pass: false, reason: 'post_enrich_unknown_units' };
+  }
+  if (n < MIN_GLAMPING_UNITS) {
+    return { pass: false, reason: 'post_enrich_insufficient_units' };
+  }
   return { pass: true };
 }

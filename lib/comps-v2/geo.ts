@@ -51,6 +51,17 @@ export function parseNum(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * Prefer generated numeric columns when present (Hipcamp/Campspot after lat_num/lon_num migration),
+ * else fall back to text lat/lon — keeps Haversine checks aligned with SQL bbox filters.
+ */
+export function parseRowLatLon(row: Record<string, unknown>): { lat: number; lon: number } | null {
+  const lat = parseNum(row.lat_num) ?? parseNum(row.lat);
+  const lon = parseNum(row.lon_num) ?? parseNum(row.lon);
+  if (lat == null || lon == null) return null;
+  return { lat, lon };
+}
+
 /** All supported US state abbreviations (50 states; DC not in map — add if dataset includes it). */
 export function usStateAbbreviations(): string[] {
   return Object.keys(STATE_ABBR_TO_NAME).sort();
@@ -70,15 +81,12 @@ export function stateSqlValuesGlampingRoverpass(stateAbbrs: string[]): string[] 
   return [...out];
 }
 
-/** Full state names for Hipcamp / Campspot (match existing `.eq('state', stateFullName)`). */
+/**
+ * @deprecated Use {@link stateSqlValuesGlampingRoverpass}. Hipcamp/Campspot `state` may be stored as
+ * "TX" or "Texas" (same as glamping/RoverPass); full-name-only `.in()` missed abbreviation rows.
+ */
 export function stateSqlValuesHipcampCampspot(stateAbbrs: string[]): string[] {
-  const out: string[] = [];
-  for (const raw of stateAbbrs) {
-    const abbr = raw.trim().toUpperCase().slice(0, 2);
-    const full = STATE_ABBR_TO_NAME[abbr];
-    if (full) out.push(full);
-  }
-  return [...new Set(out)];
+  return stateSqlValuesGlampingRoverpass(stateAbbrs);
 }
 
 export function resolveStateName(stateInput: string): string {
