@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+/* Recharts `LabelList` `content` callbacks use Label `Props`, not `LabelList` component props. */
 import {
   Bar,
   BarChart,
@@ -10,6 +11,7 @@ import {
   ResponsiveContainer,
   XAxis,
   YAxis,
+  type LabelProps as RechartsLabelProps,
 } from 'recharts';
 import {
   AMENITY_ADR_CHART_KEYS,
@@ -39,24 +41,39 @@ function niceCeil(step: number, floor: number, ...vals: number[]) {
   return Math.ceil(m / step) * step;
 }
 
-type LabelProps = {
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-  value?: number | string;
-  payload?: ChartDatum;
-};
+/** Recharts passes SVG-ish coords as string | number; normalize for layout math. */
+function labelCoord(v: string | number | undefined, fallback = 0): number {
+  if (v == null) return fallback;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : fallback;
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : fallback;
+}
 
-function WithoutBarLabel(props: LabelProps) {
-  const { x = 0, y = 0, width = 0, value, payload } = props;
+function labelNumericValue(value: unknown): number | null {
+  if (value == null || typeof value === 'boolean') return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'string') {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+/** LabelList passes payload at runtime; it is not on the public Label `Props` type. */
+type LabelListContentProps = RechartsLabelProps & { payload?: ChartDatum };
+
+function WithoutBarLabel(props: RechartsLabelProps) {
+  const { x, y, width, value, payload } = props as LabelListContentProps;
+  const xN = labelCoord(x);
+  const yN = labelCoord(y);
+  const wN = labelCoord(width);
   if (payload?.withoutNull) return null;
-  const v = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(v)) return null;
+  const v = labelNumericValue(value);
+  if (v == null) return null;
   return (
     <text
-      x={x + width / 2}
-      y={y - 4}
+      x={xN + wN / 2}
+      y={yN - 4}
       fill="#111827"
       fontSize={11}
       fontWeight={700}
@@ -68,19 +85,22 @@ function WithoutBarLabel(props: LabelProps) {
   );
 }
 
-function WithBarLabel(props: LabelProps) {
-  const { x = 0, y = 0, width = 0, value, payload } = props;
+function WithBarLabel(props: RechartsLabelProps) {
+  const { x, y, width, value, payload } = props as LabelListContentProps;
+  const xN = labelCoord(x);
+  const yN = labelCoord(y);
+  const wN = labelCoord(width);
   if (payload?.withNull) return null;
-  const v = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(v)) return null;
+  const v = labelNumericValue(value);
+  if (v == null) return null;
   const diff = payload?.diffRounded;
-  const cx = x + width / 2;
+  const cx = xN + wN / 2;
   return (
     <g>
       {diff != null ? (
         <text
           x={cx}
-          y={y - 20}
+          y={yN - 20}
           fill={diff > 0 ? '#15803d' : '#374151'}
           fontSize={11}
           fontWeight={700}
@@ -92,7 +112,7 @@ function WithBarLabel(props: LabelProps) {
       ) : null}
       <text
         x={cx}
-        y={y - 6}
+        y={yN - 6}
         fill="#111827"
         fontSize={11}
         fontWeight={700}
