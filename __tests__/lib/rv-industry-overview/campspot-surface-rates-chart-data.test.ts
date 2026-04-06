@@ -9,12 +9,16 @@ describe('classifyCampspotRvSurfaceType', () => {
     expect(classifyCampspotRvSurfaceType('Concrete Pad')).toBe('concrete_pad');
     expect(classifyCampspotRvSurfaceType('Paved Roads')).toBe('concrete_pad');
     expect(classifyCampspotRvSurfaceType('Asphalt')).toBe('concrete_pad');
+    expect(classifyCampspotRvSurfaceType('Exposed aggregate concrete')).toBe('concrete_pad');
   });
 
   it('maps gravel and dirt to loose_gravel', () => {
     expect(classifyCampspotRvSurfaceType('Loose Gravel')).toBe('loose_gravel');
     expect(classifyCampspotRvSurfaceType('Gravel Roads')).toBe('loose_gravel');
     expect(classifyCampspotRvSurfaceType('Dirt Roads')).toBe('loose_gravel');
+    expect(classifyCampspotRvSurfaceType('Road base / screenings')).toBe('loose_gravel');
+    expect(classifyCampspotRvSurfaceType('Decomposed granite (DG)')).toBe('loose_gravel');
+    expect(classifyCampspotRvSurfaceType('Caliche pad')).toBe('loose_gravel');
   });
 
   it('maps grass and field to grass_or_field', () => {
@@ -33,7 +37,6 @@ describe('aggregateCampspotRowsToSurfaceRates', () => {
     return {
       state: 'TX',
       rv_surface_type: null,
-      retail_daily_rate_ytd: null,
       avg_retail_daily_rate_2025: '100',
       ...p,
     };
@@ -54,16 +57,12 @@ describe('aggregateCampspotRowsToSurfaceRates', () => {
     expect(grav.avgAdr2025).toBe(62);
   });
 
-  it('prefers retail_daily_rate_ytd when positive', () => {
+  it('uses avg_retail_daily_rate_2025 only', () => {
     const rows: CampspotSurfaceRatesAggRow[] = [
-      row({
-        rv_surface_type: 'Grass',
-        retail_daily_rate_ytd: '50',
-        avg_retail_daily_rate_2025: '90',
-      }),
+      row({ rv_surface_type: 'Grass', avg_retail_daily_rate_2025: '90' }),
     ];
     const out = aggregateCampspotRowsToSurfaceRates(rows);
-    expect(out.find((r) => r.bucketKey === 'grass_or_field')!.avgAdr2025).toBe(50);
+    expect(out.find((r) => r.bucketKey === 'grass_or_field')!.avgAdr2025).toBe(90);
   });
 
   it('skips rows outside RV industry regions', () => {

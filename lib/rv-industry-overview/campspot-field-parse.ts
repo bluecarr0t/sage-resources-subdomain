@@ -4,8 +4,10 @@
 
 export function parseCampspotNumber(val: unknown): number | null {
   if (val == null || val === '') return null;
-  const s = String(val).trim();
+  let s = String(val).trim();
   if (!s || s.toLowerCase() === 'no data') return null;
+  // US-formatted exports: $1,234.56 and thousands separators break parseFloat("1,234") → 1
+  s = s.replace(/\$/g, '').replace(/,/g, '').replace(/\s+/g, '');
   const n = parseFloat(s);
   return Number.isFinite(n) ? n : null;
 }

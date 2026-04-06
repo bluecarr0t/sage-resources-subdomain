@@ -5,10 +5,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
 import { createServerClient } from '@/lib/supabase';
+import { meanRounded } from '@/lib/rv-industry-overview/campspot-field-parse';
 import {
-  meanRounded,
-  parseCampspotNumber,
-} from '@/lib/rv-industry-overview/campspot-field-parse';
+  parseCampspotAdr2025FromAnnualColumn,
+  passesStandardCampspotRetailRateUsd,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
 
@@ -21,7 +22,6 @@ export type SurfaceChartBucketKey = (typeof SURFACE_CHART_BUCKET_KEYS)[number];
 export type CampspotSurfaceRatesAggRow = {
   state: string | null;
   rv_surface_type: string | null;
-  retail_daily_rate_ytd: string | null;
   avg_retail_daily_rate_2025: string | null;
 };
 
@@ -45,35 +45,38 @@ export function classifyCampspotRvSurfaceType(raw: unknown): SurfaceChartBucketK
   if (!s || s === 'no data') return null;
   if (/\b(mixed|multiple|various|unknown|n\/a)\b/.test(s)) return null;
 
-  if (/\b(grass|turf|lawn|meadow|pasture|field\b|sod)\b/.test(s)) {
+  if (/\b(grass|turf|lawn|meadow|pasture|field\b|sod|artificial\s*turf)\b/.test(s)) {
     return 'grass_or_field';
   }
 
+  // Named hardscape before gravel (so "concrete aggregate" stays concrete).
   if (
     /\b(concrete|cement|asphalt|blacktop|macadam)\b/.test(s) ||
-    /\bpaved\b/.test(s) ||
-    (/\b(pad|slab)\b/.test(s) && !/\bgravel\b/.test(s))
+    /\bpaved\b/.test(s)
   ) {
     return 'concrete_pad';
   }
 
+  // Gravel / earth / road-base materials (before generic "pad" → concrete).
   if (
     /\b(gravel|crushed|aggregate|pebble|stones?|loose|sand)\b/.test(s) ||
-    /\bdirt\b/.test(s) ||
-    /\bunpaved\b/.test(s)
+    /\b(dirt|earth|mud|dust)\b/.test(s) ||
+    /\bunpaved\b/.test(s) ||
+    /\b(screenings|caliche|fines\b|road\s*base|chat\b|dg\b|decomposed)\b/.test(s) ||
+    /\b(shell\s*(rock|base)?|limestone|granite\s*chips?)\b/.test(s)
   ) {
     return 'loose_gravel';
+  }
+
+  if (/\b(pad|slab)\b/.test(s) && !/\bgravel\b/.test(s)) {
+    return 'concrete_pad';
   }
 
   return null;
 }
 
 function adr2025ForRow(row: CampspotSurfaceRatesAggRow): number | null {
-  const ytd = parseCampspotNumber(row.retail_daily_rate_ytd);
-  if (ytd != null && ytd > 0) return ytd;
-  const annual = parseCampspotNumber(row.avg_retail_daily_rate_2025);
-  if (annual != null && annual > 0) return annual;
-  return null;
+  return parseCampspotAdr2025FromAnnualColumn(row);
 }
 
 function emptyBuckets(): Record<SurfaceChartBucketKey, number[]> {
@@ -96,7 +99,7 @@ export function foldSurfaceRows(
     if (!bucket) continue;
 
     const adr = adr2025ForRow(row);
-    if (adr == null) continue;
+    if (adr == null || !passesStandardCampspotRetailRateUsd(adr)) continue;
 
     buckets[bucket].push(adr);
   }
@@ -134,7 +137,7 @@ export async function fetchCampspotSurfaceRatesChartData(
   while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
     const { data, error } = await supabase
       .from('campspot')
-      .select('state, rv_surface_type, retail_daily_rate_ytd, avg_retail_daily_rate_2025')
+      .select('state, rv_surface_type, avg_retail_daily_rate_2025')
       .order('id', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1);
 

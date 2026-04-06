@@ -34,7 +34,7 @@ type ChartDatum = {
 
 type Props = {
   rows: SizeTierChartRow[];
-  /** Omit title, intro, body, table heading & footnote (for JPEG — chart + data table only) */
+  /** Omit title, intro, body, table heading & footnote (for JPEG: chart + data table only) */
   variant?: 'default' | 'compact';
 };
 
@@ -229,11 +229,11 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
                 return (
                   <tr key={d.tierKey}>
                     <td className="px-3 py-2 font-medium">{d.name}</td>
-                    <td className="px-3 py-2">{d.occ2024Null ? '—' : `${d.occ2024.toFixed(1)}%`}</td>
-                    <td className="px-3 py-2">{d.occ2025Null ? '—' : `${d.occ2025.toFixed(1)}%`}</td>
-                    <td className="px-3 py-2">{d.adr2024Null ? '—' : `$${d.adr2024.toFixed(2)}`}</td>
-                    <td className="px-3 py-2">{d.adr2025Null ? '—' : `$${d.adr2025.toFixed(2)}`}</td>
-                    <td className="px-3 py-2">{ch == null ? '—' : `${ch >= 0 ? '+' : ''}${ch.toFixed(1)}%`}</td>
+                    <td className="px-3 py-2">{d.occ2024Null ? '-' : `${d.occ2024.toFixed(1)}%`}</td>
+                    <td className="px-3 py-2">{d.occ2025Null ? '-' : `${d.occ2025.toFixed(1)}%`}</td>
+                    <td className="px-3 py-2">{d.adr2024Null ? '-' : `$${d.adr2024.toFixed(2)}`}</td>
+                    <td className="px-3 py-2">{d.adr2025Null ? '-' : `$${d.adr2025.toFixed(2)}`}</td>
+                    <td className="px-3 py-2">{ch == null ? '-' : `${ch >= 0 ? '+' : ''}${ch.toFixed(1)}%`}</td>
                   </tr>
                 );
               })}

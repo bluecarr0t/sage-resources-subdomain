@@ -11,6 +11,10 @@ import {
   parseCampspotNumber,
   parseCampspotOccupancyPercent,
 } from '@/lib/rv-industry-overview/campspot-field-parse';
+import {
+  passesStandardCampspotOccupancyPercent,
+  passesStandardCampspotRetailRateUsd,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 
 const PAGE_SIZE = 1000;
 
@@ -90,14 +94,24 @@ export function foldSizeTierRows(buckets: Record<SizeTierKey, Bucket>, rows: Cam
 
     const o4 = parseCampspotOccupancyPercent(row.occupancy_rate_2024);
     const a4 = parseCampspotNumber(row.avg_retail_daily_rate_2024);
-    if (o4 != null && a4 != null && a4 > 0) {
+    if (
+      o4 != null &&
+      a4 != null &&
+      passesStandardCampspotOccupancyPercent(o4) &&
+      passesStandardCampspotRetailRateUsd(a4)
+    ) {
       b.occ2024.push(o4);
       b.adr2024.push(a4);
     }
 
     const o5 = parseCampspotOccupancyPercent(row.occupancy_rate_2025);
     const a5 = parseCampspotNumber(row.avg_retail_daily_rate_2025);
-    if (o5 != null && a5 != null && a5 > 0) {
+    if (
+      o5 != null &&
+      a5 != null &&
+      passesStandardCampspotOccupancyPercent(o5) &&
+      passesStandardCampspotRetailRateUsd(a5)
+    ) {
       b.occ2025.push(o5);
       b.adr2025.push(a5);
     }

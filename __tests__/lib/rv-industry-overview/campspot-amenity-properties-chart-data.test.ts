@@ -23,6 +23,8 @@ describe('aggregateCampspotRowsToAmenityPropertyPcts', () => {
       property_name: 'Park A',
       city: 'Austin',
       state: 'TX',
+      occupancy_rate_2025: '50',
+      avg_retail_daily_rate_2025: '100',
       hot_tub_sauna: null,
       pool: null,
       electrical_hook_up: null,

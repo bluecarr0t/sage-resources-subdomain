@@ -115,7 +115,7 @@ export default function RvSiteTypesDistributionRatesCharts({
         parkingKey,
         name: t(`parking.${parkingKey}`),
         value: isEmpty ? 0 : v,
-        labelText: isEmpty ? '—' : `$${Math.round(v!)}`,
+        labelText: isEmpty ? '-' : `$${Math.round(v!)}`,
         isEmpty,
       };
     });

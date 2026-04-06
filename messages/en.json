@@ -790,15 +790,29 @@
     },
     "rvIndustryOverview": {
       "title": "RV Industry Overview",
-      "subtitle": "2025 regional metrics from Campspot (ARDR — avg. retail daily rate — and occupancy). Map shows the contiguous U.S. with Alaska and Hawaii as insets in the lower-left; both are included in West region totals.",
+      "subtitle": "2025 regional metrics from Campspot (ARDR, avg. retail daily rate, and occupancy). Map shows the contiguous U.S. with Alaska in the lower-left (Albers USA) and Hawaii as a small Mercator inset immediately to the left of Alaska; both are included in West region totals.",
+      "unitFilterLabel": "Unit type",
+      "unitFilterHint": "All charts below use only Campspot rows classified as the selected type, except the two unit-type comparison bar charts (avg. rate by type and mix by type), which always include Glamping, RV Site, and Tent Site together, and except “RV Site Types Distribution & Rates,” which always uses the RV Sites cohort. Unclassified rows are excluded from each slice.",
+      "unitFilterRegionAria": "Unit type filter",
+      "unitFilter": {
+        "rv": "RV Sites",
+        "tent": "Tent Sites",
+        "glamping": "Lodging"
+      },
+      "standardFiltersTitle": "Standard data filters (all charts)",
+      "standardFiltersIntro": "The same row-level rules run everywhere on this page for the selected unit type. A value is only averaged or counted when it falls inside the standard band for that metric. There is no percentile winsorizing beyond these fixed bounds.",
+      "standardFiltersOccupancy": "Occupancy (any year used in a chart): after parsing (fractions 0–1 are scaled to percent), include only values from 10% through 99% inclusive. Values below 10% or at 100% are excluded as unreliable or invalid.",
+      "standardFiltersRate": "Retail daily rate / ARDR (USD): include only values from $10 through $3,000 per night inclusive for whichever field that chart uses (2024 annual avg. retail daily rate, 2025 avg. retail daily rate, or seasonal weekday/weekend columns on season charts). Retail Daily Rate YTD is not used on this page.",
+      "standardFiltersPropertyCohort": "Property- and RV-only charts (amenity penetration, RV parking mix, unit-type distribution): a row is included only when 2025 occupancy and 2025 ARDR from the average retail daily rate 2025 column both pass the standard bands, so denominators stay aligned with rate-based charts.",
+      "standardFiltersByChart": "Regional map coloring uses 2025 ARDR from the average retail daily rate 2025 column (same as the state choropleth) and 2025 occupancy, each in band (Lodging uses a higher ARDR ceiling on the regional map only). State hover/pop-up matched cohort requires 2024 and 2025 occupancy and ARDR (annual columns) each in band. Trends, resort size, unit-type rate, season and surface rate bars, and amenity ADR comparisons apply the band to every occupancy or rate value as it enters that chart’s buckets.",
       "mapSectionTitle": "Regional ARDR and occupancy (2025)",
-      "mapCaption": "Unweighted means across Campspot rows with both 2025 ARDR (avg. retail daily rate) and 2025 occupancy populated.",
+      "mapCaption": "Unweighted means across Campspot rows with both 2025 ARDR from the average retail daily rate 2025 column and 2025 occupancy populated, after standard occupancy and ARDR filtering (regional ARDR band is $10–$3k for RV/Tent and $10–$10k for Lodging).",
       "mapInteractHint": "Hover a state for a quick view of matched-cohort 2024 vs 2025 averages, or click for full metrics and changes.",
       "rowsScanned": "Rows scanned: {count}",
-      "rowsScannedDetail": "That count is every Campspot row read in this pass, up to the server row cap—even when a row does not qualify for the map averages.",
-      "mapOutliers": "There is no statistical outlier removal (no winsorizing, z-score, or IQR trimming). Any row that passes the checks below is included in the mean.",
-      "mapRegionalInclusion": "Regional 2025 map averages include only rows whose state maps to one of the five regions, whose 2025 occupancy parses as a non-negative number (values from 0–1 are treated as fractions and scaled to percent), and whose 2025 ARDR uses the average annual rate column, parses as a number, and is greater than zero. Rows are excluded if the state is missing or outside those regions, or if either field is blank, “no data”, non-numeric, occupancy is negative, or ARDR is zero or negative.",
-      "mapStateCohortNote": "Per-state hover and pop-up metrics use a matched cohort: only Campspot rows with valid occupancy and ARDR in both 2024 and 2025. ARDR rules match the trends chart (2024: average annual rate; 2025: year-to-date retail rate when present and positive, otherwise average annual 2025 rate).",
+      "rowsScannedDetail": "That count is every Campspot row read in this pass, up to the server row cap, even when a row does not qualify for the map averages.",
+      "mapOutliers": "Fixed-band filtering (not percentile-based): occupancy must be between 10% and 99% (100% excluded); retail rates must be between $10 and $3,000 USD for the field that chart uses. See “Standard data filters” below for chart-by-chart detail.",
+      "mapRegionalInclusion": "Regional 2025 map averages include only rows whose state maps to one of the five regions, whose 2025 occupancy parses as a non-negative number (values from 0–1 are treated as fractions and scaled to percent) and lies between 10% and 99% (100% excluded), and whose 2025 ARDR from the average retail daily rate 2025 column lies between $10 and $3,000 for RV and Tent, or between $10 and $10,000 for Lodging (glamping). Retail Daily Rate YTD and seasonal columns are not used for these regional averages. Currency symbols and thousands separators in text fields are normalized before parsing. Rows are excluded if the state is missing or outside those regions, or if occupancy or the 2025 rate is blank, “no data”, non-numeric, or outside the applicable bands.",
+      "mapStateCohortNote": "Per-state hover and pop-up metrics use a matched cohort: only Campspot rows with valid occupancy and ARDR in both 2024 and 2025, each in the standard bands. For ARDR, both years use the average retail daily rate columns (2024 and 2025). The regional map and state ADR shading use the same 2025 average retail daily rate column as the five-region labels.",
       "loadError": "Could not load Campspot aggregates.",
       "downloadJpg": "Download",
       "downloadJpgLoading": "Saving…",
@@ -833,16 +847,16 @@
         "adrChange": "ARDR change",
         "sitesMatched": "Sites (matched cohort)",
         "pp": "pp",
-        "methodNote": "Unweighted means over the matched cohort only. 2024 ARDR uses the average annual rate column. 2025 ARDR uses year-to-date retail rate when present and positive, otherwise the 2025 average annual rate (same as the trends chart).",
+        "methodNote": "Unweighted means over the matched cohort only. ARDR for both 2024 and 2025 uses the average retail daily rate columns for those years (Retail Daily Rate YTD is not used).",
         "matchedCohortNote": "Year-over-year change compares the same set of rows: units without both years are excluded so new 2025-only reporting does not shift the averages."
       },
       "trends": {
         "chartTitle": "RV Resort / Park Occupancy Rate Trends",
-        "intro": "Current and historical trends (2024–2025 only). 2024 uses full-year occupancy and ARDR (avg. retail daily rate). For 2025, ARDR prefers year-to-date retail rate when present, otherwise the 2025 average rate; occupancy uses the 2025 occupancy field. The U.S. column pools all regions. No 2023 data is included.",
+        "intro": "Current and historical trends (2024–2025 only). 2024 uses full-year occupancy and ARDR (avg. retail daily rate). For 2025, ARDR uses the average retail daily rate 2025 column only; occupancy uses the 2025 occupancy field. The U.S. column pools all regions. No 2023 data is included.",
         "axisOccupancy": "Occupancy rate",
         "axisAdr": "ARDR (Avg. Retail Daily Rate)",
         "tooltipNoData": "No data",
-        "methodology": "Unweighted means across Campspot rows that have both metrics for each cohort. U.S. aggregates include every row in the five regions.",
+        "methodology": "Unweighted means across Campspot rows that have both metrics for each cohort, after standard occupancy and ARDR filtering for the year being averaged. U.S. aggregates include every qualifying row in the five regions.",
         "loadError": "Could not load trends chart data.",
         "category": {
           "us": "U.S.",
@@ -854,9 +868,9 @@
         },
         "series": {
           "occ2024": "2024 Occupancy",
-          "occ2025": "2025 Occupancy YTD",
+          "occ2025": "2025 Occupancy",
           "adr2024": "2024 ARDR",
-          "adr2025": "2025 ARDR YTD"
+          "adr2025": "2025 ARDR"
         }
       },
       "sizeImpact": {
@@ -879,7 +893,7 @@
         "tableColAdr2024": "ARDR 2024",
         "tableColAdr2025": "ARDR 2025",
         "tableColAdrChange": "ARDR change",
-        "tableFootnote": "ARDR change is percent change from 2024 to 2025. Occupancy and 2025 ARDR use Campspot full-year fields (occupancy_rate_2025, avg_retail_daily_rate_2025).",
+        "tableFootnote": "ARDR change is percent change from 2024 to 2025. Occupancy and 2025 ARDR use Campspot full-year fields (occupancy_rate_2025, avg_retail_daily_rate_2025), with standard occupancy and ARDR band filtering applied per year.",
         "loadError": "Could not load resort size chart data.",
         "tier": {
           "large": "Large (100+)",
@@ -888,13 +902,14 @@
         }
       },
       "unitTypeCharts": {
-        "loadError": "Could not load unit type chart data."
+        "loadError": "Could not load unit type chart data.",
+        "notAffectedByUnitFilter": "Not filtered by the RV Sites / Tent Sites / Lodging toggle above; all three unit types are compared together."
       },
       "unitTypeByRate": {
         "chartTitle": "Unit Type by Rate",
         "subtitle": "Avg. Retail Daily Rate Before Taxes and Booking Fees",
-        "intro": "Mean 2025 ARDR (avg. retail daily rate) by classified unit type across Campspot rows in the five U.S. regions. Rows need a parseable unit type (Glamping, RV Site, or Tent Site), state in-region, and positive 2025 rate: YTD retail rate when present, otherwise the 2025 average rate column.",
-        "methodology": "Unweighted mean of row-level rates within each type. No taxes or booking-fee columns are added; values reflect the same retail rate fields used elsewhere on this page.",
+        "intro": "Mean 2025 ARDR (avg. retail daily rate) by classified unit type across Campspot rows in the five U.S. regions. Rows need a parseable unit type (Glamping, RV Site, or Tent Site), state in-region, and a positive average retail daily rate 2025.",
+        "methodology": "Unweighted mean of row-level rates within each type. Rows must pass standard 2025 occupancy and 2025 ARDR (average retail daily rate 2025 column) bands. No taxes or booking-fee columns are added; values reflect the same retail rate fields used elsewhere on this page.",
         "axisY": "Avg. Retail Daily Rate ($)",
         "axisX": "Unit Type",
         "noData": "No rows matched the cohort for this chart.",
@@ -907,8 +922,8 @@
       "unitTypeDistribution": {
         "chartTitle": "Unit Type Distribution",
         "subtitle": "Share of sites by unit type, averaged across properties",
-        "intro": "For each property (name, state, city), site counts use quantity of units when at least 1, otherwise 1 per row. Mix percentages are computed from classified Glamping / RV / Tent rows only, then averaged across properties with at least one classified site.",
-        "methodology": "Classification order matches the RV Industry Overview unit-type rules (same priority as glamping market unit tagging). Only rows in the five U.S. regions are included.",
+        "intro": "For each property (name, state, city), site counts use quantity of units when at least 1, otherwise 1 per row. Mix percentages are computed from classified Glamping / RV / Tent rows only, then averaged across properties with at least one classified site. Each property counts equally in that average: this is not the same as total glamping sites divided by total RV sites nationwide (a small bar here can still reflect many glamping sites if they sit on few properties).",
+        "methodology": "Classification order matches the RV Industry Overview unit-type rules (same priority as glamping market unit tagging). Only rows in the five U.S. regions are included, with standard 2025 occupancy and 2025 ARDR (average retail daily rate 2025 column) band filtering applied before counting site mix. The three bar values are means of property-level mixes and always sum to about 100%; they answer “what is the typical property’s mix?” not “what share of all unit-rows are glamping?”",
         "axisY": "% of Sites (Average per Property)",
         "axisX": "Unit Type",
         "noData": "No properties matched the cohort for this chart.",
@@ -921,8 +936,8 @@
       "ratesBySeason": {
         "chartTitle": "Rates by Season",
         "subtitle": "Avg. Retail Daily Rate Before Taxes and Booking Fees",
-        "intro": "Unweighted mean of each seasonal rate column across Campspot rows in the five U.S. regions. A row contributes to a bar only when that column parses as a positive number.",
-        "methodology": "Fields: winter_weekday, winter_weekend, spring_weekday, spring_weekend, summer_weekday, summer_weekend, fall_weekday, fall_weekend. No taxes or booking-fee columns are added.",
+        "intro": "Unweighted mean of each seasonal rate column across Campspot rows in the five U.S. regions. A row contributes to a bar only when that column parses within the standard retail rate band ($10–$3,000).",
+        "methodology": "Fields: winter_weekday, winter_weekend, spring_weekday, spring_weekend, summer_weekday, summer_weekend, fall_weekday, fall_weekend. Each value must fall in the standard ARDR band. No taxes or booking-fee columns are added.",
         "axisY": "Avg. Retail Daily Rate ($)",
         "axisX": "Season",
         "noData": "No seasonal rate values matched the cohort for this chart.",
@@ -941,8 +956,8 @@
       "siteSurfaceRates": {
         "chartTitle": "Site Surface Distribution & Rates",
         "subtitle": "Avg. Retail Daily Rates Are Before Taxes and Booking Fees",
-        "intro": "Mean 2025 ARDR (avg. retail daily rate) by RV site surface type. Rows must be in the five U.S. regions, have a surface type that maps to Concrete Pad, Loose Gravel, or Grass or Field, and a positive 2025 rate (YTD retail rate when present, otherwise the 2025 average rate column).",
-        "methodology": "Surface groups use the `rv_surface_type` text field with keyword rules (e.g. paved/concrete/asphalt → Concrete Pad; gravel/dirt/crushed → Loose Gravel; grass/turf/field → Grass or Field). Unmapped or mixed values are excluded.",
+        "intro": "Mean 2025 ARDR (avg. retail daily rate) by RV site surface type for Campspot rows in the selected unit-type slice (same toggle as the rest of the page). Rows must be in the five U.S. regions, have a surface type that maps to Concrete Pad, Loose Gravel, or Grass or Field, and average retail daily rate 2025 inside the standard ARDR band. A dash means no qualifying rows for that bucket (often `rv_surface_type` is blank on non-RV rows, e.g. Lodging).",
+        "methodology": "Surface groups use the `rv_surface_type` text field with keyword rules (e.g. paved/concrete/asphalt → Concrete Pad; gravel/dirt/crushed/road base/decomposed granite/caliche → Loose Gravel; grass/turf/field → Grass or Field). Unmapped, blank, or mixed values are excluded.",
         "axisY": "Avg. Retail Daily Rate ($)",
         "axisX": "Surface Type",
         "noData": "No rows matched the cohort for this chart.",
@@ -956,7 +971,7 @@
       "amenitiesByPropertyPct": {
         "chartTitle": "Amenities by % of Properties",
         "subtitle": "Share of distinct campgrounds (property name, state, city) with each amenity on at least one row",
-        "intro": "Each percentage is the count of distinct properties with that amenity present on any Campspot row, divided by all distinct properties in the cohort. A property is included if it has a property name and U.S. state in one of the five RV industry regions.",
+        "intro": "Each percentage is the count of distinct properties with that amenity present on any qualifying Campspot row, divided by all distinct properties in the cohort. A row qualifies only when 2025 occupancy and 2025 ARDR (average retail daily rate 2025 column) pass standard bands; a property is included if it has a property name and U.S. state in one of the five RV industry regions.",
         "methodology": "Present means yes/y/true/1 (case-insensitive) on the column, except 50 amp: also counted when `electrical_hook_up` text contains “50 amp”. Columns: hot_tub_sauna, pool, electrical_hook_up (50 amp only), sewer_hook_up, water_hookup.",
         "axisY": "Amenity",
         "axisX": "Percentage of Properties (%)",
@@ -973,8 +988,8 @@
       "amenitiesByAvgAdr": {
         "chartTitle": "Amenities by Avg. Retail Daily Rate",
         "subtitle": "RV sites were only used in determining these differences, tent sites and lodging units are excluded",
-        "intro": "For each amenity, mean 2025 ARDR (avg. retail daily rate) is computed separately for RV site rows with the amenity present (yes/y/true/1) versus without. Only rows classified as RV sites and in the five U.S. regions are included. YTD retail rate is used when present and positive, otherwise the 2025 average rate column.",
-        "methodology": "RV classification uses the same unit-type rules as the Unit Type charts (unit_type, description, property_name). Rows with missing or non-positive ADR are excluded from both splits.",
+        "intro": "For each amenity, mean 2025 ARDR (avg. retail daily rate) is computed separately for RV site rows with the amenity present (yes/y/true/1) versus without. Only rows classified as RV sites and in the five U.S. regions are included. ARDR uses the average retail daily rate 2025 column only.",
+        "methodology": "RV classification uses the same unit-type rules as the Unit Type charts (unit_type, description, property_name). Rows with missing ADR or ADR outside the standard band are excluded from both splits.",
         "axisY": "Avg. Retail Daily Rate ($)",
         "axisX": "Amenity",
         "legend": {
@@ -993,8 +1008,8 @@
       "stateAdrChoropleth": {
         "chartTitle": "Avg. Retail Daily Rate by State",
         "subtitle": "Before Taxes and Booking Fees",
-        "intro": "Mean 2025 ARDR (avg. retail daily rate) by U.S. state for Campspot rows in the five RV industry regions. Each row contributes at most once per state when it has a positive parsed rate: year-to-date retail rate when present, otherwise the 2025 average rate column. Occupancy is not required.",
-        "methodology": "Color scale spans roughly {low}–{high} per night for display; values below or above are shown as the lightest or darkest color. States with no qualifying rows are labeled N/A. States with at least one row but fewer than {minN} qualifying rows are labeled insufficient data and shown in neutral gray. Alaska and Hawaii follow the same rules; Hawaii appears in the inset.",
+        "intro": "Mean 2025 ARDR (avg. retail daily rate) by U.S. state for Campspot rows in the five RV industry regions. Each row contributes at most once per state when average retail daily rate 2025 parses within the regional ARDR band (RV/Tent $10–$3k; Lodging $10–$10k on this map). Occupancy is not required for this map.",
+        "methodology": "Color scale spans roughly {low}–{high} per night for display; values below or above are shown as the lightest or darkest color. States with no qualifying rows are labeled N/A. States with at least one row but fewer than {minN} qualifying rows are labeled insufficient data and shown in neutral gray. Alaska and Hawaii follow the same rules; Hawaii is drawn in a small inset to the left of Alaska in the lower-left corner.",
         "legendLabel": "Avg. Retail Daily Rate",
         "legendTick": "'$'{n}",
         "na": "N/A",
@@ -1006,8 +1021,9 @@
       "rvSiteTypesDistributionRates": {
         "chartTitle": "RV Site Types Distribution & Rates",
         "subtitle": "Avg. Retail Daily Rates Are Before Taxes and Booking Fees",
-        "intro": "Left: share of RV site rows (five U.S. regions) by `rv_parking` text mapped to Back-in, Pull thru, or Not Listed. Right: mean 2025 ARDR for Pull thru and Back-in rows only; Not Listed is excluded from the rate comparison. YTD retail rate is used when present and positive, otherwise the 2025 average rate column.",
-        "methodology": "RV rows use the same unit-type classification as other RV-only charts. Pull thru matches pull-through / pull thru wording; Back-in matches back-in / back in; anything else or blank is Not Listed.",
+        "notAffectedByUnitFilter": "Not filtered by the RV Sites / Tent Sites / Lodging toggle above; this section always reflects RV site rows only (same cohort as choosing RV Sites).",
+        "intro": "Left: share of RV site rows (five U.S. regions) by `rv_parking` text mapped to Back-in, Pull thru, or Not Listed. Right: mean 2025 ARDR for Pull thru and Back-in rows only; Not Listed is excluded from the rate comparison. Only rows with 2025 occupancy and 2025 ARDR from the average retail daily rate 2025 column in standard bands are counted.",
+        "methodology": "RV rows use the same unit-type classification as other RV-only charts. Pull thru matches pull-through / pull thru wording; Back-in matches back-in / back in; anything else or blank is Not Listed. Distribution and rate bars share the same qualifying row gate.",
         "barAxisY": "Avg. Retail Daily Rate ($)",
         "barAxisX": "Parking Type",
         "noData": "No RV site rows matched the cohort.",

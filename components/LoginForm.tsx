@@ -160,8 +160,7 @@ export default function LoginForm({ locale }: LoginFormProps) {
         options: {
           redirectTo,
           queryParams: {
-            // No hd param - allows both @sageoutdooradvisory.com and @sagecommercialadvisory.com.
-            // Domain validation enforced after auth via isAllowedEmailDomain.
+            hd: 'sageoutdooradvisory.com',
             prompt: 'select_account',
           },
         },

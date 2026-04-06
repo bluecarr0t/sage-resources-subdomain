@@ -30,7 +30,7 @@ type Props = {
   fileStem: string;
   /** Page-only copy below the export area (not included in JPEG) */
   captionBelow?: ReactNode;
-  /** e.g. rows scanned — not included in JPEG */
+  /** e.g. rows scanned, not included in JPEG */
   footerBelow?: ReactNode;
   children: ReactNode;
 };

@@ -57,8 +57,14 @@ export function fullStateNameToUspsAbbr(name: string | undefined): string | null
   return STATE_FULL_TO_ABBR[key] ?? null;
 }
 
-/** Exclude HI from main Albers map — Hawaii is drawn as a separate inset above Alaska. */
+/** Exclude HI from main Albers map — Hawaii is drawn as a separate Mercator inset west of Alaska (lower-left). */
 export const EXCLUDE_FROM_MAP_ABBR = new Set(['HI']);
+
+/** Pixel nudge for Alaska’s Albers inset (east/right). Hawaii label uses the same so “AK” stays centered on the state. */
+export const ALASKA_ALBERS_INSET_NUDGE = { x: 18, y: 0 } as const;
+
+/** CSS translateX(px) for the Hawaii Mercator overlay — negative moves it left, away from Alaska. */
+export const HAWAII_INSET_TRANSLATE_X_PX = -14;
 
 /** Approximate region centroids [lon, lat] for Albers USA labels */
 export const RV_REGION_LABEL_COORDS: Record<RvIndustryRegionId, [number, number]> = {

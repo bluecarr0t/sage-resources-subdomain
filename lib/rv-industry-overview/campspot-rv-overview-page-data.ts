@@ -16,6 +16,8 @@ import {
   createRvMapFoldState,
   finalizeRvMapFoldState,
   foldRvMapRows,
+  RV_MAP_REGIONAL_RATE_BANDS_DEFAULT,
+  RV_MAP_REGIONAL_RATE_BANDS_GLAMPING,
   type CampspotRvMapAggRow,
   type CampspotRvMapDataResult,
 } from '@/lib/rv-industry-overview/campspot-rv-map-data';
@@ -35,15 +37,18 @@ import {
   foldSizeTierRows,
 } from '@/lib/rv-industry-overview/campspot-size-tier-chart-data';
 import type { CampspotSizeTierChartResult } from '@/lib/rv-industry-overview/campspot-size-tier-chart-data';
-import type { CampspotUnitTypeAggRow } from '@/lib/rv-industry-overview/campspot-unit-type-chart-data';
 import {
+  type CampspotUnitTypeAggRow,
+  type CampspotUnitTypeChartsResult,
+  type UnitTypeChartBucketKey,
   aggregateCampspotRowsToUnitTypeByRate,
   aggregateCampspotRowsToUnitTypeDistribution,
+  classifyCampspotUnitChartBucket,
   createUnitTypeFoldState,
   finalizeUnitTypeFoldState,
   foldUnitTypeRows,
+  UNIT_TYPE_CHART_BUCKET_KEYS,
 } from '@/lib/rv-industry-overview/campspot-unit-type-chart-data';
-import type { CampspotUnitTypeChartsResult } from '@/lib/rv-industry-overview/campspot-unit-type-chart-data';
 import type { CampspotSeasonRatesAggRow } from '@/lib/rv-industry-overview/campspot-season-rates-chart-data';
 import {
   aggregateCampspotRowsToSeasonRates,
@@ -88,10 +93,9 @@ import type { CampspotRvParkingChartsResult } from '@/lib/rv-industry-overview/c
 const CAMPSPOT_RV_OVERVIEW_CACHE_TABLE = 'campspot_rv_overview_cache';
 
 /** Superset of columns needed by every RV overview aggregate (one row shape per page). */
-const CAMPSPOT_RV_OVERVIEW_PAGE_SELECT =
+export const CAMPSPOT_RV_OVERVIEW_PAGE_SELECT =
   'state, city, property_name, unit_type, description, quantity_of_units, property_total_sites, ' +
   'avg_retail_daily_rate_2025, avg_retail_daily_rate_2024, occupancy_rate_2025, occupancy_rate_2024, ' +
-  'retail_daily_rate_ytd, ' +
   'winter_weekday, winter_weekend, spring_weekday, spring_weekend, summer_weekday, summer_weekend, ' +
   'fall_weekday, fall_weekend, rv_surface_type, rv_parking, ' +
   'hot_tub_sauna, pool, electrical_hook_up, sewer_hook_up, water_hookup';
@@ -106,7 +110,12 @@ type CampspotRvOverviewWideRow = CampspotRvMapAggRow &
   CampspotAmenityAdrAggRow &
   CampspotRvParkingAggRow;
 
-export type CampspotRvOverviewPageData = {
+/** Same buckets as unit-type charts; UI labels Tent / RV / Lodging (lodging = glamping classifier). */
+export type RvOverviewUnitFilterKey = UnitTypeChartBucketKey;
+
+export const RV_OVERVIEW_UNIT_FILTER_KEYS: readonly RvOverviewUnitFilterKey[] = UNIT_TYPE_CHART_BUCKET_KEYS;
+
+export type CampspotRvOverviewSlice = {
   mapResult: CampspotRvMapDataResult;
   trendsResult: CampspotTrendsChartResult;
   sizeResult: CampspotSizeTierChartResult;
@@ -118,7 +127,99 @@ export type CampspotRvOverviewPageData = {
   rvParkingChartsResult: CampspotRvParkingChartsResult;
 };
 
-function bundleError(rowsScanned: number, message: string): CampspotRvOverviewPageData {
+export type CampspotRvOverviewPageData = {
+  /** Total Campspot rows read in the scan (same for every unit-type slice). */
+  rowsScannedTotal: number;
+  /**
+   * Unit-type bar charts (avg. rate + mix) across all three buckets in one pass.
+   * Not scoped to the RV / Tent / Lodging toggle; each per-filter slice still carries its own `unitTypeResult` for internal use.
+   */
+  unitTypeComparisonResult: CampspotUnitTypeChartsResult;
+  byUnitFilter: Record<RvOverviewUnitFilterKey, CampspotRvOverviewSlice>;
+};
+
+type RvOverviewFoldBundle = {
+  rvMap: ReturnType<typeof createRvMapFoldState>;
+  trends: ReturnType<typeof createTrendsFoldState>;
+  sizeTier: ReturnType<typeof createSizeTierFoldState>;
+  unitType: ReturnType<typeof createUnitTypeFoldState>;
+  season: ReturnType<typeof createSeasonRatesFoldState>;
+  surface: ReturnType<typeof createSurfaceRatesFoldState>;
+  amenityProps: ReturnType<typeof createAmenityPropertiesFoldState>;
+  amenityAdr: ReturnType<typeof createAmenityAdrFoldState>;
+  rvParking: ReturnType<typeof createRvParkingFoldState>;
+};
+
+function createRvOverviewFoldBundle(): RvOverviewFoldBundle {
+  return {
+    rvMap: createRvMapFoldState(),
+    trends: createTrendsFoldState(),
+    sizeTier: createSizeTierFoldState(),
+    unitType: createUnitTypeFoldState(),
+    season: createSeasonRatesFoldState(),
+    surface: createSurfaceRatesFoldState(),
+    amenityProps: createAmenityPropertiesFoldState(),
+    amenityAdr: createAmenityAdrFoldState(),
+    rvParking: createRvParkingFoldState(),
+  };
+}
+
+function foldWideRowIntoBundle(
+  b: RvOverviewFoldBundle,
+  row: CampspotRvOverviewWideRow,
+  unitFilter: RvOverviewUnitFilterKey
+): void {
+  const regionalBands =
+    unitFilter === 'glamping'
+      ? RV_MAP_REGIONAL_RATE_BANDS_GLAMPING
+      : RV_MAP_REGIONAL_RATE_BANDS_DEFAULT;
+  foldRvMapRows(b.rvMap.regional, b.rvMap.stateBuckets, b.rvMap.stateAdrChoropleth, [row], regionalBands);
+  foldTrendsRows(b.trends, [row]);
+  foldSizeTierRows(b.sizeTier, [row]);
+  foldUnitTypeRows(b.unitType.adrBuckets, b.unitType.byProp, [row]);
+  foldSeasonRateRows(b.season, [row]);
+  foldSurfaceRows(b.surface, [row]);
+  foldAmenityPropertyRows(b.amenityProps, [row]);
+  foldAmenityAdrRows(b.amenityAdr, [row]);
+  foldRvParkingRows(b.rvParking.distCounts, b.rvParking.rateBuckets, [row]);
+}
+
+function finalizeRvOverviewFoldBundle(
+  b: RvOverviewFoldBundle,
+  rowsScanned: number,
+  fetchError: string | null
+): CampspotRvOverviewSlice {
+  const unitFinal = finalizeUnitTypeFoldState(b.unitType);
+  const rvFinal = finalizeRvParkingFoldState(b.rvParking);
+  return {
+    mapResult: finalizeRvMapFoldState(b.rvMap, rowsScanned, fetchError),
+    trendsResult: { rows: finalizeTrendsFoldState(b.trends), rowsScanned, error: fetchError },
+    sizeResult: { rows: finalizeSizeTierFoldState(b.sizeTier), rowsScanned, error: fetchError },
+    unitTypeResult: {
+      rateRows: unitFinal.rateRows,
+      distributionRows: unitFinal.distributionRows,
+      rowsScanned,
+      error: fetchError,
+    },
+    seasonRatesResult: { rows: finalizeSeasonRatesFoldState(b.season), rowsScanned, error: fetchError },
+    surfaceRatesResult: { rows: finalizeSurfaceRatesFoldState(b.surface), rowsScanned, error: fetchError },
+    amenityPropsResult: {
+      rows: finalizeAmenityPropertiesFoldState(b.amenityProps),
+      rowsScanned,
+      error: fetchError,
+    },
+    amenityAdrResult: { rows: finalizeAmenityAdrFoldState(b.amenityAdr), rowsScanned, error: fetchError },
+    rvParkingChartsResult: {
+      distribution: rvFinal.distribution,
+      rateBars: rvFinal.rateBars,
+      totalRvRows: rvFinal.totalRvRows,
+      rowsScanned,
+      error: fetchError,
+    },
+  };
+}
+
+function bundleErrorSlice(rowsScanned: number, message: string): CampspotRvOverviewSlice {
   const emptyRv = aggregateCampspotRowsToRvParkingCharts([]);
   return {
     mapResult: { ...aggregateCampspotRowsToRvMapData([]), rowsScanned, error: message },
@@ -166,7 +267,32 @@ function bundleError(rowsScanned: number, message: string): CampspotRvOverviewPa
   };
 }
 
-function isValidRvOverviewPayload(v: unknown): v is CampspotRvOverviewPageData {
+function emptyUnitTypeComparisonResult(
+  rowsScanned: number,
+  error: string | null
+): CampspotUnitTypeChartsResult {
+  return {
+    rateRows: aggregateCampspotRowsToUnitTypeByRate([]),
+    distributionRows: aggregateCampspotRowsToUnitTypeDistribution([]),
+    rowsScanned,
+    error,
+  };
+}
+
+function bundleError(rowsScanned: number, message: string): CampspotRvOverviewPageData {
+  const slice = bundleErrorSlice(rowsScanned, message);
+  return {
+    rowsScannedTotal: rowsScanned,
+    unitTypeComparisonResult: emptyUnitTypeComparisonResult(rowsScanned, message),
+    byUnitFilter: {
+      rv: slice,
+      tent: slice,
+      glamping: slice,
+    },
+  };
+}
+
+function isValidRvOverviewSlice(v: unknown): boolean {
   if (!v || typeof v !== 'object') return false;
   const o = v as Record<string, unknown>;
   const map = o.mapResult as Record<string, unknown> | undefined;
@@ -177,6 +303,31 @@ function isValidRvOverviewPayload(v: unknown): v is CampspotRvOverviewPageData {
     typeof map.rowsScanned === 'number' &&
     typeof trends.rowsScanned === 'number'
   );
+}
+
+function isValidUnitTypeChartsPayload(v: unknown): boolean {
+  if (!v || typeof v !== 'object') return false;
+  const o = v as Record<string, unknown>;
+  return (
+    Array.isArray(o.rateRows) &&
+    Array.isArray(o.distributionRows) &&
+    typeof o.rowsScanned === 'number' &&
+    (o.error === null || typeof o.error === 'string')
+  );
+}
+
+function isValidRvOverviewPayload(v: unknown): v is CampspotRvOverviewPageData {
+  if (!v || typeof v !== 'object') return false;
+  const o = v as Record<string, unknown>;
+  if (typeof o.rowsScannedTotal !== 'number') return false;
+  if (!isValidUnitTypeChartsPayload(o.unitTypeComparisonResult)) return false;
+  const bf = o.byUnitFilter;
+  if (!bf || typeof bf !== 'object') return false;
+  const rec = bf as Record<string, unknown>;
+  for (const k of UNIT_TYPE_CHART_BUCKET_KEYS) {
+    if (!isValidRvOverviewSlice(rec[k])) return false;
+  }
+  return true;
 }
 
 async function readRvOverviewPayloadFromPg(
@@ -197,7 +348,7 @@ async function writeRvOverviewPayloadToPg(
   supabase: SupabaseClient,
   payload: CampspotRvOverviewPageData
 ): Promise<void> {
-  const rowsScanned = payload.mapResult.rowsScanned;
+  const rowsScanned = payload.rowsScannedTotal;
   const { error } = await supabase.from(CAMPSPOT_RV_OVERVIEW_CACHE_TABLE).upsert(
     {
       id: 1,
@@ -219,15 +370,12 @@ async function writeRvOverviewPayloadToPg(
 export async function fetchCampspotRvOverviewPageDataUncached(
   supabase: SupabaseClient
 ): Promise<CampspotRvOverviewPageData> {
-  const rvMap = createRvMapFoldState();
-  const trends = createTrendsFoldState();
-  const sizeTier = createSizeTierFoldState();
-  const unitType = createUnitTypeFoldState();
-  const season = createSeasonRatesFoldState();
-  const surface = createSurfaceRatesFoldState();
-  const amenityProps = createAmenityPropertiesFoldState();
-  const amenityAdr = createAmenityAdrFoldState();
-  const rvParking = createRvParkingFoldState();
+  const byFilter: Record<RvOverviewUnitFilterKey, RvOverviewFoldBundle> = {
+    rv: createRvOverviewFoldBundle(),
+    tent: createRvOverviewFoldBundle(),
+    glamping: createRvOverviewFoldBundle(),
+  };
+  const unitTypeComparisonFold = createUnitTypeFoldState();
 
   let rowsScanned = 0;
   let fetchError: string | null = null;
@@ -270,15 +418,16 @@ export async function fetchCampspotRvOverviewPageDataUncached(
 
       const rows = data as unknown as CampspotRvOverviewWideRow[];
 
-      foldRvMapRows(rvMap.regional, rvMap.stateBuckets, rvMap.stateAdrChoropleth, rows);
-      foldTrendsRows(trends, rows);
-      foldSizeTierRows(sizeTier, rows);
-      foldUnitTypeRows(unitType.adrBuckets, unitType.byProp, rows);
-      foldSeasonRateRows(season, rows);
-      foldSurfaceRows(surface, rows);
-      foldAmenityPropertyRows(amenityProps, rows);
-      foldAmenityAdrRows(amenityAdr, rows);
-      foldRvParkingRows(rvParking.distCounts, rvParking.rateBuckets, rows);
+      for (const row of rows) {
+        const fk = classifyCampspotUnitChartBucket(row);
+        if (!fk) continue;
+        foldWideRowIntoBundle(byFilter[fk], row, fk);
+        foldUnitTypeRows(
+          unitTypeComparisonFold.adrBuckets,
+          unitTypeComparisonFold.byProp,
+          [row]
+        );
+      }
 
       rowsScanned += data.length;
       if (data.length < pageSize || rowsScanned >= CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
@@ -294,33 +443,19 @@ export async function fetchCampspotRvOverviewPageDataUncached(
     return bundleError(rowsScanned, fetchError);
   }
 
-  const unitFinal = finalizeUnitTypeFoldState(unitType);
-  const rvFinal = finalizeRvParkingFoldState(rvParking);
-
+  const unitTypeCompFinal = finalizeUnitTypeFoldState(unitTypeComparisonFold);
   return {
-    mapResult: finalizeRvMapFoldState(rvMap, rowsScanned, null),
-    trendsResult: { rows: finalizeTrendsFoldState(trends), rowsScanned, error: null },
-    sizeResult: { rows: finalizeSizeTierFoldState(sizeTier), rowsScanned, error: null },
-    unitTypeResult: {
-      rateRows: unitFinal.rateRows,
-      distributionRows: unitFinal.distributionRows,
+    rowsScannedTotal: rowsScanned,
+    unitTypeComparisonResult: {
+      rateRows: unitTypeCompFinal.rateRows,
+      distributionRows: unitTypeCompFinal.distributionRows,
       rowsScanned,
       error: null,
     },
-    seasonRatesResult: { rows: finalizeSeasonRatesFoldState(season), rowsScanned, error: null },
-    surfaceRatesResult: { rows: finalizeSurfaceRatesFoldState(surface), rowsScanned, error: null },
-    amenityPropsResult: {
-      rows: finalizeAmenityPropertiesFoldState(amenityProps),
-      rowsScanned,
-      error: null,
-    },
-    amenityAdrResult: { rows: finalizeAmenityAdrFoldState(amenityAdr), rowsScanned, error: null },
-    rvParkingChartsResult: {
-      distribution: rvFinal.distribution,
-      rateBars: rvFinal.rateBars,
-      totalRvRows: rvFinal.totalRvRows,
-      rowsScanned,
-      error: null,
+    byUnitFilter: {
+      rv: finalizeRvOverviewFoldBundle(byFilter.rv, rowsScanned, null),
+      tent: finalizeRvOverviewFoldBundle(byFilter.tent, rowsScanned, null),
+      glamping: finalizeRvOverviewFoldBundle(byFilter.glamping, rowsScanned, null),
     },
   };
 }
@@ -335,13 +470,14 @@ async function loadCampspotRvOverviewPageData(): Promise<CampspotRvOverviewPageD
   if (fromPg) return fromPg;
 
   const computed = await fetchCampspotRvOverviewPageDataUncached(supabase);
-  if (!computed.mapResult.error) {
+  if (!computed.byUnitFilter.rv.mapResult.error) {
     await writeRvOverviewPayloadToPg(supabase, computed);
   }
   return computed;
 }
 
-const RV_OVERVIEW_CACHE_KEY = 'campspot-rv-industry-overview-page-v4-pg-snapshot';
+const RV_OVERVIEW_CACHE_KEY =
+  'campspot-rv-industry-overview-page-v15-adr-2025-annual-column-only-pg-snapshot';
 
 /** ~90 days — source data is updated on a quarterly cadence; avoids repeated full-table scans. */
 export const RV_INDUSTRY_OVERVIEW_REVALIDATE_SECONDS = 90 * 24 * 60 * 60;

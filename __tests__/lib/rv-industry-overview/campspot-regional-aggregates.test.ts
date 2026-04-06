@@ -46,4 +46,26 @@ describe('aggregateCampspotRowsToRegions', () => {
     const by = aggregateCampspotRowsToRegions(rows);
     expect(by.west.siteCount).toBe(1);
   });
+
+  it('excludes occupancy below 10%, at 100%, or above 100%', () => {
+    const rows: CampspotAggRow[] = [
+      { state: 'CA', avg_retail_daily_rate_2025: '100', occupancy_rate_2025: '9' },
+      { state: 'CA', avg_retail_daily_rate_2025: '100', occupancy_rate_2025: '100' },
+      { state: 'CA', avg_retail_daily_rate_2025: '100', occupancy_rate_2025: '100.1' },
+      { state: 'CA', avg_retail_daily_rate_2025: '100', occupancy_rate_2025: '50' },
+    ];
+    const by = aggregateCampspotRowsToRegions(rows);
+    expect(by.west.siteCount).toBe(1);
+  });
+
+  it('excludes ARDR outside $10–$3,000', () => {
+    const rows: CampspotAggRow[] = [
+      { state: 'CA', avg_retail_daily_rate_2025: '9', occupancy_rate_2025: '50' },
+      { state: 'CA', avg_retail_daily_rate_2025: '3001', occupancy_rate_2025: '50' },
+      { state: 'CA', avg_retail_daily_rate_2025: '80', occupancy_rate_2025: '50' },
+    ];
+    const by = aggregateCampspotRowsToRegions(rows);
+    expect(by.west.siteCount).toBe(1);
+    expect(by.west.meanAdr).toBe(80);
+  });
 });

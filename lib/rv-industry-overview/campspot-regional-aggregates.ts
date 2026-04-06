@@ -10,6 +10,10 @@ import {
   parseCampspotNumber,
   parseCampspotOccupancyPercent,
 } from '@/lib/rv-industry-overview/campspot-field-parse';
+import {
+  passesStandardCampspotOccupancyPercent,
+  passesStandardCampspotRetailRateUsd,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import {
   type RvIndustryRegionId,
@@ -61,7 +65,13 @@ function foldCampspotRows(
 
     const adr = parseCampspotNumber(row.avg_retail_daily_rate_2025);
     const occ = parseCampspotOccupancyPercent(row.occupancy_rate_2025);
-    if (adr == null || adr <= 0 || occ == null) continue;
+    if (
+      adr == null ||
+      occ == null ||
+      !passesStandardCampspotRetailRateUsd(adr) ||
+      !passesStandardCampspotOccupancyPercent(occ)
+    )
+      continue;
 
     const bucket = accum[regionId];
     bucket.adr.push(adr);

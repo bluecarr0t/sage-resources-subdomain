@@ -30,7 +30,7 @@ describe('aggregateCampspotRowsToRvParkingCharts', () => {
       description: null,
       property_name: 'P',
       quantity_of_units: null,
-      retail_daily_rate_ytd: null,
+      occupancy_rate_2025: '50',
       avg_retail_daily_rate_2025: '60',
       rv_parking: null,
       ...p,

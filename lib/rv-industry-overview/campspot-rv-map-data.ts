@@ -11,6 +11,14 @@ import {
   parseCampspotNumber,
   parseCampspotOccupancyPercent,
 } from '@/lib/rv-industry-overview/campspot-field-parse';
+import {
+  parseCampspotAdr2025FromAnnualColumn,
+  RV_OVERVIEW_STANDARD_OCC_MIN_PCT,
+  RV_OVERVIEW_STANDARD_RATE_MAX_USD,
+  RV_OVERVIEW_STANDARD_RATE_MIN_USD,
+  passesStandardCampspotOccupancyPercent,
+  passesStandardCampspotRetailRateUsd,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import {
   type RvIndustryRegionId,
@@ -21,7 +29,34 @@ import type { RegionalAggregateRow } from '@/lib/rv-industry-overview/campspot-r
 
 const PAGE_SIZE = 1000;
 
-/** Min Campspot rows with positive 2025 ARDR (YTD preferred) per state to show a rate on the state ADR choropleth. */
+/**
+ * Upper ARDR bound for five-region labels + state ADR choropleth on the regional map (2025).
+ * RV/Tent use the standard $3k cap; Lodging (glamping) uses a higher ceiling so premium Western
+ * markets are not excluded solely by rate (see `RV_MAP_REGIONAL_RATE_BANDS_GLAMPING`).
+ */
+export type RvMapRegionalRateBands = { maxRetailUsd: number };
+
+export const RV_MAP_REGIONAL_RATE_BANDS_DEFAULT: RvMapRegionalRateBands = {
+  maxRetailUsd: RV_OVERVIEW_STANDARD_RATE_MAX_USD,
+};
+
+/** Lodging toggle only — glamping ADR often exceeds $3k in CA/OR/CO-style markets. */
+export const RV_MAP_REGIONAL_RATE_BANDS_GLAMPING: RvMapRegionalRateBands = {
+  maxRetailUsd: 10_000,
+};
+
+function passesRegionalMapRetailRateUsd(
+  rateUsd: number | null,
+  bands: RvMapRegionalRateBands
+): boolean {
+  return (
+    rateUsd != null &&
+    rateUsd >= RV_OVERVIEW_STANDARD_RATE_MIN_USD &&
+    rateUsd <= bands.maxRetailUsd
+  );
+}
+
+/** Min Campspot rows with positive 2025 ARDR (`avg_retail_daily_rate_2025`) per state to show a rate on the state ADR choropleth. */
 export const STATE_ADR_CHOROPLETH_MIN_N = 8;
 
 export type StateAdrChoroplethEntry = {
@@ -36,7 +71,6 @@ export type CampspotRvMapAggRow = {
   occupancy_rate_2025: string | null;
   occupancy_rate_2024: string | null;
   avg_retail_daily_rate_2024: string | null;
-  retail_daily_rate_ytd: string | null;
 };
 
 export type StateRvMetrics = {
@@ -51,7 +85,7 @@ export type StateRvMetrics = {
 export type CampspotRvMapDataResult = {
   byRegion: Record<RvIndustryRegionId, RegionalAggregateRow>;
   byState: Record<string, StateRvMetrics>;
-  /** Per-state 2025 ARDR for choropleth: any row in the five regions with positive parsed ARDR (YTD when present). No occupancy filter. */
+  /** Per-state 2025 ARDR for choropleth: parsed `avg_retail_daily_rate_2025` in regional rate band. No occupancy filter. */
   stateAdrChoropleth: Record<string, StateAdrChoroplethEntry>;
   rowsScanned: number;
   error: string | null;
@@ -75,12 +109,9 @@ function emptyRegionalAccum(): RegionalAccum {
   };
 }
 
+/** 2025 ARDR for map/regional aggregates: `avg_retail_daily_rate_2025` only. */
 function adr2025ForRow(row: CampspotRvMapAggRow): number | null {
-  const ytd = parseCampspotNumber(row.retail_daily_rate_ytd);
-  if (ytd != null && ytd > 0) return ytd;
-  const annual = parseCampspotNumber(row.avg_retail_daily_rate_2025);
-  if (annual != null && annual > 0) return annual;
-  return null;
+  return parseCampspotAdr2025FromAnnualColumn(row);
 }
 
 /** 2024 ARDR: annual column only (no year-to-date field in Campspot for 2024). */
@@ -90,11 +121,85 @@ function adr2024ForRow(row: CampspotRvMapAggRow): number | null {
   return null;
 }
 
+/**
+ * 2025 ARDR for the state modal matched cohort (YoY with 2024): annual avg column only.
+ * Matches the definition of `adr2024ForRow` so we do not compare full-year 2024 averages
+ * to 2025 YTD retail (which often reads higher and breaks state-level YoY).
+ * Choropleth and five-region labels still use `adr2025ForRow` (YTD → annual → seasonal).
+ */
+function adr2025AnnualForMatchedCohortRow(row: CampspotRvMapAggRow): number | null {
+  const annual = parseCampspotNumber(row.avg_retail_daily_rate_2025);
+  if (annual != null && annual > 0) return annual;
+  return null;
+}
+
+/** Why a row is omitted from the five-region ARDR + occupancy labels on the regional map (2025 gate). */
+export type RegionalMapLabelExclusionReason =
+  | 'missing_2025_adr'
+  | 'adr_below_standard_minimum_usd'
+  | 'adr_above_standard_maximum_usd'
+  | 'missing_occupancy'
+  | 'occupancy_below_standard_minimum_pct'
+  | 'occupancy_at_or_above_100_pct';
+
+export type RegionalMapLabelDiagnostics =
+  | { included: true; adr2025: number; occ2025: number }
+  | {
+      included: false;
+      reason: RegionalMapLabelExclusionReason;
+      /** Parsed 2025 ADR when present (may be outside standard band). */
+      adr2025: number | null;
+      occ2025: number | null;
+    };
+
+/**
+ * Explains whether a row counts toward regional map label means (same logic as `foldRvMapRows`).
+ * Choropleth ADR uses `adr2025` when non-null and in the regional rate band (no occupancy gate).
+ */
+export function regionalMapLabelDiagnostics(
+  row: CampspotRvMapAggRow,
+  bands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT
+): RegionalMapLabelDiagnostics {
+  const adrRegional = adr2025ForRow(row);
+  const occ = parseCampspotOccupancyPercent(row.occupancy_rate_2025);
+
+  if (adrRegional == null) {
+    return { included: false, reason: 'missing_2025_adr', adr2025: null, occ2025: occ };
+  }
+  if (!passesRegionalMapRetailRateUsd(adrRegional, bands)) {
+    return {
+      included: false,
+      reason:
+        adrRegional < RV_OVERVIEW_STANDARD_RATE_MIN_USD
+          ? 'adr_below_standard_minimum_usd'
+          : 'adr_above_standard_maximum_usd',
+      adr2025: adrRegional,
+      occ2025: occ,
+    };
+  }
+  if (occ == null) {
+    return { included: false, reason: 'missing_occupancy', adr2025: adrRegional, occ2025: null };
+  }
+  if (!passesStandardCampspotOccupancyPercent(occ)) {
+    return {
+      included: false,
+      reason:
+        occ < RV_OVERVIEW_STANDARD_OCC_MIN_PCT
+          ? 'occupancy_below_standard_minimum_pct'
+          : 'occupancy_at_or_above_100_pct',
+      adr2025: adrRegional,
+      occ2025: occ,
+    };
+  }
+  return { included: true, adr2025: adrRegional, occ2025: occ };
+}
+
 export function foldRvMapRows(
   regional: RegionalAccum,
   stateBuckets: Map<string, StateBucket>,
   stateAdrChoropleth: Map<string, number[]>,
-  rows: CampspotRvMapAggRow[]
+  rows: CampspotRvMapAggRow[],
+  regionalRateBands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT
 ): void {
   for (const row of rows) {
     const stateAbbr = normalizeState(row.state);
@@ -102,18 +207,19 @@ export function foldRvMapRows(
 
     const regionId = getRvIndustryRegionForStateAbbr(stateAbbr);
     if (regionId) {
-      const adr = parseCampspotNumber(row.avg_retail_daily_rate_2025);
-      const occ = parseCampspotOccupancyPercent(row.occupancy_rate_2025);
-      if (adr != null && adr > 0 && occ != null) {
+      const labelDiag = regionalMapLabelDiagnostics(row, regionalRateBands);
+      if (labelDiag.included) {
         const bucket = regional[regionId];
-        bucket.adr.push(adr);
-        bucket.occ.push(occ);
+        bucket.adr.push(labelDiag.adr2025);
+        bucket.occ.push(labelDiag.occ2025);
       }
 
-      const adrChoro = adr2025ForRow(row);
-      if (adrChoro != null && adrChoro > 0) {
+      if (
+        labelDiag.adr2025 != null &&
+        passesRegionalMapRetailRateUsd(labelDiag.adr2025, regionalRateBands)
+      ) {
         const arr = stateAdrChoropleth.get(stateAbbr) ?? [];
-        arr.push(adrChoro);
+        arr.push(labelDiag.adr2025);
         stateAdrChoropleth.set(stateAbbr, arr);
       }
     }
@@ -127,8 +233,17 @@ export function foldRvMapRows(
     const o4 = parseCampspotOccupancyPercent(row.occupancy_rate_2024);
     const a4 = adr2024ForRow(row);
     const o5 = parseCampspotOccupancyPercent(row.occupancy_rate_2025);
-    const a5 = adr2025ForRow(row);
-    if (o4 != null && a4 != null && o5 != null && a5 != null) {
+    const a5 = adr2025AnnualForMatchedCohortRow(row);
+    if (
+      o4 != null &&
+      a4 != null &&
+      o5 != null &&
+      a5 != null &&
+      passesStandardCampspotOccupancyPercent(o4) &&
+      passesStandardCampspotOccupancyPercent(o5) &&
+      passesStandardCampspotRetailRateUsd(a4) &&
+      passesStandardCampspotRetailRateUsd(a5)
+    ) {
       sb.occ2024.push(o4);
       sb.adr2024.push(a4);
       sb.occ2025.push(o5);
@@ -213,7 +328,10 @@ function stateAdrMapToChoropleth(m: Map<string, number[]>): Record<string, State
 }
 
 /** Pure aggregation for tests */
-export function aggregateCampspotRowsToRvMapData(rows: CampspotRvMapAggRow[]): {
+export function aggregateCampspotRowsToRvMapData(
+  rows: CampspotRvMapAggRow[],
+  regionalRateBands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT
+): {
   byRegion: Record<RvIndustryRegionId, RegionalAggregateRow>;
   byState: Record<string, StateRvMetrics>;
   stateAdrChoropleth: Record<string, StateAdrChoroplethEntry>;
@@ -221,7 +339,7 @@ export function aggregateCampspotRowsToRvMapData(rows: CampspotRvMapAggRow[]): {
   const regional = emptyRegionalAccum();
   const stateBuckets = new Map<string, StateBucket>();
   const stateAdrChoropleth = new Map<string, number[]>();
-  foldRvMapRows(regional, stateBuckets, stateAdrChoropleth, rows);
+  foldRvMapRows(regional, stateBuckets, stateAdrChoropleth, rows, regionalRateBands);
   return {
     byRegion: regionalToByRegion(regional),
     byState: stateBucketsToByState(stateBuckets),
@@ -258,7 +376,7 @@ export async function fetchCampspotRvMapData(
       .from('campspot')
       .select(
         'state, avg_retail_daily_rate_2025, occupancy_rate_2025, ' +
-          'occupancy_rate_2024, avg_retail_daily_rate_2024, retail_daily_rate_ytd'
+          'occupancy_rate_2024, avg_retail_daily_rate_2024'
       )
       .order('id', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1);

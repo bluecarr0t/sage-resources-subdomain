@@ -14,9 +14,11 @@ import {
   type StateAdrChoroplethEntry,
 } from '@/lib/rv-industry-overview/campspot-rv-map-data';
 import {
+  ALASKA_ALBERS_INSET_NUDGE,
   EXCLUDE_FROM_MAP_ABBR,
   fullStateNameToUspsAbbr,
   getRvIndustryRegionForStateAbbr,
+  HAWAII_INSET_TRANSLATE_X_PX,
 } from '@/lib/rv-industry-overview/us-rv-regions';
 import { US_STATE_NAMES } from '@/lib/us-states';
 
@@ -25,8 +27,8 @@ const US_STATES_TOPO_URL =
 
 const MAP_W = 960;
 const MAP_H = 580;
-const HAWAII_INSET_W = 118;
-const HAWAII_INSET_H = 76;
+const HAWAII_INSET_W = 124;
+const HAWAII_INSET_H = 80;
 
 const ADR_COLOR_LO = 40;
 const ADR_COLOR_HI = 80;
@@ -148,7 +150,7 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
   return (
     <div className="rounded-lg bg-white px-3 py-4 sm:px-5 sm:py-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-        <div className="relative min-w-0 flex-1 overflow-hidden rounded-lg bg-white">
+        <div className="relative min-w-0 flex-1 overflow-hidden rounded-lg bg-white pb-3">
           <ComposableMap
             projection="geoAlbersUsa"
             width={MAP_W}
@@ -184,6 +186,16 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
                       ? fillForKind(kind, entry?.meanAdr ?? null)
                       : '#d1d5db';
                     if (!abbr) return null;
+                    if (abbr === 'AK') {
+                      return (
+                        <g
+                          key={geo.rsmKey}
+                          transform={`translate(${ALASKA_ALBERS_INSET_NUDGE.x}, ${ALASKA_ALBERS_INSET_NUDGE.y})`}
+                        >
+                          <Geography geography={geo} style={geographyChoroStyle(fill)} />
+                        </g>
+                      );
+                    }
                     return (
                       <Geography
                         key={geo.rsmKey}
@@ -213,22 +225,33 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
                         geometry: geo.geometry as GeoJSON.Geometry,
                       } as GeoJSON.Feature);
                       if (!c || c.length < 2) return null;
+                      const labelEl = (
+                        <text
+                          textAnchor="middle"
+                          pointerEvents="none"
+                          style={{
+                            fill: '#111827',
+                            fontSize: 8,
+                            fontWeight: 600,
+                            paintOrder: 'stroke',
+                            stroke: 'rgba(255,255,255,0.88)',
+                            strokeWidth: 2,
+                          }}
+                        >
+                          {label}
+                        </text>
+                      );
                       return (
                         <Marker key={`lbl-${geo.rsmKey}`} coordinates={c as [number, number]}>
-                          <text
-                            textAnchor="middle"
-                            pointerEvents="none"
-                            style={{
-                              fill: '#111827',
-                              fontSize: 8,
-                              fontWeight: 600,
-                              paintOrder: 'stroke',
-                              stroke: 'rgba(255,255,255,0.88)',
-                              strokeWidth: 2,
-                            }}
-                          >
-                            {label}
-                          </text>
+                          {abbr === 'AK' ? (
+                            <g
+                              transform={`translate(${ALASKA_ALBERS_INSET_NUDGE.x}, ${ALASKA_ALBERS_INSET_NUDGE.y})`}
+                            >
+                              {labelEl}
+                            </g>
+                          ) : (
+                            labelEl
+                          )}
                         </Marker>
                       );
                     } catch {
@@ -275,13 +298,16 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
             </Geographies>
           </ComposableMap>
 
-          <div className="pointer-events-none absolute z-10 left-[1.25%] bottom-[33%] w-[min(12.5vw,124px)]">
+          <div
+            className="pointer-events-none absolute z-10 left-[0.75%] bottom-[4%] w-[min(14vw,132px)] max-[480px]:left-[1%] max-[480px]:bottom-[6%]"
+            style={{ transform: `translateX(${HAWAII_INSET_TRANSLATE_X_PX}px)` }}
+          >
             <div className="pointer-events-auto w-full [&_svg]:h-auto [&_svg]:w-full">
               <ComposableMap
                 projection="geoMercator"
                 projectionConfig={{
-                  center: [-157.35, 20.05] as [number, number],
-                  scale: 4400,
+                  center: [-157.2, 20.2] as [number, number],
+                  scale: 4200,
                 }}
                 width={HAWAII_INSET_W}
                 height={HAWAII_INSET_H}

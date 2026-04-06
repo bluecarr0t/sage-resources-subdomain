@@ -119,8 +119,8 @@ async function main() {
     const t1 = performance.now();
     const elapsed = t1 - t0;
     console.log(`  wall time: ${fmtMs(elapsed)}`);
-    console.log(`  rows scanned: ${result.mapResult.rowsScanned}`);
-    console.log(`  map error: ${result.mapResult.error ?? 'none'}`);
+    console.log(`  rows scanned: ${result.rowsScannedTotal}`);
+    console.log(`  map error: ${result.byUnitFilter.rv.mapResult.error ?? 'none'}`);
 
     if (rowsInSnapshot != null && elapsed > 0) {
       const ratio = elapsed / snapMedian;

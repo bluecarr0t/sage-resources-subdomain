@@ -9,10 +9,11 @@ import {
   classifyCampspotUnitChartBucket,
   type CampspotUnitTypeAggRow,
 } from '@/lib/rv-industry-overview/campspot-unit-type-chart-data';
+import { meanRounded } from '@/lib/rv-industry-overview/campspot-field-parse';
 import {
-  meanRounded,
-  parseCampspotNumber,
-} from '@/lib/rv-industry-overview/campspot-field-parse';
+  parseCampspotAdr2025FromAnnualColumn,
+  passesStandardCampspotRetailRateUsd,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
 
@@ -35,7 +36,6 @@ export type CampspotAmenityAdrAggRow = {
   description: string | null;
   property_name: string | null;
   quantity_of_units: string | null;
-  retail_daily_rate_ytd: string | null;
   avg_retail_daily_rate_2025: string | null;
   sewer_hook_up: string | null;
   water_hookup: string | null;
@@ -67,11 +67,7 @@ function campspotTruthyAmenity(val: unknown): boolean {
 }
 
 function adr2025ForRow(row: CampspotAmenityAdrAggRow): number | null {
-  const ytd = parseCampspotNumber(row.retail_daily_rate_ytd);
-  if (ytd != null && ytd > 0) return ytd;
-  const annual = parseCampspotNumber(row.avg_retail_daily_rate_2025);
-  if (annual != null && annual > 0) return annual;
-  return null;
+  return parseCampspotAdr2025FromAnnualColumn(row);
 }
 
 function amenityPresent(row: CampspotAmenityAdrAggRow, key: AmenityAdrChartKey): boolean {
@@ -101,10 +97,10 @@ export function foldAmenityAdrRows(
     const stateAbbr = normalizeState(row.state);
     if (!stateAbbr || !getRvIndustryRegionForStateAbbr(stateAbbr)) continue;
 
-    if (classifyCampspotUnitChartBucket(row as CampspotUnitTypeAggRow) !== 'rv') continue;
+    if (classifyCampspotUnitChartBucket(row as unknown as CampspotUnitTypeAggRow) !== 'rv') continue;
 
     const adr = adr2025ForRow(row);
-    if (adr == null) continue;
+    if (adr == null || !passesStandardCampspotRetailRateUsd(adr)) continue;
 
     for (const key of AMENITY_ADR_CHART_KEYS) {
       const b = buckets[key];
@@ -152,7 +148,7 @@ export function aggregateCampspotRowsToAmenityAdrChart(
 }
 
 const SELECT_FIELDS =
-  'state, city, unit_type, description, property_name, quantity_of_units, retail_daily_rate_ytd, avg_retail_daily_rate_2025, ' +
+  'state, city, unit_type, description, property_name, quantity_of_units, avg_retail_daily_rate_2025, ' +
   'sewer_hook_up, water_hookup, hot_tub_sauna, pool';
 
 export async function fetchCampspotAmenityAdrChartData(

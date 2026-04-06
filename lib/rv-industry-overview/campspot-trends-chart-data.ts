@@ -1,7 +1,7 @@
 /**
  * Regional + U.S. aggregates for the RV trends combo chart (2024 vs 2025, Campspot only).
  * 2024: occupancy_rate_2024 + avg_retail_daily_rate_2024 (same-row cohort).
- * 2025: occupancy_rate_2025 + retail_daily_rate_ytd when parseable, else avg_retail_daily_rate_2025 (same-row cohort).
+ * 2025: occupancy_rate_2025 + avg_retail_daily_rate_2025 (same-row cohort).
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -12,6 +12,11 @@ import {
   parseCampspotNumber,
   parseCampspotOccupancyPercent,
 } from '@/lib/rv-industry-overview/campspot-field-parse';
+import {
+  parseCampspotAdr2025FromAnnualColumn,
+  passesStandardCampspotOccupancyPercent,
+  passesStandardCampspotRetailRateUsd,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import {
   type RvIndustryRegionId,
@@ -60,7 +65,6 @@ export type CampspotTrendsAggRow = {
   avg_retail_daily_rate_2024: string | null;
   occupancy_rate_2025: string | null;
   avg_retail_daily_rate_2025: string | null;
-  retail_daily_rate_ytd: string | null;
 };
 
 function emptyBuckets(): Record<TrendsChartCategoryKey, Bucket> {
@@ -81,11 +85,7 @@ function emptyBuckets(): Record<TrendsChartCategoryKey, Bucket> {
 }
 
 function adr2025ForRow(row: CampspotTrendsAggRow): number | null {
-  const ytd = parseCampspotNumber(row.retail_daily_rate_ytd);
-  if (ytd != null && ytd > 0) return ytd;
-  const annual = parseCampspotNumber(row.avg_retail_daily_rate_2025);
-  if (annual != null && annual > 0) return annual;
-  return null;
+  return parseCampspotAdr2025FromAnnualColumn(row);
 }
 
 export function createTrendsFoldState(): Record<TrendsChartCategoryKey, Bucket> {
@@ -106,7 +106,12 @@ export function foldTrendsRows(
 
     const o4 = parseCampspotOccupancyPercent(row.occupancy_rate_2024);
     const a4 = parseCampspotNumber(row.avg_retail_daily_rate_2024);
-    if (o4 != null && a4 != null && a4 > 0) {
+    if (
+      o4 != null &&
+      a4 != null &&
+      passesStandardCampspotOccupancyPercent(o4) &&
+      passesStandardCampspotRetailRateUsd(a4)
+    ) {
       for (const k of targets) {
         const b = buckets[k];
         b.occ2024.push(o4);
@@ -116,7 +121,12 @@ export function foldTrendsRows(
 
     const o5 = parseCampspotOccupancyPercent(row.occupancy_rate_2025);
     const a5 = adr2025ForRow(row);
-    if (o5 != null && a5 != null && a5 > 0) {
+    if (
+      o5 != null &&
+      a5 != null &&
+      passesStandardCampspotOccupancyPercent(o5) &&
+      passesStandardCampspotRetailRateUsd(a5)
+    ) {
       for (const k of targets) {
         const b = buckets[k];
         b.occ2025.push(o5);
@@ -171,7 +181,7 @@ export async function fetchCampspotTrendsChartData(
       .from('campspot')
       .select(
         'state, occupancy_rate_2024, avg_retail_daily_rate_2024, ' +
-          'occupancy_rate_2025, avg_retail_daily_rate_2025, retail_daily_rate_ytd'
+          'occupancy_rate_2025, avg_retail_daily_rate_2025'
       )
       .order('id', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1);

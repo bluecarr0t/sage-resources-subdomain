@@ -2,24 +2,20 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Download, Loader2 } from 'lucide-react';
 import VisualizationJpgDownload, {
   type VisualizationJpgDownloadHandle,
 } from './VisualizationJpgDownload';
-import {
-  STATE_ADR_CHOROPLETH_MIN_N,
-  type CampspotRvMapDataResult,
-} from '@/lib/rv-industry-overview/campspot-rv-map-data';
-import type { CampspotSizeTierChartResult } from '@/lib/rv-industry-overview/campspot-size-tier-chart-data';
-import type { CampspotTrendsChartResult } from '@/lib/rv-industry-overview/campspot-trends-chart-data';
+import { STATE_ADR_CHOROPLETH_MIN_N } from '@/lib/rv-industry-overview/campspot-rv-map-data';
 import type { CampspotUnitTypeChartsResult } from '@/lib/rv-industry-overview/campspot-unit-type-chart-data';
-import type { CampspotSeasonRatesChartResult } from '@/lib/rv-industry-overview/campspot-season-rates-chart-data';
-import type { CampspotSurfaceRatesChartResult } from '@/lib/rv-industry-overview/campspot-surface-rates-chart-data';
-import type { CampspotAmenityPropertiesChartResult } from '@/lib/rv-industry-overview/campspot-amenity-properties-chart-data';
-import type { CampspotAmenityAdrChartResult } from '@/lib/rv-industry-overview/campspot-amenity-adr-chart-data';
-import type { CampspotRvParkingChartsResult } from '@/lib/rv-industry-overview/campspot-rv-parking-charts-data';
+import type {
+  CampspotRvOverviewSlice,
+  RvOverviewUnitFilterKey,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-page-data';
 import { Button } from '@/components/ui';
+
+const UNIT_FILTER_TOGGLE_ORDER = ['rv', 'tent', 'glamping'] as const satisfies readonly RvOverviewUnitFilterKey[];
 
 const RegionalCampspotMap = dynamic(
   () => import('./RegionalCampspotMap'),
@@ -83,30 +79,31 @@ function MapSkeleton() {
 }
 
 type Props = {
-  mapResult: CampspotRvMapDataResult;
-  trendsResult: CampspotTrendsChartResult;
-  sizeResult: CampspotSizeTierChartResult;
-  unitTypeResult: CampspotUnitTypeChartsResult;
-  seasonRatesResult: CampspotSeasonRatesChartResult;
-  surfaceRatesResult: CampspotSurfaceRatesChartResult;
-  amenityPropsResult: CampspotAmenityPropertiesChartResult;
-  amenityAdrResult: CampspotAmenityAdrChartResult;
-  rvParkingChartsResult: CampspotRvParkingChartsResult;
+  byUnitFilter: Record<RvOverviewUnitFilterKey, CampspotRvOverviewSlice>;
+  /** Avg. rate + mix charts: all unit types together; ignores the RV/Tent/Lodging toggle. */
+  unitTypeComparisonResult: CampspotUnitTypeChartsResult;
 };
 
 const BETWEEN_DOWNLOADS_MS = 400;
 
 export default function RvIndustryOverviewClient({
-  mapResult,
-  trendsResult,
-  sizeResult,
-  unitTypeResult,
-  seasonRatesResult,
-  surfaceRatesResult,
-  amenityPropsResult,
-  amenityAdrResult,
-  rvParkingChartsResult,
+  byUnitFilter,
+  unitTypeComparisonResult,
 }: Props) {
+  const [unitFilter, setUnitFilter] = useState<RvOverviewUnitFilterKey>('rv');
+  const {
+    mapResult,
+    trendsResult,
+    sizeResult,
+    seasonRatesResult,
+    surfaceRatesResult,
+    amenityPropsResult,
+    amenityAdrResult,
+  } = byUnitFilter[unitFilter];
+
+  /** RV parking mix + rates: always the RV Sites cohort, not the selected Lodging/Tent/RV toggle. */
+  const rvParkingChartsResult = byUnitFilter.rv.rvParkingChartsResult;
+
   const t = useTranslations('admin.rvIndustryOverview');
   const tt = useTranslations('admin.rvIndustryOverview.trends');
   const ts = useTranslations('admin.rvIndustryOverview.sizeImpact');
@@ -119,6 +116,12 @@ export default function RvIndustryOverviewClient({
   const taa = useTranslations('admin.rvIndustryOverview.amenitiesByAvgAdr');
   const trp = useTranslations('admin.rvIndustryOverview.rvSiteTypesDistributionRates');
   const tsc = useTranslations('admin.rvIndustryOverview.stateAdrChoropleth');
+
+  const format = useFormatter();
+  const rowsScannedLine = (count: number) =>
+    t('rowsScanned', {
+      count: format.number(count, { maximumFractionDigits: 0 }),
+    });
 
   const mapDlRef = useRef<VisualizationJpgDownloadHandle>(null);
   const trendsDlRef = useRef<VisualizationJpgDownloadHandle>(null);
@@ -138,7 +141,7 @@ export default function RvIndustryOverviewClient({
     !mapResult.error ||
     !trendsResult.error ||
     !sizeResult.error ||
-    !unitTypeResult.error ||
+    !unitTypeComparisonResult.error ||
     !seasonRatesResult.error ||
     !surfaceRatesResult.error ||
     !amenityPropsResult.error ||
@@ -164,11 +167,11 @@ export default function RvIndustryOverviewClient({
         await sizeDlRef.current?.downloadJpeg();
         await pause();
       }
-      if (!unitTypeResult.error) {
+      if (!unitTypeComparisonResult.error) {
         await unitTypeRateDlRef.current?.downloadJpeg();
         await pause();
       }
-      if (!unitTypeResult.error) {
+      if (!unitTypeComparisonResult.error) {
         await unitTypeDistDlRef.current?.downloadJpeg();
         await pause();
       }
@@ -205,7 +208,7 @@ export default function RvIndustryOverviewClient({
     mapResult.error,
     trendsResult.error,
     sizeResult.error,
-    unitTypeResult.error,
+    unitTypeComparisonResult.error,
     seasonRatesResult.error,
     surfaceRatesResult.error,
     amenityPropsResult.error,
@@ -241,6 +244,58 @@ export default function RvIndustryOverviewClient({
         </div>
       </header>
 
+      <div
+        className="rounded-lg border border-gray-200 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-900/40"
+        role="region"
+        aria-label={t('unitFilterRegionAria')}
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <p
+            id="rv-overview-unit-filter-label"
+            className="text-sm font-medium text-gray-800 dark:text-gray-200"
+          >
+            {t('unitFilterLabel')}
+          </p>
+          <div
+            className="flex flex-wrap gap-1.5"
+            role="group"
+            aria-labelledby="rv-overview-unit-filter-label"
+          >
+            {UNIT_FILTER_TOGGLE_ORDER.map((key) => (
+              <Button
+                key={key}
+                type="button"
+                variant={unitFilter === key ? 'primary' : 'secondary'}
+                size="sm"
+                aria-pressed={unitFilter === key}
+                onClick={() => setUnitFilter(key)}
+              >
+                {key === 'rv'
+                  ? t('unitFilter.rv')
+                  : key === 'tent'
+                    ? t('unitFilter.tent')
+                    : t('unitFilter.glamping')}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{t('unitFilterHint')}</p>
+        <details className="mt-4 rounded-md border border-gray-200 bg-white/60 px-3 py-2 dark:border-gray-600 dark:bg-gray-950/40">
+          <summary className="cursor-pointer text-sm font-medium text-gray-800 dark:text-gray-200">
+            {t('standardFiltersTitle')}
+          </summary>
+          <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 text-xs text-gray-600 dark:border-gray-600 dark:text-gray-400">
+            <p>{t('standardFiltersIntro')}</p>
+            <ul className="list-disc space-y-1.5 pl-4">
+              <li>{t('standardFiltersOccupancy')}</li>
+              <li>{t('standardFiltersRate')}</li>
+              <li>{t('standardFiltersPropertyCohort')}</li>
+              <li>{t('standardFiltersByChart')}</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
       <section aria-labelledby="viz1-heading">
         {mapResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -262,7 +317,7 @@ export default function RvIndustryOverviewClient({
               <div className="max-w-4xl space-y-2 text-xs text-gray-500 dark:text-gray-400">
                 <p>
                   <span className="font-medium text-gray-600 dark:text-gray-300">
-                    {t('rowsScanned', { count: mapResult.rowsScanned })}
+                    {rowsScannedLine(mapResult.rowsScanned)}
                   </span>{' '}
                   {t('rowsScannedDetail')}
                 </p>
@@ -302,7 +357,7 @@ export default function RvIndustryOverviewClient({
             }
             footerBelow={
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('rowsScanned', { count: trendsResult.rowsScanned })}
+                {rowsScannedLine(trendsResult.rowsScanned)}
               </p>
             }
           >
@@ -334,7 +389,7 @@ export default function RvIndustryOverviewClient({
             }
             footerBelow={
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('rowsScanned', { count: sizeResult.rowsScanned })}
+                {rowsScannedLine(sizeResult.rowsScanned)}
               </p>
             }
           >
@@ -343,9 +398,9 @@ export default function RvIndustryOverviewClient({
         )}
       </section>
 
-      {unitTypeResult.error ? (
+      {unitTypeComparisonResult.error ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-          {tuc('loadError')} {unitTypeResult.error}
+          {tuc('loadError')} {unitTypeComparisonResult.error}
         </p>
       ) : (
         <>
@@ -363,16 +418,17 @@ export default function RvIndustryOverviewClient({
               captionBelow={
                 <div className="max-w-4xl space-y-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400">{tur('intro')}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{tuc('notAffectedByUnitFilter')}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{tur('methodology')}</p>
                 </div>
               }
               footerBelow={
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('rowsScanned', { count: unitTypeResult.rowsScanned })}
+                  {rowsScannedLine(unitTypeComparisonResult.rowsScanned)}
                 </p>
               }
             >
-              <UnitTypeByRateChart rows={unitTypeResult.rateRows} />
+              <UnitTypeByRateChart rows={unitTypeComparisonResult.rateRows} />
             </VisualizationJpgDownload>
           </section>
 
@@ -390,16 +446,17 @@ export default function RvIndustryOverviewClient({
               captionBelow={
                 <div className="max-w-4xl space-y-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400">{tud('intro')}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{tuc('notAffectedByUnitFilter')}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{tud('methodology')}</p>
                 </div>
               }
               footerBelow={
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('rowsScanned', { count: unitTypeResult.rowsScanned })}
+                  {rowsScannedLine(unitTypeComparisonResult.rowsScanned)}
                 </p>
               }
             >
-              <UnitTypeDistributionChart rows={unitTypeResult.distributionRows} />
+              <UnitTypeDistributionChart rows={unitTypeComparisonResult.distributionRows} />
             </VisualizationJpgDownload>
           </section>
         </>
@@ -429,7 +486,7 @@ export default function RvIndustryOverviewClient({
             }
             footerBelow={
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('rowsScanned', { count: seasonRatesResult.rowsScanned })}
+                {rowsScannedLine(seasonRatesResult.rowsScanned)}
               </p>
             }
           >
@@ -462,7 +519,7 @@ export default function RvIndustryOverviewClient({
             }
             footerBelow={
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('rowsScanned', { count: surfaceRatesResult.rowsScanned })}
+                {rowsScannedLine(surfaceRatesResult.rowsScanned)}
               </p>
             }
           >
@@ -495,7 +552,7 @@ export default function RvIndustryOverviewClient({
             }
             footerBelow={
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('rowsScanned', { count: amenityPropsResult.rowsScanned })}
+                {rowsScannedLine(amenityPropsResult.rowsScanned)}
               </p>
             }
           >
@@ -528,7 +585,7 @@ export default function RvIndustryOverviewClient({
             }
             footerBelow={
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('rowsScanned', { count: amenityAdrResult.rowsScanned })}
+                {rowsScannedLine(amenityAdrResult.rowsScanned)}
               </p>
             }
           >
@@ -556,12 +613,13 @@ export default function RvIndustryOverviewClient({
             captionBelow={
               <div className="max-w-4xl space-y-2">
                 <p className="text-sm text-gray-600 dark:text-gray-400">{trp('intro')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{trp('notAffectedByUnitFilter')}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{trp('methodology')}</p>
               </div>
             }
             footerBelow={
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('rowsScanned', { count: rvParkingChartsResult.rowsScanned })}
+                {rowsScannedLine(rvParkingChartsResult.rowsScanned)}
               </p>
             }
           >
@@ -604,7 +662,7 @@ export default function RvIndustryOverviewClient({
             }
             footerBelow={
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('rowsScanned', { count: mapResult.rowsScanned })}
+                {rowsScannedLine(mapResult.rowsScanned)}
               </p>
             }
           >

@@ -18,30 +18,13 @@ export const metadata: Metadata = {
 };
 
 export default async function RvIndustryOverviewPage() {
-  const {
-    mapResult,
-    trendsResult,
-    sizeResult,
-    unitTypeResult,
-    seasonRatesResult,
-    surfaceRatesResult,
-    amenityPropsResult,
-    amenityAdrResult,
-    rvParkingChartsResult,
-  } = await getCampspotRvOverviewPageData();
+  const pageData = await getCampspotRvOverviewPageData();
 
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <RvIndustryOverviewClient
-        mapResult={mapResult}
-        trendsResult={trendsResult}
-        sizeResult={sizeResult}
-        unitTypeResult={unitTypeResult}
-        seasonRatesResult={seasonRatesResult}
-        surfaceRatesResult={surfaceRatesResult}
-        amenityPropsResult={amenityPropsResult}
-        amenityAdrResult={amenityAdrResult}
-        rvParkingChartsResult={rvParkingChartsResult}
+        byUnitFilter={pageData.byUnitFilter}
+        unitTypeComparisonResult={pageData.unitTypeComparisonResult}
       />
     </main>
   );

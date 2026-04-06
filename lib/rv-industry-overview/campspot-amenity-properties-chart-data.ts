@@ -7,6 +7,7 @@ import { normalizeState } from '@/lib/anchor-point-insights/utils';
 import { createServerClient } from '@/lib/supabase';
 import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
+import { rowPassesStandardCampspot2025Quality } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 
 const PAGE_SIZE = 1000;
 
@@ -24,6 +25,8 @@ export type CampspotAmenityPropertiesAggRow = {
   property_name: string | null;
   city: string | null;
   state: string | null;
+  occupancy_rate_2025: string | null;
+  avg_retail_daily_rate_2025: string | null;
   hot_tub_sauna: string | null;
   pool: string | null;
   electrical_hook_up: string | null;
@@ -90,6 +93,8 @@ export function foldAmenityPropertyRows(
   for (const row of rows) {
     const stateAbbr = normalizeState(row.state);
     if (!stateAbbr || !getRvIndustryRegionForStateAbbr(stateAbbr)) continue;
+
+    if (!rowPassesStandardCampspot2025Quality(row)) continue;
 
     const pk = propertyGroupKey(row);
     if (!pk) continue;
@@ -161,7 +166,8 @@ export function aggregateCampspotRowsToAmenityPropertyPcts(
 }
 
 const SELECT_FIELDS =
-  'property_name, city, state, hot_tub_sauna, pool, electrical_hook_up, sewer_hook_up, water_hookup';
+  'property_name, city, state, occupancy_rate_2025, avg_retail_daily_rate_2025, ' +
+  'hot_tub_sauna, pool, electrical_hook_up, sewer_hook_up, water_hookup';
 
 export async function fetchCampspotAmenityPropertiesChartData(
   supabase: SupabaseClient

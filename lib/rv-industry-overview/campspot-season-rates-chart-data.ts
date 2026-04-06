@@ -6,6 +6,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
 import { createServerClient } from '@/lib/supabase';
 import { meanRounded, parseCampspotNumber } from '@/lib/rv-industry-overview/campspot-field-parse';
+import { passesStandardCampspotRetailRateUsd } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
 
@@ -79,7 +80,7 @@ export function foldSeasonRateRows(
 
     for (const key of SEASON_RATE_KEYS) {
       const n = parseCampspotNumber(row[key]);
-      if (n != null && n > 0) {
+      if (n != null && passesStandardCampspotRetailRateUsd(n)) {
         buckets[key].push(n);
       }
     }

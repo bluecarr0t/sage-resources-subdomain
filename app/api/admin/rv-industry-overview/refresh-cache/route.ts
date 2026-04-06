@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      rowsScanned: data.mapResult.rowsScanned,
-      mapError: data.mapResult.error,
+      rowsScanned: data.rowsScannedTotal,
+      mapError: data.byUnitFilter.rv.mapResult.error,
       computedAt: new Date().toISOString(),
     });
   } catch (err) {

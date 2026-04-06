@@ -41,8 +41,9 @@ type Props = {
   rows: SeasonRatesChartRow[];
 };
 
-function niceCeil(step: number, floor: number, ...vals: number[]) {
-  const m = Math.max(floor, ...vals.map((v) => (Number.isFinite(v) ? v : 0)));
+/** Next tick ≥ max value (step-aligned). Do not pass a high floor — that wastes axis space (e.g. $100 when data tops out ~$72). */
+function niceCeil(step: number, minCeil: number, ...vals: number[]) {
+  const m = Math.max(minCeil, ...vals.map((v) => (Number.isFinite(v) ? v : 0)));
   return Math.ceil(m / step) * step;
 }
 
@@ -56,7 +57,7 @@ export default function RatesBySeasonChart({ rows }: Props) {
       const v = r?.avgRate;
       const isEmpty = r == null || v == null || (r.n ?? 0) === 0;
       const value = isEmpty ? 0 : v;
-      const labelText = isEmpty ? '—' : `$${Math.round(v!)}`;
+      const labelText = isEmpty ? '-' : `$${Math.round(v!)}`;
       return {
         rateKey,
         name: t(`bar.${rateKey}`),
@@ -71,7 +72,8 @@ export default function RatesBySeasonChart({ rows }: Props) {
     const vals = rows
       .filter((r) => r.n > 0 && r.avgRate != null)
       .map((r) => r.avgRate as number);
-    return niceCeil(10, 100, ...vals, 0);
+    if (vals.length === 0) return 80;
+    return niceCeil(10, 0, ...vals);
   }, [rows]);
 
   const yMin = useMemo(() => {
@@ -102,7 +104,7 @@ export default function RatesBySeasonChart({ rows }: Props) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
-              margin={{ top: 36, right: 12, left: 4, bottom: 88 }}
+              margin={{ top: 36, right: 12, left: 4, bottom: 100 }}
               barCategoryGap="12%"
               barGap={4}
             >
@@ -114,8 +116,8 @@ export default function RatesBySeasonChart({ rows }: Props) {
                 interval={0}
                 angle={-32}
                 textAnchor="end"
-                height={84}
-                tickMargin={14}
+                height={96}
+                tickMargin={24}
               />
               <YAxis
                 domain={[yMin, yMax]}

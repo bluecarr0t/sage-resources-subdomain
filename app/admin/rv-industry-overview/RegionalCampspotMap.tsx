@@ -12,7 +12,9 @@ import { geoCentroid } from 'd3-geo';
 import type { RegionalAggregateRow } from '@/lib/rv-industry-overview/campspot-regional-aggregates';
 import type { StateRvMetrics } from '@/lib/rv-industry-overview/campspot-rv-map-data';
 import {
+  ALASKA_ALBERS_INSET_NUDGE,
   EXCLUDE_FROM_MAP_ABBR,
+  HAWAII_INSET_TRANSLATE_X_PX,
   RV_INDUSTRY_REGION_IDS,
   RV_REGION_FILL,
   RV_REGION_LABEL_COORDS,
@@ -30,9 +32,9 @@ const US_STATES_TOPO_URL =
 const MAP_W = 960;
 const MAP_H = 580;
 
-/** Hawaii-only Mercator inset (main map excludes HI so we can place it above the Alaska inset). */
-const HAWAII_INSET_W = 118;
-const HAWAII_INSET_H = 76;
+/** Hawaii-only Mercator inset (main map excludes HI; placed bottom-left, west of Alaska’s Albers inset). */
+const HAWAII_INSET_W = 124;
+const HAWAII_INSET_H = 80;
 
 function geographyInteractionStyle(fill: string) {
   return {
@@ -66,12 +68,12 @@ function parseOnlyHawaii(geos: GeoJSON.Feature[]) {
 }
 
 function formatPct(n: number | null): string {
-  if (n == null) return '—';
+  if (n == null) return '-';
   return `${n.toFixed(1)}%`;
 }
 
 function formatAdr(n: number | null): string {
-  if (n == null) return '—';
+  if (n == null) return '-';
   return `$${n.toFixed(2)}`;
 }
 
@@ -85,7 +87,7 @@ function hasStateMetrics(m: StateRvMetrics | undefined): boolean {
 }
 
 function formatOccDelta(from: number | null, to: number | null): string {
-  if (from == null || to == null) return '—';
+  if (from == null || to == null) return '-';
   const d = to - from;
   if (d === 0) return '0.0';
   const sign = d > 0 ? '+' : '−';
@@ -93,7 +95,7 @@ function formatOccDelta(from: number | null, to: number | null): string {
 }
 
 function formatAdrDelta(from: number | null, to: number | null): string {
-  if (from == null || to == null) return '—';
+  if (from == null || to == null) return '-';
   const d = to - from;
   if (d === 0) return '$0.00 (0.0%)';
   const sign = d > 0 ? '+' : '−';
@@ -176,7 +178,7 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-lg bg-white dark:bg-white"
+      className="relative w-full overflow-hidden rounded-lg bg-white pb-3 dark:bg-white"
       onMouseLeave={() => setTip(null)}
     >
       <ComposableMap
@@ -209,33 +211,41 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
                   ? RV_REGION_FILL[regionId]
                   : '#d1d5db';
                 if (!abbr) return null;
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    aria-label={ts('selectAria', {
-                      state: stateDisplayName(abbr),
-                    })}
-                    onMouseEnter={(e) => {
-                      setTip({
-                        abbr,
-                        clientX: e.clientX,
-                        clientY: e.clientY,
-                      });
-                    }}
-                    onMouseMove={(e) => {
-                      setTip({ abbr, clientX: e.clientX, clientY: e.clientY });
-                    }}
-                    onClick={() => setModalAbbr(abbr)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setModalAbbr(abbr);
-                      }
-                    }}
-                    style={geographyInteractionStyle(fill)}
-                  />
-                );
+                const geoProps = {
+                  geography: geo,
+                  'aria-label': ts('selectAria', {
+                    state: stateDisplayName(abbr),
+                  }),
+                  onMouseEnter: (e: { clientX: number; clientY: number }) => {
+                    setTip({
+                      abbr,
+                      clientX: e.clientX,
+                      clientY: e.clientY,
+                    });
+                  },
+                  onMouseMove: (e: { clientX: number; clientY: number }) => {
+                    setTip({ abbr, clientX: e.clientX, clientY: e.clientY });
+                  },
+                  onClick: () => setModalAbbr(abbr),
+                  onKeyDown: (e: { key: string; preventDefault: () => void }) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setModalAbbr(abbr);
+                    }
+                  },
+                  style: geographyInteractionStyle(fill),
+                };
+                if (abbr === 'AK') {
+                  return (
+                    <g
+                      key={geo.rsmKey}
+                      transform={`translate(${ALASKA_ALBERS_INSET_NUDGE.x}, ${ALASKA_ALBERS_INSET_NUDGE.y})`}
+                    >
+                      <Geography {...geoProps} />
+                    </g>
+                  );
+                }
+                return <Geography key={geo.rsmKey} {...geoProps} />;
               })}
               {geographies.map((geo) => {
                 const name = geo.properties?.name;
@@ -248,22 +258,33 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
                     geometry: geo.geometry as GeoJSON.Geometry,
                   } as GeoJSON.Feature);
                   if (!c || c.length < 2) return null;
+                  const labelText = (
+                    <text
+                      textAnchor="middle"
+                      pointerEvents="none"
+                      style={{
+                        fill: '#111827',
+                        fontSize: 9,
+                        fontWeight: 600,
+                        paintOrder: 'stroke',
+                        stroke: 'rgba(255,255,255,0.85)',
+                        strokeWidth: 2,
+                      }}
+                    >
+                      {abbr}
+                    </text>
+                  );
                   return (
                     <Marker key={`lbl-${geo.rsmKey}`} coordinates={c as [number, number]}>
-                      <text
-                        textAnchor="middle"
-                        pointerEvents="none"
-                        style={{
-                          fill: '#111827',
-                          fontSize: 9,
-                          fontWeight: 600,
-                          paintOrder: 'stroke',
-                          stroke: 'rgba(255,255,255,0.85)',
-                          strokeWidth: 2,
-                        }}
-                      >
-                        {abbr}
-                      </text>
+                      {abbr === 'AK' ? (
+                        <g
+                          transform={`translate(${ALASKA_ALBERS_INSET_NUDGE.x}, ${ALASKA_ALBERS_INSET_NUDGE.y})`}
+                        >
+                          {labelText}
+                        </g>
+                      ) : (
+                        labelText
+                      )}
                     </Marker>
                   );
                 } catch {
@@ -302,13 +323,16 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
         </Geographies>
       </ComposableMap>
 
-      <div className="pointer-events-none absolute z-10 left-[1.25%] bottom-[33%] w-[min(12.5vw,124px)]">
+      <div
+        className="pointer-events-none absolute z-10 left-[0.75%] bottom-[4%] w-[min(14vw,132px)] max-[480px]:left-[1%] max-[480px]:bottom-[6%]"
+        style={{ transform: `translateX(${HAWAII_INSET_TRANSLATE_X_PX}px)` }}
+      >
         <div className="pointer-events-auto w-full [&_svg]:h-auto [&_svg]:w-full">
           <ComposableMap
             projection="geoMercator"
             projectionConfig={{
-              center: [-157.35, 20.05] as [number, number],
-              scale: 4400,
+              center: [-157.2, 20.2] as [number, number],
+              scale: 4200,
             }}
             width={HAWAII_INSET_W}
             height={HAWAII_INSET_H}

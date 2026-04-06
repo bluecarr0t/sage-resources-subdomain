@@ -50,7 +50,7 @@ export default function UnitTypeDistributionChart({ rows }: Props) {
       const v = r?.pctMean;
       const isEmpty = r == null || v == null || (r.nProperties ?? 0) === 0;
       const value = isEmpty ? 0 : v;
-      const labelText = isEmpty ? '—' : `${(v as number).toFixed(1)}%`;
+      const labelText = isEmpty ? '-' : `${(v as number).toFixed(1)}%`;
       return {
         bucketKey,
         name: t(`bucket.${bucketKey}`),

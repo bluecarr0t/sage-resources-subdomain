@@ -12,7 +12,6 @@ describe('aggregateCampspotRowsToTrendsChart', () => {
         avg_retail_daily_rate_2024: '100',
         occupancy_rate_2025: '55',
         avg_retail_daily_rate_2025: '110',
-        retail_daily_rate_ytd: '',
       },
       {
         state: 'CA',
@@ -20,7 +19,6 @@ describe('aggregateCampspotRowsToTrendsChart', () => {
         avg_retail_daily_rate_2024: '120',
         occupancy_rate_2025: '0.56',
         avg_retail_daily_rate_2025: '90',
-        retail_daily_rate_ytd: '95',
       },
       {
         state: 'TX',
@@ -28,7 +26,6 @@ describe('aggregateCampspotRowsToTrendsChart', () => {
         avg_retail_daily_rate_2024: '80',
         occupancy_rate_2025: '45',
         avg_retail_daily_rate_2025: '85',
-        retail_daily_rate_ytd: '',
       },
     ];
     const out = aggregateCampspotRowsToTrendsChart(rows);
@@ -38,7 +35,7 @@ describe('aggregateCampspotRowsToTrendsChart', () => {
     expect(us.adr2024).toBe(100);
     expect(us.n2025).toBe(3);
     expect(us.occ2025).toBeCloseTo(52, 5);
-    expect(us.adr2025).toBe(96.67);
+    expect(us.adr2025).toBe(95);
 
     const west = out.find((r) => r.categoryKey === 'west')!;
     expect(west.n2024).toBe(2);
@@ -47,7 +44,7 @@ describe('aggregateCampspotRowsToTrendsChart', () => {
     expect(sw.occ2024).toBe(40);
   });
 
-  it('prefers retail_daily_rate_ytd for 2025 ADR when valid', () => {
+  it('uses avg_retail_daily_rate_2025 only for 2025 ADR', () => {
     const rows: CampspotTrendsAggRow[] = [
       {
         state: 'FL',
@@ -55,11 +52,10 @@ describe('aggregateCampspotRowsToTrendsChart', () => {
         avg_retail_daily_rate_2024: '70',
         occupancy_rate_2025: '52',
         avg_retail_daily_rate_2025: '999',
-        retail_daily_rate_ytd: '72',
       },
     ];
     const out = aggregateCampspotRowsToTrendsChart(rows);
     const se = out.find((r) => r.categoryKey === 'southeast')!;
-    expect(se.adr2025).toBe(72);
+    expect(se.adr2025).toBe(999);
   });
 });

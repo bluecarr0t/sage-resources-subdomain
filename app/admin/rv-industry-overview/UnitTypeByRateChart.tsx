@@ -50,7 +50,7 @@ export default function UnitTypeByRateChart({ rows }: Props) {
       const v = r?.avgAdr2025;
       const isEmpty = r == null || v == null || (r.n ?? 0) === 0;
       const value = isEmpty ? 0 : v;
-      const labelText = isEmpty ? '—' : `$${Math.round(v!)}`;
+      const labelText = isEmpty ? '-' : `$${Math.round(v!)}`;
       return {
         bucketKey,
         name: t(`bucket.${bucketKey}`),

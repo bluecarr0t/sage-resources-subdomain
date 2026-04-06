@@ -11,7 +11,6 @@ function row(p: Partial<CampspotAmenityAdrAggRow>): CampspotAmenityAdrAggRow {
     description: null,
     property_name: 'Park',
     quantity_of_units: null,
-    retail_daily_rate_ytd: null,
     avg_retail_daily_rate_2025: '60',
     sewer_hook_up: null,
     water_hookup: null,

@@ -9,11 +9,12 @@ import {
   classifyCampspotUnitChartBucket,
   type CampspotUnitTypeAggRow,
 } from '@/lib/rv-industry-overview/campspot-unit-type-chart-data';
-import {
-  meanRounded,
-  parseCampspotNumber,
-} from '@/lib/rv-industry-overview/campspot-field-parse';
+import { meanRounded } from '@/lib/rv-industry-overview/campspot-field-parse';
 import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
+import {
+  parseCampspotAdr2025FromAnnualColumn,
+  rowPassesStandardCampspot2025Quality,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
 
 const PAGE_SIZE = 1000;
@@ -31,7 +32,7 @@ export type CampspotRvParkingAggRow = {
   description: string | null;
   property_name: string | null;
   quantity_of_units: string | null;
-  retail_daily_rate_ytd: string | null;
+  occupancy_rate_2025: string | null;
   avg_retail_daily_rate_2025: string | null;
   rv_parking: string | null;
 };
@@ -69,11 +70,7 @@ export function classifyRvParkingType(raw: unknown): RvParkingDistKey {
 }
 
 function adr2025ForRow(row: CampspotRvParkingAggRow): number | null {
-  const ytd = parseCampspotNumber(row.retail_daily_rate_ytd);
-  if (ytd != null && ytd > 0) return ytd;
-  const annual = parseCampspotNumber(row.avg_retail_daily_rate_2025);
-  if (annual != null && annual > 0) return annual;
-  return null;
+  return parseCampspotAdr2025FromAnnualColumn(row);
 }
 
 function emptyDistCounts(): Record<RvParkingDistKey, number> {
@@ -104,6 +101,8 @@ export function foldRvParkingRows(
     if (!stateAbbr || !getRvIndustryRegionForStateAbbr(stateAbbr)) continue;
 
     if (classifyCampspotUnitChartBucket(row as CampspotUnitTypeAggRow) !== 'rv') continue;
+
+    if (!rowPassesStandardCampspot2025Quality(row)) continue;
 
     const pk = classifyRvParkingType(row.rv_parking);
     distCounts[pk] += 1;
@@ -163,7 +162,8 @@ export function aggregateCampspotRowsToRvParkingCharts(
 }
 
 const SELECT_FIELDS =
-  'state, city, unit_type, description, property_name, quantity_of_units, retail_daily_rate_ytd, avg_retail_daily_rate_2025, rv_parking';
+  'state, city, unit_type, description, property_name, quantity_of_units, occupancy_rate_2025, ' +
+  'avg_retail_daily_rate_2025, rv_parking';
 
 export async function fetchCampspotRvParkingChartsData(
   supabase: SupabaseClient
