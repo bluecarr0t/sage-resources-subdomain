@@ -5,6 +5,7 @@
  */
 
 import { OpenAI } from 'openai';
+import { isGarbageReportCity } from '@/lib/report-location-quality';
 import type { ParsedDocxReport } from './feasibility-docx-parser';
 import type { RawDocxContent } from './feasibility-docx-parser';
 
@@ -110,7 +111,7 @@ ${context}
 Return a JSON object with ONLY these keys: ${missing.join(', ')}. Use null for any field you cannot confidently extract from the document.
 - resort_name: the property/resort name (e.g. "Mountain View Glamping")
 - address: full street address if present
-- city: city name
+- city: city name only (never sentence fragments like "term. In particular")
 - state: US state code (e.g. "TN", "CA")
 - zip_code: ZIP code if present
 - client_name: person name if document is prepared for a person
@@ -173,9 +174,17 @@ Return ONLY valid JSON. No markdown or extra text.`;
         if (!isBlacklisted && strVal.length >= 3 && strVal.length <= 50) {
           (result as Record<string, unknown>)[field] = strVal;
         }
+      } else if (field === 'city') {
+        if (!isGarbageReportCity(strVal) && strVal.length >= 2 && strVal.length <= 80) {
+          (result as Record<string, unknown>)[field] = strVal;
+        }
       } else {
         (result as Record<string, unknown>)[field] = strVal;
       }
+    }
+
+    if (isGarbageReportCity(result.city)) {
+      result.city = null;
     }
 
     return result;

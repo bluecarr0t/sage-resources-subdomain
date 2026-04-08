@@ -11,6 +11,8 @@ import { parseLocationStringField } from '@/lib/parse-csv-location';
 import { reportYearFromStudyId } from '@/lib/report-year-from-study-id';
 import { canonicalReportService } from '@/lib/report-service-display';
 import { deriveClientMapPropertyHeadline } from '@/lib/client-map-display-name';
+import { clientMapReportDedupeKey } from '@/lib/client-map-report-dedupe-key';
+import { hasValidClientMapCity } from '@/lib/report-location-quality';
 import {
   DEFAULT_CENTER,
   STATE_CENTERS,
@@ -72,18 +74,6 @@ function jitterDuplicateMarkerPositions<
   });
 }
 
-/**
- * One map pin per logical job number. CSV import uses study_id suffixes like JOB__2 for
- * duplicate rows; strip those so they share a key with JOB.
- */
-function studyIdMapDedupeKey(studyId: string | null | undefined): string {
-  const s = String(studyId ?? '').trim();
-  if (!s) return '';
-  const u = s.toUpperCase();
-  const stripped = u.replace(/__\d+$/, '');
-  return stripped;
-}
-
 function reportRowScore(r: Record<string, unknown>): number {
   let s = 0;
   if (r.has_docx) s += 100;
@@ -133,7 +123,7 @@ function dedupeReportsForClientMap(rows: Record<string, unknown>[]): Record<stri
   const byKey = new Map<string, Record<string, unknown>>();
 
   for (const r of rows) {
-    const jobKey = studyIdMapDedupeKey(r.study_id as string | null | undefined);
+    const jobKey = clientMapReportDedupeKey(r.study_id as string | null | undefined);
     const key = jobKey ? jobKey : `__row:${String(r.id)}`;
 
     const prev = byKey.get(key);
@@ -179,7 +169,9 @@ export const GET = withAdminAuth(async (_request, auth) => {
       throw error;
     }
 
-    const rows = dedupeReportsForClientMap((data || []) as Record<string, unknown>[]);
+    const rows = dedupeReportsForClientMap((data || []) as Record<string, unknown>[]).filter(
+      (r) => hasValidClientMapCity(r.city as string | null | undefined)
+    );
 
     // Use only Past Report uploaded Report details (unit_descriptions, unit_mix) — not comparables
     const unitTypesByReport = new Map<string, string[]>();

@@ -19,7 +19,7 @@ Typical name: `Sage Outdoor Client Projects - Website MAP - Internal Projects Ma
 
 - **Service**: Mostly `Appraisal`, `Feasibility Study`, `Consulting`, `Market Study`, glamping revenue–style lines (mapped to **Revenue Projection** / `revenue_projection`), and compounds like `Feasibility Study and Appraisal`.
 - **Resort Type**: Phrases like `Proposed 97-Site RV Park`, `Existing ... Marina`, `Glamping Resort`, `Outdoor`, `Tiny Home`, `Micro Resort` — mapped to `rv`, `glamping`, `rv_glamping`, `marina`, or `outdoor_hospitality`.
-- **Job Number quirks**: Duplicate IDs in the sheet (e.g. same job listed twice for different client names) receive `study_id` suffixes `__2`, `__3`, …
+- **Job Number quirks**: Duplicate IDs in the sheet (e.g. same job listed twice for different locations) receive `study_id` suffixes `__2`, `__3`, … The admin Client Map and public client-work map show **one pin per `study_id`**, so `JOB` and `JOB__2` appear as **separate markers** (not merged).
 - **Junk rows**: Lines with `Value in column …` in the job column are skipped.
 
 ## Import command

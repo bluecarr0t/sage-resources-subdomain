@@ -17,6 +17,7 @@ import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { parseDocxReport } from '@/lib/parsers/feasibility-docx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
 import { geocodeAddress } from '@/lib/geocode';
+import { isGarbageReportCity } from '@/lib/report-location-quality';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
 import { isValidTempUploadPath } from '@/lib/sanitize-filename';
 import { logAdminAudit } from '@/lib/admin-audit';
@@ -389,7 +390,9 @@ export async function POST(request: NextRequest) {
                   });
                 reportUpdate.property_name = normalizedPropertyName;
                 reportUpdate.title = normalizedTitle;
-                reportUpdate.city = parsed.city ?? null;
+                const safeCity =
+                  parsed.city && !isGarbageReportCity(parsed.city) ? parsed.city.trim() : null;
+                reportUpdate.city = safeCity;
                 reportUpdate.state = parsed.state ?? null;
                 reportUpdate.address_1 = parsed.address ?? null;
                 reportUpdate.zip_code = parsed.zip_code ?? null;
@@ -411,11 +414,11 @@ export async function POST(request: NextRequest) {
                 if (parsed.financial_assumptions) reportUpdate.financial_assumptions = parsed.financial_assumptions;
                 if (parsed.recommendations) reportUpdate.recommendations = parsed.recommendations;
                 if (parsed.extraction_messages?.length) reportUpdate.docx_extraction_messages = parsed.extraction_messages;
-                reportUpdate.location = [parsed.city, parsed.state].filter(Boolean).join(', ') || null;
+                reportUpdate.location = [safeCity, parsed.state].filter(Boolean).join(', ') || null;
 
-                if (parsed.city || parsed.address) {
+                if (safeCity || parsed.address) {
                   const coords = await geocodeAddress(
-                    parsed.address || '', parsed.city || '', parsed.state || '', parsed.zip_code || '', 'USA'
+                    parsed.address || '', safeCity || '', parsed.state || '', parsed.zip_code || '', 'USA'
                   );
                   if (coords) {
                     reportUpdate.latitude = coords.lat;

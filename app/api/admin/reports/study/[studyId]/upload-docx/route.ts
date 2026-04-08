@@ -16,6 +16,7 @@ import { withAdminAuth } from '@/lib/require-admin-auth';
 import { parseDocxReport } from '@/lib/parsers/feasibility-docx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
 import { geocodeAddress } from '@/lib/geocode';
+import { isGarbageReportCity } from '@/lib/report-location-quality';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
 import { logAdminAudit } from '@/lib/admin-audit';
 
@@ -105,12 +106,15 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
 
     const parsed = await parseDocxReport(docxBuffer, file.name, { useLLMForMissing: true });
 
+    const safeCity =
+      parsed.city && !isGarbageReportCity(parsed.city) ? parsed.city.trim() : null;
+
     let latitude: number | null = null;
     let longitude: number | null = null;
-    if (parsed.city || parsed.address) {
+    if (safeCity || parsed.address) {
       const coords = await geocodeAddress(
         parsed.address || '',
-        parsed.city || '',
+        safeCity || '',
         parsed.state || '',
         parsed.zip_code || '',
         'USA'
@@ -121,7 +125,7 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
       }
     }
 
-    const locationParts = [parsed.city, parsed.state].filter(Boolean);
+    const locationParts = [safeCity, parsed.state].filter(Boolean);
     const location = locationParts.length > 0 ? locationParts.join(', ') : null;
 
     const updatePayload: Record<string, unknown> = {
@@ -130,7 +134,7 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
       has_narrative: true,
       narrative_file_path: docxStoragePath,
       status: 'completed',
-      city: parsed.city ?? null,
+      city: safeCity,
       state: parsed.state ?? null,
       address_1: parsed.address ?? null,
       zip_code: parsed.zip_code ?? null,

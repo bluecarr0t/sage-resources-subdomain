@@ -22,12 +22,28 @@ describe('buildClientWorkMapPointsFromReportRows', () => {
     expect(pts[0].id).toBe('a1');
   });
 
-  it('dedupes by study_id job key', () => {
+  it('omits rows without a valid city', () => {
+    const rows: Record<string, unknown>[] = [
+      {
+        id: 'x1',
+        study_id: '25-999',
+        city: null,
+        state: 'CO',
+        latitude: 39,
+        longitude: -105,
+        market_type: 'glamping',
+        service: 'feasibility_study',
+      },
+    ];
+    expect(buildClientWorkMapPointsFromReportRows(rows)).toHaveLength(0);
+  });
+
+  it('keeps separate pins for JOB and JOB__2 (duplicate job number, different locations)', () => {
     const rows: Record<string, unknown>[] = [
       {
         id: '1',
         study_id: '25-001',
-        city: 'A',
+        city: 'Austin',
         state: 'TX',
         latitude: 31,
         longitude: -100,
@@ -38,7 +54,7 @@ describe('buildClientWorkMapPointsFromReportRows', () => {
       {
         id: '2',
         study_id: '25-001__2',
-        city: 'B',
+        city: 'Bryan',
         state: 'TX',
         latitude: 32,
         longitude: -101,
@@ -47,7 +63,8 @@ describe('buildClientWorkMapPointsFromReportRows', () => {
       },
     ];
     const pts = buildClientWorkMapPointsFromReportRows(rows);
-    expect(pts).toHaveLength(1);
-    expect(pts[0].id).toBe('1');
+    expect(pts).toHaveLength(2);
+    const ids = pts.map((p) => p.id).sort();
+    expect(ids).toEqual(['1', '2']);
   });
 });

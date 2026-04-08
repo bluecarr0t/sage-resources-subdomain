@@ -354,9 +354,6 @@ function ClientMapContent() {
                       <p className="text-sm text-gray-500 mb-2">
                         {report.type} • {report.totalSites} sites
                       </p>
-                      {!report.hasExactCoordinates && (
-                        <p className="text-xs text-amber-600 mb-2">{t('approximatePinNotice')}</p>
-                      )}
                       <div className="flex flex-col gap-1">
                         {report.studyId && (
                           <Link

@@ -3,6 +3,8 @@
  * Returns lat/lng or null if geocoding fails
  */
 
+import { resolveUsStateAbbr } from '@/lib/us-state-centers';
+
 export interface GeocodeResult {
   lat: number;
   lng: number;
@@ -273,6 +275,73 @@ export async function reverseGeocodeCityUsa(lat: number, lng: number): Promise<s
     return a?.city || a?.town || a?.village || a?.municipality || null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Reverse geocode to US locality + state; used to verify forward geocodes match the expected state.
+ */
+export async function reverseGeocodeLocalityAndStateUsa(
+  lat: number,
+  lng: number
+): Promise<{ locality: string | null; stateAbbr: string | null }> {
+  const apiKey = getGoogleGeocodingApiKey();
+  if (apiKey) {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+      const response = await fetch(url);
+      const data = (await response.json()) as {
+        status?: string;
+        results?: Array<{ address_components?: GoogleAddressComponent[] }>;
+      };
+      if (data.status === 'OK' && data.results?.[0]?.address_components) {
+        const comps = data.results[0].address_components;
+        let locality: string | null = null;
+        let stateAbbr: string | null = null;
+        for (const c of comps) {
+          if (c.types.includes('locality')) locality = c.long_name;
+          if (c.types.includes('administrative_area_level_1')) {
+            const s = c.short_name?.toUpperCase().slice(0, 2);
+            if (s && US_STATE_2.has(s)) stateAbbr = s;
+          }
+        }
+        if (!locality) {
+          for (const c of comps) {
+            if (c.types.includes('sublocality') || c.types.includes('sublocality_level_1')) {
+              locality = c.long_name;
+              break;
+            }
+          }
+        }
+        if (locality || stateAbbr) return { locality, stateAbbr };
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': NOMINATIM_UA },
+    });
+    if (!response.ok) return { locality: null, stateAbbr: null };
+    const data = (await response.json()) as {
+      address?: {
+        city?: string;
+        town?: string;
+        village?: string;
+        municipality?: string;
+        state?: string;
+      };
+    };
+    const a = data.address;
+    const locality =
+      a?.city || a?.town || a?.village || a?.municipality || null;
+    const stateAbbr = a?.state ? resolveUsStateAbbr(a.state) : null;
+    return { locality, stateAbbr };
+  } catch {
+    return { locality: null, stateAbbr: null };
   }
 }
 

@@ -1,8 +1,11 @@
 /**
  * Build public "Client Work" map pins from `reports` rows — same dedupe, coords, and jitter
  * as the admin Client Map (`/api/admin/client-map/reports`), without property names or job IDs.
+ * Omits rows without a valid `reports.city` (same rule as the admin API).
  */
 
+import { clientMapReportDedupeKey } from '@/lib/client-map-report-dedupe-key';
+import { hasValidClientMapCity } from '@/lib/report-location-quality';
 import { parseLocationStringField } from '@/lib/parse-csv-location';
 import { canonicalReportService, reportServiceLabel } from '@/lib/report-service-display';
 import {
@@ -71,13 +74,6 @@ function jitterDuplicateMarkerPositions<T extends { id: string; lat: number; lng
   });
 }
 
-function studyIdMapDedupeKey(studyId: string | null | undefined): string {
-  const s = String(studyId ?? '').trim();
-  if (!s) return '';
-  const u = s.toUpperCase();
-  return u.replace(/__\d+$/, '');
-}
-
 function reportRowScore(r: Record<string, unknown>): number {
   let s = 0;
   if (r.has_docx) s += 100;
@@ -123,7 +119,7 @@ function dedupeReportsForClientMap(rows: Record<string, unknown>[]): Record<stri
   const byKey = new Map<string, Record<string, unknown>>();
 
   for (const r of rows) {
-    const jobKey = studyIdMapDedupeKey(r.study_id as string | null | undefined);
+    const jobKey = clientMapReportDedupeKey(r.study_id as string | null | undefined);
     const key = jobKey ? jobKey : `__row:${String(r.id)}`;
 
     const prev = byKey.get(key);
@@ -151,7 +147,9 @@ function formatMarketType(marketType: string | null | undefined): string {
 export function buildClientWorkMapPointsFromReportRows(
   rows: Record<string, unknown>[]
 ): ClientWorkMapPoint[] {
-  const deduped = dedupeReportsForClientMap(rows);
+  const deduped = dedupeReportsForClientMap(rows).filter((r) =>
+    hasValidClientMapCity(r.city as string | null | undefined)
+  );
 
   const raw: ClientWorkMapPoint[] = deduped.map((r) => {
     const stateAbbr =

@@ -1190,7 +1190,6 @@
       }
     },
     "clientMap": {
-      "approximatePinNotice": "Approximate pin: latitude/longitude are missing or still the state default (Oregon’s default is near Brothers, not the listed city). The address above is the project location — run npx tsx scripts/backfill-report-map-coordinates.ts to geocode from city/state (use --study-id to target one job).",
       "yearFilterLabel": "Year Reported",
       "yearFilterPlaceholder": "All years",
       "serviceFilterLabel": "Service",

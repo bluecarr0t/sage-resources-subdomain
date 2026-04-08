@@ -12,6 +12,7 @@ import mammoth from 'mammoth';
 import * as cheerio from 'cheerio';
 import WordExtractor from 'word-extractor';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
+import { isGarbageReportCity } from '@/lib/report-location-quality';
 import { fillMissingFieldsWithLLM } from './docx-llm-extractor';
 
 // ---------------------------------------------------------------------------
@@ -283,6 +284,7 @@ const DESCRIPTIVE_WORDS = /\b(including|such\s+as|featuring|offering|with|major|
 
 function isValidCityName(city: string): boolean {
   const trimmed = city.trim();
+  if (isGarbageReportCity(trimmed)) return false;
   const lower = trimmed.toLowerCase();
   if (trimmed.length < 2 || trimmed.length > 35) return false;
   const wordCount = trimmed.split(/\s+/).length;
@@ -1251,6 +1253,10 @@ export async function parseDocxReport(
 
   if (options?.useLLMForMissing) {
     parsed = await fillMissingFieldsWithLLM(parsed, raw);
+  }
+
+  if (isGarbageReportCity(parsed.city)) {
+    parsed.city = null;
   }
 
   return parsed;
