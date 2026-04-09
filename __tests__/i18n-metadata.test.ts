@@ -2,7 +2,11 @@
  * Tests for i18n metadata generation
  */
 
-import { generateHreflangAlternates, getOpenGraphLocale } from '../lib/i18n-utils';
+import {
+  buildStableHreflangQueryString,
+  generateHreflangAlternates,
+  getOpenGraphLocale,
+} from '../lib/i18n-utils';
 import { locales } from '../i18n';
 
 describe('Metadata Generation', () => {
@@ -45,6 +49,26 @@ describe('Metadata Generation', () => {
         expect(url).toContain('/landing/glamping-feasibility-study');
         expect(url).toContain(`/${locale}/`);
       });
+    });
+
+    test('should append query string to hreflang URLs for map-style filters', () => {
+      const qs = buildStableHreflangQueryString({
+        country: ['United States', 'Canada'],
+      });
+      expect(qs.startsWith('?')).toBe(true);
+      const alternates = generateHreflangAlternates(
+        '/en/map',
+        'https://resources.sageoutdooradvisory.com',
+        qs
+      );
+      const languages = alternates.languages || {};
+      expect(languages.en).toBe(
+        `https://resources.sageoutdooradvisory.com/en/map${qs}`
+      );
+      expect(languages.de).toBe(
+        `https://resources.sageoutdooradvisory.com/de/map${qs}`
+      );
+      expect(languages['x-default']).toContain(`/en/map${qs}`);
     });
   });
 

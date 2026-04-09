@@ -260,7 +260,7 @@ export default async function GlossaryPage({ params }: PageProps) {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer locale={locale} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { LandingPageContent, getLandingPageSync } from "@/lib/landing-pages";
 import { getGuideSync } from "@/lib/guides";
-import { createLocaleLinks } from "@/lib/locale-links";
+import { createLocaleLinks, prefixInternalResourceHrefsInHtml } from "@/lib/locale-links";
+import { getRelatedServiceAnchorText } from "@/lib/related-service-anchor-text";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -17,7 +18,6 @@ import {
 } from "@/lib/schema";
 import TableOfContents from "@/components/TableOfContents";
 import RelatedLandingPages from "@/components/RelatedLandingPages";
-import RelatedGlossaryTerms from "@/components/RelatedGlossaryTerms";
 import Footer from "./Footer";
 import FloatingHeader from "./FloatingHeader";
 
@@ -33,10 +33,12 @@ function slugify(text: string): string {
 
 interface LandingPageTemplateProps {
   content: LandingPageContent;
+  locale: string;
 }
 
-export default function LandingPageTemplate({ content }: LandingPageTemplateProps) {
-  const links = createLocaleLinks("en"); // Guides are English-only
+export default function LandingPageTemplate({ content, locale }: LandingPageTemplateProps) {
+  const links = createLocaleLinks(locale);
+  const pageCanonicalUrl = `https://resources.sageoutdooradvisory.com/${locale}/landing/${content.slug}`;
   // Generate structured data
   const organizationSchema = generateOrganizationSchema();
   const localBusinessSchema = generateLocalBusinessSchema();
@@ -48,7 +50,11 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
     ? generateHowToSchema(content.howToSteps, content.hero.headline, content.metaDescription)
     : null;
   const keyTakeawaysSchema = content.keyTakeaways && content.keyTakeaways.length > 0
-    ? generateItemListSchema(content.keyTakeaways, `Key Takeaways: ${content.hero.headline}`)
+    ? generateItemListSchema(
+        content.keyTakeaways,
+        `Key Takeaways: ${content.hero.headline}`,
+        pageCanonicalUrl
+      )
     : null;
   const speakableSchema = generateSpeakableSchema();
 
@@ -110,7 +116,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
 
       <div className="min-h-screen bg-white">
       {/* Floating Header */}
-      <FloatingHeader showFullNav={true} showSpacer={false} />
+      <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
 
       <main>
       {/* Hero Section */}
@@ -202,7 +208,9 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                   </h2>
               <div 
                 className="text-gray-700 mb-6 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: section.content }}
+                dangerouslySetInnerHTML={{
+                  __html: prefixInternalResourceHrefsInHtml(section.content, locale),
+                }}
               />
               {section.bullets && (
                 <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
@@ -210,7 +218,9 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                     <li 
                       key={bulletIndex} 
                       className="leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: bullet }}
+                      dangerouslySetInnerHTML={{
+                        __html: prefixInternalResourceHrefsInHtml(bullet, locale),
+                      }}
                     />
                   ))}
                 </ul>
@@ -417,7 +427,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       )}
 
       {/* Related Landing Pages Section - Enhanced Internal Cross-Linking */}
-      <RelatedLandingPages currentPage={content} locale="en" maxPages={6} />
+      <RelatedLandingPages currentPage={content} locale={locale} maxPages={6} />
 
       {/* Related Services Section - Root Domain Linking */}
       {content.relatedServices && content.relatedServices.services.length > 0 && (
@@ -450,7 +460,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                     href={service.url}
                     className="inline-block text-[#006b5f] hover:text-[#005a4f] font-medium text-sm"
                   >
-                    Learn More →
+                    {getRelatedServiceAnchorText(service.name)} →
                   </Link>
                 </div>
               ))}
@@ -566,7 +576,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       </section>
 
       {/* Related Landing Pages Section - Enhanced Internal Linking */}
-      <RelatedLandingPages currentPage={content} locale="en" maxPages={6} />
+      <RelatedLandingPages currentPage={content} locale={locale} maxPages={6} />
 
       {/* Related Glossary Terms Section - Enhanced Internal Linking */}
       {content.keywords && content.keywords.length > 0 && (
@@ -592,7 +602,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                   return (
                     <Link
                       key={matchingTerm.slug}
-                      href={`/glossary/${matchingTerm.slug}`}
+                      href={links.glossaryTerm(matchingTerm.slug)}
                       className="inline-block px-4 py-2 bg-gray-100 hover:bg-[#00b6a6] hover:text-white text-gray-900 rounded-lg transition-colors text-sm font-medium"
                     >
                       {matchingTerm.term}
@@ -621,7 +631,9 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
                   </h3>
                   <div 
                     className="text-gray-700 leading-relaxed speakable-answer"
-                    dangerouslySetInnerHTML={{ __html: faq.answer }}
+                    dangerouslySetInnerHTML={{
+                      __html: prefixInternalResourceHrefsInHtml(faq.answer, locale),
+                    }}
                   />
                 </div>
               ))}
@@ -700,7 +712,7 @@ export default function LandingPageTemplate({ content }: LandingPageTemplateProp
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer locale={locale} />
     </div>
     </>
   );

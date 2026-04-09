@@ -1603,7 +1603,8 @@
   },
   "glossary": {
     "title": "Outdoor-Hospitality-Glossar",
-    "subtitle": "Umfassende Definitionen von Branchenbegriffen für Glamping, Wohnmobil-Resorts, Campingplätze, Machbarkeitsstudien und Bewertungen",
+    "subtitle": "Wichtige Begriffe in klarer Sprache. Von Glamping und Camping bis zu Machbarkeit, Finanzen und Bewertung.",
+    "cardHint": "Vollständige Definition, verwandte Begriffe und Beispiele anzeigen.",
     "searchPlaceholder": "Glossar-Begriffe suchen...",
     "tabs": {
       "alphabetical": "Alphabetisch",

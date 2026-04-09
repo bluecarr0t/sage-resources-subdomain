@@ -2,9 +2,12 @@ import { Metadata } from "next";
 import { getGlossaryTerm, getAllGlossaryTerms, getRelatedTerms } from "@/lib/glossary/index";
 import { notFound } from "next/navigation";
 import GlossaryTermTemplate from "@/components/GlossaryTermTemplate";
-import Link from "next/link";
 import { locales, localeMetadata, type Locale } from "@/i18n";
-import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import {
+  buildGlossaryTermMetaDescription,
+  generateHreflangAlternates,
+  getOpenGraphLocale,
+} from "@/lib/i18n-utils";
 import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 
 // ISR: Revalidate pages every 24 hours
@@ -60,7 +63,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
   const baseTitle = `What is ${getArticle(glossaryTerm.term)} ${glossaryTerm.term}? | Definition & Guide | Sage Outdoor Advisory`;
   const title = locale === 'en' ? baseTitle : `${baseTitle} (${localeMetadata[locale as Locale].nativeName})`;
-  const description = `${glossaryTerm.definition} Learn more about ${glossaryTerm.term.toLowerCase()} in outdoor hospitality.`;
+  const description = buildGlossaryTermMetaDescription(
+    locale as Locale,
+    glossaryTerm.term,
+    glossaryTerm.definition
+  );
 
   const openGraphImages = glossaryTerm.image 
     ? [{
@@ -147,7 +154,11 @@ export default async function GlossaryTermPage({ params }: PageProps) {
 
   return (
     <>
-      <GlossaryTermTemplate term={glossaryTerm} relatedTerms={relatedTerms} />
+      <GlossaryTermTemplate
+        term={glossaryTerm}
+        relatedTerms={relatedTerms}
+        locale={locale}
+      />
     </>
   );
 }

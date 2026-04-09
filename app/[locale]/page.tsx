@@ -547,7 +547,7 @@ export default async function HomePage({ params }: PageProps) {
         </section>
 
         {/* Footer */}
-        <Footer />
+        <Footer locale={locale} />
         </div>
       </GoogleMapsProvider>
     </>

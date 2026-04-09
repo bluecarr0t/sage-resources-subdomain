@@ -1,7 +1,12 @@
 "use client";
 
 import { GuideContent, getGuideSync } from "@/lib/guides";
-import { createLocaleLinks } from "@/lib/locale-links";
+import {
+  createLocaleLinks,
+  localizeInternalHref,
+  prefixInternalResourceHrefsInHtml,
+} from "@/lib/locale-links";
+import { getRelatedServiceAnchorText } from "@/lib/related-service-anchor-text";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -16,18 +21,19 @@ import {
   generateItemListSchema,
 } from "@/lib/schema";
 import RelatedGuides from "./RelatedGuides";
-import RelatedLandingPages from "./RelatedLandingPages";
 import Footer from "./Footer";
 import FloatingHeader from "./FloatingHeader";
 
 interface PillarPageTemplateProps {
   content: GuideContent;
+  locale: string;
 }
 
-export default function PillarPageTemplate({ content }: PillarPageTemplateProps) {
+export default function PillarPageTemplate({ content, locale }: PillarPageTemplateProps) {
   const [activeSection, setActiveSection] = useState<string>("");
   const [showTOC, setShowTOC] = useState(false);
-  const links = createLocaleLinks("en"); // Guides are English-only
+  const links = createLocaleLinks(locale);
+  const pageCanonicalUrl = `https://resources.sageoutdooradvisory.com/${locale}/guides/${content.slug}`;
 
   // Generate structured data
   const organizationSchema = generateOrganizationSchema();
@@ -45,7 +51,11 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
     ? generateHowToSchema(howToSteps, content.hero.headline, content.metaDescription)
     : null;
   const keyTakeawaysSchema = content.keyTakeaways && content.keyTakeaways.length > 0
-    ? generateItemListSchema(content.keyTakeaways, `Key Takeaways: ${content.hero.headline}`)
+    ? generateItemListSchema(
+        content.keyTakeaways,
+        `Key Takeaways: ${content.hero.headline}`,
+        pageCanonicalUrl
+      )
     : null;
 
   // Track scroll position for active section highlighting
@@ -129,7 +139,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
 
       <div className="min-h-screen bg-white">
         {/* Floating Header */}
-        <FloatingHeader showFullNav={true} showSpacer={false} />
+        <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
 
         {/* Breadcrumbs */}
         <nav className="bg-gray-50 border-b border-gray-200 py-3 pt-32 md:pt-36">
@@ -139,7 +149,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                 Home
               </Link>
               <span>/</span>
-              <Link href="/guides" className="hover:text-[#006b5f]">
+              <Link href={links.guides} className="hover:text-[#006b5f]">
                 Guides
               </Link>
               <span>/</span>
@@ -298,7 +308,9 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                     </h2>
                     <div
                       className="text-gray-700 leading-relaxed prose prose-lg max-w-none prose-img:rounded-3xl prose-img:shadow-2xl prose-img:border-4 prose-img:border-white/20"
-                      dangerouslySetInnerHTML={{ __html: section.content }}
+                      dangerouslySetInnerHTML={{
+                        __html: prefixInternalResourceHrefsInHtml(section.content, locale),
+                      }}
                     />
                     {section.subsections && (
                       <div className="mt-8 space-y-8">
@@ -309,7 +321,12 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                             </h3>
                             <div
                               className="text-gray-700 leading-relaxed"
-                              dangerouslySetInnerHTML={{ __html: subsection.content }}
+                              dangerouslySetInnerHTML={{
+                                __html: prefixInternalResourceHrefsInHtml(
+                                  subsection.content,
+                                  locale,
+                                ),
+                              }}
                             />
                           </div>
                         ))}
@@ -356,7 +373,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                     {content.clusterPages.map((clusterPage, index) => (
                       <Link
                         key={index}
-                        href={clusterPage.url}
+                        href={localizeInternalHref(clusterPage.url, locale)}
                         className="block bg-gray-50 p-6 rounded-lg border border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
                       >
                         <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -429,7 +446,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                           href={service.url}
                           className="inline-block text-[#006b5f] hover:text-[#005a4f] font-medium text-sm"
                         >
-                          Learn More →
+                          {getRelatedServiceAnchorText(service.name)} →
                         </Link>
                       </div>
                     ))}
@@ -455,7 +472,9 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                     </h3>
                     <div
                       className="text-gray-700 leading-relaxed speakable-answer"
-                      dangerouslySetInnerHTML={{ __html: faq.answer }}
+                      dangerouslySetInnerHTML={{
+                        __html: prefixInternalResourceHrefsInHtml(faq.answer, locale),
+                      }}
                     />
                   </div>
                 ))}
@@ -476,7 +495,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
         )}
 
         {/* Related Guides Section - Enhanced Internal Linking */}
-        <RelatedGuides currentGuide={content} locale="en" maxGuides={6} />
+        <RelatedGuides currentGuide={content} locale={locale} maxGuides={6} />
 
         {/* Related Landing Pages Section - Enhanced Internal Linking */}
         {content.keywords && (
@@ -501,7 +520,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
                   return allLandingPages.slice(0, 3).map((page: any) => (
                     <Link
                       key={page.slug}
-                      href={`/landing/${page.slug}`}
+                      href={links.landing(page.slug)}
                       className="inline-block px-4 py-2 bg-gray-100 hover:bg-[#00b6a6] hover:text-white text-gray-900 rounded-lg transition-colors text-sm font-medium"
                     >
                       {page.hero.headline}
@@ -531,7 +550,7 @@ export default function PillarPageTemplate({ content }: PillarPageTemplateProps)
         </main>
 
         {/* Footer */}
-        <Footer />
+        <Footer locale={locale} />
       </div>
     </>
   );

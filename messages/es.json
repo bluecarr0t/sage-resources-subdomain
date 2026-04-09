@@ -1603,7 +1603,8 @@
   },
   "glossary": {
     "title": "Glosario de Hospitalidad al Aire Libre",
-    "subtitle": "Definiciones completas de términos de la industria para glamping, resorts para autocaravanas, campamentos, estudios de viabilidad y valoraciones",
+    "subtitle": "Términos clave explicados con claridad. Glamping, autocaravanas, campings, viabilidad y valoraciones.",
+    "cardHint": "Ver la definición completa, términos relacionados y ejemplos.",
     "searchPlaceholder": "Buscar términos del glosario...",
     "tabs": {
       "alphabetical": "Alfabético",

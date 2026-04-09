@@ -7,7 +7,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     slug: "feasibility-studies-complete-guide",
     title: "Feasibility Studies Complete Guide | 2025 | Sage Outdoor Advisory",
     metaDescription: "Comprehensive guide to feasibility studies for outdoor hospitality projects. Learn what feasibility studies include, how they work, timeline, and how to choose a consultant. Essential reading for glamping, RV resort, and campground developers.",
-    quickAnswer: "A feasibility study is a comprehensive analysis that evaluates the viability, market potential, and financial prospects of a proposed outdoor hospitality project. It examines market demand, competition, revenue projections, site suitability, and risks to help developers and lenders decide whether to pursue a glamping resort, RV park, or campground. Key outputs include occupancy and rate forecasts, operating expense projections, and a 10-year pro forma. Unlike a market analysis, a feasibility study is site-specific and ties findings to a particular property. Lenders typically require bank-approved feasibility studies before financing. The process usually takes 4–8 weeks and costs $15,000–$50,000 depending on project scope.",
+    quickAnswer: "A feasibility study answers whether your outdoor hospitality project can work on a specific site. It reviews demand, competition, revenue and expense forecasts, and major risks. You should see occupancy and rate assumptions, operating costs, and a multi-year pro forma. It is site-specific, so it goes deeper than a broad market scan alone. Many lenders require a bank-approved study before they fund a deal. Most reports take about four to eight weeks and often range from roughly $15,000 to $50,000 depending on scope.",
     category: "feasibility",
     hero: {
       headline: "Feasibility Studies Complete Guide",
@@ -715,6 +715,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     slug: "how-to-read-feasibility-study",
     title: "How to Read a Feasibility Study | Complete Guide | Sage Outdoor Advisory",
     metaDescription: "Learn how to read and interpret feasibility study reports for outdoor hospitality projects. Understand key sections, financial projections, and how to use the insights effectively.",
+    quickAnswer: "Start with the executive summary for the bottom-line recommendation. Then read the market section, the financial forecasts, and the risk notes. Check whether rates, occupancy, and expenses match what you see nearby. Ask how the model changes if one or two key assumptions move. This guide moves section by section so you know what to verify.",
     category: "feasibility",
     hero: {
       headline: "How to Read a Feasibility Study",

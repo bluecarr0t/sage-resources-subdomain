@@ -237,7 +237,7 @@ export default async function SitemapPage({ params }: PageProps) {
         </section>
       </main>
 
-      <Footer />
+      <Footer locale={locale} />
     </div>
   );
 }

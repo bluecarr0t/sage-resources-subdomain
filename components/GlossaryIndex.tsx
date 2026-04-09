@@ -216,7 +216,7 @@ function GlossaryTermCard({ term, locale }: { term: GlossaryTerm; locale: string
           {term.category}
         </span>
       </div>
-      <p className="text-gray-600 text-sm line-clamp-2">{term.definition}</p>
+      <p className="text-gray-600 text-sm">{t('cardHint')}</p>
       <div className="mt-4 flex items-center text-[#006b5f] text-sm font-medium">
         {t('readMore')} →
       </div>

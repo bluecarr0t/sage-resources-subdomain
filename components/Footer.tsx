@@ -1,6 +1,15 @@
 import Link from "next/link";
+import { defaultLocale } from "@/i18n";
+import { createLocaleLinks } from "@/lib/locale-links";
 
-export default function Footer() {
+interface FooterProps {
+  /** Subdomain routes use `/[locale]/...`; legal pages stay at site root. */
+  locale?: string;
+}
+
+export default function Footer({ locale = defaultLocale }: FooterProps) {
+  const links = createLocaleLinks(locale);
+
   return (
     <footer className="bg-black text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,12 +25,12 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <Link href="/glossary" className="hover:text-white">
+                <Link href={links.glossary} className="hover:text-white">
                   Glossary
                 </Link>
               </li>
               <li>
-                <Link href="/guides" className="hover:text-white">
+                <Link href={links.guides} className="hover:text-white">
                   Guides
                 </Link>
               </li>

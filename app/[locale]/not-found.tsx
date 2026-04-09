@@ -50,7 +50,7 @@ export default function NotFound() {
         </div>
       </main>
 
-      <Footer />
+      <Footer locale={locale} />
     </div>
   );
 }

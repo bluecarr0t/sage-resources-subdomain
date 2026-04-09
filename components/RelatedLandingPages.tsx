@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getLandingPageSync, getAllLandingPageSlugs, LandingPageContent } from "@/lib/landing-pages";
+import { createLocaleLinks } from "@/lib/locale-links";
 
 interface RelatedLandingPagesProps {
   currentPage: LandingPageContent;
@@ -70,7 +71,7 @@ export default function RelatedLandingPages({
     return null;
   }
 
-  const localePrefix = locale !== "en" ? `/${locale}` : "";
+  const links = createLocaleLinks(locale);
 
   return (
     <section className="py-12 bg-gray-50 border-t border-gray-200">
@@ -82,7 +83,7 @@ export default function RelatedLandingPages({
           {relatedPages.map((page) => (
             <Link
               key={page.slug}
-              href={`${localePrefix}/landing/${page.slug}`}
+              href={links.landing(page.slug)}
               className="block bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg hover:border-[#00b6a6] transition-all group"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-[#006b5f] transition-colors line-clamp-2">

@@ -1863,7 +1863,8 @@
   },
   "glossary": {
     "title": "Glossaire de l'Hospitalité de Plein Air",
-    "subtitle": "Définitions complètes des termes de l'industrie pour le glamping, les resorts pour camping-cars, les campings, les études de faisabilité et les évaluations",
+    "subtitle": "Les termes clés expliqués simplement: glamping, resorts pour camping-cars, campings, faisabilité et évaluations.",
+    "cardHint": "Voir la définition complète, les termes connexes et des exemples.",
     "searchPlaceholder": "Rechercher des termes du glossaire...",
     "tabs": {
       "alphabetical": "Alphabétique",

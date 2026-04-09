@@ -121,6 +121,6 @@ export default async function LandingPage({ params }: PageProps) {
     notFound();
   }
 
-  return <LandingPageTemplate content={page} />;
+  return <LandingPageTemplate content={page} locale={locale} />;
 }
 

@@ -124,6 +124,6 @@ export default async function GuidePage({ params }: PageProps) {
     notFound();
   }
 
-  return <PillarPageTemplate content={guide} />;
+  return <PillarPageTemplate content={guide} locale={locale} />;
 }
 

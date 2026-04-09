@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GlossaryTerm, getAllGlossaryTerms, getGlossaryTermsByCategory } from "@/lib/glossary/index";
+import { createLocaleLinks } from "@/lib/locale-links";
 
 interface RelatedGlossaryTermsProps {
   currentTerm: GlossaryTerm;
@@ -42,7 +43,7 @@ export default function RelatedGlossaryTerms({
     return null;
   }
 
-  const localePrefix = locale !== "en" ? `/${locale}` : "";
+  const links = createLocaleLinks(locale);
 
   return (
     <section className="py-8 border-t border-gray-200">
@@ -54,7 +55,7 @@ export default function RelatedGlossaryTerms({
           {relatedTerms.map((term) => (
             <Link
               key={term.slug}
-              href={`${localePrefix}/glossary/${term.slug}`}
+              href={links.glossaryTerm(term.slug)}
               className="block bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md hover:border-[#00b6a6] transition-all group text-center"
             >
               <div className="text-xs text-gray-500 mb-1">{term.category}</div>

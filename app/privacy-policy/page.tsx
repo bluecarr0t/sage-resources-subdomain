@@ -27,7 +27,10 @@ export default function PrivacyPolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Introduction</h2>
               <p className="text-gray-700 mb-4">
-                Sage Outdoor Advisory (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
+                Sage Outdoor Advisory (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy.
+              </p>
+              <p className="text-gray-700 mb-4">
+                This Privacy Policy explains how we collect, use, share, and protect your information when you use our website and services.
               </p>
             </section>
 
@@ -38,7 +41,7 @@ export default function PrivacyPolicyPage() {
                 We collect personal information that you provide to us when you:
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
-                <li><strong>Sign in via Google OAuth:</strong> When you authenticate using Google, we receive your email address, name, and profile picture from Google&apos;s authentication service</li>
+                <li><strong>Sign in via Google OAuth:</strong> If you sign in with Google, we receive your email, name, and profile photo from Google.</li>
                 <li><strong>Create an account:</strong> We store your account information in our database, including your user ID, email address, and account status</li>
                 <li><strong>Contact us:</strong> If you contact us through our website, we collect the information you provide, such as your name and email address</li>
                 <li><strong>Use our services:</strong> We collect information about how you interact with our website and services</li>
@@ -85,9 +88,9 @@ export default function PrivacyPolicyPage() {
                 We use the following third-party services that collect, monitor, and analyze information:
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
-                <li><strong>Supabase:</strong> We use Supabase for data storage, database services, and user authentication. Your account information, including email address and account status, is stored securely in Supabase databases. Supabase&apos;s privacy policy applies to their handling of this data. <a href="https://supabase.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">View Supabase Privacy Policy</a></li>
-                <li><strong>Google OAuth:</strong> We use Google OAuth for user authentication. When you sign in with Google, Google provides us with your email address, name, and profile picture. Google&apos;s privacy policy applies to data collected by Google during the authentication process. <a href="https://policies.google.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">View Google Privacy Policy</a></li>
-                <li><strong>Google Analytics:</strong> We use Google Analytics to analyze website traffic and usage patterns. Google Analytics collects information such as IP addresses, browser type, pages visited, and time spent on pages. <a href="https://policies.google.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">View Google Privacy Policy</a></li>
+                <li><strong>Supabase:</strong> We use Supabase for databases and sign-in. Your account details live in Supabase systems. Read their policy here: <a href="https://supabase.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">Supabase Privacy Policy</a>.</li>
+                <li><strong>Google OAuth:</strong> Sign-in with Google shares your email, name, and photo with us. Google&apos;s rules apply to what they collect: <a href="https://policies.google.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>.</li>
+                <li><strong>Google Analytics:</strong> We use Analytics to see traffic trends (for example pages viewed and time on site). See <a href="https://policies.google.com/privacy" className="text-[#006b5f] hover:underline" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>.</li>
               </ul>
               <p className="text-gray-700 mb-4">
                 These third-party service providers have their own privacy policies addressing how they use such information. We encourage you to review their privacy policies.
@@ -113,7 +116,10 @@ export default function PrivacyPolicyPage() {
                 <li><strong>The right to withdraw consent:</strong> Withdraw consent for processing based on consent (where applicable)</li>
               </ul>
               <p className="text-gray-700 mb-4">
-                <strong>How to Exercise Your Rights:</strong> To exercise any of these rights, please contact us at <a href="mailto:contact@sageoutdooradvisory.com" className="text-[#006b5f] hover:underline">contact@sageoutdooradvisory.com</a> with your request. We will respond to your request within 30 days (or as required by applicable law). We may need to verify your identity before processing your request.
+                <strong>How to exercise your rights:</strong> Email <a href="mailto:contact@sageoutdooradvisory.com" className="text-[#006b5f] hover:underline">contact@sageoutdooradvisory.com</a> with your request.
+              </p>
+              <p className="text-gray-700 mb-4">
+                We usually respond within 30 days, or sooner if the law requires. We may ask you to confirm who you are before we act.
               </p>
               <p className="text-gray-700 mb-4">
                 <strong>Right to Lodge a Complaint (GDPR):</strong> If you are located in the European Economic Area (EEA) or United Kingdom, you have the right to lodge a complaint with your local data protection supervisory authority if you believe we have violated your data protection rights.
@@ -193,14 +199,20 @@ export default function PrivacyPolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Children&apos;s Privacy</h2>
               <p className="text-gray-700 mb-4">
-                Our service is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately at <a href="mailto:contact@sageoutdooradvisory.com" className="text-[#006b5f] hover:underline">contact@sageoutdooradvisory.com</a>. If we become aware that we have collected personal information from a child under 18, we will take steps to delete that information promptly.
+                Our service is not for anyone under 18. We do not knowingly collect data from children.
+              </p>
+              <p className="text-gray-700 mb-4">
+                If you believe a child shared data with us, email <a href="mailto:contact@sageoutdooradvisory.com" className="text-[#006b5f] hover:underline">contact@sageoutdooradvisory.com</a>. We will delete it when we can confirm the issue.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Data Breach Notification</h2>
               <p className="text-gray-700 mb-4">
-                In the event of a data breach that compromises your personal information, we will notify you and relevant regulatory authorities as required by applicable law. Notifications will be provided without undue delay and, where feasible, within 72 hours of becoming aware of the breach (as required by GDPR) or as otherwise required by applicable law.
+                If a breach affects your personal data, we notify you and regulators when the law requires us to.
+              </p>
+              <p className="text-gray-700 mb-4">
+                Under GDPR we aim to act without undue delay and, where feasible, within 72 hours of learning of the incident.
               </p>
               <p className="text-gray-700 mb-4">
                 Notifications will be sent to the email address associated with your account or through other reasonable means as appropriate under the circumstances.

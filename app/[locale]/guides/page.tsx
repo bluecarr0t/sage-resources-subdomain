@@ -190,7 +190,7 @@ export default async function GuidesPage({ params }: PageProps) {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer locale={locale} />
     </div>
   );
 }

@@ -219,7 +219,27 @@ function deriveCountry(stateName: string): string {
     'Nova Scotia', 'Ontario', 'Quebec', 'Saskatchewan', 'Prince Edward Island',
   ];
   if (canadianProvinces.some((p) => s.includes(p))) return 'Canada';
+  const australianStates = [
+    'New South Wales',
+    'Queensland',
+    'Victoria',
+    'Tasmania',
+    'South Australia',
+    'Western Australia',
+    'Australian Capital Territory',
+    'Northern Territory',
+  ];
+  if (australianStates.some((p) => s.includes(p) || s === p)) return 'Australia';
   return 'USA';
+}
+
+/** US ZIPs that were stored as numbers lose leading zeros (3–4 digits). Do not pad AU/CA/MX. */
+function normalizeZipForCountry(zipRaw: string, country: string): string {
+  const z = zipRaw.trim();
+  if (!z) return z;
+  if (country !== 'USA') return z;
+  if (/^\d{3,4}$/.test(z)) return z.padStart(5, '0');
+  return z;
 }
 
 const NUMERIC_COLUMNS = new Set([
@@ -308,7 +328,8 @@ function combineData(
 
     const city = campground?.city_name?.trim() ?? '';
     const state = campground?.state_name?.trim() ?? '';
-    const zip = campground?.zip?.trim() ?? '';
+    const country = deriveCountry(state);
+    const zip = normalizeZipForCountry(String(campground?.zip ?? '').trim(), country);
 
     const propertyName = `Campground ${campgroundId} - ${city || 'Unknown'}, ${state || 'Unknown'}`;
 
@@ -351,7 +372,6 @@ function combineData(
 
     const siteType = (site.site_type ?? '').trim();
     const isGlamping = isGlampingSite(siteType);
-    const country = deriveCountry(state);
 
     const occupancy = occupancyByCampground.get(campgroundId);
 

@@ -1,6 +1,11 @@
 import { GlossaryTerm } from "@/lib/glossary/index";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  createLocaleLinks,
+  localizeInternalHref,
+  prefixInternalResourceHrefsInHtml,
+} from "@/lib/locale-links";
 import { generateDefinitionSchema, generateFAQSchema } from "@/lib/glossary-schema";
 import { generateSpeakableSchema } from "@/lib/schema";
 import { generateGlossaryImageAltText, generateImageTitle } from "@/lib/glossary/image-alt-text";
@@ -12,6 +17,7 @@ import FloatingHeader from "./FloatingHeader";
 interface GlossaryTermTemplateProps {
   term: GlossaryTerm;
   relatedTerms: GlossaryTerm[];
+  locale: string;
 }
 
 // Helper function to determine if a term needs "an" instead of "a"
@@ -21,7 +27,12 @@ function getArticle(term: string): string {
   return vowels.includes(firstChar) ? 'an' : 'a';
 }
 
-export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTermTemplateProps) {
+export default function GlossaryTermTemplate({
+  term,
+  relatedTerms,
+  locale,
+}: GlossaryTermTemplateProps) {
+  const links = createLocaleLinks(locale);
   const definitionSchema = generateDefinitionSchema(term);
   const faqSchema = term.faqs ? generateFAQSchema(term.faqs) : null;
   const speakableSchema = term.faqs && term.faqs.length > 0 
@@ -50,7 +61,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
 
       <div className="min-h-screen bg-white">
         {/* Floating Header */}
-        <FloatingHeader showFullNav={true} showSpacer={false} />
+        <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
 
         {/* Breadcrumb */}
         <nav className="bg-gray-50 border-b border-gray-200 pt-32 md:pt-36">
@@ -60,7 +71,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                 Home
               </Link>
               <span className="text-gray-400">/</span>
-              <Link href="/glossary" className="text-gray-600 hover:text-gray-700">
+              <Link href={links.glossary} className="text-gray-600 hover:text-gray-700">
                 Glossary
               </Link>
               <span className="text-gray-400">/</span>
@@ -126,7 +137,12 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                 </h2>
                 <div 
                   className="text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: term.extendedDefinition.replace(/\n/g, '<br />') }}
+                  dangerouslySetInnerHTML={{
+                    __html: prefixInternalResourceHrefsInHtml(
+                      term.extendedDefinition.replace(/\n/g, '<br />'),
+                      locale,
+                    ),
+                  }}
                 />
               </section>
 
@@ -174,7 +190,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                     {term.internalLinks.map((link, index) => (
                       <li key={index}>
                         <Link
-                          href={link.url}
+                          href={localizeInternalHref(link.url, locale)}
                           className="text-[#006b5f] hover:text-[#005a4f] underline"
                         >
                           {link.text}
@@ -199,7 +215,9 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                         </h3>
                         <p 
                           className="text-gray-700 leading-relaxed speakable-answer"
-                          dangerouslySetInnerHTML={{ __html: faq.answer }}
+                          dangerouslySetInnerHTML={{
+                            __html: prefixInternalResourceHrefsInHtml(faq.answer, locale),
+                          }}
                         />
                       </div>
                     ))}
@@ -226,7 +244,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
               {/* Back to Glossary */}
               <div className="text-center">
                 <Link
-                  href="/glossary"
+                  href={links.glossary}
                   className="text-[#006b5f] hover:text-[#005a4f] font-medium"
                 >
                   ← Back to Glossary
@@ -247,7 +265,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                       {relatedTerms.map((relatedTerm) => (
                         <li key={relatedTerm.slug}>
                           <Link
-                            href={`/glossary/${relatedTerm.slug}`}
+                            href={links.glossaryTerm(relatedTerm.slug)}
                             className="text-[#006b5f] hover:text-[#005a4f] underline"
                           >
                             {relatedTerm.term}
@@ -266,7 +284,7 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
                   <ul className="space-y-2">
                     <li>
                       <Link
-                        href="/glossary"
+                        href={links.glossary}
                         className="text-[#006b5f] hover:text-[#005a4f] underline"
                       >
                         View All Terms
@@ -304,10 +322,10 @@ export default function GlossaryTermTemplate({ term, relatedTerms }: GlossaryTer
         </main>
 
         {/* Related Glossary Terms Section - Enhanced Internal Linking */}
-        <RelatedGlossaryTerms currentTerm={term} locale="en" maxTerms={8} />
+        <RelatedGlossaryTerms currentTerm={term} locale={locale} maxTerms={8} />
 
         {/* Footer */}
-        <Footer />
+        <Footer locale={locale} />
       </div>
     </>
   );

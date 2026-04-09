@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
+import { locales, type Locale } from "@/i18n";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sage Partners | Outdoor Hospitality Experts | Sage Outdoor Advisory",
@@ -53,7 +55,16 @@ interface PartnerCategory {
   partners: Partner[];
 }
 
-export default function PartnersPage() {
+interface PageProps {
+  params: { locale: string };
+}
+
+export default function PartnersPage({ params }: PageProps) {
+  const { locale } = params;
+  if (!locales.includes(locale as Locale)) {
+    notFound();
+  }
+
   const partnerCategories: PartnerCategory[] = [
     {
       title: "Design & Engineering",
@@ -174,7 +185,7 @@ export default function PartnersPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Floating Header */}
-      <FloatingHeader showSpacer={false} />
+      <FloatingHeader locale={locale} showSpacer={false} />
 
       {/* Hero Section */}
       <section className="relative pt-32 md:pt-36 pb-16 overflow-hidden">
@@ -316,7 +327,7 @@ export default function PartnersPage() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer locale={locale} />
     </div>
   );
 }

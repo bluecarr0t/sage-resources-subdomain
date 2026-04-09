@@ -12,7 +12,7 @@ Common glamping accommodations include safari tents, yurts, treehouses, Airstrea
 
 The glamping industry has experienced significant growth as travelers seek unique, experiential accommodations that connect them with nature while maintaining modern conveniences. Glamping appeals to a wide demographic, from couples seeking romantic getaways to families wanting outdoor adventures with comfort.
 
-Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping properties, understanding the unique market dynamics, revenue models, and valuation methods required for these specialized accommodations. For comprehensive insights into glamping unit types, costs, and ROI considerations, see our <a href="https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/" class="text-[#006b5f] hover:text-[#005a4f] underline">Complete Guide to Glamping Unit Types</a> blog post. For current market trends and data, explore our <a href="https://sageoutdooradvisory.com/blog/glamping-market-data-2025/" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Market Data 2025</a> blog post.`,
+Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping properties, understanding the unique market dynamics, revenue models, and valuation methods required for these specialized accommodations. For comprehensive insights into glamping unit types, costs, and ROI considerations, see our <a href="https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/" class="text-[#006b5f] hover:text-[#005a4f] underline">Complete Guide to Glamping Unit Types</a> blog post. For current market trends and data, explore our <a href="https://sageoutdooradvisory.com/blog/glamping-market-trends-2025/" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Market Data 2025</a> blog post.`,
     category: "Glamping",
     relatedTerms: ["glamping-resort", "safari-tent", "yurt", "outdoor-hospitality"],
     examples: [
@@ -32,7 +32,7 @@ Sage Outdoor Advisory provides feasibility studies and appraisals specifically f
       { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
       { text: "Glamping Market Report", url: "https://sageoutdooradvisory.com/shop/" },
       { text: "Complete Guide to Glamping Unit Types", url: "https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/" },
-      { text: "Glamping Market Data 2025", url: "https://sageoutdooradvisory.com/blog/glamping-market-data-2025/" }
+      { text: "Glamping Market Data 2025", url: "https://sageoutdooradvisory.com/blog/glamping-market-trends-2025/" }
     ],
     faqs: [
       {

@@ -1,6 +1,16 @@
 import { LandingPageContent } from "./landing-pages";
 import { GuideContent } from "./guides/types";
 
+/** Sage HQ — reused anywhere a LocalBusiness/ProfessionalService needs a postal address */
+export const SAGE_HEADQUARTERS_POSTAL_ADDRESS = {
+  "@type": "PostalAddress" as const,
+  streetAddress: "5113 South Harper, Suite 2C – #4001",
+  addressLocality: "Chicago",
+  addressRegion: "Illinois",
+  postalCode: "60615",
+  addressCountry: "US",
+};
+
 export interface FAQItem {
   question: string;
   answer: string;
@@ -52,14 +62,7 @@ export function generateLocalBusinessSchema() {
     "description": "Leading consultancy for feasibility studies and appraisals in the outdoor hospitality industry",
     "url": "https://sageoutdooradvisory.com",
     "logo": "https://sageoutdooradvisory.com/logo.png",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "5113 South Harper, Suite 2C – #4001",
-      "addressLocality": "Chicago",
-      "addressRegion": "Illinois",
-      "postalCode": "60615",
-      "addressCountry": "US"
-    },
+    "address": SAGE_HEADQUARTERS_POSTAL_ADDRESS,
     "geo": {
       "@type": "GeoCoordinates",
       "latitude": "41.7897",
@@ -190,7 +193,8 @@ export function generateServiceSchema(content: LandingPageContent) {
     "provider": {
       "@type": "ProfessionalService",
       "name": "Sage Outdoor Advisory",
-      "url": "https://sageoutdooradvisory.com"
+      "url": "https://sageoutdooradvisory.com",
+      "address": SAGE_HEADQUARTERS_POSTAL_ADDRESS
     },
     "areaServed": {
       "@type": "Country",
@@ -389,16 +393,31 @@ export function generateLandingPageArticleSchema(content: LandingPageContent) {
   };
 }
 
-export function generateItemListSchema(items: string[], name: string) {
+export function generateItemListSchema(
+  items: string[],
+  name: string,
+  pageCanonicalUrl?: string
+) {
+  const baseUrl = "https://resources.sageoutdooradvisory.com";
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": name,
-    "itemListElement": items.map((item, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "name": item
-    }))
+    "itemListElement": items.map((item, index) => {
+      const listItem: Record<string, unknown> = {
+        "@type": "ListItem",
+        "position": index + 1,
+        "name": item,
+      };
+      if (pageCanonicalUrl) {
+        const base = pageCanonicalUrl.startsWith("http")
+          ? pageCanonicalUrl
+          : `${baseUrl}${pageCanonicalUrl}`;
+        const withoutHash = base.replace(/#.*$/, "");
+        listItem.item = `${withoutHash}#key-takeaway-${index + 1}`;
+      }
+      return listItem;
+    }),
   };
 }
 
@@ -565,39 +584,53 @@ export function generateMapItemListSchema(propertyCount: number, locale?: string
   };
 }
 
-export function generateMapWebApplicationSchema(locale?: string) {
+/** Core SoftwareApplication fields for the map tool (reused in Dataset mainEntity). */
+function buildMapSoftwareApplicationLd(
+  locale?: string,
+  options?: { description?: string }
+): Record<string, unknown> {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
-  const mapPath = `/${locale || 'en'}/map`;
+  const mapPath = `/${locale || "en"}/map`;
+  const url = `${baseUrl}${mapPath}`;
   return {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Glamping Properties Map",
-    "applicationCategory": "TravelApplication",
-    "operatingSystem": "Web",
-    "url": `${baseUrl}${mapPath}`,
-    "aggregateRating": {
+    "@type": "SoftwareApplication",
+    name: "Glamping Properties Map",
+    applicationCategory: "TravelApplication",
+    operatingSystem: "Web",
+    url,
+    ...(options?.description ? { description: options.description } : {}),
+    aggregateRating: {
       "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "89",
-      "bestRating": "5",
-      "worstRating": "1"
+      ratingValue: "4.8",
+      ratingCount: "89",
+      reviewCount: "89",
+      bestRating: "5",
+      worstRating: "1",
     },
-    "offers": {
+    offers: {
       "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
+      price: "0",
+      priceCurrency: "USD",
+      url,
     },
-    "featureList": [
+    featureList: [
       "Interactive map with glamping properties",
       "Filter by location, unit type, and price",
       "Property details and photos",
-      "Google Places integration"
+      "Google Places integration",
     ],
-    "browserRequirements": "Requires JavaScript. Requires HTML5.",
-    "softwareHelp": {
+    browserRequirements: "Requires JavaScript. Requires HTML5.",
+    softwareHelp: {
       "@type": "CreativeWork",
-      "text": "Use the filters on the left to narrow down properties by location, unit type, or price range. Click on map markers to view property details."
-    }
+      text: "Use the filters on the left to narrow down properties by location, unit type, or price range. Click on map markers to view property details.",
+    },
+  };
+}
+
+export function generateMapWebApplicationSchema(locale?: string) {
+  return {
+    "@context": "https://schema.org",
+    ...buildMapSoftwareApplicationLd(locale),
   };
 }
 
@@ -711,17 +744,16 @@ export function generateDatasetSchema(
       "@type": "ItemList",
       "name": "Glamping Properties",
       "numberOfItems": propertyCount,
-      "itemListElement": {
-        "@type": "ListItem",
-        "position": 1,
-        "item": {
-          "@type": "WebApplication",
-          "name": "Glamping Properties Map",
-          "url": `${baseUrl}${mapPath}`,
-          "description": `Interactive map of ${propertyCount}+ glamping properties`
-        }
-      }
-    }
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": buildMapSoftwareApplicationLd(locale, {
+            description: `Interactive map of ${propertyCount}+ glamping properties`,
+          }),
+        },
+      ],
+    },
   };
 }
 
@@ -1235,19 +1267,8 @@ export function generateTouristAttractionSchema(parks: Array<{
                         park.recreation_visitors_2022 || 
                         park.recreation_visitors_2021;
     if (visitorCount) {
-      // Parse visitor count (may be in format like "1,234,567" or "1.2M")
-      const cleanedCount = visitorCount.toString().replace(/,/g, '').replace(/[^\d.]/g, '');
-      const numericCount = parseFloat(cleanedCount);
-      if (!isNaN(numericCount)) {
-        schema.aggregateRating = {
-          "@type": "AggregateRating",
-          "ratingValue": "5",
-          "bestRating": "5",
-          "worstRating": "1",
-        };
-        // Note: visitor count can't be directly added to TouristAttraction schema
-        // but we can add it as a note in description if needed
-      }
+      const visitNote = ` Recent annual recreation visits (park reporting): ${visitorCount}.`;
+      schema.description = `${schema.description || ""}${visitNote}`.trim();
     }
     
     // Add operating months

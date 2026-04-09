@@ -265,7 +265,8 @@
   },
   "glossary": {
     "title": "Outdoor Hospitality Glossary",
-    "subtitle": "Comprehensive definitions of industry terms for glamping, RV resorts, campgrounds, feasibility studies, and appraisals",
+    "subtitle": "Industry terms explained in plain language. Browse definitions for glamping, RV resorts, campgrounds, feasibility studies, and appraisals.",
+    "cardHint": "View the full definition, related terms, and examples.",
     "searchPlaceholder": "Search glossary terms...",
     "tabs": {
       "alphabetical": "Alphabetical",

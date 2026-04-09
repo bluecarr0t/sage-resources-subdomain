@@ -7,6 +7,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     slug: "property-appraisals-complete-guide",
     title: "Property Appraisals Complete Guide | 2025 | Sage Outdoor Advisory",
     metaDescription: "Comprehensive guide to property appraisals for outdoor hospitality. Learn about appraisal methods, timelines, and how to choose an appraiser for glamping, RV resort, and campground properties.",
+    quickAnswer: "An appraisal is a licensed specialist’s opinion of what a property is worth today. Lenders rely on it for loan sizing; buyers and sellers use it to set a fair price. Outdoor hospitality assets usually need income-based methods, not just home comps. Timelines and scope vary by property complexity.",
     category: "appraisal",
     hero: {
       headline: "Property Appraisals Complete Guide",

@@ -16,7 +16,11 @@ import {
   generateTouristAttractionSchema,
 } from '@/lib/schema';
 import { locales, type Locale } from "@/i18n";
-import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import {
+  buildStableHreflangQueryString,
+  generateHreflangAlternates,
+  getOpenGraphLocale,
+} from "@/lib/i18n-utils";
 import { notFound } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
 
@@ -26,11 +30,16 @@ interface PageProps {
   };
 }
 
+type MapSearchParams = Record<string, string | string[] | undefined>;
+
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PageProps & { searchParams?: MapSearchParams }): Promise<Metadata> {
   const { locale } = params;
   
   // Validate locale
@@ -43,7 +52,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const pathname = `/${locale}/map`;
-  const url = `${baseUrl}${pathname}`;
+  const queryString = buildStableHreflangQueryString(searchParams);
+  const url = `${baseUrl}${pathname}${queryString}`;
   const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
   const title = `Glamping Properties Map | ${count}+ Locations | Sage Outdoor Advisory`;
@@ -77,7 +87,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: url,
-      ...generateHreflangAlternates(pathname),
+      ...generateHreflangAlternates(pathname, baseUrl, queryString),
     },
     robots: {
       index: true,

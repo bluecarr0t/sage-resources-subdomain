@@ -38,7 +38,8 @@
     "migrate:legacy-schema": "tsx scripts/migrate-legacy-to-supabase/export-legacy-schema.ts",
     "migrate:legacy-export": "tsx scripts/migrate-legacy-to-supabase/export-data.ts --exclude-large",
     "migrate:legacy-import": "tsx scripts/migrate-legacy-to-supabase/import-data.ts",
-    "migrate:legacy": "tsx scripts/migrate-legacy-to-supabase/run-migration.ts"
+    "migrate:legacy": "tsx scripts/migrate-legacy-to-supabase/run-migration.ts",
+    "export:glamping-roverpass-unified-xlsx": "tsx scripts/export-glamping-roverpass-unified-xlsx.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
