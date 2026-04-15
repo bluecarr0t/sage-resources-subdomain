@@ -30,6 +30,12 @@ import PropertyInfoWindow from './map/PropertyInfoWindow';
 import ParkInfoWindow from './map/ParkInfoWindow';
 import ClientWorkInfoWindow from './map/ClientWorkInfoWindow';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
+import {
+  computeMarkerPixelDeltaToFitPopup,
+  defaultInfoWindowPadding,
+  getMarkerContainerPixel,
+  markerScreenDeltaToPanBy,
+} from './map/utils/panInfoWindowIntoView';
 
 const PopulationLayer = dynamic(() => import('./PopulationLayer'), {
   ssr: false,
@@ -47,36 +53,6 @@ const OpportunityZonesLayer = dynamic(() => import('./OpportunityZonesLayer'), {
 const defaultCenter = { lat: 39.5, lng: -98.5 };
 const defaultZoom = 4;
 const defaultZoomMobile = 3.25;
-
-/**
- * Pan so the marker sits far enough below the top of the map pane for a tall InfoWindow
- * (photo ~192px + chrome + text ≈ 400–450px above the pin). Uses meters/px at the
- * current zoom so the offset scales with viewport size and zoom level.
- */
-function centerMapLeavingRoomAboveInfoWindow(
-  map: google.maps.Map,
-  marker: google.maps.LatLngLiteral
-): google.maps.LatLngLiteral {
-  const mapDiv = map.getDiv();
-  const h = mapDiv?.clientHeight ?? 500;
-  const zoom = map.getZoom() ?? 10;
-  const { lat, lng } = marker;
-
-  const estimatedCardAbovePinPx = 460;
-  const topPaddingPx = 28;
-  const bottomHeadroomPx = 72;
-  const minMarkerYFromTop = Math.min(
-    h - bottomHeadroomPx,
-    estimatedCardAbovePinPx + topPaddingPx
-  );
-  const shiftMarkerDownPx = Math.max(0, minMarkerYFromTop - h / 2);
-
-  const metersPerPixel =
-    (156543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom);
-  const deltaLat = (shiftMarkerDownPx * metersPerPixel) / 111_320;
-
-  return { lat: lat + deltaLat, lng };
-}
 
 type PropertyWithCoords = SageProperty & { coordinates: [number, number] };
 
@@ -338,7 +314,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     markerClickTimeRef,
   });
 
-  // Center map so the InfoWindow (tall card above the pin) stays inside the map pane, not clipped at the top.
+  // Pan only when the InfoWindow would overflow the padded viewport (typical map UX).
   useEffect(() => {
     if (!map) return;
 
@@ -353,12 +329,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
     if (!marker) return;
 
-    const newCenter = centerMapLeavingRoomAboveInfoWindow(map, marker);
-    setMapCenter(newCenter);
+    // React state often still has default zoom while the user has zoomed the map; syncing
+    // here keeps controlled <GoogleMap zoom={mapZoom}> from snapping back to default.
+    const liveZoom = map.getZoom();
+    if (liveZoom != null) setMapZoom(liveZoom);
 
+    let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+    let imageLayoutTimeout: ReturnType<typeof setTimeout> | null = null;
     let idleListener: google.maps.MapsEventListener | null = null;
-    let syncTimeout: number | null = null;
-    let imageLayoutTimeout: number | null = null;
     let cancelled = false;
 
     const syncFromMap = () => {
@@ -367,27 +345,50 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       if (c) setMapCenter({ lat: c.lat(), lng: c.lng() });
     };
 
-    map.panTo(newCenter);
-    idleListener = google.maps.event.addListenerOnce(map, 'idle', () => {
-      syncTimeout = window.setTimeout(syncFromMap, 50);
-    });
-
-    // Photo loading can grow the InfoWindow after first layout — add one small northward nudge.
-    imageLayoutTimeout = window.setTimeout(() => {
+    const runAdjust = async () => {
       if (cancelled) return;
-      const c = map.getCenter();
-      if (!c) return;
-      const z = map.getZoom() ?? 10;
-      const lat0 = c.lat();
-      const mpp =
-        (156543.03392 * Math.cos((lat0 * Math.PI) / 180)) / Math.pow(2, z);
-      const extraPx = Math.min(100, Math.round((map.getDiv()?.clientHeight ?? 500) * 0.06));
-      const extraDeltaLat = (extraPx * mpp) / 111_320;
-      map.panTo({ lat: lat0 + extraDeltaLat, lng: c.lng() });
+      const div = map.getDiv();
+      const w = div.clientWidth;
+      const h = div.clientHeight;
+      if (w < 1 || h < 1) return;
+
+      const pixel = await getMarkerContainerPixel(map, marker);
+      if (cancelled || !pixel) {
+        syncFromMap();
+        return;
+      }
+
+      const padding = defaultInfoWindowPadding(isMobile);
+      const { dx, dy } = computeMarkerPixelDeltaToFitPopup({
+        markerX: pixel.x,
+        markerY: pixel.y,
+        mapWidth: w,
+        mapHeight: h,
+        padding,
+      });
+
+      if (dx === 0 && dy === 0) {
+        syncFromMap();
+        return;
+      }
+
+      const pan = markerScreenDeltaToPanBy(dx, dy);
+      map.panBy(pan.x, pan.y);
       google.maps.event.addListenerOnce(map, 'idle', () => {
         syncTimeout = window.setTimeout(syncFromMap, 50);
       });
-    }, 700);
+    };
+
+    const onIdleAfterSelection = () => {
+      if (cancelled) return;
+      void runAdjust();
+      imageLayoutTimeout = window.setTimeout(() => {
+        if (cancelled) return;
+        void runAdjust();
+      }, 700);
+    };
+
+    idleListener = google.maps.event.addListenerOnce(map, 'idle', onIdleAfterSelection);
 
     return () => {
       cancelled = true;
@@ -395,7 +396,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       if (syncTimeout) clearTimeout(syncTimeout);
       if (imageLayoutTimeout) clearTimeout(imageLayoutTimeout);
     };
-  }, [map, selectedProperty, selectedPark, selectedClientWork, setMapCenter]);
+  }, [map, selectedProperty, selectedPark, selectedClientWork, setMapCenter, setMapZoom, isMobile]);
 
   const isNearMarker = useCallback((lat: number, lng: number, threshold: number = 0.002): boolean => {
     const timeSinceMarkerClick = Date.now() - markerClickTimeRef.current;
@@ -424,31 +425,33 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     setMapCenter, setMapZoom, setMapBounds, hasJustFittedBoundsRef,
   });
 
-  // Center map from URL coordinates
+  // Center map from URL coordinates only when lat/lon are in the URL. Marker/InfoWindow
+  // panning updates mapCenter without URL params; the old "not default center" check
+  // wrongly treated that as URL navigation and applied stale mapZoom (zooming out).
   useEffect(() => {
-    if (map && !shouldFitBounds && mapCenter && mapZoom) {
-      const isFromUrl = mapCenter.lat !== defaultCenter.lat || mapCenter.lng !== defaultCenter.lng || mapZoom !== defaultZoom;
-      if (isFromUrl) {
-        const currentCenter = map.getCenter();
-        const currentZoom = map.getZoom();
-        const centerDiff = currentCenter ? Math.abs(currentCenter.lat() - mapCenter.lat) + Math.abs(currentCenter.lng() - mapCenter.lng) : Infinity;
-        const zoomDiff = currentZoom ? Math.abs(currentZoom - mapZoom) : Infinity;
-        if (centerDiff > 0.001 || zoomDiff > 0.5) {
-          map.setCenter(mapCenter);
-          map.setZoom(mapZoom);
-          hasCenteredFromUrlRef.current = true;
-          setTimeout(() => { const bounds = map.getBounds(); if (bounds) setMapBounds(bounds); }, 500);
-          if (propertiesWithCoords.length > 0) {
-            const targetProperty = propertiesWithCoords.find((property) => {
-              const [lat, lon] = property.coordinates;
-              return Math.abs(lat - mapCenter.lat) < 0.01 && Math.abs(lon - mapCenter.lng) < 0.01;
-            });
-            if (targetProperty) setSelectedProperty(targetProperty);
-          }
-        }
+    if (!map || shouldFitBounds || mapCenter == null || mapZoom == null) return;
+    const urlLat = searchParams.get('lat');
+    const urlLon = searchParams.get('lon');
+    if (!urlLat || !urlLon) return;
+
+    const currentCenter = map.getCenter();
+    const currentZoom = map.getZoom();
+    const centerDiff = currentCenter ? Math.abs(currentCenter.lat() - mapCenter.lat) + Math.abs(currentCenter.lng() - mapCenter.lng) : Infinity;
+    const zoomDiff = currentZoom != null ? Math.abs(currentZoom - mapZoom) : Infinity;
+    if (centerDiff > 0.001 || zoomDiff > 0.5) {
+      map.setCenter(mapCenter);
+      map.setZoom(mapZoom);
+      hasCenteredFromUrlRef.current = true;
+      setTimeout(() => { const bounds = map.getBounds(); if (bounds) setMapBounds(bounds); }, 500);
+      if (propertiesWithCoords.length > 0) {
+        const targetProperty = propertiesWithCoords.find((property) => {
+          const [lat, lon] = property.coordinates;
+          return Math.abs(lat - mapCenter.lat) < 0.01 && Math.abs(lon - mapCenter.lng) < 0.01;
+        });
+        if (targetProperty) setSelectedProperty(targetProperty);
       }
     }
-  }, [map, mapCenter, mapZoom, shouldFitBounds, propertiesWithCoords, setMapBounds]);
+  }, [map, mapCenter, mapZoom, shouldFitBounds, propertiesWithCoords, setMapBounds, searchParams, setSelectedProperty]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
