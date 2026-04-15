@@ -11,6 +11,22 @@ export default function AdminMainContent({
   const { isCollapsed } = useSidebar();
   const pathname = usePathname();
   const isClientMap = pathname === '/admin/client-map';
+  const isSageAi = pathname === '/admin/sage-ai';
+  
+  // Sage AI needs full viewport without padding
+  if (isSageAi) {
+    return (
+      <div
+        id="mainContent"
+        className={`h-screen bg-white dark:bg-gray-950 transition-all duration-300 ease-in-out overflow-hidden ${
+          isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+        }`}
+      >
+        {children}
+      </div>
+    );
+  }
+
   const contentPadding = isClientMap
     ? 'pt-6 lg:pt-8 pb-2 lg:pb-3'
     : 'py-6 lg:py-8';
@@ -18,7 +34,7 @@ export default function AdminMainContent({
   return (
     <div
       id="mainContent"
-      className={`min-h-screen bg-gray-50 dark:bg-gray-950 pt-16 lg:pt-8 transition-all duration-300 ease-in-out ${
+      className={`min-h-screen bg-white dark:bg-gray-950 pt-16 lg:pt-8 transition-all duration-300 ease-in-out ${
         isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
       }`}
     >

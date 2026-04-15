@@ -42,6 +42,7 @@
     "export:glamping-roverpass-unified-xlsx": "tsx scripts/export-glamping-roverpass-unified-xlsx.ts"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.164",
     "@anthropic-ai/sdk": "^0.78.0",
     "@googlemaps/markerclusterer": "^2.6.2",
     "@mendable/firecrawl-js": "^4.15.2",
@@ -49,6 +50,7 @@
     "@react-google-maps/marker-clusterer": "^2.20.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.86.0",
+    "@tailwindcss/typography": "^0.5.19",
     "@tavily/core": "^0.7.2",
     "@types/leaflet": "^1.9.21",
     "@vercel/ai-sdk-gateway": "^0.1.10",
@@ -75,9 +77,11 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-leaflet": "^4.2.1",
+    "react-markdown": "^10.1.0",
     "react-simple-maps": "^3.0.0",
     "recharts": "^3.7.0",
     "redis": "^4.7.0",
+    "remark-gfm": "^4.0.1",
     "rss-parser": "^3.13.0",
     "sharp": "^0.34.5",
     "word-extractor": "^1.0.4",

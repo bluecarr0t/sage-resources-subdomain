@@ -9,7 +9,6 @@ import {
   BarChart2,
   Map,
   FileText,
-  FilePlus,
   User,
   LogOut,
   X,
@@ -24,6 +23,7 @@ import {
   LayoutGrid,
   Calculator,
   Home,
+  Bot,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSidebar } from '@/lib/sidebar-context';
@@ -40,11 +40,11 @@ function getActivePageId(pathname: string): string {
   if (pathname === '/map' || pathname.startsWith('/en/map')) return 'map';
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
-  if (pathname.startsWith('/admin/report-builder')) return 'report-builder';
   if (pathname.startsWith('/admin/comps') && !pathname.startsWith('/admin/comps-v2')) return 'comps';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/rv-site-setup') || pathname.startsWith('/admin/site-design')) return 'site-design';
   if (pathname.startsWith('/admin/site-builder')) return 'site-builder';
+  if (pathname.startsWith('/admin/sage-ai')) return 'sage-ai';
   if (pathname.startsWith('/admin/audit-log')) return 'audit-log';
   if (pathname.startsWith('/admin/cost-explorer')) return 'cost-explorer';
   if (pathname.startsWith('/admin/sites-export')) return 'sites-export';
@@ -273,15 +273,7 @@ export default function AdminSidebar() {
                   isActive={activePageId === 'past-reports'}
                   isCollapsed={showCollapsed}
                 />
-                <NavLink
-                  href="/admin/report-builder"
-                  label="Report Builder"
-                  icon={FilePlus}
-                  pageId="report-builder"
-                  isActive={activePageId === 'report-builder'}
-                  isCollapsed={showCollapsed}
-                  showBeta
-                />
+                {/* Report Builder hidden from menu — page still accessible via direct URL */}
                 <NavLink
                   href="/admin/proximity-insights"
                   label="Proximity Insights"
@@ -315,6 +307,14 @@ export default function AdminSidebar() {
                   icon={Calculator}
                   pageId="cost-explorer"
                   isActive={activePageId === 'cost-explorer'}
+                  isCollapsed={showCollapsed}
+                />
+                <NavLink
+                  href="/admin/sage-ai"
+                  label="Sage AI"
+                  icon={Bot}
+                  pageId="sage-ai"
+                  isActive={activePageId === 'sage-ai'}
                   isCollapsed={showCollapsed}
                 />
                 {/* Sites Export hidden from menu — page still accessible via direct URL */}

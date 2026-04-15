@@ -28,13 +28,15 @@ export interface WithAdminAuthOptions {
 export async function requireAdminAuth(request?: NextRequest): Promise<RequireAdminAuthResult> {
   const supabase = await createServerClientWithCookies();
   const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (sessionError || !session?.user) {
+  if (userError || !user) {
     return { ok: false, response: unauthorizedResponse() };
   }
+
+  const session = { user: { id: user.id, email: user.email } };
 
   if (!isAllowedEmailDomain(session.user.email)) {
     return { ok: false, response: forbiddenResponse() };
