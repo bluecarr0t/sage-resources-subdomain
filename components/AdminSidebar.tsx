@@ -23,7 +23,6 @@ import {
   LayoutGrid,
   Calculator,
   Home,
-  Bot,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSidebar } from '@/lib/sidebar-context';
@@ -309,14 +308,7 @@ export default function AdminSidebar() {
                   isActive={activePageId === 'cost-explorer'}
                   isCollapsed={showCollapsed}
                 />
-                <NavLink
-                  href="/admin/sage-ai"
-                  label="Sage AI"
-                  icon={Bot}
-                  pageId="sage-ai"
-                  isActive={activePageId === 'sage-ai'}
-                  isCollapsed={showCollapsed}
-                />
+                {/* Sage AI hidden from menu — page still accessible via direct URL */}
                 {/* Sites Export hidden from menu — page still accessible via direct URL */}
               </div>
             </div>

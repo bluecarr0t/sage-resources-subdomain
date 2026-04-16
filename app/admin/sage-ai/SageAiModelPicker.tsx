@@ -8,6 +8,7 @@ import {
   type SageAiChatGatewayModelId,
   type SageAiModelSelection,
   isAllowedSageAiChatModel,
+  migrateLegacySageAiChatModelId,
 } from '@/lib/sage-ai/sage-ai-chat-models';
 
 export const SAGE_AI_MODEL_STORAGE_KEY = 'sage-ai-model-selection-v1';
@@ -26,23 +27,23 @@ export function sageAiSelectionToStorage(s: SageAiModelSelection): Pick<SageAiMo
 export function sageAiSelectionFromStorage(raw: unknown): SageAiModelSelection | null {
   if (!raw || typeof raw !== 'object') return null;
   if ('modelId' in raw && typeof (raw as { modelId: unknown }).modelId === 'string') {
-    const id = (raw as { modelId: string }).modelId;
+    const id = migrateLegacySageAiChatModelId((raw as { modelId: string }).modelId);
     if (isAllowedSageAiChatModel(id)) return { modelId: id };
     return null;
   }
   const o = raw as StoredSelection;
   if ('k' in o && o.k === 'auto') return { modelId: 'anthropic/claude-sonnet-4.5' };
   if ('k' in o && o.k === 'premium') return { modelId: 'anthropic/claude-opus-4.6' };
-  if ('k' in o && o.k === 'm' && typeof o.id === 'string' && isAllowedSageAiChatModel(o.id)) {
-    return { modelId: o.id };
+  if ('k' in o && o.k === 'm' && typeof o.id === 'string') {
+    const id = migrateLegacySageAiChatModelId(o.id);
+    if (isAllowedSageAiChatModel(id)) return { modelId: id };
   }
   return null;
 }
 
 const MODEL_LABEL_KEYS: Record<SageAiChatGatewayModelId, string> = {
   'openai/gpt-5-nano': 'modelOpenaiGpt5Nano',
-  'openai/gpt-5-mini': 'modelOpenaiGpt5Mini',
-  'anthropic/claude-haiku-4.5': 'modelAnthropicHaiku45',
+  'openai/gpt-5.4-nano': 'modelOpenaiGpt54Nano',
   'anthropic/claude-sonnet-4.5': 'modelAnthropicSonnet45',
   'anthropic/claude-opus-4.6': 'modelAnthropicOpus46',
 };

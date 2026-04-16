@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useChat, type UIMessage } from '@ai-sdk/react';
-import { DefaultChatTransport, isToolUIPart } from 'ai';
+import { DefaultChatTransport, isReasoningUIPart, isToolUIPart } from 'ai';
 import { useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -71,6 +71,18 @@ function formatSessionDate(dateStr: string, t: ReturnType<typeof useTranslations
 
 type SidebarTab = 'history' | 'saved';
 
+function userMessagePlainText(message: UIMessage): string {
+  const textParts = message.parts.filter((p) => p.type === 'text') as Array<{ type: 'text'; text: string }>;
+  return textParts.map((p) => p.text).join('\n').trim();
+}
+
+/** Top edge of `el` in scroll-root content coordinates. */
+function userMessageTopInScrollRoot(messageEl: HTMLElement, scrollRoot: HTMLElement): number {
+  const rootRect = scrollRoot.getBoundingClientRect();
+  const elRect = messageEl.getBoundingClientRect();
+  return scrollRoot.scrollTop + (elRect.top - rootRect.top);
+}
+
 export default function SageAiClient() {
   const t = useTranslations('admin.sageAi');
   const [input, setInput] = useState('');
@@ -96,8 +108,12 @@ export default function SageAiClient() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
   const [savedQueriesError, setSavedQueriesError] = useState<string | null>(null);
+  const [stickyUserPrompt, setStickyUserPrompt] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const userMessageRowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const messagesRef = useRef<UIMessage[]>([]);
+  const stickyScrollRafRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const currentSessionIdRef = useRef<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -139,7 +155,15 @@ export default function SageAiClient() {
     []
   );
 
-  const { messages, sendMessage, status, setMessages, stop } = useChat({ transport });
+  const showToastRef = useRef<(msg: string) => void>(() => {});
+  const { messages, sendMessage, status, setMessages, stop } = useChat({
+    transport,
+    onError: (err) => {
+      showToastRef.current(err.message ?? 'Chat request failed');
+    },
+  });
+
+  messagesRef.current = messages;
 
   const isLoading = status === 'streaming' || status === 'submitted';
 
@@ -154,6 +178,7 @@ export default function SageAiClient() {
   }, [toastMessage]);
 
   const showToast = useCallback((msg: string) => setToastMessage(msg), []);
+  showToastRef.current = showToast;
 
   const handlePythonError = useCallback((error: string, code: string) => {
     setPythonRetryCount(prev => prev + 1);
@@ -326,15 +351,64 @@ export default function SageAiClient() {
     }
   }, [modelSelection, modelPrefsLoaded]);
 
+  const updateStickyUserPrompt = useCallback(() => {
+    const container = messagesContainerRef.current;
+    const list = messagesRef.current;
+    if (!container || list.length === 0) {
+      setStickyUserPrompt(null);
+      return;
+    }
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    const atBottom = distanceFromBottom < 100;
+    if (atBottom) {
+      setStickyUserPrompt(null);
+      return;
+    }
+    const band = 56;
+    let prompt: string | null = null;
+    for (const m of list) {
+      if (m.role !== 'user') continue;
+      const el = userMessageRowRefs.current.get(m.id);
+      if (!el) continue;
+      const y = userMessageTopInScrollRoot(el, container);
+      if (y <= scrollTop + band) {
+        const text = userMessagePlainText(m);
+        if (text) prompt = text;
+      }
+    }
+    setStickyUserPrompt(prompt);
+  }, []);
+
+  const scheduleStickyUserPromptUpdate = useCallback(() => {
+    if (stickyScrollRafRef.current != null) return;
+    stickyScrollRafRef.current = window.requestAnimationFrame(() => {
+      stickyScrollRafRef.current = null;
+      updateStickyUserPrompt();
+    });
+  }, [updateStickyUserPrompt]);
+
+  useEffect(() => {
+    return () => {
+      if (stickyScrollRafRef.current != null) {
+        window.cancelAnimationFrame(stickyScrollRafRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    scheduleStickyUserPromptUpdate();
+  }, [messages, scheduleStickyUserPromptUpdate]);
+
   // Handle scroll events to detect if user has scrolled up
   const handleScroll = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
-    
+
     const { scrollTop, scrollHeight, clientHeight } = container;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     const atBottom = distanceFromBottom < 100; // Within 100px of bottom
-    
+
     setIsAtBottom(atBottom);
     if (!atBottom && isLoading) {
       setUserHasScrolled(true);
@@ -342,7 +416,8 @@ export default function SageAiClient() {
     if (atBottom) {
       setUserHasScrolled(false);
     }
-  }, [isLoading]);
+    scheduleStickyUserPromptUpdate();
+  }, [isLoading, scheduleStickyUserPromptUpdate]);
 
   // Auto-scroll only if user hasn't manually scrolled up
   useEffect(() => {
@@ -733,11 +808,23 @@ export default function SageAiClient() {
         </div>
 
         {/* Messages */}
-        <div 
+        <div
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto relative"
+          className="relative flex-1 overflow-y-auto"
         >
+          {stickyUserPrompt ? (
+            <div className="sticky top-0 z-20 border-b border-gray-200/90 bg-white/95 px-4 py-2 shadow-sm backdrop-blur-md dark:border-gray-800/90 dark:bg-gray-950/95">
+              <div className="mx-auto max-w-3xl">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  {t('stickyUserPromptLabel')}
+                </p>
+                <p className="mt-0.5 line-clamp-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {stickyUserPrompt}
+                </p>
+              </div>
+            </div>
+          ) : null}
           {/* Scroll to bottom button */}
           {userHasScrolled && isLoading && (
             <button
@@ -829,30 +916,56 @@ export default function SageAiClient() {
             {messages.map((message) => (
               <div key={message.id} className="mb-6">
                 {message.role === 'user' ? (
-                  <div className="group relative">
-                    <div className="text-[15px] text-gray-900 dark:text-gray-100 leading-relaxed">
-                      {message.parts.map((part, partIndex) => {
-                        if (part.type === 'text') {
-                          return (
-                            <div key={partIndex} className="whitespace-pre-wrap">
-                              {part.text}
-                              <button
-                                onClick={() => openSaveQueryDialog(part.text)}
-                                className="ml-2 inline-flex opacity-0 group-hover:opacity-100 transition-opacity"
-                                title={t('saveQuery')}
-                              >
-                                <BookmarkPlus className="w-4 h-4 text-gray-400 hover:text-sage-600" />
-                              </button>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })}
+                  <div
+                    ref={(el) => {
+                      if (el) userMessageRowRefs.current.set(message.id, el);
+                      else userMessageRowRefs.current.delete(message.id);
+                    }}
+                    className="group relative"
+                  >
+                    <div className="rounded-2xl border border-gray-200/90 bg-gray-100 px-4 py-3 shadow-sm dark:border-gray-700/90 dark:bg-gray-800/95">
+                      <div className="text-[15px] leading-relaxed text-gray-900 dark:text-gray-100">
+                        {message.parts.map((part, partIndex) => {
+                          if (part.type === 'text') {
+                            return (
+                              <div key={partIndex} className="whitespace-pre-wrap">
+                                {part.text}
+                                <button
+                                  type="button"
+                                  onClick={() => openSaveQueryDialog(part.text)}
+                                  className="ml-2 inline-flex opacity-0 transition-opacity group-hover:opacity-100"
+                                  title={t('saveQuery')}
+                                >
+                                  <BookmarkPlus className="h-4 w-4 text-gray-500 hover:text-sage-600 dark:text-gray-400" />
+                                </button>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
                     </div>
                   </div>
                 ) : (
                   <div className="text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed group/response">
                     {message.parts.map((part, partIndex) => {
+                      if (isReasoningUIPart(part)) {
+                        return (
+                          <details
+                            key={partIndex}
+                            open={part.state !== 'done'}
+                            className="my-3 rounded-lg border border-gray-200 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/50"
+                          >
+                            <summary className="cursor-pointer select-none px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+                              {t('thinking')}
+                            </summary>
+                            <div className="border-t border-gray-200 px-3 py-2 text-xs leading-relaxed text-gray-700 dark:border-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono">
+                              {part.text}
+                            </div>
+                          </details>
+                        );
+                      }
+
                       if (part.type === 'text') {
                         const copyId = `${message.id}-${partIndex}`;
                         return (
