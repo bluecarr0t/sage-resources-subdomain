@@ -22,6 +22,11 @@ interface SearchableMultiSelectProps {
   disabled?: boolean;
   /** Shown as native tooltip when disabled (e.g. why the control is inactive). */
   disabledTitle?: string;
+  /**
+   * Max height of the open panel (px). The options list scrolls inside this.
+   * Default 420; pass a larger value for long lists (e.g. state filters).
+   */
+  maxDropdownHeightPx?: number;
 }
 
 export default function SearchableMultiSelect({
@@ -36,10 +41,11 @@ export default function SearchableMultiSelect({
   activeColor = 'sage',
   disabled = false,
   disabledTitle,
+  maxDropdownHeightPx = 420,
 }: SearchableMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 240 });
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 420 });
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -110,8 +116,8 @@ export default function SearchableMultiSelect({
       const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
       const spaceBelow = viewportHeight - rect.bottom - 4;
-      const defaultMaxHeight = 280;
-      const maxHeight = Math.max(Math.min(spaceBelow, defaultMaxHeight), 100);
+      const cap = maxDropdownHeightPx;
+      const maxHeight = Math.max(120, Math.min(spaceBelow, cap));
       const left = Math.max(4, Math.min(rect.left, viewportWidth - rect.width - 4));
       setDropdownPosition({
         top: rect.bottom + 4,
@@ -198,7 +204,7 @@ export default function SearchableMultiSelect({
         createPortal(
           <div
             ref={dropdownRef}
-            className="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl overflow-hidden"
+            className="fixed z-[9999] overflow-hidden bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl"
             style={{
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`,
@@ -210,7 +216,7 @@ export default function SearchableMultiSelect({
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+            <div className="p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -224,7 +230,12 @@ export default function SearchableMultiSelect({
                 />
               </div>
             </div>
-            <div className="overflow-y-auto p-2 space-y-0.5" style={{ maxHeight: dropdownPosition.maxHeight - 60 }}>
+            <div
+              className="overflow-y-auto overscroll-contain p-2 space-y-0.5 [scrollbar-gutter:stable]"
+              style={{
+                maxHeight: Math.max(160, dropdownPosition.maxHeight - 76),
+              }}
+            >
               {filteredOptions.length === 0 ? (
                 <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">No matches</div>
               ) : (

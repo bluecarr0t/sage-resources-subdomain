@@ -216,7 +216,7 @@ async function discoverPropertiesForState(
 
 ${limitClause}
 
-For each property provide: property_name (required), city (required), state (required), address, zip_code, url (official website), phone_number, description (2-4 sentences), property_type (e.g. "Glamping Resort", "Marina with Glamping", "Outdoor Resort", "Landscape Hotel"), unit_type (e.g. "safari tents, treehouses, cabins"), lat, lon if known.
+For each property provide: property_name (required), city (required), state (required), address, zip_code, url (official website), phone_number, description (2-4 sentences), property_type (e.g. "Glamping Resort", "Marina with Glamping", "Outdoor Resort", "Landscape Hotel"), unit_type (e.g. "Safari Tent, Treehouse, Cabin" — Title Case, canonical names), lat, lon if known.
 
 Return a JSON object with a "properties" array. Be accurate - only include properties you are confident exist and meet the 40% glamping unit threshold.`;
 

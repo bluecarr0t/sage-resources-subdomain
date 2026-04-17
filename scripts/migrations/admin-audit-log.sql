@@ -37,6 +37,7 @@ ALTER TABLE admin_audit_log ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role can insert audit logs"
 ON admin_audit_log
 FOR INSERT
+TO service_role
 WITH CHECK (true);
 
 CREATE POLICY "Service role can select audit logs"

@@ -2,16 +2,21 @@
  * API Route: Sage AI Sessions
  * GET /api/admin/sage-ai/sessions - List user's sessions
  * POST /api/admin/sage-ai/sessions - Create or update a session
+ *
+ * Messages are persisted in the `sage_ai_messages` child table (one row per
+ * turn). The legacy `sage_ai_sessions.messages` JSONB column is removed by
+ * `sage-ai-drop-legacy-messages.sql`; sessions now only track metadata.
  */
 
 import { NextResponse } from 'next/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { requireAdminAuth } from '@/lib/require-admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 interface SessionMessage {
-  id: string;
-  role: 'user' | 'assistant';
+  id?: string;
+  role: 'user' | 'assistant' | 'system';
   content?: string;
   parts?: unknown[];
 }
@@ -69,7 +74,6 @@ export async function POST(request: Request) {
       const { error } = await authResult.supabase
         .from('sage_ai_sessions')
         .update({
-          messages: body.messages,
           title,
           updated_at: new Date().toISOString(),
         })
@@ -81,6 +85,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to update session' }, { status: 500 });
       }
 
+      await syncMessages(authResult.supabase, body.id, userId, body.messages);
+
       return NextResponse.json({ id: body.id, title });
     }
   }
@@ -89,7 +95,6 @@ export async function POST(request: Request) {
     .from('sage_ai_sessions')
     .insert({
       user_id: userId,
-      messages: body.messages,
       title,
     })
     .select('id')
@@ -100,12 +105,62 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
   }
 
+  await syncMessages(authResult.supabase, data.id, userId, body.messages);
+
   return NextResponse.json({ id: data.id, title });
+}
+
+/**
+ * Diff-upsert messages into the sage_ai_messages child table. Rows with
+ * ordinals >= messages.length are deleted so truncations (e.g. edit-and-resend
+ * in PR 3) are reflected.
+ */
+async function syncMessages(
+  supabase: SupabaseClient,
+  sessionId: string,
+  userId: string,
+  messages: SessionMessage[]
+): Promise<void> {
+  if (messages.length === 0) {
+    await supabase
+      .from('sage_ai_messages')
+      .delete()
+      .eq('session_id', sessionId)
+      .eq('user_id', userId);
+    return;
+  }
+
+  const rows = messages.map((m, idx) => ({
+    session_id: sessionId,
+    user_id: userId,
+    ordinal: idx,
+    role: m.role,
+    parts:
+      m.parts ?? (m.content ? [{ type: 'text', text: m.content }] : []),
+  }));
+
+  const { error: upsertError } = await supabase
+    .from('sage_ai_messages')
+    .upsert(rows, { onConflict: 'session_id,ordinal' });
+  if (upsertError) {
+    console.error('[sage-ai/sessions] sync upsert error:', upsertError);
+    return;
+  }
+
+  const { error: trimError } = await supabase
+    .from('sage_ai_messages')
+    .delete()
+    .eq('session_id', sessionId)
+    .eq('user_id', userId)
+    .gte('ordinal', messages.length);
+  if (trimError) {
+    console.error('[sage-ai/sessions] sync trim error:', trimError);
+  }
 }
 
 function generateSessionTitle(messages: SessionMessage[]): string {
   const firstUserMessage = messages.find((m) => m.role === 'user');
-  if (!firstUserMessage) return 'New conversation';
+  if (!firstUserMessage) return SESSION_TITLE_FALLBACK;
 
   const content =
     firstUserMessage.content ||
@@ -113,8 +168,12 @@ function generateSessionTitle(messages: SessionMessage[]): string {
       typeof p === 'object' && p !== null && 'type' in p && (p as { type: string }).type === 'text'
     )?.text ?? '');
 
-  if (!content) return 'New conversation';
+  const cleaned = content.replace(/\s+/g, ' ').trim();
+  if (!cleaned) return SESSION_TITLE_FALLBACK;
 
-  const truncated = content.slice(0, 60);
-  return truncated.length < content.length ? `${truncated}...` : truncated;
+  const truncated = cleaned.slice(0, 60);
+  return truncated.length < cleaned.length ? `${truncated}…` : truncated;
 }
+
+/** Keep this aligned with messages/en.json → sageAi.sessionTitleFallback. */
+const SESSION_TITLE_FALLBACK = 'New chat';

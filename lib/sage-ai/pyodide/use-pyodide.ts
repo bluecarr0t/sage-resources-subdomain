@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { getPyodideCdnBase } from '@/lib/sage-ai/pyodide/pyodide-version';
 
 interface PyodideInstance {
   runPythonAsync: (code: string) => Promise<unknown>;
@@ -35,7 +36,50 @@ export interface ExecutionResult {
   executionTime: number;
 }
 
-const PYODIDE_CDN = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
+/**
+ * Prefer self-hosted Pyodide from `/public/pyodide/` (from `scripts/ensure-pyodide.js`).
+ * That folder is gitignored; if assets are missing or wasm fails to fetch, we fall
+ * back to the pinned jsDelivr URL so charts still work without manual env setup.
+ */
+function normalizePyodideBase(base: string): string {
+  return base.replace(/\/?$/, '/');
+}
+
+const PRIMARY_PYODIDE_BASE = normalizePyodideBase(
+  process.env.NEXT_PUBLIC_PYODIDE_BASE ?? '/pyodide/'
+);
+const CDN_PYODIDE_BASE = normalizePyodideBase(getPyodideCdnBase());
+
+function pyodideIndexUrlsToTry(): string[] {
+  const urls = [PRIMARY_PYODIDE_BASE, CDN_PYODIDE_BASE];
+  return urls.filter((u, i) => urls.indexOf(u) === i);
+}
+
+async function injectPyodideScript(base: string): Promise<void> {
+  if (typeof window === 'undefined' || window.loadPyodide) return;
+
+  const src = `${base}pyodide.js`;
+  await new Promise<void>((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    try {
+      const resolved = new URL(src, window.location.href);
+      if (resolved.origin !== window.location.origin) {
+        script.crossOrigin = 'anonymous';
+      }
+    } catch {
+      script.crossOrigin = 'anonymous';
+    }
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Pyodide script'));
+    document.head.appendChild(script);
+  });
+
+  if (!window.loadPyodide) {
+    throw new Error('Pyodide script loaded but loadPyodide is not defined');
+  }
+}
+
 const PYTHON_EXEC_TIMEOUT_MS = 30_000;
 
 export function usePyodide() {
@@ -53,19 +97,37 @@ export function usePyodide() {
     setLoadError(null);
 
     try {
+      const indexUrls = pyodideIndexUrlsToTry();
+
       if (!window.loadPyodide) {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = `${PYODIDE_CDN}pyodide.js`;
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error('Failed to load Pyodide script'));
-          document.head.appendChild(script);
-        });
+        let lastInjectErr: Error | null = null;
+        for (const base of indexUrls) {
+          try {
+            await injectPyodideScript(base);
+            lastInjectErr = null;
+            break;
+          } catch (e) {
+            lastInjectErr = e instanceof Error ? e : new Error(String(e));
+          }
+        }
+        if (!window.loadPyodide) {
+          throw lastInjectErr ?? new Error('Failed to load Pyodide script');
+        }
       }
 
-      const pyodide = await window.loadPyodide!({
-        indexURL: PYODIDE_CDN,
-      });
+      let pyodide: PyodideInstance | null = null;
+      let lastInitErr: Error | null = null;
+      for (const indexURL of indexUrls) {
+        try {
+          pyodide = await window.loadPyodide!({ indexURL });
+          break;
+        } catch (e) {
+          lastInitErr = e instanceof Error ? e : new Error(String(e));
+        }
+      }
+      if (!pyodide) {
+        throw lastInitErr ?? new Error('Failed to initialize Pyodide');
+      }
 
       // Load micropip first, then use it to install other packages
       await pyodide.loadPackage('micropip');

@@ -20,21 +20,17 @@ export async function POST(
 
   const { id } = await params;
 
-  const { data, error } = await authResult.supabase.rpc('increment_saved_query_use_count', {
+  const { error } = await authResult.supabase.rpc('increment_saved_query_use_count', {
     query_id: id,
     owner_id: authResult.session.user.id,
   });
 
   if (error) {
-    const { error: fallbackError } = await authResult.supabase
-      .from('sage_ai_saved_queries')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .eq('user_id', authResult.session.user.id);
-
-    if (fallbackError) {
-      return NextResponse.json({ error: 'Query not found' }, { status: 404 });
-    }
+    console.error('[sage-ai/saved-queries] increment_saved_query_use_count RPC error:', error);
+    return NextResponse.json(
+      { error: 'Failed to increment use count' },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ success: true });

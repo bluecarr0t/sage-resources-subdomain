@@ -181,12 +181,16 @@ export function filterValidCompUnits<T extends { unit_type?: string | null; num_
 }
 
 /**
- * Normalizes a stored quality score to a 0–5 display scale.
- * DB may store 0–10 or 0–5; we always show 0–5.
- * If score > 5, treat as 0–10 and divide by 2.
+ * Normalizes a stored quality score to a 0–5 display scale (star rating).
+ * - Past-report comparables / feasibility: typically 0–10 → divide by 2.
+ * - Sage `all_glamping_properties` / similar: 1–100 data-completeness → divide by 20.
+ * - Already 0–5: unchanged.
  */
-export function qualityScoreToDisplay(score: number | null): number | null {
-  if (score === null || typeof score !== 'number' || Number.isNaN(score)) return null;
-  if (score > 5) return Math.round(score / 2 * 10) / 10; // 0–10 → 0–5, 1 decimal
-  return Math.round(score * 10) / 10; // already 0–5
+export function qualityScoreToDisplay(score: number | string | null | undefined): number | null {
+  if (score === null || score === undefined) return null;
+  const n = typeof score === 'number' ? score : parseFloat(String(score));
+  if (!Number.isFinite(n) || Number.isNaN(n)) return null;
+  if (n > 10) return Math.round((n / 20) * 10) / 10; // 0–100 → 0–5
+  if (n > 5) return Math.round((n / 2) * 10) / 10; // 0–10 → 0–5
+  return Math.round(n * 10) / 10; // already 0–5
 }

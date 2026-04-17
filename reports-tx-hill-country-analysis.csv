@@ -1,0 +1,13 @@
+Metric,Value
+Total TX Hill Country records,90
+Open records,89
+Closed records,1
+Unique property names,44
+Total units (sum quantity_of_units, open),424
+Rows with quantity_of_units > 0,78
+Rows missing/zero quantity_of_units,11
+Records with rate data,87
+Avg daily rate (mean),$285
+Avg daily rate (median),$254
+Min daily rate,$119
+Max daily rate,$700

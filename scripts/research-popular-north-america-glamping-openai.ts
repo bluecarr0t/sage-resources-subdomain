@@ -237,7 +237,7 @@ ${limitClause}
 
 EXCLUDE: RV parks, traditional campgrounds, or hotels without glamping units. Include only properties that are primarily glamping-focused.
 
-For each property provide: property_name (required), city (required), state (required), address, zip_code, url (official website), phone_number, description (2-4 sentences), property_type (e.g. "Glamping Resort", "Luxury Camping"), unit_type (e.g. "safari tents, treehouses"), lat, lon if known.
+For each property provide: property_name (required), city (required), state (required), address, zip_code, url (official website), phone_number, description (2-4 sentences), property_type (e.g. "Glamping Resort", "Luxury Camping"), unit_type (e.g. "Safari Tent, Treehouse" — use Title Case and canonical names matching the database, not lowercase plurals), lat, lon if known.
 
 Return a JSON object with a "properties" array. Be accurate - only include properties you are confident exist and are popular.`,
     },

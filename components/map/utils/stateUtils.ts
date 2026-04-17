@@ -20,6 +20,103 @@ export const STATE_ABBREVIATIONS: Record<string, string> = {
   'SK': 'Saskatchewan', 'YT': 'Yukon'
 };
 
+/** Lowercase full name → USPS / province code (built from `STATE_ABBREVIATIONS`). */
+const FULL_NAME_TO_ABBREV: Record<string, string> = (() => {
+  const m: Record<string, string> = {};
+  for (const [abbr, full] of Object.entries(STATE_ABBREVIATIONS)) {
+    m[full.toLowerCase()] = abbr;
+  }
+  return m;
+})();
+
+/**
+ * Display a state/province as a 2-letter abbreviation when it matches
+ * `STATE_ABBREVIATIONS` (US, DC, Canadian provinces). Handles full names
+ * ("Texas" → "TX"), existing codes ("tx" → "TX"), and comma/semicolon lists.
+ * Unknown values are returned trimmed (uppercased if very short).
+ */
+export function formatStateAbbreviation(state: string | null | undefined): string {
+  if (state == null) return '-';
+  const raw = String(state).trim();
+  if (!raw) return '-';
+
+  const sep = raw.includes(',') ? ',' : raw.includes(';') ? ';' : null;
+  if (sep) {
+    const parts = raw.split(sep).map((s) => s.trim()).filter(Boolean);
+    if (parts.length === 0) return '-';
+    return parts.map((p) => formatSingleStateAbbreviation(p)).join(', ');
+  }
+
+  return formatSingleStateAbbreviation(raw);
+}
+
+function formatSingleStateAbbreviation(s: string): string {
+  const upper = s.toUpperCase();
+  if (STATE_ABBREVIATIONS[upper]) {
+    return upper;
+  }
+  const fromFull = FULL_NAME_TO_ABBREV[s.toLowerCase()];
+  if (fromFull) {
+    return fromFull;
+  }
+  if (s.length <= 4) {
+    return upper;
+  }
+  return s;
+}
+
+/**
+ * Map a raw `state` value from the DB (e.g. "AL", "Alabama", "ALABAMA") to a
+ * single canonical 2-letter code when it matches `STATE_ABBREVIATIONS`.
+ * Returns null when no match (pass through as unknown in facets / filters).
+ */
+export function normalizeStateToCanonicalAbbrev(state: string | null | undefined): string | null {
+  if (state == null || !String(state).trim()) return null;
+  const s = String(state).trim();
+  const upper = s.toUpperCase();
+  if (STATE_ABBREVIATIONS[upper]) {
+    return upper;
+  }
+  const fromFull = FULL_NAME_TO_ABBREV[s.toLowerCase()];
+  if (fromFull) {
+    return fromFull;
+  }
+  return null;
+}
+
+/**
+ * Expand canonical state filter values (abbreviations from the UI) to every
+ * string variant we store in `unified_comps.state`, so PostgREST `.in('state', …)`
+ * matches rows regardless of casing or full-name vs abbreviation.
+ */
+export function expandStateValuesForInQuery(selected: string[]): string[] {
+  const out = new Set<string>();
+  for (const raw of selected) {
+    const t = raw.trim();
+    if (!t) continue;
+    const abbr = normalizeStateToCanonicalAbbrev(t);
+    if (abbr) {
+      const full = STATE_ABBREVIATIONS[abbr];
+      if (full) {
+        out.add(abbr);
+        out.add(full);
+        out.add(full.toUpperCase());
+        out.add(full.toLowerCase());
+        const title = full
+          .split(' ')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ');
+        out.add(title);
+      } else {
+        out.add(abbr);
+      }
+    } else {
+      out.add(t);
+    }
+  }
+  return [...out];
+}
+
 /**
  * Canadian provinces to exclude from state filter
  */

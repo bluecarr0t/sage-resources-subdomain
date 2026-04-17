@@ -6,6 +6,79 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { enforceDailyQuota } from '@/lib/upstash';
+import { withToolTelemetry } from '@/lib/sage-ai/tool-telemetry';
+import { createGeoTools } from '@/lib/sage-ai/geo-tools';
+import { createSemanticTools } from '@/lib/sage-ai/semantic-tools';
+import { createComposedTools } from '@/lib/sage-ai/composed-tools';
+import { createVisualizationTools } from '@/lib/sage-ai/visualization-tools';
+
+export interface SageAiToolsContext {
+  /** Stable subject for quota tracking (typically auth user id). */
+  userId: string;
+  /**
+   * managed_users.role for the calling user. Used to gate admin-only tools
+   * like build_feasibility_brief. Defaults to 'user' when omitted.
+   */
+  userRole?: 'user' | 'admin' | 'editor' | null;
+  /** Correlation id to stitch tool events to the chat turn. */
+  correlationId?: string;
+  /**
+   * When true, Tavily + Firecrawl tools (web_search, scrape_webpage, crawl_website) are registered.
+   * Default false — omit so paid web research cannot run unless the user enables it in the UI.
+   */
+  webResearchEnabled?: boolean;
+  /**
+   * When true, location/proximity tools (geocode_property, nearest_attractions) and the
+   * `near` filter on query_properties are registered. Default gated by env flag
+   * SAGE_AI_GEO_TOOLS to allow dark rollout.
+   */
+  geoToolsEnabled?: boolean;
+  /**
+   * When true, the `semantic_search_properties` tool is registered. Requires
+   * the property_embeddings table to be populated and OPENAI_API_KEY.
+   * Default gated by env flag SAGE_AI_SEMANTIC_SEARCH.
+   */
+  semanticSearchEnabled?: boolean;
+  /**
+   * When true, composed tools (competitor_comparison, build_feasibility_brief)
+   * are registered. Default gated by env flag SAGE_AI_COMPOSED_TOOLS.
+   * build_feasibility_brief additionally requires userRole='admin'.
+   */
+  composedToolsEnabled?: boolean;
+  /**
+   * When true, the React-rendered visualization tools
+   * (generate_dashboard, visualize_on_map) are registered. Default gated by
+   * env flag SAGE_AI_VISUALIZATION_TOOLS.
+   */
+  visualizationToolsEnabled?: boolean;
+}
+
+/** Per-user daily quotas for external tools (env-overridable). */
+const QUOTAS = {
+  google_places_search: Number(process.env.SAGE_AI_QUOTA_GOOGLE_PLACES ?? 200),
+  google_place_details: Number(process.env.SAGE_AI_QUOTA_GOOGLE_PLACES ?? 200),
+  web_search: Number(process.env.SAGE_AI_QUOTA_WEB_SEARCH ?? 100),
+  scrape_webpage: Number(process.env.SAGE_AI_QUOTA_SCRAPE ?? 50),
+  crawl_website: Number(process.env.SAGE_AI_QUOTA_CRAWL ?? 5),
+  geocode_property: Number(process.env.SAGE_AI_QUOTA_GEOCODE ?? 300),
+} as const;
+
+async function quotaGate(
+  toolName: keyof typeof QUOTAS,
+  userId: string | undefined
+): Promise<{ error: string; data: null } | null> {
+  if (!userId) return null;
+  const quota = QUOTAS[toolName];
+  const { allowed, used } = await enforceDailyQuota(toolName, userId, quota);
+  if (!allowed) {
+    return {
+      error: `Daily quota exceeded for ${toolName} (used ${used} of ${quota}). Try again tomorrow or ask an admin to raise the limit.`,
+      data: null,
+    };
+  }
+  return null;
+}
 
 const ALLOWED_TABLES = [
   'all_glamping_properties',
@@ -48,8 +121,191 @@ const PROPERTIES_SUMMARY_COLUMNS = [
   'research_status',
 ] as const;
 
-export function createSageAiTools(supabase: SupabaseClient) {
-  return {
+/**
+ * Column allowlists per table. Keys are the canonical columns the AI is permitted
+ * to reference in `select` / filter operations. For tables with volatile schemas
+ * (campspot, all_roverpass_data_new) we don't enumerate columns; instead we fall
+ * back to a strict identifier regex.
+ */
+const PROPERTIES_COLUMN_ALLOWLIST = [
+  ...PROPERTIES_SUMMARY_COLUMNS,
+  ...PROPERTIES_FILTERABLE_COLUMNS,
+  'lat',
+  'lon',
+  'address',
+  'zip_code',
+  'description',
+  'amenities',
+  'pricing',
+  'created_at',
+  'updated_at',
+] as const;
+
+const HIPCAMP_COLUMN_ALLOWLIST = [
+  'id',
+  'name',
+  'url',
+  'city',
+  'state',
+  'country',
+  'property_type',
+  'price',
+  'rating',
+  'review_count',
+  'amenities',
+  'created_at',
+  'updated_at',
+] as const;
+
+const REPORTS_COLUMN_ALLOWLIST = [
+  'id',
+  'client_id',
+  'report_name',
+  'state',
+  'city',
+  'project_type',
+  'status',
+  'created_at',
+  'updated_at',
+] as const;
+
+const COUNTY_POPULATION_COLUMN_ALLOWLIST = [
+  'state',
+  'county',
+  'population',
+  'year',
+  'fips',
+] as const;
+
+const SKI_RESORTS_COLUMN_ALLOWLIST = [
+  'id',
+  'name',
+  'state',
+  'country',
+  'trails',
+  'lifts',
+  'elevation',
+  'skiable_acres',
+  'url',
+] as const;
+
+const NATIONAL_PARKS_COLUMN_ALLOWLIST = [
+  'id',
+  'name',
+  'state',
+  'acres',
+  'visitors',
+  'year_established',
+  'url',
+] as const;
+
+const COLUMN_ALLOWLIST_BY_TABLE: Record<
+  AllowedTable,
+  readonly string[] | 'dynamic'
+> = {
+  all_glamping_properties: PROPERTIES_COLUMN_ALLOWLIST,
+  hipcamp: HIPCAMP_COLUMN_ALLOWLIST,
+  reports: REPORTS_COLUMN_ALLOWLIST,
+  'county-population': COUNTY_POPULATION_COLUMN_ALLOWLIST,
+  ski_resorts: SKI_RESORTS_COLUMN_ALLOWLIST,
+  'national-parks': NATIONAL_PARKS_COLUMN_ALLOWLIST,
+  // Schema of these scraped sources drifts; restrict to safe identifiers only.
+  campspot: 'dynamic',
+  all_roverpass_data_new: 'dynamic',
+};
+
+/** Accept only Postgres-safe identifiers (no quotes, no dots, no whitespace). */
+const SAFE_IDENTIFIER = /^[a-zA-Z][a-zA-Z0-9_]{0,62}$/;
+
+/** Cap per-page scraped content fed back to the model (bytes, UTF-16 approx). */
+const SCRAPED_CONTENT_MAX_CHARS = 8_000;
+
+/** Escape characters that could break out of the source attribute. */
+function escapeSourceAttr(url: string): string {
+  return url.replace(/"/g, '%22').replace(/[\r\n]/g, ' ');
+}
+
+/**
+ * Wrap externally scraped content in neutral tags so the model treats it as
+ * untrusted data, not instructions. Truncates to SCRAPED_CONTENT_MAX_CHARS.
+ */
+function wrapUntrustedContent(source: string, content: string): string {
+  const safeSource = escapeSourceAttr(source);
+  const trimmed =
+    content.length > SCRAPED_CONTENT_MAX_CHARS
+      ? `${content.slice(0, SCRAPED_CONTENT_MAX_CHARS)}\n...(truncated from ${content.length} characters)`
+      : content;
+  return `<UNTRUSTED_CONTENT source="${safeSource}">\n${trimmed}\n</UNTRUSTED_CONTENT>`;
+}
+
+/**
+ * Validate a list of column names against the allowlist for `table`. Unknown
+ * columns are dropped and returned in `rejected` so callers can surface a
+ * helpful error to the model.
+ */
+function validateColumns(
+  table: AllowedTable,
+  columns: readonly string[] | undefined
+): { allowed: string[]; rejected: string[] } {
+  if (!columns || columns.length === 0) return { allowed: [], rejected: [] };
+  const policy = COLUMN_ALLOWLIST_BY_TABLE[table];
+  const allowed: string[] = [];
+  const rejected: string[] = [];
+  for (const col of columns) {
+    if (!SAFE_IDENTIFIER.test(col)) {
+      rejected.push(col);
+      continue;
+    }
+    if (policy === 'dynamic') {
+      allowed.push(col);
+    } else if (policy.includes(col)) {
+      allowed.push(col);
+    } else {
+      rejected.push(col);
+    }
+  }
+  return { allowed, rejected };
+}
+
+/**
+ * Validate filter keys (column names used as lhs of equality/ilike predicates).
+ * Uses the same allowlist as select columns.
+ */
+function validateFilterKeys(
+  table: AllowedTable,
+  filters: Record<string, string> | undefined
+): { allowed: Record<string, string>; rejected: string[] } {
+  if (!filters) return { allowed: {}, rejected: [] };
+  const policy = COLUMN_ALLOWLIST_BY_TABLE[table];
+  const allowed: Record<string, string> = {};
+  const rejected: string[] = [];
+  for (const [key, value] of Object.entries(filters)) {
+    if (!SAFE_IDENTIFIER.test(key)) {
+      rejected.push(key);
+      continue;
+    }
+    if (policy === 'dynamic' || policy.includes(key)) {
+      allowed[key] = value;
+    } else {
+      rejected.push(key);
+    }
+  }
+  return { allowed, rejected };
+}
+
+export function createSageAiTools(
+  supabase: SupabaseClient,
+  context?: SageAiToolsContext
+) {
+  const userId = context?.userId;
+  const telemetryCtx = context
+    ? {
+        supabase,
+        userId: context.userId,
+        correlationId: context.correlationId,
+      }
+    : null;
+  const baseTools = {
     list_tables: tool({
       description:
         'List available database tables and views that can be queried. Returns table names with brief descriptions.',
@@ -140,6 +396,16 @@ export function createSageAiTools(supabase: SupabaseClient) {
           })
           .optional()
           .describe('Filters to apply to the query'),
+        near: z
+          .object({
+            latitude: z.number().describe('Origin latitude'),
+            longitude: z.number().describe('Origin longitude'),
+            radius_km: z.number().min(1).max(500).describe('Search radius in kilometers (max 500)'),
+          })
+          .optional()
+          .describe(
+            'Optional proximity filter. When provided, results are restricted to properties within radius_km of (latitude, longitude) using the property_geocode cache, ordered by distance ascending. Use geocode_property first to resolve an origin from a property name/id/address.'
+          ),
         columns: z
           .array(z.string())
           .optional()
@@ -151,8 +417,61 @@ export function createSageAiTools(supabase: SupabaseClient) {
         order_by: z.string().optional().describe('Column to order by'),
         order_ascending: z.boolean().optional().default(true).describe('Sort direction'),
       }),
-      execute: async ({ filters, columns, limit, offset, order_by, order_ascending }) => {
-        const selectColumns = columns?.length ? columns.join(', ') : PROPERTIES_SUMMARY_COLUMNS.join(', ');
+      execute: async ({ filters, near, columns, limit, offset, order_by, order_ascending }) => {
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          'all_glamping_properties',
+          columns
+        );
+        const selectColumns = allowedCols.length
+          ? allowedCols.join(', ')
+          : PROPERTIES_SUMMARY_COLUMNS.join(', ');
+
+        // Proximity branch — delegates to properties_within_radius RPC so the
+        // server can use the PostGIS GIST index on property_geocode.geom.
+        if (near) {
+          const { data: nearRows, error: nearErr } = await supabase.rpc(
+            'properties_within_radius',
+            {
+              lat: near.latitude,
+              lng: near.longitude,
+              radius_km: near.radius_km,
+              limit_rows: limit ?? 50,
+            }
+          );
+          if (nearErr) {
+            return { error: nearErr.message, data: null, total_count: 0 };
+          }
+          const rows = (nearRows ?? []) as Array<Record<string, unknown>>;
+          return {
+            data: rows,
+            total_count: rows.length,
+            returned_count: rows.length,
+            limit: limit ?? 50,
+            offset: 0,
+            near: { ...near, unit: 'km' },
+            ...(rejectedCols.length
+              ? { rejected_columns: rejectedCols }
+              : {}),
+          };
+        }
+
+        if (order_by && !SAFE_IDENTIFIER.test(order_by)) {
+          return {
+            error: `Invalid order_by column: ${order_by}`,
+            data: null,
+            total_count: 0,
+          };
+        }
+        if (
+          order_by &&
+          !(PROPERTIES_COLUMN_ALLOWLIST as readonly string[]).includes(order_by)
+        ) {
+          return {
+            error: `order_by column "${order_by}" is not in the allowlist for all_glamping_properties`,
+            data: null,
+            total_count: 0,
+          };
+        }
 
         let query = supabase
           .from('all_glamping_properties')
@@ -185,6 +504,9 @@ export function createSageAiTools(supabase: SupabaseClient) {
           returned_count: data?.length ?? 0,
           limit: limit ?? 50,
           offset: offset ?? 0,
+          ...(rejectedCols.length
+            ? { rejected_columns: rejectedCols }
+            : {}),
         };
       },
     }),
@@ -208,7 +530,11 @@ export function createSageAiTools(supabase: SupabaseClient) {
         offset: z.number().min(0).optional().default(0),
       }),
       execute: async ({ filters, columns, limit, offset }) => {
-        const selectColumns = columns?.length ? columns.join(', ') : '*';
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          'hipcamp',
+          columns
+        );
+        const selectColumns = allowedCols.length ? allowedCols.join(', ') : '*';
 
         let query = supabase
           .from('hipcamp')
@@ -231,6 +557,7 @@ export function createSageAiTools(supabase: SupabaseClient) {
           data: data ?? [],
           total_count: count ?? 0,
           returned_count: data?.length ?? 0,
+          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
         };
       },
     }),
@@ -251,17 +578,21 @@ export function createSageAiTools(supabase: SupabaseClient) {
         offset: z.number().min(0).optional().default(0),
       }),
       execute: async ({ filters, columns, limit, offset }) => {
-        const selectColumns = columns?.length ? columns.join(', ') : '*';
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          'campspot',
+          columns
+        );
+        const { allowed: allowedFilters, rejected: rejectedFilters } =
+          validateFilterKeys('campspot', filters);
+        const selectColumns = allowedCols.length ? allowedCols.join(', ') : '*';
 
         let query = supabase
           .from('campspot')
           .select(selectColumns, { count: 'exact' })
           .range(offset ?? 0, (offset ?? 0) + (limit ?? 20) - 1);
 
-        if (filters) {
-          for (const [key, value] of Object.entries(filters)) {
-            query = query.ilike(key, `%${value}%`);
-          }
+        for (const [key, value] of Object.entries(allowedFilters)) {
+          query = query.ilike(key, `%${value}%`);
         }
 
         const { data, error, count } = await query;
@@ -274,6 +605,8 @@ export function createSageAiTools(supabase: SupabaseClient) {
           data: data ?? [],
           total_count: count ?? 0,
           returned_count: data?.length ?? 0,
+          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+          ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
         };
       },
     }),
@@ -294,17 +627,21 @@ export function createSageAiTools(supabase: SupabaseClient) {
         offset: z.number().min(0).optional().default(0),
       }),
       execute: async ({ filters, columns, limit, offset }) => {
-        const selectColumns = columns?.length ? columns.join(', ') : '*';
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          'all_roverpass_data_new',
+          columns
+        );
+        const { allowed: allowedFilters, rejected: rejectedFilters } =
+          validateFilterKeys('all_roverpass_data_new', filters);
+        const selectColumns = allowedCols.length ? allowedCols.join(', ') : '*';
 
         let query = supabase
           .from('all_roverpass_data_new')
           .select(selectColumns, { count: 'exact' })
           .range(offset ?? 0, (offset ?? 0) + (limit ?? 20) - 1);
 
-        if (filters) {
-          for (const [key, value] of Object.entries(filters)) {
-            query = query.ilike(key, `%${value}%`);
-          }
+        for (const [key, value] of Object.entries(allowedFilters)) {
+          query = query.ilike(key, `%${value}%`);
         }
 
         const { data, error, count } = await query;
@@ -317,6 +654,8 @@ export function createSageAiTools(supabase: SupabaseClient) {
           data: data ?? [],
           total_count: count ?? 0,
           returned_count: data?.length ?? 0,
+          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+          ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
         };
       },
     }),
@@ -340,7 +679,11 @@ export function createSageAiTools(supabase: SupabaseClient) {
         offset: z.number().min(0).optional().default(0),
       }),
       execute: async ({ filters, columns, limit, offset }) => {
-        const selectColumns = columns?.length ? columns.join(', ') : '*';
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          'reports',
+          columns
+        );
+        const selectColumns = allowedCols.length ? allowedCols.join(', ') : '*';
 
         let query = supabase
           .from('reports')
@@ -364,6 +707,7 @@ export function createSageAiTools(supabase: SupabaseClient) {
           data: data ?? [],
           total_count: count ?? 0,
           returned_count: data?.length ?? 0,
+          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
         };
       },
     }),
@@ -386,7 +730,11 @@ export function createSageAiTools(supabase: SupabaseClient) {
         offset: z.number().min(0).optional().default(0),
       }),
       execute: async ({ filters, columns, limit, offset }) => {
-        const selectColumns = columns?.length ? columns.join(', ') : '*';
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          'county-population',
+          columns
+        );
+        const selectColumns = allowedCols.length ? allowedCols.join(', ') : '*';
 
         let query = supabase
           .from('county-population')
@@ -408,6 +756,7 @@ export function createSageAiTools(supabase: SupabaseClient) {
           data: data ?? [],
           total_count: count ?? 0,
           returned_count: data?.length ?? 0,
+          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
         };
       },
     }),
@@ -430,7 +779,11 @@ export function createSageAiTools(supabase: SupabaseClient) {
         offset: z.number().min(0).optional().default(0),
       }),
       execute: async ({ filters, columns, limit, offset }) => {
-        const selectColumns = columns?.length ? columns.join(', ') : '*';
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          'ski_resorts',
+          columns
+        );
+        const selectColumns = allowedCols.length ? allowedCols.join(', ') : '*';
 
         let query = supabase
           .from('ski_resorts')
@@ -452,6 +805,7 @@ export function createSageAiTools(supabase: SupabaseClient) {
           data: data ?? [],
           total_count: count ?? 0,
           returned_count: data?.length ?? 0,
+          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
         };
       },
     }),
@@ -474,7 +828,11 @@ export function createSageAiTools(supabase: SupabaseClient) {
         offset: z.number().min(0).optional().default(0),
       }),
       execute: async ({ filters, columns, limit, offset }) => {
-        const selectColumns = columns?.length ? columns.join(', ') : '*';
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          'national-parks',
+          columns
+        );
+        const selectColumns = allowedCols.length ? allowedCols.join(', ') : '*';
 
         let query = supabase
           .from('national-parks')
@@ -496,6 +854,7 @@ export function createSageAiTools(supabase: SupabaseClient) {
           data: data ?? [],
           total_count: count ?? 0,
           returned_count: data?.length ?? 0,
+          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
         };
       },
     }),
@@ -510,12 +869,13 @@ export function createSageAiTools(supabase: SupabaseClient) {
           .describe('Key-value pairs for equality filters'),
       }),
       execute: async ({ table, filters }) => {
+        const { allowed: allowedFilters, rejected: rejectedFilters } =
+          validateFilterKeys(table, filters);
+
         let query = supabase.from(table).select('*', { count: 'exact', head: true });
 
-        if (filters) {
-          for (const [key, value] of Object.entries(filters)) {
-            query = query.eq(key, value);
-          }
+        for (const [key, value] of Object.entries(allowedFilters)) {
+          query = query.eq(key, value);
         }
 
         const { count, error } = await query;
@@ -524,7 +884,12 @@ export function createSageAiTools(supabase: SupabaseClient) {
           return { error: error.message, count: null };
         }
 
-        return { table, count: count ?? 0, filters: filters ?? {} };
+        return {
+          table,
+          count: count ?? 0,
+          filters: allowedFilters,
+          ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
+        };
       },
     }),
 
@@ -538,23 +903,21 @@ export function createSageAiTools(supabase: SupabaseClient) {
         limit: z.number().min(1).max(100).optional().default(50),
       }),
       execute: async ({ column, limit }) => {
-        const { data, error } = await supabase
-          .from('all_glamping_properties')
-          .select(column)
-          .not(column, 'is', null)
-          .limit(1000);
+        const { data, error } = await supabase.rpc('distinct_column_values', {
+          col: column,
+          max_rows: limit ?? 50,
+        });
 
         if (error) {
           return { error: error.message, values: null };
         }
 
-        const uniqueValues = [...new Set(data?.map((row) => (row as Record<string, unknown>)[column]).filter(Boolean))];
-        const sortedValues = uniqueValues.sort().slice(0, limit ?? 50);
-
+        const rows = (data ?? []) as Array<{ value: string; row_count: number }>;
         return {
           column,
-          values: sortedValues,
-          total_unique: uniqueValues.length,
+          values: rows.map((r) => r.value),
+          value_counts: rows,
+          total_unique: rows.length,
         };
       },
     }),
@@ -608,78 +971,33 @@ export function createSageAiTools(supabase: SupabaseClient) {
           .optional(),
       }),
       execute: async ({ group_by, filters }) => {
-        let query = supabase
-          .from('all_glamping_properties')
-          .select(`${group_by}, rate_avg_retail_daily_rate, property_total_sites`);
-
-        if (filters) {
-          if (filters.state) query = query.ilike('state', filters.state);
-          if (filters.country) query = query.ilike('country', `%${filters.country}%`);
-          if (filters.unit_type) query = query.ilike('unit_type', `%${filters.unit_type}%`);
-          if (filters.is_glamping_property) query = query.eq('is_glamping_property', filters.is_glamping_property);
-        }
-
-        const { data, error } = await query.limit(5000);
+        const { data, error } = await supabase.rpc('aggregate_properties_v2', {
+          group_by,
+          filters: filters ?? {},
+        });
 
         if (error) {
           return { error: error.message, aggregates: null };
         }
 
-        const groups: Record<
-          string,
-          { count: number; avg_rate: number | null; total_sites: number; rate_sum: number; rate_count: number }
-        > = {};
+        const rows = (data ?? []) as Array<{
+          key: string;
+          count: number;
+          avg_daily_rate: number | null;
+          total_sites: number;
+        }>;
 
-        for (const row of data ?? []) {
-          const rowData = row as Record<string, unknown>;
-          const key = String(rowData[group_by] ?? 'Unknown');
-          if (!groups[key]) {
-            groups[key] = { count: 0, avg_rate: null, total_sites: 0, rate_sum: 0, rate_count: 0 };
-          }
-          groups[key].count++;
-          if (rowData.rate_avg_retail_daily_rate != null) {
-            groups[key].rate_sum += Number(rowData.rate_avg_retail_daily_rate);
-            groups[key].rate_count++;
-          }
-          if (rowData.property_total_sites != null) {
-            groups[key].total_sites += Number(rowData.property_total_sites);
-          }
-        }
-
-        const aggregates = Object.entries(groups)
-          .map(([value, stats]) => ({
-            [group_by]: value,
-            count: stats.count,
-            avg_daily_rate: stats.rate_count > 0 ? Math.round((stats.rate_sum / stats.rate_count) * 100) / 100 : null,
-            total_sites: stats.total_sites,
-          }))
-          .sort((a, b) => b.count - a.count);
+        const aggregates = rows.map((r) => ({
+          [group_by]: r.key,
+          count: Number(r.count),
+          avg_daily_rate: r.avg_daily_rate == null ? null : Number(r.avg_daily_rate),
+          total_sites: Number(r.total_sites),
+        }));
 
         return {
           group_by,
           aggregates,
           total_groups: aggregates.length,
-        };
-      },
-    }),
-
-    execute_safe_sql: tool({
-      description:
-        'DISABLED - This tool is currently unavailable. Use the other query tools instead (query_properties, query_hipcamp, query_campspot, query_roverpass, aggregate_properties, etc.).',
-      inputSchema: z.object({
-        sql: z
-          .string()
-          .describe(
-            'The SQL SELECT query to execute. Must be read-only and query only allowed tables.'
-          ),
-        explanation: z
-          .string()
-          .describe('Brief explanation of what this query does'),
-      }),
-      execute: async () => {
-        return {
-          error: 'This tool is currently disabled. Please use the other query tools instead: query_properties, query_hipcamp, query_campspot, query_roverpass, aggregate_properties, get_property_details, or count_rows.',
-          data: null,
         };
       },
     }),
@@ -729,6 +1047,38 @@ plt.show()
       },
     }),
 
+    suggest_followups: tool({
+      description: `Emit a small, structured list of follow-up questions the user might ask next. Call this AT MOST ONCE per assistant turn, after you've given the primary answer. Keep questions short, actionable, and grounded in the conversation so far.`,
+      inputSchema: z.object({
+        suggestions: z
+          .array(
+            z
+              .string()
+              .min(10)
+              .max(140)
+              .describe(
+                'A short, self-contained follow-up question phrased as the user would type it.'
+              )
+          )
+          .min(1)
+          .max(5)
+          .describe('1–5 follow-up prompts ordered from most to least useful.'),
+      }),
+      execute: async ({ suggestions }) => {
+        const normalized = Array.from(
+          new Set(
+            suggestions
+              .map((s) => s.trim().replace(/\s+/g, ' '))
+              .filter((s) => s.length >= 10 && s.length <= 140)
+          )
+        ).slice(0, 5);
+        return {
+          type: 'followup_suggestions' as const,
+          suggestions: normalized,
+        };
+      },
+    }),
+
     // External API Tools
 
     google_places_search: tool({
@@ -755,7 +1105,9 @@ plt.show()
           .describe('Place type filter (e.g., campground, lodging, rv_park, tourist_attraction)'),
       }),
       execute: async ({ query, location, radius, type }) => {
-        const apiKey = process.env.GOOGLE_MAPS_API_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+        const gate = await quotaGate('google_places_search', userId);
+        if (gate) return gate;
+        const apiKey = process.env.GOOGLE_MAPS_API_KEY;
         if (!apiKey) {
           return { error: 'Google Places API key not configured', data: null };
         }
@@ -837,7 +1189,9 @@ plt.show()
           .describe('Specific fields to return (e.g., reviews, website, phone). If not specified, returns common fields.'),
       }),
       execute: async ({ place_id, fields }) => {
-        const apiKey = process.env.GOOGLE_MAPS_API_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+        const gate = await quotaGate('google_place_details', userId);
+        if (gate) return gate;
+        const apiKey = process.env.GOOGLE_MAPS_API_KEY;
         if (!apiKey) {
           return { error: 'Google Places API key not configured', data: null };
         }
@@ -889,7 +1243,9 @@ plt.show()
         }
       },
     }),
+  };
 
+  const webResearchTools = {
     web_search: tool({
       description:
         'Search the web using Tavily API. Useful for finding current information about glamping trends, competitor research, industry news, or any general web search. Returns relevant snippets and URLs.',
@@ -917,6 +1273,8 @@ plt.show()
           .describe('Maximum number of results to return'),
       }),
       execute: async ({ query, search_depth, include_domains, exclude_domains, max_results }) => {
+        const gate = await quotaGate('web_search', userId);
+        if (gate) return gate;
         const apiKey = process.env.TAVILY_API_KEY;
         if (!apiKey) {
           return { error: 'Tavily API key not configured', data: null };
@@ -987,6 +1345,8 @@ plt.show()
           .describe('Milliseconds to wait for dynamic content to load'),
       }),
       execute: async ({ url, formats, only_main_content, wait_for }) => {
+        const gate = await quotaGate('scrape_webpage', userId);
+        if (gate) return gate;
         const apiKey = process.env.FIRECRAWL_API_KEY;
         if (!apiKey) {
           return { error: 'Firecrawl API key not configured', data: null };
@@ -1018,12 +1378,18 @@ plt.show()
             return { error: result.error || 'Scraping failed', data: null };
           }
 
+          const rawMarkdown: string = result.data?.markdown ?? '';
+          const content = rawMarkdown
+            ? wrapUntrustedContent(url, rawMarkdown)
+            : '';
+
           return {
             url,
-            markdown: result.data?.markdown,
-            html: result.data?.html,
-            links: result.data?.links,
+            content,
             metadata: result.data?.metadata,
+            links: result.data?.links,
+            original_length: rawMarkdown.length,
+            truncated: rawMarkdown.length > SCRAPED_CONTENT_MAX_CHARS,
           };
         } catch (err) {
           return {
@@ -1056,13 +1422,14 @@ plt.show()
           .describe('Exclude pages matching these path patterns'),
       }),
       execute: async ({ url, max_pages, include_paths, exclude_paths }) => {
+        const gate = await quotaGate('crawl_website', userId);
+        if (gate) return gate;
         const apiKey = process.env.FIRECRAWL_API_KEY;
         if (!apiKey) {
           return { error: 'Firecrawl API key not configured', data: null };
         }
 
         try {
-          // Start crawl job
           const startResponse = await fetch('https://api.firecrawl.dev/v1/crawl', {
             method: 'POST',
             headers: {
@@ -1115,11 +1482,22 @@ plt.show()
               return {
                 url,
                 pages_crawled: statusResult.data?.length || 0,
-                pages: statusResult.data?.map((page: { metadata?: { url?: string; title?: string }; markdown?: string }) => ({
-                  url: page.metadata?.url,
-                  title: page.metadata?.title,
-                  content: page.markdown?.slice(0, 2000) + (page.markdown && page.markdown.length > 2000 ? '...' : ''),
-                })),
+                pages: statusResult.data?.map(
+                  (page: {
+                    metadata?: { url?: string; title?: string };
+                    markdown?: string;
+                  }) => {
+                    const pageUrl = page.metadata?.url ?? url;
+                    const md = page.markdown ?? '';
+                    return {
+                      url: pageUrl,
+                      title: page.metadata?.title,
+                      content: md ? wrapUntrustedContent(pageUrl, md) : '',
+                      original_length: md.length,
+                      truncated: md.length > SCRAPED_CONTENT_MAX_CHARS,
+                    };
+                  }
+                ),
               };
             }
 
@@ -1140,6 +1518,53 @@ plt.show()
       },
     }),
   };
+
+  const geoTools = context?.geoToolsEnabled
+    ? createGeoTools(supabase, userId)
+    : {};
+  const semanticTools = context?.semanticSearchEnabled
+    ? createSemanticTools(supabase, userId)
+    : {};
+  const composedTools = context?.composedToolsEnabled
+    ? createComposedTools(supabase, {
+        userId,
+        userRole: context?.userRole ?? null,
+      })
+    : {};
+  const visualizationTools = context?.visualizationToolsEnabled
+    ? createVisualizationTools()
+    : {};
+
+  const toolSet = {
+    ...baseTools,
+    ...(context?.webResearchEnabled ? webResearchTools : {}),
+    ...geoTools,
+    ...semanticTools,
+    ...composedTools,
+    ...visualizationTools,
+  };
+
+  return wrapWithTelemetry(toolSet, telemetryCtx);
+}
+
+function wrapWithTelemetry<T extends Record<string, { execute?: unknown }>>(
+  toolSet: T,
+  ctx: Parameters<typeof withToolTelemetry>[1]
+): T {
+  if (!ctx) return toolSet;
+  const wrapped: Record<string, unknown> = {};
+  for (const [name, original] of Object.entries(toolSet)) {
+    const originalExec = (original as { execute?: (...a: unknown[]) => Promise<unknown> }).execute;
+    if (typeof originalExec !== 'function') {
+      wrapped[name] = original;
+      continue;
+    }
+    wrapped[name] = {
+      ...(original as object),
+      execute: withToolTelemetry(name, ctx, originalExec.bind(original)),
+    };
+  }
+  return wrapped as T;
 }
 
 export type SageAiTools = ReturnType<typeof createSageAiTools>;

@@ -1,0 +1,602 @@
+'use client';
+
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell as RPCell,
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from 'recharts';
+import { ArrowDown, ArrowUp, Download, Maximize2, X } from 'lucide-react';
+import { Modal, ModalContent } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
+import type { DashboardPayload, DashboardCell } from '@/lib/sage-ai/ui-parts';
+import { downloadElementAsPng, slugifyChartFilename } from '@/lib/sage-ai/download-chart-png';
+
+const DEFAULT_SERIES_COLORS = [
+  '#4b8b6f',
+  '#7ca8bf',
+  '#d38c5b',
+  '#b5705f',
+  '#8a5ea8',
+  '#9a9a9a',
+];
+
+const CHART_HEIGHT_COMPACT = 220;
+const CHART_HEIGHT_EXPANDED = 420;
+
+function formatValue(
+  value: string | number | null | undefined,
+  format: DashboardCell['value_format']
+): string {
+  if (value == null) return '—';
+  if (typeof value === 'string') return value;
+  switch (format) {
+    case 'currency_usd':
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+      }).format(value);
+    case 'percent':
+      return new Intl.NumberFormat('en-US', {
+        style: 'percent',
+        maximumFractionDigits: 1,
+      }).format(value);
+    case 'count':
+    case 'number':
+    default:
+      return new Intl.NumberFormat('en-US').format(value);
+  }
+}
+
+function resolveSeries(cell: DashboardCell) {
+  if (cell.series && cell.series.length > 0) {
+    return cell.series.map((s, i) => ({
+      key: s.key,
+      label: s.label ?? s.key,
+      color: s.color ?? DEFAULT_SERIES_COLORS[i % DEFAULT_SERIES_COLORS.length],
+    }));
+  }
+  const ys = cell.y_keys ?? [];
+  return ys.map((k, i) => ({
+    key: k,
+    label: k,
+    color: DEFAULT_SERIES_COLORS[i % DEFAULT_SERIES_COLORS.length],
+  }));
+}
+
+function StatCell({ cell }: { cell: DashboardCell }) {
+  const direction = cell.delta?.direction ?? 'neutral';
+  const deltaColor =
+    direction === 'up'
+      ? 'text-emerald-600 dark:text-emerald-400'
+      : direction === 'down'
+        ? 'text-red-600 dark:text-red-400'
+        : 'text-gray-500 dark:text-gray-400';
+  return (
+    <div className="flex h-full flex-col justify-between">
+      <div>
+        <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
+          {cell.title}
+        </div>
+        {cell.subtitle && (
+          <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+            {cell.subtitle}
+          </div>
+        )}
+      </div>
+      <div className="mt-4">
+        <div className="text-3xl font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+          {formatValue(cell.value, cell.value_format ?? 'number')}
+        </div>
+        {cell.delta && (
+          <div
+            className={`mt-1 flex items-center gap-1 text-xs font-medium ${deltaColor}`}
+          >
+            {direction === 'up' && <ArrowUp className="h-3 w-3" />}
+            {direction === 'down' && <ArrowDown className="h-3 w-3" />}
+            <span>
+              {formatValue(cell.delta.value, cell.value_format ?? 'number')}
+            </span>
+            {cell.delta.label && (
+              <span className="text-gray-500 dark:text-gray-400">
+                {cell.delta.label}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ChartCell({ cell, height }: { cell: DashboardCell; height: number }) {
+  const rows = cell.rows ?? [];
+  const series = resolveSeries(cell);
+  const xKey = cell.x_key ?? 'name';
+
+  if (rows.length === 0) {
+    return (
+      <div className="flex h-full min-h-[180px] items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+        No data
+      </div>
+    );
+  }
+
+  switch (cell.kind) {
+    case 'bar':
+      return (
+        <ResponsiveContainer width="100%" height={height}>
+          <BarChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
+            <YAxis tick={{ fontSize: 11 }} />
+            <Tooltip />
+            {series.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
+            {series.map((s) => (
+              <Bar key={s.key} dataKey={s.key} name={s.label} fill={s.color} />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
+      );
+    case 'line':
+      return (
+        <ResponsiveContainer width="100%" height={height}>
+          <LineChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
+            <YAxis tick={{ fontSize: 11 }} />
+            <Tooltip />
+            {series.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
+            {series.map((s) => (
+              <Line
+                key={s.key}
+                type="monotone"
+                dataKey={s.key}
+                name={s.label}
+                stroke={s.color}
+                strokeWidth={2}
+                dot={false}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      );
+    case 'area':
+      return (
+        <ResponsiveContainer width="100%" height={height}>
+          <AreaChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
+            <YAxis tick={{ fontSize: 11 }} />
+            <Tooltip />
+            {series.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
+            {series.map((s) => (
+              <Area
+                key={s.key}
+                type="monotone"
+                dataKey={s.key}
+                name={s.label}
+                stroke={s.color}
+                fill={s.color}
+                fillOpacity={0.25}
+              />
+            ))}
+          </AreaChart>
+        </ResponsiveContainer>
+      );
+    case 'pie': {
+      const nameKey = cell.name_key ?? xKey;
+      const valueKey = cell.value_key ?? (cell.y_keys?.[0] ?? 'value');
+      return (
+        <ResponsiveContainer width="100%" height={height}>
+          <PieChart>
+            <Pie
+              data={rows}
+              dataKey={valueKey}
+              nameKey={nameKey}
+              outerRadius={80}
+              innerRadius={40}
+              paddingAngle={2}
+              label={false}
+            >
+              {rows.map((_, i) => (
+                <RPCell
+                  key={i}
+                  fill={DEFAULT_SERIES_COLORS[i % DEFAULT_SERIES_COLORS.length]}
+                />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+    }
+    case 'scatter':
+      return (
+        <ResponsiveContainer width="100%" height={height}>
+          <ScatterChart margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis
+              dataKey={xKey}
+              type="number"
+              tick={{ fontSize: 11 }}
+              name={xKey}
+            />
+            <YAxis
+              dataKey={series[0]?.key ?? 'y'}
+              type="number"
+              tick={{ fontSize: 11 }}
+              name={series[0]?.label ?? 'y'}
+            />
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+            <Scatter
+              data={rows}
+              fill={series[0]?.color ?? DEFAULT_SERIES_COLORS[0]}
+            />
+          </ScatterChart>
+        </ResponsiveContainer>
+      );
+    default:
+      return (
+        <div className="text-xs text-gray-500">
+          Unsupported chart kind: {cell.kind}
+        </div>
+      );
+  }
+}
+
+function CellBody({
+  cell,
+  chartHeight,
+  showChartToolbar,
+  onExpandChart,
+  onDownloadChart,
+  expandLabel,
+  downloadLabel,
+}: {
+  cell: DashboardCell;
+  chartHeight: number;
+  showChartToolbar: boolean;
+  onExpandChart?: () => void;
+  onDownloadChart?: () => void;
+  expandLabel: string;
+  downloadLabel: string;
+}) {
+  if (cell.kind === 'stat') {
+    return <StatCell cell={cell} />;
+  }
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            {cell.title}
+          </div>
+          {cell.subtitle && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {cell.subtitle}
+            </div>
+          )}
+        </div>
+        {showChartToolbar && (onExpandChart || onDownloadChart) && (
+          <div className="flex shrink-0 gap-0.5" data-html2canvas-ignore>
+            {onExpandChart && (
+              <button
+                type="button"
+                onClick={onExpandChart}
+                className="rounded-md p-1.5 text-gray-500 hover:bg-gray-200/80 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                aria-label={expandLabel}
+                title={expandLabel}
+              >
+                <Maximize2 className="h-4 w-4" />
+              </button>
+            )}
+            {onDownloadChart && (
+              <button
+                type="button"
+                onClick={onDownloadChart}
+                className="rounded-md p-1.5 text-gray-500 hover:bg-gray-200/80 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                aria-label={downloadLabel}
+                title={downloadLabel}
+              >
+                <Download className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="mt-2 flex-1">
+        <ChartCell cell={cell} height={chartHeight} />
+      </div>
+    </div>
+  );
+}
+
+export function CanvasDashboard({ payload }: { payload: DashboardPayload }) {
+  const t = useTranslations('admin.sageAi');
+  const cells = useMemo(() => payload.cells, [payload.cells]);
+  const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
+  const [singleChartIndex, setSingleChartIndex] = useState<number | null>(null);
+  const [downloadBusy, setDownloadBusy] = useState(false);
+
+  const dashboardCaptureRef = useRef<HTMLDivElement>(null);
+  const modalDashboardRef = useRef<HTMLDivElement>(null);
+  const cellRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const singleChartRef = useRef<HTMLDivElement>(null);
+
+  const runDownload = useCallback(
+    async (node: HTMLElement | null, filename: string) => {
+      if (!node || downloadBusy) return;
+      setDownloadBusy(true);
+      try {
+        await downloadElementAsPng(node, filename);
+      } catch (e) {
+        console.error('[CanvasDashboard] export failed', e);
+      } finally {
+        setDownloadBusy(false);
+      }
+    },
+    [downloadBusy]
+  );
+
+  const handleDownloadDashboard = useCallback(() => {
+    void runDownload(dashboardCaptureRef.current, slugifyChartFilename(payload.title, 0));
+  }, [payload.title, runDownload]);
+
+  const handleDownloadCell = useCallback(
+    (index: number) => {
+      const cell = cells[index];
+      const node = cellRefs.current[index];
+      const name = slugifyChartFilename(cell?.title ?? 'chart', index);
+      void runDownload(node, name);
+    },
+    [cells, runDownload]
+  );
+
+  const handleDownloadSingleModal = useCallback(() => {
+    if (singleChartIndex === null) return;
+    const cell = cells[singleChartIndex];
+    void runDownload(
+      singleChartRef.current,
+      slugifyChartFilename(cell?.title ?? 'chart', singleChartIndex)
+    );
+  }, [cells, singleChartIndex, runDownload]);
+
+  const singleCell =
+    singleChartIndex !== null ? cells[singleChartIndex] : null;
+
+  return (
+    <div className="my-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+      <div ref={dashboardCaptureRef}>
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="text-base font-semibold text-gray-900 dark:text-gray-50">
+              {payload.title}
+            </div>
+            {payload.description && (
+              <div className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                {payload.description}
+              </div>
+            )}
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-1" data-html2canvas-ignore>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="!px-2"
+              disabled={downloadBusy}
+              onClick={() => setDashboardModalOpen(true)}
+              aria-label={t('dashboardExpandFullscreen')}
+              title={t('dashboardExpandFullscreen')}
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="!px-2"
+              disabled={downloadBusy}
+              onClick={handleDownloadDashboard}
+              aria-label={t('dashboardDownloadAll')}
+              title={t('dashboardDownloadAll')}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-12 gap-3">
+          {cells.map((cell, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                cellRefs.current[i] = el;
+              }}
+              className="col-span-12 min-h-[160px] rounded-md border border-gray-100 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-gray-950/40"
+              style={{ gridColumn: `span ${cell.span ?? 6} / span ${cell.span ?? 6}` }}
+            >
+              <CellBody
+                cell={cell}
+                chartHeight={CHART_HEIGHT_COMPACT}
+                showChartToolbar={cell.kind !== 'stat'}
+                expandLabel={t('dashboardExpandChart')}
+                downloadLabel={t('dashboardDownloadChart')}
+                onExpandChart={
+                  cell.kind === 'stat' ? undefined : () => setSingleChartIndex(i)
+                }
+                onDownloadChart={
+                  cell.kind === 'stat' ? undefined : () => handleDownloadCell(i)
+                }
+              />
+            </div>
+          ))}
+        </div>
+        {payload.footer_note && (
+          <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            {payload.footer_note}
+          </div>
+        )}
+      </div>
+
+      <Modal
+        open={dashboardModalOpen}
+        onClose={() => setDashboardModalOpen(false)}
+        className="max-h-[96vh] w-full max-w-[min(96vw,1600px)] overflow-hidden"
+      >
+        <ModalContent className="flex max-h-[92vh] flex-col overflow-hidden p-0">
+          <div
+            className="flex items-center justify-between gap-2 border-b border-gray-200 px-4 py-3 dark:border-gray-700"
+            data-html2canvas-ignore
+          >
+            <div className="min-w-0 text-sm font-semibold text-gray-900 dark:text-gray-50">
+              {payload.title}
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="!px-2"
+                disabled={downloadBusy}
+                onClick={() => {
+                  void runDownload(
+                    modalDashboardRef.current,
+                    slugifyChartFilename(payload.title, 0)
+                  );
+                }}
+                aria-label={t('dashboardDownloadAll')}
+                title={t('dashboardDownloadAll')}
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+              <button
+                type="button"
+                onClick={() => setDashboardModalOpen(false)}
+                className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                aria-label={t('dashboardCloseFullscreen')}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4">
+            <div ref={modalDashboardRef}>
+              <div className="mb-3">
+                <div className="text-base font-semibold text-gray-900 dark:text-gray-50">
+                  {payload.title}
+                </div>
+                {payload.description && (
+                  <div className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                    {payload.description}
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-12 gap-3">
+                {cells.map((cell, i) => (
+                  <div
+                    key={`modal-${i}`}
+                    className="col-span-12 min-h-[160px] rounded-md border border-gray-100 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-gray-950/40"
+                    style={{
+                      gridColumn: `span ${cell.span ?? 6} / span ${cell.span ?? 6}`,
+                    }}
+                  >
+                    <CellBody
+                      cell={cell}
+                      chartHeight={CHART_HEIGHT_EXPANDED}
+                      showChartToolbar={false}
+                      expandLabel={t('dashboardExpandChart')}
+                      downloadLabel={t('dashboardDownloadChart')}
+                    />
+                  </div>
+                ))}
+              </div>
+              {payload.footer_note && (
+                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                  {payload.footer_note}
+                </div>
+              )}
+            </div>
+          </div>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        open={singleChartIndex !== null && singleCell != null && singleCell.kind !== 'stat'}
+        onClose={() => setSingleChartIndex(null)}
+        className="max-h-[96vh] w-full max-w-[min(96vw,1100px)] overflow-hidden"
+      >
+        <ModalContent className="flex max-h-[90vh] flex-col overflow-hidden p-0">
+          {singleCell && singleCell.kind !== 'stat' && (
+            <>
+              <div
+                className="flex items-center justify-between gap-2 border-b border-gray-200 px-4 py-3 dark:border-gray-700"
+                data-html2canvas-ignore
+              >
+                <div className="min-w-0 text-sm font-semibold text-gray-900 dark:text-gray-50">
+                  {singleCell.title}
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="!px-2"
+                    disabled={downloadBusy}
+                    onClick={handleDownloadSingleModal}
+                    aria-label={t('dashboardDownloadChart')}
+                    title={t('dashboardDownloadChart')}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setSingleChartIndex(null)}
+                    className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                    aria-label={t('dashboardCloseFullscreen')}
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="min-h-0 flex-1 overflow-auto p-4">
+                <div
+                  ref={singleChartRef}
+                  className="rounded-md border border-gray-100 bg-gray-50/60 p-4 dark:border-gray-800 dark:bg-gray-950/40"
+                >
+                  <CellBody
+                    cell={singleCell}
+                    chartHeight={480}
+                    showChartToolbar={false}
+                    expandLabel={t('dashboardExpandChart')}
+                    downloadLabel={t('dashboardDownloadChart')}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </div>
+  );
+}
+
+export default CanvasDashboard;

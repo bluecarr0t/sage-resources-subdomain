@@ -243,7 +243,7 @@ Include properties that:
 
 ${limitClause}
 
-For each property provide: property_name (required), city (required), state (required), address, zip_code, url (official website), phone_number, description (2-4 sentences emphasizing safari tent experience), property_type (e.g. "Glamping Resort", "Safari Tent Resort"), unit_type (must include "safari tent" or "safari tents"), quantity_of_units (required - number of safari tent units, must be >= 5), property_total_sites (if different), lat, lon if known.
+For each property provide: property_name (required), city (required), state (required), address, zip_code, url (official website), phone_number, description (2-4 sentences emphasizing safari tent experience), property_type (e.g. "Glamping Resort", "Safari Tent Resort"), unit_type (use exactly "Safari Tent" when safari tents are the primary offering), quantity_of_units (required - number of safari tent units, must be >= 5), property_total_sites (if different), lat, lon if known.
 
 Return a JSON object with a "properties" array. Only include properties with 5+ safari tent units.`,
     },
@@ -261,7 +261,7 @@ Include properties across provinces (BC, Ontario, Quebec, etc.) that:
 
 ${limitClause}
 
-For each property provide: property_name (required), city (required), state (province), address, zip_code (postal code), url (official website), phone_number, description (2-4 sentences), property_type, unit_type (must include "safari tent"), quantity_of_units (required, >= 5), property_total_sites, lat, lon if known. Use country: "Canada".
+For each property provide: property_name (required), city (required), state (province), address, zip_code (postal code), url (official website), phone_number, description (2-4 sentences), property_type, unit_type (use exactly "Safari Tent" when applicable), quantity_of_units (required, >= 5), property_total_sites, lat, lon if known. Use country: "Canada".
 
 Return a JSON object with a "properties" array. Only include properties with 5+ safari tent units.`,
     },
@@ -279,7 +279,7 @@ Include properties in Tulum, Riviera Maya, Oaxaca, and other regions that:
 
 ${limitClause}
 
-For each property provide: property_name (required), city (required), state (region), address, zip_code, url (official website), phone_number, description (2-4 sentences), property_type, unit_type (must include "safari tent"), quantity_of_units (required, >= 5), property_total_sites, lat, lon if known. Use country: "Mexico".
+For each property provide: property_name (required), city (required), state (region), address, zip_code, url (official website), phone_number, description (2-4 sentences), property_type, unit_type (use exactly "Safari Tent" when applicable), quantity_of_units (required, >= 5), property_total_sites, lat, lon if known. Use country: "Mexico".
 
 Return a JSON object with a "properties" array. Only include properties with 5+ safari tent units.`,
     },

@@ -22,6 +22,8 @@ export interface SageAiUsageLogParams {
   messageCount: number;
   toolCallCount: number;
   correlationId?: string;
+  /** Short machine-readable code when the request failed mid-stream. */
+  errorCode?: string | null;
 }
 
 /**
@@ -46,6 +48,7 @@ export async function logSageAiUsage(params: SageAiUsageLogParams): Promise<void
         message_count: params.messageCount,
         tool_call_count: params.toolCallCount,
         correlation_id: params.correlationId ?? null,
+        error_code: params.errorCode ?? null,
       },
     } as never);
   } catch (e) {

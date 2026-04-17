@@ -3,6 +3,12 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useChat, type UIMessage } from '@ai-sdk/react';
 import { DefaultChatTransport, isReasoningUIPart, isToolUIPart } from 'ai';
+import {
+  isDashboardPayload,
+  isMapPayload,
+} from '@/lib/sage-ai/ui-parts';
+import { CanvasDashboard } from './CanvasDashboard';
+import { SageAiMap } from './SageAiMap';
 import { useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -27,10 +33,16 @@ import {
   Check,
   Square,
   ArrowDown,
+  ThumbsUp,
+  ThumbsDown,
+  Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { CollapsibleMarkdownPre } from '@/lib/sage-ai/CollapsibleMarkdownPre';
+import { linkifyPastReportRefsInMarkdown } from '@/lib/sage-ai/linkify-past-report-refs';
 import { downloadCsvFromData, downloadXlsxFromData, generateExportFilename } from '@/lib/sage-ai/csv-download';
 import { PythonCodeBlock } from '@/lib/sage-ai/pyodide/PythonCodeBlock';
+import { isPyodideEnvironmentError } from '@/lib/sage-ai/pyodide/is-pyodide-environment-error';
 import {
   SAGE_AI_CHAT_DEFAULT_MODEL,
   resolveSageAiGatewayModelId,
@@ -41,6 +53,7 @@ import {
   sageAiSelectionFromStorage,
   sageAiSelectionToStorage,
   SAGE_AI_MODEL_STORAGE_KEY,
+  SAGE_AI_WEB_RESEARCH_UI_ENABLED,
 } from './SageAiModelPicker';
 
 interface Session {
@@ -91,6 +104,12 @@ export default function SageAiClient() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  /**
+   * Stable id for `useChat` / transport (must not be `undefined` in the options object — that
+   * triggers Chat recreation every render). Separate from `currentSessionId` so the first
+   * successful session save can update the DB id without remounting the chat and wiping messages.
+   */
+  const [chatTransportId, setChatTransportId] = useState(() => crypto.randomUUID());
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [savedQueriesLoading, setSavedQueriesLoading] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -101,14 +120,25 @@ export default function SageAiClient() {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [pythonRetryCount, setPythonRetryCount] = useState(0);
+  /** At most one LLM auto-fix message per session; incremented synchronously to avoid duplicate sends when multiple Python blocks fail in one render. */
+  const pythonAutoFixSentRef = useRef(0);
   const [modelSelection, setModelSelection] = useState<SageAiModelSelection>({
     modelId: SAGE_AI_CHAT_DEFAULT_MODEL,
   });
+  /** Tavily/Firecrawl; only sent to API when UI flag allows and server env permits. */
+  const [webResearchEnabled, setWebResearchEnabled] = useState(false);
+  const webResearchRef = useRef(false);
+  webResearchRef.current = webResearchEnabled && SAGE_AI_WEB_RESEARCH_UI_ENABLED;
   const [modelPrefsLoaded, setModelPrefsLoaded] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
   const [savedQueriesError, setSavedQueriesError] = useState<string | null>(null);
   const [stickyUserPrompt, setStickyUserPrompt] = useState<string | null>(null);
+  const [feedbackBySessionMessage, setFeedbackBySessionMessage] = useState<
+    Record<string, { rating: 1 | -1 }>
+  >({});
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingDraft, setEditingDraft] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const userMessageRowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -117,6 +147,11 @@ export default function SageAiClient() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const currentSessionIdRef = useRef<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  /** Last `part.output` reference we stored into `lastQueryData`; prevents infinite re-renders during streaming. */
+  const lastQueryDataSourceRef = useRef<unknown>(null);
+  /** Refs mirroring scroll state so effects don't depend on it and re-fire during smooth scroll. */
+  const userHasScrolledRef = useRef(false);
+  const isAtBottomRef = useRef(true);
   /** `useChat` keeps the first `transport` forever; read latest model from this ref in prepareSend. */
   const modelSelectionRef = useRef<SageAiModelSelection>(modelSelection);
   modelSelectionRef.current = modelSelection;
@@ -130,6 +165,30 @@ export default function SageAiClient() {
       console.error('Failed to copy:', err);
     }
   }, []);
+
+  const extractUserText = useCallback((message: UIMessage): string => {
+    if (!message.parts) return '';
+    return message.parts
+      .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+      .map((p) => p.text)
+      .join('\n');
+  }, []);
+
+  const beginEditMessage = useCallback(
+    (messageId: string) => {
+      const msg = messagesRef.current.find((m) => m.id === messageId);
+      if (!msg || msg.role !== 'user') return;
+      setEditingMessageId(messageId);
+      setEditingDraft(extractUserText(msg));
+    },
+    [extractUserText]
+  );
+
+  const cancelEditMessage = useCallback(() => {
+    setEditingMessageId(null);
+    setEditingDraft('');
+  }, []);
+
 
   const transport = useMemo(
     () =>
@@ -149,19 +208,33 @@ export default function SageAiClient() {
             trigger,
             messageId,
             model: resolveSageAiGatewayModelId(modelSelectionRef.current),
+            webResearch: webResearchRef.current,
           },
+        }),
+        prepareReconnectToStreamRequest: ({ id, api }) => ({
+          api: `${api}/${encodeURIComponent(id)}/resume`,
         }),
       }),
     []
   );
 
   const showToastRef = useRef<(msg: string) => void>(() => {});
-  const { messages, sendMessage, status, setMessages, stop } = useChat({
+  const { messages, sendMessage, status, setMessages, stop, resumeStream } = useChat({
+    id: chatTransportId,
     transport,
     onError: (err) => {
       showToastRef.current(err.message ?? 'Chat request failed');
     },
   });
+
+  // When a session is loaded/selected, probe the resume endpoint so a still-
+  // in-flight stream will reattach automatically after a reload. No-ops when
+  // the server returns 204 (nothing to resume).
+  useEffect(() => {
+    resumeStream().catch((err) => {
+      console.debug('[sage-ai] resumeStream noop', err);
+    });
+  }, [chatTransportId, resumeStream]);
 
   messagesRef.current = messages;
 
@@ -180,13 +253,41 @@ export default function SageAiClient() {
   const showToast = useCallback((msg: string) => setToastMessage(msg), []);
   showToastRef.current = showToast;
 
-  const handlePythonError = useCallback((error: string, code: string) => {
-    setPythonRetryCount(prev => prev + 1);
-    // Automatically ask the AI to fix the error
-    sendMessage({
-      text: `The Python code failed with this error:\n\n\`\`\`\n${error}\n\`\`\`\n\nOriginal code:\n\`\`\`python\n${code}\n\`\`\`\n\nPlease analyze the error and generate fixed Python code that will work correctly.`,
-    });
-  }, [sendMessage]);
+  const handlePythonError = useCallback(
+    (error: string, code: string) => {
+      if (isPyodideEnvironmentError(error)) {
+        showToast(t('pyodideEnvironmentToast'));
+        return;
+      }
+      if (pythonAutoFixSentRef.current >= 1) return;
+      pythonAutoFixSentRef.current += 1;
+      setPythonRetryCount(pythonAutoFixSentRef.current);
+      sendMessage({
+        text: `The Python code failed with this error:\n\n\`\`\`\n${error}\n\`\`\`\n\nOriginal code:\n\`\`\`python\n${code}\n\`\`\`\n\nPlease analyze the error and generate fixed Python code that will work correctly.`,
+      });
+    },
+    [sendMessage, showToast, t]
+  );
+
+  const submitEditMessage = useCallback(() => {
+    const messageId = editingMessageId;
+    if (!messageId) return;
+    const draft = editingDraft.trim();
+    if (!draft) return;
+    const idx = messagesRef.current.findIndex((m) => m.id === messageId);
+    if (idx === -1) {
+      setEditingMessageId(null);
+      setEditingDraft('');
+      return;
+    }
+    // Truncate history up to (but not including) the edited message, then
+    // resend the new text as a fresh user turn. This is the standard
+    // "rewind + branch" flow for chat UIs.
+    setMessages(messagesRef.current.slice(0, idx));
+    setEditingMessageId(null);
+    setEditingDraft('');
+    sendMessage({ text: draft });
+  }, [editingDraft, editingMessageId, sendMessage, setMessages]);
 
   const loadSessions = useCallback(async () => {
     setSessionsLoading(true);
@@ -409,53 +510,108 @@ export default function SageAiClient() {
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     const atBottom = distanceFromBottom < 100; // Within 100px of bottom
 
-    setIsAtBottom(atBottom);
-    if (!atBottom && isLoading) {
+    if (atBottom !== isAtBottomRef.current) {
+      isAtBottomRef.current = atBottom;
+      setIsAtBottom(atBottom);
+    }
+    if (!atBottom && isLoading && !userHasScrolledRef.current) {
+      userHasScrolledRef.current = true;
       setUserHasScrolled(true);
     }
-    if (atBottom) {
+    if (atBottom && userHasScrolledRef.current) {
+      userHasScrolledRef.current = false;
       setUserHasScrolled(false);
     }
     scheduleStickyUserPromptUpdate();
   }, [isLoading, scheduleStickyUserPromptUpdate]);
 
-  // Auto-scroll only if user hasn't manually scrolled up
+  // Auto-scroll only if user hasn't manually scrolled up. Depend on messages.length, not
+  // the full messages array or scroll-state flags — those change during a smooth scroll and
+  // would re-enter this effect, causing an infinite loop ("Maximum update depth exceeded").
   useEffect(() => {
-    if (!userHasScrolled && isAtBottom) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, userHasScrolled, isAtBottom]);
+    if (userHasScrolledRef.current || !isAtBottomRef.current) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages.length]);
 
-  // Reset scroll state when a new message is sent
-  useEffect(() => {
-    if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
-      setUserHasScrolled(false);
-      setIsAtBottom(true);
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
+  // Stick to bottom while tokens stream in, without re-entering the effect on
+  // every keystroke. `contentLen` updates as the assistant message grows.
+  const contentLen = useMemo(() => {
+    const last = messages[messages.length - 1];
+    if (!last || last.role !== 'assistant') return 0;
+    return last.parts.reduce((acc, p) => {
+      if (p.type === 'text') return acc + p.text.length;
+      return acc;
+    }, 0);
   }, [messages]);
 
+  useEffect(() => {
+    if (!isLoading) return;
+    if (userHasScrolledRef.current || !isAtBottomRef.current) return;
+    const raf = window.requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [contentLen, isLoading]);
+
+  // Reset scroll state when a new user message is appended.
+  useEffect(() => {
+    const list = messagesRef.current;
+    if (list.length === 0) return;
+    if (list[list.length - 1].role !== 'user') return;
+    userHasScrolledRef.current = false;
+    isAtBottomRef.current = true;
+    setUserHasScrolled(false);
+    setIsAtBottom(true);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages.length]);
+
   const scrollToBottom = useCallback(() => {
+    userHasScrolledRef.current = false;
+    isAtBottomRef.current = true;
     setUserHasScrolled(false);
     setIsAtBottom(true);
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
+  // Track the most recent tool-output dataset for Python injection. We guard updates with
+  // a ref of the source `part.output` object so repeated renders during streaming (which
+  // may produce new `messages` array references with the same underlying tool output) do
+  // not set new array references into state each render and trigger an infinite loop.
   useEffect(() => {
-    for (const message of messages) {
+    let latestSource: unknown = null;
+    let latestData: Record<string, unknown>[] | null = null;
+
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
       if (message.role !== 'assistant') continue;
-      for (const part of message.parts) {
+      for (let j = message.parts.length - 1; j >= 0; j--) {
+        const part = message.parts[j];
         if (!isToolUIPart(part)) continue;
         if (part.state !== 'output-available') continue;
         const output = part.output;
         if (!output || typeof output !== 'object') continue;
         const outputObj = output as Record<string, unknown>;
         if ('data' in outputObj && Array.isArray(outputObj.data) && outputObj.data.length > 0) {
-          setLastQueryData(outputObj.data as Record<string, unknown>[]);
-        } else if ('aggregates' in outputObj && Array.isArray(outputObj.aggregates) && outputObj.aggregates.length > 0) {
-          setLastQueryData(outputObj.aggregates as Record<string, unknown>[]);
+          latestSource = output;
+          latestData = outputObj.data as Record<string, unknown>[];
+          break;
+        }
+        if (
+          'aggregates' in outputObj &&
+          Array.isArray(outputObj.aggregates) &&
+          outputObj.aggregates.length > 0
+        ) {
+          latestSource = output;
+          latestData = outputObj.aggregates as Record<string, unknown>[];
+          break;
         }
       }
+      if (latestSource !== null) break;
+    }
+
+    if (latestSource !== null && latestSource !== lastQueryDataSourceRef.current) {
+      lastQueryDataSourceRef.current = latestSource;
+      setLastQueryData(latestData);
     }
   }, [messages]);
 
@@ -476,12 +632,44 @@ export default function SageAiClient() {
     }
   };
 
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     setMessages([]);
     setCurrentSessionId(null);
+    setChatTransportId(crypto.randomUUID());
     setShowSidebar(false);
+    pythonAutoFixSentRef.current = 0;
     setPythonRetryCount(0);
-  };
+    setFeedbackBySessionMessage({});
+    // Drop stale DOM references when we wipe the list so the Map doesn't
+    // grow unbounded across many session swaps in a long-lived tab.
+    userMessageRowRefs.current.clear();
+    setEditingMessageId(null);
+    setEditingDraft('');
+    setWebResearchEnabled(false);
+    inputRef.current?.focus();
+  }, [setMessages]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        handleNewChat();
+        return;
+      }
+      if (mod && e.key === '/') {
+        e.preventDefault();
+        inputRef.current?.focus();
+        return;
+      }
+      if (e.key === 'Escape' && editingMessageId) {
+        setEditingMessageId(null);
+        setEditingDraft('');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [editingMessageId, handleNewChat]);
 
   const handleLoadSession = async (sessionId: string) => {
     try {
@@ -490,10 +678,33 @@ export default function SageAiClient() {
         const data = await res.json();
         setMessages(data.session.messages ?? []);
         setCurrentSessionId(sessionId);
+        setChatTransportId(sessionId);
         setShowSidebar(false);
+        pythonAutoFixSentRef.current = 0;
+        setPythonRetryCount(0);
       }
     } catch (e) {
       console.error('Failed to load session:', e);
+    }
+
+    try {
+      const res = await fetch(
+        `/api/admin/sage-ai/feedback?sessionId=${encodeURIComponent(sessionId)}`
+      );
+      if (res.ok) {
+        const data: {
+          feedback?: Array<{ message_id: string; rating: number }>;
+        } = await res.json();
+        const map: Record<string, { rating: 1 | -1 }> = {};
+        for (const row of data.feedback ?? []) {
+          if (row.rating === 1 || row.rating === -1) {
+            map[row.message_id] = { rating: row.rating };
+          }
+        }
+        setFeedbackBySessionMessage(map);
+      }
+    } catch (e) {
+      console.error('Failed to load feedback:', e);
     }
   };
 
@@ -510,6 +721,9 @@ export default function SageAiClient() {
         if (currentSessionId === sessionId) {
           setMessages([]);
           setCurrentSessionId(null);
+          setChatTransportId(crypto.randomUUID());
+          pythonAutoFixSentRef.current = 0;
+          setPythonRetryCount(0);
         }
       }
     } catch (e) {
@@ -849,12 +1063,12 @@ export default function SageAiClient() {
                 </p>
                 
                 {/* Quick Start Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
                   <button
-                    onClick={() => sendMessage({ text: "What's the average daily rate for glamping properties by state?" })}
+                    onClick={() => sendMessage({ text: t('quickStartRatePrompt') })}
                     className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
-                    <span className="text-lg">💰</span>
+                    <span className="text-lg">📊</span>
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
                         {t('quickStartRateTitle')}
@@ -866,10 +1080,10 @@ export default function SageAiClient() {
                   </button>
                   
                   <button
-                    onClick={() => sendMessage({ text: "Show me a sample of RV sites from Campspot and RoverPass databases - what data do we have?" })}
+                    onClick={() => sendMessage({ text: t('quickStartRvPrompt') })}
                     className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
-                    <span className="text-lg">🚐</span>
+                    <span className="text-lg">🎯</span>
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
                         {t('quickStartRvTitle')}
@@ -881,10 +1095,10 @@ export default function SageAiClient() {
                   </button>
                   
                   <button
-                    onClick={() => sendMessage({ text: "What glamping unit types are most popular in Colorado? Query both Sage and Hipcamp databases. Only include properties with at least 5 units and where glamping units (not RV, tent, or vehicle sites) make up at least 40% of total units. Show me a breakdown with property counts." })}
+                    onClick={() => sendMessage({ text: t('quickStartUnitPrompt') })}
                     className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
-                    <span className="text-lg">⛺</span>
+                    <span className="text-lg">🏕️</span>
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
                         {t('quickStartUnitTitle')}
@@ -896,16 +1110,46 @@ export default function SageAiClient() {
                   </button>
                   
                   <button
-                    onClick={() => sendMessage({ text: "Which states have both National Parks and glamping properties? Show me the top states with counts of each." })}
+                    onClick={() => sendMessage({ text: t('quickStartParksPrompt') })}
                     className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
-                    <span className="text-lg">🏞️</span>
+                    <span className="text-lg">🗺️</span>
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
                         {t('quickStartParksTitle')}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         {t('quickStartParksDesc')}
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => sendMessage({ text: t('quickStartTexasReportsPrompt') })}
+                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                  >
+                    <span className="text-lg">📋</span>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
+                        {t('quickStartTexasReportsTitle')}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {t('quickStartTexasReportsDesc')}
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => sendMessage({ text: t('quickStartUsaTrendsPrompt') })}
+                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                  >
+                    <span className="text-lg">📈</span>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
+                        {t('quickStartUsaTrendsTitle')}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {t('quickStartUsaTrendsDesc')}
                       </div>
                     </div>
                   </button>
@@ -924,26 +1168,77 @@ export default function SageAiClient() {
                     className="group relative"
                   >
                     <div className="rounded-2xl border border-gray-200/90 bg-gray-100 px-4 py-3 shadow-sm dark:border-gray-700/90 dark:bg-gray-800/95">
-                      <div className="text-[15px] leading-relaxed text-gray-900 dark:text-gray-100">
-                        {message.parts.map((part, partIndex) => {
-                          if (part.type === 'text') {
-                            return (
-                              <div key={partIndex} className="whitespace-pre-wrap">
-                                {part.text}
-                                <button
-                                  type="button"
-                                  onClick={() => openSaveQueryDialog(part.text)}
-                                  className="ml-2 inline-flex opacity-0 transition-opacity group-hover:opacity-100"
-                                  title={t('saveQuery')}
-                                >
-                                  <BookmarkPlus className="h-4 w-4 text-gray-500 hover:text-sage-600 dark:text-gray-400" />
-                                </button>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
+                      {editingMessageId === message.id ? (
+                        <div className="flex flex-col gap-2">
+                          <textarea
+                            value={editingDraft}
+                            onChange={(e) => setEditingDraft(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                                e.preventDefault();
+                                submitEditMessage();
+                              } else if (e.key === 'Escape') {
+                                e.preventDefault();
+                                cancelEditMessage();
+                              }
+                            }}
+                            autoFocus
+                            rows={Math.min(8, Math.max(2, editingDraft.split('\n').length))}
+                            className="w-full resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-[15px] text-gray-900 focus:border-sage-500 focus:outline-none focus:ring-1 focus:ring-sage-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+                            disabled={isLoading}
+                          />
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={cancelEditMessage}
+                              className="px-3 py-1.5 text-sm rounded-md text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
+                              disabled={isLoading}
+                            >
+                              {t('cancel')}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={submitEditMessage}
+                              disabled={!editingDraft.trim() || isLoading}
+                              className="px-3 py-1.5 text-sm rounded-md bg-sage-600 text-white hover:bg-sage-700 disabled:opacity-40"
+                            >
+                              {t('editResend')}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-[15px] leading-relaxed text-gray-900 dark:text-gray-100">
+                          {message.parts.map((part, partIndex) => {
+                            if (part.type === 'text') {
+                              return (
+                                <div key={partIndex} className="whitespace-pre-wrap">
+                                  {part.text}
+                                  <span className="ml-2 inline-flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <button
+                                      type="button"
+                                      onClick={() => beginEditMessage(message.id)}
+                                      title={t('editMessage')}
+                                      disabled={isLoading}
+                                      className="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40"
+                                    >
+                                      <Pencil className="h-4 w-4 text-gray-500 hover:text-sage-600 dark:text-gray-400" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => openSaveQueryDialog(part.text)}
+                                      title={t('saveQuery')}
+                                      className="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                                    >
+                                      <BookmarkPlus className="h-4 w-4 text-gray-500 hover:text-sage-600 dark:text-gray-400" />
+                                    </button>
+                                  </span>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -1004,78 +1299,36 @@ export default function SageAiClient() {
                               <ReactMarkdown 
                                 remarkPlugins={[remarkGfm]}
                                 components={{
+                                  pre: CollapsibleMarkdownPre,
+                                  a: ({ href, children, ...props }) => {
+                                    const openNew =
+                                      typeof href === 'string' &&
+                                      (href.startsWith('/admin') ||
+                                        href.startsWith('/api/') ||
+                                        href.startsWith('http'));
+                                    return (
+                                      <a
+                                        href={href}
+                                        {...props}
+                                        target={openNew ? '_blank' : undefined}
+                                        rel={openNew ? 'noopener noreferrer' : undefined}
+                                      >
+                                        {children}
+                                      </a>
+                                    );
+                                  },
                                   ul: ({ children }) => (
                                     <ul className="space-y-1.5">{children}</ul>
                                   ),
-                                  li: ({ children }) => {
-                                    // Extract text content from children
-                                    const extractText = (node: React.ReactNode): string => {
-                                      if (typeof node === 'string') return node;
-                                      if (typeof node === 'number') return String(node);
-                                      if (!node) return '';
-                                      if (Array.isArray(node)) return node.map(extractText).join('');
-                                      if (typeof node === 'object' && 'props' in node) {
-                                        return extractText((node as React.ReactElement).props.children);
-                                      }
-                                      return '';
-                                    };
-                                    
-                                    // Check if children contains nested lists (ul elements)
-                                    const hasNestedList = (node: React.ReactNode): boolean => {
-                                      if (!node) return false;
-                                      if (Array.isArray(node)) return node.some(hasNestedList);
-                                      if (typeof node === 'object' && 'type' in node) {
-                                        const el = node as React.ReactElement;
-                                        if (el.type === 'ul' || el.type === 'ol') return true;
-                                        if (el.props?.children) return hasNestedList(el.props.children);
-                                      }
-                                      return false;
-                                    };
-                                    
-                                    const textContent = extractText(children).trim();
-                                    const containsNestedList = hasNestedList(children);
-                                    
-                                    // Check if this looks like a clickable suggestion
-                                    // Must be a question-like prompt, not data or amenities
-                                    const looksLikeSuggestion = 
-                                      !containsNestedList && // No nested lists
-                                      textContent.length > 20 && // Longer than typical data items
-                                      textContent.length < 150 &&
-                                      !/^\d+[\s,]/.test(textContent) && // Doesn't start with numbers
-                                      !/\$[\d,]+/.test(textContent) && // No price data
-                                      !textContent.includes('http') && // No URLs
-                                      !/\d{2,}/.test(textContent.slice(0, 20)) && // No long numbers at start
-                                      !textContent.endsWith(':') && // Not a label like "Amenities:"
-                                      !/^[A-Z][a-z]+(\s*[,&]\s*[A-Z]?[a-z]+)*$/.test(textContent) && // Not comma/ampersand separated items like "Pet friendly, Family friendly"
-                                      textContent.split(' ').length >= 4; // At least 4 words (suggests a question/prompt)
-                                    
-                                    if (looksLikeSuggestion) {
-                                      return (
-                                        <li className="flex items-start gap-2">
-                                          <span className="text-sage-500 mt-1.5 text-xs">●</span>
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              sendMessage({ text: textContent });
-                                            }}
-                                            className="flex-1 text-left hover:text-sage-600 dark:hover:text-sage-400 hover:underline cursor-pointer transition-colors"
-                                          >
-                                            {children}
-                                          </button>
-                                        </li>
-                                      );
-                                    }
-                                    
-                                    return (
-                                      <li className="flex items-start gap-2">
-                                        <span className="text-sage-500 mt-1.5 text-xs">●</span>
-                                        <span className="flex-1">{children}</span>
-                                      </li>
-                                    );
-                                  },
+                                  li: ({ children }) => (
+                                    <li className="flex items-start gap-2">
+                                      <span className="text-sage-500 mt-1.5 text-xs">●</span>
+                                      <span className="flex-1">{children}</span>
+                                    </li>
+                                  ),
                                 }}
                               >
-                                {part.text}
+                                {linkifyPastReportRefsInMarkdown(part.text)}
                               </ReactMarkdown>
                             </div>
                           </div>
@@ -1087,7 +1340,151 @@ export default function SageAiClient() {
                           ? (part as { toolName: string }).toolName 
                           : part.type.replace(/^tool-/, '');
                         const toolOutput = part.state === 'output-available' ? part.output : undefined;
-                        
+
+                        // Render `suggest_followups` as a chip row, not a tool card.
+                        if (toolName === 'suggest_followups') {
+                          if (part.state !== 'output-available') return null;
+                          const followupOutput = toolOutput as
+                            | { type?: string; suggestions?: unknown }
+                            | undefined;
+                          const suggestions = Array.isArray(followupOutput?.suggestions)
+                            ? (followupOutput.suggestions as unknown[]).filter(
+                                (s): s is string => typeof s === 'string' && s.trim().length > 0
+                              )
+                            : [];
+                          if (suggestions.length === 0) return null;
+                          return (
+                            <div
+                              key={partIndex}
+                              className="my-3 flex flex-wrap gap-2"
+                              aria-label="Follow-up suggestions"
+                            >
+                              {suggestions.map((suggestion, i) => (
+                                <button
+                                  key={`${partIndex}-${i}`}
+                                  type="button"
+                                  onClick={() => sendMessage({ text: suggestion })}
+                                  className="rounded-full border border-sage-300 bg-sage-50 px-3 py-1.5 text-sm text-sage-700 hover:bg-sage-100 hover:border-sage-400 dark:border-sage-700 dark:bg-sage-900/40 dark:text-sage-200 dark:hover:bg-sage-900/60 transition-colors"
+                                >
+                                  {suggestion}
+                                </button>
+                              ))}
+                            </div>
+                          );
+                        }
+
+                        // Custom success renderer for generate_dashboard:
+                        // pass the payload to the Recharts canvas.
+                        if (
+                          toolName === 'generate_dashboard' &&
+                          part.state === 'output-available' &&
+                          isDashboardPayload(toolOutput)
+                        ) {
+                          return (
+                            <CanvasDashboard
+                              key={partIndex}
+                              payload={toolOutput}
+                            />
+                          );
+                        }
+
+                        // Custom success renderer for visualize_on_map:
+                        // hand off GeoJSON to the Leaflet map.
+                        if (
+                          toolName === 'visualize_on_map' &&
+                          part.state === 'output-available' &&
+                          isMapPayload(toolOutput)
+                        ) {
+                          return (
+                            <SageAiMap key={partIndex} payload={toolOutput} />
+                          );
+                        }
+
+                        // Custom success renderer for competitor_comparison:
+                        // show a compact summary; the model synthesizes the
+                        // narrative from the tool payload in its follow-up text.
+                        if (
+                          toolName === 'competitor_comparison' &&
+                          part.state === 'output-available' &&
+                          typeof toolOutput === 'object' &&
+                          toolOutput !== null &&
+                          'type' in toolOutput &&
+                          (toolOutput as { type: string }).type ===
+                            'competitor_comparison'
+                        ) {
+                          const cmpOut = toolOutput as unknown as {
+                            competitors: Array<{
+                              name: string;
+                              place?: { website: string | null } | null;
+                              scrape?: { url: string } | null;
+                              errors: string[];
+                            }>;
+                          };
+                          const withPlace = cmpOut.competitors.filter(
+                            (c) => c.place
+                          ).length;
+                          const withScrape = cmpOut.competitors.filter(
+                            (c) => c.scrape
+                          ).length;
+                          return (
+                            <div
+                              key={partIndex}
+                              className="my-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3"
+                            >
+                              <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                Competitor comparison
+                              </div>
+                              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {cmpOut.competitors.length} competitors ·{' '}
+                                {withPlace} with Google Places data ·{' '}
+                                {withScrape} with scraped homepage
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // Custom success renderer for build_feasibility_brief:
+                        // show a link to the newly created draft report.
+                        if (
+                          toolName === 'build_feasibility_brief' &&
+                          part.state === 'output-available' &&
+                          typeof toolOutput === 'object' &&
+                          toolOutput !== null &&
+                          'type' in toolOutput &&
+                          (toolOutput as { type: string }).type ===
+                            'feasibility_brief_draft'
+                        ) {
+                          const briefOut = toolOutput as unknown as {
+                            report_id: string;
+                            template: string;
+                            sections_written: number;
+                            view_url: string;
+                          };
+                          return (
+                            <div
+                              key={partIndex}
+                              className="my-4 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/20 px-4 py-3"
+                            >
+                              <div className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
+                                Draft feasibility brief created
+                              </div>
+                              <div className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
+                                Template: {briefOut.template} ·{' '}
+                                {briefOut.sections_written} section
+                                {briefOut.sections_written === 1 ? '' : 's'} written
+                              </div>
+                              <a
+                                href={briefOut.view_url}
+                                className="mt-2 inline-flex items-center text-sm font-medium text-emerald-700 dark:text-emerald-200 hover:underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Open draft in reports →
+                              </a>
+                            </div>
+                          );
+                        }
+
                         return (
                           <div
                             key={partIndex}
@@ -1193,6 +1590,26 @@ export default function SageAiClient() {
 
                       return null;
                     })}
+                    {message.role === 'assistant' &&
+                      !isLoading &&
+                      currentSessionId && (
+                        <FeedbackControls
+                          sessionId={currentSessionId}
+                          messageId={message.id}
+                          model={resolveSageAiGatewayModelId(modelSelection)}
+                          initial={feedbackBySessionMessage[message.id]}
+                          onChange={(next) => {
+                            setFeedbackBySessionMessage((prev) => {
+                              if (next === null) {
+                                const { [message.id]: _removed, ...rest } = prev;
+                                return rest;
+                              }
+                              return { ...prev, [message.id]: next };
+                            });
+                          }}
+                          onError={showToast}
+                        />
+                      )}
                   </div>
                 )}
               </div>
@@ -1235,6 +1652,8 @@ export default function SageAiClient() {
                   <SageAiModelPicker
                     selection={modelSelection}
                     onSelectionChange={setModelSelection}
+                    webResearchEnabled={webResearchEnabled}
+                    onWebResearchChange={setWebResearchEnabled}
                     disabled={isLoading}
                   />
                   <div className="flex-1" />
@@ -1274,6 +1693,85 @@ export default function SageAiClient() {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+interface FeedbackControlsProps {
+  sessionId: string;
+  messageId: string;
+  model: string;
+  initial?: { rating: 1 | -1 };
+  onChange: (value: { rating: 1 | -1 } | null) => void;
+  onError: (msg: string) => void;
+}
+
+function FeedbackControls({
+  sessionId,
+  messageId,
+  model,
+  initial,
+  onChange,
+  onError,
+}: FeedbackControlsProps) {
+  const [pending, setPending] = useState<0 | 1 | -1>(0);
+  const current = initial?.rating ?? 0;
+
+  const submit = useCallback(
+    async (next: 1 | -1) => {
+      const nextValue = current === next ? 0 : next;
+      setPending(nextValue === 0 ? next : nextValue);
+      try {
+        const res = await fetch('/api/admin/sage-ai/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            messageId,
+            rating: nextValue,
+            model,
+          }),
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        onChange(nextValue === 0 ? null : { rating: nextValue });
+      } catch (err) {
+        console.error('[sage-ai] feedback submit failed', err);
+        onError('Could not save feedback');
+      } finally {
+        setPending(0);
+      }
+    },
+    [current, messageId, model, onChange, onError, sessionId]
+  );
+
+  return (
+    <div className="mt-3 flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
+      <button
+        type="button"
+        aria-label="Mark this response as helpful"
+        aria-pressed={current === 1}
+        disabled={pending !== 0}
+        onClick={() => submit(1)}
+        className={`p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+          current === 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'
+        }`}
+      >
+        <ThumbsUp className="w-3.5 h-3.5" />
+      </button>
+      <button
+        type="button"
+        aria-label="Mark this response as unhelpful"
+        aria-pressed={current === -1}
+        disabled={pending !== 0}
+        onClick={() => submit(-1)}
+        className={`p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+          current === -1 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'
+        }`}
+      >
+        <ThumbsDown className="w-3.5 h-3.5" />
+      </button>
     </div>
   );
 }

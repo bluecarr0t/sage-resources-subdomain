@@ -2,9 +2,25 @@
  * Client-side CSV/XLSX generation and download for Sage AI tool results.
  */
 
-function csvCell(value: unknown): string {
+/**
+ * Normalize a cell value to a string suitable for CSV/XLSX output.
+ * Objects and arrays (e.g. JSONB columns) are JSON-serialized so they don't
+ * collapse into "[object Object]".
+ */
+function normalizeCell(value: unknown): string {
   if (value == null) return '';
-  const str = String(value).replace(/"/g, '""');
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
+function csvCell(value: unknown): string {
+  const str = normalizeCell(value).replace(/"/g, '""');
   if (/[",\n\r]/.test(str)) return `"${str}"`;
   return str;
 }
@@ -91,7 +107,13 @@ export async function downloadXlsxFromData(
   const headers = collectAllKeys(data);
   const aoa: unknown[][] = [
     headers,
-    ...data.map((row) => headers.map((h) => row[h] ?? '')),
+    ...data.map((row) =>
+      headers.map((h) => {
+        const v = row[h];
+        if (v == null) return '';
+        return typeof v === 'object' ? normalizeCell(v) : v;
+      })
+    ),
   ];
 
   const ws = XLSX.utils.aoa_to_sheet(aoa);

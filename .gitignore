@@ -47,3 +47,6 @@ next-env.d.ts
 # migration export data (large, regeneratable)
 /scripts/migrate-legacy-to-supabase/data/
 
+# self-hosted Pyodide runtime (downloaded by scripts/ensure-pyodide.js)
+/public/pyodide/
+

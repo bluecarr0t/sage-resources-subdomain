@@ -1,135 +1,136 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef, Fragment, Suspense } from 'react';
-import { createPortal } from 'react-dom';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button, Card } from '@/components/ui';
 import MultiSelect from '@/components/MultiSelect';
 import SearchableMultiSelect from '@/components/SearchableMultiSelect';
-import { Search, ChevronLeft, ChevronRight, Star, ChevronUp, ChevronDown, FileText, Download, X, GitCompare } from 'lucide-react';
-import { qualityScoreToDisplay, getStateFromComparableOverview, getStateFromText } from '@/lib/feasibility-utils';
-import { STATE_ABBREVIATIONS } from '@/components/map/utils/stateUtils';
-
-interface ComparableRow {
-  id: string;
-  comp_name: string;
-  overview: string | null;
-  state: string | null;
-  amenities: string | null;
-  amenity_keywords: string[] | null;
-  distance_miles: number | null;
-  total_sites: number | null;
-  quality_score: number | null;
-  property_type: string | null;
-  created_at: string;
-  reports:
-    | {
-        id: string;
-        property_name: string;
-        location: string | null;
-        state: string | null;
-        city: string | null;
-        study_id: string | null;
-        created_at: string;
-      }
-    | { _grouped: true; studies: Array<{ study_id: string | null; property_name?: string | null; location: string | null; state: string | null }> };
-  _studyIds?: string[];
-  _studyCount?: number;
-  feasibility_comp_units: Array<{
-    id: string;
-    unit_type: string;
-    unit_category: string | null;
-    num_units: number | null;
-    low_adr: number | null;
-    peak_adr: number | null;
-    avg_annual_adr: number | null;
-    low_occupancy: number | null;
-    peak_occupancy: number | null;
-    quality_score: number | null;
-  }>;
-}
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  ChevronUp,
+  ChevronDown,
+  FileText,
+  Download,
+  X,
+  GitCompare,
+  ExternalLink,
+  List,
+  Map as MapIcon,
+} from 'lucide-react';
+import { qualityScoreToDisplay } from '@/lib/feasibility-utils';
+import {
+  STATE_ABBREVIATIONS,
+  formatStateAbbreviation,
+  normalizeStateToCanonicalAbbrev,
+} from '@/components/map/utils/stateUtils';
+import {
+  UNIFIED_SOURCES,
+  unifiedSourceBadgeClass,
+  unifiedSourceLabel,
+  type UnifiedCompRow,
+  type UnifiedSource,
+} from '@/lib/comps-unified/build-row';
 
 const PER_PAGE = 50;
 
+type CompsViewMode = 'list' | 'map';
+
+const CompsMapView = dynamic(() => import('./CompsMapView'), {
+  ssr: false,
+  loading: () => (
+    <div className="p-12 text-center">
+      <div className="animate-spin w-8 h-8 border-2 border-sage-500 border-t-transparent rounded-full mx-auto mb-4" />
+      <p className="text-gray-500 dark:text-gray-400">Loading map...</p>
+    </div>
+  ),
+});
+
+/** Collapse `AL`, `Alabama`, `ALABAMA` in the URL to a single canonical code per region. */
+function parseStateParamFromUrl(stateParam: string | null): string[] {
+  const s = stateParam ?? '';
+  if (!s) return [];
+  return s
+    .split(',')
+    .map((x) => {
+      const t = x.trim();
+      if (!t) return '';
+      return normalizeStateToCanonicalAbbrev(t) ?? t.toUpperCase();
+    })
+    .filter(Boolean);
+}
+
 function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value);
+  const [debounced, setDebounced] = useState(value);
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
   }, [value, delay]);
-  return debouncedValue;
+  return debounced;
 }
 
 function formatCurrency(val: number | null): string {
-  if (val === null) return '-';
+  if (val === null || val === undefined) return '-';
   return `$${Math.round(val).toLocaleString()}`;
 }
 
 /** Handles both 0-1 (decimal) and 0-100 (percent) occupancy formats */
 function formatOccupancyPercent(val: number | null): string {
-  if (val === null) return '-';
+  if (val === null || val === undefined) return '-';
   return val > 1 ? `${Math.round(val)}%` : `${Math.round(val * 100)}%`;
 }
 
-/** Dropdown / chip display for stored keyword strings (e.g. "air conditioning" → "Air conditioning") */
 function formatKeywordLabel(raw: string): string {
   const t = raw.trim();
   if (!t) return raw;
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
-/** State for display: prefer comparable's state column, then overview, then comp_name. Never use report state—comparables are often in other states. */
-function getDisplayState(comp: ComparableRow): string {
-  if ((comp._studyCount ?? 0) > 1) return 'Multiple';
-  if (comp.state?.trim()) return comp.state.trim().toUpperCase();
-  const fromOverview = getStateFromComparableOverview(comp.overview ?? null);
-  if (fromOverview) return fromOverview;
-  const fromCompName = getStateFromText(comp.comp_name ?? null);
-  if (fromCompName) return fromCompName;
-  return '-';
+/** Unit Type: underscores → spaces, title-case each word (RV stays uppercase). */
+function formatUnitTypeWords(raw: string): string {
+  const normalized = raw.trim().replace(/_+/g, ' ').replace(/\s+/g, ' ');
+  if (!normalized) return '';
+  return normalized
+    .split(' ')
+    .map((w) => {
+      const lower = w.toLowerCase();
+      if (lower === 'rv') return 'RV';
+      if (!w) return w;
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(' ');
 }
 
-function getStudyIds(comp: ComparableRow): string[] {
-  const fromGroup = comp._studyIds?.filter(Boolean) || [];
-  if (fromGroup.length > 0) return fromGroup;
-  const r = comp.reports;
-  if (r && '_grouped' in r && r._grouped && r.studies?.length) {
-    return r.studies.map((s) => s.study_id).filter(Boolean) as string[];
-  }
-  if (r && !('_grouped' in r)) {
-    const sid = (r as { study_id?: string }).study_id;
-    if (sid) return [sid];
-  }
-  return [];
+function formatUnitTypeDisplay(raw: string | null | undefined): string {
+  if (raw == null || !String(raw).trim()) return '-';
+  return formatUnitTypeWords(String(raw)) || '-';
 }
 
-function getStudyDisplay(comp: ComparableRow): { text: string; firstStudyId: string | null } {
-  const studyIds = getStudyIds(comp);
-  const firstStudyId = studyIds[0] || null;
-  if ((comp._studyCount ?? 0) > 1 && studyIds.length > 1) {
-    return { text: `In ${comp._studyCount} jobs: ${studyIds.join(' · ')}`, firstStudyId };
+/** Safe http(s) href for a property website; rejects javascript: and invalid URLs. */
+function normalizePropertyWebsiteUrl(raw: string | null | undefined): string | null {
+  const t = raw?.trim();
+  if (!t) return null;
+  try {
+    const withProto = /^https?:\/\//i.test(t) ? t : `https://${t.replace(/^\/+/, '')}`;
+    const u = new URL(withProto);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    return u.href;
+  } catch {
+    return null;
   }
-  return { text: firstStudyId || '-', firstStudyId };
 }
 
-/** Get report options for dropdown: resort name (job subject) + job number per report */
-function getReportOptions(comp: ComparableRow): { studyId: string; resortName: string }[] {
-  const r = comp.reports;
-  if (!r) return [];
-  if ('_grouped' in r && r._grouped && r.studies?.length) {
-    return r.studies
-      .map((s) => ({
-        studyId: String(s.study_id ?? ''),
-        resortName: String(s.property_name ?? ''),
-      }))
-      .filter((x) => x.studyId);
+function formatWebsiteHostname(href: string): string {
+  try {
+    return new URL(href).hostname.replace(/^www\./i, '');
+  } catch {
+    return href;
   }
-  const rep = r as { study_id?: string; property_name?: string };
-  if (rep.study_id) {
-    return [{ studyId: rep.study_id, resortName: String(rep.property_name ?? '') }];
-  }
-  return [];
 }
 
 function QualityStars({ score }: { score: number | null }) {
@@ -143,18 +144,29 @@ function QualityStars({ score }: { score: number | null }) {
   );
 }
 
-const TABLE_COLUMNS = 11; // Checkbox + SORTABLE_COLUMNS (8) + Keywords + Reports
+function SourceBadge({ source }: { source: string }) {
+  return (
+    <span
+      className={`inline-block px-2 py-0.5 text-[10px] font-semibold rounded ${unifiedSourceBadgeClass(source)}`}
+    >
+      {unifiedSourceLabel(source)}
+    </span>
+  );
+}
 
-const SORTABLE_COLUMNS: Array<{ key: string; label: string; align: 'left' | 'center' | 'right' }> = [
-  { key: 'comp_name', label: 'Property', align: 'left' },
-  { key: 'study', label: 'Job Number', align: 'left' },
-  { key: 'state', label: 'State', align: 'left' },
-  { key: 'total_sites', label: 'Sites', align: 'center' },
-  { key: 'quality_score', label: 'Quality', align: 'center' },
-  { key: 'unit_types', label: 'Unit Types', align: 'center' },
-  { key: 'adr', label: 'ADR Range', align: 'right' },
-  { key: 'occupancy', label: 'Occupancy', align: 'right' },
+const SORTABLE_COLUMNS: Array<{ key: string; label: string; align: 'left' | 'center' | 'right'; sortKey: string | null }> = [
+  { key: 'property_name', label: 'Property', align: 'left', sortKey: 'property_name' },
+  { key: 'source', label: 'Source', align: 'left', sortKey: null },
+  { key: 'state', label: 'State', align: 'left', sortKey: 'state' },
+  { key: 'total_sites', label: 'Sites', align: 'center', sortKey: 'total_sites' },
+  { key: 'quality_score', label: 'Quality', align: 'center', sortKey: 'quality_score' },
+  { key: 'unit_type', label: 'Unit Type', align: 'center', sortKey: null },
+  { key: 'adr', label: 'ADR Range', align: 'right', sortKey: 'low_adr' },
+  { key: 'occupancy', label: 'Occupancy', align: 'right', sortKey: null },
 ];
+
+// Checkbox + columns + keywords
+const TABLE_COLUMNS = SORTABLE_COLUMNS.length + 1;
 
 function SortableTh({
   column,
@@ -167,44 +179,30 @@ function SortableTh({
   sortDir: string;
   onSort: (key: string) => void;
 }) {
-  const sortKeys: Record<string, string | null> = {
-    comp_name: 'comp_name',
-    study: 'created_at',
-    state: 'state',
-    total_sites: 'total_sites',
-    quality_score: 'quality_score',
-    unit_types: null,
-    adr: null,
-    occupancy: null,
-  };
-  const sortKey = sortKeys[column.key];
-  const isSortable = sortKey !== null;
-  const isActive = isSortable && currentSortBy === sortKey;
+  const isSortable = column.sortKey !== null;
+  const isActive = isSortable && currentSortBy === column.sortKey;
   const alignClass =
-    column.align === 'right'
-      ? 'text-right'
-      : column.align === 'center'
-        ? 'text-center'
-        : 'text-left';
+    column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left';
 
   return (
     <th
       className={`px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 ${alignClass} ${isSortable ? 'cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700/50' : ''} transition-colors`}
-      onClick={() => isSortable && sortKey && onSort(sortKey)}
+      onClick={() => isSortable && column.sortKey && onSort(column.sortKey)}
     >
       <span className="inline-flex items-center gap-1">
         {column.label}
-        {isSortable && (isActive ? (
-          sortDir === 'asc' ? (
-            <ChevronUp className="w-4 h-4 text-sage-600" />
+        {isSortable &&
+          (isActive ? (
+            sortDir === 'asc' ? (
+              <ChevronUp className="w-4 h-4 text-sage-600" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-sage-600" />
+            )
           ) : (
-            <ChevronDown className="w-4 h-4 text-sage-600" />
-          )
-        ) : (
-          <span className="w-4 h-4 inline-block opacity-30">
-            <ChevronUp className="w-4 h-4" />
-          </span>
-        ))}
+            <span className="w-4 h-4 inline-block opacity-30">
+              <ChevronUp className="w-4 h-4" />
+            </span>
+          ))}
       </span>
     </th>
   );
@@ -213,18 +211,24 @@ function SortableTh({
 function ComparablesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [comparables, setComparables] = useState<ComparableRow[]>([]);
+  const t = useTranslations('admin.comps');
+
+  const [rows, setRows] = useState<UnifiedCompRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(() => Math.max(1, parseInt(searchParams.get('page') ?? '1', 10)));
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [totalProperties, setTotalProperties] = useState<number | null>(null);
 
   const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
-  const [selectedStates, setSelectedStates] = useState<string[]>(() => {
-    const s = searchParams.get('state') ?? '';
-    return s ? s.split(',').map((x) => x.trim().toUpperCase()).filter(Boolean) : [];
+  const [selectedSources, setSelectedSources] = useState<string[]>(() => {
+    const s = searchParams.get('source') ?? '';
+    return s ? s.split(',').map((x) => x.trim()).filter(Boolean) : [];
   });
+  const [selectedStates, setSelectedStates] = useState<string[]>(() =>
+    parseStateParamFromUrl(searchParams.get('state'))
+  );
   const [selectedUnitCategories, setSelectedUnitCategories] = useState<string[]>(() => {
     const u = searchParams.get('unit_category') ?? '';
     return u ? u.split(',').map((x) => x.trim()).filter(Boolean) : [];
@@ -243,15 +247,12 @@ function ComparablesPageContent() {
   const [comparePanelOpen, setComparePanelOpen] = useState(false);
   const [compareModeActive, setCompareModeActive] = useState(false);
   const [isFuzzyResults, setIsFuzzyResults] = useState(false);
-  const [openReportsDropdown, setOpenReportsDropdown] = useState<{
-    compId: string;
-    reportOptions: { studyId: string; resortName: string }[];
-    top: number;
-    left: number;
-    width: number;
-  } | null>(null);
-  const reportsDropdownRef = useRef<HTMLDivElement>(null);
-  const reportsTriggerRef = useRef<HTMLElement | null>(null);
+  const [viewMode, setViewMode] = useState<CompsViewMode>('list');
+
+  const sourceOptions = useMemo(
+    () => UNIFIED_SOURCES.map((s) => ({ value: s, label: unifiedSourceLabel(s) })),
+    []
+  );
 
   const toggleExpanded = useCallback((id: string) => {
     setExpandedIds((prev) => {
@@ -287,25 +288,8 @@ function ComparablesPageContent() {
 
   const debouncedSearch = useDebounce(search, 300);
 
-  // Close reports dropdown on click outside
   useEffect(() => {
-    if (!openReportsDropdown) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (reportsDropdownRef.current?.contains(target)) return;
-      if (reportsTriggerRef.current?.contains(target)) return;
-      setOpenReportsDropdown(null);
-    };
-    const t = setTimeout(() => document.addEventListener('mousedown', handleClickOutside), 0);
-    return () => {
-      clearTimeout(t);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openReportsDropdown]);
-
-  // Fetch facets for filter dropdowns
-  useEffect(() => {
-    fetch('/api/admin/comparables/facets')
+    fetch('/api/admin/comps/unified/facets')
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -318,7 +302,9 @@ function ComparablesPageContent() {
                   .join(' ');
                 return { value: c, label };
               })
-              .sort((a: { value: string; label: string }, b: { value: string; label: string }) => a.label.localeCompare(b.label))
+              .sort((a: { value: string; label: string }, b: { value: string; label: string }) =>
+                a.label.localeCompare(b.label)
+              )
           );
           setStateOptions(
             (data.states || []).map((s: string) => {
@@ -330,38 +316,33 @@ function ComparablesPageContent() {
             })
           );
           setKeywordOptions(
-            (data.keywords || []).map((k: string) => ({
-              value: k,
-              label: formatKeywordLabel(k),
-            }))
+            (data.keywords || []).map((k: string) => ({ value: k, label: formatKeywordLabel(k) }))
           );
         }
       })
       .catch(() => {});
   }, []);
 
-  // Sync URL -> state when searchParams changes (mount, back/forward navigation)
+  // Sync URL -> state when searchParams changes
   useEffect(() => {
-    const q = searchParams.get('search') ?? '';
-    const st = searchParams.get('state') ?? '';
+    setSearch(searchParams.get('search') ?? '');
+    const src = searchParams.get('source') ?? '';
+    setSelectedSources(src ? src.split(',').map((x) => x.trim()).filter(Boolean) : []);
+    setSelectedStates(parseStateParamFromUrl(searchParams.get('state')));
     const uc = searchParams.get('unit_category') ?? '';
-    const kw = searchParams.get('keywords') ?? '';
-    const sby = searchParams.get('sort_by') ?? 'created_at';
-    const sdir = searchParams.get('sort_dir') ?? 'desc';
-    const p = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
-    setSearch(q);
-    setSelectedStates(st ? st.split(',').map((x) => x.trim().toUpperCase()).filter(Boolean) : []);
     setSelectedUnitCategories(uc ? uc.split(',').map((x) => x.trim()).filter(Boolean) : []);
+    const kw = searchParams.get('keywords') ?? '';
     setSelectedKeywords(kw ? kw.split(',').map((x) => x.trim()).filter(Boolean) : []);
-    setSortBy(sby);
-    setSortDir(sdir);
-    setPage(p);
+    setSortBy(searchParams.get('sort_by') ?? 'created_at');
+    setSortDir(searchParams.get('sort_dir') ?? 'desc');
+    setPage(Math.max(1, parseInt(searchParams.get('page') ?? '1', 10)));
   }, [searchParams]);
 
-  // Sync state -> URL when search/sort/page/filters change
+  // Sync state -> URL
   useEffect(() => {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
+    if (selectedSources.length > 0) params.set('source', selectedSources.join(','));
     if (selectedStates.length > 0) params.set('state', selectedStates.join(','));
     if (selectedUnitCategories.length > 0) params.set('unit_category', selectedUnitCategories.join(','));
     if (selectedKeywords.length > 0) params.set('keywords', selectedKeywords.join(','));
@@ -373,14 +354,14 @@ function ComparablesPageContent() {
     if (next !== current) {
       router.replace(`/admin/comps${next ? `?${next}` : ''}`, { scroll: false });
     }
-  }, [search, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir, page, router, searchParams]);
+  }, [search, selectedSources, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir, page, router, searchParams]);
 
-  // Debounce feedback: user has typed but debounce hasn't fired
   const isDebouncing = search !== debouncedSearch;
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
     if (debouncedSearch) params.set('search', debouncedSearch);
+    if (selectedSources.length > 0) params.set('source', selectedSources.join(','));
     if (selectedStates.length > 0) params.set('state', selectedStates.join(','));
     if (selectedUnitCategories.length > 0) params.set('unit_category', selectedUnitCategories.join(','));
     if (selectedKeywords.length > 0) params.set('keywords', selectedKeywords.join(','));
@@ -389,38 +370,51 @@ function ComparablesPageContent() {
     params.set('page', String(page));
     params.set('per_page', String(PER_PAGE));
     return params.toString();
-  }, [debouncedSearch, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir, page]);
+  }, [debouncedSearch, selectedSources, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir, page]);
+
+  // Filter-only query string for the map: pagination/sort are irrelevant
+  // since the geo endpoint returns every geocoded match (up to its cap).
+  const mapQueryString = useMemo(() => {
+    const params = new URLSearchParams();
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (selectedSources.length > 0) params.set('source', selectedSources.join(','));
+    if (selectedStates.length > 0) params.set('state', selectedStates.join(','));
+    if (selectedUnitCategories.length > 0) params.set('unit_category', selectedUnitCategories.join(','));
+    if (selectedKeywords.length > 0) params.set('keywords', selectedKeywords.join(','));
+    return params.toString();
+  }, [debouncedSearch, selectedSources, selectedStates, selectedUnitCategories, selectedKeywords]);
 
   const hasCompletedInitialLoad = useRef(false);
-  const prevDebouncedSearch = useRef<string | null>(null);
-  /** Tracks last debounced search + sort; page reset only when these change (not when URL `page` alone changes). */
-  const prevSearchSortForPageReset = useRef<{
-    debouncedSearch: string;
-    sortBy: string;
-    sortDir: string;
-  } | null>(null);
+  const prevSearchSortForPageReset = useRef<{ debouncedSearch: string; sortBy: string; sortDir: string } | null>(null);
 
-  const loadComparables = useCallback(async () => {
+  const loadRows = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/comparables?${queryString}`);
+      const res = await fetch(`/api/admin/comps/unified?${queryString}`);
       const data = await res.json();
       if (data.success) {
-        setComparables(data.comparables || []);
+        setRows(data.rows || []);
         setTotal(data.pagination.total);
         setTotalPages(data.pagination.total_pages);
+        setTotalProperties(
+          typeof data.pagination?.total_properties === 'number'
+            ? data.pagination.total_properties
+            : null
+        );
         setIsFuzzyResults(data.pagination?.fuzzy === true);
         setError(null);
       } else {
-        setComparables([]);
+        setRows([]);
         setIsFuzzyResults(false);
-        setError(data.message || 'Failed to load comparables');
+        setTotalProperties(null);
+        setError(data.message || 'Failed to load comps');
       }
     } catch (err) {
-      setComparables([]);
+      setRows([]);
       setIsFuzzyResults(false);
-      setError(err instanceof Error ? err.message : 'Failed to load comparables');
+      setTotalProperties(null);
+      setError(err instanceof Error ? err.message : 'Failed to load comps');
     } finally {
       setLoading(false);
       hasCompletedInitialLoad.current = true;
@@ -428,154 +422,32 @@ function ComparablesPageContent() {
   }, [queryString]);
 
   useEffect(() => {
-    loadComparables();
-  }, [loadComparables]);
+    loadRows();
+  }, [loadRows]);
 
   useEffect(() => {
     if (!hasCompletedInitialLoad.current) return;
-    // Don't reset page when debouncedSearch is catching up from URL hydration
-    const urlSearch = searchParams.get('search') ?? '';
-    const wasEmpty = prevDebouncedSearch.current === '' || prevDebouncedSearch.current === null;
-    if (wasEmpty && debouncedSearch === urlSearch && urlSearch) {
-      prevDebouncedSearch.current = debouncedSearch;
-      prevSearchSortForPageReset.current = { debouncedSearch, sortBy, sortDir };
-      return;
-    }
-    prevDebouncedSearch.current = debouncedSearch;
-
     const prev = prevSearchSortForPageReset.current;
     prevSearchSortForPageReset.current = { debouncedSearch, sortBy, sortDir };
     if (prev === null) return;
-
-    const searchOrSortChanged =
-      prev.debouncedSearch !== debouncedSearch ||
-      prev.sortBy !== sortBy ||
-      prev.sortDir !== sortDir;
-    if (!searchOrSortChanged) return;
-
-    setPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Do not depend on searchParams: any URL change (e.g. `page=2`) re-ran this effect and reset page to 1.
+    if (prev.debouncedSearch !== debouncedSearch || prev.sortBy !== sortBy || prev.sortDir !== sortDir) {
+      setPage(1);
+    }
   }, [debouncedSearch, sortBy, sortDir]);
 
   useEffect(() => {
     setPage(1);
-  }, [selectedStates, selectedUnitCategories, selectedKeywords]);
+  }, [selectedSources, selectedStates, selectedUnitCategories, selectedKeywords]);
 
   useEffect(() => {
     setExpandedIds(new Set());
     setSelectedIds(new Set());
     setCompareModeActive(false);
-  }, [page, debouncedSearch, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir]);
+  }, [page, debouncedSearch, selectedSources, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir]);
 
-  const expandIdFromUrl = searchParams.get('expand');
+  const selectedRows = useMemo(() => rows.filter((r) => selectedIds.has(r.id)), [rows, selectedIds]);
 
-  useEffect(() => {
-    if (expandIdFromUrl && comparables.length > 0) {
-      const matching = comparables.find((c) => c.id === expandIdFromUrl);
-      if (matching) {
-        setExpandedIds((prev) => new Set([...prev, expandIdFromUrl]));
-      }
-    }
-  }, [comparables, expandIdFromUrl]);
-
-  const handleExportExcel = useCallback(async () => {
-    const { default: XLSX } = await import('xlsx');
-    const rows: (string | number)[][] = [];
-    const header = [
-      'Property',
-      'Job Number',
-      'State',
-      'Sites',
-      'Quality',
-      'Unit Types',
-      'ADR Range',
-      'Occupancy',
-      'Keywords',
-      'Detail Type',
-      'Unit Type',
-      'Unit Sites',
-      'Low ADR',
-      'Peak ADR',
-      'Low Occ.',
-      'Peak Occ.',
-      'Unit Quality',
-    ];
-    rows.push(header);
-
-    for (const comp of comparables) {
-      const units = comp.feasibility_comp_units || [];
-      const studyDisplay = getStudyDisplay(comp);
-      const stateVal = getDisplayState(comp);
-      const state = stateVal === '-' ? '' : stateVal;
-      const unitTypes = [...new Set(units.map((u) => u.unit_category || 'other'))].slice(0, 3).join(', ');
-      const minAdr = units.reduce(
-        (min, u) => (u.low_adr !== null && (min === null || u.low_adr < min) ? u.low_adr : min),
-        null as number | null
-      );
-      const maxAdr = units.reduce(
-        (max, u) => (u.peak_adr !== null && (max === null || u.peak_adr > max) ? u.peak_adr : max),
-        null as number | null
-      );
-      const avgLowOcc = units.filter((u) => u.low_occupancy !== null);
-      const avgPeakOcc = units.filter((u) => u.peak_occupancy !== null);
-      const occLow =
-        avgLowOcc.length > 0 ? formatOccupancyPercent(avgLowOcc.reduce((s, u) => s + (u.low_occupancy || 0), 0) / avgLowOcc.length) : '';
-      const occPeak =
-        avgPeakOcc.length > 0 ? formatOccupancyPercent(avgPeakOcc.reduce((s, u) => s + (u.peak_occupancy || 0), 0) / avgPeakOcc.length) : '';
-      const adrRange =
-        minAdr != null || maxAdr != null ? `${formatCurrency(minAdr)} - ${formatCurrency(maxAdr)}` : '';
-      const keywords = (comp.amenity_keywords || []).slice(0, 3).join(', ');
-      const qualityDisplay = qualityScoreToDisplay(comp.quality_score);
-      const qualityStr = qualityDisplay != null ? qualityDisplay.toFixed(1) : '';
-
-      const baseCells: (string | number)[] = [
-        comp.comp_name,
-        studyDisplay.text,
-        state,
-        comp.total_sites ?? '',
-        qualityStr,
-        unitTypes,
-        adrRange,
-        `${occLow} - ${occPeak}`,
-        keywords,
-      ];
-
-      const isExpanded = expandedIds.has(comp.id);
-
-      if (isExpanded && units.length > 0) {
-        rows.push([...baseCells, 'Comparable', '', '', '', '', '', '', '']);
-        for (const u of units) {
-          rows.push([
-            ...baseCells,
-            'Unit',
-            u.unit_type,
-            u.num_units ?? '',
-            formatCurrency(u.low_adr),
-            formatCurrency(u.peak_adr),
-            formatOccupancyPercent(u.low_occupancy),
-            formatOccupancyPercent(u.peak_occupancy),
-            qualityScoreToDisplay(u.quality_score)?.toFixed(1) ?? '',
-          ]);
-        }
-      } else {
-        rows.push([...baseCells, 'Comparable', '', '', '', '', '', '', '']);
-      }
-    }
-
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Comps');
-    XLSX.writeFile(wb, `comps-export-${new Date().toISOString().slice(0, 10)}.xlsx`);
-  }, [comparables, expandedIds]);
-
-  const selectedComps = useMemo(
-    () => comparables.filter((c) => selectedIds.has(c.id)),
-    [comparables, selectedIds]
-  );
-
-  const handleComparePanelClose = useCallback(() => {
-    setComparePanelOpen(false);
-  }, []);
+  const handleComparePanelClose = useCallback(() => setComparePanelOpen(false), []);
 
   useEffect(() => {
     if (comparePanelOpen) {
@@ -591,24 +463,65 @@ function ComparablesPageContent() {
     }
   }, [comparePanelOpen, handleComparePanelClose]);
 
+  const handleExportExcel = useCallback(async () => {
+    const { default: XLSX } = await import('xlsx');
+    const header = [
+      'Property',
+      'Source',
+      'State',
+      'Sites',
+      'Quality',
+      'Unit Type',
+      'ADR Range',
+      'Occupancy',
+      'Keywords',
+      'Study ID',
+      'City',
+      'Country',
+    ];
+    const rowsOut: (string | number)[][] = [header];
+    for (const r of rows) {
+      rowsOut.push([
+        r.property_name,
+        unifiedSourceLabel(r.source),
+        formatStateAbbreviation(r.state),
+        r.total_sites ?? '',
+        qualityScoreToDisplay(r.quality_score)?.toFixed(1) ?? '',
+        r.unit_type != null && String(r.unit_type).trim()
+          ? formatUnitTypeWords(String(r.unit_type))
+          : '',
+        r.low_adr !== null || r.peak_adr !== null
+          ? `${formatCurrency(r.low_adr)} - ${formatCurrency(r.peak_adr)}`
+          : '',
+        r.low_occupancy !== null || r.peak_occupancy !== null
+          ? `${formatOccupancyPercent(r.low_occupancy)} - ${formatOccupancyPercent(r.peak_occupancy)}`
+          : '',
+        (r.amenity_keywords || []).join(', '),
+        r.study_id ?? '',
+        r.city ?? '',
+        r.country ?? '',
+      ]);
+    }
+    const ws = XLSX.utils.aoa_to_sheet(rowsOut);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Comps');
+    XLSX.writeFile(wb, `comps-export-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  }, [rows]);
+
   return (
     <main className={`px-4 sm:px-6 lg:px-8 ${compareModeActive && selectedIds.size >= 2 ? 'pb-24' : 'pb-16'}`}>
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Comps
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Browse and search comparable properties across all feasibility studies
-            </p>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Comps</h1>
+            <p className="text-gray-600 dark:text-gray-400">{t('pageSubtitle')}</p>
           </div>
           <div className="flex gap-3">
             <Button
               variant="secondary"
               size="sm"
               onClick={() => (compareModeActive ? exitCompareMode() : setCompareModeActive(true))}
-              disabled={comparables.length === 0}
+              disabled={rows.length === 0}
               title={compareModeActive ? 'Cancel compare mode' : 'Select properties to compare side by side'}
               className={compareModeActive ? 'ring-2 ring-sage-500' : ''}
             >
@@ -619,35 +532,30 @@ function ComparablesPageContent() {
               variant="secondary"
               size="sm"
               onClick={handleExportExcel}
-              disabled={comparables.length === 0}
-              title="Export current view to Excel (includes expanded unit details)"
+              disabled={rows.length === 0}
+              title="Export current view to Excel"
             >
               <Download className="w-4 h-4 mr-1.5" />
               Export Excel
             </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => router.push('/admin/comps/analytics')}
-            >
+            <Button variant="secondary" size="sm" onClick={() => router.push('/admin/comps/analytics')}>
               Analytics
             </Button>
           </div>
         </div>
 
-        {/* Filters */}
         <Card className="mb-6">
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-0 max-w-md">
-              <label htmlFor="comparables-search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="comps-search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Search
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
-                  id="comparables-search"
+                  id="comps-search"
                   type="text"
-                  placeholder="Property, city, job number, keywords..."
+                  placeholder="Property, city, state, unit type, keywords..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className={`w-full pl-10 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${search || isDebouncing || loading ? 'pr-24' : 'pr-4'}`}
@@ -660,11 +568,8 @@ function ComparablesPageContent() {
                 {search ? (
                   <button
                     type="button"
-                    onClick={() => {
-                      setSearch('');
-                      setPage(1);
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-700"
+                    onClick={() => { setSearch(''); setPage(1); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100"
                     aria-label="Clear search"
                   >
                     <X className="w-4 h-4" />
@@ -674,14 +579,27 @@ function ComparablesPageContent() {
             </div>
             <div className="w-full sm:w-48">
               <MultiSelect
+                id="source-filter"
+                label={t('sourceFilterLabel')}
+                options={sourceOptions}
+                selectedValues={selectedSources}
+                onToggle={(v) =>
+                  setSelectedSources((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]))
+                }
+                onClear={() => setSelectedSources([])}
+                placeholder={t('sourceFilterPlaceholder')}
+                allSelectedText={t('sourceFilterAllSelected')}
+                activeColor="sage"
+              />
+            </div>
+            <div className="w-full sm:w-48">
+              <MultiSelect
                 id="unit-type-filter"
                 label="Unit Type"
                 options={unitCategoryOptions}
                 selectedValues={selectedUnitCategories}
                 onToggle={(v) =>
-                  setSelectedUnitCategories((prev) =>
-                    prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
-                  )
+                  setSelectedUnitCategories((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]))
                 }
                 onClear={() => setSelectedUnitCategories([])}
                 placeholder="All unit types"
@@ -696,14 +614,13 @@ function ComparablesPageContent() {
                 options={stateOptions}
                 selectedValues={selectedStates}
                 onToggle={(v) =>
-                  setSelectedStates((prev) =>
-                    prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
-                  )
+                  setSelectedStates((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]))
                 }
                 placeholder="All states"
                 allSelectedText="All states"
                 searchPlaceholder="Search states..."
                 activeColor="sage"
+                maxDropdownHeightPx={520}
               />
             </div>
             <div className="w-full sm:w-48">
@@ -713,9 +630,7 @@ function ComparablesPageContent() {
                 options={keywordOptions}
                 selectedValues={selectedKeywords}
                 onToggle={(v) =>
-                  setSelectedKeywords((prev) =>
-                    prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
-                  )
+                  setSelectedKeywords((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]))
                 }
                 placeholder="All keywords"
                 allSelectedText="All keywords"
@@ -724,8 +639,12 @@ function ComparablesPageContent() {
               />
             </div>
           </div>
-          {/* Active filter tags */}
-          {(search || selectedStates.length > 0 || selectedUnitCategories.length > 0 || selectedKeywords.length > 0) && (
+
+          {(search ||
+            selectedSources.length > 0 ||
+            selectedStates.length > 0 ||
+            selectedUnitCategories.length > 0 ||
+            selectedKeywords.length > 0) && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {search && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium bg-sage-100 dark:bg-sage-900/50 text-sage-800 dark:text-sage-200 border border-sage-200 dark:border-sage-700">
@@ -733,13 +652,29 @@ function ComparablesPageContent() {
                   <button
                     type="button"
                     onClick={() => { setSearch(''); setPage(1); }}
-                    className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300 hover:text-sage-800 dark:hover:text-sage-100 transition-colors"
+                    className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
                     aria-label="Remove search filter"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </span>
               )}
+              {selectedSources.map((src) => (
+                <span
+                  key={src}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium bg-sage-100 dark:bg-sage-900/50 text-sage-800 dark:text-sage-200 border border-sage-200 dark:border-sage-700"
+                >
+                  {t('activeSourceChip', { label: unifiedSourceLabel(src) })}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSources((prev) => prev.filter((x) => x !== src))}
+                    className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
+                    aria-label={`Remove source filter ${src}`}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ))}
               {selectedStates.map((st) => {
                 const label = stateOptions.find((o) => o.value === st)?.label ?? st;
                 return (
@@ -750,11 +685,8 @@ function ComparablesPageContent() {
                     State: {label}
                     <button
                       type="button"
-                      onClick={() => {
-                        setSelectedStates((prev) => prev.filter((x) => x !== st));
-                        setPage(1);
-                      }}
-                      className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300 hover:text-sage-800 dark:hover:text-sage-100 transition-colors"
+                      onClick={() => setSelectedStates((prev) => prev.filter((x) => x !== st))}
+                      className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
                       aria-label={`Remove state filter ${label}`}
                     >
                       <X className="w-3.5 h-3.5" />
@@ -772,12 +704,9 @@ function ComparablesPageContent() {
                     Unit: {label}
                     <button
                       type="button"
-                      onClick={() => {
-                        setSelectedUnitCategories((prev) => prev.filter((x) => x !== cat));
-                        setPage(1);
-                      }}
-                      className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300 hover:text-sage-800 dark:hover:text-sage-100 transition-colors"
-                      aria-label={`Remove unit type filter ${label}`}
+                      onClick={() => setSelectedUnitCategories((prev) => prev.filter((x) => x !== cat))}
+                      className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
+                      aria-label={`Remove unit filter ${label}`}
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -792,12 +721,9 @@ function ComparablesPageContent() {
                   Keyword: {formatKeywordLabel(kw)}
                   <button
                     type="button"
-                    onClick={() => {
-                      setSelectedKeywords((prev) => prev.filter((x) => x !== kw));
-                      setPage(1);
-                    }}
-                    className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300 hover:text-sage-800 dark:hover:text-sage-100 transition-colors"
-                    aria-label={`Remove keyword filter ${formatKeywordLabel(kw)}`}
+                    onClick={() => setSelectedKeywords((prev) => prev.filter((x) => x !== kw))}
+                    className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
+                    aria-label={`Remove keyword filter ${kw}`}
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -807,6 +733,7 @@ function ComparablesPageContent() {
                 type="button"
                 onClick={() => {
                   setSearch('');
+                  setSelectedSources([]);
                   setSelectedStates([]);
                   setSelectedUnitCategories([]);
                   setSelectedKeywords([]);
@@ -818,21 +745,61 @@ function ComparablesPageContent() {
               </button>
             </div>
           )}
-          {/* Results count - updates with search */}
-          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+
+          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
             <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
               {loading ? (
-                <span className="text-gray-500 dark:text-gray-400">Loading...</span>
+                <span className="text-gray-500 dark:text-gray-400">{t('summaryLoading')}</span>
               ) : (
                 <>
-                  <span className="text-sage-600 dark:text-sage-400">{total.toLocaleString()}</span>
-                  {' '}
-                  {(search || debouncedSearch || selectedStates.length > 0 || selectedUnitCategories.length > 0 || selectedKeywords.length > 0)
-                    ? `result${total === 1 ? '' : 's'} found`
-                    : `comparable${total === 1 ? '' : 's'} total`}
+                  {totalProperties != null ? (
+                    <span className="text-sage-600 dark:text-sage-400">
+                      {t('summaryUniqueProperties', { count: totalProperties })}
+                    </span>
+                  ) : (
+                    <span className="text-gray-500 dark:text-gray-400 font-normal">
+                      {t('summaryUniquePropertiesPending')}
+                    </span>
+                  )}
+                  <span className="text-gray-500 dark:text-gray-400 font-normal"> · </span>
+                  <span className="text-sage-600 dark:text-sage-400">
+                    {t('summarySiteUnits', { count: total })}
+                  </span>
                 </>
               )}
             </p>
+            <div
+              role="group"
+              aria-label="Toggle between list and map view"
+              className="inline-flex rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm"
+            >
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                aria-pressed={viewMode === 'list'}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-sage-600 text-white'
+                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+              >
+                <List className="w-4 h-4" />
+                List View
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('map')}
+                aria-pressed={viewMode === 'map'}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border-l border-gray-200 dark:border-gray-700 transition-colors ${
+                  viewMode === 'map'
+                    ? 'bg-sage-600 text-white'
+                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+              >
+                <MapIcon className="w-4 h-4" />
+                Map View
+              </button>
+            </div>
           </div>
         </Card>
 
@@ -842,27 +809,32 @@ function ComparablesPageContent() {
           </div>
         )}
 
-        {isFuzzyResults && comparables.length > 0 && (
+        {isFuzzyResults && rows.length > 0 && viewMode === 'list' && (
           <div className="mb-4 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-800 dark:text-amber-200">
             No exact matches. Showing similar results.
           </div>
         )}
 
-        {/* Results table */}
+        {viewMode === 'map' ? (
+          <Card className="overflow-hidden" padding="none">
+            <CompsMapView queryString={mapQueryString} listTotalProperties={totalProperties} />
+          </Card>
+        ) : (
         <Card className="overflow-hidden">
           {loading ? (
             <div className="p-12 text-center">
               <div className="animate-spin w-8 h-8 border-2 border-sage-500 border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">Loading comparables...</p>
+              <p className="text-gray-500 dark:text-gray-400">Loading comps...</p>
             </div>
-          ) : error || comparables.length === 0 ? (
+          ) : error || rows.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-gray-500 dark:text-gray-400 mb-4">No Results</p>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">{error || 'No Results'}</p>
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => {
                   setSearch('');
+                  setSelectedSources([]);
                   setSelectedStates([]);
                   setSelectedUnitCategories([]);
                   setSelectedKeywords([]);
@@ -879,9 +851,7 @@ function ComparablesPageContent() {
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                       {compareModeActive && (
-                        <th className="w-12 px-3 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">
-                          Select
-                        </th>
+                        <th className="w-12 px-3 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Select</th>
                       )}
                       {SORTABLE_COLUMNS.map((col) => (
                         <SortableTh
@@ -890,7 +860,7 @@ function ComparablesPageContent() {
                           currentSortBy={sortBy}
                           sortDir={sortDir}
                           onSort={(key) => {
-                            const defaultDir = ['quality_score', 'total_sites', 'created_at'].includes(key) ? 'desc' : 'asc';
+                            const defaultDir = ['quality_score', 'total_sites', 'created_at', 'low_adr'].includes(key) ? 'desc' : 'asc';
                             if (sortBy === key) {
                               setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
                             } else {
@@ -900,47 +870,35 @@ function ComparablesPageContent() {
                           }}
                         />
                       ))}
-                      <th className="text-center px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
-                        Keywords
-                      </th>
-                      <th className="text-center px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 w-24">
-                        Reports
-                      </th>
+                      <th className="text-center px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Keywords</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {comparables.map((comp) => {
-                      const units = comp.feasibility_comp_units || [];
-                      const hasUnitData = units.length > 0;
-                      const minAdr = units.reduce(
-                        (min, u) => (u.low_adr !== null && (min === null || u.low_adr < min) ? u.low_adr : min),
-                        null as number | null
-                      );
-                      const maxAdr = units.reduce(
-                        (max, u) => (u.peak_adr !== null && (max === null || u.peak_adr > max) ? u.peak_adr : max),
-                        null as number | null
-                      );
-                      const avgLowOcc = units.filter((u) => u.low_occupancy !== null);
-                      const avgPeakOcc = units.filter((u) => u.peak_occupancy !== null);
-                      const studyDisplay = getStudyDisplay(comp);
-                      const isExpanded = expandedIds.has(comp.id);
-                      const studyIds = comp._studyIds?.filter(Boolean) || [];
+                    {rows.map((r) => {
+                      const isExpanded = expandedIds.has(r.id);
+                      const websiteHref = normalizePropertyWebsiteUrl(r.website_url);
+                      const hasAnyDetail =
+                        r.overview ||
+                        websiteHref ||
+                        r.low_adr !== null ||
+                        r.peak_adr !== null ||
+                        r.low_occupancy !== null ||
+                        r.peak_occupancy !== null;
 
                       return (
-                        <Fragment key={comp.id}>
+                        <Fragment key={r.id}>
                           <tr
-                            role={hasUnitData ? 'button' : undefined}
-                            tabIndex={hasUnitData ? 0 : undefined}
-                            aria-expanded={hasUnitData ? isExpanded : undefined}
-                            aria-label={hasUnitData ? `${comp.comp_name}, ${isExpanded ? 'collapse' : 'expand'} to view unit details` : undefined}
-                            className={hasUnitData ? 'hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer transition-colors' : 'transition-colors'}
-                            onClick={hasUnitData ? () => toggleExpanded(comp.id) : undefined}
+                            role={hasAnyDetail ? 'button' : undefined}
+                            tabIndex={hasAnyDetail ? 0 : undefined}
+                            aria-expanded={hasAnyDetail ? isExpanded : undefined}
+                            className={hasAnyDetail ? 'hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer transition-colors' : 'transition-colors'}
+                            onClick={hasAnyDetail ? () => toggleExpanded(r.id) : undefined}
                             onKeyDown={
-                              hasUnitData
+                              hasAnyDetail
                                 ? (e) => {
                                     if (e.key === 'Enter' || e.key === ' ') {
                                       e.preventDefault();
-                                      toggleExpanded(comp.id);
+                                      toggleExpanded(r.id);
                                     }
                                   }
                                 : undefined
@@ -950,18 +908,18 @@ function ComparablesPageContent() {
                               <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                                 <input
                                   type="checkbox"
-                                  checked={selectedIds.has(comp.id)}
-                                  onChange={() => toggleSelected(comp.id)}
-                                  disabled={selectedIds.size >= 4 && !selectedIds.has(comp.id)}
+                                  checked={selectedIds.has(r.id)}
+                                  onChange={() => toggleSelected(r.id)}
+                                  disabled={selectedIds.size >= 4 && !selectedIds.has(r.id)}
                                   className="rounded border-gray-300 dark:border-gray-600 text-sage-600 focus:ring-sage-500 w-4 h-4"
-                                  aria-label={`Select ${comp.comp_name} for comparison`}
+                                  aria-label={`Select ${r.property_name} for comparison`}
                                 />
                               </td>
                             )}
                             <td className="px-4 py-3">
                               <div className="flex items-start gap-2">
                                 <span className="shrink-0 mt-0.5 text-gray-400 dark:text-gray-500" aria-hidden>
-                                  {hasUnitData ? (
+                                  {hasAnyDetail ? (
                                     isExpanded ? (
                                       <ChevronDown className="w-4 h-4" />
                                     ) : (
@@ -973,235 +931,133 @@ function ComparablesPageContent() {
                                 </span>
                                 <div className="min-w-0">
                                   <p
-                                    className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px]"
-                                    title={comp.comp_name}
+                                    className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[220px]"
+                                    title={r.property_name}
                                   >
-                                    {comp.comp_name}
+                                    {r.property_name}
                                   </p>
+                                  {r.city && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[220px]">
+                                      {r.city}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             </td>
-                          <td className="px-4 py-3 text-xs text-gray-700 dark:text-gray-300">
-                            {studyDisplay.text}
-                          </td>
-                          <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">
-                            {getDisplayState(comp)}
-                          </td>
-                          <td className="px-4 py-3 text-center text-gray-700 dark:text-gray-300">
-                            {comp.total_sites ?? '-'}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <QualityStars score={comp.quality_score} />
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <div className="flex flex-wrap gap-1 justify-center">
-                              {units.length > 0 ? (
-                                [...new Set(units.map((u) => u.unit_category || 'other'))].slice(0, 3).map((cat) => (
-                                  <span
-                                    key={cat}
-                                    className="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-sage-50 dark:bg-sage-900/30 text-sage-700 dark:text-sage-300 rounded"
-                                  >
-                                    {cat.replace(/_/g, ' ')}
-                                  </span>
-                                ))
-                              ) : (
-                                <span className="text-gray-400 text-xs">-</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 text-xs whitespace-nowrap">
-                            {minAdr !== null || maxAdr !== null ? (
-                              <>{formatCurrency(minAdr)} - {formatCurrency(maxAdr)}</>
-                            ) : '-'}
-                          </td>
-                          <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 text-xs whitespace-nowrap">
-                            {avgLowOcc.length > 0 || avgPeakOcc.length > 0 ? (
-                              <>
-                                {formatOccupancyPercent(avgLowOcc.length > 0 ? avgLowOcc.reduce((s, u) => s + (u.low_occupancy || 0), 0) / avgLowOcc.length : null)}
-                                {' - '}
-                                {formatOccupancyPercent(avgPeakOcc.length > 0 ? avgPeakOcc.reduce((s, u) => s + (u.peak_occupancy || 0), 0) / avgPeakOcc.length : null)}
-                              </>
-                            ) : '-'}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-1 justify-center max-w-[120px]">
-                              {comp.amenity_keywords?.slice(0, 3).map((kw) => (
+                            <td className="px-4 py-3">
+                              <SourceBadge source={r.source} />
+                            </td>
+                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">
+                              {formatStateAbbreviation(r.state)}
+                            </td>
+                            <td className="px-4 py-3 text-center text-gray-700 dark:text-gray-300">
+                              {r.total_sites ?? '-'}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <QualityStars score={r.quality_score} />
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {r.unit_type ? (
                                 <span
-                                  key={kw}
-                                  className="inline-block px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
+                                  className="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-sage-50 dark:bg-sage-900/30 text-sage-700 dark:text-sage-300 rounded truncate max-w-[140px]"
+                                  title={formatUnitTypeDisplay(r.unit_type)}
                                 >
-                                  {kw}
+                                  {formatUnitTypeDisplay(r.unit_type)}
                                 </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                              {studyIds.length === 0 ? (
+                              ) : (
                                 <span className="text-gray-400 text-xs">-</span>
-                              ) : studyIds.length === 1 ? (
-                                <button
-                                  type="button"
-                                  title={`View report ${studyIds[0]}`}
-                                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-gray-500 hover:text-sage-600 hover:bg-sage-50 dark:text-gray-400 dark:hover:text-sage-400 dark:hover:bg-sage-900/30 transition-colors"
-                                  onClick={() => router.push(`/admin/comps/${studyIds[0]}`)}
-                                >
-                                  <FileText className="w-4 h-4 shrink-0" />
-                                  <span className="text-xs font-medium truncate max-w-[72px]" title={studyIds[0]}>
-                                    {studyIds[0]}
-                                  </span>
-                                </button>
-                              ) : (
-                                <>
-                                  <button
-                                  ref={(el) => {
-                                    if (el && openReportsDropdown?.compId === comp.id) reportsTriggerRef.current = el;
-                                    else if (!openReportsDropdown) reportsTriggerRef.current = null;
-                                  }}
-                                  type="button"
-                                  title={`View report (${studyIds.length} jobs)`}
-                                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-gray-500 hover:text-sage-600 hover:bg-sage-50 dark:text-gray-400 dark:hover:text-sage-400 dark:hover:bg-sage-900/30 transition-colors"
-                                  onClick={(e) => {
-                                    if (openReportsDropdown?.compId === comp.id) {
-                                      setOpenReportsDropdown(null);
-                                      return;
-                                    }
-                                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                                    const width = Math.max(rect.width, 300);
-                                    const vw = typeof window !== 'undefined' ? window.innerWidth : 400;
-                                    const left = Math.max(8, Math.min(rect.left, vw - width - 8));
-                                    setOpenReportsDropdown({
-                                      compId: comp.id,
-                                      reportOptions: getReportOptions(comp),
-                                      top: rect.bottom + 4,
-                                      left,
-                                      width,
-                                    });
-                                  }}
-                                >
-                                  <FileText className="w-4 h-4 shrink-0" />
-                                  <span className="text-xs font-medium">{studyIds.length}</span>
-                                  <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                                </button>
-                                {openReportsDropdown?.compId === comp.id &&
-                                  createPortal(
-                                    <div
-                                      ref={reportsDropdownRef}
-                                      className="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl overflow-hidden py-1"
-                                      style={{
-                                        top: openReportsDropdown.top,
-                                        left: openReportsDropdown.left,
-                                        width: openReportsDropdown.width,
-                                        maxHeight: 280,
-                                        position: 'fixed',
-                                      }}
-                                      onMouseDown={(e) => e.stopPropagation()}
-                                    >
-                                      <div className="overflow-y-auto max-h-[272px]">
-                                        {openReportsDropdown.reportOptions.map(({ studyId, resortName }) => (
-                                          <button
-                                            key={studyId}
-                                            type="button"
-                                            className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-sage-50 dark:hover:bg-sage-900/30 flex items-center gap-2"
-                                            onClick={() => {
-                                              router.push(`/admin/comps/${studyId}`);
-                                              setOpenReportsDropdown(null);
-                                            }}
-                                          >
-                                            <FileText className="w-4 h-4 shrink-0 text-gray-400" />
-                                            <span className="whitespace-nowrap">
-                                              {resortName ? `${resortName} - ${studyId}` : studyId}
-                                            </span>
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>,
-                                    document.body
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                        {isExpanded && hasUnitData && (
-                          <tr key={`${comp.id}-expanded`} className="bg-gray-50 dark:bg-gray-800/30">
-                            <td colSpan={compareModeActive ? TABLE_COLUMNS : TABLE_COLUMNS - 1} className="px-4 py-3 align-top">
-                              {units.length > 0 ? (
-                                <div className="pl-6 pr-4 pb-2">
-                                  {(comp._studyCount ?? 0) > 1 && studyDisplay.firstStudyId && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                      Unit data from study {studyDisplay.firstStudyId}
-                                    </p>
-                                  )}
-                                  <div className="hidden sm:block overflow-x-auto">
-                                  <table className="w-full text-xs">
-                                    <thead>
-                                      <tr className="border-b border-gray-200 dark:border-gray-600">
-                                        <th className="text-left py-2 pr-4 font-semibold text-gray-700 dark:text-gray-300">Unit Type</th>
-                                        <th className="text-center py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Sites</th>
-                                        <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Low ADR</th>
-                                        <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Peak ADR</th>
-                                        <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Low Occ.</th>
-                                        <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Peak Occ.</th>
-                                        <th className="text-center py-2 pl-2 font-semibold text-gray-700 dark:text-gray-300">Quality</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                      {units.map((u) => (
-                                        <tr key={u.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-700/30">
-                                          <td className="py-2 pr-4 text-gray-800 dark:text-gray-200">{u.unit_type}</td>
-                                          <td className="py-2 px-2 text-center text-gray-700 dark:text-gray-300">{u.num_units ?? '-'}</td>
-                                          <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{formatCurrency(u.low_adr)}</td>
-                                          <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{formatCurrency(u.peak_adr)}</td>
-                                          <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{formatOccupancyPercent(u.low_occupancy)}</td>
-                                          <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{formatOccupancyPercent(u.peak_occupancy)}</td>
-                                          <td className="py-2 pl-2 text-center text-gray-700 dark:text-gray-300">
-                                            {qualityScoreToDisplay(u.quality_score)?.toFixed(1) ?? '-'}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                  </div>
-                                  <div className="sm:hidden space-y-2">
-                                    {units.map((u) => (
-                                      <div
-                                        key={u.id}
-                                        className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 p-3 text-xs"
-                                      >
-                                        <p className="font-medium text-gray-900 dark:text-gray-100 mb-2">{u.unit_type}</p>
-                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-gray-700 dark:text-gray-300">
-                                          <span>Sites:</span>
-                                          <span className="text-right">{u.num_units ?? '-'}</span>
-                                          <span>Low ADR:</span>
-                                          <span className="text-right">{formatCurrency(u.low_adr)}</span>
-                                          <span>Peak ADR:</span>
-                                          <span className="text-right">{formatCurrency(u.peak_adr)}</span>
-                                          <span>Low Occ.:</span>
-                                          <span className="text-right">{formatOccupancyPercent(u.low_occupancy)}</span>
-                                          <span>Peak Occ.:</span>
-                                          <span className="text-right">{formatOccupancyPercent(u.peak_occupancy)}</span>
-                                          <span>Quality:</span>
-                                          <span className="text-right">{qualityScoreToDisplay(u.quality_score)?.toFixed(1) ?? '-'}</span>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="pl-6 py-2 text-sm text-gray-500 dark:text-gray-400">No unit data</div>
                               )}
                             </td>
+                            <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 text-xs whitespace-nowrap">
+                              {r.low_adr !== null || r.peak_adr !== null ? (
+                                <>{formatCurrency(r.low_adr)} - {formatCurrency(r.peak_adr)}</>
+                              ) : '-'}
+                            </td>
+                            <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 text-xs whitespace-nowrap">
+                              {r.low_occupancy !== null || r.peak_occupancy !== null ? (
+                                <>{formatOccupancyPercent(r.low_occupancy)} - {formatOccupancyPercent(r.peak_occupancy)}</>
+                              ) : '-'}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex flex-wrap gap-1 justify-center max-w-[140px]">
+                                {(r.amenity_keywords || []).slice(0, 3).map((kw) => (
+                                  <span
+                                    key={kw}
+                                    className="inline-block px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
+                                  >
+                                    {kw}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
                           </tr>
-                        )}
-                      </Fragment>
+                          {isExpanded && hasAnyDetail && (
+                            <tr key={`${r.id}-expanded`} className="bg-gray-50 dark:bg-gray-800/30">
+                              <td colSpan={compareModeActive ? TABLE_COLUMNS + 1 : TABLE_COLUMNS} className="px-4 py-3 align-top">
+                                <div className="pl-6 pr-4 pb-2 space-y-2 text-sm">
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                                    <div>
+                                      <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Avg ADR</p>
+                                      <p className="text-gray-800 dark:text-gray-200">{formatCurrency(r.avg_adr)}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Units</p>
+                                      <p className="text-gray-800 dark:text-gray-200">{r.num_units ?? '-'}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Property Type</p>
+                                      <p className="text-gray-800 dark:text-gray-200">{r.property_type ?? '-'}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Country</p>
+                                      <p className="text-gray-800 dark:text-gray-200">{r.country ?? '-'}</p>
+                                    </div>
+                                    <div className="min-w-0 sm:col-span-2 lg:col-span-1">
+                                      <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                        {t('expandedWebsiteLabel')}
+                                      </p>
+                                      {websiteHref ? (
+                                        <a
+                                          href={websiteHref}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-1 text-sage-600 dark:text-sage-400 hover:underline font-medium break-all"
+                                          aria-label={t('expandedWebsiteOpenNewTab')}
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                                          <span className="truncate">{formatWebsiteHostname(websiteHref)}</span>
+                                        </a>
+                                      ) : (
+                                        <p className="text-gray-800 dark:text-gray-200">-</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {r.overview && (
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-4 whitespace-pre-line">
+                                      {r.overview}
+                                    </p>
+                                  )}
+                                  {r.source === 'reports' && r.study_id && (
+                                    <Link
+                                      href={`/admin/comps/${r.study_id}`}
+                                      className="inline-flex items-center gap-1.5 text-xs font-medium text-sage-600 dark:text-sage-400 hover:underline"
+                                    >
+                                      <FileText className="w-3.5 h-3.5" />
+                                      View report {r.study_id}
+                                    </Link>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
                       );
                     })}
                   </tbody>
                 </table>
               </div>
 
-              {/* Pagination */}
               {total > 0 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -1230,34 +1086,21 @@ function ComparablesPageContent() {
             </>
           )}
         </Card>
+        )}
 
         {compareModeActive && selectedIds.size >= 2 && (
           <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Compare {selectedIds.size} properties
-            </span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Compare {selectedIds.size} properties</span>
             <div className="flex gap-2">
-              <Button variant="secondary" size="sm" onClick={clearSelected}>
-                Clear
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setComparePanelOpen(true)}
-                disabled={selectedIds.size < 2}
-              >
-                Compare
-              </Button>
+              <Button variant="secondary" size="sm" onClick={clearSelected}>Clear</Button>
+              <Button size="sm" onClick={() => setComparePanelOpen(true)} disabled={selectedIds.size < 2}>Compare</Button>
             </div>
           </div>
         )}
 
-        {comparePanelOpen && selectedComps.length >= 2 && (
+        {comparePanelOpen && selectedRows.length >= 2 && (
           <>
-            <div
-              className="fixed inset-0 z-50 bg-black/40"
-              aria-hidden="true"
-              onClick={handleComparePanelClose}
-            />
+            <div className="fixed inset-0 z-50 bg-black/40" aria-hidden="true" onClick={handleComparePanelClose} />
             <div
               className="fixed top-0 right-0 bottom-0 w-full max-w-2xl z-50 bg-white dark:bg-gray-800 shadow-xl overflow-y-auto flex flex-col"
               role="dialog"
@@ -1265,9 +1108,7 @@ function ComparablesPageContent() {
               aria-labelledby="compare-panel-title"
             >
               <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
-                <h2 id="compare-panel-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  Compare
-                </h2>
+                <h2 id="compare-panel-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Compare</h2>
                 <button
                   type="button"
                   onClick={handleComparePanelClose}
@@ -1283,151 +1124,64 @@ function ComparablesPageContent() {
                     <thead>
                       <tr className="border-b border-gray-200 dark:border-gray-600">
                         <th className="text-left py-2 pr-4 font-semibold text-gray-700 dark:text-gray-300 w-28" />
-                        {selectedComps.map((comp) => (
+                        {selectedRows.map((r) => (
                           <th
-                            key={comp.id}
-                            className="text-left py-2 px-3 font-semibold text-gray-700 dark:text-gray-300 min-w-[120px]"
+                            key={r.id}
+                            className="text-left py-2 px-3 font-semibold text-gray-700 dark:text-gray-300 min-w-[140px]"
                           >
-                            {comp.comp_name}
+                            {r.property_name}
                           </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {[
-                        { key: 'property', label: 'Property', get: (c: ComparableRow) => c.comp_name },
-                        {
-                          key: 'job',
-                          label: 'Job Number',
-                          get: (c: ComparableRow) => getStudyDisplay(c).text,
-                        },
-                        {
-                          key: 'state',
-                          label: 'State',
-                          get: (c: ComparableRow) => getDisplayState(c),
-                        },
-                        { key: 'sites', label: 'Sites', get: (c: ComparableRow) => String(c.total_sites ?? '-') },
+                        { key: 'source', label: 'Source', get: (r: UnifiedCompRow) => unifiedSourceLabel(r.source) },
+                        { key: 'state', label: 'State', get: (r: UnifiedCompRow) => formatStateAbbreviation(r.state) },
+                        { key: 'city', label: 'City', get: (r: UnifiedCompRow) => r.city ?? '-' },
+                        { key: 'sites', label: 'Sites', get: (r: UnifiedCompRow) => String(r.total_sites ?? '-') },
+                        { key: 'units', label: 'Units', get: (r: UnifiedCompRow) => String(r.num_units ?? '-') },
                         {
                           key: 'quality',
                           label: 'Quality',
-                          get: (c: ComparableRow) => (qualityScoreToDisplay(c.quality_score)?.toFixed(1) ?? '-'),
+                          get: (r: UnifiedCompRow) => qualityScoreToDisplay(r.quality_score)?.toFixed(1) ?? '-',
+                        },
+                        {
+                          key: 'unit_type',
+                          label: 'Unit Type',
+                          get: (r: UnifiedCompRow) => formatUnitTypeDisplay(r.unit_type),
                         },
                         {
                           key: 'adr',
                           label: 'ADR Range',
-                          get: (c: ComparableRow) => {
-                            const units = c.feasibility_comp_units || [];
-                            const min = units.reduce((m, u) => (u.low_adr != null && (m == null || u.low_adr < m) ? u.low_adr : m), null as number | null);
-                            const max = units.reduce((m, u) => (u.peak_adr != null && (m == null || u.peak_adr > m) ? u.peak_adr : m), null as number | null);
-                            return min != null || max != null ? `${formatCurrency(min)} – ${formatCurrency(max)}` : '-';
-                          },
+                          get: (r: UnifiedCompRow) =>
+                            r.low_adr !== null || r.peak_adr !== null
+                              ? `${formatCurrency(r.low_adr)} – ${formatCurrency(r.peak_adr)}`
+                              : '-',
+                        },
+                        {
+                          key: 'avg_adr',
+                          label: 'Avg ADR',
+                          get: (r: UnifiedCompRow) => formatCurrency(r.avg_adr),
                         },
                         {
                           key: 'occ',
                           label: 'Occupancy',
-                          get: (c: ComparableRow) => {
-                            const units = c.feasibility_comp_units || [];
-                            const low = units.filter((u) => u.low_occupancy != null);
-                            const peak = units.filter((u) => u.peak_occupancy != null);
-                            const lowVal = low.length ? low.reduce((s, u) => s + (u.low_occupancy || 0), 0) / low.length : null;
-                            const peakVal = peak.length ? peak.reduce((s, u) => s + (u.peak_occupancy || 0), 0) / peak.length : null;
-                            return lowVal != null || peakVal != null ? `${formatOccupancyPercent(lowVal)} – ${formatOccupancyPercent(peakVal)}` : '-';
-                          },
+                          get: (r: UnifiedCompRow) =>
+                            r.low_occupancy !== null || r.peak_occupancy !== null
+                              ? `${formatOccupancyPercent(r.low_occupancy)} – ${formatOccupancyPercent(r.peak_occupancy)}`
+                              : '-',
                         },
                       ].map(({ key, label, get }) => (
                         <tr key={key} className="border-b border-gray-100 dark:border-gray-700">
                           <td className="py-2 pr-4 text-gray-600 dark:text-gray-400 font-medium">{label}</td>
-                          {selectedComps.map((comp) => (
-                            <td key={comp.id} className="py-2 px-3 text-gray-800 dark:text-gray-200">
-                              {key === 'job' ? (
-                                (() => {
-                                  const studyIds = getStudyIds(comp);
-                                  const count = comp._studyCount ?? 0;
-                                  if (studyIds.length === 0) return '-';
-                                  if (count > 1 && studyIds.length > 1) {
-                                    return (
-                                      <span>
-                                        In {count} jobs:{' '}
-                                        {studyIds.map((id, i) => (
-                                          <Fragment key={id}>
-                                            {i > 0 && ' · '}
-                                            <Link
-                                              href={`/admin/comps/${id}`}
-                                              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
-                                            >
-                                              {id}
-                                            </Link>
-                                          </Fragment>
-                                        ))}
-                                      </span>
-                                    );
-                                  }
-                                  return (
-                                    <Link
-                                      href={`/admin/comps/${studyIds[0]}`}
-                                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
-                                    >
-                                      {studyIds[0]}
-                                    </Link>
-                                  );
-                                })()
-                              ) : (
-                                get(comp)
-                              )}
+                          {selectedRows.map((r) => (
+                            <td key={r.id} className="py-2 px-3 text-gray-800 dark:text-gray-200">
+                              {get(r)}
                             </td>
                           ))}
                         </tr>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-6 mb-2">Unit Types</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm border-collapse">
-                    <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-600">
-                        <th className="text-left py-2 pr-4 font-semibold text-gray-700 dark:text-gray-300 w-28">Category</th>
-                        {selectedComps.map((comp) => (
-                          <th
-                            key={comp.id}
-                            className="text-left py-2 px-3 font-semibold text-gray-700 dark:text-gray-300 min-w-[120px]"
-                          >
-                            {comp.comp_name}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[
-                        ...new Set(
-                          selectedComps.flatMap((c) =>
-                            (c.feasibility_comp_units || []).map((u) => u.unit_category || 'other')
-                          )
-                        ),
-                      ]
-                        .sort()
-                        .map((cat) => (
-                          <tr key={cat} className="border-b border-gray-100 dark:border-gray-700">
-                            <td className="py-2 pr-4 text-gray-600 dark:text-gray-400 font-medium capitalize">
-                              {cat.replace(/_/g, ' ')}
-                            </td>
-                            {selectedComps.map((comp) => {
-                              const units = comp.feasibility_comp_units || [];
-                              const unit = units.find((u) => (u.unit_category || 'other') === cat);
-                              return (
-                                <td key={comp.id} className="py-2 px-3 text-gray-800 dark:text-gray-200">
-                                  {unit ? (
-                                    <span>
-                                      {unit.num_units ?? '-'} sites, {formatCurrency(unit.low_adr)}–{formatCurrency(unit.peak_adr)}
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-400">—</span>
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -1448,7 +1202,7 @@ export default function ComparablesPage() {
           <div className="max-w-7xl mx-auto">
             <div className="p-12 text-center">
               <div className="animate-spin w-8 h-8 border-2 border-sage-500 border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">Loading comparables...</p>
+              <p className="text-gray-500 dark:text-gray-400">Loading comps...</p>
             </div>
           </div>
         </main>

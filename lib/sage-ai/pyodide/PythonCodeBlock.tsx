@@ -1,7 +1,20 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { RotateCcw, Copy, Check, Download, Loader2, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import {
+  RotateCcw,
+  Copy,
+  Check,
+  Download,
+  Loader2,
+  AlertCircle,
+  ChevronDown,
+  ChevronRight,
+  Play,
+} from 'lucide-react';
+import { CollapsibleMarkdownPre } from '@/lib/sage-ai/CollapsibleMarkdownPre';
+import { isPyodideEnvironmentError } from '@/lib/sage-ai/pyodide/is-pyodide-environment-error';
 import { usePyodide, type ExecutionResult } from './use-pyodide';
 
 interface PythonCodeBlockProps {
@@ -13,6 +26,7 @@ interface PythonCodeBlockProps {
 }
 
 export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, retryCount = 0 }: PythonCodeBlockProps) {
+  const t = useTranslations('admin.sageAi');
   const { isLoading, isReady, loadError, loadPyodide, runCode, setGlobal } = usePyodide();
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -53,10 +67,19 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
       const execResult = await runCode(finalCode);
       setResult(execResult);
 
-      if (execResult.error && onError && !errorReportedRef.current && retryCount < 2) {
+      // Never auto-ask the model to "fix" code when Pyodide itself failed to load — that spams
+      // the thread with repeated query/python/dashboard turns. Real code bugs: at most one auto-fix.
+      const errMsg = execResult.error;
+      if (
+        errMsg &&
+        onError &&
+        !errorReportedRef.current &&
+        retryCount < 1 &&
+        !isPyodideEnvironmentError(errMsg)
+      ) {
         errorReportedRef.current = true;
         setIsRequestingFix(true);
-        onError(execResult.error, code);
+        onError(errMsg, code);
       }
     } finally {
       setIsRunning(false);
@@ -97,11 +120,14 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
 
       {/* Error State */}
       {loadError && (
-        <div className="px-4 py-4">
-          <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+        <div className="space-y-3 px-4 py-4">
+          <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <span>Failed to load Python runtime: {loadError}</span>
           </div>
+          <CollapsibleMarkdownPre>
+            <code className="block font-mono text-gray-800 dark:text-gray-200">{code}</code>
+          </CollapsibleMarkdownPre>
         </div>
       )}
 
@@ -206,16 +232,17 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
 
       {/* No results yet and not loading */}
       {!result && !isLoading && !isRunning && !loadError && (
-        <div className="px-4 py-4">
-          <pre className="p-3 bg-gray-50 dark:bg-gray-950 rounded-lg overflow-x-auto text-sm mb-3">
-            <code className="text-gray-700 dark:text-gray-300 font-mono">{code}</code>
-          </pre>
+        <div className="space-y-3 px-4 py-4">
+          <CollapsibleMarkdownPre>
+            <code className="block font-mono text-gray-800 dark:text-gray-200">{code}</code>
+          </CollapsibleMarkdownPre>
           <button
+            type="button"
             onClick={() => void handleRun()}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sage-600 text-white rounded-lg hover:bg-sage-700 transition-colors"
+            className="flex items-center gap-2 rounded-lg bg-sage-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sage-700"
           >
-            <Loader2 className="w-4 h-4" />
-            Run Code
+            <Play className="h-4 w-4" />
+            {t('runCode')}
           </button>
         </div>
       )}

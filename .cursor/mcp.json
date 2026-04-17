@@ -1,11 +1,7 @@
 {
   "mcpServers": {
     "Dropbox Dash MCP": {
-      "url": "https://mcp.dropbox.com/dash",
-      "auth": {
-        "CLIENT_ID": "ot2i0td3kll5gq0",
-        "CLIENT_SECRET": "ilcjl10mmt3872l"
-      }
+      "url": "https://mcp.dropbox.com/mcp"
     }
   }
 }

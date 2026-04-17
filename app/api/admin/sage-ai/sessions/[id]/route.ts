@@ -20,18 +20,40 @@ export async function GET(
 
   const { id } = await params;
 
-  const { data, error } = await authResult.supabase
+  const { data: session, error } = await authResult.supabase
     .from('sage_ai_sessions')
-    .select('id, title, messages, created_at, updated_at')
+    .select('id, title, created_at, updated_at')
     .eq('id', id)
     .eq('user_id', authResult.session.user.id)
     .single();
 
-  if (error || !data) {
+  if (error || !session) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ session: data });
+  const { data: messageRows, error: msgError } = await authResult.supabase
+    .from('sage_ai_messages')
+    .select('ordinal, role, parts')
+    .eq('session_id', id)
+    .eq('user_id', authResult.session.user.id)
+    .order('ordinal', { ascending: true });
+
+  if (msgError) {
+    console.error('[sage-ai/sessions] messages fetch error:', msgError);
+    return NextResponse.json({ error: 'Failed to load messages' }, { status: 500 });
+  }
+
+  const messages = (messageRows ?? []).map((r) => ({ role: r.role, parts: r.parts }));
+
+  return NextResponse.json({
+    session: {
+      id: session.id,
+      title: session.title,
+      created_at: session.created_at,
+      updated_at: session.updated_at,
+      messages,
+    },
+  });
 }
 
 export async function DELETE(

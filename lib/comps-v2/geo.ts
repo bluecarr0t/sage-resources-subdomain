@@ -51,13 +51,32 @@ export function parseNum(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+export type ParseRowLatLonOptions = {
+  /**
+   * `all_glamping_properties` uses `lat` / `lon` column headers only (ignore `lat_num`/`lon_num`
+   * if those columns are ever added). Hipcamp/Campspot prefer `lat_num`/`lon_num` with text fallback.
+   */
+  columns?: 'hipcamp_campspot' | 'all_glamping_properties';
+};
+
 /**
- * Prefer generated numeric columns when present (Hipcamp/Campspot after lat_num/lon_num migration),
- * else fall back to text lat/lon — keeps Haversine checks aligned with SQL bbox filters.
+ * Parse coordinates from a market row. Default (`hipcamp_campspot`): prefer `lat_num`/`lon_num`,
+ * else text `lat`/`lon`. For Sage (`all_glamping_properties`), pass `{ columns: 'all_glamping_properties' }`
+ * to use only `lat`/`lon`.
  */
-export function parseRowLatLon(row: Record<string, unknown>): { lat: number; lon: number } | null {
-  const lat = parseNum(row.lat_num) ?? parseNum(row.lat);
-  const lon = parseNum(row.lon_num) ?? parseNum(row.lon);
+export function parseRowLatLon(
+  row: Record<string, unknown>,
+  options?: ParseRowLatLonOptions
+): { lat: number; lon: number } | null {
+  const mode = options?.columns ?? 'hipcamp_campspot';
+  const lat =
+    mode === 'all_glamping_properties'
+      ? parseNum(row.lat)
+      : parseNum(row.lat_num) ?? parseNum(row.lat);
+  const lon =
+    mode === 'all_glamping_properties'
+      ? parseNum(row.lon)
+      : parseNum(row.lon_num) ?? parseNum(row.lon);
   if (lat == null || lon == null) return null;
   return { lat, lon };
 }

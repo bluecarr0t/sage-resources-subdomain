@@ -62,3 +62,102 @@ CREATE POLICY "Allow all for local development"
   TO service_role
   USING (true)
   WITH CHECK (true);
+
+-- admin_audit_log (INSERT was effectively public without TO service_role)
+DROP POLICY IF EXISTS "Service role can insert audit logs" ON admin_audit_log;
+CREATE POLICY "Service role can insert audit logs"
+  ON admin_audit_log
+  FOR INSERT
+  TO service_role
+  WITH CHECK (true);
+
+-- glamping discovery: scope INSERT/UPDATE to active managed users (not all authenticated)
+DROP POLICY IF EXISTS "Allow authenticated insert" ON glamping_discovery_candidates;
+DROP POLICY IF EXISTS "Allow authenticated update" ON glamping_discovery_candidates;
+DROP POLICY IF EXISTS "Allow managed users insert" ON glamping_discovery_candidates;
+DROP POLICY IF EXISTS "Allow managed users update" ON glamping_discovery_candidates;
+CREATE POLICY "Allow managed users insert" ON glamping_discovery_candidates
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  );
+CREATE POLICY "Allow managed users update" ON glamping_discovery_candidates
+  FOR UPDATE TO authenticated
+  USING (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  )
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow authenticated insert" ON glamping_discovery_processed_urls;
+DROP POLICY IF EXISTS "Allow authenticated update" ON glamping_discovery_processed_urls;
+DROP POLICY IF EXISTS "Allow managed users insert" ON glamping_discovery_processed_urls;
+DROP POLICY IF EXISTS "Allow managed users update" ON glamping_discovery_processed_urls;
+CREATE POLICY "Allow managed users insert" ON glamping_discovery_processed_urls
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  );
+CREATE POLICY "Allow managed users update" ON glamping_discovery_processed_urls
+  FOR UPDATE TO authenticated
+  USING (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  )
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow authenticated insert" ON glamping_discovery_runs;
+DROP POLICY IF EXISTS "Allow authenticated update" ON glamping_discovery_runs;
+DROP POLICY IF EXISTS "Allow managed users insert" ON glamping_discovery_runs;
+DROP POLICY IF EXISTS "Allow managed users update" ON glamping_discovery_runs;
+CREATE POLICY "Allow managed users insert" ON glamping_discovery_runs
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  );
+CREATE POLICY "Allow managed users update" ON glamping_discovery_runs
+  FOR UPDATE TO authenticated
+  USING (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  )
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.managed_users
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  );
