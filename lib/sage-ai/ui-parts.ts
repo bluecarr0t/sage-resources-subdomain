@@ -112,7 +112,8 @@ export const mapFeatureSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   geometry: z.object({
     type: z.literal('Point'),
-    coordinates: z.tuple([z.number(), z.number()]),
+    // `z.tuple` emits JSON Schema OpenAI rejects for tools; length-2 array is equivalent.
+    coordinates: z.array(z.number()).length(2),
   }),
   properties: z
     .object({
