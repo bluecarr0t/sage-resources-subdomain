@@ -112,7 +112,6 @@ export function parseUnifiedFilterOptions(
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applyUnifiedBaseFilters(q: any, opts: UnifiedFilterOptions): any {
   let out = q;
   if (opts.sources.length > 0) out = out.in('source', opts.sources);
@@ -136,7 +135,6 @@ export function applyUnifiedBaseFilters(q: any, opts: UnifiedFilterOptions): any
   return out;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applyUnifiedFtsFilter(q: any, opts: UnifiedFilterOptions): any {
   if (opts.searchTerms.length === 0) return q;
   const tsq = buildTsQuery(opts.searchTerms);
@@ -144,7 +142,6 @@ export function applyUnifiedFtsFilter(q: any, opts: UnifiedFilterOptions): any {
   return q.textSearch('search_tsv', tsq, { config: 'simple' });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applyUnifiedIlikeSearch(q: any, opts: UnifiedFilterOptions): any {
   let out = q;
   for (const term of opts.searchTerms) {

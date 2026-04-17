@@ -20,7 +20,6 @@ interface Calls {
   textSearch: Array<[string, string]>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function qb(calls: Calls, rows: unknown[]): any {
   const self: Record<string, unknown> = {};
   self.in = (c: string, v: string[]) => (calls.in.push([c, v]), self);

@@ -334,8 +334,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     const liveZoom = map.getZoom();
     if (liveZoom != null) setMapZoom(liveZoom);
 
-    let syncTimeout: ReturnType<typeof setTimeout> | null = null;
-    let imageLayoutTimeout: ReturnType<typeof setTimeout> | null = null;
+    // Browser timers are numeric IDs; Node typings overload `setTimeout` as `Timeout`.
+    let syncTimeout: number | null = null;
+    let imageLayoutTimeout: number | null = null;
     let idleListener: google.maps.MapsEventListener | null = null;
     let cancelled = false;
 

@@ -106,7 +106,6 @@ function postgrestOrFilterEq(column: string, value: string): string {
  * `search` terms). Complements FTS when users type "texas" before matview
  * includes full state names, or mixed-case city without FTS lexeme matches.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function applySearchIlikeChain(q: any, terms: string[]): any {
   let out = q;
   for (const term of terms) {
@@ -186,7 +185,6 @@ export const GET = withAdminAuth(async (request) => {
     // PostgREST's builder types are heavily overloaded; using a locally-typed
     // helper keeps us from triggering "Type instantiation is excessively deep"
     // while still exposing the filter methods we need.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const applyBaseFiltersOnly = (q: any): any => {
       let out = q;
       if (sources.length > 0) out = out.in('source', sources);
@@ -212,7 +210,6 @@ export const GET = withAdminAuth(async (request) => {
       return out;
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const applyBaseFiltersWithFts = (q: any): any => {
       let out = applyBaseFiltersOnly(q);
       if (searchTerms.length > 0) {

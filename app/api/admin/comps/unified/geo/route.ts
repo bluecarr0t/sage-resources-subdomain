@@ -32,6 +32,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -165,8 +166,7 @@ export const GET = withAdminAuth(async (request) => {
       from: number,
       to: number,
       useIlike: boolean
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ): Promise<{ data: GeoRow[] | null; error: any }> => {
+    ): Promise<{ data: GeoRow[] | null; error: PostgrestError | null }> => {
       let q = applyUnifiedBaseFilters(baseSelect(), opts);
       q = useIlike ? applyUnifiedIlikeSearch(q, opts) : applyUnifiedFtsFilter(q, opts);
       const res = await q.order('id', { ascending: true }).range(from, to);
