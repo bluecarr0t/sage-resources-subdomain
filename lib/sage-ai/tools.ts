@@ -12,6 +12,7 @@ import { createGeoTools } from '@/lib/sage-ai/geo-tools';
 import { createSemanticTools } from '@/lib/sage-ai/semantic-tools';
 import { createComposedTools } from '@/lib/sage-ai/composed-tools';
 import { createVisualizationTools } from '@/lib/sage-ai/visualization-tools';
+import { normalizeState } from '@/lib/anchor-point-insights/utils';
 
 export interface SageAiToolsContext {
   /** Stable subject for quota tracking (typically auth user id). */
@@ -380,7 +381,12 @@ export function createSageAiTools(
       inputSchema: z.object({
         filters: z
           .object({
-            state: z.string().optional().describe('US state abbreviation (e.g., TX, CA, CO)'),
+            state: z
+              .string()
+              .optional()
+              .describe(
+                'US state: 2-letter code (TX, CO) or full name (Texas, Colorado) — normalized for matching'
+              ),
             city: z.string().optional().describe('City name'),
             country: z.string().optional().describe('Country (e.g., USA, Canada)'),
             unit_type: z
@@ -479,7 +485,11 @@ export function createSageAiTools(
           .range(offset ?? 0, (offset ?? 0) + (limit ?? 50) - 1);
 
         if (filters) {
-          if (filters.state) query = query.ilike('state', filters.state);
+          if (filters.state) {
+            const stateVal =
+              normalizeState(filters.state) ?? filters.state.trim();
+            query = query.ilike('state', stateVal);
+          }
           if (filters.city) query = query.ilike('city', `%${filters.city}%`);
           if (filters.country) query = query.ilike('country', `%${filters.country}%`);
           if (filters.unit_type) query = query.ilike('unit_type', `%${filters.unit_type}%`);
@@ -967,13 +977,19 @@ export function createSageAiTools(
             country: z.string().optional(),
             unit_type: z.string().optional(),
             is_glamping_property: z.enum(['Yes', 'No']).optional(),
+            is_closed: z.enum(['Yes', 'No']).optional(),
           })
           .optional(),
       }),
       execute: async ({ group_by, filters }) => {
+        const payload: Record<string, unknown> = filters ? { ...filters } : {};
+        if (typeof payload.state === 'string' && payload.state.trim()) {
+          const n = normalizeState(payload.state);
+          if (n) payload.state = n;
+        }
         const { data, error } = await supabase.rpc('aggregate_properties_v2', {
           group_by,
-          filters: filters ?? {},
+          filters: payload,
         });
 
         if (error) {

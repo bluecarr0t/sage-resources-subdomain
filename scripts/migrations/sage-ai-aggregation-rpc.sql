@@ -47,6 +47,7 @@ DECLARE
   v_country               text := filters->>'country';
   v_unit_type             text := filters->>'unit_type';
   v_is_glamping_property  text := filters->>'is_glamping_property';
+  v_is_closed             text := filters->>'is_closed';
   sql_text                text;
 BEGIN
   IF NOT (group_by = ANY(allowed_columns)) THEN
@@ -54,26 +55,27 @@ BEGIN
       USING ERRCODE = 'invalid_parameter_value';
   END IF;
 
-  -- Placeholders must be $1..$4 for EXECUTE USING (format() only inlines %1$I for group_by).
-  sql_text := format($f$
-    SELECT
-      COALESCE(%1$I::text, 'Unknown')            AS key,
-      COUNT(*)::bigint                           AS count,
-      ROUND(AVG(rate_avg_retail_daily_rate)::numeric, 2) AS avg_daily_rate,
-      COALESCE(SUM(property_total_sites), 0)::bigint     AS total_sites
-    FROM all_glamping_properties
-    WHERE
-      ($1::text IS NULL OR state ILIKE $1)
-      AND ($2::text IS NULL OR country ILIKE '%%' || $2 || '%%')
-      AND ($3::text IS NULL OR unit_type ILIKE '%%' || $3 || '%%')
-      AND ($4::text IS NULL OR is_glamping_property = $4)
-    GROUP BY key
-    ORDER BY count DESC
-    LIMIT 500
-  $f$, group_by);
+  -- Build SQL with quote_ident (avoid format()/tuple edge cases) and keep $1..$5
+  -- aligned with EXECUTE USING — mismatches surface as "there is no parameter $N".
+  sql_text :=
+    'SELECT '
+      'COALESCE(' || quote_ident(group_by) || '::text, ''Unknown'') AS key, '
+      'COUNT(*)::bigint AS count, '
+      'ROUND(AVG(rate_avg_retail_daily_rate)::numeric, 2) AS avg_daily_rate, '
+      'COALESCE(SUM(property_total_sites), 0)::bigint AS total_sites '
+    'FROM all_glamping_properties '
+    'WHERE '
+      '($1::text IS NULL OR state ILIKE $1) '
+      'AND ($2::text IS NULL OR country ILIKE ''%'' || $2 || ''%'') '
+      'AND ($3::text IS NULL OR unit_type ILIKE ''%'' || $3 || ''%'') '
+      'AND ($4::text IS NULL OR is_glamping_property = $4) '
+      'AND ($5::text IS NULL OR is_closed = $5) '
+    'GROUP BY 1 '
+    'ORDER BY 2 DESC '
+    'LIMIT 500';
 
   RETURN QUERY EXECUTE sql_text
-    USING v_state, v_country, v_unit_type, v_is_glamping_property;
+    USING v_state, v_country, v_unit_type, v_is_glamping_property, v_is_closed;
 END;
 $$;
 
