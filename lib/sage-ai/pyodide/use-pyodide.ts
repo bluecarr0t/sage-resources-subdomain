@@ -5,7 +5,6 @@ import { getPyodideCdnBase } from '@/lib/sage-ai/pyodide/pyodide-version';
 
 interface PyodideInstance {
   runPythonAsync: (code: string) => Promise<unknown>;
-  loadPackagesFromImports: (code: string) => Promise<void>;
   loadPackage: (packages: string | string[]) => Promise<void>;
   FS: {
     readFile: (path: string, options?: { encoding: string }) => string | Uint8Array;
@@ -16,6 +15,89 @@ interface PyodideInstance {
     get: (name: string) => unknown;
     set: (name: string, value: unknown) => void;
   };
+}
+
+/**
+ * Top-level packages allowed inside generated Python. Pre-loaded matplotlib,
+ * numpy, pandas plus a handful of stdlib modules covers everything Sage AI
+ * needs for visualization. Notably absent: `os`, `subprocess`, `socket`,
+ * `urllib`, `requests`, `pathlib` — none should be reachable from a sandbox
+ * that disclaims network and filesystem access.
+ */
+const PYTHON_IMPORT_ALLOWLIST = new Set<string>([
+  // Pre-installed scientific stack
+  'numpy',
+  'np',
+  'pandas',
+  'pd',
+  'matplotlib',
+  'plt',
+  // Standard library helpers used by the runtime wrapper or harmless utilities
+  'io',
+  'base64',
+  'sys',
+  'json',
+  'math',
+  'statistics',
+  'datetime',
+  're',
+  'collections',
+  'itertools',
+  'functools',
+  'typing',
+  'random',
+  'string',
+  'decimal',
+  'fractions',
+]);
+
+interface ImportCheckResult {
+  allowed: boolean;
+  blocked: string[];
+}
+
+/**
+ * Static-scan Python source for `import x` / `from x import ...` statements.
+ * Only the top-level module name is checked against the allowlist (so
+ * `matplotlib.pyplot` is accepted because `matplotlib` is on the list). This
+ * is intentionally conservative — anything reaching `__import__` or
+ * `importlib` directly is not allowed by tooling rules and would surface as
+ * a runtime ImportError if the package was never preloaded.
+ *
+ * Lines inside string literals or comments may produce false positives, but
+ * since false positives only widen the rejection set and the allowlist
+ * already covers all legitimate matplotlib/pandas use cases, that's an
+ * acceptable trade-off for safety.
+ */
+function checkPythonImports(code: string): ImportCheckResult {
+  const blocked: string[] = [];
+  const seen = new Set<string>();
+  // Match `import X` or `import X as Y`, optionally inside multi-import
+  // (`import a, b`) and `from X import ...`. Captures the module path.
+  const patterns = [
+    /^[ \t]*from\s+([A-Za-z_][A-Za-z0-9_.]*)\s+import\s+/gm,
+    /^[ \t]*import\s+([A-Za-z0-9_.,\s]+)$/gm,
+  ];
+  for (const re of patterns) {
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(code)) !== null) {
+      const raw = m[1];
+      const modules = raw.includes(',') ? raw.split(',') : [raw];
+      for (const mod of modules) {
+        const cleaned = mod
+          .trim()
+          .replace(/\s+as\s+.*$/i, '')
+          .split('.')[0];
+        if (!cleaned) continue;
+        if (PYTHON_IMPORT_ALLOWLIST.has(cleaned)) continue;
+        if (!seen.has(cleaned)) {
+          seen.add(cleaned);
+          blocked.push(cleaned);
+        }
+      }
+    }
+  }
+  return { allowed: blocked.length === 0, blocked };
 }
 
 interface LoadPyodide {
@@ -188,7 +270,25 @@ def _save_figure_base64():
     const pyodide = pyodideRef.current;
 
     try {
-      await pyodide.loadPackagesFromImports(code);
+      // Reject anything that imports outside the allowlist BEFORE asking
+      // Pyodide to fetch packages. This replaces the previous
+      // `loadPackagesFromImports(code)` call which would happily install
+      // arbitrary packages from PyPI on demand — directly contradicting the
+      // tool's own "no network or file access" promise.
+      const importCheck = checkPythonImports(code);
+      if (!importCheck.allowed) {
+        return {
+          success: false,
+          output: '',
+          error: `Disallowed Python imports: ${importCheck.blocked.join(', ')}. Only ${[
+            ...PYTHON_IMPORT_ALLOWLIST,
+          ]
+            .filter((m) => !['np', 'pd', 'plt'].includes(m))
+            .join(', ')} are available.`,
+          charts: [],
+          executionTime: 0,
+        };
+      }
 
       const wrappedCode = `
 _output_buffer = _capture_output()
