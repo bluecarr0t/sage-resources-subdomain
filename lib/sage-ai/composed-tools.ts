@@ -31,7 +31,14 @@ async function quotaGate(
   userId: string | undefined,
   quota: number
 ): Promise<{ error: string; data: null } | null> {
-  if (!userId) return null;
+  // Composed tools fan out to Google + Firecrawl, both paid. A null userId
+  // means quota is unenforceable, so deny rather than silently bypass.
+  if (!userId) {
+    return {
+      error: `${toolName} requires an authenticated user to enforce daily quota.`,
+      data: null,
+    };
+  }
   const { allowed, used } = await enforceDailyQuota(toolName, userId, quota);
   if (!allowed) {
     return {

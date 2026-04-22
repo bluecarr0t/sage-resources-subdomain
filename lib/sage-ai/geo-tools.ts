@@ -40,7 +40,14 @@ async function quotaGate(
   userId: string | undefined,
   quota: number
 ): Promise<{ error: string; data: null } | null> {
-  if (!userId) return null;
+  // Geocoding hits the paid Google key. A missing userId means quota is
+  // unenforceable, so deny instead of silently letting the call through.
+  if (!userId) {
+    return {
+      error: `${toolName} requires an authenticated user to enforce daily quota.`,
+      data: null,
+    };
+  }
   const { allowed, used } = await enforceDailyQuota(toolName, userId, quota);
   if (!allowed) {
     return {

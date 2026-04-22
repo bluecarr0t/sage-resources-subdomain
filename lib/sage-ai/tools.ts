@@ -69,7 +69,16 @@ async function quotaGate(
   toolName: keyof typeof QUOTAS,
   userId: string | undefined
 ): Promise<{ error: string; data: null } | null> {
-  if (!userId) return null;
+  // External, paid tools (Google/Tavily/Firecrawl) MUST be billed to a user.
+  // A missing userId means we cannot enforce the daily quota, so deny rather
+  // than silently bypass — otherwise an unauthenticated/misrouted call would
+  // burn the shared API key with no rate limit.
+  if (!userId) {
+    return {
+      error: `${toolName} requires an authenticated user to enforce daily quota.`,
+      data: null,
+    };
+  }
   const quota = QUOTAS[toolName];
   const { allowed, used } = await enforceDailyQuota(toolName, userId, quota);
   if (!allowed) {

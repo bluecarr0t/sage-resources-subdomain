@@ -1,38 +1,20 @@
--- Sage AI Execute Read-Only SQL Function
--- This function allows executing read-only SQL queries in a safe sandbox
+-- ============================================================================
+-- DEPRECATED: Sage AI Execute Read-Only SQL Function
+--
+-- This file previously defined `execute_readonly_sql(TEXT)` — a SECURITY
+-- DEFINER plpgsql function that built dynamic SQL via string concatenation
+-- with only a starts_with('select') + keyword regex guard. That guard is
+-- bypassable (e.g. via UTF-8 tricks, comments, CTEs, set-returning subqueries
+-- on RLS-protected tables) and would have read through RLS by virtue of the
+-- definer privileges.
+--
+-- It is no longer called from TypeScript (the `execute_safe_sql` tool was
+-- removed in PR #X — see __tests__/lib/sage-ai/tools.test.ts). To prevent
+-- accidental reintroduction, the body has been replaced with an explicit drop
+-- and the actual cleanup is handled in
+-- `sage-ai-drop-execute-readonly-sql.sql`.
+-- ============================================================================
 
-CREATE OR REPLACE FUNCTION execute_readonly_sql(query_text TEXT)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  result JSONB;
-  normalized_query TEXT;
-BEGIN
-  normalized_query := lower(trim(query_text));
-  
-  IF NOT starts_with(normalized_query, 'select') THEN
-    RAISE EXCEPTION 'Only SELECT queries are allowed';
-  END IF;
-  
-  IF normalized_query ~ '\b(insert|update|delete|drop|create|alter|truncate|grant|revoke|execute|call|copy)\b' THEN
-    RAISE EXCEPTION 'Query contains forbidden keywords';
-  END IF;
-  
-  EXECUTE 'SELECT jsonb_agg(row_to_json(t)) FROM (' || query_text || ') t'
-    INTO result;
-  
-  RETURN COALESCE(result, '[]'::jsonb);
-  
-EXCEPTION
-  WHEN OTHERS THEN
-    RAISE EXCEPTION 'Query error: %', SQLERRM;
-END;
-$$;
-
-REVOKE ALL ON FUNCTION execute_readonly_sql(TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION execute_readonly_sql(TEXT) TO authenticated;
-
-COMMENT ON FUNCTION execute_readonly_sql IS 'Execute read-only SQL queries for Sage AI. Only SELECT statements on allowed tables.';
+REVOKE ALL ON FUNCTION public.execute_readonly_sql(TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.execute_readonly_sql(TEXT) FROM authenticated;
+DROP FUNCTION IF EXISTS public.execute_readonly_sql(TEXT);

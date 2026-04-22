@@ -25,7 +25,15 @@ async function quotaGate(
   toolName: string,
   userId: string | undefined
 ): Promise<{ error: string; data: null } | null> {
-  if (!userId) return null;
+  // Embedding/RPC calls cost real money via the OpenAI key; billing them to a
+  // null user is a bug, not a passthrough. Deny outright so we don't silently
+  // bypass the quota for any anonymous or misrouted invocation.
+  if (!userId) {
+    return {
+      error: `${toolName} requires an authenticated user to enforce daily quota.`,
+      data: null,
+    };
+  }
   const { allowed, used } = await enforceDailyQuota(
     toolName,
     userId,
