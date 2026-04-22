@@ -12,7 +12,19 @@ import { createGeoTools } from '@/lib/sage-ai/geo-tools';
 import { createSemanticTools } from '@/lib/sage-ai/semantic-tools';
 import { createComposedTools } from '@/lib/sage-ai/composed-tools';
 import { createVisualizationTools } from '@/lib/sage-ai/visualization-tools';
+import { fetchWithTimeout } from '@/lib/sage-ai/fetch-with-timeout';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
+
+/**
+ * Per-call timeout caps for external HTTP integrations (ms). These were
+ * picked to comfortably fit inside the route's `maxDuration = 60` budget so a
+ * single hung peer can't exhaust the whole turn.
+ */
+const TIMEOUT_GOOGLE_PLACES = 10_000;
+const TIMEOUT_TAVILY = 20_000;
+const TIMEOUT_FIRECRAWL_SCRAPE = 25_000;
+const TIMEOUT_FIRECRAWL_CRAWL_KICKOFF = 15_000;
+const TIMEOUT_FIRECRAWL_CRAWL_POLL = 8_000;
 
 export interface SageAiToolsContext {
   /** Stable subject for quota tracking (typically auth user id). */
@@ -167,16 +179,39 @@ const HIPCAMP_COLUMN_ALLOWLIST = [
   'updated_at',
 ] as const;
 
+// Aligned to the actual `reports` table schema (Postgres `public.reports`).
+// Do NOT add columns the model would like to exist (e.g. `report_name`,
+// `project_type`) — Postgres will reject the SELECT and we'll burn a turn on
+// a hallucinated query. Verified against information_schema 2026-04.
 const REPORTS_COLUMN_ALLOWLIST = [
   'id',
   'client_id',
-  'report_name',
+  'client_name',
+  'client_entity',
+  'title',
+  'property_name',
   'state',
   'city',
-  'project_type',
+  'county',
+  'country',
+  'address',
+  'zip_code',
+  'market_type',
+  'report_purpose',
+  'service',
+  'development_phase',
+  'resort_type',
+  'resort_name',
   'status',
+  'study_id',
+  'report_date',
+  'total_sites',
+  'has_comparables',
+  'comp_count',
+  'comp_unit_count',
   'created_at',
   'updated_at',
+  'completed_at',
 ] as const;
 
 const COUNTY_POPULATION_COLUMN_ALLOWLIST = [
@@ -271,6 +306,47 @@ const GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS = [
 /** Cap per-page scraped content fed back to the model (bytes, UTF-16 approx). */
 const SCRAPED_CONTENT_MAX_CHARS = 8_000;
 
+/**
+ * How many times we let the model re-attempt the same data tool with the same
+ * exact args after it returns an empty result, before we surface a hard error.
+ * "1" means: first empty -> retry signal, second empty -> hard error. Increase
+ * cautiously; each retry burns an LLM step and a DB roundtrip.
+ */
+const MAX_EMPTY_RESULT_RETRIES = 1;
+
+/**
+ * Sentinel returned by data tools when a query yielded zero rows but we want
+ * the model to retry with different parameters. The UI hides tiles carrying
+ * this marker so the user only sees the eventual successful (or
+ * `_emptyRetryExhausted`) attempt — empty intermediate tiles are noise.
+ */
+interface EmptyRetrySignal {
+  _emptyRetry: true;
+  attempt: number;
+  message: string;
+  hint?: string;
+}
+
+interface EmptyRetryExhausted {
+  error: string;
+  _emptyRetryExhausted: true;
+  attempts: number;
+  data: null;
+}
+
+/**
+ * Stable serialization for retry counter keys. Recursively sorts object keys
+ * so `{a:1,b:2}` and `{b:2,a:1}` collide, and tolerates anything JSON can hold.
+ */
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  const entries = Object.keys(value as Record<string, unknown>)
+    .sort()
+    .map((k) => `${JSON.stringify(k)}:${stableStringify((value as Record<string, unknown>)[k])}`);
+  return `{${entries.join(',')}}`;
+}
+
 /** Escape characters that could break out of the source attribute. */
 function escapeSourceAttr(url: string): string {
   return url.replace(/"/g, '%22').replace(/[\r\n]/g, ' ');
@@ -356,6 +432,51 @@ export function createSageAiTools(
         correlationId: context.correlationId,
       }
     : null;
+
+  /**
+   * Per-request counter of how many times each (tool, args) pair has come back
+   * empty. Lives in this closure so it naturally resets between chat turns
+   * (`createSageAiTools` is called fresh per request in chat/route.ts).
+   */
+  const emptyResultAttempts = new Map<string, number>();
+
+  /**
+   * Returns either the original payload (when non-empty), an `EmptyRetrySignal`
+   * the UI hides (so we silently re-roll), or a hard error after we've burned
+   * the retry budget. `args` should be the deduplicated tool call arguments;
+   * we serialize them so the same exact retry collides into one counter slot.
+   */
+  function handleEmptyResult<T extends object>(
+    toolName: string,
+    args: unknown,
+    payload: T,
+    isEmpty: boolean,
+    hint?: string
+  ): T | EmptyRetrySignal | EmptyRetryExhausted {
+    if (!isEmpty) return payload;
+
+    const key = `${toolName}:${stableStringify(args)}`;
+    const prev = emptyResultAttempts.get(key) ?? 0;
+    const next = prev + 1;
+    emptyResultAttempts.set(key, next);
+
+    if (next > MAX_EMPTY_RESULT_RETRIES) {
+      return {
+        error: `${toolName} returned no results after ${next} attempts with these parameters. The data does not match — report "no data available" to the user instead of retrying again.`,
+        _emptyRetryExhausted: true,
+        attempts: next,
+        data: null,
+      };
+    }
+
+    return {
+      _emptyRetry: true,
+      attempt: next,
+      message: `${toolName} returned 0 rows on attempt ${next}. Try different parameters (broaden filters, drop a constraint, or call get_column_values to find valid values) before retrying.`,
+      ...(hint ? { hint } : {}),
+    };
+  }
+
   const baseTools = {
     list_tables: tool({
       description:
@@ -395,7 +516,7 @@ export function createSageAiTools(
             {
               name: 'reports',
               description:
-                'Feasibility study reports with client info, study details, and project data',
+                'Feasibility study reports. Key columns: title (NOT report_name), market_type / report_purpose / service (NOT project_type), property_name, client_name, state, city, status, study_id, report_date, total_sites.',
               row_count_estimate: 'hundreds',
               category: 'Reports',
             },
@@ -427,7 +548,9 @@ export function createSageAiTools(
 
     query_properties: tool({
       description:
-        'Query glamping properties with optional filters. Returns property data including name, location, pricing, and amenities. Use filters to narrow results. Limit defaults to 50.',
+        'Query the all_glamping_properties table with optional filters. Returns property data including name, location, pricing, and amenities. Use filters (state/city/country/unit_type/etc.) to narrow results. Limit defaults to 50.\n\n' +
+        'STATE & REGION QUERIES — use the `filters.state` field, NOT the `near` parameter. Example: { filters: { state: "Texas" } }. The `state` filter accepts both 2-letter codes ("TX") and full names ("Texas") and is normalized server-side.\n\n' +
+        'PROXIMITY QUERIES — only set `near` when the user asked for results within a radius of a specific point (e.g. "within 50 km of Austin", "near Collective Retreats Vail"). When `near` is set, you MUST first call geocode_property (or have the user supply real lat/lng); NEVER hand-write coordinates and NEVER pass {latitude:0, longitude:0} as a placeholder — that is rejected/ignored server-side and the user sees an error.',
       inputSchema: z.object({
         filters: z
           .object({
@@ -454,13 +577,24 @@ export function createSageAiTools(
           .describe('Filters to apply to the query'),
         near: z
           .object({
-            latitude: z.number().describe('Origin latitude'),
-            longitude: z.number().describe('Origin longitude'),
+            latitude: z
+              .number()
+              .min(-90)
+              .max(90)
+              .describe('Origin latitude in decimal degrees'),
+            longitude: z
+              .number()
+              .min(-180)
+              .max(180)
+              .describe('Origin longitude in decimal degrees'),
             radius_km: z.number().min(1).max(500).describe('Search radius in kilometers (max 500)'),
           })
           .optional()
           .describe(
-            'Optional proximity filter. When provided, results are restricted to properties within radius_km of (latitude, longitude) using the property_geocode cache, ordered by distance ascending. Use geocode_property first to resolve an origin from a property name/id/address.'
+            'OPTIONAL proximity filter. ONLY include this object when the user explicitly asked for results near a coordinate, address, or named place. ' +
+              'When omitted, results are filtered by `filters` only (state/city/etc). ' +
+              'Do NOT pass placeholder zeros — if you do not have real coordinates, OMIT this field entirely instead of sending {latitude:0, longitude:0, radius_km:1}. ' +
+              'Use geocode_property first to resolve an origin from a property name/id/address.'
           ),
         columns: z
           .array(z.string())
@@ -482,6 +616,21 @@ export function createSageAiTools(
           ? allowedCols.join(', ')
           : PROPERTIES_SUMMARY_COLUMNS.join(', ');
 
+        // Defensively scrub the `(0, 0)` placeholder the model sometimes emits
+        // when it mistakenly thinks `near` is a required parameter. Returning
+        // an error here was the original fix, but the model proved unable to
+        // self-correct mid-turn and kept resending the same payload, so the
+        // user saw a wall of red error tiles for what should have been a plain
+        // state-filtered query. Silently dropping `near` lets us fall through
+        // to the filter-only branch and actually answer the question; we tag
+        // the response with `near_placeholder_dropped` so the model can learn
+        // for next turn (and so we can detect the pattern in telemetry).
+        let droppedNearPlaceholder = false;
+        if (near && near.latitude === 0 && near.longitude === 0) {
+          near = undefined;
+          droppedNearPlaceholder = true;
+        }
+
         // Proximity branch — delegates to properties_within_radius RPC so the
         // server can use the PostGIS GIST index on property_geocode.geom.
         if (near) {
@@ -497,7 +646,48 @@ export function createSageAiTools(
           if (nearErr) {
             return { error: nearErr.message, data: null, total_count: 0 };
           }
-          const rows = (nearRows ?? []) as Array<Record<string, unknown>>;
+          let rows = (nearRows ?? []) as Array<Record<string, unknown>>;
+
+          // The RPC ignores `filters`, so apply the ones we can in JS against
+          // the rows it returned. Without this, "glamping properties in CO
+          // within 50km of X" silently drops the state/city filters and returns
+          // every nearby property — including ones in other states.
+          //
+          // The RPC's projection does NOT include `is_glamping_property` or
+          // `is_closed`, so those filters cannot be honored in the near branch.
+          // We surface them in `unsupported_filters` so the model knows to do a
+          // separate filtered query if those constraints matter.
+          const unsupportedFilters: string[] = [];
+          if (filters) {
+            const matchesIlikeContains = (val: unknown, needle: string) => {
+              if (val == null) return false;
+              return String(val).toLowerCase().includes(needle.toLowerCase());
+            };
+            const matchesIlikeExact = (val: unknown, needle: string) => {
+              if (val == null) return false;
+              return String(val).toLowerCase() === needle.toLowerCase();
+            };
+            rows = rows.filter((row) => {
+              if (filters.state) {
+                const stateVal =
+                  normalizeState(filters.state) ?? filters.state.trim();
+                if (!matchesIlikeExact(row.state, stateVal)) return false;
+              }
+              if (filters.city && !matchesIlikeContains(row.city, filters.city)) return false;
+              if (filters.country && !matchesIlikeContains(row.country, filters.country))
+                return false;
+              if (filters.unit_type && !matchesIlikeContains(row.unit_type, filters.unit_type))
+                return false;
+              if (
+                filters.property_type &&
+                !matchesIlikeContains(row.property_type, filters.property_type)
+              )
+                return false;
+              return true;
+            });
+            if (filters.is_glamping_property) unsupportedFilters.push('is_glamping_property');
+            if (filters.is_closed) unsupportedFilters.push('is_closed');
+          }
 
           // The RPC returns a fixed projection and ignores the `columns` arg
           // sent by the caller. To keep the contract consistent with the
@@ -516,15 +706,27 @@ export function createSageAiTools(
             return out;
           });
 
-          return {
-            data: projectedRows,
-            total_count: projectedRows.length,
-            returned_count: projectedRows.length,
-            limit: limit ?? 50,
-            offset: 0,
-            near: { ...near, unit: 'km' },
-            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-          };
+          return handleEmptyResult(
+            'query_properties',
+            { filters, near, columns, limit, offset, order_by, order_ascending },
+            {
+              data: projectedRows,
+              total_count: projectedRows.length,
+              returned_count: projectedRows.length,
+              limit: limit ?? 50,
+              offset: 0,
+              near: { ...near, unit: 'km' },
+              ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+              ...(unsupportedFilters.length
+                ? {
+                    unsupported_filters: unsupportedFilters,
+                    note: `Filters ${unsupportedFilters.join(', ')} are not honored in proximity (\`near\`) mode because the proximity RPC's projection does not include those columns. Run a separate query_properties call without \`near\` if you need those filters.`,
+                  }
+                : {}),
+            },
+            projectedRows.length === 0,
+            'Try a larger radius_km or a different origin coordinate.'
+          );
         }
 
         if (order_by && !SAFE_IDENTIFIER.test(order_by)) {
@@ -574,16 +776,28 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
-        return {
-          data: data ?? [],
-          total_count: count ?? 0,
-          returned_count: data?.length ?? 0,
-          limit: limit ?? 50,
-          offset: offset ?? 0,
-          ...(rejectedCols.length
-            ? { rejected_columns: rejectedCols }
-            : {}),
-        };
+        return handleEmptyResult(
+          'query_properties',
+          { filters, near, columns, limit, offset, order_by, order_ascending },
+          {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            limit: limit ?? 50,
+            offset: offset ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+            ...(droppedNearPlaceholder
+              ? {
+                  near_placeholder_dropped: true,
+                  note:
+                    'Ignored placeholder near={latitude:0, longitude:0} and ran a state/filter-only query against all_glamping_properties. ' +
+                    'For state- or country-level questions, OMIT the `near` parameter — proximity (`near`) is only for "within X km of [coordinate/place]" questions.',
+                }
+              : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Try removing a filter or calling get_column_values to discover valid filter values.'
+        );
       },
     }),
 
@@ -629,12 +843,18 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
-        return {
-          data: data ?? [],
-          total_count: count ?? 0,
-          returned_count: data?.length ?? 0,
-          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-        };
+        return handleEmptyResult(
+          'query_hipcamp',
+          { filters, columns, limit, offset },
+          {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Try removing a filter or broadening the location.'
+        );
       },
     }),
 
@@ -677,13 +897,19 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
-        return {
-          data: data ?? [],
-          total_count: count ?? 0,
-          returned_count: data?.length ?? 0,
-          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-          ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
-        };
+        return handleEmptyResult(
+          'query_campspot',
+          { filters, columns, limit, offset },
+          {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+            ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Run without filters first to discover available column values.'
+        );
       },
     }),
 
@@ -726,31 +952,59 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
-        return {
-          data: data ?? [],
-          total_count: count ?? 0,
-          returned_count: data?.length ?? 0,
-          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-          ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
-        };
+        return handleEmptyResult(
+          'query_roverpass',
+          { filters, columns, limit, offset },
+          {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+            ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Run without filters first to discover available column values.'
+        );
       },
     }),
 
     query_reports: tool({
       description:
-        'Query feasibility study reports. Returns report metadata including client, study details, and status.',
+        'Query feasibility study reports. Returns report metadata including client, location, project type and status.\n\n' +
+        'IMPORTANT — column names: the report title lives in `title` (NOT `report_name`); ' +
+        'the project/market category lives in `market_type` (e.g. "glamping", "RV", "hotel"), `report_purpose`, or `service` ' +
+        '(NOT `project_type`). Other useful columns: `property_name`, `client_name`, `client_entity`, `resort_type`, ' +
+        '`development_phase`, `study_id`, `report_date`, `total_sites`, `has_comparables`. Always pick from this list when ' +
+        'specifying `columns` or filters — Postgres will reject unknown column names.',
       inputSchema: z.object({
         filters: z
           .object({
-            client_id: z.string().optional().describe('Filter by client ID'),
+            client_id: z.string().optional().describe('Filter by client UUID'),
+            client_name: z.string().optional().describe('Partial match on client_name'),
             state: z.string().optional().describe('US state abbreviation'),
-            city: z.string().optional().describe('City name'),
+            city: z.string().optional().describe('City name (partial match)'),
+            title: z.string().optional().describe('Partial match on report title'),
+            market_type: z
+              .string()
+              .optional()
+              .describe('Project category (e.g. "glamping", "RV", "hotel"). Case-insensitive partial match.'),
+            report_purpose: z
+              .string()
+              .optional()
+              .describe('Reason for the report (e.g. "feasibility", "appraisal"). Partial match.'),
+            service: z.string().optional().describe('Service line (partial match)'),
+            status: z.string().optional().describe('Workflow status (exact match)'),
           })
           .optional(),
         columns: z
           .array(z.string())
           .optional()
-          .describe('Specific columns to return'),
+          .describe(
+            'Specific columns to return. Allowed: id, client_id, client_name, client_entity, title, property_name, ' +
+              'state, city, county, country, address, zip_code, market_type, report_purpose, service, ' +
+              'development_phase, resort_type, resort_name, status, study_id, report_date, total_sites, ' +
+              'has_comparables, comp_count, comp_unit_count, created_at, updated_at, completed_at.'
+          ),
         limit: z.number().min(1).max(100).optional().default(25),
         offset: z.number().min(0).optional().default(0),
       }),
@@ -769,8 +1023,15 @@ export function createSageAiTools(
 
         if (filters) {
           if (filters.client_id) query = query.eq('client_id', filters.client_id);
+          if (filters.client_name) query = query.ilike('client_name', `%${filters.client_name}%`);
           if (filters.state) query = query.ilike('state', filters.state);
           if (filters.city) query = query.ilike('city', `%${filters.city}%`);
+          if (filters.title) query = query.ilike('title', `%${filters.title}%`);
+          if (filters.market_type) query = query.ilike('market_type', `%${filters.market_type}%`);
+          if (filters.report_purpose)
+            query = query.ilike('report_purpose', `%${filters.report_purpose}%`);
+          if (filters.service) query = query.ilike('service', `%${filters.service}%`);
+          if (filters.status) query = query.eq('status', filters.status);
         }
 
         const { data, error, count } = await query;
@@ -779,12 +1040,18 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
-        return {
-          data: data ?? [],
-          total_count: count ?? 0,
-          returned_count: data?.length ?? 0,
-          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-        };
+        return handleEmptyResult(
+          'query_reports',
+          { filters, columns, limit, offset },
+          {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Try removing the client_id, state, or city filter.'
+        );
       },
     }),
 
@@ -828,12 +1095,18 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
-        return {
-          data: data ?? [],
-          total_count: count ?? 0,
-          returned_count: data?.length ?? 0,
-          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-        };
+        return handleEmptyResult(
+          'query_county_population',
+          { filters, columns, limit, offset },
+          {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Try a state-only filter, or remove the county filter.'
+        );
       },
     }),
 
@@ -877,12 +1150,18 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
-        return {
-          data: data ?? [],
-          total_count: count ?? 0,
-          returned_count: data?.length ?? 0,
-          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-        };
+        return handleEmptyResult(
+          'query_ski_resorts',
+          { filters, columns, limit, offset },
+          {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Try a different state or remove the resort name filter.'
+        );
       },
     }),
 
@@ -926,12 +1205,18 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
-        return {
-          data: data ?? [],
-          total_count: count ?? 0,
-          returned_count: data?.length ?? 0,
-          ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-        };
+        return handleEmptyResult(
+          'query_national_parks',
+          { filters, columns, limit, offset },
+          {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Try a different state or remove the park name filter.'
+        );
       },
     }),
 
@@ -989,12 +1274,18 @@ export function createSageAiTools(
         }
 
         const rows = (data ?? []) as Array<{ value: string; row_count: number }>;
-        return {
-          column,
-          values: rows.map((r) => r.value),
-          value_counts: rows,
-          total_unique: rows.length,
-        };
+        return handleEmptyResult(
+          'get_column_values',
+          { column, limit },
+          {
+            column,
+            values: rows.map((r) => r.value),
+            value_counts: rows,
+            total_unique: rows.length,
+          },
+          rows.length === 0,
+          `Column "${column}" has no distinct values. Try a different column or check that the table has data.`
+        );
       },
     }),
 
@@ -1023,10 +1314,16 @@ export function createSageAiTools(
           return { error: error.message, data: null };
         }
 
-        return {
-          data: data ?? [],
-          count: data?.length ?? 0,
-        };
+        return handleEmptyResult(
+          'get_property_details',
+          { id, property_name },
+          {
+            data: data ?? [],
+            count: data?.length ?? 0,
+          },
+          (data?.length ?? 0) === 0,
+          'Try a different id, or call query_properties to find candidates by name.'
+        );
       },
     }),
 
@@ -1076,11 +1373,17 @@ export function createSageAiTools(
           total_sites: Number(r.total_sites),
         }));
 
-        return {
-          group_by,
-          aggregates,
-          total_groups: aggregates.length,
-        };
+        return handleEmptyResult(
+          'aggregate_properties',
+          { group_by, filters },
+          {
+            group_by,
+            aggregates,
+            total_groups: aggregates.length,
+          },
+          aggregates.length === 0,
+          `No groups returned for group_by="${group_by}". Try a different group_by column or remove a filter.`
+        );
       },
     }),
 
@@ -1169,6 +1472,53 @@ plt.show()
       },
     }),
 
+    /**
+     * Ask the user a clarifying question with 2–6 clickable answer options.
+     * The UI renders the question + options as a card with pill buttons; a
+     * click sends the option text back as the next user message. Use this
+     * INSTEAD of asking the question in prose whenever the answer space is
+     * a small, enumerable set (yes/no, scope picker, multiple choice).
+     */
+    clarifying_question: tool({
+      description: `Ask the user a clarifying question with 2–6 clickable answer options. Use this WHENEVER you need the user to confirm a choice, pick a scope, narrow ambiguous input, or answer a yes/no — INSTEAD of asking the question in prose. The UI renders the options as buttons; clicking one sends that exact text back as the user's next message. Only fall back to a prose question when the answer is genuinely free-form (e.g. "What's your budget?"). Call AT MOST ONCE per assistant turn and only when the question is the immediate next step in the conversation.`,
+      inputSchema: z.object({
+        question: z
+          .string()
+          .min(3)
+          .max(500)
+          .describe(
+            'The question to ask the user. Phrase it naturally — this text is rendered verbatim above the buttons.'
+          ),
+        options: z
+          .array(
+            z
+              .string()
+              .min(1)
+              .max(120)
+              .describe(
+                'A single answer option, phrased the way the user would say it (e.g. "Whole Texas, statewide" not "yes_statewide"). Sent verbatim as the next user message when clicked.'
+              )
+          )
+          .min(2)
+          .max(6)
+          .describe('2–6 mutually distinct answer options, ordered from most to least likely.'),
+      }),
+      execute: async ({ question, options }) => {
+        const normalizedOptions = Array.from(
+          new Set(
+            options
+              .map((o) => o.trim().replace(/\s+/g, ' '))
+              .filter((o) => o.length >= 1 && o.length <= 120)
+          )
+        ).slice(0, 6);
+        return {
+          type: 'clarifying_question' as const,
+          question: question.trim(),
+          options: normalizedOptions,
+        };
+      },
+    }),
+
     // External API Tools
 
     google_places_search: tool({
@@ -1194,7 +1544,7 @@ plt.show()
           .optional()
           .describe('Place type filter (e.g., campground, lodging, rv_park, tourist_attraction)'),
       }),
-      execute: async ({ query, location, radius, type }) => {
+      execute: async ({ query, location, radius, type }, { abortSignal }) => {
         const gate = await quotaGate('google_places_search', userId);
         if (gate) return gate;
         const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -1218,8 +1568,9 @@ plt.show()
             params.append('type', type);
           }
 
-          const response = await fetch(
-            `https://maps.googleapis.com/maps/api/place/textsearch/json?${params.toString()}`
+          const response = await fetchWithTimeout(
+            `https://maps.googleapis.com/maps/api/place/textsearch/json?${params.toString()}`,
+            { timeoutMs: TIMEOUT_GOOGLE_PLACES, parentSignal: abortSignal }
           );
 
           if (!response.ok) {
@@ -1282,7 +1633,7 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
             `Specific fields to return. Each entry must be one of: ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}. Unknown fields are silently dropped. If not specified, returns the common-field default set.`
           ),
       }),
-      execute: async ({ place_id, fields }) => {
+      execute: async ({ place_id, fields }, { abortSignal }) => {
         const gate = await quotaGate('google_place_details', userId);
         if (gate) return gate;
         const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -1336,8 +1687,9 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
             fields: appliedFields.join(','),
           });
 
-          const response = await fetch(
-            `https://maps.googleapis.com/maps/api/place/details/json?${params.toString()}`
+          const response = await fetchWithTimeout(
+            `https://maps.googleapis.com/maps/api/place/details/json?${params.toString()}`,
+            { timeoutMs: TIMEOUT_GOOGLE_PLACES, parentSignal: abortSignal }
           );
 
           if (!response.ok) {
@@ -1392,7 +1744,10 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
           .default(5)
           .describe('Maximum number of results to return'),
       }),
-      execute: async ({ query, search_depth, include_domains, exclude_domains, max_results }) => {
+      execute: async (
+        { query, search_depth, include_domains, exclude_domains, max_results },
+        { abortSignal }
+      ) => {
         const gate = await quotaGate('web_search', userId);
         if (gate) return gate;
         const apiKey = process.env.TAVILY_API_KEY;
@@ -1401,11 +1756,13 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
         }
 
         try {
-          const response = await fetch('https://api.tavily.com/search', {
+          const response = await fetchWithTimeout('https://api.tavily.com/search', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
+            timeoutMs: TIMEOUT_TAVILY,
+            parentSignal: abortSignal,
             body: JSON.stringify({
               api_key: apiKey,
               query,
@@ -1464,7 +1821,10 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
           .optional()
           .describe('Milliseconds to wait for dynamic content to load'),
       }),
-      execute: async ({ url, formats, only_main_content, wait_for }) => {
+      execute: async (
+        { url, formats, only_main_content, wait_for },
+        { abortSignal }
+      ) => {
         const gate = await quotaGate('scrape_webpage', userId);
         if (gate) return gate;
         const apiKey = process.env.FIRECRAWL_API_KEY;
@@ -1473,12 +1833,14 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
         }
 
         try {
-          const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+          const response = await fetchWithTimeout('https://api.firecrawl.dev/v1/scrape', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${apiKey}`,
             },
+            timeoutMs: TIMEOUT_FIRECRAWL_SCRAPE,
+            parentSignal: abortSignal,
             body: JSON.stringify({
               url,
               formats: formats || ['markdown'],
@@ -1541,7 +1903,10 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
           .optional()
           .describe('Exclude pages matching these path patterns'),
       }),
-      execute: async ({ url, max_pages, include_paths, exclude_paths }) => {
+      execute: async (
+        { url, max_pages, include_paths, exclude_paths },
+        { abortSignal }
+      ) => {
         const gate = await quotaGate('crawl_website', userId);
         if (gate) return gate;
         const apiKey = process.env.FIRECRAWL_API_KEY;
@@ -1550,12 +1915,14 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
         }
 
         try {
-          const startResponse = await fetch('https://api.firecrawl.dev/v1/crawl', {
+          const startResponse = await fetchWithTimeout('https://api.firecrawl.dev/v1/crawl', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${apiKey}`,
             },
+            timeoutMs: TIMEOUT_FIRECRAWL_CRAWL_KICKOFF,
+            parentSignal: abortSignal,
             body: JSON.stringify({
               url,
               limit: max_pages || 5,
@@ -1584,13 +1951,23 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
           const maxAttempts = 30;
 
           while (attempts < maxAttempts) {
+            // Bail early if the parent stream was cancelled — keeps polling
+            // from outliving the chat turn it was started for.
+            if (abortSignal?.aborted) {
+              return { error: 'Crawl cancelled by client', data: null };
+            }
             await new Promise((resolve) => setTimeout(resolve, 2000));
 
-            const statusResponse = await fetch(`https://api.firecrawl.dev/v1/crawl/${crawlId}`, {
-              headers: {
-                Authorization: `Bearer ${apiKey}`,
-              },
-            });
+            const statusResponse = await fetchWithTimeout(
+              `https://api.firecrawl.dev/v1/crawl/${crawlId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${apiKey}`,
+                },
+                timeoutMs: TIMEOUT_FIRECRAWL_CRAWL_POLL,
+                parentSignal: abortSignal,
+              }
+            );
 
             if (!statusResponse.ok) {
               return { error: `Failed to check crawl status: ${statusResponse.status}`, data: null };

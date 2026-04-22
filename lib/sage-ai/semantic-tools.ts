@@ -25,9 +25,8 @@ async function quotaGate(
   toolName: string,
   userId: string | undefined
 ): Promise<{ error: string; data: null } | null> {
-  // Embedding/RPC calls cost real money via the OpenAI key; billing them to a
-  // null user is a bug, not a passthrough. Deny outright so we don't silently
-  // bypass the quota for any anonymous or misrouted invocation.
+  // semantic_search calls OpenAI embeddings (paid) when given a free-text
+  // query. Require a user so we can rate-limit per identity.
   if (!userId) {
     return {
       error: `${toolName} requires an authenticated user to enforce daily quota.`,
@@ -152,7 +151,10 @@ Provide EITHER \`query\` (text) OR \`similar_to_property_id\` (use that property
           const gate = await quotaGate('semantic_search_properties', userId);
           if (gate) return gate;
           try {
-            const openai = new OpenAI({ apiKey });
+            // Cap embedding latency at 15s. The OpenAI SDK retries 2x by
+            // default; we cap the total wall time so a single bad embedding
+            // call can't hold the whole tool step open for the gateway timeout.
+            const openai = new OpenAI({ apiKey, timeout: 15_000, maxRetries: 1 });
             queryEmbedding = await embedText(openai, query);
           } catch (err) {
             return {

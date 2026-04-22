@@ -12,6 +12,7 @@ import { SageAiMap } from './SageAiMap';
 import { useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import {
   Send,
   Download,
@@ -33,13 +34,12 @@ import {
   Check,
   Square,
   ArrowDown,
-  ThumbsUp,
-  ThumbsDown,
   Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal, ModalContent } from '@/components/ui/Modal';
 import { CollapsibleMarkdownPre } from '@/lib/sage-ai/CollapsibleMarkdownPre';
+import { FeedbackControls } from './FeedbackControls';
 import { linkifyPastReportRefsInMarkdown } from '@/lib/sage-ai/linkify-past-report-refs';
 import { downloadCsvFromData, downloadXlsxFromData, generateExportFilename } from '@/lib/sage-ai/csv-download';
 import { PythonCodeBlock } from '@/lib/sage-ai/pyodide/PythonCodeBlock';
@@ -71,6 +71,36 @@ interface SavedQuery {
   use_count: number;
   created_at: string;
 }
+
+/**
+ * Whitelist of HTML tags / attributes the assistant is allowed to render via
+ * `<ReactMarkdown>`. We start from `defaultSchema` (which already strips
+ * scripts/iframes/event handlers) and add the few attributes our markdown
+ * relies on — `className` for prose styling, `target/rel` so our custom `a`
+ * component can produce an external-link affordance.
+ *
+ * Why this matters: assistant output is partly model-generated and partly
+ * scraped (UNTRUSTED_CONTENT) — without sanitization, a model that decides
+ * to emit raw `<img onerror>` or `<script>` would execute in the admin UI.
+ */
+const SAGE_AI_MARKDOWN_SANITIZE_SCHEMA = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    a: [
+      ...(defaultSchema.attributes?.a ?? []),
+      'target',
+      'rel',
+    ],
+    code: [...(defaultSchema.attributes?.code ?? []), 'className'],
+    span: [...(defaultSchema.attributes?.span ?? []), 'className'],
+    div: [...(defaultSchema.attributes?.div ?? []), 'className'],
+    pre: [...(defaultSchema.attributes?.pre ?? []), 'className'],
+    table: [...(defaultSchema.attributes?.table ?? []), 'className'],
+    th: [...(defaultSchema.attributes?.th ?? []), 'className'],
+    td: [...(defaultSchema.attributes?.td ?? []), 'className'],
+  },
+};
 
 function formatSessionDate(dateStr: string, t: ReturnType<typeof useTranslations>): string {
   const date = new Date(dateStr);
@@ -224,7 +254,7 @@ export default function SageAiClient() {
     id: chatTransportId,
     transport,
     onError: (err) => {
-      showToastRef.current(err.message ?? 'Chat request failed');
+      showToastRef.current(err.message ?? t('toastChatRequestFailed'));
     },
   });
 
@@ -342,12 +372,12 @@ export default function SageAiClient() {
         }
         loadSessions();
       } else {
-        showToast('Failed to save session');
+        showToast(t('toastFailedSaveSession'));
       }
     } catch {
-      showToast('Failed to save session');
+      showToast(t('toastFailedSaveSession'));
     }
-  }, [loadSessions, showToast]);
+  }, [loadSessions, showToast, t]);
 
   const handleSaveQuery = async () => {
     if (!saveQueryName.trim() || !queryToSave.trim()) return;
@@ -363,12 +393,12 @@ export default function SageAiClient() {
         setShowSaveDialog(false);
         setSaveQueryName('');
         setQueryToSave('');
-        showToast('Query saved');
+        showToast(t('toastQuerySaved'));
       } else {
-        showToast('Failed to save query');
+        showToast(t('toastFailedSaveQuery'));
       }
     } catch {
-      showToast('Failed to save query');
+      showToast(t('toastFailedSaveQuery'));
     }
   };
 
@@ -398,10 +428,10 @@ export default function SageAiClient() {
       if (res.ok) {
         setSavedQueries((prev) => prev.filter((q) => q.id !== queryId));
       } else {
-        showToast('Failed to delete saved query');
+        showToast(t('toastFailedDeleteQuery'));
       }
     } catch {
-      showToast('Failed to delete saved query');
+      showToast(t('toastFailedDeleteQuery'));
     }
   };
 
@@ -770,7 +800,7 @@ export default function SageAiClient() {
         const filename = generateExportFilename(`sage-ai-${toolName}`);
         await downloadXlsxFromData(exportData, `${filename}.xlsx`);
       } catch (err) {
-        showToast(err instanceof Error ? err.message : 'Failed to export XLSX');
+        showToast(err instanceof Error ? err.message : t('toastFailedExportXlsx'));
       }
     }
   };
@@ -1332,8 +1362,9 @@ export default function SageAiClient() {
                                 prose-hr:my-6 prose-hr:border-gray-200 dark:prose-hr:border-gray-700
                                 prose-blockquote:border-l-4 prose-blockquote:border-sage-500 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400"
                             >
-                              <ReactMarkdown 
+                              <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[[rehypeSanitize, SAGE_AI_MARKDOWN_SANITIZE_SCHEMA]]}
                                 components={{
                                   pre: CollapsibleMarkdownPre,
                                   a: ({ href, children, ...props }) => {
@@ -1376,6 +1407,68 @@ export default function SageAiClient() {
                           ? (part as { toolName: string }).toolName 
                           : part.type.replace(/^tool-/, '');
                         const toolOutput = part.state === 'output-available' ? part.output : undefined;
+
+                        // Hide intermediate empty-result tiles. The tool layer
+                        // returns `{ _emptyRetry: true }` when a query yielded
+                        // 0 rows but we want the model to retry with different
+                        // params — rendering that tile is just noise. The
+                        // model will produce a follow-up tool call (or, after
+                        // burning the retry budget, a `_emptyRetryExhausted`
+                        // payload that flows through the existing error path).
+                        if (
+                          part.state === 'output-available' &&
+                          typeof toolOutput === 'object' &&
+                          toolOutput !== null &&
+                          '_emptyRetry' in toolOutput &&
+                          (toolOutput as { _emptyRetry: unknown })._emptyRetry === true
+                        ) {
+                          return null;
+                        }
+
+                        // Render `clarifying_question` as a question card with
+                        // clickable answer pills. Clicking an option sends that
+                        // exact text back as the next user message — saves the
+                        // user from typing the answer.
+                        if (toolName === 'clarifying_question') {
+                          if (part.state !== 'output-available') return null;
+                          const cqOutput = toolOutput as
+                            | { type?: string; question?: unknown; options?: unknown }
+                            | undefined;
+                          const question =
+                            typeof cqOutput?.question === 'string'
+                              ? cqOutput.question.trim()
+                              : '';
+                          const options = Array.isArray(cqOutput?.options)
+                            ? (cqOutput.options as unknown[]).filter(
+                                (o): o is string => typeof o === 'string' && o.trim().length > 0
+                              )
+                            : [];
+                          if (!question || options.length === 0) return null;
+                          return (
+                            <div
+                              key={partIndex}
+                              className="my-3 rounded-lg border border-sage-200 bg-sage-50/60 px-4 py-3 dark:border-sage-800 dark:bg-sage-900/20"
+                              role="group"
+                              aria-label={t('clarifyingQuestionAria')}
+                            >
+                              <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                                {question}
+                              </p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {options.map((option, i) => (
+                                  <button
+                                    key={`${partIndex}-${i}`}
+                                    type="button"
+                                    onClick={() => sendMessage({ text: option })}
+                                    className="rounded-full border border-sage-400 bg-white px-3 py-1.5 text-sm font-medium text-sage-800 hover:bg-sage-100 hover:border-sage-500 dark:border-sage-600 dark:bg-sage-900/60 dark:text-sage-100 dark:hover:bg-sage-900/80 transition-colors"
+                                  >
+                                    {option}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
 
                         // Render `suggest_followups` as a chip row, not a tool card.
                         if (toolName === 'suggest_followups') {
@@ -1733,81 +1826,3 @@ export default function SageAiClient() {
   );
 }
 
-interface FeedbackControlsProps {
-  sessionId: string;
-  messageId: string;
-  model: string;
-  initial?: { rating: 1 | -1 };
-  onChange: (value: { rating: 1 | -1 } | null) => void;
-  onError: (msg: string) => void;
-}
-
-function FeedbackControls({
-  sessionId,
-  messageId,
-  model,
-  initial,
-  onChange,
-  onError,
-}: FeedbackControlsProps) {
-  const [pending, setPending] = useState<0 | 1 | -1>(0);
-  const current = initial?.rating ?? 0;
-
-  const submit = useCallback(
-    async (next: 1 | -1) => {
-      const nextValue = current === next ? 0 : next;
-      setPending(nextValue === 0 ? next : nextValue);
-      try {
-        const res = await fetch('/api/admin/sage-ai/feedback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId,
-            messageId,
-            rating: nextValue,
-            model,
-          }),
-        });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        onChange(nextValue === 0 ? null : { rating: nextValue });
-      } catch (err) {
-        console.error('[sage-ai] feedback submit failed', err);
-        onError('Could not save feedback');
-      } finally {
-        setPending(0);
-      }
-    },
-    [current, messageId, model, onChange, onError, sessionId]
-  );
-
-  return (
-    <div className="mt-3 flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
-      <button
-        type="button"
-        aria-label="Mark this response as helpful"
-        aria-pressed={current === 1}
-        disabled={pending !== 0}
-        onClick={() => submit(1)}
-        className={`p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
-          current === 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'
-        }`}
-      >
-        <ThumbsUp className="w-3.5 h-3.5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Mark this response as unhelpful"
-        aria-pressed={current === -1}
-        disabled={pending !== 0}
-        onClick={() => submit(-1)}
-        className={`p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
-          current === -1 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'
-        }`}
-      >
-        <ThumbsDown className="w-3.5 h-3.5" />
-      </button>
-    </div>
-  );
-}

@@ -4,45 +4,69 @@
  */
 
 import { NextRequest } from 'next/server';
-import { GET, POST } from '@/app/api/cron/discover-glamping/route';
-import { spawnSync } from 'child_process';
 
-jest.mock('child_process', () => ({
-  spawnSync: jest.fn(),
+const mockSearchGlampingNews = jest.fn();
+const mockFetchArticleContent = jest.fn();
+const mockGetDatabasePropertyNames = jest.fn();
+const mockProcessDiscoveryArticle = jest.fn();
+
+jest.mock('@/lib/glamping-discovery', () => ({
+  searchGlampingNews: (...args: unknown[]) => mockSearchGlampingNews(...args),
+  fetchArticleContent: (...args: unknown[]) => mockFetchArticleContent(...args),
+  getDatabasePropertyNames: (...args: unknown[]) => mockGetDatabasePropertyNames(...args),
+  processDiscoveryArticle: (...args: unknown[]) => mockProcessDiscoveryArticle(...args),
 }));
 
-const mockSpawnSync = spawnSync as jest.MockedFunction<typeof spawnSync>;
+const mockSupabaseInsert = jest.fn().mockResolvedValue({ error: null });
+const mockSupabaseSelect = jest.fn().mockResolvedValue({ data: [], error: null });
 
-function successSpawnResult(): ReturnType<typeof spawnSync> {
-  return {
-    status: 0,
-    stdout: 'Glamping Discovery Pipeline\nDiscovery run complete',
-    stderr: '',
-    signal: null,
-    output: [],
-    pid: 12345,
-    error: undefined,
-  } as ReturnType<typeof spawnSync>;
-}
+jest.mock('@supabase/supabase-js', () => ({
+  createClient: jest.fn(() => ({
+    from: () => ({
+      insert: (...args: unknown[]) => mockSupabaseInsert(...args),
+      select: (...args: unknown[]) => mockSupabaseSelect(...args),
+    }),
+  })),
+}));
+
+jest.mock('openai', () => ({
+  OpenAI: jest.fn().mockImplementation(() => ({})),
+}));
+
+import { GET, POST } from '@/app/api/cron/discover-glamping/route';
 
 describe('/api/cron/discover-glamping', () => {
-  const originalCronSecret = process.env.CRON_SECRET;
+  const originalEnv = { ...process.env };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_SUPABASE_URL: 'https://example.supabase.co',
+      SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
+      OPENAI_API_KEY: 'sk-test',
+      TAVILY_API_KEY: 'tvly-test',
+    };
     delete process.env.CRON_SECRET;
-    mockSpawnSync.mockReturnValue(successSpawnResult());
+
+    mockSearchGlampingNews.mockResolvedValue([
+      { url: 'https://news.example.com/a' },
+    ]);
+    mockFetchArticleContent.mockResolvedValue('article body');
+    mockGetDatabasePropertyNames.mockResolvedValue(new Set<string>());
+    mockProcessDiscoveryArticle.mockResolvedValue({
+      propertiesExtracted: 1,
+      propertiesNew: 1,
+      propertiesInserted: 1,
+      queuedInsertRows: [],
+    });
   });
 
   afterEach(() => {
-    if (originalCronSecret === undefined) {
-      delete process.env.CRON_SECRET;
-    } else {
-      process.env.CRON_SECRET = originalCronSecret;
-    }
+    process.env = { ...originalEnv };
   });
 
-  it('GET returns 200 and runs discovery script (Vercel cron)', async () => {
+  it('GET runs the discovery library and persists run metrics', async () => {
     const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
       method: 'GET',
     });
@@ -50,23 +74,20 @@ describe('/api/cron/discover-glamping', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.message).toContain('Tavily');
-    expect(mockSpawnSync).toHaveBeenCalledTimes(1);
-    expect(mockSpawnSync.mock.calls[0][0]).toBe('npx');
-    expect(mockSpawnSync.mock.calls[0][1]).toEqual(
-      expect.arrayContaining(['tsx', expect.stringMatching(/discover-glamping-from-news\.ts$/), '--tavily', '--limit', '1'])
-    );
+    expect(body.metrics.propertiesInserted).toBe(1);
+    expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
+    expect(mockFetchArticleContent).toHaveBeenCalledTimes(1);
+    expect(mockProcessDiscoveryArticle).toHaveBeenCalledTimes(1);
+    expect(mockSupabaseInsert).toHaveBeenCalled();
   });
 
-  it('POST returns 200 and runs the same script', async () => {
+  it('POST runs the same handler', async () => {
     const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
       method: 'POST',
     });
     const res = await POST(req);
     expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.success).toBe(true);
-    expect(mockSpawnSync).toHaveBeenCalledTimes(1);
+    expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
   });
 
   it('returns 401 when CRON_SECRET is set and Authorization is missing', async () => {
@@ -76,7 +97,7 @@ describe('/api/cron/discover-glamping', () => {
     });
     const res = await GET(req);
     expect(res.status).toBe(401);
-    expect(mockSpawnSync).not.toHaveBeenCalled();
+    expect(mockSearchGlampingNews).not.toHaveBeenCalled();
   });
 
   it('returns 401 when Bearer token does not match CRON_SECRET', async () => {
@@ -87,7 +108,7 @@ describe('/api/cron/discover-glamping', () => {
     });
     const res = await GET(req);
     expect(res.status).toBe(401);
-    expect(mockSpawnSync).not.toHaveBeenCalled();
+    expect(mockSearchGlampingNews).not.toHaveBeenCalled();
   });
 
   it('returns 200 when Bearer token matches CRON_SECRET', async () => {
@@ -98,21 +119,12 @@ describe('/api/cron/discover-glamping', () => {
     });
     const res = await GET(req);
     expect(res.status).toBe(200);
-    expect(mockSpawnSync).toHaveBeenCalledTimes(1);
+    expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
   });
 
-  it('returns 500 when the script exits with non-zero status', async () => {
+  it('returns 500 with the missing env vars when keys are not configured', async () => {
+    delete process.env.TAVILY_API_KEY;
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    mockSpawnSync.mockReturnValue({
-      status: 1,
-      stdout: '',
-      stderr: 'Missing TAVILY_API_KEY',
-      signal: null,
-      output: [],
-      pid: 12345,
-      error: undefined,
-    } as ReturnType<typeof spawnSync>);
-
     const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
       method: 'GET',
     });
@@ -120,6 +132,23 @@ describe('/api/cron/discover-glamping', () => {
     expect(res.status).toBe(500);
     const body = await res.json();
     expect(body.success).toBe(false);
+    expect(body.error).toContain('TAVILY_API_KEY');
+    expect(mockSearchGlampingNews).not.toHaveBeenCalled();
+    errSpy.mockRestore();
+  });
+
+  it('returns 500 and persists run metrics when the library throws', async () => {
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockSearchGlampingNews.mockRejectedValueOnce(new Error('Tavily down'));
+    const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
+      method: 'GET',
+    });
+    const res = await GET(req);
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.error).toContain('Tavily down');
+    expect(mockSupabaseInsert).toHaveBeenCalled();
     errSpy.mockRestore();
   });
 });
