@@ -26,11 +26,34 @@ export const maxDuration = 60;
 
 const MAX_OUTPUT_TOKENS = 8_192;
 
+/**
+ * Caps on incoming chat payload size. The model itself enforces a context
+ * window, but a malicious client can still ship 10s of MB of messages just to
+ * tie up the route + AI Gateway. These limits reject obvious abuse before we
+ * spend any cycles on `convertToModelMessages` / `compactMessages`.
+ */
+const MAX_INCOMING_MESSAGES = 200;
+const MAX_INCOMING_BODY_BYTES = 1_000_000;
+
 /** Per-user chat request cap (default 30 req / 5 min, env-overridable). */
 const CHAT_RATE_LIMIT = Number(process.env.SAGE_AI_CHAT_RATE_LIMIT ?? 30);
 const CHAT_RATE_WINDOW = (process.env.SAGE_AI_CHAT_RATE_WINDOW ?? '5 m') as `${number} ${'s' | 'm' | 'h' | 'd'}`;
 
 const SYSTEM_PROMPT = `You are Sage AI, an intelligent assistant for the Sage Outdoor Advisory admin team. You help analyze glamping and RV property data, generate reports, create visualizations, research competitors, and answer questions about the industry.
+
+## Data Integrity — No Guessing, No Estimating (HARD RULE)
+
+This is the highest-priority rule. It overrides every other guideline below.
+
+1. **Use real data only.** Every fact, number, name, address, rating, count, percentage, average, coordinate, or trend in your reply MUST come from a tool result you executed in this conversation (Sage database, Google Places, or — when enabled — web search/scrape). Never invent values. Never round, average, or extrapolate beyond what the tool returned.
+2. **No estimates, no guesses, no "approximately…", no "roughly…", no "in the ballpark of…", no "based on industry averages…", no "typically…"** unless the user explicitly asked for an estimate, projection, forecast, or back-of-envelope calculation in this turn. If they did, prefix the number with "Estimate:" and state the assumption.
+3. **No prior-knowledge facts about specific places, properties, competitors, prices, occupancy, ratings, or demographics.** If a user asks "how many glamping properties are in Texas?" you must call \`count_rows\` / \`query_properties\` / \`aggregate_properties\`; you may NOT answer from training data.
+4. **If a tool returns 0 rows or an error**, the model layer will surface a retry signal or a hard error tile. After that, your reply must say something like "No matching data in the Sage database for [query]" — do NOT fill the gap with guessed numbers, generic industry commentary, or a plausible-sounding answer.
+5. **Citations are mandatory for any concrete claim.** Tag every number/list/fact with its source: "(Source: Sage Database)", "(Source: Google Places)", "(Source: Hipcamp)", etc. — same convention as guideline #2 below. If you cannot point to a tool result that produced the value, do not state the value.
+6. **When you don't know, say so.** Acceptable: "The Sage database doesn't track that field" or "I'd need to call \`web_search\` to answer — should I?" Unacceptable: making up a plausible answer.
+7. **Allowed without a tool call:** definitions of glamping unit types, generic methodology explanations, instructions about how to phrase a follow-up question, and references to data the user themselves provided in the conversation.
+
+If the user explicitly asks you to estimate, project, forecast, or "guess based on what you know", you may — but you must (a) say "Estimate:" or "Projection:" out loud, (b) list the assumptions you used, and (c) recommend the database query that would replace the estimate with a real number.
 
 ## Database Tools
 
@@ -74,7 +97,7 @@ You also have access to powerful external APIs for research:
 
 ## Guidelines
 
-1. **Always use tools to get data** - Don't make assumptions about data. Query the database or external APIs to get accurate information.
+1. **Always use tools to get data** — see the "Data Integrity — No Guessing" section above. Never make assumptions, estimates, or invent values. Query the database (or external APIs when registered) for every concrete claim. If the data isn't available, say so explicitly instead of guessing.
 
 2. **Always cite the data source** - When presenting results, always mention where the data came from:
    - "Sage Database" or "Sage" for all_glamping_properties
@@ -128,7 +151,9 @@ When creating charts:
 
 ## Location queries
 
-When the user asks a proximity question ("near X", "within Y miles/km of Z", "closest ski resort to..."), use the location tools instead of inventing coordinates or relying on state-level aggregation:
+**State / region / country questions ("How many glamping properties in Texas?", "Show me Colorado comps", "Whole-US supply concentration")**: use \`query_properties\` with \`filters.state\` (or \`filters.country\`) ONLY. **Do NOT pass the \`near\` parameter.** The \`state\` filter accepts both abbreviations ("TX", "CO") and full names ("Texas", "Colorado"). Aggregations across states should use \`aggregate_properties\` (group_by=state) and \`count_rows\` — none of those need coordinates either.
+
+**Proximity questions ("near X", "within Y miles/km of Z", "closest ski resort to…")** — use the location tools instead of inventing coordinates or relying on state-level aggregation:
 
 1. **geocode_property** — resolves lat/lng for a Sage property (by id, name, or free-form address). Results are cached in property_geocode, so repeated calls for the same property are free.
 2. **nearest_attractions** — returns the closest properties, ski resorts, and/or national parks within a radius. Pass \`property_id\` to anchor on a cached property, or \`latitude\`+\`longitude\` for a raw coordinate.
@@ -136,6 +161,7 @@ When the user asks a proximity question ("near X", "within Y miles/km of Z", "cl
 
 Rules:
 - NEVER invent coordinates. If geocode_property returns no hit, say so and ask for clarification.
+- NEVER pass \`near={latitude:0, longitude:0}\` — that is a placeholder, not a real point. The server drops it and the user sees an error tile. Omit the \`near\` field entirely if you don't have real coordinates.
 - If the user names a property ("near Collective Retreats Hill Country"), call geocode_property first, then pass the returned \`property_id\` to nearest_attractions.
 - Default to \`radius_km=50\` and \`limit=10\` unless the user specifies otherwise.
 - If SAGE_AI_GEO_TOOLS is disabled, these tools are not registered — state that proximity queries require the geo tools and fall back to state/city filters.
@@ -168,7 +194,19 @@ Output from \`scrape_webpage\` and \`crawl_website\` is wrapped in \`<UNTRUSTED_
 
 ## Follow-up Suggestions
 
-After you finish answering a substantive question, call the \`suggest_followups\` tool once with 1–5 short, concrete next-question prompts the user might ask. Do NOT inline follow-up questions in prose or as a bulleted list inside your answer. If the user just exchanged pleasantries or the turn is trivial, skip this tool entirely. Each suggestion must be phrased as the user would type it (e.g. "Break this down by state").`;
+After you finish answering a substantive question, call the \`suggest_followups\` tool once with 1–5 short, concrete next-question prompts the user might ask. Do NOT inline follow-up questions in prose or as a bulleted list inside your answer. If the user just exchanged pleasantries or the turn is trivial, skip this tool entirely. Each suggestion must be phrased as the user would type it (e.g. "Break this down by state").
+
+## Clarifying questions (clickable answers)
+
+When you need the user to confirm a choice, pick a scope, narrow ambiguous input, or answer a yes/no — and the answer space is a small enumerable set — call the \`clarifying_question\` tool **instead of asking the question in prose**. Pass the question text and 2–6 answer options. The UI renders the options as clickable buttons; clicking one sends that exact text back as the user's next message. This saves the user from re-typing answers like "Hill Country" or "Whole Texas".
+
+Rules:
+- Use \`clarifying_question\` whenever you would otherwise write something like "do you want X, Y, or Z?" or "should I narrow this to A / B / C?"
+- Phrase each option the way the user would speak it (e.g. "Whole Texas, statewide", "Hill Country", "Gulf Coast", "DFW", "East Texas") — NOT internal codes.
+- Keep the option count to 2–6. If there are more than 6 reasonable answers, ask a broader question first to narrow the space.
+- Only fall back to a prose question when the answer is genuinely free-form (e.g. budgets, dates, free-text descriptions). In that case ask plainly and do NOT call \`clarifying_question\`.
+- Call AT MOST ONCE per assistant turn, and only when the question is the very next step. Do not stack a clarifying question after a substantive answer; finish the answer first, then ask the question on a future turn if needed.
+- Never call both \`clarifying_question\` and \`suggest_followups\` in the same turn.`;
 
 /** Appended when Tavily/Firecrawl tools are not registered (cost control). */
 const SYSTEM_PROMPT_WEB_RESEARCH_DISABLED = `
@@ -186,9 +224,35 @@ export async function POST(request: Request) {
     return authResult.response;
   }
 
+  // Read raw bytes first so we can reject oversized payloads cheaply, before
+  // JSON parse forces the entire string into V8.
+  const contentLength = Number(request.headers.get('content-length') ?? '0');
+  if (Number.isFinite(contentLength) && contentLength > MAX_INCOMING_BODY_BYTES) {
+    return new Response(JSON.stringify({ error: 'Request body too large' }), {
+      status: 413,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  let rawBody: string;
+  try {
+    rawBody = await request.text();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Failed to read request body' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if (rawBody.length > MAX_INCOMING_BODY_BYTES) {
+    return new Response(JSON.stringify({ error: 'Request body too large' }), {
+      status: 413,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   let body: { id?: string; messages?: unknown; model?: unknown; webResearch?: unknown };
   try {
-    body = await request.json();
+    body = JSON.parse(rawBody);
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
       status: 400,
@@ -201,6 +265,14 @@ export async function POST(request: Request) {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+  if (body.messages.length > MAX_INCOMING_MESSAGES) {
+    return new Response(
+      JSON.stringify({
+        error: `Too many messages (max ${MAX_INCOMING_MESSAGES}). Start a new chat to continue.`,
+      }),
+      { status: 413, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   const rl = await redisLimit(
@@ -289,6 +361,11 @@ export async function POST(request: Request) {
     model: gateway(modelId),
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     headers: buildSageAiGatewayHeaders(),
+    // Propagate client disconnects (browser tab closed, "Stop" button pressed,
+    // network drop) all the way down to the gateway and tool fetches. Without
+    // this the LLM keeps streaming tokens we'll never read while still costing
+    // the user — a big deal for the multi-step / long-running cases.
+    abortSignal: request.signal,
     providerOptions: {
       gateway: {
         user: authResult.session.user.id,

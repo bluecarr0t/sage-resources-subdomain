@@ -14,6 +14,10 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { enforceDailyQuota } from '@/lib/upstash';
+import { fetchWithTimeout } from '@/lib/sage-ai/fetch-with-timeout';
+
+/** Cap any single Google call (find-place / geocode) at 8s. */
+const GOOGLE_TIMEOUT_MS = 8_000;
 
 const GEOCODE_CACHE_TTL_DAYS = Number(
   process.env.SAGE_AI_GEOCODE_TTL_DAYS ?? 180
@@ -40,7 +44,14 @@ async function quotaGate(
   userId: string | undefined,
   quota: number
 ): Promise<{ error: string; data: null } | null> {
-  if (!userId) return null;
+  // geocode_property hits Google Places/Geocoding when there is no DB or
+  // cached lat/lon hit. Require an attributable user.
+  if (!userId) {
+    return {
+      error: `${toolName} requires an authenticated user to enforce daily quota.`,
+      data: null,
+    };
+  }
   const { allowed, used } = await enforceDailyQuota(toolName, userId, quota);
   if (!allowed) {
     return {
@@ -139,7 +150,8 @@ interface GooglePlacesFindResult {
 
 async function googleFindPlace(
   apiKey: string,
-  query: string
+  query: string,
+  parentSignal?: AbortSignal
 ): Promise<GooglePlacesFindResult | null> {
   const params = new URLSearchParams({
     input: query,
@@ -147,9 +159,16 @@ async function googleFindPlace(
     fields: 'place_id,formatted_address,geometry',
     key: apiKey,
   });
-  const response = await fetch(
-    `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?${params.toString()}`
-  );
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(
+      `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?${params.toString()}`,
+      { timeoutMs: GOOGLE_TIMEOUT_MS, parentSignal }
+    );
+  } catch {
+    // Swallow timeouts/abort here — caller falls back to geocoding.
+    return null;
+  }
   if (!response.ok) return null;
   const result = (await response.json()) as {
     status: string;
@@ -172,12 +191,19 @@ async function googleFindPlace(
 
 async function googleGeocodeAddress(
   apiKey: string,
-  address: string
+  address: string,
+  parentSignal?: AbortSignal
 ): Promise<GooglePlacesFindResult | null> {
   const params = new URLSearchParams({ address, key: apiKey });
-  const response = await fetch(
-    `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`
-  );
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(
+      `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`,
+      { timeoutMs: GOOGLE_TIMEOUT_MS, parentSignal }
+    );
+  } catch {
+    return null;
+  }
   if (!response.ok) return null;
   const result = (await response.json()) as {
     status: string;
@@ -238,7 +264,7 @@ Use this before calling nearest_attractions or query_properties with the 'near' 
           (v) => !!v.property_id || !!v.property_name || !!v.address,
           { message: 'Provide property_id, property_name, or address' }
         ),
-      execute: async ({ property_id, property_name, address }) => {
+      execute: async ({ property_id, property_name, address }, { abortSignal }) => {
         const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
         // Free-form address path — no DB lookup, no cache write.
@@ -248,7 +274,7 @@ Use this before calling nearest_attractions or query_properties with the 'near' 
           }
           const gate = await quotaGate('geocode_property', userId, GEOCODE_QUOTA);
           if (gate) return gate;
-          const hit = await googleGeocodeAddress(apiKey, address);
+          const hit = await googleGeocodeAddress(apiKey, address, abortSignal);
           if (!hit) return { error: 'No geocode results', data: null };
           return {
             data: {
@@ -359,12 +385,12 @@ Use this before calling nearest_attractions or query_properties with the 'near' 
         let source: GeocodeRow['source'] = 'google_places';
 
         if (namedQuery.length > 0) {
-          hit = await googleFindPlace(apiKey, namedQuery);
+          hit = await googleFindPlace(apiKey, namedQuery, abortSignal);
         }
         if (!hit) {
           const addr = composeAddress(property);
           if (addr) {
-            hit = await googleGeocodeAddress(apiKey, addr);
+            hit = await googleGeocodeAddress(apiKey, addr, abortSignal);
             source = 'google_geocoding';
           }
         }

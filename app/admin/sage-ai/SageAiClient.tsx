@@ -12,6 +12,7 @@ import { SageAiMap } from './SageAiMap';
 import { useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import {
   Send,
   Download,
@@ -33,12 +34,12 @@ import {
   Check,
   Square,
   ArrowDown,
-  ThumbsUp,
-  ThumbsDown,
   Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Modal, ModalContent } from '@/components/ui/Modal';
 import { CollapsibleMarkdownPre } from '@/lib/sage-ai/CollapsibleMarkdownPre';
+import { FeedbackControls } from './FeedbackControls';
 import { linkifyPastReportRefsInMarkdown } from '@/lib/sage-ai/linkify-past-report-refs';
 import { downloadCsvFromData, downloadXlsxFromData, generateExportFilename } from '@/lib/sage-ai/csv-download';
 import { PythonCodeBlock } from '@/lib/sage-ai/pyodide/PythonCodeBlock';
@@ -70,6 +71,36 @@ interface SavedQuery {
   use_count: number;
   created_at: string;
 }
+
+/**
+ * Whitelist of HTML tags / attributes the assistant is allowed to render via
+ * `<ReactMarkdown>`. We start from `defaultSchema` (which already strips
+ * scripts/iframes/event handlers) and add the few attributes our markdown
+ * relies on — `className` for prose styling, `target/rel` so our custom `a`
+ * component can produce an external-link affordance.
+ *
+ * Why this matters: assistant output is partly model-generated and partly
+ * scraped (UNTRUSTED_CONTENT) — without sanitization, a model that decides
+ * to emit raw `<img onerror>` or `<script>` would execute in the admin UI.
+ */
+const SAGE_AI_MARKDOWN_SANITIZE_SCHEMA = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    a: [
+      ...(defaultSchema.attributes?.a ?? []),
+      'target',
+      'rel',
+    ],
+    code: [...(defaultSchema.attributes?.code ?? []), 'className'],
+    span: [...(defaultSchema.attributes?.span ?? []), 'className'],
+    div: [...(defaultSchema.attributes?.div ?? []), 'className'],
+    pre: [...(defaultSchema.attributes?.pre ?? []), 'className'],
+    table: [...(defaultSchema.attributes?.table ?? []), 'className'],
+    th: [...(defaultSchema.attributes?.th ?? []), 'className'],
+    td: [...(defaultSchema.attributes?.td ?? []), 'className'],
+  },
+};
 
 function formatSessionDate(dateStr: string, t: ReturnType<typeof useTranslations>): string {
   const date = new Date(dateStr);
@@ -223,7 +254,7 @@ export default function SageAiClient() {
     id: chatTransportId,
     transport,
     onError: (err) => {
-      showToastRef.current(err.message ?? 'Chat request failed');
+      showToastRef.current(err.message ?? t('toastChatRequestFailed'));
     },
   });
 
@@ -341,12 +372,12 @@ export default function SageAiClient() {
         }
         loadSessions();
       } else {
-        showToast('Failed to save session');
+        showToast(t('toastFailedSaveSession'));
       }
     } catch {
-      showToast('Failed to save session');
+      showToast(t('toastFailedSaveSession'));
     }
-  }, [loadSessions, showToast]);
+  }, [loadSessions, showToast, t]);
 
   const handleSaveQuery = async () => {
     if (!saveQueryName.trim() || !queryToSave.trim()) return;
@@ -362,12 +393,12 @@ export default function SageAiClient() {
         setShowSaveDialog(false);
         setSaveQueryName('');
         setQueryToSave('');
-        showToast('Query saved');
+        showToast(t('toastQuerySaved'));
       } else {
-        showToast('Failed to save query');
+        showToast(t('toastFailedSaveQuery'));
       }
     } catch {
-      showToast('Failed to save query');
+      showToast(t('toastFailedSaveQuery'));
     }
   };
 
@@ -397,10 +428,10 @@ export default function SageAiClient() {
       if (res.ok) {
         setSavedQueries((prev) => prev.filter((q) => q.id !== queryId));
       } else {
-        showToast('Failed to delete saved query');
+        showToast(t('toastFailedDeleteQuery'));
       }
     } catch {
-      showToast('Failed to delete saved query');
+      showToast(t('toastFailedDeleteQuery'));
     }
   };
 
@@ -769,7 +800,7 @@ export default function SageAiClient() {
         const filename = generateExportFilename(`sage-ai-${toolName}`);
         await downloadXlsxFromData(exportData, `${filename}.xlsx`);
       } catch (err) {
-        showToast(err instanceof Error ? err.message : 'Failed to export XLSX');
+        showToast(err instanceof Error ? err.message : t('toastFailedExportXlsx'));
       }
     }
   };
@@ -865,28 +896,40 @@ export default function SageAiClient() {
                       <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2 mb-1">
                         {group}
                       </p>
-                      {groupSessions.map((session) => (
-                        <div
-                          key={session.id}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => handleLoadSession(session.id)}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleLoadSession(session.id); } }}
-                          className={`w-full text-left px-2 py-1.5 rounded-md text-sm group flex items-center justify-between transition-colors cursor-pointer ${
-                            currentSessionId === session.id
-                              ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200'
-                          }`}
-                        >
-                          <span className="truncate flex-1 text-[13px]">{session.title}</span>
-                          <button
-                            onClick={(e) => handleDeleteSession(session.id, e)}
-                            className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-opacity"
+                      {groupSessions.map((session) => {
+                        const isActive = currentSessionId === session.id;
+                        return (
+                          <div
+                            key={session.id}
+                            className={`group flex items-center rounded-md transition-colors ${
+                              isActive
+                                ? 'bg-white dark:bg-gray-800 shadow-sm'
+                                : 'hover:bg-white dark:hover:bg-gray-800'
+                            }`}
                           >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
+                            <button
+                              type="button"
+                              onClick={() => handleLoadSession(session.id)}
+                              aria-current={isActive ? 'true' : undefined}
+                              className={`flex-1 min-w-0 text-left px-2 py-1.5 text-[13px] rounded-md focus:outline-none focus:ring-2 focus:ring-sage-500 ${
+                                isActive
+                                  ? 'text-gray-900 dark:text-gray-100'
+                                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                              }`}
+                            >
+                              <span className="block truncate">{session.title}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => handleDeleteSession(session.id, e)}
+                              aria-label={t('deleteSessionAria', { title: session.title })}
+                              className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 mr-1 hover:text-red-500 transition-opacity rounded focus:outline-none focus:ring-2 focus:ring-sage-500"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   ))
                 )}
@@ -914,29 +957,31 @@ export default function SageAiClient() {
                 savedQueries.map((query) => (
                   <div
                     key={query.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => handleUseSavedQuery(query)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleUseSavedQuery(query); } }}
-                    className="w-full text-left px-2 py-2 rounded-md text-sm group hover:bg-white dark:hover:bg-gray-800 transition-colors mb-1 cursor-pointer"
+                    className="group flex items-start rounded-md hover:bg-white dark:hover:bg-gray-800 transition-colors mb-1"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-700 dark:text-gray-300 truncate text-[13px]">
-                        {query.name}
+                    <button
+                      type="button"
+                      onClick={() => handleUseSavedQuery(query)}
+                      className="flex-1 min-w-0 text-left px-2 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sage-500"
+                    >
+                      <span className="flex items-center gap-1">
+                        <span className="font-medium text-gray-700 dark:text-gray-300 truncate text-[13px] flex-1 min-w-0">
+                          {query.name}
+                        </span>
+                        <Play className="w-3 h-3 text-sage-600 opacity-0 group-hover:opacity-100 shrink-0" aria-hidden="true" />
                       </span>
-                      <div className="flex items-center gap-1">
-                        <Play className="w-3 h-3 text-sage-600 opacity-0 group-hover:opacity-100" />
-                        <button
-                          onClick={(e) => handleDeleteSavedQuery(query.id, e)}
-                          className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">
-                      {query.query}
-                    </p>
+                      <span className="block text-xs text-gray-500 truncate mt-0.5">
+                        {query.query}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteSavedQuery(query.id, e)}
+                      aria-label={t('deleteSavedQueryAria', { name: query.name })}
+                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 mr-1 mt-2 hover:text-red-500 rounded focus:outline-none focus:ring-2 focus:ring-sage-500"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
                   </div>
                 ))
               )}
@@ -945,47 +990,68 @@ export default function SageAiClient() {
         </div>
       )}
 
-      {/* Save Query Dialog */}
-      {showSaveDialog && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-[400px] p-5 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              {t('saveQuery')}
-            </h3>
+      <Modal
+        open={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+        className="max-w-[400px]"
+      >
+        <ModalContent className="p-5">
+          <h2
+            id="save-query-dialog-title"
+            className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4"
+          >
+            {t('saveQuery')}
+          </h2>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (saveQueryName.trim()) void handleSaveQuery();
+            }}
+          >
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+              <label
+                htmlFor="save-query-name"
+                className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1.5"
+              >
                 {t('saveQueryName')}
               </label>
               <input
+                id="save-query-name"
                 type="text"
                 value={saveQueryName}
                 onChange={(e) => setSaveQueryName(e.target.value)}
                 placeholder={t('saveQueryPlaceholder')}
+                aria-describedby="save-query-preview"
                 className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent focus:outline-none"
                 autoFocus
+                maxLength={200}
               />
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono text-xs">
+            <p
+              id="save-query-preview"
+              className="text-sm text-gray-500 dark:text-gray-400 mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono text-xs whitespace-pre-wrap break-words"
+            >
               {queryToSave}
             </p>
             <div className="flex justify-end gap-2">
               <button
+                type="button"
                 onClick={() => setShowSaveDialog(false)}
                 className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
               >
                 {t('saveQueryCancel')}
               </button>
               <button
-                onClick={() => void handleSaveQuery()}
+                type="submit"
                 disabled={!saveQueryName.trim()}
                 className="px-4 py-2 text-sm font-medium bg-sage-600 text-white rounded-lg hover:bg-sage-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {t('saveQueryConfirm')}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </form>
+        </ModalContent>
+      </Modal>
 
       {/* Main Chat Area — overflow-visible so model picker popover can extend above the composer */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-visible bg-white dark:bg-gray-950">
@@ -1296,8 +1362,9 @@ export default function SageAiClient() {
                                 prose-hr:my-6 prose-hr:border-gray-200 dark:prose-hr:border-gray-700
                                 prose-blockquote:border-l-4 prose-blockquote:border-sage-500 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400"
                             >
-                              <ReactMarkdown 
+                              <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[[rehypeSanitize, SAGE_AI_MARKDOWN_SANITIZE_SCHEMA]]}
                                 components={{
                                   pre: CollapsibleMarkdownPre,
                                   a: ({ href, children, ...props }) => {
@@ -1340,6 +1407,68 @@ export default function SageAiClient() {
                           ? (part as { toolName: string }).toolName 
                           : part.type.replace(/^tool-/, '');
                         const toolOutput = part.state === 'output-available' ? part.output : undefined;
+
+                        // Hide intermediate empty-result tiles. The tool layer
+                        // returns `{ _emptyRetry: true }` when a query yielded
+                        // 0 rows but we want the model to retry with different
+                        // params — rendering that tile is just noise. The
+                        // model will produce a follow-up tool call (or, after
+                        // burning the retry budget, a `_emptyRetryExhausted`
+                        // payload that flows through the existing error path).
+                        if (
+                          part.state === 'output-available' &&
+                          typeof toolOutput === 'object' &&
+                          toolOutput !== null &&
+                          '_emptyRetry' in toolOutput &&
+                          (toolOutput as { _emptyRetry: unknown })._emptyRetry === true
+                        ) {
+                          return null;
+                        }
+
+                        // Render `clarifying_question` as a question card with
+                        // clickable answer pills. Clicking an option sends that
+                        // exact text back as the next user message — saves the
+                        // user from typing the answer.
+                        if (toolName === 'clarifying_question') {
+                          if (part.state !== 'output-available') return null;
+                          const cqOutput = toolOutput as
+                            | { type?: string; question?: unknown; options?: unknown }
+                            | undefined;
+                          const question =
+                            typeof cqOutput?.question === 'string'
+                              ? cqOutput.question.trim()
+                              : '';
+                          const options = Array.isArray(cqOutput?.options)
+                            ? (cqOutput.options as unknown[]).filter(
+                                (o): o is string => typeof o === 'string' && o.trim().length > 0
+                              )
+                            : [];
+                          if (!question || options.length === 0) return null;
+                          return (
+                            <div
+                              key={partIndex}
+                              className="my-3 rounded-lg border border-sage-200 bg-sage-50/60 px-4 py-3 dark:border-sage-800 dark:bg-sage-900/20"
+                              role="group"
+                              aria-label={t('clarifyingQuestionAria')}
+                            >
+                              <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                                {question}
+                              </p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {options.map((option, i) => (
+                                  <button
+                                    key={`${partIndex}-${i}`}
+                                    type="button"
+                                    onClick={() => sendMessage({ text: option })}
+                                    className="rounded-full border border-sage-400 bg-white px-3 py-1.5 text-sm font-medium text-sage-800 hover:bg-sage-100 hover:border-sage-500 dark:border-sage-600 dark:bg-sage-900/60 dark:text-sage-100 dark:hover:bg-sage-900/80 transition-colors"
+                                  >
+                                    {option}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
 
                         // Render `suggest_followups` as a chip row, not a tool card.
                         if (toolName === 'suggest_followups') {
@@ -1697,81 +1826,3 @@ export default function SageAiClient() {
   );
 }
 
-interface FeedbackControlsProps {
-  sessionId: string;
-  messageId: string;
-  model: string;
-  initial?: { rating: 1 | -1 };
-  onChange: (value: { rating: 1 | -1 } | null) => void;
-  onError: (msg: string) => void;
-}
-
-function FeedbackControls({
-  sessionId,
-  messageId,
-  model,
-  initial,
-  onChange,
-  onError,
-}: FeedbackControlsProps) {
-  const [pending, setPending] = useState<0 | 1 | -1>(0);
-  const current = initial?.rating ?? 0;
-
-  const submit = useCallback(
-    async (next: 1 | -1) => {
-      const nextValue = current === next ? 0 : next;
-      setPending(nextValue === 0 ? next : nextValue);
-      try {
-        const res = await fetch('/api/admin/sage-ai/feedback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId,
-            messageId,
-            rating: nextValue,
-            model,
-          }),
-        });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        onChange(nextValue === 0 ? null : { rating: nextValue });
-      } catch (err) {
-        console.error('[sage-ai] feedback submit failed', err);
-        onError('Could not save feedback');
-      } finally {
-        setPending(0);
-      }
-    },
-    [current, messageId, model, onChange, onError, sessionId]
-  );
-
-  return (
-    <div className="mt-3 flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
-      <button
-        type="button"
-        aria-label="Mark this response as helpful"
-        aria-pressed={current === 1}
-        disabled={pending !== 0}
-        onClick={() => submit(1)}
-        className={`p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
-          current === 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'
-        }`}
-      >
-        <ThumbsUp className="w-3.5 h-3.5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Mark this response as unhelpful"
-        aria-pressed={current === -1}
-        disabled={pending !== 0}
-        onClick={() => submit(-1)}
-        className={`p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
-          current === -1 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'
-        }`}
-      >
-        <ThumbsDown className="w-3.5 h-3.5" />
-      </button>
-    </div>
-  );
-}
