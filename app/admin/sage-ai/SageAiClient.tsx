@@ -45,6 +45,10 @@ import { downloadCsvFromData, downloadXlsxFromData, generateExportFilename } fro
 import { PythonCodeBlock } from '@/lib/sage-ai/pyodide/PythonCodeBlock';
 import { isPyodideEnvironmentError } from '@/lib/sage-ai/pyodide/is-pyodide-environment-error';
 import {
+  useAnyPythonBlockRunActive,
+  abortAllPythonBlockRuns,
+} from '@/lib/sage-ai/pyodide/python-execution-bridge';
+import {
   SAGE_AI_CHAT_DEFAULT_MODEL,
   resolveSageAiGatewayModelId,
   type SageAiModelSelection,
@@ -54,6 +58,7 @@ import {
   sageAiSelectionFromStorage,
   sageAiSelectionToStorage,
   SAGE_AI_MODEL_STORAGE_KEY,
+  SAGE_AI_PREMIUM_MODELS_STORAGE_KEY,
   SAGE_AI_WEB_RESEARCH_UI_ENABLED,
 } from './SageAiModelPicker';
 
@@ -139,6 +144,8 @@ export default function SageAiClient() {
    * Stable id for `useChat` / transport (must not be `undefined` in the options object — that
    * triggers Chat recreation every render). Separate from `currentSessionId` so the first
    * successful session save can update the DB id without remounting the chat and wiping messages.
+   * Also: changing this id recreates the Chat client and clears messages — never sync it to
+   * `currentSessionId` when loading history from the sidebar (`handleLoadSession`).
    */
   const [chatTransportId, setChatTransportId] = useState(() => crypto.randomUUID());
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
@@ -160,6 +167,13 @@ export default function SageAiClient() {
   const [webResearchEnabled, setWebResearchEnabled] = useState(false);
   const webResearchRef = useRef(false);
   webResearchRef.current = webResearchEnabled && SAGE_AI_WEB_RESEARCH_UI_ENABLED;
+  /**
+   * Whether the user has opted in to selecting higher-cost premium models
+   * (Claude Opus 4.7, Sonnet 4.5). Persisted in localStorage so the choice
+   * sticks across reloads. Server still validates the model id against the
+   * allowlist in `parseSageAiChatModelId`, so this is purely a UI gate.
+   */
+  const [premiumModelsUnlocked, setPremiumModelsUnlocked] = useState(false);
   const [modelPrefsLoaded, setModelPrefsLoaded] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
@@ -270,6 +284,9 @@ export default function SageAiClient() {
   messagesRef.current = messages;
 
   const isLoading = status === 'streaming' || status === 'submitted';
+  const anyPythonBlockRunActive = useAnyPythonBlockRunActive();
+  /** Stops the LLM stream and/or in-browser Python so the user is never “stuck” with only the send button. */
+  const showComposerStop = isLoading || anyPythonBlockRunActive;
 
   useEffect(() => {
     currentSessionIdRef.current = currentSessionId;
@@ -283,6 +300,11 @@ export default function SageAiClient() {
 
   const showToast = useCallback((msg: string) => setToastMessage(msg), []);
   showToastRef.current = showToast;
+
+  /** Stable ref for `PythonCodeBlock` so `handleRun` is not re-created on every parent render. */
+  const getInjectedQueryData = useCallback((): Record<string, unknown>[] | null => {
+    return lastQueryData;
+  }, [lastQueryData]);
 
   const handlePythonError = useCallback(
     (error: string, code: string) => {
@@ -468,6 +490,12 @@ export default function SageAiClient() {
     } catch {
       /* ignore */
     }
+    try {
+      const rawPremium = localStorage.getItem(SAGE_AI_PREMIUM_MODELS_STORAGE_KEY);
+      if (rawPremium === 'true') setPremiumModelsUnlocked(true);
+    } catch {
+      /* ignore */
+    }
     setModelPrefsLoaded(true);
   }, []);
 
@@ -482,6 +510,18 @@ export default function SageAiClient() {
       /* ignore */
     }
   }, [modelSelection, modelPrefsLoaded]);
+
+  useEffect(() => {
+    if (!modelPrefsLoaded) return;
+    try {
+      localStorage.setItem(
+        SAGE_AI_PREMIUM_MODELS_STORAGE_KEY,
+        premiumModelsUnlocked ? 'true' : 'false'
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [premiumModelsUnlocked, modelPrefsLoaded]);
 
   const updateStickyUserPrompt = useCallback(() => {
     const container = messagesContainerRef.current;
@@ -648,7 +688,7 @@ export default function SageAiClient() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || anyPythonBlockRunActive) return;
     sendMessage({ text: input });
     setInput('');
     if (inputRef.current) {
@@ -664,6 +704,7 @@ export default function SageAiClient() {
   };
 
   const handleNewChat = useCallback(() => {
+    abortAllPythonBlockRuns();
     setMessages([]);
     setCurrentSessionId(null);
     setChatTransportId(crypto.randomUUID());
@@ -707,15 +748,41 @@ export default function SageAiClient() {
       const res = await fetch(`/api/admin/sage-ai/sessions/${sessionId}`);
       if (res.ok) {
         const data = await res.json();
-        setMessages(data.session.messages ?? []);
+        // Defense in depth: even though the API now backfills `id`, never trust
+        // the server completely. useChat silently drops messages without an id
+        // (React loses the key) and the UI falls back to the empty welcome
+        // state — which was the bug that brought us here.
+        const rawMessages = Array.isArray(data?.session?.messages)
+          ? (data.session.messages as Array<Partial<UIMessage>>)
+          : [];
+        const hydratedMessages: UIMessage[] = rawMessages.map((m, idx) => ({
+          ...(m as UIMessage),
+          id:
+            typeof m.id === 'string' && m.id.length > 0
+              ? m.id
+              : `${sessionId}-${idx}`,
+          parts: Array.isArray(m.parts) ? m.parts : [],
+        }));
+        // IMPORTANT: Do NOT call `setChatTransportId(sessionId)` here.
+        // `useChat` recreates its internal Chat instance whenever `id` changes
+        // (@ai-sdk/react), which resets messages to []. That runs in the same
+        // render as these updates, wiping the history we just loaded. Keep
+        // `chatTransportId` stable (see comment on state above); `currentSessionId`
+        // drives which row we persist to in `saveSession`.
+        stop();
+        abortAllPythonBlockRuns();
+        setMessages(hydratedMessages);
         setCurrentSessionId(sessionId);
-        setChatTransportId(sessionId);
         setShowSidebar(false);
         pythonAutoFixSentRef.current = 0;
         setPythonRetryCount(0);
+      } else {
+        console.error('Failed to load session:', res.status, res.statusText);
+        showToast(t('loadSessionError'));
       }
     } catch (e) {
       console.error('Failed to load session:', e);
+      showToast(t('loadSessionError'));
     }
 
     try {
@@ -761,6 +828,25 @@ export default function SageAiClient() {
       console.error('Failed to delete session:', e);
     }
   };
+
+  const handleClearAllHistory = useCallback(async () => {
+    if (sessions.length === 0) return;
+    if (!confirm(t('clearHistoryConfirm'))) return;
+
+    try {
+      const res = await fetch('/api/admin/sage-ai/sessions', { method: 'DELETE' });
+      if (!res.ok) {
+        showToast(t('toastClearHistoryFailed'));
+        return;
+      }
+      setSessions([]);
+      handleNewChat();
+      showToast(t('toastHistoryCleared'));
+    } catch (e) {
+      console.error('Failed to clear history:', e);
+      showToast(t('toastClearHistoryFailed'));
+    }
+  }, [sessions.length, t, showToast, handleNewChat]);
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -872,6 +958,15 @@ export default function SageAiClient() {
                 >
                   <Plus className="w-4 h-4" />
                   {t('newChat')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearAllHistory}
+                  disabled={sessionsLoading || sessions.length === 0}
+                  aria-label={t('clearAllHistoryAria')}
+                  className="mt-2 w-full px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                >
+                  {t('clearAllHistory')}
                 </button>
               </div>
 
@@ -1309,7 +1404,175 @@ export default function SageAiClient() {
                   </div>
                 ) : (
                   <div className="text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed group/response">
-                    {message.parts.map((part, partIndex) => {
+                    {(() => {
+                      // Tools that have their own custom renderer (CanvasDashboard,
+                      // SageAiMap, clarifying-question card, etc.) render inline as
+                      // before. Every other tool falls through to the generic
+                      // "data tile" — and a single research turn often emits 3-5
+                      // of those in a row (count + a few aggregations). To keep
+                      // the chat scannable we collapse runs of ≥ 2 consecutive
+                      // generic data tiles into one `<details>` group.
+                      const CUSTOM_RENDERED_TOOL_NAMES = new Set([
+                        'clarifying_question',
+                        'suggest_followups',
+                        'generate_dashboard',
+                        'visualize_on_map',
+                        'competitor_comparison',
+                        'build_feasibility_brief',
+                        'generate_python_code',
+                      ]);
+                      const isEmptyRetryOutput = (output: unknown): boolean =>
+                        typeof output === 'object' &&
+                        output !== null &&
+                        '_emptyRetry' in output &&
+                        (output as { _emptyRetry: unknown })._emptyRetry === true;
+                      const isBundleableDataTool = (
+                        part: typeof message.parts[number]
+                      ): boolean => {
+                        if (!isToolUIPart(part)) return false;
+                        const name =
+                          'toolName' in part
+                            ? (part as { toolName: string }).toolName
+                            : part.type.replace(/^tool-/, '');
+                        if (CUSTOM_RENDERED_TOOL_NAMES.has(name)) return false;
+                        if (
+                          part.state === 'output-available' &&
+                          isEmptyRetryOutput(part.output)
+                        ) {
+                          return false;
+                        }
+                        return true;
+                      };
+                      const skipIndexes = new Set<number>();
+                      const bundleStarts = new Map<number, number[]>();
+                      let activeBundle: number[] | null = null;
+                      for (let i = 0; i < message.parts.length; i++) {
+                        if (isBundleableDataTool(message.parts[i])) {
+                          if (!activeBundle) {
+                            activeBundle = [i];
+                            bundleStarts.set(i, activeBundle);
+                          } else {
+                            activeBundle.push(i);
+                            skipIndexes.add(i);
+                          }
+                        } else {
+                          activeBundle = null;
+                        }
+                      }
+                      const renderDefaultDataTile = (
+                        innerPart: typeof message.parts[number],
+                        innerIndex: number
+                      ) => {
+                        if (!isToolUIPart(innerPart)) return null;
+                        const innerToolName =
+                          'toolName' in innerPart
+                            ? (innerPart as { toolName: string }).toolName
+                            : innerPart.type.replace(/^tool-/, '');
+                        const innerOutput =
+                          innerPart.state === 'output-available'
+                            ? innerPart.output
+                            : undefined;
+                        return (
+                          <div
+                            key={innerIndex}
+                            className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
+                          >
+                            <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                              <Database className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {innerToolName.replace(/_/g, ' ')}
+                              </span>
+                              {innerPart.state === 'input-streaming' && (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
+                              )}
+                              {innerPart.state === 'input-available' && (
+                                <span className="text-xs text-amber-600 dark:text-amber-400">{t('toolRunning')}</span>
+                              )}
+                              {innerPart.state === 'output-available' && (
+                                <span className="text-xs text-emerald-600 dark:text-emerald-400">{t('toolDone')}</span>
+                              )}
+                            </div>
+                            {innerPart.state === 'output-available' && innerOutput != null && (
+                              <div className="px-3 py-2">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  {typeof innerOutput === 'object' && innerOutput !== null && 'error' in innerOutput ? (
+                                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                                      <AlertCircle className="w-4 h-4" />
+                                      <span>{String((innerOutput as { error: string }).error)}</span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center justify-between">
+                                      <div>
+                                        {typeof innerOutput === 'object' && 'total_count' in (innerOutput as object) && (
+                                          <span>
+                                            {t('toolFoundResults', { total: (innerOutput as { total_count: number }).total_count })}
+                                            {typeof innerOutput === 'object' && 'returned_count' in (innerOutput as object) &&
+                                              ` · ${t('toolShowingResults', { count: (innerOutput as { returned_count: number }).returned_count })}`}
+                                          </span>
+                                        )}
+                                        {typeof innerOutput === 'object' && 'count' in (innerOutput as object) && !('total_count' in (innerOutput as object)) && (() => {
+                                          const co = innerOutput as {
+                                            count: number;
+                                            scope?: 'whole_table' | 'filtered';
+                                            filters?: Record<string, string>;
+                                            table?: string;
+                                          };
+                                          const filterEntries = co.filters
+                                            ? Object.entries(co.filters)
+                                            : [];
+                                          const scopeText =
+                                            co.scope === 'whole_table'
+                                              ? t('toolCountUnfiltered')
+                                              : filterEntries.length > 0
+                                                ? t('toolCountFiltered', {
+                                                    filters: filterEntries
+                                                      .map(([k, v]) => `${k}=${v}`)
+                                                      .join(', '),
+                                                  })
+                                                : null;
+                                          return (
+                                            <span>
+                                              {t('toolCount', { count: co.count })}
+                                              {scopeText && (
+                                                <span className="ml-2 text-xs text-amber-600 dark:text-amber-400">
+                                                  {scopeText}
+                                                </span>
+                                              )}
+                                            </span>
+                                          );
+                                        })()}
+                                        {typeof innerOutput === 'object' && 'total_groups' in (innerOutput as object) && (
+                                          <span>{t('toolGroups', { count: (innerOutput as { total_groups: number }).total_groups })}</span>
+                                        )}
+                                      </div>
+                                      {hasExportableData(innerOutput) && (
+                                        <div className="flex items-center gap-1">
+                                          <button
+                                            onClick={() => handleDownloadCsv(innerOutput, innerToolName)}
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                                          >
+                                            <Download className="w-3 h-3" />
+                                            CSV
+                                          </button>
+                                          <button
+                                            onClick={() => void handleDownloadXlsx(innerOutput, innerToolName)}
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                                          >
+                                            <FileSpreadsheet className="w-3 h-3" />
+                                            Excel
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      };
+                      return message.parts.map((part, partIndex) => {
+                      if (skipIndexes.has(partIndex)) return null;
                       if (isReasoningUIPart(part)) {
                         return (
                           <details
@@ -1614,111 +1877,97 @@ export default function SageAiClient() {
                           );
                         }
 
-                        return (
-                          <div
-                            key={partIndex}
-                            className="my-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
-                          >
-                            <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-                              <Database className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {toolName.replace(/_/g, ' ')}
-                              </span>
-                              {part.state === 'input-streaming' && (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
-                              )}
-                              {part.state === 'input-available' && (
-                                <span className="text-xs text-amber-600 dark:text-amber-400">{t('toolRunning')}</span>
-                              )}
-                              {part.state === 'output-available' && (
+                        // Inline `generate_python_code` tiles (chunky python
+                        // editor + chart output) keep their own card so the user
+                        // can run / inspect them without expanding a group.
+                        if (
+                          toolName === 'generate_python_code' &&
+                          part.state === 'output-available' &&
+                          typeof toolOutput === 'object' &&
+                          toolOutput !== null &&
+                          'type' in toolOutput &&
+                          (toolOutput as { type: string }).type === 'python_code'
+                        ) {
+                          const pyOutput = toolOutput as unknown as {
+                            code: string;
+                            description: string;
+                            uses_query_data?: boolean;
+                          };
+                          return (
+                            <div
+                              key={partIndex}
+                              className="my-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
+                            >
+                              <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                                <Database className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  {toolName.replace(/_/g, ' ')}
+                                </span>
                                 <span className="text-xs text-emerald-600 dark:text-emerald-400">{t('toolDone')}</span>
-                              )}
-                            </div>
-
-                            {part.state === 'output-available' && toolOutput != null && (
+                              </div>
                               <div className="px-3 py-2">
-                                {typeof toolOutput === 'object' &&
-                                toolOutput !== null &&
-                                'type' in toolOutput &&
-                                (toolOutput as unknown as { type: string }).type === 'python_code' ? (
-                                  (() => {
-                                    const pyOutput = toolOutput as unknown as {
-                                      code: string;
-                                      description: string;
-                                      uses_query_data?: boolean;
-                                    };
-                                    return (
-                                      <div>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                          {pyOutput.description}
-                                        </p>
-                                        <PythonCodeBlock
-                                          code={pyOutput.code}
-                                          onDataInject={
-                                            pyOutput.uses_query_data
-                                              ? () => lastQueryData
-                                              : undefined
-                                          }
-                                          onError={handlePythonError}
-                                          retryCount={pythonRetryCount}
-                                        />
-                                      </div>
-                                    );
-                                  })()
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                  {pyOutput.description}
+                                </p>
+                                <PythonCodeBlock
+                                  code={pyOutput.code}
+                                  onDataInject={
+                                    pyOutput.uses_query_data
+                                      ? getInjectedQueryData
+                                      : undefined
+                                  }
+                                  onError={handlePythonError}
+                                  retryCount={pythonRetryCount}
+                                />
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // Generic data tile. If this index is the start of a
+                        // ≥ 2 tile bundle, collapse the whole run behind a
+                        // single `<details>` toggle; otherwise render solo.
+                        const bundle = bundleStarts.get(partIndex);
+                        if (bundle && bundle.length > 1) {
+                          const allDone = bundle.every((i) => {
+                            const bp = message.parts[i];
+                            return (
+                              isToolUIPart(bp) && bp.state === 'output-available'
+                            );
+                          });
+                          return (
+                            <details
+                              key={partIndex}
+                              className="my-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden group/bundle"
+                            >
+                              <summary className="cursor-pointer select-none flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <Database className="w-4 h-4 text-gray-400" />
+                                <span>{t('toolBundle', { count: bundle.length })}</span>
+                                {allDone ? (
+                                  <span className="text-xs text-emerald-600 dark:text-emerald-400">{t('toolDone')}</span>
                                 ) : (
-                                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                                    {typeof toolOutput === 'object' && toolOutput !== null && 'error' in toolOutput ? (
-                                      <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                                        <AlertCircle className="w-4 h-4" />
-                                        <span>{String((toolOutput as { error: string }).error)}</span>
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center justify-between">
-                                        <div>
-                                          {typeof toolOutput === 'object' && 'total_count' in (toolOutput as object) && (
-                                            <span>
-                                              {t('toolFoundResults', { total: (toolOutput as { total_count: number }).total_count })}
-                                              {typeof toolOutput === 'object' && 'returned_count' in (toolOutput as object) &&
-                                                ` · ${t('toolShowingResults', { count: (toolOutput as { returned_count: number }).returned_count })}`}
-                                            </span>
-                                          )}
-                                          {typeof toolOutput === 'object' && 'count' in (toolOutput as object) && !('total_count' in (toolOutput as object)) && (
-                                            <span>{t('toolCount', { count: (toolOutput as { count: number }).count })}</span>
-                                          )}
-                                          {typeof toolOutput === 'object' && 'total_groups' in (toolOutput as object) && (
-                                            <span>{t('toolGroups', { count: (toolOutput as { total_groups: number }).total_groups })}</span>
-                                          )}
-                                        </div>
-                                        {hasExportableData(toolOutput) && (
-                                          <div className="flex items-center gap-1">
-                                            <button
-                                              onClick={() => handleDownloadCsv(toolOutput, toolName)}
-                                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                                            >
-                                              <Download className="w-3 h-3" />
-                                              CSV
-                                            </button>
-                                            <button
-                                              onClick={() => void handleDownloadXlsx(toolOutput, toolName)}
-                                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                                            >
-                                              <FileSpreadsheet className="w-3 h-3" />
-                                              Excel
-                                            </button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
+                                )}
+                              </summary>
+                              <div className="border-t border-gray-200 dark:border-gray-800 px-3 py-2 space-y-2">
+                                {bundle.map((i) =>
+                                  renderDefaultDataTile(message.parts[i], i)
                                 )}
                               </div>
-                            )}
+                            </details>
+                          );
+                        }
+
+                        return (
+                          <div key={partIndex} className="my-4">
+                            {renderDefaultDataTile(part, partIndex)}
                           </div>
                         );
                       }
 
                       return null;
-                    })}
+                      });
+                    })()}
                     {message.role === 'assistant' &&
                       !isLoading &&
                       currentSessionId && (
@@ -1783,13 +2032,18 @@ export default function SageAiClient() {
                     onSelectionChange={setModelSelection}
                     webResearchEnabled={webResearchEnabled}
                     onWebResearchChange={setWebResearchEnabled}
+                    premiumModelsUnlocked={premiumModelsUnlocked}
+                    onPremiumModelsUnlockedChange={setPremiumModelsUnlocked}
                     disabled={isLoading}
                   />
                   <div className="flex-1" />
-                  {isLoading ? (
+                  {showComposerStop ? (
                     <button
                       type="button"
-                      onClick={() => stop()}
+                      onClick={() => {
+                        void stop();
+                        abortAllPythonBlockRuns();
+                      }}
                       className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-900 transition-colors hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300"
                       title={t('stopGenerating')}
                     >

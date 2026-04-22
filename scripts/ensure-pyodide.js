@@ -18,10 +18,14 @@ const PYODIDE_VERSION = '0.26.4';
 const BASE_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 const PUBLIC_DIR = path.join(__dirname, '..', 'public', 'pyodide');
 
-// Core runtime + packages we actually load (micropip bootstraps the rest at
-// runtime). This list intentionally mirrors the packages the usePyodide hook
-// requests. If usePyodide adds a new package, add it here too.
-const FILES = [
+// Core runtime files always required to bootstrap Pyodide. Package wheels are
+// resolved dynamically below from `pyodide-lock.json` so we pull *all* the
+// transitive dependencies of the packages the usePyodide hook installs at
+// startup (micropip + matplotlib + numpy + pandas). Missing any of those
+// wheels would surface to the user as a "ModuleNotFoundError: micropip" tile
+// when generate_python_code runs — which is exactly the failure mode this
+// script exists to prevent.
+const CORE_FILES = [
   'pyodide.js',
   'pyodide.asm.js',
   'pyodide.asm.wasm',
@@ -29,6 +33,10 @@ const FILES = [
   'pyodide-lock.json',
   'package.json',
 ];
+
+// Packages explicitly loaded by usePyodide() at startup. Mirror this list with
+// the runPythonAsync() bootstrap call in lib/sage-ai/pyodide/use-pyodide.ts.
+const RUNTIME_PACKAGES = ['micropip', 'matplotlib', 'numpy', 'pandas'];
 
 function download(file) {
   return new Promise((resolve, reject) => {
@@ -62,6 +70,37 @@ function download(file) {
   });
 }
 
+/**
+ * Resolve the transitive closure of wheel filenames for the given top-level
+ * packages by walking the `depends` graph from `pyodide-lock.json`. Returns a
+ * sorted, de-duplicated list of `file_name` values ready to feed into
+ * `download()`.
+ */
+function resolveRuntimeWheels(lockPath, topLevel) {
+  const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+  const packages = lock.packages || {};
+  const wheels = new Set();
+  const visited = new Set();
+  const stack = [...topLevel];
+  while (stack.length > 0) {
+    const name = stack.pop();
+    if (visited.has(name)) continue;
+    visited.add(name);
+    const info = packages[name];
+    if (!info || typeof info.file_name !== 'string') {
+      // Skip silently: a future Pyodide release may rename or merge a
+      // package, and we'd rather fall back to the CDN at runtime than fail
+      // the postinstall hook.
+      continue;
+    }
+    wheels.add(info.file_name);
+    for (const dep of info.depends || []) {
+      if (!visited.has(dep)) stack.push(dep);
+    }
+  }
+  return Array.from(wheels).sort();
+}
+
 async function main() {
   if (process.env.SKIP_PYODIDE_DOWNLOAD === '1') {
     console.log('pyodide: SKIP_PYODIDE_DOWNLOAD=1, skipping');
@@ -77,11 +116,23 @@ async function main() {
   fs.mkdirSync(PUBLIC_DIR, { recursive: true });
 
   try {
-    const results = await Promise.all(FILES.map(download));
-    const downloaded = results.filter((r) => !r.skipped).length;
-    const skipped = results.filter((r) => r.skipped).length;
+    const coreResults = await Promise.all(CORE_FILES.map(download));
+    const coreDownloaded = coreResults.filter((r) => !r.skipped).length;
+    const coreSkipped = coreResults.filter((r) => r.skipped).length;
+
+    let wheelDownloaded = 0;
+    let wheelSkipped = 0;
+    const lockPath = path.join(PUBLIC_DIR, 'pyodide-lock.json');
+    if (fs.existsSync(lockPath)) {
+      const wheelFiles = resolveRuntimeWheels(lockPath, RUNTIME_PACKAGES);
+      const wheelResults = await Promise.all(wheelFiles.map(download));
+      wheelDownloaded = wheelResults.filter((r) => !r.skipped).length;
+      wheelSkipped = wheelResults.filter((r) => r.skipped).length;
+    }
+
     console.log(
-      `pyodide v${PYODIDE_VERSION}: downloaded ${downloaded} file(s), skipped ${skipped} (already present)`
+      `pyodide v${PYODIDE_VERSION}: core downloaded=${coreDownloaded} skipped=${coreSkipped}; ` +
+      `wheels downloaded=${wheelDownloaded} skipped=${wheelSkipped}`
     );
   } catch (err) {
     console.warn(

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { SAGE_AI_CHART_COLORS } from '@/lib/sage-ai/chart-palette';
 import { getPyodideCdnBase } from '@/lib/sage-ai/pyodide/pyodide-version';
 
 interface PyodideInstance {
@@ -116,6 +117,29 @@ export interface ExecutionResult {
   error?: string;
   charts: string[];
   executionTime: number;
+  /** True when the user stopped the run; not a code failure. */
+  cancelled?: boolean;
+}
+
+export type PyodideRunOptions = {
+  signal?: AbortSignal;
+};
+
+function isAbortError(e: unknown): boolean {
+  return e instanceof DOMException && e.name === 'AbortError';
+}
+
+/** Rejects when `signal` is aborted; never resolves. */
+function abortPromise(signal: AbortSignal | undefined): Promise<never> {
+  if (!signal) {
+    return new Promise(() => {});
+  }
+  if (signal.aborted) {
+    return Promise.reject(new DOMException('aborted', 'AbortError'));
+  }
+  return new Promise((_, reject) => {
+    signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')), { once: true });
+  });
 }
 
 /**
@@ -164,61 +188,69 @@ async function injectPyodideScript(base: string): Promise<void> {
 
 const PYTHON_EXEC_TIMEOUT_MS = 30_000;
 
-export function usePyodide() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const pyodideRef = useRef<PyodideInstance | null>(null);
-  const loadingRef = useRef(false);
+/** One WASM runtime for the page — `usePyodide` is called per `PythonCodeBlock`, but the interpreter must be shared. */
+let sharedPyodide: PyodideInstance | null = null;
+let initPromise: Promise<PyodideInstance> | null = null;
+/** Serializes `runPythonAsync` so concurrent blocks do not clobber the same `globals` slots. */
+let runQueue: Promise<unknown> = Promise.resolve();
 
-  const loadPyodide = useCallback(async () => {
-    if (pyodideRef.current || loadingRef.current) return;
+function enqueueRun<T>(fn: () => Promise<T>): Promise<T> {
+  const out = runQueue.then(() => fn());
+  runQueue = out.then(
+    () => undefined,
+    () => undefined
+  );
+  return out;
+}
 
-    loadingRef.current = true;
-    setIsLoading(true);
-    setLoadError(null);
+/**
+ * Idempotent: multiple `PythonCodeBlock` components share one load, one `globals` object.
+ */
+async function getOrInitPyodide(): Promise<PyodideInstance> {
+  if (sharedPyodide) {
+    return sharedPyodide;
+  }
+  if (initPromise) {
+    return initPromise;
+  }
 
-    try {
-      const indexUrls = pyodideIndexUrlsToTry();
+  const runInit = async (): Promise<PyodideInstance> => {
+    const indexUrls = pyodideIndexUrlsToTry();
 
-      if (!window.loadPyodide) {
-        let lastInjectErr: Error | null = null;
-        for (const base of indexUrls) {
-          try {
-            await injectPyodideScript(base);
-            lastInjectErr = null;
-            break;
-          } catch (e) {
-            lastInjectErr = e instanceof Error ? e : new Error(String(e));
-          }
-        }
-        if (!window.loadPyodide) {
-          throw lastInjectErr ?? new Error('Failed to load Pyodide script');
-        }
-      }
-
-      let pyodide: PyodideInstance | null = null;
-      let lastInitErr: Error | null = null;
-      for (const indexURL of indexUrls) {
+    if (!window.loadPyodide) {
+      let lastInjectErr: Error | null = null;
+      for (const base of indexUrls) {
         try {
-          pyodide = await window.loadPyodide!({ indexURL });
+          await injectPyodideScript(base);
+          lastInjectErr = null;
           break;
         } catch (e) {
-          lastInitErr = e instanceof Error ? e : new Error(String(e));
+          lastInjectErr = e instanceof Error ? e : new Error(String(e));
         }
       }
-      if (!pyodide) {
-        throw lastInitErr ?? new Error('Failed to initialize Pyodide');
+      if (!window.loadPyodide) {
+        throw lastInjectErr ?? new Error('Failed to load Pyodide script');
       }
+    }
 
-      // Load micropip first, then use it to install other packages
-      await pyodide.loadPackage('micropip');
-      await pyodide.runPythonAsync(`
-import micropip
-await micropip.install(['matplotlib', 'numpy', 'pandas'])
-`);
+    let pyodide: PyodideInstance | null = null;
+    let lastInitErr: Error | null = null;
+    for (const indexURL of indexUrls) {
+      try {
+        const candidate = await window.loadPyodide!({ indexURL });
+        await candidate.loadPackage(['micropip', 'numpy', 'pandas', 'matplotlib']);
+        pyodide = candidate;
+        break;
+      } catch (e) {
+        lastInitErr = e instanceof Error ? e : new Error(String(e));
+      }
+    }
+    if (!pyodide) {
+      throw lastInitErr ?? new Error('Failed to initialize Pyodide');
+    }
 
-      await pyodide.runPythonAsync(`
+    const earthyPy = SAGE_AI_CHART_COLORS.map((c) => `'${c}'`).join(', ');
+    await pyodide.runPythonAsync(`
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -226,6 +258,19 @@ import io
 import base64
 import sys
 from io import StringIO
+from cycler import cycler
+
+_SAGE_AI_COLORS = [${earthyPy}]
+plt.rcParams['axes.prop_cycle'] = cycler(color=_SAGE_AI_COLORS)
+plt.rcParams['text.color'] = '#334033'
+plt.rcParams['axes.labelcolor'] = '#3d503d'
+plt.rcParams['xtick.color'] = '#4a4a45'
+plt.rcParams['ytick.color'] = '#4a4a45'
+plt.rcParams['grid.color'] = '#e0dbd2'
+plt.rcParams['grid.alpha'] = 0.8
+plt.rcParams['axes.edgecolor'] = '#c7d2c7'
+plt.rcParams['figure.facecolor'] = 'white'
+plt.rcParams['axes.facecolor'] = '#faf9f6'
 
 def _capture_output():
     return StringIO()
@@ -245,36 +290,79 @@ def _save_figure_base64():
     return figures
 `);
 
-      pyodideRef.current = pyodide;
+    sharedPyodide = pyodide;
+    return pyodide;
+  };
+
+  initPromise = runInit().catch((err) => {
+    initPromise = null;
+    sharedPyodide = null;
+    throw err;
+  });
+
+  const py = await initPromise;
+  return py;
+}
+
+export function usePyodide() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadPyodide = useCallback(async (options?: PyodideRunOptions) => {
+    const { signal } = options ?? {};
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      await Promise.race([getOrInitPyodide(), abortPromise(signal)]);
       setIsReady(true);
     } catch (err) {
+      if (isAbortError(err)) {
+        return;
+      }
       setLoadError(err instanceof Error ? err.message : 'Failed to load Pyodide');
     } finally {
       setIsLoading(false);
-      loadingRef.current = false;
     }
   }, []);
 
-  const runCode = useCallback(async (code: string): Promise<ExecutionResult> => {
-    if (!pyodideRef.current) {
-      return {
-        success: false,
-        output: '',
-        error: 'Pyodide not loaded',
-        charts: [],
-        executionTime: 0,
-      };
-    }
+  const runCode = useCallback(
+    async (code: string, options?: PyodideRunOptions): Promise<ExecutionResult> => {
+      const { signal } = options ?? {};
+      const startTime = performance.now();
 
-    const startTime = performance.now();
-    const pyodide = pyodideRef.current;
+      if (signal?.aborted) {
+        return {
+          success: false,
+          output: '',
+          charts: [],
+          executionTime: 0,
+          cancelled: true,
+        };
+      }
 
-    try {
-      // Reject anything that imports outside the allowlist BEFORE asking
-      // Pyodide to fetch packages. This replaces the previous
-      // `loadPackagesFromImports(code)` call which would happily install
-      // arbitrary packages from PyPI on demand — directly contradicting the
-      // tool's own "no network or file access" promise.
+      let pyodide: PyodideInstance;
+      try {
+        pyodide = await Promise.race([getOrInitPyodide(), abortPromise(signal)]);
+      } catch (err) {
+        if (isAbortError(err)) {
+          return {
+            success: false,
+            output: '',
+            charts: [],
+            executionTime: performance.now() - startTime,
+            cancelled: true,
+          };
+        }
+        return {
+          success: false,
+          output: '',
+          error: err instanceof Error ? err.message : 'Failed to load Pyodide',
+          charts: [],
+          executionTime: performance.now() - startTime,
+        };
+      }
+
       const importCheck = checkPythonImports(code);
       if (!importCheck.allowed) {
         return {
@@ -286,7 +374,7 @@ def _save_figure_base64():
             .filter((m) => !['np', 'pd', 'plt'].includes(m))
             .join(', ')} are available.`,
           charts: [],
-          executionTime: 0,
+          executionTime: performance.now() - startTime,
         };
       }
 
@@ -296,7 +384,7 @@ _old_stdout = sys.stdout
 sys.stdout = _output_buffer
 
 try:
-${code.split('\n').map(line => '    ' + line).join('\n')}
+${code.split('\n').map((line) => '    ' + line).join('\n')}
 finally:
     sys.stdout = _old_stdout
 
@@ -304,46 +392,72 @@ _result_output = _get_output(_output_buffer)
 _result_charts = _save_figure_base64()
 `;
 
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(
-          () => reject(new Error(`Python execution timed out after ${PYTHON_EXEC_TIMEOUT_MS / 1000}s. The code may contain an infinite loop or be too computationally expensive.`)),
-          PYTHON_EXEC_TIMEOUT_MS
-        );
+      return enqueueRun(async () => {
+        const t0 = performance.now();
+        if (signal?.aborted) {
+          return {
+            success: false,
+            output: '',
+            charts: [],
+            executionTime: 0,
+            cancelled: true,
+          };
+        }
+        try {
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(
+              () =>
+                reject(
+                  new Error(
+                    `Python execution timed out after ${PYTHON_EXEC_TIMEOUT_MS / 1000}s. The code may contain an infinite loop or be too computationally expensive.`
+                  )
+                ),
+              PYTHON_EXEC_TIMEOUT_MS
+            );
+          });
+
+          await Promise.race([
+            pyodide.runPythonAsync(wrappedCode),
+            timeoutPromise,
+            abortPromise(signal),
+          ]);
+
+          const output = pyodide.globals.get('_result_output') as string;
+          const charts = pyodide.globals.get('_result_charts') as string[];
+          const executionTime = performance.now() - t0;
+
+          return {
+            success: true,
+            output: output || '',
+            charts: charts || [],
+            executionTime,
+          };
+        } catch (err) {
+          const executionTime = performance.now() - t0;
+          if (isAbortError(err)) {
+            return {
+              success: false,
+              output: '',
+              charts: [],
+              executionTime,
+              cancelled: true,
+            };
+          }
+          return {
+            success: false,
+            output: '',
+            error: err instanceof Error ? err.message : String(err),
+            charts: [],
+            executionTime,
+          };
+        }
       });
-
-      await Promise.race([pyodide.runPythonAsync(wrappedCode), timeoutPromise]);
-
-      const output = pyodide.globals.get('_result_output') as string;
-      const charts = pyodide.globals.get('_result_charts') as string[];
-
-      const executionTime = performance.now() - startTime;
-
-      return {
-        success: true,
-        output: output || '',
-        charts: charts || [],
-        executionTime,
-      };
-    } catch (err) {
-      const executionTime = performance.now() - startTime;
-      return {
-        success: false,
-        output: '',
-        error: err instanceof Error ? err.message : String(err),
-        charts: [],
-        executionTime,
-      };
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      pyodideRef.current = null;
-    };
-  }, []);
+    },
+    []
+  );
 
   const setGlobal = useCallback((name: string, value: unknown) => {
-    pyodideRef.current?.globals.set(name, value);
+    sharedPyodide?.globals.set(name, value);
   }, []);
 
   return {

@@ -83,7 +83,7 @@ export const dashboardPayloadSchema = z.object({
   title: z.string().min(1).max(140),
   description: z.string().max(500).optional(),
   cells: z.array(dashboardCellSchema).min(1).max(8),
-  footer_note: z.string().max(400).optional(),
+  footer_note: z.string().max(800).optional(),
 });
 
 export type DashboardPayload = z.infer<typeof dashboardPayloadSchema>;

@@ -26,15 +26,14 @@ import { Modal, ModalContent } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import type { DashboardPayload, DashboardCell } from '@/lib/sage-ai/ui-parts';
 import { downloadElementAsPng, slugifyChartFilename } from '@/lib/sage-ai/download-chart-png';
+import {
+  SAGE_AI_CHART_COLORS,
+  SAGE_AI_CHART_GRID_STROKE,
+  formatChartSeriesLegendLabel,
+} from '@/lib/sage-ai/chart-palette';
+import { buildScatterChartData } from '@/lib/sage-ai/scatter-chart-data';
 
-const DEFAULT_SERIES_COLORS = [
-  '#4b8b6f',
-  '#7ca8bf',
-  '#d38c5b',
-  '#b5705f',
-  '#8a5ea8',
-  '#9a9a9a',
-];
+const DEFAULT_SERIES_COLORS: readonly string[] = [...SAGE_AI_CHART_COLORS];
 
 const CHART_HEIGHT_COMPACT = 220;
 const CHART_HEIGHT_EXPANDED = 420;
@@ -68,14 +67,17 @@ function resolveSeries(cell: DashboardCell) {
   if (cell.series && cell.series.length > 0) {
     return cell.series.map((s, i) => ({
       key: s.key,
-      label: s.label ?? s.key,
+      label:
+        s.label != null && String(s.label).trim() !== ''
+          ? s.label
+          : formatChartSeriesLegendLabel(s.key),
       color: s.color ?? DEFAULT_SERIES_COLORS[i % DEFAULT_SERIES_COLORS.length],
     }));
   }
   const ys = cell.y_keys ?? [];
   return ys.map((k, i) => ({
     key: k,
-    label: k,
+    label: formatChartSeriesLegendLabel(k),
     color: DEFAULT_SERIES_COLORS[i % DEFAULT_SERIES_COLORS.length],
   }));
 }
@@ -84,9 +86,9 @@ function StatCell({ cell }: { cell: DashboardCell }) {
   const direction = cell.delta?.direction ?? 'neutral';
   const deltaColor =
     direction === 'up'
-      ? 'text-emerald-600 dark:text-emerald-400'
+      ? 'text-sage-700 dark:text-sage-400'
       : direction === 'down'
-        ? 'text-red-600 dark:text-red-400'
+        ? 'text-amber-800 dark:text-amber-500/90'
         : 'text-gray-500 dark:text-gray-400';
   return (
     <div className="flex h-full flex-col justify-between">
@@ -126,24 +128,51 @@ function StatCell({ cell }: { cell: DashboardCell }) {
 }
 
 function ChartCell({ cell, height }: { cell: DashboardCell; height: number }) {
-  const rows = cell.rows ?? [];
+  const rawRows = cell.rows ?? [];
   const series = resolveSeries(cell);
   const xKey = cell.x_key ?? 'name';
+  const yKey0 = series[0]?.key ?? 'y';
 
-  if (rows.length === 0) {
+  const scatterPrepped = useMemo(() => {
+    if (cell.kind !== 'scatter') return null;
+    return buildScatterChartData(rawRows, xKey, yKey0);
+  }, [cell.kind, rawRows, xKey, yKey0]);
+
+  if (rawRows.length === 0) {
     return (
-      <div className="flex h-full min-h-[180px] items-center justify-center text-xs text-gray-500 dark:text-gray-400">
-        No data
+      <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-1 px-2 text-center text-xs text-gray-500 dark:text-gray-400">
+        <span>No chart data</span>
+        <span className="max-w-[28ch] text-[11px] leading-snug text-gray-400 dark:text-gray-500">
+          This panel was sent without <code className="rounded bg-gray-100 px-0.5 font-mono dark:bg-gray-800">rows</code>
+          . The assistant should pass row data (e.g. from{' '}
+          <code className="rounded bg-gray-100 px-0.5 font-mono dark:bg-gray-800">aggregate_properties</code>{' '}
+          <code className="rounded bg-gray-100 px-0.5 font-mono dark:bg-gray-800">aggregates</code>).
+        </span>
       </div>
     );
   }
+
+  if (cell.kind === 'scatter' && (!scatterPrepped || scatterPrepped.rows.length === 0)) {
+    return (
+      <div className="flex h-full min-h-[180px] items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+        No plottable points (add numeric Y values, e.g. rate columns)
+      </div>
+    );
+  }
+
+  const rows =
+    cell.kind === 'scatter' && scatterPrepped ? scatterPrepped.rows : rawRows;
+  const scatterXType =
+    cell.kind === 'scatter' && scatterPrepped
+      ? scatterPrepped.xType
+      : 'number';
 
   switch (cell.kind) {
     case 'bar':
       return (
         <ResponsiveContainer width="100%" height={height}>
           <BarChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke={SAGE_AI_CHART_GRID_STROKE} />
             <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip />
@@ -158,7 +187,7 @@ function ChartCell({ cell, height }: { cell: DashboardCell; height: number }) {
       return (
         <ResponsiveContainer width="100%" height={height}>
           <LineChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke={SAGE_AI_CHART_GRID_STROKE} />
             <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip />
@@ -181,7 +210,7 @@ function ChartCell({ cell, height }: { cell: DashboardCell; height: number }) {
       return (
         <ResponsiveContainer width="100%" height={height}>
           <AreaChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke={SAGE_AI_CHART_GRID_STROKE} />
             <XAxis dataKey={xKey} tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip />
@@ -228,31 +257,48 @@ function ChartCell({ cell, height }: { cell: DashboardCell; height: number }) {
         </ResponsiveContainer>
       );
     }
-    case 'scatter':
+    case 'scatter': {
+      const yKey = series[0]?.key ?? 'y';
+      const categoryX = scatterXType === 'category';
       return (
         <ResponsiveContainer width="100%" height={height}>
-          <ScatterChart margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <ScatterChart
+            margin={{
+              top: 8,
+              right: 8,
+              left: 0,
+              bottom: categoryX ? 36 : 6,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke={SAGE_AI_CHART_GRID_STROKE} />
             <XAxis
               dataKey={xKey}
-              type="number"
-              tick={{ fontSize: 11 }}
+              type={scatterXType}
+              allowDuplicatedCategory={categoryX}
+              tick={{
+                fontSize: 10,
+                angle: categoryX ? -30 : 0,
+                textAnchor: categoryX ? 'end' : 'middle',
+              }}
+              height={categoryX ? 50 : 30}
               name={xKey}
             />
             <YAxis
-              dataKey={series[0]?.key ?? 'y'}
+              dataKey={yKey}
               type="number"
               tick={{ fontSize: 11 }}
-              name={series[0]?.label ?? 'y'}
+              name={series[0]?.label ?? yKey}
             />
             <Tooltip cursor={{ strokeDasharray: '3 3' }} />
             <Scatter
+              name={series[0]?.label ?? yKey}
               data={rows}
               fill={series[0]?.color ?? DEFAULT_SERIES_COLORS[0]}
             />
           </ScatterChart>
         </ResponsiveContainer>
       );
+    }
     default:
       return (
         <div className="text-xs text-gray-500">

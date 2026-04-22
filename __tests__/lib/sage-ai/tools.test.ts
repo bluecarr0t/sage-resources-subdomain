@@ -201,6 +201,87 @@ describe('createSageAiTools', () => {
     expect(res).toHaveProperty('error');
   });
 
+  it('strips empty-string filter values on aggregate_properties before calling the RPC', async () => {
+    // Regression: the model often "fills in every slot" with `""` for optional
+    // string filters (e.g. `state: ""`). Without this strip, the v2 aggregate
+    // RPC runs `state ILIKE ''` (no wildcard, empty pattern) and returns 0
+    // rows for what should have been a country-only aggregate.
+    const rpcCalls: Array<{ name: string; args: Record<string, unknown> }> = [];
+    const supabase = {
+      from() {
+        const { builder } = makeBuilder({ data: [], error: null, count: 0 });
+        return builder;
+      },
+      rpc(name: string, args: Record<string, unknown>) {
+        rpcCalls.push({ name, args });
+        return Promise.resolve({
+          data: [
+            { key: 'BC', count: 69, avg_daily_rate: 250, total_sites: 500 },
+            { key: 'ON', count: 49, avg_daily_rate: 300, total_sites: 400 },
+          ],
+          error: null,
+        });
+      },
+    };
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    const res = await tools.aggregate_properties.execute!(
+      {
+        group_by: 'state',
+        filters: {
+          state: '',
+          country: 'Canada',
+          unit_type: '   ',
+          is_closed: 'No',
+          is_glamping_property: 'Yes',
+        },
+      },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    expect(rpcCalls).toHaveLength(1);
+    const sentFilters = rpcCalls[0]!.args.filters as Record<string, unknown>;
+    expect(sentFilters).not.toHaveProperty('state');
+    expect(sentFilters).not.toHaveProperty('unit_type');
+    expect(sentFilters.country).toBe('Canada');
+    expect(sentFilters.is_closed).toBe('No');
+    expect(sentFilters.is_glamping_property).toBe('Yes');
+    const typed = res as {
+      total_groups: number;
+      applied_filters: Record<string, unknown>;
+      summary: string;
+    };
+    expect(typed.total_groups).toBe(2);
+    expect(typed.applied_filters).not.toHaveProperty('state');
+    expect(typed.summary).toMatch(/country=Canada/);
+  });
+
+  it('rejects `state: "Canada"` on aggregate_properties with a corrective error', async () => {
+    const supabase = {
+      from() {
+        const { builder } = makeBuilder({ data: [], error: null, count: 0 });
+        return builder;
+      },
+      rpc() {
+        return Promise.resolve({ data: [], error: null });
+      },
+    };
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    const res = await tools.aggregate_properties.execute!(
+      {
+        group_by: 'unit_type',
+        filters: { state: 'Canada' },
+      },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    const typed = res as { error?: string; aggregates: null; hint?: string };
+    expect(typed.error).toBeDefined();
+    expect(typed.error).toMatch(/country, not a state/i);
+    expect(typed.error).toMatch(/filters\.country=/);
+  });
+
   it('drops filter keys with malicious identifiers on count_rows', async () => {
     const { supabase } = makeSupabaseStub({ count: 3, error: null });
     const tools = createSageAiTools(
@@ -275,6 +356,121 @@ describe('createSageAiTools', () => {
     expect(res).toMatchObject({ count: 0 });
     expect(res).not.toHaveProperty('_emptyRetry');
     expect(res).not.toHaveProperty('error');
+  });
+
+  it('count_unique_properties dedupes by trimmed-lowercase address with name+city+state+country fallback', async () => {
+    // 5 unit-level rows representing 3 distinct properties:
+    //  - "Radius Retreat" appears on 2 rows with the SAME address (different
+    //    casing/whitespace) → dedupes to 1.
+    //  - "Daydreamer Domes" has a null address and is split across 2 rows;
+    //    falls back to name+city+state+country → dedupes to 1.
+    //  - "Cheekye Ranch" is a single distinct address → 1.
+    const rows = [
+      {
+        address: '7058 Hwy 95',
+        property_name: 'Radius Retreat',
+        city: 'Radium',
+        state: 'BC',
+        country: 'Canada',
+        quantity_of_units: 4,
+        rate_avg_retail_daily_rate: 250,
+      },
+      {
+        address: ' 7058 hwy 95 ',
+        property_name: 'Radius Retreat',
+        city: 'Radium',
+        state: 'BC',
+        country: 'Canada',
+        quantity_of_units: 6,
+        rate_avg_retail_daily_rate: 350,
+      },
+      {
+        address: null,
+        property_name: 'Daydreamer Domes',
+        city: 'Tofino',
+        state: 'BC',
+        country: 'Canada',
+        quantity_of_units: 3,
+        rate_avg_retail_daily_rate: null,
+      },
+      {
+        address: '',
+        property_name: 'Daydreamer Domes',
+        city: 'Tofino',
+        state: 'BC',
+        country: 'Canada',
+        quantity_of_units: 2,
+        rate_avg_retail_daily_rate: 0,
+      },
+      {
+        address: '60001 Squamish Valley Rd',
+        property_name: 'Cheekye Ranch',
+        city: 'Squamish',
+        state: 'BC',
+        country: 'Canada',
+        quantity_of_units: 5,
+        rate_avg_retail_daily_rate: 500,
+      },
+    ];
+    // Return all rows on the first page; second page returns empty so the
+    // pagination loop terminates after one iteration.
+    let callCount = 0;
+    const supabase = {
+      from() {
+        const builder = new Proxy({}, {
+          get(_t, prop) {
+            if (prop === 'then') {
+              callCount += 1;
+              const result =
+                callCount === 1
+                  ? { data: rows, error: null }
+                  : { data: [], error: null };
+              return (resolve: (v: unknown) => unknown) => resolve(result);
+            }
+            return () => builder;
+          },
+        });
+        return builder;
+      },
+    };
+
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    const res = await tools.count_unique_properties.execute!(
+      { filters: { country: 'Canada', is_glamping_property: 'Yes' } },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    const typed = res as {
+      unique_properties: number;
+      unit_level_rows: number;
+      rows_with_fallback_key: number;
+      total_units: number;
+      avg_retail_daily_rate: number | null;
+      rated_rows_counted: number;
+    };
+    expect(typed.unique_properties).toBe(3);
+    expect(typed.unit_level_rows).toBe(5);
+    expect(typed.rows_with_fallback_key).toBe(2);
+    expect(typed.total_units).toBe(20);
+    // 3 rated rows: 250, 350, 500 (rate=0 and rate=null are excluded)
+    expect(typed.rated_rows_counted).toBe(3);
+    expect(typed.avg_retail_daily_rate).toBeCloseTo((250 + 350 + 500) / 3, 5);
+  });
+
+  it('count_unique_properties rejects country names passed in filters.state with a corrective error', async () => {
+    const { supabase } = makeSupabaseStub({ data: [], error: null });
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    const res = await tools.count_unique_properties.execute!(
+      { filters: { state: 'Canada' } },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    const typed = res as { error?: string };
+    expect(typed.error).toBeDefined();
+    expect(typed.error).toMatch(/country, not a state/i);
+    expect(typed.error).toMatch(/filters\.country=/);
   });
 
   it('allows dynamic columns on campspot, rejecting malformed identifiers', async () => {

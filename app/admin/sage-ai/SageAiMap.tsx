@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { SAGE_AI_MAP_MARKER_HEX } from '@/lib/sage-ai/chart-palette';
 import type { MapPayload, MapMarkerColor } from '@/lib/sage-ai/ui-parts';
 
 // react-leaflet hits `window` during initialization; render it client-only.
@@ -14,14 +15,7 @@ const InnerMap = dynamic(() => import('./SageAiMapInner'), {
   ),
 });
 
-const MARKER_HEX: Record<MapMarkerColor, string> = {
-  sage: '#4b8b6f',
-  blue: '#3b82f6',
-  orange: '#f97316',
-  red: '#ef4444',
-  purple: '#8b5cf6',
-  gray: '#6b7280',
-};
+const MARKER_HEX: Record<MapMarkerColor, string> = SAGE_AI_MAP_MARKER_HEX;
 
 export function SageAiMap({ payload }: { payload: MapPayload }) {
   const hexLayers = useMemo(

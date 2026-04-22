@@ -215,3 +215,28 @@ function generateSessionTitle(messages: SessionMessage[]): string {
 
 /** Keep this aligned with messages/en.json → sageAi.sessionTitleFallback. */
 const SESSION_TITLE_FALLBACK = 'New chat';
+
+/**
+ * DELETE /api/admin/sage-ai/sessions — remove every Sage AI session for the
+ * signed-in admin. Child rows in `sage_ai_messages` and `sage_ai_feedback`
+ * cascade on session delete.
+ */
+export async function DELETE() {
+  const authResult = await requireAdminAuth();
+  if (!authResult.ok) {
+    return authResult.response;
+  }
+
+  const userId = authResult.session.user.id;
+  const { error } = await authResult.supabase
+    .from('sage_ai_sessions')
+    .delete()
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('[sage-ai/sessions] Delete all error:', error);
+    return NextResponse.json({ error: 'Failed to clear history' }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}

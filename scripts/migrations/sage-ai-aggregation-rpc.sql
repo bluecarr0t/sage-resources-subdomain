@@ -48,6 +48,11 @@ DECLARE
   v_unit_type             text := filters->>'unit_type';
   v_is_glamping_property  text := filters->>'is_glamping_property';
   v_is_closed             text := filters->>'is_closed';
+  v_city                  text := filters->>'city';
+  v_property_type         text := filters->>'property_type';
+  v_source                text := filters->>'source';
+  v_discovery_source      text := filters->>'discovery_source';
+  v_research_status       text := filters->>'research_status';
   sql_text                text;
 BEGIN
   IF NOT (group_by = ANY(allowed_columns)) THEN
@@ -55,8 +60,13 @@ BEGIN
       USING ERRCODE = 'invalid_parameter_value';
   END IF;
 
-  -- Build SQL with quote_ident (avoid format()/tuple edge cases) and keep $1..$5
-  -- aligned with EXECUTE USING — mismatches surface as "there is no parameter $N".
+  -- Build SQL with quote_ident (avoid format()/tuple edge cases) and keep
+  -- $1..$10 aligned with EXECUTE USING — mismatches surface as "there is no
+  -- parameter $N". `city`, `property_type`, `source`, `discovery_source`,
+  -- and `research_status` use exact-match equality (lowercased) because their
+  -- valid values are short, stable enums (e.g. research_status ∈
+  -- {published, in_progress, new}). State/country/unit_type keep the
+  -- ILIKE/contains semantics they had since v1 to be tolerant of casing.
   sql_text :=
     'SELECT '
       'COALESCE(' || quote_ident(group_by) || '::text, ''Unknown'') AS key, '
@@ -70,12 +80,18 @@ BEGIN
       'AND ($3::text IS NULL OR unit_type ILIKE ''%'' || $3 || ''%'') '
       'AND ($4::text IS NULL OR is_glamping_property = $4) '
       'AND ($5::text IS NULL OR is_closed = $5) '
+      'AND ($6::text IS NULL OR city ILIKE $6) '
+      'AND ($7::text IS NULL OR property_type ILIKE ''%'' || $7 || ''%'') '
+      'AND ($8::text IS NULL OR source = $8) '
+      'AND ($9::text IS NULL OR discovery_source = $9) '
+      'AND ($10::text IS NULL OR LOWER(research_status) = LOWER($10)) '
     'GROUP BY 1 '
     'ORDER BY 2 DESC '
     'LIMIT 500';
 
   RETURN QUERY EXECUTE sql_text
-    USING v_state, v_country, v_unit_type, v_is_glamping_property, v_is_closed;
+    USING v_state, v_country, v_unit_type, v_is_glamping_property, v_is_closed,
+          v_city, v_property_type, v_source, v_discovery_source, v_research_status;
 END;
 $$;
 

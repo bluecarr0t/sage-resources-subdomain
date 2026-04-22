@@ -335,6 +335,38 @@ interface EmptyRetryExhausted {
 }
 
 /**
+ * Strip filter entries the model passed as empty/whitespace strings.
+ *
+ * Models (especially smaller/faster ones) often "fill out" every optional
+ * filter slot with `""` instead of omitting the key. The Postgres aggregate
+ * RPC then runs `column ILIKE ''` which matches NOTHING (an empty pattern
+ * only matches an empty string, and our data has no empty-string values),
+ * so the call returns 0 rows and the model — having received what looks
+ * like a legitimate empty result — narrates "no data available". This
+ * helper makes the tools tolerant: an empty/whitespace filter value is
+ * treated identically to omitting the field, which is what the model
+ * almost certainly meant.
+ */
+function stripEmptyFilters<T extends Record<string, unknown> | undefined>(
+  filters: T
+): T {
+  if (!filters) return filters;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(filters)) {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed === '') continue;
+      out[key] = trimmed;
+    } else if (value === null || value === undefined) {
+      continue;
+    } else {
+      out[key] = value;
+    }
+  }
+  return out as T;
+}
+
+/**
  * Stable serialization for retry counter keys. Recursively sorts object keys
  * so `{a:1,b:2}` and `{b:2,a:1}` collide, and tolerates anything JSON can hold.
  */
@@ -548,7 +580,7 @@ export function createSageAiTools(
 
     query_properties: tool({
       description:
-        'Query the all_glamping_properties table with optional filters. Returns property data including name, location, pricing, and amenities. Use filters (state/city/country/unit_type/etc.) to narrow results. Limit defaults to 50.\n\n' +
+        'Query the all_glamping_properties table with optional filters. **Data grain:** rows are **by unit** (unit-type / unit offering at a physical **`address`**), not one row per property — the same resort may appear on multiple rows. For **property counts**, dedupe by **`address`** (trimmed); if `address` is null/empty, use **`property_name` + `city` + `state` + `country`**. **`quantity_of_units` is the authoritative per-row physical unit count** — for **any** total units, inventory, or unit-weighted calculation, **always sum `quantity_of_units`** over the result set (do not use `len(rows)` or `property_total_sites` unless the user explicitly asked for rows or sites). Returns name, location, pricing, and related fields. Use filters (state/city/country/unit_type/etc.) to narrow results. Limit defaults to 50.\n\n' +
         'STATE & REGION QUERIES — use the `filters.state` field, NOT the `near` parameter. Example: { filters: { state: "Texas" } }. The `state` filter accepts both 2-letter codes ("TX") and full names ("Texas") and is normalized server-side.\n\n' +
         'PROXIMITY QUERIES — only set `near` when the user asked for results within a radius of a specific point (e.g. "within 50 km of Austin", "near Collective Retreats Vail"). When `near` is set, you MUST first call geocode_property (or have the user supply real lat/lng); NEVER hand-write coordinates and NEVER pass {latitude:0, longitude:0} as a placeholder — that is rejected/ignored server-side and the user sees an error.',
       inputSchema: z.object({
@@ -608,6 +640,11 @@ export function createSageAiTools(
         order_ascending: z.boolean().optional().default(true).describe('Sort direction'),
       }),
       execute: async ({ filters, near, columns, limit, offset, order_by, order_ascending }) => {
+        // Drop empty-string filter values the model sometimes emits when it
+        // "fills out" every optional slot. See `stripEmptyFilters` for why
+        // this matters (an empty string would translate to `column ILIKE ''`
+        // and silently match zero rows).
+        filters = stripEmptyFilters(filters) as typeof filters;
         const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
           'all_glamping_properties',
           columns
@@ -1221,7 +1258,17 @@ export function createSageAiTools(
     }),
 
     count_rows: tool({
-      description: 'Get the count of rows in a table, optionally with filters.',
+      description:
+        'Get the count of rows in a table, optionally with filters. ' +
+        'IMPORTANT: passing no `filters` returns the WHOLE-TABLE count — never ' +
+        'narrate that number as a state/region/segment count. The result ' +
+        'envelope includes a `scope` ("whole_table" | "filtered") and a ' +
+        '`summary` string you must repeat verbatim (or paraphrase faithfully) ' +
+        'when citing the number.\n\n' +
+        'TABLE GRAIN — `all_glamping_properties`: rows are **unit-level** (unit-type lines tied to an `address`). ' +
+        'This tool counts **rows**, not unique properties or total units. For "how many properties", count **distinct addresses** ' +
+        '(fallback: `property_name`+`city`+`state`+`country` when `address` is empty) via `query_properties` and dedupe in your reasoning. ' +
+        'For "how many units" or any **unit inventory** total on `all_glamping_properties`, you must **sum `quantity_of_units`** (or call `count_unique_properties` for `total_units`). **Never** use this tool\'s row `count` as unit count; `quantity_of_units` is the per-record unit count.',
       inputSchema: z.object({
         table: z.enum(ALLOWED_TABLES).describe('Table to count rows from'),
         filters: z
@@ -1230,8 +1277,9 @@ export function createSageAiTools(
           .describe('Key-value pairs for equality filters'),
       }),
       execute: async ({ table, filters }) => {
+        const cleanedFilters = stripEmptyFilters(filters);
         const { allowed: allowedFilters, rejected: rejectedFilters } =
-          validateFilterKeys(table, filters);
+          validateFilterKeys(table, cleanedFilters);
 
         let query = supabase.from(table).select('*', { count: 'exact', head: true });
 
@@ -1245,10 +1293,37 @@ export function createSageAiTools(
           return { error: error.message, count: null };
         }
 
+        const safeCount = count ?? 0;
+        const filterEntries = Object.entries(allowedFilters);
+        const scope: 'whole_table' | 'filtered' =
+          filterEntries.length === 0 ? 'whole_table' : 'filtered';
+        const filterPretty = filterEntries
+          .map(([k, v]) => `${k}=${v}`)
+          .join(', ');
+        const glampingGrainNote =
+          table === 'all_glamping_properties'
+            ? ' Unit-grain table: this is ROWS (unit-type records per address), not unique properties; for property counts use distinct `address` (or name+city+state+country fallback). For unit totals, sum `quantity_of_units`.'
+            : '';
+
+        const summary =
+          scope === 'whole_table'
+            ? `Counted ALL rows in ${table} (no filters applied) = ${safeCount}. ` +
+              `Do NOT narrate this as a regional/state/segment count.` +
+              glampingGrainNote
+            : `Counted rows in ${table} where ${filterPretty} = ${safeCount}.` + glampingGrainNote;
+
         return {
           table,
-          count: count ?? 0,
+          count: safeCount,
           filters: allowedFilters,
+          scope,
+          summary,
+          ...(table === 'all_glamping_properties'
+            ? {
+                data_grain:
+                  'Unit-level rows tied to `address`. `count` = database rows. Unique properties = distinct `address` (trimmed), or `property_name|city|state|country` when address missing. Units in scope = sum of `quantity_of_units`.',
+              }
+            : {}),
           ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
         };
       },
@@ -1329,7 +1404,11 @@ export function createSageAiTools(
 
     aggregate_properties: tool({
       description:
-        'Get aggregate statistics for properties grouped by a column. Useful for summaries like "count by state" or "average rate by unit type".',
+        'Get aggregate statistics for properties grouped by a column. Useful for summaries like "average rate by unit type" or row-count breakdowns by `state`. ' +
+        '**Grain:** `all_glamping_properties` is **unit-level**; `count` in each group is the number of **rows** (unit lines), not distinct addresses. For **unique property counts** by segment, use `query_properties` and count distinct `address` (or the name+city+state+country fallback). For **unit inventory, "how many units", or any total that should reflect physical units**, **always sum `quantity_of_units`** over the relevant rows — it is the exact per-row unit count; **do not** use row `count` or `property_total_sites` as a substitute unless the user asked for those metrics explicitly. ' +
+        'IMPORTANT — country vs state: pass country names ("Canada", "Mexico", "United States") in `filters.country`, NEVER in `filters.state`. ' +
+        'The `state` filter only matches US state codes/names (CO, Colorado, …) and Canadian province codes (BC, ON, AB, QC, NS, NB, MB, SK, PE, NL, YT, NT, NU). ' +
+        'The result envelope echoes `applied_filters` and a `summary` string — cite those when narrating the result so you do not misattribute the slice.',
       inputSchema: z.object({
         group_by: z
           .enum(PROPERTIES_FILTERABLE_COLUMNS)
@@ -1337,26 +1416,89 @@ export function createSageAiTools(
         filters: z
           .object({
             state: z.string().optional(),
+            city: z.string().optional(),
             country: z.string().optional(),
             unit_type: z.string().optional(),
+            property_type: z.string().optional(),
+            source: z.string().optional(),
+            discovery_source: z.string().optional(),
+            research_status: z
+              .string()
+              .optional()
+              .describe(
+                'Push "published only" / "researched only" filters down here instead of post-filtering in Python. Call get_column_values({column:"research_status"}) first if unsure which casing is in the data.'
+              ),
             is_glamping_property: z.enum(['Yes', 'No']).optional(),
             is_closed: z.enum(['Yes', 'No']).optional(),
           })
           .optional(),
       }),
       execute: async ({ group_by, filters }) => {
-        const payload: Record<string, unknown> = filters ? { ...filters } : {};
+        // Models often "fill in every slot" with empty strings — strip those
+        // before they reach the RPC, where `state ILIKE ''` would match zero
+        // rows and silently kill the whole aggregation.
+        const cleanedFilters = stripEmptyFilters(filters);
+        const payload: Record<string, unknown> = { ...cleanedFilters };
         if (typeof payload.state === 'string' && payload.state.trim()) {
           const n = normalizeState(payload.state);
           if (n) payload.state = n;
         }
+
+        // Catch the common "state: 'Canada'" mistake before we round-trip to
+        // Postgres and return an empty result the model would then misnarrate.
+        // We accept US state codes/names (handled by normalizeState above) and
+        // Canadian province codes; anything else is almost certainly a country
+        // name or region the caller mis-routed into `state`.
+        const COUNTRY_NAMES = new Set([
+          'canada', 'mexico', 'united states', 'usa', 'us', 'u.s.',
+          'u.s.a.', 'united kingdom', 'uk', 'australia', 'new zealand',
+          'france', 'germany', 'italy', 'spain', 'portugal', 'ireland',
+          'iceland', 'norway', 'sweden', 'finland', 'denmark', 'japan',
+        ]);
+        const CA_PROVINCE_CODES = new Set([
+          'BC', 'ON', 'AB', 'QC', 'NS', 'NB', 'MB', 'SK', 'PE', 'NL', 'YT', 'NT', 'NU',
+        ]);
+        if (typeof payload.state === 'string') {
+          const raw = payload.state.trim();
+          const upper = raw.toUpperCase();
+          const lower = raw.toLowerCase();
+          const looksLikeUsState =
+            normalizeState(raw) !== null || raw.length > 2;
+          const looksLikeCaProvince = CA_PROVINCE_CODES.has(upper);
+          if (COUNTRY_NAMES.has(lower) && !looksLikeCaProvince) {
+            return {
+              error:
+                `\`state\` filter "${raw}" is a country, not a state/province. ` +
+                `Re-call aggregate_properties with filters.country="${raw}" (and drop filters.state) ` +
+                `to aggregate across the whole country.`,
+              aggregates: null,
+              applied_filters: payload,
+              hint:
+                'aggregate_properties.filters.state accepts US state codes/names ' +
+                '(CO, Colorado) and Canadian province codes (BC, ON, AB, QC, NS, NB, MB, SK, PE, NL, YT, NT, NU). ' +
+                'Use filters.country for country-level slicing.',
+            };
+          }
+          // Surface a soft warning for unrecognized state values — we still
+          // run the query (the value might be a regional shorthand we do not
+          // know about) but flag it so the model does not narrate empty
+          // results as "no data" without checking the filter.
+          if (!looksLikeUsState && !looksLikeCaProvince) {
+            payload._state_warning = `state value "${raw}" did not match any recognized US state or Canadian province; the aggregate may return 0 groups`;
+          }
+        }
+        const stateWarning = typeof payload._state_warning === 'string'
+          ? (payload._state_warning as string)
+          : null;
+        if (stateWarning) delete payload._state_warning;
+
         const { data, error } = await supabase.rpc('aggregate_properties_v2', {
           group_by,
           filters: payload,
         });
 
         if (error) {
-          return { error: error.message, aggregates: null };
+          return { error: error.message, aggregates: null, applied_filters: payload };
         }
 
         const rows = (data ?? []) as Array<{
@@ -1373,6 +1515,26 @@ export function createSageAiTools(
           total_sites: Number(r.total_sites),
         }));
 
+        const filterEntries = Object.entries(payload);
+        const filterPretty = filterEntries
+          .map(([k, v]) => `${k}=${String(v)}`)
+          .join(', ');
+        const scope: 'whole_table' | 'filtered' =
+          filterEntries.length === 0 ? 'whole_table' : 'filtered';
+        const summary =
+          aggregates.length === 0
+            ? `Aggregated all_glamping_properties grouped by ${group_by} ` +
+              (scope === 'whole_table'
+                ? '(no filters)'
+                : `where ${filterPretty}`) +
+              ` → 0 groups. Likely the filters did not match any rows; ` +
+              `verify them via get_column_values or count_rows before reporting "no data".`
+            : `Aggregated all_glamping_properties grouped by ${group_by} ` +
+              (scope === 'whole_table'
+                ? '(no filters)'
+                : `where ${filterPretty}`) +
+              ` → ${aggregates.length} groups.`;
+
         return handleEmptyResult(
           'aggregate_properties',
           { group_by, filters },
@@ -1380,10 +1542,188 @@ export function createSageAiTools(
             group_by,
             aggregates,
             total_groups: aggregates.length,
+            applied_filters: payload,
+            scope,
+            summary,
+            ...(stateWarning ? { warnings: [stateWarning] } : {}),
           },
           aggregates.length === 0,
-          `No groups returned for group_by="${group_by}". Try a different group_by column or remove a filter.`
+          `No groups returned for group_by="${group_by}" with filters ${
+            filterPretty || '(none)'
+          }. Common causes: passing a country name in filters.state ` +
+            `(use filters.country instead), or filtering on a value that does not exist ` +
+            `in the column (call get_column_values to enumerate valid values).`
         );
+      },
+    }),
+
+    count_unique_properties: tool({
+      description:
+        'Server-side **distinct-property** count for `all_glamping_properties`. ' +
+        'Use this whenever the user asks "how many properties / locations / resorts" — never count rows yourself, and never hand-count from a returned list. ' +
+        'Dedupe key: trimmed lowercase `address`. When `address` is null/empty, falls back to `property_name|city|state|country` (also trimmed/lowercased). ' +
+        '**`total_units` in the result is always the sum of `quantity_of_units`** — the authoritative physical-unit inventory for the filtered rows; never reinterpret it as row count. Also returns the **average `rate_avg_retail_daily_rate`** (across rated rows only) so a single call answers the typical KPI tile question.\n\n' +
+        'Country goes in `filters.country` ("Canada", "United States"); state/province goes in `filters.state`. ' +
+        'For "true glamping" set `filters.is_glamping_property = "Yes"` (the user usually means this). ' +
+        'For "published only" / "researched only" / "verified only", push the filter down via `filters.research_status` (call `get_column_values({ column: "research_status" })` first if you do not know the exact valid values — do NOT guess "Published" vs "published"). ' +
+        'Always prefer pushing a new filter into THIS tool over filtering injected `data` in Python downstream — the injected rows may not contain the column you want to filter on.',
+      inputSchema: z.object({
+        filters: z
+          .object({
+            state: z.string().optional(),
+            city: z.string().optional(),
+            country: z.string().optional(),
+            unit_type: z.string().optional(),
+            property_type: z.string().optional(),
+            source: z.string().optional(),
+            discovery_source: z.string().optional(),
+            research_status: z.string().optional(),
+            is_glamping_property: z.enum(['Yes', 'No']).optional(),
+            is_closed: z.enum(['Yes', 'No']).optional(),
+          })
+          .optional()
+          .describe(
+            'Equality filters applied before deduplication. All fields here mirror PROPERTIES_FILTERABLE_COLUMNS so any slice the user describes can be pushed down server-side.'
+          ),
+      }),
+      execute: async ({ filters }) => {
+        const cleaned = stripEmptyFilters(filters) ?? {};
+        // Same country-vs-state defensive check the aggregate tool uses, so a
+        // model mistake doesn't silently produce 0 properties.
+        if (typeof cleaned.state === 'string' && cleaned.state.trim()) {
+          const raw = cleaned.state.trim();
+          const COUNTRY_NAMES = new Set([
+            'canada', 'mexico', 'united states', 'usa', 'us',
+            'u.s.', 'u.s.a.', 'united kingdom', 'uk', 'australia',
+          ]);
+          if (COUNTRY_NAMES.has(raw.toLowerCase())) {
+            return {
+              error:
+                `\`state\` filter "${raw}" is a country, not a state/province. ` +
+                `Re-call count_unique_properties with filters.country="${raw}".`,
+              unique_properties: null,
+              applied_filters: cleaned,
+            };
+          }
+          const normalized = normalizeState(raw);
+          if (normalized) cleaned.state = normalized;
+        }
+
+        // Page through results in chunks of 1000 (Supabase's default cap).
+        // For typical country-level queries the unit-level row count is well
+        // under 10k, so 10 pages is a hard ceiling that protects us from
+        // accidentally fetching the entire table when filters are missing.
+        const PAGE_SIZE = 1000;
+        const MAX_PAGES = 10;
+        type Row = {
+          address: string | null;
+          property_name: string | null;
+          city: string | null;
+          state: string | null;
+          country: string | null;
+          quantity_of_units: number | null;
+          rate_avg_retail_daily_rate: number | null;
+        };
+
+        const collected: Row[] = [];
+        for (let page = 0; page < MAX_PAGES; page += 1) {
+          let q = supabase
+            .from('all_glamping_properties')
+            .select(
+              'address, property_name, city, state, country, quantity_of_units, rate_avg_retail_daily_rate'
+            )
+            .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
+          for (const [k, v] of Object.entries(cleaned)) {
+            q = q.eq(k, v as string);
+          }
+          const { data, error } = await q;
+          if (error) {
+            return {
+              error: error.message,
+              unique_properties: null,
+              applied_filters: cleaned,
+            };
+          }
+          const rows = (data ?? []) as Row[];
+          collected.push(...rows);
+          if (rows.length < PAGE_SIZE) break;
+        }
+
+        const truncated = collected.length === MAX_PAGES * PAGE_SIZE;
+
+        const seen = new Set<string>();
+        let usedFallback = 0;
+        let totalUnits = 0;
+        let unitsRowsCounted = 0;
+        let rateSum = 0;
+        let rateCount = 0;
+        for (const r of collected) {
+          const addr =
+            typeof r.address === 'string' ? r.address.trim().toLowerCase() : '';
+          let key: string;
+          if (addr.length > 0) {
+            key = `addr:${addr}`;
+          } else {
+            usedFallback += 1;
+            key =
+              'fb:' +
+              [r.property_name, r.city, r.state, r.country]
+                .map((v) => (typeof v === 'string' ? v.trim().toLowerCase() : ''))
+                .join('|');
+          }
+          seen.add(key);
+
+          if (typeof r.quantity_of_units === 'number' && Number.isFinite(r.quantity_of_units)) {
+            totalUnits += r.quantity_of_units;
+            unitsRowsCounted += 1;
+          }
+          if (
+            typeof r.rate_avg_retail_daily_rate === 'number' &&
+            Number.isFinite(r.rate_avg_retail_daily_rate) &&
+            r.rate_avg_retail_daily_rate > 0
+          ) {
+            rateSum += r.rate_avg_retail_daily_rate;
+            rateCount += 1;
+          }
+        }
+
+        const filterPretty = Object.entries(cleaned)
+          .map(([k, v]) => `${k}=${String(v)}`)
+          .join(', ');
+        const scope: 'whole_table' | 'filtered' =
+          Object.keys(cleaned).length === 0 ? 'whole_table' : 'filtered';
+        const avgRate = rateCount > 0 ? rateSum / rateCount : null;
+        const summary =
+          `Counted distinct addresses in all_glamping_properties ` +
+          (scope === 'whole_table' ? '(no filters)' : `where ${filterPretty}`) +
+          ` → ${seen.size} unique properties from ${collected.length} unit-level rows ` +
+          `(${usedFallback} used name+city+state+country fallback). ` +
+          `Total units (sum quantity_of_units) = ${totalUnits} across ${unitsRowsCounted} rows. ` +
+          (avgRate !== null
+            ? `Avg retail daily rate = ${avgRate.toFixed(2)} across ${rateCount} rated rows.`
+            : `No rated rows in scope.`);
+
+        return {
+          unique_properties: seen.size,
+          unit_level_rows: collected.length,
+          rows_with_address: collected.length - usedFallback,
+          rows_with_fallback_key: usedFallback,
+          total_units: totalUnits,
+          unit_rows_counted: unitsRowsCounted,
+          avg_retail_daily_rate: avgRate,
+          rated_rows_counted: rateCount,
+          applied_filters: cleaned,
+          scope,
+          truncated,
+          summary,
+          ...(truncated
+            ? {
+                warnings: [
+                  `Hit page cap of ${MAX_PAGES * PAGE_SIZE} rows; counts may be undercounts. Add more filters to narrow the slice.`,
+                ],
+              }
+            : {}),
+        };
       },
     }),
 
@@ -1402,6 +1742,7 @@ NOT AVAILABLE (do not import or attempt to use):
 
 IMPORTANT RULES:
 - If you need data from a previous query, use the special variable 'data' which will contain the query results as a list of dictionaries.
+- When analyzing all_glamping_properties rows: quantity_of_units is the exact unit count per record — sum it for total units or unit-weighted metrics; do not substitute row count unless the user asked for row/listing counts.
 - For charts, use matplotlib and call plt.show() at the end.
 - Use print() for any text output you want to display.
 - Execution time is bounded (~30s wall-clock); WASM cannot be hard-killed mid-computation, so avoid infinite loops or O(n^4)-style work over large arrays.

@@ -30,7 +30,7 @@ const generateDashboardInputSchema = z.object({
   title: z.string().min(1).max(140),
   description: z.string().max(500).optional(),
   cells: z.array(dashboardCellSchema).min(1).max(8),
-  footer_note: z.string().max(400).optional(),
+  footer_note: z.string().max(800).optional(),
 });
 
 const visualizeOnMapInputSchema = z.object({
@@ -53,11 +53,17 @@ export function createVisualizationTools() {
 
 Use this INSTEAD of generate_python_code when the user wants charts, KPI tiles, or a multi-panel summary. It's much faster than Pyodide, interactive, and works on mobile.
 
+CRITICAL — chart cells need real \`rows\`:
+- \`stat\` cells use \`value\` / \`value_format\` only; they do **not** need \`rows\`.
+- Every **bar / line / area / pie / scatter** cell MUST include a **non-empty** \`rows\` array. If you omit \`rows\` or pass \`[]\`, the chart shows **"No data"** in the UI — this is not a model bug; the payload was incomplete.
+- After \`aggregate_properties\`, copy the tool's \`aggregates\` array into each chart cell as \`rows\` (same objects). Set \`x_key\` to the \`group_by\` column name (e.g. \`unit_type\`, \`state\`). Set \`y_keys\` to the metric keys present on each row, e.g. \`["count"]\`, \`["avg_daily_rate"]\`, \`["total_sites"]\`, or multiple for grouped bars. Example for unit_type breakdown: \`rows\` = aggregates, \`x_key\` = "unit_type", \`y_keys\` = ["total_sites", "avg_daily_rate"].
+
 Rules:
-- Pass the rows you've already gathered via query_properties / aggregate_properties_v2. Do NOT invent numbers.
+- Pass the rows you've already gathered via query_properties or the \`aggregates\` array from aggregate_properties. Do NOT invent numbers.
 - Kinds available: ${DASHBOARD_CHART_KINDS.join(', ')}. Use \`stat\` for big-number KPI tiles.
 - Keep \`cells.length\` <= 8. Aim for 2–4 cells for most asks.
-- Each chart cell needs \`rows\` plus \`x_key\` and either \`y_keys\` (bar/line/area/scatter) or \`name_key\`+\`value_key\` (pie).
+- For \`scatter\`, \`x_key\` may be categorical; the client infers axis type. Y values may be numbers or numeric strings.
+- \`stat\` cells for **unit totals / inventory** on \`all_glamping_properties\` must use **sum of \`quantity_of_units\`** (e.g. \`count_unique_properties.total_units\`); never use raw row count as "units".
 - \`span\` is on a 12-col grid; use 6 for two-up, 12 for full-width, 4 for triple KPI rows.
 - Use \`value_format='currency_usd'\` when a series is money and \`'percent'\` when it's a ratio in [0,1].
 - Do NOT include PII or raw URLs in cell payloads.`,
@@ -80,7 +86,26 @@ Rules:
             data: null,
           };
         }
-        return parsed.data;
+        const chartKinds = new Set([
+          'bar',
+          'line',
+          'area',
+          'pie',
+          'scatter',
+        ]);
+        const hasEmptyChartRows = parsed.data.cells.some(
+          (c) => chartKinds.has(c.kind) && (!c.rows || c.rows.length === 0)
+        );
+        if (!hasEmptyChartRows) {
+          return parsed.data;
+        }
+        const hint =
+          'Some chart cells had no `rows`, so the UI shows "No data" for those panels. After aggregate_properties, set each bar/line/area/pie/scatter cell `rows` to the `aggregates` array, `x_key` to the group_by field (e.g. unit_type), and `y_keys` to plotted fields (count, avg_daily_rate, total_sites). Stat cells use `value`, not `rows`.';
+        const mergedFooter = [parsed.data.footer_note, hint].filter(Boolean).join('\n\n');
+        return {
+          ...parsed.data,
+          footer_note: mergedFooter.slice(0, 800),
+        };
       },
     }),
 

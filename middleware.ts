@@ -193,6 +193,13 @@ export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
 
+    // Self-hosted Pyodide lives in `public/pyodide/` at URLs `/pyodide/*`.
+    // next-intl would otherwise rewrite/redirect these to `/{locale}/pyodide/…`,
+    // which does not map to static files and breaks `python_stdlib.zip` loads.
+    if (pathname === '/pyodide' || pathname.startsWith('/pyodide/')) {
+      return NextResponse.next();
+    }
+
     // Protect /admin routes - require valid session (Google OAuth)
     if (pathname.startsWith('/admin')) {
       const response = NextResponse.next({ request });
@@ -334,7 +341,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - pyodide (WASM runtime in public/pyodide; must bypass i18n)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|pyodide).*)',
   ],
 };

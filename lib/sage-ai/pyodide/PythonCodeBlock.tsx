@@ -16,6 +16,7 @@ import {
 import { CollapsibleMarkdownPre } from '@/lib/sage-ai/CollapsibleMarkdownPre';
 import { isPyodideEnvironmentError } from '@/lib/sage-ai/pyodide/is-pyodide-environment-error';
 import { usePyodide, type ExecutionResult } from './use-pyodide';
+import { trackPythonBlockRun } from './python-execution-bridge';
 
 interface PythonCodeBlockProps {
   code: string;
@@ -35,36 +36,74 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
   const [isRequestingFix, setIsRequestingFix] = useState(false);
   const hasStartedRef = useRef(false);
   const errorReportedRef = useRef(false);
+  const runAbortRef = useRef<AbortController | null>(null);
+  const runInFlightRef = useRef(false);
 
   useEffect(() => {
     setIsRequestingFix(false);
     errorReportedRef.current = false;
   }, [code]);
 
-  const handleRun = useCallback(async () => {
-    if (isRunning) return;
+  const handleCancelRun = useCallback(() => {
+    runAbortRef.current?.abort();
+  }, []);
 
-    if (!isReady && !isLoading) {
-      await loadPyodide();
-    }
+  const handleRun = useCallback(async () => {
+    if (runInFlightRef.current) return;
+    runInFlightRef.current = true;
+
+    const ac = new AbortController();
+    runAbortRef.current = ac;
 
     setIsRunning(true);
     setResult(null);
     setIsRequestingFix(false);
     errorReportedRef.current = false;
 
+    const untrack = trackPythonBlockRun(ac);
     try {
+      if (!isReady) {
+        await loadPyodide({ signal: ac.signal });
+      }
+
+      if (ac.signal.aborted) {
+        setResult({
+          success: false,
+          output: '',
+          charts: [],
+          executionTime: 0,
+          cancelled: true,
+        });
+        return;
+      }
+
       let finalCode = code;
 
       if (onDataInject) {
         const data = onDataInject();
         if (data) {
           setGlobal('_injected_data_json', JSON.stringify(data));
-          finalCode = `import json\ndata = json.loads(_injected_data_json)\n\n${code}`;
+          // Surface the actual keys present on the first row in a Python
+          // assertion. If the model wrote `df['research_status']` against a
+          // payload that came from `aggregate_properties` (which only emits
+          // `key`/`count`/`avg_daily_rate`/`total_sites`), the assert fires a
+          // clear, self-explanatory error in the result tile — and the model
+          // sees on retry exactly which keys ARE available rather than a
+          // bare `KeyError: 'research_status'` it has to guess about.
+          const sampleKeys = data.length > 0 ? Object.keys(data[0]) : [];
+          const sampleKeysJson = JSON.stringify(sampleKeys);
+          finalCode =
+            `import json\n` +
+            `data = json.loads(_injected_data_json)\n` +
+            `# Injected from the previous tool call. Keys on the first row: ${sampleKeysJson}.\n` +
+            `# If you expected a column that's not in this list, re-run the original\n` +
+            `# query/aggregate tool with the right filter instead of post-filtering here.\n` +
+            `_data_keys = ${sampleKeysJson}\n` +
+            `\n${code}`;
         }
       }
 
-      const execResult = await runCode(finalCode);
+      const execResult = await runCode(finalCode, { signal: ac.signal });
       setResult(execResult);
 
       // Never auto-ask the model to "fix" code when Pyodide itself failed to load — that spams
@@ -72,6 +111,7 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
       const errMsg = execResult.error;
       if (
         errMsg &&
+        !execResult.cancelled &&
         onError &&
         !errorReportedRef.current &&
         retryCount < 1 &&
@@ -82,9 +122,14 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
         onError(errMsg, code);
       }
     } finally {
+      untrack();
+      runInFlightRef.current = false;
       setIsRunning(false);
+      if (runAbortRef.current === ac) {
+        runAbortRef.current = null;
+      }
     }
-  }, [code, isReady, isLoading, loadPyodide, runCode, onDataInject, isRunning, onError, retryCount, setGlobal]);
+  }, [code, isReady, loadPyodide, runCode, onDataInject, onError, retryCount, setGlobal]);
 
   useEffect(() => {
     if (autoRun && !hasStartedRef.current) {
@@ -110,11 +155,18 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
     <div className="my-3 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
       {/* Loading State */}
       {(isLoading || isRunning) && !result && (
-        <div className="px-4 py-8 flex flex-col items-center justify-center text-gray-500">
-          <Loader2 className="w-6 h-6 animate-spin mb-2" />
-          <span className="text-sm">
-            {isLoading ? 'Loading Python runtime...' : 'Generating visualization...'}
+        <div className="px-4 py-8 flex flex-col items-center justify-center gap-3 text-gray-500">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span className="text-sm text-center">
+            {isLoading ? 'Loading Python runtime...' : 'Running Python...'}
           </span>
+          <button
+            type="button"
+            onClick={handleCancelRun}
+            className="text-sm font-medium text-sage-700 underline-offset-2 hover:underline dark:text-sage-400"
+          >
+            {t('pythonStopRun')}
+          </button>
         </div>
       )}
 
@@ -134,6 +186,12 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
       {/* Results */}
       {result && (
         <>
+          {result.cancelled && (
+            <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/30">
+              <p className="text-sm text-amber-900 dark:text-amber-100">{t('pythonRunCancelled')}</p>
+            </div>
+          )}
+
           {/* Charts - Show prominently at the top */}
           {result.charts.length > 0 && (
             <div className="p-4 space-y-4">
@@ -166,7 +224,7 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
           )}
 
           {/* Error Output */}
-          {result.error && (
+          {result.error && !result.cancelled && (
             <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20">
               <pre className="text-sm text-red-600 dark:text-red-400 whitespace-pre-wrap font-mono">
                 {result.error}
@@ -197,6 +255,8 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
               <span className="text-xs text-gray-400">
                 {result.success ? (
                   <span className="text-emerald-600 dark:text-emerald-400">Completed in {(result.executionTime / 1000).toFixed(2)}s</span>
+                ) : result.cancelled ? (
+                  <span className="text-amber-700 dark:text-amber-300">Stopped</span>
                 ) : (
                   <span className="text-red-500">Failed</span>
                 )}

@@ -33,7 +33,7 @@ export async function GET(
 
   const { data: messageRows, error: msgError } = await authResult.supabase
     .from('sage_ai_messages')
-    .select('ordinal, role, parts')
+    .select('id, ordinal, role, parts')
     .eq('session_id', id)
     .eq('user_id', authResult.session.user.id)
     .order('ordinal', { ascending: true });
@@ -43,7 +43,20 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to load messages' }, { status: 500 });
   }
 
-  const messages = (messageRows ?? []).map((r) => ({ role: r.role, parts: r.parts }));
+  // useChat (`@ai-sdk/react`) requires every UIMessage to carry an `id` —
+  // React uses it as the list key and the SDK uses it for diffing during
+  // edit/regenerate. Without it, setMessages([...]) silently renders nothing
+  // and the user sees the empty welcome state. Backfill from the row's UUID,
+  // and synthesize a stable id from (session, ordinal) for any legacy row
+  // that somehow lacks one.
+  const messages = (messageRows ?? []).map((r) => ({
+    id:
+      typeof r.id === 'string' && r.id.length > 0
+        ? r.id
+        : `legacy-${id}-${r.ordinal}`,
+    role: r.role,
+    parts: Array.isArray(r.parts) ? r.parts : [],
+  }));
 
   return NextResponse.json({
     session: {
