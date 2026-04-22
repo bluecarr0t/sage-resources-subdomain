@@ -61,7 +61,12 @@ export async function GET(
     return new NextResponse(null, { status: 204 });
   }
 
-  if (marker.userId && marker.userId !== authResult.session.user.id) {
+  // Require an explicit owner on the marker. Older markers without `userId`
+  // would otherwise let any authenticated admin claim resume rights for any
+  // active stream id, leaking partial responses across users. Markers are
+  // always written with a userId by the chat route below; missing field means
+  // either a corrupt entry or a forged key, so we treat both as "no resume".
+  if (!marker.userId || marker.userId !== authResult.session.user.id) {
     return new NextResponse(null, { status: 204 });
   }
 
