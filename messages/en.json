@@ -1464,6 +1464,8 @@
       "saveQueryPlaceholder": "e.g., Monthly property count",
       "saveQueryConfirm": "Save",
       "saveQueryCancel": "Cancel",
+      "deleteSessionAria": "Delete session: {title}",
+      "deleteSavedQueryAria": "Delete saved query: {name}",
       "cancel": "Cancel",
       "editMessage": "Edit message",
       "editResend": "Edit & resend",
