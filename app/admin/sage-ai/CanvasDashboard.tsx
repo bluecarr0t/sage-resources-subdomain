@@ -275,9 +275,9 @@ function ChartCell({ cell, height }: { cell: DashboardCell; height: number }) {
               dataKey={xKey}
               type={scatterXType}
               allowDuplicatedCategory={categoryX}
+              angle={categoryX ? -30 : 0}
               tick={{
                 fontSize: 10,
-                angle: categoryX ? -30 : 0,
                 textAnchor: categoryX ? 'end' : 'middle',
               }}
               height={categoryX ? 50 : 30}
