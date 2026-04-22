@@ -227,6 +227,47 @@ const COLUMN_ALLOWLIST_BY_TABLE: Record<
 /** Accept only Postgres-safe identifiers (no quotes, no dots, no whitespace). */
 const SAFE_IDENTIFIER = /^[a-zA-Z][a-zA-Z0-9_]{0,62}$/;
 
+/**
+ * Fields the model is allowed to request from Google Place Details. The
+ * `fields` parameter on the Places API drives billing tier (Basic / Contact /
+ * Atmosphere), so accepting arbitrary strings would let a prompt-injected
+ * response opt us into the most expensive tier on every call. Anything outside
+ * this list is silently dropped at request time.
+ */
+const GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS = [
+  // Basic data SKU
+  'address_component',
+  'address_components',
+  'adr_address',
+  'business_status',
+  'formatted_address',
+  'geometry',
+  'icon',
+  'icon_mask_base_uri',
+  'icon_background_color',
+  'name',
+  'permanently_closed',
+  'photo',
+  'photos',
+  'place_id',
+  'plus_code',
+  'type',
+  'types',
+  'url',
+  'utc_offset',
+  'vicinity',
+  // Contact data SKU
+  'formatted_phone_number',
+  'international_phone_number',
+  'opening_hours',
+  'website',
+  // Atmosphere data SKU — kept narrow on purpose
+  'price_level',
+  'rating',
+  'reviews',
+  'user_ratings_total',
+] as const;
+
 /** Cap per-page scraped content fed back to the model (bytes, UTF-16 approx). */
 const SCRAPED_CONTENT_MAX_CHARS = 8_000;
 
@@ -457,16 +498,32 @@ export function createSageAiTools(
             return { error: nearErr.message, data: null, total_count: 0 };
           }
           const rows = (nearRows ?? []) as Array<Record<string, unknown>>;
+
+          // The RPC returns a fixed projection and ignores the `columns` arg
+          // sent by the caller. To keep the contract consistent with the
+          // non-near branch (which only returns allowlisted columns) and to
+          // avoid leaking fields the model didn't ask for, project rows here.
+          // We always preserve the distance helpers the RPC adds (`distance_km`,
+          // any geometry columns) since callers rely on ordering.
+          const distancePassthrough = ['distance_km', 'distance', 'geom'];
+          const projection = allowedCols.length ? allowedCols : PROPERTIES_SUMMARY_COLUMNS;
+          const projectionSet = new Set<string>([...projection, ...distancePassthrough]);
+          const projectedRows = rows.map((row) => {
+            const out: Record<string, unknown> = {};
+            for (const key of Object.keys(row)) {
+              if (projectionSet.has(key)) out[key] = row[key];
+            }
+            return out;
+          });
+
           return {
-            data: rows,
-            total_count: rows.length,
-            returned_count: rows.length,
+            data: projectedRows,
+            total_count: projectedRows.length,
+            returned_count: projectedRows.length,
             limit: limit ?? 50,
             offset: 0,
             near: { ...near, unit: 'km' },
-            ...(rejectedCols.length
-              ? { rejected_columns: rejectedCols }
-              : {}),
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
           };
         }
 
@@ -1028,16 +1085,24 @@ export function createSageAiTools(
     }),
 
     generate_python_code: tool({
-      description: `Generate Python code for data analysis or visualization. The code will be executed in the user's browser using Pyodide (Python in WebAssembly).
+      description: `Generate Python code for data analysis or visualization. The code is executed in the USER'S BROWSER using Pyodide (Python compiled to WebAssembly). Nothing runs server-side.
 
-Available libraries: numpy, pandas, matplotlib.
+ALLOWED IMPORTS (everything else will be REJECTED before execution):
+  - Pre-installed scientific stack: numpy (np), pandas (pd), matplotlib / matplotlib.pyplot (plt)
+  - Stdlib helpers: io, base64, sys, json, math, statistics, datetime, re, collections, itertools, functools, typing, random, string, decimal, fractions
+
+NOT AVAILABLE (do not import or attempt to use):
+  - Network: urllib, requests, httpx, socket
+  - Filesystem / OS: os, pathlib, subprocess, shutil
+  - Plotting alternatives: seaborn, plotly, bokeh, altair (use matplotlib instead)
+  - SciPy / scikit-learn / statsmodels — not preloaded
 
 IMPORTANT RULES:
-- If you need data from a previous query, use the special variable 'data' which will contain the query results as a list of dictionaries
-- For charts, use matplotlib and call plt.show() at the end
-- Use print() for any text output you want to display
-- The code runs in a sandbox with no network or file access
-- Keep code simple and focused on the task
+- If you need data from a previous query, use the special variable 'data' which will contain the query results as a list of dictionaries.
+- For charts, use matplotlib and call plt.show() at the end.
+- Use print() for any text output you want to display.
+- Execution time is bounded (~30s wall-clock); WASM cannot be hard-killed mid-computation, so avoid infinite loops or O(n^4)-style work over large arrays.
+- Treat the runtime as offline and ephemeral — no network, no filesystem, no shell.
 
 Example for creating a chart from query data:
 \`\`\`python
@@ -1204,14 +1269,18 @@ plt.show()
     }),
 
     google_place_details: tool({
-      description:
-        'Get detailed information about a specific place using its place_id from Google Places API. Returns reviews, contact info, hours, and more.',
+      description: `Get detailed information about a specific place using its place_id from Google Places API. Returns reviews, contact info, hours, and more.
+
+Allowed fields (anything outside this list is dropped to control billing tier):
+${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
       inputSchema: z.object({
-        place_id: z.string().describe('The Google Place ID to get details for'),
+        place_id: z.string().min(1).max(256).describe('The Google Place ID to get details for'),
         fields: z
           .array(z.string())
           .optional()
-          .describe('Specific fields to return (e.g., reviews, website, phone). If not specified, returns common fields.'),
+          .describe(
+            `Specific fields to return. Each entry must be one of: ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}. Unknown fields are silently dropped. If not specified, returns the common-field default set.`
+          ),
       }),
       execute: async ({ place_id, fields }) => {
         const gate = await quotaGate('google_place_details', userId);
@@ -1236,10 +1305,35 @@ plt.show()
             'url',
           ];
 
+          // Filter caller-supplied fields against the allowlist. Google Places
+          // bills per-field-mask, so accepting arbitrary strings means a
+          // prompt-injection or buggy model could opt us into the more
+          // expensive Pro/Enterprise SKU fields (Atmosphere/Contact). Track
+          // rejected fields to surface them in the response for debugging.
+          let appliedFields = defaultFields;
+          let rejectedFields: string[] = [];
+          if (fields && fields.length > 0) {
+            const allowed: string[] = [];
+            const rejected: string[] = [];
+            const seen = new Set<string>();
+            for (const f of fields) {
+              const key = String(f ?? '').trim();
+              if (!key || seen.has(key)) continue;
+              seen.add(key);
+              if ((GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS as readonly string[]).includes(key)) {
+                allowed.push(key);
+              } else {
+                rejected.push(key);
+              }
+            }
+            appliedFields = allowed.length > 0 ? allowed : defaultFields;
+            rejectedFields = rejected;
+          }
+
           const params = new URLSearchParams({
             place_id,
             key: apiKey,
-            fields: (fields || defaultFields).join(','),
+            fields: appliedFields.join(','),
           });
 
           const response = await fetch(
@@ -1259,6 +1353,7 @@ plt.show()
           return {
             data: result.result,
             place_id,
+            ...(rejectedFields.length ? { rejected_fields: rejectedFields } : {}),
           };
         } catch (err) {
           return {
