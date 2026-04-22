@@ -55,6 +55,25 @@ export async function POST(request: Request) {
 
   const userId = authResult.session.user.id;
 
+  // Verify the session actually belongs to the calling user before recording
+  // (or clearing) any feedback. Without this check, an authenticated admin
+  // could attach votes to other users' sessions by guessing/leaking the
+  // session UUID, polluting the per-session quality signal.
+  const { data: ownedSession, error: ownerErr } = await authResult.supabase
+    .from('sage_ai_sessions')
+    .select('id')
+    .eq('id', sessionId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (ownerErr) {
+    console.error('[sage-ai/feedback] session lookup error:', ownerErr);
+    return NextResponse.json({ error: 'Failed to verify session ownership' }, { status: 500 });
+  }
+  if (!ownedSession) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   if (rating === 0) {
     const { error } = await authResult.supabase
       .from('sage_ai_feedback')

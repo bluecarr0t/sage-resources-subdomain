@@ -42,6 +42,11 @@ export async function GET() {
   return NextResponse.json({ sessions: data ?? [] });
 }
 
+/** Hard cap on persisted messages. Matches the 800k default body limit and prevents
+ *  a runaway client from filling sage_ai_messages with unbounded payloads. */
+const MAX_MESSAGES_PER_SESSION = 200;
+const MAX_TITLE_LENGTH = 200;
+
 export async function POST(request: Request) {
   const authResult = await requireAdminAuth();
   if (!authResult.ok) {
@@ -58,9 +63,20 @@ export async function POST(request: Request) {
   if (!body.messages || !Array.isArray(body.messages)) {
     return NextResponse.json({ error: 'messages must be an array' }, { status: 400 });
   }
+  if (body.messages.length > MAX_MESSAGES_PER_SESSION) {
+    return NextResponse.json(
+      {
+        error: `messages exceeds limit of ${MAX_MESSAGES_PER_SESSION}`,
+      },
+      { status: 413 }
+    );
+  }
+  if (body.title != null && (typeof body.title !== 'string' || body.title.length > MAX_TITLE_LENGTH)) {
+    return NextResponse.json({ error: 'title must be a string up to 200 chars' }, { status: 400 });
+  }
 
   const userId = authResult.session.user.id;
-  const title = body.title || generateSessionTitle(body.messages);
+  const title = (body.title || generateSessionTitle(body.messages)).slice(0, MAX_TITLE_LENGTH);
 
   if (body.id) {
     const { data: existing } = await authResult.supabase
@@ -85,7 +101,15 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to update session' }, { status: 500 });
       }
 
-      await syncMessages(authResult.supabase, body.id, userId, body.messages);
+      try {
+        await syncMessages(authResult.supabase, body.id, userId, body.messages);
+      } catch (err) {
+        console.error('[sage-ai/sessions] sync error during update:', err);
+        return NextResponse.json(
+          { error: 'Failed to persist messages' },
+          { status: 500 }
+        );
+      }
 
       return NextResponse.json({ id: body.id, title });
     }
@@ -105,7 +129,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
   }
 
-  await syncMessages(authResult.supabase, data.id, userId, body.messages);
+  try {
+    await syncMessages(authResult.supabase, data.id, userId, body.messages);
+  } catch (err) {
+    console.error('[sage-ai/sessions] sync error during insert:', err);
+    return NextResponse.json(
+      { error: 'Failed to persist messages' },
+      { status: 500 }
+    );
+  }
 
   return NextResponse.json({ id: data.id, title });
 }
@@ -114,6 +146,10 @@ export async function POST(request: Request) {
  * Diff-upsert messages into the sage_ai_messages child table. Rows with
  * ordinals >= messages.length are deleted so truncations (e.g. edit-and-resend
  * in PR 3) are reflected.
+ *
+ * Throws on any DB error so the caller surfaces a 500 to the client. Returning
+ * silently here previously let the UI believe a save had succeeded when it
+ * had not (the next reload would lose the conversation).
  */
 async function syncMessages(
   supabase: SupabaseClient,
@@ -122,11 +158,14 @@ async function syncMessages(
   messages: SessionMessage[]
 ): Promise<void> {
   if (messages.length === 0) {
-    await supabase
+    const { error } = await supabase
       .from('sage_ai_messages')
       .delete()
       .eq('session_id', sessionId)
       .eq('user_id', userId);
+    if (error) {
+      throw new Error(`sage_ai_messages delete failed: ${error.message}`);
+    }
     return;
   }
 
@@ -143,8 +182,7 @@ async function syncMessages(
     .from('sage_ai_messages')
     .upsert(rows, { onConflict: 'session_id,ordinal' });
   if (upsertError) {
-    console.error('[sage-ai/sessions] sync upsert error:', upsertError);
-    return;
+    throw new Error(`sage_ai_messages upsert failed: ${upsertError.message}`);
   }
 
   const { error: trimError } = await supabase
@@ -154,7 +192,7 @@ async function syncMessages(
     .eq('user_id', userId)
     .gte('ordinal', messages.length);
   if (trimError) {
-    console.error('[sage-ai/sessions] sync trim error:', trimError);
+    throw new Error(`sage_ai_messages trim failed: ${trimError.message}`);
   }
 }
 
