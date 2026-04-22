@@ -85,8 +85,8 @@ export function PythonCodeBlock({ code, onDataInject, autoRun = true, onError, r
           setGlobal('_injected_data_json', JSON.stringify(data));
           // Surface the actual keys present on the first row in a Python
           // assertion. If the model wrote `df['research_status']` against a
-          // payload that came from `aggregate_properties` (which only emits
-          // `key`/`count`/`avg_daily_rate`/`total_sites`), the assert fires a
+          // payload that came from `aggregate_properties` (which emits
+          // `key`/`properties`/`avg_daily_rate`/`median_daily_rate`/`total_units`; `total_sites` is null for glamping), the assert fires a
           // clear, self-explanatory error in the result tile — and the model
           // sees on retry exactly which keys ARE available rather than a
           // bare `KeyError: 'research_status'` it has to guess about.

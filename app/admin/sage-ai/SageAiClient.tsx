@@ -9,6 +9,11 @@ import {
 } from '@/lib/sage-ai/ui-parts';
 import { CanvasDashboard } from './CanvasDashboard';
 import { SageAiMap } from './SageAiMap';
+import {
+  FeasibilitySectionPreview,
+  type FeasibilitySectionPreviewPayload,
+} from './FeasibilitySectionPreview';
+import { isFeasibilityDocxPayload } from '@/lib/sage-ai/feasibility-docx-payload';
 import { useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -53,6 +58,7 @@ import {
   resolveSageAiGatewayModelId,
   type SageAiModelSelection,
 } from '@/lib/sage-ai/sage-ai-chat-models';
+import { generateUniqueId } from '@/lib/random-id';
 import {
   SageAiModelPicker,
   sageAiSelectionFromStorage,
@@ -61,6 +67,7 @@ import {
   SAGE_AI_PREMIUM_MODELS_STORAGE_KEY,
   SAGE_AI_WEB_RESEARCH_UI_ENABLED,
 } from './SageAiModelPicker';
+import { SageAiFieldGuidePanel } from './SageAiFieldGuidePanel';
 
 interface Session {
   id: string;
@@ -134,6 +141,8 @@ function userMessageTopInScrollRoot(messageEl: HTMLElement, scrollRoot: HTMLElem
 
 export default function SageAiClient() {
   const t = useTranslations('admin.sageAi');
+  const tRef = useRef(t);
+  tRef.current = t;
   const [input, setInput] = useState('');
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('history');
@@ -147,7 +156,7 @@ export default function SageAiClient() {
    * Also: changing this id recreates the Chat client and clears messages — never sync it to
    * `currentSessionId` when loading history from the sidebar (`handleLoadSession`).
    */
-  const [chatTransportId, setChatTransportId] = useState(() => crypto.randomUUID());
+  const [chatTransportId, setChatTransportId] = useState(() => generateUniqueId());
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [savedQueriesLoading, setSavedQueriesLoading] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -192,8 +201,14 @@ export default function SageAiClient() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const currentSessionIdRef = useRef<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  /** Last `part.output` reference we stored into `lastQueryData`; prevents infinite re-renders during streaming. */
+  /** Last `part.output` reference we stored into `lastQueryData`; used for debugging / future guards. */
   const lastQueryDataSourceRef = useRef<unknown>(null);
+  /**
+   * Stable key for the latest tabular tool payload. `part.output` is often a new object
+   * reference on every `messages` update from the AI SDK — comparing it alone caused
+   * `setLastQueryData` to run every render (Maximum update depth exceeded).
+   */
+  const lastQueryDataFingerprintRef = useRef<string | null>(null);
   /** Refs mirroring scroll state so effects don't depend on it and re-fire during smooth scroll. */
   const userHasScrolledRef = useRef(false);
   const isAtBottomRef = useRef(true);
@@ -271,15 +286,23 @@ export default function SageAiClient() {
       showToastRef.current(err.message ?? t('toastChatRequestFailed'));
     },
   });
+  // useChat re-exposes `resumeStream` with a new function identity every render
+  // (see @ai-sdk/react: `resumeStream: chatRef.current.resumeStream`). A
+  // useEffect that lists `resumeStream` in its deps will run on every
+  // render, call `resumeStream()`, and trigger a state update → infinite
+  // loop (React #185 "Maximum update depth exceeded"). Re-run only when
+  // the transport id changes.
+  const resumeStreamRef = useRef(resumeStream);
+  resumeStreamRef.current = resumeStream;
 
   // When a session is loaded/selected, probe the resume endpoint so a still-
   // in-flight stream will reattach automatically after a reload. No-ops when
   // the server returns 204 (nothing to resume).
   useEffect(() => {
-    resumeStream().catch((err) => {
+    resumeStreamRef.current().catch((err) => {
       console.debug('[sage-ai] resumeStream noop', err);
     });
-  }, [chatTransportId, resumeStream]);
+  }, [chatTransportId]);
 
   messagesRef.current = messages;
 
@@ -394,12 +417,12 @@ export default function SageAiClient() {
         }
         loadSessions();
       } else {
-        showToast(t('toastFailedSaveSession'));
+        showToast(tRef.current('toastFailedSaveSession'));
       }
     } catch {
-      showToast(t('toastFailedSaveSession'));
+      showToast(tRef.current('toastFailedSaveSession'));
     }
-  }, [loadSessions, showToast, t]);
+  }, [loadSessions, showToast]);
 
   const handleSaveQuery = async () => {
     if (!saveQueryName.trim() || !queryToSave.trim()) return;
@@ -549,7 +572,7 @@ export default function SageAiClient() {
         if (text) prompt = text;
       }
     }
-    setStickyUserPrompt(prompt);
+    setStickyUserPrompt((prev) => (prev === prompt ? prev : prompt));
   }, []);
 
   const scheduleStickyUserPromptUpdate = useCallback(() => {
@@ -568,9 +591,34 @@ export default function SageAiClient() {
     };
   }, []);
 
+  // `contentLen` / part-count keys must be declared before the sticky `useEffect` below.
+  const contentLen = useMemo(() => {
+    const last = messages[messages.length - 1];
+    if (!last || last.role !== 'assistant') return 0;
+    return last.parts.reduce((acc, p) => {
+      if (p.type === 'text') return acc + p.text.length;
+      return acc;
+    }, 0);
+  }, [messages]);
+
+  /** Changes when a new part is appended to the last assistant message (e.g. a tool result). */
+  const lastAssistantMessagePartsKey = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i]!.role === 'assistant') {
+        return messages[i]!.parts.length;
+      }
+    }
+    return 0;
+  }, [messages]);
+
   useEffect(() => {
     scheduleStickyUserPromptUpdate();
-  }, [messages, scheduleStickyUserPromptUpdate]);
+  }, [
+    messages.length,
+    contentLen,
+    lastAssistantMessagePartsKey,
+    scheduleStickyUserPromptUpdate,
+  ]);
 
   // Handle scroll events to detect if user has scrolled up
   const handleScroll = useCallback(() => {
@@ -604,17 +652,6 @@ export default function SageAiClient() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages.length]);
 
-  // Stick to bottom while tokens stream in, without re-entering the effect on
-  // every keystroke. `contentLen` updates as the assistant message grows.
-  const contentLen = useMemo(() => {
-    const last = messages[messages.length - 1];
-    if (!last || last.role !== 'assistant') return 0;
-    return last.parts.reduce((acc, p) => {
-      if (p.type === 'text') return acc + p.text.length;
-      return acc;
-    }, 0);
-  }, [messages]);
-
   useEffect(() => {
     if (!isLoading) return;
     if (userHasScrolledRef.current || !isAtBottomRef.current) return;
@@ -644,13 +681,14 @@ export default function SageAiClient() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // Track the most recent tool-output dataset for Python injection. We guard updates with
-  // a ref of the source `part.output` object so repeated renders during streaming (which
-  // may produce new `messages` array references with the same underlying tool output) do
-  // not set new array references into state each render and trigger an infinite loop.
+  // Track the most recent tool-output dataset for Python injection. Do **not** key off
+  // `part.output` object identity: the AI SDK can replace that object on every
+  // `messages` update, which re-fired this effect and called `setLastQueryData` every
+  // render (Maximum update depth exceeded). We use a stable fingerprint instead.
   useEffect(() => {
     let latestSource: unknown = null;
     let latestData: Record<string, unknown>[] | null = null;
+    let fingerprint: string | null = null;
 
     for (let i = messages.length - 1; i >= 0; i--) {
       const message = messages[i];
@@ -662,9 +700,19 @@ export default function SageAiClient() {
         const output = part.output;
         if (!output || typeof output !== 'object') continue;
         const outputObj = output as Record<string, unknown>;
+        const toolId =
+          (part as { toolCallId?: string; toolName?: string }).toolCallId ??
+          (part as { type?: string }).type ??
+          '';
         if ('data' in outputObj && Array.isArray(outputObj.data) && outputObj.data.length > 0) {
+          const data = outputObj.data as Record<string, unknown>[];
+          const first = data[0] ?? {};
+          const firstKey = String(
+            (first as { id?: unknown; key?: unknown }).id ?? (first as { key?: unknown }).key ?? ''
+          );
+          fingerprint = `data:${message.id}:${j}:${toolId}:${data.length}:${firstKey}`;
           latestSource = output;
-          latestData = outputObj.data as Record<string, unknown>[];
+          latestData = data;
           break;
         }
         if (
@@ -672,18 +720,28 @@ export default function SageAiClient() {
           Array.isArray(outputObj.aggregates) &&
           outputObj.aggregates.length > 0
         ) {
+          const data = outputObj.aggregates as Record<string, unknown>[];
+          const first = data[0] ?? {};
+          const firstKey = String(
+            (first as { id?: unknown; key?: unknown }).id ?? (first as { key?: unknown }).key ?? ''
+          );
+          fingerprint = `agg:${message.id}:${j}:${toolId}:${data.length}:${firstKey}`;
           latestSource = output;
-          latestData = outputObj.aggregates as Record<string, unknown>[];
+          latestData = data;
           break;
         }
       }
-      if (latestSource !== null) break;
+      if (fingerprint != null) break;
     }
 
-    if (latestSource !== null && latestSource !== lastQueryDataSourceRef.current) {
-      lastQueryDataSourceRef.current = latestSource;
-      setLastQueryData(latestData);
+    if (fingerprint == null) return;
+    if (fingerprint === lastQueryDataFingerprintRef.current) {
+      if (latestSource != null) lastQueryDataSourceRef.current = latestSource;
+      return;
     }
+    lastQueryDataFingerprintRef.current = fingerprint;
+    if (latestSource != null) lastQueryDataSourceRef.current = latestSource;
+    if (latestData != null) setLastQueryData(latestData);
   }, [messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -706,8 +764,11 @@ export default function SageAiClient() {
   const handleNewChat = useCallback(() => {
     abortAllPythonBlockRuns();
     setMessages([]);
+    lastQueryDataSourceRef.current = null;
+    lastQueryDataFingerprintRef.current = null;
+    setLastQueryData(null);
     setCurrentSessionId(null);
-    setChatTransportId(crypto.randomUUID());
+    setChatTransportId(generateUniqueId());
     setShowSidebar(false);
     pythonAutoFixSentRef.current = 0;
     setPythonRetryCount(0);
@@ -771,6 +832,9 @@ export default function SageAiClient() {
         // drives which row we persist to in `saveSession`.
         stop();
         abortAllPythonBlockRuns();
+        lastQueryDataSourceRef.current = null;
+        lastQueryDataFingerprintRef.current = null;
+        setLastQueryData(null);
         setMessages(hydratedMessages);
         setCurrentSessionId(sessionId);
         setShowSidebar(false);
@@ -819,7 +883,7 @@ export default function SageAiClient() {
         if (currentSessionId === sessionId) {
           setMessages([]);
           setCurrentSessionId(null);
-          setChatTransportId(crypto.randomUUID());
+          setChatTransportId(generateUniqueId());
           pythonAutoFixSentRef.current = 0;
           setPythonRetryCount(0);
         }
@@ -1161,6 +1225,7 @@ export default function SageAiClient() {
                 <PanelLeft className="w-4 h-4 text-gray-500" />
               </button>
             )}
+            <SageAiFieldGuidePanel setInput={setInput} inputRef={inputRef} />
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <span className="font-medium text-gray-900 dark:text-gray-100">Sage Outdoor Advisory</span>
               {currentSessionTitle && (
@@ -1606,23 +1671,23 @@ export default function SageAiClient() {
                               )}
                             </button>
                             <div
-                              className="prose prose-gray dark:prose-invert max-w-none 
-                                prose-p:my-2.5 prose-p:leading-relaxed
-                                prose-ul:my-3 prose-ul:pl-0 prose-ul:list-none
-                                prose-ol:my-3 prose-ol:pl-5
-                                prose-li:my-1.5 prose-li:leading-relaxed
-                                prose-headings:my-4 prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100
-                                prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200 dark:prose-h2:border-gray-700
-                                prose-h3:text-base prose-h3:mt-5 prose-h3:mb-2
+                              className="prose prose-sm prose-gray dark:prose-invert max-w-none
+                                prose-p:my-1.5 prose-p:leading-normal
+                                prose-ul:my-2 prose-ul:pl-0 prose-ul:list-none
+                                prose-ol:my-2 prose-ol:pl-5
+                                prose-li:my-0.5 prose-li:leading-normal
+                                prose-headings:my-3 prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100
+                                prose-h2:text-base prose-h2:mt-5 prose-h2:mb-2 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200 dark:prose-h2:border-gray-700
+                                prose-h3:text-sm prose-h3:mt-4 prose-h3:mb-1.5
                                 prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-strong:font-semibold
-                                prose-code:text-[13px] prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:before:content-none prose-code:after:content-none
-                                prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
+                                prose-code:text-xs prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:before:content-none prose-code:after:content-none
+                                prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:p-3 prose-pre:rounded-lg prose-pre:overflow-x-auto
                                 prose-a:text-sage-600 prose-a:no-underline hover:prose-a:underline
-                                prose-table:w-full prose-table:border-collapse prose-table:text-sm prose-table:my-4
+                                prose-table:w-full prose-table:border-collapse prose-table:text-sm prose-table:my-3
                                 prose-th:border prose-th:border-gray-200 prose-th:bg-gray-50 prose-th:px-3 prose-th:py-2 prose-th:text-left prose-th:font-semibold
                                 prose-td:border prose-td:border-gray-200 prose-td:px-3 prose-td:py-2
                                 dark:prose-th:border-gray-700 dark:prose-th:bg-gray-800 dark:prose-td:border-gray-700
-                                prose-hr:my-6 prose-hr:border-gray-200 dark:prose-hr:border-gray-700
+                                prose-hr:my-5 prose-hr:border-gray-200 dark:prose-hr:border-gray-700
                                 prose-blockquote:border-l-4 prose-blockquote:border-sage-500 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400"
                             >
                               <ReactMarkdown
@@ -1648,12 +1713,19 @@ export default function SageAiClient() {
                                     );
                                   },
                                   ul: ({ children }) => (
-                                    <ul className="space-y-1.5">{children}</ul>
+                                    <ul className="m-0 list-none space-y-0.5 p-0">{children}</ul>
                                   ),
                                   li: ({ children }) => (
-                                    <li className="flex items-start gap-2">
-                                      <span className="text-sage-500 mt-1.5 text-xs">●</span>
-                                      <span className="flex-1">{children}</span>
+                                    <li className="m-0 flex list-none items-baseline gap-2 pl-0">
+                                      <span
+                                        className="shrink-0 select-none text-[0.7em] leading-none text-sage-500"
+                                        aria-hidden
+                                      >
+                                        ●
+                                      </span>
+                                      <span className="min-w-0 flex-1 [&>p]:mb-0 [&>p]:mt-0 [&>p+p]:mt-1.5">
+                                        {children}
+                                      </span>
                                     </li>
                                   ),
                                 }}
@@ -1789,6 +1861,23 @@ export default function SageAiClient() {
                         ) {
                           return (
                             <SageAiMap key={partIndex} payload={toolOutput} />
+                          );
+                        }
+
+                        // Custom success renderer for generate_feasibility_section:
+                        // styled inline preview + "Download .docx" button that
+                        // POSTs the same payload to the section builder route.
+                        if (
+                          toolName === 'generate_feasibility_section' &&
+                          part.state === 'output-available' &&
+                          isFeasibilityDocxPayload(toolOutput)
+                        ) {
+                          const previewPayload = toolOutput as FeasibilitySectionPreviewPayload;
+                          return (
+                            <FeasibilitySectionPreview
+                              key={partIndex}
+                              payload={previewPayload}
+                            />
                           );
                         }
 

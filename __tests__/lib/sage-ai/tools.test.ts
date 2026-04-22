@@ -65,6 +65,20 @@ describe('createSageAiTools', () => {
     );
   });
 
+  it('exposes find_glamping_columns for plain-language feature lookup', async () => {
+    const { supabase } = makeSupabaseStub({ data: [], error: null, count: 0 });
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    expect(Object.keys(tools)).toContain('find_glamping_columns');
+    const res = await tools.find_glamping_columns.execute!(
+      { query: 'private bath ensuite', max_results: 3 },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    const top = (res as { matches?: Array<{ column: string }> }).matches;
+    expect(top?.[0]?.column).toBe('unit_private_bathroom');
+  });
+
   it('accepts allowlisted columns on query_properties', async () => {
     const { supabase, calls } = makeSupabaseStub({ data: [{ id: '1' }], error: null, count: 1 });
     const tools = createSageAiTools(
@@ -94,6 +108,35 @@ describe('createSageAiTools', () => {
     );
     const selectCall = calls.find((c) => c.method === 'select');
     expect(selectCall?.args[0]).toContain('state');
+  });
+
+  it('query_properties default select includes seasonal rate columns and effective_retail_adr on rows', async () => {
+    const { supabase, calls } = makeSupabaseStub({
+      data: [
+        {
+          id: 1,
+          property_name: 'P',
+          city: 'Vancouver',
+          state: 'BC',
+          country: 'Canada',
+          rate_avg_retail_daily_rate: null,
+          rate_summer_weekend: 950,
+        },
+      ],
+      error: null,
+      count: 1,
+    });
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    const res = await tools.query_properties.execute!(
+      { filters: { country: 'Canada' }, limit: 10, offset: 0, order_ascending: true },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    const selectCall = calls.find((c) => c.method === 'select');
+    expect(String(selectCall?.args[0])).toContain('rate_summer_weekend');
+    const typed = res as { data: Array<{ effective_retail_adr: number | null }> };
+    expect(typed.data[0]!.effective_retail_adr).toBe(950);
   });
 
   it('silently drops placeholder near={lat:0, lng:0} and falls through to filter-only branch', async () => {
@@ -144,7 +187,9 @@ describe('createSageAiTools', () => {
     const ilikeCall = calls.find((c) => c.method === 'ilike');
     expect(ilikeCall?.args).toEqual(['state', 'TX']);
     expect(typed.error).toBeUndefined();
-    expect(typed.data).toEqual([{ id: 1, property_name: 'Some TX Glamp', state: 'TX' }]);
+    expect(typed.data).toEqual([
+      { id: 1, property_name: 'Some TX Glamp', state: 'TX', effective_retail_adr: null },
+    ]);
     expect(typed.total_count).toBe(1);
     expect(typed.near_placeholder_dropped).toBe(true);
     expect(typed.note).toMatch(/placeholder/i);
@@ -156,7 +201,30 @@ describe('createSageAiTools', () => {
       { id: 2, property_name: 'B', state: 'NM', distance_km: 7 },
       { id: 3, property_name: 'C', state: 'co', distance_km: 9 }, // case-insensitive
     ];
-    const { builder } = makeBuilder({ data: [], error: null, count: 0 });
+    const fullRows = [
+      {
+        id: 1,
+        property_name: 'A',
+        state: 'CO',
+        is_glamping_property: 'Yes',
+        is_closed: 'No',
+      },
+      {
+        id: 2,
+        property_name: 'B',
+        state: 'NM',
+        is_glamping_property: 'Yes',
+        is_closed: 'No',
+      },
+      {
+        id: 3,
+        property_name: 'C',
+        state: 'co',
+        is_glamping_property: 'Yes',
+        is_closed: 'No',
+      },
+    ];
+    const { builder } = makeBuilder({ data: fullRows, error: null, count: fullRows.length });
     const supabase = {
       from() {
         return builder;
@@ -182,11 +250,50 @@ describe('createSageAiTools', () => {
     const typed = res as unknown as {
       data: Array<{ id: number; state: string }>;
       total_count: number;
-      unsupported_filters?: string[];
     };
     expect(typed.data.map((r) => r.id).sort()).toEqual([1, 3]);
     expect(typed.total_count).toBe(2);
-    expect(typed.unsupported_filters).toEqual(['is_glamping_property']);
+  });
+
+  it('accepts near with column_eq_filters after hydrating full rows from all_glamping_properties', async () => {
+    const rpcRows = [
+      { id: 42, property_name: 'Pool Place', state: 'CO', distance_km: 2 },
+    ];
+    const fullRows = [
+      {
+        id: 42,
+        property_name: 'Pool Place',
+        state: 'CO',
+        property_pool: 'Yes',
+        is_glamping_property: 'Yes',
+      },
+    ];
+    const { builder } = makeBuilder({ data: fullRows, error: null, count: 1 });
+    const supabase = {
+      from() {
+        return builder;
+      },
+      rpc() {
+        return Promise.resolve({ data: rpcRows, error: null });
+      },
+    };
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    const res = (await tools.query_properties.execute!(
+      {
+        near: { latitude: 39.7, longitude: -104.9, radius_km: 20 },
+        column_eq_filters: [{ column: 'property_pool', value: 'Yes' }],
+        limit: 10,
+        offset: 0,
+        order_ascending: true,
+      },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    )) as { error?: string; data?: Array<{ id: number; property_pool?: string }> };
+    expect(res.error).toBeUndefined();
+    expect(res.data).toHaveLength(1);
+    expect(res.data![0]!.id).toBe(42);
+    expect(res.data![0]!.property_pool).toBe('Yes');
   });
 
   it('returns an error for order_by columns outside the allowlist', async () => {
@@ -216,8 +323,22 @@ describe('createSageAiTools', () => {
         rpcCalls.push({ name, args });
         return Promise.resolve({
           data: [
-            { key: 'BC', count: 69, avg_daily_rate: 250, total_sites: 500 },
-            { key: 'ON', count: 49, avg_daily_rate: 300, total_sites: 400 },
+            {
+              key: 'BC',
+              unique_properties: 69,
+              avg_daily_rate: 250,
+              median_daily_rate: 240,
+              total_units: 1200,
+              total_sites: 500,
+            },
+            {
+              key: 'ON',
+              unique_properties: 49,
+              avg_daily_rate: 300,
+              median_daily_rate: 280,
+              total_units: 800,
+              total_sites: 400,
+            },
           ],
           error: null,
         });
@@ -250,10 +371,13 @@ describe('createSageAiTools', () => {
       total_groups: number;
       applied_filters: Record<string, unknown>;
       summary: string;
+      aggregates: Array<Record<string, unknown>>;
     };
     expect(typed.total_groups).toBe(2);
     expect(typed.applied_filters).not.toHaveProperty('state');
     expect(typed.summary).toMatch(/country=Canada/);
+    expect(typed.aggregates[0]!.properties).toBe(69);
+    expect(typed.aggregates[0]!).not.toHaveProperty('count');
   });
 
   it('rejects `state: "Canada"` on aggregate_properties with a corrective error', async () => {
@@ -447,15 +571,19 @@ describe('createSageAiTools', () => {
       rows_with_fallback_key: number;
       total_units: number;
       avg_retail_daily_rate: number | null;
+      median_retail_daily_rate: number | null;
       rated_rows_counted: number;
     };
     expect(typed.unique_properties).toBe(3);
     expect(typed.unit_level_rows).toBe(5);
     expect(typed.rows_with_fallback_key).toBe(2);
     expect(typed.total_units).toBe(20);
-    // 3 rated rows: 250, 350, 500 (rate=0 and rate=null are excluded)
+    // 3 rated rows: 250, 350, 500 (rate=0 and rate=null are excluded);
+    // avg is unit-weighted by quantity_of_units.
     expect(typed.rated_rows_counted).toBe(3);
-    expect(typed.avg_retail_daily_rate).toBeCloseTo((250 + 350 + 500) / 3, 5);
+    const weighted = (250 * 4 + 350 * 6 + 500 * 5) / (4 + 6 + 5);
+    expect(typed.avg_retail_daily_rate).toBeCloseTo(weighted, 5);
+    expect(typed.median_retail_daily_rate).toBe(350);
   });
 
   it('count_unique_properties rejects country names passed in filters.state with a corrective error', async () => {

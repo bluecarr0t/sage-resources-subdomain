@@ -43,9 +43,10 @@ describe('composedToolsEnabled registration', () => {
     );
     expect(Object.keys(tools)).not.toContain('competitor_comparison');
     expect(Object.keys(tools)).not.toContain('build_feasibility_brief');
+    expect(Object.keys(tools)).not.toContain('generate_feasibility_section');
   });
 
-  it('registers both composed tools when enabled', () => {
+  it('registers all composed tools when enabled', () => {
     const { supabase } = makeSupabase();
     const tools = createSageAiTools(
       supabase as unknown as Parameters<typeof createSageAiTools>[0],
@@ -55,6 +56,7 @@ describe('composedToolsEnabled registration', () => {
       expect.arrayContaining([
         'competitor_comparison',
         'build_feasibility_brief',
+        'generate_feasibility_section',
       ])
     );
   });
@@ -131,5 +133,108 @@ describe('build_feasibility_brief', () => {
       .filter((s) => s.filled)
       .map((s) => s.key);
     expect(filledKeys).toEqual(['market_overview']);
+  });
+});
+
+describe('generate_feasibility_section', () => {
+  it('denies non-admin callers', async () => {
+    const { supabase } = makeSupabase();
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0],
+      { userId: 'u1', userRole: 'user', composedToolsEnabled: true }
+    );
+
+    const res = (await tools.generate_feasibility_section.execute!(
+      {
+        market_type: 'rv',
+        title: 'Executive Summary',
+        blocks: [{ kind: 'paragraph', text: 'Body text.' }],
+      },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    )) as { error?: string };
+
+    expect(res.error).toMatch(/requires role=admin/i);
+  });
+
+  it('returns a sanitized, validated payload with download_url for admins', async () => {
+    const { supabase } = makeSupabase();
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0],
+      { userId: 'u1', userRole: 'admin', composedToolsEnabled: true }
+    );
+
+    const res = (await tools.generate_feasibility_section.execute!(
+      {
+        market_type: 'glamping',
+        title: 'Site Analysis',
+        filename_hint: 'AUSTIN Glamping Site Analysis!',
+        blocks: [
+          {
+            kind: 'paragraph',
+            name: 'Site',
+            text: 'Approximately ~47 acres along the Austin\u2013Round Rock corridor\u2014ideal.',
+          },
+          {
+            kind: 'numbered_list',
+            items: [
+              { name: 'Daily Rate', description: 'Average $185 across comp set.' },
+              { name: 'Occupancy', description: 'TTM occupancy 78%.' },
+            ],
+          },
+        ],
+      },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    )) as {
+      type: string;
+      title: string;
+      filename_hint?: string;
+      blocks: Array<{ kind: string; text?: string }>;
+      market_type: string;
+      download_url: string;
+    };
+
+    expect(res.type).toBe('feasibility_section');
+    expect(res.title).toBe('Site Analysis');
+    expect(res.market_type).toBe('glamping');
+    expect(res.download_url).toBe('/api/admin/sage-ai/feasibility-docx');
+    expect(res.filename_hint).toBe('austin-glamping-site-analysis');
+
+    // Sanitization stripped the tilde and en/em dashes from the paragraph text.
+    const para = res.blocks.find((b) => b.kind === 'paragraph') as
+      | { text: string }
+      | undefined;
+    expect(para?.text).not.toContain('~');
+    expect(para?.text).not.toContain('\u2013');
+    expect(para?.text).not.toContain('\u2014');
+    expect(para?.text).toContain('Approximately 47 acres');
+    expect(para?.text).toContain('Austin-Round Rock corridor-ideal.');
+  });
+
+  it('rejects table payloads with mismatched row/header column counts', async () => {
+    const { supabase } = makeSupabase();
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0],
+      { userId: 'u1', userRole: 'admin', composedToolsEnabled: true }
+    );
+
+    const res = (await tools.generate_feasibility_section.execute!(
+      {
+        market_type: 'rv',
+        title: 'Comparables',
+        blocks: [
+          {
+            kind: 'table',
+            headers: ['Property', 'ADR', 'Occupancy'],
+            rows: [
+              ['Property A', '$210', '82%'],
+              ['Property B', '$195'],
+            ],
+          },
+        ],
+      },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    )) as { error?: string };
+
+    expect(res.error).toMatch(/cells but headers has 3/);
   });
 });

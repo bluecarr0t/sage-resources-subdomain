@@ -18,6 +18,15 @@ import {
 } from '@/lib/sage-ai/report-templates';
 import { assertToolRole } from '@/lib/sage-ai/require-tool-role';
 import { fetchWithTimeout } from '@/lib/sage-ai/fetch-with-timeout';
+import {
+  feasibilityBlockSchema,
+  FEASIBILITY_DOCX_SCHEMA_VERSION,
+  feasibilityDocxPayloadSchema,
+  sanitizeFeasibilityText,
+  slugifyFeasibilityFilename,
+  type FeasibilityBlock,
+  type FeasibilityDocxPayload,
+} from '@/lib/sage-ai/feasibility-docx-payload';
 
 const TIMEOUT_GOOGLE = 8_000;
 const TIMEOUT_FIRECRAWL = 25_000;
@@ -27,6 +36,9 @@ const COMPETITOR_QUOTA = Number(
 );
 const FEASIBILITY_QUOTA = Number(
   process.env.SAGE_AI_QUOTA_FEASIBILITY_BRIEF ?? 10
+);
+const FEASIBILITY_SECTION_QUOTA = Number(
+  process.env.SAGE_AI_QUOTA_FEASIBILITY_SECTION ?? 30
 );
 const SCRAPED_CONTENT_MAX = 4_000;
 
@@ -498,6 +510,136 @@ The returned \`report_id\` can be linked to in the UI.`,
           template: tpl.id,
           sections_written: draft.sections.filter((s) => s.filled).length,
           view_url: `/admin/reports/${reportId}`,
+        };
+      },
+    }),
+
+    generate_feasibility_section: tool({
+      description: `Compose a single section of a Feasibility Study (e.g. Executive Summary, Letter of Transmittal, SWOT, Site Analysis, Demand Indicators, Project Overview, Comparables, Development Costs narrative) as a STRUCTURED .docx payload. The Sage UI renders the section inline as a preview AND offers a "Download .docx" button that streams a Microsoft Word file.
+
+The .docx is built on top of the rv or glamping template used by /admin/report-builder, so it inherits the Sage branding (Calibri styles, headers/footers from \`templates/{rv|glamping}/template.docx\`). The body is then re-written from your blocks per the Sage writing-style guide:
+
+  - Calibri 11pt body, 1.15 line spacing, justified
+  - Section headings in BOLD only (no random bolding elsewhere)
+  - Numbered list items: "<bold>Name</bold> - description" on one line
+  - Paragraphs may begin with a bold "Name -" lead-in via the optional \`name\` field
+  - Tables use Calibri 10pt body with a bold header row filled #E2EFDA
+  - Standardized short hyphen "-" only (en/em dashes are stripped automatically)
+  - Never include "~" (approximate) anywhere
+  - Never include URLs / inline citations in the section body — keep citations in your chat reply unless the user explicitly asked for them in the download
+
+WHEN TO CALL:
+  - Use this AFTER you've gathered enough Sage database / web context for the section the user requested.
+  - The model is responsible for the prose; this tool just packages and styles it. Do not call it speculatively or with placeholder copy.
+  - For multi-section drafts call this tool once per section (heading-grouped). Each call produces ONE downloadable .docx.
+
+INPUT RULES:
+  - \`market_type\` selects the template branding ('rv' or 'glamping'); defaults to 'rv'.
+  - \`title\` is rendered as the top-level Heading 1 inside the .docx.
+  - Pass an array of \`blocks\` (heading | paragraph | numbered_list | table). Aim for 3–20 blocks per section.
+  - For paragraphs that should start with a bold lead-in, set \`name\` (e.g. \`{ kind: "paragraph", name: "Daily Rate", text: "..." }\`).
+  - For numbered lists, every item needs both \`name\` (bold lead-in) and \`description\`.
+  - Tables: every \`rows[i]\` MUST have the same number of cells as \`headers\`.
+
+The tool returns the validated payload AS the tool result, so the UI can render the preview without an extra round-trip. The user clicks "Download .docx" and the client POSTs the same payload back to /api/admin/sage-ai/feasibility-docx.`,
+      inputSchema: z.object({
+        market_type: z
+          .enum(['rv', 'glamping', 'rv_glamping'])
+          .default('rv')
+          .describe(
+            'Template branding for the section .docx. Use the same value as the parent report.'
+          ),
+        title: z
+          .string()
+          .min(2)
+          .max(200)
+          .describe('Section heading as it should appear at the top of the document.'),
+        filename_hint: z
+          .string()
+          .max(120)
+          .optional()
+          .describe(
+            'Optional filename stem (without extension). Defaults to a slug of `title`.'
+          ),
+        blocks: z
+          .array(feasibilityBlockSchema)
+          .min(1)
+          .max(120)
+          .describe('Ordered content blocks that will be styled per the Sage writing guide.'),
+      }),
+      execute: async ({ market_type, title, filename_hint, blocks }) => {
+        const role = assertToolRole(
+          { userRole, toolName: 'generate_feasibility_section' },
+          'admin'
+        );
+        if (role) return role;
+
+        const gate = await quotaGate(
+          'generate_feasibility_section',
+          userId,
+          FEASIBILITY_SECTION_QUOTA
+        );
+        if (gate) return gate;
+
+        // Defensive sanitization: strip banned characters even if the model
+        // forgot the rules. The .docx builder also calls sanitize on every
+        // text run, but normalising here keeps the inline preview consistent
+        // with what the user will get on download.
+        const cleanedBlocks: FeasibilityBlock[] = blocks.map((block) => {
+          if (block.kind === 'heading') {
+            return { ...block, text: sanitizeFeasibilityText(block.text) };
+          }
+          if (block.kind === 'paragraph') {
+            return {
+              ...block,
+              name: block.name ? sanitizeFeasibilityText(block.name) : undefined,
+              text: sanitizeFeasibilityText(block.text),
+            };
+          }
+          if (block.kind === 'numbered_list') {
+            return {
+              ...block,
+              items: block.items.map((item) => ({
+                name: sanitizeFeasibilityText(item.name),
+                description: sanitizeFeasibilityText(item.description),
+              })),
+            };
+          }
+          // table
+          return {
+            ...block,
+            caption: block.caption ? sanitizeFeasibilityText(block.caption) : undefined,
+            headers: block.headers.map(sanitizeFeasibilityText),
+            rows: block.rows.map((row) => row.map(sanitizeFeasibilityText)),
+          };
+        });
+
+        const candidatePayload: FeasibilityDocxPayload = {
+          type: 'feasibility_section',
+          schema_version: FEASIBILITY_DOCX_SCHEMA_VERSION,
+          title: sanitizeFeasibilityText(title),
+          filename_hint: filename_hint
+            ? slugifyFeasibilityFilename(filename_hint)
+            : undefined,
+          blocks: cleanedBlocks,
+        };
+
+        // Re-validate after sanitization so the downstream renderer never has
+        // to second-guess the shape.
+        const parsed = feasibilityDocxPayloadSchema.safeParse(candidatePayload);
+        if (!parsed.success) {
+          return {
+            error: `Section payload failed validation: ${parsed.error.issues
+              .map((i) => `${i.path.join('.')}: ${i.message}`)
+              .join('; ')}`,
+            data: null,
+          };
+        }
+
+        return {
+          ...parsed.data,
+          market_type,
+          download_url: '/api/admin/sage-ai/feasibility-docx',
         };
       },
     }),

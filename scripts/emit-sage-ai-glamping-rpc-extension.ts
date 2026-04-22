@@ -1,16 +1,27 @@
--- ============================================================================
--- Sage AI aggregation RPCs
+/**
+ * Regenerates scripts/migrations/sage-ai-extend-glamping-allowlist-rpc.sql
+ * from lib/sage-ai/all-glamping-properties-columns.ts
+ *
+ *   npx tsx scripts/emit-sage-ai-glamping-rpc-extension.ts
+ */
+import { writeFileSync } from 'fs';
+import { join } from 'path';
+import {
+  GLAMPING_RPC_GROUP_BY_COLUMNS,
+  GLAMPING_RPC_DISTINCT_COLUMNS,
+} from '../lib/sage-ai/all-glamping-properties-columns';
+
+function fmtPgArray(cols: readonly string[]): string {
+  return `ARRAY[\n    ${cols.map((c) => `'${c.replace(/'/g, "''")}'`).join(',\n    ')}\n  ]`;
+}
+
+const out = `-- ============================================================================
+-- Sage AI: extend aggregate_properties_v2 / distinct_column_values allowlists
+-- to full glamping property feature columns (unit_*, property_*, activities_*,
+-- setting_*, rv_*, etc.). Safe to re-run: drops and recreates the functions.
 --
--- Moves two hot-path tools from client-side aggregation to Postgres:
---   * aggregate_properties_v2(group_by text, filters jsonb)
---   * distinct_column_values(col text, max_rows int)
---
--- Both RPCs whitelist `group_by` / `col` against the same column set the
--- aggregate_properties tool uses, so the AI cannot pivot on arbitrary columns.
---
--- Apply with:
---   psql $DATABASE_URL -f scripts/migrations/sage-ai-aggregation-rpc.sql
--- or via Supabase SQL editor.
+-- Apply in Supabase SQL editor (or: psql \$DATABASE_URL -f this file).
+-- Regenerate: npx tsx scripts/emit-sage-ai-glamping-rpc-extension.ts
 -- ============================================================================
 
 -- Dedupe key aligned with count_unique_properties / Sage AI tools (address, else name|city|state|country)
@@ -36,29 +47,16 @@ AS $$
     END
 $$;
 
--- Drop previous versions so re-runs are idempotent.
 DROP FUNCTION IF EXISTS public.aggregate_properties_v2(text, jsonb);
 DROP FUNCTION IF EXISTS public.distinct_column_values(text, integer);
 
--- ----------------------------------------------------------------------------
--- aggregate_properties_v2
--- Returns (key, unique_properties, avg_daily_rate, median_daily_rate, total_units, total_sites)
--- grouped by one of the allowlisted columns on all_glamping_properties.
--- Per row, eff_adr = average of the eight seasonal rate columns when any are
--- non-null/positive, else NULLIF(rate_avg_retail_daily_rate, 0). IQR(1.5) on
--- eff_adr within each key (if >=4 rated lines and IQR>0), else all rated lines;
--- if the fence would remove every line, use all. avg_daily_rate is then
--- unit-weighted; median_daily_rate = median of per-row eff_adr in that set.
--- total_units / total_sites sum all unit lines in the key (outliers still count).
--- unique_properties = COUNT(DISTINCT property dedupe key) per group.
--- ----------------------------------------------------------------------------
 CREATE FUNCTION public.aggregate_properties_v2(
   group_by text,
   filters  jsonb DEFAULT '{}'::jsonb
 )
 RETURNS TABLE (
   key                 text,
-  unique_properties   bigint,
+  unique_properties  bigint,
   avg_daily_rate      numeric,
   median_daily_rate   numeric,
   total_units         bigint,
@@ -70,11 +68,7 @@ SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE
-  allowed_columns constant text[] := ARRAY[
-    'state', 'city', 'country', 'unit_type', 'property_type',
-    'source', 'discovery_source', 'research_status',
-    'is_glamping_property', 'is_closed'
-  ];
+  allowed_columns constant text[] := ${fmtPgArray(GLAMPING_RPC_GROUP_BY_COLUMNS)};
   v_state                 text := filters->>'state';
   v_country               text := filters->>'country';
   v_unit_type             text := filters->>'unit_type';
@@ -92,14 +86,7 @@ BEGIN
       USING ERRCODE = 'invalid_parameter_value';
   END IF;
 
-  -- Build SQL with quote_ident (avoid format()/tuple edge cases) and keep
-  -- $1..$10 aligned with EXECUTE USING — mismatches surface as "there is no
-  -- parameter $N". `city`, `property_type`, `source`, `discovery_source`,
-  -- and `research_status` use exact-match equality (lowercased) because their
-  -- valid values are short, stable enums (e.g. research_status ∈
-  -- {published, in_progress, new}). State/country/unit_type keep the
-  -- ILIKE/contains semantics they had since v1 to be tolerant of casing.
-    sql_text :=
+  sql_text :=
     'WITH s AS ( '
       'SELECT '
         'COALESCE(' || quote_ident(group_by) || '::text, ''Unknown'') AS gk, '
@@ -182,11 +169,6 @@ BEGIN
 END;
 $$;
 
--- ----------------------------------------------------------------------------
--- distinct_column_values
--- Returns top-N distinct values for an allowlisted filterable column, ordered
--- by frequency. Mirrors the behavior of the old get_column_values tool.
--- ----------------------------------------------------------------------------
 CREATE FUNCTION public.distinct_column_values(
   col      text,
   max_rows integer DEFAULT 50
@@ -201,11 +183,7 @@ SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE
-  allowed_columns constant text[] := ARRAY[
-    'state', 'city', 'country', 'unit_type', 'property_type',
-    'source', 'discovery_source', 'research_status',
-    'is_glamping_property', 'is_closed'
-  ];
+  allowed_columns constant text[] := ${fmtPgArray(GLAMPING_RPC_DISTINCT_COLUMNS)};
   sql_text text;
   capped   integer := LEAST(GREATEST(max_rows, 1), 500);
 BEGIN
@@ -229,7 +207,13 @@ BEGIN
 END;
 $$;
 
--- Grant to authenticated users (RLS is not applicable to function calls; the
--- functions only read tables protected by RLS so the usual policies apply).
 GRANT EXECUTE ON FUNCTION public.aggregate_properties_v2(text, jsonb) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.distinct_column_values(text, integer) TO authenticated;
+`;
+
+writeFileSync(
+  join(__dirname, 'migrations', 'sage-ai-extend-glamping-allowlist-rpc.sql'),
+  out,
+  'utf8'
+);
+console.log('Wrote scripts/migrations/sage-ai-extend-glamping-allowlist-rpc.sql');

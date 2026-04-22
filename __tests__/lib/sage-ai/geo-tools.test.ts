@@ -23,7 +23,7 @@ function makeSupabase() {
     const chain: Record<string, unknown> = {};
     const impl = (_method: string) => (..._args: unknown[]) => chain;
     const terminals = ['maybeSingle', 'single', 'limit'];
-    for (const m of ['select', 'eq', 'ilike', 'not', 'is', 'order', 'range']) {
+    for (const m of ['select', 'eq', 'ilike', 'not', 'is', 'order', 'range', 'in']) {
       chain[m] = impl(m);
     }
     for (const t of terminals) {
@@ -230,7 +230,7 @@ describe('nearest_attractions — RPC integration', () => {
 
 describe('query_properties — near branch', () => {
   it('delegates to properties_within_radius RPC when near is provided', async () => {
-    const { supabase, setRpcResult, calls } = makeSupabase();
+    const { supabase, setRpcResult, setTableResult, calls } = makeSupabase();
     setRpcResult('properties_within_radius', {
       data: [
         {
@@ -239,6 +239,18 @@ describe('query_properties — near branch', () => {
           city: 'Austin',
           state: 'TX',
           distance_km: 3.21,
+        },
+      ],
+      error: null,
+    });
+    setTableResult('all_glamping_properties', {
+      data: [
+        {
+          id: 7,
+          property_name: 'Near Place',
+          city: 'Austin',
+          state: 'TX',
+          country: 'USA',
         },
       ],
       error: null,

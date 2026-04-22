@@ -4,6 +4,8 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
+
 export const GLAMPING_DISCOVERY_CANDIDATES_TABLE = 'glamping_discovery_candidates';
 
 type FailureRow = {
@@ -33,7 +35,7 @@ export async function routeDiscoveryFailuresToCandidates(
       country: p.country ?? null,
       url: p.url ?? null,
       description: p.description ?? null,
-      unit_type: p.unit_type ?? null,
+      unit_type: normalizeGlampingUnitTypeForStorage(p.unit_type) ?? null,
       property_type: p.property_type ?? null,
       number_of_units: p.number_of_units ?? null,
       article_url: articleUrl ?? null,

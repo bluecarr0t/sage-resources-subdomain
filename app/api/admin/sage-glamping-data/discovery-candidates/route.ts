@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
+import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,7 +117,7 @@ export const POST = withAdminAuth(async (request) => {
         url: candidate.url ?? null,
         phone_number: null,
         description: candidate.description ?? null,
-        unit_type: candidate.unit_type ?? null,
+        unit_type: normalizeGlampingUnitTypeForStorage(candidate.unit_type) ?? null,
         quantity_of_units: candidate.number_of_units != null ? String(candidate.number_of_units) : null,
         year_site_opened: null,
         site_name: null,

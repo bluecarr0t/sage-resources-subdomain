@@ -5,6 +5,7 @@
 import type { OpenAI } from 'openai';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ExtractedProperty } from './extract-properties';
+import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
 
 const TABLE_NAME = 'all_glamping_properties';
 const DELAY_MS = 2000;
@@ -54,7 +55,7 @@ Provide a JSON object with as much detail as possible:
 - zip_code: ZIP/postal code if available
 - url: Official website URL
 - description: 3-5 sentence description of the property, amenities, and what makes it special
-- unit_type: Types of accommodations (comma-separated, e.g., "tents, yurts, cabins")
+- unit_type: **Single** unit product for this row, singular label in Title Case (e.g. "Yurt", "Safari Tent", "Geodesic Dome") — not a comma list; if multiple, pick the primary / best-known offering
 - property_type: Type of property (e.g., "Glamping Resort", "Luxury Campground")
 - number_of_units: Integer — total glamping accommodations (tents, yurts, domes, cabins, etc.). Use a number only when you can support it from the property website, press, or other reliable sources; omit or null if unknown. Do not guess.
 - phone_number: Phone number if available
@@ -167,7 +168,7 @@ export function toInsertRow(
     url: url || null,
     phone_number: property.phone_number || null,
     description: property.description || null,
-    unit_type: property.unit_type || null,
+    unit_type: normalizeGlampingUnitTypeForStorage(property.unit_type) ?? null,
     quantity_of_units: property.number_of_units != null ? String(property.number_of_units) : null,
     year_site_opened: property.year_opened != null ? String(property.year_opened) : null,
     site_name: property.site_name || null,

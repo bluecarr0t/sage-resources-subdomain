@@ -6,8 +6,11 @@ import {
 describe('formatChartSeriesLegendLabel', () => {
   it('replaces underscores and title-cases words', () => {
     expect(formatChartSeriesLegendLabel('total_sites')).toBe('Total Sites');
+    expect(formatChartSeriesLegendLabel('total_units')).toBe('Total Units');
     expect(formatChartSeriesLegendLabel('avg_daily_rate')).toBe('Avg Daily Rate');
+    expect(formatChartSeriesLegendLabel('median_daily_rate')).toBe('Median Daily Rate');
     expect(formatChartSeriesLegendLabel('count')).toBe('Count');
+    expect(formatChartSeriesLegendLabel('properties')).toBe('Properties');
   });
 });
 

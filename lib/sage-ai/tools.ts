@@ -14,6 +14,37 @@ import { createComposedTools } from '@/lib/sage-ai/composed-tools';
 import { createVisualizationTools } from '@/lib/sage-ai/visualization-tools';
 import { fetchWithTimeout } from '@/lib/sage-ai/fetch-with-timeout';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
+import {
+  ALL_GLAMPING_PROPERTY_COLUMNS,
+  GLAMPING_AMENITIES_SCHEMA_BLURB,
+  isGlampingEqFilterColumn,
+  isGlampingGroupByColumn,
+  isGlampingDistinctColumn,
+} from '@/lib/sage-ai/all-glamping-properties-columns';
+import {
+  effectiveGlampingRetailAdrFromRow,
+  GLAMPING_SEASONAL_RATE_COLUMN_KEYS,
+} from '@/lib/sage-ai/effective-glamping-retail-adr';
+import { robustGlampingRateStats, type RateRow } from '@/lib/sage-ai/robust-rate-stats';
+import {
+  isAllowlistBlockedDistinctError,
+  scanGlampingColumnDistinctFrequencies,
+} from '@/lib/sage-ai/glamping-distinct-fallback';
+import {
+  GLAMPING_FIELD_GUIDE_VERSION,
+  searchFieldGuide,
+} from '@/lib/sage-ai/glamping-field-guide';
+
+/** PostgREST often returns `numeric` columns as strings; keep aggregates numeric for UI. */
+function coerceRpcNullableNumber(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
 
 /**
  * Per-call timeout caps for external HTTP integrations (ms). These were
@@ -143,25 +174,32 @@ const PROPERTIES_SUMMARY_COLUMNS = [
   'research_status',
 ] as const;
 
+/** Default `select` for `query_properties` when `columns` is omitted: summary + seasonal `rate_*` for `effective_retail_adr`. */
+const PROPERTIES_QUERY_DEFAULT_SELECT = [
+  ...PROPERTIES_SUMMARY_COLUMNS,
+  ...GLAMPING_SEASONAL_RATE_COLUMN_KEYS,
+] as const;
+
+function addEffectiveRetailAdrToPropertyRows(
+  rows: Array<Record<string, unknown>>
+): Array<Record<string, unknown>> {
+  return rows.map((row) => ({
+    ...row,
+    effective_retail_adr: effectiveGlampingRetailAdrFromRow(row),
+  }));
+}
+
 /**
  * Column allowlists per table. Keys are the canonical columns the AI is permitted
  * to reference in `select` / filter operations. For tables with volatile schemas
  * (campspot, all_roverpass_data_new) we don't enumerate columns; instead we fall
  * back to a strict identifier regex.
+ *
+ * Glamping uses many per-feature `unit_*` / `property_*` / `activities_*` /
+ * `setting_*` / `rv_*` text columns (typically "Yes" / "No") — not a single
+ * `amenities` column. See `GLAMPING_AMENITIES_SCHEMA_BLURB` in tool descriptions.
  */
-const PROPERTIES_COLUMN_ALLOWLIST = [
-  ...PROPERTIES_SUMMARY_COLUMNS,
-  ...PROPERTIES_FILTERABLE_COLUMNS,
-  'lat',
-  'lon',
-  'address',
-  'zip_code',
-  'description',
-  'amenities',
-  'pricing',
-  'created_at',
-  'updated_at',
-] as const;
+const PROPERTIES_COLUMN_ALLOWLIST = ALL_GLAMPING_PROPERTY_COLUMNS as unknown as readonly string[];
 
 const HIPCAMP_COLUMN_ALLOWLIST = [
   'id',
@@ -520,7 +558,7 @@ export function createSageAiTools(
             {
               name: 'all_glamping_properties',
               description:
-                'Glamping properties database with location, pricing, amenities, and operational data (Glamping only)',
+                'Glamping properties (unit-level rows). Features/amenities are many `unit_*`, `property_*`, `activities_*`, `setting_*`, `rv_*` columns — not one `amenities` field. Use `column_eq_filters` or `get_column_values` on a specific flag column.',
               row_count_estimate: 'thousands',
               category: 'Glamping',
             },
@@ -581,8 +619,12 @@ export function createSageAiTools(
     query_properties: tool({
       description:
         'Query the all_glamping_properties table with optional filters. **Data grain:** rows are **by unit** (unit-type / unit offering at a physical **`address`**), not one row per property — the same resort may appear on multiple rows. For **property counts**, dedupe by **`address`** (trimmed); if `address` is null/empty, use **`property_name` + `city` + `state` + `country`**. **`quantity_of_units` is the authoritative per-row physical unit count** — for **any** total units, inventory, or unit-weighted calculation, **always sum `quantity_of_units`** over the result set (do not use `len(rows)` or `property_total_sites` unless the user explicitly asked for rows or sites). Returns name, location, pricing, and related fields. Use filters (state/city/country/unit_type/etc.) to narrow results. Limit defaults to 50.\n\n' +
+        '**AMENITIES & FEATURES —** ' +
+        GLAMPING_AMENITIES_SCHEMA_BLURB +
+        ' Use `column_eq_filters` for exact matches, e.g. `[{ column: "property_pool", value: "Yes" }]`, optionally combined with `filters.state` / `filters.country`.\n\n' +
         'STATE & REGION QUERIES — use the `filters.state` field, NOT the `near` parameter. Example: { filters: { state: "Texas" } }. The `state` filter accepts both 2-letter codes ("TX") and full names ("Texas") and is normalized server-side.\n\n' +
-        'PROXIMITY QUERIES — only set `near` when the user asked for results within a radius of a specific point (e.g. "within 50 km of Austin", "near Collective Retreats Vail"). When `near` is set, you MUST first call geocode_property (or have the user supply real lat/lng); NEVER hand-write coordinates and NEVER pass {latitude:0, longitude:0} as a placeholder — that is rejected/ignored server-side and the user sees an error.',
+        'PROXIMITY QUERIES — only set `near` when the user asked for results within a radius of a specific point (e.g. "within 50 km of Austin", "near Collective Retreats Vail"). When `near` is set, you MUST first call geocode_property (or have the user supply real lat/lng); NEVER hand-write coordinates and NEVER pass {latitude:0, longitude:0} as a placeholder — that is dropped server-side. You **may** combine `near` with `column_eq_filters` (e.g. amenity flags) or rate-related columns: the tool loads full `all_glamping_properties` rows for the in-radius ids and applies those filters in memory. Closest-`limit` matches from the RPC are still the candidate set before that filter, so a tight radius with many `column_eq` constraints can return 0 rows — widen the radius if needed.\n\n' +
+        '**PRICING / RETAIL ADR** — each row includes `rate_avg_retail_daily_rate` and a server-computed **`effective_retail_adr`** (USD/night, two decimals). When the average is null or stale, `effective_retail_adr` uses the seasonal `rate_winter_*` / `rate_spring_*` / `rate_summer_*` / `rate_fall_*` fields when any are present (same rules as `count_unique_properties`). For questions like "any units over $X/night", prefer **`effective_retail_adr`** over `rate_avg_retail_daily_rate` alone.',
       inputSchema: z.object({
         filters: z
           .object({
@@ -628,18 +670,39 @@ export function createSageAiTools(
               'Do NOT pass placeholder zeros — if you do not have real coordinates, OMIT this field entirely instead of sending {latitude:0, longitude:0, radius_km:1}. ' +
               'Use geocode_property first to resolve an origin from a property name/id/address.'
           ),
+        column_eq_filters: z
+          .array(
+            z.object({
+              column: z.string().min(1).max(64),
+              value: z.string().min(1).max(200),
+            })
+          )
+          .max(30)
+          .optional()
+          .describe(
+            'Exact `.eq` filters on allowlisted columns (amenity/activity/setting/RV flags use "Yes"/"No", e.g. property_pool, unit_hot_tub). Works with `near` after the server re-hydrates full rows for in-radius property ids.'
+          ),
         columns: z
           .array(z.string())
           .optional()
           .describe(
-            'Specific columns to return. If not provided, returns summary columns: id, property_name, city, state, country, unit_type, property_type, url, property_total_sites, quantity_of_units, rate_avg_retail_daily_rate, research_status'
+            'Specific allowlisted columns to return. If omitted, the tool selects summary columns plus seasonal `rate_*` fields (so `effective_retail_adr` can be filled). Every row also includes `effective_retail_adr` (computed).'
           ),
         limit: z.number().min(1).max(500).optional().default(50).describe('Max rows to return'),
         offset: z.number().min(0).optional().default(0).describe('Offset for pagination'),
         order_by: z.string().optional().describe('Column to order by'),
         order_ascending: z.boolean().optional().default(true).describe('Sort direction'),
       }),
-      execute: async ({ filters, near, columns, limit, offset, order_by, order_ascending }) => {
+      execute: async ({
+        filters,
+        near,
+        column_eq_filters,
+        columns,
+        limit,
+        offset,
+        order_by,
+        order_ascending,
+      }) => {
         // Drop empty-string filter values the model sometimes emits when it
         // "fills out" every optional slot. See `stripEmptyFilters` for why
         // this matters (an empty string would translate to `column ILIKE ''`
@@ -651,7 +714,17 @@ export function createSageAiTools(
         );
         const selectColumns = allowedCols.length
           ? allowedCols.join(', ')
-          : PROPERTIES_SUMMARY_COLUMNS.join(', ');
+          : PROPERTIES_QUERY_DEFAULT_SELECT.join(', ');
+
+        const validColumnEq: Array<{ column: string; value: string }> = [];
+        const rejectedColumnEq: string[] = [];
+        for (const row of column_eq_filters ?? []) {
+          if (!isGlampingEqFilterColumn(row.column)) {
+            rejectedColumnEq.push(row.column);
+            continue;
+          }
+          validColumnEq.push(row);
+        }
 
         // Defensively scrub the `(0, 0)` placeholder the model sometimes emits
         // when it mistakenly thinks `near` is a required parameter. Returning
@@ -668,9 +741,29 @@ export function createSageAiTools(
           droppedNearPlaceholder = true;
         }
 
-        // Proximity branch — delegates to properties_within_radius RPC so the
-        // server can use the PostGIS GIST index on property_geocode.geom.
+        // Proximity: `properties_within_radius` for distance-ordered ids (PostGIS),
+        // then re-fetch full all_glamping_properties rows so `column_eq_filters`
+        // and `filters.is_glamping_property` / `is_closed` match the non-near path.
         if (near) {
+          const baseSelectCols: string[] = allowedCols.length
+            ? [...allowedCols]
+            : [...PROPERTIES_QUERY_DEFAULT_SELECT];
+          const nearSelectSet = new Set<string>(baseSelectCols);
+          for (const { column } of validColumnEq) {
+            if (isGlampingEqFilterColumn(column)) {
+              nearSelectSet.add(column);
+            }
+          }
+          if (filters?.is_glamping_property) {
+            nearSelectSet.add('is_glamping_property');
+          }
+          if (filters?.is_closed) {
+            nearSelectSet.add('is_closed');
+          }
+          const nearSelectString = [...nearSelectSet]
+            .filter((c) => (PROPERTIES_COLUMN_ALLOWLIST as readonly string[]).includes(c))
+            .join(', ');
+
           const { data: nearRows, error: nearErr } = await supabase.rpc(
             'properties_within_radius',
             {
@@ -683,28 +776,90 @@ export function createSageAiTools(
           if (nearErr) {
             return { error: nearErr.message, data: null, total_count: 0 };
           }
-          let rows = (nearRows ?? []) as Array<Record<string, unknown>>;
+          const nearList = (nearRows ?? []) as Array<Record<string, unknown>>;
 
-          // The RPC ignores `filters`, so apply the ones we can in JS against
-          // the rows it returned. Without this, "glamping properties in CO
-          // within 50km of X" silently drops the state/city filters and returns
-          // every nearby property — including ones in other states.
-          //
-          // The RPC's projection does NOT include `is_glamping_property` or
-          // `is_closed`, so those filters cannot be honored in the near branch.
-          // We surface them in `unsupported_filters` so the model knows to do a
-          // separate filtered query if those constraints matter.
-          const unsupportedFilters: string[] = [];
-          if (filters) {
-            const matchesIlikeContains = (val: unknown, needle: string) => {
-              if (val == null) return false;
-              return String(val).toLowerCase().includes(needle.toLowerCase());
-            };
-            const matchesIlikeExact = (val: unknown, needle: string) => {
-              if (val == null) return false;
-              return String(val).toLowerCase() === needle.toLowerCase();
-            };
-            rows = rows.filter((row) => {
+          const toFiniteId = (raw: unknown): number | null => {
+            if (raw == null) return null;
+            if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+            if (typeof raw === 'string' && /^\d+$/.test(raw)) return parseInt(raw, 10);
+            const n = Number(raw);
+            return Number.isFinite(n) ? n : null;
+          };
+
+          const idOrder: number[] = [];
+          const distanceById = new Map<number, number>();
+          for (const r of nearList) {
+            const id = toFiniteId(r.id);
+            if (id == null) continue;
+            idOrder.push(id);
+            const d = r.distance_km;
+            const num =
+              typeof d === 'number' ? d : parseFloat(String(d ?? 'NaN'));
+            distanceById.set(id, Number.isFinite(num) ? num : 0);
+          }
+
+          if (idOrder.length === 0) {
+            return handleEmptyResult(
+              'query_properties',
+              {
+                filters,
+                near,
+                column_eq_filters,
+                columns,
+                limit,
+                offset,
+                order_by,
+                order_ascending,
+              },
+              {
+                data: [],
+                total_count: 0,
+                returned_count: 0,
+                limit: limit ?? 50,
+                offset: 0,
+                near: { ...near, unit: 'km' },
+                ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+                ...(rejectedColumnEq.length ? { rejected_column_eq: rejectedColumnEq } : {}),
+              },
+              true,
+              'Try a larger radius_km or a different origin coordinate.'
+            );
+          }
+
+          const { data: fullRows, error: fullErr } = await supabase
+            .from('all_glamping_properties')
+            .select(nearSelectString)
+            .in('id', idOrder);
+          if (fullErr) {
+            return { error: fullErr.message, data: null, total_count: 0 };
+          }
+
+          const byId = new Map<number, Record<string, unknown>>();
+          for (const row of fullRows ?? []) {
+            const r = row as Record<string, unknown>;
+            const id = toFiniteId(r.id);
+            if (id != null) byId.set(id, r);
+          }
+
+          let rows: Array<Record<string, unknown>> = [];
+          for (const id of idOrder) {
+            const base = byId.get(id);
+            if (base) {
+              rows.push({ ...base, distance_km: distanceById.get(id) });
+            }
+          }
+
+          const matchesIlikeContains = (val: unknown, needle: string) => {
+            if (val == null) return false;
+            return String(val).toLowerCase().includes(needle.toLowerCase());
+          };
+          const matchesIlikeExact = (val: unknown, needle: string) => {
+            if (val == null) return false;
+            return String(val).toLowerCase() === needle.toLowerCase();
+          };
+
+          rows = rows.filter((row) => {
+            if (filters) {
               if (filters.state) {
                 const stateVal =
                   normalizeState(filters.state) ?? filters.state.trim();
@@ -720,32 +875,50 @@ export function createSageAiTools(
                 !matchesIlikeContains(row.property_type, filters.property_type)
               )
                 return false;
-              return true;
-            });
-            if (filters.is_glamping_property) unsupportedFilters.push('is_glamping_property');
-            if (filters.is_closed) unsupportedFilters.push('is_closed');
-          }
+              if (filters.is_glamping_property) {
+                if (String(row.is_glamping_property ?? '') !== filters.is_glamping_property) {
+                  return false;
+                }
+              }
+              if (filters.is_closed) {
+                if (String(row.is_closed ?? '') !== filters.is_closed) return false;
+              }
+            }
+            for (const { column, value } of validColumnEq) {
+              const cell = row[column];
+              if (String(cell ?? '') !== value) return false;
+            }
+            return true;
+          });
 
-          // The RPC returns a fixed projection and ignores the `columns` arg
-          // sent by the caller. To keep the contract consistent with the
-          // non-near branch (which only returns allowlisted columns) and to
-          // avoid leaking fields the model didn't ask for, project rows here.
-          // We always preserve the distance helpers the RPC adds (`distance_km`,
-          // any geometry columns) since callers rely on ordering.
           const distancePassthrough = ['distance_km', 'distance', 'geom'];
-          const projection = allowedCols.length ? allowedCols : PROPERTIES_SUMMARY_COLUMNS;
-          const projectionSet = new Set<string>([...projection, ...distancePassthrough]);
+          const projection = allowedCols.length ? allowedCols : [...PROPERTIES_SUMMARY_COLUMNS];
+          const projectionSet = new Set<string>([
+            ...projection,
+            ...distancePassthrough,
+            ...validColumnEq.map((v) => v.column),
+          ]);
           const projectedRows = rows.map((row) => {
             const out: Record<string, unknown> = {};
             for (const key of Object.keys(row)) {
               if (projectionSet.has(key)) out[key] = row[key];
             }
+            out.effective_retail_adr = effectiveGlampingRetailAdrFromRow(row);
             return out;
           });
 
           return handleEmptyResult(
             'query_properties',
-            { filters, near, columns, limit, offset, order_by, order_ascending },
+            {
+              filters,
+              near,
+              column_eq_filters,
+              columns,
+              limit,
+              offset,
+              order_by,
+              order_ascending,
+            },
             {
               data: projectedRows,
               total_count: projectedRows.length,
@@ -754,15 +927,10 @@ export function createSageAiTools(
               offset: 0,
               near: { ...near, unit: 'km' },
               ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
-              ...(unsupportedFilters.length
-                ? {
-                    unsupported_filters: unsupportedFilters,
-                    note: `Filters ${unsupportedFilters.join(', ')} are not honored in proximity (\`near\`) mode because the proximity RPC's projection does not include those columns. Run a separate query_properties call without \`near\` if you need those filters.`,
-                  }
-                : {}),
+              ...(rejectedColumnEq.length ? { rejected_column_eq: rejectedColumnEq } : {}),
             },
             projectedRows.length === 0,
-            'Try a larger radius_km or a different origin coordinate.'
+            'Try a larger radius_km, fewer filters / column_eq constraints, or a different origin coordinate.'
           );
         }
 
@@ -802,6 +970,9 @@ export function createSageAiTools(
           if (filters.is_glamping_property) query = query.eq('is_glamping_property', filters.is_glamping_property);
           if (filters.is_closed) query = query.eq('is_closed', filters.is_closed);
         }
+        for (const { column, value } of validColumnEq) {
+          query = query.eq(column, value);
+        }
 
         if (order_by) {
           query = query.order(order_by, { ascending: order_ascending ?? true });
@@ -813,16 +984,30 @@ export function createSageAiTools(
           return { error: error.message, data: null, total_count: 0 };
         }
 
+        const dataWithAdr = addEffectiveRetailAdrToPropertyRows(
+          (data ?? []) as Array<Record<string, unknown>>
+        );
+
         return handleEmptyResult(
           'query_properties',
-          { filters, near, columns, limit, offset, order_by, order_ascending },
           {
-            data: data ?? [],
+            filters,
+            near,
+            column_eq_filters,
+            columns,
+            limit,
+            offset,
+            order_by,
+            order_ascending,
+          },
+          {
+            data: dataWithAdr,
             total_count: count ?? 0,
-            returned_count: data?.length ?? 0,
+            returned_count: dataWithAdr.length,
             limit: limit ?? 50,
             offset: offset ?? 0,
             ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+            ...(rejectedColumnEq.length ? { rejected_column_eq: rejectedColumnEq } : {}),
             ...(droppedNearPlaceholder
               ? {
                   near_placeholder_dropped: true,
@@ -1331,20 +1516,60 @@ export function createSageAiTools(
 
     get_column_values: tool({
       description:
-        'Get distinct values for a column in the properties table. Useful for understanding what filter values are available.',
+        'Get distinct values for a column on `all_glamping_properties` (ordered by frequency). Use for `research_status`, `unit_type`, or any **allowlisted** feature column — e.g. `unit_private_bathroom` (private/ensuite bathroom on the unit), `unit_hot_tub`, `property_pool` — typically "Yes" / "No" / null. ' +
+        GLAMPING_AMENITIES_SCHEMA_BLURB,
       inputSchema: z.object({
         column: z
-          .enum(PROPERTIES_FILTERABLE_COLUMNS)
-          .describe('Column to get distinct values for'),
+          .string()
+          .min(1)
+          .max(64)
+          .refine((c) => isGlampingDistinctColumn(c), {
+            message:
+              'Unknown or unsupported column for distinct values on all_glamping_properties (long-text / JSON columns are excluded).',
+          })
+          .describe('Column name (e.g. research_status, property_pool, activities_hiking).'),
         limit: z.number().min(1).max(100).optional().default(50),
       }),
       execute: async ({ column, limit }) => {
+        const cap = limit ?? 50;
         const { data, error } = await supabase.rpc('distinct_column_values', {
           col: column,
-          max_rows: limit ?? 50,
+          max_rows: cap,
         });
 
         if (error) {
+          if (isAllowlistBlockedDistinctError(error.message) && isGlampingDistinctColumn(column)) {
+            try {
+              const { value_rows, rows_scanned, scan_truncated } =
+                await scanGlampingColumnDistinctFrequencies(supabase, column, cap);
+              return handleEmptyResult(
+                'get_column_values',
+                { column, limit },
+                {
+                  column,
+                  values: value_rows.map((r) => r.value),
+                  value_counts: value_rows,
+                  total_unique: value_rows.length,
+                  distinct_method: 'table_scan' as const,
+                  rows_scanned,
+                  ...(scan_truncated
+                    ? {
+                        warnings: [
+                          `Distinct scan read ${rows_scanned} rows (cap ${100_000}); counts may be incomplete. Apply scripts/migrations/sage-ai-extend-glamping-allowlist-rpc.sql for server-side distincts.`,
+                        ],
+                      }
+                    : {}),
+                },
+                value_rows.length === 0,
+                `Column "${column}" has no non-null values in the scanned range.`
+              );
+            } catch (fallbackErr) {
+              return {
+                error: `${error.message} (fallback: ${(fallbackErr as Error).message})`,
+                values: null,
+              };
+            }
+          }
           return { error: error.message, values: null };
         }
 
@@ -1357,10 +1582,54 @@ export function createSageAiTools(
             values: rows.map((r) => r.value),
             value_counts: rows,
             total_unique: rows.length,
+            distinct_method: 'rpc' as const,
           },
           rows.length === 0,
           `Column "${column}" has no distinct values. Try a different column or check that the table has data.`
         );
+      },
+    }),
+
+    find_glamping_columns: tool({
+      description:
+        '**Team-friendly column lookup (no database access required).** Map plain-language features or questions to real `all_glamping_properties` column names. ' +
+        'Call this when the user mentions amenities in conversational language ("private bath", "dog park", "waterfront", "hiking", "true glamping") and you are not 100% sure of the exact `unit_*` / `property_*` / `activities_*` / `setting_*` name. ' +
+        'Returns ranked matches with `column`, human `label`, and a short `how_to_filter` string. ' +
+        'After resolving the column, use `get_column_values` to see actual values, then `query_properties` with `column_eq_filters` or `aggregate_properties` with `group_by`. ' +
+        `Field guide data version: ${GLAMPING_FIELD_GUIDE_VERSION}.`,
+      inputSchema: z.object({
+        query: z
+          .string()
+          .min(1)
+          .max(200)
+          .describe(
+            'What the user is asking for in plain language (e.g. "bathroom in the unit", "pet friendly", "on the lake", "gym on site", "RV sewer hookup").'
+          ),
+        max_results: z
+          .number()
+          .min(1)
+          .max(25)
+          .optional()
+          .default(12)
+          .describe('Max matches to return (default 12).'),
+      }),
+      execute: async ({ query, max_results }) => {
+        const max = max_results ?? 12;
+        const matches = searchFieldGuide(query, max);
+        return {
+          field_guide_version: GLAMPING_FIELD_GUIDE_VERSION,
+          query: query.trim(),
+          matches: matches.map((m) => ({
+            column: m.column,
+            category: m.category,
+            label: m.label,
+            also_known_as: m.aliases.slice(0, 8),
+            how_to_filter: m.tool_tip,
+            relevance: m.score,
+          })),
+          note:
+            'These are the Sage column names. Values are often "Yes" / "No" / null — use get_column_values on the chosen `column` before filtering.',
+        };
       },
     }),
 
@@ -1404,15 +1673,24 @@ export function createSageAiTools(
 
     aggregate_properties: tool({
       description:
-        'Get aggregate statistics for properties grouped by a column. Useful for summaries like "average rate by unit type" or row-count breakdowns by `state`. ' +
-        '**Grain:** `all_glamping_properties` is **unit-level**; `count` in each group is the number of **rows** (unit lines), not distinct addresses. For **unique property counts** by segment, use `query_properties` and count distinct `address` (or the name+city+state+country fallback). For **unit inventory, "how many units", or any total that should reflect physical units**, **always sum `quantity_of_units`** over the relevant rows — it is the exact per-row unit count; **do not** use row `count` or `property_total_sites` as a substitute unless the user asked for those metrics explicitly. ' +
+        'Get aggregate statistics for properties grouped by a column. Useful for summaries like "average and median rate by unit type" or breakdowns by `state`. ' +
+        '**Each group includes:** **`properties`** (distinct **properties** in that group using the same dedupe key as `count_unique_properties`: trimmed lowercase `address`, else `property_name|city|state|country`), **`total_units` (sum of `quantity_of_units` — the inventory field for glamping)**, `avg_daily_rate` (**IQR-robust, unit-weighted** “normal” mean: per row **effective** ADR = average of the eight `rate_*_weekday/weekend` when any are set, else `rate_avg_retail_daily_rate` → then Tukey IQR(1.5) outlier screen per group on positive effective ADRs when the group has ≥4 rated lines and non-zero IQR, else no dropping → unit-weighted mean; if the screen would remove every line, the mean/median use all rated lines in that group), and **`median_daily_rate`** (median of those same per-row eff values after the same IQR set). **Always show both** when you narrate rate breakdowns. ' +
+        '**`total_sites` is always `null` in the returned payload** (the RPC can sum `property_total_sites`, but that is a per-property, often whole-park, site count: repeating it on every unit-type row means grouped “sites” are **not** comparable to glamping **units**). **For all glamping Q&A, tables, and charts, use and label `total_units` only — never “sites” from this tool.** ' +
+        'You may also `group_by` amenity / feature flag columns (e.g. `property_pool`, `unit_hot_tub`, `activities_hiking`) to see **how many properties** and units fall under each value. ' +
+        '**Grain:** `all_glamping_properties` is **unit-level** (multiple rows per resort are normal); `properties` in each group is **not** a raw row count — it is how many **unique physical locations** in that group. For **unit inventory, "how many units", or any total that should reflect physical units**, use **`total_units` from this tool** (or sum `quantity_of_units` from query results) — **do not** use `property_total_sites` as a substitute for glamping unit inventory. ' +
         'IMPORTANT — country vs state: pass country names ("Canada", "Mexico", "United States") in `filters.country`, NEVER in `filters.state`. ' +
         'The `state` filter only matches US state codes/names (CO, Colorado, …) and Canadian province codes (BC, ON, AB, QC, NS, NB, MB, SK, PE, NL, YT, NT, NU). ' +
         'The result envelope echoes `applied_filters` and a `summary` string — cite those when narrating the result so you do not misattribute the slice.',
       inputSchema: z.object({
         group_by: z
-          .enum(PROPERTIES_FILTERABLE_COLUMNS)
-          .describe('Column to group results by'),
+          .string()
+          .min(1)
+          .max(64)
+          .refine((c) => isGlampingGroupByColumn(c), {
+            message:
+              'group_by must be an allowlisted all_glamping_properties column. For amenity pivots use real column names (e.g. property_pool, unit_wifi), not "amenities".',
+          })
+          .describe('Column to group by (state, unit_type, property_pool, activities_hiking, …)'),
         filters: z
           .object({
             state: z.string().optional(),
@@ -1498,22 +1776,41 @@ export function createSageAiTools(
         });
 
         if (error) {
-          return { error: error.message, aggregates: null, applied_filters: payload };
+          const allowlistHint = isAllowlistBlockedDistinctError(error.message)
+            ? 'If group_by is a unit_/property_/activities_/setting_ column, apply scripts/migrations/sage-ai-extend-glamping-allowlist-rpc.sql so aggregate_properties_v2 allowlists match Sage AI tools.'
+            : undefined;
+          return {
+            error: error.message,
+            aggregates: null,
+            applied_filters: payload,
+            ...(allowlistHint ? { hint: allowlistHint } : {}),
+          };
         }
 
         const rows = (data ?? []) as Array<{
           key: string;
-          count: number;
+          unique_properties?: number;
+          count?: number;
           avg_daily_rate: number | null;
+          median_daily_rate: number | null;
+          total_units: number;
           total_sites: number;
         }>;
 
-        const aggregates = rows.map((r) => ({
-          [group_by]: r.key,
-          count: Number(r.count),
-          avg_daily_rate: r.avg_daily_rate == null ? null : Number(r.avg_daily_rate),
-          total_sites: Number(r.total_sites),
-        }));
+        const aggregates = rows.map((r) => {
+          const raw = r as unknown as Record<string, unknown>;
+          const propertyCount = raw.unique_properties ?? raw.count;
+          return {
+            [group_by]: r.key,
+            properties: Number(propertyCount ?? 0),
+            avg_daily_rate: coerceRpcNullableNumber(raw.avg_daily_rate),
+            median_daily_rate: coerceRpcNullableNumber(raw.median_daily_rate),
+            total_units: Number(r.total_units),
+            // Do not surface summed `property_total_sites` for glamping aggregates — it
+            // double-counts across unit-type lines; inventory is `total_units` only.
+            total_sites: null,
+          };
+        });
 
         const filterEntries = Object.entries(payload);
         const filterPretty = filterEntries
@@ -1562,7 +1859,7 @@ export function createSageAiTools(
         'Server-side **distinct-property** count for `all_glamping_properties`. ' +
         'Use this whenever the user asks "how many properties / locations / resorts" — never count rows yourself, and never hand-count from a returned list. ' +
         'Dedupe key: trimmed lowercase `address`. When `address` is null/empty, falls back to `property_name|city|state|country` (also trimmed/lowercased). ' +
-        '**`total_units` in the result is always the sum of `quantity_of_units`** — the authoritative physical-unit inventory for the filtered rows; never reinterpret it as row count. Also returns the **average `rate_avg_retail_daily_rate`** (across rated rows only) so a single call answers the typical KPI tile question.\n\n' +
+        '**`total_units` in the result is always the sum of `quantity_of_units`** — the authoritative physical-unit inventory for the filtered rows; never reinterpret it as row count. `avg_retail_daily_rate` / `median_retail_daily_rate` match the **same IQR(1.5) + unit-weighting + effective-ADR** rules as `aggregate_properties` (see that tool) over the filtered set. `retail_rate_outliers_dropped` counts how many **rated** unit rows were left out of the IQR “normal” set (0 when the screen was skipped or nothing dropped). **When discussing rates, cite both mean and median.**\n\n' +
         'Country goes in `filters.country` ("Canada", "United States"); state/province goes in `filters.state`. ' +
         'For "true glamping" set `filters.is_glamping_property = "Yes"` (the user usually means this). ' +
         'For "published only" / "researched only" / "verified only", push the filter down via `filters.research_status` (call `get_column_values({ column: "research_status" })` first if you do not know the exact valid values — do NOT guess "Published" vs "published"). ' +
@@ -1585,9 +1882,30 @@ export function createSageAiTools(
           .describe(
             'Equality filters applied before deduplication. All fields here mirror PROPERTIES_FILTERABLE_COLUMNS so any slice the user describes can be pushed down server-side.'
           ),
+        column_eq_filters: z
+          .array(
+            z.object({
+              column: z.string().min(1).max(64),
+              value: z.string().min(1).max(200),
+            })
+          )
+          .max(30)
+          .optional()
+          .describe(
+            'Additional exact `.eq` filters (e.g. property_pool=Yes). See the `query_properties` tool description for how amenity data is modeled (per-feature columns).'
+          ),
       }),
-      execute: async ({ filters }) => {
+      execute: async ({ filters, column_eq_filters }) => {
         const cleaned = stripEmptyFilters(filters) ?? {};
+        for (const { column, value } of column_eq_filters ?? []) {
+          if (!isGlampingEqFilterColumn(column)) {
+            return {
+              error: `Invalid column_eq_filters.column "${column}" — not an allowlisted filter column on all_glamping_properties.`,
+              unique_properties: null,
+              applied_filters: cleaned,
+            };
+          }
+        }
         // Same country-vs-state defensive check the aggregate tool uses, so a
         // model mistake doesn't silently produce 0 properties.
         if (typeof cleaned.state === 'string' && cleaned.state.trim()) {
@@ -1625,16 +1943,20 @@ export function createSageAiTools(
           rate_avg_retail_daily_rate: number | null;
         };
 
+        const seasonSelect = GLAMPING_SEASONAL_RATE_COLUMN_KEYS.join(', ');
         const collected: Row[] = [];
         for (let page = 0; page < MAX_PAGES; page += 1) {
           let q = supabase
             .from('all_glamping_properties')
             .select(
-              'address, property_name, city, state, country, quantity_of_units, rate_avg_retail_daily_rate'
+              `address, property_name, city, state, country, quantity_of_units, rate_avg_retail_daily_rate, ${seasonSelect}`
             )
             .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
           for (const [k, v] of Object.entries(cleaned)) {
             q = q.eq(k, v as string);
+          }
+          for (const { column, value } of column_eq_filters ?? []) {
+            q = q.eq(column, value);
           }
           const { data, error } = await q;
           if (error) {
@@ -1655,8 +1977,7 @@ export function createSageAiTools(
         let usedFallback = 0;
         let totalUnits = 0;
         let unitsRowsCounted = 0;
-        let rateSum = 0;
-        let rateCount = 0;
+        const rateRows: RateRow[] = [];
         for (const r of collected) {
           const addr =
             typeof r.address === 'string' ? r.address.trim().toLowerCase() : '';
@@ -1677,13 +1998,15 @@ export function createSageAiTools(
             totalUnits += r.quantity_of_units;
             unitsRowsCounted += 1;
           }
-          if (
-            typeof r.rate_avg_retail_daily_rate === 'number' &&
-            Number.isFinite(r.rate_avg_retail_daily_rate) &&
-            r.rate_avg_retail_daily_rate > 0
-          ) {
-            rateSum += r.rate_avg_retail_daily_rate;
-            rateCount += 1;
+          const eff = effectiveGlampingRetailAdrFromRow(r as Record<string, unknown>);
+          if (eff !== null) {
+            const w =
+              typeof r.quantity_of_units === 'number' &&
+              Number.isFinite(r.quantity_of_units) &&
+              r.quantity_of_units > 0
+                ? r.quantity_of_units
+                : 1;
+            rateRows.push({ eff, w });
           }
         }
 
@@ -1692,15 +2015,23 @@ export function createSageAiTools(
           .join(', ');
         const scope: 'whole_table' | 'filtered' =
           Object.keys(cleaned).length === 0 ? 'whole_table' : 'filtered';
-        const avgRate = rateCount > 0 ? rateSum / rateCount : null;
+        const robust = robustGlampingRateStats(rateRows);
+        const avgRate = robust.avg;
+        const medianRate = robust.median;
+        const rateCount = robust.ratedCount;
+        const outlierDrop = robust.droppedAsOutliers;
         const summary =
           `Counted distinct addresses in all_glamping_properties ` +
           (scope === 'whole_table' ? '(no filters)' : `where ${filterPretty}`) +
           ` → ${seen.size} unique properties from ${collected.length} unit-level rows ` +
           `(${usedFallback} used name+city+state+country fallback). ` +
           `Total units (sum quantity_of_units) = ${totalUnits} across ${unitsRowsCounted} rows. ` +
-          (avgRate !== null
-            ? `Avg retail daily rate = ${avgRate.toFixed(2)} across ${rateCount} rated rows.`
+          (avgRate !== null && medianRate !== null
+            ? `Robust (IQR-screened) unit-weighted avg retail daily rate = ${avgRate.toFixed(2)}; ` +
+              `median = ${medianRate.toFixed(2)} across ${rateCount} rated unit rows` +
+              (outlierDrop > 0
+                ? ` (IQR excluded ${outlierDrop} rated line(s) from the mean/median; see retail_rate_outliers_dropped).`
+                : '.')
             : `No rated rows in scope.`);
 
         return {
@@ -1711,7 +2042,9 @@ export function createSageAiTools(
           total_units: totalUnits,
           unit_rows_counted: unitsRowsCounted,
           avg_retail_daily_rate: avgRate,
+          median_retail_daily_rate: medianRate,
           rated_rows_counted: rateCount,
+          retail_rate_outliers_dropped: outlierDrop,
           applied_filters: cleaned,
           scope,
           truncated,
@@ -1743,6 +2076,7 @@ NOT AVAILABLE (do not import or attempt to use):
 IMPORTANT RULES:
 - If you need data from a previous query, use the special variable 'data' which will contain the query results as a list of dictionaries.
 - When analyzing all_glamping_properties rows: quantity_of_units is the exact unit count per record — sum it for total units or unit-weighted metrics; do not substitute row count unless the user asked for row/listing counts.
+- For **retail ADR / rate averages and medians**, do not re-invent the pipeline in Python: \`aggregate_properties\` and \`count_unique_properties\` already return **IQR-robust, unit-weighted** effective ADR. If you must average rates in \`data\` yourself, weight by \`quantity_of_units\` and say your number is an unaudited recompute (and prefer calling the tools instead).
 - For charts, use matplotlib and call plt.show() at the end.
 - Use print() for any text output you want to display.
 - Execution time is bounded (~30s wall-clock); WASM cannot be hard-killed mid-computation, so avoid infinite loops or O(n^4)-style work over large arrays.

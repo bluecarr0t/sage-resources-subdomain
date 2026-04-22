@@ -125,6 +125,64 @@ export async function downloadXlsxFromData(
 }
 
 /**
+ * Build CSV text from a row-major grid of string cells (e.g. parsed from an HTML
+ * &lt;table&gt;). Used by markdown table exports; exposed for unit tests.
+ */
+export function tableRowsToCsvString(rows: string[][]): string {
+  if (!rows.length) return '';
+  return rows.map((row) => row.map((c) => csvCell(c)).join(',')).join('\r\n');
+}
+
+/**
+ * Download a 2D string table (first row is usually the header).
+ */
+export function downloadCsvFromRows(
+  rows: string[][],
+  filename = 'sage-ai-table.csv'
+): void {
+  if (!rows.length) {
+    console.warn('No data to export');
+    return;
+  }
+  const csv = tableRowsToCsvString(rows);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename.endsWith('.csv') ? filename : `${filename}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * XLSX download from a 2D string grid (uses sheet `Data`).
+ */
+export async function downloadXlsxFromRows(
+  rows: string[][],
+  filename = 'sage-ai-table.xlsx'
+): Promise<void> {
+  if (!rows.length) {
+    console.warn('No data to export');
+    return;
+  }
+  let XLSX: typeof import('xlsx');
+  try {
+    XLSX = await import('xlsx');
+  } catch {
+    throw new Error(
+      'Failed to load the Excel export library. Please try CSV export instead.'
+    );
+  }
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+  const finalFilename = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
+  XLSX.writeFile(wb, finalFilename);
+}
+
+/**
  * Generate a timestamped filename for exports (without extension).
  */
 export function generateExportFilename(prefix = 'sage-ai-export'): string {
