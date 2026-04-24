@@ -165,7 +165,7 @@ function cleanValue(value: any, columnName: string): any {
       'google_reservable', 'google_wheelchair_accessible_parking',
       'google_wheelchair_accessible_entrance', 'google_wheelchair_accessible_restroom',
       'google_wheelchair_accessible_seating', 'google_allows_dogs', 'is_glamping_property',
-      'is_closed'
+      'is_open'
     ];
     
     if (booleanColumns.includes(columnName)) {
@@ -251,9 +251,9 @@ async function uploadData(
         cleaned.is_glamping_property = 'Yes'; // Default value
       }
       
-      // Ensure is_closed has a value (required NOT NULL column with default 'No')
-      if (!cleaned.is_closed || cleaned.is_closed === '' || cleaned.is_closed === null) {
-        cleaned.is_closed = 'No'; // Default value
+      // Ensure is_open has a value (required NOT NULL column with default 'Yes' = operating)
+      if (!cleaned.is_open || cleaned.is_open === '' || cleaned.is_open === null) {
+        cleaned.is_open = 'Yes'; // Default value
       }
       
       return cleaned;

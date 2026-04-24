@@ -85,7 +85,7 @@ async function getPropertyStatistics() {
       .from('all_glamping_properties')
       .select('property_name, state, country')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_closed', 'Yes')
+      .neq('is_open', 'No')
       .eq('research_status', 'published');
 
     if (error) {

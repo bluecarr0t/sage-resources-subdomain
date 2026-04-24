@@ -44,7 +44,7 @@ BEGIN
     missing_description
   FROM all_glamping_properties
   WHERE LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
-    AND LOWER(TRIM(COALESCE(is_closed, ''))) = 'no'
+    AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'published';
 
   result := json_build_object(

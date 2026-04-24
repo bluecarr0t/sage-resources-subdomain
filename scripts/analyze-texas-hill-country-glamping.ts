@@ -104,7 +104,7 @@ interface PropertyRow {
   site_name: string | null;
   property_type: string | null;
   is_glamping_property: string | null;
-  is_closed: string | null;
+  is_open: string | null;
   city: string | null;
   state: string | null;
   lat: string | number | null;
@@ -168,7 +168,7 @@ interface PropertyRow {
 
 const SELECT_COLUMNS = [
   'id', 'property_name', 'site_name', 'property_type',
-  'is_glamping_property', 'is_closed',
+  'is_glamping_property', 'is_open',
   'city', 'state', 'lat', 'lon',
   'unit_type', 'unit_capacity', 'quantity_of_units', 'property_total_sites',
   'year_site_opened', 'operating_season_months',
@@ -373,7 +373,7 @@ async function main(): Promise<void> {
 
   // Exclude closed properties for most metrics
   const open = hillCountry.filter(
-    (r) => !r.is_closed || r.is_closed.toLowerCase() !== 'yes'
+    (r) => !r.is_open || r.is_open.toLowerCase() === 'yes'
   );
   console.log(`Open (not closed) Hill Country records: ${open.length}`);
   const closed = hillCountry.length - open.length;

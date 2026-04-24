@@ -9,7 +9,7 @@ export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'id',
   'research_status',
   'is_glamping_property',
-  'is_closed',
+  'is_open',
   'property_name',
   'site_name',
   'slug',
@@ -100,6 +100,7 @@ export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'url',
   'phone_number',
   'description',
+  'notes',
   'minimum_nights',
   'rv_vehicle_length',
   'rv_parking',
@@ -170,6 +171,7 @@ const ALL_SET = new Set<string>(ALL_GLAMPING_PROPERTY_COLUMNS);
 
 const EQ_FILTER_EXCLUDE = new Set<string>([
   'description',
+  'notes',
   'unit_description',
   'rate_unit_rates_by_year',
   'amenities_raw',

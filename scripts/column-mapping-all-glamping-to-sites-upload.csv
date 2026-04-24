@@ -2,7 +2,7 @@ all_glamping_properties_column,sites_upload_column
 id,
 research_status,
 is_glamping_property,
-is_closed,
+is_open,
 property_name,Property Name
 site_name,Site Name
 slug,

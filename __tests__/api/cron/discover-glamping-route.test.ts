@@ -76,9 +76,28 @@ describe('/api/cron/discover-glamping', () => {
     expect(body.success).toBe(true);
     expect(body.metrics.propertiesInserted).toBe(1);
     expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
+    expect(mockSearchGlampingNews).toHaveBeenCalledWith('tvly-test', 1, 'default');
     expect(mockFetchArticleContent).toHaveBeenCalledTimes(1);
     expect(mockProcessDiscoveryArticle).toHaveBeenCalledTimes(1);
+    expect(mockProcessDiscoveryArticle).toHaveBeenCalledWith(
+      expect.objectContaining({ insertDefaults: undefined })
+    );
     expect(mockSupabaseInsert).toHaveBeenCalled();
+  });
+
+  it('GET ?canada=1 uses Canada Tavily query set and insert defaults', async () => {
+    const req = new NextRequest('https://example.com/api/cron/discover-glamping?canada=1', {
+      method: 'GET',
+    });
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    expect(mockSearchGlampingNews).toHaveBeenCalledWith('tvly-test', 1, 'canada');
+    expect(mockProcessDiscoveryArticle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        insertDefaults: { defaultCountry: 'Canada' },
+        discoverySource: 'Tavily Search (Canada)',
+      })
+    );
   });
 
   it('POST runs the same handler', async () => {
@@ -90,7 +109,7 @@ describe('/api/cron/discover-glamping', () => {
     expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
   });
 
-  it('returns 401 when CRON_SECRET is set and Authorization is missing', async () => {
+  it('returns 401 when CRON_SECRET is set and request is not authorized', async () => {
     process.env.CRON_SECRET = 'test-cron-secret';
     const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
       method: 'GET',
@@ -98,6 +117,17 @@ describe('/api/cron/discover-glamping', () => {
     const res = await GET(req);
     expect(res.status).toBe(401);
     expect(mockSearchGlampingNews).not.toHaveBeenCalled();
+  });
+
+  it('returns 200 when CRON_SECRET is set but Vercel cron header is present (no Bearer)', async () => {
+    process.env.CRON_SECRET = 'test-cron-secret';
+    const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
+      method: 'GET',
+      headers: { 'x-vercel-cron': '1' },
+    });
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    expect(mockSearchGlampingNews).toHaveBeenCalled();
   });
 
   it('returns 401 when Bearer token does not match CRON_SECRET', async () => {

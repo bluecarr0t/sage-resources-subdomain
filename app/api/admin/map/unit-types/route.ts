@@ -16,7 +16,7 @@ export const GET = withAdminAuth(async (_request, _auth) => {
       .from('all_glamping_properties')
       .select('unit_type')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_closed', 'Yes')
+      .neq('is_open', 'No')
       .not('unit_type', 'is', null);
 
     if (error) throw error;

@@ -90,12 +90,23 @@ function csvRowToDbRow(row: Record<string, string>): Record<string, unknown> {
     out[key] = isEmpty ? null : val;
   }
 
+  // Legacy CSV column `is_closed` → `is_open` (values inverted: was-closed Yes → open No)
+  if (
+    (out.is_open == null || out.is_open === '') &&
+    out.is_closed != null &&
+    out.is_closed !== ''
+  ) {
+    const c = String(out.is_closed).trim().toLowerCase();
+    out.is_open = c === 'yes' ? 'No' : c === 'no' ? 'Yes' : 'Yes';
+  }
+  delete out.is_closed;
+
   // Required columns for insert (NOT NULL in DB)
   if (out.is_glamping_property == null || out.is_glamping_property === '') {
     out.is_glamping_property = 'Yes';
   }
-  if (out.is_closed == null || out.is_closed === '') {
-    out.is_closed = 'No';
+  if (out.is_open == null || out.is_open === '') {
+    out.is_open = 'Yes';
   }
 
   return out;

@@ -25,8 +25,8 @@ export {
   insertProperties,
 } from './enrich-and-insert';
 export type { InsertRow } from './enrich-and-insert';
-export { searchGlampingNews } from './tavily-search';
-export type { TavilyArticleResult } from './tavily-search';
+export { searchGlampingNews, DISCOVERY_QUERIES_CANADA } from './tavily-search';
+export type { TavilyArticleResult, GlampingTavilyQuerySet } from './tavily-search';
 export {
   processDiscoveryArticle,
   type ProcessDiscoveryArticleParams,

@@ -12,6 +12,7 @@
  *   npx tsx scripts/discover-glamping-from-news.ts --rss --dry-run
  *   npx tsx scripts/discover-glamping-from-news.ts --rss --limit 3
  *   npx tsx scripts/discover-glamping-from-news.ts --tavily
+ *   npx tsx scripts/discover-glamping-from-news.ts --tavily --canada   (Canada news queries + default country Canada on insert)
  *   npx tsx scripts/discover-glamping-from-news.ts --firecrawl-primary  (try Firecrawl before Cheerio)
  *   npx tsx scripts/discover-glamping-from-news.ts --batch-size 5       (process max 5 articles; useful for cron)
  *
@@ -146,10 +147,13 @@ function parseArgs(): {
   dryRun: boolean;
   limit?: number;
   firecrawlPrimary: boolean;
+  /** North-American insert default + Canada Tavily query set (with --tavily) */
+  canada: boolean;
 } {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
   const firecrawlPrimary = args.includes('--firecrawl-primary');
+  const canada = args.includes('--canada');
   const limitIdx = args.indexOf('--limit');
   const batchIdx = args.indexOf('--batch-size');
   let limit =
@@ -162,7 +166,7 @@ function parseArgs(): {
   }
 
   if (args.includes('--tavily')) {
-    return { mode: 'tavily', dryRun, limit, firecrawlPrimary };
+    return { mode: 'tavily', dryRun, limit, firecrawlPrimary, canada };
   }
 
   if (args.includes('--url')) {
@@ -172,7 +176,7 @@ function parseArgs(): {
       console.error('--url requires a URL argument');
       process.exit(1);
     }
-    return { mode: 'url', url, dryRun, limit, firecrawlPrimary };
+    return { mode: 'url', url, dryRun, limit, firecrawlPrimary, canada };
   }
 
   if (args.includes('--text')) {
@@ -182,10 +186,10 @@ function parseArgs(): {
       console.error('--text requires a file path argument');
       process.exit(1);
     }
-    return { mode: 'text', textPath, dryRun, limit, firecrawlPrimary };
+    return { mode: 'text', textPath, dryRun, limit, firecrawlPrimary, canada };
   }
 
-  return { mode: 'rss', dryRun, limit, firecrawlPrimary };
+  return { mode: 'rss', dryRun, limit, firecrawlPrimary, canada };
 }
 
 interface DiscoveryMetrics {
@@ -203,8 +207,9 @@ interface DiscoveryMetrics {
 }
 
 async function main(): Promise<void> {
-  const { mode, url, textPath, dryRun, limit, firecrawlPrimary } = parseArgs();
+  const { mode, url, textPath, dryRun, limit, firecrawlPrimary, canada } = parseArgs();
   const fetchOptions = firecrawlPrimary ? { firecrawlPrimary: true } : {};
+  const insertDefaults = canada ? { defaultCountry: 'Canada' as const } : undefined;
 
   const metrics: DiscoveryMetrics = {
     mode,
@@ -223,7 +228,9 @@ async function main(): Promise<void> {
   console.log('='.repeat(60));
   console.log('Glamping Discovery Pipeline');
   console.log('='.repeat(60));
-  console.log(`Mode: ${mode} | Dry run: ${dryRun} | Limit: ${limit ?? 'none'} | Firecrawl primary: ${firecrawlPrimary}\n`);
+  console.log(
+    `Mode: ${mode} | Dry run: ${dryRun} | Limit: ${limit ?? 'none'} | Firecrawl primary: ${firecrawlPrimary} | Canada: ${canada}\n`
+  );
 
   let articleTasks: { content: string; url?: string; discoverySource: string }[] = [];
 
@@ -244,7 +251,11 @@ async function main(): Promise<void> {
           ...fetchOptions,
           ...(rssFallbackText ? { rssFallbackText } : {}),
         });
-        articleTasks.push({ content, url: articleUrl, discoverySource });
+        articleTasks.push({
+          content,
+          url: articleUrl,
+          discoverySource: canada ? `${discoverySource} (Canada)` : discoverySource,
+        });
         metrics.articlesFetched++;
       } catch (err) {
         metrics.articlesFailed++;
@@ -257,7 +268,7 @@ async function main(): Promise<void> {
       console.error('--tavily requires TAVILY_API_KEY in .env.local');
       process.exit(1);
     }
-    const tavilyResults = await searchGlampingNews(tavilyKey, limit ?? 5);
+    const tavilyResults = await searchGlampingNews(tavilyKey, limit ?? 5, canada ? 'canada' : 'default');
     metrics.articlesFound = tavilyResults.length;
     const processed = await getProcessedUrls();
     metrics.processedUrlsCount = processed.size;
@@ -268,7 +279,11 @@ async function main(): Promise<void> {
     for (const { url: articleUrl } of toProcess) {
       try {
         const content = await fetchArticleContent(articleUrl, fetchOptions);
-        articleTasks.push({ content, url: articleUrl, discoverySource: 'Tavily Search' });
+        articleTasks.push({
+          content,
+          url: articleUrl,
+          discoverySource: canada ? 'Tavily Search (Canada)' : 'Tavily Search',
+        });
         metrics.articlesFetched++;
       } catch (err) {
         metrics.articlesFailed++;
@@ -279,7 +294,11 @@ async function main(): Promise<void> {
     metrics.articlesFound = 1;
     try {
       const content = await fetchArticleContent(url, fetchOptions);
-      articleTasks.push({ content, url, discoverySource: 'Manual Article' });
+      articleTasks.push({
+        content,
+        url,
+        discoverySource: canada ? 'Manual Article (Canada)' : 'Manual Article',
+      });
       metrics.articlesFetched++;
     } catch (err) {
       metrics.articlesFailed++;
@@ -291,7 +310,10 @@ async function main(): Promise<void> {
       process.exit(1);
     }
     const content = fs.readFileSync(textPath, 'utf-8');
-    articleTasks.push({ content, discoverySource: 'Local Text File' });
+    articleTasks.push({
+      content,
+      discoverySource: canada ? 'Local Text File (Canada)' : 'Local Text File',
+    });
     metrics.articlesFound = 1;
     metrics.articlesFetched = 1;
   }
@@ -322,6 +344,7 @@ async function main(): Promise<void> {
       openai,
       supabase,
       dbPropertyNames: dbProperties,
+      insertDefaults,
     });
 
     metrics.propertiesExtracted += result.propertiesExtracted;

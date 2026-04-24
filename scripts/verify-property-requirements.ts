@@ -50,11 +50,11 @@ async function verifyProperty(propertyIdOrName: string | number) {
       console.log('✅ is_glamping_property = "Yes"');
     }
     
-    // Check is_closed
-    if (property.is_closed === 'Yes') {
-      issues.push(`❌ is_closed = 'Yes' (property is marked as closed)`);
+    // Check is_open
+    if (property.is_open === 'No') {
+      issues.push(`❌ is_open = 'No' (property is marked as closed)`);
     } else {
-      console.log('✅ is_closed ≠ "Yes"');
+      console.log('✅ is_open is not "No" (operating)');
     }
     
     // Check coordinates

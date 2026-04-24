@@ -352,7 +352,7 @@ function toDbRow(p: DiscoveredProperty): Record<string, unknown> {
     property_type: p.property_type || 'Treehouse Resort',
     research_status: 'new',
     is_glamping_property: 'Yes',
-    is_closed: 'No',
+    is_open: 'Yes',
     source: 'Sage',
     discovery_source: 'OpenAI Research - Treehouses',
     date_added: TODAY,

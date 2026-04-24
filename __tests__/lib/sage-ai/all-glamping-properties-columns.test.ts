@@ -14,12 +14,14 @@ describe('all-glamping-properties-columns', () => {
 
   it('excludes long-text / JSON columns from eq filters', () => {
     expect(isGlampingEqFilterColumn('description')).toBe(false);
+    expect(isGlampingEqFilterColumn('notes')).toBe(false);
     expect(isGlampingEqFilterColumn('rate_unit_rates_by_year')).toBe(false);
   });
 
   it('allows group_by on flags but not on description', () => {
     expect(isGlampingGroupByColumn('property_pool')).toBe(true);
     expect(isGlampingGroupByColumn('description')).toBe(false);
+    expect(isGlampingGroupByColumn('notes')).toBe(false);
   });
 
   it('allows distinct on id for tooling but excludes description', () => {
@@ -27,5 +29,6 @@ describe('all-glamping-properties-columns', () => {
     expect(isGlampingDistinctColumn('property_pool')).toBe(true);
     expect(isGlampingDistinctColumn('unit_private_bathroom')).toBe(true);
     expect(isGlampingDistinctColumn('description')).toBe(false);
+    expect(isGlampingDistinctColumn('notes')).toBe(false);
   });
 });

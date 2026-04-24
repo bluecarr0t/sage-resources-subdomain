@@ -112,7 +112,7 @@ export interface InsertRow {
   property_type: string | null;
   research_status: string;
   is_glamping_property: string;
-  is_closed: string;
+  is_open: string;
   source: string;
   discovery_source: string;
   date_added: string;
@@ -136,7 +136,8 @@ export interface InsertRow {
 
 export function toInsertRow(
   property: ExtractedProperty,
-  discoverySource: string
+  discoverySource: string,
+  options?: { defaultCountry?: string }
 ): InsertRow {
   const slug = slugifyPropertyName(property.property_name);
   let url = (property.url || '').trim();
@@ -151,9 +152,10 @@ export function toInsertRow(
     property_name: property.property_name,
     slug,
     property_type: property.property_type || 'Glamping Resort',
-    research_status: 'new',
+    /** Pipeline rows need manual review / enrichment before publish — same as admin workflow for "in progress". */
+    research_status: 'in_progress',
     is_glamping_property: 'Yes',
-    is_closed: 'No',
+    is_open: 'Yes',
     source: 'Sage',
     discovery_source: discoverySource,
     date_added: today,
@@ -162,7 +164,7 @@ export function toInsertRow(
     city: property.city || null,
     state: toStateCode(property.state || '') || null,
     zip_code: property.zip_code || null,
-    country: property.country || 'USA',
+    country: property.country || options?.defaultCountry || 'USA',
     lat: typeof lat === 'number' ? lat : null,
     lon: typeof lon === 'number' ? lon : null,
     url: url || null,

@@ -149,10 +149,10 @@ function baseQuery(
   let q = supabase.from(table as never).select(sel);
 
   if (table === 'all_glamping_properties') {
-    q = q.eq('is_closed', 'No').eq('is_glamping_property', 'Yes');
+    q = q.eq('is_open', 'Yes').eq('is_glamping_property', 'Yes');
   }
   if (table === 'all_roverpass_data_new') {
-    q = q.eq('is_closed', 'No');
+    q = q.eq('is_open', 'Yes');
   }
 
   if (parsed.countries.length > 0) {

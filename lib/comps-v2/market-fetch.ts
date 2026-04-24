@@ -91,7 +91,7 @@ export async function fetchGlampingPropsNumeric(
         'rate_spring_weekday, rate_spring_weekend, rate_summer_weekday, rate_summer_weekend, ' +
         'rate_fall_weekday, rate_fall_weekend, operating_season_months, url, description, lat, lon'
     )
-    .eq('is_closed', 'No')
+    .eq('is_open', 'Yes')
     .gte('lat', bb.minLat)
     .lte('lat', bb.maxLat)
     .gte('lon', bb.minLng)
@@ -217,7 +217,7 @@ export async function fetchRoverpassComps(
         'rate_fall_weekday, rate_fall_weekend, operating_season_months, url, description, lat, lon, ' +
         'roverpass_occupancy_rate'
     )
-    .eq('is_closed', 'No')
+    .eq('is_open', 'Yes')
     .gte('lat', bb.minLat)
     .lte('lat', bb.maxLat)
     .gte('lon', bb.minLng)

@@ -11,7 +11,7 @@ export interface SageProperty {
   property_type: string | null;
   research_status: string | null;
   is_glamping_property: string | null;
-  is_closed: string | null;
+  is_open: string | null;
 
   // SOURCE & TRACKING
   source: string | null;
@@ -110,6 +110,8 @@ export interface SageProperty {
   url: string | null;
   phone_number: string | null;
   description: string | null;
+  /** Internal / admin notes (Sage Data editor); not the public `description` */
+  notes: string | null;
   minimum_nights: string | null;
 
   // OTHER AMENITIES

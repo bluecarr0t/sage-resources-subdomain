@@ -21,7 +21,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
       'property_type',
       'research_status',
       'is_glamping_property',
-      'is_closed',
+      'is_open',
     ],
     defaultOpen: true,
   },
@@ -38,6 +38,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
       'url',
       'phone_number',
       'description',
+      'notes',
     ],
   },
   {

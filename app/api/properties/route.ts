@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         .select('*')
         .eq('id', propertyId)
         .eq('is_glamping_property', 'Yes')
-        .neq('is_closed', 'Yes')
+        .neq('is_open', 'No')
         .eq('research_status', 'published')
         .single();
       
@@ -166,7 +166,7 @@ async function fetchPropertiesFromDatabase(
   let query = supabase.from('all_glamping_properties')
     .select('*')
     .eq('is_glamping_property', 'Yes')
-    .neq('is_closed', 'Yes')
+    .neq('is_open', 'No')
     .eq('research_status', 'published');
 
   // Filter by country

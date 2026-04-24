@@ -6,7 +6,7 @@
  * unit_, property_, activities_, setting_, rv_ prefixes), and INSERTs with:
  *   - research_status = 'new'
  *   - is_glamping_property = 'Yes'
- *   - is_closed = 'No'
+ *   - is_open = 'Yes'
  *
  * Does not delete existing data; appends only.
  *
@@ -293,7 +293,7 @@ function csvRowToDbRow(csvRow: Record<string, string>): Record<string, unknown> 
 
   dbRow.research_status = 'new';
   dbRow.is_glamping_property = 'Yes';
-  dbRow.is_closed = 'No';
+  dbRow.is_open = 'Yes';
 
   if (!dbRow.date_added) dbRow.date_added = TODAY;
   if (!dbRow.date_updated) dbRow.date_updated = TODAY;

@@ -70,7 +70,7 @@ const STEPS = [
     title: 'Insert into database',
     subtitle: 'Save with discovery source',
     description:
-      'Enriched records are inserted into all_glamping_properties with research_status = "new". Each row is tagged with its discovery source (e.g. "Google News RSS", "Tavily Search", "Manual Article") so we can see where new properties came from. Processed article URLs are stored so we don’t re-run them. New properties do not appear on the public map until they are approved.',
+      'Enriched records are inserted into all_glamping_properties with research_status = "in_progress". Each row is tagged with its discovery source (e.g. "Google News RSS", "Tavily Search", "Manual Article") so we can see where new properties came from. Processed article URLs are stored so we don’t re-run them. New properties do not appear on the public map until they are approved.',
     icon: Database,
     color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200',
   },
@@ -79,7 +79,7 @@ const STEPS = [
     title: 'Approval & publish',
     subtitle: 'Review and make live on the map',
     description:
-      'Newly inserted properties stay in "New" (or move to "In progress" during enrichment). The team reviews them in the Sage Glamping Data Breakdown and can run enrichment scripts to fill in more detail. When a property is approved, research_status is set to "Published". Only published properties appear on the public map. This step ensures quality control before new discoveries go live.',
+      'Newly inserted properties start in "In progress" for review. The team works them in the Sage Glamping Data Breakdown and can run enrichment scripts to fill in more detail. When a property is approved, research_status is set to "Published". Only published properties appear on the public map. This step ensures quality control before new discoveries go live.',
     icon: CheckCircle2,
     color: 'bg-sage-100 dark:bg-sage-900/40 text-sage-800 dark:text-sage-200',
   },

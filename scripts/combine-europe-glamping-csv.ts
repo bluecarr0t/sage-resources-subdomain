@@ -168,7 +168,7 @@ const SCHEMA_COLUMNS = [
   'phone_number',
   'quality_score',
   'is_glamping_property',
-  'is_closed',
+  'is_open',
   'unit_hot_tub',
   'unit_suana',
   'property_hot_tub',
@@ -248,8 +248,8 @@ function normalizeRow(row: Record<string, string>): Record<string, string> {
   if (!normalized.is_glamping_property) {
     normalized.is_glamping_property = 'Yes';
   }
-  if (!normalized.is_closed) {
-    normalized.is_closed = 'No';
+  if (!normalized.is_open) {
+    normalized.is_open = 'Yes';
   }
   
   return normalized;

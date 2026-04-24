@@ -16,16 +16,20 @@
  *   OPENAI_API_KEY
  *   TAVILY_API_KEY
  * Optional:
- *   CRON_SECRET — when set, Vercel sends `Authorization: Bearer <CRON_SECRET>`.
+ *   CRON_SECRET — when set, require `Authorization: Bearer <CRON_SECRET>` or a
+ *   Vercel cron invocation (`x-vercel-cron` / `vercel-cron` user-agent) if the
+ *   bearer header is missing.
  *
  * Query params (manual triggers):
  *   ?limit=N      — fetch up to N Tavily results per query (default 1)
  *   ?force=1      — bypass the processed-URLs dedup table for that run
+ *   ?canada=1     — use Canada Tavily query set; default country Canada on insert
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { OpenAI } from 'openai';
+import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
 import {
   fetchArticleContent,
   getDatabasePropertyNames,
@@ -126,9 +130,7 @@ function parseLimit(raw: string | null): number {
 }
 
 async function runDiscovery(request: NextRequest): Promise<NextResponse> {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!authorizeVercelCronRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -157,12 +159,18 @@ async function runDiscovery(request: NextRequest): Promise<NextResponse> {
   const url = new URL(request.url);
   const limit = parseLimit(url.searchParams.get('limit'));
   const force = url.searchParams.get('force') === '1';
+  const canada = url.searchParams.get('canada') === '1';
+  const insertDefaults = canada ? { defaultCountry: 'Canada' as const } : undefined;
 
   const metrics = emptyMetrics();
   let runError: string | null = null;
 
   try {
-    const tavilyResults = await searchGlampingNews(tavilyKey!, limit);
+    const tavilyResults = await searchGlampingNews(
+      tavilyKey!,
+      limit,
+      canada ? 'canada' : 'default'
+    );
     metrics.articlesFound = tavilyResults.length;
 
     const processed = force ? new Set<string>() : await getProcessedUrls(supabase);
@@ -170,11 +178,19 @@ async function runDiscovery(request: NextRequest): Promise<NextResponse> {
 
     const toProcess = tavilyResults.filter((r) => !processed.has(r.url));
 
-    const articleTasks: { content: string; url: string; discoverySource: 'Tavily Search' }[] = [];
+    const articleTasks: {
+      content: string;
+      url: string;
+      discoverySource: 'Tavily Search' | 'Tavily Search (Canada)';
+    }[] = [];
     for (const { url: articleUrl } of toProcess) {
       try {
         const content = await fetchArticleContent(articleUrl, {});
-        articleTasks.push({ content, url: articleUrl, discoverySource: 'Tavily Search' });
+        articleTasks.push({
+          content,
+          url: articleUrl,
+          discoverySource: canada ? 'Tavily Search (Canada)' : 'Tavily Search',
+        });
         metrics.articlesFetched++;
       } catch (err) {
         metrics.articlesFailed++;
@@ -196,6 +212,7 @@ async function runDiscovery(request: NextRequest): Promise<NextResponse> {
           openai,
           supabase,
           dbPropertyNames: dbProperties,
+          insertDefaults,
         });
         metrics.propertiesExtracted += result.propertiesExtracted;
         metrics.propertiesNew += result.propertiesNew;

@@ -399,14 +399,15 @@ export const GLAMPING_FIELD_GUIDE: FieldGuideEntry[] = [
     tool_tip: 'Set `Yes` in filters when the user means glamping product.',
   },
   {
-    column: 'is_closed',
+    column: 'is_open',
     category: 'geo_status',
-    label: 'Property closed (status)',
+    label: 'Property open (operating)',
     aliases: [
       'shut',
       'not operating',
+      'closed',
     ],
-    tool_tip: 'Usually `No` to exclude closed listings.',
+    tool_tip: 'Use `Yes` in filters to include only operating listings (exclude closed).',
   },
   {
     column: 'research_status',

@@ -18,6 +18,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { getRedis } from '@/lib/upstash';
+import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -25,10 +26,7 @@ export const maxDuration = 60;
 const FACETS_CACHE_KEY = 'admin:comps-unified:facets:v2';
 
 async function refresh(request: NextRequest): Promise<NextResponse> {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!authorizeVercelCronRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

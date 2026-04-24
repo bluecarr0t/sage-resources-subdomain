@@ -1,0 +1,152 @@
+import { NextRequest, NextResponse } from 'next/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import * as XLSX from 'xlsx';
+import { createServerClient } from '@/lib/supabase';
+import { withAdminAuth } from '@/lib/require-admin-auth';
+import { ALL_GLAMPING_PROPERTY_COLUMNS } from '@/lib/sage-ai/all-glamping-properties-columns';
+
+export const dynamic = 'force-dynamic';
+export const maxDuration = 300;
+
+type ExportFormat = 'csv' | 'xlsx';
+type ExportTable = 'all_glamping_properties' | 'all_roverpass_data_new';
+type ExportRow = Record<string, unknown>;
+type ExportCell = string | number | boolean;
+
+const PAGE_SIZE = 1000;
+const XLSX_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const EXCLUDED_FROM_UNIFIED_EXPORT = new Set([
+  'quality_score',
+  'amenities_raw',
+  'activities_raw',
+  'lifestyle_raw',
+]);
+
+const EXPORT_COLUMNS = ALL_GLAMPING_PROPERTY_COLUMNS.filter(
+  (column) => !EXCLUDED_FROM_UNIFIED_EXPORT.has(column)
+);
+
+function parseFormat(request: NextRequest): ExportFormat {
+  return request.nextUrl.searchParams.get('format') === 'csv' ? 'csv' : 'xlsx';
+}
+
+function buildFilename(format: ExportFormat): string {
+  const date = new Date().toISOString().slice(0, 10);
+  return `glamping-and-roverpass-unified-${date}.${format}`;
+}
+
+function cellValue(value: unknown): ExportCell {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'number' || typeof value === 'boolean') return value;
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
+function csvCell(value: unknown): string {
+  const raw = cellValue(value);
+  let text = String(raw);
+  if (/^[=+\-@]/.test(text)) {
+    text = `'${text}`;
+  }
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+async function fetchAllRows(
+  supabase: SupabaseClient,
+  table: ExportTable
+): Promise<ExportRow[]> {
+  const rows: ExportRow[] = [];
+  let offset = 0;
+
+  for (;;) {
+    const { data, error } = await supabase
+      .from(table)
+      .select('*')
+      .order('id', { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error) {
+      throw new Error(`${table} fetch failed: ${error.message}`);
+    }
+    if (!data?.length) break;
+
+    rows.push(...(data as ExportRow[]));
+    if (data.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+
+  return rows;
+}
+
+function normalizeRows(rows: ExportRow[]): ExportRow[] {
+  return rows.map((row) => {
+    const out: ExportRow = {};
+    for (const column of EXPORT_COLUMNS) {
+      out[column] = row[column] ?? null;
+    }
+    return out;
+  });
+}
+
+function rowsToAoa(rows: ExportRow[]): ExportCell[][] {
+  return rows.map((row) => EXPORT_COLUMNS.map((column) => cellValue(row[column])));
+}
+
+function buildCsv(rows: ExportRow[]): string {
+  return [
+    EXPORT_COLUMNS.map(csvCell).join(','),
+    ...rows.map((row) => EXPORT_COLUMNS.map((column) => csvCell(row[column])).join(',')),
+  ].join('\r\n');
+}
+
+function buildXlsx(rows: ExportRow[]): ArrayBuffer {
+  const aoa: ExportCell[][] = [EXPORT_COLUMNS, ...rowsToAoa(rows)];
+  const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Combined');
+  const buffer = XLSX.write(workbook, {
+    type: 'buffer',
+    bookType: 'xlsx',
+    compression: true,
+  }) as Buffer;
+  return buffer.buffer.slice(
+    buffer.byteOffset,
+    buffer.byteOffset + buffer.byteLength
+  ) as ArrayBuffer;
+}
+
+export const GET = withAdminAuth(async (request) => {
+  try {
+    const format = parseFormat(request);
+    const supabase = createServerClient();
+
+    const [glampingRows, roverpassRows] = await Promise.all([
+      fetchAllRows(supabase, 'all_glamping_properties'),
+      fetchAllRows(supabase, 'all_roverpass_data_new'),
+    ]);
+    const rows = [...normalizeRows(glampingRows), ...normalizeRows(roverpassRows)];
+    const filename = buildFilename(format);
+
+    if (format === 'csv') {
+      return new NextResponse(`\uFEFF${buildCsv(rows)}`, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/csv; charset=utf-8',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+        },
+      });
+    }
+
+    return new NextResponse(buildXlsx(rows), {
+      status: 200,
+      headers: {
+        'Content-Type': XLSX_CONTENT_TYPE,
+        'Content-Disposition': `attachment; filename="${filename}"`,
+      },
+    });
+  } catch (err) {
+    console.error('[admin/sage-data/export] GET error:', err);
+    const message = err instanceof Error ? err.message : 'Failed to export Sage data';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+});

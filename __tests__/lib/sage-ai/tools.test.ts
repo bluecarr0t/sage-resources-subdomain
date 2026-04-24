@@ -164,7 +164,7 @@ describe('createSageAiTools', () => {
     const res = await tools.query_properties.execute!(
       {
         near: { latitude: 0, longitude: 0, radius_km: 1 },
-        filters: { state: 'Texas', is_glamping_property: 'Yes', is_closed: 'No' },
+        filters: { state: 'Texas', is_glamping_property: 'Yes', is_open: 'Yes' },
         limit: 50,
         offset: 0,
         order_ascending: true,
@@ -207,21 +207,21 @@ describe('createSageAiTools', () => {
         property_name: 'A',
         state: 'CO',
         is_glamping_property: 'Yes',
-        is_closed: 'No',
+        is_open: 'Yes',
       },
       {
         id: 2,
         property_name: 'B',
         state: 'NM',
         is_glamping_property: 'Yes',
-        is_closed: 'No',
+        is_open: 'Yes',
       },
       {
         id: 3,
         property_name: 'C',
         state: 'co',
         is_glamping_property: 'Yes',
-        is_closed: 'No',
+        is_open: 'Yes',
       },
     ];
     const { builder } = makeBuilder({ data: fullRows, error: null, count: fullRows.length });
@@ -354,10 +354,10 @@ describe('createSageAiTools', () => {
           state: '',
           country: 'Canada',
           unit_type: '   ',
-          is_closed: 'No',
-          is_glamping_property: 'Yes',
-        },
+        is_open: 'Yes',
+        is_glamping_property: 'Yes',
       },
+    },
       { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
     );
     expect(rpcCalls).toHaveLength(1);
@@ -365,7 +365,7 @@ describe('createSageAiTools', () => {
     expect(sentFilters).not.toHaveProperty('state');
     expect(sentFilters).not.toHaveProperty('unit_type');
     expect(sentFilters.country).toBe('Canada');
-    expect(sentFilters.is_closed).toBe('No');
+    expect(sentFilters.is_open).toBe('Yes');
     expect(sentFilters.is_glamping_property).toBe('Yes');
     const typed = res as {
       total_groups: number;

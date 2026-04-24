@@ -284,7 +284,7 @@ async function main() {
       property_type: prop.property_type,
       unit_type: prop.unit_type,
       is_glamping_property: 'Yes',
-      is_closed: 'No',
+      is_open: 'Yes',
       research_status: 'new',
       source: 'Sage',
       discovery_source: 'Manual Research',

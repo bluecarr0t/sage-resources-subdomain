@@ -23,6 +23,8 @@ export interface ProcessDiscoveryArticleParams {
   supabase: SupabaseClient;
   /** Mutable set of normalized names; updated when rows are queued for insert */
   dbPropertyNames: Set<string>;
+  /** When set (e.g. Canada pipeline), used if extraction omits `country` */
+  insertDefaults?: { defaultCountry?: string };
 }
 
 export interface ProcessDiscoveryArticleResult {
@@ -50,7 +52,7 @@ async function markUrlProcessed(
 export async function processDiscoveryArticle(
   params: ProcessDiscoveryArticleParams
 ): Promise<ProcessDiscoveryArticleResult> {
-  const { content, articleUrl, discoverySource, dryRun, openai, supabase, dbPropertyNames } =
+  const { content, articleUrl, discoverySource, dryRun, openai, supabase, dbPropertyNames, insertDefaults } =
     params;
 
   const extracted = await extractPropertiesFromArticle(content, openai);
@@ -92,7 +94,7 @@ export async function processDiscoveryArticle(
       postEnrichFailed.push({ p: enriched, reason: post.reason ?? 'post_enrich' });
       continue;
     }
-    rows.push(toInsertRow(enriched, discoverySource));
+    rows.push(toInsertRow(enriched, discoverySource, insertDefaults));
     dbPropertyNames.add(normalizePropertyName(enriched.property_name || ''));
   }
 

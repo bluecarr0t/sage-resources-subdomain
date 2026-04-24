@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
 
 const BING_ENDPOINT = 'https://api.bing.com/indexnow';
 const YANDEX_ENDPOINT = 'https://yandex.com/indexnow';
@@ -53,8 +54,6 @@ async function submitToIndexNow(
 }
 
 async function runIndexNowCron(request: NextRequest): Promise<NextResponse> {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
   const indexNowKey = process.env.INDEXNOW_KEY;
 
   if (!indexNowKey) {
@@ -64,7 +63,7 @@ async function runIndexNowCron(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!authorizeVercelCronRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -261,7 +261,7 @@ function toDbRow(p: DiscoveredProperty): Record<string, unknown> {
     property_type: p.property_type || 'Glamping',
     research_status: 'new',
     is_glamping_property: 'Yes',
-    is_closed: 'No',
+    is_open: 'Yes',
     source: 'Sage',
     discovery_source: 'OpenAI Research - Mixed Properties (40%+ Glamping)',
     date_added: TODAY,

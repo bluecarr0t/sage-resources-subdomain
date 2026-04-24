@@ -73,13 +73,13 @@ DECLARE
   allowed_columns constant text[] := ARRAY[
     'state', 'city', 'country', 'unit_type', 'property_type',
     'source', 'discovery_source', 'research_status',
-    'is_glamping_property', 'is_closed'
+    'is_glamping_property', 'is_open'
   ];
   v_state                 text := filters->>'state';
   v_country               text := filters->>'country';
   v_unit_type             text := filters->>'unit_type';
   v_is_glamping_property  text := filters->>'is_glamping_property';
-  v_is_closed             text := filters->>'is_closed';
+  v_is_open               text := filters->>'is_open';
   v_city                  text := filters->>'city';
   v_property_type         text := filters->>'property_type';
   v_source                text := filters->>'source';
@@ -118,7 +118,7 @@ BEGIN
         'AND ($2::text IS NULL OR country ILIKE ''%'' || $2 || ''%'') '
         'AND ($3::text IS NULL OR unit_type ILIKE ''%'' || $3 || ''%'') '
         'AND ($4::text IS NULL OR is_glamping_property = $4) '
-        'AND ($5::text IS NULL OR is_closed = $5) '
+        'AND ($5::text IS NULL OR is_open = $5) '
         'AND ($6::text IS NULL OR city ILIKE $6) '
         'AND ($7::text IS NULL OR property_type ILIKE ''%'' || $7 || ''%'') '
         'AND ($8::text IS NULL OR source = $8) '
@@ -177,7 +177,7 @@ BEGIN
     'LIMIT 500';
 
   RETURN QUERY EXECUTE sql_text
-    USING v_state, v_country, v_unit_type, v_is_glamping_property, v_is_closed,
+    USING v_state, v_country, v_unit_type, v_is_glamping_property, v_is_open,
           v_city, v_property_type, v_source, v_discovery_source, v_research_status;
 END;
 $$;
@@ -204,7 +204,7 @@ DECLARE
   allowed_columns constant text[] := ARRAY[
     'state', 'city', 'country', 'unit_type', 'property_type',
     'source', 'discovery_source', 'research_status',
-    'is_glamping_property', 'is_closed'
+    'is_glamping_property', 'is_open'
   ];
   sql_text text;
   capped   integer := LEAST(GREATEST(max_rows, 1), 500);

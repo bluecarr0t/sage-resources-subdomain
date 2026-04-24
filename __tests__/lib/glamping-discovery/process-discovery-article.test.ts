@@ -121,7 +121,7 @@ describe('processDiscoveryArticle', () => {
     expect(row.property_name).toBe('Willow Creek Glamping Resort 2026');
     expect(row.discovery_source).toBe('Tavily Search');
     expect(row.source).toBe('Sage');
-    expect(row.research_status).toBe('new');
+    expect(row.research_status).toBe('in_progress');
     expect(row.is_glamping_property).toBe('Yes');
     expect(row.unit_type).toBe('Yurt');
     expect(dbPropertyNames.has('willow creek glamping resort 2026')).toBe(true);

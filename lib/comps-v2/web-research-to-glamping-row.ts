@@ -28,7 +28,7 @@ export function compsV2WebCandidateToGlampingRow(c: CompsV2Candidate): Record<st
   return {
     research_status: 'new',
     is_glamping_property: 'Yes',
-    is_closed: 'No',
+    is_open: 'Yes',
     property_name: c.property_name?.trim() || 'Unknown',
     site_name: null,
     slug: null,

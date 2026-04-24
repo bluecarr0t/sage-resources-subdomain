@@ -379,7 +379,7 @@ function combineData(
       id: parseNum(site.id) ?? parseInt(site.id, 10),
       research_status: 'new',
       is_glamping_property: isGlamping ? 'Yes' : 'No',
-      is_closed: 'No',
+      is_open: 'Yes',
       property_name: propertyName,
       property_type: null,
       site_name: null,

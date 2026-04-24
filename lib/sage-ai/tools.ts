@@ -156,7 +156,7 @@ const PROPERTIES_FILTERABLE_COLUMNS = [
   'discovery_source',
   'research_status',
   'is_glamping_property',
-  'is_closed',
+  'is_open',
 ] as const;
 
 const PROPERTIES_SUMMARY_COLUMNS = [
@@ -645,7 +645,10 @@ export function createSageAiTools(
               .enum(['Yes', 'No'])
               .optional()
               .describe('Filter to glamping properties only'),
-            is_closed: z.enum(['Yes', 'No']).optional().describe('Filter by open/closed status'),
+            is_open: z
+              .enum(['Yes', 'No'])
+              .optional()
+              .describe('Filter by whether the property is open (Yes) or not (No)'),
           })
           .optional()
           .describe('Filters to apply to the query'),
@@ -743,7 +746,7 @@ export function createSageAiTools(
 
         // Proximity: `properties_within_radius` for distance-ordered ids (PostGIS),
         // then re-fetch full all_glamping_properties rows so `column_eq_filters`
-        // and `filters.is_glamping_property` / `is_closed` match the non-near path.
+        // and `filters.is_glamping_property` / `is_open` match the non-near path.
         if (near) {
           const baseSelectCols: string[] = allowedCols.length
             ? [...allowedCols]
@@ -757,8 +760,8 @@ export function createSageAiTools(
           if (filters?.is_glamping_property) {
             nearSelectSet.add('is_glamping_property');
           }
-          if (filters?.is_closed) {
-            nearSelectSet.add('is_closed');
+          if (filters?.is_open) {
+            nearSelectSet.add('is_open');
           }
           const nearSelectString = [...nearSelectSet]
             .filter((c) => (PROPERTIES_COLUMN_ALLOWLIST as readonly string[]).includes(c))
@@ -880,8 +883,8 @@ export function createSageAiTools(
                   return false;
                 }
               }
-              if (filters.is_closed) {
-                if (String(row.is_closed ?? '') !== filters.is_closed) return false;
+              if (filters.is_open) {
+                if (String(row.is_open ?? '') !== filters.is_open) return false;
               }
             }
             for (const { column, value } of validColumnEq) {
@@ -968,7 +971,7 @@ export function createSageAiTools(
           if (filters.unit_type) query = query.ilike('unit_type', `%${filters.unit_type}%`);
           if (filters.property_type) query = query.ilike('property_type', `%${filters.property_type}%`);
           if (filters.is_glamping_property) query = query.eq('is_glamping_property', filters.is_glamping_property);
-          if (filters.is_closed) query = query.eq('is_closed', filters.is_closed);
+          if (filters.is_open) query = query.eq('is_open', filters.is_open);
         }
         for (const { column, value } of validColumnEq) {
           query = query.eq(column, value);
@@ -1707,7 +1710,7 @@ export function createSageAiTools(
                 'Push "published only" / "researched only" filters down here instead of post-filtering in Python. Call get_column_values({column:"research_status"}) first if unsure which casing is in the data.'
               ),
             is_glamping_property: z.enum(['Yes', 'No']).optional(),
-            is_closed: z.enum(['Yes', 'No']).optional(),
+            is_open: z.enum(['Yes', 'No']).optional(),
           })
           .optional(),
       }),
@@ -1876,7 +1879,7 @@ export function createSageAiTools(
             discovery_source: z.string().optional(),
             research_status: z.string().optional(),
             is_glamping_property: z.enum(['Yes', 'No']).optional(),
-            is_closed: z.enum(['Yes', 'No']).optional(),
+            is_open: z.enum(['Yes', 'No']).optional(),
           })
           .optional()
           .describe(

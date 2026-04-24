@@ -162,7 +162,7 @@ const NUMERIC_FIELDS = new Set([
 
 const ALL_DB_KEYS = [
   ...STABLE_FIELDS, ...DEEP_SCRAPE_FIELDS, ...VOLATILE_FIELDS,
-  'research_status', 'is_glamping_property', 'is_closed', 'slug',
+  'research_status', 'is_glamping_property', 'is_open', 'slug',
   'source', 'discovery_source', 'date_added', 'date_updated', 'site_name',
   'data_source_url', 'data_confidence_score', 'enrichment_pass',
   'quality_score', 'roverpass_campground_id', 'roverpass_occupancy_rate', 'roverpass_occupancy_year',
@@ -928,7 +928,7 @@ async function main() {
       brand_or_chain: d.brand_or_chain || null,
       research_status: 'new',
       is_glamping_property: 'Yes',
-      is_closed: 'No',
+      is_open: 'Yes',
       source: 'Sage',
       discovery_source: `OpenAI Research - ${d.unit_type || 'Glamping'}`,
       date_added: TODAY_DATE,

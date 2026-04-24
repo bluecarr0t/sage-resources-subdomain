@@ -31,6 +31,7 @@
     "research:glamping-resorts": "tsx scripts/research-glamping-resorts-openai.ts",
     "discover:glamping": "tsx scripts/discover-glamping-from-news.ts --tavily",
     "discover:glamping:once": "tsx scripts/discover-glamping-from-news.ts --tavily --limit 1",
+    "discover:glamping:canada": "tsx scripts/discover-glamping-from-news.ts --tavily --canada --limit 5",
     "migrate:discovery": "tsx scripts/apply-discovery-processed-urls-migration.ts",
     "migrate:wineries-acreage": "tsx scripts/apply-wineries-acreage-raw-migration.ts",
     "migrate:hipcamp-campspot-rls": "tsx scripts/apply-hipcamp-campspot-rls-migration.ts",

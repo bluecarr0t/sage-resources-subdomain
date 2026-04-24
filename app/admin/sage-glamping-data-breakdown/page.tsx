@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Table2 } from 'lucide-react';
 import AdminColumnsView from '@/components/AdminColumnsView';
 import AdminDiscoveryPipelineStats from '@/components/AdminDiscoveryPipelineStats';
 import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
@@ -23,13 +23,22 @@ export default function SageGlampingDataBreakdownPage() {
           <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
             Sage Glamping Data Breakdown
           </h1>
-          <Link
-            href="/admin/ai-research-pipeline"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md shrink-0"
-          >
-            View AI Research Pipeline
-            <ChevronRight className="w-4 h-4" aria-hidden />
-          </Link>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              href="/admin/sage-data"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-sage-600 hover:bg-sage-700 px-3 py-1.5 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2"
+            >
+              <Table2 className="w-4 h-4" aria-hidden />
+              Edit data table
+            </Link>
+            <Link
+              href="/admin/ai-research-pipeline"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md"
+            >
+              View AI Research Pipeline
+              <ChevronRight className="w-4 h-4" aria-hidden />
+            </Link>
+          </div>
         </div>
 
         <AdminGlampingMetrics />

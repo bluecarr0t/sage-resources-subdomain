@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Rss, FileText, Globe, Search, ChevronRight, Clock, AlertTriangle } from 'lucide-react';
-
-const STALE_RUN_DAYS = 7;
+import { Rss, FileText, Globe, Search, ChevronRight, Clock } from 'lucide-react';
 
 interface DiscoveryStats {
   totalFromPipeline: number;
@@ -120,12 +118,6 @@ export default function AdminDiscoveryPipelineStats() {
 
   const pending = stats.candidatesPending ?? 0;
   const totalCand = stats.candidatesTotal ?? 0;
-  const lastRun = runs[0];
-  const lastRunAt = lastRun ? new Date(lastRun.started_at).getTime() : null;
-  const daysSinceLastRun =
-    lastRunAt != null ? (Date.now() - lastRunAt) / (24 * 60 * 60 * 1000) : null;
-  const runsLookStale =
-    runs.length === 0 || (daysSinceLastRun != null && daysSinceLastRun > STALE_RUN_DAYS);
 
   return (
     <section
@@ -161,47 +153,6 @@ export default function AdminDiscoveryPipelineStats() {
               <ChevronRight className="w-4 h-4" aria-hidden />
             </Link>
           </div>
-        </div>
-
-        <div
-          className={`rounded-xl border px-4 py-3 space-y-2 ${
-            runsLookStale || pending > 0
-              ? 'border-amber-200 dark:border-amber-900/50 bg-amber-50/80 dark:bg-amber-950/25'
-              : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
-          }`}
-        >
-          <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
-            {runsLookStale ? (
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" aria-hidden />
-            ) : (
-              <Clock className="w-4 h-4 text-gray-400 shrink-0" aria-hidden />
-            )}
-            {t('healthHeading')}
-          </h3>
-          {lastRun ? (
-            <p className="text-sm text-gray-800 dark:text-gray-200">
-              {t('healthLastRun', {
-                datetime: new Date(lastRun.started_at).toLocaleString(),
-                mode: lastRun.mode,
-                dry: lastRun.dry_run ? ` ${t('dryRunSuffix')}` : '',
-                inserted: lastRun.properties_inserted,
-              })}
-            </p>
-          ) : (
-            <p className="text-sm text-gray-800 dark:text-gray-200">{t('healthLastRunNever')}</p>
-          )}
-          {runsLookStale && (
-            <p className="text-sm text-amber-900 dark:text-amber-100/90">{t('healthStaleRuns', { days: STALE_RUN_DAYS })}</p>
-          )}
-          {pending > 0 && (
-            <p className="text-sm font-medium text-amber-900 dark:text-amber-100/90">
-              {t('healthPendingCallout', { count: pending })}
-            </p>
-          )}
-          <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-disc pl-5">
-            <li>{t('healthAuthHint')}</li>
-            <li>{t('healthServerHint')}</li>
-          </ul>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

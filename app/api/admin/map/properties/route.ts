@@ -27,7 +27,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       .from('all_glamping_properties')
       .select('property_name, lat, lon, city, state, property_type, unit_type, avg__retail_daily_rate_2024, occupancy_rate_2024, property__total_sites')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_closed', 'Yes')
+      .neq('is_open', 'No')
       .eq('research_status', 'published')
       .not('lat', 'is', null)
       .not('lon', 'is', null)
