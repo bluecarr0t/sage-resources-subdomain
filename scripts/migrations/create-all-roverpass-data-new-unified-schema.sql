@@ -155,7 +155,8 @@ CREATE TABLE public.all_roverpass_data_new (
   amenities_raw text NULL,
   activities_raw text NULL,
   lifestyle_raw text NULL,
-  CONSTRAINT all_roverpass_data_new_pkey PRIMARY KEY (id)
+  CONSTRAINT all_roverpass_data_new_pkey PRIMARY KEY (id),
+  CONSTRAINT all_roverpass_data_new_id_namespace_chk CHECK (id >= 1000000000)
 ) TABLESPACE pg_default;
 
 -- Step 2: Copy data from all_roverpass_data with column mapping (old schema → unified schema)
@@ -194,7 +195,8 @@ INSERT INTO public.all_roverpass_data_new (
   amenities_raw, activities_raw, lifestyle_raw
 )
 SELECT
-  r.id, r.research_status, r.is_glamping_property, r.is_closed,
+  CASE WHEN r.id < 1000000000 THEN r.id + 1000000000 ELSE r.id END,
+  r.research_status, r.is_glamping_property, r.is_closed,
   r.property_name, r.site_name, r.slug, r.property_type,
   r.source, r.discovery_source, r.date_added, r.date_updated,
   r.address, r.city, r.state, r.zip_code, r.country, r.lat, r.lon,
@@ -302,7 +304,10 @@ END $$;
 -- Step 5: Reset sequence so future inserts get correct IDs
 SELECT setval(
   pg_get_serial_sequence('public.all_roverpass_data_new', 'id'),
-  COALESCE((SELECT MAX(id) FROM public.all_roverpass_data_new), 1)
+  GREATEST(
+    COALESCE((SELECT MAX(id) FROM public.all_roverpass_data_new), 1000000000),
+    1000000000
+  )
 );
 
 COMMIT;

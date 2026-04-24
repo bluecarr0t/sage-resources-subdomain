@@ -29,6 +29,7 @@ if (!supabaseUrl || !secretKey) {
 
 const TABLE = 'all_glamping_properties';
 const BATCH_SIZE = 50;
+const ROVERPASS_ID_NAMESPACE_START = 1_000_000_000;
 
 // Columns to exclude from upsert (id used for match, created_at/updated_at are DB-managed)
 const SKIP_COLS = new Set(['id', 'created_at', 'updated_at']);
@@ -125,11 +126,17 @@ async function main() {
   const toUpdate: { id: number; row: Record<string, unknown> }[] = [];
   const toInsert: Record<string, unknown>[] = [];
   const toDelete: number[] = [];
+  const roverpassNamespaceIds: number[] = [];
 
   for (const row of rows) {
     const researchStatus = String(row.research_status ?? '').trim().toLowerCase();
     const idVal = row.id?.trim();
     const id = idVal && !isNaN(parseInt(idVal, 10)) ? parseInt(idVal, 10) : null;
+
+    if (id != null && id >= ROVERPASS_ID_NAMESPACE_START) {
+      roverpassNamespaceIds.push(id);
+      continue;
+    }
 
     if (researchStatus === 'remove') {
       if (id) toDelete.push(id);
@@ -142,6 +149,15 @@ async function main() {
     } else {
       toInsert.push(dbRow);
     }
+  }
+
+  if (roverpassNamespaceIds.length > 0) {
+    console.error(
+      `Refusing to upload ${roverpassNamespaceIds.length} row(s) with RoverPass namespace IDs ` +
+      `(${ROVERPASS_ID_NAMESPACE_START}+). Use the RoverPass table workflow for those rows.`
+    );
+    console.error(`First RoverPass namespace IDs: ${roverpassNamespaceIds.slice(0, 10).join(', ')}`);
+    process.exit(1);
   }
 
   console.log(`Rows with research_status=remove (delete): ${toDelete.length}`);
