@@ -37,7 +37,7 @@ export async function scanGlampingColumnDistinctFrequencies(
       .select(column)
       .range(offset, offset + PAGE - 1);
     if (error) throw new Error(error.message);
-    const batch = (data ?? []) as Array<Record<string, unknown>>;
+    const batch = (data ?? []) as unknown as Array<Record<string, unknown>>;
     rowsScanned += batch.length;
     for (const r of batch) {
       const v = r[column];

@@ -6,6 +6,7 @@
  */
 
 export type ScatterChartRow = Record<string, string | number | null>;
+type ScatterChartInputRow = Record<string, unknown>;
 
 function xValueLooksNumeric(v: unknown): boolean {
   if (v == null) return true;
@@ -47,20 +48,30 @@ function coerceFiniteNumber(value: unknown): number | null {
   return null;
 }
 
+function toScatterChartValue(value: unknown): string | number | null {
+  if (value == null) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  return null;
+}
+
 /**
  * Drops rows without a finite Y; coerces Y from numeric strings. X is left as-is
  * so category labels (strings) still flow to the category axis.
  */
 export function buildScatterChartData(
-  rows: ScatterChartRow[],
+  rows: ScatterChartInputRow[],
   xKey: string,
   yKey: string
 ): { rows: ScatterChartRow[]; xType: 'number' | 'category' } {
   const out: ScatterChartRow[] = [];
   for (const row of rows) {
-    const y = coerceFiniteNumber(row[yKey]);
+    const normalized = Object.fromEntries(
+      Object.entries(row).map(([key, value]) => [key, toScatterChartValue(value)])
+    ) as ScatterChartRow;
+    const y = coerceFiniteNumber(normalized[yKey]);
     if (y == null) continue;
-    out.push({ ...row, [yKey]: y });
+    out.push({ ...normalized, [yKey]: y });
   }
   return {
     rows: out,

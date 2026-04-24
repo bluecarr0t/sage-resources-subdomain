@@ -776,7 +776,7 @@ export function createSageAiTools(
           if (nearErr) {
             return { error: nearErr.message, data: null, total_count: 0 };
           }
-          const nearList = (nearRows ?? []) as Array<Record<string, unknown>>;
+          const nearList = (nearRows ?? []) as unknown as Array<Record<string, unknown>>;
 
           const toFiniteId = (raw: unknown): number | null => {
             if (raw == null) return null;
@@ -836,7 +836,7 @@ export function createSageAiTools(
 
           const byId = new Map<number, Record<string, unknown>>();
           for (const row of fullRows ?? []) {
-            const r = row as Record<string, unknown>;
+            const r = row as unknown as Record<string, unknown>;
             const id = toFiniteId(r.id);
             if (id != null) byId.set(id, r);
           }
@@ -985,7 +985,7 @@ export function createSageAiTools(
         }
 
         const dataWithAdr = addEffectiveRetailAdrToPropertyRows(
-          (data ?? []) as Array<Record<string, unknown>>
+          (data ?? []) as unknown as Array<Record<string, unknown>>
         );
 
         return handleEmptyResult(
@@ -1966,7 +1966,7 @@ export function createSageAiTools(
               applied_filters: cleaned,
             };
           }
-          const rows = (data ?? []) as Row[];
+          const rows = (data ?? []) as unknown as Row[];
           collected.push(...rows);
           if (rows.length < PAGE_SIZE) break;
         }
@@ -1998,7 +1998,7 @@ export function createSageAiTools(
             totalUnits += r.quantity_of_units;
             unitsRowsCounted += 1;
           }
-          const eff = effectiveGlampingRetailAdrFromRow(r as Record<string, unknown>);
+          const eff = effectiveGlampingRetailAdrFromRow(r as unknown as Record<string, unknown>);
           if (eff !== null) {
             const w =
               typeof r.quantity_of_units === 'number' &&
