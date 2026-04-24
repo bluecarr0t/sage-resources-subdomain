@@ -565,21 +565,21 @@ export function createSageAiTools(
             {
               name: 'hipcamp',
               description:
-                'Hipcamp listings with campsite and glamping data including pricing and availability (Glamping & RV)',
+                'Hipcamp listings (Glamping & RV). For **RV market / RV park** questions, prefer `campspot` and `all_roverpass_data_new` first; Hipcamp is a lower-quality secondary source for RV.',
               row_count_estimate: 'thousands',
               category: 'Glamping & RV',
             },
             {
               name: 'campspot',
               description:
-                'Campspot RV park and campground data with site info and amenities (RV only)',
+                '**Primary** Sage dataset for **RV** parks and RV site supply (use with `all_roverpass_data_new` for RV market work).',
               row_count_estimate: 'thousands',
               category: 'RV',
             },
             {
               name: 'all_roverpass_data_new',
               description:
-                'Roverpass RV park data with reservations, pricing, and park details (RV only)',
+                '**Primary** Sage dataset for **RV** parks and listings (use with `campspot` for RV market work).',
               row_count_estimate: 'thousands',
               category: 'RV',
             },
@@ -1025,7 +1025,7 @@ export function createSageAiTools(
 
     query_hipcamp: tool({
       description:
-        'Query Hipcamp listings (Glamping & RV). Returns campsite and glamping data including location, pricing, and availability.',
+        'Query Hipcamp listings (Glamping & RV). For **RV-park or RV market** questions, use `query_campspot` and `query_roverpass` first; Hipcamp is a lower-quality supplement for RV.',
       inputSchema: z.object({
         filters: z
           .object({
@@ -1082,7 +1082,7 @@ export function createSageAiTools(
 
     query_campspot: tool({
       description:
-        'Query Campspot RV site data. Contains RV site listings scraped from Campspot. To explore the data, first query without filters to see available columns and sample data.',
+        '**Primary** tool for **RV** supply: Campspot `campspot` table. Use with `query_roverpass` for RV markets. Query without filters first to discover columns, then filter (e.g. state).',
       inputSchema: z.object({
         filters: z
           .record(z.string())
@@ -1137,7 +1137,7 @@ export function createSageAiTools(
 
     query_roverpass: tool({
       description:
-        'Query RoverPass RV site data. Contains RV site listings scraped from RoverPass. To explore the data, first query without filters to see available columns and sample data.',
+        '**Primary** tool for **RV** supply: RoverPass `all_roverpass_data_new` table. Use with `query_campspot` for RV markets. Query without filters first to discover columns, then filter (e.g. state).',
       inputSchema: z.object({
         filters: z
           .record(z.string())

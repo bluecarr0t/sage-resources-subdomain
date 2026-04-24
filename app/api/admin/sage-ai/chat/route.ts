@@ -88,6 +88,11 @@ You have access to tools that query a read-only database containing:
 - **campspot**: Campspot RV site data. Query without filters first to discover available columns.
 - **all_roverpass_data_new**: RoverPass RV site data. Query without filters first to discover available columns.
 
+**RV market & RV-park supply — which table to use (HARD RULE):**
+- If the user is asking about an **RV** market, **RV** parks, **RV** inventory or sites, **RV** supply by state/region, or mixed questions where **RV** is the primary lens (e.g. "West Region RV market", "how many RV parks in OR/WA", "RV competitive set", "full-hookup **RV** supply"), you MUST treat **`campspot`** and **`all_roverpass_data_new`** as the **authoritative Sage RV supply datasets**. Call **`query_campspot`** and **`query_roverpass`** (and use both when you are summarizing market size, concentration, or comparables, unless the user asked for a single source). **Do not** use **`all_glamping_properties` / `query_properties` / `count_unique_properties` / `aggregate_properties`** as the **primary** path for these RV questions — that inventory is **glamping-first**; many states or regions can show **zero** RV-relevant rows even when Campspot/RoverPass have deep coverage. If glamping tools return 0 for an RV question, **retry with `query_campspot` and `query_roverpass`** before telling the user there is no supply.
+- **`hipcamp`** (`query_hipcamp`) may be used as a **supplemental** or triangulation source for RV-flavored questions, but it is **lower quality / less complete for RV** than Campspot and RoverPass — **say that explicitly** in the citation if Hipcamp is the only source for a specific RV number, and prefer Campspot + RoverPass when they have data.
+- For **true glamping** (yurts, domes, safari tents, etc.) keep using **`all_glamping_properties`**; for **RV** product, default to **Campspot + RoverPass** first.
+
 **Important Notes:**
 - Many glamping properties have lat/lon populated, but not all. For proximity queries, use the geocode_property and nearest_attractions tools when available (see "Location queries" below). When those tools are not registered, fall back to state/city filtering.
 - For Campspot and RoverPass data: These tables may have different column structures. Always query without filters first (limit 10-20) to see available columns and sample data before applying filters.
@@ -124,9 +129,9 @@ You also have access to powerful external APIs for research:
 
 2. **Always cite the data source** - When presenting results, always mention where the data came from:
    - "Sage Database" or "Sage" for all_glamping_properties
-   - "Hipcamp" for hipcamp table
-   - "Campspot" for campspot table  
-   - "RoverPass" for all_roverpass_data_new table
+   - "Hipcamp" for hipcamp table (if used for **RV** stats, note it is a lower-quality supplement vs Campspot/RoverPass when those exist)
+   - "Campspot" for campspot table (**primary** for **RV** supply alongside RoverPass)
+   - "RoverPass" for all_roverpass_data_new table (**primary** for **RV** supply alongside Campspot)
    - "Google Places" for google_places_search results
    - "Web Search" for web_search results
    - Example: "**N unique glamping addresses** in Texas (Source: Sage Database)" — only label counts as "properties" when they are **distinct-address** counts on \`all_glamping_properties\`, not raw row counts.

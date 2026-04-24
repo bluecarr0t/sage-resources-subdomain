@@ -21,7 +21,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { ArrowDown, ArrowUp, Download, Maximize2, X } from 'lucide-react';
+import { ArrowDown, ArrowDownWideNarrow, ArrowUp, ArrowUpNarrowWide, Download, Maximize2, X } from 'lucide-react';
 import { Modal, ModalContent } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import type { DashboardPayload, DashboardCell } from '@/lib/sage-ai/ui-parts';
@@ -61,6 +61,54 @@ function formatValue(
     default:
       return new Intl.NumberFormat('en-US').format(value);
   }
+}
+
+function toNumericSortValue(v: unknown): number {
+  if (v == null) return Number.NaN;
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number(v);
+    if (Number.isFinite(n)) return n;
+  }
+  return Number.NaN;
+}
+
+/** Sum of numeric y-values across series for bar sort (single-key uses that column only). */
+function barRowSortMetric(row: Record<string, unknown>, seriesKeys: string[]): number {
+  if (seriesKeys.length === 0) return 0;
+  let sum = 0;
+  let any = false;
+  for (const k of seriesKeys) {
+    const n = toNumericSortValue(row[k]);
+    if (Number.isFinite(n)) {
+      sum += n;
+      any = true;
+    }
+  }
+  if (!any) return Number.NEGATIVE_INFINITY;
+  return sum;
+}
+
+function sortBarRows(
+  rows: readonly unknown[],
+  seriesKeys: string[],
+  order: 'asc' | 'desc'
+): Record<string, unknown>[] {
+  const asObjects = rows.filter(
+    (r): r is Record<string, unknown> => r != null && typeof r === 'object' && !Array.isArray(r)
+  );
+  const copy = asObjects.slice();
+  copy.sort((a, b) => {
+    const av = barRowSortMetric(a, seriesKeys);
+    const bv = barRowSortMetric(b, seriesKeys);
+    const aFin = Number.isFinite(av) && av !== Number.NEGATIVE_INFINITY;
+    const bFin = Number.isFinite(bv) && bv !== Number.NEGATIVE_INFINITY;
+    if (!aFin && !bFin) return 0;
+    if (!aFin) return 1;
+    if (!bFin) return -1;
+    return order === 'desc' ? bv - av : av - bv;
+  });
+  return copy;
 }
 
 function resolveSeries(cell: DashboardCell) {
@@ -127,8 +175,17 @@ function StatCell({ cell }: { cell: DashboardCell }) {
   );
 }
 
-function ChartCell({ cell, height }: { cell: DashboardCell; height: number }) {
-  const rawRows = cell.rows ?? [];
+function ChartCell({
+  cell,
+  height,
+  dataRows,
+}: {
+  cell: DashboardCell;
+  height: number;
+  /** When set (e.g. user-sorted bar data), used instead of `cell.rows` for drawing. */
+  dataRows?: Record<string, unknown>[];
+}) {
+  const rawRows = (dataRows ?? cell.rows) ?? [];
   const series = resolveSeries(cell);
   const xKey = cell.x_key ?? 'name';
   const yKey0 = series[0]?.key ?? 'y';
@@ -316,6 +373,9 @@ function CellBody({
   onDownloadChart,
   expandLabel,
   downloadLabel,
+  barSortGroupAria,
+  barSortDescendingLabel,
+  barSortAscendingLabel,
 }: {
   cell: DashboardCell;
   chartHeight: number;
@@ -324,7 +384,22 @@ function CellBody({
   onDownloadChart?: () => void;
   expandLabel: string;
   downloadLabel: string;
+  barSortGroupAria: string;
+  barSortDescendingLabel: string;
+  barSortAscendingLabel: string;
 }) {
+  const [barSortOrder, setBarSortOrder] = useState<'asc' | 'desc'>('desc');
+  const series = useMemo(() => resolveSeries(cell), [cell]);
+
+  const barChartData = useMemo(() => {
+    if (cell.kind !== 'bar' || !cell.rows || cell.rows.length === 0) {
+      return undefined;
+    }
+    const keys = series.map((s) => s.key).filter((k) => k.length > 0);
+    if (keys.length === 0) return undefined;
+    return sortBarRows(cell.rows, keys, barSortOrder);
+  }, [cell, series, barSortOrder]);
+
   if (cell.kind === 'stat') {
     return <StatCell cell={cell} />;
   }
@@ -341,35 +416,78 @@ function CellBody({
             </div>
           )}
         </div>
-        {showChartToolbar && (onExpandChart || onDownloadChart) && (
-          <div className="flex shrink-0 gap-0.5" data-html2canvas-ignore>
-            {onExpandChart && (
+        <div className="flex shrink-0 items-center gap-0.5">
+          {cell.kind === 'bar' && (
+            <div
+              className="mr-0.5 inline-flex items-center overflow-hidden rounded-md border border-gray-200/80 dark:border-gray-600"
+              data-html2canvas-ignore
+              role="group"
+              aria-label={barSortGroupAria}
+            >
               <button
                 type="button"
-                onClick={onExpandChart}
-                className="rounded-md p-1.5 text-gray-500 hover:bg-gray-200/80 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100"
-                aria-label={expandLabel}
-                title={expandLabel}
+                onClick={() => setBarSortOrder('desc')}
+                aria-pressed={barSortOrder === 'desc'}
+                className={`px-1.5 py-1.5 ${
+                  barSortOrder === 'desc'
+                    ? 'bg-sage-100 text-sage-800 dark:bg-sage-900/50 dark:text-sage-200'
+                    : 'text-gray-500 hover:bg-gray-200/80 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100'
+                }`}
+                title={barSortDescendingLabel}
+                aria-label={barSortDescendingLabel}
               >
-                <Maximize2 className="h-4 w-4" />
+                <ArrowDownWideNarrow className="h-3.5 w-3.5" aria-hidden />
               </button>
-            )}
-            {onDownloadChart && (
               <button
                 type="button"
-                onClick={onDownloadChart}
-                className="rounded-md p-1.5 text-gray-500 hover:bg-gray-200/80 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100"
-                aria-label={downloadLabel}
-                title={downloadLabel}
+                onClick={() => setBarSortOrder('asc')}
+                aria-pressed={barSortOrder === 'asc'}
+                className={`border-l border-gray-200/80 px-1.5 py-1.5 dark:border-gray-600 ${
+                  barSortOrder === 'asc'
+                    ? 'bg-sage-100 text-sage-800 dark:bg-sage-900/50 dark:text-sage-200'
+                    : 'text-gray-500 hover:bg-gray-200/80 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100'
+                }`}
+                title={barSortAscendingLabel}
+                aria-label={barSortAscendingLabel}
               >
-                <Download className="h-4 w-4" />
+                <ArrowUpNarrowWide className="h-3.5 w-3.5" aria-hidden />
               </button>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+          {showChartToolbar && (onExpandChart || onDownloadChart) && (
+            <div className="flex shrink-0 gap-0.5" data-html2canvas-ignore>
+              {onExpandChart && (
+                <button
+                  type="button"
+                  onClick={onExpandChart}
+                  className="rounded-md p-1.5 text-gray-500 hover:bg-gray-200/80 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                  aria-label={expandLabel}
+                  title={expandLabel}
+                >
+                  <Maximize2 className="h-4 w-4" />
+                </button>
+              )}
+              {onDownloadChart && (
+                <button
+                  type="button"
+                  onClick={onDownloadChart}
+                  className="rounded-md p-1.5 text-gray-500 hover:bg-gray-200/80 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                  aria-label={downloadLabel}
+                  title={downloadLabel}
+                >
+                  <Download className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
       <div className="mt-2 flex-1">
-        <ChartCell cell={cell} height={chartHeight} />
+        <ChartCell
+          cell={cell}
+          height={chartHeight}
+          dataRows={barChartData}
+        />
       </div>
     </div>
   );
@@ -486,6 +604,9 @@ export function CanvasDashboard({ payload }: { payload: DashboardPayload }) {
                 showChartToolbar={cell.kind !== 'stat'}
                 expandLabel={t('dashboardExpandChart')}
                 downloadLabel={t('dashboardDownloadChart')}
+                barSortGroupAria={t('dashboardBarSortGroupAria')}
+                barSortDescendingLabel={t('dashboardBarSortDescending')}
+                barSortAscendingLabel={t('dashboardBarSortAscending')}
                 onExpandChart={
                   cell.kind === 'stat' ? undefined : () => setSingleChartIndex(i)
                 }
@@ -571,6 +692,9 @@ export function CanvasDashboard({ payload }: { payload: DashboardPayload }) {
                       showChartToolbar={false}
                       expandLabel={t('dashboardExpandChart')}
                       downloadLabel={t('dashboardDownloadChart')}
+                      barSortGroupAria={t('dashboardBarSortGroupAria')}
+                      barSortDescendingLabel={t('dashboardBarSortDescending')}
+                      barSortAscendingLabel={t('dashboardBarSortAscending')}
                     />
                   </div>
                 ))}
@@ -634,6 +758,9 @@ export function CanvasDashboard({ payload }: { payload: DashboardPayload }) {
                     showChartToolbar={false}
                     expandLabel={t('dashboardExpandChart')}
                     downloadLabel={t('dashboardDownloadChart')}
+                    barSortGroupAria={t('dashboardBarSortGroupAria')}
+                    barSortDescendingLabel={t('dashboardBarSortDescending')}
+                    barSortAscendingLabel={t('dashboardBarSortAscending')}
                   />
                 </div>
               </div>
