@@ -13,6 +13,13 @@ type ExportTable = 'all_glamping_properties' | 'all_roverpass_data_new';
 type ExportRow = Record<string, unknown>;
 type ExportCell = string | number | boolean;
 
+/** Per-row export metadata (not written to CSV/XLSX — only keys in EXPORT_COLUMNS are). */
+type AugmentedExportRow = ExportRow & {
+  __exportSource: 'glamping' | 'roverpass';
+  /** RoverPass `all_roverpass_data_new.is_closed` when present (export as `is_closed` as-is). */
+  __roverpass_is_closed?: unknown;
+};
+
 const PAGE_SIZE = 1000;
 /** Excel / SheetJS hard limit per cell (inclusive). Longer text throws from `aoa_to_sheet`. */
 const XLSX_MAX_CELL_TEXT = 32767;
@@ -43,12 +50,30 @@ function invertOpenToClosedValue(value: unknown): ExportCell {
   return cellValue(value);
 }
 
+/**
+ * Unified `is_closed` export column:
+ * - Glamping: from `is_open`, inverted (Yes→No, No→Yes) — same as before.
+ * - RoverPass: from table column `is_closed` when set; otherwise fall back to `is_open` with the same inversion as glamping.
+ */
 function getExportSourceValue(row: ExportRow, sourceColumn: string): unknown {
-  const raw = row[sourceColumn];
-  if (sourceColumn === 'is_open') {
-    return invertOpenToClosedValue(raw);
+  if (sourceColumn !== 'is_open') {
+    return row[sourceColumn];
   }
-  return raw;
+
+  const r = row as AugmentedExportRow;
+  if (r.__exportSource === 'roverpass') {
+    const fromClosed = r.__roverpass_is_closed;
+    if (
+      fromClosed !== null &&
+      fromClosed !== undefined &&
+      String(fromClosed).trim() !== ''
+    ) {
+      return fromClosed;
+    }
+    return invertOpenToClosedValue(row['is_open']);
+  }
+
+  return invertOpenToClosedValue(row['is_open']);
 }
 
 function parseFormat(request: NextRequest): ExportFormat {
@@ -121,11 +146,17 @@ async function fetchAllRows(
   return rows;
 }
 
-function normalizeRows(rows: ExportRow[]): ExportRow[] {
+function normalizeRows(
+  rows: ExportRow[],
+  source: 'glamping' | 'roverpass'
+): ExportRow[] {
   return rows.map((row) => {
-    const out: ExportRow = {};
+    const out: AugmentedExportRow = { __exportSource: source };
     for (const column of EXPORT_COLUMNS) {
       out[column] = row[column] ?? null;
+    }
+    if (source === 'roverpass') {
+      out.__roverpass_is_closed = row['is_closed'];
     }
     return out;
   });
@@ -174,7 +205,10 @@ export const GET = withAdminAuth(async (request) => {
       fetchAllRows(supabase, 'all_glamping_properties'),
       fetchAllRows(supabase, 'all_roverpass_data_new'),
     ]);
-    const rows = [...normalizeRows(glampingRows), ...normalizeRows(roverpassRows)];
+    const rows = [
+      ...normalizeRows(glampingRows, 'glamping'),
+      ...normalizeRows(roverpassRows, 'roverpass'),
+    ];
     const filename = buildFilename(format);
 
     if (format === 'csv') {
