@@ -785,7 +785,8 @@
       "exportingXlsx": "Exporting XLSX...",
       "exportPreparing": "Preparing export...",
       "exportDownloaded": "{format} export downloaded",
-      "exportError": "Export failed."
+      "exportError": "Export failed.",
+      "toastSaveSuccess": "Changes saved successfully."
     },
     "discoveryCandidates": {
       "addedOn": "Added on {date}",

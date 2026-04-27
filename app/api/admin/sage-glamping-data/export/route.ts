@@ -14,6 +14,8 @@ type ExportRow = Record<string, unknown>;
 type ExportCell = string | number | boolean;
 
 const PAGE_SIZE = 1000;
+/** Excel / SheetJS hard limit per cell (inclusive). Longer text throws from `aoa_to_sheet`. */
+const XLSX_MAX_CELL_TEXT = 32767;
 const XLSX_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const EXCLUDED_FROM_UNIFIED_EXPORT = new Set([
   'quality_score',
@@ -26,6 +28,29 @@ const EXPORT_COLUMNS = ALL_GLAMPING_PROPERTY_COLUMNS.filter(
   (column) => !EXCLUDED_FROM_UNIFIED_EXPORT.has(column)
 );
 
+/** File headers: `is_open` is emitted as `is_closed` (values inverted); DB is unchanged. */
+const EXPORT_OUTPUT_COLUMN_NAMES = EXPORT_COLUMNS.map((column) =>
+  column === 'is_open' ? 'is_closed' : column
+);
+
+/** Export-only: is_open Yes/No → is_closed No/Yes. Other values pass through. */
+function invertOpenToClosedValue(value: unknown): ExportCell {
+  if (value === null || value === undefined) return '';
+  const s = String(value).trim();
+  const low = s.toLowerCase();
+  if (low === 'yes') return 'No';
+  if (low === 'no') return 'Yes';
+  return cellValue(value);
+}
+
+function getExportSourceValue(row: ExportRow, sourceColumn: string): unknown {
+  const raw = row[sourceColumn];
+  if (sourceColumn === 'is_open') {
+    return invertOpenToClosedValue(raw);
+  }
+  return raw;
+}
+
 function parseFormat(request: NextRequest): ExportFormat {
   return request.nextUrl.searchParams.get('format') === 'csv' ? 'csv' : 'xlsx';
 }
@@ -37,9 +62,27 @@ function buildFilename(format: ExportFormat): string {
 
 function cellValue(value: unknown): ExportCell {
   if (value === null || value === undefined) return '';
-  if (typeof value === 'number' || typeof value === 'boolean') return value;
-  if (typeof value === 'object') return JSON.stringify(value);
+  if (typeof value === 'bigint') return value.toString();
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : '';
+  }
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return '';
+    }
+  }
   return String(value);
+}
+
+function cellValueForXlsx(value: unknown): ExportCell {
+  const v = cellValue(value);
+  if (typeof v === 'string' && v.length > XLSX_MAX_CELL_TEXT) {
+    return `${v.slice(0, XLSX_MAX_CELL_TEXT - 1)}\u2026`;
+  }
+  return v;
 }
 
 function csvCell(value: unknown): string {
@@ -89,30 +132,37 @@ function normalizeRows(rows: ExportRow[]): ExportRow[] {
 }
 
 function rowsToAoa(rows: ExportRow[]): ExportCell[][] {
-  return rows.map((row) => EXPORT_COLUMNS.map((column) => cellValue(row[column])));
+  return rows.map((row) =>
+    EXPORT_COLUMNS.map((column) =>
+      cellValueForXlsx(getExportSourceValue(row, column))
+    )
+  );
 }
 
 function buildCsv(rows: ExportRow[]): string {
   return [
-    EXPORT_COLUMNS.map(csvCell).join(','),
-    ...rows.map((row) => EXPORT_COLUMNS.map((column) => csvCell(row[column])).join(',')),
+    EXPORT_OUTPUT_COLUMN_NAMES.map((name) => csvCell(name)).join(','),
+    ...rows.map((row) =>
+      EXPORT_COLUMNS.map((column) =>
+        csvCell(getExportSourceValue(row, column))
+      ).join(',')
+    ),
   ].join('\r\n');
 }
 
-function buildXlsx(rows: ExportRow[]): ArrayBuffer {
-  const aoa: ExportCell[][] = [EXPORT_COLUMNS, ...rowsToAoa(rows)];
+function buildXlsxBuffer(rows: ExportRow[]): Buffer {
+  const aoa: ExportCell[][] = [
+    [...EXPORT_OUTPUT_COLUMN_NAMES] as ExportCell[],
+    ...rowsToAoa(rows),
+  ];
   const worksheet = XLSX.utils.aoa_to_sheet(aoa);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Combined');
-  const buffer = XLSX.write(workbook, {
+  return XLSX.write(workbook, {
     type: 'buffer',
     bookType: 'xlsx',
     compression: true,
   }) as Buffer;
-  return buffer.buffer.slice(
-    buffer.byteOffset,
-    buffer.byteOffset + buffer.byteLength
-  ) as ArrayBuffer;
 }
 
 export const GET = withAdminAuth(async (request) => {
@@ -137,7 +187,8 @@ export const GET = withAdminAuth(async (request) => {
       });
     }
 
-    return new NextResponse(buildXlsx(rows), {
+    const xlsxBuffer = buildXlsxBuffer(rows);
+    return new NextResponse(new Uint8Array(xlsxBuffer), {
       status: 200,
       headers: {
         'Content-Type': XLSX_CONTENT_TYPE,

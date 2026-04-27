@@ -20,6 +20,8 @@ config({ path: resolve(process.cwd(), '.env.local') });
 
 const DEFAULT_OUT = resolve(process.cwd(), 'csv/glamping-and-roverpass-unified.xlsx');
 const PAGE_SIZE = 1000;
+/** SheetJS / Excel limit; longer strings throw in `aoa_to_sheet`. */
+const XLSX_MAX_CELL_TEXT = 32767;
 
 const EXCLUDED_FROM_UNIFIED_EXPORT = new Set([
   'quality_score',
@@ -30,9 +32,25 @@ const EXCLUDED_FROM_UNIFIED_EXPORT = new Set([
 
 function cellValue(value: unknown): string | number | boolean {
   if (value === null || value === undefined) return '';
-  if (typeof value === 'object') return JSON.stringify(value);
-  if (typeof value === 'boolean' || typeof value === 'number') return value;
-  return String(value);
+  if (typeof value === 'bigint') return truncateCellText(value.toString());
+  if (typeof value === 'number') return Number.isFinite(value) ? value : '';
+  if (typeof value === 'boolean') return value;
+  let text: string;
+  if (typeof value === 'object') {
+    try {
+      text = JSON.stringify(value);
+    } catch {
+      return '';
+    }
+  } else {
+    text = String(value);
+  }
+  return truncateCellText(text);
+}
+
+function truncateCellText(text: string): string {
+  if (text.length <= XLSX_MAX_CELL_TEXT) return text;
+  return `${text.slice(0, XLSX_MAX_CELL_TEXT - 1)}\u2026`;
 }
 
 async function fetchAllRows(

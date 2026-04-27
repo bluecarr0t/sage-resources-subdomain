@@ -63,7 +63,7 @@ export async function getStatePropertyStatistics(
       .from('all_glamping_properties')
       .select('property_name, rate_avg_retail_daily_rate, rate_unit_rates_by_year, unit_type')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .eq('state', normalizedState);
     
@@ -167,7 +167,7 @@ export async function getCityPropertyStatistics(
       .from('all_glamping_properties')
       .select('property_name, rate_avg_retail_daily_rate, rate_unit_rates_by_year, unit_type')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .ilike('city', normalizedCity)
       .eq('state', normalizedState);
@@ -270,7 +270,7 @@ export async function getFeaturedPropertiesForState(
       .from('all_glamping_properties')
       .select('*')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .eq('state', normalizedState)
       .not('property_name', 'is', null)
@@ -350,7 +350,7 @@ export async function getFeaturedPropertiesForCity(
       .from('all_glamping_properties')
       .select('*')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .eq('state', normalizedState)
       .not('lat', 'is', null)
@@ -514,7 +514,7 @@ export async function getPropertiesNearNationalPark(
       .from('all_glamping_properties')
       .select('*')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .not('lat', 'is', null)
       .not('lon', 'is', null)
@@ -591,7 +591,7 @@ export async function getStateProperties(
       .from('all_glamping_properties')
       .select('*')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .eq('state', normalizedState);
     
@@ -634,7 +634,7 @@ export async function getCityProperties(
       .from('all_glamping_properties')
       .select('*')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .eq('state', normalizedState)
       .not('lat', 'is', null)

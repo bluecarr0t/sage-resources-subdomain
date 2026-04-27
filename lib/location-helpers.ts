@@ -144,7 +144,7 @@ export async function getCityCoordinates(
       .from('all_glamping_properties')
       .select('lat, lon')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .ilike('city', city.trim())
       .eq('state', normalizeStateName(state))
@@ -213,7 +213,7 @@ export async function getTopStates(count: number = 50): Promise<Array<{ state: s
       .from('all_glamping_properties')
       .select('property_name, state')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .not('state', 'is', null);
     
@@ -295,7 +295,7 @@ export async function getTopCities(count: number = 100): Promise<Array<{
       .from('all_glamping_properties')
       .select('property_name, city, state, lat, lon')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .not('city', 'is', null)
       .not('state', 'is', null)

@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         .select('*')
         .eq('id', propertyId)
         .eq('is_glamping_property', 'Yes')
-        .neq('is_open', 'No')
+        .eq('is_open', 'Yes')
         .eq('research_status', 'published')
         .single();
       
@@ -162,11 +162,11 @@ async function fetchPropertiesFromDatabase(
   
   // Start query - apply filters BEFORE limit for better performance
   // Filter to only show glamping properties FIRST (uses index)
-  // Exclude closed properties
+  // Operating properties only (is_open = Yes)
   let query = supabase.from('all_glamping_properties')
     .select('*')
     .eq('is_glamping_property', 'Yes')
-    .neq('is_open', 'No')
+    .eq('is_open', 'Yes')
     .eq('research_status', 'published');
 
   // Filter by country

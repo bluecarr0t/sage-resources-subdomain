@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import {
   ArrowDown,
   ArrowUp,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -487,7 +488,7 @@ export default function AdminGlampingPropertiesTable() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   const [editingProperty, setEditingProperty] = useState<PropertyRow | null>(null);
-  const [savingMessage, setSavingMessage] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -530,6 +531,12 @@ export default function AdminGlampingPropertiesTable() {
   useEffect(() => {
     loadProperties();
   }, [loadProperties]);
+
+  useEffect(() => {
+    if (!toastMessage) return undefined;
+    const timer = window.setTimeout(() => setToastMessage(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [toastMessage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -615,7 +622,7 @@ export default function AdminGlampingPropertiesTable() {
   const handleExport = async (format: ExportFormat) => {
     setExportingFormat(format);
     setError(null);
-    setSavingMessage(t('exportPreparing'));
+    setToastMessage(t('exportPreparing'));
     try {
       const res = await fetch(`/api/admin/sage-glamping-data/export?format=${format}`);
       if (!res.ok) {
@@ -636,10 +643,9 @@ export default function AdminGlampingPropertiesTable() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      setSavingMessage(t('exportDownloaded', { format: format.toUpperCase() }));
-      window.setTimeout(() => setSavingMessage(null), 2000);
+      setToastMessage(t('exportDownloaded', { format: format.toUpperCase() }));
     } catch (err) {
-      setSavingMessage(null);
+      setToastMessage(null);
       setError(err instanceof Error ? err.message : t('exportError'));
     } finally {
       setExportingFormat(null);
@@ -826,11 +832,8 @@ export default function AdminGlampingPropertiesTable() {
           </p>
         )}
 
-        <div className="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-between px-4 pb-4 text-xs text-gray-500 dark:text-gray-400">
           <span>{summary}</span>
-          {savingMessage && (
-            <span className="text-sage-600 dark:text-sage-400 font-medium">{savingMessage}</span>
-          )}
         </div>
       </div>
 
@@ -991,10 +994,20 @@ export default function AdminGlampingPropertiesTable() {
         onClose={() => setEditingProperty(null)}
         onSaved={(updated) => {
           setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-          setSavingMessage('Saved');
-          window.setTimeout(() => setSavingMessage(null), 1500);
+          setToastMessage(t('toastSaveSuccess'));
         }}
       />
+
+      {toastMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg animate-in fade-in slide-in-from-bottom-4 dark:bg-gray-100 dark:text-gray-900"
+        >
+          <CheckCircle className="h-4 w-4 text-emerald-300 dark:text-emerald-700" aria-hidden />
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
