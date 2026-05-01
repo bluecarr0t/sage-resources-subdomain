@@ -15,6 +15,7 @@
  * This reduces API calls by reusing placeIds while ensuring all data is fresh.
  */
 
+import { normalizePlacesApiPlaceId } from '@/lib/google-places-place-id';
 import { createServerClient } from './supabase';
 import { fetchGooglePlacesData, type GooglePlacesData } from './google-places';
 
@@ -117,7 +118,9 @@ export async function fetchGooglePlacesDataCached(
   propertyName: string,
   city?: string | null,
   state?: string | null,
-  address?: string | null
+  address?: string | null,
+  /** From SSR / trusted DB (`google_place_id`) — skips Text Search when valid */
+  knownPlaceId?: string | null
 ): Promise<GooglePlacesData | null> {
   const cacheKey = normalizeCacheKey(propertyName, city, state, address);
   
@@ -125,22 +128,27 @@ export async function fetchGooglePlacesDataCached(
   if (placeIdCache.size > 0 && placeIdCache.size % 100 === 0) {
     cleanupCache();
   }
+
+  const normalizedKnown = normalizePlacesApiPlaceId(knownPlaceId);
   
-  // Step 1: Check database for placeId first (permanent storage - allowed)
-  let placeId: string | null = await getPlaceIdFromDatabase(propertyName, city, state);
+  // Step 1: Prefer caller-supplied place ID, then database, then in-memory cache
+  let placeId: string | null = normalizedKnown;
+
+  if (!placeId) {
+    placeId = await getPlaceIdFromDatabase(propertyName, city, state);
+  }
   
-  // Step 2: Check in-memory placeId cache (permanent - no expiration)
   if (!placeId) {
     placeId = placeIdCache.get(cacheKey) || null;
   }
   
-  // Step 3: Fetch Google Places data
+  // Fetch Google Places data
   // - If placeId exists: Skip Text Search, go directly to Place Details (saves 1 API call)
   // - If no placeId: Search for it, then get Place Details (2 API calls)
   // - Place Details ALWAYS fetches fresh data (never cached) ✅ Compliant
   const result = await fetchGooglePlacesData(propertyName, city, state, address, placeId);
   
-  // Step 4: Cache the placeId if we got a new one (permanent storage - allowed)
+  // Cache the placeId if we got a new one (permanent storage - allowed)
   if (result && result.placeId && !placeId) {
     placeIdCache.set(cacheKey, result.placeId);
     

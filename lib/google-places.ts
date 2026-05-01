@@ -108,7 +108,10 @@ async function getPlaceDetails(
   description?: string;
   phoneNumber?: string;
 } | null> {
-  const url = `https://places.googleapis.com/v1/places/${placeId}`;
+  const barePlaceId = placeId.startsWith('places/')
+    ? placeId.slice('places/'.length)
+    : placeId;
+  const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(barePlaceId)}`;
   const headers = {
     'Content-Type': 'application/json',
     'X-Goog-Api-Key': apiKey,

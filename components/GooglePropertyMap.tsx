@@ -129,7 +129,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   useEffect(() => { setCurrentPhotoIndex(0); }, [selectedProperty?.id]);
   useEffect(() => { setCurrentParkPhotoIndex(0); }, [selectedPark?.id]);
 
-  // Fetch full property details AND fresh Google Places data when marker is clicked
+  // Fetch full property details, then Google Places (with place ID when available) when marker is clicked
   useEffect(() => {
     if (!selectedProperty || !selectedProperty.id) {
       setFullPropertyDetails(null);
@@ -137,57 +137,73 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       return;
     }
 
-    const hasFullDetails = selectedProperty.google_photos !== undefined ||
-      selectedProperty.address !== undefined ||
-      selectedProperty.description !== undefined;
+    const sel = selectedProperty;
+
+    const hasFullDetails =
+      sel.google_photos !== undefined ||
+      sel.address !== undefined ||
+      sel.description !== undefined;
 
     if (hasFullDetails) {
-      setFullPropertyDetails(selectedProperty);
-    } else if (selectedProperty.property_name || selectedProperty.site_name) {
-      setFullPropertyDetails(selectedProperty);
+      setFullPropertyDetails(sel);
+    } else if (sel.property_name || sel.site_name) {
+      setFullPropertyDetails(sel);
     }
 
-    async function fetchFullPropertyDetails() {
-      if (!selectedProperty?.id) return;
+    let cancelled = false;
+
+    async function loadPropertyOverlayData() {
       setLoadingPropertyDetails(true);
+      setFreshGooglePlacesData(null);
+
+      let merged: typeof sel = sel;
+
       try {
-        const response = await fetch(`/api/properties?id=${selectedProperty.id}`);
+        const response = await fetch(`/api/properties?id=${sel.id}`);
         if (!response.ok) throw new Error('Failed to fetch property details');
         const result = await response.json();
         if (result.success && result.data) {
-          setFullPropertyDetails({ ...selectedProperty, ...result.data });
-        } else {
-          setFullPropertyDetails(selectedProperty);
+          merged = { ...sel, ...result.data };
+          if (!cancelled) setFullPropertyDetails(merged);
+        } else if (!cancelled) {
+          setFullPropertyDetails(sel);
         }
-      } catch (err) {
-        console.error('Error fetching property details:', err);
-        setFullPropertyDetails(selectedProperty);
-      } finally {
-        setLoadingPropertyDetails(false);
-      }
-    }
 
-    async function fetchFreshGooglePlacesData() {
-      if (!selectedProperty?.property_name) return;
-      try {
-        const params = new URLSearchParams({ propertyName: selectedProperty.property_name || '' });
-        if (selectedProperty.city) params.append('city', selectedProperty.city);
-        if (selectedProperty.state) params.append('state', selectedProperty.state);
-        if (selectedProperty.address) params.append('address', selectedProperty.address);
-        const response = await fetch(`/api/google-places?${params.toString()}`);
-        if (response.ok) {
-          const data = await response.json();
-          setFreshGooglePlacesData(data);
+        const nameForPlaces =
+          merged.property_name?.trim() || merged.site_name?.trim() || '';
+        if (!nameForPlaces) {
+          return;
+        }
+
+        const params = new URLSearchParams({ propertyName: nameForPlaces });
+        if (merged.city) params.append('city', merged.city);
+        if (merged.state) params.append('state', merged.state);
+        if (merged.address) params.append('address', merged.address);
+        const pid = merged.google_place_id;
+        if (pid) params.append('placeId', pid);
+
+        const gpResponse = await fetch(`/api/google-places?${params.toString()}`);
+        if (cancelled) return;
+        if (gpResponse.ok) {
+          setFreshGooglePlacesData(await gpResponse.json());
         } else {
           setFreshGooglePlacesData(null);
         }
-      } catch {
-        setFreshGooglePlacesData(null);
+      } catch (err) {
+        console.error('Error fetching property details:', err);
+        if (!cancelled) {
+          setFullPropertyDetails(sel);
+          setFreshGooglePlacesData(null);
+        }
+      } finally {
+        if (!cancelled) setLoadingPropertyDetails(false);
       }
     }
 
-    fetchFullPropertyDetails();
-    fetchFreshGooglePlacesData();
+    void loadPropertyOverlayData();
+    return () => {
+      cancelled = true;
+    };
   }, [selectedProperty]);
 
   const propertyForDisplay = selectedProperty ? { ...selectedProperty, ...(fullPropertyDetails || {}) } : null;

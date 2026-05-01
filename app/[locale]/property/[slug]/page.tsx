@@ -410,6 +410,7 @@ export default async function PropertyPage({ params }: PageProps) {
         propertyName={propertyName}
         nearbyProperties={nearbyProperties}
         googlePlacesData={null}
+        googlePlaceId={firstProperty.google_place_id ?? null}
         locale={locale}
       />
     </>

@@ -16,6 +16,15 @@
  * PATCH /api/admin/sage-glamping-data/properties
  *   Body: { id: string | number, updates: Record<string, unknown> }
  *   Updates are restricted to the editable column allowlist below.
+ *
+ * DELETE /api/admin/sage-glamping-data/properties
+ *   Body: { id: string | number }
+ *   Removes a row by primary key `id`.
+ *
+ * POST /api/admin/sage-glamping-data/properties
+ *   Body: fields for a new row (see EDITABLE_COLUMNS). Required: property_name, city, state, url.
+ *   Defaults: research_status in_progress, is_glamping_property Yes, is_open Yes, source Sage,
+ *   date_added / date_updated today (YYYY-MM-DD).
  */
 
 import { NextResponse } from 'next/server';
@@ -40,6 +49,20 @@ const EDITABLE_COLUMNS = new Set<string>(
   ALL_GLAMPING_PROPERTY_COLUMNS.filter((c) => !READ_ONLY_COLUMNS.has(c))
 );
 
+const REQUIRED_CREATE_FIELDS = [
+  'property_name',
+  'city',
+  'state',
+  'url',
+] as const;
+
+function normalizeWebsiteUrl(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
 
@@ -53,6 +76,95 @@ function escapeIlikeTerm(term: string): string {
   // Strip wildcards / commas that would break PostgREST `or` filters.
   return term.replace(/[%,()]/g, '').trim();
 }
+
+export const POST = withAdminAuth(async (request) => {
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+
+    const insertRow: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(body)) {
+      if (key === 'id' || !EDITABLE_COLUMNS.has(key)) continue;
+      insertRow[key] =
+        typeof value === 'string' && value.trim() === '' ? null : value;
+    }
+
+    for (const key of REQUIRED_CREATE_FIELDS) {
+      const raw = body[key];
+      if (typeof raw !== 'string' || !raw.trim()) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `${key} is required`,
+          },
+          { status: 400 }
+        );
+      }
+      insertRow[key] = raw.trim();
+    }
+
+    insertRow.url = normalizeWebsiteUrl(String(insertRow.url ?? ''));
+
+    insertRow.research_status =
+      typeof insertRow.research_status === 'string' &&
+      insertRow.research_status.trim() !== ''
+        ? insertRow.research_status.trim()
+        : 'in_progress';
+    insertRow.is_glamping_property =
+      typeof insertRow.is_glamping_property === 'string' &&
+      insertRow.is_glamping_property.trim() !== ''
+        ? insertRow.is_glamping_property.trim()
+        : 'Yes';
+    insertRow.is_open =
+      typeof insertRow.is_open === 'string' && insertRow.is_open.trim() !== ''
+        ? insertRow.is_open.trim()
+        : 'Yes';
+    insertRow.source =
+      typeof insertRow.source === 'string' && insertRow.source.trim() !== ''
+        ? insertRow.source.trim()
+        : 'Sage';
+
+    const today = new Date().toISOString().split('T')[0];
+    if (
+      insertRow.date_added == null ||
+      insertRow.date_added === ''
+    ) {
+      insertRow.date_added = today;
+    }
+    if (
+      insertRow.date_updated == null ||
+      insertRow.date_updated === ''
+    ) {
+      insertRow.date_updated = today;
+    }
+
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+      .from(TABLE)
+      .insert(insertRow)
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('[admin/sage-data/properties] POST error:', error);
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      property: data,
+    });
+  } catch (err) {
+    console.error('[admin/sage-data/properties] POST unexpected error:', err);
+    return NextResponse.json(
+      { success: false, error: 'Failed to create property' },
+      { status: 500 }
+    );
+  }
+});
 
 export const GET = withAdminAuth(async (request) => {
   try {
@@ -231,6 +343,46 @@ export const PATCH = withAdminAuth(async (request) => {
     console.error('[admin/sage-data/properties] PATCH unexpected error:', err);
     return NextResponse.json(
       { success: false, error: 'Failed to update property' },
+      { status: 500 }
+    );
+  }
+});
+
+export const DELETE = withAdminAuth(async (request) => {
+  try {
+    const body = (await request.json()) as { id?: string | number };
+    const rawId = body?.id;
+
+    if (rawId === undefined || rawId === null || rawId === '') {
+      return NextResponse.json(
+        { success: false, error: 'id is required' },
+        { status: 400 }
+      );
+    }
+    const id = String(rawId).trim();
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'id is required' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createServerClient();
+    const { error } = await supabase.from(TABLE).delete().eq('id', id);
+
+    if (error) {
+      console.error('[admin/sage-data/properties] DELETE error:', error);
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('[admin/sage-data/properties] DELETE unexpected error:', err);
+    return NextResponse.json(
+      { success: false, error: 'Failed to delete property' },
       { status: 500 }
     );
   }

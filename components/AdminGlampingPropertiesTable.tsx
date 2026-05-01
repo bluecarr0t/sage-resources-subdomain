@@ -10,8 +10,10 @@ import {
   ChevronRight,
   Download,
   ExternalLink,
+  Plus,
   Save,
   Search,
+  Trash2,
   X,
 } from 'lucide-react';
 import { Modal, ModalContent } from '@/components/ui/Modal';
@@ -35,6 +37,11 @@ interface UpdateResponse {
   success: boolean;
   property?: PropertyRow;
   rejected?: string[];
+  error?: string;
+}
+
+interface DeleteResponse {
+  success: boolean;
   error?: string;
 }
 
@@ -176,6 +183,14 @@ const EDIT_FIELD_GROUPS: FieldGroup[] = [
   },
 ];
 
+/** Fields that must be filled before creating a row (validated client + API). */
+const REQUIRED_FIELDS_CREATE = new Set([
+  'property_name',
+  'city',
+  'state',
+  'url',
+]);
+
 function formatCellValue(value: unknown): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'object') return JSON.stringify(value);
@@ -243,7 +258,24 @@ function researchStatusPillClasses(raw: string): string {
   }
 }
 
-function TableCellReadOnly({ value, column }: { value: unknown; column: QuickColumn }) {
+/** Browser tooltips truncate unpredictably; keep native `title` readable. */
+function truncateForNativeTitle(text: string, maxChars = 900): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= maxChars) return trimmed;
+  return `${trimmed.slice(0, maxChars)}…`;
+}
+
+function TableCellReadOnly({
+  value,
+  column,
+  row,
+  onOpenStatusNote,
+}: {
+  value: unknown;
+  column: QuickColumn;
+  row?: PropertyRow;
+  onOpenStatusNote: (payload: { propertyName: string; notes: string }) => void;
+}) {
   const t = useTranslations('admin.sageData');
   const displayValue = formatCellValue(value);
   const isEmpty = displayValue === '';
@@ -251,6 +283,16 @@ function TableCellReadOnly({ value, column }: { value: unknown; column: QuickCol
   const isYesNoPill =
     (column.key === 'is_glamping_property' || column.key === 'is_open') && !isEmpty;
   const isResearchStatusPill = column.key === 'research_status' && !isEmpty;
+  const notesText =
+    column.key === 'research_status' && row
+      ? formatCellValue(row.notes).trim()
+      : '';
+  const statusHoverTitle =
+    column.key === 'research_status'
+      ? notesText.length > 0
+        ? truncateForNativeTitle(notesText)
+        : t('statusNoteHoverEmpty')
+      : undefined;
 
   return (
     <div
@@ -274,11 +316,26 @@ function TableCellReadOnly({ value, column }: { value: unknown; column: QuickCol
           <ExternalLink className="w-4 h-4 shrink-0" aria-hidden />
         </a>
       ) : isResearchStatusPill ? (
-        <span
-          className={`inline-flex max-w-full items-center truncate rounded-full px-2 py-0.5 text-xs font-medium ${researchStatusPillClasses(displayValue)}`}
+        <button
+          type="button"
+          title={statusHoverTitle}
+          className={`inline-flex max-w-full min-w-0 cursor-pointer items-center truncate rounded-full px-2 py-0.5 text-left text-xs font-medium transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-900 ${researchStatusPillClasses(displayValue)}`}
+          aria-label={t('statusNoteShowAria', {
+            status: formatResearchStatusLabel(displayValue),
+          })}
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenStatusNote({
+              propertyName:
+                row && formatCellValue(row.property_name).trim()
+                  ? formatCellValue(row.property_name)
+                  : t('statusNoteUntitledProperty'),
+              notes: notesText,
+            });
+          }}
         >
-          {formatResearchStatusLabel(displayValue)}
-        </span>
+          <span className="truncate">{formatResearchStatusLabel(displayValue)}</span>
+        </button>
       ) : isYesNoPill ? (
         <span
           className={`inline-flex max-w-full items-center truncate rounded-full px-2 py-0.5 text-xs font-medium ${glampingYesNoPillClasses(displayValue)}`}
@@ -294,17 +351,44 @@ function TableCellReadOnly({ value, column }: { value: unknown; column: QuickCol
 
 interface EditModalProps {
   open: boolean;
+  mode: 'edit' | 'create';
   property: PropertyRow | null;
   onClose: () => void;
-  onSaved: (updated: PropertyRow) => void;
+  onSaved: (updated: PropertyRow, meta?: { created?: boolean }) => void;
+  onDeleted: (id: string) => void;
 }
 
-function EditModal({ open, property, onClose, onSaved }: EditModalProps) {
+function EditModal({
+  open,
+  mode,
+  property,
+  onClose,
+  onSaved,
+  onDeleted,
+}: EditModalProps) {
+  const t = useTranslations('admin.sageData');
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!open) return;
+    if (mode === 'create') {
+      const initial: Record<string, string> = {};
+      for (const group of EDIT_FIELD_GROUPS) {
+        for (const field of group.fields) {
+          initial[field.key] = '';
+        }
+      }
+      initial.research_status = 'in_progress';
+      initial.is_glamping_property = 'Yes';
+      initial.is_open = 'Yes';
+      initial.source = 'Sage';
+      setDraft(initial);
+      setError(null);
+      return;
+    }
     if (!property) return;
     const initial: Record<string, string> = {};
     for (const group of EDIT_FIELD_GROUPS) {
@@ -314,14 +398,78 @@ function EditModal({ open, property, onClose, onSaved }: EditModalProps) {
     }
     setDraft(initial);
     setError(null);
-  }, [property]);
+  }, [open, mode, property]);
 
-  if (!property) return null;
+  if (!open) return null;
+  if (mode === 'edit' && !property) return null;
+
+  const busy = saving || deleting;
+
+  const handleDelete = async () => {
+    if (mode !== 'edit' || !property) return;
+    const name = String(property.property_name ?? property.id);
+    if (!confirm(t('deleteConfirm', { name }))) return;
+
+    setDeleting(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/sage-glamping-data/properties', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: String(property.id) }),
+      });
+      const json = (await res.json()) as DeleteResponse;
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || t('deleteError'));
+      }
+      onDeleted(String(property.id));
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('deleteError'));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const buildPayloadFromDraft = (): Record<string, unknown> => {
+    const payload: Record<string, unknown> = {};
+    for (const group of EDIT_FIELD_GROUPS) {
+      for (const field of group.fields) {
+        const raw = draft[field.key] ?? '';
+        payload[field.key] = raw.trim() === '' ? null : raw.trim();
+      }
+    }
+    return payload;
+  };
 
   const handleSave = async () => {
     setSaving(true);
     setError(null);
     try {
+      if (mode === 'create') {
+        for (const key of REQUIRED_FIELDS_CREATE) {
+          if (!(draft[key]?.trim())) {
+            setError(t('createRequiredFields'));
+            return;
+          }
+        }
+        const payload = buildPayloadFromDraft();
+        const res = await fetch('/api/admin/sage-glamping-data/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const json = (await res.json()) as UpdateResponse;
+        if (!res.ok || !json.success || !json.property) {
+          throw new Error(json.error || t('createError'));
+        }
+        onSaved(json.property, { created: true });
+        onClose();
+        return;
+      }
+
+      if (!property) return;
+
       const updates: Record<string, string | null> = {};
       for (const [key, raw] of Object.entries(draft)) {
         const original = formatCellValue(property[key]);
@@ -351,22 +499,25 @@ function EditModal({ open, property, onClose, onSaved }: EditModalProps) {
     }
   };
 
+  const subtitle =
+    mode === 'create'
+      ? t('addPropertySubtitle')
+      : String(property?.property_name ?? 'Untitled property');
+
   return (
-    <Modal open={open} onClose={saving ? () => undefined : onClose} className="max-w-3xl">
+    <Modal open={open} onClose={busy ? () => undefined : onClose} className="max-w-3xl">
       <ModalContent className="max-h-[85vh] flex flex-col">
         <div className="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Edit property
+              {mode === 'create' ? t('addPropertyTitle') : t('editPropertyTitle')}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {String(property.property_name ?? 'Untitled property')}
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            disabled={saving}
+            disabled={busy}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50"
             aria-label="Close edit dialog"
           >
@@ -393,13 +544,22 @@ function EditModal({ open, property, onClose, onSaved }: EditModalProps) {
                   const inputClasses =
                     'w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none disabled:opacity-50';
                   const colSpan = field.type === 'textarea' ? 'md:col-span-2' : '';
+                  const labelText =
+                    field.key === 'url' ? t('fieldWebsite') : humanizeKey(field.key);
+                  const showRequired =
+                    mode === 'create' && REQUIRED_FIELDS_CREATE.has(field.key);
                   return (
                     <div key={field.key} className={colSpan}>
                       <label
                         htmlFor={id}
                         className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        {humanizeKey(field.key)}
+                        {labelText}
+                        {showRequired ? (
+                          <span className="text-red-600 dark:text-red-400 ml-0.5" aria-hidden>
+                            *
+                          </span>
+                        ) : null}
                         <span className="ml-1 font-mono text-[10px] text-gray-400 dark:text-gray-500">
                           {field.key}
                         </span>
@@ -408,7 +568,8 @@ function EditModal({ open, property, onClose, onSaved }: EditModalProps) {
                         <textarea
                           id={id}
                           value={value}
-                          disabled={saving}
+                          disabled={busy}
+                          aria-required={showRequired}
                           onChange={(e) =>
                             setDraft((prev) => ({ ...prev, [field.key]: e.target.value }))
                           }
@@ -419,7 +580,8 @@ function EditModal({ open, property, onClose, onSaved }: EditModalProps) {
                         <select
                           id={id}
                           value={value}
-                          disabled={saving}
+                          disabled={busy}
+                          aria-required={showRequired}
                           onChange={(e) =>
                             setDraft((prev) => ({ ...prev, [field.key]: e.target.value }))
                           }
@@ -437,7 +599,9 @@ function EditModal({ open, property, onClose, onSaved }: EditModalProps) {
                           id={id}
                           type="text"
                           value={value}
-                          disabled={saving}
+                          disabled={busy}
+                          aria-required={showRequired}
+                          autoComplete={field.key === 'url' ? 'url' : undefined}
                           onChange={(e) =>
                             setDraft((prev) => ({ ...prev, [field.key]: e.target.value }))
                           }
@@ -452,16 +616,40 @@ function EditModal({ open, property, onClose, onSaved }: EditModalProps) {
           ))}
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-6 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
-          <Button variant="secondary" onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSave} disabled={saving}>
-            <span className="inline-flex items-center gap-1.5">
-              <Save className="w-4 h-4" />
-              {saving ? 'Saving…' : 'Save changes'}
-            </span>
-          </Button>
+        <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
+          <div>
+            {mode === 'edit' ? (
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                onClick={() => void handleDelete()}
+                disabled={busy}
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  <Trash2 className="w-4 h-4" aria-hidden />
+                  {deleting ? t('deleteDeleting') : t('deleteRecord')}
+                </span>
+              </Button>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <Button variant="secondary" onClick={onClose} disabled={busy}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={() => void handleSave()} disabled={busy}>
+              <span className="inline-flex items-center gap-1.5">
+                <Save className="w-4 h-4" />
+                {saving
+                  ? mode === 'create'
+                    ? t('createSaving')
+                    : 'Saving…'
+                  : mode === 'create'
+                    ? t('createRecord')
+                    : 'Save changes'}
+              </span>
+            </Button>
+          </div>
         </div>
       </ModalContent>
     </Modal>
@@ -488,17 +676,23 @@ export default function AdminGlampingPropertiesTable() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   const [editingProperty, setEditingProperty] = useState<PropertyRow | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null);
+  const [statusNotePreview, setStatusNotePreview] = useState<{
+    propertyName: string;
+    notes: string;
+  } | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  const loadProperties = useCallback(async () => {
+  const loadProperties = useCallback(async (overridePage?: number) => {
+    const pageToFetch = overridePage ?? page;
     setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams({
-        page: String(page),
+        page: String(pageToFetch),
         pageSize: String(pageSize),
         sortBy,
         sortDir,
@@ -531,6 +725,12 @@ export default function AdminGlampingPropertiesTable() {
   useEffect(() => {
     loadProperties();
   }, [loadProperties]);
+
+  useEffect(() => {
+    if (total <= 0) return;
+    const maxPage = Math.max(1, Math.ceil(total / pageSize));
+    setPage((p) => (p > maxPage ? maxPage : p));
+  }, [total, pageSize]);
 
   useEffect(() => {
     if (!toastMessage) return undefined;
@@ -678,6 +878,22 @@ export default function AdminGlampingPropertiesTable() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setIsCreatingNew(true);
+                setEditingProperty(null);
+              }}
+              disabled={exportingFormat !== null}
+              aria-label={t('addRecordAria')}
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <Plus className="w-4 h-4" aria-hidden />
+                {t('addRecord')}
+              </span>
+            </Button>
             <Button
               type="button"
               variant="secondary"
@@ -935,10 +1151,14 @@ export default function AdminGlampingPropertiesTable() {
                       key={row.id}
                       tabIndex={0}
                       className="hover:bg-sage-50/80 dark:hover:bg-sage-900/20 cursor-pointer focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sage-500"
-                      onClick={() => setEditingProperty(row)}
+                      onClick={() => {
+                        setIsCreatingNew(false);
+                        setEditingProperty(row);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
+                          setIsCreatingNew(false);
                           setEditingProperty(row);
                         }
                       }}
@@ -946,7 +1166,12 @@ export default function AdminGlampingPropertiesTable() {
                     >
                       {QUICK_COLUMNS.map((col) => (
                         <td key={col.key} className={`${bodyCellClass} ${col.width ?? ''}`}>
-                          <TableCellReadOnly value={row[col.key]} column={col} />
+                          <TableCellReadOnly
+                            value={row[col.key]}
+                            column={col}
+                            row={row}
+                            onOpenStatusNote={setStatusNotePreview}
+                          />
                         </td>
                       ))}
                     </tr>
@@ -989,14 +1214,58 @@ export default function AdminGlampingPropertiesTable() {
       </div>
 
       <EditModal
-        open={editingProperty !== null}
+        open={editingProperty !== null || isCreatingNew}
+        mode={isCreatingNew ? 'create' : 'edit'}
         property={editingProperty}
-        onClose={() => setEditingProperty(null)}
-        onSaved={(updated) => {
-          setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+        onClose={() => {
+          setEditingProperty(null);
+          setIsCreatingNew(false);
+        }}
+        onSaved={(updated, meta) => {
+          if (meta?.created) {
+            setPage(1);
+            void loadProperties(1);
+            setToastMessage(t('toastCreateSuccess'));
+            return;
+          }
+          setRows((prev) =>
+            prev.map((r) => (String(r.id) === String(updated.id) ? updated : r))
+          );
           setToastMessage(t('toastSaveSuccess'));
         }}
+        onDeleted={(deletedId) => {
+          setRows((prev) => prev.filter((r) => String(r.id) !== deletedId));
+          setTotal((prevTotal) => Math.max(0, prevTotal - 1));
+          setToastMessage(t('toastDeleteSuccess'));
+        }}
       />
+
+      <Modal
+        open={statusNotePreview !== null}
+        onClose={() => setStatusNotePreview(null)}
+        className="max-w-lg"
+      >
+        <ModalContent className="flex max-h-[min(70vh,560px)] flex-col">
+          <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {t('statusNoteModalTitle')}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {statusNotePreview?.propertyName}
+            </p>
+          </div>
+          <div className="flex-1 overflow-y-auto px-6 py-4 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+            {statusNotePreview?.notes.trim()
+              ? statusNotePreview.notes
+              : t('statusNoteBodyEmpty')}
+          </div>
+          <div className="flex justify-end gap-2 border-t border-gray-200 px-6 py-3 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
+            <Button variant="secondary" onClick={() => setStatusNotePreview(null)}>
+              {t('statusNoteClose')}
+            </Button>
+          </div>
+        </ModalContent>
+      </Modal>
 
       {toastMessage && (
         <div

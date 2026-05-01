@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SageProperty } from '@/lib/types/sage';
@@ -8,6 +8,7 @@ import { parseCoordinates } from '@/lib/types/sage';
 import RelatedPropertiesCarousel from '@/components/RelatedPropertiesCarousel';
 import FloatingHeader from './FloatingHeader';
 import { GooglePlacesData } from '@/lib/google-places';
+import { useDeferredGooglePlacesFetch } from '@/lib/hooks/useDeferredGooglePlacesFetch';
 
 interface PropertyDetailTemplateProps {
   properties: SageProperty[];
@@ -15,6 +16,8 @@ interface PropertyDetailTemplateProps {
   propertyName: string;
   nearbyProperties?: SageProperty[];
   googlePlacesData?: GooglePlacesData | null;
+  /** Skips Places Text Search when set (from DB `google_place_id`) */
+  googlePlaceId?: string | null;
   locale?: string;
 }
 
@@ -87,56 +90,38 @@ export default function PropertyDetailTemplate({
   propertyName,
   nearbyProperties = [],
   googlePlacesData: initialGooglePlacesData,
+  googlePlaceId,
   locale,
 }: PropertyDetailTemplateProps) {
   const firstProperty = properties[0];
-  
-  // State for client-side fetched Google Places data
-  const [googlePlacesData, setGooglePlacesData] = useState<GooglePlacesData | null>(initialGooglePlacesData || null);
-  const [isLoadingPlacesData, setIsLoadingPlacesData] = useState(!initialGooglePlacesData);
-  
-  // Fetch Google Places data client-side if not provided
-  useEffect(() => {
-    if (initialGooglePlacesData) {
-      // Already have data, no need to fetch
-      return;
-    }
-    
-    const fetchGooglePlacesData = async () => {
-      try {
-        setIsLoadingPlacesData(true);
-        const params = new URLSearchParams({
-          propertyName: propertyName,
-        });
-        
-        if (firstProperty.city) params.append('city', firstProperty.city);
-        if (firstProperty.state) params.append('state', firstProperty.state);
-        if (firstProperty.address) params.append('address', firstProperty.address);
-        
-        const response = await fetch(`/api/google-places?${params.toString()}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          setGooglePlacesData(data);
-        } else {
-          // Silently fail - page will work without Google Places data
-          console.warn('Failed to fetch Google Places data:', response.statusText);
-        }
-      } catch (error) {
-        // Silently fail - page will work without Google Places data
-        console.warn('Error fetching Google Places data:', error);
-      } finally {
-        setIsLoadingPlacesData(false);
-      }
-    };
-    
-    fetchGooglePlacesData();
-  }, [propertyName, firstProperty.city, firstProperty.state, firstProperty.address, initialGooglePlacesData]);
+
+  const deferredPlacesParams = useMemo(
+    () => ({
+      propertyName,
+      city: firstProperty.city ?? null,
+      state: firstProperty.state ?? null,
+      address: firstProperty.address ?? null,
+      placeId: googlePlaceId ?? null,
+    }),
+    [propertyName, firstProperty.city, firstProperty.state, firstProperty.address, googlePlaceId]
+  );
+
+  const { googlePlacesData, phase: placesFetchPhase } = useDeferredGooglePlacesFetch(
+    initialGooglePlacesData ?? undefined,
+    initialGooglePlacesData != null ? null : deferredPlacesParams
+  );
+
+  const showPhotoSkeleton = placesFetchPhase !== 'complete';
+  const showPhotos = placesFetchPhase === 'complete' && (googlePlacesData?.photos?.length ?? 0) > 0;
   
   // Use photos from Google Places API (not from database)
   const photos = googlePlacesData?.photos || [];
   
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+
+  useEffect(() => {
+    setCurrentPhotoIndex(0);
+  }, [propertyName, placesFetchPhase]);
   
   // Keyboard navigation for photo carousel
   const handlePhotoKeyDown = (e: React.KeyboardEvent) => {
@@ -254,7 +239,7 @@ export default function PropertyDetailTemplate({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Photos */}
             <div className="relative">
-              {photos.length > 0 ? (
+              {showPhotos ? (
                 <div 
                   className="relative w-full h-96 lg:h-full min-h-[400px] rounded-lg overflow-hidden bg-gray-100 group"
                   role="region"
@@ -313,6 +298,12 @@ export default function PropertyDetailTemplate({
                     </>
                   )}
                 </div>
+              ) : showPhotoSkeleton ? (
+                <div
+                  className="relative w-full h-96 lg:h-full min-h-[400px] rounded-lg overflow-hidden bg-gray-200 animate-pulse"
+                  aria-busy="true"
+                  aria-label={`Loading photos for ${propertyName}`}
+                />
               ) : (
                 <div 
                   className="w-full h-96 lg:h-full min-h-[400px] rounded-lg bg-gray-200 flex items-center justify-center"
