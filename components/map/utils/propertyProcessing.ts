@@ -1,14 +1,7 @@
 import { SageProperty } from '@/lib/types/sage';
-import { 
-  createStateFilterSet, 
-  stateMatchesFilter, 
-  CANADIAN_PROVINCES 
-} from './stateUtils';
-import { 
-  isLikelyCanadaByCoords, 
-  isInNorthAmerica, 
-  getPropertyCoordinates 
-} from './coordinateUtils';
+import { propertyMatchesCountryFilters } from '@/lib/map/map-country-filter';
+import { createStateFilterSet, stateMatchesFilter } from './stateUtils';
+import { getPropertyCoordinates } from './coordinateUtils';
 
 /**
  * Normalize property name for consistent grouping and counting
@@ -33,51 +26,6 @@ export function getRateCategory(rate: number | null): string | null {
   if (rate >= 550) return '$550+';
   
   return null;
-}
-
-/**
- * Check if property is Canadian based on country field and coordinates
- */
-function isCanadianProperty(property: any): boolean {
-  const country = String(property.country || '').toUpperCase();
-  const state = String(property.state || '').toUpperCase();
-  
-  if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
-  
-  const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-  if (canadianProvinceCodes.includes(state)) return true;
-  if (CANADIAN_PROVINCES.some(province => province.toUpperCase() === state)) return true;
-  
-  const coords = getPropertyCoordinates(property);
-  if (coords && isLikelyCanadaByCoords(coords.lat, coords.lon)) return true;
-  
-  return false;
-}
-
-/**
- * Check if property is US based on country field and coordinates
- */
-function isUSProperty(property: any): boolean {
-  const country = String(property.country || '').toUpperCase();
-  const state = String(property.state || '').toUpperCase();
-  
-  if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
-  
-  const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-  const isCanadianProvince = canadianProvinceCodes.includes(state) || 
-    CANADIAN_PROVINCES.some(province => province.toUpperCase() === state);
-  
-  if ((!country || country === '' || country === 'NULL') && !isCanadianProvince && state && state.length === 2) return true;
-  if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
-  
-  const coords = getPropertyCoordinates(property);
-  if (coords) {
-    if (isInNorthAmerica(coords.lat, coords.lon) && !isLikelyCanadaByCoords(coords.lat, coords.lon)) {
-      return true;
-    }
-  }
-  
-  return false;
 }
 
 /**
@@ -208,64 +156,12 @@ export function processProperties(
     console.log(`After state filtering: ${uniqueProperties.length} properties match the state filter`);
   }
   
-  // Apply country filter
-  if (filterCountry.length === 1) {
-    if (filterCountry.includes('Canada')) {
-      // Strict filtering: only properties with country field set to Canada/CA
-      uniqueProperties = uniqueProperties.filter((property: any) => {
-        const country = String(property.country || '').toUpperCase();
-        return country === 'CA' || country === 'CAN' || country === 'CANADA';
-      });
-      console.log(`After client-side Canada filtering (country field only): ${uniqueProperties.length} properties`);
-    } else if (filterCountry.includes('United States')) {
-      // Strict filtering: only properties with country field set to United States/USA/US
-      uniqueProperties = uniqueProperties.filter((property: any) => {
-        const country = String(property.country || '').toUpperCase();
-        return country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA';
-      });
-      console.log(`After client-side US filtering (country field only): ${uniqueProperties.length} properties`);
-    }
-  } else if (filterCountry.length === 2 && filterCountry.includes('Canada') && filterCountry.includes('United States')) {
-    // Both countries selected - use coordinate-based detection to catch properties with incorrect country data
-    uniqueProperties = uniqueProperties.filter((property: any) => {
-      // Check if Canadian first
-      if (isCanadianProperty(property)) {
-        return true;
-      }
-      
-      // Check if US
-      if (isUSProperty(property)) {
-        return true;
-      }
-      
-      // If we can't determine, check coordinates - include any property in North America
-      const coords = getPropertyCoordinates(property);
-      if (coords && isInNorthAmerica(coords.lat, coords.lon)) {
-        return true;
-      }
-      
-      // Include all other properties (database query already filtered)
-      return true;
-    });
-    console.log(`After client-side filtering (both countries): ${uniqueProperties.length} properties`);
-  } else {
-    // Fallback: apply filtering if needed
-    uniqueProperties = uniqueProperties.filter((property: any) => {
-      if (isCanadianProperty(property)) {
-        return true;
-      }
-      if (isUSProperty(property)) {
-        return true;
-      }
-      
-      const coords = getPropertyCoordinates(property);
-      if (coords && isInNorthAmerica(coords.lat, coords.lon)) {
-        return true;
-      }
-      
-      return true;
-    });
-    console.log(`After client-side filtering (both countries): ${uniqueProperties.length} properties`);
+  // Apply country filter (empty = all countries in the loaded dataset)
+  if (filterCountry.length > 0) {
+    uniqueProperties = uniqueProperties.filter((property: any) =>
+      propertyMatchesCountryFilters(property, filterCountry)
+    );
+    console.log(`After client-side country filtering: ${uniqueProperties.length} properties`);
   }
   
   // Apply unit type filter (client-side single source of truth)

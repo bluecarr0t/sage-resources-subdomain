@@ -8,6 +8,7 @@ import { UNIT_TYPES } from '@/lib/unit-types';
 import { US_STATES_OPTIONS, isValidUsZip } from '@/lib/us-states';
 import { REPORT_MARKET_TYPE_OPTIONS, isValidStudyIdFormat } from '@/lib/report-constants';
 import { generateUniqueId } from '@/lib/random-id';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 const REQUEST_TIMEOUT_MS = 180_000;
 
@@ -363,12 +364,12 @@ export default function ReportBuilderClient() {
       </div>
 
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className={`${adminPageHeadingMargin} flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4`}>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 className={`${adminPageTitle} mb-1`}>
               Report Builder
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className={adminPageDescription}>
               Enter property details to generate an AI-assisted feasibility study draft. The system
               will enrich with regional benchmarks and produce a downloadable DOCX and XLSX.
             </p>
@@ -533,7 +534,7 @@ export default function ReportBuilderClient() {
                       type="checkbox"
                       checked={addUnitMixLater}
                       onChange={(e) => setAddUnitMixLater(e.target.checked)}
-                      className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                      className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-neutral-700 dark:bg-gray-700"
                     />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                       Add it later
@@ -662,7 +663,7 @@ export default function ReportBuilderClient() {
                 onChange={(e) => setAmenitiesDescription(e.target.value)}
                 placeholder="Describe the parcel, property, planned amenities, client goals, and any context you want the AI to use for initial research and report generation."
                 rows={5}
-                className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
+                className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-neutral-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
               />
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 This open description is used by the AI to guide research and to tailor the executive summary, letter of transmittal, and SWOT. Include parcel details, planned amenities, client priorities, and any other context.
@@ -683,7 +684,7 @@ export default function ReportBuilderClient() {
                 type="checkbox"
                 checked={includeWebResearch}
                 onChange={(e) => setIncludeWebResearch(e.target.checked)}
-                className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-neutral-700 dark:bg-gray-700"
                 aria-describedby="include-web-research-description"
               />
               <div>
@@ -726,7 +727,7 @@ export default function ReportBuilderClient() {
               </p>
 
               {loading && (
-                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 space-y-3">
+                <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40 p-4 space-y-3">
                   {/* Elapsed / Estimated */}
                   <div className="flex items-center justify-between text-sm">
                     <span className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
@@ -779,7 +780,7 @@ export default function ReportBuilderClient() {
                   </div>
 
                   {/* Output files indicator */}
-                  <div className="pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="pt-2 border-t border-neutral-200/75 dark:border-neutral-800 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> DOCX report</span>
                     <span className="flex items-center gap-1"><FileSpreadsheet className="w-3.5 h-3.5" /> XLSX workbook</span>
                   </div>

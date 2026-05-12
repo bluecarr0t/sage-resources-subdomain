@@ -542,7 +542,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     <div ref={containerRef} className={`w-full relative ${isCompact ? '' : 'max-w-2xl mx-auto'}`}>
       <form onSubmit={handleSubmit}>
         <div className={isCompact 
-          ? "bg-white rounded-lg shadow-sm border border-gray-200 p-1"
+          ? "bg-white rounded-md border border-stone-200/90 p-0.5"
           : "bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-1 border border-white/20"
         }>
           <div className="flex items-center gap-2">
@@ -652,7 +652,9 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
           style={{ maxHeight: `${dropdownMaxHeight}px` }}
         >
           <div className={`${isCompact ? 'px-2 py-1.5' : 'px-3 py-2'} bg-gray-50 border-b border-gray-200 flex-shrink-0`}>
-            <p className={`${isCompact ? 'text-[10px]' : 'text-xs'} font-semibold text-gray-600 uppercase tracking-wide`}>Suggestions</p>
+            <p className={`${isCompact ? 'text-[10px]' : 'text-xs'} font-semibold text-gray-600 uppercase tracking-wide`}>
+              {t('suggestions')}
+            </p>
           </div>
           <div ref={dropdownScrollRef} className="location-dropdown-scroll overflow-y-auto overscroll-contain">
             {/* Use Current Location Option */}
@@ -735,10 +737,10 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className={`${isCompact ? 'text-sm' : ''} font-semibold ${selectedIndex === -1 ? 'text-[#006b5f]' : 'text-gray-900'}`}>
-                    {isGettingLocation ? 'Getting your location...' : 'Use Current Location'}
+                    {isGettingLocation ? t('useCurrentLocation.loadingTitle') : t('useCurrentLocation.title')}
                   </div>
                   <div className={`${isCompact ? 'text-xs' : 'text-sm'} text-gray-500`}>
-                    {isGettingLocation ? 'Please wait...' : 'Find glamping near you'}
+                    {isGettingLocation ? t('useCurrentLocation.loadingDescription') : t('useCurrentLocation.description')}
                   </div>
                 </div>
               </div>

@@ -6,6 +6,7 @@ import AdminSidebar from '@/components/AdminSidebar';
 import AdminMainContent from '@/components/AdminMainContent';
 import { SidebarProvider } from '@/lib/sidebar-context';
 import { getAdminAuthServer } from '@/lib/admin-auth-server';
+import { adminRoot } from '@/lib/admin-ui';
 import enMessages from '@/messages/en.json';
 import type { AbstractIntlMessages } from 'next-intl';
 
@@ -32,8 +33,10 @@ export default async function AdminLayout({
     <NextIntlClientProvider locale="en" messages={enMessages as unknown as AbstractIntlMessages}>
       <AdminAuthGuard trustServerAuth>
         <SidebarProvider>
-          <AdminSidebar />
-          <AdminMainContent>{children}</AdminMainContent>
+          <div className={`${adminRoot} min-h-screen`}>
+            <AdminSidebar />
+            <AdminMainContent>{children}</AdminMainContent>
+          </div>
         </SidebarProvider>
       </AdminAuthGuard>
     </NextIntlClientProvider>

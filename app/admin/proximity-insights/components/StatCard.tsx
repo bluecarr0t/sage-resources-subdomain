@@ -13,7 +13,7 @@ export function StatCard({
 }) {
   return (
     <div
-      className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl"
+      className="flex items-center gap-3 p-4 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl"
       title={tooltip}
     >
       <div className="p-2 bg-sage-50 dark:bg-sage-900/30 rounded-lg">

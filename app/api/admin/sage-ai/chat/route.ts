@@ -160,7 +160,7 @@ You also have access to powerful external APIs for research:
 - "Find glamping competitors near Fredericksburg, TX"
 - "What are the top-rated glamping spots in California on Google?"
 - "Search the web for glamping industry trends 2024"
-- "Scrape the pricing page from getaway.house"
+- "Scrape the pricing page from postcardcabins.com (Postcard Cabins; formerly Getaway)"
 - "Research what amenities AutoCamp offers"
 - "Find RV parks near Yellowstone with Google Places"
 - "What's the population of counties in Colorado?"

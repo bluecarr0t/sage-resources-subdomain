@@ -36,6 +36,7 @@ import {
   type UnifiedCompRow,
   type UnifiedSource,
 } from '@/lib/comps-unified/build-row';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 const PER_PAGE = 50;
 
@@ -186,7 +187,7 @@ function SortableTh({
 
   return (
     <th
-      className={`px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 ${alignClass} ${isSortable ? 'cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700/50' : ''} transition-colors`}
+      className={`px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 ${alignClass} ${isSortable ? 'cursor-pointer select-none hover:bg-neutral-100/80 dark:hover:bg-neutral-800/55/50' : ''} transition-colors`}
       onClick={() => isSortable && column.sortKey && onSort(column.sortKey)}
     >
       <span className="inline-flex items-center gap-1">
@@ -349,6 +350,12 @@ function ComparablesPageContent() {
     params.set('sort_by', sortBy);
     params.set('sort_dir', sortDir);
     if (page > 1) params.set('page', String(page));
+    for (const key of searchParams.keys()) {
+      if (key.startsWith('map_radius_')) {
+        const v = searchParams.get(key);
+        if (v != null && v !== '') params.set(key, v);
+      }
+    }
     const next = params.toString();
     const current = searchParams.toString();
     if (next !== current) {
@@ -511,10 +518,10 @@ function ComparablesPageContent() {
   return (
     <main className={`px-4 sm:px-6 lg:px-8 ${compareModeActive && selectedIds.size >= 2 ? 'pb-24' : 'pb-16'}`}>
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className={`${adminPageHeadingMargin} flex items-center justify-between`}>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Comps</h1>
-            <p className="text-gray-600 dark:text-gray-400">{t('pageSubtitle')}</p>
+            <h1 className={`${adminPageTitle} mb-1`}>Comps</h1>
+            <p className={adminPageDescription}>{t('pageSubtitle')}</p>
           </div>
           <div className="flex gap-3">
             <Button
@@ -558,7 +565,7 @@ function ComparablesPageContent() {
                   placeholder="Property, city, state, unit type, keywords..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className={`w-full pl-10 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${search || isDebouncing || loading ? 'pr-24' : 'pr-4'}`}
+                  className={`w-full pl-10 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${search || isDebouncing || loading ? 'pr-24' : 'pr-4'}`}
                 />
                 {(isDebouncing || loading) && (
                   <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400 pointer-events-none">
@@ -746,7 +753,7 @@ function ComparablesPageContent() {
             </div>
           )}
 
-          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
+          <div className="mt-3 pt-3 border-t border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between gap-3">
             <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
               {loading ? (
                 <span className="text-gray-500 dark:text-gray-400">{t('summaryLoading')}</span>
@@ -771,7 +778,7 @@ function ComparablesPageContent() {
             <div
               role="group"
               aria-label="Toggle between list and map view"
-              className="inline-flex rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm"
+              className="inline-flex rounded-md border border-neutral-200/75 dark:border-neutral-800 overflow-hidden shadow-sm"
             >
               <button
                 type="button"
@@ -780,7 +787,7 @@ function ComparablesPageContent() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${
                   viewMode === 'list'
                     ? 'bg-sage-600 text-white'
-                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    : 'bg-white dark:bg-neutral-950 text-gray-700 dark:text-gray-300 hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40'
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -790,10 +797,10 @@ function ComparablesPageContent() {
                 type="button"
                 onClick={() => setViewMode('map')}
                 aria-pressed={viewMode === 'map'}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border-l border-gray-200 dark:border-gray-700 transition-colors ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border-l border-neutral-200/75 dark:border-neutral-800 transition-colors ${
                   viewMode === 'map'
                     ? 'bg-sage-600 text-white'
-                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    : 'bg-white dark:bg-neutral-950 text-gray-700 dark:text-gray-300 hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40'
                 }`}
               >
                 <MapIcon className="w-4 h-4" />
@@ -849,7 +856,7 @@ function ComparablesPageContent() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <tr className="border-b border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40">
                       {compareModeActive && (
                         <th className="w-12 px-3 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Select</th>
                       )}
@@ -891,7 +898,7 @@ function ComparablesPageContent() {
                             role={hasAnyDetail ? 'button' : undefined}
                             tabIndex={hasAnyDetail ? 0 : undefined}
                             aria-expanded={hasAnyDetail ? isExpanded : undefined}
-                            className={hasAnyDetail ? 'hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer transition-colors' : 'transition-colors'}
+                            className={hasAnyDetail ? 'hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/30 cursor-pointer transition-colors' : 'transition-colors'}
                             onClick={hasAnyDetail ? () => toggleExpanded(r.id) : undefined}
                             onKeyDown={
                               hasAnyDetail
@@ -911,7 +918,7 @@ function ComparablesPageContent() {
                                   checked={selectedIds.has(r.id)}
                                   onChange={() => toggleSelected(r.id)}
                                   disabled={selectedIds.size >= 4 && !selectedIds.has(r.id)}
-                                  className="rounded border-gray-300 dark:border-gray-600 text-sage-600 focus:ring-sage-500 w-4 h-4"
+                                  className="rounded border-neutral-300/80 dark:border-neutral-600 text-sage-600 focus:ring-sage-500 w-4 h-4"
                                   aria-label={`Select ${r.property_name} for comparison`}
                                 />
                               </td>
@@ -992,7 +999,7 @@ function ComparablesPageContent() {
                             </td>
                           </tr>
                           {isExpanded && hasAnyDetail && (
-                            <tr key={`${r.id}-expanded`} className="bg-gray-50 dark:bg-gray-800/30">
+                            <tr key={`${r.id}-expanded`} className="bg-neutral-50/70 dark:bg-neutral-900/30">
                               <td colSpan={compareModeActive ? TABLE_COLUMNS + 1 : TABLE_COLUMNS} className="px-4 py-3 align-top">
                                 <div className="pl-6 pr-4 pb-2 space-y-2 text-sm">
                                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -1059,7 +1066,7 @@ function ComparablesPageContent() {
               </div>
 
               {total > 0 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Page {page} of {totalPages} ({Math.min(PER_PAGE, Math.max(0, total - (page - 1) * PER_PAGE))} out of {total.toLocaleString()})
                   </p>
@@ -1089,7 +1096,7 @@ function ComparablesPageContent() {
         )}
 
         {compareModeActive && selectedIds.size >= 2 && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+          <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200/75 dark:border-neutral-800 shadow-lg">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Compare {selectedIds.size} properties</span>
             <div className="flex gap-2">
               <Button variant="secondary" size="sm" onClick={clearSelected}>Clear</Button>
@@ -1102,12 +1109,12 @@ function ComparablesPageContent() {
           <>
             <div className="fixed inset-0 z-50 bg-black/40" aria-hidden="true" onClick={handleComparePanelClose} />
             <div
-              className="fixed top-0 right-0 bottom-0 w-full max-w-2xl z-50 bg-white dark:bg-gray-800 shadow-xl overflow-y-auto flex flex-col"
+              className="fixed top-0 right-0 bottom-0 w-full max-w-2xl z-50 bg-white dark:bg-neutral-900 shadow-xl overflow-y-auto flex flex-col"
               role="dialog"
               aria-modal="true"
               aria-labelledby="compare-panel-title"
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-800 shrink-0">
                 <h2 id="compare-panel-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Compare</h2>
                 <button
                   type="button"
@@ -1122,7 +1129,7 @@ function ComparablesPageContent() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm border-collapse">
                     <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-600">
+                      <tr className="border-b border-neutral-200/75 dark:border-neutral-700">
                         <th className="text-left py-2 pr-4 font-semibold text-gray-700 dark:text-gray-300 w-28" />
                         {selectedRows.map((r) => (
                           <th
@@ -1173,7 +1180,7 @@ function ComparablesPageContent() {
                               : '-',
                         },
                       ].map(({ key, label, get }) => (
-                        <tr key={key} className="border-b border-gray-100 dark:border-gray-700">
+                        <tr key={key} className="border-b border-neutral-100/90 dark:border-neutral-800">
                           <td className="py-2 pr-4 text-gray-600 dark:text-gray-400 font-medium">{label}</td>
                           {selectedRows.map((r) => (
                             <td key={r.id} className="py-2 px-3 text-gray-800 dark:text-gray-200">

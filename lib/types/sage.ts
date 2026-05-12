@@ -284,7 +284,8 @@ export function isInUSAOrCanada(lat: number, lon: number): boolean {
 }
 
 /**
- * Filter properties that have valid coordinates and are in USA or Canada
+ * Properties that have parseable lat/lon within valid geographic ranges (worldwide).
+ * Use {@link isInUSAOrCanada} when you need to restrict to North America only.
  */
 export function filterPropertiesWithCoordinates(
   properties: SageProperty[]
@@ -293,7 +294,6 @@ export function filterPropertiesWithCoordinates(
     .map((prop) => {
       const coords = parseCoordinates(prop.lat, prop.lon);
       if (!coords) return null;
-      if (!isInUSAOrCanada(coords[0], coords[1])) return null;
       return { ...prop, coordinates: coords };
     })
     .filter((prop): prop is SageProperty & { coordinates: [number, number] } => prop !== null);

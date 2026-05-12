@@ -11,6 +11,7 @@ import {
   ChevronDown,
   CheckCircle2,
 } from 'lucide-react';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 export const metadata: Metadata = {
   title: 'Discovery Pipeline Automation - Sage Admin',
@@ -120,17 +121,17 @@ export default function DiscoveryPipelineAutomationPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
+        <div className={adminPageHeadingMargin}>
           <Link
             href="/admin/sage-glamping-data-breakdown"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 mb-4"
           >
             ← Back to Sage Glamping Data Breakdown
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className={adminPageTitle}>
             Discovery Pipeline Automation
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+          <p className={`${adminPageDescription} mt-2`}>
             How new glamping resorts are found from news articles and RSS feeds and added to the
             database. This pipeline runs via script or automation; the steps and tech below are in
             simple terms for the internal team.
@@ -139,10 +140,10 @@ export default function DiscoveryPipelineAutomationPage() {
 
         {/* Pipeline steps */}
         <section
-          className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden"
+          className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm overflow-hidden"
           aria-label="Pipeline steps"
         >
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+          <div className="px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-800 bg-gray-50 dark:bg-gray-800/60">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Pipeline steps
             </h2>
@@ -158,11 +159,11 @@ export default function DiscoveryPipelineAutomationPage() {
                 return (
                   <div key={step.id} className="flex flex-col items-stretch">
                     <div
-                      className={`flex flex-col sm:flex-row sm:items-start gap-4 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 ${step.color}`}
+                      className={`flex flex-col sm:flex-row sm:items-start gap-4 rounded-xl border border-neutral-200/75 dark:border-neutral-800 p-4 sm:p-5 ${step.color}`}
                     >
                       <div className="flex items-center gap-3 shrink-0">
                         <span
-                          className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 font-bold text-gray-900 dark:text-gray-100"
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-700 font-bold text-gray-900 dark:text-gray-100"
                           aria-hidden
                         >
                           {step.id}
@@ -194,8 +195,8 @@ export default function DiscoveryPipelineAutomationPage() {
         </section>
 
         {/* Research status (approval workflow) */}
-        <section className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+        <section className="mt-8 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-800 bg-gray-50 dark:bg-gray-800/60">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Research status (approval workflow)
             </h2>
@@ -228,8 +229,8 @@ export default function DiscoveryPipelineAutomationPage() {
         </section>
 
         {/* Input sources */}
-        <section className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+        <section className="mt-8 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-800 bg-gray-50 dark:bg-gray-800/60">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Where article URLs come from
             </h2>
@@ -239,7 +240,7 @@ export default function DiscoveryPipelineAutomationPage() {
               {SOURCES.map(({ name, description, icon: Icon }) => (
                 <div
                   key={name}
-                  className="flex gap-3 rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-800/30"
+                  className="flex gap-3 rounded-lg border border-neutral-200/75 dark:border-neutral-800 p-4 bg-gray-50/50 dark:bg-gray-800/30"
                 >
                   <Icon className="h-5 w-5 text-sage-600 dark:text-sage-400 shrink-0 mt-0.5" />
                   <div>
@@ -253,7 +254,7 @@ export default function DiscoveryPipelineAutomationPage() {
         </section>
 
         {/* Production runs & cron */}
-        <section className="mt-8 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+        <section className="mt-8 rounded-lg border border-emerald-200 dark:border-emerald-900/50 bg-white dark:bg-neutral-950 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/80 dark:bg-emerald-950/30">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Production runs (writes to the database)
@@ -294,8 +295,8 @@ export default function DiscoveryPipelineAutomationPage() {
         </section>
 
         {/* Tech stack */}
-        <section className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+        <section className="mt-8 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-800 bg-gray-50 dark:bg-gray-800/60">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Tech stack (simple terms)
             </h2>

@@ -131,7 +131,7 @@ export default function CompsV2DiscoverySection({
                     type="checkbox"
                     checked={kinds.has(k)}
                     onChange={() => toggleKind(k)}
-                    className="h-5 w-5 shrink-0 rounded border-gray-300 accent-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer dark:border-gray-600"
+                    className="h-5 w-5 shrink-0 rounded border-gray-300 accent-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer dark:border-neutral-700"
                   />
                   {kindLabels[k]}
                 </label>
@@ -148,7 +148,7 @@ export default function CompsV2DiscoverySection({
                     type="checkbox"
                     checked={tiers.has(q)}
                     onChange={() => toggleTier(q)}
-                    className="h-5 w-5 shrink-0 rounded border-gray-300 accent-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer dark:border-gray-600"
+                    className="h-5 w-5 shrink-0 rounded border-gray-300 accent-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer dark:border-neutral-700"
                   />
                   {tierLabels[q]}
                 </label>

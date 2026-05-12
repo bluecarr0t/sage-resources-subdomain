@@ -104,9 +104,9 @@ export default function AdminAuthGuard({
 
   if (timedOut) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-neutral-50/90 dark:bg-neutral-950 flex items-center justify-center p-4">
         <div className="max-w-md text-center">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
             Session verification timed out. This can happen after a deployment — please log in again.
           </p>
           <Link
@@ -122,8 +122,8 @@ export default function AdminAuthGuard({
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">Verifying access...</div>
+      <div className="min-h-screen bg-neutral-50/90 dark:bg-neutral-950 flex items-center justify-center">
+        <div className="text-neutral-500 dark:text-neutral-400">Verifying access...</div>
       </div>
     );
   }

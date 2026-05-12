@@ -71,7 +71,7 @@ export function SageAiFieldGuidePanel({ setInput, inputRef }: SageAiFieldGuidePa
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+        className="flex items-center gap-1.5 rounded-md border border-neutral-200/70 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-950 dark:text-gray-200 dark:hover:bg-gray-800"
         aria-label={t('fieldGuideButtonAria')}
       >
         <BookOpen className="h-3.5 w-3.5" />
@@ -108,7 +108,7 @@ export function SageAiFieldGuidePanel({ setInput, inputRef }: SageAiFieldGuidePa
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t('fieldGuideSearchPlaceholder')}
-            className="mb-4 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-sage-500 focus:outline-none focus:ring-1 focus:ring-sage-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+            className="mb-4 w-full rounded-lg border border-neutral-200/70 bg-white px-3 py-2 text-sm text-gray-900 focus:border-sage-500 focus:outline-none focus:ring-1 focus:ring-sage-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-gray-100"
             autoFocus
             aria-label={t('fieldGuideSearchPlaceholder')}
           />
@@ -138,7 +138,7 @@ export function SageAiFieldGuidePanel({ setInput, inputRef }: SageAiFieldGuidePa
                             }
                             setOpen(false);
                           }}
-                          className="w-full cursor-pointer rounded-md border border-gray-100 bg-gray-50/80 px-2.5 py-2 text-left text-sm transition-colors hover:border-sage-200 hover:bg-sage-50/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-sage-500 dark:border-gray-700/80 dark:bg-gray-900/50 dark:hover:border-sage-700 dark:hover:bg-sage-900/30"
+                          className="w-full cursor-pointer rounded-md border border-gray-100 bg-gray-50/80 px-2.5 py-2 text-left text-sm transition-colors hover:border-sage-200 hover:bg-sage-50/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-sage-500 dark:border-neutral-800/80 dark:bg-neutral-900/50 dark:hover:border-sage-700 dark:hover:bg-sage-900/30"
                           aria-label={t('fieldGuideRowInsertAria', { column: row.column })}
                         >
                           <div className="font-mono text-xs text-sage-700 dark:text-sage-400">

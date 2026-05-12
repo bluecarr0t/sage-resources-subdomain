@@ -141,7 +141,7 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
                 const fmtAdr = (v: number, isNull: boolean) =>
                   isNull ? t('tooltipNoData') : `$${v.toFixed(2)}`;
                 return (
-                  <div className="rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-xs shadow-md">
+                  <div className="rounded-md border border-neutral-200/75 dark:border-neutral-700 bg-white dark:bg-neutral-950 px-3 py-2 text-xs shadow-md">
                     <div className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{d.name}</div>
                     <div className="text-gray-700 dark:text-gray-300 space-y-0.5">
                       <div>
@@ -208,9 +208,9 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
       {!compact ? (
         <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">{t('tableTitle')}</p>
       ) : null}
-      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="overflow-x-auto rounded-lg border border-neutral-200/75 dark:border-neutral-800">
           <table className="min-w-full text-sm text-left">
-            <thead className="bg-gray-50 dark:bg-gray-900/80 text-gray-700 dark:text-gray-300">
+            <thead className="bg-neutral-50/80 dark:bg-neutral-950/55/80 text-gray-700 dark:text-gray-300">
               <tr>
                 <th className="px-3 py-2 font-semibold">{t('tableColTier')}</th>
                 <th className="px-3 py-2 font-semibold">{t('tableColOcc2024')}</th>
@@ -220,7 +220,7 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
                 <th className="px-3 py-2 font-semibold">{t('tableColAdrChange')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700 text-gray-800 dark:text-gray-200">
+            <tbody className="divide-y divide-neutral-200/75 dark:divide-neutral-800 text-gray-800 dark:text-gray-200">
               {data.map((d) => {
                 const ch = pctChange(
                   d.adr2024Null ? null : d.adr2024,

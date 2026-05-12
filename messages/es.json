@@ -813,6 +813,13 @@
       "default": "Ingrese su destino (ciudad, estado o región)"
     },
     "button": "Encontrar Glamping",
+    "suggestions": "Sugerencias",
+    "useCurrentLocation": {
+      "title": "Usar ubicación actual",
+      "loadingTitle": "Obteniendo su ubicación...",
+      "description": "Encuentre propiedades de glamping cerca de usted",
+      "loadingDescription": "Espere por favor..."
+    },
     "error": {
       "apiError": "Error de API"
     }

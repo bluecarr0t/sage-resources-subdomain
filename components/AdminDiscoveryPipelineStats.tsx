@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Rss, FileText, Globe, Search, ChevronRight, Clock } from 'lucide-react';
+import { adminDangerPanel, adminInlineLink, adminSurface } from '@/lib/admin-ui';
 
 interface DiscoveryStats {
   totalFromPipeline: number;
@@ -90,10 +91,7 @@ export default function AdminDiscoveryPipelineStats() {
 
   if (loading) {
     return (
-      <section
-        className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden"
-        aria-label={t('loadingAria')}
-      >
+      <section className={adminSurface} aria-label={t('loadingAria')}>
         <div className="p-6 animate-pulse">
           <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
           <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4" />
@@ -105,11 +103,8 @@ export default function AdminDiscoveryPipelineStats() {
 
   if (error) {
     return (
-      <section
-        className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-6"
-        role="alert"
-      >
-        <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
+      <section className={adminDangerPanel} role="alert">
+        <p className="text-sm text-red-800 dark:text-red-200/90 font-medium">{error}</p>
       </section>
     );
   }
@@ -120,10 +115,7 @@ export default function AdminDiscoveryPipelineStats() {
   const totalCand = stats.candidatesTotal ?? 0;
 
   return (
-    <section
-      className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden"
-      aria-labelledby="discovery-pipeline-heading"
-    >
+    <section className={adminSurface} aria-labelledby="discovery-pipeline-heading">
       <div className="p-6 sm:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
@@ -140,14 +132,14 @@ export default function AdminDiscoveryPipelineStats() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin/discovery-candidates"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md shrink-0"
+              className={`${adminInlineLink} text-sm shrink-0`}
             >
               {t('reviewCandidates')}
               <ChevronRight className="w-4 h-4" aria-hidden />
             </Link>
             <Link
               href="/admin/discovery-pipeline-automation"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md shrink-0"
+              className={`${adminInlineLink} text-sm shrink-0`}
             >
               {t('automationDocs')}
               <ChevronRight className="w-4 h-4" aria-hidden />
@@ -159,7 +151,7 @@ export default function AdminDiscoveryPipelineStats() {
           {PERIOD_CONFIG.map(({ key, labelKey }) => (
             <div
               key={key}
-              className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3 text-center"
+              className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40 px-4 py-3 text-center"
             >
               <p className="text-2xl font-bold tabular-nums text-sage-600 dark:text-sage-400">
                 {(stats.byPeriod?.[key] ?? 0).toLocaleString()}
@@ -171,7 +163,7 @@ export default function AdminDiscoveryPipelineStats() {
           ))}
         </div>
 
-        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
+        <div className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40 px-4 py-3">
           <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
             {t('queueHeading')}
           </h3>
@@ -188,7 +180,7 @@ export default function AdminDiscoveryPipelineStats() {
         </div>
 
         {stats.totalFromPipeline > 0 && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="pt-4 border-t border-neutral-200/75 dark:border-neutral-800">
             <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
               {t('bySourceHeading')}
             </h3>
@@ -203,7 +195,7 @@ export default function AdminDiscoveryPipelineStats() {
                 return (
                   <div
                     key={key}
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3"
+                    className="flex items-center gap-3 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40 px-4 py-3"
                   >
                     <Icon className="w-4 h-4 text-sage-500 dark:text-sage-400 shrink-0" />
                     <div className="min-w-0 flex-1">
@@ -224,7 +216,7 @@ export default function AdminDiscoveryPipelineStats() {
           </div>
         )}
 
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="pt-4 border-t border-neutral-200/75 dark:border-neutral-800">
           <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4" />
             {t('runHistoryHeading')}
@@ -235,7 +227,7 @@ export default function AdminDiscoveryPipelineStats() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[640px]">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                     <th className="text-left py-2 pr-3 font-medium text-gray-500 dark:text-gray-400">
                       {t('colStarted')}
                     </th>
@@ -261,7 +253,7 @@ export default function AdminDiscoveryPipelineStats() {
                 </thead>
                 <tbody>
                   {runs.map((r) => (
-                    <tr key={r.id} className="border-b border-gray-100 dark:border-gray-800">
+                    <tr key={r.id} className="border-b border-neutral-100/85 dark:border-neutral-800">
                       <td className="py-2 pr-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                         {new Date(r.started_at).toLocaleString()}
                       </td>

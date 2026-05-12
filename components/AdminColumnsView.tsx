@@ -300,7 +300,7 @@ export default function AdminColumnsView() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow border border-neutral-200/75 dark:border-neutral-800 p-6">
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Table Columns ({displayedColumnCount} total)
@@ -320,11 +320,11 @@ export default function AdminColumnsView() {
             return (
               <div
                 key={group.title}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                className="border border-neutral-200/75 dark:border-neutral-800 rounded-lg overflow-hidden"
               >
                 <button
                   onClick={() => toggleGroup(group.title)}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between text-left transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-neutral-100/80 dark:hover:bg-neutral-800/55 flex items-center justify-between text-left transition-colors"
                 >
                   <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {group.title} ({groupColumns.length})
@@ -345,12 +345,12 @@ export default function AdminColumnsView() {
                 </button>
                 
                 {isOpen && (
-                  <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                  <div className="p-4 bg-white dark:bg-neutral-900 border-t border-neutral-200/75 dark:border-neutral-800">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                       {groupColumns.map((column) => (
                         <div
                           key={column}
-                          className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded text-sm font-mono text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded text-sm font-mono text-gray-800 dark:text-gray-200 hover:bg-neutral-100/80 dark:hover:bg-neutral-800/55 transition-colors"
                         >
                           {column}
                         </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { ChevronRight, Database } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 interface Metrics {
   usaPropertyCount: number;
@@ -21,27 +21,21 @@ const FUNNEL_STAGES = [
     label: 'New',
     sublabel: null,
     href: '/admin/sage-glamping-data-breakdown',
-    cardClass:
-      'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800',
-    labelClass: 'text-slate-600 dark:text-slate-400',
+    accentClass: 'bg-neutral-400 dark:bg-neutral-500',
   },
   {
     key: 'inProgress' as const,
-    label: 'In Progress',
-    sublabel: 'Work queue',
+    label: 'In progress',
+    sublabel: 'Queue',
     href: '/admin/sage-glamping-data-breakdown',
-    cardClass:
-      'border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100/80 dark:hover:bg-amber-950/60 ring-1 ring-amber-200/80 dark:ring-amber-800/50',
-    labelClass: 'text-amber-700 dark:text-amber-400',
+    accentClass: 'bg-amber-500/90 dark:bg-amber-500/70',
   },
   {
     key: 'published' as const,
     label: 'Published',
     sublabel: null,
     href: '/admin/sage-glamping-data-breakdown',
-    cardClass:
-      'border-emerald-200 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/40 hover:bg-emerald-100/80 dark:hover:bg-emerald-950/60',
-    labelClass: 'text-emerald-700 dark:text-emerald-400',
+    accentClass: 'bg-emerald-600/85 dark:bg-emerald-500/65',
   },
 ] as const;
 
@@ -92,15 +86,16 @@ export default function AdminGlampingMetrics() {
   if (loading) {
     return (
       <section
-        className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden"
+        className="rounded-lg border border-neutral-200/60 dark:border-neutral-800/80 bg-neutral-50/30 dark:bg-neutral-900/20"
         aria-label="Sage Glamping Database loading"
       >
-        <div className="p-6 sm:p-8 animate-pulse">
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-4" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-6" />
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-6" />
-          <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+        <div className="px-1 py-4 animate-pulse space-y-4">
+          <div className="h-3.5 bg-neutral-200/70 dark:bg-neutral-800 rounded w-36" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px rounded-lg overflow-hidden border border-neutral-200/50 dark:border-neutral-800/60 bg-neutral-200/50 dark:bg-neutral-800/50">
+            <div className="h-[4.5rem] bg-neutral-50 dark:bg-neutral-950/40" />
+            <div className="h-[4.5rem] bg-neutral-50 dark:bg-neutral-950/40" />
+          </div>
+          <div className="h-14 bg-neutral-100/80 dark:bg-neutral-900/40 rounded-md" />
         </div>
       </section>
     );
@@ -109,10 +104,10 @@ export default function AdminGlampingMetrics() {
   if (error) {
     return (
       <section
-        className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-6"
+        className="rounded-lg border border-red-200/80 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/20 px-5 py-4"
         role="alert"
       >
-        <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
+        <p className="text-sm text-red-800 dark:text-red-200/90">{error}</p>
       </section>
     );
   }
@@ -146,106 +141,100 @@ export default function AdminGlampingMetrics() {
       : { new: 0, inProgress: 0, published: 0 };
 
   return (
-    <section
-      className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
-      aria-labelledby="glamping-db-heading"
-    >
-      <div className="p-6 sm:p-8 space-y-8">
-        {/* Header with data freshness */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-sage-100 dark:bg-sage-900/50">
-              <Database className="w-5 h-5 text-sage-600 dark:text-sage-400" aria-hidden />
-            </div>
-            <div>
-              <h2
-                id="glamping-db-heading"
-                className="text-lg font-semibold text-gray-900 dark:text-gray-100"
-              >
-                Sage Glamping Database
-              </h2>
-              {lastFetched != null && (
-                <p
-                  className="text-xs text-gray-500 dark:text-gray-400 tabular-nums mt-0.5"
-                  title={`Data fetched ${new Date(lastFetched).toLocaleString()}`}
-                >
-                  Updated {formatRelativeTime(Date.now() - lastFetched)}
-                </p>
-              )}
-            </div>
-          </div>
+    <section aria-labelledby="glamping-db-heading">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1.5 sm:gap-2 mb-3">
+        <h2
+          id="glamping-db-heading"
+          className="text-xs sm:text-sm font-medium text-neutral-900 dark:text-neutral-100"
+        >
+          Sage glamping database
+        </h2>
+        <div className="flex items-center gap-3 text-[11px] text-neutral-500 dark:text-neutral-500">
+          {lastFetched != null && (
+            <span
+              className="tabular-nums"
+              title={`Data fetched ${new Date(lastFetched).toLocaleString()}`}
+            >
+              Updated {formatRelativeTime(Date.now() - lastFetched)}
+            </span>
+          )}
           <Link
             href="/admin/sage-glamping-data-breakdown"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md"
+            className="inline-flex items-center gap-0.5 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 rounded-sm"
           >
-            View breakdown
-            <ChevronRight className="w-4 h-4" aria-hidden />
+            Breakdown
+            <ChevronRight className="w-3.5 h-3.5 opacity-60" aria-hidden />
           </Link>
         </div>
+      </div>
 
-        {/* Total Properties & Total Units — primary stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-5">
-            <p className="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
-              Total Properties
-            </p>
-            <p className="text-3xl sm:text-4xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
-              {metrics.totalPropertyCount.toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              USA: {metrics.usaPropertyCount.toLocaleString()} ({usaPct}%) · Other:{' '}
-              {otherPropertyCount.toLocaleString()} ({otherPct}%)
-            </p>
-          </div>
-          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-5">
-            <p className="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
-              Total Units
-            </p>
-            <p className="text-3xl sm:text-4xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
-              {metrics.totalUnitCount.toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Across all properties
-            </p>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-px rounded-lg overflow-hidden border border-neutral-200/70 dark:border-neutral-800 bg-neutral-200/60 dark:bg-neutral-800/80 mb-4">
+        <div className="px-3 sm:px-4 py-3 bg-white dark:bg-neutral-950/50 flex flex-col justify-center">
+          <p className="text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-500">
+            Total properties
+          </p>
+          <p className="mt-0.5 text-xl sm:text-2xl font-semibold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-100 leading-none">
+            {metrics.totalPropertyCount.toLocaleString()}
+          </p>
+          <p className="mt-1 text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-500 leading-snug">
+            USA {metrics.usaPropertyCount.toLocaleString()} ({usaPct}%) · Other{' '}
+            {otherPropertyCount.toLocaleString()} ({otherPct}%)
+          </p>
         </div>
+        <div className="px-3 sm:px-4 py-3 bg-white dark:bg-neutral-950/50 flex flex-col justify-center">
+          <p className="text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-500">Total units</p>
+          <p className="mt-0.5 text-xl sm:text-2xl font-semibold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-100 leading-none">
+            {metrics.totalUnitCount.toLocaleString()}
+          </p>
+          <p className="mt-1 text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-500">
+            All properties
+          </p>
+        </div>
+      </div>
 
-        {/* Research pipeline — three phases */}
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-            Research pipeline
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {FUNNEL_STAGES.map((stage) => {
-              const value = researchValues[stage.key];
-              const pct = researchPcts[stage.key];
-              return (
-                <Link
-                  key={stage.key}
-                  href={stage.href}
-                  className={`group flex flex-col items-center justify-center rounded-xl border-2 px-4 py-4 text-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${stage.cardClass}`}
-                  title={`${stage.label}: ${value.toLocaleString()} (${pct}%) — View in breakdown`}
-                >
-                  <p
-                    className={`text-xs font-medium uppercase tracking-wide mb-1 ${stage.labelClass}`}
-                  >
+      <div>
+        <h3 className="text-[10px] font-medium uppercase tracking-[0.14em] text-neutral-400 dark:text-neutral-500 mb-2">
+          Research pipeline
+        </h3>
+        <div className="divide-y divide-neutral-200/70 dark:divide-neutral-800 border border-neutral-200/70 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-950/50">
+          {FUNNEL_STAGES.map((stage) => {
+            const value = researchValues[stage.key];
+            const pct = researchPcts[stage.key];
+            return (
+              <Link
+                key={stage.key}
+                href={stage.href}
+                className="group flex items-center gap-3 px-3 py-2 sm:px-4 sm:py-2 hover:bg-neutral-50/80 dark:hover:bg-neutral-900/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-neutral-300 dark:focus-visible:ring-neutral-600"
+                title={`${stage.label}: ${value.toLocaleString()} (${pct}%)`}
+              >
+                <span
+                  className={`shrink-0 w-0.5 self-stretch min-h-[1.5rem] rounded-full ${stage.accentClass}`}
+                  aria-hidden
+                />
+                <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-0 sm:gap-3">
+                  <span className="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300">
                     {stage.label}
                     {stage.sublabel && (
-                      <span className="ml-1 font-normal">· {stage.sublabel}</span>
+                      <span className="text-neutral-400 dark:text-neutral-500 font-normal">
+                        {' '}
+                        · {stage.sublabel}
+                      </span>
                     )}
-                  </p>
-                  <p className="text-2xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
-                    {value.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{pct}%</p>
-                  <ChevronRight
-                    className="mt-2 w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-sage-500 group-hover:translate-x-0.5 transition-all opacity-0 group-hover:opacity-100 sm:opacity-100"
-                    aria-hidden
-                  />
-                </Link>
-              );
-            })}
-          </div>
+                  </span>
+                  <span className="flex items-baseline gap-2 tabular-nums">
+                    <span className="text-sm sm:text-base font-semibold text-neutral-900 dark:text-neutral-100">
+                      {value.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-neutral-500 w-8 text-right">{pct}%</span>
+                  </span>
+                </div>
+                <ChevronRight
+                  className="w-4 h-4 text-neutral-300 dark:text-neutral-600 group-hover:text-neutral-500 dark:group-hover:text-neutral-400 shrink-0 transition-colors"
+                  aria-hidden
+                />
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

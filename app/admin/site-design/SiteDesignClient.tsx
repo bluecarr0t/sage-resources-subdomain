@@ -12,6 +12,7 @@ import { SQFT_PER_ACRE, computeResults } from '@/lib/site-design/calculator';
 import { buildSiteDesignExportData } from '@/lib/site-design/export';
 import { buildSiteDesignUrlParams, parseSitesFromUrl } from '@/lib/site-design/url-state';
 import type { SiteTypeConfig } from '@/lib/site-design/types';
+import { adminPageDescription, adminPageTitle } from '@/lib/admin-ui';
 
 const PRESETS = {
   standard: {
@@ -368,14 +369,14 @@ export default function SiteDesignClient() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-10">
+        <header className="mb-6 sm:mb-7">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="max-w-2xl min-w-0">
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 tracking-tight flex items-center gap-2">
-                <LayoutGrid className="w-8 h-8 text-sage-500" aria-hidden />
+              <h1 className={`${adminPageTitle} flex items-center gap-2`}>
+                <LayoutGrid className="w-7 h-7 text-sage-500 shrink-0" aria-hidden />
                 {t('title')}
               </h1>
-              <p className="mt-1.5 text-base text-gray-600 dark:text-gray-400 max-w-xl">
+              <p className={`mt-1 max-w-xl ${adminPageDescription}`}>
                 {t('subtitle')}
               </p>
               <Link
@@ -394,7 +395,7 @@ export default function SiteDesignClient() {
                   if (v) loadPreset(v);
                   else clearToEmpty();
                 }}
-                className="w-[10rem] pl-3 pr-5 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                className="w-[10rem] pl-3 pr-5 py-2 rounded-lg text-sm border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
                 aria-label={t('selectPreset')}
               >
                 <option value="">{t('selectPreset')}</option>
@@ -559,7 +560,7 @@ export default function SiteDesignClient() {
                   setAutoFillRemainingLand(e.target.checked);
                   setActivePreset('');
                 }}
-                className="h-4 w-4 rounded border-gray-300 text-sage-600 focus:ring-sage-500 dark:border-gray-600 dark:bg-gray-900"
+                className="h-4 w-4 rounded border-gray-300 text-sage-600 focus:ring-sage-500 dark:border-neutral-700 dark:bg-neutral-950"
               />
               {t('autoFillRemainingLand')}
             </label>
@@ -570,7 +571,7 @@ export default function SiteDesignClient() {
               {siteTypes.map((st) => (
                 <div
                   key={st.id}
-                  className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 space-y-3"
+                  className="p-4 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/50 dark:bg-gray-800/50 space-y-3"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <Input
@@ -790,7 +791,7 @@ export default function SiteDesignClient() {
               )}
             </dl>
 
-            <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-3 mt-3 border-t border-neutral-200/75 dark:border-neutral-800">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('siteMixBreakdown')}
               </h3>
@@ -815,7 +816,7 @@ export default function SiteDesignClient() {
                   ))}
               </div>
             </div>
-            <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-3 mt-3 border-t border-neutral-200/75 dark:border-neutral-800">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('perSiteType')}
               </h3>

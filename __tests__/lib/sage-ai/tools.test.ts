@@ -79,6 +79,98 @@ describe('createSageAiTools', () => {
     expect(top?.[0]?.column).toBe('unit_private_bathroom');
   });
 
+  it('calls top_multi_location_chains RPC with expected parameters', async () => {
+    const rpcLog: Array<{ name: string; args: Record<string, unknown> }> = [];
+    const supabase = {
+      rpc(name: string, args?: Record<string, unknown>) {
+        rpcLog.push({ name, args: args ?? {} });
+        return Promise.resolve({
+          data: [
+            {
+              chain_label: 'Demo',
+              reported_brand_locations: 40,
+              earliest_site_year: 2015,
+              properties_in_sage: 3,
+              total_glamping_units_in_sage: 12,
+              sample_property_name: 'Demo — Site',
+              sample_city: 'Testville',
+              sample_state: 'TX',
+              sample_country: 'United States',
+            },
+          ],
+          error: null,
+        });
+      },
+    };
+
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    expect(Object.keys(tools)).toContain('top_multi_location_chains');
+
+    await tools.top_multi_location_chains.execute!(
+      {
+        limit: 10,
+        establishment_filter: true,
+        min_chain_age_years: 5,
+      },
+      {
+        messages: [],
+        toolCallId: 'tc',
+        abortSignal: new AbortController().signal,
+      }
+    );
+
+    expect(rpcLog).toHaveLength(1);
+    expect(rpcLog[0]?.name).toBe('top_multi_location_chains');
+    expect(rpcLog[0]?.args).toMatchObject({
+      p_limit: 10,
+      p_min_reported_locations: 2,
+      p_min_chain_age_years: 5,
+      p_country: null,
+      p_is_open: 'Yes',
+      p_is_glamping_property: 'Yes',
+    });
+
+    const off = await tools.top_multi_location_chains.execute!(
+      {
+        establishment_filter: false,
+      },
+      {
+        messages: [],
+        toolCallId: 'tc2',
+        abortSignal: new AbortController().signal,
+      }
+    );
+    expect(rpcLog[1]?.args.p_min_chain_age_years).toBeNull();
+    expect((off as { chains?: unknown[] }).chains?.length).toBe(1);
+  });
+
+  it('calls sage_chain_retail_rate_kpis RPC via chain_retail_rate_kpis tool', async () => {
+    const rpcLog: Array<{ name: string; args: Record<string, unknown> }> = [];
+    const supabase = {
+      rpc(name: string, args?: Record<string, unknown>) {
+        rpcLog.push({ name, args: args ?? {} });
+        return Promise.resolve({ data: [], error: null });
+      },
+    };
+    const tools = createSageAiTools(supabase as unknown as Parameters<typeof createSageAiTools>[0]);
+    expect(Object.keys(tools)).toContain('chain_retail_rate_kpis');
+
+    await tools.chain_retail_rate_kpis.execute!(
+      {},
+      { messages: [], toolCallId: 'tc-kpi', abortSignal: new AbortController().signal }
+    );
+    expect(rpcLog[0]?.name).toBe('sage_chain_retail_rate_kpis');
+    expect(rpcLog[0]?.args).toEqual({});
+
+    await tools.chain_retail_rate_kpis.execute!(
+      { chain_keys: ['under canvas', 'autocamp'] },
+      { messages: [], toolCallId: 'tc-kpi2', abortSignal: new AbortController().signal }
+    );
+    expect(rpcLog[1]?.args).toEqual({ p_chain_keys: ['under canvas', 'autocamp'] });
+  });
+
   it('accepts allowlisted columns on query_properties', async () => {
     const { supabase, calls } = makeSupabaseStub({ data: [{ id: '1' }], error: null, count: 1 });
     const tools = createSageAiTools(

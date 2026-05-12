@@ -38,7 +38,7 @@ export default function CompsV2ResultsTable({
   return (
     <table className="min-w-full text-sm">
       <thead>
-        <tr className="text-left border-b dark:border-gray-700">
+        <tr className="text-left border-b dark:border-neutral-800">
           <th className="py-2 pr-2 w-10" aria-label={t('selectForDeep')} />
           <th
             scope="col"
@@ -320,14 +320,14 @@ export default function CompsV2ResultsTable({
         {rows.map((c) => {
           const totalUnits = candidateTotalUnitsOrSites(c);
           return (
-            <tr key={c.stable_id} className="border-b border-gray-100 dark:border-gray-800">
+            <tr key={c.stable_id} className="border-b border-neutral-100/85 dark:border-neutral-800">
               <td className="py-2 pr-2">
                 <input
                   type="checkbox"
                   checked={selected.has(c.stable_id)}
                   onChange={() => toggleSelect(c.stable_id)}
                   disabled={!selected.has(c.stable_id) && selected.size >= 5}
-                  className="h-5 w-5 shrink-0 rounded border-gray-300 accent-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50 dark:border-gray-600"
+                  className="h-5 w-5 shrink-0 rounded border-gray-300 accent-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50 dark:border-neutral-700"
                 />
               </td>
               <td className="py-2 pr-2 font-medium">{c.property_name}</td>

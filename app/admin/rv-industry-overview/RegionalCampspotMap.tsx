@@ -416,7 +416,7 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
 
       {tip ? (
         <div
-          className="pointer-events-none fixed z-[45] isolate w-[min(calc(100vw-20px),280px)] rounded-md border border-gray-200 bg-white px-3 py-2.5 text-xs shadow-lg dark:border-gray-200 dark:bg-white"
+          className="pointer-events-none fixed z-[45] isolate w-[min(calc(100vw-20px),280px)] rounded-md border border-neutral-200/70 bg-white px-3 py-2.5 text-xs shadow-lg dark:border-gray-200 dark:bg-white"
           style={{
             left: clamp(
               tip.clientX + 14,
@@ -486,7 +486,7 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
       ) : null}
 
       <div
-        className="absolute bottom-3 right-3 z-20 rounded-md bg-white/95 dark:bg-gray-900/95 px-3 py-2 shadow-sm border border-gray-200 dark:border-gray-600 text-xs space-y-1.5 max-w-[200px]"
+        className="absolute bottom-3 right-3 z-20 rounded-md bg-white/95 dark:bg-gray-900/95 px-3 py-2 shadow-sm border border-neutral-200/75 dark:border-neutral-700 text-xs space-y-1.5 max-w-[200px]"
         aria-label={t('legendAria')}
       >
         <div className="font-semibold text-gray-800 dark:text-gray-100">
@@ -508,7 +508,7 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
         <ModalContent className="p-5">
           {modalAbbr ? (
             <>
-              <div className="flex items-start justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-600">
+              <div className="flex items-start justify-between gap-3 border-b border-gray-200 pb-3 dark:border-neutral-700">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {stateDisplayName(modalAbbr)}
                 </h2>

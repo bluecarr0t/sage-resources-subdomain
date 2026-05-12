@@ -14,6 +14,7 @@ import type {
   RvOverviewUnitFilterKey,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-page-data';
 import { Button } from '@/components/ui';
+import { adminPageDescription, adminPageTitle } from '@/lib/admin-ui';
 
 const UNIT_FILTER_TOGGLE_ORDER = ['rv', 'tent', 'glamping'] as const satisfies readonly RvOverviewUnitFilterKey[];
 
@@ -60,7 +61,7 @@ const RvSiteTypesDistributionRatesCharts = dynamic(
 function RechartsMountSkeleton() {
   return (
     <div
-      className="flex min-h-[280px] w-full items-center justify-center rounded-md bg-gray-50 dark:bg-gray-900"
+      className="flex min-h-[280px] w-full items-center justify-center rounded-md bg-neutral-50/80 dark:bg-neutral-950/55"
       aria-hidden
     >
       <div className="h-48 w-full max-w-lg animate-pulse rounded bg-gray-200/90 dark:bg-gray-800" />
@@ -219,11 +220,11 @@ export default function RvIndustryOverviewClient({
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <header>
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className={adminPageTitle}>
           {t('title')}
         </h1>
         <div className="mt-2 flex flex-row items-start justify-between gap-4">
-          <p className="min-w-0 flex-1 text-sm text-gray-600 dark:text-gray-400">
+          <p className={`min-w-0 flex-1 ${adminPageDescription}`}>
             {t('subtitle')}
           </p>
           <Button
@@ -245,7 +246,7 @@ export default function RvIndustryOverviewClient({
       </header>
 
       <div
-        className="rounded-lg border border-gray-200 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-900/40"
+        className="rounded-lg border border-gray-200 bg-gray-50/80 p-4 dark:border-neutral-800 dark:bg-gray-900/40"
         role="region"
         aria-label={t('unitFilterRegionAria')}
       >
@@ -280,11 +281,11 @@ export default function RvIndustryOverviewClient({
           </div>
         </div>
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{t('unitFilterHint')}</p>
-        <details className="mt-4 rounded-md border border-gray-200 bg-white/60 px-3 py-2 dark:border-gray-600 dark:bg-gray-950/40">
+        <details className="mt-4 rounded-md border border-neutral-200/70 bg-white/60 px-3 py-2 dark:border-neutral-700 dark:bg-gray-950/40">
           <summary className="cursor-pointer text-sm font-medium text-gray-800 dark:text-gray-200">
             {t('standardFiltersTitle')}
           </summary>
-          <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 text-xs text-gray-600 dark:border-gray-600 dark:text-gray-400">
+          <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 text-xs text-gray-600 dark:border-neutral-700 dark:text-gray-400">
             <p>{t('standardFiltersIntro')}</p>
             <ul className="list-disc space-y-1.5 pl-4">
               <li>{t('standardFiltersOccupancy')}</li>
@@ -337,7 +338,7 @@ export default function RvIndustryOverviewClient({
 
       <section
         aria-labelledby="viz2-heading"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+        className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
       >
         {trendsResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -368,7 +369,7 @@ export default function RvIndustryOverviewClient({
 
       <section
         aria-labelledby="viz3-heading"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+        className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
       >
         {sizeResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -406,7 +407,7 @@ export default function RvIndustryOverviewClient({
         <>
           <section
             aria-labelledby="viz4-heading"
-            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+            className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
           >
             <VisualizationJpgDownload
               ref={unitTypeRateDlRef}
@@ -434,7 +435,7 @@ export default function RvIndustryOverviewClient({
 
           <section
             aria-labelledby="viz5-heading"
-            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+            className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
           >
             <VisualizationJpgDownload
               ref={unitTypeDistDlRef}
@@ -464,7 +465,7 @@ export default function RvIndustryOverviewClient({
 
       <section
         aria-labelledby="viz6-heading"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+        className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
       >
         {seasonRatesResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -497,7 +498,7 @@ export default function RvIndustryOverviewClient({
 
       <section
         aria-labelledby="viz7-heading"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+        className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
       >
         {surfaceRatesResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -530,7 +531,7 @@ export default function RvIndustryOverviewClient({
 
       <section
         aria-labelledby="viz8-heading"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+        className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
       >
         {amenityPropsResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -563,7 +564,7 @@ export default function RvIndustryOverviewClient({
 
       <section
         aria-labelledby="viz9-heading"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+        className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
       >
         {amenityAdrResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -596,7 +597,7 @@ export default function RvIndustryOverviewClient({
 
       <section
         aria-labelledby="viz10-heading"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+        className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
       >
         {rvParkingChartsResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -634,7 +635,7 @@ export default function RvIndustryOverviewClient({
 
       <section
         aria-labelledby="viz11-heading"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 shadow-sm p-4 sm:p-6"
+        className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm p-4 sm:p-6"
       >
         {mapResult.error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">

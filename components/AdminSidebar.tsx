@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -24,6 +24,8 @@ import {
   Calculator,
   Home,
   Bot,
+  Wrench,
+  ChevronDown,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSidebar } from '@/lib/sidebar-context';
@@ -51,6 +53,13 @@ function getActivePageId(pathname: string): string {
   return '';
 }
 
+const TOOLS_PAGE_IDS = new Set([
+  'proximity-insights',
+  'site-design',
+  'site-builder',
+  'sage-ai',
+]);
+
 function NavLink({
   href,
   label,
@@ -77,22 +86,22 @@ function NavLink({
       href={href}
       data-page={pageId}
       title={collapsedTitle}
-      className={`nav-item flex items-center ${collapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-lg transition-all duration-200 ease-in-out group ${
+      className={`nav-item flex items-center ${collapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-md transition-colors duration-150 ease-out group ${
         isActive
-          ? 'bg-sage-50 dark:bg-white/10 text-sage-700 dark:text-sage-300 font-medium'
-          : 'text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-gray-200'
+          ? 'bg-neutral-100/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100 font-medium'
+          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
       }`}
     >
       <Icon
         className={`w-5 h-5 flex-shrink-0 ${
-          isActive ? 'text-sage-600 dark:text-sage-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300'
+          isActive ? 'text-neutral-700 dark:text-neutral-200' : 'text-neutral-500 dark:text-neutral-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
         }`}
       />
       {!collapsed && (
         <span className="text-sm inline-flex items-center gap-1.5 min-w-0 flex-1">
           <span className="truncate">{label}</span>
           {showBeta ? (
-            <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-1 py-px text-[8px] font-semibold uppercase leading-none tracking-wide text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-200">
+            <span className="shrink-0 rounded-full border border-orange-200/90 bg-orange-100 px-1 py-px text-[8px] font-semibold uppercase leading-none tracking-wide text-orange-900 dark:border-orange-800/80 dark:bg-orange-950/80 dark:text-orange-200">
               {tSidebar('beta')}
             </span>
           ) : null}
@@ -110,10 +119,42 @@ export default function AdminSidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
-
   const activePageId = getActivePageId(pathname || '');
+  const toolsSectionActive = TOOLS_PAGE_IDS.has(activePageId);
+  const [toolsMenuOpen, setToolsMenuOpen] = useState(() => toolsSectionActive);
+  const [toolsFlyoutOpen, setToolsFlyoutOpen] = useState(false);
+  const toolsFlyoutRef = useRef<HTMLDivElement>(null);
+  const wasToolsSectionActiveRef = useRef(false);
+
   const showCollapsed = isDesktop && isCollapsed;
   const tSidebar = useTranslations('admin.sidebar');
+
+  useEffect(() => {
+    if (!toolsSectionActive) {
+      setToolsMenuOpen(false);
+      wasToolsSectionActiveRef.current = false;
+      return;
+    }
+    if (!wasToolsSectionActiveRef.current) {
+      setToolsMenuOpen(true);
+    }
+    wasToolsSectionActiveRef.current = true;
+  }, [toolsSectionActive]);
+
+  useEffect(() => {
+    if (!showCollapsed) setToolsFlyoutOpen(false);
+  }, [showCollapsed]);
+
+  useEffect(() => {
+    if (!toolsFlyoutOpen || !showCollapsed) return;
+    const close = (e: MouseEvent) => {
+      if (toolsFlyoutRef.current && !toolsFlyoutRef.current.contains(e.target as Node)) {
+        setToolsFlyoutOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [toolsFlyoutOpen, showCollapsed]);
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)');
@@ -173,13 +214,13 @@ export default function AdminSidebar() {
 
       <aside
         id="sidebar"
-        className={`fixed inset-y-0 left-0 z-50 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-900/50 transition-all duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 bg-white dark:bg-neutral-950 border-r border-neutral-200/75 dark:border-neutral-800 transition-all duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } w-64 ${isCollapsed ? 'lg:w-20' : ''}`}
       >
         <div className="flex flex-col h-full">
           {/* Header - Logo area */}
-          <div className={`flex items-center justify-center border-b border-gray-200 dark:border-gray-900/50 relative py-0 ${showCollapsed ? 'pt-8' : ''}`}>
+          <div className={`flex items-center justify-center border-b border-neutral-200/75 dark:border-neutral-800 relative py-0 ${showCollapsed ? 'pt-8' : ''}`}>
             <Link
               href="/admin/dashboard"
               className={`flex items-center justify-center ${showCollapsed ? 'w-11 h-11' : 'w-36 h-36'}`}
@@ -195,21 +236,21 @@ export default function AdminSidebar() {
             </Link>
             <button
               onClick={toggleSidebar}
-              className="absolute top-1 right-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 lg:hidden"
+              className="absolute top-1 right-1 p-2 rounded-md hover:bg-neutral-100/90 dark:hover:bg-neutral-900/50 lg:hidden"
               aria-label="Close sidebar"
             >
               <X className="w-5 h-5" />
             </button>
             <button
               onClick={toggleCollapsed}
-              className="absolute top-1 right-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 hidden lg:flex items-center justify-center"
+              className="absolute top-1 right-1 p-2 rounded-md hover:bg-neutral-100/90 dark:hover:bg-neutral-900/50 hidden lg:flex items-center justify-center"
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? (
-                <ChevronsRight className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                <ChevronsRight className="w-5 h-5 text-neutral-500 dark:text-neutral-500" />
               ) : (
-                <ChevronsLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                <ChevronsLeft className="w-5 h-5 text-neutral-500 dark:text-neutral-500" />
               )}
             </button>
           </div>
@@ -231,7 +272,7 @@ export default function AdminSidebar() {
             {/* INTERNAL section */}
             <div className="py-2">
               {!showCollapsed && (
-                <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <div className="px-3 py-2 text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.16em]">
                   Internal
                 </div>
               )}
@@ -242,10 +283,10 @@ export default function AdminSidebar() {
                   rel="noopener noreferrer"
                   data-page="web-scraper"
                   title={showCollapsed ? 'Web Scraper' : undefined}
-                  className={`nav-item flex items-center ${showCollapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-lg transition-all duration-200 ease-in-out group text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-gray-200`}
+                  className={`nav-item flex items-center ${showCollapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-md transition-colors duration-150 ease-out group text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100`}
                 >
                   <Globe
-                    className="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300"
+                    className="w-5 h-5 flex-shrink-0 text-neutral-500 dark:text-neutral-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-300"
                   />
                   {!showCollapsed && <span className="text-sm">Web Scraper</span>}
                 </a>
@@ -259,7 +300,7 @@ export default function AdminSidebar() {
                 />
                 <NavLink
                   href="/admin/comps"
-                  label="Comps"
+                  label={tSidebar('properties')}
                   icon={TentTree}
                   pageId="comps"
                   isActive={activePageId === 'comps'}
@@ -273,34 +314,6 @@ export default function AdminSidebar() {
                   isActive={activePageId === 'past-reports'}
                   isCollapsed={showCollapsed}
                 />
-                {/* Report Builder hidden from menu — page still accessible via direct URL */}
-                <NavLink
-                  href="/admin/proximity-insights"
-                  label="Proximity Insights"
-                  icon={MapPin}
-                  pageId="proximity-insights"
-                  isActive={activePageId === 'proximity-insights'}
-                  isCollapsed={showCollapsed}
-                  showBeta
-                />
-                <NavLink
-                  href="/admin/rv-site-setup"
-                  label="RV Site Setup"
-                  icon={LayoutGrid}
-                  pageId="site-design"
-                  isActive={activePageId === 'site-design'}
-                  isCollapsed={showCollapsed}
-                  showBeta
-                />
-                <NavLink
-                  href="/admin/site-builder"
-                  label="Site Builder"
-                  icon={Home}
-                  pageId="site-builder"
-                  isActive={activePageId === 'site-builder'}
-                  isCollapsed={showCollapsed}
-                  showBeta
-                />
                 <NavLink
                   href="/admin/cost-explorer"
                   label="Cost Explorer"
@@ -309,14 +322,169 @@ export default function AdminSidebar() {
                   isActive={activePageId === 'cost-explorer'}
                   isCollapsed={showCollapsed}
                 />
-                <NavLink
-                  href="/admin/sage-ai"
-                  label="Sage AI"
-                  icon={Bot}
-                  pageId="sage-ai"
-                  isActive={activePageId === 'sage-ai'}
-                  isCollapsed={showCollapsed}
-                />
+                {/* Report Builder hidden from menu — page still accessible via direct URL */}
+                {!showCollapsed ? (
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => setToolsMenuOpen((o) => !o)}
+                      className={`nav-item flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 ease-out ${
+                        toolsSectionActive
+                          ? 'bg-neutral-100/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100 font-medium'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
+                      }`}
+                      aria-expanded={toolsMenuOpen}
+                      aria-controls="admin-tools-submenu"
+                      id="admin-tools-trigger"
+                    >
+                      <Wrench
+                        className={`h-5 w-5 flex-shrink-0 ${
+                          toolsSectionActive
+                            ? 'text-neutral-700 dark:text-neutral-200'
+                            : 'text-neutral-500 dark:text-neutral-500'
+                        }`}
+                        aria-hidden
+                      />
+                      <span className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-sm">
+                        <span className="truncate">{tSidebar('tools')}</span>
+                        <span className="shrink-0 rounded-full border border-orange-200/90 bg-orange-100 px-1 py-px text-[8px] font-semibold uppercase leading-none tracking-wide text-orange-900 dark:border-orange-800/80 dark:bg-orange-950/80 dark:text-orange-200">
+                          {tSidebar('beta')}
+                        </span>
+                      </span>
+                      <ChevronDown
+                        className={`h-4 w-4 flex-shrink-0 text-neutral-400 transition-transform duration-200 ${
+                          toolsMenuOpen ? 'rotate-180' : ''
+                        }`}
+                        aria-hidden
+                      />
+                    </button>
+                    {toolsMenuOpen ? (
+                      <div
+                        id="admin-tools-submenu"
+                        role="region"
+                        aria-labelledby="admin-tools-trigger"
+                        className="ml-3 space-y-1 border-l border-neutral-200/80 py-0.5 pl-3 dark:border-neutral-800"
+                      >
+                        <NavLink
+                          href="/admin/proximity-insights"
+                          label={tSidebar('proximityInsights')}
+                          icon={MapPin}
+                          pageId="proximity-insights"
+                          isActive={activePageId === 'proximity-insights'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/rv-site-setup"
+                          label={tSidebar('rvSiteSetup')}
+                          icon={LayoutGrid}
+                          pageId="site-design"
+                          isActive={activePageId === 'site-design'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/site-builder"
+                          label={tSidebar('siteBuilder')}
+                          icon={Home}
+                          pageId="site-builder"
+                          isActive={activePageId === 'site-builder'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/sage-ai"
+                          label={tSidebar('sageAi')}
+                          icon={Bot}
+                          pageId="sage-ai"
+                          isActive={activePageId === 'sage-ai'}
+                          isCollapsed={false}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="relative flex justify-center" ref={toolsFlyoutRef}>
+                    <button
+                      type="button"
+                      onClick={() => setToolsFlyoutOpen((o) => !o)}
+                      className={`nav-item flex items-center justify-center rounded-md px-2 py-2 transition-colors duration-150 ease-out ${
+                        toolsSectionActive
+                          ? 'bg-neutral-100/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
+                      }`}
+                      aria-expanded={toolsFlyoutOpen}
+                      aria-haspopup="menu"
+                      aria-label={`${tSidebar('tools')} (${tSidebar('beta')})`}
+                      title={`${tSidebar('tools')} (${tSidebar('beta')})`}
+                    >
+                      <Wrench
+                        className={`h-5 w-5 flex-shrink-0 ${
+                          toolsSectionActive
+                            ? 'text-neutral-700 dark:text-neutral-200'
+                            : 'text-neutral-500 dark:text-neutral-500'
+                        }`}
+                      />
+                    </button>
+                    {toolsFlyoutOpen ? (
+                      <div
+                        role="menu"
+                        aria-label={tSidebar('toolsMenu')}
+                        className="absolute left-full top-0 z-[60] ml-1 min-w-[13.5rem] rounded-md border border-neutral-200/80 bg-white py-1 dark:border-neutral-800 dark:bg-neutral-950"
+                      >
+                        <Link
+                          href="/admin/proximity-insights"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'proximity-insights'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <MapPin className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('proximityInsights')}
+                        </Link>
+                        <Link
+                          href="/admin/rv-site-setup"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'site-design'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <LayoutGrid className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('rvSiteSetup')}
+                        </Link>
+                        <Link
+                          href="/admin/site-builder"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'site-builder'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <Home className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('siteBuilder')}
+                        </Link>
+                        <Link
+                          href="/admin/sage-ai"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'sage-ai'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <Bot className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('sageAi')}
+                        </Link>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
                 {/* Sites Export hidden from menu — page still accessible via direct URL */}
               </div>
             </div>
@@ -324,7 +492,7 @@ export default function AdminSidebar() {
             {/* EXTERNAL section */}
             <div className="py-2">
               {!showCollapsed && (
-                <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <div className="px-3 py-2 text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.16em]">
                   External
                 </div>
               )}
@@ -335,15 +503,15 @@ export default function AdminSidebar() {
                   rel="noopener noreferrer"
                   data-page="map"
                   title={showCollapsed ? 'Glamping Map' : undefined}
-                  className={`nav-item flex items-center ${showCollapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-lg transition-all duration-200 ease-in-out group ${
+                  className={`nav-item flex items-center ${showCollapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'} rounded-md transition-colors duration-150 ease-out group ${
                     activePageId === 'map'
-                      ? 'bg-sage-50 dark:bg-white/10 text-sage-700 dark:text-sage-300 font-medium'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-gray-200'
+                      ? 'bg-neutral-100/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100 font-medium'
+                      : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
                   }`}
                 >
                   <Map
                     className={`w-5 h-5 flex-shrink-0 ${
-                      activePageId === 'map' ? 'text-sage-600 dark:text-sage-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-slate-600 dark:group-hover:text-gray-300'
+                      activePageId === 'map' ? 'text-neutral-700 dark:text-neutral-200' : 'text-neutral-500 dark:text-neutral-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
                     }`}
                   />
                   {!showCollapsed && <span className="text-sm">Glamping Map</span>}
@@ -353,49 +521,49 @@ export default function AdminSidebar() {
           </nav>
 
           {/* Footer - theme toggle + user profile (modern CPO placement) */}
-          <div className={`absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-900/50 bg-white dark:bg-black space-y-3 ${showCollapsed ? 'p-2' : 'p-4'}`}>
+          <div className={`absolute bottom-0 left-0 right-0 border-t border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 space-y-3 ${showCollapsed ? 'p-2' : 'p-4'}`}>
             <div className={`flex items-center ${showCollapsed ? 'justify-center' : 'justify-between'}`}>
               {!showCollapsed && (
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Appearance</span>
+                <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.14em]">Appearance</span>
               )}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                className="p-2 rounded-md hover:bg-neutral-100/90 dark:hover:bg-neutral-900/50 text-neutral-500 dark:text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors"
                 aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                 title={isDark ? 'Light mode' : 'Dark mode'}
               >
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
             </div>
-            <div className={`flex items-center ${showCollapsed ? 'justify-center gap-1' : 'justify-between gap-2'} pt-3 border-t border-gray-200 dark:border-gray-900/50`}>
+            <div className={`flex items-center ${showCollapsed ? 'justify-center gap-1' : 'justify-between gap-2'} pt-3 border-t border-neutral-200/75 dark:border-neutral-800`}>
               {!showCollapsed && (
                 <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  <div className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-sage-600" />
+                  <div className="w-8 h-8 bg-neutral-200/80 dark:bg-neutral-800 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p
                       id="userEmail"
-                      className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
+                      className="text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate"
                       title={userEmail}
                     >
                       {userEmail}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Administrator</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-500 truncate">Administrator</p>
                   </div>
                 </div>
               )}
               {showCollapsed && (
                 <div
-                  className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0"
+                  className="w-8 h-8 bg-neutral-200/80 dark:bg-neutral-800 rounded-full flex items-center justify-center flex-shrink-0"
                   title={userEmail}
                 >
-                  <User className="w-4 h-4 text-sage-600" />
+                  <User className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
                 </div>
               )}
               <button
                 onClick={handleLogout}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
+                className="p-1 rounded-md hover:bg-neutral-100/90 dark:hover:bg-neutral-900/50 text-neutral-400 hover:text-red-600 transition-colors flex-shrink-0"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />
@@ -408,7 +576,7 @@ export default function AdminSidebar() {
       {/* Mobile toggle button */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-40 p-2 bg-white dark:bg-black rounded-lg shadow-md lg:hidden border border-gray-200 dark:border-gray-900/50"
+        className="fixed top-4 left-4 z-40 p-2 bg-white dark:bg-neutral-950 rounded-md border border-neutral-200/80 dark:border-neutral-800 lg:hidden"
         aria-label="Open menu"
       >
         <Menu className="w-5 h-5" />

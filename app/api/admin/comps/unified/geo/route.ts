@@ -11,17 +11,18 @@
  * Response shape:
  *   {
  *     success: true,
- *     points: Array<[lat, lon, sourceIndex, id, name, avgAdr, website, totalSites, numUnits]>,
+ *     points: Array<[lat, lon, sourceIndex, id, name, avgAdr, website, totalSites, numUnits, isGlamping1]>,
  *     sources: string[],                    // index → source key lookup
- *     total: number,                        // points returned
- *     geocoded_by_source: Record<string, number>, // marker counts per source (after collapse)
- *     capped: boolean,                      // true when hit the hard limit
+ *     total: number,                        // geocoded markers (DB-exact via RPC when deployed)
+ *     geocoded_by_source: Record<string, number>, // per-source marker counts (same as `total` split)
+ *     capped: boolean,                      // true when the coordinate payload hit the row cap
  *     limit: number
  *   }
- *   Tuple tail: avg_adr (nullable), website_url (nullable), total_sites (nullable), num_units (nullable).
+ *   Tuple tail: avg_adr (nullable), website_url (nullable), total_sites (nullable), num_units (nullable),
+ *   is_glamping_1 (0|1) — num_units in radius scorecard counts only rows where this is 1.
  *
  * Performance:
- *  - Columns: id, name, source, lat, lon + popup fields + `address_key`.
+ *  - Columns: id, name, source, lat, lon + popup fields + `address_key` + `is_glamping_property`.
  *  - The matview is site/unit–centric: multiple rows per property. Rows are collapsed to
  *    **one marker per property per source** using `source` + `address_key` (not `address_key`
  *    alone — overlapping listings across sources must stay visible). Merged metrics:
@@ -29,10 +30,14 @@
  *  - Source names are de-duplicated into an index array so each point
  *    carries a small int rather than repeating `"all_glamping_properties"`.
  *  - Hard-capped at MAX_POINTS to bound worst-case payload size.
+ *  - Rows are fetched **per source** with an even budget (`MAX_POINTS / N`).
+ *    Ordering only by synthetic `id` would otherwise return every `camp:` row
+ *    first (lexicographically before `glamp:`, `hip:`, etc.) and hide other
+ *    sources on the map once the cap is hit.
  */
 
 import { NextResponse } from 'next/server';
-import type { PostgrestError } from '@supabase/supabase-js';
+import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,9 +49,45 @@ import {
   applyUnifiedFtsFilter,
   applyUnifiedIlikeSearch,
 } from '@/lib/comps-unified/apply-filters';
+import { UNIFIED_SOURCES } from '@/lib/comps-unified/build-row';
 
 const MAX_POINTS = 150_000;
 const CHUNK_SIZE = 10_000;
+
+/** Full matview row shape (see `scripts/migrations/unified-comps-matview.sql`). */
+const GEO_SELECT_WITH_GLAMP =
+  'id,property_name,source,state,country,lat,lon,avg_adr,website_url,total_sites,num_units,address_key,is_glamping_property';
+
+/** Older deployments before `is_glamping_property` was added to `unified_comps`. */
+const GEO_SELECT_LEGACY =
+  'id,property_name,source,state,country,lat,lon,avg_adr,website_url,total_sites,num_units,address_key';
+
+type GeoSelectMeta = { selectList: string; includeGlampColumn: boolean };
+
+function getCachedGeoSelectMeta(): GeoSelectMeta | undefined {
+  return (globalThis as unknown as { __unifiedCompsGeoSelect?: GeoSelectMeta }).__unifiedCompsGeoSelect;
+}
+
+function setCachedGeoSelectMeta(meta: GeoSelectMeta): void {
+  (globalThis as unknown as { __unifiedCompsGeoSelect?: GeoSelectMeta }).__unifiedCompsGeoSelect = meta;
+}
+
+/**
+ * Detect whether `unified_comps` exposes `is_glamping_property` (older matviews do not).
+ * Result is cached per Node process so we only probe once.
+ */
+async function resolveGeoRowSelect(supabase: SupabaseClient): Promise<GeoSelectMeta> {
+  const cached = getCachedGeoSelectMeta();
+  if (cached) return cached;
+
+  const { error } = await supabase.from('unified_comps').select('is_glamping_property').limit(1);
+  const meta: GeoSelectMeta =
+    error?.code === '42703'
+      ? { selectList: GEO_SELECT_LEGACY, includeGlampColumn: false }
+      : { selectList: GEO_SELECT_WITH_GLAMP, includeGlampColumn: true };
+  setCachedGeoSelectMeta(meta);
+  return meta;
+}
 
 interface GeoRow {
   id: string;
@@ -61,12 +102,24 @@ interface GeoRow {
   total_sites: number | string | null;
   num_units: number | string | null;
   address_key: string | null;
+  /** Yes/No from underlying sources (Sage, RoverPass); OTAs/reports default Yes in matview. */
+  is_glamping_property?: string | null;
 }
 
 function numOrNull(v: unknown): number | null {
   if (v === null || v === undefined) return null;
   const n = typeof v === 'string' ? parseFloat(v) : Number(v);
   return Number.isFinite(n) ? n : null;
+}
+
+function isGlampingYesValue(v: string | null | undefined): boolean {
+  return String(v ?? '').trim().toLowerCase() === 'yes';
+}
+
+/** Map marker glamping flag: use DB column when present; else match matview defaults (Yes for all sources). */
+function flagGlampingForMarker(r: GeoRow, includeGlampColumn: boolean): boolean {
+  if (includeGlampColumn) return isGlampingYesValue(r.is_glamping_property);
+  return true;
 }
 
 /**
@@ -83,7 +136,7 @@ function addressKeyGroupKey(r: GeoRow): string {
 }
 
 /** One map marker per matview property (`address_key`); merge site/unit rows. */
-function mergePropertyGroup(rows: GeoRow[]): GeoRow {
+function mergePropertyGroup(rows: GeoRow[], includeGlampColumn: boolean): GeoRow {
   if (rows.length === 1) return rows[0];
   const first = rows[0];
   let maxSites: number | null = null;
@@ -91,6 +144,7 @@ function mergePropertyGroup(rows: GeoRow[]): GeoRow {
   let anyUnit = false;
   const adrs: number[] = [];
   let website: string | null = null;
+  let glampingYes = false;
 
   for (const r of rows) {
     const ts = numOrNull(r.total_sites);
@@ -107,6 +161,7 @@ function mergePropertyGroup(rows: GeoRow[]): GeoRow {
     if (!website && r.website_url?.trim()) {
       website = r.website_url.trim();
     }
+    if (flagGlampingForMarker(r, includeGlampColumn)) glampingYes = true;
   }
 
   const avgAdr =
@@ -121,10 +176,35 @@ function mergePropertyGroup(rows: GeoRow[]): GeoRow {
     website_url: website,
     total_sites: maxSites,
     num_units: anyUnit ? sumUnits : null,
+    is_glamping_property: glampingYes ? 'Yes' : 'No',
   };
 }
 
-function collapseToOneRowPerProperty(rows: GeoRow[]): GeoRow[] {
+/** Same tsquery shape as `lib/comps-unified/apply-filters` + list route. */
+function buildTsQuery(terms: string[]): string {
+  return terms
+    .map((t) => t.replace(/[^a-z0-9]/gi, ' ').trim())
+    .filter(Boolean)
+    .map((t) => `${t}:*`)
+    .join(' & ');
+}
+
+function parseGeoMarkerCountRpc(data: unknown): Record<string, number> | null {
+  if (!Array.isArray(data)) return null;
+  const out: Record<string, number> = {};
+  for (const row of data) {
+    if (!row || typeof row !== 'object') continue;
+    const r = row as Record<string, unknown>;
+    const src = r.source;
+    const raw = r.marker_count ?? r.markerCount;
+    if (typeof src !== 'string' || !src) continue;
+    const n = typeof raw === 'number' ? raw : Number(raw);
+    if (Number.isFinite(n)) out[src] = n;
+  }
+  return out;
+}
+
+function collapseToOneRowPerProperty(rows: GeoRow[], includeGlampColumn: boolean): GeoRow[] {
   const groups = new Map<string, GeoRow[]>();
   for (const r of rows) {
     const k = addressKeyGroupKey(r);
@@ -134,7 +214,7 @@ function collapseToOneRowPerProperty(rows: GeoRow[]): GeoRow[] {
   }
   const out: GeoRow[] = [];
   for (const group of groups.values()) {
-    out.push(group.length === 1 ? group[0] : mergePropertyGroup(group));
+    out.push(group.length === 1 ? group[0] : mergePropertyGroup(group, includeGlampColumn));
   }
   return out;
 }
@@ -145,75 +225,124 @@ export const GET = withAdminAuth(async (request) => {
     const { searchParams } = new URL(request.url);
     const opts = parseUnifiedFilterOptions(searchParams);
 
+    const { selectList, includeGlampColumn } = await resolveGeoRowSelect(supabase);
+
     const baseSelect = () =>
       supabase
         .from('unified_comps')
-        .select(
-          'id,property_name,source,state,country,lat,lon,avg_adr,website_url,total_sites,num_units,address_key'
-        )
+        .select(selectList)
         .not('lat', 'is', null)
         .not('lon', 'is', null);
 
     // PostgREST caps per-request rows (commonly 1000–10000). Page in chunks
     // up to MAX_POINTS so we can serve large filtered sets without requiring
     // an RPC. Each chunk reuses the same filter set.
-    const collected: GeoRow[] = [];
-    let offset = 0;
-    let capped = false;
-    let usedIlikeFallback = false;
+    const sourceList =
+      opts.sources.length > 0 ? opts.sources : [...UNIFIED_SOURCES];
+    const capPerSource = Math.max(1, Math.ceil(MAX_POINTS / sourceList.length));
 
-    const fetchChunk = async (
+    const fetchChunkForSource = async (
+      source: string,
       from: number,
       to: number,
       useIlike: boolean
     ): Promise<{ data: GeoRow[] | null; error: PostgrestError | null }> => {
       let q = applyUnifiedBaseFilters(baseSelect(), opts);
+      q = q.eq('source', source);
       q = useIlike ? applyUnifiedIlikeSearch(q, opts) : applyUnifiedFtsFilter(q, opts);
       const res = await q.order('id', { ascending: true }).range(from, to);
       return { data: (res.data as GeoRow[]) ?? null, error: res.error };
     };
 
-    // PostgREST often enforces max-rows (commonly 1000) per request even when
-    // `.range(from, to)` asks for more. Do not treat `chunk.length < batchSize`
-    // as end-of-data — only an empty chunk means there are no more rows.
-    while (collected.length < MAX_POINTS) {
-      const remaining = MAX_POINTS - collected.length;
-      const batchSize = Math.min(CHUNK_SIZE, remaining);
-      const to = offset + batchSize - 1;
+    const collectWithSearchMode = async (
+      useIlike: boolean
+    ): Promise<{ rows: GeoRow[]; capped: boolean }> => {
+      const collected: GeoRow[] = [];
+      let capped = false;
 
-      const { data, error } = await fetchChunk(offset, to, usedIlikeFallback);
+      outer: for (const source of sourceList) {
+        let offset = 0;
+        let sourceRowCount = 0;
 
-      if (error) {
-        console.error('[comps/unified/geo] query error:', error);
-        throw error;
+        while (sourceRowCount < capPerSource && collected.length < MAX_POINTS) {
+          const remainingGlobal = MAX_POINTS - collected.length;
+          const remainingSource = capPerSource - sourceRowCount;
+          const batchSize = Math.min(CHUNK_SIZE, remainingGlobal, remainingSource);
+          const to = offset + batchSize - 1;
+
+          const { data, error } = await fetchChunkForSource(source, offset, to, useIlike);
+
+          if (error) {
+            console.error('[comps/unified/geo] query error:', error);
+            throw error;
+          }
+
+          const chunk = data ?? [];
+          if (chunk.length === 0) break;
+
+          collected.push(...chunk);
+          offset += chunk.length;
+          sourceRowCount += chunk.length;
+
+          if (collected.length >= MAX_POINTS) {
+            capped = true;
+            break outer;
+          }
+          if (sourceRowCount >= capPerSource) {
+            capped = true;
+            break;
+          }
+        }
       }
 
-      const chunk = data ?? [];
+      return { rows: collected, capped };
+    };
 
-      // On the very first chunk, if FTS returned nothing AND there were
-      // search terms, retry with the ILIKE fallback (matches list endpoint).
-      if (
-        offset === 0 &&
-        chunk.length === 0 &&
-        opts.searchTerms.length > 0 &&
-        !usedIlikeFallback
-      ) {
-        usedIlikeFallback = true;
-        continue;
-      }
+    let collected: GeoRow[] = [];
+    let capped = false;
+    let usedIlikeForData = false;
 
-      if (chunk.length === 0) break;
+    const firstPass = await collectWithSearchMode(false);
+    collected = firstPass.rows;
+    capped = firstPass.capped;
 
-      collected.push(...chunk);
-      offset += chunk.length;
-
-      if (collected.length >= MAX_POINTS) {
-        capped = true;
-        break;
-      }
+    if (collected.length === 0 && opts.searchTerms.length > 0) {
+      const secondPass = await collectWithSearchMode(true);
+      collected = secondPass.rows;
+      capped = secondPass.capped;
+      usedIlikeForData = true;
     }
 
-    const forPoints = collapseToOneRowPerProperty(collected);
+    const searchMode: 'none' | 'fts' | 'ilike' =
+      opts.searchTerms.length === 0 ? 'none' : usedIlikeForData ? 'ilike' : 'fts';
+    const tsq = buildTsQuery(opts.searchTerms);
+
+    const { data: markerRpcData, error: markerRpcErr } = await supabase.rpc(
+      'unified_comps_geo_marker_counts',
+      {
+        p_sources: opts.sources.length > 0 ? opts.sources : null,
+        p_states: opts.expandedStateValues.length > 0 ? opts.expandedStateValues : null,
+        p_keywords: opts.keywordFilters.length > 0 ? opts.keywordFilters : null,
+        p_min_adr:
+          opts.parsedMinAdr !== null && !Number.isNaN(opts.parsedMinAdr)
+            ? opts.parsedMinAdr
+            : null,
+        p_max_adr:
+          opts.parsedMaxAdr !== null && !Number.isNaN(opts.parsedMaxAdr)
+            ? opts.parsedMaxAdr
+            : null,
+        p_unit_categories: opts.unitCategories.length > 0 ? opts.unitCategories : null,
+        p_tsquery: searchMode === 'fts' ? tsq : null,
+        p_ilike_terms: searchMode === 'ilike' ? opts.searchTerms : null,
+      }
+    );
+
+    if (markerRpcErr) {
+      console.error('[comps/unified/geo] marker counts RPC error:', markerRpcErr);
+    }
+    const geocodedBySourceFromRpc = markerRpcErr ? null : parseGeoMarkerCountRpc(markerRpcData);
+
+    const forPoints = collapseToOneRowPerProperty(collected, includeGlampColumn);
 
     // Build compact payload: source name → index table to compress repeats.
     const sourceIndex = new Map<string, number>();
@@ -229,10 +358,19 @@ export const GET = withAdminAuth(async (request) => {
         string | null,
         number | null,
         number | null,
+        0 | 1,
       ]
     > = [];
-    /** Plotted markers per source after collapse (for legend vs cluster confusion). */
-    const geocodedBySource: Record<string, number> = {};
+    /** Exact per-source marker totals from DB when RPC is deployed; else derived from `points`. */
+    const geocodedBySource: Record<string, number> =
+      geocodedBySourceFromRpc != null ? { ...geocodedBySourceFromRpc } : {};
+    let totalGeocodedExact = 0;
+    if (geocodedBySourceFromRpc != null) {
+      for (const v of Object.values(geocodedBySourceFromRpc)) {
+        totalGeocodedExact += v;
+      }
+    }
+
     for (const r of forPoints) {
       const lat = typeof r.lat === 'string' ? parseFloat(r.lat) : r.lat;
       const lon = typeof r.lon === 'string' ? parseFloat(r.lon) : r.lon;
@@ -249,7 +387,9 @@ export const GET = withAdminAuth(async (request) => {
         sourceIndex.set(r.source, idx);
         sources.push(r.source);
       }
-      geocodedBySource[r.source] = (geocodedBySource[r.source] ?? 0) + 1;
+      if (geocodedBySourceFromRpc == null) {
+        geocodedBySource[r.source] = (geocodedBySource[r.source] ?? 0) + 1;
+      }
       const w = r.website_url?.trim() || null;
       points.push([
         lat,
@@ -261,14 +401,18 @@ export const GET = withAdminAuth(async (request) => {
         w,
         numOrNull(r.total_sites),
         numOrNull(r.num_units),
+        flagGlampingForMarker(r, includeGlampColumn) ? 1 : 0,
       ]);
     }
+
+    const totalMarkers =
+      geocodedBySourceFromRpc != null ? totalGeocodedExact : points.length;
 
     return NextResponse.json({
       success: true,
       points,
       sources,
-      total: points.length,
+      total: totalMarkers,
       geocoded_by_source: geocodedBySource,
       capped,
       limit: MAX_POINTS,

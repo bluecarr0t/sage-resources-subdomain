@@ -90,13 +90,13 @@ export default function AdminMissingFieldsBreakdown() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/30 p-6 animate-pulse">
-        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/3 mb-4" />
+      <div className="rounded-lg border border-neutral-200/70 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30 p-5 animate-pulse">
+        <div className="h-4 bg-neutral-200/80 dark:bg-neutral-700 rounded w-1/3 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="h-12 bg-gray-200 dark:bg-gray-600 rounded"
+              className="h-12 bg-neutral-200/70 dark:bg-neutral-800 rounded"
             />
           ))}
         </div>
@@ -106,7 +106,7 @@ export default function AdminMissingFieldsBreakdown() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/20 p-4 text-red-700 dark:text-red-300">
+      <div className="rounded-lg border border-red-200/80 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/20 p-4 text-red-800 dark:text-red-200/90">
         {error}
         <p className="text-sm mt-2 text-red-600 dark:text-red-400">
           Run scripts/add-missing-fields-breakdown-function.sql in Supabase SQL
@@ -123,15 +123,15 @@ export default function AdminMissingFieldsBreakdown() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">
+        <h3 className="text-xs font-medium text-neutral-700 dark:text-neutral-300 tracking-tight">
           Key missing fields
         </h3>
-        <span className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+        <span className="text-[11px] text-neutral-500 dark:text-neutral-500 tabular-nums">
           {data.total_count.toLocaleString()} published records
         </span>
       </div>
-      <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/30 overflow-hidden">
-        <div className="divide-y divide-slate-200 dark:divide-slate-700">
+      <div className="rounded-lg border border-neutral-200/70 dark:border-neutral-800 bg-white dark:bg-neutral-950/50 overflow-hidden">
+        <div className="divide-y divide-neutral-200/70 dark:divide-neutral-800">
           {KEY_FIELDS.map(({ key, label, description }) => {
             const missing = data[key];
             const pct =
@@ -144,10 +144,10 @@ export default function AdminMissingFieldsBreakdown() {
                 className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-5"
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 font-mono">
+                  <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100 font-mono">
                     {label}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-500">
                     {description}
                   </p>
                 </div>
@@ -164,7 +164,7 @@ export default function AdminMissingFieldsBreakdown() {
                       : 'Complete'}
                   </span>
                   {missing > 0 && (
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <span className="text-[11px] text-neutral-500 dark:text-neutral-500">
                       ({pct}%)
                     </span>
                   )}

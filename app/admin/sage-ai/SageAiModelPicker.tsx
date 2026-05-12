@@ -155,10 +155,10 @@ export function SageAiModelPicker({
 
         {open && (
           <div
-            className="absolute bottom-full left-0 z-[100] mb-1.5 w-[min(calc(100vw-2rem),320px)] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 dark:border-gray-700 dark:bg-gray-900 dark:ring-white/10"
+            className="absolute bottom-full left-0 z-[100] mb-1.5 w-[min(calc(100vw-2rem),320px)] overflow-hidden rounded-xl border border-neutral-200/70 bg-white py-1 shadow-xl ring-1 ring-black/5 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-white/10"
           >
             <div
-              className={`border-b border-gray-200 px-2 pb-2 pt-1 dark:border-gray-700 ${
+              className={`border-b border-gray-200 px-2 pb-2 pt-1 dark:border-neutral-800 ${
                 SAGE_AI_WEB_RESEARCH_UI_ENABLED ? '' : 'cursor-not-allowed opacity-50'
               }`}
             >
@@ -214,7 +214,7 @@ export function SageAiModelPicker({
                 </button>
               </div>
             </div>
-            <div className="border-b border-gray-200 px-2 pb-2 pt-1 dark:border-gray-700">
+            <div className="border-b border-gray-200 px-2 pb-2 pt-1 dark:border-neutral-800">
               <div className="flex items-center justify-between gap-3 rounded-md px-2 py-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <DollarSign className="h-3.5 w-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
@@ -284,7 +284,7 @@ export function SageAiModelPicker({
                     className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-sm ${
                       uiDisabled
                         ? 'cursor-not-allowed opacity-50'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        : 'hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40'
                     }`}
                   >
                     <div className="flex min-w-0 flex-1 items-center gap-2">

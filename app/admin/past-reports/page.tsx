@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { MoreHorizontal, FileText, UploadCloud } from 'lucide-react';
 import { Button, Input, Modal, ModalContent, Select } from '@/components/ui';
 import { reportServiceLabel } from '@/lib/report-service-display';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 interface Report {
   id: string;
@@ -316,7 +317,7 @@ export default function PastReportsPage() {
       <main className="pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div id="loadingState" className="py-12 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
-            <div className="w-8 h-8 border-2 border-gray-300 dark:border-gray-600 border-t-[#4a624a] rounded-full animate-spin mb-4" />
+            <div className="w-8 h-8 border-2 border-neutral-300/80 dark:border-neutral-600 border-t-[#4a624a] rounded-full animate-spin mb-4" />
             Loading reports...
           </div>
         </div>
@@ -327,10 +328,10 @@ export default function PastReportsPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className={`${adminPageHeadingMargin} flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4`}>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Past Reports</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <h1 className={`${adminPageTitle} mb-1`}>Past Reports</h1>
+            <p className={adminPageDescription}>
               View and manage your uploaded feasibility study reports
             </p>
           </div>
@@ -361,7 +362,7 @@ export default function PastReportsPage() {
               placeholder="Search reports by property, location, or keywords..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-sage-600 focus:border-transparent"
+              className="w-full px-4 py-2 border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-sage-600 focus:border-transparent"
             />
           </div>
           <div>
@@ -372,7 +373,7 @@ export default function PastReportsPage() {
               id="marketFilter"
               value={marketFilter}
               onChange={(e) => setMarketFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent"
+              className="px-4 py-2 border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent"
             >
               {MARKET_TYPE_OPTIONS.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>
@@ -389,7 +390,7 @@ export default function PastReportsPage() {
               id="dateFilter"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent"
+              className="px-4 py-2 border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent"
             >
               {DATE_OPTIONS.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>
@@ -417,7 +418,7 @@ export default function PastReportsPage() {
 
         {/* Empty state */}
         {filteredReports.length === 0 && (
-          <div id="emptyState" className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center border border-gray-200 dark:border-gray-700">
+          <div id="emptyState" className="bg-white dark:bg-neutral-900 rounded-lg shadow p-12 text-center border border-neutral-200/75 dark:border-neutral-800">
             <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             {reports.length > 0 && reportsWithDocx.length === 0 ? (
               <>
@@ -441,7 +442,7 @@ export default function PastReportsPage() {
         {/* Table */}
         {filteredReports.length > 0 && (
           <div id="reportsTable">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-neutral-900 rounded-lg shadow overflow-hidden border border-neutral-200/75 dark:border-neutral-800">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                   <thead className="bg-gray-50 dark:bg-gray-700/50">
@@ -466,11 +467,11 @@ export default function PastReportsPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                  <tbody className="bg-white dark:bg-neutral-900 divide-y divide-gray-200 dark:divide-gray-600">
                     {paginatedReports.map((report) => (
                       <tr
                         key={report.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
+                        className="hover:bg-neutral-50/90 dark:hover:bg-neutral-800/55/50 cursor-pointer"
                         onClick={(e) => {
                           const target = e.target as HTMLElement;
                           if (target.closest('button') || target.closest('a') || target.closest('.dropdown-container')) return;
@@ -513,19 +514,19 @@ export default function PastReportsPage() {
                           <div className="dropdown-container relative inline-block">
                             <button
                               onClick={() => openDropdownMenu(report.id)}
-                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                              className="p-1 rounded hover:bg-neutral-100/80 dark:hover:bg-neutral-800/55"
                               aria-label="Actions"
                             >
                               <MoreHorizontal className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                             </button>
                             {openDropdown === report.id && (
                               <div
-                                className="dropdown-menu absolute right-0 top-full mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 min-w-[120px]"
+                                className="dropdown-menu absolute right-0 top-full mt-1 py-1 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-neutral-200/75 dark:border-neutral-700 z-10 min-w-[120px]"
                                 role="menu"
                               >
                                 <button
                                   onClick={() => openEdit(report)}
-                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-neutral-50/90 dark:hover:bg-neutral-800/55"
                                 >
                                   Edit
                                 </button>

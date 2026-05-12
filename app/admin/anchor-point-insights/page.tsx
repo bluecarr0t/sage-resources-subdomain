@@ -20,6 +20,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 const CANADIAN_PROVINCE_CODES = new Set(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT']);
 const US_STATE_OPTIONS = Object.entries(STATE_ABBREVIATIONS)
@@ -111,7 +112,7 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+    <div className="flex items-center gap-3 p-4 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl">
       <div className="p-2 bg-sage-50 dark:bg-sage-900/30 rounded-lg">
         <Icon className="w-5 h-5 text-sage-600 dark:text-sage-400" />
       </div>
@@ -219,7 +220,7 @@ export default function AnchorPointInsightsPage() {
             {Array.from({ length: 7 }).map((_, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl"
+                className="flex items-center gap-3 p-4 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl"
               >
                 <div className="p-2 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-9 h-9" />
                 <div className="flex-1">
@@ -230,17 +231,17 @@ export default function AnchorPointInsightsPage() {
             ))}
           </div>
           {/* Skeleton: Chart */}
-          <div className="mb-6 p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+          <div className="mb-6 p-6 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl">
             <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
             <div className="h-80 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
           </div>
           {/* Skeleton: Two charts row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div className="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+            <div className="p-6 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl">
               <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
               <div className="h-72 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
             </div>
-            <div className="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+            <div className="p-6 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl">
               <div className="h-6 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
               <div className="h-72 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
             </div>
@@ -308,13 +309,13 @@ export default function AnchorPointInsightsPage() {
       <GoogleMapsProvider>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <div className={adminPageHeadingMargin}>
+          <h1 className={`${adminPageTitle} mb-1`}>
             {data.selected_anchor
               ? t('titleWithAnchor', { anchorName: data.selected_anchor.name })
               : t('title')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className={`${adminPageDescription} mb-4`}>
             {data.selected_anchor
               ? t('subtitleWithAnchor', { anchorName: data.selected_anchor.name })
               : t('subtitle')}
@@ -367,7 +368,7 @@ export default function AnchorPointInsightsPage() {
                 if (anchorFilter?.slug) p.set('anchor_slug', anchorFilter.slug);
                 router.replace(`${pathname}?${p.toString()}`, { scroll: false });
               }}
-              className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+              className="px-3 py-2 rounded-lg text-sm border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
               aria-label={t('filterByState')}
             >
               <option value="">{t('allStates')}</option>
@@ -417,7 +418,7 @@ export default function AnchorPointInsightsPage() {
                   }
                 }
               }}
-              className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent min-w-[200px]"
+              className="px-3 py-2 rounded-lg text-sm border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent min-w-[200px]"
               aria-label={t('filterByAnchor')}
             >
               <option value="">
@@ -697,7 +698,7 @@ export default function AnchorPointInsightsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
                       {t('state')}
                     </th>
@@ -790,7 +791,7 @@ export default function AnchorPointInsightsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
                       {t('property')}
                     </th>
@@ -850,7 +851,7 @@ export default function AnchorPointInsightsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
                       {anchorType === 'national-parks' ? t('nationalPark') : t('skiResort')}
                     </th>

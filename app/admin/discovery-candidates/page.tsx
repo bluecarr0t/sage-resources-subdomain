@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ChevronLeft, Check, X, ExternalLink } from 'lucide-react';
+import { adminPageDescription, adminPageTitle } from '@/lib/admin-ui';
 
 function formatAddedAt(iso: string | null | undefined): string {
   if (!iso) return '';
@@ -131,10 +132,10 @@ export default function DiscoveryCandidatesPage() {
           Back to Sage Glamping Data
         </Link>
 
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <h1 className={`${adminPageTitle} mb-1`}>
           Discovery candidates
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-6">
+        <p className={`${adminPageDescription} mb-6`}>
           Properties excluded by inclusion criteria. Approve to add to database or reject to dismiss.
         </p>
 
@@ -159,7 +160,7 @@ export default function DiscoveryCandidatesPage() {
             onClick={() => setTab('pending')}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               tab === 'pending'
-                ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm'
+                ? 'bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
           >
@@ -175,7 +176,7 @@ export default function DiscoveryCandidatesPage() {
             onClick={() => setTab('approved')}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               tab === 'approved'
-                ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm'
+                ? 'bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
           >
@@ -191,7 +192,7 @@ export default function DiscoveryCandidatesPage() {
               <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl" />
             </div>
           ) : candidates.length === 0 ? (
-            <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-8 text-center">
+            <div className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40 p-8 text-center">
               <p className="text-gray-500 dark:text-gray-400">
                 {tab === 'pending' ? t('emptyPending') : t('emptyApproved')}
               </p>
@@ -204,7 +205,7 @@ export default function DiscoveryCandidatesPage() {
                 return (
                   <li
                     key={c.id}
-                    className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4"
+                    className="rounded-xl border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                       <div>

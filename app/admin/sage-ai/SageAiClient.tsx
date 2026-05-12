@@ -979,14 +979,14 @@ export default function SageAiClient() {
     <div className="flex h-full overflow-hidden">
       {/* Sidebar */}
       {showSidebar && (
-        <div className="w-64 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col">
-          <div className="p-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+        <div className="w-64 flex-shrink-0 border-r border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 flex flex-col">
+          <div className="p-3 border-b border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between">
             <div className="flex gap-1">
               <button
                 onClick={() => setSidebarTab('history')}
                 className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
                   sidebarTab === 'history'
-                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                    ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-sm'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
@@ -997,7 +997,7 @@ export default function SageAiClient() {
                 onClick={() => setSidebarTab('saved')}
                 className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
                   sidebarTab === 'saved'
-                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                    ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-sm'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
@@ -1018,7 +1018,7 @@ export default function SageAiClient() {
               <div className="p-2">
                 <button
                   onClick={handleNewChat}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200/75 dark:border-neutral-800 hover:bg-neutral-50/90 dark:hover:bg-neutral-800/50 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   {t('newChat')}
@@ -1062,7 +1062,7 @@ export default function SageAiClient() {
                             key={session.id}
                             className={`group flex items-center rounded-md transition-colors ${
                               isActive
-                                ? 'bg-white dark:bg-gray-800 shadow-sm'
+                                ? 'bg-white dark:bg-neutral-900 shadow-sm'
                                 : 'hover:bg-white dark:hover:bg-gray-800'
                             }`}
                           >
@@ -1181,7 +1181,7 @@ export default function SageAiClient() {
                 onChange={(e) => setSaveQueryName(e.target.value)}
                 placeholder={t('saveQueryPlaceholder')}
                 aria-describedby="save-query-preview"
-                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent focus:outline-none"
+                className="w-full px-3 py-2 text-sm border border-neutral-200/75 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent focus:outline-none"
                 autoFocus
                 maxLength={200}
               />
@@ -1213,9 +1213,9 @@ export default function SageAiClient() {
       </Modal>
 
       {/* Main Chat Area — overflow-visible so model picker popover can extend above the composer */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-visible bg-white dark:bg-gray-950">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-visible bg-white dark:bg-neutral-950">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100/85 dark:border-neutral-800">
           <div className="flex items-center gap-3">
             {!showSidebar && (
               <button
@@ -1269,7 +1269,7 @@ export default function SageAiClient() {
           {userHasScrolled && isLoading && (
             <button
               onClick={scrollToBottom}
-              className="fixed bottom-36 left-1/2 transform -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+              className="fixed bottom-36 left-1/2 transform -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-800 rounded-full shadow-lg hover:bg-neutral-50/90 dark:hover:bg-neutral-800/55 transition-all"
             >
               <ArrowDown className="w-4 h-4" />
               <span className="text-sm font-medium">{t('scrollToBottom')}</span>
@@ -1292,7 +1292,7 @@ export default function SageAiClient() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
                   <button
                     onClick={() => sendMessage({ text: t('quickStartRatePrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
                     <span className="text-lg">📊</span>
                     <div>
@@ -1307,7 +1307,7 @@ export default function SageAiClient() {
                   
                   <button
                     onClick={() => sendMessage({ text: t('quickStartRvPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
                     <span className="text-lg">🎯</span>
                     <div>
@@ -1322,7 +1322,7 @@ export default function SageAiClient() {
                   
                   <button
                     onClick={() => sendMessage({ text: t('quickStartUnitPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
                     <span className="text-lg">🏕️</span>
                     <div>
@@ -1337,7 +1337,7 @@ export default function SageAiClient() {
                   
                   <button
                     onClick={() => sendMessage({ text: t('quickStartParksPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
                     <span className="text-lg">🗺️</span>
                     <div>
@@ -1352,7 +1352,7 @@ export default function SageAiClient() {
 
                   <button
                     onClick={() => sendMessage({ text: t('quickStartTexasReportsPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
                     <span className="text-lg">📋</span>
                     <div>
@@ -1367,7 +1367,7 @@ export default function SageAiClient() {
 
                   <button
                     onClick={() => sendMessage({ text: t('quickStartUsaTrendsPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-gray-200 dark:border-gray-700 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
                   >
                     <span className="text-lg">📈</span>
                     <div>
@@ -1393,7 +1393,7 @@ export default function SageAiClient() {
                     }}
                     className="group relative"
                   >
-                    <div className="rounded-2xl border border-gray-200/90 bg-gray-100 px-4 py-3 shadow-sm dark:border-gray-700/90 dark:bg-gray-800/95">
+                    <div className="rounded-lg border border-gray-200/90 bg-gray-100 px-4 py-3 shadow-sm dark:border-neutral-800/90 dark:bg-gray-800/95">
                       {editingMessageId === message.id ? (
                         <div className="flex flex-col gap-2">
                           <textarea
@@ -1410,7 +1410,7 @@ export default function SageAiClient() {
                             }}
                             autoFocus
                             rows={Math.min(8, Math.max(2, editingDraft.split('\n').length))}
-                            className="w-full resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-[15px] text-gray-900 focus:border-sage-500 focus:outline-none focus:ring-1 focus:ring-sage-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+                            className="w-full resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-[15px] text-gray-900 focus:border-sage-500 focus:outline-none focus:ring-1 focus:ring-sage-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-gray-100"
                             disabled={isLoading}
                           />
                           <div className="flex items-center justify-end gap-2">
@@ -1540,9 +1540,9 @@ export default function SageAiClient() {
                         return (
                           <div
                             key={innerIndex}
-                            className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
+                            className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden"
                           >
-                            <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                            <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950">
                               <Database className="w-4 h-4 text-gray-400" />
                               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {innerToolName.replace(/_/g, ' ')}
@@ -1643,12 +1643,12 @@ export default function SageAiClient() {
                           <details
                             key={partIndex}
                             open={part.state !== 'done'}
-                            className="my-3 rounded-lg border border-gray-200 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/50"
+                            className="my-3 rounded-lg border border-gray-200 bg-gray-50/80 dark:border-neutral-800 dark:bg-neutral-900/50"
                           >
                             <summary className="cursor-pointer select-none px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400">
                               {t('thinking')}
                             </summary>
-                            <div className="border-t border-gray-200 px-3 py-2 text-xs leading-relaxed text-gray-700 dark:border-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono">
+                            <div className="border-t border-gray-200 px-3 py-2 text-xs leading-relaxed text-gray-700 dark:border-neutral-800 dark:text-gray-300 whitespace-pre-wrap font-mono">
                               {part.text}
                             </div>
                           </details>
@@ -1910,7 +1910,7 @@ export default function SageAiClient() {
                           return (
                             <div
                               key={partIndex}
-                              className="my-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3"
+                              className="my-4 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-4 py-3"
                             >
                               <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
                                 Competitor comparison
@@ -1985,9 +1985,9 @@ export default function SageAiClient() {
                           return (
                             <div
                               key={partIndex}
-                              className="my-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
+                              className="my-4 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden"
                             >
-                              <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                              <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950">
                                 <Database className="w-4 h-4 text-gray-400" />
                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                   {toolName.replace(/_/g, ' ')}
@@ -2027,7 +2027,7 @@ export default function SageAiClient() {
                           return (
                             <details
                               key={partIndex}
-                              className="my-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden group/bundle"
+                              className="my-4 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden group/bundle"
                             >
                               <summary className="cursor-pointer select-none flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 <Database className="w-4 h-4 text-gray-400" />
@@ -2038,7 +2038,7 @@ export default function SageAiClient() {
                                   <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
                                 )}
                               </summary>
-                              <div className="border-t border-gray-200 dark:border-gray-800 px-3 py-2 space-y-2">
+                              <div className="border-t border-neutral-200/75 dark:border-neutral-800 px-3 py-2 space-y-2">
                                 {bundle.map((i) =>
                                   renderDefaultDataTile(message.parts[i], i)
                                 )}
@@ -2103,7 +2103,7 @@ export default function SageAiClient() {
         <div className="relative z-20 border-t border-gray-100 bg-white pb-[50px] dark:border-gray-800 dark:bg-gray-950">
           <div className="max-w-3xl mx-auto px-4 py-4">
             <form onSubmit={handleSubmit}>
-              <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-visible">
+              <div className="rounded-xl border border-neutral-200/70 bg-white shadow-sm dark:border-gray-800 dark:bg-neutral-950 overflow-visible">
                 <textarea
                   ref={inputRef}
                   value={input}

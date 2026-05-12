@@ -16,6 +16,7 @@ import {
   Link as LinkIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 const MAX_FILES = 20;
 const MAX_XLSX_SIZE_MB = 50;
@@ -310,11 +311,9 @@ export default function UploadReportsPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Upload Reports
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className={adminPageHeadingMargin}>
+          <h1 className={`${adminPageTitle} mb-1`}>Upload Reports</h1>
+          <p className={adminPageDescription}>
             Upload paired .xlsx/.xlsm/.xlsxm workbooks and .docx report files per feasibility study.
             Files are automatically matched by job number from the filename.
           </p>
@@ -497,8 +496,8 @@ export default function UploadReportsPage() {
               </button>
             </div>
 
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="border border-neutral-200/75 dark:border-neutral-800 rounded-lg overflow-hidden">
+              <table className="min-w-full divide-y divide-neutral-200/75 dark:divide-neutral-800">
                 <thead className="bg-gray-50 dark:bg-gray-700/50">
                   <tr>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
@@ -518,11 +517,11 @@ export default function UploadReportsPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="divide-y divide-neutral-200/75 dark:divide-neutral-800">
                   {studyPairs.map((pair) => {
                     const hasBoth = !!pair.xlsx && !!pair.docx;
                     return (
-                      <tr key={pair.studyId} className="bg-white dark:bg-gray-800">
+                      <tr key={pair.studyId} className="bg-white dark:bg-neutral-900">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                           {pair.studyId}
                         </td>

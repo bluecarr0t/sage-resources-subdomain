@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useRef, useEffect, type Dispatch, type SetStateAction } from 'react';
 import { SageProperty } from '@/lib/types/sage';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
 
@@ -22,11 +22,10 @@ interface MapContextType {
   showOpportunityZones: boolean;
   populationYear: '2010' | '2020';
   isFullscreen: boolean;
-  setFilterCountry: (country: string[]) => void;
-  setFilterState: (state: string[]) => void;
-  setFilterUnitType: (unitType: string[]) => void;
-  setFilterRateRange: (rateRange: string[]) => void;
-  toggleCountry: (country: string) => void;
+  setFilterCountry: Dispatch<SetStateAction<string[]>>;
+  setFilterState: Dispatch<SetStateAction<string[]>>;
+  setFilterUnitType: Dispatch<SetStateAction<string[]>>;
+  setFilterRateRange: Dispatch<SetStateAction<string[]>>;
   toggleState: (state: string) => void;
   toggleUnitType: (unitType: string) => void;
   toggleRateRange: (rateRange: string) => void;
@@ -49,7 +48,8 @@ interface MapContextType {
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
 export function MapProvider({ children }: { children: ReactNode }) {
-  const [filterCountry, setFilterCountry] = useState<string[]>(['United States', 'Canada']);
+  /** Empty array = all countries in the published map dataset */
+  const [filterCountry, setFilterCountry] = useState<string[]>([]);
   const [filterState, setFilterState] = useState<string[]>([]);
   const [filterUnitType, setFilterUnitType] = useState<string[]>([]);
   const [filterRateRange, setFilterRateRange] = useState<string[]>([]);
@@ -73,12 +73,6 @@ export function MapProvider({ children }: { children: ReactNode }) {
 
   const [clientWorkPoints, setClientWorkPoints] = useState<ClientWorkMapPoint[]>([]);
   const [clientWorkPointsLoading, setClientWorkPointsLoading] = useState<boolean>(true);
-
-  const toggleCountry = (country: string) => {
-    setFilterCountry((prev) => 
-      prev.includes(country) ? prev.filter((c) => c !== country) : [...prev, country]
-    );
-  };
 
   const toggleState = (state: string) => {
     setFilterState((prev) => 
@@ -104,16 +98,14 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const toggleFullscreen = () => setIsFullscreen((prev) => !prev);
 
   const clearFilters = () => {
-    setFilterCountry(['United States', 'Canada']);
+    setFilterCountry([]);
     setFilterState([]);
     setFilterUnitType([]);
     setFilterRateRange([]);
   };
 
   const hasActiveFilters =
-    filterCountry.length !== 2 ||
-    !filterCountry.includes('United States') ||
-    !filterCountry.includes('Canada') ||
+    filterCountry.length > 0 ||
     filterState.length > 0 ||
     filterUnitType.length > 0 ||
     filterRateRange.length > 0;
@@ -142,8 +134,6 @@ export function MapProvider({ children }: { children: ReactNode }) {
         setPropertiesError(null);
 
         const params = new URLSearchParams();
-        params.append('country', 'United States');
-        params.append('country', 'Canada');
         params.append('fields', 'id,property_name,lat,lon,state,country,unit_type,rate_category');
 
         const response = await fetch(`/api/properties?${params.toString()}`, {
@@ -228,7 +218,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         showPopulationLayer, showGDPLayer, showOpportunityZones,
         populationYear, isFullscreen,
         setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange,
-        toggleCountry, toggleState, toggleUnitType, toggleRateRange,
+        toggleState, toggleUnitType, toggleRateRange,
         toggleNationalParks, toggleClientWork, setMapLayer, setPopulationYear, toggleFullscreen,
         clearFilters, hasActiveFilters,
         // allProperties serves as both the complete dataset AND the "properties" for processing

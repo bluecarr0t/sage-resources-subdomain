@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Card } from '@/components/ui';
 import { Calculator, ChevronLeft, ChevronRight, RefreshCw, Search, X } from 'lucide-react';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 interface CceCostRow {
   id: string;
@@ -137,13 +138,13 @@ export default function CceCostsPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className={`${adminPageHeadingMargin} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4`}>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Calculator className="w-10 h-10 text-sage-600" />
+            <h1 className={`${adminPageTitle} flex items-center gap-2`}>
+              <Calculator className="w-8 h-8 text-sage-600 shrink-0" />
               {t('title')}
             </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p className={`${adminPageDescription} mt-1`}>
               {t('subtitle')}
             </p>
           </div>
@@ -176,7 +177,7 @@ export default function CceCostsPage() {
                     setSearch(e.target.value);
                     resetPageOnFilter();
                   }}
-                  className={`w-full pl-10 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${search || isDebouncing || loading ? 'pr-24' : 'pr-4'}`}
+                  className={`w-full pl-10 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${search || isDebouncing || loading ? 'pr-24' : 'pr-4'}`}
                 />
                 {(isDebouncing || loading) && (
                   <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400 pointer-events-none">
@@ -209,7 +210,7 @@ export default function CceCostsPage() {
                   setBuildingClass(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               >
                 <option value="">{t('filters.all')}</option>
                 {BUILDING_CLASSES.map((c) => (
@@ -230,7 +231,7 @@ export default function CceCostsPage() {
                   setQualityType(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               >
                 <option value="">{t('filters.all')}</option>
                 {QUALITY_TYPES.map((q) => (
@@ -255,7 +256,7 @@ export default function CceCostsPage() {
                   setMinCost(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="w-full sm:w-28">
@@ -273,7 +274,7 @@ export default function CceCostsPage() {
                   setMaxCost(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               />
             </div>
           </div>
@@ -295,7 +296,7 @@ export default function CceCostsPage() {
               </button>
             </div>
           )}
-          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-3 pt-3 border-t border-neutral-200/75 dark:border-neutral-800">
             <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
               {loading ? (
                 <span className="text-gray-500 dark:text-gray-400">{t('table.loading')}</span>
@@ -323,8 +324,8 @@ export default function CceCostsPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                <table className="min-w-full divide-y divide-neutral-200/75 dark:divide-neutral-800">
+                  <thead className="bg-neutral-50/85 dark:bg-neutral-900/40">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                         {t('table.occupancy')}
@@ -352,9 +353,9 @@ export default function CceCostsPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-neutral-200/75 dark:divide-neutral-800">
                     {rows.map((row) => (
-                      <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                      <tr key={row.id} className="hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/30">
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
                           {row.cce_occupancies
                             ? `${row.cce_occupancies.occupancy_name} (${row.cce_occupancies.occupancy_code})`
@@ -388,7 +389,7 @@ export default function CceCostsPage() {
               </div>
 
               {pagination.total_pages > 1 && (
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="px-4 py-3 border-t border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Page {pagination.page} of {pagination.total_pages} ({pagination.total} total)
                   </div>

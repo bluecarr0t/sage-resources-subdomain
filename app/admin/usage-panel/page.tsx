@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui';
 import { Activity, Loader2, RefreshCw } from 'lucide-react';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 type CompsTotals = {
   runCount: number;
@@ -149,19 +150,19 @@ export default function UsagePanelPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className={`${adminPageHeadingMargin} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4`}>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Activity className="w-10 h-10 text-sage-600" />
+            <h1 className={`${adminPageTitle} flex items-center gap-2`}>
+              <Activity className="w-8 h-8 text-sage-600 shrink-0" />
               {t('title')}
             </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('subtitle')}</p>
+            <p className={`${adminPageDescription} mt-1`}>{t('subtitle')}</p>
           </div>
           <button
             type="button"
             onClick={() => void refresh()}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-neutral-200/75 dark:border-neutral-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
             {t('refresh')}
@@ -177,7 +178,7 @@ export default function UsagePanelPage() {
                 type="date"
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
-                className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-gray-900 dark:text-gray-100"
+                className="rounded-md border border-neutral-300/80 dark:border-neutral-600 bg-white dark:bg-neutral-950 px-3 py-2 text-gray-900 dark:text-gray-100"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -186,7 +187,7 @@ export default function UsagePanelPage() {
                 type="date"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
-                className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-gray-900 dark:text-gray-100"
+                className="rounded-md border border-neutral-300/80 dark:border-neutral-600 bg-white dark:bg-neutral-950 px-3 py-2 text-gray-900 dark:text-gray-100"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm min-w-[12rem]">
@@ -196,7 +197,7 @@ export default function UsagePanelPage() {
                 value={feature}
                 onChange={(e) => setFeature(e.target.value)}
                 placeholder={t('featurePlaceholder')}
-                className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-gray-900 dark:text-gray-100"
+                className="rounded-md border border-neutral-300/80 dark:border-neutral-600 bg-white dark:bg-neutral-950 px-3 py-2 text-gray-900 dark:text-gray-100"
               />
             </label>
             <button
@@ -273,7 +274,7 @@ export default function UsagePanelPage() {
                       </tr>
                     ) : (
                       data.compsV2.byDay.map((row) => (
-                        <tr key={row.date} className="border-t border-gray-100 dark:border-gray-800">
+                        <tr key={row.date} className="border-t border-neutral-100/85 dark:border-neutral-800">
                           <td className="p-3 text-gray-900 dark:text-gray-100">{row.date}</td>
                           <td className="p-3 text-right tabular-nums">{row.runCount}</td>
                           <td className="p-3 text-right tabular-nums">{row.tavily_queries_completed}</td>
@@ -322,7 +323,7 @@ export default function UsagePanelPage() {
                       </tr>
                     ) : (
                       Object.entries(data.adminAi.byFeature).map(([feat, row]) => (
-                        <tr key={feat} className="border-t border-gray-100 dark:border-gray-800">
+                        <tr key={feat} className="border-t border-neutral-100/85 dark:border-neutral-800">
                           <td className="p-3 font-mono text-xs text-gray-900 dark:text-gray-100">{feat}</td>
                           <td className="p-3 text-right tabular-nums">{row.eventCount}</td>
                           <td className="p-3 text-right tabular-nums">{row.inputTokens}</td>
@@ -353,7 +354,7 @@ export default function UsagePanelPage() {
                       </tr>
                     ) : (
                       data.adminAi.byDay.map((row) => (
-                        <tr key={row.date} className="border-t border-gray-100 dark:border-gray-800">
+                        <tr key={row.date} className="border-t border-neutral-100/85 dark:border-neutral-800">
                           <td className="p-3 text-gray-900 dark:text-gray-100">{row.date}</td>
                           <td className="p-3 text-right tabular-nums">{row.eventCount}</td>
                           <td className="p-3 text-right tabular-nums">{row.totalTokens}</td>
@@ -392,7 +393,7 @@ export default function UsagePanelPage() {
                       </tr>
                     ) : (
                       data.adminAi.recentEvents.map((ev, i) => (
-                        <tr key={`${ev.created_at}-${i}`} className="border-t border-gray-100 dark:border-gray-800">
+                        <tr key={`${ev.created_at}-${i}`} className="border-t border-neutral-100/85 dark:border-neutral-800">
                           <td className="p-3 whitespace-nowrap text-gray-900 dark:text-gray-100">
                             {new Date(ev.created_at).toLocaleString()}
                           </td>
@@ -427,7 +428,7 @@ export default function UsagePanelPage() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-900/40">
+    <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 p-3 bg-white dark:bg-neutral-950/40">
       <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
       <div className="text-lg font-semibold tabular-nums text-gray-900 dark:text-gray-100">{value}</div>
     </div>

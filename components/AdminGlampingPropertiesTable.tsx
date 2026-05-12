@@ -507,7 +507,7 @@ function EditModal({
   return (
     <Modal open={open} onClose={busy ? () => undefined : onClose} className="max-w-3xl">
       <ModalContent className="max-h-[85vh] flex flex-col">
-        <div className="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-start justify-between gap-4 px-6 py-4 border-b border-neutral-200/75 dark:border-neutral-800">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {mode === 'create' ? t('addPropertyTitle') : t('editPropertyTitle')}
@@ -542,7 +542,7 @@ function EditModal({
                   const id = `edit-${field.key}`;
                   const value = draft[field.key] ?? '';
                   const inputClasses =
-                    'w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none disabled:opacity-50';
+                    'w-full px-3 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none disabled:opacity-50';
                   const colSpan = field.type === 'textarea' ? 'md:col-span-2' : '';
                   const labelText =
                     field.key === 'url' ? t('fieldWebsite') : humanizeKey(field.key);
@@ -616,7 +616,7 @@ function EditModal({
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-3 border-t border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40 rounded-b-lg">
           <div>
             {mode === 'edit' ? (
               <Button
@@ -853,10 +853,10 @@ export default function AdminGlampingPropertiesTable() {
   };
 
   const headerCellClass =
-    'text-left bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700';
+    'text-left bg-neutral-50/85 dark:bg-neutral-900/45 border-b border-neutral-200/75 dark:border-neutral-800';
   const sortHeaderButtonClass =
     'flex w-full min-w-0 items-center justify-between gap-1 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700/60 dark:hover:text-white transition-colors';
-  const bodyCellClass = 'px-3 py-2 text-sm align-top border-b border-gray-100 dark:border-gray-800';
+  const bodyCellClass = 'px-3 py-2 text-sm align-top border-b border-neutral-100/85 dark:border-neutral-800';
 
   const summary = useMemo(() => {
     if (total === 0) return '0 properties';
@@ -867,8 +867,8 @@ export default function AdminGlampingPropertiesTable() {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="flex flex-col gap-3 border-b border-gray-100 bg-gray-50/80 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/70 sm:flex-row sm:items-center sm:justify-between">
+      <div className="overflow-hidden rounded-xl border border-neutral-200/70 bg-white shadow-sm dark:border-neutral-800 dark:bg-gray-800">
+        <div className="flex flex-col gap-3 border-b border-gray-100 bg-gray-50/80 px-4 py-3 dark:border-neutral-800 dark:bg-gray-800/70 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {t('controlsHeading')}
@@ -901,7 +901,7 @@ export default function AdminGlampingPropertiesTable() {
               onClick={() => handleExport('csv')}
               disabled={exportingFormat !== null}
               aria-label={t('exportCsvAria')}
-              className="bg-white dark:bg-gray-800"
+              className="bg-white dark:bg-neutral-900"
             >
               <span className="inline-flex items-center gap-1.5">
                 <Download className="w-4 h-4" aria-hidden />
@@ -915,7 +915,7 @@ export default function AdminGlampingPropertiesTable() {
               onClick={() => handleExport('xlsx')}
               disabled={exportingFormat !== null}
               aria-label={t('exportXlsxAria')}
-              className="bg-white dark:bg-gray-800"
+              className="bg-white dark:bg-neutral-900"
             >
               <span className="inline-flex items-center gap-1.5">
                 <Download className="w-4 h-4" aria-hidden />
@@ -944,7 +944,7 @@ export default function AdminGlampingPropertiesTable() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder={t('searchPlaceholder')}
-                className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
               />
             </div>
           </div>
@@ -973,7 +973,7 @@ export default function AdminGlampingPropertiesTable() {
             <select
               value={statusFilter}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
             >
               {RESEARCH_STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -991,7 +991,7 @@ export default function AdminGlampingPropertiesTable() {
               id="sage-data-country-filter"
               value={countryFilter}
               onChange={(e) => handleCountryChange(e.target.value)}
-              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
               aria-busy={countryNames === null}
               aria-label={t('countryLabel')}
               title={
@@ -1018,7 +1018,7 @@ export default function AdminGlampingPropertiesTable() {
               id="sage-data-missing-filter"
               value={missingDataFilter}
               onChange={(e) => handleMissingDataChange(e.target.value)}
-              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
               aria-label={t('missingDataAria')}
             >
               {MISSING_DATA_OPTIONS.map((opt) => (
@@ -1059,7 +1059,7 @@ export default function AdminGlampingPropertiesTable() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow border border-neutral-200/75 dark:border-neutral-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead>
@@ -1182,7 +1182,7 @@ export default function AdminGlampingPropertiesTable() {
           </table>
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40">
           <div className="text-xs text-gray-500 dark:text-gray-400">
             Page {page} of {totalPages}
           </div>
@@ -1246,7 +1246,7 @@ export default function AdminGlampingPropertiesTable() {
         className="max-w-lg"
       >
         <ModalContent className="flex max-h-[min(70vh,560px)] flex-col">
-          <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+          <div className="border-b border-gray-200 px-6 py-4 dark:border-neutral-800">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {t('statusNoteModalTitle')}
             </h2>
@@ -1259,7 +1259,7 @@ export default function AdminGlampingPropertiesTable() {
               ? statusNotePreview.notes
               : t('statusNoteBodyEmpty')}
           </div>
-          <div className="flex justify-end gap-2 border-t border-gray-200 px-6 py-3 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
+          <div className="flex justify-end gap-2 border-t border-gray-200 px-6 py-3 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40 rounded-b-lg">
             <Button variant="secondary" onClick={() => setStatusNotePreview(null)}>
               {t('statusNoteClose')}
             </Button>

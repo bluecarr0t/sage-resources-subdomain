@@ -18,6 +18,7 @@ import {
   List,
 } from 'lucide-react';
 import { qualityScoreToDisplay } from '@/lib/feasibility-utils';
+import { adminPageTitle } from '@/lib/admin-ui';
 
 /** Detect titles that are mis-extracted descriptions rather than resort names */
 function isMisExtractedTitle(title: string | null): boolean {
@@ -418,7 +419,7 @@ export default function StudyDetailPage() {
           </button>
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+              <h1 className={`${adminPageTitle} mb-1`}>
                 {displayTitle(report)}
               </h1>
               <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -490,7 +491,7 @@ export default function StudyDetailPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Stat</th>
                     <th className="text-center px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Units</th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Low ADR</th>
@@ -530,7 +531,7 @@ export default function StudyDetailPage() {
               {phaseSummaries.map((phase) => (
                 <div
                   key={phase.id}
-                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+                  className="p-4 border border-neutral-200/75 dark:border-neutral-800 rounded-lg bg-neutral-50/85 dark:bg-neutral-900/40"
                 >
                   <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">
                     {phase.label}
@@ -571,7 +572,7 @@ export default function StudyDetailPage() {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {comparables.map((comp) => (
-              <div key={comp.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800/50 flex flex-col">
+              <div key={comp.id} className="p-4 border border-neutral-200/75 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900/50 flex flex-col">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                     {comp.comp_name}
@@ -602,7 +603,7 @@ export default function StudyDetailPage() {
                   )}
                 </div>
                 {comp.amenity_keywords && comp.amenity_keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-auto pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <div className="flex flex-wrap gap-1 mt-auto pt-2 border-t border-neutral-100/85 dark:border-neutral-800">
                     {comp.amenity_keywords.map((kw) => (
                       <span
                         key={kw}
@@ -645,7 +646,7 @@ export default function StudyDetailPage() {
                 </div>
               )}
               {val.total_units !== null && (
-                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="p-3 bg-neutral-50/85 dark:bg-neutral-900/45 rounded-lg">
                   <p className="text-xs text-gray-500 dark:text-gray-400">Total Units</p>
                   <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{val.total_units}</p>
                 </div>
@@ -710,7 +711,7 @@ export default function StudyDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                         <th className="text-left px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">Unit Type</th>
                         <th className="text-right px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">Daily</th>
                         <th className="text-right px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">Weekly</th>
@@ -739,7 +740,7 @@ export default function StudyDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                         <th className="text-center px-2 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">Year</th>
                         <th className="text-right px-2 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">Revenue</th>
                         <th className="text-right px-2 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">Expenses</th>
@@ -774,7 +775,7 @@ export default function StudyDetailPage() {
             </h2>
             <div className="space-y-4">
               {proFormaUnits.map((pfu) => (
-                <div key={pfu.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <div key={pfu.id} className="border border-neutral-200/75 dark:border-neutral-800 rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">{pfu.unit_type}</h3>
                     {pfu.unit_category && (
@@ -792,7 +793,7 @@ export default function StudyDetailPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                        <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                           <th className="text-center px-2 py-1 text-xs font-semibold text-gray-600 dark:text-gray-400">Year</th>
                           <th className="text-right px-2 py-1 text-xs font-semibold text-gray-600 dark:text-gray-400">ADR</th>
                           <th className="text-right px-2 py-1 text-xs font-semibold text-gray-600 dark:text-gray-400">Occupancy</th>
@@ -896,7 +897,7 @@ export default function StudyDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                         <th className="text-center px-2 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">Year</th>
                         <th className="text-right px-2 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">NOI</th>
                         <th className="text-right px-2 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400">Net Income to Equity</th>
@@ -932,7 +933,7 @@ export default function StudyDetailPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <tr className="border-b border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Line Item</th>
                     <th className="text-center px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Category</th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Per Unit</th>
@@ -941,7 +942,7 @@ export default function StudyDetailPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {developmentCosts.map((dc) => (
-                    <tr key={dc.id} className={dc.category === 'total' ? 'font-semibold bg-gray-50 dark:bg-gray-800/30' : ''}>
+                    <tr key={dc.id} className={dc.category === 'total' ? 'font-semibold bg-neutral-50/70 dark:bg-neutral-900/30' : ''}>
                       <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{dc.line_item}</td>
                       <td className="px-3 py-2 text-center">
                         <span className="inline-block px-2 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
@@ -968,7 +969,7 @@ export default function StudyDetailPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <tr className="border-b border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Source / Unit Type</th>
                     <th className="text-center px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Category</th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Low Rate</th>
@@ -1014,7 +1015,7 @@ export default function StudyDetailPage() {
               {occupancyProjections.map((op) => (
                 <div
                   key={op.id}
-                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800/50"
+                  className="p-4 border border-neutral-200/75 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900/50"
                 >
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">{op.unit_type}</h3>
                   <div className="grid grid-cols-3 gap-3 text-sm mb-3">
@@ -1068,7 +1069,7 @@ export default function StudyDetailPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <tr className="border-b border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40">
                     <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Radius</th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Pop. (2020)</th>
                     <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Pop. (Projected)</th>
@@ -1107,7 +1108,7 @@ export default function StudyDetailPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <tr className="border-b border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/85 dark:bg-neutral-900/40">
                   <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Property</th>
                   <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Unit Type</th>
                   <th className="text-center px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Category</th>
@@ -1122,7 +1123,7 @@ export default function StudyDetailPage() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {allUnits.map((unit) => (
-                  <tr key={unit.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                  <tr key={unit.id} className="hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/30">
                     <td className="px-3 py-2 text-gray-800 dark:text-gray-200 truncate max-w-[160px]">
                       {unit.property_name}
                     </td>

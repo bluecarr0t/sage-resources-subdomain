@@ -9,6 +9,7 @@ import { GoogleMap, InfoWindow, Marker } from '@react-google-maps/api';
 import { Button } from '@/components/ui';
 import MultiSelect from '@/components/MultiSelect';
 import { canonicalReportService, reportServiceLabel } from '@/lib/report-service-display';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 interface ReportMarker {
   id: string;
@@ -244,7 +245,7 @@ function ClientMapContent() {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 items-end p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="flex flex-wrap gap-4 items-end p-4 bg-neutral-50/85 dark:bg-neutral-900/40 rounded-lg border border-neutral-200/75 dark:border-neutral-800">
         <div className="min-w-[200px]">
           <MultiSelect
             id="resort-type-filter"
@@ -313,7 +314,7 @@ function ClientMapContent() {
       </div>
 
       <div className="w-full">
-        <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="rounded-lg overflow-hidden border border-neutral-200/75 dark:border-neutral-800">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={
@@ -390,11 +391,9 @@ export default function ClientMapPage() {
   return (
     <main className="pb-2 sm:pb-3 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Client Map
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className={adminPageHeadingMargin}>
+          <h1 className={`${adminPageTitle} mb-1`}>Client Map</h1>
+          <p className={adminPageDescription}>
             Interactive map of your feasibility study reports
           </p>
         </div>

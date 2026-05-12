@@ -70,7 +70,7 @@ export function SageAiMarkdownTable({
         <button
           type="button"
           onClick={() => void runExport('csv')}
-          className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+          className="inline-flex items-center gap-1 rounded-md border border-neutral-200/70 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-950 dark:text-gray-200 dark:hover:bg-gray-800"
           aria-label={t('tableDownloadCsvAria')}
         >
           <FileText className="h-3.5 w-3.5 opacity-80" aria-hidden />
@@ -79,14 +79,14 @@ export function SageAiMarkdownTable({
         <button
           type="button"
           onClick={() => void runExport('xlsx')}
-          className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+          className="inline-flex items-center gap-1 rounded-md border border-neutral-200/70 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-950 dark:text-gray-200 dark:hover:bg-gray-800"
           aria-label={t('tableDownloadXlsxAria')}
         >
           <FileSpreadsheet className="h-3.5 w-3.5 opacity-80" aria-hidden />
           {t('tableDownloadXlsx')}
         </button>
       </div>
-      <div className="max-w-full overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="max-w-full overflow-x-auto rounded-lg border border-neutral-200/75 dark:border-neutral-800">
         <table
           ref={tableRef}
           className={className}

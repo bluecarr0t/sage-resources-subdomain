@@ -171,8 +171,7 @@ async function fetchPropertiesFromDatabase(
 
   // Filter by country
   if (filterCountry.length === 0) {
-    // No countries selected - return empty result
-    query = query.eq('id', -1); // This will return no results
+    // No country params — same published/open/glamping scope as map worldwide load
   } else if (filterCountry.length === 1) {
     // Only one country selected
     if (filterCountry.includes('United States')) {

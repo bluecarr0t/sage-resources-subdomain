@@ -85,7 +85,7 @@ export function FeasibilitySectionPreview({
   };
 
   return (
-    <div className="my-4 rounded-lg border border-sage-200 bg-white shadow-sm dark:border-sage-800 dark:bg-gray-900">
+    <div className="my-4 rounded-lg border border-sage-200 bg-white shadow-sm dark:border-sage-800 dark:bg-neutral-950">
       <div className="flex items-center justify-between gap-3 border-b border-sage-100 px-4 py-2.5 dark:border-sage-800/60">
         <div className="flex items-center gap-2 min-w-0">
           <FileText className="w-4 h-4 text-sage-600 dark:text-sage-300 shrink-0" />
@@ -187,7 +187,7 @@ function BlockView({ block }: { block: FeasibilityBlock }) {
                 <th
                   key={i}
                   scope="col"
-                  className="border border-gray-300 px-2 py-1.5 font-bold dark:border-gray-700"
+                  className="border border-gray-300 px-2 py-1.5 font-bold dark:border-neutral-800"
                   style={{
                     backgroundColor: TABLE_HEADER_FILL,
                     color: '#1f2937',
@@ -208,7 +208,7 @@ function BlockView({ block }: { block: FeasibilityBlock }) {
                   return (
                     <td
                       key={ci}
-                      className="border border-gray-300 px-2 py-1.5 dark:border-gray-700"
+                      className="border border-gray-300 px-2 py-1.5 dark:border-neutral-800"
                       style={{ textAlign: align }}
                     >
                       {cell}

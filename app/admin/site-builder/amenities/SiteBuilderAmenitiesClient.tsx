@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Card, Button, Input, Select } from '@/components/ui';
 import { ArrowLeft, Loader2, Check } from 'lucide-react';
+import { adminPageDescription, adminPageTitle } from '@/lib/admin-ui';
 
 type AppliesTo = 'glamping' | 'rv' | 'both';
 type ResortTypeFilter = 'all' | AppliesTo;
@@ -250,8 +251,8 @@ export default function SiteBuilderAmenitiesClient() {
           <ArrowLeft className="h-4 w-4" aria-hidden />
           {t('amenitiesBackToSiteBuilder')}
         </Link>
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{t('amenitiesPageTitle')}</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('amenitiesPageSubtitle')}</p>
+        <h1 className={adminPageTitle}>{t('amenitiesPageTitle')}</h1>
+        <p className={`mt-1 ${adminPageDescription}`}>{t('amenitiesPageSubtitle')}</p>
       </div>
 
       {loadError ? (
@@ -359,7 +360,7 @@ export default function SiteBuilderAmenitiesClient() {
               <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <table className="w-full min-w-[520px] text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-600 text-left">
+                    <tr className="border-b border-neutral-200/75 dark:border-neutral-700 text-left">
                       <th className="pb-2 pr-3 font-medium text-gray-700 dark:text-gray-300 w-[110px]">
                         {t('amenitiesColumnLevel')}
                       </th>
@@ -399,7 +400,7 @@ export default function SiteBuilderAmenitiesClient() {
                       return (
                         <tr
                           key={r.id}
-                          className={`border-b border-gray-100 dark:border-gray-700/50 align-top ${
+                          className={`border-b border-neutral-100/90 dark:border-neutral-800/50 align-top ${
                             r.dirty ? 'bg-amber-50/50 dark:bg-amber-950/10' : ''
                           }`}
                         >

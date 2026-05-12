@@ -74,7 +74,7 @@ export default function CompsV2ResultsSection({
             : t('resultsPropertiesFound', { count: filteredCandidates.length })}
         </h2>
         <div
-          className="inline-flex rounded-lg border border-gray-400 dark:border-gray-600 p-0.5 bg-gray-200 dark:bg-gray-950 shrink-0"
+          className="inline-flex rounded-lg border border-gray-400 dark:border-neutral-700 p-0.5 bg-gray-200 dark:bg-gray-950 shrink-0"
           role="group"
           aria-label={t('resultsViewToggleGroup')}
         >
@@ -83,7 +83,7 @@ export default function CompsV2ResultsSection({
             onClick={() => setResultsViewMode('list')}
             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
               resultsViewMode === 'list'
-                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-sm'
                 : 'text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-gray-100'
             }`}
             aria-pressed={resultsViewMode === 'list'}
@@ -95,7 +95,7 @@ export default function CompsV2ResultsSection({
             onClick={() => setResultsViewMode('map')}
             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
               resultsViewMode === 'map'
-                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-sm'
                 : 'text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-gray-100'
             }`}
             aria-pressed={resultsViewMode === 'map'}
@@ -116,7 +116,7 @@ export default function CompsV2ResultsSection({
                 value={resultsSearch}
                 onChange={(e) => setResultsSearch(e.target.value)}
                 placeholder={t('resultsSearchPlaceholder')}
-                className="w-full border rounded-md px-3 py-2 text-sm dark:bg-gray-900 dark:border-gray-700"
+                className="w-full border rounded-md px-3 py-2 text-sm dark:bg-neutral-950 dark:border-neutral-800"
                 autoComplete="off"
               />
             </label>

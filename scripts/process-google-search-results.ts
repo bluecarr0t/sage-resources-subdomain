@@ -110,7 +110,7 @@ ORIGINAL SEARCH RESULTS:
 36. AutoCamp Yosemite - Near Yosemite National Park, CA - Airstreams and canvas tents
 37. Treebones Resort - Big Sur, CA - Glamping yurts overlooking Pacific Ocean
 38. Collective Vail - Vail Valley, CO - Elegant tents with alpine views
-39. Ulum Moab - Moab, UT - Safari-inspired suite tents
+39. ULUM Moab - Moab, UT - Safari-inspired suite tents
 `;
 
 async function sleep(ms: number): Promise<void> {

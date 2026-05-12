@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import AdminGlampingPropertiesTable from '@/components/AdminGlampingPropertiesTable';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 export const metadata: Metadata = {
   title: 'Sage Data Editor - Sage Admin',
@@ -24,11 +25,11 @@ export default function SageDataPage() {
           Back to Sage Glamping Data Breakdown
         </Link>
 
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+        <div className={adminPageHeadingMargin}>
+          <h1 className={adminPageTitle}>
             Sage Data Editor
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className={`${adminPageDescription} mt-2`}>
             Browse and edit rows in <code className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">all_glamping_properties</code>.
             <span className="font-medium">Click a row</span> to open the editor, or use keyboard (focus a row, then Enter or Space). Follow URL links to open the site; they do not open the editor.
           </p>

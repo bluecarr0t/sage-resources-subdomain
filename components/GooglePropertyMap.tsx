@@ -76,7 +76,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError,
     hasLoadedOnce, isFullscreen, toggleFullscreen,
     setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange,
-    toggleCountry, toggleState, toggleUnitType, toggleRateRange,
+    toggleState, toggleUnitType, toggleRateRange,
   } = useMapContext();
 
   const t = useTranslations('map');

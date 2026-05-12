@@ -23,6 +23,7 @@ import {
   Line,
 } from 'recharts';
 import { qualityScoreToDisplay } from '@/lib/feasibility-utils';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 interface AnalyticsData {
   summary: {
@@ -151,7 +152,7 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+    <div className="flex items-center gap-3 p-4 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl">
       <div className="p-2 bg-sage-50 dark:bg-sage-900/30 rounded-lg">
         <Icon className="w-5 h-5 text-sage-600 dark:text-sage-400" />
       </div>
@@ -217,7 +218,7 @@ export default function AnalyticsPage() {
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className={adminPageHeadingMargin}>
           <button
             onClick={() => router.push('/admin/comparables')}
             className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 mb-4 transition-colors"
@@ -225,10 +226,10 @@ export default function AnalyticsPage() {
             <ArrowLeft className="w-4 h-4" />
             Back to Comparables
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className={`${adminPageTitle} mb-1`}>
             Comparables Analytics
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className={adminPageDescription}>
             Market insights aggregated across all feasibility studies
           </p>
         </div>
@@ -379,7 +380,7 @@ export default function AnalyticsPage() {
                     const d = payload[0].payload;
                     const qs = qualityScoreToDisplay(d.quality_score);
                     return (
-                      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 text-xs">
+                      <div className="bg-white dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-800 rounded-lg shadow-lg p-3 text-xs">
                         <p className="font-semibold text-gray-900 dark:text-gray-100">{d.property_name}</p>
                         <p className="text-gray-600 dark:text-gray-400">
                           {formatCategoryLabel(d.unit_category)}
@@ -482,7 +483,7 @@ export default function AnalyticsPage() {
                     )}
                   </div>
                   {data.valuation_summary.avg_revenue !== null && (
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-3 bg-neutral-50/85 dark:bg-neutral-900/45 rounded-lg">
                       <p className="text-xs text-gray-500 dark:text-gray-400">Avg Revenue</p>
                       <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
                         ${(data.valuation_summary.avg_revenue / 1_000_000).toFixed(1)}M
@@ -611,7 +612,7 @@ export default function AnalyticsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                         <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Radius</th>
                         <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Avg Population</th>
                         <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">Avg Median Income</th>

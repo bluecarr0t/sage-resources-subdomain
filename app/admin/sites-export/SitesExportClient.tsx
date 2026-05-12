@@ -14,6 +14,7 @@ import {
   sitesExportMergedUnitTypeOptionValues,
   sitesExportUnitTypeOptionValuesForTable,
 } from '@/lib/sites-export/unit-type-options-by-source';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 const ALL_TOKEN = 'all';
 
@@ -398,11 +399,11 @@ export default function SitesExportClient() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
+        <header className={adminPageHeadingMargin}>
+          <h1 className={adminPageTitle}>
             {t('title')}
           </h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">{t('subtitle')}</p>
+          <p className={`mt-1 ${adminPageDescription}`}>{t('subtitle')}</p>
           {geoValid && hasRegionScope && (
             <p className="mt-3 text-sm text-gray-700 dark:text-gray-300" aria-live="polite">
               {t('countSummary', { count: countSummaryValue })}
@@ -511,7 +512,7 @@ export default function SitesExportClient() {
 
         {exporting && (
           <div
-            className="mt-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4"
+            className="mt-8 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-neutral-50/80 dark:bg-neutral-950/55/40 p-4"
             role="status"
             aria-live="polite"
             aria-busy="true"

@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 export const metadata: Metadata = {
   title: 'AI Research Pipeline - Sage Admin',
@@ -91,17 +92,17 @@ export default function AIResearchPipelinePage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
+        <div className={adminPageHeadingMargin}>
           <Link
             href="/admin/sage-glamping-data-breakdown"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 mb-4"
           >
             ← Back to Sage Glamping Data Breakdown
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className={adminPageTitle}>
             AI Research Pipeline
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+          <p className={`${adminPageDescription} mt-2`}>
             How we discover and enrich glamping property data using Tavily, Firecrawl, and OpenAI. This
             pipeline powers the Sage Glamping database and ensures only qualifying resorts are added.
           </p>
@@ -109,10 +110,10 @@ export default function AIResearchPipelinePage() {
 
         {/* Visual pipeline diagram */}
         <section
-          className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden"
+          className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm overflow-hidden"
           aria-label="Pipeline steps"
         >
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+          <div className="px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-800 bg-gray-50 dark:bg-gray-800/60">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Pipeline overview
             </h2>
@@ -129,11 +130,11 @@ export default function AIResearchPipelinePage() {
                 return (
                   <div key={step.id} className="flex flex-col items-stretch">
                     <div
-                      className={`flex flex-col sm:flex-row sm:items-start gap-4 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 ${step.color}`}
+                      className={`flex flex-col sm:flex-row sm:items-start gap-4 rounded-xl border border-neutral-200/75 dark:border-neutral-800 p-4 sm:p-5 ${step.color}`}
                     >
                       <div className="flex items-center gap-3 shrink-0">
                         <span
-                          className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 font-bold text-gray-900 dark:text-gray-100"
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-700 font-bold text-gray-900 dark:text-gray-100"
                           aria-hidden
                         >
                           {step.id}
@@ -165,29 +166,29 @@ export default function AIResearchPipelinePage() {
         </section>
 
         {/* Services at a glance */}
-        <section className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+        <section className="mt-8 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-800 bg-gray-50 dark:bg-gray-800/60">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               The three services
             </h2>
           </div>
           <div className="p-6 sm:p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-blue-50/50 dark:bg-blue-950/20">
+              <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 p-4 bg-blue-50/50 dark:bg-blue-950/20">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">Tavily</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Web search that returns full page content (markdown). Used for discovery, stable
                   facts, and volatile data (prices, reviews).
                 </p>
               </div>
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-amber-50/50 dark:bg-amber-950/20">
+              <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 p-4 bg-amber-50/50 dark:bg-amber-950/20">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">Firecrawl</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Deep scrape of specific URLs (e.g. property site, Hipcamp). Renders JavaScript and
                   returns markdown so we can read amenities and booking details.
                 </p>
               </div>
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-slate-50 dark:bg-slate-800/40">
+              <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 p-4 bg-slate-50 dark:bg-slate-800/40">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">OpenAI (GPT)</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Lists entities in discovery; extracts structured data from web content using strict
@@ -199,8 +200,8 @@ export default function AIResearchPipelinePage() {
         </section>
 
         {/* Glamping inclusion criteria */}
-        <section className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+        <section className="mt-8 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-800 bg-gray-50 dark:bg-gray-800/60">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Glamping resort inclusion criteria
             </h2>

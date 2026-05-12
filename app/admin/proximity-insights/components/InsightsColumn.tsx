@@ -145,7 +145,7 @@ export function InsightsColumn({
                     const wd = p[wdKey] as number | null | undefined;
                     const we = p[weKey] as number | null | undefined;
                     return (
-                      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-3 py-2 text-sm">
+                      <div className="bg-white dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-800 rounded-lg shadow-lg px-3 py-2 text-sm">
                         <p className="font-medium text-gray-900 dark:text-gray-100">{p.band}</p>
                         <p className="text-gray-600 dark:text-gray-400">
                           {t('bandTooltipProperties', { count: p.count })}
@@ -205,7 +205,7 @@ export function InsightsColumn({
                     };
                     const occ = p['Avg Occupancy %'];
                     return (
-                      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-3 py-2 text-sm">
+                      <div className="bg-white dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-800 rounded-lg shadow-lg px-3 py-2 text-sm">
                         <p className="font-medium text-gray-900 dark:text-gray-100">{p.band}</p>
                         <p className="text-gray-600 dark:text-gray-400">
                           {t('bandTooltipProperties', { count: p.count })}
@@ -260,7 +260,7 @@ export function InsightsColumn({
                       const total = p.units ?? 0;
                       const withRates = p.count_with_winter_rates ?? 0;
                       return (
-                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-3 py-2 text-sm">
+                        <div className="bg-white dark:bg-neutral-900 border border-neutral-200/75 dark:border-neutral-800 rounded-lg shadow-lg px-3 py-2 text-sm">
                           <p className="font-medium text-gray-900 dark:text-gray-100">{p.source}</p>
                           <p className="text-gray-600 dark:text-gray-400">
                             {t('sourceTooltipUnits', { total, withRates })}
@@ -328,7 +328,7 @@ export function InsightsColumn({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
+                <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                   <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
                     {t('state')}
                   </th>
@@ -423,7 +423,7 @@ export function InsightsColumn({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
+                <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                   <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
                     {t('property')}
                   </th>
@@ -485,7 +485,7 @@ export function InsightsColumn({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
+                <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                   <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
                     {colAnchorType === 'national-parks' ? t('nationalPark') : t('skiResort')}
                   </th>

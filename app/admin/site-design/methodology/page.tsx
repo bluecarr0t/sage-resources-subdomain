@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 export const metadata: Metadata = {
   title: 'Calculator Methodology - RV Site Setup | Sage Admin',
@@ -15,9 +16,9 @@ export const metadata: Metadata = {
 const tableBase =
   'min-w-full text-sm border-collapse rounded-lg overflow-hidden';
 const thBase =
-  'text-left font-semibold bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 px-4 py-3 border-b border-gray-200 dark:border-gray-600';
+  'text-left font-semibold bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 px-4 py-3 border-b border-neutral-200/75 dark:border-neutral-700';
 const tdBase =
-  'px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 text-gray-700 dark:text-gray-300';
+  'px-4 py-3 border-b border-neutral-100/90 dark:border-neutral-800/50 text-gray-700 dark:text-gray-300';
 const tdAlt = 'bg-gray-50/50 dark:bg-gray-800/30';
 
 function Section({
@@ -87,11 +88,11 @@ export default function SiteDesignMethodologyPage() {
           Back to RV Site Setup
         </Link>
 
-        <header className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+        <header className={adminPageHeadingMargin}>
+          <h1 className={adminPageTitle}>
             RV Site Setup — Methodology & Calculations
           </h1>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+          <div className={`mt-2 flex flex-wrap gap-x-4 gap-y-1 ${adminPageDescription}`}>
             <span>Tool: RV Site Setup (Yield & Economics)</span>
             <span>·</span>
             <span>Location: /admin/rv-site-setup</span>
@@ -145,7 +146,7 @@ export default function SiteDesignMethodologyPage() {
           </Section>
 
           <Section id="constants" num={2} title="Constants">
-            <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 overflow-hidden">
               <table className={tableBase}>
                 <thead>
                   <tr>
@@ -169,7 +170,7 @@ export default function SiteDesignMethodologyPage() {
 
           <Section id="inputs" num={3} title="Input Parameters">
             <SubSection title="3.1 Parcel & Road">
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 overflow-hidden">
                 <table className={tableBase}>
                   <thead>
                     <tr>
@@ -200,7 +201,7 @@ export default function SiteDesignMethodologyPage() {
             </SubSection>
 
             <SubSection title="3.2 Operating Assumptions">
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 overflow-hidden">
                 <table className={tableBase}>
                   <thead>
                     <tr>
@@ -230,7 +231,7 @@ export default function SiteDesignMethodologyPage() {
             </SubSection>
 
             <SubSection title="3.3 Site Types">
-              <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 overflow-hidden">
                 <table className={tableBase}>
                   <thead>
                     <tr>
@@ -334,7 +335,7 @@ export default function SiteDesignMethodologyPage() {
           </Section>
 
           <Section id="assumptions" num={7} title="Assumptions & Limitations">
-            <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 overflow-hidden">
               <table className={tableBase}>
                 <thead>
                   <tr>
@@ -383,7 +384,7 @@ export default function SiteDesignMethodologyPage() {
           </Section>
 
           <Section id="control" num={9} title="Document Control">
-            <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 overflow-hidden">
               <table className={tableBase}>
                 <thead>
                   <tr>
@@ -405,7 +406,7 @@ export default function SiteDesignMethodologyPage() {
             </div>
           </Section>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-10 pt-6 border-t border-neutral-200/75 dark:border-neutral-800">
             This document may be shared internally and externally. For questions
             or updates, contact the Sage Outdoor Advisory team.
           </p>

@@ -27,54 +27,54 @@ export default function MapLayoutNoLocale() {
   const { isFullscreen, toggleFullscreen } = useMapContext();
 
   return (
-    <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-gray-50">
+    <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-stone-100/80">
       {/* Left Sidebar - Hidden on mobile when fullscreen */}
       <aside 
-        className={`w-full md:w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col overflow-y-auto shadow-sm relative z-20 md:max-h-screen transition-transform duration-300 ${
+        className={`w-full md:w-80 lg:w-96 flex flex-col overflow-y-auto relative z-20 md:max-h-screen transition-transform duration-300 border-r border-stone-200/90 bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 ${
           isFullscreen ? 'hidden md:flex' : 'flex'
         }`}
       >
-        <div className="p-4 md:p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+        <div className="p-4 md:p-5 border-b border-stone-300 bg-white/90 backdrop-blur-sm">
           {/* Breadcrumb Navigation */}
-          <nav aria-label="Breadcrumb" className="mb-4">
-            <ol className="flex items-center gap-1.5 text-sm text-gray-600">
+          <nav aria-label="Breadcrumb" className="mb-3">
+            <ol className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-stone-500">
               <li>
                 <Link
                   href="/"
-                  className="hover:text-gray-900 transition-colors"
+                  className="text-stone-900 hover:text-black normal-case underline-offset-2 hover:underline transition-colors"
                 >
                   Home
                 </Link>
               </li>
-              <li aria-hidden="true" className="text-gray-400">/</li>
-              <li className="text-gray-900 font-medium" aria-current="page">
+              <li aria-hidden="true" className="text-stone-300">/</li>
+              <li className="text-stone-800 tracking-normal normal-case" aria-current="page">
                 Map
               </li>
             </ol>
           </nav>
           
           {/* SEO Content Section */}
-          <section className="mb-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <section className="mb-0">
+            <h1 className="text-lg font-semibold tracking-tight text-stone-900 leading-snug">
               Glamping Properties Map
             </h1>
           </section>
         </div>
         
         {/* Filters Section */}
-        <section className="p-4 md:p-6 space-y-6 flex-1 relative overflow-visible md:overflow-y-auto">
+        <section className="pt-1 pb-4 px-4 md:pt-2 md:pb-5 md:px-5 flex-1 relative overflow-visible md:overflow-y-auto">
           <DynamicGooglePropertyMapSidebar showMap={false} />
         </section>
         
         {/* Footer */}
-        <div className="p-4 md:p-6 border-t border-gray-200 mt-auto">
-          <p className="text-xs text-gray-500 text-center">
+        <div className="py-3 px-4 border-t border-stone-100 mt-auto">
+          <p className="text-[11px] text-stone-400 text-center leading-relaxed">
             Powered by{' '}
             <a
               href="https://sageoutdooradvisory.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-600 hover:text-gray-900 underline transition-colors"
+              className="text-blue-600 hover:text-blue-800 underline-offset-2 hover:underline transition-colors"
             >
               Sage Outdoor Advisory
             </a>

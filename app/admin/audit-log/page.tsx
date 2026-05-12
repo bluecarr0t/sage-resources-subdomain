@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button, Card } from '@/components/ui';
 import { Shield, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 interface AuditLogEntry {
   id: number;
@@ -88,13 +89,13 @@ export default function AuditLogPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className={`${adminPageHeadingMargin} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4`}>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Shield className="w-10 h-10 text-sage-600" />
+            <h1 className={`${adminPageTitle} flex items-center gap-2`}>
+              <Shield className="w-8 h-8 text-sage-600 shrink-0" />
               Audit Log
             </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p className={`${adminPageDescription} mt-1`}>
               Track uploads, edits, deletes, and downloads
             </p>
           </div>
@@ -105,7 +106,7 @@ export default function AuditLogPage() {
                 setActionFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
+              className="rounded-lg border border-neutral-300/80 dark:border-neutral-600 bg-white dark:bg-neutral-900 px-3 py-2 text-sm"
             >
               <option value="">All actions</option>
               {Object.entries(ACTION_LABELS).map(([value, label]) => (
@@ -139,8 +140,8 @@ export default function AuditLogPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                <table className="min-w-full divide-y divide-neutral-200/75 dark:divide-neutral-800">
+                  <thead className="bg-neutral-50/85 dark:bg-neutral-900/40">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                         Date
@@ -162,9 +163,9 @@ export default function AuditLogPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-neutral-200/75 dark:divide-neutral-800">
                     {logs.map((log) => (
-                      <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                      <tr key={log.id} className="hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/30">
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
                           {formatDate(log.created_at)}
                         </td>
@@ -213,7 +214,7 @@ export default function AuditLogPage() {
               </div>
 
               {pagination.total_pages > 1 && (
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="px-4 py-3 border-t border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Page {pagination.page} of {pagination.total_pages} ({pagination.total} total)
                   </div>

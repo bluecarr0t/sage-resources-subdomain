@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button, Card, Input, Select } from '@/components/ui';
 import { FilePlus, Loader2, Plus, Trash2 } from 'lucide-react';
 import { UNIT_TYPES } from '@/lib/unit-types';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 const US_STATES = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -138,11 +139,9 @@ export default function CreateReportDraftPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Create Report Draft
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className={adminPageHeadingMargin}>
+          <h1 className={`${adminPageTitle} mb-1`}>Create Report Draft</h1>
+          <p className={adminPageDescription}>
             Enter property details to generate an AI-assisted feasibility study draft. The system will enrich with
             regional benchmarks and produce a downloadable DOCX.
           </p>

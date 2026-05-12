@@ -69,16 +69,16 @@ export default function AdminPastReportsStats() {
   if (loading) {
     return (
       <section
-        className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden"
+        className="rounded-lg border border-neutral-200/60 dark:border-neutral-800/80 bg-neutral-50/30 dark:bg-neutral-900/20"
         aria-label="Past Reports loading"
       >
-        <div className="p-6 sm:p-8">
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-6 animate-pulse" />
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="px-1 py-4">
+          <div className="h-3.5 bg-neutral-200/70 dark:bg-neutral-800 rounded w-24 mb-4 animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-md overflow-hidden bg-neutral-200/50 dark:bg-neutral-800/50">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse"
+                className="h-16 sm:h-[4.25rem] bg-neutral-50 dark:bg-neutral-950/40 animate-pulse"
               />
             ))}
           </div>
@@ -90,10 +90,10 @@ export default function AdminPastReportsStats() {
   if (error) {
     return (
       <section
-        className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-6"
+        className="rounded-lg border border-red-200/80 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/20 px-5 py-4"
         role="alert"
       >
-        <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
+        <p className="text-sm text-red-800 dark:text-red-200/90">{error}</p>
       </section>
     );
   }
@@ -101,52 +101,47 @@ export default function AdminPastReportsStats() {
   if (!stats) return null;
 
   return (
-    <section
-      className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
-      aria-labelledby="past-reports-heading"
-    >
-      <div className="p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h2
-            id="past-reports-heading"
-            className="text-lg font-semibold text-gray-900 dark:text-gray-100"
+    <section aria-labelledby="past-reports-heading">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1.5 sm:gap-2 mb-3">
+        <h2
+          id="past-reports-heading"
+          className="text-xs sm:text-sm font-medium text-neutral-900 dark:text-neutral-100"
+        >
+          Past reports
+        </h2>
+        <div className="flex items-center gap-3 text-[11px] text-neutral-500 dark:text-neutral-500">
+          {lastFetched != null && (
+            <span
+              className="tabular-nums"
+              title={`Data fetched ${new Date(lastFetched).toLocaleString()}`}
+            >
+              Updated {formatRelativeTime(Date.now() - lastFetched)}
+            </span>
+          )}
+          <Link
+            href="/admin/past-reports"
+            className="inline-flex items-center gap-0.5 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 rounded-sm"
           >
-            Past Reports
-          </h2>
-          <div className="flex items-center gap-4">
-            {lastFetched != null && (
-              <span
-                className="text-xs text-gray-500 dark:text-gray-400 tabular-nums"
-                title={`Data fetched ${new Date(lastFetched).toLocaleString()}`}
-              >
-                Updated {formatRelativeTime(Date.now() - lastFetched)}
-              </span>
-            )}
-            <Link
-              href="/admin/past-reports"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md"
-            >
-              View all
-              <ChevronRight className="w-4 h-4" aria-hidden />
-            </Link>
-          </div>
+            View all
+            <ChevronRight className="w-3.5 h-3.5 opacity-60" aria-hidden />
+          </Link>
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {STAT_CARDS.map(({ key, label }) => (
-            <div
-              key={key}
-              className="flex flex-col p-4 sm:p-5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800"
-            >
-              <p className="text-2xl sm:text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
-                {stats[key].toLocaleString()}
-              </p>
-              <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                {label}
-              </p>
-            </div>
-          ))}
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-lg overflow-hidden border border-neutral-200/70 dark:border-neutral-800 bg-neutral-200/60 dark:bg-neutral-800/80">
+        {STAT_CARDS.map(({ key, label }) => (
+          <div
+            key={key}
+            className="flex flex-col justify-center px-3 sm:px-4 py-2.5 sm:py-3 bg-white dark:bg-neutral-950/50"
+          >
+            <p className="text-xl sm:text-2xl font-semibold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-100 leading-none">
+              {stats[key].toLocaleString()}
+            </p>
+            <p className="mt-1 text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-500 leading-none">
+              {label}
+            </p>
+          </div>
+        ))}
       </div>
     </section>
   );

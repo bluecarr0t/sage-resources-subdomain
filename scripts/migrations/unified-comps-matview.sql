@@ -391,6 +391,7 @@ SELECT
     COALESCE(NULLIF(trim(fc.comp_name), ''), 'Unknown')
   )                                                                 AS address_key,
   fc.created_at                                                       AS created_at,
+  'Yes'::text                                                         AS is_glamping_property,
   to_tsvector(
     'simple',
     COALESCE(fc.comp_name, '') || ' ' ||
@@ -507,6 +508,7 @@ SELECT
     COALESCE(NULLIF(trim(g.property_name), ''), 'Unknown')
   )                                                                 AS address_key,
   COALESCE(g.created_at, g.updated_at)                                AS created_at,
+  g.is_glamping_property::text                                        AS is_glamping_property,
   to_tsvector(
     'simple',
     COALESCE(g.property_name, '') || ' ' ||
@@ -603,6 +605,7 @@ SELECT
     COALESCE(NULLIF(trim(h.property_name), ''), 'Unknown')
   )                                                                 AS address_key,
   COALESCE(h.created_at, h.updated_at)                                AS created_at,
+  'Yes'::text                                                         AS is_glamping_property,
   to_tsvector(
     'simple',
     COALESCE(h.property_name, '') || ' ' ||
@@ -697,6 +700,7 @@ SELECT
     COALESCE(NULLIF(trim(c.property_name), ''), 'Unknown')
   )                                                                 AS address_key,
   COALESCE(c.created_at, c.updated_at)                                AS created_at,
+  'Yes'::text                                                         AS is_glamping_property,
   to_tsvector(
     'simple',
     COALESCE(c.property_name, '') || ' ' ||
@@ -796,6 +800,7 @@ SELECT
     COALESCE(NULLIF(trim(rp.property_name), ''), 'Unknown')
   )                                                                 AS address_key,
   COALESCE(rp.created_at, rp.updated_at)                              AS created_at,
+  rp.is_glamping_property::text                                       AS is_glamping_property,
   to_tsvector(
     'simple',
     COALESCE(rp.property_name, '') || ' ' ||

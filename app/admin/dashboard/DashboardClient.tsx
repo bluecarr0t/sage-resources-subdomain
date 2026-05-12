@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
 import AdminPastReportsStats from '@/components/AdminPastReportsStats';
-import { BarChart2 } from 'lucide-react';
+import { adminEyebrow, adminPageHeader, adminPageTitle } from '@/lib/admin-ui';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -18,48 +18,41 @@ export default function DashboardClient() {
 
   if (!mounted) {
     return (
-      <main className="pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <div className="h-10 w-64 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
-            <div className="h-5 w-96 mt-2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+      <main className="flex w-full flex-1 flex-col min-h-[calc(100svh-6.75rem)] lg:min-h-[calc(100svh-5.25rem)] pb-4">
+        <div className="flex w-full flex-1 flex-col min-h-0">
+          <div className="mb-3 space-y-2 shrink-0">
+            <div className="h-6 w-40 bg-neutral-200/80 dark:bg-neutral-800 rounded-md animate-pulse" />
+            <div className="h-3 w-64 bg-neutral-100 dark:bg-neutral-800/60 rounded animate-pulse" />
           </div>
-          <div className="space-y-8">
-            <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse" />
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse" />
+          <div className="space-y-6 sm:space-y-8 shrink-0">
+            <div className="h-28 bg-neutral-100/80 dark:bg-neutral-900/50 rounded-lg border border-neutral-200/40 dark:border-neutral-800/60 animate-pulse" />
+            <div className="h-52 bg-neutral-100/80 dark:bg-neutral-900/50 rounded-lg border border-neutral-200/40 dark:border-neutral-800/60 animate-pulse" />
           </div>
+          <div className="flex-1 min-h-8" aria-hidden />
         </div>
       </main>
     );
   }
 
   return (
-    <main className="pb-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Modern header with greeting and context */}
-        <header className="mb-10">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-                {getGreeting()}
-              </h1>
-              <p className="mt-1.5 text-base text-gray-600 dark:text-gray-400">
-                Here&apos;s your operational overview at a glance.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <BarChart2 className="w-4 h-4 text-sage-500" aria-hidden />
-              <span>Dashboard</span>
-            </div>
-          </div>
-        </header>
+    <main className="flex w-full flex-1 flex-col min-h-[calc(100svh-6.75rem)] lg:min-h-[calc(100svh-5.25rem)] pb-4">
+      <header className={`${adminPageHeader} shrink-0`}>
+        <p className={adminEyebrow}>
+          Overview
+        </p>
+        <h1 className={`${adminPageTitle} mt-1`}>
+          {getGreeting()}
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 max-w-md leading-snug">
+          Past reports and glamping data at a glance.
+        </p>
+      </header>
 
-        {/* Main content - improved spacing and visual hierarchy */}
-        <div className="space-y-8">
-          <AdminPastReportsStats />
-          <AdminGlampingMetrics />
-        </div>
+      <div className="flex shrink-0 flex-col gap-6 sm:gap-8">
+        <AdminPastReportsStats />
+        <AdminGlampingMetrics />
       </div>
+      <div className="flex-1 min-h-8" aria-hidden />
     </main>
   );
 }

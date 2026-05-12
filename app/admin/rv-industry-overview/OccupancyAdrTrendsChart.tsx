@@ -138,7 +138,7 @@ export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: P
                 const fmt = (v: number, isNull: boolean, suffix: string) =>
                   isNull ? t('tooltipNoData') : `${v.toFixed(1)}${suffix}`;
                 return (
-                  <div className="rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-xs shadow-md">
+                  <div className="rounded-md border border-neutral-200/75 dark:border-neutral-700 bg-white dark:bg-neutral-950 px-3 py-2 text-xs shadow-md">
                     <div className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{d.name}</div>
                     <div className="text-gray-700 dark:text-gray-300 space-y-0.5">
                       <div>

@@ -64,7 +64,7 @@ export default function CompsV2SummarySection({
         {t('summarySectionMarketSize')}
       </p>
       <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mb-1">
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+        <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
           <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryTotalSites')}</dt>
           <dd className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5">
             {summaryStats.totalSites != null ? summaryStats.totalSites.toLocaleString() : t('summaryDash')}
@@ -76,7 +76,7 @@ export default function CompsV2SummarySection({
         {t('summarySectionPricing')}
       </p>
       <dl className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mb-1">
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+        <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
           <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryMeanAdr')}</dt>
           <dd className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5">
             {summaryStats.avgAdr != null
@@ -84,7 +84,7 @@ export default function CompsV2SummarySection({
               : t('summaryDash')}
           </dd>
         </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+        <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
           <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryMedianAdr')}</dt>
           <dd className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5">
             {summaryStats.medianAdr != null
@@ -92,7 +92,7 @@ export default function CompsV2SummarySection({
               : t('summaryDash')}
           </dd>
         </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+        <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
           <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryAdrP25P75')}</dt>
           <dd className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5">
             {summaryStats.adrP25 != null && summaryStats.adrP75 != null
@@ -100,7 +100,7 @@ export default function CompsV2SummarySection({
               : t('summaryDash')}
           </dd>
         </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+        <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
           <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryAdrRange')}</dt>
           <dd className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5">
             {summaryStats.adrLow != null && summaryStats.adrHigh != null
@@ -114,19 +114,19 @@ export default function CompsV2SummarySection({
         {t('summarySectionCoverage')}
       </p>
       <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mb-1">
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+        <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
           <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryCoverageAdr')}</dt>
           <dd className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5">
             {summaryStats.coverageAdrPct != null ? `${summaryStats.coverageAdrPct}%` : t('summaryDash')}
           </dd>
         </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+        <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
           <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryCoverageUnits')}</dt>
           <dd className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5">
             {summaryStats.coverageUnitsPct != null ? `${summaryStats.coverageUnitsPct}%` : t('summaryDash')}
           </dd>
         </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+        <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
           <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryCoverageCoords')}</dt>
           <dd className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5">
             {summaryStats.coverageCoordsPct != null ? `${summaryStats.coverageCoordsPct}%` : t('summaryDash')}
@@ -140,7 +140,7 @@ export default function CompsV2SummarySection({
             {t('summarySectionWebResearch')}
           </p>
           <dl className="grid gap-3 sm:grid-cols-1 max-w-5xl mb-1">
-            <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
+            <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5">
               <dt className="text-xs text-gray-500 dark:text-gray-400">{t('summaryWebResearchHealthLabel')}</dt>
               <dd className="text-sm text-gray-900 dark:text-gray-100 mt-0.5 leading-snug space-y-1.5">
                 {!webResearch.tavily.apiConfigured ? (
@@ -254,7 +254,7 @@ export default function CompsV2SummarySection({
         ) : null}
       </div>
 
-      <div className="mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-6 pt-5 border-t border-neutral-200/75 dark:border-neutral-800">
         <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">{t('summaryCompositionTitle')}</p>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3 space-y-1">
           <p className="m-0 leading-snug">
@@ -268,7 +268,7 @@ export default function CompsV2SummarySection({
           {orderedCompsV2CountEntries(counts).map(([key, value]) => (
             <div
               key={key}
-              className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5"
+              className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-gray-50/80 dark:bg-gray-900/40 px-3 py-2.5"
             >
               <span className="text-sm text-gray-700 dark:text-gray-300 leading-snug">
                 {sourceLabel(key)}
@@ -280,7 +280,7 @@ export default function CompsV2SummarySection({
           ))}
         </div>
       </div>
-      <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-neutral-200/75 dark:border-neutral-800">
         <Button
           type="button"
           variant="secondary"

@@ -1857,10 +1857,204 @@ export function createSageAiTools(
       },
     }),
 
+    top_multi_location_chains: tool({
+      description:
+        'Rank approximate **multi-location glamping chains / operators** using `all_glamping_properties`. ' +
+        'Sorts by the researched **`number_of_locations`** field (brand-reported footprint, not counted from Sage rows). ' +
+        'Builds a **chain label** from **`property_name`**: text before a spaced hyphen (` - `), en dash (`–`), or em dash (`—`) when present (e.g. `Brand — Outpost` → `Brand`); otherwise the full trimmed name forms its own group. ' +
+        'Dedupes physical resorts with the same **`address`** key used elsewhere (else **`property_name|city|state|country`**). ' +
+        'Default filters emphasize **currently open glamping** rows and treat **`establishment_filter`** + **`min_chain_age_years`** as “established” using the earliest **`year_site_opened`** seen in each chain (drops chains with no opening year when that filter is on). ' +
+        'Chain names use a **known-brand prefix list** plus dash-splitting on `property_name` (re-apply the SQL migration when that list grows). ' +
+        'Always distinguish **`reported_brand_locations`** (survey metadata) from **`properties_in_sage`** / **`total_glamping_units_in_sage`** (coverage in this dataset). ' +
+        'Prefer this over hand-sorting `query_properties` when the user asks for biggest multi-location brands.',
+      inputSchema: z.object({
+        limit: z.number().int().min(1).max(50).optional().default(10),
+        min_reported_locations: z.number().min(2).max(9999).optional().default(2),
+        establishment_filter: z.boolean().optional().default(true),
+        min_chain_age_years: z.number().int().min(1).max(80).optional().default(5),
+        country: z
+          .string()
+          .max(120)
+          .optional()
+          .describe('Optional substring match on `country`, e.g. "United States" or "Canada".'),
+        is_open: z.enum(['Yes', 'No']).optional().default('Yes'),
+        is_glamping_property: z.enum(['Yes', 'No']).optional().default('Yes'),
+      }),
+      execute: async ({
+        limit: limitRaw,
+        min_reported_locations: minLocRaw,
+        establishment_filter: estRaw,
+        min_chain_age_years: ageRaw,
+        country,
+        is_open: openRaw,
+        is_glamping_property: glampingRaw,
+      }) => {
+        const limit = limitRaw ?? 10;
+        const min_reported_locations = minLocRaw ?? 2;
+        const establishment_filter = estRaw ?? true;
+        const min_chain_age_years = ageRaw ?? 5;
+        const is_open = openRaw ?? 'Yes';
+        const is_glamping_property = glampingRaw ?? 'Yes';
+        const payload = {
+          limit,
+          min_reported_locations,
+          establishment_filter,
+          min_chain_age_years,
+          country: country?.trim() || undefined,
+          is_open,
+          is_glamping_property,
+        };
+        const countryTrimmed = country?.trim() || null;
+        const { data, error } = await supabase.rpc('top_multi_location_chains', {
+          p_limit: limit,
+          p_min_reported_locations: min_reported_locations,
+          p_min_chain_age_years: establishment_filter ? min_chain_age_years : null,
+          p_country: countryTrimmed,
+          p_is_open: is_open,
+          p_is_glamping_property: is_glamping_property,
+        });
+
+        if (error) {
+          return {
+            error: error.message,
+            chains: null,
+            hint:
+              'Ensure scripts/migrations/sage-ai-top-multi-location-chains-rpc.sql is applied in Postgres ' +
+              '(defines `top_multi_location_chains` + `sage_chain_label_from_property_name`).',
+            applied: payload,
+          };
+        }
+
+        type ChainRow = {
+          chain_label: string;
+          reported_brand_locations: number | null;
+          earliest_site_year: number | null;
+          properties_in_sage: number;
+          total_glamping_units_in_sage: number;
+          sample_property_name: string | null;
+          sample_city: string | null;
+          sample_state: string | null;
+          sample_country: string | null;
+        };
+
+        const chains = ((data ?? []) as ChainRow[]).map((r) => ({
+          chain_label: r.chain_label,
+          reported_brand_locations:
+            r.reported_brand_locations === null ? null : Number(r.reported_brand_locations),
+          earliest_site_year: r.earliest_site_year === null ? null : Number(r.earliest_site_year),
+          properties_in_sage: Number(r.properties_in_sage),
+          total_glamping_units_in_sage: Number(r.total_glamping_units_in_sage),
+          sample_property_name: r.sample_property_name,
+          sample_city: r.sample_city,
+          sample_state: r.sample_state,
+          sample_country: r.sample_country,
+        }));
+
+        const filterBits = [
+          `is_open=${is_open}`,
+          `is_glamping_property=${is_glamping_property}`,
+          establishment_filter
+            ? `min_chain_age_years>=${min_chain_age_years}`
+            : 'establishment_filter=false',
+          countryTrimmed ? `country~="${countryTrimmed}"` : null,
+        ].filter(Boolean);
+
+        const summary =
+          chains.length === 0
+            ? `No multi-location chains matched (${filterBits.join(', ')}). Try lowering min_chain_age_years, setting establishment_filter=false, or widening country.`
+            : `Top ${chains.length} chain rollup(s) by reported brand locations (${filterBits.join(', ')}).`;
+
+        return handleEmptyResult(
+          'top_multi_location_chains',
+          payload,
+          {
+            chains,
+            summary,
+            applied: payload,
+          },
+          chains.length === 0,
+          'No chains for these filters — try establishment_filter=false, a smaller min_chain_age_years, or min_reported_locations=2 with country unset.'
+        );
+      },
+    }),
+
+    chain_retail_rate_kpis: tool({
+      description:
+        '**Brand / chain retail rate card (simple definitions).** Calls Postgres `sage_chain_retail_rate_kpis` on `all_glamping_properties` rows grouped by `sage_chain_label_from_property_name` (same chain keys as `top_multi_location_chains`). ' +
+        'For each chain returns: **`avg_rate_all_filled_seasonal`** = unit-weighted mean of per-row **average of every non-null positive** `rate_winter_*` … `rate_fall_*` cell (same as `effectiveGlampingRetailAdrFromRow`); **`peak_summer_rate`** = unit-weighted mean of per-row **average of `rate_summer_weekday` + `rate_summer_weekend`** when either is set, else the **max** of all filled seasonal cells for that row. ' +
+        'Also returns **`distinct_properties`**, **`total_unit_weight`** (sum of `GREATEST(quantity_of_units,1)`), and **`sku_row_count`**. ' +
+        'Use this for end-user questions like “what is Under Canvas peak vs average rate?” — **do not** invent **calendar-year** or **`operating_season_months ÷ 12`** blends unless the user explicitly asks for annualization; those confuse readers. ' +
+        'Default `chain_keys` is the five national brands: Postcard Cabins, Under Canvas, AutoCamp, Huttopia, Wander Camp (lowercased keys).',
+      inputSchema: z.object({
+        chain_keys: z
+          .array(z.string().min(2).max(80))
+          .max(30)
+          .optional()
+          .describe(
+            'Optional explicit `sage_chain_label_from_property_name` keys (lowercase), e.g. ["under canvas","autocamp"]. Omit to use the default five-brand bundle.'
+          ),
+      }),
+      execute: async ({ chain_keys }) => {
+        const rpcArgs =
+          chain_keys && chain_keys.length > 0 ? { p_chain_keys: chain_keys } : {};
+        const { data, error } = await supabase.rpc('sage_chain_retail_rate_kpis', rpcArgs);
+
+        if (error) {
+          return {
+            error: error.message,
+            chains: null,
+            hint:
+              'Apply scripts/migrations/sage-chain-retail-rate-kpis-rpc.sql in Supabase (defines `sage_chain_retail_rate_kpis`).',
+            applied: rpcArgs,
+          };
+        }
+
+        type KpiRow = {
+          chain_key: string;
+          chain_label: string;
+          distinct_properties: number;
+          total_unit_weight: number;
+          sku_row_count: number;
+          avg_rate_all_filled_seasonal: number | string | null;
+          peak_summer_rate: number | string | null;
+        };
+
+        const rows = ((data ?? []) as KpiRow[]).map((r) => ({
+          chain_key: r.chain_key,
+          chain_label: r.chain_label,
+          distinct_properties: Number(r.distinct_properties),
+          total_unit_weight: Number(r.total_unit_weight),
+          sku_row_count: Number(r.sku_row_count),
+          avg_rate_all_filled_seasonal:
+            r.avg_rate_all_filled_seasonal === null || r.avg_rate_all_filled_seasonal === ''
+              ? null
+              : Number(r.avg_rate_all_filled_seasonal),
+          peak_summer_rate:
+            r.peak_summer_rate === null || r.peak_summer_rate === ''
+              ? null
+              : Number(r.peak_summer_rate),
+        }));
+
+        const summary =
+          rows.length === 0
+            ? 'No rated rows matched the requested chain keys (or keys were invalid).'
+            : `Chain retail KPIs for ${rows.length} chain(s): unit-weighted **avg of all filled seasonal cells** and **peak (summer avg, else max seasonal)** — see each row.`;
+
+        return handleEmptyResult(
+          'chain_retail_rate_kpis',
+          rpcArgs,
+          { chains: rows, summary, applied: rpcArgs },
+          rows.length === 0,
+          'No chain KPI rows — pass valid lowercase chain keys from sage_chain_label_from_property_name, or omit chain_keys for the default five brands.'
+        );
+      },
+    }),
+
     count_unique_properties: tool({
       description:
         'Server-side **distinct-property** count for `all_glamping_properties`. ' +
         'Use this whenever the user asks "how many properties / locations / resorts" — never count rows yourself, and never hand-count from a returned list. ' +
+        'For **named multi-brand retail rate cards** (Postcard Cabins, Under Canvas, AutoCamp, Huttopia, Wander Camp peak vs average of filled seasonal rates), call **`chain_retail_rate_kpis`** instead of inventing calendar-year blends. ' +
         'Dedupe key: trimmed lowercase `address`. When `address` is null/empty, falls back to `property_name|city|state|country` (also trimmed/lowercased). ' +
         '**`total_units` in the result is always the sum of `quantity_of_units`** — the authoritative physical-unit inventory for the filtered rows; never reinterpret it as row count. `avg_retail_daily_rate` / `median_retail_daily_rate` match the **same IQR(1.5) + unit-weighting + effective-ADR** rules as `aggregate_properties` (see that tool) over the filtered set. `retail_rate_outliers_dropped` counts how many **rated** unit rows were left out of the IQR “normal” set (0 when the screen was skipped or nothing dropped). **When discussing rates, cite both mean and median.**\n\n' +
         'Country goes in `filters.country` ("Canada", "United States"); state/province goes in `filters.state`. ' +
@@ -2079,7 +2273,7 @@ NOT AVAILABLE (do not import or attempt to use):
 IMPORTANT RULES:
 - If you need data from a previous query, use the special variable 'data' which will contain the query results as a list of dictionaries.
 - When analyzing all_glamping_properties rows: quantity_of_units is the exact unit count per record — sum it for total units or unit-weighted metrics; do not substitute row count unless the user asked for row/listing counts.
-- For **retail ADR / rate averages and medians**, do not re-invent the pipeline in Python: \`aggregate_properties\` and \`count_unique_properties\` already return **IQR-robust, unit-weighted** effective ADR. If you must average rates in \`data\` yourself, weight by \`quantity_of_units\` and say your number is an unaudited recompute (and prefer calling the tools instead).
+- For **retail ADR / rate averages and medians**, do not re-invent the pipeline in Python: \`aggregate_properties\` and \`count_unique_properties\` already return **IQR-robust, unit-weighted** effective ADR. For **headline chain / brand** peak vs simple seasonal averages, use \`chain_retail_rate_kpis\` (explicit peak + avg of filled cells, no calendar-year blend). If you must average rates in \`data\` yourself, weight by \`quantity_of_units\` and say your number is an unaudited recompute (and prefer calling the tools instead).
 - For charts, use matplotlib and call plt.show() at the end.
 - Use print() for any text output you want to display.
 - Execution time is bounded (~30s wall-clock); WASM cannot be hard-killed mid-computation, so avoid infinite loops or O(n^4)-style work over large arrays.

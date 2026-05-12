@@ -7,6 +7,7 @@ import CompsV2PageAlerts from '@/app/admin/comps-v2/CompsV2PageAlerts';
 import CompsV2ResultsSection from '@/app/admin/comps-v2/CompsV2ResultsSection';
 import CompsV2SummarySection from '@/app/admin/comps-v2/CompsV2SummarySection';
 import { useCompsV2PageState } from '@/app/admin/comps-v2/useCompsV2PageState';
+import { adminPageDescription, adminPageTitle } from '@/lib/admin-ui';
 
 export default function CompsV2Page() {
   return (
@@ -22,8 +23,8 @@ function CompsV2PageContent() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{s.t('title')}</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{s.t('subtitle')}</p>
+        <h1 className={adminPageTitle}>{s.t('title')}</h1>
+        <p className={`${adminPageDescription} mt-1`}>{s.t('subtitle')}</p>
       </div>
 
       <CompsV2PageAlerts

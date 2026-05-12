@@ -27,7 +27,7 @@ export function SageAiMap({ payload }: { payload: MapPayload }) {
     [payload.layers]
   );
   return (
-    <div className="my-4 rounded-lg border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-gray-900">
+    <div className="my-4 rounded-lg border border-neutral-200/70 bg-white overflow-hidden dark:border-gray-800 dark:bg-neutral-950">
       <div className="border-b border-gray-200 px-4 py-2 dark:border-gray-800">
         <div className="text-sm font-semibold text-gray-900 dark:text-gray-50">
           {payload.title}

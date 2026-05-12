@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Button, Card } from '@/components/ui';
 import { formatComponentSectionName } from '@/lib/cce-component-section-display';
 import { ArrowDown, ArrowUp, Calculator, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ExternalLink, FileUp, Loader2, PieChart, Ruler, Search, Star, Tent, Wrench, X } from 'lucide-react';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 type TabType = 'cost' | 'percent' | 'catalog' | 'component';
 
@@ -115,7 +116,7 @@ function SortableTh({
   const isActive = currentSort === sortKey;
   return (
     <th
-      className={`px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 ${align === 'right' ? 'text-right' : 'text-left'}`}
+      className={`px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-neutral-100/80 dark:hover:bg-neutral-800/55/50 ${align === 'right' ? 'text-right' : 'text-left'}`}
       onClick={() => onSort(sortKey)}
     >
       <span className="inline-flex items-center gap-1">
@@ -620,13 +621,13 @@ export default function CostExplorerPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className={`${adminPageHeadingMargin} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4`}>
           <div className="pr-6 sm:pr-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Calculator className="w-10 h-10 text-sage-600" />
+            <h1 className={`${adminPageTitle} flex items-center gap-2`}>
+              <Calculator className="w-8 h-8 text-sage-600 shrink-0" />
               {t('title')}
             </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p className={`${adminPageDescription} mt-1`}>
               {t('subtitle')}
             </p>
           </div>
@@ -635,12 +636,12 @@ export default function CostExplorerPage() {
               href="/api/admin/cce-pdf/March_2026"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg border border-neutral-300/80 dark:border-neutral-600 bg-white dark:bg-neutral-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-neutral-50/90 dark:hover:bg-neutral-800/55 transition-colors"
             >
               <ExternalLink className="w-4 h-4" />
               View Marshall & Swift PDF
             </a>
-            <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 p-0.5">
+            <div className="flex rounded-lg border border-neutral-300/80 dark:border-neutral-600 p-0.5">
               <button
                 type="button"
                 onClick={() => {
@@ -749,7 +750,7 @@ export default function CostExplorerPage() {
           <div className="flex flex-wrap gap-4 items-end">
             <div>
               <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('upload.uploadPdf')}</label>
-              <label className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+              <label className="inline-flex items-center gap-2 rounded-lg border border-neutral-300/80 dark:border-neutral-600 bg-white dark:bg-neutral-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-neutral-50/90 dark:hover:bg-neutral-800/55 cursor-pointer transition-colors">
                 <FileUp className="w-4 h-4" />
                 {uploading ? t('upload.uploading') : t('upload.uploadPdf')}
                 <input
@@ -763,7 +764,7 @@ export default function CostExplorerPage() {
             </div>
             <div className="min-w-[200px]">
               <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('upload.fileLabel')}</label>
-              <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 min-h-[40px] flex items-center">
+              <div className="rounded-lg border border-neutral-200/75 dark:border-neutral-700 bg-neutral-50/85 dark:bg-neutral-900/40 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 min-h-[40px] flex items-center">
                 {uploadedFilename ?? t('upload.noFileSelected')}
               </div>
             </div>
@@ -805,11 +806,11 @@ export default function CostExplorerPage() {
         {/* Filters */}
         <Card className="mb-6">
           {(tab === 'cost' || tab === 'component') && (
-            <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+            <div className="border-b border-neutral-200/75 dark:border-neutral-800 pb-4 mb-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="mt-1 rounded border-gray-300 dark:border-gray-600"
+                  className="mt-1 rounded border-neutral-300/80 dark:border-neutral-600"
                   checked={outdoorHospitalityScope}
                   onChange={(e) => {
                     setOutdoorHospitalityScope(e.target.checked);
@@ -844,7 +845,7 @@ export default function CostExplorerPage() {
                     setSearch(e.target.value);
                     resetPageOnFilter();
                   }}
-                  className={`w-full pl-11 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${search || isDebouncing || loading ? 'pr-24' : 'pr-4'}`}
+                  className={`w-full pl-11 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${search || isDebouncing || loading ? 'pr-24' : 'pr-4'}`}
                 />
                 {(isDebouncing || loading) && (
                   <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400 pointer-events-none">
@@ -877,7 +878,7 @@ export default function CostExplorerPage() {
                   setBuildingClass(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full pl-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full pl-3 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               >
                 <option value="">{t('filters.all')}</option>
                 {buildingClasses.map((c) => (
@@ -898,7 +899,7 @@ export default function CostExplorerPage() {
                   setQualityType(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full pl-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full pl-3 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               >
                 <option value="">{t('filters.all')}</option>
                 {qualityTypes.map((q) => (
@@ -923,7 +924,7 @@ export default function CostExplorerPage() {
                   setMinCost(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full pl-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full pl-4 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="w-full sm:w-28">
@@ -941,7 +942,7 @@ export default function CostExplorerPage() {
                   setMaxCost(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full pl-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full pl-4 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               />
             </div>
             {favorites.length > 0 && (
@@ -955,7 +956,7 @@ export default function CostExplorerPage() {
                   className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors ${
                     showFavoritesOnly
                       ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200'
-                      : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      : 'border-neutral-300/80 dark:border-neutral-600 hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40'
                   }`}
                 >
                   <Star className={`w-4 h-4 ${showFavoritesOnly ? 'fill-amber-500' : ''}`} />
@@ -982,7 +983,7 @@ export default function CostExplorerPage() {
                     setSearch(e.target.value);
                     resetPageOnFilter();
                   }}
-                  className="w-full pl-10 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500"
+                  className="w-full pl-10 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500"
                 />
               </div>
             </div>
@@ -998,7 +999,7 @@ export default function CostExplorerPage() {
                     setCategory(e.target.value);
                     resetPageOnFilter();
                   }}
-                  className="w-full pl-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="w-full pl-4 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">{t('filters.all')}</option>
                   {categories.map((c) => (
@@ -1019,7 +1020,7 @@ export default function CostExplorerPage() {
                     setOccupancyFilter(e.target.value);
                     resetPageOnFilter();
                   }}
-                  className="w-full pl-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="w-full pl-4 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">{t('filters.all')}</option>
                   {occupancyOptions.map((o) => (
@@ -1047,7 +1048,7 @@ export default function CostExplorerPage() {
                     setSearch(e.target.value);
                     resetPageOnFilter();
                   }}
-                  className="w-full pl-10 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500"
+                  className="w-full pl-10 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500"
                 />
               </div>
             </div>
@@ -1066,7 +1067,7 @@ export default function CostExplorerPage() {
                   setMinCost(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full pl-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full pl-4 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="w-full sm:w-28">
@@ -1084,7 +1085,7 @@ export default function CostExplorerPage() {
                   setMaxCost(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full pl-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full pl-4 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               />
             </div>
           </div>
@@ -1106,7 +1107,7 @@ export default function CostExplorerPage() {
                     setSearch(e.target.value);
                     resetPageOnFilter();
                   }}
-                  className="w-full pl-10 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500"
+                  className="w-full pl-10 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500"
                 />
               </div>
             </div>
@@ -1121,7 +1122,7 @@ export default function CostExplorerPage() {
                   setUnitTypeFilter(e.target.value);
                   resetPageOnFilter();
                 }}
-                className="w-full pl-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full pl-4 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
               >
                 <option value="">{t('filters.all')}</option>
                 {CATALOG_UNIT_TYPES.map((u) => (
@@ -1141,7 +1142,7 @@ export default function CostExplorerPage() {
                     setManufacturerFilter(e.target.value);
                     resetPageOnFilter();
                   }}
-                  className="w-full pl-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="w-full pl-4 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">{t('filters.all')}</option>
                   {manufacturers.map((m) => (
@@ -1182,7 +1183,7 @@ export default function CostExplorerPage() {
               </button>
             </div>
           )}
-          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-3 pt-3 border-t border-neutral-200/75 dark:border-neutral-800">
             <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
               {loading ? (
                 <span className="text-gray-500 dark:text-gray-400">{t('table.loading')}</span>
@@ -1204,8 +1205,8 @@ export default function CostExplorerPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                <table className="min-w-full divide-y divide-neutral-200/75 dark:divide-neutral-800">
+                  <thead className="bg-neutral-50/85 dark:bg-neutral-900/40">
                     <tr>
                       <SortableTh label={t('catalog.manufacturer')} sortKey="manufacturer" currentSort={sortBy} currentDir={sortDir} onSort={handleSort} />
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
@@ -1220,7 +1221,7 @@ export default function CostExplorerPage() {
                       >
                         {t('catalog.leadTime')}
                         <span
-                          className="absolute left-0 top-full z-50 mt-1 px-2 py-1 text-xs font-normal text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-none pointer-events-none whitespace-nowrap"
+                          className="absolute left-0 top-full z-50 mt-1 px-2 py-1 text-xs font-normal text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-neutral-200/75 dark:border-neutral-700 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-none pointer-events-none whitespace-nowrap"
                           role="tooltip"
                         >
                           {t('catalog.leadTimeTooltip')}
@@ -1229,9 +1230,9 @@ export default function CostExplorerPage() {
                       <SortableTh label={t('catalog.link')} sortKey="source_page" currentSort={sortBy} currentDir={sortDir} onSort={handleSort} align="right" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-neutral-200/75 dark:divide-neutral-800">
                     {catalogRows.map((row) => (
-                      <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                      <tr key={row.id} className="hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/30">
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{row.manufacturer || '-'}</td>
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{row.catalog_section || '-'}</td>
                         <td className="px-4 py-3 text-sm">
@@ -1270,7 +1271,7 @@ export default function CostExplorerPage() {
                         <td className="group/lt relative px-4 py-3 text-sm text-gray-500 dark:text-gray-400 cursor-help">
                           {row.lead_time_weeks || '-'}
                           <span
-                            className="absolute left-0 bottom-full z-50 mb-1 px-2 py-1 text-xs font-normal text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded shadow-sm opacity-0 group-hover/lt:opacity-100 transition-none pointer-events-none whitespace-nowrap"
+                            className="absolute left-0 bottom-full z-50 mb-1 px-2 py-1 text-xs font-normal text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-neutral-200/75 dark:border-neutral-700 rounded shadow-sm opacity-0 group-hover/lt:opacity-100 transition-none pointer-events-none whitespace-nowrap"
                             role="tooltip"
                           >
                             {t('catalog.leadTimeTooltip')}
@@ -1298,7 +1299,7 @@ export default function CostExplorerPage() {
                 </table>
               </div>
               {pagination.total_pages > 1 && (
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="px-4 py-3 border-t border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Page {pagination.page} of {pagination.total_pages} ({pagination.total} total)
                   </div>
@@ -1322,8 +1323,8 @@ export default function CostExplorerPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                <table className="min-w-full divide-y divide-neutral-200/75 dark:divide-neutral-800">
+                  <thead className="bg-neutral-50/85 dark:bg-neutral-900/40">
                     <tr>
                       <SortableTh label={t('component.section')} sortKey="section_name" currentSort={sortBy} currentDir={sortDir} onSort={handleSort} />
                       <SortableTh label={t('component.itemName')} sortKey="item_name" currentSort={sortBy} currentDir={sortDir} onSort={handleSort} />
@@ -1334,9 +1335,9 @@ export default function CostExplorerPage() {
                       <SortableTh label={t('table.page')} sortKey="source_page" currentSort={sortBy} currentDir={sortDir} onSort={handleSort} align="right" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-neutral-200/75 dark:divide-neutral-800">
                     {componentRows.map((row) => (
-                      <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                      <tr key={row.id} className="hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/30">
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{formatComponentSectionName(row.section_name)}</td>
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{row.item_name || '-'}</td>
                         <td className="px-4 py-3 text-sm text-right">{formatCost(row.col_1)}</td>
@@ -1365,7 +1366,7 @@ export default function CostExplorerPage() {
                 </table>
               </div>
               {pagination.total_pages > 1 && (
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="px-4 py-3 border-t border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Page {pagination.page} of {pagination.total_pages} ({pagination.total} total)
                   </div>
@@ -1389,8 +1390,8 @@ export default function CostExplorerPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                <table className="min-w-full divide-y divide-neutral-200/75 dark:divide-neutral-800">
+                  <thead className="bg-neutral-50/85 dark:bg-neutral-900/40">
                     <tr>
                       <SortableTh label="Section" sortKey="section_name" currentSort={sortBy} currentDir={sortDir} onSort={handleSort} />
                       <SortableTh label="Occupancy" sortKey="occupancy" currentSort={sortBy} currentDir={sortDir} onSort={handleSort} />
@@ -1401,9 +1402,9 @@ export default function CostExplorerPage() {
                       <SortableTh label={t('table.page')} sortKey="source_page" currentSort={sortBy} currentDir={sortDir} onSort={handleSort} align="right" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-neutral-200/75 dark:divide-neutral-800">
                     {pctRows.map((row) => (
-                      <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                      <tr key={row.id} className="hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/30">
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{row.section_name}</td>
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{row.occupancy}</td>
                         <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{row.category.replace(/_/g, ' ')}</td>
@@ -1432,7 +1433,7 @@ export default function CostExplorerPage() {
                 </table>
               </div>
               {pagination.total_pages > 1 && (
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="px-4 py-3 border-t border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Page {pagination.page} of {pagination.total_pages} ({pagination.total} total)
                   </div>
@@ -1455,8 +1456,8 @@ export default function CostExplorerPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                <table className="min-w-full divide-y divide-neutral-200/75 dark:divide-neutral-800">
+                  <thead className="bg-neutral-50/85 dark:bg-neutral-900/40">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-10" />
                       <SortableTh
@@ -1514,7 +1515,7 @@ export default function CostExplorerPage() {
                       />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-neutral-200/75 dark:divide-neutral-800">
                     {rows.map((row) => {
                       const isExpanded = expandedRowIds.has(row.id);
                       const hasExpandContent =
@@ -1527,7 +1528,7 @@ export default function CostExplorerPage() {
                           <tr
                             key={row.id}
                             onClick={() => hasExpandContent && toggleRowExpand(row.id)}
-                            className={`hover:bg-gray-50 dark:hover:bg-gray-800/30 ${
+                            className={`hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/30 ${
                               hasExpandContent ? 'cursor-pointer' : ''
                             } ${isExpanded ? 'bg-sage-50/50 dark:bg-sage-900/20' : ''}`}
                           >
@@ -1644,7 +1645,7 @@ export default function CostExplorerPage() {
               </div>
 
               {pagination.total_pages > 1 && (
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="px-4 py-3 border-t border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Page {pagination.page} of {pagination.total_pages} ({pagination.total} total)
                   </div>

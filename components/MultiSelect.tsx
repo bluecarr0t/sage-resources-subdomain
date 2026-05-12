@@ -20,6 +20,8 @@ interface MultiSelectProps {
   label: string;
   id: string;
   activeColor?: 'blue' | 'purple' | 'orange' | 'green' | 'indigo' | 'sage';
+  /** Neutral, low-chrome styling for public map sidebar */
+  variant?: 'default' | 'minimal';
 }
 
 export default function MultiSelect({
@@ -32,6 +34,7 @@ export default function MultiSelect({
   label,
   id,
   activeColor = 'blue',
+  variant = 'default',
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 240 });
@@ -148,10 +151,22 @@ export default function MultiSelect({
     ? 'border-sage-300 bg-sage-50/50 dark:border-sage-600 dark:bg-sage-900/30'
     : 'border-purple-300 bg-purple-50/50';
 
+  const minimalActive = 'border-stone-300 bg-stone-50 text-stone-900';
+  const minimalInactive = 'border-stone-200 text-stone-600';
+  const minimalFocus =
+    'focus:outline-none focus:ring-1 focus:ring-stone-400/50 focus:border-stone-400';
+
   return (
     <div className={`relative ${isOpen ? 'z-50' : 'z-auto'}`} ref={containerRef}>
       <div className="flex items-center justify-between mb-1">
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor={id}
+          className={
+            variant === 'minimal'
+              ? 'block text-[11px] font-medium uppercase tracking-[0.14em] text-stone-500'
+              : 'block text-sm font-medium text-gray-700 dark:text-gray-300'
+          }
+        >
           {label}
         </label>
       </div>
@@ -167,15 +182,21 @@ export default function MultiSelect({
           e.preventDefault();
           e.stopPropagation();
         }}
-        className={`w-full px-3 py-2 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all text-left flex items-center justify-between cursor-pointer ${
-          isActive 
-            ? `${colorClasses} text-gray-900 font-medium` 
-            : 'border-gray-300 text-gray-600'
+        className={`w-full px-3 py-2 border text-sm transition-all text-left flex items-center justify-between cursor-pointer ${
+          variant === 'minimal'
+            ? `rounded-md bg-white ${minimalFocus} ${
+                isActive ? `${minimalActive} font-medium` : minimalInactive
+              }`
+            : `rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                isActive ? `${colorClasses} text-gray-900 font-medium` : 'border-gray-300 text-gray-600'
+              }`
         }`}
       >
         <span className="truncate flex-1">{selectedSummary}</span>
         <svg
-          className={`w-5 h-5 text-gray-400 transition-transform ml-2 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 transition-transform ml-2 flex-shrink-0 ${
+            variant === 'minimal' ? 'text-stone-400' : 'text-gray-400'
+          } ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -187,7 +208,11 @@ export default function MultiSelect({
       {isOpen && isMounted && createPortal(
         <div 
           ref={dropdownRef}
-          className="fixed z-[9999] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl overflow-y-auto"
+          className={`fixed z-[9999] bg-white dark:bg-gray-900 border overflow-y-auto ${
+            variant === 'minimal'
+              ? 'border-stone-200 rounded-md shadow-lg'
+              : 'border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl'
+          }`}
           style={{ 
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,
@@ -208,7 +233,11 @@ export default function MultiSelect({
               return (
                 <label
                   key={option.value}
-                  className="flex items-start gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/80 rounded-md cursor-pointer transition-colors"
+                  className={`flex items-start gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors ${
+                    variant === 'minimal'
+                      ? 'hover:bg-stone-50 dark:hover:bg-gray-800/80'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800/80'
+                  }`}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
@@ -229,7 +258,11 @@ export default function MultiSelect({
                     onMouseDown={(e) => {
                       e.stopPropagation();
                     }}
-                    className="h-5 w-5 shrink-0 mt-0.5 accent-blue-600 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                    className={`h-5 w-5 shrink-0 mt-0.5 border-gray-300 dark:border-gray-600 rounded focus:ring-2 cursor-pointer ${
+                      variant === 'minimal'
+                        ? 'accent-stone-900 text-stone-900 focus:ring-stone-400/40'
+                        : 'accent-blue-600 text-blue-600 focus:ring-blue-500'
+                    }`}
                   />
                   <span className="min-w-0 flex-1 ml-1 text-sm text-gray-700 dark:text-gray-200 break-words">
                     {option.label}

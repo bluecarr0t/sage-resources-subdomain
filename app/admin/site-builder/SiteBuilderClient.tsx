@@ -33,6 +33,7 @@ import {
   type SceneFramingChoice,
 } from '@/lib/site-builder/property-scene-archetype';
 import { SITE_BUILDER_AMENITY_OVERRIDE_MAX } from '@/lib/site-builder/amenity-cost-resolve';
+import { adminPageDescription, adminPageTitle } from '@/lib/admin-ui';
 
 interface GlampingType {
   slug: string;
@@ -940,8 +941,8 @@ export default function SiteBuilderClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{t('title')}</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('subtitle')}</p>
+        <h1 className={adminPageTitle}>{t('title')}</h1>
+        <p className={`mt-1 ${adminPageDescription}`}>{t('subtitle')}</p>
         <p className="mt-2">
           <Link
             href="/admin/site-builder/amenities"
@@ -985,7 +986,7 @@ export default function SiteBuilderClient() {
               >
                 {index + 1}
               </span>
-              <Card padding="md" className="border border-gray-200 dark:border-gray-700 pl-10">
+              <Card padding="md" className="border border-neutral-200/75 dark:border-neutral-800 pl-10">
               <div className="flex flex-wrap items-end gap-2">
                 <div className="w-[165px] shrink-0">
                   <Select
@@ -1129,7 +1130,7 @@ export default function SiteBuilderClient() {
                           {t('cancel')}
                         </Button>
                       </div>
-                      <div className="absolute left-0 right-0 top-full mt-1 z-20 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg">
+                      <div className="absolute left-0 right-0 top-full mt-1 z-20 rounded-lg border border-neutral-200/75 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg">
                         {catalogSearchLoading ? (
                           <p className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{t('loading')}</p>
                         ) : catalogSearchResults.length > 0 ? (
@@ -1221,7 +1222,7 @@ export default function SiteBuilderClient() {
               >
                 {index + 1}
               </span>
-              <Card padding="md" className="border border-gray-200 dark:border-gray-700 pl-10">
+              <Card padding="md" className="border border-neutral-200/75 dark:border-neutral-800 pl-10">
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="w-[280px] shrink-0">
                   <Select
@@ -1263,7 +1264,7 @@ export default function SiteBuilderClient() {
                   <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {t('costPerSite')}
                   </label>
-                  <p className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100">
+                  <p className="px-3 py-2 rounded-lg border border-neutral-200/75 dark:border-neutral-700 bg-neutral-50/85 dark:bg-neutral-900/45 text-sm text-gray-900 dark:text-gray-100">
                     {loadingCosts ? t('calculating') : costResult?.configs[index] != null ? formatCurrency(costResult.configs[index].costPerUnit) : '—'}
                   </p>
                 </div>
@@ -1318,7 +1319,7 @@ export default function SiteBuilderClient() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-600">
+                    <tr className="border-b border-neutral-200/75 dark:border-neutral-700">
                       <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">{t('type')}</th>
                       <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">{t('config')}</th>
                       <th className="text-left py-2 font-medium text-gray-700 dark:text-gray-300">{t('qualityTierColumn')}</th>
@@ -1329,7 +1330,7 @@ export default function SiteBuilderClient() {
                   </thead>
                   <tbody>
                     {costResult.configs.map((r) => (
-                      <tr key={r.configIndex} className="border-b border-gray-100 dark:border-gray-700/50">
+                      <tr key={r.configIndex} className="border-b border-neutral-100/90 dark:border-neutral-800/50">
                         <td className="py-2 text-gray-700 dark:text-gray-300">
                           {r.type === 'rv' ? t('typeRv') : t('typeGlamping')}
                         </td>
@@ -1343,7 +1344,7 @@ export default function SiteBuilderClient() {
                   </tbody>
                 </table>
               </div>
-              <div className="pt-3 border-t border-gray-200 dark:border-gray-600 flex flex-wrap items-center justify-end gap-3">
+              <div className="pt-3 border-t border-neutral-200/75 dark:border-neutral-700 flex flex-wrap items-center justify-end gap-3">
                 <Button
                   type="button"
                   variant="secondary"
@@ -1410,14 +1411,14 @@ export default function SiteBuilderClient() {
                   value={imageDescription}
                   onChange={(e) => setImageDescription(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-y"
+                  className="w-full px-4 py-2 border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-600 focus:border-transparent focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-y"
                 />
               </div>
               {imageBatchStyleHintSummary || imageBatchStyleHintIntro || imageBatchStyleHintBullets.length > 0 ? (
                 <div className="max-w-xl text-sm text-gray-600 dark:text-gray-400 space-y-2">
                   {imageBatchStyleHintSummary ? <p>{imageBatchStyleHintSummary}</p> : null}
                   {imageBatchStyleHintMoreInfoLabel ? (
-                    <details className="group rounded-md border border-gray-200 bg-gray-50/80 px-3 py-2 dark:border-gray-600 dark:bg-gray-800/40">
+                    <details className="group rounded-md border border-gray-200 bg-gray-50/80 px-3 py-2 dark:border-neutral-700 dark:bg-gray-800/40">
                       <summary className="cursor-pointer list-none text-sage-700 underline-offset-2 hover:underline dark:text-sage-400 [&::-webkit-details-marker]:hidden">
                         <span className="inline-flex items-center gap-1">
                           {imageBatchStyleHintMoreInfoLabel}
@@ -1431,7 +1432,7 @@ export default function SiteBuilderClient() {
                           />
                         </span>
                       </summary>
-                      <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 dark:border-gray-600">
+                      <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 dark:border-neutral-700">
                         {imageBatchStyleHintIntro ? <p>{imageBatchStyleHintIntro}</p> : null}
                         {imageBatchStyleHintBullets.length > 0 ? (
                           <ul className="list-disc list-outside space-y-1.5 pl-5 marker:text-gray-500 dark:marker:text-gray-400">
@@ -1489,7 +1490,7 @@ export default function SiteBuilderClient() {
                   {generatedImages.map((img, i) => (
                     <div
                       key={i}
-                      className="flex h-fit flex-col rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
+                      className="flex h-fit flex-col rounded-lg overflow-hidden border border-neutral-200/75 dark:border-neutral-800"
                     >
                       <button
                         type="button"
@@ -1504,7 +1505,7 @@ export default function SiteBuilderClient() {
                           className="h-full w-full object-cover"
                         />
                       </button>
-                      <div className="p-2 flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800">
+                      <div className="p-2 flex items-center justify-between gap-2 bg-neutral-50/85 dark:bg-neutral-900/45">
                         <div className="w-full flex flex-col items-start gap-2">
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-normal break-words leading-snug">
                             {img.configName}
@@ -1585,7 +1586,7 @@ export default function SiteBuilderClient() {
               <img
                 src={`data:${imagePreview.mediaType};base64,${imagePreview.imageBase64}`}
                 alt={imagePreview.configName}
-                className="mx-auto max-h-[min(75vh,880px)] w-full rounded-md object-contain bg-gray-100 dark:bg-gray-900"
+                className="mx-auto max-h-[min(75vh,880px)] w-full rounded-md object-contain bg-gray-100 dark:bg-neutral-950"
               />
             </>
           ) : null}

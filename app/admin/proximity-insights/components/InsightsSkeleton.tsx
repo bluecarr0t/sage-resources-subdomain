@@ -20,7 +20,7 @@ export function InsightsSkeleton() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl"
+              className="flex items-center gap-3 p-4 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl"
             >
               <div className="p-2 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-9 h-9" />
               <div className="flex-1">
@@ -31,17 +31,17 @@ export function InsightsSkeleton() {
           ))}
         </div>
         {/* Skeleton: Chart */}
-        <div className="mb-6 p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+        <div className="mb-6 p-6 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl">
           <div className="h-6 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
           <div className="h-80 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
         </div>
         {/* Skeleton: Two charts row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+          <div className="p-6 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl">
             <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
             <div className="h-72 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
           </div>
-          <div className="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+          <div className="p-6 bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-xl">
             <div className="h-6 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
             <div className="h-72 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
           </div>

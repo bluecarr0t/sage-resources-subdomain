@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import { Button, Card } from '@/components/ui';
 import { UploadCloud, FileText, CheckCircle, XCircle, Loader2, Trash2, RotateCcw } from 'lucide-react';
 import type { UploadResult } from '@/lib/types/feasibility';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 const MAX_FILES = 10;
 const MAX_FILE_SIZE_MB = 25;
@@ -208,11 +209,9 @@ export default function UploadComparablesPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Upload Feasibility Studies
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className={adminPageHeadingMargin}>
+          <h1 className={`${adminPageTitle} mb-1`}>Upload Feasibility Studies</h1>
+          <p className={adminPageDescription}>
             Upload complete .xlsx workbooks (up to {MAX_FILES} at a time).
             All sheets are automatically extracted: Comps, Best Comps, Pro Forma,
             Financing, IRR, Development Costs, Rate &amp; Occupancy Projections,
@@ -310,7 +309,7 @@ export default function UploadComparablesPage() {
               className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200 ${
                 dragActive
                   ? 'border-sage-500 bg-sage-50 dark:bg-sage-900/20'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-sage-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  : 'border-neutral-300/80 dark:border-neutral-600 hover:border-sage-400 hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40/50'
               }`}
             >
               <UploadCloud className={`w-12 h-12 mx-auto mb-4 ${
@@ -348,11 +347,11 @@ export default function UploadComparablesPage() {
                     Clear all
                   </button>
                 </div>
-                <div className="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 border border-neutral-200/75 dark:border-neutral-800 rounded-lg overflow-hidden">
                   {queuedFiles.map((qf) => (
                     <div
                       key={qf.id}
-                      className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900/50"
+                      className="flex items-center justify-between px-4 py-3 bg-white dark:bg-neutral-950/50"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <FileText className="w-5 h-5 text-sage-500 flex-shrink-0" />

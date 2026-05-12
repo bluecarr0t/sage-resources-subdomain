@@ -10,6 +10,7 @@ import SearchableAnchorSelect from '@/components/SearchableAnchorSelect';
 import { InsightsSkeleton } from './components/InsightsSkeleton';
 import { InsightsColumn } from './components/InsightsColumn';
 import type { AnchorType, InsightsData, PropertyTypeFilter, Season } from './types';
+import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 const CANADIAN_PROVINCE_CODES = new Set(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT']);
 const US_STATE_OPTIONS = Object.entries(STATE_ABBREVIATIONS)
@@ -316,15 +317,15 @@ export default function AnchorPointInsightsPage() {
       <GoogleMapsProvider>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <div className={adminPageHeadingMargin}>
+          <h1 className={`${adminPageTitle} mb-1`}>
             {compareMode
               ? t('compare')
               : leftData.selected_anchor
                 ? t('titleWithAnchor', { anchorName: leftData.selected_anchor.name })
                 : t('title')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className={`${adminPageDescription} mb-4`}>
             {compareMode
               ? t('subtitle')
               : leftData.selected_anchor
@@ -433,7 +434,7 @@ export default function AnchorPointInsightsPage() {
                 else p.delete('state');
                 router.replace(`${pathname}?${p.toString()}`, { scroll: false });
               }}
-              className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+              className="px-3 py-2 rounded-lg text-sm border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent"
               aria-label={t('filterByState')}
             >
               <option value="">{t('allStates')}</option>
@@ -456,7 +457,7 @@ export default function AnchorPointInsightsPage() {
                       p.delete('anchor_a_slug');
                       router.replace(`${pathname}?${p.toString()}`, { scroll: false });
                     }}
-                    className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                    className="px-3 py-2 rounded-lg text-sm border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100"
                   >
                     <option value="ski">{t('skiResorts')}</option>
                     <option value="national-parks">{t('nationalParks')}</option>
@@ -496,7 +497,7 @@ export default function AnchorPointInsightsPage() {
                       p.delete('anchor_b_slug');
                       router.replace(`${pathname}?${p.toString()}`, { scroll: false });
                     }}
-                    className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                    className="px-3 py-2 rounded-lg text-sm border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100"
                   >
                     <option value="ski">{t('skiResorts')}</option>
                     <option value="national-parks">{t('nationalParks')}</option>
@@ -608,7 +609,7 @@ export default function AnchorPointInsightsPage() {
                 {exportingFull ? t('exportingFull') : t('export')}
               </button>
               {exportOpen && (
-                <div className="absolute right-0 top-full mt-1 py-1 min-w-[220px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                <div className="absolute right-0 top-full mt-1 py-1 min-w-[220px] bg-white dark:bg-neutral-950 border border-neutral-200/75 dark:border-neutral-800 rounded-lg shadow-lg z-50">
                   <button
                     type="button"
                     onClick={handleExportPropertySample}
@@ -653,7 +654,7 @@ export default function AnchorPointInsightsPage() {
                     onChange={(e) => setDistanceBandsInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && router.replace(`${pathname}?${buildUrlParams().toString()}`, { scroll: false })}
                     placeholder={t('distanceBandsPlaceholder')}
-                    className="px-3 py-2 rounded-lg text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent w-36"
+                    className="px-3 py-2 rounded-lg text-sm border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-sage-500 focus:border-transparent w-36"
                     aria-label={t('customDistanceBands')}
                   />
                   <button

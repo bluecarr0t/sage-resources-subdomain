@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
 import { STATE_ABBREVIATIONS, CANADIAN_PROVINCES } from '../utils/stateUtils';
 import { normalizePropertyName } from '../utils/propertyProcessing';
+import { getMapCountryFilterKey, propertyMatchesCountryFilters } from '@/lib/map/map-country-filter';
 
 interface FilterComputationsInput {
   allProperties: SageProperty[];
@@ -47,37 +48,9 @@ function stateMatchesFilterLocal(state: string | null, filterStates: string[]): 
   );
 }
 
-function isCanadianProperty(property: any): boolean {
-  const country = String(property.country || '').toUpperCase();
-  const state = String(property.state || '').toUpperCase();
-  if (country === 'CA' || country === 'CAN' || country === 'CANADA') return true;
-  const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-  if (canadianProvinceCodes.includes(state)) return true;
-  if (CANADIAN_PROVINCES.some((province) => province.toUpperCase() === state)) return true;
-  return false;
-}
-
-function isUSProperty(property: any): boolean {
-  const country = String(property.country || '').toUpperCase();
-  const state = String(property.state || '').toUpperCase();
-  if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') return true;
-  const canadianProvinceCodes = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
-  const isCanadian =
-    canadianProvinceCodes.includes(state) || CANADIAN_PROVINCES.some((province) => province.toUpperCase() === state);
-  if ((!country || country === '' || country === 'NULL') && !isCanadian && state && state.length === 2) return true;
-  if (country && (country.includes('US') || country.includes('UNITED STATES'))) return true;
-  return false;
-}
-
 function applyCountryFilter(properties: SageProperty[], filterCountry: string[]): SageProperty[] {
-  if (filterCountry.length === 1) {
-    if (filterCountry.includes('United States')) {
-      return properties.filter((p) => isUSProperty(p));
-    } else if (filterCountry.includes('Canada')) {
-      return properties.filter((p) => isCanadianProperty(p));
-    }
-  }
-  return properties;
+  if (filterCountry.length === 0) return properties;
+  return properties.filter((p) => propertyMatchesCountryFilters(p, filterCountry));
 }
 
 function applyUnitTypeFilter(properties: SageProperty[], filterUnitType: string[]): SageProperty[] {
@@ -123,7 +96,7 @@ export function useFilterComputations({
 
   const uniqueStates = useMemo(() => {
     let propertiesToUse = allProperties;
-    if (filterCountry.length === 1) {
+    if (filterCountry.length > 0) {
       propertiesToUse = applyCountryFilter(allProperties, filterCountry);
     }
 
@@ -212,19 +185,8 @@ export function useFilterComputations({
     propertiesWithValidCoords.forEach((p) => {
       const propertyName = p.property_name;
       if (!propertyName) return;
+      if (!propertyMatchesCountryFilters(p, filterCountry)) return;
       const normalizedName = normalizePropertyName(propertyName);
-      const country = String(p.country || '').toUpperCase();
-      let normalizedCountry: string | null = null;
-
-      if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
-        normalizedCountry = 'Canada';
-      } else if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
-        normalizedCountry = 'United States';
-      } else {
-        return;
-      }
-
-      if (filterCountry.length > 0 && !filterCountry.includes(normalizedCountry)) return;
       uniquePropertyNames.add(normalizedName);
     });
 
@@ -245,28 +207,17 @@ export function useFilterComputations({
       const propertyName = p.property_name;
       if (!propertyName) return;
       const normalizedName = normalizePropertyName(propertyName);
-      const country = String(p.country || '').toUpperCase();
-      let normalizedCountry: string | null = null;
-
-      if (country === 'CA' || country === 'CAN' || country === 'CANADA') {
-        normalizedCountry = 'Canada';
-      } else if (country === 'US' || country === 'USA' || country === 'UNITED STATES' || country === 'UNITED STATES OF AMERICA') {
-        normalizedCountry = 'United States';
-      } else {
-        return;
-      }
+      const mapKey = getMapCountryFilterKey(p);
+      if (!mapKey) return;
 
       if (!propertyToCountryMap.has(normalizedName)) {
-        propertyToCountryMap.set(normalizedName, normalizedCountry);
+        propertyToCountryMap.set(normalizedName, mapKey);
       }
     });
 
     propertyToCountryMap.forEach((country) => {
       counts[country] = (counts[country] || 0) + 1;
     });
-
-    if (!counts['United States']) counts['United States'] = 0;
-    if (!counts['Canada']) counts['Canada'] = 0;
 
     return counts;
   }, [allProperties, filterUnitType, filterRateRange, filterState]);

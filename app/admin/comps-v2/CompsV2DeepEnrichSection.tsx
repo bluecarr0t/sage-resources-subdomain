@@ -92,7 +92,7 @@ export default function CompsV2DeepEnrichSection({
             </div>
           </div>
           {deepResults.map((r, i) => (
-            <div key={i} className="border rounded-md p-3 dark:border-gray-700 text-sm space-y-2">
+            <div key={i} className="border rounded-md p-3 dark:border-neutral-800 text-sm space-y-2">
               <p className="font-semibold">{r.property_name}</p>
               {r.error && <p className="text-red-600">{r.error}</p>}
               <p>
