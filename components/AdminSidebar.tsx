@@ -26,6 +26,7 @@ import {
   Bot,
   Wrench,
   ChevronDown,
+  FileBarChart,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSidebar } from '@/lib/sidebar-context';
@@ -44,6 +45,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
   if (pathname.startsWith('/admin/comps') && !pathname.startsWith('/admin/comps-v2')) return 'comps';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
+  if (pathname.startsWith('/admin/market-report')) return 'market-report';
   if (pathname.startsWith('/admin/rv-site-setup') || pathname.startsWith('/admin/site-design')) return 'site-design';
   if (pathname.startsWith('/admin/site-builder')) return 'site-builder';
   if (pathname.startsWith('/admin/sage-ai')) return 'sage-ai';
@@ -55,6 +57,7 @@ function getActivePageId(pathname: string): string {
 
 const TOOLS_PAGE_IDS = new Set([
   'proximity-insights',
+  'market-report',
   'site-design',
   'site-builder',
   'sage-ai',
@@ -218,9 +221,11 @@ export default function AdminSidebar() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } w-64 ${isCollapsed ? 'lg:w-20' : ''}`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex h-full min-h-0 flex-col overflow-hidden">
           {/* Header - Logo area */}
-          <div className={`flex items-center justify-center border-b border-neutral-200/75 dark:border-neutral-800 relative py-0 ${showCollapsed ? 'pt-8' : ''}`}>
+          <div
+            className={`relative flex shrink-0 items-center justify-center border-b border-neutral-200/75 dark:border-neutral-800 py-0 ${showCollapsed ? 'pt-8' : ''}`}
+          >
             <Link
               href="/admin/dashboard"
               className={`flex items-center justify-center ${showCollapsed ? 'w-11 h-11' : 'w-36 h-36'}`}
@@ -255,8 +260,8 @@ export default function AdminSidebar() {
             </button>
           </div>
 
-          {/* Navigation - pb-24 to clear absolute footer */}
-          <nav className="pt-2 px-4 pb-24 space-y-1 flex-1 overflow-y-auto">
+          {/* Navigation — min-h-0 so flex-1 can shrink and overflow-y-auto scrolls when Tools expands */}
+          <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-4 pb-24 pt-2">
             {/* Dashboard - top-level */}
             <div className="py-2">
               <NavLink
@@ -366,6 +371,22 @@ export default function AdminSidebar() {
                         className="ml-3 space-y-1 border-l border-neutral-200/80 py-0.5 pl-3 dark:border-neutral-800"
                       >
                         <NavLink
+                          href="/admin/market-report"
+                          label={tSidebar('marketReport')}
+                          icon={FileBarChart}
+                          pageId="market-report"
+                          isActive={activePageId === 'market-report'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/sage-ai"
+                          label={tSidebar('sageAi')}
+                          icon={Bot}
+                          pageId="sage-ai"
+                          isActive={activePageId === 'sage-ai'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
                           href="/admin/proximity-insights"
                           label={tSidebar('proximityInsights')}
                           icon={MapPin}
@@ -387,14 +408,6 @@ export default function AdminSidebar() {
                           icon={Home}
                           pageId="site-builder"
                           isActive={activePageId === 'site-builder'}
-                          isCollapsed={false}
-                        />
-                        <NavLink
-                          href="/admin/sage-ai"
-                          label={tSidebar('sageAi')}
-                          icon={Bot}
-                          pageId="sage-ai"
-                          isActive={activePageId === 'sage-ai'}
                           isCollapsed={false}
                         />
                       </div>
@@ -429,6 +442,32 @@ export default function AdminSidebar() {
                         aria-label={tSidebar('toolsMenu')}
                         className="absolute left-full top-0 z-[60] ml-1 min-w-[13.5rem] rounded-md border border-neutral-200/80 bg-white py-1 dark:border-neutral-800 dark:bg-neutral-950"
                       >
+                        <Link
+                          href="/admin/market-report"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'market-report'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <FileBarChart className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('marketReport')}
+                        </Link>
+                        <Link
+                          href="/admin/sage-ai"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'sage-ai'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <Bot className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('sageAi')}
+                        </Link>
                         <Link
                           href="/admin/proximity-insights"
                           role="menuitem"
@@ -467,19 +506,6 @@ export default function AdminSidebar() {
                         >
                           <Home className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                           {tSidebar('siteBuilder')}
-                        </Link>
-                        <Link
-                          href="/admin/sage-ai"
-                          role="menuitem"
-                          onClick={() => setToolsFlyoutOpen(false)}
-                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
-                            activePageId === 'sage-ai'
-                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
-                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
-                          }`}
-                        >
-                          <Bot className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-                          {tSidebar('sageAi')}
                         </Link>
                       </div>
                     ) : null}

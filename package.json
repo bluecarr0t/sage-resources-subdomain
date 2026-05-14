@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3003",
     "postinstall": "node scripts/ensure-pyodide.js",
-    "prebuild": "node scripts/ensure-indexnow-key.js && node scripts/ensure-feasibility-template.js && node scripts/ensure-pyodide.js",
+    "prebuild": "node scripts/ensure-indexnow-key.js && node scripts/ensure-feasibility-template.js && node scripts/ensure-market-report-template.js && node scripts/ensure-pyodide.js",
     "build": "next build",
     "indexnow:submit": "tsx scripts/submit-indexnow.ts",
     "start": "next start",
@@ -71,6 +71,7 @@
     "docxtemplater": "^3.68.3",
     "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
     "jszip": "^3.10.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.575.0",

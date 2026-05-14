@@ -1,0 +1,132 @@
+/**
+ * Print layout for /admin/market-report: hide sidebar and form when saving as PDF.
+ * Activated via `html.market-report-print-mode` (see MarketReportPageInner).
+ */
+@media print {
+  html.market-report-print-mode #sidebar,
+  html.market-report-print-mode #sidebarOverlay {
+    display: none !important;
+  }
+
+  html.market-report-print-mode #mainContent {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  html.market-report-print-mode .market-report-no-print {
+    display: none !important;
+  }
+
+  html.market-report-print-mode .market-report-print-root,
+  html.market-report-print-mode .market-report-print-root * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  html.market-report-print-mode .market-report-page {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  html.market-report-print-mode .market-report-print-root {
+    max-width: 100% !important;
+  }
+
+  /* Keep each report card on a single page when possible. */
+  html.market-report-print-mode .market-report-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #d4d4d4 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Section headings should not orphan from their content. */
+  html.market-report-print-mode .market-report-section h2 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Keep the gold accent bar visible in print (chrome strips backgrounds by default). */
+  html.market-report-print-mode .market-report-section-title {
+    border-bottom-color: #d4d4d4 !important;
+  }
+  html.market-report-print-mode .market-report-section-title span[aria-hidden] {
+    background-color: #f59e0b !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Prevent table rows from splitting across pages. */
+  html.market-report-print-mode .market-report-section table {
+    break-inside: auto;
+  }
+  html.market-report-print-mode .market-report-section thead {
+    display: table-header-group;
+  }
+  html.market-report-print-mode .market-report-section tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  html.market-report-print-mode .market-report-pdf-keep {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Crisper borders + neutral fills for stat tiles in print. */
+  html.market-report-print-mode .market-report-section .tabular-nums {
+    color: #111 !important;
+  }
+}
+
+@page {
+  margin: 0.5in;
+}
+
+/**
+ * Client-side PDF capture (html2canvas): mirror key print visuals on screen
+ * while `html.market-report-pdf-capture` is set (see downloadMarketReportPdfFromElement).
+ */
+.market-report-pdf-cover {
+  display: none;
+}
+
+html.market-report-pdf-capture .market-report-pdf-cover {
+  display: block !important;
+}
+
+html.market-report-pdf-capture .market-report-print-root {
+  max-width: 100% !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html.market-report-pdf-capture .market-report-section {
+  border: 1px solid #d4d4d4 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  margin-bottom: 0.75rem !important;
+}
+
+html.market-report-pdf-capture .market-report-section-title {
+  border-bottom-color: #d4d4d4 !important;
+}
+
+html.market-report-pdf-capture .market-report-section-title span[aria-hidden] {
+  background-color: #f59e0b !important;
+}
+
+html.market-report-pdf-capture .market-report-section .tabular-nums {
+  color: #111 !important;
+}
+
+html.market-report-pdf-capture .market-report-pdf-keep {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}

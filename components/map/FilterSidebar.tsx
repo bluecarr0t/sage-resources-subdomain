@@ -137,8 +137,8 @@ export default function FilterSidebar({
           <div className="flex items-center gap-2 min-w-0 flex-1" aria-live="polite" aria-atomic="true">
             <span
               key={displayedCount}
-              className={`text-xl font-semibold tabular-nums leading-none text-[#3B82F6] transition-all duration-500 ease-in-out relative inline-block whitespace-nowrap ${
-                isAnimating ? 'scale-[1.02] opacity-80' : 'scale-100 opacity-100'
+              className={`text-xl font-semibold tabular-nums leading-none text-[#3B82F6] transition-all duration-500 ease-in-out relative inline-block whitespace-nowrap opacity-100 ${
+                isAnimating ? 'scale-[1.02]' : 'scale-100'
               }`}
             >
               <span className={loading ? 'opacity-50' : ''}>{displayedCount}</span>
@@ -192,8 +192,8 @@ export default function FilterSidebar({
         <div className="flex items-center justify-center gap-2.5">
           <span
             key={displayedCount}
-            className={`text-2xl font-semibold tabular-nums leading-none text-[#3B82F6] transition-all duration-500 ease-in-out relative inline-block ${
-              isAnimating ? 'scale-[1.02] opacity-80' : 'scale-100 opacity-100'
+            className={`text-2xl font-semibold tabular-nums leading-none text-[#3B82F6] transition-all duration-500 ease-in-out relative inline-block opacity-100 ${
+              isAnimating ? 'scale-[1.02]' : 'scale-100'
             }`}
           >
             <span className={loading ? 'opacity-50' : ''}>{displayedCount}</span>

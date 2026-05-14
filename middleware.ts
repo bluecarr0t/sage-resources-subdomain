@@ -2,6 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale, type Locale } from './i18n';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseMiddlewareClient } from '@/lib/supabase-middleware';
+import { isLegacyUsCanadaOnlyCountryQuery } from '@/lib/map/legacy-map-country-query';
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware({
@@ -198,6 +199,17 @@ export async function middleware(request: NextRequest) {
     // which does not map to static files and breaks `python_stdlib.zip` loads.
     if (pathname === '/pyodide' || pathname.startsWith('/pyodide/')) {
       return NextResponse.next();
+    }
+
+    // Legacy full-map URLs used only US+Canada query params; canonical default is plain /{locale}/map (all countries).
+    const localeMapMatch = pathname.match(/^\/([a-z]{2})\/map$/);
+    if (localeMapMatch && locales.includes(localeMapMatch[1] as Locale)) {
+      const countryParams = request.nextUrl.searchParams.getAll('country');
+      if (countryParams.length > 0 && isLegacyUsCanadaOnlyCountryQuery(countryParams)) {
+        const nextUrl = request.nextUrl.clone();
+        nextUrl.searchParams.delete('country');
+        return NextResponse.redirect(nextUrl, 301);
+      }
     }
 
     // Protect /admin routes - require valid session (Google OAuth)

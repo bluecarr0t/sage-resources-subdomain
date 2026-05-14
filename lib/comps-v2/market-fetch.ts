@@ -217,7 +217,7 @@ export async function fetchRoverpassComps(
         'rate_fall_weekday, rate_fall_weekend, operating_season_months, url, description, lat, lon, ' +
         'roverpass_occupancy_rate'
     )
-    .eq('is_open', 'Yes')
+    .neq('is_closed', 'Yes')
     .gte('lat', bb.minLat)
     .lte('lat', bb.maxLat)
     .gte('lon', bb.minLng)
@@ -295,7 +295,7 @@ export async function fetchCampspotComps(
         'occupancy_rate_2024, occupancy_rate_2025, occupancy_rate_2026, ' +
         'winter_weekday, winter_weekend, spring_weekday, spring_weekend, ' +
         'summer_weekday, summer_weekend, fall_weekday, fall_weekend, ' +
-        'operating_season_months, url, description, lat, lon'
+        'operating_season_months, url, description, lat, lon, lat_num, lon_num'
     )
     .in('state', stateKeys)
     .not('lat', 'is', null)
@@ -312,8 +312,8 @@ export async function fetchCampspotComps(
 
   return (data as unknown as AnyRow[])
     .map((r) => {
-      const rLat = parseNum(r.lat);
-      const rLon = parseNum(r.lon);
+      const rLat = parseNum(r.lat_num) ?? parseNum(r.lat);
+      const rLon = parseNum(r.lon_num) ?? parseNum(r.lon);
       if (rLat == null || rLon == null) return null;
       const dist = haversineDistanceMiles(lat, lng, rLat, rLon);
       if (dist > radiusMiles) return null;

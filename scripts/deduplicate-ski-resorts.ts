@@ -47,6 +47,8 @@ interface SkiResortRow {
 function normalize(s: string | null | undefined): string {
   return (s || '')
     .toLowerCase()
+    .replace(/\bmt\.?\b/g, 'mount')
+    .replace(/\bft\.?\b/g, 'fort')
     .replace(/[^\w\s]/g, '')
     .replace(/\s+/g, ' ')
     .trim();

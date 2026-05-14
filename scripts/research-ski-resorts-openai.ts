@@ -15,6 +15,7 @@
  *   npx tsx scripts/research-ski-resorts-openai.ts --dry-run           # No DB writes
  *   npx tsx scripts/research-ski-resorts-openai.ts --limit 50          # 50 resorts per country
  *   npx tsx scripts/research-ski-resorts-openai.ts --country USA       # USA only
+ *   npx tsx scripts/research-ski-resorts-openai.ts --states OR,WA      # Restrict discovery to these US states
  *   npx tsx scripts/research-ski-resorts-openai.ts --tier 1            # Major resorts first (default)
  *   npx tsx scripts/research-ski-resorts-openai.ts --tier 2            # Regional favorites
  *   npx tsx scripts/research-ski-resorts-openai.ts --tier 3            # Smaller boutique areas
@@ -452,24 +453,31 @@ async function discoverResorts(
   limit: number,
   useWebSearch: boolean,
   tier: DiscoveryTier = 1,
+  statesFilter: string | null = null
 ): Promise<SkiResortRecord[]> {
   const limitClause = limit ? `Return exactly ${limit} resorts.` : 'Return 20-30 resorts.';
 
   let webContext = '';
   if (useWebSearch && tavilyClient) {
     console.log('  🔍 Tavily: fetching current resort list...');
+    const region = statesFilter ? ` ${statesFilter.replace(/,/g, ' ')}` : '';
     const { content } = await tavilyMultiSearch([
-      { query: `${country} ski resorts list 2024 2025 vertical drop snowfall lift ticket prices` },
+      { query: `${country} ski resorts list${region} 2024 2025 vertical drop snowfall lift ticket prices` },
     ]);
     if (content) webContext = `\n\nCurrent web search results (use for accurate, up-to-date data):\n${content}`;
   }
 
   const tierPrompt = country === 'USA' ? TIER_PROMPTS[tier] : `List notable ski resorts in Canada. Prioritize major destinations (Whistler, Banff/Lake Louise, Revelstoke, etc.) first, then regional favorites.`;
 
+  const stateRestriction =
+    statesFilter && country === 'USA'
+      ? `\n\nSTATE RESTRICTION — Only include resorts whose true location lies in these US states (use full state names in state_province, e.g. Oregon, Washington): ${statesFilter.replace(/,/g, ', ')}. Do not list resorts outside those states.\n`
+      : '';
+
   const prompt = `You are a ski industry researcher. List ski resorts in ${country}.
 
 ${tierPrompt}
-
+${stateRestriction}
 ${limitClause}
 
 Focus on resorts with reliable, verifiable stats and strong web presence.
@@ -554,6 +562,9 @@ async function main() {
   const limit = limitIdx >= 0 ? parseInt(String(process.argv[limitIdx + 1] || '0'), 10) || undefined : undefined;
   const countryIdx = process.argv.indexOf('--country');
   const countryFilter = countryIdx >= 0 ? (process.argv[countryIdx + 1] || '').toUpperCase() : null;
+  const statesIdx = process.argv.indexOf('--states');
+  const statesCsv =
+    statesIdx >= 0 ? String(process.argv[statesIdx + 1] || '').trim().toUpperCase() || null : null;
   const countries: ('USA' | 'Canada')[] =
     countryFilter === 'USA' ? ['USA'] : countryFilter === 'CANADA' ? ['Canada'] : ['USA', 'Canada'];
   const tierIdx = process.argv.indexOf('--tier');
@@ -565,6 +576,7 @@ async function main() {
   console.log(`   Pipeline: Tavily multi-search → GPT structured output → Validation → Supabase`);
   console.log(`   Mode: ${dryRun ? 'DRY RUN' : discoverOnly ? 'DISCOVER ONLY' : enrichOnly ? 'ENRICH ONLY' : 'FULL PIPELINE'}`);
   if (!enrichOnly) console.log(`   Discovery tier: ${discoveryTier} (1=major, 2=regional, 3=smaller)\n`);
+  if (statesCsv) console.log(`   State filter (discovery): ${statesCsv}\n`);
 
   if (!dryRun && !discoverOnly) {
     const { error: tableError } = await supabase.from(TABLE).select('id').limit(0);
@@ -602,7 +614,13 @@ async function main() {
   for (const country of countries) {
     console.log(`\n📋 Discovering ${country} ski resorts...`);
     await new Promise(r => setTimeout(r, DELAY_MS));
-    const discovered = await discoverResorts(country, limit ?? 0, useWebSearch, discoveryTier);
+    const discovered = await discoverResorts(
+      country,
+      limit ?? 0,
+      useWebSearch,
+      discoveryTier,
+      statesCsv
+    );
     console.log(`   Found ${discovered.length} resorts`);
     allResorts.push(...discovered);
   }

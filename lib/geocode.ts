@@ -10,6 +10,11 @@ export interface GeocodeResult {
   lng: number;
   /** US state abbreviation when known (Google components, request, or parsed from freeform line). */
   stateAbbr?: string;
+  /**
+   * US county / parish / borough (Google `administrative_area_level_2`) when present.
+   * Used for county economic metrics when the user typed a city, not "X County".
+   */
+  countyLevel2?: string;
 }
 
 const US_STATE_2 = new Set([
@@ -32,6 +37,23 @@ function extractUsStateFromGoogleComponents(components?: GoogleAddressComponent[
     return admin1.toUpperCase();
   }
   return undefined;
+}
+
+/** US county / parish (Google admin_area_level_2), e.g. "Walworth County" or "Orleans Parish". */
+function extractUsCountyLevel2FromGoogleComponents(
+  components?: GoogleAddressComponent[]
+): string | undefined {
+  if (!components?.length) return undefined;
+  let country = '';
+  let county: string | undefined;
+  for (const c of components) {
+    if (c.types.includes('country')) country = c.short_name;
+    if (c.types.includes('administrative_area_level_2')) {
+      const name = c.long_name?.trim();
+      if (name) county = name;
+    }
+  }
+  return country === 'US' && county ? county : undefined;
 }
 
 /** Parse ", ST" or ", ST 12345" patterns from a US place line (e.g. "Austin, TX"). */
@@ -104,7 +126,13 @@ export async function geocodeAddress(
       const row = data.results[0];
       const location = row.geometry.location;
       const stateAbbr = extractUsStateFromGoogleComponents(row.address_components);
-      return { lat: location.lat, lng: location.lng, ...(stateAbbr ? { stateAbbr } : {}) };
+      const countyLevel2 = extractUsCountyLevel2FromGoogleComponents(row.address_components);
+      return {
+        lat: location.lat,
+        lng: location.lng,
+        ...(stateAbbr ? { stateAbbr } : {}),
+        ...(countyLevel2 ? { countyLevel2 } : {}),
+      };
     }
     if (data.status && data.status !== 'OK') {
       console.warn(
@@ -200,7 +228,13 @@ export async function geocodePlaceLine(addressLine: string): Promise<GeocodeResu
       const row = data.results[0];
       const location = row.geometry.location;
       const stateAbbr = extractUsStateFromGoogleComponents(row.address_components);
-      return { lat: location.lat, lng: location.lng, ...(stateAbbr ? { stateAbbr } : {}) };
+      const countyLevel2 = extractUsCountyLevel2FromGoogleComponents(row.address_components);
+      return {
+        lat: location.lat,
+        lng: location.lng,
+        ...(stateAbbr ? { stateAbbr } : {}),
+        ...(countyLevel2 ? { countyLevel2 } : {}),
+      };
     }
     if (data.status && data.status !== 'OK') {
       console.warn(
@@ -342,6 +376,46 @@ export async function reverseGeocodeLocalityAndStateUsa(
     return { locality, stateAbbr };
   } catch {
     return { locality: null, stateAbbr: null };
+  }
+}
+
+/**
+ * Reverse geocode to US county (Google `administrative_area_level_2`), e.g. "Walworth County".
+ * Used for county economic metrics when the search line is a city/venue without the county name.
+ * Tries Google when a key is set, then Nominatim (`address.county`).
+ */
+export async function reverseGeocodeCountyLevel2Usa(lat: number, lng: number): Promise<string | null> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+  const apiKey = getGoogleGeocodingApiKey();
+  if (apiKey) {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+      const response = await fetch(url);
+      const data = (await response.json()) as {
+        status?: string;
+        results?: Array<{ address_components?: GoogleAddressComponent[] }>;
+      };
+      if (data.status === 'OK' && data.results?.[0]?.address_components) {
+        const county = extractUsCountyLevel2FromGoogleComponents(data.results[0].address_components);
+        if (county) return county;
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': NOMINATIM_UA },
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { address?: { county?: string } };
+    const county = data.address?.county?.trim();
+    return county || null;
+  } catch {
+    return null;
   }
 }
 

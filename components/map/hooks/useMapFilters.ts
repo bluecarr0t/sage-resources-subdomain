@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { isLegacyUsCanadaOnlyCountryQuery } from '@/lib/map/legacy-map-country-query';
 
 const defaultCenter = { lat: 39.5, lng: -98.5 };
 const defaultZoom = 4;
@@ -63,7 +64,7 @@ export function useMapFilters({
     const urlZoom = searchParams.get('zoom');
 
     if (urlState.length > 0 || urlCountry.length > 0 || urlUnitType.length > 0 || urlRateRange.length > 0) {
-      if (urlCountry.length > 0) {
+      if (urlCountry.length > 0 && !isLegacyUsCanadaOnlyCountryQuery(urlCountry)) {
         setFilterCountry(urlCountry);
       }
       if (urlState.length > 0) {
