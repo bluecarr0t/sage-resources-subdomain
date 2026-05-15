@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
-import { ChevronDown, Loader2, Presentation } from 'lucide-react';
+import { ChevronDown, ChevronRight, Loader2, MessageSquare, Presentation } from 'lucide-react';
 import CompsV2AddressPlaceInput from '@/components/CompsV2AddressPlaceInput';
 import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
 import { MarketReportMapPreview } from '@/components/admin/market-report/MarketReportMapPreview';
@@ -31,10 +32,20 @@ import {
   formatOccupancyPct,
   humanLabel,
 } from '@/lib/market-report/format-labels';
+import { formatCountyGdpThousands } from '@/lib/market-report/format-county-gdp';
+import {
+  resolveMarketInsightsModelLabel,
+  type MarketInsightsModelLabelResolution,
+} from '@/lib/market-report/insights-model-label';
 import { unitTypePillSurfaceClasses } from '@/lib/market-report/unit-type-pill-styles';
 import { groupPropertySample } from '@/lib/market-report/group-property-sample';
 import { downloadMarketReportPdfFromElement } from '@/lib/market-report/download-market-report-pdf';
 import { resolveUsStateAbbr } from '@/lib/us-state-centers';
+import {
+  SAGE_AI_FROM_MARKET_REPORT_SEARCH_PARAM,
+  SAGE_AI_FROM_MARKET_REPORT_SEARCH_VALUE,
+  writeSageAiMarketReportBootstrap,
+} from '@/lib/sage-ai/market-report-bootstrap';
 
 import './market-report-print.css';
 
@@ -108,6 +119,7 @@ type InsightsState = {
   status: 'idle' | 'loading' | 'ready' | 'empty' | 'failed';
   bullets: string[];
   model: string | null;
+  tokensUsed: number | null;
   cached: boolean;
   failedKind?: 'rate_limit' | 'generic';
 };
@@ -162,6 +174,7 @@ function MarketReportPageInner() {
   const t = useTranslations('admin.marketReport');
   const tSidebar = useTranslations('admin.sidebar');
   const format = useFormatter();
+  const router = useRouter();
   const [addressLine, setAddressLine] = useState('');
   const [radiusMiles, setRadiusMiles] = useState(50);
   const [segment, setSegment] = useState<'glamping' | 'rv_resort'>('glamping');
@@ -183,6 +196,7 @@ function MarketReportPageInner() {
     status: 'idle',
     bullets: [],
     model: null,
+    tokensUsed: null,
     cached: false,
   });
   const reportFetchAbortRef = useRef<AbortController | null>(null);
@@ -251,10 +265,10 @@ function MarketReportPageInner() {
       const inventoryRows =
         ok.sections.marketSummary.inventoryRowCount ?? ok.meta.propertyCount ?? 0;
       if (inventoryRows === 0) {
-        setInsights({ status: 'empty', bullets: [], model: null, cached: false });
+        setInsights({ status: 'empty', bullets: [], model: null, tokensUsed: null, cached: false });
         return;
       }
-      setInsights({ status: 'loading', bullets: [], model: null, cached: false });
+      setInsights({ status: 'loading', bullets: [], model: null, tokensUsed: null, cached: false });
       try {
         const res = await fetch('/api/admin/market-report/insights', {
           method: 'POST',
@@ -280,6 +294,7 @@ function MarketReportPageInner() {
             status: 'failed',
             bullets: [],
             model: null,
+            tokensUsed: null,
             cached: false,
             failedKind,
           });
@@ -290,6 +305,7 @@ function MarketReportPageInner() {
           bullets?: string[];
           model?: string | null;
           cached?: boolean;
+          tokensUsed?: number | null;
         };
         try {
           json = await res.json();
@@ -298,6 +314,7 @@ function MarketReportPageInner() {
             status: 'failed',
             bullets: [],
             model: null,
+            tokensUsed: null,
             cached: false,
             failedKind: 'generic',
           });
@@ -309,16 +326,23 @@ function MarketReportPageInner() {
             status: 'failed',
             bullets: [],
             model: null,
+            tokensUsed: null,
             cached: false,
             failedKind: 'generic',
           });
           return;
         }
         const bullets = Array.isArray(json.bullets) ? json.bullets : [];
+        const tokensRaw = json.tokensUsed;
+        const tokensUsed =
+          typeof tokensRaw === 'number' && Number.isFinite(tokensRaw) && tokensRaw > 0
+            ? Math.round(tokensRaw)
+            : null;
         setInsights({
           status: bullets.length > 0 ? 'ready' : 'empty',
           bullets,
           model: json.model ?? null,
+          tokensUsed,
           cached: !!json.cached,
         });
       } catch (err) {
@@ -329,6 +353,7 @@ function MarketReportPageInner() {
           status: 'failed',
           bullets: [],
           model: null,
+          tokensUsed: null,
           cached: false,
           failedKind: 'generic',
         });
@@ -348,11 +373,12 @@ function MarketReportPageInner() {
       setError(null);
       setExportError(null);
       setLastReportServerMs(null);
-      setInsights({ status: 'idle', bullets: [], model: null, cached: false });
+      setInsights({ status: 'idle', bullets: [], model: null, tokensUsed: null, cached: false });
       try {
         const res = await fetch('/api/admin/market-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           signal: reportAc.signal,
           body: JSON.stringify({
             scope,
@@ -367,7 +393,31 @@ function MarketReportPageInner() {
         });
         if (reportAc.signal.aborted) return;
 
-        const json = (await res.json()) as ApiSuccess | ApiError;
+        const responseText = await res.text();
+        let json: ApiSuccess | ApiError;
+        try {
+          const parsed = responseText ? JSON.parse(responseText) : null;
+          if (
+            parsed == null ||
+            typeof parsed !== 'object' ||
+            Array.isArray(parsed)
+          ) {
+            setResult(null);
+            setLastReportServerMs(null);
+            setError(t('errorInvalidResponse', { status: String(res.status) }));
+            return;
+          }
+          json = parsed as ApiSuccess | ApiError;
+        } catch {
+          setResult(null);
+          setLastReportServerMs(null);
+          setError(
+            res.ok
+              ? t('errorGeneric')
+              : t('errorInvalidResponse', { status: String(res.status) }),
+          );
+          return;
+        }
         if (res.status === 429) {
           setResult(null);
           setLastReportServerMs(null);
@@ -511,6 +561,23 @@ function MarketReportPageInner() {
     },
     [result, t, downloadBlob, slugifyFilename, cohortExportJsonBody]
   );
+
+  const startAiConvoWithReport = useCallback(() => {
+    if (!result) return;
+    setExportError(null);
+    const w = writeSageAiMarketReportBootstrap({
+      meta: result.meta,
+      sections: result.sections,
+      mapPins: result.mapPins,
+    });
+    if (!w.ok) {
+      setExportError(t('startAiConvoTooLarge'));
+      return;
+    }
+    const q = new URLSearchParams();
+    q.set(SAGE_AI_FROM_MARKET_REPORT_SEARCH_PARAM, SAGE_AI_FROM_MARKET_REPORT_SEARCH_VALUE);
+    router.push(`/admin/sage-ai?${q.toString()}`);
+  }, [result, router, t]);
 
   const onDownloadPdf = useCallback(async () => {
     if (!result) return;
@@ -848,6 +915,17 @@ function MarketReportPageInner() {
                 </div>
               ) : null}
             </div>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={rawExportBusy || pdfExportBusy}
+              className="inline-flex items-center gap-2"
+              title={t('startAiConvoTitle')}
+              onClick={() => startAiConvoWithReport()}
+            >
+              <MessageSquare className="h-4 w-4 shrink-0" aria-hidden />
+              {t('startAiConvo')}
+            </Button>
           </div>
 
           <div id="market-report-print-root" className="market-report-print-root space-y-8 max-w-5xl">
@@ -1383,17 +1461,36 @@ function RateImpactCell({
   );
 }
 
+function formatInsightsOperatorLabel(
+  t: (key: string, values?: Record<string, string | number>) => string,
+  res: MarketInsightsModelLabelResolution,
+): string {
+  if (res.operatorLabelKey === 'insightsModelOtherProviderViaGateway') {
+    return t('insightsModelOtherProviderViaGateway', {
+      provider: res.otherProvider ?? 'Unknown',
+    });
+  }
+  return t(res.operatorLabelKey);
+}
+
 function AiInsightsBlock({
   t,
+  format,
   insights,
   presenterMode,
   onRetryInsights,
 }: {
   t: (key: string, values?: Record<string, string | number>) => string;
+  format: ReturnType<typeof useFormatter>;
   insights: InsightsState;
   presenterMode: boolean;
   onRetryInsights: () => void;
 }) {
+  const modelLabel = useMemo(() => {
+    if (insights.status !== 'ready' || !insights.model) return null;
+    return resolveMarketInsightsModelLabel(insights.model);
+  }, [insights.status, insights.model]);
+
   if (insights.status === 'idle' || insights.status === 'empty') return null;
   if (presenterMode && insights.status === 'failed') return null;
 
@@ -1409,10 +1506,30 @@ function AiInsightsBlock({
         >
           {t('summaryAiBulletsTitle')}
         </h3>
-        {!presenterMode && insights.status === 'ready' && insights.model ? (
-          <span className="text-[10px] uppercase tracking-wide text-amber-900/60 dark:text-amber-200/60">
-            {insights.cached ? t('summaryAiBulletsModelCached', { model: insights.model }) : t('summaryAiBulletsModel', { model: insights.model })}
-          </span>
+        {!presenterMode && insights.status === 'ready' && modelLabel ? (
+          <div className="flex max-w-[min(100%,20rem)] flex-col items-end gap-0.5 text-right">
+            <p className="text-[10px] leading-snug text-amber-900/75 dark:text-amber-200/75">
+              <span>{t('summaryAiBulletsAttributionPrefix')}</span>
+              {insights.cached ? (
+                <>
+                  {' '}
+                  · <span className="text-amber-900/60 dark:text-amber-200/60">{t('summaryAiBulletsAttributionCachedBadge')}</span>
+                </>
+              ) : null}
+              {' · '}
+              <span
+                className="cursor-help border-b border-dotted border-amber-900/35 dark:border-amber-200/35"
+                title={t('insightsModelRawIdTooltip', { id: modelLabel.rawModelId })}
+              >
+                {formatInsightsOperatorLabel(t, modelLabel)}
+              </span>
+            </p>
+            {insights.tokensUsed != null ? (
+              <p className="text-[10px] tabular-nums text-amber-900/55 dark:text-amber-200/55">
+                {t('summaryAiBulletsTokensUsed', { tokens: format.number(insights.tokensUsed) })}
+              </p>
+            ) : null}
+          </div>
         ) : null}
       </div>
       {insights.status === 'loading' ? (
@@ -1440,14 +1557,21 @@ function AiInsightsBlock({
         </div>
       ) : null}
       {insights.status === 'ready' ? (
-        <ul className="space-y-1.5 text-sm text-neutral-800 dark:text-neutral-100">
-          {insights.bullets.map((b, i) => (
-            <li key={i} className="flex gap-2">
-              <span aria-hidden="true" className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-              <span>{b}</span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="space-y-1.5 text-sm text-neutral-800 dark:text-neutral-100">
+            {insights.bullets.map((b, i) => (
+              <li key={i} className="flex gap-2">
+                <span aria-hidden="true" className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[10px] leading-relaxed text-amber-950/65 dark:text-amber-100/60">
+            {presenterMode
+              ? t('summaryAiBulletsAttributionFootnotePresenter')
+              : t('summaryAiBulletsAttributionFootnote')}
+          </p>
+        </>
       ) : null}
     </section>
   );
@@ -1476,13 +1600,25 @@ function MarketSummaryRedesigned({
   const drivers = marketSummary.demandDrivers ?? null;
   const county = marketSummary.countyMetrics ?? null;
   const isLocal = scope === 'local';
+  const [expandedTopUnitType, setExpandedTopUnitType] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (presenterMode) setExpandedTopUnitType(null);
+  }, [presenterMode]);
+
+  const toggleTopUnitType = useCallback((unitType: string) => {
+    setExpandedTopUnitType((prev) => (prev === unitType ? null : unitType));
+  }, []);
 
   return (
     <div className="space-y-5">
-      {isLocal && score ? <OpportunityScoreCard score={score} t={t} /> : null}
+      {isLocal && score ? (
+        <OpportunityScoreCard score={score} county={county} t={t} />
+      ) : null}
 
       <AiInsightsBlock
         t={t}
+        format={format}
         insights={insights}
         presenterMode={presenterMode}
         onRetryInsights={onRetryInsights}
@@ -1537,32 +1673,175 @@ function MarketSummaryRedesigned({
                 </tr>
               </thead>
               <tbody>
-                {marketSummary.topUnitTypesWithAdr.map((row) => (
-                  <tr
-                    key={row.unit_type}
-                    className="border-t border-neutral-200 dark:border-neutral-700"
-                  >
-                    <td className="px-3 py-2 text-neutral-900 dark:text-neutral-100">
-                      <span
-                        className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-medium ${unitTypePillSurfaceClasses(row.unit_type)}`}
+                {marketSummary.topUnitTypesWithAdr.map((row) => {
+                  const expanded = expandedTopUnitType === row.unit_type;
+                  const details = row.details ?? [];
+                  const hasDetails = details.length > 0;
+                  return (
+                    <Fragment key={row.unit_type}>
+                      <tr
+                        className={`border-t border-neutral-200 dark:border-neutral-700 ${
+                          hasDetails && !presenterMode
+                            ? 'hover:bg-neutral-50/80 dark:hover:bg-neutral-900/50'
+                            : ''
+                        }`}
                       >
-                        {humanLabel(row.unit_type)}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
-                      {format.number(row.count)}
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
-                      {row.unitCount != null ? format.number(row.unitCount) : '—'}
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
-                      {row.meanAdr != null ? formatCurrency(row.meanAdr) : '—'}
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
-                      {row.medianAdr != null ? formatCurrency(row.medianAdr) : '—'}
-                    </td>
-                  </tr>
-                ))}
+                        <td className="px-3 py-2 text-neutral-900 dark:text-neutral-100">
+                          {hasDetails && !presenterMode ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleTopUnitType(row.unit_type)}
+                              aria-expanded={expanded}
+                              aria-label={
+                                expanded
+                                  ? t('summaryTopUnitTypesCollapseRow', {
+                                      unitType: humanLabel(row.unit_type),
+                                    })
+                                  : t('summaryTopUnitTypesExpandRow', {
+                                      unitType: humanLabel(row.unit_type),
+                                    })
+                              }
+                              className="flex w-full max-w-[min(100%,20rem)] items-center gap-2 rounded-md py-0.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500"
+                            >
+                              <ChevronRight
+                                className={`h-4 w-4 shrink-0 text-neutral-500 transition-transform dark:text-neutral-400 ${
+                                  expanded ? 'rotate-90' : ''
+                                }`}
+                                aria-hidden
+                              />
+                              <span
+                                className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-medium ${unitTypePillSurfaceClasses(row.unit_type)}`}
+                              >
+                                {humanLabel(row.unit_type)}
+                              </span>
+                            </button>
+                          ) : (
+                            <span
+                              className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-medium ${unitTypePillSurfaceClasses(row.unit_type)}`}
+                            >
+                              {humanLabel(row.unit_type)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums">
+                          {format.number(row.count)}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums">
+                          {row.unitCount != null ? format.number(row.unitCount) : '—'}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums">
+                          {row.meanAdr != null ? formatCurrency(row.meanAdr) : '—'}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums">
+                          {row.medianAdr != null ? formatCurrency(row.medianAdr) : '—'}
+                        </td>
+                      </tr>
+                      {expanded && hasDetails ? (
+                        <tr className="border-t border-neutral-100 bg-neutral-50/70 dark:border-neutral-800 dark:bg-neutral-900/35">
+                          <td colSpan={5} className="px-3 py-3 align-top">
+                            <div className="overflow-x-auto rounded-md border border-neutral-200/80 bg-white dark:border-neutral-700 dark:bg-neutral-950/80">
+                              <table className="w-full min-w-[32rem] border-collapse text-xs">
+                                <thead className="bg-neutral-50/90 dark:bg-neutral-900/60">
+                                  <tr className="text-left text-neutral-600 dark:text-neutral-300">
+                                    <th className="px-3 py-2 font-medium">{t('tableProperty')}</th>
+                                    <th className="px-3 py-2 font-medium">{t('summaryTopUnitTypesColSiteName')}</th>
+                                    <th className="px-3 py-2 font-medium">{t('tableCity')}</th>
+                                    <th className="px-3 py-2 font-medium">{t('tableState')}</th>
+                                    {!presenterMode ? (
+                                      <th className="px-3 py-2 font-medium">{t('tableSource')}</th>
+                                    ) : null}
+                                    {isLocal ? (
+                                      <th className="px-3 py-2 font-medium">{t('tableDistanceMi')}</th>
+                                    ) : null}
+                                    <th className="px-3 py-2 text-right font-medium">
+                                      {t('summaryTopUnitTypesDetailUnits')}
+                                    </th>
+                                    <th className="px-3 py-2 text-right font-medium">
+                                      {t('tablePropertyArdr')}
+                                    </th>
+                                    <th className="px-3 py-2 font-medium">{t('tableWebsite')}</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {details.map((d) => {
+                                    const safeUrl = sanitizeHttpUrl(d.url);
+                                    return (
+                                      <tr
+                                        key={d.key}
+                                        className="border-t border-neutral-100 dark:border-neutral-800"
+                                      >
+                                        <td
+                                          className="max-w-[11rem] truncate px-3 py-2 font-medium text-neutral-900 dark:text-neutral-100"
+                                          title={d.property_name}
+                                        >
+                                          {d.property_name}
+                                        </td>
+                                        <td
+                                          className="max-w-[10rem] truncate px-3 py-2 text-neutral-800 dark:text-neutral-200"
+                                          title={d.site_name ?? undefined}
+                                        >
+                                          {d.site_name != null && d.site_name.trim() !== ''
+                                            ? d.site_name
+                                            : '—'}
+                                        </td>
+                                        <td className="px-3 py-2 text-neutral-800 dark:text-neutral-200">
+                                          {d.city}
+                                        </td>
+                                        <td className="px-3 py-2 text-neutral-800 dark:text-neutral-200">
+                                          {formatMarketReportStateCell(d.state)}
+                                        </td>
+                                        {!presenterMode ? (
+                                          <td className="px-3 py-2 text-neutral-600 dark:text-neutral-400">
+                                            {d.sourceLabel}
+                                          </td>
+                                        ) : null}
+                                        {isLocal ? (
+                                          <td className="px-3 py-2 tabular-nums text-neutral-800 dark:text-neutral-200">
+                                            {format.number(d.distance_miles)}
+                                          </td>
+                                        ) : null}
+                                        <td className="px-3 py-2 text-right tabular-nums text-neutral-800 dark:text-neutral-200">
+                                          {d.quantity_of_units != null
+                                            ? format.number(d.quantity_of_units)
+                                            : '—'}
+                                        </td>
+                                        <td className="px-3 py-2 text-right tabular-nums text-neutral-800 dark:text-neutral-200">
+                                          {d.rate_avg != null ? formatCurrency(d.rate_avg) : '—'}
+                                        </td>
+                                        <td className="px-3 py-2">
+                                          {safeUrl ? (
+                                            <a
+                                              href={safeUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-600 hover:underline dark:text-blue-400"
+                                            >
+                                              {t('tableWebsiteVisit')} ↗
+                                            </a>
+                                          ) : (
+                                            <span className="text-neutral-400">—</span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                            {row.detailsTruncated ? (
+                              <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                                {t('summaryTopUnitTypesTruncated', {
+                                  shown: details.length,
+                                  total: row.count,
+                                })}
+                              </p>
+                            ) : null}
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -1592,11 +1871,27 @@ function gradeColors(grade: 'A' | 'B' | 'C' | 'D' | 'F'): { ring: string; bg: st
   }
 }
 
+function opportunityPillarBarFillClass(available: boolean, points: number, maxPoints: number): string {
+  if (!available || maxPoints <= 0) {
+    return 'fill-neutral-400 dark:fill-neutral-600';
+  }
+  const ratio = points / maxPoints;
+  if (ratio >= 2 / 3) {
+    return 'fill-emerald-600 dark:fill-emerald-500';
+  }
+  if (ratio >= 1 / 3) {
+    return 'fill-amber-500 dark:fill-amber-400';
+  }
+  return 'fill-rose-600 dark:fill-rose-500';
+}
+
 function OpportunityScoreCard({
   score,
+  county,
   t,
 }: {
   score: NonNullable<MarketReportSections['marketSummary']['opportunityScore']>;
+  county: MarketReportSections['marketSummary']['countyMetrics'] | null | undefined;
   t: (key: string, values?: Record<string, string | number>) => string;
 }) {
   const colors = gradeColors(score.grade);
@@ -1631,7 +1926,13 @@ function OpportunityScoreCard({
           <p className="mt-1 text-sm text-neutral-800 dark:text-neutral-200">{score.headline}</p>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {score.components.map((c) => (
-              <OpportunityComponentBar key={c.key} component={c} />
+              <OpportunityComponentBar
+                key={c.key}
+                component={c}
+                county={c.key === 'economy' ? county ?? null : null}
+                fillClassName={opportunityPillarBarFillClass(c.available, c.points, c.maxPoints)}
+                t={t}
+              />
             ))}
           </div>
         </div>
@@ -1642,25 +1943,75 @@ function OpportunityScoreCard({
 
 function OpportunityComponentBar({
   component,
+  county,
+  fillClassName,
+  t,
 }: {
   component: NonNullable<MarketReportSections['marketSummary']['opportunityScore']>['components'][number];
+  county: MarketReportSections['marketSummary']['countyMetrics'] | null;
+  fillClassName: string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 }) {
-  const pct = component.maxPoints === 0 ? 0 : Math.round((component.points / component.maxPoints) * 100);
+  const pct =
+    !component.available || component.maxPoints === 0
+      ? 0
+      : Math.round((component.points / component.maxPoints) * 100);
+  const showCountyLowConfidence =
+    component.key === 'economy' && county != null && county.highConfidence === false;
+  const barFillW = component.available ? Math.min(100, Math.max(0, pct)) : 0;
+
   return (
     <div className="text-xs">
-      <div className="flex items-baseline justify-between">
-        <span className="font-medium text-neutral-700 dark:text-neutral-300">{component.label}</span>
-        <span className="tabular-nums text-neutral-600 dark:text-neutral-400">
-          {component.available ? `${component.points}/${component.maxPoints}` : '—'}
-        </span>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+            <span className="font-medium text-neutral-700 dark:text-neutral-300">{component.label}</span>
+            {showCountyLowConfidence ? (
+              <span
+                title={t('countyMetricsLowConfidenceTooltip')}
+                className="inline-flex max-w-full shrink-0 rounded border border-amber-200/90 bg-amber-50/90 px-1 py-px text-[9px] font-semibold uppercase tracking-wide text-amber-900 dark:border-amber-800/70 dark:bg-amber-950/50 dark:text-amber-200"
+              >
+                {t('countyMetricsLowConfidenceBadge')}
+              </span>
+            ) : null}
+          </div>
+        </div>
+        <div className="shrink-0 text-right">
+          <span className="tabular-nums text-neutral-600 dark:text-neutral-400">
+            {component.available ? `${component.points}/${component.maxPoints}` : '—'}
+          </span>
+          {component.available && component.maxPoints > 0 ? (
+            <p className="mt-0.5 text-[10px] tabular-nums text-neutral-500 dark:text-neutral-400">
+              {t('opportunityPillarPercentOfMax', { pct })}
+            </p>
+          ) : null}
+        </div>
       </div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-200/80 dark:bg-neutral-800">
-        <div
-          className={`h-full rounded-full ${component.available ? 'bg-amber-400' : 'bg-neutral-300 dark:bg-neutral-700'}`}
-          style={{ width: `${pct}%` }}
-        />
+      <div
+        className="relative mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-200/80 dark:bg-neutral-800"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={component.available ? pct : 0}
+        aria-label={component.label}
+      >
+        {component.available && barFillW > 0 ? (
+          <svg
+            className="absolute inset-0 block h-full w-full"
+            viewBox="0 0 100 6"
+            preserveAspectRatio="none"
+            aria-hidden
+          >
+            <rect x="0" y="0" width={barFillW} height="6" className={fillClassName} />
+          </svg>
+        ) : null}
       </div>
       <p className="mt-1 leading-snug text-neutral-500 dark:text-neutral-400">{component.detail}</p>
+      {component.key === 'premium' && component.available ? (
+        <p className="mt-1 leading-snug text-neutral-600 dark:text-neutral-500">
+          {t('opportunityPremiumPositioningInterpretation')}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -1726,9 +2077,17 @@ function DemandDriversBlock({
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
             {t('summaryCountyTitle')}
           </p>
-          <p className="mt-0.5 font-semibold text-neutral-900 dark:text-neutral-100">
-            {county.countyName}
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className="font-semibold text-neutral-900 dark:text-neutral-100">{county.countyName}</p>
+            {!county.highConfidence ? (
+              <span
+                title={t('countyMetricsLowConfidenceTooltip')}
+                className="inline-flex max-w-full items-center rounded-md border border-amber-200/90 bg-amber-50/90 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900 dark:border-amber-800/70 dark:bg-amber-950/50 dark:text-amber-200"
+              >
+                {t('countyMetricsLowConfidenceBadge')}
+              </span>
+            ) : null}
+          </div>
           <p className="mt-1 text-neutral-700 dark:text-neutral-300">
             {county.population2020 != null
               ? t('countyPopulationLine', {
@@ -1743,7 +2102,7 @@ function DemandDriversBlock({
           <p className="mt-0.5 text-neutral-700 dark:text-neutral-300">
             {county.gdp2023 != null
               ? t('countyGdpLine', {
-                  gdp: `$${(county.gdp2023 / 1000).toFixed(2)}B`,
+                  gdp: formatCountyGdpThousands(county.gdp2023),
                   growth:
                     county.gdpGrowthMaaPct != null
                       ? `${county.gdpGrowthMaaPct >= 0 ? '+' : ''}${county.gdpGrowthMaaPct.toFixed(2)}%`

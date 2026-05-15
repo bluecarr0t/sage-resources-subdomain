@@ -21,7 +21,7 @@ import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { getCache, setCache } from '@/lib/redis';
-import { computeAnchorPointInsights } from '@/lib/anchor-point-insights';
+import { computeAnchorPointInsightsCached } from '@/lib/anchor-point-insights/cached-compute';
 import { CACHE_TTL_SECONDS } from '@/lib/anchor-point-insights/constants';
 import { parseDistanceBandsParam } from '@/lib/proximity-utils';
 
@@ -78,7 +78,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       }
 
       const [resultA, resultB] = await Promise.all([
-        computeAnchorPointInsights(supabaseAdmin, {
+        computeAnchorPointInsightsCached(supabaseAdmin, {
           stateFilter,
           anchorType: anchorAType === 'national-parks' ? 'national-parks' : 'ski',
           anchorId: anchorAId,
@@ -86,7 +86,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
           propertyTypeFilter,
           distanceBandThresholds: distanceBandThresholds ?? undefined,
         }),
-        computeAnchorPointInsights(supabaseAdmin, {
+        computeAnchorPointInsightsCached(supabaseAdmin, {
           stateFilter,
           anchorType: anchorBType === 'national-parks' ? 'national-parks' : 'ski',
           anchorId: anchorBId,
@@ -117,7 +117,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
       return NextResponse.json(cached);
     }
 
-    const result = await computeAnchorPointInsights(supabaseAdmin, {
+    const result = await computeAnchorPointInsightsCached(supabaseAdmin, {
       stateFilter,
       anchorType: anchorType === 'national-parks' ? 'national-parks' : 'ski',
       anchorId,

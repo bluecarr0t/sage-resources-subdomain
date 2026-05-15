@@ -12,14 +12,18 @@
  *     missing      — optional: 'city' | 'rates' | 'website' | 'lat_lng' | 'total_sites' — gap filters
  *                    (city/url: null or empty string; rates: rate_avg_retail_daily_rate null or 0 — numeric, no `eq.''`);
  *                    lat_lng: lat or lon null; total_sites: property_total_sites null or 0)
+ *     siblingOf    — optional: when set (row id), returns all sibling rows for the multi-site editor:
+ *                    `{ success, anchorId, rows, capped? }` (same slug, or property_name+city+state if slug empty).
+ *                    Max 50 rows (`capped: true` if more exist).
  *
  * PATCH /api/admin/sage-glamping-data/properties
  *   Body: { id: string | number, updates: Record<string, unknown> }
  *   Updates are restricted to the editable column allowlist below.
  *
  * DELETE /api/admin/sage-glamping-data/properties
- *   Body: { id: string | number }
- *   Removes a row by primary key `id`.
+ *   Body: { id: string | number } — delete one row (backward compatible), or
+ *         { ids: (string|number)[] } — delete multiple rows; every id must belong to the same
+ *         sibling group as `ids[0]` (slug / name+city+state rule). Max 50 ids.
  *
  * POST /api/admin/sage-glamping-data/properties
  *   Body: fields for a new row (see EDITABLE_COLUMNS). Required: property_name, city, state, url.
@@ -30,7 +34,14 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
+import {
+  idsBelongToSiblingGroup,
+  MAX_GLAMPING_SIBLING_ROWS,
+  siblingFilterSpecFromAnchor,
+  sortSiblingPropertyRows,
+} from '@/lib/admin/glamping-property-siblings';
 import { ALL_GLAMPING_PROPERTY_COLUMNS } from '@/lib/sage-ai/all-glamping-properties-columns';
+import { isValidLandOperatorCategory } from '@/lib/glamping-land-operator-category';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +86,40 @@ function parseIntParam(value: string | null, fallback: number): number {
 function escapeIlikeTerm(term: string): string {
   // Strip wildcards / commas that would break PostgREST `or` filters.
   return term.replace(/[%,()]/g, '').trim();
+}
+
+async function fetchSiblingRowsForAnchor(
+  supabase: ReturnType<typeof createServerClient>,
+  anchor: Record<string, unknown>
+): Promise<{ rows: Record<string, unknown>[]; capped: boolean }> {
+  const spec = siblingFilterSpecFromAnchor(anchor);
+  let q = supabase.from(TABLE).select('*');
+  if (spec.mode === 'slug') {
+    q = q.eq('slug', spec.slug);
+  } else {
+    q = q.eq('property_name', spec.propertyName);
+    if (spec.city == null || spec.city === '') {
+      q = q.or('city.is.null,city.eq.');
+    } else {
+      q = q.eq('city', spec.city);
+    }
+    if (spec.state == null || spec.state === '') {
+      q = q.or('state.is.null,state.eq.');
+    } else {
+      q = q.eq('state', spec.state);
+    }
+  }
+  const { data, error } = await q.limit(MAX_GLAMPING_SIBLING_ROWS + 1);
+  if (error) {
+    throw new Error(error.message);
+  }
+  const raw = data ?? [];
+  const capped = raw.length > MAX_GLAMPING_SIBLING_ROWS;
+  const slice = capped ? raw.slice(0, MAX_GLAMPING_SIBLING_ROWS) : raw;
+  return {
+    rows: sortSiblingPropertyRows(slice),
+    capped,
+  };
 }
 
 export const POST = withAdminAuth(async (request) => {
@@ -169,6 +214,46 @@ export const POST = withAdminAuth(async (request) => {
 export const GET = withAdminAuth(async (request) => {
   try {
     const params = request.nextUrl.searchParams;
+    const siblingOf = params.get('siblingOf')?.trim();
+
+    const supabase = createServerClient();
+
+    if (siblingOf) {
+      const { data: anchor, error: anchorError } = await supabase
+        .from(TABLE)
+        .select('*')
+        .eq('id', siblingOf)
+        .maybeSingle();
+
+      if (anchorError) {
+        console.error('[admin/sage-data/properties] GET sibling anchor error:', anchorError);
+        return NextResponse.json(
+          { success: false, error: anchorError.message },
+          { status: 500 }
+        );
+      }
+      if (!anchor) {
+        return NextResponse.json(
+          { success: false, error: 'Property not found' },
+          { status: 404 }
+        );
+      }
+
+      try {
+        const { rows, capped } = await fetchSiblingRowsForAnchor(supabase, anchor);
+        return NextResponse.json({
+          success: true,
+          anchorId: String(anchor.id),
+          rows,
+          capped: capped ? true : undefined,
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load sibling rows';
+        console.error('[admin/sage-data/properties] GET sibling rows error:', err);
+        return NextResponse.json({ success: false, error: message }, { status: 500 });
+      }
+    }
+
     const q = (params.get('q') ?? '').trim();
     const researchStatus = params.get('research_status');
     const country = params.get('country');
@@ -187,11 +272,11 @@ export const GET = withAdminAuth(async (request) => {
 
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
-
-    const supabase = createServerClient();
+    // `exact` counts can be very slow on large tables (full scan). Planned count is
+    // enough for admin pagination UX while keeping the list endpoint responsive.
     let query = supabase
       .from(TABLE)
-      .select('*', { count: 'exact' })
+      .select('*', { count: 'planned' })
       .order(sortBy, { ascending: sortDir === 'asc', nullsFirst: false })
       .range(from, to);
 
@@ -247,10 +332,16 @@ export const GET = withAdminAuth(async (request) => {
       );
     }
 
+    const rows = data ?? [];
+    let total = typeof count === 'number' && !Number.isNaN(count) ? count : 0;
+    if (count == null && rows.length > 0) {
+      total = Math.max(total, from + rows.length);
+    }
+
     return NextResponse.json({
       success: true,
-      properties: data ?? [],
-      total: count ?? 0,
+      properties: rows,
+      total,
       page,
       pageSize,
       sortBy,
@@ -305,6 +396,23 @@ export const PATCH = withAdminAuth(async (request) => {
         typeof value === 'string' && value.trim() === '' ? null : value;
     }
 
+    if (
+      'land_operator_category' in sanitized &&
+      sanitized.land_operator_category != null
+    ) {
+      const cat = sanitized.land_operator_category;
+      if (typeof cat !== 'string' || !isValidLandOperatorCategory(cat)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'land_operator_category must be private_commercial, state_park, federal_public, or other_public',
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     if (Object.keys(sanitized).length === 0) {
       return NextResponse.json(
         {
@@ -350,25 +458,97 @@ export const PATCH = withAdminAuth(async (request) => {
 
 export const DELETE = withAdminAuth(async (request) => {
   try {
-    const body = (await request.json()) as { id?: string | number };
-    const rawId = body?.id;
+    const body = (await request.json()) as {
+      id?: string | number;
+      ids?: (string | number)[];
+    };
 
-    if (rawId === undefined || rawId === null || rawId === '') {
+    let ids: string[];
+    if (Array.isArray(body?.ids)) {
+      ids = [
+        ...new Set(
+          body.ids
+            .map((x) => String(x).trim())
+            .filter((x) => x.length > 0)
+        ),
+      ];
+    } else {
+      const rawId = body?.id;
+      if (rawId === undefined || rawId === null || rawId === '') {
+        return NextResponse.json(
+          { success: false, error: 'id or ids is required' },
+          { status: 400 }
+        );
+      }
+      const id = String(rawId).trim();
+      if (!id) {
+        return NextResponse.json(
+          { success: false, error: 'id is required' },
+          { status: 400 }
+        );
+      }
+      ids = [id];
+    }
+
+    if (ids.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'id is required' },
+        { success: false, error: 'id or ids is required' },
         { status: 400 }
       );
     }
-    const id = String(rawId).trim();
-    if (!id) {
+    if (ids.length > MAX_GLAMPING_SIBLING_ROWS) {
       return NextResponse.json(
-        { success: false, error: 'id is required' },
+        {
+          success: false,
+          error: `At most ${MAX_GLAMPING_SIBLING_ROWS} rows can be deleted at once`,
+        },
         { status: 400 }
       );
     }
 
     const supabase = createServerClient();
-    const { error } = await supabase.from(TABLE).delete().eq('id', id);
+    const anchorId = ids[0];
+    const { data: anchor, error: anchorError } = await supabase
+      .from(TABLE)
+      .select('*')
+      .eq('id', anchorId)
+      .maybeSingle();
+
+    if (anchorError) {
+      console.error('[admin/sage-data/properties] DELETE anchor error:', anchorError);
+      return NextResponse.json(
+        { success: false, error: anchorError.message },
+        { status: 500 }
+      );
+    }
+    if (!anchor) {
+      return NextResponse.json(
+        { success: false, error: 'Property not found' },
+        { status: 404 }
+      );
+    }
+
+    let siblingRows: Record<string, unknown>[];
+    try {
+      const { rows } = await fetchSiblingRowsForAnchor(supabase, anchor);
+      siblingRows = rows;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to resolve sibling group';
+      console.error('[admin/sage-data/properties] DELETE sibling fetch error:', err);
+      return NextResponse.json({ success: false, error: message }, { status: 500 });
+    }
+
+    if (!idsBelongToSiblingGroup(ids, siblingRows)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Every id must belong to the same sibling group as the first id',
+        },
+        { status: 400 }
+      );
+    }
+
+    const { error } = await supabase.from(TABLE).delete().in('id', ids);
 
     if (error) {
       console.error('[admin/sage-data/properties] DELETE error:', error);
@@ -378,7 +558,7 @@ export const DELETE = withAdminAuth(async (request) => {
       );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, deletedIds: ids });
   } catch (err) {
     console.error('[admin/sage-data/properties] DELETE unexpected error:', err);
     return NextResponse.json(

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useChat, type UIMessage } from '@ai-sdk/react';
 import { DefaultChatTransport, isReasoningUIPart, isToolUIPart } from 'ai';
 import {
@@ -68,6 +69,11 @@ import {
   SAGE_AI_WEB_RESEARCH_UI_ENABLED,
 } from './SageAiModelPicker';
 import { SageAiFieldGuidePanel } from './SageAiFieldGuidePanel';
+import {
+  readAndConsumeSageAiMarketReportBootstrap,
+  SAGE_AI_FROM_MARKET_REPORT_SEARCH_PARAM,
+  SAGE_AI_FROM_MARKET_REPORT_SEARCH_VALUE,
+} from '@/lib/sage-ai/market-report-bootstrap';
 
 interface Session {
   id: string;
@@ -143,6 +149,10 @@ export default function SageAiClient() {
   const t = useTranslations('admin.sageAi');
   const tRef = useRef(t);
   tRef.current = t;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const marketReportBootstrapHandledRef = useRef(false);
   const [input, setInput] = useState('');
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('history');
@@ -286,6 +296,8 @@ export default function SageAiClient() {
       showToastRef.current(err.message ?? t('toastChatRequestFailed'));
     },
   });
+  const sendMessageRef = useRef(sendMessage);
+  sendMessageRef.current = sendMessage;
   // useChat re-exposes `resumeStream` with a new function identity every render
   // (see @ai-sdk/react: `resumeStream: chatRef.current.resumeStream`). A
   // useEffect that lists `resumeStream` in its deps will run on every
@@ -781,6 +793,37 @@ export default function SageAiClient() {
     setWebResearchEnabled(false);
     inputRef.current?.focus();
   }, [setMessages]);
+
+  useEffect(() => {
+    if (marketReportBootstrapHandledRef.current) return;
+    if (searchParams.get(SAGE_AI_FROM_MARKET_REPORT_SEARCH_PARAM) !== SAGE_AI_FROM_MARKET_REPORT_SEARCH_VALUE) {
+      return;
+    }
+    marketReportBootstrapHandledRef.current = true;
+
+    const payload = readAndConsumeSageAiMarketReportBootstrap();
+    const path = pathname && pathname.startsWith('/') ? pathname : '/admin/sage-ai';
+    router.replace(path);
+
+    if (!payload) return;
+
+    const envelope: Record<string, unknown> = {
+      meta: payload.meta,
+      sections: payload.sections,
+      mapPins: payload.mapPins,
+    };
+    if (payload.mapPinsOmittedDueToSize) {
+      envelope.mapPinsOmittedDueToSize = true;
+    }
+    const json = JSON.stringify(envelope, null, 2);
+    const text = `${t('marketReportBootstrapPreamble')}\n\n\`\`\`json\n${json}\n\`\`\``;
+
+    handleNewChat();
+
+    window.setTimeout(() => {
+      sendMessageRef.current({ text });
+    }, 0);
+  }, [handleNewChat, pathname, router, searchParams, t]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

@@ -41,7 +41,7 @@ export function compsV2WebCandidateToGlampingRow(c: CompsV2Candidate): Record<st
     city: c.city?.trim() ?? '',
     state: (c.state ?? '').trim().toUpperCase().slice(0, 2) || null,
     zip_code: null,
-    country: 'USA',
+    country: 'United States',
     lat: n(c.geo_lat ?? null),
     lon: n(c.geo_lng ?? null),
     property_total_sites: n(c.property_total_sites),

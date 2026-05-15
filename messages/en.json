@@ -223,15 +223,15 @@
   },
   "locationSearch": {
     "placeholder": {
-      "compact": "Search location...",
-      "default": "Enter your destination (city, state, or region)"
+      "compact": "Search market or location...",
+      "default": "Search a market, city, state, or region"
     },
-    "button": "Find Glamping",
+    "button": "Open market map",
     "suggestions": "Suggestions",
     "useCurrentLocation": {
       "title": "Use Current Location",
       "loadingTitle": "Getting your location...",
-      "description": "Find Glamping properties near you",
+      "description": "Center the map on your location for market context",
       "loadingDescription": "Please wait..."
     },
     "error": {
@@ -304,20 +304,21 @@
   },
   "home": {
     "metadata": {
-      "title": "Find Glamping Near You | 600+ Properties Across North America | Sage Outdoor Advisory",
-      "description": "Discover 600+ glamping properties across North America. Expert guides on feasibility studies, appraisals, and 57+ industry terms. Your complete resource for outdoor hospitality insights and property discovery.",
-      "keywords": "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business"
+      "title": "Outdoor Hospitality Research & Resources | Sage Outdoor Advisory",
+      "description": "Market intelligence for glamping, RV resort, and campground developers and investors: 650+ benchmark properties across North America and Europe, feasibility and appraisal guides, and a deep industry glossary—plus tools to explore supply by market.",
+      "keywords": "outdoor hospitality feasibility study, glamping market research, RV resort appraisal, campground development, glamping industry data, outdoor hospitality consultants, glamping investment analysis, Europe glamping data, North America glamping map"
     },
     "hero": {
-      "headline": "Your Complete Glamping Resource",
-      "subheadline": "600+ properties, expert guides, and industry resources for travelers and outdoor hospitality professionals.",
+      "headline": "Outdoor hospitality market intelligence",
+      "subheadline": "650+ benchmarks across North America and Europe, feasibility and appraisal guides, and industry terms for outdoor hospitality teams.",
       "quickStats": {
-        "properties": "600+ Properties",
-        "usCanada": "US & Canada",
-        "verified": "Verified Listings"
+        "properties": "650+ benchmark properties",
+        "usCanada": "US, Canada & Europe coverage",
+        "verified": "Research-grade listings"
       }
     },
     "stats": {
+      "propertiesCount": "650+",
       "properties": "Properties",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"
@@ -330,7 +331,7 @@
         "readGuide": "Read Guide →"
       },
       "map": {
-        "title": "Explore 600+ Glamping Properties",
+        "title": "Explore 650+ Glamping Properties",
         "description": "Discover glamping properties across the United States and Canada on our interactive map. Filter by location, property type, and amenities to find the perfect outdoor hospitality destination.",
         "cta": "View Interactive Map →"
       },
@@ -355,7 +356,7 @@
         },
         {
           "question": "How do I find glamping properties near me?",
-          "answer": "Use our interactive map to search for glamping properties by location. We have 600+ verified properties across the United States and Canada. You can filter by location, property type, amenities, and price range to find the perfect glamping destination for your outdoor adventure."
+          "answer": "Use our interactive map to search for glamping properties by location. We have 650+ verified properties across the United States, Canada, and Europe. You can filter by location, property type, amenities, and price range to find the perfect glamping destination for your outdoor adventure."
         },
         {
           "question": "What's the difference between glamping and camping?",
@@ -367,7 +368,7 @@
         },
         {
           "question": "What should I look for in a glamping property?",
-          "answer": "Key factors include location and accessibility, unique accommodation types, quality amenities (wifi, bathrooms, kitchen facilities), safety features, and proximity to attractions. Our database includes detailed information on 600+ properties including ratings, amenities, and pricing to help you compare options."
+          "answer": "Key factors include location and accessibility, unique accommodation types, quality amenities (wifi, bathrooms, kitchen facilities), safety features, and proximity to attractions. Our database includes detailed information on 650+ properties including ratings, amenities, and pricing to help you compare options."
         },
         {
           "question": "Are glamping properties profitable?",
@@ -726,6 +727,7 @@
       "chartLoading": "Loading chart…",
       "emptyState": "Run a search to see the market report.",
       "errorGeneric": "Something went wrong. Try again.",
+      "errorInvalidResponse": "Could not read the server response (HTTP {status}). Try again or refresh the page.",
       "errors": {
         "geocodeFailed": "We could not resolve that address to coordinates. Include city and state (e.g. Bend, OR) or check Google Geocoding API settings.",
         "rvStateRequired": "RV Resort search needs a US state (e.g. Austin, TX) so Campspot can be queried.",
@@ -818,6 +820,11 @@
       "summaryTopUnitTypesColUnitCount": "Unit count",
       "summaryTopUnitTypesColMeanAdr": "Mean ARDR",
       "summaryTopUnitTypesColMedianAdr": "Median ARDR",
+      "summaryTopUnitTypesColSiteName": "Site name",
+      "summaryTopUnitTypesDetailUnits": "Units (row)",
+      "summaryTopUnitTypesTruncated": "Showing {shown} of {total} inventory rows for this unit type.",
+      "summaryTopUnitTypesExpandRow": "Show inventory rows for {unitType}",
+      "summaryTopUnitTypesCollapseRow": "Hide inventory rows for {unitType}",
       "summaryDemandDriversTitle": "Demand drivers in catchment",
       "driverNationalParks": "National parks",
       "driverSkiResorts": "Ski resorts",
@@ -829,14 +836,37 @@
       "countyPopulationLine": "Population (2020): {pop} · 2010→2020 change: {change}",
       "countyGdpLine": "GDP (2023): {gdp} · 10-yr trend: {growth}",
       "countyGdpUnknown": "GDP not available for this county.",
+      "countyMetricsLowConfidenceBadge": "Approximate match",
+      "countyMetricsLowConfidenceTooltip": "County was resolved with lower confidence from your search location. Treat GDP and population figures as directional, not definitive.",
+      "opportunityPillarPercentOfMax": "{pct}% of max",
       "opportunityScoreLabel": "Opportunity score",
       "opportunityScoreOutOf": "of 100",
       "opportunityScoreBetaLabel": "Beta",
       "opportunityScoreBetaTooltip": "Early in development — algorithm and weighting are still being tuned. Treat as directional, not definitive.",
+      "opportunityPremiumPositioningInterpretation": "A larger share means more nearby comps already validate $300+ nightly rates — market proof at the premium tier, not “headroom” to undercut.",
       "summaryAiBulletsTitle": "Key takeaways",
       "summaryAiBulletsLoading": "Generating insights from cohort data…",
-      "summaryAiBulletsModel": "Generated by Sage AI · {model}",
-      "summaryAiBulletsModelCached": "Sage AI · {model} (cached)",
+      "summaryAiBulletsAttributionPrefix": "AI-generated from this cohort",
+      "summaryAiBulletsAttributionCachedBadge": "cached",
+      "summaryAiBulletsAttributionFootnote": "Operator labels describe the configured AI route (not an audited product name or public release). Technical model id is available on hover.",
+      "summaryAiBulletsAttributionFootnotePresenter": "AI-generated summary — not audited; confirm figures using the tables in this report.",
+      "summaryAiBulletsTokensUsed": "≈{tokens} tokens",
+      "insightsModelRawIdTooltip": "Technical model id: {id}",
+      "insightsModelClaudeOpusViaGateway": "Claude Opus-class (via AI Gateway)",
+      "insightsModelClaudeSonnetViaGateway": "Claude Sonnet-class (via AI Gateway)",
+      "insightsModelClaudeHaikuViaGateway": "Claude Haiku-class (via AI Gateway)",
+      "insightsModelClaudeViaGateway": "Claude-class (via AI Gateway)",
+      "insightsModelOpenaiGpt4oMiniViaGateway": "GPT-4o mini-class (via AI Gateway)",
+      "insightsModelOpenaiGpt4oViaGateway": "GPT-4o-class (via AI Gateway)",
+      "insightsModelOpenaiOFamilyViaGateway": "OpenAI reasoning-class (via AI Gateway)",
+      "insightsModelOpenaiViaGateway": "OpenAI model (via AI Gateway)",
+      "insightsModelGeminiViaGateway": "Gemini-class (via AI Gateway)",
+      "insightsModelMetaLlamaViaGateway": "Meta Llama-class (via AI Gateway)",
+      "insightsModelMistralViaGateway": "Mistral-class (via AI Gateway)",
+      "insightsModelXaiGrokViaGateway": "xAI Grok-class (via AI Gateway)",
+      "insightsModelOtherProviderViaGateway": "{provider} (via AI Gateway)",
+      "insightsModelOpenaiDirect": "OpenAI (direct API)",
+      "insightsModelUnknown": "Configured AI model",
       "summaryAiBulletsFailed": "AI takeaways could not be loaded.",
       "summaryAiBulletsFailedRateLimited": "Too many insight requests. Wait a moment, then try again.",
       "summaryAiBulletsRetry": "Retry takeaways",
@@ -875,6 +905,9 @@
       "exportRawDataXlsx": "Excel (XLSX)",
       "exportRawDataLoading": "Preparing download…",
       "exportRawDataError": "Could not download cohort export. Try again.",
+      "startAiConvo": "Start AI Convo",
+      "startAiConvoTitle": "Open Sage AI with this report’s data as context",
+      "startAiConvoTooLarge": "Could not copy this report into the AI session (browser storage limit). Try a smaller radius, tighter ARDR bounds, or export raw data instead.",
       "scopeLabel": "Scope",
       "scopeLocal": "Local (radius)",
       "scopeNational": "National (US)",
@@ -946,6 +979,10 @@
       "regionScopeRequired": "Select at least one country or state, or set zip code and range (miles). Without that, the export would include all markets (very large downloads)."
     },
     "sageData": {
+      "propertiesLoadingSummary": "Loading properties…",
+      "propertiesEmptySummary": "0 properties",
+      "propertiesRangeSummary": "{start}–{end} of {total}",
+      "propertiesLoadTimeout": "That request timed out. Try refreshing the page. If you still see skeleton rows, stop the dev server, delete the `.next` folder, and run `npm run dev` again.",
       "countryLabel": "Country",
       "countryAll": "All countries",
       "countriesLoading": "Loading countries…",
@@ -960,6 +997,24 @@
       "missingLatLngHint": "Shows rows where lat or lon is null (coordinates needed to map the property).",
       "missingTotalSites": "No property_total_sites",
       "missingTotalSitesHint": "Shows rows where property_total_sites is null or zero.",
+      "landOperatorColumn": "Operator / tenure",
+      "fieldLandOperatorCategory": "Operator / tenure",
+      "fieldPropertyType": "Property type",
+      "propertyType": {
+        "unknown": "Unknown",
+        "glamping": "Glamping",
+        "rvResort": "RV Resort",
+        "campground": "Campground",
+        "landscapeHotel": "Landscape Hotel",
+        "marina": "Marina"
+      },
+      "landOperatorUnset": "Not set (defaults to private commercial on map)",
+      "landOperator": {
+        "private_commercial": "Private commercial",
+        "state_park": "State park / state public",
+        "federal_public": "Federal / national public land",
+        "other_public": "Other public (county, municipal, …)"
+      },
       "missingRatesHint": "Shows rows where rate_avg_retail_daily_rate is null or zero. Seasonal rate columns and rate_unit_rates_by_year are not evaluated by this filter.",
       "controlsHeading": "Table controls",
       "controlsDescription": "Search and filter rows, or export the combined Sage and RoverPass dataset.",
@@ -982,6 +1037,23 @@
       "exportDownloaded": "{format} export downloaded",
       "exportError": "Export failed.",
       "toastSaveSuccess": "Changes saved successfully.",
+      "toastDeleteGroupSuccess": "Property rows deleted.",
+      "siblingsLoading": "Loading sites for this property…",
+      "siblingsLoadError": "Could not load property sites. Try closing and opening the editor again.",
+      "sitesSectionTitle": "Sites",
+      "sitesUnnamed": "Site {index}",
+      "sitesUnnamedShort": "Unnamed site",
+      "addSite": "Add site",
+      "removeSite": "Remove site",
+      "removeSiteWorking": "Removing…",
+      "removeSiteConfirm": "Remove the site \"{siteName}\" from the database? This cannot be undone.",
+      "removeNewSiteConfirm": "Discard this unsaved site?",
+      "deleteGroupConfirm": "Delete this property and all {count} database row(s) for \"{name}\"? This cannot be undone.",
+      "modalCloseAria": "Close edit dialog",
+      "modalCancel": "Cancel",
+      "saveChanges": "Save changes",
+      "saveWorking": "Saving…",
+      "saveError": "Failed to save changes.",
       "deleteRecord": "Delete record",
       "deleteConfirm": "Delete \"{name}\" from the database? This cannot be undone.",
       "deleteDeleting": "Deleting…",
@@ -1003,7 +1075,40 @@
       "statusNoteUntitledProperty": "Untitled property",
       "statusNoteModalTitle": "Notes",
       "statusNoteBodyEmpty": "No notes for this property.",
-      "statusNoteClose": "Close"
+      "statusNoteClose": "Close",
+      "bulkBarTitle": "Bulk edit",
+      "bulkSelectedCount": "{count} selected",
+      "bulkNoChange": "No change",
+      "bulkApply": "Apply to selected",
+      "bulkApplying": "Applying…",
+      "bulkClearSelection": "Clear selection",
+      "bulkNothingToApply": "Choose at least one field to change.",
+      "bulkSuccess": "Updated {count} rows.",
+      "bulkError": "Bulk update failed.",
+      "bulkSelectRowAria": "Select this property row",
+      "bulkSelectAllPageAria": "Select all properties on this page",
+      "fieldResearchStatus": "Research status",
+      "fieldIsGlampingProperty": "Is glamping property",
+      "fieldSource": "Source",
+      "propertyImages": {
+        "sectionTitle": "Property images",
+        "sectionHint": "Images are stored in Supabase and linked to this database row (the row you opened). Use the star to choose a hero image for maps and previews.",
+        "upload": "Upload image",
+        "uploading": "Uploading…",
+        "loading": "Loading images…",
+        "empty": "No images yet. Upload a JPEG, PNG, WebP, or GIF (max 10 MB).",
+        "badgeHero": "Hero",
+        "setHero": "Set as hero image",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "delete": "Delete image",
+        "deleteConfirm": "Delete this image from storage? This cannot be undone.",
+        "loadError": "Could not load images.",
+        "uploadError": "Upload failed.",
+        "heroError": "Could not set hero image.",
+        "deleteError": "Could not delete image.",
+        "reorderError": "Could not reorder images."
+      }
     },
     "discoveryCandidates": {
       "addedOn": "Added on {date}",
@@ -1044,7 +1149,7 @@
       "statusOk": "OK",
       "statusError": "Error",
       "loadingAria": "Discovery pipeline stats loading",
-      "healthCronSchedule": "Vercel cron targets this route once daily at 15:00 UTC (see vercel.json).",
+      "healthCronSchedule": "Vercel cron targets this route every Monday at 15:00 UTC (see vercel.json).",
       "runHistoryEmpty": "No rows in run history yet."
     },
     "rvIndustryOverview": {
@@ -1722,6 +1827,7 @@
       "subtitle": "Ask questions about glamping properties, reports, and data. Export results as CSV.",
       "emptyStateTitle": "How can I help you today?",
       "emptyStateHint": "For feasibility and market work, start by naming a state or region—or use a preset below. I’ll ask for your geography before pulling Sage data. You don’t need database column names: use Field guide (top) or ask in plain English (e.g. “properties with private bathrooms in Colorado”).",
+      "marketReportBootstrapPreamble": "Here is the Sage market report you just ran (numbers below). Use only what is in the report — do not guess. Answer in plain English and keep it short unless I ask for more detail.",
       "markdownCodeExpandLabel": "Show code",
       "inputPlaceholder": "Ask about properties, reports, or data...",
       "clearChat": "Clear",

@@ -14,6 +14,7 @@ export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'site_name',
   'slug',
   'property_type',
+  'land_operator_category',
   'source',
   'discovery_source',
   'date_added',

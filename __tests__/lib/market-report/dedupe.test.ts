@@ -45,6 +45,16 @@ describe('dedupeCohortRows', () => {
     expect(out.every((r) => (r as DedupedCohortRow).rateTierRows === 1)).toBe(true);
   });
 
+  it('prefers first non-empty site_name when collapsing duplicates', () => {
+    const rows = [
+      makeRow({ property_name: 'X', unit_type: 'Cabin', site_name: 'Alpha' }),
+      makeRow({ property_name: 'X', unit_type: 'Cabin', site_name: 'Beta' }),
+    ];
+    const { rows: out } = dedupeCohortRows(rows);
+    expect(out).toHaveLength(1);
+    expect(out[0]!.site_name).toBe('Alpha');
+  });
+
   it('collapses Camp-Fimfo-style rate-tier rows into one canonical row', () => {
     const fimfoTinyHomes = [
       makeRow({ property_name: 'Camp Fimfo', unit_type: 'Tiny Home', rate_avg: 162.6, quantity_of_units: 1, property_total_sites: 40 }),

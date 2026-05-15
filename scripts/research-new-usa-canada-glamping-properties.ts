@@ -334,7 +334,13 @@ Return ONLY valid JSON in this format:
         property_name: p.property_name.trim(),
         city: p.city?.trim() || undefined,
         state: p.state?.trim()?.toUpperCase() || undefined,
-        country: p.country?.trim() === 'United States' ? 'USA' : (p.country?.trim() || undefined),
+        country: (() => {
+          const raw = p.country?.trim();
+          if (!raw) return undefined;
+          const cl = raw.toLowerCase();
+          if (cl === 'usa' || cl === 'united states' || cl === 'united states of america') return 'United States';
+          return raw;
+        })(),
       }));
 
     console.log(`✅ Found ${properties.length} properties for this search\n`);

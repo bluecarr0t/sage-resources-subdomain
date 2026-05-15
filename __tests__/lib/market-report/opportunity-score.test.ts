@@ -5,7 +5,7 @@ const fullDrivers = {
   skiResorts: { count: 5, top: [], radiusMiles: 100 },
   wineries: { count: 20, top: [], radiusMiles: 50 },
   majorOutdoorSites: { count: 4, top: [], radiusMiles: 100 },
-  majorAndLargeCities: { count: 0, top: [], radiusMiles: 100 },
+  majorAndLargeCities: { count: 5, top: [], radiusMiles: 100 },
 };
 
 const emptyDrivers = {
@@ -16,6 +16,7 @@ const emptyDrivers = {
   majorAndLargeCities: { count: 0, top: [], radiusMiles: 100 },
 };
 
+/** `gdp2023` matches `county-gdp.gdp_2023`: thousands of chained dollars (~$5B here). */
 const strongCounty = {
   countyName: 'Walworth County, Wisconsin',
   stateAbbr: 'WI',
@@ -116,5 +117,58 @@ describe('calculateOpportunityScore', () => {
       demandDrivers: fullDrivers,
       countyMetrics: strongCounty,
     }).score).toBeGreaterThanOrEqual(85);
+  });
+
+  it('labels county GDP using BEA thousands → $B / $M (not mislabeled billions)', () => {
+    const detail = calculateOpportunityScore({
+      cohortSize: 10,
+      premiumCohortCount: 0,
+      demandDrivers: null,
+      countyMetrics: {
+        ...strongCounty,
+        gdp2023: 9_940_000,
+      },
+    }).components.find((c) => c.key === 'economy')?.detail;
+    expect(detail).toContain('$9.9B');
+  });
+
+  it('uses summed inventory sites for whitespace when totalSites > 0 (lower density vs listings-only)', () => {
+    const listingsOnly = calculateOpportunityScore({
+      cohortSize: 10,
+      premiumCohortCount: 0,
+      demandDrivers: fullDrivers,
+      countyMetrics: null,
+    });
+    const withSites = calculateOpportunityScore({
+      cohortSize: 10,
+      totalSites: 200,
+      premiumCohortCount: 0,
+      demandDrivers: fullDrivers,
+      countyMetrics: null,
+    });
+    const wsListings = listingsOnly.components.find((c) => c.key === 'whitespace')!;
+    const wsSites = withSites.components.find((c) => c.key === 'whitespace')!;
+    expect(wsSites.points).toBeLessThan(wsListings.points);
+    expect(wsSites.detail).toContain('inventory sites');
+    expect(wsListings.detail).toContain('distinct listings');
+  });
+
+  it('treats totalSites 0 like missing (listings denominator)', () => {
+    const a = calculateOpportunityScore({
+      cohortSize: 10,
+      premiumCohortCount: 0,
+      demandDrivers: fullDrivers,
+      countyMetrics: null,
+    });
+    const b = calculateOpportunityScore({
+      cohortSize: 10,
+      totalSites: 0,
+      premiumCohortCount: 0,
+      demandDrivers: fullDrivers,
+      countyMetrics: null,
+    });
+    expect(b.components.find((c) => c.key === 'whitespace')?.points).toBe(
+      a.components.find((c) => c.key === 'whitespace')?.points,
+    );
   });
 });

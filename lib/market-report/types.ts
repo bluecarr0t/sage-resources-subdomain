@@ -8,6 +8,11 @@ export interface CohortPropertyRow {
   geo_lat: number;
   geo_lng: number;
   property_name: string;
+  /**
+   * Site or unit listing name when different from {@link property_name}
+   * (e.g. a specific cabin under a resort). Omitted or null when unknown.
+   */
+  site_name?: string | null;
   city: string;
   state: string;
   property_type: string | null;
@@ -135,6 +140,25 @@ export interface MarketReportSourceBreakdownRow {
   avgOccupancy: number | null;
 }
 
+/** One cohort inventory row under a top unit type (for expandable drill-down in the UI). */
+export interface MarketSummaryTopUnitTypeDetailRow {
+  /** Stable key for React lists */
+  key: string;
+  property_name: string;
+  city: string;
+  state: string;
+  source: string;
+  sourceLabel: string;
+  distance_miles: number;
+  /** Site / unit name for this inventory row when present. */
+  site_name: string | null;
+  /** Primary ARDR for this row when known (> 0). */
+  rate_avg: number | null;
+  quantity_of_units: number | null;
+  property_total_sites: number | null;
+  url: string | null;
+}
+
 export interface MarketSummaryTopUnitTypeRow {
   unit_type: string;
   /**
@@ -152,6 +176,14 @@ export interface MarketSummaryTopUnitTypeRow {
   meanAdr: number | null;
   /** Median ADR (USD) for cohort rows of this unit type; null when no rates known. */
   medianAdr: number | null;
+  /**
+   * Cohort rows backing this unit type (same order as the summary bucket), capped
+   * for JSON size. When {@link detailsTruncated} is true, more than this many rows exist.
+   * Omitted on legacy cached payloads — treat as empty.
+   */
+  details?: MarketSummaryTopUnitTypeDetailRow[];
+  /** True when `details` omits rows because the bucket exceeded the server cap. */
+  detailsTruncated?: boolean;
 }
 
 export interface MarketSummarySection {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronUp, Download, RefreshCw, RotateCcw } from 'lucide-react';
@@ -11,6 +11,12 @@ import { InsightsSkeleton } from './components/InsightsSkeleton';
 import { InsightsColumn } from './components/InsightsColumn';
 import type { AnchorType, InsightsData, PropertyTypeFilter, Season } from './types';
 import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
+import {
+  buildProximityInsightsApiQueryString,
+  readProximityInsightsSessionCache,
+  writeProximityInsightsSessionCache,
+  PROXIMITY_INSIGHTS_SESSION_CACHE_MS,
+} from '@/lib/admin/proximity-insights-session-cache';
 
 const CANADIAN_PROVINCE_CODES = new Set(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT']);
 const US_STATE_OPTIONS = Object.entries(STATE_ABBREVIATIONS)
@@ -82,10 +88,37 @@ export default function AnchorPointInsightsPage() {
     }
   }, [anchorType]);
 
+  const sessionQueryKey = buildProximityInsightsApiQueryString({
+    searchParams,
+    compareMode,
+    anchorType,
+    propertyTypeFilter,
+    stateFilter,
+    anchorFilter,
+  });
+
+  useLayoutEffect(() => {
+    const cached = readProximityInsightsSessionCache(sessionQueryKey, PROXIMITY_INSIGHTS_SESSION_CACHE_MS);
+    if (cached) {
+      setError(null);
+      if (cached.mode === 'compare') {
+        setCompareData({ insights_a: cached.insights_a, insights_b: cached.insights_b });
+        setData(null);
+      } else {
+        setData(cached.insights);
+        setCompareData(null);
+      }
+      setLoading(false);
+    } else {
+      setLoading(true);
+      setData(null);
+      setCompareData(null);
+    }
+  }, [sessionQueryKey]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    setCompareData(null);
     try {
       const params = new URLSearchParams();
       params.set('type', propertyTypeFilter);
@@ -112,6 +145,11 @@ export default function AnchorPointInsightsPage() {
           setCompareData({ insights_a: json.insights_a, insights_b: json.insights_b });
           setData(null);
           setError(null);
+          writeProximityInsightsSessionCache(sessionQueryKey, {
+            mode: 'compare',
+            insights_a: json.insights_a,
+            insights_b: json.insights_b,
+          });
         } else {
           setCompareData(null);
           setData(null);
@@ -128,6 +166,10 @@ export default function AnchorPointInsightsPage() {
           setData(json.insights);
           setCompareData(null);
           setError(null);
+          writeProximityInsightsSessionCache(sessionQueryKey, {
+            mode: 'single',
+            insights: json.insights,
+          });
         } else {
           setData(null);
           setError(json.message || json.error || 'Failed to load insights');
@@ -138,7 +180,7 @@ export default function AnchorPointInsightsPage() {
     } finally {
       setLoading(false);
     }
-  }, [anchorType, propertyTypeFilter, stateFilter, anchorFilter, compareMode, searchParams, t]);
+  }, [anchorType, propertyTypeFilter, stateFilter, anchorFilter, compareMode, searchParams, sessionQueryKey, t]);
 
   useEffect(() => {
     load();
@@ -241,7 +283,7 @@ export default function AnchorPointInsightsPage() {
     }
   }, [anchorType, propertyTypeFilter, stateFilter, anchorFilter, searchParams]);
 
-  if (loading) {
+  if (loading && !data && !compareData) {
     return <InsightsSkeleton />;
   }
 

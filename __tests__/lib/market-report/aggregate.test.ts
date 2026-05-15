@@ -232,6 +232,23 @@ describe('buildMarketSummary topUnitTypesWithAdr', () => {
     const cabin = sections.marketSummary.topUnitTypesWithAdr.find((u) => u.unit_type === 'Cabin');
     expect(cabin?.count).toBe(1);
     expect(cabin?.unitCount).toBe(2);
+    expect(cabin?.details).toHaveLength(1);
+    expect(cabin?.details?.[0]?.property_name).toBe('a');
+    expect(cabin?.details?.[0]?.rate_avg).toBe(300);
+  });
+
+  it('passes site_name into top unit type detail rows', () => {
+    const sections = buildMarketReportSections('glamping', 50, [
+      row({
+        property_name: 'Resort',
+        site_name: 'Lakeside Cabin',
+        unit_type: 'Cabin',
+        quantity_of_units: 1,
+        rate_avg: 250,
+      }),
+    ]);
+    const cabin = sections.marketSummary.topUnitTypesWithAdr.find((u) => u.unit_type === 'Cabin');
+    expect(cabin?.details?.[0]?.site_name).toBe('Lakeside Cabin');
   });
 
   it('keeps RV Site in rollups for the RV resort segment', () => {
@@ -262,8 +279,10 @@ describe('buildMarketSummary topUnitTypesWithAdr', () => {
     const cabin = sections.marketSummary.topUnitTypesWithAdr.find((r) => r.unit_type === 'Cabin');
     expect(yurt?.count).toBe(2);
     expect(yurt?.unitCount).toBe(8);
+    expect(yurt?.details).toHaveLength(2);
     expect(cabin?.count).toBe(1);
     expect(cabin?.unitCount).toBe(12);
+    expect(cabin?.details).toHaveLength(1);
   });
 
   it('returns unitCount=null when no row reports a positive quantity', () => {

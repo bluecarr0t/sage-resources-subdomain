@@ -6,11 +6,11 @@ import { Metadata } from 'next';
 // All actual content is in app/[locale]/page.tsx
 export const metadata: Metadata = {
   title: "Outdoor Hospitality Resources | Guides, Glossary & Property Data | Sage Outdoor Advisory",
-  description: "600+ glamping properties, 21 expert guides, and 57+ industry terms. Your trusted resource for outdoor hospitality feasibility studies, appraisals, and property discovery across North America.",
+  description: "650+ glamping properties, 21 expert guides, and 57+ industry terms. Your trusted resource for outdoor hospitality feasibility studies, appraisals, and property discovery across North America and Europe.",
   keywords: "outdoor hospitality resources, glamping properties, feasibility study guide, RV resort appraisal, campground data, outdoor hospitality glossary, glamping industry, RV park resources",
   openGraph: {
     title: "Outdoor Hospitality Resources | Sage Outdoor Advisory",
-    description: "600+ glamping properties, 21 expert guides, and 57+ industry terms. Your trusted resource for outdoor hospitality feasibility studies, appraisals, and property discovery across North America.",
+    description: "650+ glamping properties, 21 expert guides, and 57+ industry terms. Your trusted resource for outdoor hospitality feasibility studies, appraisals, and property discovery across North America and Europe.",
     siteName: "Sage Outdoor Advisory",
     type: "website",
     images: [
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Outdoor Hospitality Resources | Sage Outdoor Advisory",
-    description: "600+ glamping properties, 21 expert guides, and 57+ industry terms. Your trusted resource for outdoor hospitality feasibility studies, appraisals, and property discovery across North America.",
+    description: "650+ glamping properties, 21 expert guides, and 57+ industry terms. Your trusted resource for outdoor hospitality feasibility studies, appraisals, and property discovery across North America and Europe.",
     images: ["https://sageoutdooradvisory.com/og-image.jpg"],
   },
   robots: {

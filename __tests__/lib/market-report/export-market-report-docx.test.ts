@@ -39,7 +39,14 @@ describe('assembleMarketReportDocx', () => {
         topStates: [{ state: 'OR', count: 1 }],
         totalSites: 10,
         topUnitTypesWithAdr: [
-          { unit_type: 'Safari Tent', count: 1, unitCount: 5, meanAdr: 100, medianAdr: 100 },
+          {
+            unit_type: 'Safari Tent',
+            count: 1,
+            unitCount: 5,
+            meanAdr: 100,
+            medianAdr: 100,
+            details: [],
+          },
         ],
       },
       propertyAnalysis: {

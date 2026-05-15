@@ -50,7 +50,7 @@ Provide a JSON object with as much detail as possible:
 - property_name: Keep the original name
 - city: City name
 - state: State/province abbreviation
-- country: Country name (USA or Canada)
+- country: Country name (United States or Canada)
 - address: Full street address if you can find it
 - zip_code: ZIP/postal code if available
 - url: Official website URL
@@ -164,7 +164,7 @@ export function toInsertRow(
     city: property.city || null,
     state: toStateCode(property.state || '') || null,
     zip_code: property.zip_code || null,
-    country: property.country || options?.defaultCountry || 'USA',
+    country: property.country || options?.defaultCountry || 'United States',
     lat: typeof lat === 'number' ? lat : null,
     lon: typeof lon === 'number' ? lon : null,
     url: url || null,

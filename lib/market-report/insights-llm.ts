@@ -161,7 +161,7 @@ export function buildSummarySnapshot(input: MarketInsightsInput): Record<string,
           name: county.countyName,
           population_2020: county.population2020,
           pop_change_pct: county.populationChangePct,
-          gdp_2023_million: county.gdp2023,
+          gdp_2023_thousands_usd: county.gdp2023,
           gdp_growth_10yr_pct: county.gdpGrowthMaaPct,
         }
       : null,
@@ -187,6 +187,7 @@ Hard rules:
 - Output exactly 4 to 5 bullet points, one per line, each prefixed with "- ".
 - Each bullet is ONE sentence (max ~28 words).
 - Cite specific numbers from the data (counts, $ARDR, %s). NEVER invent figures.
+- County GDP (JSON key gdp_2023_thousands_usd) is BEA real GDP in thousands of dollars; cite magnitudes consistently (e.g. 9940000 thousands ≈ $9.94B).
 - Lead with the strongest signal (opportunity, gap, premium pricing, demand drivers, supply).
 - No introductions, no headings, no closing line, no markdown beyond "- ".
 - Use concrete operator language ("luxury safari tents median $480/night within 50 mi"), not buzzwords.

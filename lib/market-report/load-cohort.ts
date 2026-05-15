@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from "@/lib/glamping-land-operator-category";
 import {
   getBoundingBox,
   haversineDistanceMiles,
@@ -44,6 +45,12 @@ export type LoadCohortResult = {
   /** Pre-dedupe row count (raw rows fetched + in-radius for local). */
   rawRowsConsidered: number;
 };
+
+function trimStringField(v: unknown): string | null {
+  if (v == null) return null;
+  const s = String(v).trim();
+  return s.length > 0 ? s : null;
+}
 
 /**
  * Single number for "sites / units per property" min filter.
@@ -282,10 +289,12 @@ async function paginateNationalCampspotRaw(
 const BASE_GLAMPING_FIELDS = [
   "id",
   "property_name",
+  "site_name",
   "city",
   "state",
   "country",
   "property_type",
+  "land_operator_category",
   "unit_type",
   "property_total_sites",
   "quantity_of_units",
@@ -340,6 +349,7 @@ function mapGlampingRow(
     geo_lat: lat,
     geo_lng: lon,
     property_name: (r.property_name as string) ?? "Unknown",
+    site_name: trimStringField(r.site_name),
     city: (r.city as string) ?? "",
     state: (r.state as string) ?? "",
     property_type: r.property_type != null ? String(r.property_type) : null,
@@ -383,6 +393,7 @@ function mapRoverpassRow(
     geo_lat: lat,
     geo_lng: lon,
     property_name: (r.property_name as string) ?? "Unknown",
+    site_name: trimStringField(r.site_name),
     city: (r.city as string) ?? "",
     state: (r.state as string) ?? "",
     property_type: r.property_type != null ? String(r.property_type) : null,
@@ -660,6 +671,7 @@ function mapHipcampRow(
     geo_lat: lat,
     geo_lng: lon,
     property_name: (r.property_name as string) ?? "Unknown",
+    site_name: trimStringField(r.site_name),
     city: (r.city as string) ?? "",
     state: (r.state as string) ?? "",
     property_type: r.property_type != null ? String(r.property_type) : null,
@@ -709,6 +721,7 @@ function mapCampspotRow(
     geo_lat: lat,
     geo_lng: lon,
     property_name: (r.property_name as string) ?? "Unknown",
+    site_name: trimStringField(r.site_name),
     city: (r.city as string) ?? "",
     state: (r.state as string) ?? "",
     property_type: null,
@@ -770,6 +783,7 @@ async function fetchGlampingCohort(
       .eq("is_glamping_property", "Yes")
       .or("is_open.is.null,is_open.neq.No")
       .eq("research_status", "published")
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .gte("lat", bb.minLat)
       .lte("lat", bb.maxLat)
       .gte("lon", bb.minLng)
@@ -831,7 +845,7 @@ async function fetchRoverpassCohort(
 }> {
   const bb = getBoundingBox(anchorLat, anchorLng, radiusMiles);
   const roverSelect =
-    "id, property_type, property_name, city, state, unit_type, property_total_sites, quantity_of_units, " +
+    "id, property_type, property_name, site_name, city, state, unit_type, property_total_sites, quantity_of_units, " +
     "rate_avg_retail_daily_rate, rate_winter_weekday, rate_winter_weekend, " +
     "rate_spring_weekday, rate_spring_weekend, rate_summer_weekday, rate_summer_weekend, " +
     "rate_fall_weekday, rate_fall_weekend, operating_season_months, url, lat, lon, " +
@@ -913,7 +927,7 @@ async function fetchCampspotCohort(
   const { data, error } = await supabase
     .from("campspot")
     .select(
-      "property_name, city, state, unit_type, property_total_sites, quantity_of_units, " +
+      "property_name, site_name, city, state, unit_type, property_total_sites, quantity_of_units, " +
         "avg_retail_daily_rate_2025, high_rate_2025, low_rate_2025, " +
         "occupancy_rate_2024, occupancy_rate_2025, occupancy_rate_2026, " +
         "winter_weekday, winter_weekend, spring_weekday, spring_weekend, " +
@@ -988,6 +1002,7 @@ async function paginateNationalGlampingScopedRaw(
       .eq("is_glamping_property", "Yes")
       .or("is_open.is.null,is_open.neq.No")
       .eq("research_status", "published")
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .not("lat", "is", null)
       .not("lon", "is", null);
     if (filter.adrMin != null)
@@ -1087,7 +1102,7 @@ async function fetchNationalRoverpass(
   meta: NonNullable<MarketReportFetchMeta["roverpass"]>;
 }> {
   const roverSelect =
-    "id, property_type, property_name, city, state, country, unit_type, property_total_sites, quantity_of_units, " +
+    "id, property_type, property_name, site_name, city, state, country, unit_type, property_total_sites, quantity_of_units, " +
     "rate_avg_retail_daily_rate, rate_winter_weekday, rate_winter_weekend, " +
     "rate_spring_weekday, rate_spring_weekend, rate_summer_weekday, rate_summer_weekend, " +
     "rate_fall_weekday, rate_fall_weekend, operating_season_months, url, lat, lon, " +
@@ -1136,6 +1151,7 @@ async function fetchNationalRoverpass(
 const HIPCAMP_SELECT = [
   "id",
   "property_name",
+  "site_name",
   "city",
   "state",
   "country",
@@ -1381,7 +1397,7 @@ async function fetchNationalCampspot(
   // Campspot stores rates as text with values like "No data" — cast at the app layer
   // and rely on the ADR filter (applied post-fetch) when given.
   const campspotSelect =
-    "id, property_name, city, state, country, unit_type, property_total_sites, quantity_of_units, " +
+    "id, property_name, site_name, city, state, country, unit_type, property_total_sites, quantity_of_units, " +
     "avg_retail_daily_rate_2025, high_rate_2025, low_rate_2025, " +
     "occupancy_rate_2024, occupancy_rate_2025, occupancy_rate_2026, " +
     "winter_weekday, winter_weekend, spring_weekday, spring_weekend, " +

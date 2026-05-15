@@ -15,7 +15,7 @@
  *   - occupancy         → MEDIAN of non-null
  *   - distance_miles    → MIN (closest representative)
  *   - lat/lng           → from the row with the smallest distance_miles
- *   - city/state/url/operating_season_months/property_type → first non-empty
+ *   - city/state/url/operating_season_months/property_type/site_name → first non-empty
  *   - raw               → first non-null `raw` blob (amenity columns are property-wide)
  *
  * Keeps the existing `CohortPropertyRow` shape so downstream aggregation in
@@ -161,6 +161,7 @@ export function dedupeCohortRows(rows: CohortPropertyRow[]): DedupeResult {
       source: head.source,
       sourceId: firstNonNullString(group.map((g) => g.sourceId)),
       property_name: head.property_name,
+      site_name: firstNonNullString(group.map((g) => g.site_name)),
       city: firstNonEmptyString(group.map((g) => g.city)),
       state: head.state,
       property_type: firstNonNullString(group.map((g) => g.property_type)),

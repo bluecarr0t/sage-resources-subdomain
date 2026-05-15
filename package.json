@@ -36,6 +36,7 @@
     "discover:glamping": "tsx scripts/discover-glamping-from-news.ts --tavily",
     "discover:glamping:once": "tsx scripts/discover-glamping-from-news.ts --tavily --limit 1",
     "discover:glamping:canada": "tsx scripts/discover-glamping-from-news.ts --tavily --canada --limit 5",
+    "backfill:glamping-descriptions": "tsx scripts/backfill-glamping-descriptions-web.ts",
     "migrate:discovery": "tsx scripts/apply-discovery-processed-urls-migration.ts",
     "migrate:wineries-acreage": "tsx scripts/apply-wineries-acreage-raw-migration.ts",
     "migrate:hipcamp-campspot-rls": "tsx scripts/apply-hipcamp-campspot-rls-migration.ts",
@@ -50,7 +51,6 @@
   "dependencies": {
     "@ai-sdk/react": "^3.0.164",
     "@anthropic-ai/sdk": "^0.78.0",
-    "@googlemaps/markerclusterer": "^2.6.2",
     "@mendable/firecrawl-js": "^4.15.2",
     "@react-google-maps/api": "^2.20.7",
     "@react-google-maps/marker-clusterer": "^2.20.0",

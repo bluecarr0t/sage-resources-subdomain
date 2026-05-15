@@ -3,6 +3,8 @@
  * @jest-environment node
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { NextRequest } from 'next/server';
 
 const mockSearchGlampingNews = jest.fn();
@@ -34,6 +36,18 @@ jest.mock('openai', () => ({
 }));
 
 import { GET, POST } from '@/app/api/cron/discover-glamping/route';
+
+describe('vercel.json — glamping discovery cron', () => {
+  it('schedules /api/cron/discover-glamping weekly on Mondays at 15:00 UTC', () => {
+    const vercelPath = join(__dirname, '../../../vercel.json');
+    const vercel = JSON.parse(readFileSync(vercelPath, 'utf8')) as {
+      crons?: { path: string; schedule: string }[];
+    };
+    const entry = vercel.crons?.find((c) => c.path === '/api/cron/discover-glamping');
+    expect(entry).toBeDefined();
+    expect(entry!.schedule).toBe('0 15 * * 1');
+  });
+});
 
 describe('/api/cron/discover-glamping', () => {
   const originalEnv = { ...process.env };

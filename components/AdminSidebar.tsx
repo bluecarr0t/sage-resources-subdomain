@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -127,22 +127,34 @@ export default function AdminSidebar() {
   const [toolsMenuOpen, setToolsMenuOpen] = useState(() => toolsSectionActive);
   const [toolsFlyoutOpen, setToolsFlyoutOpen] = useState(false);
   const toolsFlyoutRef = useRef<HTMLDivElement>(null);
-  const wasToolsSectionActiveRef = useRef(false);
+  const toolsSubmenuRef = useRef<HTMLDivElement>(null);
+  /** Previous `toolsSectionActive` after each toolsSectionActive effect run (null = not yet mounted). */
+  const prevToolsSectionActiveRef = useRef<boolean | null>(null);
 
   const showCollapsed = isDesktop && isCollapsed;
   const tSidebar = useTranslations('admin.sidebar');
 
   useEffect(() => {
-    if (!toolsSectionActive) {
-      setToolsMenuOpen(false);
-      wasToolsSectionActiveRef.current = false;
+    const prev = prevToolsSectionActiveRef.current;
+    prevToolsSectionActiveRef.current = toolsSectionActive;
+
+    if (prev === null) {
+      if (toolsSectionActive) setToolsMenuOpen(true);
       return;
     }
-    if (!wasToolsSectionActiveRef.current) {
-      setToolsMenuOpen(true);
+
+    if (toolsSectionActive) {
+      if (!prev) setToolsMenuOpen(true);
+      return;
     }
-    wasToolsSectionActiveRef.current = true;
+
+    if (prev) setToolsMenuOpen(false);
   }, [toolsSectionActive]);
+
+  useLayoutEffect(() => {
+    if (!toolsMenuOpen || showCollapsed || !toolsSubmenuRef.current) return;
+    toolsSubmenuRef.current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [toolsMenuOpen, showCollapsed]);
 
   useEffect(() => {
     if (!showCollapsed) setToolsFlyoutOpen(false);
@@ -261,7 +273,7 @@ export default function AdminSidebar() {
           </div>
 
           {/* Navigation — min-h-0 so flex-1 can shrink and overflow-y-auto scrolls when Tools expands */}
-          <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-4 pb-24 pt-2">
+          <nav className="relative z-10 min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-4 pb-32 pt-2">
             {/* Dashboard - top-level */}
             <div className="py-2">
               <NavLink
@@ -365,6 +377,7 @@ export default function AdminSidebar() {
                     </button>
                     {toolsMenuOpen ? (
                       <div
+                        ref={toolsSubmenuRef}
                         id="admin-tools-submenu"
                         role="region"
                         aria-labelledby="admin-tools-trigger"
@@ -547,7 +560,9 @@ export default function AdminSidebar() {
           </nav>
 
           {/* Footer - theme toggle + user profile (modern CPO placement) */}
-          <div className={`absolute bottom-0 left-0 right-0 border-t border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 space-y-3 ${showCollapsed ? 'p-2' : 'p-4'}`}>
+          <div
+            className={`absolute bottom-0 left-0 right-0 z-20 border-t border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 space-y-3 ${showCollapsed ? 'p-2' : 'p-4'}`}
+          >
             <div className={`flex items-center ${showCollapsed ? 'justify-center' : 'justify-between'}`}>
               {!showCollapsed && (
                 <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.14em]">Appearance</span>

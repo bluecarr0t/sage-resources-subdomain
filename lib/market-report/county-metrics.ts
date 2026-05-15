@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { STATE_ABBR_TO_NAME } from '@/lib/comps-v2/geo';
+import { parseNum, STATE_ABBR_TO_NAME } from '@/lib/comps-v2/geo';
 import { reverseGeocodeCountyLevel2Usa } from '@/lib/geocode';
 
 /**
@@ -22,6 +22,7 @@ export interface CountyMetricsResult {
   stateAbbr: string;
   population2020: number | null;
   populationChangePct: number | null;
+  /** BEA real GDP for 2023 in **thousands of chained (2017) dollars** (`county-gdp.gdp_2023`). */
   gdp2023: number | null;
   /** GDP growth (%) — uses moving-annual-average column. */
   gdpGrowthMaaPct: number | null;
@@ -178,10 +179,10 @@ export async function fetchCountyMetrics(
   return {
     countyName: bestRow.name,
     stateAbbr,
-    population2020: bestRow.population_2020 ?? null,
-    populationChangePct: bestRow.change ?? null,
-    gdp2023: gdpMatch?.gdp_2023 ?? null,
-    gdpGrowthMaaPct: gdpMatch?.['moving-annual-average'] ?? null,
+    population2020: parseNum(bestRow.population_2020),
+    populationChangePct: parseNum(bestRow.change),
+    gdp2023: gdpMatch ? parseNum(gdpMatch.gdp_2023) : null,
+    gdpGrowthMaaPct: gdpMatch ? parseNum(gdpMatch['moving-annual-average']) : null,
     highConfidence,
   };
 }

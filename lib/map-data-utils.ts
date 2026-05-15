@@ -8,6 +8,7 @@ import { getCache, setCache } from '@/lib/redis';
 import { normalizeStateName, normalizeCityName } from '@/lib/location-helpers';
 import { NationalPark } from '@/lib/types/national-parks';
 import { SageProperty } from '@/lib/types/sage';
+import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -65,6 +66,7 @@ export async function getStatePropertyStatistics(
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .eq('state', normalizedState);
     
     if (error || !properties) {
@@ -169,6 +171,7 @@ export async function getCityPropertyStatistics(
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .ilike('city', normalizedCity)
       .eq('state', normalizedState);
     
@@ -272,6 +275,7 @@ export async function getFeaturedPropertiesForState(
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .eq('state', normalizedState)
       .not('property_name', 'is', null)
       .order('quality_score', { ascending: false })
@@ -352,6 +356,7 @@ export async function getFeaturedPropertiesForCity(
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .eq('state', normalizedState)
       .not('lat', 'is', null)
       .not('lon', 'is', null)
@@ -516,6 +521,7 @@ export async function getPropertiesNearNationalPark(
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .not('lat', 'is', null)
       .not('lon', 'is', null)
       .not('property_name', 'is', null)
@@ -593,6 +599,7 @@ export async function getStateProperties(
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .eq('state', normalizedState);
     
     if (limit) {
@@ -636,6 +643,7 @@ export async function getCityProperties(
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .eq('state', normalizedState)
       .not('lat', 'is', null)
       .not('lon', 'is', null);

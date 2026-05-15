@@ -1,5 +1,6 @@
 import type { CountyMetricsResult } from '@/lib/market-report/county-metrics';
 import type { DemandDriversResult } from '@/lib/market-report/demand-drivers';
+import { formatCountyGdpThousands } from '@/lib/market-report/format-county-gdp';
 
 /**
  * Opportunity Score (0–100) — proxy for how attractive a market is for a
@@ -9,14 +10,22 @@ import type { DemandDriversResult } from '@/lib/market-report/demand-drivers';
  *
  *   1. Demand drivers (40 pts) — natural attractions in the catchment
  *      (national parks, ski, wineries, major outdoor / state-park POIs, nearby major/large cities)
- *   2. Economic strength (25 pts) — county GDP + population growth
+ *   2. Economic strength (25 pts) — county GDP (BEA, thousands of $) + population growth
  *   3. Premium positioning (20 pts) — how much of the cohort already prices ≥ $300
- *   4. Market white space (15 pts) — demand drivers ÷ competitor density
+ *   4. Market white space (15 pts) — demand drivers ÷ effective supply density.
+ *      Supply denominator: summed `property_total_sites` across the cohort when that
+ *      total is known and > 0 (inventory site capacity); otherwise distinct listings
+ *      (competitor count). Same 0–15 mapping: higher drivers per unit of supply → more whitespace.
  */
 
 export interface OpportunityScoreInputs {
   /** Number of distinct listings inside the search radius (see cohort listing identity). */
   cohortSize: number;
+  /**
+   * Sum of `property_total_sites` for cohort rows where each value is > 0, or null when none reported.
+   * When > 0, the whitespace pillar divides demand drivers by this site total instead of {@link cohortSize}.
+   */
+  totalSites?: number | null;
   /** Number of cohort rows priced at or above $300/night. */
   premiumCohortCount: number;
   /** Demand drivers fetched from external tables; null when unavailable. */
@@ -68,6 +77,17 @@ function letterFor(score: number): OpportunityGrade {
   return 'F';
 }
 
+/** Supply units for whitespace ratio: sites when summed inventory is known, else distinct listings. */
+function whitespaceSupplyDenominator(
+  cohortDistinctListings: number,
+  cohortTotalSites: number | null | undefined
+): { supplyUnits: number; basis: 'sites' | 'listings' } {
+  if (cohortTotalSites != null && cohortTotalSites > 0) {
+    return { supplyUnits: cohortTotalSites, basis: 'sites' };
+  }
+  return { supplyUnits: cohortDistinctListings, basis: 'listings' };
+}
+
 function scoreDemandPillar(
   drivers: DemandDriversResult | null
 ): { points: number; available: boolean; detail: string } {
@@ -75,10 +95,11 @@ function scoreDemandPillar(
     return { points: 0, available: false, detail: 'No demand driver data available.' };
   }
   // Sub-weights summing to MAX_POINTS.demand (40):
-  //   National parks:       12  (max at 3+ parks; high-visitor parks bump faster)
+  //   National parks:       12  (max at 3+ parks)
   //   Ski resorts:           8  (max at 5+ resorts)
   //   Wineries:             12  (max at 20+ wineries)
-  //   Major outdoor sites:   8  (state parks / recreation POIs; max at 4+ sites)
+  //   Major outdoor sites:   4  (max at 4+ sites)
+  //   Major/large cities:    4  (max at 5+ cities — urban pull / fly-market access)
   const np = drivers.nationalParks.count;
   const ski = drivers.skiResorts.count;
   const win = drivers.wineries.count;
@@ -87,8 +108,9 @@ function scoreDemandPillar(
   const npPts = clamp(np / 3, 0, 1) * 12;
   const skiPts = clamp(ski / 5, 0, 1) * 8;
   const winPts = clamp(win / 20, 0, 1) * 12;
-  const outPts = clamp(outdoor / 4, 0, 1) * 8;
-  const points = Math.round(npPts + skiPts + winPts + outPts);
+  const outPts = clamp(outdoor / 4, 0, 1) * 4;
+  const cityPts = clamp(cities / 5, 0, 1) * 4;
+  const points = Math.round(npPts + skiPts + winPts + outPts + cityPts);
   const detail = `${np} national park${np === 1 ? '' : 's'}, ${ski} ski resort${ski === 1 ? '' : 's'}, ${win} winer${win === 1 ? 'y' : 'ies'}, ${outdoor} major outdoor site${outdoor === 1 ? '' : 's'}, ${cities} major/large cit${cities === 1 ? 'y' : 'ies'} within catchment.`;
   return { points, available: true, detail };
 }
@@ -99,7 +121,7 @@ function scoreEconomyPillar(
   if (!county || (county.gdp2023 == null && county.populationChangePct == null)) {
     return { points: 0, available: false, detail: 'County metrics not matched for anchor.' };
   }
-  // GDP: 0–15 pts. $1B is the soft anchor (≈ median rural-tourism county). Scale linearly to $5B.
+  // GDP (thousands of $): 0–15 pts. $100M → 0 pts in log band; $5B (5M thousands) → max.
   const gdpPts =
     county.gdp2023 != null ? clamp((Math.log10(county.gdp2023) - 5) / (Math.log10(5_000_000) - 5), 0, 1) * 15 : 0;
   // Population change 2010 → 2020. -5% → 0 pts, +10% → 10 pts.
@@ -108,7 +130,8 @@ function scoreEconomyPillar(
   const points = Math.round(gdpPts + popPts);
   const popLabel =
     county.populationChangePct != null ? `${county.populationChangePct.toFixed(1)}% pop. change` : 'pop. change unknown';
-  const gdpLabel = county.gdp2023 != null ? `$${(county.gdp2023 / 1000).toFixed(1)}B GDP` : 'GDP unknown';
+  const gdpLabel =
+    county.gdp2023 != null ? `${formatCountyGdpThousands(county.gdp2023)} GDP` : 'GDP unknown';
   return {
     points,
     available: true,
@@ -135,6 +158,7 @@ function scorePremiumPillar(
 
 function scoreWhitespacePillar(
   cohortSize: number,
+  cohortTotalSites: number | null | undefined,
   drivers: DemandDriversResult | null
 ): { points: number; available: boolean; detail: string } {
   if (!drivers) {
@@ -146,17 +170,22 @@ function scoreWhitespacePillar(
     drivers.wineries.count +
     drivers.majorOutdoorSites.count +
     drivers.majorAndLargeCities.count;
-  if (totalDrivers === 0 && cohortSize === 0) {
-    return { points: 0, available: false, detail: 'No drivers and no cohort to compare.' };
+  const { supplyUnits, basis } = whitespaceSupplyDenominator(cohortSize, cohortTotalSites);
+  if (totalDrivers === 0 && supplyUnits === 0) {
+    return { points: 0, available: false, detail: 'No drivers and no cohort supply to compare.' };
   }
-  // Higher = more demand per competitor = more whitespace. Anchor: 1.0 ratio (parity) → 7.5 pts.
-  // 3.0+ ratio (3x more drivers than competitors) → max 15 pts.
-  const ratio = (totalDrivers + 1) / (cohortSize + 1);
+  // Higher = more demand per unit of supply = more whitespace. Anchor: 1.0 ratio (parity) → 7.5 pts.
+  // 3.0+ ratio (3× more drivers than supply units) → max 15 pts.
+  const ratio = (totalDrivers + 1) / (supplyUnits + 1);
   const points = Math.round(clamp(ratio / 3, 0, 1) * MAX_POINTS.whitespace);
+  const supplyPhrase =
+    basis === 'sites'
+      ? `${supplyUnits} inventory sites (summed property site counts where reported)`
+      : `${supplyUnits} distinct listings`;
   return {
     points,
     available: true,
-    detail: `${totalDrivers} demand drivers vs ${cohortSize} competitors (ratio ${ratio.toFixed(2)}).`,
+    detail: `${totalDrivers} demand drivers vs ${supplyPhrase}; ratio ${ratio.toFixed(2)}.`,
   };
 }
 
@@ -187,7 +216,7 @@ export function calculateOpportunityScore(inputs: OpportunityScoreInputs): Oppor
   const demand = scoreDemandPillar(inputs.demandDrivers);
   const economy = scoreEconomyPillar(inputs.countyMetrics);
   const premium = scorePremiumPillar(inputs.cohortSize, inputs.premiumCohortCount);
-  const whitespace = scoreWhitespacePillar(inputs.cohortSize, inputs.demandDrivers);
+  const whitespace = scoreWhitespacePillar(inputs.cohortSize, inputs.totalSites, inputs.demandDrivers);
 
   const componentsRaw: Array<
     OpportunityScoreComponent & { _maxConst: number }

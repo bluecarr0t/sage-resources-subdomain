@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache, hashCacheKey, logCacheMetrics } from '@/lib/redis';
 import { filterToPublicColumns, filterRequestedFieldsToPublic } from '@/lib/property-column-privacy';
+import {
+  isExcludedLandOperatorForPublicMap,
+  PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR,
+} from '@/lib/glamping-land-operator-category';
 
 /**
  * API route for fetching glamping properties with caching
@@ -27,9 +31,17 @@ export async function GET(request: NextRequest) {
         .eq('is_glamping_property', 'Yes')
         .eq('is_open', 'Yes')
         .eq('research_status', 'published')
+        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
         .single();
       
       if (error || !property) {
+        return NextResponse.json(
+          { success: false, error: 'Property not found' },
+          { status: 404 }
+        );
+      }
+
+      if (isExcludedLandOperatorForPublicMap((property as Record<string, unknown>).land_operator_category)) {
         return NextResponse.json(
           { success: false, error: 'Property not found' },
           { status: 404 }
@@ -167,7 +179,8 @@ async function fetchPropertiesFromDatabase(
     .select('*')
     .eq('is_glamping_property', 'Yes')
     .eq('is_open', 'Yes')
-    .eq('research_status', 'published');
+    .eq('research_status', 'published')
+    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR);
 
   // Filter by country
   if (filterCountry.length === 0) {
@@ -175,8 +188,8 @@ async function fetchPropertiesFromDatabase(
   } else if (filterCountry.length === 1) {
     // Only one country selected
     if (filterCountry.includes('United States')) {
-      // Handle both 'USA' and 'United States' values
-      query = query.in('country', ['USA', 'United States', 'US']);
+      // Canonical DB value is "United States"; keep "US" for rare legacy rows.
+      query = query.in('country', ['United States', 'US']);
     } else if (filterCountry.includes('Canada')) {
       // Filter by country field only - only show properties with country='Canada' or 'CA'
       query = query.in('country', ['Canada', 'CA']);

@@ -7,6 +7,7 @@ import {
 import {
   buildMarketReportSections,
   countPremiumCohortListings,
+  sumCohortPropertyTotalSites,
 } from "@/lib/market-report/aggregate";
 import { countDistinctListings } from "@/lib/market-report/listing-identity";
 import {
@@ -255,6 +256,7 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
       scope === "local"
         ? calculateOpportunityScore({
             cohortSize: countDistinctListings(rows),
+            totalSites: sumCohortPropertyTotalSites(rows),
             premiumCohortCount: countPremiumCohortListings(rows),
             demandDrivers,
             countyMetrics,

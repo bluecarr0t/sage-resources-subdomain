@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/discover-glamping",
-      "schedule": "0 15 * * *"
+      "schedule": "0 15 * * 1"
     },
     {
       "path": "/api/cron/refresh-unified-comps",

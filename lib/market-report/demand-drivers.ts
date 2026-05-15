@@ -279,7 +279,7 @@ async function fetchTextLatLngTable(
     .select('name, state_province, country, lat, lon, overall_rating')
     .not('lat', 'is', null)
     .not('lon', 'is', null)
-    .in('country', ['US', 'USA', 'United States'])
+    .in('country', ['US', 'United States'])
     .limit(5000);
 
   if (error) {

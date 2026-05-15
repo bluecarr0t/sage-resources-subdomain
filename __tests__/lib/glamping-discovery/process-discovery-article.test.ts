@@ -81,7 +81,7 @@ describe('processDiscoveryArticle', () => {
             property_name: 'Willow Creek Glamping Resort 2026',
             city: 'Boulder',
             state: 'CO',
-            country: 'USA',
+            country: 'United States',
             unit_type: 'yurts',
             property_type: 'Glamping Resort',
             description: 'New glamping resort opening in 2026.',
@@ -92,7 +92,7 @@ describe('processDiscoveryArticle', () => {
         number_of_units: 8,
         city: 'Boulder',
         state: 'CO',
-        country: 'USA',
+        country: 'United States',
       }),
     ]);
 
@@ -140,7 +140,7 @@ describe('processDiscoveryArticle', () => {
           },
         ],
       }),
-      JSON.stringify({ number_of_units: 6, state: 'UT', country: 'USA' }),
+      JSON.stringify({ number_of_units: 6, state: 'UT', country: 'United States' }),
     ]);
 
     const resultPromise = processDiscoveryArticle({

@@ -4,6 +4,7 @@ import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
 import MapLayoutNoLocale from '@/components/MapLayoutNoLocale';
 import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache } from '@/lib/redis';
+import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 import {
   generateOrganizationSchema,
   generateMapSchema,
@@ -86,7 +87,8 @@ async function getPropertyStatistics() {
       .select('property_name, state, country')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
-      .eq('research_status', 'published');
+      .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR);
 
     if (error) {
       console.error('Error fetching property count:', error);

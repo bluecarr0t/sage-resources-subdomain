@@ -49,7 +49,9 @@ describe('buildSummarySnapshot', () => {
     sourceBreakdown: [],
     topStates: [{ state: 'TX', count: 5 }],
     totalSites: null,
-    topUnitTypesWithAdr: [{ unit_type: 'Yurt', count: 3, unitCount: null, meanAdr: 200, medianAdr: 200 }],
+    topUnitTypesWithAdr: [
+      { unit_type: 'Yurt', count: 3, unitCount: null, meanAdr: 200, medianAdr: 200, details: [] },
+    ],
   });
 
   it('does not throw when demandDrivers is missing majorAndLargeCities (legacy shape)', () => {

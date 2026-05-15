@@ -24,6 +24,7 @@ import type {
   MarketReportSegment,
   MarketReportSourceBreakdownRow,
   MarketSummarySection,
+  MarketSummaryTopUnitTypeDetailRow,
   MarketSummaryTopUnitTypeRow,
   PropertyAnalysisSection,
   RateAnalysisSection,
@@ -32,6 +33,8 @@ import type {
 
 const PREMIUM_COHORT_ADR_THRESHOLD = 300;
 const TOP_UNIT_TYPES_FOR_SUMMARY = 5;
+/** Max cohort rows shipped per top unit type for expandable UI (payload guard). */
+const TOP_UNIT_TYPE_COHORT_DETAIL_CAP = 200;
 
 const SAMPLE_CAP = 25;
 const SOURCE_BREAKDOWN_ORDER: CohortPropertyRow['source'][] = [
@@ -106,6 +109,32 @@ function buildSourceBreakdown(rows: CohortPropertyRow[]): MarketReportSourceBrea
   });
 }
 
+function buildTopUnitTypeDetailRow(
+  unit_type: string,
+  rowIndex: number,
+  r: CohortPropertyRow,
+): MarketSummaryTopUnitTypeDetailRow {
+  const rateOk =
+    r.rate_avg != null && r.rate_avg > 0 && Number.isFinite(r.rate_avg) ? r.rate_avg : null;
+  return {
+    key: `${unit_type}|${rowIndex}|${r.source}|${r.sourceId ?? 'noid'}|${r.distance_miles}|${rateOk ?? 'na'}`,
+    property_name: r.property_name,
+    city: r.city,
+    state: r.state,
+    source: r.source,
+    sourceLabel: marketReportSourceLabel(r.source),
+    distance_miles: r.distance_miles,
+    site_name:
+      r.site_name != null && String(r.site_name).trim().length > 0
+        ? String(r.site_name).trim()
+        : null,
+    rate_avg: rateOk,
+    quantity_of_units: r.quantity_of_units,
+    property_total_sites: r.property_total_sites,
+    url: r.url ?? null,
+  };
+}
+
 function buildTopUnitTypesWithAdr(
   rows: CohortPropertyRow[],
   segment: MarketReportSegment,
@@ -114,44 +143,54 @@ function buildTopUnitTypesWithAdr(
     segment === 'glamping'
       ? rows.filter((r) => !isExcludedGlampingUnitType(r.unit_type))
       : rows;
-  // For each unit type bucket we track:
-  //   - count: number of (property × unit_type) cohort rows (Sage: all table rows;
-  //     other sources collapsed upstream in load-cohort)
-  //   - rates: list of positive rate_avg values for ARDR stats
-  //   - unitCount: running sum of `quantity_of_units` (per-unit-type inventory)
-  //   - hasUnitData: whether any row contributed to unitCount, so we can return
-  //     `null` (vs misleading 0) when no row reports unit quantity
-  const buckets = new Map<
-    string,
-    { count: number; rates: number[]; unitCount: number; hasUnitData: boolean }
-  >();
+  const rowLists = new Map<string, CohortPropertyRow[]>();
   for (const r of cohortRows) {
     const key = (r.unit_type ?? '').trim() || 'Unknown';
-    const bucket = buckets.get(key) ?? { count: 0, rates: [], unitCount: 0, hasUnitData: false };
-    bucket.count += 1;
-    if (r.rate_avg != null && r.rate_avg > 0) bucket.rates.push(r.rate_avg);
-    if (r.quantity_of_units != null && r.quantity_of_units > 0) {
-      bucket.unitCount += r.quantity_of_units;
-      bucket.hasUnitData = true;
+    if (isOmittedUnitTypeForCharts(key)) continue;
+    const list = rowLists.get(key) ?? [];
+    list.push(r);
+    rowLists.set(key, list);
+  }
+  const sortedTypes = [...rowLists.entries()].sort((a, b) => b[1].length - a[1].length);
+  return sortedTypes.slice(0, TOP_UNIT_TYPES_FOR_SUMMARY).map(([unit_type, list]) => {
+    const rates = list
+      .map((r) => r.rate_avg)
+      .filter((n): n is number => n != null && n > 0 && Number.isFinite(n));
+    const sorted = [...rates].sort((a, b) => a - b);
+    let unitCount = 0;
+    let hasUnitData = false;
+    for (const r of list) {
+      if (r.quantity_of_units != null && r.quantity_of_units > 0) {
+        unitCount += r.quantity_of_units;
+        hasUnitData = true;
+      }
     }
-    buckets.set(key, bucket);
+    const capped = list.slice(0, TOP_UNIT_TYPE_COHORT_DETAIL_CAP);
+    const details = capped.map((r, i) => buildTopUnitTypeDetailRow(unit_type, i, r));
+    return {
+      unit_type,
+      count: list.length,
+      unitCount: hasUnitData ? unitCount : null,
+      meanAdr: mean(rates),
+      medianAdr: medianSorted(sorted),
+      details,
+      detailsTruncated: list.length > TOP_UNIT_TYPE_COHORT_DETAIL_CAP,
+    };
+  });
+}
+
+/**
+ * Sum of `property_total_sites` across cohort rows where the value is present and
+ * greater than zero (same definition as {@link MarketSummarySection.totalSites}).
+ */
+export function sumCohortPropertyTotalSites(rows: CohortPropertyRow[]): number | null {
+  let total: number | null = null;
+  for (const r of rows) {
+    if (r.property_total_sites != null && r.property_total_sites > 0) {
+      total = (total ?? 0) + r.property_total_sites;
+    }
   }
-  for (const k of [...buckets.keys()]) {
-    if (isOmittedUnitTypeForCharts(k)) buckets.delete(k);
-  }
-  return [...buckets.entries()]
-    .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, TOP_UNIT_TYPES_FOR_SUMMARY)
-    .map(([unit_type, { count, rates, unitCount, hasUnitData }]) => {
-      const sorted = [...rates].sort((a, b) => a - b);
-      return {
-        unit_type,
-        count,
-        unitCount: hasUnitData ? unitCount : null,
-        meanAdr: mean(rates),
-        medianAdr: medianSorted(sorted),
-      };
-    });
+  return total;
 }
 
 export function buildMarketSummary(
@@ -174,12 +213,7 @@ export function buildMarketSummary(
   const stateMap = countBy(rows, (r) => r.state);
   const topStates = topFromMap(stateMap, 10).map(({ key: state, count }) => ({ state, count }));
 
-  let totalSites: number | null = null;
-  for (const r of rows) {
-    if (r.property_total_sites != null && r.property_total_sites > 0) {
-      totalSites = (totalSites ?? 0) + r.property_total_sites;
-    }
-  }
+  const totalSites = sumCohortPropertyTotalSites(rows);
 
   return {
     distinctListingCount,

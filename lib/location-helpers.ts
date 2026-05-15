@@ -5,6 +5,7 @@
 
 import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache } from '@/lib/redis';
+import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 
 /**
  * State code to full name mapping
@@ -146,6 +147,7 @@ export async function getCityCoordinates(
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .ilike('city', city.trim())
       .eq('state', normalizeStateName(state))
       .not('lat', 'is', null)
@@ -215,6 +217,7 @@ export async function getTopStates(count: number = 50): Promise<Array<{ state: s
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .not('state', 'is', null);
     
     if (error || !properties) {
@@ -297,6 +300,7 @@ export async function getTopCities(count: number = 100): Promise<Array<{
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
+      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .not('city', 'is', null)
       .not('state', 'is', null)
       .not('lat', 'is', null)

@@ -7,7 +7,7 @@
  * available at runtime in serverless functions, which is why
  * `glamping_discovery_runs` was only ever populated by manual triggers.
  *
- * Schedule: Daily at 15:00 UTC — see vercel.json (`0 15 * * *`).
+ * Schedule: Weekly Mondays 15:00 UTC — see vercel.json (`0 15 * * 1`).
  * Vercel Cron invokes this route with HTTP GET; POST is supported for manual triggers.
  *
  * Required env vars on Vercel (Production):

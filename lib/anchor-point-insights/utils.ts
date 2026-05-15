@@ -42,7 +42,12 @@ export async function fetchAllRows<T>(
   supabase: SupabaseClient,
   table: string,
   select: string,
-  filters: { notNull?: string[]; neq?: Array<{ col: string; val: unknown }> },
+  filters: {
+    notNull?: string[];
+    neq?: Array<{ col: string; val: unknown }>;
+    /** PostgREST `.or(...)` filter string (e.g. `col.is.null,col.eq.x`). */
+    or?: string;
+  },
   maxRows: number,
   orderBy: string = 'id'
 ): Promise<T[]> {
@@ -60,6 +65,9 @@ export async function fetchAllRows<T>(
     }
     for (const item of filters.neq ?? []) {
       q = q.neq(item.col, item.val);
+    }
+    if (filters.or) {
+      q = q.or(filters.or);
     }
     const { data, error } = await q;
     if (error) throw error;

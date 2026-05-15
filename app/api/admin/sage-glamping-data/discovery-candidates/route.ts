@@ -111,7 +111,7 @@ export const POST = withAdminAuth(async (request) => {
         city: candidate.city ?? null,
         state: candidate.state ?? null,
         zip_code: null,
-        country: candidate.country ?? 'USA',
+        country: candidate.country ?? 'United States',
         lat: null,
         lon: null,
         url: candidate.url ?? null,

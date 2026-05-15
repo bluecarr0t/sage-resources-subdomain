@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { GoogleMap } from '@react-google-maps/api';
-import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { useGoogleMaps } from '@/components/GoogleMapsProvider';
 import { formatCurrency, humanLabel } from '@/lib/market-report/format-labels';
 import { marketReportSourceLabel } from '@/lib/market-report/source-labels';
@@ -134,7 +133,7 @@ export function MarketReportMapPreview({
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const circleRef = useRef<google.maps.Circle | null>(null);
   const anchorMarkerRef = useRef<google.maps.Marker | null>(null);
-  const clustererRef = useRef<MarkerClusterer | null>(null);
+  const propertyMarkersRef = useRef<google.maps.Marker[]>([]);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
   const onLoad = useCallback((m: google.maps.Map) => {
@@ -142,8 +141,10 @@ export function MarketReportMapPreview({
   }, []);
 
   const onUnmount = useCallback(() => {
-    clustererRef.current?.clearMarkers();
-    clustererRef.current = null;
+    for (const m of propertyMarkersRef.current) {
+      m.setMap(null);
+    }
+    propertyMarkersRef.current = [];
     circleRef.current?.setMap(null);
     circleRef.current = null;
     anchorMarkerRef.current?.setMap(null);
@@ -224,8 +225,10 @@ export function MarketReportMapPreview({
 
     infoWindowRef.current?.close();
 
-    clustererRef.current?.clearMarkers();
-    clustererRef.current = null;
+    for (const m of propertyMarkersRef.current) {
+      m.setMap(null);
+    }
+    propertyMarkersRef.current = [];
 
     if (!infoWindowRef.current) {
       infoWindowRef.current = new google.maps.InfoWindow();
@@ -234,6 +237,7 @@ export function MarketReportMapPreview({
 
     const markers = mapPins.map((p) => {
       const marker = new google.maps.Marker({
+        map,
         position: { lat: p.lat, lng: p.lng },
         title: `${p.property_name} (${fmtMi(p.distance_miles)})`,
       });
@@ -244,13 +248,13 @@ export function MarketReportMapPreview({
       return marker;
     });
 
-    if (markers.length > 0) {
-      clustererRef.current = new MarkerClusterer({ map, markers });
-    }
+    propertyMarkersRef.current = markers;
 
     return () => {
-      clustererRef.current?.clearMarkers();
-      clustererRef.current = null;
+      for (const m of propertyMarkersRef.current) {
+        m.setMap(null);
+      }
+      propertyMarkersRef.current = [];
     };
   }, [map, isLoaded, mapPins, presenterMode]);
 

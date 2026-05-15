@@ -9,6 +9,7 @@ import {
   haversineDistanceMiles,
   parseNum,
 } from '@/lib/comps-v2/geo';
+import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 
 type AnyRow = Record<string, unknown>;
 
@@ -92,6 +93,7 @@ export async function fetchGlampingPropsNumeric(
         'rate_fall_weekday, rate_fall_weekend, operating_season_months, url, description, lat, lon'
     )
     .eq('is_open', 'Yes')
+    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
     .gte('lat', bb.minLat)
     .lte('lat', bb.maxLat)
     .gte('lon', bb.minLng)

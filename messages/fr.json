@@ -809,15 +809,15 @@
   },
   "locationSearch": {
     "placeholder": {
-      "compact": "Rechercher un lieu...",
-      "default": "Entrez votre destination (ville, état ou région)"
+      "compact": "Marché ou lieu...",
+      "default": "Rechercher un marché, une ville, un État ou une région"
     },
-    "button": "Trouver du Glamping",
+    "button": "Ouvrir la carte marché",
     "suggestions": "Suggestions",
     "useCurrentLocation": {
       "title": "Utiliser la position actuelle",
       "loadingTitle": "Obtention de votre position...",
-      "description": "Trouver des propriétés de glamping près de chez vous",
+      "description": "Centrer la carte sur votre position pour le contexte de marché",
       "loadingDescription": "Veuillez patienter..."
     },
     "error": {
@@ -2168,20 +2168,21 @@
   },
   "home": {
     "metadata": {
-      "title": "Find Glamping Near You | 600+ Properties Across North America | Sage Outdoor Advisory",
-      "description": "Discover 600+ glamping properties across North America. Expert guides on feasibility studies, appraisals, and 57+ industry terms. Your complete resource for outdoor hospitality insights and property discovery.",
-      "keywords": "glamping properties, glamping guides, outdoor hospitality, glamping feasibility studies, glamping appraisals, glamping resources, glamping destinations, luxury camping, glamping industry, glamping business"
+      "title": "Recherche et ressources en hospitalité de plein air | Sage Outdoor Advisory",
+      "description": "Intelligence de marché pour développeurs et investisseurs en glamping, resorts pour camping-cars et campings : plus de 650 propriétés de référence en Amérique du Nord et en Europe, guides sur la faisabilité et l'évaluation, glossaire sectoriel approfondi—et outils pour analyser l'offre par marché.",
+      "keywords": "étude de faisabilité hospitalité plein air, recherche marché glamping, évaluation resort RV, développement camping, données industrie glamping, conseil hospitalité plein air, analyse investissement glamping, données glamping Europe, carte glamping Amérique du Nord"
     },
     "hero": {
-      "headline": "Your Complete Glamping Resource",
-      "subheadline": "600+ properties, expert guides, and industry resources for travelers and outdoor hospitality professionals.",
+      "headline": "Intelligence de marché pour l'hospitalité de plein air",
+      "subheadline": "Plus de 650 benchmarks en Amérique du Nord et en Europe, guides faisabilité et évaluation, terminologie pour les équipes en hospitalité de plein air.",
       "quickStats": {
-        "properties": "600+ Properties",
-        "usCanada": "US & Canada",
-        "verified": "Verified Listings"
+        "properties": "Plus de 650 propriétés de référence",
+        "usCanada": "Couverture États-Unis, Canada et Europe",
+        "verified": "Annonces niveau recherche"
       }
     },
     "stats": {
+      "propertiesCount": "650+",
       "properties": "Properties",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"
@@ -2194,7 +2195,7 @@
         "readGuide": "Read Guide →"
       },
       "map": {
-        "title": "Explore 600+ Glamping Properties",
+        "title": "Explore 650+ Glamping Properties",
         "description": "Discover glamping properties across the United States and Canada on our interactive map. Filter by location, property type, and amenities to find the perfect outdoor hospitality destination.",
         "cta": "View Interactive Map →"
       },
@@ -2219,7 +2220,7 @@
         },
         {
           "question": "How do I find glamping properties near me?",
-          "answer": "Use our interactive map to search for glamping properties by location. We have 600+ verified properties across the United States and Canada. You can filter by location, property type, amenities, and price range to find the perfect glamping destination for your outdoor adventure."
+          "answer": "Use our interactive map to search for glamping properties by location. We have 650+ verified properties across the United States, Canada, and Europe. You can filter by location, property type, amenities, and price range to find the perfect glamping destination for your outdoor adventure."
         },
         {
           "question": "What's the difference between glamping and camping?",
@@ -2231,7 +2232,7 @@
         },
         {
           "question": "What should I look for in a glamping property?",
-          "answer": "Key factors include location and accessibility, unique accommodation types, quality amenities (wifi, bathrooms, kitchen facilities), safety features, and proximity to attractions. Our database includes detailed information on 600+ properties including ratings, amenities, and pricing to help you compare options."
+          "answer": "Key factors include location and accessibility, unique accommodation types, quality amenities (wifi, bathrooms, kitchen facilities), safety features, and proximity to attractions. Our database includes detailed information on 650+ properties including ratings, amenities, and pricing to help you compare options."
         },
         {
           "question": "Are glamping properties profitable?",

@@ -256,7 +256,7 @@ export default async function HomePage({ params }: PageProps) {
           <div className="absolute inset-0 z-0">
             <Image
               src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/tipi.jpg"
-              alt="Tipi glamping accommodation in natural outdoor setting - representing outdoor hospitality resources and glamping properties"
+              alt="Glamping accommodation at dusk—representing outdoor hospitality supply and market research resources for developers and investors"
               fill
               className="object-cover"
               priority
@@ -313,7 +313,7 @@ export default async function HomePage({ params }: PageProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div>
-                <div className="text-4xl font-bold text-[#006b5f] mb-2">600+</div>
+                <div className="text-4xl font-bold text-[#006b5f] mb-2">{t('stats.propertiesCount')}</div>
                 <div className="text-gray-600">{t('stats.properties')}</div>
               </div>
               <div>
@@ -399,7 +399,7 @@ export default async function HomePage({ params }: PageProps) {
           <div className="absolute inset-0 z-0">
             <Image
               src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg"
-              alt="Mountain landscape showcasing glamping properties across North America - explore 600+ outdoor hospitality destinations"
+              alt="Mountain landscape showcasing glamping properties across North America and Europe - explore 650+ outdoor hospitality destinations"
               fill
               className="object-cover"
               loading="lazy"

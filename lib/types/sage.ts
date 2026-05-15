@@ -9,6 +9,8 @@ export interface SageProperty {
   site_name: string | null;
   slug: string | null;
   property_type: string | null;
+  /** Tenure / operator: private_commercial | state_park | federal_public | other_public; null = unset. */
+  land_operator_category: string | null;
   research_status: string | null;
   is_glamping_property: string | null;
   is_open: string | null;

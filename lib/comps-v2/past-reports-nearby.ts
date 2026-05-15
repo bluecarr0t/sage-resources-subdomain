@@ -7,6 +7,7 @@ import type { ComparableProperty, SeasonalRates } from '@/lib/ai-report-builder/
 import { geocodePlaceLine } from '@/lib/geocode';
 import { haversineDistanceMiles, parseNum, STATE_ABBR_TO_NAME } from '@/lib/comps-v2/geo';
 import { parseLocationAndState } from '@/lib/feasibility-utils';
+import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 
 const EMPTY_SEASONAL: SeasonalRates = {
   winter_weekday: null,
@@ -42,6 +43,7 @@ async function tryMatchGlampingCoords(
     .select('lat, lon')
     .ilike('property_name', `%${short}%`)
     .eq('state', stateAbbr)
+    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
     .not('lat', 'is', null)
     .not('lon', 'is', null)
     .limit(1);
