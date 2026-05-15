@@ -11,9 +11,18 @@ export type SageDataGlampingListFilters = {
   missing: string | null;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- PostgREST builder chain
-export function applySageDataGlampingListFilters(query: any, filters: SageDataGlampingListFilters): any {
-  let q = query;
+/** Minimal PostgREST filter surface used by the Sage Data list endpoint. */
+export interface SageGlampingListQuery {
+  or(filters: string): SageGlampingListQuery;
+  eq(column: string, value: string): SageGlampingListQuery;
+  ilike(column: string, value: string): SageGlampingListQuery;
+}
+
+export function applySageDataGlampingListFilters<T extends SageGlampingListQuery>(
+  query: T,
+  filters: SageDataGlampingListFilters
+): T {
+  let q: SageGlampingListQuery = query;
   const trimmedQ = filters.q.trim();
   if (trimmedQ.length > 0) {
     const term = escapeIlikeTerm(trimmedQ);
@@ -50,5 +59,5 @@ export function applySageDataGlampingListFilters(query: any, filters: SageDataGl
     q = q.or('property_total_sites.is.null,property_total_sites.eq.0');
   }
 
-  return q;
+  return q as T;
 }
