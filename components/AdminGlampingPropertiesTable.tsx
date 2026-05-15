@@ -26,6 +26,7 @@ type ExportFormat = 'csv' | 'xlsx';
 interface ListResponse {
   success: boolean;
   properties: PropertyRow[];
+  /** Exact number of unit-level rows matching the current filters. */
   total: number;
   page: number;
   pageSize: number;

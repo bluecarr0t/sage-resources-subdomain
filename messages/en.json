@@ -981,7 +981,7 @@
     "sageData": {
       "propertiesLoadingSummary": "Loading properties…",
       "propertiesEmptySummary": "0 properties",
-      "propertiesRangeSummary": "{start}–{end} of {total}",
+      "propertiesRangeSummary": "{start}–{end} of {total} properties",
       "propertiesLoadTimeout": "That request timed out. Try refreshing the page. If you still see skeleton rows, stop the dev server, delete the `.next` folder, and run `npm run dev` again.",
       "countryLabel": "Country",
       "countryAll": "All countries",

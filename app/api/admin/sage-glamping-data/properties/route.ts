@@ -15,6 +15,7 @@
  *     siblingOf    — optional: when set (row id), returns all sibling rows for the multi-site editor:
  *                    `{ success, anchorId, rows, capped? }` (same slug, or property_name+city+state if slug empty).
  *                    Max 50 rows (`capped: true` if more exist).
+ *   List response: `total` = exact **row** count (unit-level records) matching the same filters as the page.
  *
  * PATCH /api/admin/sage-glamping-data/properties
  *   Body: { id: string | number, updates: Record<string, unknown> }
@@ -34,6 +35,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
+import { applySageDataGlampingListFilters } from '@/lib/admin/glamping-sage-data-list';
 import {
   idsBelongToSiblingGroup,
   MAX_GLAMPING_SIBLING_ROWS,
@@ -81,11 +83,6 @@ function parseIntParam(value: string | null, fallback: number): number {
   if (!value) return fallback;
   const n = Number.parseInt(value, 10);
   return Number.isFinite(n) && n > 0 ? n : fallback;
-}
-
-function escapeIlikeTerm(term: string): string {
-  // Strip wildcards / commas that would break PostgREST `or` filters.
-  return term.replace(/[%,()]/g, '').trim();
 }
 
 async function fetchSiblingRowsForAnchor(
@@ -257,6 +254,7 @@ export const GET = withAdminAuth(async (request) => {
     const q = (params.get('q') ?? '').trim();
     const researchStatus = params.get('research_status');
     const country = params.get('country');
+    const missingParam = params.get('missing');
     const page = parseIntParam(params.get('page'), 1);
     const pageSize = Math.min(
       parseIntParam(params.get('pageSize'), DEFAULT_PAGE_SIZE),
@@ -272,55 +270,22 @@ export const GET = withAdminAuth(async (request) => {
 
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
-    // `exact` counts can be very slow on large tables (full scan). Planned count is
-    // enough for admin pagination UX while keeping the list endpoint responsive.
+
+    const listFilters = {
+      q,
+      researchStatus: researchStatus ?? undefined,
+      country: country ?? undefined,
+      missing: missingParam,
+    };
+
+    // Exact count so the admin footer matches the number of table rows for the active filters
+    // (planned counts were often far off on large filtered slices).
     let query = supabase
       .from(TABLE)
-      .select('*', { count: 'planned' })
+      .select('*', { count: 'exact' })
       .order(sortBy, { ascending: sortDir === 'asc', nullsFirst: false })
       .range(from, to);
-
-    if (q.length > 0) {
-      const term = escapeIlikeTerm(q);
-      if (term.length > 0) {
-        const pattern = `%${term}%`;
-        query = query.or(
-          [
-            `property_name.ilike.${pattern}`,
-            `city.ilike.${pattern}`,
-            `state.ilike.${pattern}`,
-            `country.ilike.${pattern}`,
-          ].join(',')
-        );
-      }
-    }
-
-    if (researchStatus && researchStatus !== 'all') {
-      query = query.eq('research_status', researchStatus);
-    }
-    if (country && country !== 'all') {
-      // Case-insensitive match on the full stored value (no wildcards in param — country comes from the admin list).
-      query = query.ilike('country', country);
-    }
-
-    const missing = params.get('missing');
-    if (missing === 'city') {
-      query = query.or('city.is.null,city.eq.');
-    } else if (missing === 'website') {
-      query = query.or('url.is.null,url.eq.');
-    } else if (missing === 'rates') {
-      // Numeric column: `col.eq.` (empty string) is invalid for Postgres numeric — use null or 0.
-      query = query.or(
-        'rate_avg_retail_daily_rate.is.null,rate_avg_retail_daily_rate.eq.0'
-      );
-    } else if (missing === 'lat_lng') {
-      // Missing either coordinate (numeric — do not use eq.'').
-      query = query.or('lat.is.null,lon.is.null');
-    } else if (missing === 'total_sites') {
-      query = query.or(
-        'property_total_sites.is.null,property_total_sites.eq.0'
-      );
-    }
+    query = applySageDataGlampingListFilters(query, listFilters);
 
     const { data, count, error } = await query;
 
