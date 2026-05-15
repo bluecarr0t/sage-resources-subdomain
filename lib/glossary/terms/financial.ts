@@ -183,7 +183,8 @@ Sage Outdoor Advisory includes RevPAR analysis and benchmarking in our feasibili
     "noi": {
     slug: "noi",
     term: "NOI (Net Operating Income)",
-    definition: "The income generated from a property after subtracting operating expenses but before deducting debt service, taxes, and capital expenditures.",
+    definition:
+      "For glamping resorts, RV parks, and campgrounds: the income left after operating expenses—before debt service, taxes, and capex—a core input for NOI-based valuations and lender underwriting.",
     extendedDefinition: `Net Operating Income (NOI) is a fundamental financial metric for income-producing properties like glamping resorts, RV parks, and campgrounds. It represents the property's profitability from operations before financing costs and taxes.
 
 NOI is calculated by subtracting operating expenses from gross operating income. Operating expenses include utilities, maintenance, insurance, property management, marketing, and other day-to-day costs, but exclude debt service, income taxes, and capital improvements.
@@ -335,7 +336,8 @@ Sage Outdoor Advisory uses DCF analysis in our feasibility studies and appraisal
     "irr": {
     slug: "irr",
     term: "IRR (Internal Rate of Return)",
-    definition: "The annualized rate of return that makes the net present value of all cash flows from an investment equal to zero.",
+    definition:
+      "For outdoor hospitality investments (glamping, RV resorts, campgrounds): the annualized discount rate that sets the net present value of project cash flows—including build-out, operations, and exit—to zero.",
     extendedDefinition: `The Internal Rate of Return (IRR) is a financial metric used to evaluate the profitability of an investment. It's the discount rate at which the net present value (NPV) of all cash flows (both positive and negative) equals zero.
 
 IRR is particularly useful for comparing investment opportunities with different cash flow patterns and timeframes. A higher IRR indicates a more attractive investment opportunity. IRR accounts for the timing of cash flows, making it more sophisticated than simple ROI calculations.
@@ -411,7 +413,8 @@ Sage Outdoor Advisory includes cash-on-cash return analysis in our feasibility s
     "debt-service-coverage-ratio": {
     slug: "debt-service-coverage-ratio",
     term: "Debt Service Coverage Ratio (DSCR)",
-    definition: "A financial ratio that measures a property's ability to cover its debt payments, calculated by dividing NOI by annual debt service.",
+    definition:
+      "For campground, glamping, and RV resort financing: NOI divided by annual debt service—lenders use DSCR to stress-test whether operations can cover loan payments through seasonal demand swings.",
     extendedDefinition: `The Debt Service Coverage Ratio (DSCR) is a critical metric used by lenders to assess a borrower's ability to repay a loan. It's calculated by dividing the property's Net Operating Income (NOI) by its annual debt service (principal and interest payments).
 
 Lenders typically require a DSCR of 1.25 to 1.5 or higher, meaning the property's income must be 25-50% higher than its debt payments. This provides a safety margin in case of income fluctuations.

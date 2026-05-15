@@ -5,7 +5,7 @@ import { parseCoordinates } from "@/lib/types/sage";
 import { notFound } from "next/navigation";
 import PropertyDetailTemplate from "@/components/PropertyDetailTemplate";
 import NationalParkDetailTemplate from "@/components/NationalParkDetailTemplate";
-import { generatePropertyBreadcrumbSchema, generatePropertyLocalBusinessSchema, generatePropertyFAQSchema, generatePropertyAmenitiesSchema } from "@/lib/schema";
+import { generatePropertyBreadcrumbSchema, generatePropertyLocalBusinessSchema, generatePropertyFAQSchema, generatePropertyAmenitiesSchema, buildPropertyFaqEntries } from "@/lib/schema";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 
@@ -362,6 +362,19 @@ export default async function PropertyPage({ params }: PageProps) {
     google_rating: null,
     google_user_rating_total: null,
   });
+
+  const propertyFaqEntries = buildPropertyFaqEntries({
+    property_name: firstProperty.property_name,
+    unit_type: firstProperty.unit_type,
+    city: firstProperty.city,
+    state: firstProperty.state,
+    operating_season_months: firstProperty.operating_season_months,
+    minimum_nights: firstProperty.minimum_nights,
+    pets: firstProperty.unit_pets,
+    rate_avg_retail_daily_rate: firstProperty.rate_avg_retail_daily_rate ?? null,
+    google_rating: null,
+    google_user_rating_total: null,
+  });
   
   const amenitiesSchema = generatePropertyAmenitiesSchema({
     property_name: firstProperty.property_name,
@@ -412,6 +425,7 @@ export default async function PropertyPage({ params }: PageProps) {
         googlePlacesData={null}
         googlePlaceId={firstProperty.google_place_id ?? null}
         locale={locale}
+        propertyFaqs={propertyFaqEntries}
       />
     </>
   );

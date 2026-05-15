@@ -142,6 +142,8 @@ describe('Locale Links', () => {
       // Guides are English-only - non-en locales link to /en/guides/ to avoid broken links
       expect(links.guide('test-guide')).toBe('/en/guides/test-guide');
       expect(links.glossaryTerm('test-term')).toBe('/es/glossary/test-term');
+      expect(links.glampingNearNationalParks).toBe('/en/glamping/near-national-parks');
+      expect(links.glampingByUnitType('yurt')).toBe('/en/glamping/yurt');
     });
 
     test('should handle default locale correctly', () => {

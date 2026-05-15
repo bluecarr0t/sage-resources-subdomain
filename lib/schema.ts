@@ -1048,10 +1048,9 @@ function hasAmenity(value: string | null | undefined): boolean {
 }
 
 /**
- * Generate FAQ schema for property pages
- * Creates rich snippet opportunities for common property questions
+ * Build FAQ question/answer pairs for property pages (visible copy + JSON-LD).
  */
-export function generatePropertyFAQSchema(property: {
+export type PropertyFaqInput = {
   property_name: string | null;
   unit_type: string | null;
   city: string | null;
@@ -1062,78 +1061,87 @@ export function generatePropertyFAQSchema(property: {
   rate_avg_retail_daily_rate: string | number | null;
   google_rating: number | null;
   google_user_rating_total: number | null;
-}): any {
+};
+
+export function buildPropertyFaqEntries(property: PropertyFaqInput): Array<{ question: string; answer: string }> {
   const propertyName = property.property_name || 'This property';
-  const location = property.city && property.state 
-    ? `${property.city}, ${property.state}` 
-    : property.city || property.state || '';
-  
+  const location =
+    property.city && property.state
+      ? `${property.city}, ${property.state}`
+      : property.city || property.state || '';
+
   const faqs: Array<{ question: string; answer: string }> = [];
-  
-  // Question 1: What type of units are available?
+
   if (property.unit_type) {
     faqs.push({
       question: `What type of glamping units are available at ${propertyName}?`,
-      answer: `${propertyName} offers ${property.unit_type} accommodations. View all available unit types, amenities, and rates on the property page.`
+      answer: `${propertyName} offers ${property.unit_type} accommodations. View all available unit types, amenities, and rates on the property page.`,
     });
   }
-  
-  // Question 2: When is the property open?
+
   if (property.operating_season_months) {
     const months = String(property.operating_season_months).trim();
     const seasonText = months === '12' ? 'year-round' : `${months} months per year`;
     faqs.push({
       question: `When is ${propertyName} open for bookings?`,
-      answer: `${propertyName} operates ${seasonText}. Check availability and book directly through the property's website.`
+      answer: `${propertyName} operates ${seasonText}. Check availability and book directly through the property's website.`,
     });
   }
-  
-  // Question 3: What is the minimum stay?
+
   if (property.minimum_nights) {
     faqs.push({
       question: `What is the minimum stay requirement at ${propertyName}?`,
-      answer: `The minimum stay at ${propertyName} is ${property.minimum_nights} nights.`
+      answer: `The minimum stay at ${propertyName} is ${property.minimum_nights} nights.`,
     });
   }
-  
-  // Question 4: Are pets allowed?
+
   if (property.pets) {
-    const petAnswer = hasAmenity(property.pets) 
+    const petAnswer = hasAmenity(property.pets)
       ? `Yes, ${propertyName} welcomes pets. Please check the property's pet policy for specific details and restrictions.`
       : `No, ${propertyName} does not allow pets.`;
     faqs.push({
       question: `Are pets allowed at ${propertyName}?`,
-      answer: petAnswer
+      answer: petAnswer,
     });
   }
-  
-  // Question 5: What are the rates?
+
   if (property.rate_avg_retail_daily_rate) {
     faqs.push({
       question: `What are the rates at ${propertyName}?`,
-      answer: `Rates at ${propertyName} start from $${property.rate_avg_retail_daily_rate} per night. Rates may vary by season and unit type. Check the property's website for current pricing and availability.`
+      answer: `Rates at ${propertyName} start from $${property.rate_avg_retail_daily_rate} per night. Rates may vary by season and unit type. Check the property's website for current pricing and availability.`,
     });
   }
-  
-  // Question 6: What is the property's rating?
-  if (property.google_rating !== null && property.google_rating !== undefined && property.google_rating >= 4.0) {
+
+  if (
+    property.google_rating !== null &&
+    property.google_rating !== undefined &&
+    property.google_rating >= 4.0
+  ) {
     const reviewCount = property.google_user_rating_total || 0;
     faqs.push({
       question: `What is ${propertyName}'s rating?`,
-      answer: `${propertyName} has a ${property.google_rating.toFixed(1)}-star rating from ${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}, indicating high satisfaction among visitors.`
+      answer: `${propertyName} has a ${property.google_rating.toFixed(1)}-star rating from ${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}, indicating high satisfaction among visitors.`,
     });
   }
-  
-  // Question 7: Where is the property located?
+
   if (location) {
     faqs.push({
       question: `Where is ${propertyName} located?`,
-      answer: `${propertyName} is located in ${location}. View the property on our interactive map for exact location and nearby attractions.`
+      answer: `${propertyName} is located in ${location}. View the property on our interactive map for exact location and nearby attractions.`,
     });
   }
-  
+
+  return faqs;
+}
+
+/**
+ * Generate FAQ schema for property pages
+ * Creates rich snippet opportunities for common property questions
+ */
+export function generatePropertyFAQSchema(property: PropertyFaqInput): any {
+  const faqs = buildPropertyFaqEntries(property);
   if (faqs.length === 0) return null;
-  
+
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",

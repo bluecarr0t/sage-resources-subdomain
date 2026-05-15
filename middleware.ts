@@ -194,6 +194,10 @@ export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
 
+    const pathnameHasLocale = locales.some(
+      (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    );
+
     // Self-hosted Pyodide lives in `public/pyodide/` at URLs `/pyodide/*`.
     // next-intl would otherwise rewrite/redirect these to `/{locale}/pyodide/…`,
     // which does not map to static files and breaks `python_stdlib.zip` loads.
@@ -212,6 +216,24 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    // Legacy SEO: indexed duplicates without /{locale}/ prefix → canonical /en/... (query preserved)
+    if (!pathnameHasLocale) {
+      const legacyResource = pathname.match(/^\/(guides|glossary|property|partners|map)(\/.*)?$/);
+      if (legacyResource) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/en${pathname}`;
+        return NextResponse.redirect(url, 301);
+      }
+    }
+
+    // Glamping hub pages use English primary copy → consolidate non-en locales to /en for SEO
+    const glampingLocaleRedirect = pathname.match(/^\/(de|es|fr)\/(glamping(?:\/.*)?)$/);
+    if (glampingLocaleRedirect) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/en/${glampingLocaleRedirect[2]}`;
+      return NextResponse.redirect(url, 301);
+    }
+
     // Protect /admin routes - require valid session (Google OAuth)
     if (pathname.startsWith('/admin')) {
       const response = NextResponse.next({ request });
@@ -223,11 +245,6 @@ export async function middleware(request: NextRequest) {
       response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       return response;
     }
-
-    // Check if pathname already has a locale prefix (needed early for sitemap logic)
-    const pathnameHasLocale = locales.some(
-      (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-    );
 
     // Redirect de/es/fr guide URLs to en - guides are English-only, these return 500
     const guideRedirectMatch = pathname.match(/^\/(de|es|fr)\/guides\/(.+)$/);

@@ -1,12 +1,13 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
-import { generateHreflangAlternates, getOpenGraphLocale } from '@/lib/i18n-utils';
+import { generateEnOnlyHreflangAlternates, getOpenGraphLocale } from '@/lib/i18n-utils';
 import { getNationalParkBySlug, getNationalParksWithCoordinates } from '@/lib/national-parks';
 import { getPropertiesNearNationalPark } from '@/lib/map-data-utils';
 import { slugifyPropertyName } from '@/lib/properties';
 import { generateOrganizationSchema } from '@/lib/schema';
 import GlampingNearNationalParkTemplate from '@/components/GlampingNearNationalParkTemplate';
+import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 
 export const revalidate = 86400;
 
@@ -16,9 +17,10 @@ interface PageProps {
 
 export async function generateStaticParams() {
   const parks = await getNationalParksWithCoordinates();
+  const availableLocales = getAvailableLocalesForContent('glamping');
   const params: Array<{ locale: string; parkSlug: string }> = [];
 
-  for (const locale of locales) {
+  for (const locale of availableLocales) {
     for (const park of parks) {
       if (park.slug) {
         params.push({ locale, parkSlug: park.slug });
@@ -48,8 +50,8 @@ export async function generateMetadata({
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
 
   return {
-    title: `Glamping Near ${parkName} | Sage Outdoor Advisory`,
-    description: `Find glamping properties within 75 miles of ${parkName}. Discover unique accommodations near ${park.state || 'the park'} for your outdoor adventure.`,
+    title: `Glamping Near ${parkName} | National Park Stays | Sage Outdoor Advisory`,
+    description: `Glamping and unique stays within 75 miles of ${parkName}. Compare outdoor hospitality properties near ${park.state || 'the park'}—ideal for trip planning and market research.`,
     keywords: [
       `glamping near ${parkName}`,
       `glamping ${park.state || ''}`,
@@ -67,7 +69,7 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: url,
-      ...generateHreflangAlternates(pathname),
+      ...generateEnOnlyHreflangAlternates(pathname),
     },
     robots: {
       index: true,
@@ -136,7 +138,7 @@ export default async function GlampingNearParkPage({ params }: PageProps) {
           position: index + 1,
           name: prop.property_name || 'Unnamed Property',
           url: slug
-            ? `https://resources.sageoutdooradvisory.com/${locale}/property/${slug}`
+            ? `https://resources.sageoutdooradvisory.com/en/property/${slug}`
             : undefined,
         };
       })

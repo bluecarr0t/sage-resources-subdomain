@@ -23,9 +23,8 @@ export default function GlampingNearNationalParkTemplate({
   const location = locationParts.join(', ');
   const mapLink =
     park.latitude && park.longitude
-      ? `/map?lat=${park.latitude}&lon=${park.longitude}&zoom=10`
-      : '/map';
-  const localePrefix = locale && locale !== 'en' ? `/${locale}` : '';
+      ? `/${locale}/map?lat=${park.latitude}&lon=${park.longitude}&zoom=10`
+      : `/${locale}/map`;
 
   return (
     <div className="min-h-screen bg-white">
@@ -36,14 +35,14 @@ export default function GlampingNearNationalParkTemplate({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center flex-wrap gap-x-2 text-sm text-gray-600">
             <Link
-              href={`${localePrefix}/`}
+              href={`/${locale}/`}
               className="hover:text-[#006b5f]"
             >
               Home
             </Link>
             <span className="text-gray-400">/</span>
             <Link
-              href={`${localePrefix}/glamping/near-national-parks`}
+              href={`/${locale}/glamping/near-national-parks`}
               className="hover:text-[#006b5f]"
             >
               Glamping Near National Parks
@@ -84,7 +83,7 @@ export default function GlampingNearNationalParkTemplate({
                   (property.property_name
                     ? slugifyPropertyName(property.property_name)
                     : '');
-                const propertyUrl = `${localePrefix}/property/${propertySlug}`;
+                const propertyUrl = `/${locale}/property/${propertySlug}`;
 
                 return (
                   <article
@@ -125,7 +124,7 @@ export default function GlampingNearNationalParkTemplate({
                 No glamping properties found within 75 miles of {parkName}.
               </p>
               <Link
-                href={`${localePrefix}/map`}
+                href={`/${locale}/map`}
                 className="inline-block px-6 py-2 bg-[#007a6e] text-white rounded-lg hover:bg-[#006b5f] transition-colors"
               >
                 Explore Glamping Map
@@ -137,7 +136,7 @@ export default function GlampingNearNationalParkTemplate({
         {/* CTAs */}
         <section className="flex flex-wrap gap-4">
           <Link
-            href={`${localePrefix}/property/${park.slug || parkName.toLowerCase().replace(/\s+/g, '-')}`}
+            href={`/${locale}/property/${park.slug || parkName.toLowerCase().replace(/\s+/g, '-')}`}
             className="px-6 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors"
           >
             Learn About {parkName}
@@ -149,7 +148,7 @@ export default function GlampingNearNationalParkTemplate({
             View on Map
           </Link>
           <Link
-            href={`${localePrefix}/glamping/near-national-parks`}
+            href={`/${locale}/glamping/near-national-parks`}
             className="px-6 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors"
           >
             All National Parks

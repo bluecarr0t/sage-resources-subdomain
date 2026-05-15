@@ -1265,7 +1265,7 @@ export default function AdminGlampingPropertiesTable() {
   const [bulkLandOperator, setBulkLandOperator] = useState('');
   const [bulkResearchStatus, setBulkResearchStatus] = useState('');
   const [bulkIsGlamping, setBulkIsGlamping] = useState('');
-  const [bulkSource, setBulkSource] = useState('');
+  const [bulkPropertyType, setBulkPropertyType] = useState('');
   const [bulkApplying, setBulkApplying] = useState(false);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -1314,7 +1314,7 @@ export default function AdminGlampingPropertiesTable() {
     setBulkLandOperator('');
     setBulkResearchStatus('');
     setBulkIsGlamping('');
-    setBulkSource('');
+    setBulkPropertyType('');
   }, []);
 
   const loadProperties = useCallback(async (overridePage?: number) => {
@@ -1378,9 +1378,8 @@ export default function AdminGlampingPropertiesTable() {
     if (bulkIsGlamping !== '') {
       updates.is_glamping_property = bulkIsGlamping;
     }
-    const sourceTrim = bulkSource.trim();
-    if (sourceTrim !== '') {
-      updates.source = sourceTrim;
+    if (bulkPropertyType !== '') {
+      updates.property_type = bulkPropertyType;
     }
     if (Object.keys(updates).length === 0) {
       setError(t('bulkNothingToApply'));
@@ -1414,7 +1413,7 @@ export default function AdminGlampingPropertiesTable() {
     bulkLandOperator,
     bulkResearchStatus,
     bulkIsGlamping,
-    bulkSource,
+    bulkPropertyType,
     selectedIds,
     t,
     clearBulkSelection,
@@ -1572,8 +1571,6 @@ export default function AdminGlampingPropertiesTable() {
   const showBulkBar = selectedIds.size >= 2;
   const bulkControlClass =
     'h-9 min-w-[7.5rem] rounded-lg border border-gray-300 bg-white px-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-gray-100';
-  const bulkTextInputClass =
-    'h-9 min-w-[8rem] flex-1 rounded-lg border border-gray-300 bg-white px-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-gray-100 sm:max-w-xs';
   const checkboxHeaderClass = `${headerCellClass} w-11 px-2 text-center align-middle`;
   const checkboxCellClass = `${bodyCellClass} w-11 px-2 text-center align-middle`;
 
@@ -1848,22 +1845,27 @@ export default function AdminGlampingPropertiesTable() {
                     <option value="No">No</option>
                   </select>
                 </label>
-                <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 sm:min-w-[14rem]">
+                <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-gray-700 dark:text-gray-300">
                   <span>
-                    {t('fieldSource')}
+                    {t('fieldPropertyType')}
                     <span className="ml-1 font-mono text-[10px] font-normal text-gray-400 dark:text-gray-500">
-                      source
+                      property_type
                     </span>
                   </span>
-                  <input
-                    type="text"
-                    value={bulkSource}
-                    onChange={(e) => setBulkSource(e.target.value)}
+                  <select
+                    value={bulkPropertyType}
+                    onChange={(e) => setBulkPropertyType(e.target.value)}
                     disabled={bulkApplying}
-                    placeholder={t('bulkNoChange')}
-                    className={bulkTextInputClass}
-                    aria-label={t('fieldSource')}
-                  />
+                    className={bulkControlClass}
+                    aria-label={t('fieldPropertyType')}
+                  >
+                    <option value="">{t('bulkNoChange')}</option>
+                    {PROPERTY_TYPE_FORM_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {t(`propertyType.${o.msg}` as never)}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <div className="flex flex-wrap items-center gap-2 pt-1 sm:pt-0">
                   <Button

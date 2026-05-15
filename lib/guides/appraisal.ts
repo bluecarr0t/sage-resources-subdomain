@@ -558,8 +558,8 @@ export const appraisalGuides: Record<string, GuideContent> = {
   },
 "appraisal-vs-feasibility-study": {
     slug: "appraisal-vs-feasibility-study",
-    title: "Appraisal vs. Feasibility Study | Key Differences | Sage Outdoor Advisory",
-    metaDescription: "Understand the differences between property appraisals and feasibility studies. Learn when you need each and how they work together.",
+    title: "Appraisal vs Feasibility Study for Glamping & RV Resorts | Sage Outdoor Advisory",
+    metaDescription: "Compare appraisal vs feasibility study for outdoor hospitality: property value vs project viability, what banks require, timelines, and when developers need both for glamping, RV parks, and campgrounds.",
     category: "appraisal",
     hero: {
       headline: "Appraisal vs. Feasibility Study",
@@ -599,7 +599,15 @@ export const appraisalGuides: Record<string, GuideContent> = {
         title: "Key Differences",
         content: `<p><strong>Purpose:</strong> Appraisal = property value; Feasibility study = project viability</p>
         <p><strong>Focus:</strong> Appraisal = present value; Feasibility study = future potential</p>
-        <p><strong>When used:</strong> Appraisal = financing/transactions; Feasibility study = planning/development</p>`
+        <p><strong>When used:</strong> Appraisal = financing/transactions; Feasibility study = planning/development</p>
+        <div class="overflow-x-auto my-6">
+        <table class="min-w-full border-collapse border border-gray-300 text-sm">
+        <thead><tr class="bg-gray-100"><th class="border border-gray-300 px-3 py-2 text-left">Dimension</th><th class="border border-gray-300 px-3 py-2 text-left">Appraisal</th><th class="border border-gray-300 px-3 py-2 text-left">Feasibility study</th></tr></thead>
+        <tbody>
+        <tr><td class="border border-gray-300 px-3 py-2">Core question</td><td class="border border-gray-300 px-3 py-2">What is the property worth today?</td><td class="border border-gray-300 px-3 py-2">Should we build/expand—and can it cash-flow?</td></tr>
+        <tr><td class="border border-gray-300 px-3 py-2">Typical audience</td><td class="border border-gray-300 px-3 py-2">Lenders, buyers, insurers</td><td class="border border-gray-300 px-3 py-2">Developers, investors, equity partners</td></tr>
+        <tr><td class="border border-gray-300 px-3 py-2">Outdoor hospitality lens</td><td class="border border-gray-300 px-3 py-2">Income approach, comps, cost approach for parks & glamping assets</td><td class="border border-gray-300 px-3 py-2">Market demand, competitive set, ADR/occupancy scenarios</td></tr>
+        </tbody></table></div>`
       },
       {
         id: "when-need-each",

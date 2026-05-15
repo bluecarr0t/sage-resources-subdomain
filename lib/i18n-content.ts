@@ -7,7 +7,14 @@
 
 import { locales, type Locale } from '@/i18n';
 
-export type ContentType = 'landing' | 'guide' | 'glossary' | 'property' | 'national-park';
+export type ContentType =
+  | 'landing'
+  | 'guide'
+  | 'glossary'
+  | 'property'
+  | 'national-park'
+  /** Glamping discovery hubs (near-national-parks, unit types): English primary body copy */
+  | 'glamping';
 
 /**
  * Determine which locales have translations for a given content type.
@@ -44,7 +51,11 @@ export function getAvailableLocalesForContent(contentType: ContentType): Locale[
       // National park pages are data-driven and don't need localization
       // Already optimized to only generate 'en' pages
       return ['en'];
-    
+
+    case 'glamping':
+      // Hub templates use English copy; non-en URLs redirected to /en for SEO consolidation
+      return ['en'];
+
     default:
       // Default to all locales for safety
       return [...locales];

@@ -18,7 +18,6 @@ export default function GlampingByUnitTypeTemplate({
   locale = 'en',
 }: GlampingByUnitTypeTemplateProps) {
   const { displayName } = unitTypeConfig;
-  const localePrefix = locale && locale !== 'en' ? `/${locale}` : '';
 
   return (
     <div className="min-h-screen bg-white">
@@ -28,7 +27,7 @@ export default function GlampingByUnitTypeTemplate({
       <nav className="bg-gray-50 border-b border-gray-200 py-3 pt-32 md:pt-36">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center flex-wrap gap-x-2 text-sm text-gray-600">
-            <Link href={`${localePrefix}/`} className="hover:text-[#006b5f]">
+            <Link href={`/${locale}/`} className="hover:text-[#006b5f]">
               Home
             </Link>
             <span className="text-gray-400">/</span>
@@ -69,7 +68,7 @@ export default function GlampingByUnitTypeTemplate({
                   (property.property_name
                     ? slugifyPropertyName(property.property_name)
                     : '');
-                const propertyUrl = `${localePrefix}/property/${propertySlug}`;
+                const propertyUrl = `/${locale}/property/${propertySlug}`;
 
                 return (
                   <article
@@ -108,7 +107,7 @@ export default function GlampingByUnitTypeTemplate({
                 accommodations.
               </p>
               <Link
-                href={`${localePrefix}/map`}
+                href={`/${locale}/map`}
                 className="inline-block px-6 py-2 bg-[#007a6e] text-white rounded-lg hover:bg-[#006b5f] transition-colors"
               >
                 Explore Glamping Map
@@ -120,13 +119,13 @@ export default function GlampingByUnitTypeTemplate({
         {/* CTAs */}
         <section className="flex flex-wrap gap-4">
           <Link
-            href={`${localePrefix}/map`}
+            href={`/${locale}/map`}
             className="px-6 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors"
           >
             View on Map
           </Link>
           <Link
-            href={`${localePrefix}/glamping/near-national-parks`}
+            href={`/${locale}/glamping/near-national-parks`}
             className="px-6 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors"
           >
             Glamping Near National Parks

@@ -1089,7 +1089,6 @@
       "bulkSelectAllPageAria": "Select all properties on this page",
       "fieldResearchStatus": "Research status",
       "fieldIsGlampingProperty": "Is glamping property",
-      "fieldSource": "Source",
       "propertyImages": {
         "sectionTitle": "Property images",
         "sectionHint": "Images are stored in Supabase and linked to this database row (the row you opened). Use the star to choose a hero image for maps and previews.",

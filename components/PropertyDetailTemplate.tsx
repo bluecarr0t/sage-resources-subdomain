@@ -19,6 +19,8 @@ interface PropertyDetailTemplateProps {
   /** Skips Places Text Search when set (from DB `google_place_id`) */
   googlePlaceId?: string | null;
   locale?: string;
+  /** Visible FAQ copy aligned with JSON-LD (buildPropertyFaqEntries) */
+  propertyFaqs?: Array<{ question: string; answer: string }>;
 }
 
 /**
@@ -92,6 +94,7 @@ export default function PropertyDetailTemplate({
   googlePlacesData: initialGooglePlacesData,
   googlePlaceId,
   locale,
+  propertyFaqs = [],
 }: PropertyDetailTemplateProps) {
   const firstProperty = properties[0];
 
@@ -707,6 +710,25 @@ export default function PropertyDetailTemplate({
             </div>
           )}
         </div>
+
+        {propertyFaqs.length > 0 && (
+          <section
+            className="mt-12 pt-8 border-t border-gray-200"
+            aria-labelledby="property-faq-heading"
+          >
+            <h2 id="property-faq-heading" className="text-2xl font-bold text-gray-900 mb-6">
+              Questions about this property
+            </h2>
+            <dl className="space-y-6 max-w-3xl">
+              {propertyFaqs.map((item) => (
+                <div key={item.question}>
+                  <dt className="font-semibold text-gray-900 mb-1">{item.question}</dt>
+                  <dd className="text-gray-700 leading-relaxed">{item.answer}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
 
         {/* Related Properties Carousel */}
         {nearbyProperties.length > 0 && (

@@ -1162,8 +1162,8 @@ export const feasibilityGuides: Record<string, GuideContent> = {
   },
 "feasibility-study-process-timeline": {
     slug: "feasibility-study-process-timeline",
-    title: "Feasibility Study Process & Timeline | Step-by-Step Guide | Sage Outdoor Advisory",
-    metaDescription: "Step-by-step guide to the feasibility study process and timeline. Learn what happens during each phase and how long a feasibility study takes.",
+    title: "How Long Does a Feasibility Study Take? Process & Timeline (4–6 Weeks) | Sage Outdoor Advisory",
+    metaDescription: "Outdoor hospitality feasibility study timeline: kickoff, market research, financial modeling, and report delivery. Typical 4–6 weeks for glamping, RV resorts, and campgrounds—what to expect at each phase.",
     category: "feasibility",
     hero: {
       headline: "Feasibility Study Process & Timeline",
@@ -1298,6 +1298,11 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <p>To keep the process on track, provide requested information promptly and respond to questions and clarifications quickly. See our <a href="/guides/feasibility-study-process-timeline" class="text-[#006b5f] hover:text-[#005a4f] underline">process and timeline guide</a> for more details.</p>`
+      },
+      {
+        question: "What is the typical feasibility study timeline for glamping or RV resort financing?",
+        answer: `<p>For most outdoor hospitality projects—glamping resorts, RV parks, and campgrounds—Sage and most specialized consultants target roughly <strong>4–6 weeks</strong> from kickoff to a bank-ready draft, assuming timely data from the client and clear project scope.</p>
+        <p>Lenders usually care most about market support, realistic ADR and occupancy assumptions, operating expense benchmarks, and a pro forma that ties back to comparable supply. Those workstreams map directly to the phase breakdown in this guide.</p>`
       }
     ],
     lastModified: "2025-01-15",

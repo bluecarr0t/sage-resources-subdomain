@@ -8,6 +8,7 @@ import {
   generateHreflangAlternates,
   getOpenGraphLocale,
 } from "@/lib/i18n-utils";
+import { glossaryMetadataOverridesEn } from "@/lib/glossary-metadata-overrides";
 import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 
 // ISR: Revalidate pages every 24 hours
@@ -61,13 +62,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const pathname = `/${locale}/glossary/${glossaryTerm.slug}`;
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
+  const override = locale === 'en' ? glossaryMetadataOverridesEn[glossaryTerm.slug] : undefined;
   const baseTitle = `What is ${getArticle(glossaryTerm.term)} ${glossaryTerm.term}? | Definition & Guide | Sage Outdoor Advisory`;
-  const title = locale === 'en' ? baseTitle : `${baseTitle} (${localeMetadata[locale as Locale].nativeName})`;
-  const description = buildGlossaryTermMetaDescription(
-    locale as Locale,
-    glossaryTerm.term,
-    glossaryTerm.definition
-  );
+  const title = override?.title
+    ? override.title
+    : locale === 'en'
+      ? baseTitle
+      : `${baseTitle} (${localeMetadata[locale as Locale].nativeName})`;
+  const description =
+    override?.description ??
+    buildGlossaryTermMetaDescription(
+      locale as Locale,
+      glossaryTerm.term,
+      glossaryTerm.definition
+    );
 
   const openGraphImages = glossaryTerm.image 
     ? [{

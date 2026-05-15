@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
-import { generateHreflangAlternates, getOpenGraphLocale } from '@/lib/i18n-utils';
+import { generateEnOnlyHreflangAlternates, getOpenGraphLocale } from '@/lib/i18n-utils';
 import {
   getUnitTypeConfigBySlug,
   getAllUnitTypeSlugs,
@@ -10,6 +10,7 @@ import { getPropertiesByUnitType } from '@/lib/unit-type-data';
 import { slugifyPropertyName } from '@/lib/properties';
 import { generateOrganizationSchema } from '@/lib/schema';
 import GlampingByUnitTypeTemplate from '@/components/GlampingByUnitTypeTemplate';
+import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 
 export const revalidate = 86400;
 
@@ -20,8 +21,9 @@ interface PageProps {
 export async function generateStaticParams() {
   const slugs = getAllUnitTypeSlugs();
   const params: Array<{ locale: string; unitTypeSlug: string }> = [];
+  const availableLocales = getAvailableLocalesForContent('glamping');
 
-  for (const locale of locales) {
+  for (const locale of availableLocales) {
     for (const slug of slugs) {
       params.push({ locale, unitTypeSlug: slug });
     }
@@ -48,8 +50,8 @@ export async function generateMetadata({
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
 
   return {
-    title: `Glamping ${config.displayName} | Sage Outdoor Advisory`,
-    description: `Find glamping properties with ${config.displayName.toLowerCase()} accommodations. Discover unique ${config.displayName.toLowerCase()} across the United States and Canada.`,
+    title: `${config.displayName} Glamping Properties | US & Canada | Sage Outdoor Advisory`,
+    description: `Directory of ${config.displayName.toLowerCase()} glamping stays across the US and Canada. Compare outdoor hospitality properties for travel planning or market research.`,
     keywords: [
       `glamping ${config.displayName.toLowerCase()}`,
       `${config.displayName.toLowerCase()} glamping`,
@@ -65,7 +67,7 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: url,
-      ...generateHreflangAlternates(pathname),
+      ...generateEnOnlyHreflangAlternates(pathname),
     },
     robots: {
       index: true,

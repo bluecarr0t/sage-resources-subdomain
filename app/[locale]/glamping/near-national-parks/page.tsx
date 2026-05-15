@@ -2,10 +2,11 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
-import { generateHreflangAlternates, getOpenGraphLocale } from '@/lib/i18n-utils';
+import { generateEnOnlyHreflangAlternates, getOpenGraphLocale } from '@/lib/i18n-utils';
 import { getNationalParksWithCoordinates } from '@/lib/national-parks';
 import { generateOrganizationSchema } from '@/lib/schema';
 import FloatingHeader from '@/components/FloatingHeader';
+import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 
 export const revalidate = 86400;
 
@@ -14,7 +15,7 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return getAvailableLocalesForContent('glamping').map((locale) => ({ locale }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -28,9 +29,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
 
   return {
-    title: 'Glamping Near National Parks | Sage Outdoor Advisory',
+    title: 'Glamping Near US National Parks | Directory & Map | Sage Outdoor Advisory',
     description:
-      'Find glamping properties near Yellowstone, Yosemite, Great Smoky Mountains, and more. Discover unique outdoor accommodations within 75 miles of your favorite national parks.',
+      'Browse glamping and outdoor hospitality stays within 75 miles of major US national parks. Sage maps properties for travelers, owners, and feasibility research.',
     keywords: [
       'glamping near national parks',
       'glamping near Yellowstone',
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: url,
-      ...generateHreflangAlternates(pathname),
+      ...generateEnOnlyHreflangAlternates(pathname),
     },
     robots: {
       index: true,
@@ -68,7 +69,6 @@ export default async function GlampingNearNationalParksIndexPage({
   }
 
   const parks = await getNationalParksWithCoordinates();
-  const localePrefix = locale && locale !== 'en' ? `/${locale}` : '';
   const pathname = `/${locale}/glamping/near-national-parks`;
 
   const breadcrumbSchema = {
@@ -95,7 +95,7 @@ export default async function GlampingNearNationalParksIndexPage({
       '@type': 'ListItem',
       position: index + 1,
       name: park.name,
-      url: `https://resources.sageoutdooradvisory.com${localePrefix}/glamping/near-national-parks/${park.slug}`,
+      url: `https://resources.sageoutdooradvisory.com/en/glamping/near-national-parks/${park.slug}`,
     })),
   };
 
@@ -126,7 +126,7 @@ export default async function GlampingNearNationalParksIndexPage({
         <nav className="bg-gray-50 border-b border-gray-200 py-3 pt-32 md:pt-36">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-x-2 text-sm text-gray-600">
-              <Link href={`${localePrefix}/`} className="hover:text-[#006b5f]">
+              <Link href={`/${locale}/`} className="hover:text-[#006b5f]">
                 Home
               </Link>
               <span className="text-gray-400">/</span>
@@ -159,7 +159,7 @@ export default async function GlampingNearNationalParksIndexPage({
                 {parks.map((park) => (
                   <Link
                     key={park.id}
-                    href={`${localePrefix}/glamping/near-national-parks/${park.slug}`}
+                    href={`/${locale}/glamping/near-national-parks/${park.slug}`}
                     className="block border border-gray-200 rounded-lg p-6 hover:border-[#006b5f] hover:shadow-md transition-all"
                   >
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -181,7 +181,7 @@ export default async function GlampingNearNationalParksIndexPage({
 
           <section className="mt-12 pt-8 border-t border-gray-200">
             <Link
-              href={`${localePrefix}/map`}
+              href={`/${locale}/map`}
               className="inline-block px-6 py-2 bg-[#007a6e] text-white rounded-lg hover:bg-[#006b5f] transition-colors"
             >
               Explore Glamping Map

@@ -4,6 +4,7 @@ import { getTopStates, getTopCities, slugifyLocation, createCitySlug } from '@/l
 import { getNationalParksWithCoordinates } from '@/lib/national-parks';
 import { getAllUnitTypeSlugs } from '@/lib/unit-type-config';
 import { getMostRecentContentDate } from '@/lib/sitemap-dates';
+import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
@@ -20,9 +21,16 @@ function generateHreflangTags(path: string): string {
   return hreflangs.join('\n');
 }
 
+/** Glamping hub URLs are English-only in the index; avoid hreflang to locales that 301 to /en. */
+function generateEnOnlyHreflangTags(path: string): string {
+  return `    <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${path}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path}" />`;
+}
+
 export async function GET() {
   const urls: string[] = [];
   const contentLastmod = getMostRecentContentDate();
+  const glampingLocales = getAvailableLocalesForContent('glamping');
 
   // Generate main pages for all locales with hreflang
   const mainPages = ['', '/guides', '/glossary', '/partners', '/map', '/sitemap'];
@@ -94,9 +102,9 @@ ${hreflangs}
   }
 
   // Add glamping near national parks index (priority 0.8)
-  for (const locale of locales) {
+  for (const locale of glampingLocales) {
     const fullPath = `/${locale}/glamping/near-national-parks`;
-    const hreflangs = generateHreflangTags(fullPath);
+    const hreflangs = generateEnOnlyHreflangTags(fullPath);
     urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
     <lastmod>${contentLastmod}</lastmod>
@@ -113,9 +121,9 @@ ${hreflangs}
 
     for (const park of parks) {
       if (!park.slug) continue;
-      for (const locale of locales) {
+      for (const locale of glampingLocales) {
         const fullPath = `/${locale}/glamping/near-national-parks/${park.slug}`;
-        const hreflangs = generateHreflangTags(fullPath);
+        const hreflangs = generateEnOnlyHreflangTags(fullPath);
 
         urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
@@ -136,9 +144,9 @@ ${hreflangs}
     const lastmod = contentLastmod;
 
     for (const slug of unitTypeSlugs) {
-      for (const locale of locales) {
+      for (const locale of glampingLocales) {
         const fullPath = `/${locale}/glamping/${slug}`;
-        const hreflangs = generateHreflangTags(fullPath);
+        const hreflangs = generateEnOnlyHreflangTags(fullPath);
 
         urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>

@@ -54,7 +54,9 @@ export async function generateMetadata({
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const pathname = `/${locale}/map`;
   const queryString = buildStableHreflangQueryString(searchParams);
-  const url = `${baseUrl}${pathname}${queryString}`;
+  const hasFilterQuery = queryString.length > 1;
+  const canonicalUrl = `${baseUrl}${pathname}`;
+  const url = hasFilterQuery ? `${baseUrl}${pathname}${queryString}` : canonicalUrl;
   const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
   const title = `Glamping Properties Map | ${count}+ Locations | Sage Outdoor Advisory`;
@@ -87,14 +89,14 @@ export async function generateMetadata({
       images: [imageUrl],
     },
     alternates: {
-      canonical: url,
-      ...generateHreflangAlternates(pathname, baseUrl, queryString),
+      canonical: canonicalUrl,
+      ...generateHreflangAlternates(pathname, baseUrl, hasFilterQuery ? '' : queryString),
     },
     robots: {
-      index: true,
+      index: !hasFilterQuery,
       follow: true,
       googleBot: {
-        index: true,
+        index: !hasFilterQuery,
         follow: true,
         "max-image-preview": "large",
         "max-snippet": -1,

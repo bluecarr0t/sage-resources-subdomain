@@ -1,21 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getAllGlossaryTerms } from '@/lib/glossary/index';
 import { getMostRecentContentDate } from '@/lib/sitemap-dates';
-import { locales } from '@/i18n';
+import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
 // Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic';
 
-function generateHreflangTags(path: string): string {
-  const hreflangs: string[] = [];
-  for (const locale of locales) {
-    const localePath = path.replace(/^\/[a-z]{2}(\/|$)/, `/${locale}$1`);
-    hreflangs.push(`    <xhtml:link rel="alternate" hreflang="${locale}" href="${baseUrl}${localePath}" />`);
-  }
-  hreflangs.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path.replace(/^\/[a-z]{2}(\/|$)/, '/en$1')}" />`);
-  return hreflangs.join('\n');
+function generateEnOnlyHreflangTags(path: string): string {
+  return `    <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${path}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path}" />`;
 }
 
 export async function GET() {
@@ -23,11 +18,11 @@ export async function GET() {
   const urls: string[] = [];
   const glossaryDefaultDate = getMostRecentContentDate();
 
-  // Generate glossary term pages for all locales with hreflang
+  // Generate glossary term pages for locales with translated term content
   for (const term of glossaryTerms) {
-    for (const locale of locales) {
+    for (const locale of getAvailableLocalesForContent('glossary')) {
       const fullPath = `/${locale}/glossary/${term.slug}`;
-      const hreflangs = generateHreflangTags(fullPath);
+      const hreflangs = generateEnOnlyHreflangTags(fullPath);
       
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>

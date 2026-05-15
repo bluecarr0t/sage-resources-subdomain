@@ -2,21 +2,16 @@ import { NextResponse } from 'next/server';
 import { getAllPropertySlugs, getMaxPropertyUpdatedAt } from '@/lib/properties';
 import { getAllNationalParkSlugs } from '@/lib/national-parks';
 import { getMostRecentContentDate } from '@/lib/sitemap-dates';
-import { locales } from '@/i18n';
+import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
 // Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic';
 
-function generateHreflangTags(path: string): string {
-  const hreflangs: string[] = [];
-  for (const locale of locales) {
-    const localePath = path.replace(/^\/[a-z]{2}(\/|$)/, `/${locale}$1`);
-    hreflangs.push(`    <xhtml:link rel="alternate" hreflang="${locale}" href="${baseUrl}${localePath}" />`);
-  }
-  hreflangs.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path.replace(/^\/[a-z]{2}(\/|$)/, '/en$1')}" />`);
-  return hreflangs.join('\n');
+function generateEnOnlyHreflangTags(path: string): string {
+  return `    <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${path}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path}" />`;
 }
 
 export async function GET() {
@@ -28,12 +23,13 @@ export async function GET() {
   const urls: string[] = [];
   const defaultDate = maxPropertyUpdated ?? getMostRecentContentDate();
 
-  // Generate property pages for ALL locales (en, es, fr, de) with hreflang
-  // This enables Google to discover and index all language versions
+  const propertyLocales = getAvailableLocalesForContent('property');
+
+  // Generate property pages for indexed locales with hreflang
   for (const item of propertySlugs) {
-    for (const locale of locales) {
+    for (const locale of propertyLocales) {
       const fullPath = `/${locale}/property/${item.slug}`;
-      const hreflangs = generateHreflangTags(fullPath);
+      const hreflangs = generateEnOnlyHreflangTags(fullPath);
       
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
@@ -45,11 +41,11 @@ ${hreflangs}
     }
   }
 
-  // Generate national park pages for ALL locales (same /property/[slug] route)
+  // Generate national park pages for indexed locales
   for (const item of nationalParkSlugs) {
-    for (const locale of locales) {
+    for (const locale of propertyLocales) {
       const fullPath = `/${locale}/property/${item.slug}`;
-      const hreflangs = generateHreflangTags(fullPath);
+      const hreflangs = generateEnOnlyHreflangTags(fullPath);
       
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
