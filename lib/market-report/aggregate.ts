@@ -7,6 +7,12 @@ import {
   medianSorted,
   percentileSorted,
 } from '@/lib/market-report/normalize';
+import {
+  countDistinctListings,
+  countDistinctListingsInSourceSlice,
+  countDistinctListingsWhere,
+} from '@/lib/market-report/listing-identity';
+import { isOmittedUnitTypeForCharts } from '@/lib/market-report/dedupe';
 import { marketReportSourceLabel } from '@/lib/market-report/source-labels';
 import type { CountyMetricsResult } from '@/lib/market-report/county-metrics';
 import type { DemandDriversResult } from '@/lib/market-report/demand-drivers';
@@ -25,7 +31,7 @@ import type {
 } from '@/lib/market-report/types';
 
 const PREMIUM_COHORT_ADR_THRESHOLD = 300;
-const TOP_UNIT_TYPES_FOR_SUMMARY = 3;
+const TOP_UNIT_TYPES_FOR_SUMMARY = 5;
 
 const SAMPLE_CAP = 25;
 const SOURCE_BREAKDOWN_ORDER: CohortPropertyRow['source'][] = [
@@ -90,7 +96,8 @@ function buildSourceBreakdown(rows: CohortPropertyRow[]): MarketReportSourceBrea
     return {
       source,
       sourceLabel: marketReportSourceLabel(source),
-      propertyCount: list.length,
+      inventoryRowCount: list.length,
+      distinctListingCount: countDistinctListingsInSourceSlice(list),
       totalSites: anySites ? totalSites : null,
       totalUnits: anyUnits ? totalUnits : null,
       avgRetailDailyRate: mean(rates),
@@ -108,7 +115,8 @@ function buildTopUnitTypesWithAdr(
       ? rows.filter((r) => !isExcludedGlampingUnitType(r.unit_type))
       : rows;
   // For each unit type bucket we track:
-  //   - count: number of (property × unit_type) rows (deduped upstream)
+  //   - count: number of (property × unit_type) cohort rows (Sage: all table rows;
+  //     other sources collapsed upstream in load-cohort)
   //   - rates: list of positive rate_avg values for ARDR stats
   //   - unitCount: running sum of `quantity_of_units` (per-unit-type inventory)
   //   - hasUnitData: whether any row contributed to unitCount, so we can return
@@ -127,6 +135,9 @@ function buildTopUnitTypesWithAdr(
       bucket.hasUnitData = true;
     }
     buckets.set(key, bucket);
+  }
+  for (const k of [...buckets.keys()]) {
+    if (isOmittedUnitTypeForCharts(k)) buckets.delete(k);
   }
   return [...buckets.entries()]
     .sort((a, b) => b[1].count - a[1].count)
@@ -148,6 +159,8 @@ export function buildMarketSummary(
   radiusMiles: number,
   rows: CohortPropertyRow[]
 ): MarketSummarySection {
+  const distinctListingCount = countDistinctListings(rows);
+  const inventoryRowCount = rows.length;
   const sourceMap = new Map<string, number>();
   for (const r of rows) {
     sourceMap.set(r.source, (sourceMap.get(r.source) ?? 0) + 1);
@@ -169,7 +182,8 @@ export function buildMarketSummary(
   }
 
   return {
-    propertyCount: rows.length,
+    distinctListingCount,
+    inventoryRowCount,
     radiusMiles,
     segment,
     sourceCounts,
@@ -181,12 +195,15 @@ export function buildMarketSummary(
 }
 
 /** Number of cohort rows priced at or above the premium threshold ($300/night). */
-export function countPremiumCohortRows(rows: CohortPropertyRow[]): number {
-  let n = 0;
-  for (const r of rows) {
-    if (r.rate_avg != null && r.rate_avg >= PREMIUM_COHORT_ADR_THRESHOLD) n += 1;
-  }
-  return n;
+/** Distinct listings with at least one row priced at or above the premium threshold. */
+export function countPremiumCohortListings(rows: CohortPropertyRow[]): number {
+  return countDistinctListingsWhere(
+    rows,
+    (r) =>
+      r.rate_avg != null &&
+      Number.isFinite(r.rate_avg) &&
+      r.rate_avg >= PREMIUM_COHORT_ADR_THRESHOLD,
+  );
 }
 
 export function buildPropertyAnalysis(rows: CohortPropertyRow[]): PropertyAnalysisSection {
@@ -210,6 +227,10 @@ export function buildPropertyAnalysis(rows: CohortPropertyRow[]): PropertyAnalys
     unit_type: r.unit_type,
     source: r.source,
     sourceLabel: marketReportSourceLabel(r.source),
+    rate_avg:
+      r.rate_avg != null && r.rate_avg > 0 && Number.isFinite(r.rate_avg)
+        ? r.rate_avg
+        : null,
     url: r.url ?? null,
   }));
   return {
@@ -275,7 +296,7 @@ export function buildAmenityAnalysis(segment: MarketReportSegment, rows: CohortP
     return { mode: 'rv_limited' };
   }
   const glampingRows = rows.filter((r) => r.raw);
-  const cohortSize = glampingRows.length;
+  const cohortSize = countDistinctListings(glampingRows);
   const cohortRates = glampingRows
     .map((r) => r.rate_avg)
     .filter((n): n is number => n != null && n > 0);
@@ -284,10 +305,14 @@ export function buildAmenityAnalysis(segment: MarketReportSegment, rows: CohortP
   const amenityRates: AmenityAnalysisSection['amenityRates'] = [];
   for (const col of GLAMPING_PROPERTY_AMENITY_COLUMNS) {
     if (cohortSize === 0) break;
-    const withKnownValue = glampingRows.filter((r) => hasMeaningfulCell(r.raw?.[col])).length;
+    const withKnownValue = countDistinctListingsWhere(glampingRows, (r) =>
+      hasMeaningfulCell(r.raw?.[col]),
+    );
     if (withKnownValue === 0) continue;
     const affirmativeRows = glampingRows.filter((r) => isAffirmative(r.raw?.[col]));
-    const affirmativeCount = affirmativeRows.length;
+    const yesListings = countDistinctListingsWhere(glampingRows, (r) =>
+      isAffirmative(r.raw?.[col]),
+    );
     const affirmativeRates = affirmativeRows
       .map((r) => r.rate_avg)
       .filter((n): n is number => n != null && n > 0);
@@ -301,19 +326,20 @@ export function buildAmenityAnalysis(segment: MarketReportSegment, rows: CohortP
     amenityRates.push({
       column: col,
       label: humanizeColumnKey(col),
-      pctOfCohort: Math.round((affirmativeCount / cohortSize) * 1000) / 10,
-      pctOfKnown: Math.round((affirmativeCount / withKnownValue) * 1000) / 10,
+      pctOfCohort: Math.round((yesListings / cohortSize) * 1000) / 10,
+      pctOfKnown: Math.round((yesListings / withKnownValue) * 1000) / 10,
       withKnownValue,
-      yesCount: affirmativeCount,
+      yesCount: yesListings,
       rateImpactUsd,
       rateImpactSampleSize: affirmativeRates.length,
     });
   }
-  amenityRates.sort((a, b) => b.pctOfCohort - a.pctOfCohort);
+  const withAnyYesAmongKnown = amenityRates.filter((a) => a.pctOfKnown > 0);
+  withAnyYesAmongKnown.sort((a, b) => b.pctOfCohort - a.pctOfCohort);
   return {
     mode: 'glamping',
     cohortSize,
-    amenityRates: amenityRates.slice(0, TOP_AMENITIES),
+    amenityRates: withAnyYesAmongKnown.slice(0, TOP_AMENITIES),
   };
 }
 
@@ -331,12 +357,16 @@ export function buildSiteUnitAnalysis(segment: MarketReportSegment, rows: Cohort
       ? rows.filter((r) => !isExcludedGlampingUnitType(r.unit_type))
       : rows;
   const unitMap = countBy(rowsForUnitRollup, (r) => r.unit_type);
+  for (const k of [...unitMap.keys()]) {
+    if (isOmittedUnitTypeForCharts(k)) unitMap.delete(k);
+  }
   // Build a parallel rate index so we can attach mean/median ARDR per unit type
   // for the dual-axis chart in the Site/Unit section. Same key normalization
   // as `buildTopUnitTypesWithAdr` to keep the two surfaces consistent.
   const rateBuckets = new Map<string, number[]>();
   for (const r of rowsForUnitRollup) {
     const key = (r.unit_type ?? '').trim() || 'Unknown';
+    if (isOmittedUnitTypeForCharts(key)) continue;
     if (r.rate_avg != null && r.rate_avg > 0) {
       const list = rateBuckets.get(key) ?? [];
       list.push(r.rate_avg);
@@ -361,7 +391,7 @@ export function buildSiteUnitAnalysis(segment: MarketReportSegment, rows: Cohort
     const label = bucketTotalSites(r.property_total_sites);
     bucketMap.set(label, (bucketMap.get(label) ?? 0) + 1);
   }
-  const order = ['Unknown', '1–25', '26–75', '76–150', '151+'];
+  const order = ['1–25', '26–75', '76–150', '151+'];
   const siteBuckets = order
     .filter((label) => bucketMap.has(label))
     .map((label) => ({ label, count: bucketMap.get(label) ?? 0 }));

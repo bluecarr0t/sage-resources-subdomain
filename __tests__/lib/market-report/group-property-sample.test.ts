@@ -15,6 +15,7 @@ function row(overrides: Partial<Row>): Row {
     unit_type: 'safari_tent',
     source: 'sage',
     sourceLabel: 'Sage',
+    rate_avg: null,
     url: null,
     ...overrides,
   };
@@ -74,6 +75,33 @@ describe('groupPropertySample', () => {
       row({ unit_type: 'cabin', distance_miles: 9.9 }),
     ]);
     expect(out[0].rep.distance_miles).toBe(1.2);
+  });
+
+  it('averages positive ARDR across merged unit-type rows for the property', () => {
+    const out = groupPropertySample([
+      row({ key: 'a', unit_type: 'cabin', rate_avg: 200 }),
+      row({ key: 'b', unit_type: 'yurt', rate_avg: 400 }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0].avgRetailDailyRate).toBe(300);
+  });
+
+  it('returns null ARDR when no row has a positive rate', () => {
+    const out = groupPropertySample([
+      row({ unit_type: 'cabin', rate_avg: null }),
+      row({ unit_type: 'yurt', rate_avg: 0 }),
+    ]);
+    expect(out[0].avgRetailDailyRate).toBeNull();
+  });
+
+  it('uses max property_total_sites across merged unit-type rows', () => {
+    const out = groupPropertySample([
+      row({ key: 'a', unit_type: 'safari_tent', property_total_sites: null }),
+      row({ key: 'b', unit_type: 'cabin', property_total_sites: 44 }),
+      row({ key: 'c', unit_type: 'yurt', property_total_sites: 30 }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0].propertyTotalSites).toBe(44);
   });
 
   it('returns an empty array for empty input', () => {

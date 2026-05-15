@@ -38,7 +38,8 @@ export async function buildMarketReportCsvZip(payload: MarketReportExportPayload
         { key: 'addressLine', value: meta.addressLine },
         { key: 'radiusMiles', value: meta.radiusMiles },
         { key: 'segment', value: meta.segment },
-        { key: 'propertyCount', value: ms.propertyCount },
+        { key: 'distinctListingCount', value: ms.distinctListingCount },
+        { key: 'inventoryRowCount', value: ms.inventoryRowCount },
         { key: 'generatedAt', value: meta.generatedAt },
         ...ms.sourceCounts.map((s) => ({ key: `source:${s.source}`, value: `${s.sourceLabel}: ${s.count}` })),
         ...ms.topStates.map((s) => ({ key: `state:${s.state}`, value: s.count })),
@@ -49,11 +50,21 @@ export async function buildMarketReportCsvZip(payload: MarketReportExportPayload
   zip.file(
     '01b-data-by-source.csv',
     csvLines(
-      ['source_key', 'source_label', 'properties', 'total_sites', 'total_units', 'avg_retail_daily_rate', 'avg_occupancy_pct'],
+      [
+        'source_key',
+        'source_label',
+        'distinct_listings',
+        'inventory_rows',
+        'total_sites',
+        'total_units',
+        'avg_retail_daily_rate',
+        'avg_occupancy_pct',
+      ],
       ms.sourceBreakdown.map((r) => ({
         source_key: r.source,
         source_label: r.sourceLabel,
-        properties: r.propertyCount,
+        distinct_listings: r.distinctListingCount,
+        inventory_rows: r.inventoryRowCount,
         total_sites: r.totalSites ?? '',
         total_units: r.totalUnits ?? '',
         avg_retail_daily_rate: r.avgRetailDailyRate ?? '',
@@ -77,7 +88,19 @@ export async function buildMarketReportCsvZip(payload: MarketReportExportPayload
   zip.file(
     '02b-property-sample.csv',
     csvLines(
-      ['key', 'property_name', 'city', 'state', 'distance_miles', 'property_total_sites', 'property_type', 'unit_type', 'source_key', 'source_label'],
+      [
+        'key',
+        'property_name',
+        'city',
+        'state',
+        'distance_miles',
+        'property_total_sites',
+        'property_type',
+        'unit_type',
+        'avg_retail_daily_rate',
+        'source_key',
+        'source_label',
+      ],
       pa.sample.map((r) => ({
         key: r.key,
         property_name: r.property_name,
@@ -87,6 +110,7 @@ export async function buildMarketReportCsvZip(payload: MarketReportExportPayload
         property_total_sites: r.property_total_sites,
         property_type: r.property_type,
         unit_type: r.unit_type,
+        avg_retail_daily_rate: r.rate_avg ?? '',
         source_key: r.source,
         source_label: r.sourceLabel,
       }))

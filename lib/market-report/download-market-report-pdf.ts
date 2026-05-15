@@ -27,7 +27,7 @@ export async function downloadMarketReportPdfFromElement({
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
-    allowTaint: true,
+    allowTaint: false,
     logging: false,
     backgroundColor: '#ffffff',
     scrollX: 0,

@@ -56,12 +56,14 @@ describe('isHipcampRvDominantPropertyType', () => {
 describe('isExcludedGlampingUnitType', () => {
   it('excludes RV / vehicle unit types from glamping rollups', () => {
     expect(isExcludedGlampingUnitType('Vehicles')).toBe(true);
+    expect(isExcludedGlampingUnitType('Vehicle')).toBe(true);
     expect(isExcludedGlampingUnitType('RV Site')).toBe(true);
     expect(isExcludedGlampingUnitType('RV Sites')).toBe(true);
   });
 
   it('is case-insensitive and tolerates extra whitespace', () => {
     expect(isExcludedGlampingUnitType('vehicles')).toBe(true);
+    expect(isExcludedGlampingUnitType('vehicle')).toBe(true);
     expect(isExcludedGlampingUnitType('  rv   site  ')).toBe(true);
   });
 
@@ -72,6 +74,6 @@ describe('isExcludedGlampingUnitType', () => {
   });
 
   it('exports a normalized set with the expected size', () => {
-    expect(GLAMPING_EXCLUDED_UNIT_TYPES.size).toBe(3);
+    expect(GLAMPING_EXCLUDED_UNIT_TYPES.size).toBe(4);
   });
 });

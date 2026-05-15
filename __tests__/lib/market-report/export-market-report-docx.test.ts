@@ -10,6 +10,7 @@ describe('assembleMarketReportDocx', () => {
       radiusMiles: 25,
       segment: 'glamping',
       propertyCount: 1,
+      distinctListingCount: 1,
       sources: ['Sage'],
       generatedAt: '2026-05-12T12:00:00.000Z',
       fetchPossiblyIncomplete: false,
@@ -18,7 +19,8 @@ describe('assembleMarketReportDocx', () => {
     };
     const sections: MarketReportSections = {
       marketSummary: {
-        propertyCount: 1,
+        distinctListingCount: 1,
+        inventoryRowCount: 1,
         radiusMiles: 25,
         segment: 'glamping',
         sourceCounts: [{ source: 'all_glamping_properties', sourceLabel: 'Sage', count: 1 }],
@@ -26,7 +28,8 @@ describe('assembleMarketReportDocx', () => {
           {
             source: 'all_glamping_properties',
             sourceLabel: 'Sage',
-            propertyCount: 1,
+            inventoryRowCount: 1,
+            distinctListingCount: 1,
             totalSites: 10,
             totalUnits: null,
             avgRetailDailyRate: 100,
@@ -55,6 +58,7 @@ describe('assembleMarketReportDocx', () => {
             unit_type: 'Yurt',
             source: 'all_glamping_properties',
             sourceLabel: 'Sage',
+            rate_avg: 100,
             url: null,
           },
         ],

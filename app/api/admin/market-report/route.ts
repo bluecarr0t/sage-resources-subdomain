@@ -6,8 +6,9 @@ import {
 } from "@/lib/geocode";
 import {
   buildMarketReportSections,
-  countPremiumCohortRows,
+  countPremiumCohortListings,
 } from "@/lib/market-report/aggregate";
+import { countDistinctListings } from "@/lib/market-report/listing-identity";
 import {
   buildMarketReportCohortCacheKey,
   cacheGetOrFetch,
@@ -118,6 +119,8 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
 
   const minSiteUnitResolved =
     minSiteUnitCount ?? (segment === "rv_resort" ? 30 : 3);
+
+  const wallStartedAt = Date.now();
 
   try {
     let anchorLat = 0;
@@ -251,8 +254,8 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
     const opportunityScore =
       scope === "local"
         ? calculateOpportunityScore({
-            cohortSize: rows.length,
-            premiumCohortCount: countPremiumCohortRows(rows),
+            cohortSize: countDistinctListings(rows),
+            premiumCohortCount: countPremiumCohortListings(rows),
             demandDrivers,
             countyMetrics,
           })
@@ -270,7 +273,20 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
       mapPinsTruncated,
     } = buildMapPinsFromRows(rows);
 
-    return NextResponse.json({
+    const distinctListingCount = countDistinctListings(rows);
+    const durationMs = Date.now() - wallStartedAt;
+    console.info("[market-report]", {
+      durationMs,
+      scope,
+      segment,
+      inventoryRows: rows.length,
+      distinctListings: distinctListingCount,
+      cohortCached: cohortLookup.cached,
+      driversCached: driversLookup?.cached ?? null,
+      countyCached: countyLookup?.cached ?? null,
+    });
+    return NextResponse.json(
+      {
       success: true,
       meta: {
         addressLine: resolvedAddress,
@@ -283,6 +299,7 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
         adrMax: adrMax ?? null,
         minSiteUnitCount: minSiteUnitResolved,
         propertyCount: rows.length,
+        distinctListingCount,
         sources: marketReportQueriedSources(
           segment,
           scope === "national" || stateAbbr.length === 2,
@@ -303,7 +320,13 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
       },
       sections,
       mapPins,
-    });
+    },
+      {
+        headers: {
+          "X-Market-Report-Ms": String(durationMs),
+        },
+      },
+    );
   } catch (err) {
     console.error("[market-report]", err);
     const message =

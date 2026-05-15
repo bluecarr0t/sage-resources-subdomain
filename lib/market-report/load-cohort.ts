@@ -8,11 +8,14 @@ import {
 } from "@/lib/comps-v2/geo";
 import {
   dedupeCohortRows,
+  dedupeCohortRowsPreservingSage,
   type DedupedCohortRow,
 } from "@/lib/market-report/dedupe";
 import {
   bboxFetchLimitForRadius,
   MARKET_REPORT_MAX_ID_CHUNKS,
+  resolveNationalHipcampMaxChunks,
+  resolveNationalHipcampPageSize,
   resolveNationalRvMaxChunks,
   resolveNationalRvPageSize,
 } from "@/lib/market-report/fetch-limits";
@@ -65,14 +68,35 @@ export function cohortSiteUnitMetric(
   return 0;
 }
 
-/** Drop properties below the min site/unit threshold (applied after dedupe). */
+/**
+ * Drop properties below the min site/unit threshold (applied after dedupe).
+ * For glamping, Sage rows (`all_glamping_properties`) are always exempt.
+ * Hipcamp rows are exempt for **national** scope only: after dedupe each row
+ * is one unit-type bucket, so a per-property-style minimum would incorrectly
+ * drop almost the entire Hipcamp cohort. Local glamping still applies the
+ * threshold to Hipcamp.
+ */
 export function applyMinSiteUnitCountFilter(
   rows: DedupedCohortRow[],
   segment: MarketReportSegment,
   minCount: number,
+  options?: { scope?: CohortScope },
 ): DedupedCohortRow[] {
   if (minCount <= 0) return rows;
-  return rows.filter((r) => cohortSiteUnitMetric(r, segment) >= minCount);
+  const scope = options?.scope ?? "local";
+  return rows.filter((r) => {
+    if (segment === "glamping" && r.source === "all_glamping_properties") {
+      return true;
+    }
+    if (
+      segment === "glamping" &&
+      scope === "national" &&
+      r.source === "hipcamp"
+    ) {
+      return true;
+    }
+    return cohortSiteUnitMetric(r, segment) >= minCount;
+  });
 }
 
 /**
@@ -80,10 +104,11 @@ export function applyMinSiteUnitCountFilter(
  * memory, and Vercel function payload size.
  *
  * Default 25,000 per source comfortably covers Sage glamping (~few thousand),
- * RoverPass (~thousands), and Campspot, and captures the entire post-filter
- * Hipcamp set (~32k after the RV-dominant exclusion). Override via env when
- * tuning for very large national runs:
- *   MARKET_REPORT_NATIONAL_PER_SOURCE_CAP=50000
+ * RoverPass (~thousands), and Campspot. National Hipcamp is **paged** with
+ * `resolveNationalHipcampPageSize` / `resolveNationalHipcampMaxChunks` and
+ * **two US scopes** (state list + US `country` match, merged by `id`) so rows
+ * are not dropped when `state` is missing or nonstandard. Override:
+ *   MARKET_REPORT_NATIONAL_HIPCAMP_MAX_CHUNKS, MARKET_REPORT_NATIONAL_PER_SOURCE_CAP=50000
  */
 const NATIONAL_PER_SOURCE_CAP_DEFAULT = 25000;
 const NATIONAL_PER_SOURCE_CAP_MIN = 1000;
@@ -183,14 +208,13 @@ async function paginateNationalRoverRaw(
     const prevCursor = lastIdCursor;
     const batchMax = maxNumericRowId(batch);
     if (batchMax != null && batchMax > lastIdCursor) lastIdCursor = batchMax;
-    if (batch.length >= pageSize && lastIdCursor === prevCursor) {
+    // Do not treat `batch.length < pageSize` as "done": PostgREST often caps
+    // responses below the requested `.limit()` (e.g. ~1000 rows), which would
+    // otherwise stop keyset paging after the first chunk.
+    if (batch.length > 0 && lastIdCursor === prevCursor) {
       console.warn(
-        "[market-report] national roverpass: id cursor stalled on a full page",
+        "[market-report] national roverpass: id cursor stalled (non-advancing page)",
       );
-      break;
-    }
-    if (batch.length < pageSize) {
-      hitRowCap = false;
       break;
     }
     if (chunk === maxChunks - 1) {
@@ -240,14 +264,10 @@ async function paginateNationalCampspotRaw(
     const prevCursor = lastIdCursor;
     const batchMax = maxNumericRowId(batch);
     if (batchMax != null && batchMax > lastIdCursor) lastIdCursor = batchMax;
-    if (batch.length >= pageSize && lastIdCursor === prevCursor) {
+    if (batch.length > 0 && lastIdCursor === prevCursor) {
       console.warn(
-        "[market-report] national campspot: id cursor stalled on a full page",
+        "[market-report] national campspot: id cursor stalled (non-advancing page)",
       );
-      break;
-    }
-    if (batch.length < pageSize) {
-      hitRowCap = false;
       break;
     }
     if (chunk === maxChunks - 1) {
@@ -264,6 +284,7 @@ const BASE_GLAMPING_FIELDS = [
   "property_name",
   "city",
   "state",
+  "country",
   "property_type",
   "unit_type",
   "property_total_sites",
@@ -433,7 +454,8 @@ export function isHipcampRvDominantPropertyType(value: unknown): boolean {
 
 /**
  * Hipcamp `unit_type` values excluded from **glamping** unit-type rollups
- * (market summary “Top unit types”, site/unit charts).
+ * (market summary “Top unit types”, site/unit charts) and counted toward
+ * vehicle-majority property exclusion (see {@link filterGlampingMajorityVehicleInventoryRows}).
  *
  * A listing can stay in the glamping cohort (e.g. property_type “Glamping”)
  * while still listing RV pads or vehicle spots on some rows; those rows are
@@ -442,7 +464,7 @@ export function isHipcampRvDominantPropertyType(value: unknown): boolean {
  * Match is case-insensitive after collapsing internal whitespace.
  */
 export const GLAMPING_EXCLUDED_UNIT_TYPES: ReadonlySet<string> = new Set(
-  ["Vehicles", "RV Site", "RV Sites"].map((s) =>
+  ["Vehicles", "Vehicle", "RV Site", "RV Sites"].map((s) =>
     s.toLowerCase().replace(/\s+/g, " ").trim(),
   ),
 );
@@ -456,6 +478,9 @@ export function isExcludedGlampingUnitType(value: unknown): boolean {
 
 /** Hipcamp glaming cohort: drop properties where ≥ this share of units are tent-site inventory. */
 const HIPCAMP_TENT_SITE_MAJORITY_RATIO = 0.5;
+
+/** Glamping cohort (Sage + Hipcamp): drop properties where ≥ this share of weighted unit rows are vehicle/RV pad inventory. */
+const GLAMPING_VEHICLE_UNIT_MAJORITY_RATIO = 0.5;
 
 /** One Hipcamp listing (name + city + state) for aggregating unit-type mix. */
 function hipcampGlampingPropertyInventoryKey(row: CohortPropertyRow): string {
@@ -530,6 +555,56 @@ export function filterHipcampMajorityTentSiteProperties(rows: CohortPropertyRow[
   }
   const keptHip = hip.filter((r) => !dropKeys.has(hipcampGlampingPropertyInventoryKey(r)));
   return [...other, ...keptHip];
+}
+
+const GLAMPING_VEHICLE_MAJORITY_SOURCES = new Set<CohortPropertyRow["source"]>([
+  "hipcamp",
+  "all_glamping_properties",
+]);
+
+/**
+ * Removes rows for properties whose weighted unit-type mix is ≥50% vehicle/RV
+ * pad inventory (`{@link GLAMPING_EXCLUDED_UNIT_TYPES}`), so glamping market
+ * reports and property tables match structure-first glamping (not drive-in
+ * vehicle camping).
+ *
+ * Applies to Hipcamp and Sage (`all_glamping_properties`) rows; other sources
+ * pass through unchanged.
+ *
+ * @internal Exported for unit tests.
+ */
+export function filterGlampingMajorityVehicleInventoryRows(
+  rows: CohortPropertyRow[],
+): CohortPropertyRow[] {
+  const affected = rows.filter((r) => GLAMPING_VEHICLE_MAJORITY_SOURCES.has(r.source));
+  const rest = rows.filter((r) => !GLAMPING_VEHICLE_MAJORITY_SOURCES.has(r.source));
+  if (affected.length === 0) return rows;
+
+  const byKey = new Map<string, CohortPropertyRow[]>();
+  for (const r of affected) {
+    const k = `${r.source}|${hipcampGlampingPropertyInventoryKey(r)}`;
+    const list = byKey.get(k) ?? [];
+    list.push(r);
+    byKey.set(k, list);
+  }
+  const dropKeys = new Set<string>();
+  for (const [k, group] of byKey) {
+    let vehicleW = 0;
+    let totalW = 0;
+    for (const r of group) {
+      const w = rowWeightForTentMajority(r);
+      totalW += w;
+      if (isExcludedGlampingUnitType(r.unit_type)) vehicleW += w;
+    }
+    if (totalW > 0 && vehicleW / totalW >= GLAMPING_VEHICLE_UNIT_MAJORITY_RATIO) {
+      dropKeys.add(k);
+    }
+  }
+  const kept = affected.filter((r) => {
+    const k = `${r.source}|${hipcampGlampingPropertyInventoryKey(r)}`;
+    return !dropKeys.has(k);
+  });
+  return [...rest, ...kept];
 }
 
 const HIPCAMP_AMENITY_ALIASES: Array<{
@@ -693,7 +768,7 @@ async function fetchGlampingCohort(
       .from("all_glamping_properties")
       .select(GLAMPING_SELECT)
       .eq("is_glamping_property", "Yes")
-      .neq("is_open", "No")
+      .or("is_open.is.null,is_open.neq.No")
       .eq("research_status", "published")
       .gte("lat", bb.minLat)
       .lte("lat", bb.maxLat)
@@ -877,7 +952,7 @@ async function fetchCampspotCohort(
   return { rows, meta };
 }
 
-function mergeAndDedupeRv(rows: CohortPropertyRow[]): CohortPropertyRow[] {
+export function mergeAndDedupeRv(rows: CohortPropertyRow[]): CohortPropertyRow[] {
   const byKey = new Map<string, CohortPropertyRow>();
   const sorted = [...rows].sort((a, b) => a.distance_miles - b.distance_miles);
   for (const r of sorted) {
@@ -889,7 +964,70 @@ function mergeAndDedupeRv(rows: CohortPropertyRow[]): CohortPropertyRow[] {
   );
 }
 
-/** National (US-wide) glamping fetch with mandatory ADR floor for performance. */
+async function paginateNationalGlampingScopedRaw(
+  supabase: SupabaseClient,
+  applyUsScope: (q: any) => any,
+  filter: CohortAdrFilter,
+  logLabel: string,
+): Promise<{
+  allRaw: Record<string, unknown>[];
+  chunksUsed: number;
+  hitRowCap: boolean;
+}> {
+  const pageSize = resolveNationalHipcampPageSize();
+  const maxChunks = resolveNationalHipcampMaxChunks();
+  const allRaw: Record<string, unknown>[] = [];
+  let lastIdCursor = 0;
+  let chunksUsed = 0;
+  let hitRowCap = false;
+
+  for (let chunk = 0; chunk < maxChunks; chunk++) {
+    let q: any = supabase.from("all_glamping_properties").select(GLAMPING_SELECT);
+    q = applyUsScope(q);
+    q = q
+      .eq("is_glamping_property", "Yes")
+      .or("is_open.is.null,is_open.neq.No")
+      .eq("research_status", "published")
+      .not("lat", "is", null)
+      .not("lon", "is", null);
+    if (filter.adrMin != null)
+      q = q.gte("rate_avg_retail_daily_rate", filter.adrMin);
+    if (filter.adrMax != null)
+      q = q.lte("rate_avg_retail_daily_rate", filter.adrMax);
+    if (lastIdCursor > 0) q = q.gt("id", lastIdCursor);
+    const { data, error } = await q
+      .order("id", { ascending: true })
+      .limit(pageSize);
+    if (error || !data) {
+      console.warn(
+        `[market-report] national glamping fetch (${logLabel}):`,
+        error?.message ?? "no data",
+      );
+      break;
+    }
+    const batch = data as unknown as Record<string, unknown>[];
+    chunksUsed += 1;
+    if (batch.length === 0) break;
+    allRaw.push(...batch);
+    const prevCursor = lastIdCursor;
+    const batchMax = maxNumericRowId(batch);
+    if (batchMax != null && batchMax > lastIdCursor) lastIdCursor = batchMax;
+    if (batch.length > 0 && lastIdCursor === prevCursor) {
+      console.warn(
+        `[market-report] national glamping: id cursor stalled (non-advancing page) (${logLabel})`,
+      );
+      break;
+    }
+    if (chunk === maxChunks - 1) {
+      hitRowCap = true;
+      break;
+    }
+  }
+
+  return { allRaw, chunksUsed, hitRowCap };
+}
+
+/** National (US-wide) glamping: Sage rows in US by state list **or** US country string (merged by `id`). */
 async function fetchNationalGlamping(
   supabase: SupabaseClient,
   filter: CohortAdrFilter,
@@ -897,33 +1035,42 @@ async function fetchNationalGlamping(
   rows: CohortPropertyRow[];
   meta: NonNullable<MarketReportFetchMeta["glamping"]>;
 }> {
-  let q = supabase
-    .from("all_glamping_properties")
-    .select(GLAMPING_SELECT)
-    .eq("is_glamping_property", "Yes")
-    .neq("is_open", "No")
-    .eq("research_status", "published")
-    .in("state", US_STATE_ALL_KEYS)
-    .not("lat", "is", null)
-    .not("lon", "is", null);
-  if (filter.adrMin != null)
-    q = q.gte("rate_avg_retail_daily_rate", filter.adrMin);
-  if (filter.adrMax != null)
-    q = q.lte("rate_avg_retail_daily_rate", filter.adrMax);
-  const { data, error } = await q
-    .order("id", { ascending: true })
-    .limit(NATIONAL_PER_SOURCE_CAP);
-  if (error || !data) {
-    return {
-      rows: [],
-      meta: { candidatesInBBox: 0, hitRowCap: false, chunksUsed: 0 },
-    };
+  const [byState, byCountry] = await Promise.all([
+    paginateNationalGlampingScopedRaw(
+      supabase,
+      (q) => q.in("state", US_STATE_ALL_KEYS),
+      filter,
+      "state",
+    ),
+    paginateNationalGlampingScopedRaw(
+      supabase,
+      (q) => q.or(US_COUNTRY_OR_FILTER).not("country", "is", null),
+      filter,
+      "country",
+    ),
+  ]);
+
+  const seen = new Set<string>();
+  const raw: Record<string, unknown>[] = [];
+  for (const r of byState.allRaw) {
+    const k = String(r.id ?? "");
+    if (!k) continue;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    raw.push(r);
   }
-  const raw = data as unknown as Record<string, unknown>[];
+  for (const r of byCountry.allRaw) {
+    const k = String(r.id ?? "");
+    if (!k) continue;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    raw.push(r);
+  }
+
   const meta = {
     candidatesInBBox: raw.length,
-    hitRowCap: raw.length >= NATIONAL_PER_SOURCE_CAP,
-    chunksUsed: 1,
+    hitRowCap: byState.hitRowCap || byCountry.hitRowCap,
+    chunksUsed: byState.chunksUsed + byCountry.chunksUsed,
   };
   const rows = raw
     .map((r) => mapGlampingRow(r, 0, 0, Number.POSITIVE_INFINITY))
@@ -1034,6 +1181,8 @@ async function fetchHipcampCohort(
   anchorLng: number,
   radiusMiles: number,
   rowLimit: number,
+  /** Local scope: USPS state (e.g. `OR`) to pull a capped batch of Hipcamp rows with text lat/lon but null `lat_num`. */
+  anchorStateAbbr?: string,
 ): Promise<{
   rows: CohortPropertyRow[];
   meta: NonNullable<MarketReportFetchMeta["hipcamp"]>;
@@ -1076,6 +1225,37 @@ async function fetchHipcampCohort(
     if (!lastChunkHitCap) break;
   }
 
+  const seenIds = new Set(
+    allRaw.map((r) => Number(r.id)).filter((n) => Number.isFinite(n)),
+  );
+  let supplementalHitCap = false;
+  const abbr = anchorStateAbbr?.trim().toUpperCase() ?? "";
+  if (abbr.length === 2) {
+    const supLimit = Math.min(4000, Math.max(rowLimit, 1500));
+    const stateKeys = stateSqlValuesGlampingRoverpass([abbr]);
+    const { data: supData, error: supErr } = await supabase
+      .from("hipcamp")
+      .select(HIPCAMP_SELECT)
+      .in("state", stateKeys)
+      .is("lat_num", null)
+      .not("lat", "is", null)
+      .not("lon", "is", null)
+      .not("property_name", "is", null)
+      .order("id", { ascending: true })
+      .limit(supLimit);
+    if (!supErr && supData?.length) {
+      const batch = supData as unknown as Record<string, unknown>[];
+      for (const r of batch) {
+        const id = Number(r.id);
+        if (Number.isFinite(id) && seenIds.has(id)) continue;
+        if (Number.isFinite(id)) seenIds.add(id);
+        allRaw.push(r);
+      }
+      supplementalHitCap = batch.length >= supLimit;
+      chunksUsed += 1;
+    }
+  }
+
   const rows = allRaw
     .map((r) => mapHipcampRow(r, anchorLat, anchorLng, radiusMiles))
     .filter((x): x is CohortPropertyRow => x !== null);
@@ -1084,10 +1264,66 @@ async function fetchHipcampCohort(
     rows,
     meta: {
       candidatesInBBox: allRaw.length,
-      hitRowCap: lastChunkHitCap,
+      hitRowCap: lastChunkHitCap || supplementalHitCap,
       chunksUsed,
     },
   };
+}
+
+async function paginateNationalHipcampScopedRaw(
+  supabase: SupabaseClient,
+  applyUsScope: (q: any) => any,
+  logLabel: string,
+): Promise<{
+  allRaw: Record<string, unknown>[];
+  chunksUsed: number;
+  hitRowCap: boolean;
+}> {
+  const pageSize = resolveNationalHipcampPageSize();
+  const maxChunks = resolveNationalHipcampMaxChunks();
+  const allRaw: Record<string, unknown>[] = [];
+  let lastIdCursor = 0;
+  let chunksUsed = 0;
+  let hitRowCap = false;
+
+  for (let chunk = 0; chunk < maxChunks; chunk++) {
+    let q: any = supabase.from("hipcamp").select(HIPCAMP_SELECT);
+    q = applyUsScope(q);
+    q = q
+      .not("lat_num", "is", null)
+      .not("lon_num", "is", null)
+      .not("property_name", "is", null);
+    if (lastIdCursor > 0) q = q.gt("id", lastIdCursor);
+    const { data, error } = await q
+      .order("id", { ascending: true })
+      .limit(pageSize);
+    if (error || !data) {
+      console.warn(
+        `[market-report] national hipcamp fetch (${logLabel}):`,
+        error?.message ?? "no data",
+      );
+      break;
+    }
+    const batch = data as unknown as Record<string, unknown>[];
+    chunksUsed += 1;
+    if (batch.length === 0) break;
+    allRaw.push(...batch);
+    const prevCursor = lastIdCursor;
+    const batchMax = maxNumericRowId(batch);
+    if (batchMax != null && batchMax > lastIdCursor) lastIdCursor = batchMax;
+    if (batch.length > 0 && lastIdCursor === prevCursor) {
+      console.warn(
+        `[market-report] national hipcamp: id cursor stalled (non-advancing page) (${logLabel})`,
+      );
+      break;
+    }
+    if (chunk === maxChunks - 1) {
+      hitRowCap = true;
+      break;
+    }
+  }
+
+  return { allRaw, chunksUsed, hitRowCap };
 }
 
 async function fetchNationalHipcamp(
@@ -1097,33 +1333,38 @@ async function fetchNationalHipcamp(
   rows: CohortPropertyRow[];
   meta: NonNullable<MarketReportFetchMeta["hipcamp"]>;
 }> {
-  // Hipcamp `country` column may be null; fall back to a state-list filter
-  // (the same approach used for Campspot).
-  let q = supabase
-    .from("hipcamp")
-    .select(HIPCAMP_SELECT)
-    .in("state", US_STATE_ALL_KEYS)
-    .not("lat_num", "is", null)
-    .not("lon_num", "is", null)
-    .not("property_name", "is", null);
-  // ADR can be filtered at SQL when both bounds use the same column. Hipcamp's
-  // 2025 column is text — we cast in `mapHipcampRow`. Keep ADR filter in TS.
-  const { data, error } = await q
-    .order("id", { ascending: true })
-    .limit(NATIONAL_PER_SOURCE_CAP);
-  if (error || !data) {
-    return {
-      rows: [],
-      meta: { candidatesInBBox: 0, hitRowCap: false, chunksUsed: 0 },
-    };
+  const [byState, byCountry] = await Promise.all([
+    paginateNationalHipcampScopedRaw(supabase, (q) => q.in("state", US_STATE_ALL_KEYS), "state"),
+    paginateNationalHipcampScopedRaw(
+      supabase,
+      (q) => q.or(US_COUNTRY_OR_FILTER).not("country", "is", null),
+      "country",
+    ),
+  ]);
+
+  const seen = new Set<string>();
+  const merged: Record<string, unknown>[] = [];
+  for (const r of byState.allRaw) {
+    const k = String(r.id ?? "");
+    if (!k) continue;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    merged.push(r);
   }
-  const raw = data as unknown as Record<string, unknown>[];
+  for (const r of byCountry.allRaw) {
+    const k = String(r.id ?? "");
+    if (!k) continue;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    merged.push(r);
+  }
+
   const meta = {
-    candidatesInBBox: raw.length,
-    hitRowCap: raw.length >= NATIONAL_PER_SOURCE_CAP,
-    chunksUsed: 1,
+    candidatesInBBox: merged.length,
+    hitRowCap: byState.hitRowCap || byCountry.hitRowCap,
+    chunksUsed: byState.chunksUsed + byCountry.chunksUsed,
   };
-  const mapped = raw
+  const mapped = merged
     .map((r) => mapHipcampRow(r, 0, 0, Number.POSITIVE_INFINITY))
     .filter((x): x is CohortPropertyRow => x !== null)
     .map((r) => ({ ...r, distance_miles: 0 }));
@@ -1208,7 +1449,8 @@ export async function loadMarketReportCohort(
     Math.min(100_000, Math.floor(params.minSiteUnitCount ?? 0)),
   );
 
-  // National scope: skip bbox; query all US states directly with ADR floor.
+  // National scope: skip bbox; merge cohort (Sage: every `all_glamping_properties` row;
+  // Hipcamp deduped), then filters.
   if (scope === "national") {
     if (segment === "glamping") {
       // Glamping cohort = Sage + Hipcamp. Campspot is intentionally excluded
@@ -1219,10 +1461,13 @@ export async function loadMarketReportCohort(
       ]);
       const rawConsidered = glam.rows.length + hip.rows.length;
       const hipFiltered = filterHipcampMajorityTentSiteProperties(hip.rows);
-      const filtered = [...applyAdrFilter(glam.rows, adrFilter), ...hipFiltered];
-      const { rows: deduped } = dedupeCohortRows(filtered);
+      const merged = [...applyAdrFilter(glam.rows, adrFilter), ...hipFiltered];
+      const vehicleFiltered = filterGlampingMajorityVehicleInventoryRows(merged);
+      const { rows: deduped } = dedupeCohortRowsPreservingSage(vehicleFiltered);
       return {
-        rows: applyMinSiteUnitCountFilter(deduped, segment, minSiteUnit),
+        rows: applyMinSiteUnitCountFilter(deduped, segment, minSiteUnit, {
+          scope: "national",
+        }),
         fetchMeta: { glamping: glam.meta, hipcamp: hip.meta },
         rawRowsConsidered: rawConsidered,
       };
@@ -1235,13 +1480,16 @@ export async function loadMarketReportCohort(
     const filtered = [...applyAdrFilter(rover.rows, adrFilter), ...camp.rows];
     const { rows: deduped } = dedupeCohortRows(filtered);
     return {
-      rows: applyMinSiteUnitCountFilter(deduped, segment, minSiteUnit),
+      rows: applyMinSiteUnitCountFilter(deduped, segment, minSiteUnit, {
+        scope: "national",
+      }),
       fetchMeta: { roverpass: rover.meta, campspot: camp.meta },
       rawRowsConsidered: rawConsidered,
     };
   }
 
-  // Local scope: existing bbox + Haversine path, then dedupe + ADR filter in TS.
+  // Local scope: bbox + Haversine, then cohort merge (Sage: all `all_glamping_properties`
+  // rows; Hipcamp deduped), ADR filter in TS.
   const rowLimit = bboxFetchLimitForRadius(radiusMiles);
 
   if (segment === "glamping") {
@@ -1262,13 +1510,25 @@ export async function loadMarketReportCohort(
           anchorLng,
           radiusMiles,
           rowLimit,
+          scope === "local" && stateAbbr.length === 2 ? stateAbbr : undefined,
         ),
       ]);
     const hipFiltered = filterHipcampMajorityTentSiteProperties(hipResult.rows);
-    const merged = mergeAndDedupeRv([...glamRows, ...hipFiltered]);
-    const filtered = applyAdrFilter(merged, adrFilter);
-    const { rows: deduped } = dedupeCohortRows(filtered);
-    const siteFiltered = applyMinSiteUnitCountFilter(deduped, segment, minSiteUnit);
+    // Do not use `mergeAndDedupeRv` here: that helper is for RoverPass+Campspot
+    // listings that duplicate the same RV park at one set of coordinates. Hipcamp
+    // intentionally has many rows per listing (one per unit type); geo-merging
+    // them drops inventory used by tent/vehicle majority filters and understates
+    // the cohort. National glamping already concatenates Sage + Hipcamp the same way.
+    const merged = [...glamRows, ...hipFiltered];
+    const vehicleFiltered = filterGlampingMajorityVehicleInventoryRows(merged);
+    const filtered = applyAdrFilter(vehicleFiltered, adrFilter);
+    const { rows: deduped } = dedupeCohortRowsPreservingSage(filtered);
+    const siteFiltered = applyMinSiteUnitCountFilter(
+      deduped,
+      segment,
+      minSiteUnit,
+      { scope: "local" },
+    );
     const sorted = siteFiltered.sort((a, b) => a.distance_miles - b.distance_miles);
     return {
       rows: sorted,
@@ -1301,7 +1561,9 @@ export async function loadMarketReportCohort(
   const filtered = applyAdrFilter(merged, adrFilter);
   const { rows: deduped } = dedupeCohortRows(filtered);
   return {
-    rows: applyMinSiteUnitCountFilter(deduped, segment, minSiteUnit),
+    rows: applyMinSiteUnitCountFilter(deduped, segment, minSiteUnit, {
+      scope: "local",
+    }),
     fetchMeta: {
       roverpass: roverResult.meta,
       campspot: campResult.meta,

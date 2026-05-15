@@ -2,14 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
+import dynamic from 'next/dynamic';
 import { useFormatter, useTranslations } from 'next-intl';
 import { ChevronDown, Loader2, Presentation } from 'lucide-react';
 import CompsV2AddressPlaceInput from '@/components/CompsV2AddressPlaceInput';
 import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
 import { MarketReportMapPreview } from '@/components/admin/market-report/MarketReportMapPreview';
-import { SeasonalRatesChart } from '@/components/admin/market-report/SeasonalRatesChart';
-import { UnitTypeRateCountChart } from '@/components/admin/market-report/UnitTypeRateCountChart';
-import { UnitTypeRateDumbbellChart } from '@/components/admin/market-report/UnitTypeRateDumbbellChart';
 import { Button } from '@/components/ui';
 import {
   adminBodyMuted,
@@ -20,9 +18,11 @@ import {
   adminSurface,
 } from '@/lib/admin-ui';
 import type {
+  MarketReportFetchMeta,
   MarketReportMapPin,
   MarketReportMeta,
   MarketReportSections,
+  MarketReportSegment,
   MarketReportSourceBreakdownRow,
 } from '@/lib/market-report/types';
 
@@ -37,6 +37,39 @@ import { downloadMarketReportPdfFromElement } from '@/lib/market-report/download
 import { resolveUsStateAbbr } from '@/lib/us-state-centers';
 
 import './market-report-print.css';
+
+function MarketReportChartSkeleton() {
+  const t = useTranslations('admin.marketReport');
+  return (
+    <div
+      className="flex h-[260px] w-full items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 text-xs text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900/30 dark:text-neutral-400"
+      role="status"
+      aria-live="polite"
+    >
+      {t('chartLoading')}
+    </div>
+  );
+}
+
+const SeasonalRatesChart = dynamic(
+  () =>
+    import('@/components/admin/market-report/SeasonalRatesChart').then((m) => m.SeasonalRatesChart),
+  { ssr: false, loading: () => <MarketReportChartSkeleton /> },
+);
+
+const UnitTypeRateCountChart = dynamic(
+  () =>
+    import('@/components/admin/market-report/UnitTypeRateCountChart').then((m) => m.UnitTypeRateCountChart),
+  { ssr: false, loading: () => <MarketReportChartSkeleton /> },
+);
+
+const UnitTypeRateDumbbellChart = dynamic(
+  () =>
+    import('@/components/admin/market-report/UnitTypeRateDumbbellChart').then(
+      (m) => m.UnitTypeRateDumbbellChart,
+    ),
+  { ssr: false, loading: () => <MarketReportChartSkeleton /> },
+);
 
 /** US full name or mixed case → USPS abbreviation; otherwise unchanged (e.g. provinces). */
 function formatMarketReportStateCell(state: string | null | undefined): string {
@@ -70,6 +103,14 @@ type ApiSuccess = {
 };
 
 type ApiError = { success: false; message?: string; code?: string; error?: string };
+
+type InsightsState = {
+  status: 'idle' | 'loading' | 'ready' | 'empty' | 'failed';
+  bullets: string[];
+  model: string | null;
+  cached: boolean;
+  failedKind?: 'rate_limit' | 'generic';
+};
 
 function parseContentDispositionFilename(header: string | null, fallback: string): string {
   if (!header?.trim()) return fallback;
@@ -137,12 +178,15 @@ function MarketReportPageInner() {
   const rawExportRef = useRef<HTMLDivElement>(null);
   const [presenterMode, setPresenterMode] = useState(false);
   const [result, setResult] = useState<ApiSuccess | null>(null);
-  const [insights, setInsights] = useState<{
-    status: 'idle' | 'loading' | 'ready' | 'empty';
-    bullets: string[];
-    model: string | null;
-    cached: boolean;
-  }>({ status: 'idle', bullets: [], model: null, cached: false });
+  const [lastReportServerMs, setLastReportServerMs] = useState<number | null>(null);
+  const [insights, setInsights] = useState<InsightsState>({
+    status: 'idle',
+    bullets: [],
+    model: null,
+    cached: false,
+  });
+  const reportFetchAbortRef = useRef<AbortController | null>(null);
+  const insightsFetchAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setMinSiteUnitCount(segment === 'rv_resort' ? 30 : 3);
@@ -185,6 +229,13 @@ function MarketReportPageInner() {
     };
   }, [rawExportOpen]);
 
+  useEffect(() => {
+    return () => {
+      reportFetchAbortRef.current?.abort();
+      insightsFetchAbortRef.current?.abort();
+    };
+  }, []);
+
   const parseAdr = (s: string): number | null => {
     const trimmed = s.trim();
     if (!trimmed) return null;
@@ -193,18 +244,23 @@ function MarketReportPageInner() {
   };
 
   const fetchInsights = useCallback(
-    async (ok: ApiSuccess, options: { noCache?: boolean } = {}) => {
-      // Skip the LLM call entirely for empty cohorts — nothing to summarize.
-      if (ok.meta.propertyCount === 0) {
+    async (
+      ok: ApiSuccess,
+      options: { noCache?: boolean; signal?: AbortSignal } = {},
+    ) => {
+      const inventoryRows =
+        ok.sections.marketSummary.inventoryRowCount ?? ok.meta.propertyCount ?? 0;
+      if (inventoryRows === 0) {
         setInsights({ status: 'empty', bullets: [], model: null, cached: false });
         return;
       }
-      setInsights((prev) => ({ ...prev, status: 'loading' }));
+      setInsights({ status: 'loading', bullets: [], model: null, cached: false });
       try {
         const res = await fetch('/api/admin/market-report/insights', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
+          signal: options.signal,
           body: JSON.stringify({
             segment,
             scope: ok.meta.scope ?? scope,
@@ -212,89 +268,161 @@ function MarketReportPageInner() {
             radiusMiles: ok.meta.radiusMiles ?? 0,
             adrMin: ok.meta.adrMin ?? null,
             adrMax: ok.meta.adrMax ?? null,
+            minSiteUnitCount: ok.meta.minSiteUnitCount ?? minSiteUnitCount,
             summary: ok.sections.marketSummary,
             noCache: options.noCache ?? false,
           }),
         });
+        if (options.signal?.aborted) return;
         if (!res.ok) {
-          // 429 / 5xx / etc — silently degrade; the report itself is still useful.
-          setInsights({ status: 'empty', bullets: [], model: null, cached: false });
+          const failedKind = res.status === 429 ? 'rate_limit' : 'generic';
+          setInsights({
+            status: 'failed',
+            bullets: [],
+            model: null,
+            cached: false,
+            failedKind,
+          });
           return;
         }
-        const json = (await res.json()) as {
+        let json: {
           success: boolean;
           bullets?: string[];
           model?: string | null;
           cached?: boolean;
         };
-        const bullets = json.success && Array.isArray(json.bullets) ? json.bullets : [];
+        try {
+          json = await res.json();
+        } catch {
+          setInsights({
+            status: 'failed',
+            bullets: [],
+            model: null,
+            cached: false,
+            failedKind: 'generic',
+          });
+          return;
+        }
+        if (options.signal?.aborted) return;
+        if (!json || typeof json !== 'object' || !json.success) {
+          setInsights({
+            status: 'failed',
+            bullets: [],
+            model: null,
+            cached: false,
+            failedKind: 'generic',
+          });
+          return;
+        }
+        const bullets = Array.isArray(json.bullets) ? json.bullets : [];
         setInsights({
           status: bullets.length > 0 ? 'ready' : 'empty',
           bullets,
           model: json.model ?? null,
           cached: !!json.cached,
         });
-      } catch {
-        setInsights({ status: 'empty', bullets: [], model: null, cached: false });
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        if (err instanceof Error && err.name === 'AbortError') return;
+        if (options.signal?.aborted) return;
+        setInsights({
+          status: 'failed',
+          bullets: [],
+          model: null,
+          cached: false,
+          failedKind: 'generic',
+        });
       }
     },
-    [segment, scope]
+    [segment, scope, minSiteUnitCount],
   );
 
-  const runReport = useCallback(async (options: { noCache?: boolean } = {}) => {
-    setLoading(true);
-    setError(null);
-    setExportError(null);
-    setInsights({ status: 'idle', bullets: [], model: null, cached: false });
-    try {
-      const res = await fetch('/api/admin/market-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          scope,
-          addressLine: addressLine.trim(),
-          radiusMiles,
-          segment,
-          adrMin: parseAdr(adrMin),
-          adrMax: parseAdr(adrMax),
-          minSiteUnitCount,
-          noCache: options.noCache ?? false,
-        }),
-      });
-      const json = (await res.json()) as ApiSuccess | ApiError;
-      if (res.status === 429) {
+  const runReport = useCallback(
+    async (options: { noCache?: boolean } = {}) => {
+      reportFetchAbortRef.current?.abort();
+      insightsFetchAbortRef.current?.abort();
+      const reportAc = new AbortController();
+      reportFetchAbortRef.current = reportAc;
+
+      setLoading(true);
+      setError(null);
+      setExportError(null);
+      setLastReportServerMs(null);
+      setInsights({ status: 'idle', bullets: [], model: null, cached: false });
+      try {
+        const res = await fetch('/api/admin/market-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: reportAc.signal,
+          body: JSON.stringify({
+            scope,
+            addressLine: addressLine.trim(),
+            radiusMiles,
+            segment,
+            adrMin: parseAdr(adrMin),
+            adrMax: parseAdr(adrMax),
+            minSiteUnitCount,
+            noCache: options.noCache ?? false,
+          }),
+        });
+        if (reportAc.signal.aborted) return;
+
+        const json = (await res.json()) as ApiSuccess | ApiError;
+        if (res.status === 429) {
+          setResult(null);
+          setLastReportServerMs(null);
+          setError(t('errors.rateLimited'));
+          return;
+        }
+        if (!res.ok || !json.success) {
+          const msg = !json.success ? errorMessageFromApi(t, json) : undefined;
+          setResult(null);
+          setLastReportServerMs(null);
+          setError(msg || t('errorGeneric'));
+          return;
+        }
+        const headerMs = res.headers.get('X-Market-Report-Ms');
+        const parsedHeader = headerMs != null ? Number(headerMs) : NaN;
+        setLastReportServerMs(Number.isFinite(parsedHeader) ? parsedHeader : null);
+
+        const ok = json as ApiSuccess;
+        const normalized: ApiSuccess = {
+          ...ok,
+          mapPins: ok.mapPins ?? [],
+          meta: {
+            ...ok.meta,
+            mapPinsTotal: ok.meta.mapPinsTotal ?? ok.mapPins?.length ?? 0,
+            mapPinsTruncated: ok.meta.mapPinsTruncated ?? false,
+            distinctListingCount:
+              ok.meta.distinctListingCount ?? ok.sections.marketSummary.distinctListingCount,
+          },
+        };
+        setResult(normalized);
+        const insightsAc = new AbortController();
+        insightsFetchAbortRef.current = insightsAc;
+        void fetchInsights(normalized, { noCache: options.noCache, signal: insightsAc.signal });
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        if (err instanceof Error && err.name === 'AbortError') return;
         setResult(null);
-        setError(t('errors.rateLimited'));
-        return;
+        setLastReportServerMs(null);
+        setError(t('errorGeneric'));
+      } finally {
+        if (!reportAc.signal.aborted) {
+          setLoading(false);
+        }
       }
-      if (!res.ok || !json.success) {
-        const msg = !json.success ? errorMessageFromApi(t, json) : undefined;
-        setResult(null);
-        setError(msg || t('errorGeneric'));
-        return;
-      }
-      const ok = json as ApiSuccess;
-      const normalized: ApiSuccess = {
-        ...ok,
-        mapPins: ok.mapPins ?? [],
-        meta: {
-          ...ok.meta,
-          mapPinsTotal: ok.meta.mapPinsTotal ?? ok.mapPins?.length ?? 0,
-          mapPinsTruncated: ok.meta.mapPinsTruncated ?? false,
-        },
-      };
-      setResult(normalized);
-      // Fire-and-forget: insights generation is non-blocking. A bypassed cache
-      // on the parent report should also bypass the insight cache so analysts
-      // see fresh narrative on Force Refresh.
-      void fetchInsights(normalized, { noCache: options.noCache });
-    } catch {
-      setResult(null);
-      setError(t('errorGeneric'));
-    } finally {
-      setLoading(false);
-    }
-  }, [scope, addressLine, radiusMiles, segment, adrMin, adrMax, minSiteUnitCount, t, fetchInsights]);
+    },
+    [scope, addressLine, radiusMiles, segment, adrMin, adrMax, minSiteUnitCount, t, fetchInsights],
+  );
+
+  const retryInsights = useCallback(() => {
+    if (!result) return;
+    insightsFetchAbortRef.current?.abort();
+    const insightsAc = new AbortController();
+    insightsFetchAbortRef.current = insightsAc;
+    void fetchInsights(result, { noCache: true, signal: insightsAc.signal });
+  }, [result, fetchInsights]);
 
   const fmtNum = (n: number | null | undefined, opts?: { maximumFractionDigits?: number }) =>
     n == null || Number.isNaN(n) ? '—' : format.number(n, opts ?? { maximumFractionDigits: 1 });
@@ -582,15 +710,22 @@ function MarketReportPageInner() {
         ) : null}
 
         <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-neutral-100 pt-4 dark:border-neutral-800">
+          {loading ? (
+            <p className="sr-only" role="status">
+              {t('statusReportLoading')}
+            </p>
+          ) : null}
           <Button
             type="button"
             onClick={() => runReport()}
             disabled={loading || (scope === 'local' && !addressLine.trim())}
+            aria-busy={loading}
+            className="inline-flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-                {t('generating')}
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                <span className="whitespace-nowrap">{t('generating')}</span>
               </>
             ) : (
               t('generate')
@@ -606,12 +741,23 @@ function MarketReportPageInner() {
             {t('forceRefresh')}
           </button>
           {error ? (
-            <p className="ml-auto text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="ml-auto text-sm text-red-600 dark:text-red-400" role="alert" aria-live="assertive">
+              {error}
+            </p>
           ) : null}
           {exportError ? (
-            <p className="ml-auto text-sm text-red-600 dark:text-red-400">{exportError}</p>
+            <p className="ml-auto text-sm text-red-600 dark:text-red-400" role="alert" aria-live="assertive">
+              {exportError}
+            </p>
           ) : null}
         </div>
+        {result && lastReportServerMs != null ? (
+          <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+            {t('reportServerTiming', {
+              seconds: format.number(lastReportServerMs / 1000, { maximumFractionDigits: 1 }),
+            })}
+          </p>
+        ) : null}
       </div>
 
       {!result && !loading && !error ? <p className={adminBodyMuted}>{t('emptyState')}</p> : null}
@@ -755,7 +901,7 @@ function MarketReportPageInner() {
             <p className={adminBodyMuted}>{t('noPropertiesInRadius')}</p>
           ) : (
             <>
-              <SectionCard title={t('sectionMarketSummary')}>
+              <SectionCard title={t('sectionMarketSummary')} pdfKeepHeading>
                 <MarketSummaryRedesigned
                   t={t}
                   format={format}
@@ -764,6 +910,7 @@ function MarketReportPageInner() {
                   scope={result.meta.scope ?? 'local'}
                   insights={insights}
                   presenterMode={presenterMode}
+                  onRetryInsights={retryInsights}
                 />
               </SectionCard>
 
@@ -793,6 +940,7 @@ function MarketReportPageInner() {
                         ) : null}
                         <th className="py-2 pr-3 font-medium">{t('tableSites')}</th>
                         <th className="py-2 pr-3 font-medium">{t('tableUnitType')}</th>
+                        <th className="py-2 pr-3 font-medium">{t('tablePropertyArdr')}</th>
                         <th className="py-2 font-medium">{t('tableWebsite')}</th>
                       </tr>
                     </thead>
@@ -823,7 +971,11 @@ function MarketReportPageInner() {
                             {result.meta.scope !== 'national' ? (
                               <td className="py-2 pr-3">{fmtNum(row.distance_miles)}</td>
                             ) : null}
-                            <td className="py-2 pr-3">{row.property_total_sites ?? '—'}</td>
+                            <td className="py-2 pr-3 tabular-nums">
+                              {group.propertyTotalSites != null
+                                ? format.number(group.propertyTotalSites)
+                                : '—'}
+                            </td>
                             <td className="py-2 pr-3 max-w-[14rem]" title={unitTypeTitle}>
                               {unitTypesForDisplay.length === 0 ? (
                                 <span className="text-neutral-400">—</span>
@@ -839,6 +991,9 @@ function MarketReportPageInner() {
                                   ))}
                                 </span>
                               )}
+                            </td>
+                            <td className="py-2 pr-3 tabular-nums">
+                              {formatCurrency(group.avgRetailDailyRate)}
                             </td>
                             <td className="py-2">
                               {safeUrl ? (
@@ -981,29 +1136,6 @@ function MarketReportPageInner() {
                     valueLabelMax={t('siteUnitDumbbellValueMax')}
                   />
                 </div>
-                <p className="mb-2 text-sm font-medium text-neutral-800 dark:text-neutral-200">
-                  {t('siteUnitTopUnitTypes')}
-                </p>
-                <div className="mb-5 flex flex-wrap gap-2">
-                  {result.sections.siteUnitAnalysis.topUnitTypes.map((u) => (
-                    <span
-                      key={u.unit_type}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${unitTypePillSurfaceClasses(u.unit_type)}`}
-                    >
-                      <span className="font-medium">{humanLabel(u.unit_type)}</span>
-                      <span className="text-current/55 dark:text-current/50">·</span>
-                      <span className="tabular-nums">{format.number(u.count)}</span>
-                    </span>
-                  ))}
-                </div>
-                <p className="mb-2 text-sm font-medium text-neutral-800 dark:text-neutral-200">
-                  {t('siteUnitSitesHistogram')}
-                </p>
-                <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {result.sections.siteUnitAnalysis.siteBuckets.map((b) => (
-                    <Stat key={b.label} label={b.label} value={format.number(b.count)} />
-                  ))}
-                </div>
                 {result.meta.segment !== 'glamping' && result.sections.siteUnitAnalysis.rvFieldPresence?.length ? (
                   <>
                     <p className="mb-2 text-sm font-medium text-neutral-800 dark:text-neutral-200">
@@ -1037,13 +1169,30 @@ function MarketReportPageInner() {
   );
 }
 
-function SectionCard({ title, children }: { title: string; children: ReactNode }) {
+function SectionCard({
+  title,
+  children,
+  pdfKeepHeading = false,
+}: {
+  title: string;
+  children: ReactNode;
+  /** Wraps the section title for PDF slicing so html2canvas page cuts do not split the heading. */
+  pdfKeepHeading?: boolean;
+}) {
+  const heading = (
+    <h2 className="market-report-section-title mb-4 flex items-center gap-2 border-b border-neutral-200/80 pb-3 text-lg font-semibold tracking-tight text-neutral-900 dark:border-neutral-700 dark:text-neutral-100 sm:text-xl">
+      <span aria-hidden className="inline-block h-4 w-1 rounded-sm bg-amber-400" />
+      {title}
+    </h2>
+  );
+
   return (
-    <section className={`${adminSurface} p-4 sm:p-5 market-report-section`}>
-      <h2 className="market-report-section-title mb-4 flex items-center gap-2 border-b border-neutral-200/80 pb-3 text-lg font-semibold tracking-tight text-neutral-900 dark:border-neutral-700 dark:text-neutral-100 sm:text-xl">
-        <span aria-hidden className="inline-block h-4 w-1 rounded-sm bg-amber-400" />
-        {title}
-      </h2>
+    <section
+      className={`${adminSurface} p-4 sm:p-5 market-report-section${
+        pdfKeepHeading ? ' market-report-pdf-break-before-export' : ''
+      }`}
+    >
+      {pdfKeepHeading ? <div className="market-report-pdf-keep">{heading}</div> : heading}
       {children}
     </section>
   );
@@ -1238,20 +1387,15 @@ function AiInsightsBlock({
   t,
   insights,
   presenterMode,
+  onRetryInsights,
 }: {
   t: (key: string, values?: Record<string, string | number>) => string;
-  insights: {
-    status: 'idle' | 'loading' | 'ready' | 'empty';
-    bullets: string[];
-    model: string | null;
-    cached: boolean;
-  };
+  insights: InsightsState;
   presenterMode: boolean;
+  onRetryInsights: () => void;
 }) {
-  // Hide entirely on `idle` (no report yet) or `empty` (LLM unavailable / nothing
-  // to summarize) — we don't want a permanently-empty placeholder cluttering
-  // the print PDF or the live UI.
   if (insights.status === 'idle' || insights.status === 'empty') return null;
+  if (presenterMode && insights.status === 'failed') return null;
 
   return (
     <section
@@ -1272,11 +1416,30 @@ function AiInsightsBlock({
         ) : null}
       </div>
       {insights.status === 'loading' ? (
-        <div className="flex items-center gap-2 text-sm text-amber-900/80 dark:text-amber-200/80">
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        <div
+          className="flex items-center gap-2 text-sm text-amber-900/80 dark:text-amber-200/80"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden />
           <span>{t('summaryAiBulletsLoading')}</span>
         </div>
-      ) : (
+      ) : null}
+      {insights.status === 'failed' ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-amber-950 dark:text-amber-100" role="alert">
+            {insights.failedKind === 'rate_limit'
+              ? t('summaryAiBulletsFailedRateLimited')
+              : t('summaryAiBulletsFailed')}
+          </p>
+          {!presenterMode ? (
+            <Button type="button" variant="secondary" className="shrink-0 self-start sm:self-auto" onClick={onRetryInsights}>
+              {t('summaryAiBulletsRetry')}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      {insights.status === 'ready' ? (
         <ul className="space-y-1.5 text-sm text-neutral-800 dark:text-neutral-100">
           {insights.bullets.map((b, i) => (
             <li key={i} className="flex gap-2">
@@ -1285,7 +1448,7 @@ function AiInsightsBlock({
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
     </section>
   );
 }
@@ -1298,19 +1461,16 @@ function MarketSummaryRedesigned({
   scope,
   insights,
   presenterMode,
+  onRetryInsights,
 }: {
   t: (key: string, values?: Record<string, string | number>) => string;
   format: ReturnType<typeof useFormatter>;
   marketSummary: MarketReportSections['marketSummary'];
   rateAnalysis: MarketReportSections['rateAnalysis'];
   scope: 'local' | 'national';
-  insights: {
-    status: 'idle' | 'loading' | 'ready' | 'empty';
-    bullets: string[];
-    model: string | null;
-    cached: boolean;
-  };
+  insights: InsightsState;
   presenterMode: boolean;
+  onRetryInsights: () => void;
 }) {
   const score = marketSummary.opportunityScore ?? null;
   const drivers = marketSummary.demandDrivers ?? null;
@@ -1321,12 +1481,17 @@ function MarketSummaryRedesigned({
     <div className="space-y-5">
       {isLocal && score ? <OpportunityScoreCard score={score} t={t} /> : null}
 
-      <AiInsightsBlock t={t} insights={insights} presenterMode={presenterMode} />
+      <AiInsightsBlock
+        t={t}
+        insights={insights}
+        presenterMode={presenterMode}
+        onRetryInsights={onRetryInsights}
+      />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           label={t('summaryStatProperties')}
-          value={format.number(marketSummary.propertyCount)}
+          value={format.number(marketSummary.distinctListingCount)}
         />
         <Stat
           label={t('summaryStatTotalSites')}
@@ -1335,11 +1500,9 @@ function MarketSummaryRedesigned({
           }
         />
         <Stat
-          label={t('summaryStatRadius')}
+          label={t('summaryStatMeanArdr')}
           value={
-            isLocal
-              ? `${format.number(marketSummary.radiusMiles)} mi`
-              : t('scopeNational')
+            rateAnalysis.meanAdr != null ? formatCurrency(rateAnalysis.meanAdr) : '—'
           }
         />
         <Stat
@@ -1352,9 +1515,6 @@ function MarketSummaryRedesigned({
 
       {marketSummary.topUnitTypesWithAdr.length > 0 ? (
         <div>
-          <p className="mb-2 text-sm font-medium text-neutral-800 dark:text-neutral-200">
-            {t('summaryTopUnitTypesTitle')}
-          </p>
           <div className="overflow-x-auto rounded-md border border-neutral-200 dark:border-neutral-700">
             <table className="w-full min-w-[20rem] border-collapse text-sm">
               <thead className="bg-neutral-50/80 dark:bg-neutral-900/40">
@@ -1521,7 +1681,7 @@ function DemandDriversBlock({
       <p className="mb-2 text-sm font-medium text-neutral-800 dark:text-neutral-200">
         {t('summaryDemandDriversTitle')}
       </p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
         {drivers ? (
           <>
             <DriverTile
@@ -1549,13 +1709,11 @@ function DemandDriversBlock({
               t={t}
             />
             <DriverTile
-              label={t('driverMajorOutdoor')}
-              count={drivers.majorOutdoorSites.count}
-              radiusMiles={drivers.majorOutdoorSites.radiusMiles}
-              top={drivers.majorOutdoorSites.top.slice(0, 3).map((p) =>
-                p.siteType
-                  ? `${p.name} (${p.siteType.replace(/_/g, ' ')})`
-                  : p.name
+              label={t('driverMajorLargeCities')}
+              count={drivers.majorAndLargeCities.count}
+              radiusMiles={drivers.majorAndLargeCities.radiusMiles}
+              top={drivers.majorAndLargeCities.top.slice(0, 3).map((p) =>
+                p.siteType ? `${p.name} · ${p.siteType}` : p.name,
               )}
               format={format}
               t={t}
@@ -1638,6 +1796,57 @@ function DriverTile({
   );
 }
 
+function fetchPartnerMessageKey(source: keyof MarketReportFetchMeta): string {
+  switch (source) {
+    case 'glamping':
+      return 'fetchPartnerGlamping';
+    case 'roverpass':
+      return 'fetchPartnerRoverpass';
+    case 'campspot':
+      return 'fetchPartnerCampspot';
+    case 'hipcamp':
+      return 'fetchPartnerHipcamp';
+    default: {
+      const _exhaustive: never = source;
+      return _exhaustive;
+    }
+  }
+}
+
+function MarketReportFetchHealth({
+  fetch: fetchMeta,
+  t,
+  format,
+}: {
+  fetch: NonNullable<MarketReportMeta['fetch']>;
+  t: (key: string, values?: Record<string, string | number>) => string;
+  format: ReturnType<typeof useFormatter>;
+}) {
+  const ordered: (keyof MarketReportFetchMeta)[] = ['glamping', 'roverpass', 'campspot', 'hipcamp'];
+  const lines: ReactNode[] = [];
+  for (const key of ordered) {
+    const slice = fetchMeta[key];
+    if (!slice) continue;
+    lines.push(
+      <li key={key}>
+        {t('fetchSliceLine', {
+          partner: t(fetchPartnerMessageKey(key)),
+          candidates: format.number(slice.candidatesInBBox),
+          chunks: format.number(slice.chunksUsed),
+          capped: slice.hitRowCap ? t('fetchHitCapSuffix') : '',
+        })}
+      </li>,
+    );
+  }
+  if (lines.length === 0) return null;
+  return (
+    <div className="mt-2 rounded-md border border-neutral-200 bg-neutral-50/80 p-2 text-xs dark:border-neutral-700 dark:bg-neutral-900/40">
+      <p className="font-medium text-neutral-700 dark:text-neutral-200">{t('fetchHealthTitle')}</p>
+      <ul className="mt-1 list-inside list-disc space-y-0.5 text-neutral-600 dark:text-neutral-400">{lines}</ul>
+    </div>
+  );
+}
+
 function MetaBlock({
   t,
   meta,
@@ -1711,6 +1920,7 @@ function MetaBlock({
             <span className="font-medium">{meta.sources.join(', ')}</span>
           </p>
           <p className="text-xs text-neutral-500 dark:text-neutral-400">{t('metaSourcesHipcampNote')}</p>
+          {meta.fetch ? <MarketReportFetchHealth fetch={meta.fetch} t={t} format={format} /> : null}
         </>
       ) : null}
 
@@ -1719,19 +1929,29 @@ function MetaBlock({
           <p className="mb-1 text-sm font-medium text-neutral-800 dark:text-neutral-200">{t('dataBySourceTitle')}</p>
           <p className="mb-2 text-xs text-neutral-500 dark:text-neutral-400">{t('dataBySourceIntro')}</p>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[22rem] border-collapse text-xs">
+            <table className="w-full min-w-[28rem] border-collapse text-xs">
               <thead>
                 <tr className="border-b border-neutral-200 text-left dark:border-neutral-700">
                   <th className="py-1.5 pr-2 font-medium text-neutral-600 dark:text-neutral-300">{t('dataBySourceColSource')}</th>
-                  <th className="py-1.5 pr-2 font-medium text-neutral-600 dark:text-neutral-300">{t('dataBySourceColProperties')}</th>
-                  <th className="py-1.5 pr-2 font-medium text-neutral-600 dark:text-neutral-300">{t('dataBySourceColSitesUnits')}</th>
+                  <th className="py-1.5 pr-2 font-medium text-neutral-600 dark:text-neutral-300">{t('dataBySourceColListings')}</th>
+                  <th className="py-1.5 pr-2 font-medium text-neutral-600 dark:text-neutral-300">
+                    {meta.segment === 'glamping'
+                      ? t('dataBySourceColUnits')
+                      : t('dataBySourceColSites')}
+                  </th>
                   <th className="py-1.5 pr-2 font-medium text-neutral-600 dark:text-neutral-300">{t('dataBySourceColAvgAdr')}</th>
                   <th className="py-1.5 font-medium text-neutral-600 dark:text-neutral-300">{t('dataBySourceColAvgOccupancy')}</th>
                 </tr>
               </thead>
               <tbody>
                 {marketSummary.sourceBreakdown.map((row) => (
-                  <SourceBreakdownRow key={row.source} row={row} t={t} format={format} />
+                  <SourceBreakdownRow
+                    key={row.source}
+                    row={row}
+                    segment={meta.segment}
+                    t={t}
+                    format={format}
+                  />
                 ))}
               </tbody>
             </table>
@@ -1744,31 +1964,31 @@ function MetaBlock({
 
 function formatSitesUnitsCell(
   row: MarketReportSourceBreakdownRow,
+  segment: MarketReportSegment,
   t: (key: string, values?: Record<string, string | number>) => string,
   format: ReturnType<typeof useFormatter>
 ): string {
   const { totalSites, totalUnits } = row;
-  if (totalSites != null && totalUnits != null) {
-    return t('dataBySourceSitesAndUnits', {
-      sites: format.number(totalSites),
-      units: format.number(totalUnits),
-    });
+  if (segment === 'glamping') {
+    if (totalUnits != null) {
+      return t('dataBySourceUnitsOnly', { n: format.number(totalUnits) });
+    }
+    return t('dataBySourceDash');
   }
   if (totalSites != null) {
     return t('dataBySourceSitesOnly', { n: format.number(totalSites) });
-  }
-  if (totalUnits != null) {
-    return t('dataBySourceUnitsOnly', { n: format.number(totalUnits) });
   }
   return t('dataBySourceDash');
 }
 
 function SourceBreakdownRow({
   row,
+  segment,
   t,
   format,
 }: {
   row: MarketReportSourceBreakdownRow;
+  segment: MarketReportSegment;
   t: (key: string, values?: Record<string, string | number>) => string;
   format: ReturnType<typeof useFormatter>;
 }) {
@@ -1778,7 +1998,7 @@ function SourceBreakdownRow({
       : t('dataBySourceDash');
   const occ =
     row.avgOccupancy != null
-      ? `${format.number(row.avgOccupancy, { maximumFractionDigits: 1 })}%`
+      ? formatOccupancyPct(row.avgOccupancy)
       : t('dataBySourceDash');
 
   return (
@@ -1786,8 +2006,8 @@ function SourceBreakdownRow({
       <th scope="row" className="py-1.5 pr-2 text-left font-medium text-neutral-800 dark:text-neutral-200">
         {row.sourceLabel}
       </th>
-      <td className="py-1.5 pr-2 tabular-nums">{format.number(row.propertyCount)}</td>
-      <td className="py-1.5 pr-2">{formatSitesUnitsCell(row, t, format)}</td>
+      <td className="py-1.5 pr-2 tabular-nums">{format.number(row.distinctListingCount)}</td>
+      <td className="py-1.5 pr-2">{formatSitesUnitsCell(row, segment, t, format)}</td>
       <td className="py-1.5 pr-2 tabular-nums">{adr}</td>
       <td className="py-1.5 tabular-nums">{occ}</td>
     </tr>

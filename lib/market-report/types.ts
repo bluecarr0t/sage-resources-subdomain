@@ -73,7 +73,14 @@ export interface MarketReportMeta {
   /** Miles for `local` scope; 0 for `national`. */
   radiusMiles: number;
   segment: MarketReportSegment;
+  /**
+   * Cohort inventory rows after load (Sage: every `all_glamping_properties` row;
+   * other sources: collapsed to one row per property × unit type). Legacy field
+   * name for API consumers.
+   */
   propertyCount: number;
+  /** Distinct listings in the cohort (normalized name + city + state + source). */
+  distinctListingCount: number;
   sources: string[];
   generatedAt: string;
   /** When true, a bbox query hit the row cap; in-radius counts may be incomplete. */
@@ -112,11 +119,14 @@ export interface MarketReportSections {
   siteUnitAnalysis: SiteUnitAnalysisSection;
 }
 
-/** Per listing source: counts and averages for properties inside the radius. */
+/** Per listing source: inventory row counts and distinct listings inside the radius. */
 export interface MarketReportSourceBreakdownRow {
   source: string;
   sourceLabel: string;
-  propertyCount: number;
+  /** Rows for this source after cohort load (Sage: all rows; other sources deduped). */
+  inventoryRowCount: number;
+  /** Distinct `(property_name, city, state)` listings for this source. */
+  distinctListingCount: number;
   /** Sum of `property_total_sites` where present and greater than zero. */
   totalSites: number | null;
   /** Sum of `quantity_of_units` where present and greater than zero. */
@@ -128,9 +138,8 @@ export interface MarketReportSourceBreakdownRow {
 export interface MarketSummaryTopUnitTypeRow {
   unit_type: string;
   /**
-   * Number of properties offering this unit type. Because the cohort is
-   * deduped at `(source, property, unit_type)` grain upstream, one row =
-   * one property × unit_type combination.
+   * Number of cohort rows for this unit type (Sage: each rate tier / row counts;
+   * other sources: one row per property × unit type after dedupe).
    */
   count: number;
   /**
@@ -146,17 +155,23 @@ export interface MarketSummaryTopUnitTypeRow {
 }
 
 export interface MarketSummarySection {
-  propertyCount: number;
+  /** Distinct listings (`source` + normalized name + city + state). */
+  distinctListingCount: number;
+  /** Cohort inventory rows (Sage: all table rows; other sources deduped). */
+  inventoryRowCount: number;
   radiusMiles: number;
   segment: MarketReportSegment;
-  /** `source` is the internal cohort key; `sourceLabel` is the product name (Sage, RoverPass, Campspot). */
+  /**
+   * Per internal `source` key: `count` = cohort **inventory rows** (Sage: all rows;
+   * other sources: deduped property × unit type grain), not distinct listings.
+   */
   sourceCounts: { source: string; sourceLabel: string; count: number }[];
   /** One row per source that appears in the cohort (stable display order). */
   sourceBreakdown: MarketReportSourceBreakdownRow[];
   topStates: { state: string; count: number }[];
   /** Sum of `property_total_sites` across the cohort (null when none reported). */
   totalSites: number | null;
-  /** Top unit types by count, with median ADR for that unit type. Capped at 3. */
+  /** Top unit types by count, with median ADR for that unit type. Capped at 5. */
   topUnitTypesWithAdr: MarketSummaryTopUnitTypeRow[];
   /** Demand drivers (national parks, ski resorts, wineries) in the catchment. Local scope only. */
   demandDrivers?: import('./demand-drivers').DemandDriversResult | null;
@@ -183,6 +198,8 @@ export interface PropertyAnalysisSection {
     unit_type: string | null;
     source: string;
     sourceLabel: string;
+    /** Primary avg. retail daily rate for this sample row when known (> 0). */
+    rate_avg: number | null;
     /** Listing URL for the property when known. */
     url: string | null;
   }[];
@@ -207,20 +224,24 @@ export interface RateAnalysisSection {
 
 export interface AmenityAnalysisSection {
   mode: 'glamping' | 'rv_limited';
+  /** Glamping: distinct listings among rows with amenity `raw` data (subset of full cohort). */
   cohortSize?: number;
   /**
-   * Glamping only. `pctOfCohort` = Yes / full cohort; `pctOfKnown` = Yes / rows with non-empty cell.
+   * Glamping only. `pctOfCohort` = listings with Yes / distinct listings in cohort;
+   * `pctOfKnown` = listings with Yes / listings with any non-empty cell for that amenity.
+   * A listing counts as Yes if any inventory row for that listing is affirmative.
+   * Rows with 0% “Yes” among known values are omitted (nothing to highlight for operators).
    */
   amenityRates?: {
     column: string;
     label: string;
-    /** % of cohort with “Yes” (missing/empty treated as not yes). */
+    /** % of cohort listings with “Yes” on at least one row (missing/empty treated as not yes). */
     pctOfCohort: number;
-    /** % “Yes” among rows with a non-empty value for this column. */
+    /** % “Yes” among listings with a non-empty value for this column on at least one row. */
     pctOfKnown: number;
-    /** Rows with non-empty cell for this amenity. */
+    /** Listings with a non-empty cell for this amenity on at least one row. */
     withKnownValue: number;
-    /** Rows with affirmative value. */
+    /** Listings with an affirmative value on at least one row. */
     yesCount: number;
     /**
      * Mean ARDR (USD) for properties where this amenity is affirmative, minus

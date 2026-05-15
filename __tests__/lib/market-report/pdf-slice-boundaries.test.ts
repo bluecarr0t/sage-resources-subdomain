@@ -20,4 +20,12 @@ describe('nextPdfSliceEnd', () => {
     const end = nextPdfSliceEnd(0, maxSlice, 2000, regions);
     expect(end).toBe(600);
   });
+
+  it('still ends before a keep region when that leaves a short trailing strip (heading snap)', () => {
+    const y = 370;
+    const maxSlice = 100;
+    const regions = [{ top: 400, bottom: 500 }];
+    const end = nextPdfSliceEnd(y, maxSlice, 2000, regions);
+    expect(end).toBe(400);
+  });
 });

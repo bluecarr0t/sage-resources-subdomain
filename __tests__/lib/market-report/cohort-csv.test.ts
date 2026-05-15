@@ -115,7 +115,7 @@ describe('buildCohortCsv', () => {
     expect(csv).toContain('Unknown');
   });
 
-  it('wide mode adds raw_* columns and JSON for nested raw values', () => {
+  it('wide mode adds per-field columns from raw (DB-style names) and JSON for nested raw values', () => {
     const rows = [
       makeRow({
         raw: { hot_tub: true, nested: { a: 1 } },
@@ -126,9 +126,10 @@ describe('buildCohortCsv', () => {
     ];
     expect(new Set(collectUnionRawKeys(rows))).toEqual(new Set(['hot_tub', 'nested', 'other_col']));
     const csv = buildCohortCsv({ rows, wide: true });
-    expect(csv).toContain('raw_hot_tub');
-    expect(csv).toContain('raw_nested');
-    expect(csv).toContain('raw_other_col');
+    expect(csv).toContain('hot_tub');
+    expect(csv).toContain('nested');
+    expect(csv).toContain('other_col');
+    expect(csv).not.toContain('raw_hot_tub');
     expect(csv).toContain('""a""');
     expect(csv).toContain(':1');
   });

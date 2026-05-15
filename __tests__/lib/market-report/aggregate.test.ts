@@ -107,6 +107,36 @@ describe('buildAmenityAnalysis', () => {
     expect(laundry?.pctOfKnown).toBe(50);
     expect(laundry?.pctOfCohort).toBe(50);
   });
+
+  it('amenity cohort size uses distinct listings when one property has multiple unit-type rows', () => {
+    const r = buildAmenityAnalysis('glamping', [
+      row({
+        property_name: 'Same Camp',
+        unit_type: 'Yurt',
+        raw: { property_pool: 'Yes', property_laundry: 'No' },
+      }),
+      row({
+        property_name: 'Same Camp',
+        unit_type: 'Cabin',
+        raw: { property_pool: 'Yes', property_laundry: 'Yes' },
+      }),
+    ]);
+    expect(r.cohortSize).toBe(1);
+    const laundry = r.amenityRates?.find((x) => x.column === 'property_laundry');
+    expect(laundry?.withKnownValue).toBe(1);
+    expect(laundry?.yesCount).toBe(1);
+    expect(laundry?.pctOfCohort).toBe(100);
+    expect(laundry?.pctOfKnown).toBe(100);
+  });
+
+  it('omits amenities with 0% Yes among known values', () => {
+    const r = buildAmenityAnalysis('glamping', [
+      row({ property_name: 'a', raw: { property_pool: 'No', property_laundry: 'Yes' } }),
+      row({ property_name: 'b', raw: { property_pool: 'No', property_laundry: 'Yes' } }),
+    ]);
+    expect(r.amenityRates?.some((x) => x.column === 'property_pool')).toBe(false);
+    expect(r.amenityRates?.find((x) => x.column === 'property_laundry')).toBeTruthy();
+  });
 });
 
 describe('buildSiteUnitAnalysis', () => {
@@ -130,6 +160,15 @@ describe('buildSiteUnitAnalysis', () => {
     expect(cabin?.maxAdr).toBe(300);
   });
 
+  it('excludes Unspecified from top unit types (chart noise)', () => {
+    const r = buildSiteUnitAnalysis('glamping', [
+      row({ property_name: 'a', unit_type: 'Unspecified', rate_avg: 230 }),
+      row({ property_name: 'b', unit_type: 'Yurt', rate_avg: 200 }),
+    ]);
+    expect(r.topUnitTypes.some((u) => u.unit_type === 'Unspecified')).toBe(false);
+    expect(r.topUnitTypes.find((u) => u.unit_type === 'Yurt')?.count).toBe(1);
+  });
+
   it('returns null rates when no priced rows exist for a unit type', () => {
     const r = buildSiteUnitAnalysis('glamping', [
       row({ property_name: 'a', unit_type: 'Tent', rate_avg: null }),
@@ -150,6 +189,15 @@ describe('buildSiteUnitAnalysis', () => {
     ]);
     expect(r.topUnitTypes[0]?.unit_type).toBe('Cabin');
     expect(r.topUnitTypes[1]?.unit_type).toBe('Yurt');
+  });
+
+  it('excludes Unknown from site bucket histogram (missing site counts stay out of the grid)', () => {
+    const r = buildSiteUnitAnalysis('glamping', [
+      row({ property_name: 'a', unit_type: 'Yurt', property_total_sites: null }),
+      row({ property_name: 'b', unit_type: 'Yurt', property_total_sites: 5 }),
+    ]);
+    expect(r.siteBuckets.some((b) => b.label === 'Unknown')).toBe(false);
+    expect(r.siteBuckets.find((b) => b.label === '1–25')?.count).toBe(1);
   });
 
   it('omits Vehicles and RV Site from glamping top unit types but not from RV resort', () => {
@@ -193,6 +241,17 @@ describe('buildMarketSummary topUnitTypesWithAdr', () => {
     expect(sections.marketSummary.topUnitTypesWithAdr.some((u) => u.unit_type === 'RV Site')).toBe(true);
   });
 
+  it('excludes Unspecified from market summary top unit types', () => {
+    const sections = buildMarketReportSections('glamping', 50, [
+      row({ property_name: 'a', unit_type: 'Unspecified', rate_avg: 215 }),
+      row({ property_name: 'b', unit_type: 'Yurt', rate_avg: 200 }),
+    ]);
+    expect(sections.marketSummary.topUnitTypesWithAdr.some((u) => u.unit_type === 'Unspecified')).toBe(
+      false,
+    );
+    expect(sections.marketSummary.topUnitTypesWithAdr.some((u) => u.unit_type === 'Yurt')).toBe(true);
+  });
+
   it('sums quantity_of_units across rows for each unit type and exposes it as unitCount', () => {
     const sections = buildMarketReportSections('glamping', 50, [
       row({ property_name: 'a', unit_type: 'Yurt', quantity_of_units: 5, rate_avg: 200 }),
@@ -232,7 +291,17 @@ describe('buildMarketReportSections', () => {
   it('wires radius into market summary', () => {
     const sections = buildMarketReportSections('glamping', 42, [row({ property_name: 'only' })]);
     expect(sections.marketSummary.radiusMiles).toBe(42);
-    expect(sections.marketSummary.propertyCount).toBe(1);
+    expect(sections.marketSummary.inventoryRowCount).toBe(1);
+    expect(sections.marketSummary.distinctListingCount).toBe(1);
+  });
+
+  it('counts inventory rows separately from distinct listings for the same property', () => {
+    const sections = buildMarketReportSections('glamping', 50, [
+      row({ property_name: 'Same Lodge', unit_type: 'Yurt' }),
+      row({ property_name: 'Same Lodge', unit_type: 'Cabin' }),
+    ]);
+    expect(sections.marketSummary.inventoryRowCount).toBe(2);
+    expect(sections.marketSummary.distinctListingCount).toBe(1);
   });
 
   it('labels source counts for display', () => {
@@ -256,10 +325,13 @@ describe('buildMarketReportSections', () => {
     expect(bd).toHaveLength(2);
     const sage = bd.find((r) => r.source === 'all_glamping_properties');
     const rp = bd.find((r) => r.source === 'all_roverpass_data_new');
-    expect(sage?.propertyCount).toBe(1);
+    expect(sage?.inventoryRowCount).toBe(1);
+    expect(sage?.distinctListingCount).toBe(1);
     expect(sage?.totalSites).toBe(10);
     expect(sage?.avgRetailDailyRate).toBe(100);
     expect(sage?.avgOccupancy).toBe(50);
+    expect(rp?.inventoryRowCount).toBe(1);
+    expect(rp?.distinctListingCount).toBe(1);
     expect(rp?.totalUnits).toBe(5);
     expect(rp?.avgRetailDailyRate).toBe(200);
     expect(rp?.avgOccupancy).toBe(70);

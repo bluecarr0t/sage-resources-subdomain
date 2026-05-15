@@ -79,6 +79,12 @@
     page-break-inside: avoid;
   }
 
+  /* Market Summary (and any section using this helper): start on a fresh page in print. */
+  html.market-report-print-mode .market-report-pdf-break-before-export {
+    break-before: page;
+    page-break-before: always;
+  }
+
   /* Crisper borders + neutral fills for stat tiles in print. */
   html.market-report-print-mode .market-report-section .tabular-nums {
     color: #111 !important;

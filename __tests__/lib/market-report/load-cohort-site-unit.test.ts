@@ -25,7 +25,44 @@ describe('cohort site/unit metric and min filter', () => {
     expect(applyMinSiteUnitCountFilter(rows, 'glamping', 0)).toEqual(rows);
   });
 
-  it('applyMinSiteUnitCountFilter drops rows below threshold', () => {
+  it('applyMinSiteUnitCountFilter keeps glamping Sage rows below threshold', () => {
+    const sage = {
+      source: 'all_glamping_properties',
+      property_total_sites: 1,
+      quantity_of_units: 1,
+    } as DedupedCohortRow;
+    const hip = {
+      source: 'hipcamp',
+      property_total_sites: null,
+      quantity_of_units: 2,
+    } as DedupedCohortRow;
+    const out = applyMinSiteUnitCountFilter([sage, hip], 'glamping', 5);
+    expect(out).toEqual([sage]);
+  });
+
+  it('applyMinSiteUnitCountFilter keeps national Hipcamp rows below threshold', () => {
+    const hip = {
+      source: 'hipcamp',
+      property_total_sites: null,
+      quantity_of_units: 1,
+    } as DedupedCohortRow;
+    const out = applyMinSiteUnitCountFilter([hip], 'glamping', 5, {
+      scope: 'national',
+    });
+    expect(out).toEqual([hip]);
+  });
+
+  it('applyMinSiteUnitCountFilter still applies to all sources for rv_resort', () => {
+    const sageRv = {
+      source: 'all_glamping_properties',
+      property_total_sites: 2,
+      quantity_of_units: null,
+    } as DedupedCohortRow;
+    const out = applyMinSiteUnitCountFilter([sageRv], 'rv_resort', 5);
+    expect(out).toHaveLength(0);
+  });
+
+  it('applyMinSiteUnitCountFilter drops non-Sage glamping rows below threshold', () => {
     const rows = [row(null, 10), row(null, 2)];
     const out = applyMinSiteUnitCountFilter(rows, 'glamping', 5);
     expect(out).toHaveLength(1);

@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 
 import { formatCurrency, humanLabel } from '@/lib/market-report/format-labels';
+import { isOmittedUnitTypeForCharts } from '@/lib/market-report/dedupe';
 
 /**
  * Dual-axis bar chart for the Site/Unit Analysis section: count of cohort rows
@@ -102,6 +103,7 @@ export function UnitTypeRateCountChart({
   const data: ChartDatum[] = useMemo(
     () =>
       rows
+        .filter((r) => !isOmittedUnitTypeForCharts(r.unit_type))
         .map((r) => ({
           unit_type: r.unit_type,
           label: humanLabel(r.unit_type),

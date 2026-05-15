@@ -1,4 +1,4 @@
-import { dedupeCohortRows, dedupeKey, type DedupedCohortRow } from '@/lib/market-report/dedupe';
+import { dedupeCohortRows, dedupeCohortRowsPreservingSage, dedupeKey, isOmittedUnitTypeForCharts, type DedupedCohortRow } from '@/lib/market-report/dedupe';
 import type { CohortPropertyRow } from '@/lib/market-report/types';
 
 function makeRow(overrides: Partial<CohortPropertyRow> = {}): CohortPropertyRow {
@@ -137,5 +137,97 @@ describe('dedupeCohortRows', () => {
     expect(out[0]!.distance_miles).toBe(5);
     expect(out[0]!.geo_lat).toBe(42.5);
     expect(out[0]!.geo_lng).toBe(-88.5);
+  });
+});
+
+describe('dedupeCohortRowsPreservingSage', () => {
+  it('keeps every Sage row even when dedupeKey would merge under dedupeCohortRows', () => {
+    const sageDupes = [
+      makeRow({ property_name: 'Camp Fimfo', unit_type: 'Tiny Home', rate_avg: 162.6, quantity_of_units: 1 }),
+      makeRow({ property_name: 'Camp Fimfo', unit_type: 'Tiny Home', rate_avg: 499.5, quantity_of_units: 1 }),
+    ];
+    const { rows } = dedupeCohortRowsPreservingSage(sageDupes);
+    expect(rows).toHaveLength(2);
+    expect(rows.every((r) => r.rateTierRows === 1)).toBe(true);
+    expect(rows[0]!.rate_avg).toBe(162.6);
+    expect(rows[1]!.rate_avg).toBe(499.5);
+  });
+
+  it('still dedupes Hipcamp rows in the same cohort', () => {
+    const hipDupes: CohortPropertyRow[] = [
+      {
+        source: 'hipcamp',
+        sourceId: '1',
+        geo_lat: 44.0,
+        geo_lng: -121.0,
+        property_name: 'Lake Yurt',
+        city: 'Bend',
+        state: 'OR',
+        property_type: 'Glamping',
+        unit_type: 'Yurt',
+        property_total_sites: null,
+        quantity_of_units: 1,
+        distance_miles: 3,
+        rate_avg: 100,
+        winter_weekday: null,
+        winter_weekend: null,
+        spring_weekday: null,
+        spring_weekend: null,
+        summer_weekday: null,
+        summer_weekend: null,
+        fall_weekday: null,
+        fall_weekend: null,
+        occupancy: null,
+        operating_season_months: null,
+        url: null,
+        raw: {},
+      },
+      {
+        source: 'hipcamp',
+        sourceId: '2',
+        geo_lat: 44.1,
+        geo_lng: -121.1,
+        property_name: 'Lake Yurt',
+        city: 'Bend',
+        state: 'OR',
+        property_type: 'Glamping',
+        unit_type: 'Yurt',
+        property_total_sites: null,
+        quantity_of_units: 2,
+        distance_miles: 4,
+        rate_avg: 300,
+        winter_weekday: null,
+        winter_weekend: null,
+        spring_weekday: null,
+        spring_weekend: null,
+        summer_weekday: null,
+        summer_weekend: null,
+        fall_weekday: null,
+        fall_weekend: null,
+        occupancy: null,
+        operating_season_months: null,
+        url: null,
+        raw: {},
+      },
+    ];
+    const sageDupes = [
+      makeRow({ property_name: 'Camp Fimfo', unit_type: 'Tiny Home', rate_avg: 200, distance_miles: 10 }),
+      makeRow({ property_name: 'Camp Fimfo', unit_type: 'Tiny Home', rate_avg: 250, distance_miles: 11 }),
+    ];
+    const { rows } = dedupeCohortRowsPreservingSage([...sageDupes, ...hipDupes]);
+    expect(rows.filter((r) => r.source === 'all_glamping_properties')).toHaveLength(2);
+    const hipOut = rows.filter((r) => r.source === 'hipcamp');
+    expect(hipOut).toHaveLength(1);
+    expect(hipOut[0]!.rate_avg).toBe(200);
+    expect(hipOut[0]!.rateTierRows).toBe(2);
+  });
+});
+
+describe('isOmittedUnitTypeForCharts', () => {
+  it('flags Unspecified case-insensitively', () => {
+    expect(isOmittedUnitTypeForCharts('Unspecified')).toBe(true);
+    expect(isOmittedUnitTypeForCharts('  unspecified  ')).toBe(true);
+    expect(isOmittedUnitTypeForCharts('Yurt')).toBe(false);
+    expect(isOmittedUnitTypeForCharts(null)).toBe(false);
   });
 });

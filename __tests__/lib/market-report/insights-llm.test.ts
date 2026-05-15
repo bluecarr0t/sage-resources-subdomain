@@ -1,4 +1,5 @@
-import { parseBullets } from '@/lib/market-report/insights-llm';
+import { buildSummarySnapshot, parseBullets } from '@/lib/market-report/insights-llm';
+import type { MarketSummarySection } from '@/lib/market-report/types';
 
 describe('parseBullets', () => {
   it('parses dashed bullets and trims surrounding whitespace', () => {
@@ -35,5 +36,57 @@ describe('parseBullets', () => {
 
   it('preserves text after a bullet prefix even with multiple spaces', () => {
     expect(parseBullets('-   Spaced bullet')).toEqual(['Spaced bullet']);
+  });
+});
+
+describe('buildSummarySnapshot', () => {
+  const baseSummary = (): MarketSummarySection => ({
+    distinctListingCount: 10,
+    inventoryRowCount: 12,
+    radiusMiles: 50,
+    segment: 'glamping',
+    sourceCounts: [],
+    sourceBreakdown: [],
+    topStates: [{ state: 'TX', count: 5 }],
+    totalSites: null,
+    topUnitTypesWithAdr: [{ unit_type: 'Yurt', count: 3, unitCount: null, meanAdr: 200, medianAdr: 200 }],
+  });
+
+  it('does not throw when demandDrivers is missing majorAndLargeCities (legacy shape)', () => {
+    const demandDrivers = {
+      nationalParks: { count: 1, top: [{ name: 'Park A', state: 'TX', distance_miles: 10 }], radiusMiles: 100 },
+      skiResorts: { count: 0, top: [], radiusMiles: 100 },
+      wineries: { count: 0, top: [], radiusMiles: 50 },
+      majorOutdoorSites: { count: 0, top: [], radiusMiles: 50 },
+    } as unknown as MarketSummarySection['demandDrivers'];
+
+    const snap = buildSummarySnapshot({
+      segment: 'glamping',
+      scope: 'local',
+      addressLine: 'Austin, TX',
+      radiusMiles: 50,
+      adrMin: null,
+      adrMax: null,
+      summary: { ...baseSummary(), demandDrivers },
+    });
+    const dd = snap.demand_drivers as Record<string, unknown>;
+    expect(dd.major_large_cities_count).toBe(0);
+    expect(dd.top_cities).toEqual([]);
+    expect(dd.top_parks).toEqual(['Park A']);
+  });
+
+  it('uses empty arrays when topStates or sourceBreakdown are missing', () => {
+    const summary = { ...baseSummary(), topStates: undefined as unknown as MarketSummarySection['topStates'] };
+    const snap = buildSummarySnapshot({
+      segment: 'glamping',
+      scope: 'national',
+      addressLine: '',
+      radiusMiles: 0,
+      adrMin: null,
+      adrMax: null,
+      summary,
+    });
+    expect(snap.top_states).toEqual([]);
+    expect(snap.sources).toEqual([]);
   });
 });

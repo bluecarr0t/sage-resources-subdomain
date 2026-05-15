@@ -23,6 +23,7 @@ export const marketReportExportMetaSchema = z.object({
   radiusMiles: z.number().min(0).max(250),
   segment: z.enum(['glamping', 'rv_resort']),
   propertyCount: z.number().int().min(0).max(500_000),
+  distinctListingCount: z.number().int().min(0).max(500_000).optional(),
   sources: z.array(z.string().max(200)).max(30),
   generatedAt: z.string().max(100),
   fetchPossiblyIncomplete: z.boolean(),

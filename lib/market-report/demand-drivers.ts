@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getBoundingBox, haversineDistanceMiles, parseNum, stateSqlValuesGlampingRoverpass } from '@/lib/comps-v2/geo';
+import { computeMajorLargeCitiesNear } from '@/lib/market-report/us-demand-driver-cities';
 import { anchorUsStatesForRegionalDemandFetch } from '@/lib/market-report/us-state-border-states';
 
 /**
@@ -10,6 +11,7 @@ import { anchorUsStatesForRegionalDemandFetch } from '@/lib/market-report/us-sta
  *   national-parks            → latitude/longitude (numeric), state, recreation_visitors_* (text)
  *   ski_resorts / wineries    → lat/lon (text), state_province, country, overall_rating (text)
  *   outdoor_recreation_sites  → latitude/longitude (numeric), site_type, state (optional)
+ *   major/large US cities     → static catalog (≥250k pop) for urban demand context
  */
 
 const NATIONAL_PARK_RADIUS_MI_DEFAULT = 100;
@@ -37,6 +39,8 @@ export interface DemandDriversResult {
   skiResorts: { count: number; top: DemandDriverItem[]; radiusMiles: number };
   wineries: { count: number; top: DemandDriverItem[]; radiusMiles: number };
   majorOutdoorSites: { count: number; top: DemandDriverItem[]; radiusMiles: number };
+  /** US cities ≥250k population (city-center coords) within the search radius. */
+  majorAndLargeCities: { count: number; top: DemandDriverItem[]; radiusMiles: number };
 }
 
 function makeEmptyDemand(radii: {
@@ -50,6 +54,7 @@ function makeEmptyDemand(radii: {
     skiResorts: { count: 0, top: [], radiusMiles: radii.ski },
     wineries: { count: 0, top: [], radiusMiles: radii.wineries },
     majorOutdoorSites: { count: 0, top: [], radiusMiles: radii.outdoor },
+    majorAndLargeCities: { count: 0, top: [], radiusMiles: radii.outdoor },
   };
 }
 
@@ -380,7 +385,18 @@ export async function fetchDemandDrivers(
         }
       ),
     ]);
-    return { nationalParks: parks, skiResorts: ski, wineries, majorOutdoorSites: outdoor };
+    const majorAndLargeCities = computeMajorLargeCitiesNear(
+      opts.anchorLat,
+      opts.anchorLng,
+      outdoorRadius
+    );
+    return {
+      nationalParks: parks,
+      skiResorts: ski,
+      wineries,
+      majorOutdoorSites: outdoor,
+      majorAndLargeCities,
+    };
   } catch (err) {
     console.warn('[market-report] demand-drivers fetch:', err);
     return makeEmptyDemand(emptyRadii);

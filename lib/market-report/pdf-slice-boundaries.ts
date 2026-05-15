@@ -50,6 +50,8 @@ export function nextPdfSliceEnd(
 
   for (let iter = 0; iter < 64; iter++) {
     let changed = false;
+    /** Snapped slice end to the top edge of a keep region so the cut does not enter it. */
+    let snappedToKeepStart = false;
     for (const r of regions) {
       if (end <= y + 1e-6) break;
       if (r.bottom <= y || r.top >= end) continue;
@@ -59,6 +61,7 @@ export function nextPdfSliceEnd(
       if (y < r.top && end > r.top && end < r.bottom) {
         end = r.top;
         changed = true;
+        snappedToKeepStart = true;
         break;
       }
 
@@ -73,7 +76,9 @@ export function nextPdfSliceEnd(
       }
     }
     if (!changed) break;
-    if (end <= y + MIN_SLICE && end < hardEnd) {
+    // Avoid tiny trailing strips unless we deliberately ended right before a keep
+    // region (e.g. section heading); reverting would bisect that heading again.
+    if (!snappedToKeepStart && end <= y + MIN_SLICE && end < hardEnd) {
       end = hardEnd;
       break;
     }

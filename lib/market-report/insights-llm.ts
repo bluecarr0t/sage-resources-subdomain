@@ -25,7 +25,8 @@ const GATEWAY_BASE_URL = 'https://ai-gateway.vercel.sh/v1';
 const DEFAULT_GATEWAY_MODEL = 'anthropic/claude-opus-4.6';
 const MAX_OUTPUT_TOKENS = 380;
 const MAX_BULLETS = 5;
-const MIN_BULLETS = 3;
+/** Below this we treat the model output as unusable and fall back to empty bullets (no 500). */
+const MIN_BULLETS = 2;
 
 export interface MarketInsightsInput {
   segment: 'glamping' | 'rv_resort';
@@ -71,42 +72,88 @@ function resolveClient(env: NodeJS.ProcessEnv = process.env): ResolvedClient | n
  * Strip the structured summary down to a small JSON blob the model can reason
  * over without bloating the context window or leaking sensitive fields.
  */
-function buildSummarySnapshot(input: MarketInsightsInput): Record<string, unknown> {
+function mapDriverTopNames(
+  top: Array<{ name?: string | null }> | null | undefined,
+  cap: number
+): string[] {
+  if (!Array.isArray(top)) return [];
+  return top
+    .slice(0, cap)
+    .map((p) => (p?.name != null && String(p.name).trim() !== '' ? String(p.name) : ''))
+    .filter((n) => n.length > 0);
+}
+
+function driverLayerCount(drivers: MarketSummarySection['demandDrivers'], key: string): number {
+  if (!drivers || typeof drivers !== 'object') return 0;
+  const layer = (drivers as Record<string, unknown>)[key];
+  if (!layer || typeof layer !== 'object' || Array.isArray(layer)) return 0;
+  const c = (layer as Record<string, unknown>).count;
+  return typeof c === 'number' && Number.isFinite(c) ? c : 0;
+}
+
+function driverLayerTop(
+  drivers: MarketSummarySection['demandDrivers'],
+  key: string,
+  cap: number
+): Array<{ name?: string | null }> {
+  if (!drivers || typeof drivers !== 'object') return [];
+  const layer = (drivers as Record<string, unknown>)[key];
+  if (!layer || typeof layer !== 'object' || Array.isArray(layer)) return [];
+  const top = (layer as Record<string, unknown>).top;
+  return Array.isArray(top)
+    ? (top as Array<{ name?: string | null }>).slice(0, cap)
+    : [];
+}
+
+/**
+ * Strip the structured summary down to a small JSON blob the model can reason
+ * over. Defensive against partial / legacy enrichment objects so we never throw
+ * before the LLM call (which previously surfaced as 500 + "could not be loaded").
+ */
+export function buildSummarySnapshot(input: MarketInsightsInput): Record<string, unknown> {
   const s = input.summary;
   const drivers = s.demandDrivers ?? null;
   const county = s.countyMetrics ?? null;
   const score = s.opportunityScore ?? null;
+  const topUnitTypes = Array.isArray(s.topUnitTypesWithAdr) ? s.topUnitTypesWithAdr : [];
+  const topStates = Array.isArray(s.topStates) ? s.topStates : [];
+  const sourceBreakdown = Array.isArray(s.sourceBreakdown) ? s.sourceBreakdown : [];
+
   return {
     segment: input.segment,
     scope: input.scope,
     address: input.addressLine,
     radius_miles: input.scope === 'local' ? input.radiusMiles : null,
     ardr_filter: { min: input.adrMin, max: input.adrMax },
-    properties: s.propertyCount,
+    properties: input.summary.distinctListingCount,
+    inventory_rows: input.summary.inventoryRowCount,
     total_sites: s.totalSites,
-    top_unit_types: s.topUnitTypesWithAdr.map((u) => ({
+    top_unit_types: topUnitTypes.map((u) => ({
       unit_type: u.unit_type,
       count: u.count,
       mean_ardr: u.meanAdr,
       median_ardr: u.medianAdr,
     })),
-    top_states: s.topStates.slice(0, 5),
-    sources: s.sourceBreakdown.map((b) => ({
+    top_states: topStates.slice(0, 5),
+    sources: sourceBreakdown.map((b) => ({
       source: b.sourceLabel,
-      properties: b.propertyCount,
+      properties: b.distinctListingCount,
+      inventory_rows: b.inventoryRowCount,
       avg_ardr: b.avgRetailDailyRate,
       avg_occupancy: b.avgOccupancy,
     })),
     demand_drivers: drivers
       ? {
-          national_parks_count: drivers.nationalParks.count,
-          ski_resorts_count: drivers.skiResorts.count,
-          wineries_count: drivers.wineries.count,
-          major_outdoor_count: drivers.majorOutdoorSites.count,
-          top_parks: drivers.nationalParks.top.slice(0, 3).map((p) => p.name),
-          top_ski: drivers.skiResorts.top.slice(0, 3).map((p) => p.name),
-          top_wineries: drivers.wineries.top.slice(0, 3).map((p) => p.name),
-          top_outdoor: drivers.majorOutdoorSites.top.slice(0, 3).map((p) => p.name),
+          national_parks_count: driverLayerCount(drivers, 'nationalParks'),
+          ski_resorts_count: driverLayerCount(drivers, 'skiResorts'),
+          wineries_count: driverLayerCount(drivers, 'wineries'),
+          major_outdoor_count: driverLayerCount(drivers, 'majorOutdoorSites'),
+          major_large_cities_count: driverLayerCount(drivers, 'majorAndLargeCities'),
+          top_parks: mapDriverTopNames(driverLayerTop(drivers, 'nationalParks', 8), 3),
+          top_ski: mapDriverTopNames(driverLayerTop(drivers, 'skiResorts', 8), 3),
+          top_wineries: mapDriverTopNames(driverLayerTop(drivers, 'wineries', 8), 3),
+          top_outdoor: mapDriverTopNames(driverLayerTop(drivers, 'majorOutdoorSites', 8), 3),
+          top_cities: mapDriverTopNames(driverLayerTop(drivers, 'majorAndLargeCities', 8), 3),
         }
       : null,
     county: county
@@ -123,7 +170,7 @@ function buildSummarySnapshot(input: MarketInsightsInput): Record<string, unknow
           score: score.score,
           grade: score.grade,
           headline: score.headline,
-          components: score.components.map((c) => ({
+          components: (Array.isArray(score.components) ? score.components : []).map((c) => ({
             pillar: c.label,
             points: c.available ? c.points : null,
             max: c.maxPoints,
@@ -177,42 +224,53 @@ export function parseBullets(raw: string): string[] {
 export async function generateMarketSummaryInsights(
   input: MarketInsightsInput
 ): Promise<MarketInsightsResult | null> {
-  // Skip entirely for empty cohorts — there is nothing meaningful to summarize.
-  if (input.summary.propertyCount === 0) return null;
-
-  const cfg = resolveClient();
-  if (!cfg) {
-    console.warn('[market-report:insights] no AI key configured (AI_GATEWAY_API_KEY / OPENAI_API_KEY)');
-    return null;
-  }
-
-  const client = new OpenAI({ apiKey: cfg.apiKey, baseURL: cfg.baseURL });
-  const userPrompt = buildUserPrompt(input);
-
   try {
-    const response = await client.chat.completions.create({
-      model: cfg.model,
-      max_tokens: MAX_OUTPUT_TOKENS,
-      temperature: 0.2,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt },
-      ],
-    });
+    // Skip entirely for empty cohorts — there is nothing meaningful to summarize.
+    if ((input.summary.inventoryRowCount ?? 0) === 0) return null;
 
-    const raw = response.choices[0]?.message?.content?.trim() ?? '';
-    const bullets = parseBullets(raw);
-    if (bullets.length < MIN_BULLETS) {
-      console.warn('[market-report:insights] model returned fewer than minimum bullets', { bullets });
+    const cfg = resolveClient();
+    if (!cfg) {
+      console.warn('[market-report:insights] no AI key configured (AI_GATEWAY_API_KEY / OPENAI_API_KEY)');
       return null;
     }
-    const promptTokens = response.usage?.prompt_tokens ?? 0;
-    const completionTokens = response.usage?.completion_tokens ?? 0;
-    const totalTokens = response.usage?.total_tokens ?? promptTokens + completionTokens;
-    const tokensUsed = totalTokens > 0 ? totalTokens : null;
-    return { bullets, model: cfg.model, tokensUsed };
+
+    const client = new OpenAI({ apiKey: cfg.apiKey, baseURL: cfg.baseURL });
+    let userPrompt: string;
+    try {
+      userPrompt = buildUserPrompt(input);
+    } catch (err) {
+      console.warn('[market-report:insights] failed to build prompt snapshot', err);
+      return null;
+    }
+
+    try {
+      const response = await client.chat.completions.create({
+        model: cfg.model,
+        max_tokens: MAX_OUTPUT_TOKENS,
+        temperature: 0.2,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt },
+        ],
+      });
+
+      const raw = response.choices[0]?.message?.content?.trim() ?? '';
+      const bullets = parseBullets(raw);
+      if (bullets.length < MIN_BULLETS) {
+        console.warn('[market-report:insights] model returned fewer than minimum bullets', { bullets });
+        return null;
+      }
+      const promptTokens = response.usage?.prompt_tokens ?? 0;
+      const completionTokens = response.usage?.completion_tokens ?? 0;
+      const totalTokens = response.usage?.total_tokens ?? promptTokens + completionTokens;
+      const tokensUsed = totalTokens > 0 ? totalTokens : null;
+      return { bullets, model: cfg.model, tokensUsed };
+    } catch (err) {
+      console.warn('[market-report:insights] generation failed:', err);
+      return null;
+    }
   } catch (err) {
-    console.warn('[market-report:insights] generation failed:', err);
+    console.warn('[market-report:insights] generateMarketSummaryInsights failed:', err);
     return null;
   }
 }

@@ -37,6 +37,37 @@ export function resolveNationalRvMaxChunks(env: NodeJS.ProcessEnv = process.env)
 }
 
 /**
+ * National Hipcamp (Market Report glamping): page size for `id` keyset paging.
+ * Defaults match RV paging; override with `MARKET_REPORT_NATIONAL_HIPCAMP_PAGE_SIZE`.
+ */
+export function resolveNationalHipcampPageSize(env: NodeJS.ProcessEnv = process.env): number {
+  const raw = env.MARKET_REPORT_NATIONAL_HIPCAMP_PAGE_SIZE;
+  if (!raw) return resolveNationalRvPageSize(env);
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return resolveNationalRvPageSize(env);
+  return Math.max(NATIONAL_RV_PAGE_MIN, Math.min(NATIONAL_RV_PAGE_MAX, Math.floor(n)));
+}
+
+/**
+ * Max `id` pages per Hipcamp US scope stream (state match **or** US country match).
+ * Much higher than RV default so large Hipcamp tables exhaust before we set
+ * `hitRowCap`. Override: `MARKET_REPORT_NATIONAL_HIPCAMP_MAX_CHUNKS`.
+ */
+const NATIONAL_HIPCAMP_MAX_CHUNKS_DEFAULT = 25_000;
+const NATIONAL_HIPCAMP_MAX_CHUNKS_MIN = 500;
+const NATIONAL_HIPCAMP_MAX_CHUNKS_MAX = 100_000;
+export function resolveNationalHipcampMaxChunks(env: NodeJS.ProcessEnv = process.env): number {
+  const raw = env.MARKET_REPORT_NATIONAL_HIPCAMP_MAX_CHUNKS;
+  if (!raw) return NATIONAL_HIPCAMP_MAX_CHUNKS_DEFAULT;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return NATIONAL_HIPCAMP_MAX_CHUNKS_DEFAULT;
+  return Math.max(
+    NATIONAL_HIPCAMP_MAX_CHUNKS_MIN,
+    Math.min(NATIONAL_HIPCAMP_MAX_CHUNKS_MAX, Math.floor(n)),
+  );
+}
+
+/**
  * Rows fetched inside the bounding box before Haversine filtering.
  * Scales with search radius so dense areas are less likely to miss in-radius properties
  * when capped (still possible at extreme density).

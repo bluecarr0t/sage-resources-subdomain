@@ -20,12 +20,21 @@
  *
  * Keeps the existing `CohortPropertyRow` shape so downstream aggregation in
  * {@link buildMarketReportSections} is unchanged.
+ *
+ * **Sage (`all_glamping_properties`):** cohort assembly uses
+ * {@link dedupeCohortRowsPreservingSage} instead of this function alone, so every
+ * Supabase row is kept (no rate-tier collapse) while other sources still dedupe here.
  */
 
 import { medianSorted, parseNum } from "@/lib/market-report/normalize";
 import type { CohortPropertyRow } from "@/lib/market-report/types";
 
 const UNSPECIFIED_UNIT_TYPE = "Unspecified";
+
+/** Hide this bucket from unit-type charts and ranked unit-type tables (not operator-useful). */
+export function isOmittedUnitTypeForCharts(unitType: string | null | undefined): boolean {
+  return String(unitType ?? "").trim().toLowerCase() === UNSPECIFIED_UNIT_TYPE.toLowerCase();
+}
 
 /** Stable canonical key. Source is included so a property listed in two tables stays separate. */
 export function dedupeKey(row: CohortPropertyRow): string {
@@ -212,6 +221,65 @@ export function dedupeCohortRows(rows: CohortPropertyRow[]): DedupeResult {
       rawRowCount: rows.length,
       collapsedRowCount: collapsed.length,
       distinctProperties: distinctProps.size,
+      bySource,
+    },
+  };
+}
+
+const SAGE_GLAMPING_SOURCE: CohortPropertyRow['source'] = 'all_glamping_properties';
+
+function sageRowAsDedupedShape(r: CohortPropertyRow): DedupedCohortRow {
+  return {
+    ...r,
+    rateTierRows: 1,
+    rateLow: r.rate_avg,
+    rateHigh: r.rate_avg,
+  };
+}
+
+function distinctPropertyTriples(rows: DedupedCohortRow[]): number {
+  const set = new Set<string>();
+  for (const r of rows) {
+    set.add(
+      `${r.source}|${String(r.property_name ?? '').toLowerCase()}|${String(r.state ?? '')}`,
+    );
+  }
+  return set.size;
+}
+
+/**
+ * Like {@link dedupeCohortRows}, but **`all_glamping_properties` rows are not merged** —
+ * every Sage table row is emitted as its own `DedupedCohortRow` (each with
+ * `rateTierRows: 1` and `rateLow`/`rateHigh` = that row’s `rate_avg`). All other
+ * sources are deduped normally.
+ */
+export function dedupeCohortRowsPreservingSage(rows: CohortPropertyRow[]): DedupeResult {
+  const sage: CohortPropertyRow[] = [];
+  const nonSage: CohortPropertyRow[] = [];
+  for (const r of rows) {
+    if (r.source === SAGE_GLAMPING_SOURCE) sage.push(r);
+    else nonSage.push(r);
+  }
+
+  const { rows: dedupedNonSage, stats: nonSageStats } = dedupeCohortRows(nonSage);
+  const sageOut = sage.map(sageRowAsDedupedShape);
+  const combined = [...sageOut, ...dedupedNonSage];
+  combined.sort((a, b) => a.distance_miles - b.distance_miles);
+
+  const bySource: DedupeStats['bySource'] = { ...nonSageStats.bySource };
+  if (sage.length > 0) {
+    bySource[SAGE_GLAMPING_SOURCE] = {
+      raw: sage.length,
+      collapsed: sageOut.length,
+    };
+  }
+
+  return {
+    rows: combined,
+    stats: {
+      rawRowCount: rows.length,
+      collapsedRowCount: sageOut.length + nonSageStats.collapsedRowCount,
+      distinctProperties: distinctPropertyTriples(combined),
       bySource,
     },
   };

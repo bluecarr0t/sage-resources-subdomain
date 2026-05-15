@@ -52,7 +52,8 @@ export interface BuildCohortCsvOptions {
   meta?: Pick<MarketReportMeta, 'addressLine' | 'segment' | 'scope' | 'adrMin' | 'adrMax' | 'radiusMiles'>;
   /**
    * When true, add one column per key present in any row's `raw` record
-   * (values JSON-stringified when not plain primitives). Base columns always
+   * (values JSON-stringified when not plain primitives). Headers use the same
+   * field names as the database / `raw` keys (CSV-safe slug). Base columns always
    * include `source_id`.
    */
   wide?: boolean;
@@ -93,6 +94,8 @@ export const COHORT_EXPORT_HEADERS = [
 
 export type CohortExportRecord = Record<(typeof COHORT_EXPORT_HEADERS)[number], string | number>;
 
+const COHORT_EXPORT_HEADER_SET = new Set<string>(COHORT_EXPORT_HEADERS);
+
 /** Keys from `raw`, sorted for stable CSV/XLSX column order. */
 export function collectUnionRawKeys(rows: DedupedCohortRow[]): string[] {
   const keys = new Set<string>();
@@ -105,15 +108,19 @@ export function collectUnionRawKeys(rows: DedupedCohortRow[]): string[] {
   return Array.from(keys).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 }
 
+/**
+ * CSV-safe header names for `raw` keys: same slugs as DB-style field names, no
+ * `raw_` prefix. De-duplicates against each other and against {@link COHORT_EXPORT_HEADERS}.
+ */
 function cohortRawHeaderNames(originalKeys: string[]): string[] {
   const used = new Set<string>();
   const out: string[] = [];
   for (const key of originalKeys) {
     const slug = key.replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '') || 'field';
-    let h = `raw_${slug}`;
+    let h = slug;
     let n = 2;
-    while (used.has(h)) {
-      h = `raw_${slug}_${n++}`;
+    while (used.has(h) || COHORT_EXPORT_HEADER_SET.has(h)) {
+      h = `${slug}_${n++}`;
     }
     used.add(h);
     out.push(h);

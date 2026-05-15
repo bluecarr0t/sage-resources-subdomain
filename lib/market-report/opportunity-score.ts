@@ -8,14 +8,14 @@ import type { DemandDriversResult } from '@/lib/market-report/demand-drivers';
  * sparse-data markets still get a meaningful number.
  *
  *   1. Demand drivers (40 pts) — natural attractions in the catchment
- *      (national parks, ski, wineries, major outdoor / state-park POIs)
+ *      (national parks, ski, wineries, major outdoor / state-park POIs, nearby major/large cities)
  *   2. Economic strength (25 pts) — county GDP + population growth
  *   3. Premium positioning (20 pts) — how much of the cohort already prices ≥ $300
  *   4. Market white space (15 pts) — demand drivers ÷ competitor density
  */
 
 export interface OpportunityScoreInputs {
-  /** Number of properties (deduped) inside the search radius. */
+  /** Number of distinct listings inside the search radius (see cohort listing identity). */
   cohortSize: number;
   /** Number of cohort rows priced at or above $300/night. */
   premiumCohortCount: number;
@@ -83,12 +83,13 @@ function scoreDemandPillar(
   const ski = drivers.skiResorts.count;
   const win = drivers.wineries.count;
   const outdoor = drivers.majorOutdoorSites.count;
+  const cities = drivers.majorAndLargeCities.count;
   const npPts = clamp(np / 3, 0, 1) * 12;
   const skiPts = clamp(ski / 5, 0, 1) * 8;
   const winPts = clamp(win / 20, 0, 1) * 12;
   const outPts = clamp(outdoor / 4, 0, 1) * 8;
   const points = Math.round(npPts + skiPts + winPts + outPts);
-  const detail = `${np} national park${np === 1 ? '' : 's'}, ${ski} ski resort${ski === 1 ? '' : 's'}, ${win} winer${win === 1 ? 'y' : 'ies'}, ${outdoor} major outdoor site${outdoor === 1 ? '' : 's'} within catchment.`;
+  const detail = `${np} national park${np === 1 ? '' : 's'}, ${ski} ski resort${ski === 1 ? '' : 's'}, ${win} winer${win === 1 ? 'y' : 'ies'}, ${outdoor} major outdoor site${outdoor === 1 ? '' : 's'}, ${cities} major/large cit${cities === 1 ? 'y' : 'ies'} within catchment.`;
   return { points, available: true, detail };
 }
 
@@ -143,7 +144,8 @@ function scoreWhitespacePillar(
     drivers.nationalParks.count +
     drivers.skiResorts.count +
     drivers.wineries.count +
-    drivers.majorOutdoorSites.count;
+    drivers.majorOutdoorSites.count +
+    drivers.majorAndLargeCities.count;
   if (totalDrivers === 0 && cohortSize === 0) {
     return { points: 0, available: false, detail: 'No drivers and no cohort to compare.' };
   }

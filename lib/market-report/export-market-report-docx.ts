@@ -2,7 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
-import type { MarketReportMapPin, MarketReportMeta, MarketReportSections } from '@/lib/market-report/types';
+import type {
+  MarketReportMapPin,
+  MarketReportMeta,
+  MarketReportSections,
+  MarketReportSourceBreakdownRow,
+} from '@/lib/market-report/types';
+import { formatOccupancyPct } from '@/lib/market-report/format-labels';
 
 const DOCX_MAP_PIN_LINE_CAP = 200;
 
@@ -24,23 +30,24 @@ export function buildMarketReportDocxViewModel(
   const su = sections.siteUnitAnalysis;
 
   const summaryLines = [
-    `Properties in radius: ${ms.propertyCount}`,
+    `Listings: ${ms.distinctListingCount} · Inventory rows: ${ms.inventoryRowCount}`,
     `Radius: ${ms.radiusMiles} miles`,
     `Segment: ${segment_label}`,
   ];
 
   const sourceLines = ms.sourceCounts.map((s) => `${s.sourceLabel}: ${s.count}`);
-  const sourceBreakdownLines = ms.sourceBreakdown.map((r) => {
-    let sitesUnits = '—';
-    if (r.totalSites != null && r.totalUnits != null) {
-      sitesUnits = `${nstr(r.totalSites)} sites, ${nstr(r.totalUnits)} units`;
-    } else if (r.totalSites != null) {
-      sitesUnits = `${nstr(r.totalSites)} sites`;
-    } else if (r.totalUnits != null) {
-      sitesUnits = `${nstr(r.totalUnits)} units`;
+  function formatSourceBreakdownSitesUnits(r: MarketReportSourceBreakdownRow): string {
+    if (meta.segment === 'glamping') {
+      if (r.totalUnits != null) return `${nstr(r.totalUnits)} units`;
+      return '—';
     }
-    const occStr = r.avgOccupancy != null ? `${nstr(r.avgOccupancy)}%` : '—';
-    return `${r.sourceLabel}: ${r.propertyCount} properties · ${sitesUnits} · avg retail daily rate ${nstr(r.avgRetailDailyRate)} · avg occupancy ${occStr}`;
+    if (r.totalSites != null) return `${nstr(r.totalSites)} sites`;
+    return '—';
+  }
+  const sourceBreakdownLines = ms.sourceBreakdown.map((r) => {
+    const sitesUnits = formatSourceBreakdownSitesUnits(r);
+    const occStr = r.avgOccupancy != null ? formatOccupancyPct(r.avgOccupancy) : '—';
+    return `${r.sourceLabel}: ${r.distinctListingCount} listings (${r.inventoryRowCount} rows) · ${sitesUnits} · avg retail daily rate ${nstr(r.avgRetailDailyRate)} · avg occupancy ${occStr}`;
   });
   const stateLines = ms.topStates.map((s) => `${s.state}: ${s.count}`);
 
@@ -48,7 +55,7 @@ export function buildMarketReportDocxViewModel(
 
   const propertySampleLines = pa.sample.map(
     (r) =>
-      `${r.property_name} | ${r.city}, ${r.state} | ${nstr(r.distance_miles)} mi | ${r.source} | sites ${r.property_total_sites ?? '—'}`
+      `${r.property_name} | ${r.city}, ${r.state} | ${nstr(r.distance_miles)} mi | ${r.source} | sites ${r.property_total_sites ?? '—'} | ARDR ${nstr(r.rate_avg)}`
   );
 
   const rateLines: string[] = [
@@ -60,7 +67,7 @@ export function buildMarketReportDocxViewModel(
   ];
   if (ra.occupancySummary) {
     rateLines.push(
-      `Occupancy — count: ${ra.occupancySummary.countWithOccupancy}, mean: ${nstr(ra.occupancySummary.meanOccupancy)}, median: ${nstr(ra.occupancySummary.medianOccupancy)}`
+      `Occupancy — count: ${ra.occupancySummary.countWithOccupancy}, mean: ${formatOccupancyPct(ra.occupancySummary.meanOccupancy)}, median: ${formatOccupancyPct(ra.occupancySummary.medianOccupancy)}`
     );
   }
   for (const s of ra.seasonalAverages) {
@@ -100,7 +107,8 @@ export function buildMarketReportDocxViewModel(
     radiusMiles: String(meta.radiusMiles),
     segment_label,
     generatedAt: meta.generatedAt,
-    propertyCount: String(ms.propertyCount),
+    propertyCount: String(ms.inventoryRowCount),
+    distinctListingCount: String(ms.distinctListingCount),
     mapPinsShown: String(mapPins.length),
     mapPinsTotal: String(meta.mapPinsTotal),
     mapPinsTruncated_label: meta.mapPinsTruncated ? 'yes' : 'no',

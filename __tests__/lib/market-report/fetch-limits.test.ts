@@ -2,6 +2,8 @@ import {
   MARKET_REPORT_FETCH_CAP_MAX,
   MARKET_REPORT_MAX_ID_CHUNKS,
   bboxFetchLimitForRadius,
+  resolveNationalHipcampMaxChunks,
+  resolveNationalHipcampPageSize,
   resolveNationalRvMaxChunks,
   resolveNationalRvPageSize,
 } from '@/lib/market-report/fetch-limits';
@@ -35,5 +37,24 @@ describe('resolveNationalRvPageSize / resolveNationalRvMaxChunks', () => {
     expect(resolveNationalRvPageSize({ MARKET_REPORT_NATIONAL_RV_PAGE_SIZE: '20000' })).toBe(15000);
     expect(resolveNationalRvPageSize({ MARKET_REPORT_NATIONAL_RV_PAGE_SIZE: '100' })).toBe(500);
     expect(resolveNationalRvMaxChunks({ MARKET_REPORT_NATIONAL_RV_MAX_CHUNKS: '99999' })).toBe(2000);
+  });
+});
+
+describe('resolveNationalHipcampPageSize / resolveNationalHipcampMaxChunks', () => {
+  it('defaults to RV page size and a high chunk ceiling', () => {
+    expect(resolveNationalHipcampPageSize({})).toBe(5000);
+    expect(resolveNationalHipcampMaxChunks({})).toBe(25_000);
+  });
+
+  it('respects Hipcamp-specific env overrides within bounds', () => {
+    expect(
+      resolveNationalHipcampPageSize({ MARKET_REPORT_NATIONAL_HIPCAMP_PAGE_SIZE: '9000' }),
+    ).toBe(9000);
+    expect(
+      resolveNationalHipcampMaxChunks({ MARKET_REPORT_NATIONAL_HIPCAMP_MAX_CHUNKS: '999999' }),
+    ).toBe(100_000);
+    expect(
+      resolveNationalHipcampMaxChunks({ MARKET_REPORT_NATIONAL_HIPCAMP_MAX_CHUNKS: '10' }),
+    ).toBe(500);
   });
 });

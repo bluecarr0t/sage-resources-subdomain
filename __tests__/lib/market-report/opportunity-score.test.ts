@@ -5,6 +5,7 @@ const fullDrivers = {
   skiResorts: { count: 5, top: [], radiusMiles: 100 },
   wineries: { count: 20, top: [], radiusMiles: 50 },
   majorOutdoorSites: { count: 4, top: [], radiusMiles: 100 },
+  majorAndLargeCities: { count: 0, top: [], radiusMiles: 100 },
 };
 
 const emptyDrivers = {
@@ -12,6 +13,7 @@ const emptyDrivers = {
   skiResorts: { count: 0, top: [], radiusMiles: 100 },
   wineries: { count: 0, top: [], radiusMiles: 50 },
   majorOutdoorSites: { count: 0, top: [], radiusMiles: 100 },
+  majorAndLargeCities: { count: 0, top: [], radiusMiles: 100 },
 };
 
 const strongCounty = {
