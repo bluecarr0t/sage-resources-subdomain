@@ -85,9 +85,9 @@ function mapDriverTopNames(
 
 function driverLayerCount(drivers: MarketSummarySection['demandDrivers'], key: string): number {
   if (!drivers || typeof drivers !== 'object') return 0;
-  const layer = (drivers as Record<string, unknown>)[key];
+  const layer = (drivers as unknown as Record<string, unknown>)[key];
   if (!layer || typeof layer !== 'object' || Array.isArray(layer)) return 0;
-  const c = (layer as Record<string, unknown>).count;
+  const c = (layer as unknown as Record<string, unknown>).count;
   return typeof c === 'number' && Number.isFinite(c) ? c : 0;
 }
 
@@ -97,9 +97,9 @@ function driverLayerTop(
   cap: number
 ): Array<{ name?: string | null }> {
   if (!drivers || typeof drivers !== 'object') return [];
-  const layer = (drivers as Record<string, unknown>)[key];
+  const layer = (drivers as unknown as Record<string, unknown>)[key];
   if (!layer || typeof layer !== 'object' || Array.isArray(layer)) return [];
-  const top = (layer as Record<string, unknown>).top;
+  const top = (layer as unknown as Record<string, unknown>).top;
   return Array.isArray(top)
     ? (top as Array<{ name?: string | null }>).slice(0, cap)
     : [];

@@ -152,7 +152,7 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
           radiusMiles: body.radiusMiles,
           adrMin: body.adrMin ?? null,
           adrMax: body.adrMax ?? null,
-          summary: summaryPayload as MarketSummarySection,
+          summary: summaryPayload as unknown as MarketSummarySection,
         });
         return result;
       },
