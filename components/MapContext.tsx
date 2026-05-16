@@ -138,6 +138,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
 
         const response = await fetch(`/api/properties?${params.toString()}`, {
           signal: abortController.signal,
+          // Do not reuse a long-lived browser cache of the full map payload (CDN uses Cache-Control from the API).
+          cache: 'no-store',
         });
 
         if (abortController.signal.aborted) return;

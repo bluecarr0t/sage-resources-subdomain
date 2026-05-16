@@ -13,6 +13,16 @@ import {
  * Google API calls are NOT cached - they should use their own routes
  */
 
+/** Redis TTL for filter-keyed property lists — keep short so map counts track new publishes without manual purge. */
+const PROPERTIES_LIST_REDIS_TTL_SECONDS = 1800; // 30 minutes
+
+/**
+ * CDN / browser cache for JSON list responses. Avoid multi-day/year s-maxage or production
+ * stays stale vs DB after new glamping rows are published (local often shows higher counts).
+ */
+const PROPERTIES_LIST_CACHE_CONTROL =
+  'public, max-age=0, s-maxage=120, stale-while-revalidate=600';
+
 // Mark route as dynamic since it uses searchParams
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +66,7 @@ export async function GET(request: NextRequest) {
         data: publicProperty,
       }, {
         headers: {
-          'Cache-Control': 'public, s-maxage=31536000, stale-while-revalidate=86400',
+          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         },
       });
     }
@@ -91,8 +101,8 @@ export async function GET(request: NextRequest) {
     // Use SHA-256 hash of the filter parameters for shorter, faster cache keys
     const filterParams = { filterCountry, filterState, filterUnitType, filterRateRange, bounds, fields: requestedFields };
     const filterHash = hashCacheKey(filterParams);
-    const cacheKey = `properties:${filterHash}`;
-    const ttlSeconds = 1209600; // 14 days
+    const cacheKey = `properties:v2:${filterHash}`;
+    const ttlSeconds = PROPERTIES_LIST_REDIS_TTL_SECONDS;
 
     console.warn(`[Cache] Checking cache for key: ${cacheKey.substring(0, 30)}...`);
     
@@ -141,7 +151,7 @@ export async function GET(request: NextRequest) {
       count: properties.length,
     }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=31536000, stale-while-revalidate=86400',
+        'Cache-Control': PROPERTIES_LIST_CACHE_CONTROL,
         'X-Cache-Status': cacheStatus,
       },
     });
