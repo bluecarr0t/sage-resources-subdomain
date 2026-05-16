@@ -918,7 +918,28 @@
       "adrRangeHint": "Primary ARDR filter; leave blank for no limit.",
       "minSiteUnitLabel": "Minimum site / unit count (per property)",
       "minSiteUnitHint": "Glamping: Sage exempt. Hipcamp local only (not national). RV: all sources. 0 = none.",
-      "metaMinSiteUnit": "Min. sites / units per property"
+      "metaMinSiteUnit": "Min. sites / units per property",
+      "anonymizedListingLabel": "Listing {n}",
+      "openEnhancedStudy": "Open Enhanced Market Study (interactive)",
+      "openClassicMarketReport": "Classic Market Report"
+    },
+    "enhancedMarketStudy": {
+      "title": "Enhanced Market Study",
+      "subtitle": "Interactive, deep-linkable market view powered by the same Supabase-backed cohort engine as Market Report.",
+      "phase2Note": "Multi-county drive-catchment GDP and population rollups are planned as a follow-up (Phase 2).",
+      "tocLabel": "On this page",
+      "tocSummary": "Market summary",
+      "tocMap": "Map",
+      "tocProperty": "Property analysis",
+      "tocRates": "Rates and seasonality",
+      "tocAmenities": "Amenities",
+      "tocUnits": "Site / unit mix",
+      "tocMethodology": "Methodology",
+      "anonymizeLabel": "Anonymize listing names and map details",
+      "anonymizeHint": "Hides identifiable property names in expandable tables, masks city in map popups, and omits listing URLs on the map. Does not change cohort counts or aggregates.",
+      "copyShareableLink": "Copy shareable link",
+      "linkCopied": "Link copied",
+      "studyMvpBadge": "MVP"
     },
     "sitesExport": {
       "title": "Sites export",

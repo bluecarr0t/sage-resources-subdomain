@@ -65,19 +65,28 @@ function shortDomain(href: string): string {
 
 function buildInfoWindowHtml(
   p: MarketReportMapPin,
-  opts: { presenterMode?: boolean } = {}
+  opts: { presenterMode?: boolean; anonymizePins?: boolean; listingIndex?: number } = {},
 ): string {
   const presenterMode = opts.presenterMode ?? false;
+  const anonymizePins = opts.anonymizePins ?? false;
+  const listingIndex = opts.listingIndex ?? 0;
   const lines: string[] = [];
-  lines.push(
-    `<div style="font-weight:600;font-size:13px;margin-bottom:2px">${escapeHtml(p.property_name)}</div>`
-  );
-  lines.push(
-    `<div style="color:#475569">${escapeHtml(p.city)}${p.city && p.state ? ', ' : ''}${escapeHtml(p.state)}</div>`
-  );
+  const title = anonymizePins
+    ? `Listing ${listingIndex + 1}`
+    : p.property_name;
+  lines.push(`<div style="font-weight:600;font-size:13px;margin-bottom:2px">${escapeHtml(title)}</div>`);
+  if (!anonymizePins) {
+    lines.push(
+      `<div style="color:#475569">${escapeHtml(p.city)}${p.city && p.state ? ', ' : ''}${escapeHtml(p.state)}</div>`,
+    );
+  } else {
+    lines.push(
+      `<div style="color:#475569">${escapeHtml(p.state || '—')}</div>`,
+    );
+  }
 
   const meta: string[] = [];
-  if (!presenterMode) {
+  if (!presenterMode && !anonymizePins) {
     meta.push(escapeHtml(marketReportSourceLabel(p.source)));
   }
   if (Number.isFinite(p.distance_miles) && p.distance_miles > 0) {
@@ -88,21 +97,23 @@ function buildInfoWindowHtml(
   }
   if (meta.length > 0) {
     lines.push(
-      `<div style="color:#475569;margin-top:2px">${meta.join(' · ')}</div>`
+      `<div style="color:#475569;margin-top:2px">${meta.join(' · ')}</div>`,
     );
   }
 
   if (p.rate_avg != null && Number.isFinite(p.rate_avg)) {
     lines.push(
-      `<div style="margin-top:6px"><span style="color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:0.04em">ARDR</span> <strong>${escapeHtml(formatCurrency(p.rate_avg))}</strong></div>`
+      `<div style="margin-top:6px"><span style="color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:0.04em">ARDR</span> <strong>${escapeHtml(formatCurrency(p.rate_avg))}</strong></div>`,
     );
   }
 
-  const safeUrl = safeHttpUrl(p.url ?? null);
-  if (safeUrl) {
-    lines.push(
-      `<div style="margin-top:6px"><a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:underline">${escapeHtml(shortDomain(safeUrl))} ↗</a></div>`
-    );
+  if (!anonymizePins) {
+    const safeUrl = safeHttpUrl(p.url ?? null);
+    if (safeUrl) {
+      lines.push(
+        `<div style="margin-top:6px"><a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:underline">${escapeHtml(shortDomain(safeUrl))} ↗</a></div>`,
+      );
+    }
   }
 
   return `<div style="font-size:12px;max-width:260px;line-height:1.4;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif">${lines.join('')}</div>`;
@@ -117,6 +128,11 @@ export interface MarketReportMapPreviewProps {
   mapPinsTruncated: boolean;
   /** When true, hide listing-source mentions from the info window. */
   presenterMode?: boolean;
+  /**
+   * When true, map markers stay visible but info windows use generic listing labels
+   * and omit city and external URLs (reduces fingerprinting for screenshots / sharing).
+   */
+  anonymizePins?: boolean;
 }
 
 export function MarketReportMapPreview({
@@ -127,6 +143,7 @@ export function MarketReportMapPreview({
   mapPinsTotal,
   mapPinsTruncated,
   presenterMode = false,
+  anonymizePins = false,
 }: MarketReportMapPreviewProps) {
   const t = useTranslations('admin.marketReport');
   const { isLoaded, loadError } = useGoogleMaps();
@@ -235,14 +252,19 @@ export function MarketReportMapPreview({
     }
     const infoWindow = infoWindowRef.current;
 
-    const markers = mapPins.map((p) => {
+    const markers = mapPins.map((p, index) => {
+      const markerTitle = anonymizePins
+        ? `Listing ${index + 1} (${fmtMi(p.distance_miles)})`
+        : `${p.property_name} (${fmtMi(p.distance_miles)})`;
       const marker = new google.maps.Marker({
         map,
         position: { lat: p.lat, lng: p.lng },
-        title: `${p.property_name} (${fmtMi(p.distance_miles)})`,
+        title: markerTitle,
       });
       marker.addListener('click', () => {
-        infoWindow.setContent(buildInfoWindowHtml(p, { presenterMode }));
+        infoWindow.setContent(
+          buildInfoWindowHtml(p, { presenterMode, anonymizePins, listingIndex: index }),
+        );
         infoWindow.open({ map, anchor: marker });
       });
       return marker;
@@ -256,7 +278,7 @@ export function MarketReportMapPreview({
       }
       propertyMarkersRef.current = [];
     };
-  }, [map, isLoaded, mapPins, presenterMode]);
+  }, [map, isLoaded, mapPins, presenterMode, anonymizePins]);
 
   if (loadError) {
     return (
