@@ -11,6 +11,7 @@ import {
   Download,
   ExternalLink,
   Plus,
+  RefreshCw,
   Save,
   Search,
   Trash2,
@@ -1257,6 +1258,7 @@ export default function AdminGlampingPropertiesTable() {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null);
+  const [mapRefreshWorking, setMapRefreshWorking] = useState(false);
   const [statusNotePreview, setStatusNotePreview] = useState<{
     propertyName: string;
     notes: string;
@@ -1551,6 +1553,29 @@ export default function AdminGlampingPropertiesTable() {
     }
   };
 
+  const handleRefreshMapData = useCallback(async () => {
+    setMapRefreshWorking(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/sage-glamping-data/revalidate-map', {
+        method: 'POST',
+      });
+      const json = (await res.json().catch(() => ({}))) as {
+        success?: boolean;
+        error?: string;
+        message?: string;
+      };
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || json.error || t('refreshMapDataError'));
+      }
+      setToastMessage(t('refreshMapDataSuccess'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('refreshMapDataError'));
+    } finally {
+      setMapRefreshWorking(false);
+    }
+  }, [t]);
+
   const headerCellClass =
     'text-left bg-neutral-50/85 dark:bg-neutral-900/45 border-b border-neutral-200/75 dark:border-neutral-800';
   const sortHeaderButtonClass =
@@ -1602,6 +1627,23 @@ export default function AdminGlampingPropertiesTable() {
               <span className="inline-flex items-center gap-1.5">
                 <Plus className="w-4 h-4" aria-hidden />
                 {t('addRecord')}
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => void handleRefreshMapData()}
+              disabled={exportingFormat !== null || mapRefreshWorking}
+              aria-label={t('refreshMapDataAria')}
+              className="bg-white dark:bg-neutral-900"
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <RefreshCw
+                  className={`h-4 w-4 ${mapRefreshWorking ? 'animate-spin' : ''}`}
+                  aria-hidden
+                />
+                {mapRefreshWorking ? t('refreshMapDataWorking') : t('refreshMapData')}
               </span>
             </Button>
             <Button
