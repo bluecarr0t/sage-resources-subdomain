@@ -5,7 +5,7 @@
  */
 import { isKnownGlampingColumn } from '@/lib/sage-ai/all-glamping-properties-columns';
 
-export const GLAMPING_FIELD_GUIDE_VERSION = 1 as const;
+export const GLAMPING_FIELD_GUIDE_VERSION = 2 as const;
 
 export type FieldGuideCategory = 'unit' | 'property' | 'activities' | 'setting' | 'rv' | 'geo_status';
 
@@ -406,8 +406,11 @@ export const GLAMPING_FIELD_GUIDE: FieldGuideEntry[] = [
       'shut',
       'not operating',
       'closed',
+      'pre-opening',
+      'under construction',
     ],
-    tool_tip: 'Use `Yes` in filters to include only operating listings (exclude closed).',
+    tool_tip:
+      'Values: Yes (operating), Closed (not operating), Under Construction (not yet accepting guests). Use `Yes` in filters for operating-only cohorts.',
   },
   {
     column: 'research_status',

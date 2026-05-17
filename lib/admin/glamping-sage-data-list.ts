@@ -7,6 +7,8 @@ export type SageDataGlampingListFilters = {
   q: string;
   researchStatus: string | undefined;
   country: string | undefined;
+  /** Exact `is_open` when set (e.g. Yes, Closed, Under Construction). */
+  isOpen: string | undefined;
   /** `missing` query param value, or null when unset / "all". */
   missing: string | null;
 };
@@ -44,6 +46,9 @@ export function applySageDataGlampingListFilters<T extends SageGlampingListQuery
   }
   if (filters.country && filters.country !== 'all') {
     q = q.ilike('country', filters.country);
+  }
+  if (filters.isOpen && filters.isOpen !== 'all') {
+    q = q.eq('is_open', filters.isOpen);
   }
 
   const missing = filters.missing;

@@ -1,0 +1,22 @@
+---
+description: Canonical country string for public.all_glamping_properties (US rows)
+globs:
+  - "**/all_glamping_properties**"
+  - "scripts/migrations/**/*glamping*.sql"
+  - "scripts/migrations/**/add-*-glamping*.sql"
+  - "scripts/migrations/**/enrich-*.sql"
+  - "app/api/admin/sage-glamping-data/**"
+  - "lib/glamping-discovery/**"
+  - "lib/all-glamping-properties-country.ts"
+alwaysApply: false
+---
+
+# `all_glamping_properties.country` (United States)
+
+For properties in the United States:
+
+1. **Always set `country` to `"United States"`** — never `"USA"`, `"U.S.A."`, or `"US"` as the stored country name for new/updated Sage glamping rows.
+2. **SQL seed/migration scripts** that insert into `public.all_glamping_properties` must use `'United States'` for US rows.
+3. **Admin API** normalizes legacy `"USA"` on POST/PATCH via `normalizeAllGlampingPropertiesCountryForDb` in `lib/all-glamping-properties-country.ts`.
+
+Canada and other countries: use full conventional English names (e.g. `"Canada"`) as today.

@@ -371,10 +371,12 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Exclude closed properties for most metrics
-  const open = hillCountry.filter(
-    (r) => !r.is_open || r.is_open.toLowerCase() === 'yes'
-  );
+  // Exclude closed and pre-opening properties for most metrics
+  const open = hillCountry.filter((r) => {
+    const v = (r.is_open ?? '').trim().toLowerCase();
+    if (!v) return true;
+    return v === 'yes';
+  });
   console.log(`Open (not closed) Hill Country records: ${open.length}`);
   const closed = hillCountry.length - open.length;
   if (closed > 0) console.log(`Closed Hill Country records: ${closed}`);

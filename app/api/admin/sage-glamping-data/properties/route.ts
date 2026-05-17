@@ -5,17 +5,20 @@
  *     q            — case-insensitive search across property_name, city, state, country
  *     research_status — exact match (e.g. 'in_progress', 'published', 'new')
  *     country      — case-insensitive exact match (ilike) on `country`
+ *     is_open      — exact match on `is_open` when value is Yes | Closed | Under Construction
  *     page         — 1-based (default 1)
  *     pageSize     — default 50, max 200
  *     sortBy       — column name (default 'date_updated')
  *     sortDir      — 'asc' | 'desc' (default 'desc')
  *     missing      — optional: 'city' | 'rates' | 'website' | 'lat_lng' | 'total_sites' — gap filters
+ *                    (applied to anchor rows only when the list-anchors view is installed)
  *                    (city/url: null or empty string; rates: rate_avg_retail_daily_rate null or 0 — numeric, no `eq.''`);
  *                    lat_lng: lat or lon null; total_sites: property_total_sites null or 0)
  *     siblingOf    — optional: when set (row id), returns all sibling rows for the multi-site editor:
- *                    `{ success, anchorId, rows, capped? }` (same slug, or property_name+city+state if slug empty).
+ *                    `{ success, anchorId, rows, capped? }` (same `property_id`; slug/name+city+state fallback only if unset).
  *                    Max 50 rows (`capped: true` if more exist).
- *   List response: `total` = exact **row** count (unit-level records) matching the same filters as the page.
+ *   List response: `total` = exact **property** count (one per `property_id`)
+ *   when `public.all_glamping_properties_list_anchors` exists; otherwise unit-level row count.
  *
  * PATCH /api/admin/sage-glamping-data/properties
  *   Body: { id: string | number, updates: Record<string, unknown> }
@@ -24,7 +27,7 @@
  * DELETE /api/admin/sage-glamping-data/properties
  *   Body: { id: string | number } — delete one row (backward compatible), or
  *         { ids: (string|number)[] } — delete multiple rows; every id must belong to the same
- *         sibling group as `ids[0]` (slug / name+city+state rule). Max 50 ids.
+ *         sibling group as `ids[0]` (same `property_id`; slug/name+city+state fallback if unset). Max 50 ids.
  *
  * POST /api/admin/sage-glamping-data/properties
  *   Body: fields for a new row (see EDITABLE_COLUMNS). Required: property_name, city, state, url.
@@ -44,15 +47,33 @@ import {
 } from '@/lib/admin/glamping-property-siblings';
 import { ALL_GLAMPING_PROPERTY_COLUMNS } from '@/lib/sage-ai/all-glamping-properties-columns';
 import { isValidLandOperatorCategory } from '@/lib/glamping-land-operator-category';
+import {
+  GLAMPING_IS_OPEN_VALUES,
+  type GlampingIsOpenValue,
+} from '@/lib/glamping-is-open';
+import { normalizeAllGlampingPropertiesCountryForDb } from '@/lib/all-glamping-properties-country';
 
 export const dynamic = 'force-dynamic';
 
 const TABLE = 'all_glamping_properties';
 
+/**
+ * Read-only view: one row per logical property (same grouping as sibling editor).
+ * If missing in a database, the list GET falls back to `all_glamping_properties` and logs a warning.
+ */
+const LIST_ANCHORS_VIEW = 'all_glamping_properties_list_anchors';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isValidUuidString(value: unknown): value is string {
+  return typeof value === 'string' && UUID_RE.test(value.trim());
+}
+
 // Columns the admin editor is NOT allowed to overwrite via PATCH.
 // id / created_at / updated_at are managed by Postgres; quality_score is derived.
 const READ_ONLY_COLUMNS = new Set<string>([
   'id',
+  'property_id',
   'created_at',
   'updated_at',
   'quality_score',
@@ -91,7 +112,9 @@ async function fetchSiblingRowsForAnchor(
 ): Promise<{ rows: Record<string, unknown>[]; capped: boolean }> {
   const spec = siblingFilterSpecFromAnchor(anchor);
   let q = supabase.from(TABLE).select('*');
-  if (spec.mode === 'slug') {
+  if (spec.mode === 'property_id') {
+    q = q.eq('property_id', spec.propertyId);
+  } else if (spec.mode === 'slug') {
     q = q.eq('slug', spec.slug);
   } else {
     q = q.eq('property_name', spec.propertyName);
@@ -166,6 +189,8 @@ export const POST = withAdminAuth(async (request) => {
         ? insertRow.source.trim()
         : 'Sage';
 
+    insertRow.country = normalizeAllGlampingPropertiesCountryForDb(insertRow.country);
+
     const today = new Date().toISOString().split('T')[0];
     if (
       insertRow.date_added == null ||
@@ -178,6 +203,19 @@ export const POST = withAdminAuth(async (request) => {
       insertRow.date_updated === ''
     ) {
       insertRow.date_updated = today;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(body, 'property_id')) {
+      const rawPid = body.property_id;
+      if (rawPid != null && String(rawPid).trim() !== '') {
+        if (!isValidUuidString(rawPid)) {
+          return NextResponse.json(
+            { success: false, error: 'property_id must be a valid UUID when provided' },
+            { status: 400 }
+          );
+        }
+        insertRow.property_id = String(rawPid).trim();
+      }
     }
 
     const supabase = createServerClient();
@@ -254,6 +292,12 @@ export const GET = withAdminAuth(async (request) => {
     const q = (params.get('q') ?? '').trim();
     const researchStatus = params.get('research_status');
     const country = params.get('country');
+    const isOpenRaw = params.get('is_open')?.trim();
+    const isOpenFilter: string | undefined =
+      isOpenRaw &&
+      (GLAMPING_IS_OPEN_VALUES as readonly string[]).includes(isOpenRaw)
+        ? (isOpenRaw as GlampingIsOpenValue)
+        : undefined;
     const missingParam = params.get('missing');
     const page = parseIntParam(params.get('page'), 1);
     const pageSize = Math.min(
@@ -268,26 +312,53 @@ export const GET = withAdminAuth(async (request) => {
       : 'date_updated';
     const sortDir = params.get('sortDir') === 'asc' ? 'asc' : 'desc';
 
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
+    const rangeFrom = (page - 1) * pageSize;
+    const rangeTo = rangeFrom + pageSize - 1;
 
     const listFilters = {
       q,
       researchStatus: researchStatus ?? undefined,
       country: country ?? undefined,
+      isOpen: isOpenFilter,
       missing: missingParam,
     };
 
-    // Exact count so the admin footer matches the number of table rows for the active filters
-    // (planned counts were often far off on large filtered slices).
-    let query = supabase
-      .from(TABLE)
-      .select('*', { count: 'exact' })
-      .order(sortBy, { ascending: sortDir === 'asc', nullsFirst: false })
-      .range(from, to);
-    query = applySageDataGlampingListFilters(query, listFilters);
+    const buildListQuery = (relation: string) => {
+      let q = supabase
+        .from(relation)
+        .select('*', { count: 'exact' })
+        .order(sortBy, { ascending: sortDir === 'asc', nullsFirst: false })
+        .range(rangeFrom, rangeTo);
+      q = applySageDataGlampingListFilters(q, listFilters);
+      return q;
+    };
 
-    const { data, count, error } = await query;
+    // Exact count so the admin footer matches the number of list rows for the active filters.
+    let listRelation = LIST_ANCHORS_VIEW;
+    let query = buildListQuery(listRelation);
+    let { data, count, error } = await query;
+
+    if (error) {
+      const code = String((error as { code?: string }).code ?? '');
+      const msg = String(error.message ?? '').toLowerCase();
+      const missingListView =
+        listRelation === LIST_ANCHORS_VIEW &&
+        (code === '42P01' ||
+          code === 'PGRST205' ||
+          (code.startsWith('PGRST') && msg.includes('list_anchors')) ||
+          msg.includes('list_anchors') ||
+          msg.includes('does not exist') ||
+          msg.includes('could not find the table'));
+
+      if (missingListView) {
+        console.warn(
+          '[admin/sage-data/properties] LIST_ANCHORS_VIEW missing; falling back to unit-level rows. Apply scripts/migrations/create-all-glamping-properties-list-anchors-view.sql on Postgres.'
+        );
+        listRelation = TABLE;
+        query = buildListQuery(TABLE);
+        ({ data, count, error } = await query);
+      }
+    }
 
     if (error) {
       console.error('[admin/sage-data/properties] GET error:', error);
@@ -297,10 +368,11 @@ export const GET = withAdminAuth(async (request) => {
       );
     }
 
-    const rows = data ?? [];
+    const rawRows = data ?? [];
+    const rows = rawRows;
     let total = typeof count === 'number' && !Number.isNaN(count) ? count : 0;
     if (count == null && rows.length > 0) {
-      total = Math.max(total, from + rows.length);
+      total = Math.max(total, rangeFrom + rows.length);
     }
 
     return NextResponse.json({
@@ -376,6 +448,10 @@ export const PATCH = withAdminAuth(async (request) => {
           { status: 400 },
         );
       }
+    }
+
+    if ('country' in sanitized) {
+      sanitized.country = normalizeAllGlampingPropertiesCountryForDb(sanitized.country);
     }
 
     if (Object.keys(sanitized).length === 0) {

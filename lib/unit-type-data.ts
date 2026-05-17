@@ -44,7 +44,7 @@ export async function getPropertiesByUnitType(
       .from('all_glamping_properties')
       .select('*')
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .neq('is_open', 'Closed')
       .eq('research_status', 'published')
       .not('property_name', 'is', null)
       .or(orConditions)

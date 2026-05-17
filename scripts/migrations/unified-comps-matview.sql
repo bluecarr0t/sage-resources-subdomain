@@ -523,7 +523,7 @@ FROM public.all_glamping_properties g
 LEFT JOIN public.property_geocode pg ON pg.property_id = g.id
 WHERE g.property_name IS NOT NULL
   AND length(trim(g.property_name)) > 0
-  AND COALESCE(g.is_open, 'Yes') <> 'No'
+  AND COALESCE(g.is_open, 'Yes') NOT IN ('No', 'Closed')
 
 UNION ALL
 

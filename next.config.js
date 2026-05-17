@@ -8,6 +8,11 @@ const nextConfig = {
 
   async redirects() {
     return [
+      {
+        source: '/glamping-industry',
+        destination: '/glamping-market-snapshot',
+        permanent: true,
+      },
       { source: '/admin/comparables', destination: '/admin/comps', permanent: false },
       { source: '/admin/comparables/:path+', destination: '/admin/comps/:path+', permanent: false },
     ];

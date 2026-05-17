@@ -73,6 +73,6 @@ WHERE id = 10561;
 --    inventory in chain analytics that filter on is_open.
 -- ----------------------------------------------------------------------------
 UPDATE all_glamping_properties
-SET is_open = 'No',
+SET is_open = 'Closed',
     date_updated = to_char(current_date, 'YYYY-MM-DD')
 WHERE id IN (10620, 10621, 10622, 10623);

@@ -50,11 +50,15 @@ async function verifyProperty(propertyIdOrName: string | number) {
       console.log('✅ is_glamping_property = "Yes"');
     }
     
-    // Check is_open
-    if (property.is_open === 'No') {
-      issues.push(`❌ is_open = 'No' (property is marked as closed)`);
+    // Check is_open (public map only includes Yes)
+    if (property.is_open === 'Closed' || property.is_open === 'No') {
+      issues.push(`❌ is_open = '${property.is_open}' (property is marked as closed)`);
+    } else if (property.is_open === 'Under Construction') {
+      warnings.push(
+        `⚠️  is_open = 'Under Construction' (pre-opening — will not appear on the public map until set to Yes)`
+      );
     } else {
-      console.log('✅ is_open is not "No" (operating)');
+      console.log('✅ is_open allows public map (not closed)');
     }
     
     // Check coordinates
@@ -73,8 +77,8 @@ async function verifyProperty(propertyIdOrName: string | number) {
     }
     
     // Check country field (for filtering)
-    if (!property.country || (property.country !== 'USA' && property.country !== 'United States' && property.country !== 'US' && property.country !== 'Canada' && property.country !== 'CA')) {
-      warnings.push(`⚠️  country = '${property.country}' (should be 'USA', 'United States', 'US', 'Canada', or 'CA' for proper filtering)`);
+    if (!property.country || (property.country !== 'United States' && property.country !== 'US' && property.country !== 'Canada' && property.country !== 'CA')) {
+      warnings.push(`⚠️  country = '${property.country}' (use "United States" or "Canada" for proper filtering; "US"/"CA" accepted as legacy)`);
     } else {
       console.log(`✅ country = "${property.country}"`);
     }

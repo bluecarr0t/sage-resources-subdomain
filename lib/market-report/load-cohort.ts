@@ -781,7 +781,7 @@ async function fetchGlampingCohort(
       .from("all_glamping_properties")
       .select(GLAMPING_SELECT)
       .eq("is_glamping_property", "Yes")
-      .or("is_open.is.null,is_open.neq.No")
+      .or("is_open.is.null,is_open.eq.Yes")
       .eq("research_status", "published")
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .gte("lat", bb.minLat)
@@ -1000,7 +1000,7 @@ async function paginateNationalGlampingScopedRaw(
     q = applyUsScope(q);
     q = q
       .eq("is_glamping_property", "Yes")
-      .or("is_open.is.null,is_open.neq.No")
+      .or("is_open.is.null,is_open.eq.Yes")
       .eq("research_status", "published")
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .not("lat", "is", null)

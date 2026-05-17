@@ -42,4 +42,12 @@ describe('normalizeGlampingUnitTypeForStorage', () => {
     expect(normalizeGlampingUnitTypeForStorage('a-frames')).toBe('A-Frame');
     expect(normalizeGlampingUnitTypeForStorage('rv sites')).toBe('RV Site');
   });
+
+  it('maps wagon aliases to Covered Wagon (not generic Wagon)', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Wagon')).toBe('Covered Wagon');
+    expect(normalizeGlampingUnitTypeForStorage('wagons')).toBe('Covered Wagon');
+    expect(normalizeGlampingUnitTypeForStorage('covered wagon')).toBe('Covered Wagon');
+    expect(normalizeGlampingUnitTypeForStorage('Conestoga Wagons')).toBe('Covered Wagon');
+    expect(normalizeGlampingUnitTypeForStorage('wagonette')).toBe('Wagonette');
+  });
 });

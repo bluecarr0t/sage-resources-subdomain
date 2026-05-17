@@ -26,7 +26,10 @@ export async function fetchAndNormalizeProperties(
       'id, property_name, lat, lon, state, property_type, property_total_sites, quantity_of_units, unit_type, is_glamping_property, rate_winter_weekday, rate_winter_weekend, rate_spring_weekday, rate_spring_weekend, rate_summer_weekday, rate_summer_weekend, rate_fall_weekday, rate_fall_weekend, roverpass_occupancy_rate, roverpass_occupancy_year',
       {
         notNull: ['lat', 'lon'],
-        neq: [{ col: 'is_open', val: 'No' }],
+        neq: [
+          { col: 'is_open', val: 'Closed' },
+          { col: 'is_open', val: 'Under Construction' },
+        ],
         or: PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR,
       },
       MAX_PER_TABLE

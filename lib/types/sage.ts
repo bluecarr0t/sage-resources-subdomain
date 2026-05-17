@@ -5,6 +5,8 @@
 export interface SageProperty {
   // CORE IDENTITY
   id: number;
+  /** Shared by all sibling / unit rows for one logical property (UUID). */
+  property_id: string | null;
   property_name: string | null;
   site_name: string | null;
   slug: string | null;
@@ -13,6 +15,7 @@ export interface SageProperty {
   land_operator_category: string | null;
   research_status: string | null;
   is_glamping_property: string | null;
+  /** Yes = operating; Closed = not operating; Under Construction = pre-opening (excluded from public map). */
   is_open: string | null;
 
   // SOURCE & TRACKING

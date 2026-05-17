@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
 import { useTranslations } from 'next-intl';
 import {
   ArrowDown,
@@ -58,6 +59,19 @@ const RESEARCH_STATUS_OPTIONS = [
 ] as const;
 
 const RESEARCH_STATUS_EDIT_OPTIONS = RESEARCH_STATUS_OPTIONS.filter((o) => o.value !== 'all');
+
+const OPEN_STATUS_FILTER_OPTIONS = [
+  { value: 'all' as const, labelKey: 'openStatusAll' as const },
+  ...GLAMPING_IS_OPEN_VALUES.map((value) => {
+    const labelKey =
+      value === 'Yes'
+        ? ('openStatusYes' as const)
+        : value === 'Closed'
+          ? ('openStatusClosed' as const)
+          : ('openStatusUnderConstruction' as const);
+    return { value, labelKey };
+  }),
+];
 
 const LAND_OPERATOR_BULK_VALUES = [
   'private_commercial',
@@ -177,7 +191,7 @@ const SHARED_EDIT_FIELD_GROUPS: FieldGroup[] = [
         options: ['in_progress', 'published', 'new', 'rejected'],
       },
       { key: 'is_glamping_property', type: 'select', options: ['Yes', 'No'] },
-      { key: 'is_open', type: 'select', options: ['Yes', 'No'] },
+      { key: 'is_open', type: 'select', options: [...GLAMPING_IS_OPEN_VALUES] },
       { key: 'source' },
       { key: 'discovery_source' },
     ],
@@ -376,8 +390,11 @@ function glampingYesNoPillClasses(raw: string): string {
   if (v === 'yes') {
     return 'bg-emerald-100 text-emerald-900 dark:bg-emerald-900/45 dark:text-emerald-100';
   }
-  if (v === 'no') {
+  if (v === 'closed' || v === 'no') {
     return 'bg-red-100 text-red-900 dark:bg-red-900/40 dark:text-red-100';
+  }
+  if (v === 'under construction') {
+    return 'bg-amber-100 text-amber-950 dark:bg-amber-900/50 dark:text-amber-100';
   }
   return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
 }
@@ -795,8 +812,12 @@ function EditModal({
             return;
           }
         }
+        let newPropertyId: string | undefined;
         for (let i = 0; i < siteEntries.length; i++) {
           const payload = mergeSharedAndSiteDrafts(sharedDraft, siteEntries[i].draft);
+          if (newPropertyId) {
+            (payload as Record<string, unknown>).property_id = newPropertyId;
+          }
           const res = await fetch('/api/admin/sage-glamping-data/properties', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -805,6 +826,12 @@ function EditModal({
           const json = (await res.json()) as UpdateResponse;
           if (!res.ok || !json.success || !json.property) {
             throw new Error(json.error || t('createError'));
+          }
+          if (!newPropertyId && json.property) {
+            const pid = (json.property as Record<string, unknown>).property_id;
+            if (typeof pid === 'string' && pid.trim() !== '') {
+              newPropertyId = pid.trim();
+            }
           }
         }
         onSaved({ created: true });
@@ -848,6 +875,10 @@ function EditModal({
       for (const entry of siteEntries) {
         if (!entry.dbId) {
           const payload = mergeSharedAndSiteDrafts(sharedDraft, entry.draft);
+          const pid = property ? formatCellValue(property.property_id).trim() : '';
+          if (pid) {
+            (payload as Record<string, unknown>).property_id = pid;
+          }
           const res = await fetch('/api/admin/sage-glamping-data/properties', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1248,6 +1279,7 @@ export default function AdminGlampingPropertiesTable() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [countryFilter, setCountryFilter] = useState<string>('all');
+  const [openStatusFilter, setOpenStatusFilter] = useState<string>('all');
   /** `null` = list not loaded yet */
   const [countryNames, setCountryNames] = useState<string[] | null>(null);
   const [missingDataFilter, setMissingDataFilter] = useState<MissingDataFilter>('all');
@@ -1275,7 +1307,7 @@ export default function AdminGlampingPropertiesTable() {
 
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [search, statusFilter, countryFilter, missingDataFilter]);
+  }, [search, statusFilter, countryFilter, openStatusFilter, missingDataFilter]);
 
   const pageRowIds = useMemo(() => rows.map((r) => String(r.id)), [rows]);
   const selectedOnPageCount = useMemo(
@@ -1334,6 +1366,7 @@ export default function AdminGlampingPropertiesTable() {
       if (search) params.set('q', search);
       if (statusFilter !== 'all') params.set('research_status', statusFilter);
       if (countryFilter !== 'all') params.set('country', countryFilter);
+      if (openStatusFilter !== 'all') params.set('is_open', openStatusFilter);
       if (missingDataFilter !== 'all') {
         params.set('missing', missingDataFilter);
       }
@@ -1366,7 +1399,18 @@ export default function AdminGlampingPropertiesTable() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, search, statusFilter, countryFilter, missingDataFilter, sortBy, sortDir, t]);
+  }, [
+    page,
+    pageSize,
+    search,
+    statusFilter,
+    countryFilter,
+    openStatusFilter,
+    missingDataFilter,
+    sortBy,
+    sortDir,
+    t,
+  ]);
 
   const handleBulkApply = useCallback(async () => {
     const updates: Record<string, string | null> = {};
@@ -1490,6 +1534,11 @@ export default function AdminGlampingPropertiesTable() {
   const handleCountryChange = (value: string) => {
     setPage(1);
     setCountryFilter(value);
+  };
+
+  const handleOpenStatusChange = (value: string) => {
+    setPage(1);
+    setOpenStatusFilter(value);
   };
 
   const handleMissingDataChange = (value: string) => {
@@ -1679,7 +1728,7 @@ export default function AdminGlampingPropertiesTable() {
 
         <form
           onSubmit={handleSearchSubmit}
-          className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-[minmax(18rem,1.4fr)_auto_minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(12rem,1fr)] xl:items-end"
+          className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-[minmax(18rem,1.4fr)_auto_minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(12rem,1fr)] xl:items-end"
         >
           <div className="space-y-1.5">
             <label
@@ -1757,6 +1806,25 @@ export default function AdminGlampingPropertiesTable() {
               {countrySelectOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label
+            className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
+            htmlFor="sage-data-open-status-filter"
+          >
+            <span>{t('openStatusLabel')}</span>
+            <select
+              id="sage-data-open-status-filter"
+              value={openStatusFilter}
+              onChange={(e) => handleOpenStatusChange(e.target.value)}
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
+              aria-label={t('openStatusAria')}
+            >
+              {OPEN_STATUS_FILTER_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {t(opt.labelKey)}
                 </option>
               ))}
             </select>

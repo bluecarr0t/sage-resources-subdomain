@@ -113,6 +113,9 @@ describe('createSageAiTools', () => {
         limit: 10,
         establishment_filter: true,
         min_chain_age_years: 5,
+        min_reported_locations: 2,
+        is_glamping_property: 'Yes',
+        is_open: 'Yes',
       },
       {
         messages: [],
@@ -135,6 +138,11 @@ describe('createSageAiTools', () => {
     const off = await tools.top_multi_location_chains.execute!(
       {
         establishment_filter: false,
+        limit: 10,
+        min_reported_locations: 2,
+        min_chain_age_years: 5,
+        is_glamping_property: 'Yes',
+        is_open: 'Yes',
       },
       {
         messages: [],
@@ -227,7 +235,9 @@ describe('createSageAiTools', () => {
     );
     const selectCall = calls.find((c) => c.method === 'select');
     expect(String(selectCall?.args[0])).toContain('rate_summer_weekend');
-    const typed = res as { data: Array<{ effective_retail_adr: number | null }> };
+    const typed = res as unknown as {
+      data: Array<{ effective_retail_adr: number | null }>;
+    };
     expect(typed.data[0]!.effective_retail_adr).toBe(950);
   });
 
@@ -773,7 +783,7 @@ describe('scrape_webpage / crawl_website prompt-injection wrapping', () => {
         }) as Response
     );
 
-    const res = await tools.scrape_webpage.execute!(
+    const res = await tools.scrape_webpage!.execute!(
       {
         url: 'https://example.com',
         formats: ['markdown'],

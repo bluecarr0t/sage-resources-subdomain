@@ -7,6 +7,7 @@
 /** All queryable / selectable columns in document order. */
 export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'id',
+  'property_id',
   'research_status',
   'is_glamping_property',
   'is_open',
@@ -194,9 +195,10 @@ const GROUP_BY_EXCLUDE = new Set<string>([
   'created_at',
   'updated_at',
   'roverpass_campground_id',
+  'property_id',
 ]);
 
-const DISTINCT_EXCLUDE = new Set<string>([...EQ_FILTER_EXCLUDE, 'id']);
+const DISTINCT_EXCLUDE = new Set<string>([...EQ_FILTER_EXCLUDE, 'id', 'property_id']);
 
 export function isKnownGlampingColumn(name: string): boolean {
   return ALL_SET.has(name);

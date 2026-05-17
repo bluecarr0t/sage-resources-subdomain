@@ -5,7 +5,10 @@
 
 export const MAX_GLAMPING_SIBLING_ROWS = 50;
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export type SiblingFilterSpec =
+  | { mode: 'property_id'; propertyId: string }
   | { mode: 'slug'; slug: string }
   | {
       mode: 'name_city_state';
@@ -14,6 +17,14 @@ export type SiblingFilterSpec =
       state: string | null;
     };
 
+/** Canonical grouping key when `property_id` is populated on the anchor row. */
+export function normalizePropertyIdForSiblings(propertyId: unknown): string | null {
+  if (typeof propertyId !== 'string') return null;
+  const t = propertyId.trim();
+  if (!UUID_RE.test(t)) return null;
+  return t;
+}
+
 export function normalizeSlugForSiblings(slug: unknown): string | null {
   if (typeof slug !== 'string') return null;
   const t = slug.trim();
@@ -21,13 +32,15 @@ export function normalizeSlugForSiblings(slug: unknown): string | null {
 }
 
 /**
- * When the anchor row has a non-empty `slug`, siblings match on `slug`.
- * Otherwise fall back to exact `(property_name, city, state)` (null/empty city
- * or state matches null or empty DB values).
+ * Prefer `property_id` when set (canonical). Otherwise non-empty `slug`, else
+ * exact `(property_name, city, state)` (null/empty city or state matches null or empty DB values).
  */
 export function siblingFilterSpecFromAnchor(
   anchor: Record<string, unknown>
 ): SiblingFilterSpec {
+  const propertyIdNorm = normalizePropertyIdForSiblings(anchor.property_id);
+  if (propertyIdNorm) return { mode: 'property_id', propertyId: propertyIdNorm };
+
   const slugNorm = normalizeSlugForSiblings(anchor.slug);
   if (slugNorm) return { mode: 'slug', slug: slugNorm };
 

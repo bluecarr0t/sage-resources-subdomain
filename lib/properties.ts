@@ -324,7 +324,8 @@ export async function getNearbyProperties(
         .not('lat', 'is', null)
         .not('lon', 'is', null)
         .not('slug', 'is', null)
-        .neq('is_open', 'No')
+        .neq('is_open', 'Closed')
+        .neq('is_open', 'Under Construction')
         .limit(5000); // Reduced limit to prevent oversized responses
 
       if (error) {

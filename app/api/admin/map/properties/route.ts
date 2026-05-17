@@ -33,7 +33,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
         'id, property_name, lat, lon, city, state, property_type, unit_type, avg__retail_daily_rate_2024, occupancy_rate_2024, property__total_sites'
       )
       .eq('is_glamping_property', 'Yes')
-      .neq('is_open', 'No')
+      .neq('is_open', 'Closed')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .not('lat', 'is', null)

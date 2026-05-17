@@ -1,5 +1,6 @@
 import {
   idsBelongToSiblingGroup,
+  normalizePropertyIdForSiblings,
   normalizeSlugForSiblings,
   siblingFilterSpecFromAnchor,
   sortSiblingPropertyRows,
@@ -13,7 +14,29 @@ describe('glamping-property-siblings', () => {
     expect(normalizeSlugForSiblings('foo')).toBe('foo');
   });
 
-  it('siblingFilterSpecFromAnchor prefers slug', () => {
+  it('normalizePropertyIdForSiblings accepts UUID strings', () => {
+    expect(normalizePropertyIdForSiblings('not-a-uuid')).toBeNull();
+    expect(
+      normalizePropertyIdForSiblings('  550e8400-e29b-41d4-a716-446655440000  ')
+    ).toBe('550e8400-e29b-41d4-a716-446655440000');
+  });
+
+  it('siblingFilterSpecFromAnchor prefers property_id over slug', () => {
+    expect(
+      siblingFilterSpecFromAnchor({
+        property_id: '550e8400-e29b-41d4-a716-446655440000',
+        slug: '  my-slug  ',
+        property_name: 'X',
+        city: 'A',
+        state: 'B',
+      })
+    ).toEqual({
+      mode: 'property_id',
+      propertyId: '550e8400-e29b-41d4-a716-446655440000',
+    });
+  });
+
+  it('siblingFilterSpecFromAnchor prefers slug when property_id absent', () => {
     expect(
       siblingFilterSpecFromAnchor({
         slug: '  my-slug  ',

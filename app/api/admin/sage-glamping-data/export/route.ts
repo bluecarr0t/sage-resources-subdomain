@@ -40,19 +40,19 @@ const EXPORT_OUTPUT_COLUMN_NAMES = EXPORT_COLUMNS.map((column) =>
   column === 'is_open' ? 'is_closed' : column
 );
 
-/** Export-only: is_open Yes/No → is_closed No/Yes. Other values pass through. */
+/** Export-only: is_open Yes/Closed → is_closed No/Yes. Legacy `No` and Under Construction export as closed (Yes). Other values pass through. */
 function invertOpenToClosedValue(value: unknown): ExportCell {
   if (value === null || value === undefined) return '';
   const s = String(value).trim();
   const low = s.toLowerCase();
   if (low === 'yes') return 'No';
-  if (low === 'no') return 'Yes';
+  if (low === 'no' || low === 'closed' || low === 'under construction') return 'Yes';
   return cellValue(value);
 }
 
 /**
  * Unified `is_closed` export column:
- * - Glamping: from `is_open`, inverted (Yes→No, No→Yes) — same as before.
+ * - Glamping: from `is_open`, inverted (Yes→No, Closed→Yes, Under Construction→Yes) — same as before.
  * - RoverPass: from table column `is_closed` when set; otherwise fall back to `is_open` with the same inversion as glamping.
  */
 function getExportSourceValue(row: ExportRow, sourceColumn: string): unknown {

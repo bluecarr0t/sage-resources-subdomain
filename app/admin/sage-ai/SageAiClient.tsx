@@ -1551,11 +1551,18 @@ export default function SageAiClient() {
                         }
                         return true;
                       };
+                      /** Whitespace-only assistant `text` parts sit between tool results in some streams; they should not split Supabase query groups. */
+                      const doesNotBreakDataToolBundle = (
+                        p: typeof message.parts[number]
+                      ): boolean =>
+                        p.type === 'text' &&
+                        !(p as { type: 'text'; text: string }).text.trim();
                       const skipIndexes = new Set<number>();
                       const bundleStarts = new Map<number, number[]>();
                       let activeBundle: number[] | null = null;
                       for (let i = 0; i < message.parts.length; i++) {
-                        if (isBundleableDataTool(message.parts[i])) {
+                        const p = message.parts[i];
+                        if (isBundleableDataTool(p)) {
                           if (!activeBundle) {
                             activeBundle = [i];
                             bundleStarts.set(i, activeBundle);
@@ -1563,6 +1570,8 @@ export default function SageAiClient() {
                             activeBundle.push(i);
                             skipIndexes.add(i);
                           }
+                        } else if (doesNotBreakDataToolBundle(p)) {
+                          // keep activeBundle
                         } else {
                           activeBundle = null;
                         }
@@ -1699,6 +1708,9 @@ export default function SageAiClient() {
                       }
 
                       if (part.type === 'text') {
+                        if (!part.text.trim()) {
+                          return null;
+                        }
                         const copyId = `${message.id}-${partIndex}`;
                         return (
                           <div key={partIndex} className="relative">
@@ -2072,13 +2084,16 @@ export default function SageAiClient() {
                               key={partIndex}
                               className="my-4 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden group/bundle"
                             >
-                              <summary className="cursor-pointer select-none flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                <Database className="w-4 h-4 text-gray-400" />
+                              <summary className="cursor-pointer select-none flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 list-none [&::-webkit-details-marker]:hidden">
+                                <Database className="w-4 h-4 shrink-0 text-gray-400" />
                                 <span>{t('toolBundle', { count: bundle.length })}</span>
+                                <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
+                                  {t('toolBundleExpand')}
+                                </span>
                                 {allDone ? (
                                   <span className="text-xs text-emerald-600 dark:text-emerald-400">{t('toolDone')}</span>
                                 ) : (
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
+                                  <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin text-gray-400" />
                                 )}
                               </summary>
                               <div className="border-t border-neutral-200/75 dark:border-neutral-800 px-3 py-2 space-y-2">

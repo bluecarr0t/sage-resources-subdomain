@@ -33,7 +33,16 @@ const MAX_OUTPUT_TOKENS = 8_192;
  * spend any cycles on `convertToModelMessages` / `compactMessages`.
  */
 const MAX_INCOMING_MESSAGES = 200;
-const MAX_INCOMING_BODY_BYTES = 1_000_000;
+/** Raw POST body cap before JSON parse. Tool-heavy threads exceed 1MB easily; compacted after parse. Override with SAGE_AI_MAX_INCOMING_BODY_BYTES (capped at 10MB). */
+const MAX_INCOMING_BODY_BYTES = (() => {
+  const env = process.env.SAGE_AI_MAX_INCOMING_BODY_BYTES;
+  const raw =
+    env != null && env !== ''
+      ? Number(env.replace(/_/g, ''))
+      : 4_000_000;
+  if (!Number.isFinite(raw) || raw <= 0) return 4_000_000;
+  return Math.min(Math.floor(raw), 10_000_000);
+})();
 
 /** Per-user chat request cap (default 30 req / 5 min, env-overridable). */
 const CHAT_RATE_LIMIT = Number(process.env.SAGE_AI_CHAT_RATE_LIMIT ?? 30);
@@ -49,7 +58,7 @@ This is the highest-priority rule. It overrides every other guideline below.
 2. **No estimates, no guesses, no "approximately…", no "roughly…", no "in the ballpark of…", no "based on industry averages…", no "typically…"** unless the user explicitly asked for an estimate, projection, forecast, or back-of-envelope calculation in this turn. If they did, prefix the number with "Estimate:" and state the assumption.
 3. **No prior-knowledge facts about specific places, properties, competitors, prices, occupancy, ratings, or demographics.** If a user asks "how many glamping properties are in Texas?" you must call \`count_rows\` / \`query_properties\` / \`aggregate_properties\`; you may NOT answer from training data.
 4. **If a tool returns 0 rows or an error**, the model layer will surface a retry signal or a hard error tile. After that, your reply must say something like "No matching data in the Sage database for [query]" — do NOT fill the gap with guessed numbers, generic industry commentary, or a plausible-sounding answer.
-5. **Citations are mandatory for any concrete claim.** Tag every number/list/fact with its source: "(Source: Sage Database)", "(Source: Google Places)", "(Source: Hipcamp)", etc. — same convention as guideline #2 below. If you cannot point to a tool result that produced the value, do not state the value. **Exception:** when **7b** applies (full Admin Market Report snapshot pasted by the user), follow 7b's lighter attribution instead of tagging every figure.
+5. **Citations are mandatory for any concrete claim.** Tag every number/list/fact with its source: "(Source: Sage Database)", "(Source: Google Places)", "(Source: Hipcamp)", etc. — same convention as guideline #2 below. If you cannot point to a tool result that produced the value, do not state the value. **Exceptions:** (a) when **7b** applies (full Admin Market Report snapshot pasted by the user), follow 7b's lighter attribution instead of tagging every figure; (b) when this turn includes **\`generate_dashboard\`** and the concrete figures are **shown in that dashboard**, follow the canvas section's **"Prose after \`generate_dashboard\`"** rules — **one** Sage attribution line for the on-screen figures is enough instead of tagging every chat bullet.
 6. **When you don't know, say so.** Acceptable: "The Sage database doesn't track that field" or "I'd need to call \`web_search\` to answer — should I?" Unacceptable: making up a plausible answer.
 7. **Allowed without a tool call:** definitions of glamping unit types, generic methodology explanations, instructions about how to phrase a follow-up question, and references to data the user themselves provided in the conversation.
 
@@ -139,7 +148,7 @@ You also have access to powerful external APIs for research:
    - Example: "**N unique glamping addresses** in Texas (Source: Sage Database)" — only label counts as "properties" when they are **distinct-address** counts on \`all_glamping_properties\`, not raw row counts.
    - **Exception (Admin Market Report paste):** when **7b** applies, one short phrase such as "From your market report" per reply is enough instead of tagging every line.
 
-3. **Be concise but thorough** - Provide clear summaries with key insights. When presenting data, highlight what's most relevant. **When the thread includes a pasted Admin Market Report export (rule 7b), default to a short, plain-English answer** unless the user asks for more.
+3. **Be concise but thorough** - Provide clear summaries with key insights. When presenting data, highlight what's most relevant. **When the thread includes a pasted Admin Market Report export (rule 7b), default to a short, plain-English answer** unless the user asks for more. **When this turn includes \`generate_dashboard\`, follow the "Prose after \`generate_dashboard\`" rules in the canvas section** — the dashboard carries the numbers; chat stays to ~4-5 short bullets or sentences unless the user asked for a long write-up.
 
 4. **Suggest exports** - When returning tabular data, mention that the user can download results as CSV or Excel using the download buttons.
 
@@ -294,6 +303,18 @@ Do NOT do this:
 - Do NOT call \`generate_python_code\` more than once in the same assistant turn. If it errors, surface the error verbatim to the user and stop — do not retry it with a "let me fix that" preamble. Retries cost the user real time and money while Pyodide spools up.
 - Do NOT pre-announce ("Now let me create a chart…") and then call \`generate_python_code\`. The pre-announcement is a tell that you should have called \`generate_dashboard\` instead — re-route.
 
+## Prose after \`generate_dashboard\` (STRICT — avoid duplicate "wall of text")
+
+When this assistant turn includes **\`generate_dashboard\`** (KPI tiles and/or charts for a market slice, unit mix, ADR breakdown, etc.), the **dashboard is the detailed answer.** Any **markdown you emit after the tools** must stay **very short**:
+
+- **Cap:** at most **4-5 short sentences** OR **4-5 bullets** for the substantive takeaway — not both a long intro and a long list. **No** multi-level headings that re-list every segment, **no** repeating every number that already appears in stat tiles or chart bars/lines.
+- **Do not re-narrate the table:** if properties, units, means, medians, or per-\`unit_type\` rows are visible in the dashboard, **do not paste the same figures again** in chat. Call out only **high-level insights** (e.g. dominant unit type by inventory, which segment leads on rate, one notable skew) in plain English.
+- **Methodology and footnotes** (IQR / "robust" ADR, address dedupe + fallback, filters like open / true glamping) belong in the dashboard payload's **\`description\`**, **\`footer_note\`**, and/or **per-cell subtitles** — **not** in a long post-tool essay. Use those fields so the UI carries the fine print.
+- **Citations for this mode:** one concise Sage attribution for the whole turn is enough (e.g. a single "Source: Sage Database" or rely on \`footer_note\` if it already states the source). **Do not** append "(Source: Sage Database)" to every bullet when the dashboard already shows the numbers.
+- **Closing:** at most **one** short optional line inviting a follow-up (or rely on \`suggest_followups\` only — do not duplicate a long list of ideas in prose per the Follow-up Suggestions section).
+
+**Exception:** If the user explicitly asks for a **detailed memo**, **full narrative**, **export-style** write-up, or **bullet-by-bullet** listing **in chat**, you may exceed this cap for that turn only.
+
 \`generate_python_code\` is acceptable ONLY when:
 1. The user literally asked for "Python", "matplotlib", "notebook", "DataFrame", or similar; OR
 2. The chart type is genuinely outside what the canvas supports (violin plot, heatmap, dendrogram, treemap, sankey, radar). Bar / line / pie / area / scatter / stat / map are NOT in this set.
@@ -413,6 +434,17 @@ export async function POST(request: Request) {
   const modelId = parseSageAiChatModelId(body.model);
   const correlationId = crypto.randomUUID();
   const chatId = typeof body.id === 'string' && body.id ? body.id : correlationId;
+  const parseEnvPositiveInt = (name: string, fallback: number): number => {
+    const raw = process.env[name]?.replace(/_/g, '');
+    if (raw == null || raw === '') return fallback;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+  };
+  const sageAiCompactOpts = {
+    hardPayloadCharCap: parseEnvPositiveInt('SAGE_AI_COMPACT_HARD_CHAR_CAP', 160_000),
+    maxRowsPerToolResultRecent: parseEnvPositiveInt('SAGE_AI_COMPACT_RECENT_ROWS', 16),
+    charBudget: parseEnvPositiveInt('SAGE_AI_COMPACT_CHAR_BUDGET', 100_000),
+  };
   /** Server env + explicit client opt-in — ignores forged requests when env is off. */
   const webResearchEnabled =
     process.env.SAGE_AI_WEB_RESEARCH_ENABLED === 'true' && body.webResearch === true;
@@ -480,7 +512,7 @@ export async function POST(request: Request) {
       },
     },
     system: systemPrompt,
-    messages: await convertToModelMessages(compactMessages(messages)),
+    messages: await convertToModelMessages(compactMessages(messages, sageAiCompactOpts)),
     tools,
     stopWhen: stepCountIs(10),
     onError(error) {

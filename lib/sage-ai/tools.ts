@@ -34,6 +34,10 @@ import {
   GLAMPING_FIELD_GUIDE_VERSION,
   searchFieldGuide,
 } from '@/lib/sage-ai/glamping-field-guide';
+import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
+
+/** `all_glamping_properties.is_open` filter values (Yes / Closed / Under Construction). */
+const zGlampingIsOpen = z.enum(GLAMPING_IS_OPEN_VALUES);
 
 /** PostgREST often returns `numeric` columns as strings; keep aggregates numeric for UI. */
 function coerceRpcNullableNumber(v: unknown): number | null {
@@ -645,10 +649,11 @@ export function createSageAiTools(
               .enum(['Yes', 'No'])
               .optional()
               .describe('Filter to glamping properties only'),
-            is_open: z
-              .enum(['Yes', 'No'])
+            is_open: zGlampingIsOpen
               .optional()
-              .describe('Filter by whether the property is open (Yes) or not (No)'),
+              .describe(
+                'Filter by operating status: Yes = open, Closed = not operating, Under Construction = pre-opening.'
+              ),
           })
           .optional()
           .describe('Filters to apply to the query'),
@@ -1710,7 +1715,7 @@ export function createSageAiTools(
                 'Push "published only" / "researched only" filters down here instead of post-filtering in Python. Call get_column_values({column:"research_status"}) first if unsure which casing is in the data.'
               ),
             is_glamping_property: z.enum(['Yes', 'No']).optional(),
-            is_open: z.enum(['Yes', 'No']).optional(),
+            is_open: zGlampingIsOpen.optional(),
           })
           .optional(),
       }),
@@ -1877,7 +1882,7 @@ export function createSageAiTools(
           .max(120)
           .optional()
           .describe('Optional substring match on `country`, e.g. "United States" or "Canada".'),
-        is_open: z.enum(['Yes', 'No']).optional().default('Yes'),
+        is_open: zGlampingIsOpen.optional().default('Yes'),
         is_glamping_property: z.enum(['Yes', 'No']).optional().default('Yes'),
       }),
       execute: async ({
@@ -2073,7 +2078,7 @@ export function createSageAiTools(
             discovery_source: z.string().optional(),
             research_status: z.string().optional(),
             is_glamping_property: z.enum(['Yes', 'No']).optional(),
-            is_open: z.enum(['Yes', 'No']).optional(),
+            is_open: zGlampingIsOpen.optional(),
           })
           .optional()
           .describe(
