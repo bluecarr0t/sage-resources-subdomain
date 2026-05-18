@@ -45,18 +45,14 @@ function formatUsd(n: number | null): string {
   }).format(n);
 }
 
-function formatAsOfLabel(iso: string): string {
+function formatLastUpdatedDate(iso: string): string {
   const d = new Date(iso);
-  const date = d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'UTC',
   });
-  const time = d.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `${date}, ${time}`;
 }
 
 function parseMarket(raw: string | undefined): GlampingMarketSnapshotMarket {
@@ -110,14 +106,14 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
         backgroundImage: `linear-gradient(to bottom, rgb(250 249 243 / 0.55), rgb(250 249 243 / 0.9)), url(${SNAPSHOT_TOPO_BG_URL})`,
       }}
     >
-      <main className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-x-visible px-6 py-24 sm:py-32">
+      <main className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-x-visible px-6 pt-16 pb-24 sm:pt-24 sm:pb-32">
         <h1 className="font-[Georgia] text-sm font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg">
           Glamping Market Overview
         </h1>
 
         {result.ok ? (
           <p className="mt-3 text-[11px] font-light tabular-nums leading-snug text-neutral-500 sm:text-xs">
-            Last Updated: {formatAsOfLabel(result.data.asOf)}
+            Last Updated: {formatLastUpdatedDate(result.data.asOf)}
           </p>
         ) : null}
 

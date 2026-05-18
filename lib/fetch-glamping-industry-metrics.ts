@@ -35,6 +35,8 @@ type Row = {
   quantity_of_units: string | number | null;
   property_total_sites: string | number | null;
   rate_avg_retail_daily_rate: string | number | null;
+  updated_at: string | null;
+  created_at: string | null;
 };
 
 function parsePositiveNumber(value: unknown): number | null {
@@ -51,6 +53,12 @@ function normalizeIsOpen(raw: string | null | undefined): 'yes' | 'under_constru
   if (v === 'under construction') return 'under_construction';
   if (v === 'closed' || v === 'no') return 'closed';
   return 'other';
+}
+
+function parseTimestampMs(value: string | null | undefined): number | null {
+  if (value == null || !String(value).trim()) return null;
+  const ms = Date.parse(String(value));
+  return Number.isFinite(ms) ? ms : null;
 }
 
 function sitesForRow(row: Row): number {
@@ -91,12 +99,14 @@ export async function fetchGlampingIndustryMetrics(
   const adrValues: number[] = [];
   const sitesByPrimaryUnitLabel = new Map<string, number>();
 
+  let dataFreshnessMs = 0;
+
   let offset = 0;
   for (;;) {
     const { data, error } = await supabase
       .from('all_glamping_properties')
       .select(
-        'property_name, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate'
+        'property_name, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, updated_at, created_at'
       )
       .eq('is_glamping_property', 'Yes')
       .eq('research_status', 'published')
@@ -113,6 +123,11 @@ export async function fetchGlampingIndustryMetrics(
     if (batch.length === 0) break;
 
     for (const row of batch) {
+      const u = parseTimestampMs(row.updated_at);
+      const c = parseTimestampMs(row.created_at);
+      const rowFresh = Math.max(u ?? 0, c ?? 0);
+      if (rowFresh > 0) dataFreshnessMs = Math.max(dataFreshnessMs, rowFresh);
+
       const name = (row.property_name ?? '').trim();
       if (name) {
         distinctNames.add(name);
@@ -166,7 +181,10 @@ export async function fetchGlampingIndustryMetrics(
       avgRetailDailyRateMean: mean != null ? Math.round(mean) : null,
       avgRetailDailyRateMedian: median != null ? Math.round(median) : null,
       topUnitTypesBySites,
-      asOf: new Date().toISOString(),
+      asOf:
+        dataFreshnessMs > 0
+          ? new Date(dataFreshnessMs).toISOString()
+          : new Date().toISOString(),
     },
   };
 }
