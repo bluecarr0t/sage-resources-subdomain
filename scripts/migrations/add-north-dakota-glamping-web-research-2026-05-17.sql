@@ -1,0 +1,78 @@
+-- North Dakota glamping web research (May 2026).
+-- Adds bookable glamping-style inventory not already represented in Sage ND coverage
+-- (Fort Ransom / Cross Ranch / Lake Metigoshe / Turtle River state-park rows already exist as published).
+-- discovery_source = web_research_2026_05_nd. research_status = in_progress for manual enrichment.
+-- Applied to production via Supabase migration add_north_dakota_glamping_web_research_2026_05_17.
+
+INSERT INTO public.all_glamping_properties (
+  research_status,
+  is_glamping_property,
+  is_open,
+  property_name,
+  site_name,
+  slug,
+  property_type,
+  unit_type,
+  source,
+  discovery_source,
+  country,
+  state,
+  city,
+  address,
+  lat,
+  lon,
+  url,
+  description,
+  notes,
+  date_added,
+  date_updated,
+  land_operator_category
+) VALUES
+(
+  'in_progress',
+  'Yes',
+  'Yes',
+  'Medora Campground',
+  'Covered Wagon',
+  'medora-campground-medora-nd',
+  'Glamping Resort',
+  'Covered Wagon',
+  'Sage',
+  'web_research_2026_05_nd',
+  'United States',
+  'ND',
+  'Medora',
+  '3370 Pool Dr, Medora, ND 58645',
+  46.914,
+  -103.524,
+  'https://medora.com/listing/medora-campground/',
+  $$Badlands-area campground on the Little Missouri River (Theodore Roosevelt Medora Foundation): Conestoga-style covered wagons (king + twin bunk, heat/AC, USB power) plus multiple rentable cabins with kitchenettes/baths, full-service RV and tent camping, store, laundry, Wi-Fi, river access. Seasonal operations (marketing: open approx. mid-May through late Sept); verify exact dates and cabin vs. wagon inventory annually.$$,
+  $$Sources: medora.com campground listing + ND Tourism / regional listings (May 2026 web research). Coordinates approximate (Medora).$$,
+  '2026-05-17',
+  '2026-05-17',
+  'private_commercial'
+),
+(
+  'in_progress',
+  'Yes',
+  'Yes',
+  'Rockstad''s River Inn and Yurt',
+  'Yurt',
+  'rockstads-river-inn-and-yurt-fort-ransom-nd',
+  'Glamping Resort',
+  'Yurt',
+  'Sage',
+  'web_research_2026_05_nd',
+  'United States',
+  'ND',
+  'Fort Ransom',
+  NULL,
+  46.508,
+  -97.931,
+  'https://www.rockstadsriverinn.com/',
+  $$Small Fort Ransom lodging on the Sheyenne River corridor next to Fort Ransom State Park: a large (~30 ft) yurt with deck plus on-site RV sites, cottage, and inn rooms. Travel coverage highlights quilts, bathtub, and year-round/winter-stay potential; confirm current rates, exact street address, and booking rules with the operator.$$,
+  $$Sources: rockstadsriverinn.com + independent travel write-up (Prairie Style File, May 2026 web research). Phone on operator site: 701-973-2103.$$,
+  '2026-05-17',
+  '2026-05-17',
+  'private_commercial'
+);

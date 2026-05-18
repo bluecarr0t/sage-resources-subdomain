@@ -51,6 +51,8 @@ function isUsRow(country: string | null | undefined): boolean {
 
 export type GlampingUsStateMetricRow = {
   propertyCount: number;
+  openProperties: number;
+  underConstructionProperties: number;
   siteCount: number;
   avgRetailDailyRateMean: number | null;
   avgRetailDailyRateMedian: number | null;
@@ -60,6 +62,8 @@ export type GlampingUsStateMetricsMap = Record<string, GlampingUsStateMetricRow>
 
 type Agg = {
   names: Set<string>;
+  openNames: Set<string>;
+  underConstructionNames: Set<string>;
   sites: number;
   adrValues: number[];
 };
@@ -103,14 +107,17 @@ export async function fetchGlampingIndustryUsStateMetrics(): Promise<
       const name = (row.property_name ?? '').trim();
       let agg = aggs.get(abbr);
       if (!agg) {
-        agg = { names: new Set(), sites: 0, adrValues: [] };
+        agg = { names: new Set(), openNames: new Set(), underConstructionNames: new Set(), sites: 0, adrValues: [] };
         aggs.set(abbr, agg);
       }
 
       if (name) agg.names.add(name);
+      const status = normalizeIsOpen(row.is_open);
+      if (name && status === 'yes') agg.openNames.add(name);
+      if (name && status === 'under_construction') agg.underConstructionNames.add(name);
       agg.sites += sitesForRow(row);
 
-      if (normalizeIsOpen(row.is_open) === 'yes') {
+      if (status === 'yes') {
         const adr = parsePositiveNumber(row.rate_avg_retail_daily_rate);
         if (adr != null) agg.adrValues.push(adr);
       }
@@ -128,6 +135,8 @@ export async function fetchGlampingIndustryUsStateMetrics(): Promise<
     const median = sorted.length > 0 ? medianSorted(sorted) : null;
     out[abbr] = {
       propertyCount: agg.names.size,
+      openProperties: agg.openNames.size,
+      underConstructionProperties: agg.underConstructionNames.size,
       siteCount: agg.sites,
       avgRetailDailyRateMean: mean != null ? Math.round(mean) : null,
       avgRetailDailyRateMedian: median != null ? Math.round(median) : null,

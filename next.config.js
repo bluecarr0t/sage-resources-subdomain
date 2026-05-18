@@ -10,7 +10,12 @@ const nextConfig = {
     return [
       {
         source: '/glamping-industry',
-        destination: '/glamping-market-snapshot',
+        destination: '/glamping-market-overview',
+        permanent: true,
+      },
+      {
+        source: '/glamping-market-snapshot',
+        destination: '/glamping-market-overview',
         permanent: true,
       },
       { source: '/admin/comparables', destination: '/admin/comps', permanent: false },

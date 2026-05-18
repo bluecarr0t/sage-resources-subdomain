@@ -13,23 +13,24 @@ import { US_STATE_NAMES } from '@/lib/us-states';
 const US_STATES_TOPO_URL =
   'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
 
-/** County polygons give clearer Hawaiian island shapes than the single state feature. */
-const US_COUNTIES_TOPO_URL = 'https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json';
+/** Sage Outdoor Advisory — matches `theme.extend.colors.sage` in tailwind.config.ts */
+const SAGE_MAP = {
+  fill: '#f6f7f6',
+  fillHover: '#e3e7e3',
+  fillSelected: '#c7d2c7',
+  stroke: '#334033',
+} as const;
 
 const MAP_W = 880;
 const MAP_H = 520;
 /** Mercator inset for HI only — placed above Alaska (Albers lower-left) so it does not cover AK. */
-const HAWAII_INSET_W = 160;
-const HAWAII_INSET_H = 96;
+const HAWAII_INSET_W = 64;
+const HAWAII_INSET_H = 38;
 
-function parseHawaiiInsetGeos(geos: GeoJSON.Feature[]) {
+function parseHawaiiStateGeo(geos: GeoJSON.Feature[]) {
   return geos.filter((g) => {
-    const id = String((g as unknown as { id?: string | number }).id ?? '');
-    if (/^15\d{3}$/.test(id)) return true;
-    const geoid = String((g.properties as { GEOID?: string })?.GEOID ?? '');
-    if (/^15\d{3}$/.test(geoid)) return true;
-    const stateFp = String((g.properties as { STATEFP?: string })?.STATEFP ?? '');
-    return stateFp === '15';
+    const name = (g.properties as { name?: string })?.name;
+    return fullStateNameToUspsAbbr(name) === 'HI';
   });
 }
 
@@ -52,25 +53,25 @@ function formatUsd(n: number | null): string {
 
 function styleForState(abbr: string, selected: string | null) {
   const isSel = selected === abbr;
-  const fill = isSel ? '#d4d4d4' : '#fafafa';
+  const fill = isSel ? SAGE_MAP.fillSelected : SAGE_MAP.fill;
   return {
     default: {
       fill,
-      stroke: '#0a0a0a',
+      stroke: SAGE_MAP.stroke,
       strokeWidth: 0.4,
       outline: 'none' as const,
       cursor: 'pointer' as const,
     },
     hover: {
-      fill: isSel ? '#d4d4d4' : '#ececec',
-      stroke: '#0a0a0a',
+      fill: isSel ? SAGE_MAP.fillSelected : SAGE_MAP.fillHover,
+      stroke: SAGE_MAP.stroke,
       strokeWidth: 0.75,
       outline: 'none' as const,
       cursor: 'pointer' as const,
     },
     pressed: {
-      fill: '#d4d4d4',
-      stroke: '#0a0a0a',
+      fill: SAGE_MAP.fillSelected,
+      stroke: SAGE_MAP.stroke,
       strokeWidth: 0.75,
       outline: 'none' as const,
       cursor: 'pointer' as const,
@@ -78,35 +79,32 @@ function styleForState(abbr: string, selected: string | null) {
   };
 }
 
-/** Slightly heavier strokes for the small Mercator Hawaii inset. */
+/** Stroke styles for the small Hawaii Mercator inset (single state outline). */
 function styleForHawaiiInset(selected: string | null) {
   const isSel = selected === 'HI';
-  const fill = isSel ? '#d4d4d4' : '#fafafa';
-  const sw = { default: 0.75, hover: 0.95, pressed: 0.95 } as const;
+  const fill = isSel ? SAGE_MAP.fillSelected : SAGE_MAP.fill;
+  const sw = { default: 0.55, hover: 0.75, pressed: 0.75 } as const;
   return {
     default: {
       fill,
-      stroke: '#0a0a0a',
+      stroke: SAGE_MAP.stroke,
       strokeWidth: sw.default,
       outline: 'none' as const,
       cursor: 'pointer' as const,
-      vectorEffect: 'non-scaling-stroke' as const,
     },
     hover: {
-      fill: isSel ? '#d4d4d4' : '#ececec',
-      stroke: '#0a0a0a',
+      fill: isSel ? SAGE_MAP.fillSelected : SAGE_MAP.fillHover,
+      stroke: SAGE_MAP.stroke,
       strokeWidth: sw.hover,
       outline: 'none' as const,
       cursor: 'pointer' as const,
-      vectorEffect: 'non-scaling-stroke' as const,
     },
     pressed: {
-      fill: '#d4d4d4',
-      stroke: '#0a0a0a',
+      fill: SAGE_MAP.fillSelected,
+      stroke: SAGE_MAP.stroke,
       strokeWidth: sw.pressed,
       outline: 'none' as const,
       cursor: 'pointer' as const,
-      vectorEffect: 'non-scaling-stroke' as const,
     },
   };
 }
@@ -123,12 +121,12 @@ export default function GlampingIndustryUsMap({ byState }: Props) {
   }, []);
 
   return (
-    <div className="relative mt-16 space-y-12 sm:mt-20 lg:space-y-0 lg:pr-[calc(220px+3rem)]">
-      <div className="relative min-w-0 overflow-visible">
-        <div className="mb-4 space-y-1 text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+    <div className="relative mt-16 space-y-12 overflow-x-visible sm:mt-20 lg:space-y-0 lg:pr-[calc(220px+3rem)]">
+      <div className="relative min-w-0 overflow-x-visible overflow-y-visible">
+        <div className="mb-4 space-y-1 text-[10px] uppercase tracking-[0.25em] text-neutral-500">
           <p>United States map · click a state</p>
-          <p className="text-[9px] font-light normal-case tracking-normal text-neutral-400">
-            Alaska lower left · Hawaii inset lower left, west of the lower 48
+          <p className="text-[9px] font-light normal-case tracking-normal text-neutral-500">
+            Alaska lower left · Hawaii lower left
           </p>
         </div>
         <ComposableMap
@@ -200,21 +198,24 @@ export default function GlampingIndustryUsMap({ byState }: Props) {
           </Geographies>
         </ComposableMap>
 
-        <div className="pointer-events-none absolute bottom-[8%] left-0 z-10 w-[min(26vw,160px)] -translate-x-16 sm:bottom-[11%] sm:-translate-x-32 md:bottom-[13%] md:-translate-x-44 lg:-translate-x-56">
-          <div className="w-full [&_svg]:pointer-events-none [&_svg]:h-auto [&_svg]:w-full [&_path.rsm-geography]:pointer-events-auto">
+        <div
+          className="pointer-events-none absolute bottom-[10%] left-2 z-10 -translate-x-4 sm:bottom-[12%] sm:left-3 sm:-translate-x-5 md:bottom-[14%] md:left-4 md:-translate-x-6 lg:left-4 lg:-translate-x-7"
+          style={{ width: HAWAII_INSET_W, height: HAWAII_INSET_H }}
+        >
+          <div className="h-full w-full overflow-hidden [&_svg]:pointer-events-none [&_svg]:overflow-hidden [&_path.rsm-geography]:pointer-events-auto">
             <ComposableMap
               projection="geoMercator"
               projectionConfig={{
-                center: [-157.25, 20.35] as [number, number],
-                scale: 6700,
+                center: [-157.35, 20.42] as [number, number],
+                scale: 1400,
               }}
               width={HAWAII_INSET_W}
               height={HAWAII_INSET_H}
-              className="[&_.rsm-geography]:outline-none"
+              className="block h-full w-full max-w-none [&_.rsm-geography]:outline-none"
             >
               <Geographies
-                geography={US_COUNTIES_TOPO_URL}
-                parseGeographies={(geos) => parseHawaiiInsetGeos(geos as GeoJSON.Feature[])}
+                geography={US_STATES_TOPO_URL}
+                parseGeographies={(geos) => parseHawaiiStateGeo(geos as GeoJSON.Feature[])}
               >
                 {({ geographies }) => (
                   <>
@@ -242,28 +243,44 @@ export default function GlampingIndustryUsMap({ byState }: Props) {
         </div>
       </div>
 
-      <aside className="border-t border-neutral-200 pt-6 lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:flex lg:min-h-0 lg:w-[220px] lg:flex-col lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+      <aside className="border-t border-sage-200 pt-6 lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:flex lg:min-h-0 lg:w-[220px] lg:flex-col lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
         <div className="min-h-0 flex-1 overflow-y-auto lg:min-h-0">
           {!selected ? (
-            <p className="text-xs font-light leading-relaxed text-neutral-500">
+            <p className="text-xs font-light leading-relaxed text-neutral-600">
               Select a state on the map for property count, site count, and average retail daily rate.
             </p>
           ) : (
             <div className="space-y-6">
-              <h2 className="text-[11px] font-medium uppercase tracking-widest text-neutral-400">
+              <h2 className="text-[11px] font-medium uppercase tracking-widest text-neutral-500">
                 {stateLabel(selected)}
               </h2>
               <dl className="space-y-5 text-sm">
                 <div>
-                  <dt className="text-[10px] uppercase tracking-wider text-neutral-400">
+                  <dt className="text-[10px] uppercase tracking-wider text-neutral-500">
                     Property count
                   </dt>
-                  <dd className="mt-1 font-light tabular-nums text-2xl tracking-tight text-neutral-900">
-                    {formatInt(row?.propertyCount ?? 0)}
+                  <dd>
+                    <div className="mt-1 font-light tabular-nums text-2xl tracking-tight text-neutral-900">
+                      {formatInt(row?.propertyCount ?? 0)}
+                    </div>
+                    <ul className="mt-4 space-y-2 border-l border-sage-200 pl-4 text-sm text-neutral-600">
+                      <li>
+                        <span className="text-neutral-500">Open</span>{' '}
+                        <span className="tabular-nums text-neutral-800">
+                          {formatInt(row?.openProperties ?? 0)}
+                        </span>
+                      </li>
+                      <li>
+                        <span className="text-neutral-500">Under construction</span>{' '}
+                        <span className="tabular-nums text-neutral-800">
+                          {formatInt(row?.underConstructionProperties ?? 0)}
+                        </span>
+                      </li>
+                    </ul>
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[10px] uppercase tracking-wider text-neutral-400">
+                  <dt className="text-[10px] uppercase tracking-wider text-neutral-500">
                     Site count
                   </dt>
                   <dd className="mt-1 font-light tabular-nums text-2xl tracking-tight text-neutral-900">
@@ -271,20 +288,20 @@ export default function GlampingIndustryUsMap({ byState }: Props) {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[10px] uppercase tracking-wider text-neutral-400">
+                  <dt className="text-[10px] uppercase tracking-wider text-neutral-500">
                     Avg. retail daily rate
                   </dt>
                   <dd className="mt-1 space-y-0.5 font-light tabular-nums text-lg tracking-tight text-neutral-900">
                     <div>
-                      <span className="text-neutral-400">Mean</span>{' '}
+                      <span className="text-neutral-500">Mean</span>{' '}
                       {formatUsd(row?.avgRetailDailyRateMean ?? null)}
                     </div>
                     <div>
-                      <span className="text-neutral-400">Median</span>{' '}
+                      <span className="text-neutral-500">Median</span>{' '}
                       {formatUsd(row?.avgRetailDailyRateMedian ?? null)}
                     </div>
                   </dd>
-                  <p className="mt-2 text-[10px] leading-relaxed text-neutral-400">
+                  <p className="mt-2 text-[10px] leading-relaxed text-neutral-500">
                     From operating properties with a recorded rate.
                   </p>
                 </div>

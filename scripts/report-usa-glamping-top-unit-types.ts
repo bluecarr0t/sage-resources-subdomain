@@ -1,6 +1,6 @@
 /**
  * Top N unit types by summed site counts for the same cohort as
- * `/glamping-market-snapshot` (US market).
+ * `/glamping-market-overview` (US market).
  *
  * Run: npx tsx scripts/report-usa-glamping-top-unit-types.ts
  */
