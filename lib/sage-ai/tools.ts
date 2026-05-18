@@ -36,7 +36,7 @@ import {
 } from '@/lib/sage-ai/glamping-field-guide';
 import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
 
-/** `all_glamping_properties.is_open` filter values (Yes / Closed / Under Construction). */
+/** `all_glamping_properties.is_open` filter values (Yes / Under Construction / Proposed Development / Closed). */
 const zGlampingIsOpen = z.enum(GLAMPING_IS_OPEN_VALUES);
 
 /** PostgREST often returns `numeric` columns as strings; keep aggregates numeric for UI. */
@@ -652,7 +652,7 @@ export function createSageAiTools(
             is_open: zGlampingIsOpen
               .optional()
               .describe(
-                'Filter by operating status: Yes = open, Closed = not operating, Under Construction = pre-opening.'
+                'Filter by operating status: Yes = open, Under Construction = pre-opening, Proposed Development = planned site, Closed = not operating.'
               ),
           })
           .optional()

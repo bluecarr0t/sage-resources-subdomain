@@ -15,7 +15,7 @@ export interface SageProperty {
   land_operator_category: string | null;
   research_status: string | null;
   is_glamping_property: string | null;
-  /** Yes = operating; Closed = not operating; Under Construction = pre-opening (excluded from public map). */
+  /** Yes = operating; Under Construction / Proposed Development = pre-opening; Closed = not operating (non-operating values excluded from public map). */
   is_open: string | null;
 
   // SOURCE & TRACKING

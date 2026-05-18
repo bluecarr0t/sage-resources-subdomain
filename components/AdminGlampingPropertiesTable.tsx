@@ -1,7 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
+import {
+  GLAMPING_IS_OPEN_VALUES,
+  type GlampingIsOpenValue,
+} from '@/lib/glamping-is-open';
 import { useTranslations } from 'next-intl';
 import {
   ArrowDown,
@@ -60,17 +63,25 @@ const RESEARCH_STATUS_OPTIONS = [
 
 const RESEARCH_STATUS_EDIT_OPTIONS = RESEARCH_STATUS_OPTIONS.filter((o) => o.value !== 'all');
 
+const OPEN_STATUS_LABEL_KEYS: Record<
+  GlampingIsOpenValue,
+  | 'openStatusYes'
+  | 'openStatusUnderConstruction'
+  | 'openStatusProposedDevelopment'
+  | 'openStatusClosed'
+> = {
+  Yes: 'openStatusYes',
+  'Under Construction': 'openStatusUnderConstruction',
+  'Proposed Development': 'openStatusProposedDevelopment',
+  Closed: 'openStatusClosed',
+};
+
 const OPEN_STATUS_FILTER_OPTIONS = [
   { value: 'all' as const, labelKey: 'openStatusAll' as const },
-  ...GLAMPING_IS_OPEN_VALUES.map((value) => {
-    const labelKey =
-      value === 'Yes'
-        ? ('openStatusYes' as const)
-        : value === 'Closed'
-          ? ('openStatusClosed' as const)
-          : ('openStatusUnderConstruction' as const);
-    return { value, labelKey };
-  }),
+  ...GLAMPING_IS_OPEN_VALUES.map((value) => ({
+    value,
+    labelKey: OPEN_STATUS_LABEL_KEYS[value],
+  })),
 ];
 
 const LAND_OPERATOR_BULK_VALUES = [

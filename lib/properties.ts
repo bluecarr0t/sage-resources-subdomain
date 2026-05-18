@@ -326,6 +326,7 @@ export async function getNearbyProperties(
         .not('slug', 'is', null)
         .neq('is_open', 'Closed')
         .neq('is_open', 'Under Construction')
+        .neq('is_open', 'Proposed Development')
         .limit(5000); // Reduced limit to prevent oversized responses
 
       if (error) {

@@ -40,13 +40,20 @@ const EXPORT_OUTPUT_COLUMN_NAMES = EXPORT_COLUMNS.map((column) =>
   column === 'is_open' ? 'is_closed' : column
 );
 
-/** Export-only: is_open Yes/Closed → is_closed No/Yes. Legacy `No` and Under Construction export as closed (Yes). Other values pass through. */
+/** Export-only: is_open Yes/Closed → is_closed No/Yes. Legacy `No`, Under Construction, and Proposed Development export as closed (Yes). Other values pass through. */
 function invertOpenToClosedValue(value: unknown): ExportCell {
   if (value === null || value === undefined) return '';
   const s = String(value).trim();
   const low = s.toLowerCase();
   if (low === 'yes') return 'No';
-  if (low === 'no' || low === 'closed' || low === 'under construction') return 'Yes';
+  if (
+    low === 'no' ||
+    low === 'closed' ||
+    low === 'under construction' ||
+    low === 'proposed development'
+  ) {
+    return 'Yes';
+  }
   return cellValue(value);
 }
 

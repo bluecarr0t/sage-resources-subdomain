@@ -5,7 +5,7 @@
  *     q            — case-insensitive search across property_name, city, state, country
  *     research_status — exact match (e.g. 'in_progress', 'published', 'new')
  *     country      — case-insensitive exact match (ilike) on `country`
- *     is_open      — exact match on `is_open` when value is Yes | Closed | Under Construction
+ *     is_open      — exact match on `is_open` when value is Yes | Under Construction | Proposed Development | Closed
  *     page         — 1-based (default 1)
  *     pageSize     — default 50, max 200
  *     sortBy       — column name (default 'date_updated')
@@ -219,6 +219,26 @@ export const POST = withAdminAuth(async (request) => {
     }
 
     const supabase = createServerClient();
+
+    // Sibling site rows must share the anchor property_id (avoid per-row gen_random_uuid()).
+    if (
+      !insertRow.property_id &&
+      typeof insertRow.slug === 'string' &&
+      insertRow.slug.trim() !== ''
+    ) {
+      const { data: slugSibling } = await supabase
+        .from(TABLE)
+        .select('property_id')
+        .eq('slug', insertRow.slug.trim())
+        .not('property_id', 'is', null)
+        .order('id', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (slugSibling?.property_id) {
+        insertRow.property_id = slugSibling.property_id;
+      }
+    }
+
     const { data, error } = await supabase
       .from(TABLE)
       .insert(insertRow)

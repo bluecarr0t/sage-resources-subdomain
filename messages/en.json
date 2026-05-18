@@ -1011,6 +1011,7 @@
       "openStatusYes": "Open (Yes)",
       "openStatusClosed": "Closed",
       "openStatusUnderConstruction": "Under construction",
+      "openStatusProposedDevelopment": "Proposed development",
       "countryAll": "All countries",
       "countriesLoading": "Loading countries…",
       "countriesFromDataEmpty": "No country values in the table yet. Only All countries is available until rows have a country set.",

@@ -7,7 +7,7 @@ export type SageDataGlampingListFilters = {
   q: string;
   researchStatus: string | undefined;
   country: string | undefined;
-  /** Exact `is_open` when set (e.g. Yes, Closed, Under Construction). */
+  /** Exact `is_open` when set (e.g. Yes, Under Construction, Proposed Development, Closed). */
   isOpen: string | undefined;
   /** `missing` query param value, or null when unset / "all". */
   missing: string | null;

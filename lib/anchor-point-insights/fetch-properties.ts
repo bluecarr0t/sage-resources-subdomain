@@ -29,6 +29,7 @@ export async function fetchAndNormalizeProperties(
         neq: [
           { col: 'is_open', val: 'Closed' },
           { col: 'is_open', val: 'Under Construction' },
+          { col: 'is_open', val: 'Proposed Development' },
         ],
         or: PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR,
       },
