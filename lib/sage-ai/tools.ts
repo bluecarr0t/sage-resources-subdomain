@@ -161,6 +161,7 @@ const PROPERTIES_FILTERABLE_COLUMNS = [
   'research_status',
   'is_glamping_property',
   'is_open',
+  'glamping_service_tier',
 ] as const;
 
 const PROPERTIES_SUMMARY_COLUMNS = [
@@ -176,6 +177,8 @@ const PROPERTIES_SUMMARY_COLUMNS = [
   'quantity_of_units',
   'rate_avg_retail_daily_rate',
   'research_status',
+  'glamping_service_tier',
+  'glamping_service_tier_source',
 ] as const;
 
 /** Default `select` for `query_properties` when `columns` is omitted: summary + seasonal `rate_*` for `effective_retail_adr`. */
@@ -1871,7 +1874,8 @@ export function createSageAiTools(
         'Default filters emphasize **currently open glamping** rows and treat **`establishment_filter`** + **`min_chain_age_years`** as “established” using the earliest **`year_site_opened`** seen in each chain (drops chains with no opening year when that filter is on). ' +
         'Chain names use a **known-brand prefix list** plus dash-splitting on `property_name` (re-apply the SQL migration when that list grows). ' +
         'Always distinguish **`reported_brand_locations`** (survey metadata) from **`properties_in_sage`** / **`total_glamping_units_in_sage`** (coverage in this dataset). ' +
-        'Prefer this over hand-sorting `query_properties` when the user asks for biggest multi-location brands.',
+        'Prefer this over hand-sorting `query_properties` when the user asks for biggest multi-location brands. ' +
+        'Use `brand_slug` (e.g. `under-canvas`) with `include_sub_brands=true` to roll up a portfolio including sub-brands such as ULUM.',
       inputSchema: z.object({
         limit: z.number().int().min(1).max(50).optional().default(10),
         min_reported_locations: z.number().min(2).max(9999).optional().default(2),
@@ -1884,6 +1888,20 @@ export function createSageAiTools(
           .describe('Optional substring match on `country`, e.g. "United States" or "Canada".'),
         is_open: zGlampingIsOpen.optional().default('Yes'),
         is_glamping_property: z.enum(['Yes', 'No']).optional().default('Yes'),
+        brand_slug: z
+          .string()
+          .max(80)
+          .optional()
+          .describe(
+            'Optional `glamping_brands.slug` filter (e.g. under-canvas, ulum). When set, only that brand scope is returned.'
+          ),
+        include_sub_brands: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            'When brand_slug is a portfolio (e.g. under-canvas), include descendant sub-brands (e.g. ulum).'
+          ),
       }),
       execute: async ({
         limit: limitRaw,
@@ -1893,6 +1911,8 @@ export function createSageAiTools(
         country,
         is_open: openRaw,
         is_glamping_property: glampingRaw,
+        brand_slug: brandSlugRaw,
+        include_sub_brands: includeSubRaw,
       }) => {
         const limit = limitRaw ?? 10;
         const min_reported_locations = minLocRaw ?? 2;
@@ -1900,6 +1920,8 @@ export function createSageAiTools(
         const min_chain_age_years = ageRaw ?? 5;
         const is_open = openRaw ?? 'Yes';
         const is_glamping_property = glampingRaw ?? 'Yes';
+        const brand_slug = brandSlugRaw?.trim() || undefined;
+        const include_sub_brands = includeSubRaw ?? false;
         const payload = {
           limit,
           min_reported_locations,
@@ -1908,6 +1930,8 @@ export function createSageAiTools(
           country: country?.trim() || undefined,
           is_open,
           is_glamping_property,
+          brand_slug,
+          include_sub_brands,
         };
         const countryTrimmed = country?.trim() || null;
         const { data, error } = await supabase.rpc('top_multi_location_chains', {
@@ -1917,6 +1941,8 @@ export function createSageAiTools(
           p_country: countryTrimmed,
           p_is_open: is_open,
           p_is_glamping_property: is_glamping_property,
+          p_brand_slug: brand_slug ?? null,
+          p_include_sub_brands: include_sub_brands,
         });
 
         if (error) {
@@ -1932,6 +1958,7 @@ export function createSageAiTools(
 
         type ChainRow = {
           chain_label: string;
+          brand_slug?: string | null;
           reported_brand_locations: number | null;
           earliest_site_year: number | null;
           properties_in_sage: number;
@@ -1944,6 +1971,7 @@ export function createSageAiTools(
 
         const chains = ((data ?? []) as ChainRow[]).map((r) => ({
           chain_label: r.chain_label,
+          brand_slug: r.brand_slug ?? null,
           reported_brand_locations:
             r.reported_brand_locations === null ? null : Number(r.reported_brand_locations),
           earliest_site_year: r.earliest_site_year === null ? null : Number(r.earliest_site_year),
@@ -1989,19 +2017,38 @@ export function createSageAiTools(
         'For each chain returns: **`avg_rate_all_filled_seasonal`** = unit-weighted mean of per-row **average of every non-null positive** `rate_winter_*` … `rate_fall_*` cell (same as `effectiveGlampingRetailAdrFromRow`); **`peak_summer_rate`** = unit-weighted mean of per-row **average of `rate_summer_weekday` + `rate_summer_weekend`** when either is set, else the **max** of all filled seasonal cells for that row. ' +
         'Also returns **`distinct_properties`**, **`total_unit_weight`** (sum of `GREATEST(quantity_of_units,1)`), and **`sku_row_count`**. ' +
         'Use this for end-user questions like “what is Under Canvas peak vs average rate?” — **do not** invent **calendar-year** or **`operating_season_months ÷ 12`** blends unless the user explicitly asks for annualization; those confuse readers. ' +
-        'Default `chain_keys` is the five national brands: Postcard Cabins, Under Canvas, AutoCamp, Huttopia, Wander Camp (lowercased keys).',
+        'Default `chain_keys` is the five national brands: Postcard Cabins, Under Canvas, AutoCamp, Huttopia, Wander Camp (lowercased keys). ' +
+        'Prefer `brand_slugs` (registry slugs, e.g. `under-canvas`) with `include_sub_brands=true` for portfolio rollups (Under Canvas + ULUM).',
       inputSchema: z.object({
         chain_keys: z
           .array(z.string().min(2).max(80))
           .max(30)
           .optional()
           .describe(
-            'Optional explicit `sage_chain_label_from_property_name` keys (lowercase), e.g. ["under canvas","autocamp"]. Omit to use the default five-brand bundle.'
+            'Optional legacy chain keys (lowercase), e.g. ["under canvas","autocamp"]. Ignored when brand_slugs is set.'
           ),
+        brand_slugs: z
+          .array(z.string().min(2).max(80))
+          .max(20)
+          .optional()
+          .describe('Optional `glamping_brands.slug` values, e.g. ["under-canvas","ulum"].'),
+        include_sub_brands: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe('Include descendant sub-brands when filtering by a portfolio brand_slug.'),
       }),
-      execute: async ({ chain_keys }) => {
-        const rpcArgs =
-          chain_keys && chain_keys.length > 0 ? { p_chain_keys: chain_keys } : {};
+      execute: async ({ chain_keys, brand_slugs, include_sub_brands }) => {
+        const slugs =
+          brand_slugs?.map((s) => s.trim().toLowerCase()).filter((s) => s.length > 0) ?? [];
+        const rpcArgs: Record<string, unknown> = {
+          p_include_sub_brands: include_sub_brands ?? false,
+        };
+        if (slugs.length > 0) {
+          rpcArgs.p_brand_slugs = slugs;
+        } else if (chain_keys && chain_keys.length > 0) {
+          rpcArgs.p_chain_keys = chain_keys;
+        }
         const { data, error } = await supabase.rpc('sage_chain_retail_rate_kpis', rpcArgs);
 
         if (error) {
@@ -2017,28 +2064,32 @@ export function createSageAiTools(
         type KpiRow = {
           chain_key: string;
           chain_label: string;
+          brand_slug?: string | null;
           distinct_properties: number;
           total_unit_weight: number;
           sku_row_count: number;
-          avg_rate_all_filled_seasonal: number | string | null;
+          avg_rate_in_operating_season?: number | string | null;
+          avg_rate_all_filled_seasonal?: number | string | null;
           peak_summer_rate: number | string | null;
         };
 
-        const rows = ((data ?? []) as KpiRow[]).map((r) => ({
-          chain_key: r.chain_key,
-          chain_label: r.chain_label,
-          distinct_properties: Number(r.distinct_properties),
-          total_unit_weight: Number(r.total_unit_weight),
-          sku_row_count: Number(r.sku_row_count),
-          avg_rate_all_filled_seasonal:
-            r.avg_rate_all_filled_seasonal === null || r.avg_rate_all_filled_seasonal === ''
-              ? null
-              : Number(r.avg_rate_all_filled_seasonal),
-          peak_summer_rate:
-            r.peak_summer_rate === null || r.peak_summer_rate === ''
-              ? null
-              : Number(r.peak_summer_rate),
-        }));
+        const rows = ((data ?? []) as KpiRow[]).map((r) => {
+          const avgRaw = r.avg_rate_in_operating_season ?? r.avg_rate_all_filled_seasonal;
+          return {
+            chain_key: r.chain_key,
+            chain_label: r.chain_label,
+            brand_slug: r.brand_slug ?? r.chain_key,
+            distinct_properties: Number(r.distinct_properties),
+            total_unit_weight: Number(r.total_unit_weight),
+            sku_row_count: Number(r.sku_row_count),
+            avg_rate_in_operating_season:
+              avgRaw === null || avgRaw === '' ? null : Number(avgRaw),
+            peak_summer_rate:
+              r.peak_summer_rate === null || r.peak_summer_rate === ''
+                ? null
+                : Number(r.peak_summer_rate),
+          };
+        });
 
         const summary =
           rows.length === 0

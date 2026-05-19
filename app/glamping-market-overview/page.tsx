@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import nextDynamic from 'next/dynamic';
+import { GlampingMarketClassificationFilter } from '@/components/glamping-industry/GlampingMarketClassificationFilter';
+import { GlampingMarketScopeDisclosure } from '@/components/glamping-industry/GlampingMarketScopeDisclosure';
 import { GlampingMarketSnapshotToggle } from '@/components/glamping-industry/GlampingMarketSnapshotToggle';
+import { parseGlampingMarketSnapshotTierFilter } from '@/lib/glamping-market-snapshot-classification';
 import { fetchGlampingIndustryCaProvinceMetrics } from '@/lib/fetch-glamping-industry-ca-province-metrics';
 import { fetchGlampingIndustryMetrics } from '@/lib/fetch-glamping-industry-metrics';
 import { fetchGlampingIndustryUsStateMetrics } from '@/lib/fetch-glamping-industry-us-state-metrics';
@@ -9,6 +12,20 @@ import { CA_PROVINCE_DISPLAY_NAME } from '@/lib/normalize-ca-province-key';
 import { US_STATE_NAMES } from '@/lib/us-states';
 
 const TOP_REGIONS_COUNT = 5;
+
+/** Right-aligned numeric columns in sidebar metric tables (unit types, states). */
+const SIDEBAR_METRIC_NUMERIC_GROUP_CLASS = 'flex shrink-0 items-baseline gap-x-4 tabular-nums';
+const SIDEBAR_METRIC_MID_COL_CLASS = 'w-[3.25rem] shrink-0 text-right';
+const SIDEBAR_METRIC_RATE_COL_CLASS = 'w-[4.25rem] shrink-0 text-right';
+
+function SidebarMetricLeader() {
+  return (
+    <span
+      aria-hidden
+      className="mb-[0.2em] min-w-[0.75rem] flex-1 border-b border-dotted border-neutral-300"
+    />
+  );
+}
 
 /** Olympic National Park topo line art — `public/images/glamping-market-snapshot-topo.png` */
 const SNAPSHOT_TOPO_BG_URL = '/images/glamping-market-snapshot-topo.png';
@@ -28,7 +45,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Glamping Market Overview',
   description:
-    'United States or Canada glamping metrics focused on private commercial glamping stays; excludes RV parks, tent-heavy campgrounds, marketplace-only listings, and state or federal public-lands glamping.',
+    'US and Canada glamping metrics for private commercial operators. Excludes RV parks, campgrounds, booking marketplaces, and public-land stays.',
   robots: { index: true, follow: true },
 };
 
@@ -60,25 +77,36 @@ function parseMarket(raw: string | undefined): GlampingMarketSnapshotMarket {
 }
 
 type PageProps = {
-  searchParams: { market?: string };
+  searchParams: { market?: string; tier?: string };
 };
 
 export default async function GlampingMarketOverviewPage({ searchParams }: PageProps) {
   const market = parseMarket(searchParams.market);
+  const tier = parseGlampingMarketSnapshotTierFilter(searchParams.tier);
 
   const [result, usStates, caProvinces] = await Promise.all([
-    fetchGlampingIndustryMetrics(market),
-    market === 'us' ? fetchGlampingIndustryUsStateMetrics() : Promise.resolve({ ok: true as const, data: {} }),
-    market === 'ca' ? fetchGlampingIndustryCaProvinceMetrics() : Promise.resolve({ ok: true as const, data: {} }),
+    fetchGlampingIndustryMetrics(market, tier),
+    market === 'us'
+      ? fetchGlampingIndustryUsStateMetrics(tier)
+      : Promise.resolve({ ok: true as const, data: {} }),
+    market === 'ca'
+      ? fetchGlampingIndustryCaProvinceMetrics(tier)
+      : Promise.resolve({ ok: true as const, data: {} }),
   ]);
 
-  const topUsStates: { key: string; name: string; propertyCount: number }[] =
+  const topUsStates: {
+    key: string;
+    name: string;
+    propertyCount: number;
+    meanRate: number | null;
+  }[] =
     market === 'us' && result.ok && usStates.ok
       ? Object.entries(usStates.data)
           .map(([abbr, m]) => ({
             key: abbr,
             name: (US_STATE_NAMES as Record<string, string>)[abbr] ?? abbr,
             propertyCount: m.propertyCount,
+            meanRate: m.avgRetailDailyRateMean,
           }))
           .filter((r) => r.propertyCount > 0)
           .sort((a, b) => b.propertyCount - a.propertyCount)
@@ -117,25 +145,19 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
           </p>
         ) : null}
 
-        <GlampingMarketSnapshotToggle market={market} />
+        <div className="mt-6 flex w-full flex-wrap items-center justify-between gap-4">
+          <GlampingMarketSnapshotToggle market={market} tier={tier} />
+          <GlampingMarketClassificationFilter market={market} tier={tier} />
+        </div>
 
-        <p className="mt-6 max-w-xl text-sm font-light leading-relaxed text-neutral-600">
-          A <span className="text-neutral-900">glamping property</span> here means private stays in
-          glamping-style units (tents, treehouses, cabins, domes, yurts, and similar). We exclude{' '}
-          <span className="text-neutral-900">RV resorts</span>, tent-heavy{' '}
-          <span className="text-neutral-900">campgrounds</span>, marketplace-only bookings (e.g.{' '}
-          <span className="text-neutral-900">Hipcamp</span>), and glamping on{' '}
-          <span className="text-neutral-900">state</span> or{' '}
-          <span className="text-neutral-900">federal</span> public land so totals reflect commercial
-          glamping operators.
-        </p>
+        <GlampingMarketScopeDisclosure />
 
         {result.ok ? (
           <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-x-16">
             <dl className="space-y-12">
               <div>
                 <dt className="text-[11px] uppercase tracking-widest text-neutral-500">
-                  Total properties
+                  Total glamping properties
                 </dt>
                 <dd className="mt-3 font-light text-4xl tabular-nums tracking-tight sm:text-5xl">
                   {formatInt(result.data.totalProperties)}
@@ -153,15 +175,21 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                       {formatInt(result.data.underConstructionProperties)}
                     </span>
                   </li>
+                  <li>
+                    <span className="text-neutral-500">Proposed development</span>{' '}
+                    <span className="tabular-nums text-neutral-800">
+                      {formatInt(result.data.proposedDevelopmentProperties)}
+                    </span>
+                  </li>
                 </ul>
               </div>
 
               <div>
                 <dt className="text-[11px] uppercase tracking-widest text-neutral-500">
-                  Total sites
+                  Total glamping units
                 </dt>
                 <dd className="mt-3 font-light text-4xl tabular-nums tracking-tight sm:text-5xl">
-                  {formatInt(result.data.totalSites)}
+                  {formatInt(result.data.totalUnits)}
                 </dd>
               </div>
 
@@ -180,7 +208,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                   </div>
                 </dd>
                 <p className="mt-4 max-w-xs text-[11px] leading-relaxed text-neutral-500">
-                  Mean and median use published operating properties with a recorded nightly rate.
+                  Mean and median use operating properties with a recorded nightly rate.
                 </p>
               </div>
             </dl>
@@ -190,23 +218,41 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                 Top unit types
               </h2>
               <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
-                Percent of total sites by primary unit label on each row (first listed type when
-                several are stored together).
+                % of glamping units by product type; unit-weighted avg. rate where nightly rates are
+                published. Basic tent and RV inventory are excluded.
               </p>
-              {result.data.topUnitTypesBySites.length > 0 ? (
+              {result.data.topUnitTypesByUnits.length > 0 ? (
                 <ul className="mt-6 space-y-3 text-sm">
-                  {result.data.topUnitTypesBySites.map((row) => (
+                  <li
+                    aria-hidden
+                    className="flex min-w-0 items-baseline gap-x-2 text-[10px] uppercase tracking-wider text-neutral-500"
+                  >
+                    <span className="min-w-0 flex-1" />
+                    <span className={SIDEBAR_METRIC_NUMERIC_GROUP_CLASS}>
+                      <span className={`${SIDEBAR_METRIC_MID_COL_CLASS} whitespace-nowrap`}>
+                        % units
+                      </span>
+                      <span className={`${SIDEBAR_METRIC_RATE_COL_CLASS} whitespace-nowrap`}>
+                        Avg rate
+                      </span>
+                    </span>
+                  </li>
+                  {result.data.topUnitTypesByUnits.map((row) => (
                     <li
                       key={row.label}
                       className="flex min-w-0 items-baseline gap-x-2 font-light"
                     >
                       <span className="shrink-0 text-neutral-700">{row.label}</span>
+                      <SidebarMetricLeader />
                       <span
-                        aria-hidden
-                        className="mb-[0.2em] min-w-[0.75rem] flex-1 border-b border-dotted border-neutral-300"
-                      />
-                      <span className="shrink-0 tabular-nums text-neutral-900">
-                        {row.pctOfSites}%
+                        className={`${SIDEBAR_METRIC_NUMERIC_GROUP_CLASS} text-neutral-900`}
+                      >
+                        <span className={`${SIDEBAR_METRIC_MID_COL_CLASS} whitespace-nowrap`}>
+                          {row.pctOfUnits}%
+                        </span>
+                        <span className={SIDEBAR_METRIC_RATE_COL_CLASS}>
+                          {formatUsd(row.avgRetailDailyRateMean)}
+                        </span>
                       </span>
                     </li>
                   ))}
@@ -221,22 +267,40 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                     Top states
                   </h2>
                   <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
-                    Distinct property names with a published row in that state.
+                    Properties per state; avg. rate where nightly rates are published.
                   </p>
                   {topUsStates.length > 0 ? (
                     <ul className="mt-6 space-y-3 text-sm">
+                      <li
+                        aria-hidden
+                        className="flex min-w-0 items-baseline gap-x-2 text-[10px] uppercase tracking-wider text-neutral-500"
+                      >
+                        <span className="min-w-0 flex-1" />
+                        <span className={SIDEBAR_METRIC_NUMERIC_GROUP_CLASS}>
+                          <span className={`${SIDEBAR_METRIC_MID_COL_CLASS} whitespace-nowrap`}>
+                            Props
+                          </span>
+                          <span className={`${SIDEBAR_METRIC_RATE_COL_CLASS} whitespace-nowrap`}>
+                            Avg rate
+                          </span>
+                        </span>
+                      </li>
                       {topUsStates.map((row) => (
                         <li
                           key={row.key}
                           className="flex min-w-0 items-baseline gap-x-2 font-light"
                         >
                           <span className="shrink-0 text-neutral-700">{row.name}</span>
+                          <SidebarMetricLeader />
                           <span
-                            aria-hidden
-                            className="mb-[0.2em] min-w-[0.75rem] flex-1 border-b border-dotted border-neutral-300"
-                          />
-                          <span className="shrink-0 tabular-nums text-neutral-900">
-                            {formatInt(row.propertyCount)}
+                            className={`${SIDEBAR_METRIC_NUMERIC_GROUP_CLASS} text-neutral-900`}
+                          >
+                            <span className={`${SIDEBAR_METRIC_MID_COL_CLASS} whitespace-nowrap`}>
+                              {formatInt(row.propertyCount)}
+                            </span>
+                            <span className={SIDEBAR_METRIC_RATE_COL_CLASS}>
+                              {formatUsd(row.meanRate)}
+                            </span>
                           </span>
                         </li>
                       ))}
@@ -263,10 +327,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                           className="flex min-w-0 items-baseline gap-x-2 font-light"
                         >
                           <span className="shrink-0 text-neutral-700">{row.name}</span>
-                          <span
-                            aria-hidden
-                            className="mb-[0.2em] min-w-[0.75rem] flex-1 border-b border-dotted border-neutral-300"
-                          />
+                          <SidebarMetricLeader />
                           <span className="shrink-0 tabular-nums text-neutral-900">
                             {formatInt(row.propertyCount)}
                           </span>

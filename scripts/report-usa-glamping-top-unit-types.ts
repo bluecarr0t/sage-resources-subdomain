@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '../lib/glamping-land-operator-category';
 import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '../lib/glamping-market-snapshot-region';
+import { isExcludedGlampingMarketSnapshotUnitType } from '../lib/glamping-market-snapshot-unit-filter';
 import { normalizeGlampingUnitTypeForStorage } from '../lib/glamping-unit-type-normalize';
 
 config({ path: resolve(process.cwd(), '.env.local') });
@@ -52,8 +53,8 @@ function sitesForRow(row: Row): number {
 
 async function main() {
   const countryIn = [...GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN];
-  let totalSites = 0;
-  const sitesByPrimaryUnitLabel = new Map<string, number>();
+  let totalUnits = 0;
+  const unitsByPrimaryUnitLabel = new Map<string, number>();
   let offset = 0;
 
   for (;;) {
@@ -76,13 +77,15 @@ async function main() {
     if (batch.length === 0) break;
 
     for (const row of batch) {
-      const rowSites = sitesForRow(row);
-      totalSites += rowSites;
+      if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
+
+      const rowUnits = sitesForRow(row);
+      totalUnits += rowUnits;
       const primaryLabel = normalizeGlampingUnitTypeForStorage(row.unit_type);
       if (primaryLabel) {
-        sitesByPrimaryUnitLabel.set(
+        unitsByPrimaryUnitLabel.set(
           primaryLabel,
-          (sitesByPrimaryUnitLabel.get(primaryLabel) ?? 0) + rowSites
+          (unitsByPrimaryUnitLabel.get(primaryLabel) ?? 0) + rowUnits
         );
       }
     }
@@ -91,13 +94,13 @@ async function main() {
     offset += PAGE_SIZE;
   }
 
-  const ranked = [...sitesByPrimaryUnitLabel.entries()].sort((a, b) => b[1] - a[1]);
+  const ranked = [...unitsByPrimaryUnitLabel.entries()].sort((a, b) => b[1] - a[1]);
   const top = ranked.slice(0, TOP);
 
-  console.log(`USA glamping snapshot cohort — total sites (sum of row site counts): ${totalSites}\n`);
+  console.log(`USA glamping snapshot cohort — total units (sum of row unit counts): ${totalUnits}\n`);
   top.forEach(([label, n], i) => {
-    const pct = totalSites > 0 ? Math.round((100 * n) / totalSites) : 0;
-    console.log(`${i + 1}. ${label}\t${pct}%\t(${n} sites)`);
+    const pct = totalUnits > 0 ? Math.round((100 * n) / totalUnits) : 0;
+    console.log(`${i + 1}. ${label}\t${pct}%\t(${n} units)`);
   });
 }
 

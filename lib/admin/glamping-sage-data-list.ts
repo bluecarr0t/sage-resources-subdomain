@@ -11,6 +11,8 @@ export type SageDataGlampingListFilters = {
   isOpen: string | undefined;
   /** `missing` query param value, or null when unset / "all". */
   missing: string | null;
+  /** Exact `glamping_service_tier` when set (luxury | upscale | midscale | rustic). */
+  glampingServiceTier: string | undefined;
 };
 
 /** Minimal PostgREST filter surface used by the Sage Data list endpoint. */
@@ -49,6 +51,9 @@ export function applySageDataGlampingListFilters<T extends SageGlampingListQuery
   }
   if (filters.isOpen && filters.isOpen !== 'all') {
     q = q.eq('is_open', filters.isOpen);
+  }
+  if (filters.glampingServiceTier && filters.glampingServiceTier !== 'all') {
+    q = q.eq('glamping_service_tier', filters.glampingServiceTier);
   }
 
   const missing = filters.missing;

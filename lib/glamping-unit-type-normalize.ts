@@ -14,8 +14,8 @@ const PHRASE_CANONICAL: Record<string, string> = {
   tents: 'Tent',
   dome: 'Dome',
   domes: 'Dome',
-  geodome: 'Geodome',
-  geodomes: 'Geodome',
+  geodome: 'Dome',
+  geodomes: 'Dome',
   cabin: 'Cabin',
   cabins: 'Cabin',
   lodge: 'Lodge',
@@ -87,8 +87,8 @@ const PHRASE_CANONICAL: Record<string, string> = {
   'eco suite': 'Eco-suite',
   'eco-suites': 'Eco-suite',
   'eco-suit': 'Eco-suite',
-  'geodesic dome': 'Geodesic Dome',
-  'geodesic domes': 'Geodesic Dome',
+  'geodesic dome': 'Dome',
+  'geodesic domes': 'Dome',
   treehouse: 'Treehouse',
   treehouses: 'Treehouse',
   'tree house': 'Treehouse',
@@ -267,4 +267,112 @@ export function normalizeGlampingUnitTypeForStorage(
   }
 
   return titleCaseWords(key);
+}
+
+const CANONICAL_PHRASES_BY_LENGTH = Object.keys(PHRASE_CANONICAL).sort(
+  (a, b) => b.length - a.length
+);
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const PROPERTY_TYPE_NOISE_PATTERNS = [
+  /\s+glamping\s+resort\s*$/i,
+  /\s+glamping\s+hotel\s*$/i,
+  /\s+glamping\s+experience\s*$/i,
+  /\s+glamping\s*$/i,
+  /\s+resort\s*$/i,
+  /\s+hotel\s*$/i,
+  /\s+campground\s*$/i,
+];
+
+function stripPropertyTypeNoise(s: string): string {
+  let out = collapseSpaces(s);
+  let prev = '';
+  while (out !== prev) {
+    prev = out;
+    for (const re of PROPERTY_TYPE_NOISE_PATTERNS) {
+      out = out.replace(re, '').trim();
+    }
+  }
+  return out;
+}
+
+function splitUnitTypeListSegments(raw: string): string[] {
+  return raw
+    .split(/\s*(?:,|;|(?:\s+and\s+)|(?:\s*\/\s*))\s*/i)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/** Left-to-right: earliest canonical phrase match, then continue after it. */
+function extractCanonicalLabelsFromSegment(segment: string): string[] {
+  let lower = stripPropertyTypeNoise(segment).toLowerCase();
+  const labels: string[] = [];
+
+  while (lower) {
+    let best: { start: number; end: number; label: string } | null = null;
+
+    for (const phrase of CANONICAL_PHRASES_BY_LENGTH) {
+      const re = new RegExp(`(?:^|[\\s,;/])${escapeRegExp(phrase)}(?=$|[\\s,;/])`);
+      const m = re.exec(lower);
+      if (!m) continue;
+
+      const start = lower.indexOf(phrase, m.index);
+      if (start < 0) continue;
+
+      const end = start + phrase.length;
+      const candidate = { start, end, label: PHRASE_CANONICAL[phrase]! };
+
+      if (
+        !best ||
+        candidate.start < best.start ||
+        (candidate.start === best.start && candidate.end - candidate.start > best.end - best.start)
+      ) {
+        best = candidate;
+      }
+    }
+
+    if (!best) break;
+
+    labels.push(best.label);
+    lower = lower.slice(best.end).trim();
+  }
+
+  return labels;
+}
+
+/**
+ * Display label for admin comps / maps when `unit_type` may be a Sage matview merge of
+ * unit_type + site_name + property_type (e.g. "Geodesic Dome Glamping Resort" → "Dome";
+ * "Tiny Home Casita Cabins" → "Tiny Home, Cabin").
+ */
+export function normalizeGlampingUnitTypeForDisplay(
+  raw: string | null | undefined
+): string | null {
+  if (raw == null) return null;
+  const trimmed = collapseSpaces(String(raw));
+  if (!trimmed) return null;
+
+  const lower = trimmed.toLowerCase();
+  const mergedCount = lower.match(/^(\d+)\s+unit\s+types$/);
+  if (mergedCount) {
+    return `${mergedCount[1]} Unit Types`;
+  }
+
+  const segments = splitUnitTypeListSegments(trimmed);
+  const labels: string[] = [];
+
+  for (const segment of segments) {
+    for (const label of extractCanonicalLabelsFromSegment(segment)) {
+      if (!labels.includes(label)) labels.push(label);
+    }
+  }
+
+  if (labels.length > 0) {
+    return labels.join(', ');
+  }
+
+  return normalizeGlampingUnitTypeForStorage(trimmed);
 }

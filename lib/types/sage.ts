@@ -7,6 +7,8 @@ export interface SageProperty {
   id: number;
   /** Shared by all sibling / unit rows for one logical property (UUID). */
   property_id: string | null;
+  /** Leaf glamping brand (UUID); sibling rows should share the same value. */
+  brand_id: string | null;
   property_name: string | null;
   site_name: string | null;
   slug: string | null;
@@ -79,6 +81,11 @@ export interface SageProperty {
   rate_fall_weekday: string | number | null;
   rate_fall_weekend: string | number | null;
   rate_category: string | null;
+  /** Property-level experience tier: luxury | upscale | midscale | rustic */
+  glamping_service_tier: string | null;
+  /** auto = rule-based classifier; manual = admin override */
+  glamping_service_tier_source: string | null;
+  glamping_service_tier_notes: string | null;
 
   // PROPERTY AMENITIES (property_ group)
   property_laundry: string | null;

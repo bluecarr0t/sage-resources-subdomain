@@ -220,7 +220,7 @@ export default function AnalyticsPage() {
         {/* Header */}
         <div className={adminPageHeadingMargin}>
           <button
-            onClick={() => router.push('/admin/comps')}
+            onClick={() => router.push('/admin/glamping-properties')}
             className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

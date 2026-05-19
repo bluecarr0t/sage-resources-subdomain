@@ -8,6 +8,7 @@
 export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'id',
   'property_id',
+  'brand_id',
   'research_status',
   'is_glamping_property',
   'is_open',
@@ -70,6 +71,9 @@ export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'rate_fall_weekday',
   'rate_fall_weekend',
   'rate_category',
+  'glamping_service_tier',
+  'glamping_service_tier_source',
+  'glamping_service_tier_notes',
   'property_laundry',
   'property_playground',
   'property_pool',
@@ -215,6 +219,9 @@ export function isGlampingGroupByColumn(name: string): boolean {
 export function isGlampingDistinctColumn(name: string): boolean {
   return isKnownGlampingColumn(name) && !DISTINCT_EXCLUDE.has(name);
 }
+
+export const GLAMPING_SERVICE_TIER_BLURB =
+  'glamping_service_tier (luxury | upscale | midscale | rustic) is property-level experience classification from amenities + max site ADR; distinct from rate_category (price buckets). glamping_service_tier_source is auto (classifier) or manual (admin override).';
 
 export const GLAMPING_AMENITIES_SCHEMA_BLURB = [
   'There is NO single "amenities" column.',

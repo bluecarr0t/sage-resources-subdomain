@@ -8,12 +8,14 @@ import { join } from 'path';
 import { NextRequest } from 'next/server';
 
 const mockSearchGlampingNews = jest.fn();
+const mockGetRssArticleTasks = jest.fn();
 const mockFetchArticleContent = jest.fn();
 const mockGetDatabasePropertyNames = jest.fn();
 const mockProcessDiscoveryArticle = jest.fn();
 
 jest.mock('@/lib/glamping-discovery', () => ({
   searchGlampingNews: (...args: unknown[]) => mockSearchGlampingNews(...args),
+  getRssArticleTasks: (...args: unknown[]) => mockGetRssArticleTasks(...args),
   fetchArticleContent: (...args: unknown[]) => mockFetchArticleContent(...args),
   getDatabasePropertyNames: (...args: unknown[]) => mockGetDatabasePropertyNames(...args),
   processDiscoveryArticle: (...args: unknown[]) => mockProcessDiscoveryArticle(...args),
@@ -64,7 +66,13 @@ describe('/api/cron/discover-glamping', () => {
     delete process.env.CRON_SECRET;
 
     mockSearchGlampingNews.mockResolvedValue([
-      { url: 'https://news.example.com/a' },
+      { url: 'https://news.example.com/tavily-a' },
+    ]);
+    mockGetRssArticleTasks.mockResolvedValue([
+      {
+        url: 'https://news.example.com/rss-a',
+        discoverySource: 'Google News RSS',
+      },
     ]);
     mockFetchArticleContent.mockResolvedValue('article body');
     mockGetDatabasePropertyNames.mockResolvedValue(new Set<string>());
@@ -80,7 +88,7 @@ describe('/api/cron/discover-glamping', () => {
     process.env = { ...originalEnv };
   });
 
-  it('GET runs the discovery library and persists run metrics', async () => {
+  it('GET runs Tavily and RSS and persists two run metric rows', async () => {
     const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
       method: 'GET',
     });
@@ -88,15 +96,15 @@ describe('/api/cron/discover-glamping', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.metrics.propertiesInserted).toBe(1);
+    expect(body.metrics.tavily.propertiesInserted).toBe(1);
+    expect(body.metrics.rss.propertiesInserted).toBe(1);
     expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
     expect(mockSearchGlampingNews).toHaveBeenCalledWith('tvly-test', 1, 'default');
-    expect(mockFetchArticleContent).toHaveBeenCalledTimes(1);
-    expect(mockProcessDiscoveryArticle).toHaveBeenCalledTimes(1);
-    expect(mockProcessDiscoveryArticle).toHaveBeenCalledWith(
-      expect.objectContaining({ insertDefaults: undefined })
-    );
-    expect(mockSupabaseInsert).toHaveBeenCalled();
+    expect(mockGetRssArticleTasks).toHaveBeenCalledTimes(1);
+    expect(mockGetRssArticleTasks).toHaveBeenCalledWith(10);
+    expect(mockFetchArticleContent).toHaveBeenCalledTimes(2);
+    expect(mockProcessDiscoveryArticle).toHaveBeenCalledTimes(2);
+    expect(mockSupabaseInsert).toHaveBeenCalledTimes(2);
   });
 
   it('GET ?canada=1 uses Canada Tavily query set and insert defaults', async () => {
@@ -112,6 +120,34 @@ describe('/api/cron/discover-glamping', () => {
         discoverySource: 'Tavily Search (Canada)',
       })
     );
+    expect(mockProcessDiscoveryArticle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        discoverySource: 'Google News RSS (Canada)',
+      })
+    );
+  });
+
+  it('GET ?rssOnly=1 skips Tavily and does not require TAVILY_API_KEY', async () => {
+    delete process.env.TAVILY_API_KEY;
+    const req = new NextRequest('https://example.com/api/cron/discover-glamping?rssOnly=1', {
+      method: 'GET',
+    });
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    expect(mockSearchGlampingNews).not.toHaveBeenCalled();
+    expect(mockGetRssArticleTasks).toHaveBeenCalledTimes(1);
+    expect(mockSupabaseInsert).toHaveBeenCalledTimes(1);
+  });
+
+  it('GET ?tavilyOnly=1 skips RSS', async () => {
+    const req = new NextRequest('https://example.com/api/cron/discover-glamping?tavilyOnly=1', {
+      method: 'GET',
+    });
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
+    expect(mockGetRssArticleTasks).not.toHaveBeenCalled();
+    expect(mockSupabaseInsert).toHaveBeenCalledTimes(1);
   });
 
   it('POST runs the same handler', async () => {
@@ -121,6 +157,7 @@ describe('/api/cron/discover-glamping', () => {
     const res = await POST(req);
     expect(res.status).toBe(200);
     expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
+    expect(mockGetRssArticleTasks).toHaveBeenCalledTimes(1);
   });
 
   it('returns 401 when CRON_SECRET is set and request is not authorized', async () => {
@@ -131,6 +168,7 @@ describe('/api/cron/discover-glamping', () => {
     const res = await GET(req);
     expect(res.status).toBe(401);
     expect(mockSearchGlampingNews).not.toHaveBeenCalled();
+    expect(mockGetRssArticleTasks).not.toHaveBeenCalled();
   });
 
   it('returns 200 when CRON_SECRET is set but Vercel cron header is present (no Bearer)', async () => {
@@ -142,6 +180,7 @@ describe('/api/cron/discover-glamping', () => {
     const res = await GET(req);
     expect(res.status).toBe(200);
     expect(mockSearchGlampingNews).toHaveBeenCalled();
+    expect(mockGetRssArticleTasks).toHaveBeenCalled();
   });
 
   it('returns 401 when Bearer token does not match CRON_SECRET', async () => {
@@ -164,6 +203,7 @@ describe('/api/cron/discover-glamping', () => {
     const res = await GET(req);
     expect(res.status).toBe(200);
     expect(mockSearchGlampingNews).toHaveBeenCalledTimes(1);
+    expect(mockGetRssArticleTasks).toHaveBeenCalledTimes(1);
   });
 
   it('returns 500 with the missing env vars when keys are not configured', async () => {
@@ -181,9 +221,10 @@ describe('/api/cron/discover-glamping', () => {
     errSpy.mockRestore();
   });
 
-  it('returns 500 and persists run metrics when the library throws', async () => {
+  it('returns 500 when both Tavily and RSS passes fail', async () => {
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockSearchGlampingNews.mockRejectedValueOnce(new Error('Tavily down'));
+    mockGetRssArticleTasks.mockRejectedValueOnce(new Error('RSS down'));
     const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
       method: 'GET',
     });
@@ -192,7 +233,23 @@ describe('/api/cron/discover-glamping', () => {
     const body = await res.json();
     expect(body.success).toBe(false);
     expect(body.error).toContain('Tavily down');
-    expect(mockSupabaseInsert).toHaveBeenCalled();
+    expect(body.error).toContain('RSS down');
+    expect(mockSupabaseInsert).toHaveBeenCalledTimes(2);
+    errSpy.mockRestore();
+  });
+
+  it('returns 200 with warnings when only Tavily fails', async () => {
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockSearchGlampingNews.mockRejectedValueOnce(new Error('Tavily down'));
+    const req = new NextRequest('https://example.com/api/cron/discover-glamping', {
+      method: 'GET',
+    });
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.warnings).toEqual(expect.arrayContaining([expect.stringContaining('tavily')]));
+    expect(body.metrics.rss.propertiesInserted).toBe(1);
     errSpy.mockRestore();
   });
 });

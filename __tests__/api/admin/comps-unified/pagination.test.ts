@@ -126,6 +126,12 @@ beforeEach(() => {
         error: null,
       });
     }
+    if (name === 'unified_comps_list_properties') {
+      return Promise.resolve({
+        data: [{ anchor: mockRows[0], site_rows: mockRows }],
+        error: null,
+      });
+    }
     return Promise.resolve({ data: [], error: null });
   });
 });
@@ -138,51 +144,75 @@ describe('GET /api/admin/comps/unified', () => {
     const body = await res.json();
     expect(body.success).toBe(true);
     expect(body.rows).toHaveLength(1);
-    expect(body.pagination.total).toBe(123);
+    expect(body.pagination.total).toBe(99);
+    expect(body.pagination.total_site_units).toBe(123);
     expect(body.pagination.per_page).toBe(50);
     expect(body.pagination.page).toBe(1);
-    expect(body.pagination.total_pages).toBe(Math.ceil(123 / 50));
+    expect(body.pagination.total_pages).toBe(Math.ceil(99 / 50));
     expect(body.pagination.total_properties).toBe(99);
   });
 
-  it('pushes pagination to the DB via .range(from, to)', async () => {
+  it('requests property-level pagination via unified_comps_list_properties RPC', async () => {
     const req = new NextRequest('http://localhost/api/admin/comps/unified?page=2&per_page=25');
     await GET(req);
-    expect(lastCalls.range).toEqual([[25, 49]]);
+    expect(mockRpc).toHaveBeenCalledWith(
+      'unified_comps_list_properties',
+      expect.objectContaining({ p_page: 2, p_per_page: 25 })
+    );
   });
 
-  it('clamps per_page to the configured max', async () => {
+  it('clamps per_page to the configured max in the property list RPC', async () => {
     const req = new NextRequest('http://localhost/api/admin/comps/unified?page=1&per_page=9999');
     await GET(req);
-    const [from, to] = lastCalls.range[0];
-    expect(from).toBe(0);
-    expect(to - from + 1).toBeLessThanOrEqual(100);
+    expect(mockRpc).toHaveBeenCalledWith(
+      'unified_comps_list_properties',
+      expect.objectContaining({ p_per_page: 100 })
+    );
   });
 
-  it('orders by created_at desc by default, with id as secondary key', async () => {
-    const req = new NextRequest('http://localhost/api/admin/comps/unified');
+  it('passes sort_by and sort_dir to the property list RPC', async () => {
+    const req = new NextRequest(
+      'http://localhost/api/admin/comps/unified?sort_by=property_name&sort_dir=asc'
+    );
     await GET(req);
-    expect(lastCalls.order[0][0]).toBe('created_at');
-    expect(lastCalls.order[0][1].ascending).toBe(false);
-    expect(lastCalls.order[1][0]).toBe('id');
-    expect(lastCalls.order[1][1].ascending).toBe(true);
+    expect(mockRpc).toHaveBeenCalledWith(
+      'unified_comps_list_properties',
+      expect.objectContaining({ p_sort_by: 'property_name', p_sort_asc: true })
+    );
   });
 
-  it('rejects unknown sort_by and falls back to created_at', async () => {
+  it('rejects unknown sort_by and falls back to created_at in the property list RPC', async () => {
     const req = new NextRequest(
       'http://localhost/api/admin/comps/unified?sort_by=drop_table;--&sort_dir=asc'
     );
     await GET(req);
-    expect(lastCalls.order[0][0]).toBe('created_at');
+    expect(mockRpc).toHaveBeenCalledWith(
+      'unified_comps_list_properties',
+      expect.objectContaining({ p_sort_by: 'created_at' })
+    );
   });
 
-  it('applies tsvector full-text search when `search` is present', async () => {
+  it('applies admin published Glamping cohort on the property list RPC', async () => {
+    const req = new NextRequest('http://localhost/api/admin/comps/unified');
+    await GET(req);
+    expect(mockRpc).toHaveBeenCalledWith(
+      'unified_comps_list_properties',
+      expect.objectContaining({
+        p_apply_admin_cohort: true,
+        p_property_types: ['Glamping'],
+      })
+    );
+  });
+
+  it('uses FTS mode in the property list RPC when `search` is present', async () => {
     const req = new NextRequest('http://localhost/api/admin/comps/unified?search=austin%20ranch');
     await GET(req);
-    expect(lastCalls.textSearch).toHaveLength(1);
-    expect(lastCalls.textSearch[0][0]).toBe('search_tsv');
-    expect(lastCalls.textSearch[0][1]).toContain('austin');
-    expect(lastCalls.textSearch[0][1]).toContain('ranch');
-    expect(lastCalls.textSearch[0][1]).toContain('&');
+    expect(mockRpc).toHaveBeenCalledWith(
+      'unified_comps_list_properties',
+      expect.objectContaining({
+        p_tsquery: expect.stringContaining('austin'),
+        p_ilike_terms: null,
+      })
+    );
   });
 });

@@ -4,6 +4,8 @@
 
 export { GLAMPING_RSS_FEEDS } from './feeds';
 export type { RssFeedConfig } from './feeds';
+export { getRssArticleTasks } from './rss-articles';
+export type { RssArticleTask } from './rss-articles';
 export { fetchArticleContent } from './fetch-article';
 export type { FetchArticleOptions } from './fetch-article';
 export { extractPropertiesFromArticle } from './extract-properties';

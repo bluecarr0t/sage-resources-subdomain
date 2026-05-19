@@ -170,13 +170,25 @@ describe('createSageAiTools', () => {
       { messages: [], toolCallId: 'tc-kpi', abortSignal: new AbortController().signal }
     );
     expect(rpcLog[0]?.name).toBe('sage_chain_retail_rate_kpis');
-    expect(rpcLog[0]?.args).toEqual({});
+    expect(rpcLog[0]?.args).toEqual({ p_include_sub_brands: false });
 
     await tools.chain_retail_rate_kpis.execute!(
       { chain_keys: ['under canvas', 'autocamp'] },
       { messages: [], toolCallId: 'tc-kpi2', abortSignal: new AbortController().signal }
     );
-    expect(rpcLog[1]?.args).toEqual({ p_chain_keys: ['under canvas', 'autocamp'] });
+    expect(rpcLog[1]?.args).toEqual({
+      p_chain_keys: ['under canvas', 'autocamp'],
+      p_include_sub_brands: false,
+    });
+
+    await tools.chain_retail_rate_kpis.execute!(
+      { brand_slugs: ['under-canvas'], include_sub_brands: true },
+      { messages: [], toolCallId: 'tc-kpi3', abortSignal: new AbortController().signal }
+    );
+    expect(rpcLog[2]?.args).toEqual({
+      p_brand_slugs: ['under-canvas'],
+      p_include_sub_brands: true,
+    });
   });
 
   it('accepts allowlisted columns on query_properties', async () => {

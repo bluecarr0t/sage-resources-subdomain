@@ -1,4 +1,5 @@
 import {
+  normalizeGlampingUnitTypeForDisplay,
   normalizeGlampingUnitTypeForStorage,
   primaryGlampingUnitTypeSegment,
 } from '@/lib/glamping-unit-type-normalize';
@@ -49,5 +50,31 @@ describe('normalizeGlampingUnitTypeForStorage', () => {
     expect(normalizeGlampingUnitTypeForStorage('covered wagon')).toBe('Covered Wagon');
     expect(normalizeGlampingUnitTypeForStorage('Conestoga Wagons')).toBe('Covered Wagon');
     expect(normalizeGlampingUnitTypeForStorage('wagonette')).toBe('Wagonette');
+  });
+
+  it('maps geodesic dome and geodome aliases to Dome', () => {
+    expect(normalizeGlampingUnitTypeForStorage('geodesic dome')).toBe('Dome');
+    expect(normalizeGlampingUnitTypeForStorage('Geodesic Domes')).toBe('Dome');
+    expect(normalizeGlampingUnitTypeForStorage('geodome')).toBe('Dome');
+  });
+});
+
+describe('normalizeGlampingUnitTypeForDisplay', () => {
+  it('canonicalizes merged Sage matview unit text', () => {
+    expect(normalizeGlampingUnitTypeForDisplay('Geodesic Dome Glamping Resort')).toBe('Dome');
+    expect(normalizeGlampingUnitTypeForDisplay('geodesic dome glamping')).toBe('Dome');
+    expect(normalizeGlampingUnitTypeForDisplay('Safari Tent Glamping Resort')).toBe('Safari Tent');
+  });
+
+  it('extracts multiple main unit types from compound strings', () => {
+    expect(normalizeGlampingUnitTypeForDisplay('Tiny Home Casita Cabins')).toBe('Tiny Home, Cabin');
+    expect(normalizeGlampingUnitTypeForDisplay('Safari Tent, Yurt')).toBe('Safari Tent, Yurt');
+    expect(normalizeGlampingUnitTypeForDisplay('Cabin and Treehouse')).toBe('Cabin, Treehouse');
+  });
+
+  it('falls back to storage normalization for simple labels', () => {
+    expect(normalizeGlampingUnitTypeForDisplay('yurts')).toBe('Yurt');
+    expect(normalizeGlampingUnitTypeForDisplay('2 unit types')).toBe('2 Unit Types');
+    expect(normalizeGlampingUnitTypeForDisplay('Bell Tent')).toBe('Bell Tent');
   });
 });

@@ -43,7 +43,7 @@ function getActivePageId(pathname: string): string {
   if (pathname === '/map' || pathname.startsWith('/en/map')) return 'map';
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
-  if (pathname.startsWith('/admin/comps') && !pathname.startsWith('/admin/comps-v2')) return 'comps';
+  if (pathname.startsWith('/admin/glamping-properties')) return 'comps';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/market-report')) return 'market-report';
   if (pathname.startsWith('/admin/rv-site-setup') || pathname.startsWith('/admin/site-design')) return 'site-design';
@@ -316,7 +316,7 @@ export default function AdminSidebar() {
                   isCollapsed={showCollapsed}
                 />
                 <NavLink
-                  href="/admin/comps"
+                  href="/admin/glamping-properties"
                   label={tSidebar('properties')}
                   icon={TentTree}
                   pageId="comps"

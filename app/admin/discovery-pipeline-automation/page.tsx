@@ -286,7 +286,8 @@ export default function DiscoveryPipelineAutomationPage() {
               <p className="font-medium text-gray-900 dark:text-gray-100">Vercel cron</p>
               <p className="mt-1 text-gray-600 dark:text-gray-400">
                 Path <code className="text-xs">/api/cron/discover-glamping</code>, schedule <code className="text-xs">0 15 * * 1</code> UTC (
-                <code className="text-xs">vercel.json</code>). Same env vars on the project. If <code className="text-xs">CRON_SECRET</code> is
+                <code className="text-xs">vercel.json</code>). Each run uses Tavily search and Google News RSS (default up to 10 RSS articles).
+                Same env vars on the project. If <code className="text-xs">CRON_SECRET</code> is
                 set, only requests with <code className="text-xs">Authorization: Bearer &lt;CRON_SECRET&gt;</code> succeed; Vercel is expected to
                 send that header for cron invocations.
               </p>

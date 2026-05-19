@@ -17,97 +17,150 @@ import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { getRedis } from '@/lib/upstash';
 import { normalizeStateToCanonicalAbbrev, STATE_ABBREVIATIONS } from '@/components/map/utils/stateUtils';
+import { buildCountryFilterOptions } from '@/lib/comps-unified/country-filter';
 
-const CACHE_KEY = 'admin:comps-unified:facets:v2';
+const CACHE_KEY = 'admin:comps-unified:facets:v5';
 const CACHE_TTL_SECONDS = 24 * 60 * 60;
 
 interface FacetsPayload {
   sources: string[];
+  countries: string[];
   states: string[];
   unit_categories: string[];
   keywords: string[];
+  sage_property_types: string[];
+}
+
+function normalizeStatesFromRaw(rawStates: string[]): string[] {
+  const stateAbbrevSet = new Set<string>();
+  const unknownStates = new Set<string>();
+  for (const raw of rawStates) {
+    const trimmed = String(raw ?? '').trim();
+    if (!trimmed) continue;
+    const abbr = normalizeStateToCanonicalAbbrev(trimmed);
+    if (abbr) {
+      stateAbbrevSet.add(abbr);
+    } else {
+      unknownStates.add(trimmed);
+    }
+  }
+  return [...stateAbbrevSet, ...unknownStates].sort((a, b) => {
+    const la = STATE_ABBREVIATIONS[a] ?? a;
+    const lb = STATE_ABBREVIATIONS[b] ?? b;
+    return la.localeCompare(lb, undefined, { sensitivity: 'base' });
+  });
 }
 
 async function computeFacets(): Promise<FacetsPayload> {
   const supabase = createServerClient();
 
-  const [sourcesRes, statesRes, unitRes, keywordsRes] = await Promise.all([
-    supabase
-      .from('unified_comps')
-      .select('source')
-      .not('source', 'is', null)
-      .limit(50_000),
-    supabase
-      .from('unified_comps')
-      .select('state')
-      .not('state', 'is', null)
-      .limit(50_000),
-    supabase
-      .from('unified_comps')
-      .select('unit_category')
-      .not('unit_category', 'is', null)
-      .limit(50_000),
-    supabase
-      .from('unified_comps')
-      .select('amenity_keywords')
-      .not('amenity_keywords', 'is', null)
-      .limit(50_000),
-  ]);
+  const { data: rpcData, error: rpcError } = await supabase.rpc('unified_comps_facets');
 
-  if (sourcesRes.error) throw sourcesRes.error;
-  if (statesRes.error) throw statesRes.error;
-  if (unitRes.error) throw unitRes.error;
-  if (keywordsRes.error) throw keywordsRes.error;
+  if (!rpcError && rpcData && typeof rpcData === 'object') {
+    const payload = rpcData as {
+      sources?: unknown;
+      countries?: unknown;
+      states?: unknown;
+      unit_categories?: unknown;
+      keywords?: unknown;
+      sage_property_types?: unknown;
+    };
+    const sources = Array.isArray(payload.sources)
+      ? payload.sources.map((s) => String(s).trim()).filter(Boolean).sort()
+      : [];
+    const rawCountries = Array.isArray(payload.countries)
+      ? payload.countries.map((c) => String(c).trim()).filter(Boolean)
+      : [];
+    const rawStates = Array.isArray(payload.states)
+      ? payload.states.map((s) => String(s).trim()).filter(Boolean)
+      : [];
+    const unitCategories = Array.isArray(payload.unit_categories)
+      ? payload.unit_categories.map((c) => String(c).trim()).filter(Boolean).sort()
+      : [];
+    const keywords = Array.isArray(payload.keywords)
+      ? payload.keywords
+          .map((k) => String(k).trim())
+          .filter(Boolean)
+          .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+      : [];
+    const sagePropertyTypes = Array.isArray(payload.sage_property_types)
+      ? payload.sage_property_types
+          .map((pt) => String(pt).trim())
+          .filter(Boolean)
+          .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+      : [];
 
-  const sources = [
-    ...new Set(
-      (sourcesRes.data || [])
-        .map((r) => String(r.source ?? '').trim())
-        .filter(Boolean)
-    ),
-  ].sort();
-
-  // One entry per region: normalize "AL", "Alabama", "ALABAMA" → "AL"
-  const stateAbbrevSet = new Set<string>();
-  const unknownStates = new Set<string>();
-  for (const row of statesRes.data || []) {
-    const raw = String((row as { state?: string }).state ?? '').trim();
-    if (!raw) continue;
-    const abbr = normalizeStateToCanonicalAbbrev(raw);
-    if (abbr) {
-      stateAbbrevSet.add(abbr);
-    } else {
-      unknownStates.add(raw);
-    }
+    return {
+      sources,
+      countries: buildCountryFilterOptions(rawCountries).map((o) => o.value),
+      states: normalizeStatesFromRaw(rawStates),
+      unit_categories: unitCategories,
+      keywords,
+      sage_property_types: sagePropertyTypes,
+    };
   }
-  const states = [...stateAbbrevSet, ...unknownStates].sort((a, b) => {
-    const la = STATE_ABBREVIATIONS[a] ?? a;
-    const lb = STATE_ABBREVIATIONS[b] ?? b;
-    return la.localeCompare(lb, undefined, { sensitivity: 'base' });
-  });
 
-  const unitCategories = [
-    ...new Set(
-      (unitRes.data || [])
-        .map((r) => String(r.unit_category ?? '').trim())
-        .filter(Boolean)
-    ),
-  ].sort();
+  if (rpcError) {
+    console.warn('[comps/unified/facets] unified_comps_facets RPC failed, using paginated scan:', rpcError.message);
+  }
 
+  return computeFacetsPaginated(supabase);
+}
+
+/** Fallback when unified_comps_facets() is not deployed yet. */
+async function computeFacetsPaginated(supabase: ReturnType<typeof createServerClient>): Promise<FacetsPayload> {
+  const PAGE = 10_000;
+  const sourceSet = new Set<string>();
+  const rawCountrySet = new Set<string>();
+  const rawStateSet = new Set<string>();
+  const unitSet = new Set<string>();
   const kwSet = new Set<string>();
-  for (const row of keywordsRes.data || []) {
-    const arr = (row as { amenity_keywords?: unknown }).amenity_keywords;
-    if (!Array.isArray(arr)) continue;
-    for (const k of arr) {
-      const t = String(k ?? '').trim();
-      if (t) kwSet.add(t);
-    }
-  }
-  const keywords = [...kwSet].sort((a, b) =>
-    a.localeCompare(b, undefined, { sensitivity: 'base' })
-  );
+  const sagePropertyTypeSet = new Set<string>();
 
-  return { sources, states, unit_categories: unitCategories, keywords };
+  for (let offset = 0; ; offset += PAGE) {
+    const { data, error } = await supabase
+      .from('unified_comps')
+      .select('source, country, state, unit_category, amenity_keywords, property_type')
+      .range(offset, offset + PAGE - 1);
+
+    if (error) throw error;
+    if (!data?.length) break;
+
+    for (const row of data) {
+      const src = String(row.source ?? '').trim();
+      if (src) sourceSet.add(src);
+      const co = String(row.country ?? '').trim();
+      if (co) rawCountrySet.add(co);
+      const st = String(row.state ?? '').trim();
+      if (st) rawStateSet.add(st);
+      const uc = String(row.unit_category ?? '').trim();
+      if (uc) unitSet.add(uc);
+      const arr = row.amenity_keywords;
+      if (Array.isArray(arr)) {
+        for (const k of arr) {
+          const t = String(k ?? '').trim();
+          if (t) kwSet.add(t);
+        }
+      }
+      if (src === 'all_glamping_properties') {
+        const pt = String(row.property_type ?? '').trim();
+        if (pt) sagePropertyTypeSet.add(pt);
+      }
+    }
+
+    if (data.length < PAGE) break;
+  }
+
+  return {
+    sources: [...sourceSet].sort(),
+    countries: buildCountryFilterOptions([...rawCountrySet]).map((o) => o.value),
+    states: normalizeStatesFromRaw([...rawStateSet]),
+    unit_categories: [...unitSet].sort(),
+    keywords: [...kwSet].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })),
+    sage_property_types: [...sagePropertyTypeSet].sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    ),
+  };
 }
 
 export const GET = withAdminAuth(async (request) => {

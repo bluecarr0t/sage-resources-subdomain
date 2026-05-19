@@ -9,10 +9,13 @@
 import {
   filterUnifiedSources,
 } from '@/lib/comps-unified/build-row';
+import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
+import { GLAMPING_PROPERTY_TYPE_ALLOWED } from '@/lib/glamping-property-types';
 import {
   expandStateValuesForInQuery,
   normalizeStateToCanonicalAbbrev,
 } from '@/components/map/utils/stateUtils';
+import { expandCountryValuesForInQuery } from '@/lib/comps-unified/country-filter';
 import {
   validateFilterValues,
   validateSearchTerms,
@@ -51,7 +54,16 @@ function buildTsQuery(terms: string[]): string {
 export interface UnifiedFilterOptions {
   sources: string[];
   expandedStateValues: string[];
+  expandedCountryValues: string[];
   unitCategories: string[];
+  /** Sage `property_type` values (e.g. Glamping Resort). Applied when non-empty. */
+  propertyTypes: string[];
+  /** Matview `is_glamping_property` (e.g. Yes). Applied when non-empty. */
+  isGlampingProperty: string[];
+  /** When set, Sage (`all_glamping_properties`) rows must match this `research_status`. */
+  sageResearchStatus: string | null;
+  /** Sage `is_open` values (Yes, Under Construction, etc.). Applied when non-empty. */
+  openStatuses: string[];
   keywordFilters: string[];
   parsedMinAdr: number | null;
   parsedMaxAdr: number | null;
@@ -75,12 +87,33 @@ export function parseUnifiedFilterOptions(
   );
   const expandedStateValues =
     states.length > 0 ? expandStateValuesForInQuery(states) : [];
+  const countries = validateFilterValues(
+    (searchParams.get('country') || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  );
+  const expandedCountryValues =
+    countries.length > 0 ? expandCountryValuesForInQuery(countries) : [];
   const unitCategories = validateFilterValues(
     (searchParams.get('unit_category') || '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean)
   );
+  const propertyTypes = validateFilterValues(
+    (searchParams.get('property_type') || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  ).filter((v) => GLAMPING_PROPERTY_TYPE_ALLOWED.has(v));
+  const allowedOpen = new Set<string>(GLAMPING_IS_OPEN_VALUES);
+  const openStatuses = validateFilterValues(
+    (searchParams.get('is_open') || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  ).filter((v) => allowedOpen.has(v));
   const keywordFilters = validateFilterValues(
     (searchParams.get('keywords') || '')
       .split(',')
@@ -104,7 +137,12 @@ export function parseUnifiedFilterOptions(
   return {
     sources,
     expandedStateValues,
+    expandedCountryValues,
     unitCategories,
+    propertyTypes,
+    isGlampingProperty: [],
+    sageResearchStatus: null,
+    openStatuses,
     keywordFilters,
     parsedMinAdr,
     parsedMaxAdr,
@@ -115,6 +153,7 @@ export function parseUnifiedFilterOptions(
 export function applyUnifiedBaseFilters(q: any, opts: UnifiedFilterOptions): any {
   let out = q;
   if (opts.sources.length > 0) out = out.in('source', opts.sources);
+  if (opts.expandedCountryValues.length > 0) out = out.in('country', opts.expandedCountryValues);
   if (opts.expandedStateValues.length > 0) out = out.in('state', opts.expandedStateValues);
   if (opts.keywordFilters.length > 0) out = out.overlaps('amenity_keywords', opts.keywordFilters);
   if (opts.parsedMinAdr !== null && !Number.isNaN(opts.parsedMinAdr)) {
@@ -131,6 +170,15 @@ export function applyUnifiedBaseFilters(q: any, opts: UnifiedFilterOptions): any
       ors.push(`unit_type.ilike.%${esc}%`);
     }
     out = out.or(ors.join(','));
+  }
+  if (opts.propertyTypes.length > 0) {
+    out = out.in('property_type', opts.propertyTypes);
+  }
+  if (opts.isGlampingProperty.length > 0) {
+    out = out.in('is_glamping_property', opts.isGlampingProperty);
+  }
+  if (opts.openStatuses.length > 0) {
+    out = out.in('is_open', opts.openStatuses);
   }
   return out;
 }

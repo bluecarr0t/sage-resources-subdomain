@@ -12,7 +12,6 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  Star,
   ChevronUp,
   ChevronDown,
   FileText,
@@ -23,22 +22,65 @@ import {
   List,
   Map as MapIcon,
 } from 'lucide-react';
-import { qualityScoreToDisplay } from '@/lib/feasibility-utils';
 import {
   STATE_ABBREVIATIONS,
   formatStateAbbreviation,
   normalizeStateToCanonicalAbbrev,
 } from '@/components/map/utils/stateUtils';
+import { normalizeGlampingUnitTypeForDisplay } from '@/lib/glamping-unit-type-normalize';
 import {
   UNIFIED_SOURCES,
+  isSageOnlyUnifiedSourceFilter,
+  shouldShowUnifiedCompsOccupancy,
   unifiedSourceBadgeClass,
   unifiedSourceLabel,
   type UnifiedCompRow,
   type UnifiedSource,
 } from '@/lib/comps-unified/build-row';
 import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
+import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
+import { ADMIN_COMPS_COHORT_PROPERTY_TYPE } from '@/lib/comps-unified/admin-comps-cohort';
+import { GLAMPING_PROPERTY_TYPE_ALLOWED } from '@/lib/glamping-property-types';
+import { US_STATES } from '@/lib/us-states';
+import {
+  buildCountryFilterOptions,
+  DEFAULT_SELECTED_COUNTRIES,
+  formatCountryFilterLabel,
+  parseCountryFilterFromUrl,
+  writeCountryFilterToParams,
+} from '@/lib/comps-unified/country-filter';
+
+/** State filter on /admin/glamping-properties is US-only (excludes Canadian provinces, etc.). */
+const US_STATE_FILTER_CODES = new Set<string>([...US_STATES, 'DC']);
+
+/** Display label for Status filter (`is_open` DB value stays `Yes`). */
+function formatIsOpenFilterLabel(value: string): string {
+  return value === 'Yes' ? 'Open' : value;
+}
 
 const PER_PAGE = 50;
+
+/** Default Source filter on /admin/glamping-properties (Sage glamping database). */
+const DEFAULT_SELECTED_SOURCES = ['all_glamping_properties'] as const;
+
+/** Server-enforced cohort; kept in the URL for clarity. */
+const DEFAULT_SELECTED_PROPERTY_TYPES = [ADMIN_COMPS_COHORT_PROPERTY_TYPE] as const;
+
+function parseSourceFilterFromUrl(sourceParam: string | null): string[] {
+  if (sourceParam === 'all') return [];
+  if (sourceParam) {
+    return sourceParam.split(',').map((x) => x.trim()).filter(Boolean);
+  }
+  return [...DEFAULT_SELECTED_SOURCES];
+}
+
+function writeSourceFilterToParams(params: URLSearchParams, sources: string[]): void {
+  if (sources.length === 0) {
+    params.set('source', 'all');
+  } else {
+    params.set('source', sources.join(','));
+  }
+}
 
 type CompsViewMode = 'list' | 'map';
 
@@ -53,6 +95,22 @@ const CompsMapView = dynamic(() => import('./CompsMapView'), {
 });
 
 /** Collapse `AL`, `Alabama`, `ALABAMA` in the URL to a single canonical code per region. */
+function parsePropertyTypeParamFromUrl(param: string | null): string[] {
+  const raw = param ?? '';
+  if (!raw) return [...DEFAULT_SELECTED_PROPERTY_TYPES];
+  const parsed = raw
+    .split(',')
+    .map((x) => x.trim())
+    .filter((x) => x && GLAMPING_PROPERTY_TYPE_ALLOWED.has(x));
+  return parsed.length > 0 ? parsed : [...DEFAULT_SELECTED_PROPERTY_TYPES];
+}
+
+function writePropertyTypeFilterToParams(params: URLSearchParams, propertyTypes: string[]): void {
+  const values =
+    propertyTypes.length > 0 ? propertyTypes : [...DEFAULT_SELECTED_PROPERTY_TYPES];
+  params.set('property_type', values.join(','));
+}
+
 function parseStateParamFromUrl(stateParam: string | null): string[] {
   const s = stateParam ?? '';
   if (!s) return [];
@@ -92,24 +150,9 @@ function formatKeywordLabel(raw: string): string {
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
-/** Unit Type: underscores → spaces, title-case each word (RV stays uppercase). */
-function formatUnitTypeWords(raw: string): string {
-  const normalized = raw.trim().replace(/_+/g, ' ').replace(/\s+/g, ' ');
-  if (!normalized) return '';
-  return normalized
-    .split(' ')
-    .map((w) => {
-      const lower = w.toLowerCase();
-      if (lower === 'rv') return 'RV';
-      if (!w) return w;
-      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-    })
-    .join(' ');
-}
-
 function formatUnitTypeDisplay(raw: string | null | undefined): string {
   if (raw == null || !String(raw).trim()) return '-';
-  return formatUnitTypeWords(String(raw)) || '-';
+  return normalizeGlampingUnitTypeForDisplay(raw) ?? '-';
 }
 
 /** Safe http(s) href for a property website; rejects javascript: and invalid URLs. */
@@ -134,17 +177,6 @@ function formatWebsiteHostname(href: string): string {
   }
 }
 
-function QualityStars({ score }: { score: number | null }) {
-  const display = qualityScoreToDisplay(score);
-  if (display === null) return <span className="text-gray-400 text-xs">-</span>;
-  return (
-    <span className="flex items-center gap-0.5" title={`${display}/5`}>
-      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-      <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{display.toFixed(1)}</span>
-    </span>
-  );
-}
-
 function SourceBadge({ source }: { source: string }) {
   return (
     <span
@@ -155,19 +187,20 @@ function SourceBadge({ source }: { source: string }) {
   );
 }
 
-const SORTABLE_COLUMNS: Array<{ key: string; label: string; align: 'left' | 'center' | 'right'; sortKey: string | null }> = [
+const BASE_TABLE_COLUMNS: Array<{
+  key: string;
+  label: string;
+  align: 'left' | 'center' | 'right';
+  sortKey: string | null;
+}> = [
   { key: 'property_name', label: 'Property', align: 'left', sortKey: 'property_name' },
   { key: 'source', label: 'Source', align: 'left', sortKey: null },
   { key: 'state', label: 'State', align: 'left', sortKey: 'state' },
   { key: 'total_sites', label: 'Sites', align: 'center', sortKey: 'total_sites' },
-  { key: 'quality_score', label: 'Quality', align: 'center', sortKey: 'quality_score' },
   { key: 'unit_type', label: 'Unit Type', align: 'center', sortKey: null },
-  { key: 'adr', label: 'ADR Range', align: 'right', sortKey: 'low_adr' },
+  { key: 'adr', label: 'ARDR Range', align: 'right', sortKey: 'low_adr' },
   { key: 'occupancy', label: 'Occupancy', align: 'right', sortKey: null },
 ];
-
-// Checkbox + columns + keywords
-const TABLE_COLUMNS = SORTABLE_COLUMNS.length + 1;
 
 function SortableTh({
   column,
@@ -175,7 +208,7 @@ function SortableTh({
   sortDir,
   onSort,
 }: {
-  column: (typeof SORTABLE_COLUMNS)[number];
+  column: (typeof BASE_TABLE_COLUMNS)[number];
   currentSortBy: string;
   sortDir: string;
   onSort: (key: string) => void;
@@ -220,13 +253,16 @@ function ComparablesPageContent() {
   const [page, setPage] = useState(() => Math.max(1, parseInt(searchParams.get('page') ?? '1', 10)));
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [totalSiteUnits, setTotalSiteUnits] = useState(0);
   const [totalProperties, setTotalProperties] = useState<number | null>(null);
 
   const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
-  const [selectedSources, setSelectedSources] = useState<string[]>(() => {
-    const s = searchParams.get('source') ?? '';
-    return s ? s.split(',').map((x) => x.trim()).filter(Boolean) : [];
-  });
+  const [selectedSources, setSelectedSources] = useState<string[]>(() =>
+    parseSourceFilterFromUrl(searchParams.get('source'))
+  );
+  const [selectedCountries, setSelectedCountries] = useState<string[]>(() =>
+    parseCountryFilterFromUrl(searchParams.get('country'))
+  );
   const [selectedStates, setSelectedStates] = useState<string[]>(() =>
     parseStateParamFromUrl(searchParams.get('state'))
   );
@@ -238,7 +274,21 @@ function ComparablesPageContent() {
     const k = searchParams.get('keywords') ?? '';
     return k ? k.split(',').map((x) => x.trim()).filter(Boolean) : [];
   });
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>(() =>
+    parsePropertyTypeParamFromUrl(searchParams.get('property_type'))
+  );
+  const [selectedOpenStatuses, setSelectedOpenStatuses] = useState<string[]>(() => {
+    const io = searchParams.get('is_open') ?? '';
+    const allowed = new Set<string>(GLAMPING_IS_OPEN_VALUES);
+    return io
+      ? io
+          .split(',')
+          .map((x) => x.trim())
+          .filter((x) => x && allowed.has(x))
+      : [];
+  });
   const [unitCategoryOptions, setUnitCategoryOptions] = useState<{ value: string; label: string }[]>([]);
+  const [countryOptions, setCountryOptions] = useState<{ value: string; label: string }[]>([]);
   const [stateOptions, setStateOptions] = useState<{ value: string; label: string }[]>([]);
   const [keywordOptions, setKeywordOptions] = useState<{ value: string; label: string }[]>([]);
   const [sortBy, setSortBy] = useState(() => searchParams.get('sort_by') ?? 'created_at');
@@ -254,6 +304,25 @@ function ComparablesPageContent() {
     () => UNIFIED_SOURCES.map((s) => ({ value: s, label: unifiedSourceLabel(s) })),
     []
   );
+
+  const showSageOnlyFilters = isSageOnlyUnifiedSourceFilter(selectedSources);
+  const showOccupancyColumn = shouldShowUnifiedCompsOccupancy(selectedSources);
+  const tableColumns = useMemo(
+    () =>
+      showOccupancyColumn
+        ? BASE_TABLE_COLUMNS
+        : BASE_TABLE_COLUMNS.filter((col) => col.key !== 'occupancy'),
+    [showOccupancyColumn]
+  );
+
+  const statusOptions = useMemo(
+    () => GLAMPING_IS_OPEN_VALUES.map((v) => ({ value: v, label: formatIsOpenFilterLabel(v) })),
+    []
+  );
+
+  const clearSageOnlyFilterSelections = useCallback(() => {
+    setSelectedOpenStatuses([]);
+  }, []);
 
   const toggleExpanded = useCallback((id: string) => {
     setExpandedIds((prev) => {
@@ -307,14 +376,22 @@ function ComparablesPageContent() {
                 a.label.localeCompare(b.label)
               )
           );
+          setCountryOptions(buildCountryFilterOptions(data.countries || []));
           setStateOptions(
-            (data.states || []).map((s: string) => {
-              const fullName = STATE_ABBREVIATIONS[s] ?? s;
-              return {
-                value: s,
-                label: fullName !== s ? `${fullName} (${s})` : s,
-              };
-            })
+            (data.states || [])
+              .map((s: string) => {
+                const abbr = normalizeStateToCanonicalAbbrev(s) ?? s.toUpperCase();
+                return { raw: s, abbr };
+              })
+              .filter(({ abbr }) => US_STATE_FILTER_CODES.has(abbr))
+              .map(({ raw, abbr }) => {
+                const fullName = STATE_ABBREVIATIONS[abbr] ?? raw;
+                return {
+                  value: abbr,
+                  label: fullName !== abbr ? `${fullName} (${abbr})` : abbr,
+                };
+              })
+              .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }))
           );
           setKeywordOptions(
             (data.keywords || []).map((k: string) => ({ value: k, label: formatKeywordLabel(k) }))
@@ -324,16 +401,33 @@ function ComparablesPageContent() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!showSageOnlyFilters && selectedOpenStatuses.length > 0) {
+      clearSageOnlyFilterSelections();
+    }
+  }, [showSageOnlyFilters, selectedOpenStatuses.length, clearSageOnlyFilterSelections]);
+
   // Sync URL -> state when searchParams changes
   useEffect(() => {
     setSearch(searchParams.get('search') ?? '');
-    const src = searchParams.get('source') ?? '';
-    setSelectedSources(src ? src.split(',').map((x) => x.trim()).filter(Boolean) : []);
+    setSelectedSources(parseSourceFilterFromUrl(searchParams.get('source')));
+    setSelectedCountries(parseCountryFilterFromUrl(searchParams.get('country')));
     setSelectedStates(parseStateParamFromUrl(searchParams.get('state')));
     const uc = searchParams.get('unit_category') ?? '';
     setSelectedUnitCategories(uc ? uc.split(',').map((x) => x.trim()).filter(Boolean) : []);
     const kw = searchParams.get('keywords') ?? '';
     setSelectedKeywords(kw ? kw.split(',').map((x) => x.trim()).filter(Boolean) : []);
+    setSelectedPropertyTypes(parsePropertyTypeParamFromUrl(searchParams.get('property_type')));
+    const io = searchParams.get('is_open') ?? '';
+    const allowedOpen = new Set<string>(GLAMPING_IS_OPEN_VALUES);
+    setSelectedOpenStatuses(
+      io
+        ? io
+            .split(',')
+            .map((x) => x.trim())
+            .filter((x) => x && allowedOpen.has(x))
+        : []
+    );
     setSortBy(searchParams.get('sort_by') ?? 'created_at');
     setSortDir(searchParams.get('sort_dir') ?? 'desc');
     setPage(Math.max(1, parseInt(searchParams.get('page') ?? '1', 10)));
@@ -343,10 +437,15 @@ function ComparablesPageContent() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
-    if (selectedSources.length > 0) params.set('source', selectedSources.join(','));
+    writeSourceFilterToParams(params, selectedSources);
+    writeCountryFilterToParams(params, selectedCountries);
     if (selectedStates.length > 0) params.set('state', selectedStates.join(','));
     if (selectedUnitCategories.length > 0) params.set('unit_category', selectedUnitCategories.join(','));
     if (selectedKeywords.length > 0) params.set('keywords', selectedKeywords.join(','));
+    writePropertyTypeFilterToParams(params, selectedPropertyTypes);
+    if (showSageOnlyFilters && selectedOpenStatuses.length > 0) {
+      params.set('is_open', selectedOpenStatuses.join(','));
+    }
     params.set('sort_by', sortBy);
     params.set('sort_dir', sortDir);
     if (page > 1) params.set('page', String(page));
@@ -359,9 +458,24 @@ function ComparablesPageContent() {
     const next = params.toString();
     const current = searchParams.toString();
     if (next !== current) {
-      router.replace(`/admin/comps${next ? `?${next}` : ''}`, { scroll: false });
+      router.replace(`/admin/glamping-properties${next ? `?${next}` : ''}`, { scroll: false });
     }
-  }, [search, selectedSources, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir, page, router, searchParams]);
+  }, [
+    search,
+    selectedSources,
+    selectedCountries,
+    selectedStates,
+    selectedUnitCategories,
+    selectedKeywords,
+    showSageOnlyFilters,
+    selectedPropertyTypes,
+    selectedOpenStatuses,
+    sortBy,
+    sortDir,
+    page,
+    router,
+    searchParams,
+  ]);
 
   const isDebouncing = search !== debouncedSearch;
 
@@ -369,15 +483,33 @@ function ComparablesPageContent() {
     const params = new URLSearchParams();
     if (debouncedSearch) params.set('search', debouncedSearch);
     if (selectedSources.length > 0) params.set('source', selectedSources.join(','));
+    if (selectedCountries.length > 0) params.set('country', selectedCountries.join(','));
     if (selectedStates.length > 0) params.set('state', selectedStates.join(','));
     if (selectedUnitCategories.length > 0) params.set('unit_category', selectedUnitCategories.join(','));
     if (selectedKeywords.length > 0) params.set('keywords', selectedKeywords.join(','));
+    writePropertyTypeFilterToParams(params, selectedPropertyTypes);
+    if (showSageOnlyFilters && selectedOpenStatuses.length > 0) {
+      params.set('is_open', selectedOpenStatuses.join(','));
+    }
     params.set('sort_by', sortBy);
     params.set('sort_dir', sortDir);
     params.set('page', String(page));
     params.set('per_page', String(PER_PAGE));
     return params.toString();
-  }, [debouncedSearch, selectedSources, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir, page]);
+  }, [
+    debouncedSearch,
+    selectedSources,
+    selectedCountries,
+    selectedStates,
+    selectedUnitCategories,
+    selectedKeywords,
+    showSageOnlyFilters,
+    selectedPropertyTypes,
+    selectedOpenStatuses,
+    sortBy,
+    sortDir,
+    page,
+  ]);
 
   // Filter-only query string for the map: pagination/sort are irrelevant
   // since the geo endpoint returns every geocoded match (up to its cap).
@@ -385,11 +517,26 @@ function ComparablesPageContent() {
     const params = new URLSearchParams();
     if (debouncedSearch) params.set('search', debouncedSearch);
     if (selectedSources.length > 0) params.set('source', selectedSources.join(','));
+    if (selectedCountries.length > 0) params.set('country', selectedCountries.join(','));
     if (selectedStates.length > 0) params.set('state', selectedStates.join(','));
     if (selectedUnitCategories.length > 0) params.set('unit_category', selectedUnitCategories.join(','));
     if (selectedKeywords.length > 0) params.set('keywords', selectedKeywords.join(','));
+    writePropertyTypeFilterToParams(params, selectedPropertyTypes);
+    if (showSageOnlyFilters && selectedOpenStatuses.length > 0) {
+      params.set('is_open', selectedOpenStatuses.join(','));
+    }
     return params.toString();
-  }, [debouncedSearch, selectedSources, selectedStates, selectedUnitCategories, selectedKeywords]);
+  }, [
+    debouncedSearch,
+    selectedSources,
+    selectedCountries,
+    selectedStates,
+    selectedUnitCategories,
+    selectedKeywords,
+    showSageOnlyFilters,
+    selectedPropertyTypes,
+    selectedOpenStatuses,
+  ]);
 
   const hasCompletedInitialLoad = useRef(false);
   const prevSearchSortForPageReset = useRef<{ debouncedSearch: string; sortBy: string; sortDir: string } | null>(null);
@@ -404,10 +551,15 @@ function ComparablesPageContent() {
         setRows(data.rows || []);
         setTotal(data.pagination.total);
         setTotalPages(data.pagination.total_pages);
+        setTotalSiteUnits(
+          typeof data.pagination?.total_site_units === 'number'
+            ? data.pagination.total_site_units
+            : data.pagination.total
+        );
         setTotalProperties(
           typeof data.pagination?.total_properties === 'number'
             ? data.pagination.total_properties
-            : null
+            : data.pagination.total
         );
         setIsFuzzyResults(data.pagination?.fuzzy === true);
         setError(null);
@@ -415,12 +567,14 @@ function ComparablesPageContent() {
         setRows([]);
         setIsFuzzyResults(false);
         setTotalProperties(null);
+        setTotalSiteUnits(0);
         setError(data.message || 'Failed to load comps');
       }
     } catch (err) {
       setRows([]);
       setIsFuzzyResults(false);
       setTotalProperties(null);
+      setTotalSiteUnits(0);
       setError(err instanceof Error ? err.message : 'Failed to load comps');
     } finally {
       setLoading(false);
@@ -444,13 +598,33 @@ function ComparablesPageContent() {
 
   useEffect(() => {
     setPage(1);
-  }, [selectedSources, selectedStates, selectedUnitCategories, selectedKeywords]);
+  }, [
+    selectedSources,
+    selectedCountries,
+    selectedStates,
+    selectedUnitCategories,
+    selectedKeywords,
+    selectedPropertyTypes,
+    selectedOpenStatuses,
+  ]);
 
   useEffect(() => {
     setExpandedIds(new Set());
     setSelectedIds(new Set());
     setCompareModeActive(false);
-  }, [page, debouncedSearch, selectedSources, selectedStates, selectedUnitCategories, selectedKeywords, sortBy, sortDir]);
+  }, [
+    page,
+    debouncedSearch,
+    selectedSources,
+    selectedCountries,
+    selectedStates,
+    selectedUnitCategories,
+    selectedKeywords,
+    selectedPropertyTypes,
+    selectedOpenStatuses,
+    sortBy,
+    sortDir,
+  ]);
 
   const selectedRows = useMemo(() => rows.filter((r) => selectedIds.has(r.id)), [rows, selectedIds]);
 
@@ -477,11 +651,9 @@ function ComparablesPageContent() {
       'Source',
       'State',
       'Sites',
-      'Quality',
       'Unit Type',
-      'ADR Range',
-      'Occupancy',
-      'Keywords',
+      'ARDR Range',
+      ...(showOccupancyColumn ? (['Occupancy'] as const) : []),
       'Study ID',
       'City',
       'Country',
@@ -493,17 +665,19 @@ function ComparablesPageContent() {
         unifiedSourceLabel(r.source),
         formatStateAbbreviation(r.state),
         r.total_sites ?? '',
-        qualityScoreToDisplay(r.quality_score)?.toFixed(1) ?? '',
         r.unit_type != null && String(r.unit_type).trim()
-          ? formatUnitTypeWords(String(r.unit_type))
+          ? (normalizeGlampingUnitTypeForDisplay(r.unit_type) ?? '')
           : '',
         r.low_adr !== null || r.peak_adr !== null
           ? `${formatCurrency(r.low_adr)} - ${formatCurrency(r.peak_adr)}`
           : '',
-        r.low_occupancy !== null || r.peak_occupancy !== null
-          ? `${formatOccupancyPercent(r.low_occupancy)} - ${formatOccupancyPercent(r.peak_occupancy)}`
-          : '',
-        (r.amenity_keywords || []).join(', '),
+        ...(showOccupancyColumn
+          ? [
+              r.low_occupancy !== null || r.peak_occupancy !== null
+                ? `${formatOccupancyPercent(r.low_occupancy)} - ${formatOccupancyPercent(r.peak_occupancy)}`
+                : '',
+            ]
+          : []),
         r.study_id ?? '',
         r.city ?? '',
         r.country ?? '',
@@ -513,14 +687,14 @@ function ComparablesPageContent() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Comps');
     XLSX.writeFile(wb, `comps-export-${new Date().toISOString().slice(0, 10)}.xlsx`);
-  }, [rows]);
+  }, [rows, showOccupancyColumn]);
 
   return (
     <main className={`px-4 sm:px-6 lg:px-8 ${compareModeActive && selectedIds.size >= 2 ? 'pb-24' : 'pb-16'}`}>
       <div className="max-w-7xl mx-auto">
         <div className={`${adminPageHeadingMargin} flex items-center justify-between`}>
           <div>
-            <h1 className={`${adminPageTitle} mb-1`}>Comps</h1>
+            <h1 className={`${adminPageTitle} mb-1`}>Properties</h1>
             <p className={adminPageDescription}>{t('pageSubtitle')}</p>
           </div>
           <div className="flex gap-3">
@@ -545,7 +719,7 @@ function ComparablesPageContent() {
               <Download className="w-4 h-4 mr-1.5" />
               Export Excel
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push('/admin/comps/analytics')}>
+            <Button variant="secondary" size="sm" onClick={() => router.push('/glamping-market-overview')}>
               Analytics
             </Button>
           </div>
@@ -591,14 +765,40 @@ function ComparablesPageContent() {
                 options={sourceOptions}
                 selectedValues={selectedSources}
                 onToggle={(v) =>
-                  setSelectedSources((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]))
+                  setSelectedSources((prev) => {
+                    const next = prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v];
+                    if (!isSageOnlyUnifiedSourceFilter(next)) clearSageOnlyFilterSelections();
+                    return next;
+                  })
                 }
-                onClear={() => setSelectedSources([])}
+                onClear={() => {
+                  setSelectedSources([]);
+                  clearSageOnlyFilterSelections();
+                }}
                 placeholder={t('sourceFilterPlaceholder')}
                 allSelectedText={t('sourceFilterAllSelected')}
                 activeColor="sage"
               />
             </div>
+            {showSageOnlyFilters ? (
+              <div className="w-full sm:w-48">
+                <MultiSelect
+                  id="status-filter"
+                  label="Status"
+                  options={statusOptions}
+                  selectedValues={selectedOpenStatuses}
+                  onToggle={(v) =>
+                    setSelectedOpenStatuses((prev) =>
+                      prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+                    )
+                  }
+                  onClear={() => setSelectedOpenStatuses([])}
+                  placeholder="All statuses"
+                  allSelectedText="All statuses"
+                  activeColor="sage"
+                />
+              </div>
+            ) : null}
             <div className="w-full sm:w-48">
               <MultiSelect
                 id="unit-type-filter"
@@ -612,6 +812,22 @@ function ComparablesPageContent() {
                 placeholder="All unit types"
                 allSelectedText="All unit types"
                 activeColor="sage"
+              />
+            </div>
+            <div className="w-full sm:w-48">
+              <SearchableMultiSelect
+                id="country-filter"
+                label="Country"
+                options={countryOptions}
+                selectedValues={selectedCountries}
+                onToggle={(v) =>
+                  setSelectedCountries((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]))
+                }
+                placeholder="All countries"
+                allSelectedText="All countries"
+                searchPlaceholder="Search countries..."
+                activeColor="sage"
+                maxDropdownHeightPx={520}
               />
             </div>
             <div className="w-full sm:w-48">
@@ -633,15 +849,15 @@ function ComparablesPageContent() {
             <div className="w-full sm:w-48">
               <SearchableMultiSelect
                 id="keywords-filter"
-                label="Keywords"
+                label="Amenities"
                 options={keywordOptions}
                 selectedValues={selectedKeywords}
                 onToggle={(v) =>
                   setSelectedKeywords((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]))
                 }
-                placeholder="All keywords"
-                allSelectedText="All keywords"
-                searchPlaceholder="Search keywords..."
+                placeholder="All amenities"
+                allSelectedText="All amenities"
+                searchPlaceholder="Search amenities..."
                 activeColor="sage"
               />
             </div>
@@ -649,9 +865,12 @@ function ComparablesPageContent() {
 
           {(search ||
             selectedSources.length > 0 ||
+            selectedCountries.length > 0 ||
             selectedStates.length > 0 ||
             selectedUnitCategories.length > 0 ||
-            selectedKeywords.length > 0) && (
+            selectedKeywords.length > 0 ||
+            selectedPropertyTypes.length > 0 ||
+            selectedOpenStatuses.length > 0) && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {search && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium bg-sage-100 dark:bg-sage-900/50 text-sage-800 dark:text-sage-200 border border-sage-200 dark:border-sage-700">
@@ -674,7 +893,13 @@ function ComparablesPageContent() {
                   {t('activeSourceChip', { label: unifiedSourceLabel(src) })}
                   <button
                     type="button"
-                    onClick={() => setSelectedSources((prev) => prev.filter((x) => x !== src))}
+                    onClick={() =>
+                      setSelectedSources((prev) => {
+                        const next = prev.filter((x) => x !== src);
+                        if (!isSageOnlyUnifiedSourceFilter(next)) clearSageOnlyFilterSelections();
+                        return next;
+                      })
+                    }
                     className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
                     aria-label={`Remove source filter ${src}`}
                   >
@@ -682,6 +907,25 @@ function ComparablesPageContent() {
                   </button>
                 </span>
               ))}
+              {selectedCountries.map((co) => {
+                const label = countryOptions.find((o) => o.value === co)?.label ?? formatCountryFilterLabel(co);
+                return (
+                  <span
+                    key={co}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium bg-sage-100 dark:bg-sage-900/50 text-sage-800 dark:text-sage-200 border border-sage-200 dark:border-sage-700"
+                  >
+                    Country: {label}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCountries((prev) => prev.filter((x) => x !== co))}
+                      className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
+                      aria-label={`Remove country filter ${label}`}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </span>
+                );
+              })}
               {selectedStates.map((st) => {
                 const label = stateOptions.find((o) => o.value === st)?.label ?? st;
                 return (
@@ -725,12 +969,28 @@ function ComparablesPageContent() {
                   key={kw}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium bg-sage-100 dark:bg-sage-900/50 text-sage-800 dark:text-sage-200 border border-sage-200 dark:border-sage-700"
                 >
-                  Keyword: {formatKeywordLabel(kw)}
+                  Amenity: {formatKeywordLabel(kw)}
                   <button
                     type="button"
                     onClick={() => setSelectedKeywords((prev) => prev.filter((x) => x !== kw))}
                     className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
-                    aria-label={`Remove keyword filter ${kw}`}
+                    aria-label={`Remove amenity filter ${kw}`}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ))}
+              {selectedOpenStatuses.map((st) => (
+                <span
+                  key={st}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium bg-sage-100 dark:bg-sage-900/50 text-sage-800 dark:text-sage-200 border border-sage-200 dark:border-sage-700"
+                >
+                  Status: {formatIsOpenFilterLabel(st)}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOpenStatuses((prev) => prev.filter((x) => x !== st))}
+                    className="p-0.5 rounded hover:bg-sage-200 dark:hover:bg-sage-700 text-sage-600 dark:text-sage-300"
+                    aria-label={`Remove status filter ${st}`}
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -740,10 +1000,13 @@ function ComparablesPageContent() {
                 type="button"
                 onClick={() => {
                   setSearch('');
-                  setSelectedSources([]);
+                  setSelectedSources([...DEFAULT_SELECTED_SOURCES]);
+                  setSelectedCountries([...DEFAULT_SELECTED_COUNTRIES]);
+                  setSelectedPropertyTypes([...DEFAULT_SELECTED_PROPERTY_TYPES]);
                   setSelectedStates([]);
                   setSelectedUnitCategories([]);
                   setSelectedKeywords([]);
+                  clearSageOnlyFilterSelections();
                   setPage(1);
                 }}
                 className="text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-800 dark:hover:text-sage-200 hover:underline"
@@ -770,7 +1033,7 @@ function ComparablesPageContent() {
                   )}
                   <span className="text-gray-500 dark:text-gray-400 font-normal"> · </span>
                   <span className="text-sage-600 dark:text-sage-400">
-                    {t('summarySiteUnits', { count: total })}
+                    {t('summarySiteUnits', { count: totalSiteUnits })}
                   </span>
                 </>
               )}
@@ -841,7 +1104,9 @@ function ComparablesPageContent() {
                 size="sm"
                 onClick={() => {
                   setSearch('');
-                  setSelectedSources([]);
+                  setSelectedSources([...DEFAULT_SELECTED_SOURCES]);
+                  setSelectedCountries([...DEFAULT_SELECTED_COUNTRIES]);
+                  setSelectedPropertyTypes([...DEFAULT_SELECTED_PROPERTY_TYPES]);
                   setSelectedStates([]);
                   setSelectedUnitCategories([]);
                   setSelectedKeywords([]);
@@ -860,14 +1125,14 @@ function ComparablesPageContent() {
                       {compareModeActive && (
                         <th className="w-12 px-3 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Select</th>
                       )}
-                      {SORTABLE_COLUMNS.map((col) => (
+                      {tableColumns.map((col) => (
                         <SortableTh
                           key={col.key}
                           column={col}
                           currentSortBy={sortBy}
                           sortDir={sortDir}
                           onSort={(key) => {
-                            const defaultDir = ['quality_score', 'total_sites', 'created_at', 'low_adr'].includes(key) ? 'desc' : 'asc';
+                            const defaultDir = ['total_sites', 'created_at', 'low_adr'].includes(key) ? 'desc' : 'asc';
                             if (sortBy === key) {
                               setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
                             } else {
@@ -877,16 +1142,24 @@ function ComparablesPageContent() {
                           }}
                         />
                       ))}
-                      <th className="text-center px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Keywords</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {rows.map((r) => {
                       const isExpanded = expandedIds.has(r.id);
                       const websiteHref = normalizePropertyWebsiteUrl(r.website_url);
+                      const siteRows = r.site_rows ?? [];
+                      const unitTypeTitle =
+                        siteRows.length > 0
+                          ? siteRows
+                              .map((s) => formatUnitTypeDisplay(s.unit_type))
+                              .filter((label) => label !== '-')
+                              .join(', ')
+                          : formatUnitTypeDisplay(r.unit_type);
                       const hasAnyDetail =
                         r.overview ||
                         websiteHref ||
+                        siteRows.length > 1 ||
                         r.low_adr !== null ||
                         r.peak_adr !== null ||
                         r.low_occupancy !== null ||
@@ -961,13 +1234,10 @@ function ComparablesPageContent() {
                               {r.total_sites ?? '-'}
                             </td>
                             <td className="px-4 py-3 text-center">
-                              <QualityStars score={r.quality_score} />
-                            </td>
-                            <td className="px-4 py-3 text-center">
                               {r.unit_type ? (
                                 <span
                                   className="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-sage-50 dark:bg-sage-900/30 text-sage-700 dark:text-sage-300 rounded truncate max-w-[140px]"
-                                  title={formatUnitTypeDisplay(r.unit_type)}
+                                  title={unitTypeTitle}
                                 >
                                   {formatUnitTypeDisplay(r.unit_type)}
                                 </span>
@@ -980,27 +1250,25 @@ function ComparablesPageContent() {
                                 <>{formatCurrency(r.low_adr)} - {formatCurrency(r.peak_adr)}</>
                               ) : '-'}
                             </td>
-                            <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 text-xs whitespace-nowrap">
-                              {r.low_occupancy !== null || r.peak_occupancy !== null ? (
-                                <>{formatOccupancyPercent(r.low_occupancy)} - {formatOccupancyPercent(r.peak_occupancy)}</>
-                              ) : '-'}
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex flex-wrap gap-1 justify-center max-w-[140px]">
-                                {(r.amenity_keywords || []).slice(0, 3).map((kw) => (
-                                  <span
-                                    key={kw}
-                                    className="inline-block px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
-                                  >
-                                    {kw}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
+                            {showOccupancyColumn && (
+                              <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 text-xs whitespace-nowrap">
+                                {r.low_occupancy !== null || r.peak_occupancy !== null ? (
+                                  <>
+                                    {formatOccupancyPercent(r.low_occupancy)} -{' '}
+                                    {formatOccupancyPercent(r.peak_occupancy)}
+                                  </>
+                                ) : (
+                                  '-'
+                                )}
+                              </td>
+                            )}
                           </tr>
                           {isExpanded && hasAnyDetail && (
                             <tr key={`${r.id}-expanded`} className="bg-neutral-50/70 dark:bg-neutral-900/30">
-                              <td colSpan={compareModeActive ? TABLE_COLUMNS + 1 : TABLE_COLUMNS} className="px-4 py-3 align-top">
+                              <td
+                                colSpan={compareModeActive ? tableColumns.length + 1 : tableColumns.length}
+                                className="px-4 py-3 align-top"
+                              >
                                 <div className="pl-6 pr-4 pb-2 space-y-2 text-sm">
                                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                                     <div>
@@ -1040,6 +1308,27 @@ function ComparablesPageContent() {
                                       )}
                                     </div>
                                   </div>
+                                  {siteRows.length > 1 && (
+                                    <div>
+                                      <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+                                        Unit types ({siteRows.length})
+                                      </p>
+                                      <ul className="space-y-1 text-xs text-gray-700 dark:text-gray-300">
+                                        {siteRows.map((site) => (
+                                          <li key={site.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                            <span className="font-medium">
+                                              {formatUnitTypeDisplay(site.unit_type)}
+                                            </span>
+                                            {site.low_adr !== null || site.peak_adr !== null ? (
+                                              <span className="text-gray-500 dark:text-gray-400">
+                                                {formatCurrency(site.low_adr)} – {formatCurrency(site.peak_adr)}
+                                              </span>
+                                            ) : null}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                   {r.overview && (
                                     <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-4 whitespace-pre-line">
                                       {r.overview}
@@ -1047,7 +1336,7 @@ function ComparablesPageContent() {
                                   )}
                                   {r.source === 'reports' && r.study_id && (
                                     <Link
-                                      href={`/admin/comps/${r.study_id}`}
+                                      href={`/admin/glamping-properties/${r.study_id}`}
                                       className="inline-flex items-center gap-1.5 text-xs font-medium text-sage-600 dark:text-sage-400 hover:underline"
                                     >
                                       <FileText className="w-3.5 h-3.5" />
@@ -1149,18 +1438,13 @@ function ComparablesPageContent() {
                         { key: 'sites', label: 'Sites', get: (r: UnifiedCompRow) => String(r.total_sites ?? '-') },
                         { key: 'units', label: 'Units', get: (r: UnifiedCompRow) => String(r.num_units ?? '-') },
                         {
-                          key: 'quality',
-                          label: 'Quality',
-                          get: (r: UnifiedCompRow) => qualityScoreToDisplay(r.quality_score)?.toFixed(1) ?? '-',
-                        },
-                        {
                           key: 'unit_type',
                           label: 'Unit Type',
                           get: (r: UnifiedCompRow) => formatUnitTypeDisplay(r.unit_type),
                         },
                         {
                           key: 'adr',
-                          label: 'ADR Range',
+                          label: 'ARDR Range',
                           get: (r: UnifiedCompRow) =>
                             r.low_adr !== null || r.peak_adr !== null
                               ? `${formatCurrency(r.low_adr)} – ${formatCurrency(r.peak_adr)}`
@@ -1171,14 +1455,18 @@ function ComparablesPageContent() {
                           label: 'Avg ADR',
                           get: (r: UnifiedCompRow) => formatCurrency(r.avg_adr),
                         },
-                        {
-                          key: 'occ',
-                          label: 'Occupancy',
-                          get: (r: UnifiedCompRow) =>
-                            r.low_occupancy !== null || r.peak_occupancy !== null
-                              ? `${formatOccupancyPercent(r.low_occupancy)} – ${formatOccupancyPercent(r.peak_occupancy)}`
-                              : '-',
-                        },
+                        ...(showOccupancyColumn
+                          ? [
+                              {
+                                key: 'occ',
+                                label: 'Occupancy',
+                                get: (r: UnifiedCompRow) =>
+                                  r.low_occupancy !== null || r.peak_occupancy !== null
+                                    ? `${formatOccupancyPercent(r.low_occupancy)} – ${formatOccupancyPercent(r.peak_occupancy)}`
+                                    : '-',
+                              },
+                            ]
+                          : []),
                       ].map(({ key, label, get }) => (
                         <tr key={key} className="border-b border-neutral-100/90 dark:border-neutral-800">
                           <td className="py-2 pr-4 text-gray-600 dark:text-gray-400 font-medium">{label}</td>

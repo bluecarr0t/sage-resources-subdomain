@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Map view for /admin/comps — Google Maps (same stack as /admin/client-map) with
+ * Map view for /admin/glamping-properties — Google Maps (same stack as /admin/client-map) with
  * supercluster-based clustering. Only markers visible in the current viewport
  * are instantiated so 100k+ points stay responsive.
  */

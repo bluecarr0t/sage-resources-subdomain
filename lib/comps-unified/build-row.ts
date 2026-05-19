@@ -1,6 +1,6 @@
 /**
  * Shared types + helpers for the `unified_comps` matview used by
- * /api/admin/comps/unified and the /admin/comps page.
+ * /api/admin/comps/unified and the /admin/glamping-properties page.
  *
  * Keep the `UnifiedCompRow` shape in sync with the column list of the
  * matview in `scripts/migrations/unified-comps-matview.sql`.
@@ -13,6 +13,28 @@ export const UNIFIED_SOURCES = [
   'campspot',
   'all_roverpass_data_new',
 ] as const;
+
+/** Matview `source` value for the Sage glamping database. */
+export const SAGE_UNIFIED_SOURCE = 'all_glamping_properties' as const;
+
+export function isSageOnlyUnifiedSourceFilter(sources: string[]): boolean {
+  return sources.length === 1 && sources[0] === SAGE_UNIFIED_SOURCE;
+}
+
+/** Sources that carry low/peak occupancy on unified comps rows. */
+export const OCCUPANCY_UNIFIED_SOURCES = [
+  'hipcamp',
+  'campspot',
+  'all_roverpass_data_new',
+] as const satisfies readonly UnifiedSource[];
+
+const OCCUPANCY_UNIFIED_SOURCE_SET = new Set<string>(OCCUPANCY_UNIFIED_SOURCES);
+
+/** Show Occupancy column when the active source filter includes an OTA with occupancy data. */
+export function shouldShowUnifiedCompsOccupancy(selectedSources: string[]): boolean {
+  if (selectedSources.length === 0) return true;
+  return selectedSources.some((s) => OCCUPANCY_UNIFIED_SOURCE_SET.has(s));
+}
 
 export type UnifiedSource = (typeof UNIFIED_SOURCES)[number];
 
@@ -71,6 +93,8 @@ export interface UnifiedCompRow {
   property_type: string | null;
   /** Yes/No when present on matview (Sage / RoverPass); reports + OTAs may be constant Yes in SQL. */
   is_glamping_property: string | null;
+  /** Sage operational status (Yes / Under Construction / Proposed Development / Closed). */
+  is_open: string | null;
   /** For Sage, matview merges `unit_type` + `site_name` + `property_type` so unit filters match site labels. */
   unit_type: string | null;
   unit_category: string | null;
@@ -92,7 +116,11 @@ export interface UnifiedCompRow {
   website_url: string | null;
   /** Dedupe key for distinct property counts (address / geocode–based; see matview). */
   address_key: string;
+  /** Sage `all_glamping_properties.property_id` when present (list/map dedupe by property). */
+  sage_property_id?: string | null;
   created_at: string;
+  /** Site/unit matview rows merged into this property row (list view only). */
+  site_rows?: UnifiedCompRow[];
 }
 
 export type UnifiedSortKey =

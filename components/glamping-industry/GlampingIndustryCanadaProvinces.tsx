@@ -44,7 +44,7 @@ export default function GlampingIndustryCanadaProvinces({ byProvince }: Props) {
         <div className="mb-4 space-y-1 text-[10px] uppercase tracking-[0.25em] text-neutral-500">
           <p>Canada · provinces & territories</p>
           <p className="font-light normal-case tracking-normal text-neutral-500">
-            Select a region for property count, site count, and average retail daily rate.
+            Select a region for property count, unit count, and average retail daily rate.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -93,10 +93,10 @@ export default function GlampingIndustryCanadaProvinces({ byProvince }: Props) {
                 </div>
                 <div>
                   <dt className="text-[10px] uppercase tracking-wider text-neutral-500">
-                    Site count
+                    Unit count
                   </dt>
                   <dd className="mt-1 font-light tabular-nums text-2xl tracking-tight text-neutral-900">
-                    {formatInt(row?.siteCount ?? 0)}
+                    {formatInt(row?.unitCount ?? 0)}
                   </dd>
                 </div>
                 <div>
@@ -114,7 +114,7 @@ export default function GlampingIndustryCanadaProvinces({ byProvince }: Props) {
                     </div>
                   </dd>
                   <p className="mt-2 text-[10px] leading-relaxed text-neutral-500">
-                    From operating properties with a recorded rate.
+                    From operating properties with a rate.
                   </p>
                 </div>
               </dl>

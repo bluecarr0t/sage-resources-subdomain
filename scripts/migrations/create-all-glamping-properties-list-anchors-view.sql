@@ -9,10 +9,29 @@
 DROP VIEW IF EXISTS public.all_glamping_properties_list_anchors;
 
 CREATE VIEW public.all_glamping_properties_list_anchors AS
-SELECT DISTINCT ON (agp.property_id)
+SELECT DISTINCT ON (
+  COALESCE(
+    agp.property_id::text,
+    NULLIF(btrim(agp.slug), ''),
+    lower(btrim(coalesce(agp.property_name, ''))) || '|' ||
+      lower(btrim(coalesce(agp.city, ''))) || '|' ||
+      lower(btrim(coalesce(agp.state, '')))
+  )
+)
   agp.*
 FROM public.all_glamping_properties agp
-ORDER BY agp.property_id, agp.id;
+ORDER BY
+  COALESCE(
+    agp.property_id::text,
+    NULLIF(btrim(agp.slug), ''),
+    lower(btrim(coalesce(agp.property_name, ''))) || '|' ||
+      lower(btrim(coalesce(agp.city, ''))) || '|' ||
+      lower(btrim(coalesce(agp.state, '')))
+  ),
+  agp.id;
 
 COMMENT ON VIEW public.all_glamping_properties_list_anchors IS
-  'Deduped admin Sage Data list: one row per property_id (lowest id = anchor).';
+  'Deduped admin Sage Data list: one row per logical property (lowest id = anchor).';
+
+GRANT SELECT ON public.all_glamping_properties_list_anchors TO authenticated;
+GRANT SELECT ON public.all_glamping_properties_list_anchors TO service_role;

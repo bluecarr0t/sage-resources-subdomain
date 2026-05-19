@@ -10,6 +10,8 @@ export interface ModalProps {
   closeOnOverlayClick?: boolean;
   /** Optional: additional classes for the modal wrapper (e.g. max-w-xl for wider modals) */
   className?: string;
+  /** Optional: id of the element that labels the dialog */
+  ariaLabelledBy?: string;
 }
 
 export function Modal({
@@ -18,6 +20,7 @@ export function Modal({
   children,
   closeOnOverlayClick = true,
   className = '',
+  ariaLabelledBy,
 }: ModalProps) {
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
@@ -46,7 +49,12 @@ export function Modal({
         aria-hidden="true"
         onClick={closeOnOverlayClick ? onClose : undefined}
       />
-      <div className={`relative z-10 w-full ${className || 'max-w-md'}`.trim()} role="dialog" aria-modal="true">
+      <div
+        className={`relative z-10 w-full ${className || 'max-w-md'}`.trim()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={ariaLabelledBy}
+      >
         {children}
       </div>
     </div>

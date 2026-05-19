@@ -18,8 +18,10 @@ const nextConfig = {
         destination: '/glamping-market-overview',
         permanent: true,
       },
-      { source: '/admin/comparables', destination: '/admin/comps', permanent: false },
-      { source: '/admin/comparables/:path+', destination: '/admin/comps/:path+', permanent: false },
+      { source: '/admin/comparables', destination: '/admin/glamping-properties', permanent: false },
+      { source: '/admin/comparables/:path+', destination: '/admin/glamping-properties/:path+', permanent: false },
+      { source: '/admin/comps', destination: '/admin/glamping-properties', permanent: true },
+      { source: '/admin/comps/:path+', destination: '/admin/glamping-properties/:path+', permanent: true },
     ];
   },
 

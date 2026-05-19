@@ -2,12 +2,24 @@ import { createServerClient } from '@/lib/supabase';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '@/lib/glamping-market-snapshot-region';
 import { normalizeDbStateToUspsAbbr } from '@/lib/normalize-us-state-abbr';
-import { medianSorted } from '@/lib/fetch-glamping-industry-metrics';
+import {
+  meanAndMedianAdr,
+  propertyLevelAdrValues,
+  recordPropertyAdrSample,
+} from '@/lib/fetch-glamping-industry-metrics';
+import { bucketGlampingIsOpenForMetrics } from '@/lib/glamping-is-open';
+import { GLAMPING_MARKET_SNAPSHOT_US_STATE_SELECT } from '@/lib/glamping-market-snapshot-row-select';
+import {
+  applyGlampingMarketSnapshotTierToQuery,
+  type GlampingMarketSnapshotTierFilter,
+} from '@/lib/glamping-market-snapshot-classification';
+import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 
 const PAGE_SIZE = 1000;
 
 type Row = {
   property_name: string | null;
+  unit_type: string | null;
   state: string | null;
   country: string | null;
   is_open: string | null;
@@ -24,15 +36,7 @@ function parsePositiveNumber(value: unknown): number | null {
   return n;
 }
 
-function normalizeIsOpen(raw: string | null | undefined): 'yes' | 'under_construction' | 'closed' | 'other' {
-  const v = (raw ?? '').trim().toLowerCase();
-  if (v === 'yes') return 'yes';
-  if (v === 'under construction') return 'under_construction';
-  if (v === 'closed' || v === 'no') return 'closed';
-  return 'other';
-}
-
-function sitesForRow(row: Row): number {
+function unitsForRow(row: Row): number {
   const fromUnits = parsePositiveNumber(row.quantity_of_units);
   const fromTotal = parsePositiveNumber(row.property_total_sites);
   const n = fromUnits ?? fromTotal ?? 0;
@@ -53,7 +57,8 @@ export type GlampingUsStateMetricRow = {
   propertyCount: number;
   openProperties: number;
   underConstructionProperties: number;
-  siteCount: number;
+  proposedDevelopmentProperties: number;
+  unitCount: number;
   avgRetailDailyRateMean: number | null;
   avgRetailDailyRateMedian: number | null;
 };
@@ -64,31 +69,32 @@ type Agg = {
   names: Set<string>;
   openNames: Set<string>;
   underConstructionNames: Set<string>;
-  sites: number;
-  adrValues: number[];
+  proposedDevelopmentNames: Set<string>;
+  units: number;
+  adrByProperty: Map<string, number[]>;
 };
 
 /**
  * Per-USPS-state aggregates for published commercial glamping in the United States only
  * (Canada is included in national snapshot metrics but has no US-state breakdown here).
  */
-export async function fetchGlampingIndustryUsStateMetrics(): Promise<
-  { ok: true; data: GlampingUsStateMetricsMap } | { ok: false; error: string }
-> {
+export async function fetchGlampingIndustryUsStateMetrics(
+  tier: GlampingMarketSnapshotTierFilter = 'all'
+): Promise<{ ok: true; data: GlampingUsStateMetricsMap } | { ok: false; error: string }> {
   const supabase = createServerClient();
   const aggs = new Map<string, Agg>();
 
   let offset = 0;
   for (;;) {
-    const { data, error } = await supabase
+    let query = supabase
       .from('all_glamping_properties')
-      .select(
-        'property_name, state, country, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate'
-      )
+      .select(GLAMPING_MARKET_SNAPSHOT_US_STATE_SELECT)
       .eq('is_glamping_property', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .in('country', [...GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN])
+      .in('country', [...GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN]);
+    query = applyGlampingMarketSnapshotTierToQuery(query, tier);
+    const { data, error } = await query
       .order('id', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1);
 
@@ -100,6 +106,7 @@ export async function fetchGlampingIndustryUsStateMetrics(): Promise<
     if (batch.length === 0) break;
 
     for (const row of batch) {
+      if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
       if (!isUsRow(row.country)) continue;
       const abbr = normalizeDbStateToUspsAbbr(row.state);
       if (!abbr) continue;
@@ -107,19 +114,27 @@ export async function fetchGlampingIndustryUsStateMetrics(): Promise<
       const name = (row.property_name ?? '').trim();
       let agg = aggs.get(abbr);
       if (!agg) {
-        agg = { names: new Set(), openNames: new Set(), underConstructionNames: new Set(), sites: 0, adrValues: [] };
+        agg = {
+          names: new Set(),
+          openNames: new Set(),
+          underConstructionNames: new Set(),
+          proposedDevelopmentNames: new Set(),
+          units: 0,
+          adrByProperty: new Map(),
+        };
         aggs.set(abbr, agg);
       }
 
       if (name) agg.names.add(name);
-      const status = normalizeIsOpen(row.is_open);
+      const status = bucketGlampingIsOpenForMetrics(row.is_open);
       if (name && status === 'yes') agg.openNames.add(name);
       if (name && status === 'under_construction') agg.underConstructionNames.add(name);
-      agg.sites += sitesForRow(row);
+      if (name && status === 'proposed_development') agg.proposedDevelopmentNames.add(name);
+      agg.units += unitsForRow(row);
 
-      if (status === 'yes') {
+      if (status === 'yes' && name) {
         const adr = parsePositiveNumber(row.rate_avg_retail_daily_rate);
-        if (adr != null) agg.adrValues.push(adr);
+        if (adr != null) recordPropertyAdrSample(agg.adrByProperty, name, adr);
       }
     }
 
@@ -129,15 +144,14 @@ export async function fetchGlampingIndustryUsStateMetrics(): Promise<
 
   const out: GlampingUsStateMetricsMap = {};
   for (const [abbr, agg] of aggs) {
-    const sorted = [...agg.adrValues].sort((a, b) => a - b);
-    const mean =
-      sorted.length > 0 ? sorted.reduce((s, x) => s + x, 0) / sorted.length : null;
-    const median = sorted.length > 0 ? medianSorted(sorted) : null;
+    const propertyAdrs = propertyLevelAdrValues(agg.adrByProperty);
+    const { mean, median } = meanAndMedianAdr(propertyAdrs);
     out[abbr] = {
       propertyCount: agg.names.size,
       openProperties: agg.openNames.size,
       underConstructionProperties: agg.underConstructionNames.size,
-      siteCount: agg.sites,
+      proposedDevelopmentProperties: agg.proposedDevelopmentNames.size,
+      unitCount: agg.units,
       avgRetailDailyRateMean: mean != null ? Math.round(mean) : null,
       avgRetailDailyRateMedian: median != null ? Math.round(median) : null,
     };

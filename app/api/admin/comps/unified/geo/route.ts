@@ -44,11 +44,20 @@ export const dynamic = 'force-dynamic';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import {
+  adminCompsCohortRpcParams,
+  withAdminCompsCohortFilters,
+} from '@/lib/comps-unified/admin-comps-cohort';
+import {
   parseUnifiedFilterOptions,
   applyUnifiedBaseFilters,
   applyUnifiedFtsFilter,
   applyUnifiedIlikeSearch,
 } from '@/lib/comps-unified/apply-filters';
+import { filterGeoRowsToPublishedSageIds } from '@/lib/comps-unified/filter-sage-published-geo-rows';
+import {
+  attachSagePropertyIds,
+  unifiedPropertyGroupKey,
+} from '@/lib/comps-unified/sage-property-group-key';
 import { UNIFIED_SOURCES } from '@/lib/comps-unified/build-row';
 
 const MAX_POINTS = 150_000;
@@ -129,10 +138,10 @@ function flagGlampingForMarker(r: GeoRow, includeGlampColumn: boolean): boolean 
  * only by address_key would keep whichever row sorts first by `id` (often
  * `camp:` before `glamp:` / `hip:`), hiding other sources on the map.
  */
-function addressKeyGroupKey(r: GeoRow): string {
-  const k = r.address_key?.trim();
-  if (k) return `${r.source}\u0001${k}`;
-  return `${r.source}\u0001__row:${r.id}`;
+function addressKeyGroupKey(
+  r: GeoRow & { sage_property_id?: string | null }
+): string {
+  return unifiedPropertyGroupKey(r);
 }
 
 /** One map marker per matview property (`address_key`); merge site/unit rows. */
@@ -223,7 +232,8 @@ export const GET = withAdminAuth(async (request) => {
   try {
     const supabase = createServerClient();
     const { searchParams } = new URL(request.url);
-    const opts = parseUnifiedFilterOptions(searchParams);
+    const opts = withAdminCompsCohortFilters(parseUnifiedFilterOptions(searchParams));
+    const cohortRpc = adminCompsCohortRpcParams();
 
     const { selectList, includeGlampColumn } = await resolveGeoRowSelect(supabase);
 
@@ -313,6 +323,12 @@ export const GET = withAdminAuth(async (request) => {
       usedIlikeForData = true;
     }
 
+    if (opts.sageResearchStatus) {
+      collected = await filterGeoRowsToPublishedSageIds(supabase, collected, opts.sageResearchStatus);
+    }
+
+    const collectedWithSagePid = await attachSagePropertyIds(supabase, collected);
+
     const searchMode: 'none' | 'fts' | 'ilike' =
       opts.searchTerms.length === 0 ? 'none' : usedIlikeForData ? 'ilike' : 'fts';
     const tsq = buildTsQuery(opts.searchTerms);
@@ -322,6 +338,7 @@ export const GET = withAdminAuth(async (request) => {
       {
         p_sources: opts.sources.length > 0 ? opts.sources : null,
         p_states: opts.expandedStateValues.length > 0 ? opts.expandedStateValues : null,
+        p_countries: opts.expandedCountryValues.length > 0 ? opts.expandedCountryValues : null,
         p_keywords: opts.keywordFilters.length > 0 ? opts.keywordFilters : null,
         p_min_adr:
           opts.parsedMinAdr !== null && !Number.isNaN(opts.parsedMinAdr)
@@ -332,8 +349,11 @@ export const GET = withAdminAuth(async (request) => {
             ? opts.parsedMaxAdr
             : null,
         p_unit_categories: opts.unitCategories.length > 0 ? opts.unitCategories : null,
+        p_property_types: opts.propertyTypes.length > 0 ? opts.propertyTypes : null,
+        p_is_open: opts.openStatuses.length > 0 ? opts.openStatuses : null,
         p_tsquery: searchMode === 'fts' ? tsq : null,
         p_ilike_terms: searchMode === 'ilike' ? opts.searchTerms : null,
+        ...cohortRpc,
       }
     );
 
@@ -342,7 +362,7 @@ export const GET = withAdminAuth(async (request) => {
     }
     const geocodedBySourceFromRpc = markerRpcErr ? null : parseGeoMarkerCountRpc(markerRpcData);
 
-    const forPoints = collapseToOneRowPerProperty(collected, includeGlampColumn);
+    const forPoints = collapseToOneRowPerProperty(collectedWithSagePid, includeGlampColumn);
 
     // Build compact payload: source name → index table to compress repeats.
     const sourceIndex = new Map<string, number>();

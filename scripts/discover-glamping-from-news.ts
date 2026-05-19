@@ -27,29 +27,15 @@ import { resolve } from 'path';
 import * as fs from 'fs';
 import { createClient } from '@supabase/supabase-js';
 import { OpenAI } from 'openai';
-import Parser from 'rss-parser';
 import {
-  GLAMPING_RSS_FEEDS,
   fetchArticleContent,
   getDatabasePropertyNames,
+  getRssArticleTasks,
   processDiscoveryArticle,
   searchGlampingNews,
 } from '../lib/glamping-discovery';
 
 config({ path: resolve(process.cwd(), '.env.local') });
-
-/** Minimum combined RSS text to pass as fallback when the article page cannot be scraped */
-const MIN_RSS_SNIPPET_CHARS = 80;
-
-function buildRssItemFallbackText(item: Parser.Item): string | undefined {
-  const parts: string[] = [];
-  if (item.title?.trim()) parts.push(item.title.trim());
-  const encoded = (item as Record<string, string | undefined>)['content:encoded'];
-  const body = item.content ?? encoded ?? item.summary ?? item.contentSnippet;
-  if (body?.trim()) parts.push(body.trim());
-  const combined = parts.join('\n\n').trim();
-  return combined.length >= MIN_RSS_SNIPPET_CHARS ? combined : undefined;
-}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
@@ -110,34 +96,6 @@ async function getProcessedUrls(): Promise<Set<string>> {
   }
 
   return new Set((data || []).map((r: { url: string }) => r.url));
-}
-
-async function getRssArticleTasks(
-  limit?: number
-): Promise<{ url: string; discoverySource: string; rssFallbackText?: string }[]> {
-  const parser = new Parser();
-  const results: { url: string; discoverySource: string; rssFallbackText?: string }[] = [];
-
-  for (const feed of GLAMPING_RSS_FEEDS) {
-    try {
-      const parsed = await parser.parseURL(feed.url);
-      for (const item of parsed.items || []) {
-        const link = item.link;
-        if (link && link.startsWith('http')) {
-          const rssFallbackText = buildRssItemFallbackText(item);
-          results.push({ url: link, discoverySource: feed.discoverySource, rssFallbackText });
-        }
-      }
-    } catch (err) {
-      console.warn(`Failed to parse feed ${feed.name}:`, err instanceof Error ? err.message : err);
-    }
-  }
-
-  const unique = Array.from(
-    new Map(results.map((r) => [r.url, r])).values()
-  );
-
-  return limit ? unique.slice(0, limit) : unique;
 }
 
 function parseArgs(): {

@@ -10,6 +10,7 @@
  *     pageSize     — default 50, max 200
  *     sortBy       — column name (default 'date_updated')
  *     sortDir      — 'asc' | 'desc' (default 'desc')
+ *     glamping_service_tier — exact match (luxury | upscale | midscale | rustic)
  *     missing      — optional: 'city' | 'rates' | 'website' | 'lat_lng' | 'total_sites' — gap filters
  *                    (applied to anchor rows only when the list-anchors view is installed)
  *                    (city/url: null or empty string; rates: rate_avg_retail_daily_rate null or 0 — numeric, no `eq.''`);
@@ -17,8 +18,8 @@
  *     siblingOf    — optional: when set (row id), returns all sibling rows for the multi-site editor:
  *                    `{ success, anchorId, rows, capped? }` (same `property_id`; slug/name+city+state fallback only if unset).
  *                    Max 50 rows (`capped: true` if more exist).
- *   List response: `total` = exact **property** count (one per `property_id`)
- *   when `public.all_glamping_properties_list_anchors` exists; otherwise unit-level row count.
+ *   List response: `total` = property count from `all_glamping_properties_list_anchors`
+ *   (one row per logical property). Falls back to site-level rows only if the view is missing.
  *
  * PATCH /api/admin/sage-glamping-data/properties
  *   Body: { id: string | number, updates: Record<string, unknown> }
@@ -39,6 +40,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { applySageDataGlampingListFilters } from '@/lib/admin/glamping-sage-data-list';
+import { dedupeRowsToPropertyAnchors } from '@/lib/admin/glamping-list-anchor-key';
 import {
   idsBelongToSiblingGroup,
   MAX_GLAMPING_SIBLING_ROWS,
@@ -52,6 +54,8 @@ import {
   type GlampingIsOpenValue,
 } from '@/lib/glamping-is-open';
 import { normalizeAllGlampingPropertiesCountryForDb } from '@/lib/all-glamping-properties-country';
+import { isValidGlampingBrandId } from '@/lib/glamping-brands';
+import { isGlampingServiceTier } from '@/lib/glamping-service-tier';
 
 export const dynamic = 'force-dynamic';
 
@@ -319,6 +323,11 @@ export const GET = withAdminAuth(async (request) => {
         ? (isOpenRaw as GlampingIsOpenValue)
         : undefined;
     const missingParam = params.get('missing');
+    const glampingServiceTierRaw = params.get('glamping_service_tier')?.trim();
+    const glampingServiceTierFilter =
+      glampingServiceTierRaw && isGlampingServiceTier(glampingServiceTierRaw)
+        ? glampingServiceTierRaw
+        : undefined;
     const page = parseIntParam(params.get('page'), 1);
     const pageSize = Math.min(
       parseIntParam(params.get('pageSize'), DEFAULT_PAGE_SIZE),
@@ -341,6 +350,7 @@ export const GET = withAdminAuth(async (request) => {
       country: country ?? undefined,
       isOpen: isOpenFilter,
       missing: missingParam,
+      glampingServiceTier: glampingServiceTierFilter,
     };
 
     const buildListQuery = (relation: string) => {
@@ -389,8 +399,14 @@ export const GET = withAdminAuth(async (request) => {
     }
 
     const rawRows = data ?? [];
-    const rows = rawRows;
+    const rows =
+      listRelation === TABLE ? dedupeRowsToPropertyAnchors(rawRows) : rawRows;
     let total = typeof count === 'number' && !Number.isNaN(count) ? count : 0;
+    if (listRelation === TABLE && rows.length !== rawRows.length) {
+      console.warn(
+        '[admin/sage-data/properties] List used site-level fallback with in-page dedupe; apply scripts/migrations/refresh-all-glamping-properties-list-anchors-view-2026-05-18.sql for correct pagination.'
+      );
+    }
     if (count == null && rows.length > 0) {
       total = Math.max(total, rangeFrom + rows.length);
     }
@@ -474,6 +490,37 @@ export const PATCH = withAdminAuth(async (request) => {
       sanitized.country = normalizeAllGlampingPropertiesCountryForDb(sanitized.country);
     }
 
+    if ('brand_id' in sanitized && sanitized.brand_id != null) {
+      const bid = sanitized.brand_id;
+      if (typeof bid !== 'string' || !isValidGlampingBrandId(bid)) {
+        return NextResponse.json(
+          { success: false, error: 'brand_id must be a valid UUID or empty to clear' },
+          { status: 400 }
+        );
+      }
+      sanitized.brand_id = bid.trim();
+    }
+
+    if ('glamping_service_tier' in sanitized && sanitized.glamping_service_tier != null) {
+      const tier = sanitized.glamping_service_tier;
+      if (typeof tier !== 'string' || !isGlampingServiceTier(tier)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'glamping_service_tier must be luxury, upscale, midscale, or rustic',
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const tierManualEdit =
+      'glamping_service_tier' in sanitized || 'glamping_service_tier_notes' in sanitized;
+    if (tierManualEdit) {
+      sanitized.glamping_service_tier_source = 'manual';
+    }
+
     if (Object.keys(sanitized).length === 0) {
       return NextResponse.json(
         {
@@ -488,6 +535,18 @@ export const PATCH = withAdminAuth(async (request) => {
     sanitized.date_updated = new Date().toISOString().split('T')[0];
 
     const supabase = createServerClient();
+
+    const tierPropagateKeys = [
+      'glamping_service_tier',
+      'glamping_service_tier_source',
+      'glamping_service_tier_notes',
+    ] as const;
+    const tierPatch = Object.fromEntries(
+      Object.entries(sanitized).filter(([k]) =>
+        (tierPropagateKeys as readonly string[]).includes(k)
+      )
+    );
+
     const { data, error } = await supabase
       .from(TABLE)
       .update(sanitized)
@@ -501,6 +560,32 @@ export const PATCH = withAdminAuth(async (request) => {
         { success: false, error: error.message },
         { status: 500 }
       );
+    }
+
+    if (data && Object.keys(tierPatch).length > 0) {
+      try {
+        const { rows } = await fetchSiblingRowsForAnchor(
+          supabase,
+          data as Record<string, unknown>
+        );
+        const siblingIds = rows
+          .map((r) => String(r.id))
+          .filter((sid) => sid !== id);
+        if (siblingIds.length > 0) {
+          const { error: sibErr } = await supabase
+            .from(TABLE)
+            .update(tierPatch)
+            .in('id', siblingIds);
+          if (sibErr) {
+            console.warn(
+              '[admin/sage-data/properties] PATCH tier sibling propagate:',
+              sibErr.message
+            );
+          }
+        }
+      } catch (propErr) {
+        console.warn('[admin/sage-data/properties] PATCH tier propagate failed:', propErr);
+      }
     }
 
     return NextResponse.json({

@@ -5,6 +5,12 @@ import {
   GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN,
   type GlampingMarketSnapshotMarket,
 } from '@/lib/glamping-market-snapshot-region';
+import { bucketGlampingIsOpenForMetrics } from '@/lib/glamping-is-open';
+import {
+  applyGlampingMarketSnapshotTierToQuery,
+  type GlampingMarketSnapshotTierFilter,
+} from '@/lib/glamping-market-snapshot-classification';
+import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
 
 const PAGE_SIZE = 1000;
@@ -13,18 +19,24 @@ export const TOP_UNIT_TYPES_COUNT = 5;
 
 export type GlampingTopUnitTypeRow = {
   label: string;
-  /** Integer percent of total sites (primary `unit_type` label per row). */
-  pctOfSites: number;
+  /** Integer percent of total units (primary `unit_type` label per row). */
+  pctOfUnits: number;
+  /**
+   * Unit-weighted mean retail ADR for open rows with this primary unit label and a recorded
+   * rate (`quantity_of_units`, else `property_total_sites`, else weight 1).
+   */
+  avgRetailDailyRateMean: number | null;
 };
 
 export type GlampingIndustryMetrics = {
   totalProperties: number;
   openProperties: number;
   underConstructionProperties: number;
-  totalSites: number;
+  proposedDevelopmentProperties: number;
+  totalUnits: number;
   avgRetailDailyRateMean: number | null;
   avgRetailDailyRateMedian: number | null;
-  topUnitTypesBySites: GlampingTopUnitTypeRow[];
+  topUnitTypesByUnits: GlampingTopUnitTypeRow[];
   asOf: string;
 };
 
@@ -47,21 +59,13 @@ function parsePositiveNumber(value: unknown): number | null {
   return n;
 }
 
-function normalizeIsOpen(raw: string | null | undefined): 'yes' | 'under_construction' | 'closed' | 'other' {
-  const v = (raw ?? '').trim().toLowerCase();
-  if (v === 'yes') return 'yes';
-  if (v === 'under construction') return 'under_construction';
-  if (v === 'closed' || v === 'no') return 'closed';
-  return 'other';
-}
-
 function parseTimestampMs(value: string | null | undefined): number | null {
   if (value == null || !String(value).trim()) return null;
   const ms = Date.parse(String(value));
   return Number.isFinite(ms) ? ms : null;
 }
 
-function sitesForRow(row: Row): number {
+function unitsForRow(row: Row): number {
   const fromUnits = parsePositiveNumber(row.quantity_of_units);
   const fromTotal = parsePositiveNumber(row.property_total_sites);
   const n = fromUnits ?? fromTotal ?? 0;
@@ -77,12 +81,51 @@ export function medianSorted(sortedAsc: number[]): number {
   return (sortedAsc[mid - 1] + sortedAsc[mid]) / 2;
 }
 
+/** Collect open-row ADRs under each trimmed `property_name`. */
+export function recordPropertyAdrSample(
+  byProperty: Map<string, number[]>,
+  propertyName: string,
+  adr: number
+): void {
+  const key = propertyName.trim();
+  if (!key) return;
+  const list = byProperty.get(key);
+  if (list) list.push(adr);
+  else byProperty.set(key, [adr]);
+}
+
+/**
+ * Headline mean/median ADR uses one value per property (median of that property's
+ * rated unit rows) so multi-unit resorts do not dominate state/national stats.
+ */
+export function propertyLevelAdrValues(byProperty: Map<string, number[]>): number[] {
+  const values: number[] = [];
+  for (const rowAdrs of byProperty.values()) {
+    if (rowAdrs.length === 0) continue;
+    const sorted = [...rowAdrs].sort((a, b) => a - b);
+    values.push(medianSorted(sorted));
+  }
+  return values.sort((a, b) => a - b);
+}
+
+export function meanAndMedianAdr(samples: number[]): {
+  mean: number | null;
+  median: number | null;
+} {
+  if (samples.length === 0) return { mean: null, median: null };
+  const mean = samples.reduce((s, x) => s + x, 0) / samples.length;
+  return { mean, median: medianSorted(samples) };
+}
+
 /**
  * Published commercial-glamping universe (same land-tenure scope as the public map),
  * filtered to {@link GlampingMarketSnapshotMarket}: United States or Canada.
+ * Rows whose `unit_type` is tent-site, RV, or vehicle inventory are omitted
+ * ({@link isExcludedGlampingMarketSnapshotUnitType}).
  */
 export async function fetchGlampingIndustryMetrics(
-  market: GlampingMarketSnapshotMarket = 'us'
+  market: GlampingMarketSnapshotMarket = 'us',
+  tier: GlampingMarketSnapshotTierFilter = 'all'
 ): Promise<{ ok: true; data: GlampingIndustryMetrics } | { ok: false; error: string }> {
   const supabase = createServerClient();
 
@@ -94,16 +137,18 @@ export async function fetchGlampingIndustryMetrics(
   const distinctNames = new Set<string>();
   const openNames = new Set<string>();
   const underConstructionNames = new Set<string>();
+  const proposedDevelopmentNames = new Set<string>();
 
-  let totalSites = 0;
-  const adrValues: number[] = [];
-  const sitesByPrimaryUnitLabel = new Map<string, number>();
+  let totalUnits = 0;
+  const adrByProperty = new Map<string, number[]>();
+  const unitsByPrimaryUnitLabel = new Map<string, number>();
+  const adrWeightByPrimaryUnitLabel = new Map<string, { rateTimesUnits: number; units: number }>();
 
   let dataFreshnessMs = 0;
 
   let offset = 0;
   for (;;) {
-    const { data, error } = await supabase
+    let query = supabase
       .from('all_glamping_properties')
       .select(
         'property_name, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, updated_at, created_at'
@@ -111,7 +156,9 @@ export async function fetchGlampingIndustryMetrics(
       .eq('is_glamping_property', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .in('country', countryIn)
+      .in('country', countryIn);
+    query = applyGlampingMarketSnapshotTierToQuery(query, tier);
+    const { data, error } = await query
       .order('id', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1);
 
@@ -123,6 +170,8 @@ export async function fetchGlampingIndustryMetrics(
     if (batch.length === 0) break;
 
     for (const row of batch) {
+      if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
+
       const u = parseTimestampMs(row.updated_at);
       const c = parseTimestampMs(row.created_at);
       const rowFresh = Math.max(u ?? 0, c ?? 0);
@@ -131,25 +180,39 @@ export async function fetchGlampingIndustryMetrics(
       const name = (row.property_name ?? '').trim();
       if (name) {
         distinctNames.add(name);
-        const openState = normalizeIsOpen(row.is_open);
+        const openState = bucketGlampingIsOpenForMetrics(row.is_open);
         if (openState === 'yes') openNames.add(name);
         if (openState === 'under_construction') underConstructionNames.add(name);
+        if (openState === 'proposed_development') proposedDevelopmentNames.add(name);
       }
 
-      const rowSites = sitesForRow(row);
-      totalSites += rowSites;
+      const rowUnits = unitsForRow(row);
+      totalUnits += rowUnits;
 
       const primaryLabel = normalizeGlampingUnitTypeForStorage(row.unit_type);
       if (primaryLabel) {
-        sitesByPrimaryUnitLabel.set(
+        unitsByPrimaryUnitLabel.set(
           primaryLabel,
-          (sitesByPrimaryUnitLabel.get(primaryLabel) ?? 0) + rowSites
+          (unitsByPrimaryUnitLabel.get(primaryLabel) ?? 0) + rowUnits
         );
       }
 
-      if (normalizeIsOpen(row.is_open) === 'yes') {
+      if (bucketGlampingIsOpenForMetrics(row.is_open) === 'yes') {
         const adr = parsePositiveNumber(row.rate_avg_retail_daily_rate);
-        if (adr != null) adrValues.push(adr);
+        if (adr != null) {
+          if (name) recordPropertyAdrSample(adrByProperty, name, adr);
+          if (primaryLabel) {
+            const unitWeight = rowUnits > 0 ? rowUnits : 1;
+            const prev = adrWeightByPrimaryUnitLabel.get(primaryLabel) ?? {
+              rateTimesUnits: 0,
+              units: 0,
+            };
+            adrWeightByPrimaryUnitLabel.set(primaryLabel, {
+              rateTimesUnits: prev.rateTimesUnits + adr * unitWeight,
+              units: prev.units + unitWeight,
+            });
+          }
+        }
       }
     }
 
@@ -157,18 +220,22 @@ export async function fetchGlampingIndustryMetrics(
     offset += PAGE_SIZE;
   }
 
-  adrValues.sort((a, b) => a - b);
-  const mean =
-    adrValues.length > 0 ? adrValues.reduce((s, x) => s + x, 0) / adrValues.length : null;
-  const median = adrValues.length > 0 ? medianSorted(adrValues) : null;
+  const propertyAdrs = propertyLevelAdrValues(adrByProperty);
+  const { mean, median } = meanAndMedianAdr(propertyAdrs);
 
-  const rankedUnitTypes = [...sitesByPrimaryUnitLabel.entries()].sort((a, b) => b[1] - a[1]);
-  const topUnitTypesBySites: GlampingTopUnitTypeRow[] =
-    totalSites > 0
-      ? rankedUnitTypes.slice(0, TOP_UNIT_TYPES_COUNT).map(([label, n]) => ({
-          label,
-          pctOfSites: Math.round((100 * n) / totalSites),
-        }))
+  const rankedUnitTypes = [...unitsByPrimaryUnitLabel.entries()].sort((a, b) => b[1] - a[1]);
+  const topUnitTypesByUnits: GlampingTopUnitTypeRow[] =
+    totalUnits > 0
+      ? rankedUnitTypes.slice(0, TOP_UNIT_TYPES_COUNT).map(([label, n]) => {
+          const agg = adrWeightByPrimaryUnitLabel.get(label);
+          const unitMean =
+            agg && agg.units > 0 ? agg.rateTimesUnits / agg.units : null;
+          return {
+            label,
+            pctOfUnits: Math.round((100 * n) / totalUnits),
+            avgRetailDailyRateMean: unitMean != null ? Math.round(unitMean) : null,
+          };
+        })
       : [];
 
   return {
@@ -177,10 +244,11 @@ export async function fetchGlampingIndustryMetrics(
       totalProperties: distinctNames.size,
       openProperties: openNames.size,
       underConstructionProperties: underConstructionNames.size,
-      totalSites,
+      proposedDevelopmentProperties: proposedDevelopmentNames.size,
+      totalUnits,
       avgRetailDailyRateMean: mean != null ? Math.round(mean) : null,
       avgRetailDailyRateMedian: median != null ? Math.round(median) : null,
-      topUnitTypesBySites,
+      topUnitTypesByUnits,
       asOf:
         dataFreshnessMs > 0
           ? new Date(dataFreshnessMs).toISOString()

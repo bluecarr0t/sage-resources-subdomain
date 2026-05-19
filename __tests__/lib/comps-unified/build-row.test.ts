@@ -3,6 +3,7 @@ import {
   UNIFIED_SORT_COLUMNS,
   filterUnifiedSources,
   isUnifiedSource,
+  shouldShowUnifiedCompsOccupancy,
   unifiedSourceBadgeClass,
   unifiedSourceLabel,
 } from '@/lib/comps-unified/build-row';
@@ -64,6 +65,23 @@ describe('comps-unified/build-row', () => {
     });
     it('falls back to a neutral class for unknown sources', () => {
       expect(unifiedSourceBadgeClass('foo')).toMatch(/bg-gray/);
+    });
+  });
+
+  describe('shouldShowUnifiedCompsOccupancy', () => {
+    it('is hidden for Sage-only and Past Reports filters', () => {
+      expect(shouldShowUnifiedCompsOccupancy(['all_glamping_properties'])).toBe(false);
+      expect(shouldShowUnifiedCompsOccupancy(['reports'])).toBe(false);
+    });
+
+    it('is shown for Hipcamp, Campspot, RoverPass, or all sources', () => {
+      expect(shouldShowUnifiedCompsOccupancy(['hipcamp'])).toBe(true);
+      expect(shouldShowUnifiedCompsOccupancy(['campspot'])).toBe(true);
+      expect(shouldShowUnifiedCompsOccupancy(['all_roverpass_data_new'])).toBe(true);
+      expect(shouldShowUnifiedCompsOccupancy([])).toBe(true);
+      expect(
+        shouldShowUnifiedCompsOccupancy(['all_glamping_properties', 'hipcamp'])
+      ).toBe(true);
     });
   });
 

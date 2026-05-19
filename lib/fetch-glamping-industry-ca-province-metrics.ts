@@ -1,13 +1,24 @@
 import { createServerClient } from '@/lib/supabase';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 import { GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN } from '@/lib/glamping-market-snapshot-region';
-import { medianSorted } from '@/lib/fetch-glamping-industry-metrics';
+import {
+  meanAndMedianAdr,
+  propertyLevelAdrValues,
+  recordPropertyAdrSample,
+} from '@/lib/fetch-glamping-industry-metrics';
+import { GLAMPING_MARKET_SNAPSHOT_CA_PROVINCE_SELECT } from '@/lib/glamping-market-snapshot-row-select';
+import {
+  applyGlampingMarketSnapshotTierToQuery,
+  type GlampingMarketSnapshotTierFilter,
+} from '@/lib/glamping-market-snapshot-classification';
+import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 import { normalizeCaProvinceToCode } from '@/lib/normalize-ca-province-key';
 
 const PAGE_SIZE = 1000;
 
 type Row = {
   property_name: string | null;
+  unit_type: string | null;
   state: string | null;
   country: string | null;
   is_open: string | null;
@@ -32,7 +43,7 @@ function normalizeIsOpen(raw: string | null | undefined): 'yes' | 'under_constru
   return 'other';
 }
 
-function sitesForRow(row: Row): number {
+function unitsForRow(row: Row): number {
   const fromUnits = parsePositiveNumber(row.quantity_of_units);
   const fromTotal = parsePositiveNumber(row.property_total_sites);
   const n = fromUnits ?? fromTotal ?? 0;
@@ -47,7 +58,7 @@ function isCanadaRow(country: string | null | undefined): boolean {
 /** Same row shape as US state metrics (reused by region UIs). */
 export type GlampingCaProvinceMetricRow = {
   propertyCount: number;
-  siteCount: number;
+  unitCount: number;
   avgRetailDailyRateMean: number | null;
   avgRetailDailyRateMedian: number | null;
 };
@@ -56,30 +67,30 @@ export type GlampingCaProvinceMetricsMap = Record<string, GlampingCaProvinceMetr
 
 type Agg = {
   names: Set<string>;
-  sites: number;
-  adrValues: number[];
+  units: number;
+  adrByProperty: Map<string, number[]>;
 };
 
 /**
  * Per-province/territory aggregates for published commercial glamping in Canada only.
  */
-export async function fetchGlampingIndustryCaProvinceMetrics(): Promise<
-  { ok: true; data: GlampingCaProvinceMetricsMap } | { ok: false; error: string }
-> {
+export async function fetchGlampingIndustryCaProvinceMetrics(
+  tier: GlampingMarketSnapshotTierFilter = 'all'
+): Promise<{ ok: true; data: GlampingCaProvinceMetricsMap } | { ok: false; error: string }> {
   const supabase = createServerClient();
   const aggs = new Map<string, Agg>();
 
   let offset = 0;
   for (;;) {
-    const { data, error } = await supabase
+    let query = supabase
       .from('all_glamping_properties')
-      .select(
-        'property_name, state, country, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate'
-      )
+      .select(GLAMPING_MARKET_SNAPSHOT_CA_PROVINCE_SELECT)
       .eq('is_glamping_property', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .in('country', [...GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN])
+      .in('country', [...GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN]);
+    query = applyGlampingMarketSnapshotTierToQuery(query, tier);
+    const { data, error } = await query
       .order('id', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1);
 
@@ -91,6 +102,7 @@ export async function fetchGlampingIndustryCaProvinceMetrics(): Promise<
     if (batch.length === 0) break;
 
     for (const row of batch) {
+      if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
       if (!isCanadaRow(row.country)) continue;
       const code = normalizeCaProvinceToCode(row.state);
       if (!code) continue;
@@ -98,16 +110,16 @@ export async function fetchGlampingIndustryCaProvinceMetrics(): Promise<
       const name = (row.property_name ?? '').trim();
       let agg = aggs.get(code);
       if (!agg) {
-        agg = { names: new Set(), sites: 0, adrValues: [] };
+        agg = { names: new Set(), units: 0, adrByProperty: new Map() };
         aggs.set(code, agg);
       }
 
       if (name) agg.names.add(name);
-      agg.sites += sitesForRow(row);
+      agg.units += unitsForRow(row);
 
-      if (normalizeIsOpen(row.is_open) === 'yes') {
+      if (normalizeIsOpen(row.is_open) === 'yes' && name) {
         const adr = parsePositiveNumber(row.rate_avg_retail_daily_rate);
-        if (adr != null) agg.adrValues.push(adr);
+        if (adr != null) recordPropertyAdrSample(agg.adrByProperty, name, adr);
       }
     }
 
@@ -117,13 +129,11 @@ export async function fetchGlampingIndustryCaProvinceMetrics(): Promise<
 
   const out: GlampingCaProvinceMetricsMap = {};
   for (const [code, agg] of aggs) {
-    const sorted = [...agg.adrValues].sort((a, b) => a - b);
-    const mean =
-      sorted.length > 0 ? sorted.reduce((s, x) => s + x, 0) / sorted.length : null;
-    const median = sorted.length > 0 ? medianSorted(sorted) : null;
+    const propertyAdrs = propertyLevelAdrValues(agg.adrByProperty);
+    const { mean, median } = meanAndMedianAdr(propertyAdrs);
     out[code] = {
       propertyCount: agg.names.size,
-      siteCount: agg.sites,
+      unitCount: agg.units,
       avgRetailDailyRateMean: mean != null ? Math.round(mean) : null,
       avgRetailDailyRateMedian: median != null ? Math.round(median) : null,
     };

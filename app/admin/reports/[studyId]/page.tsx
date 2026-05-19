@@ -441,7 +441,7 @@ export default function ReportDetailPage() {
             {/* Action Buttons - below report details */}
             <div className="flex flex-wrap gap-2">
               {report.has_comparables && (
-                <Link href={`/admin/comps/${report.study_id}`}>
+                <Link href={`/admin/glamping-properties/${report.study_id}`}>
                   <Button variant="primary" size="sm" className="flex flex-col items-start gap-1">
                     <BarChart3 className="w-4 h-4" />
                     <span>View Comps & Financial Data</span>

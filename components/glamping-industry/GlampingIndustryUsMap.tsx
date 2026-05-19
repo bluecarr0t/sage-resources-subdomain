@@ -23,6 +23,9 @@ const SAGE_MAP = {
 
 const MAP_W = 880;
 const MAP_H = 520;
+
+/** Default highlighted state on first paint (United States glamping market overview). */
+const DEFAULT_SELECTED_STATE_ABBR = 'TX';
 /** Mercator inset for HI only — placed above Alaska (Albers lower-left) so it does not cover AK. */
 const HAWAII_INSET_W = 64;
 const HAWAII_INSET_H = 38;
@@ -112,7 +115,7 @@ function styleForHawaiiInset(selected: string | null) {
 type Props = { byState: GlampingUsStateMetricsMap };
 
 export default function GlampingIndustryUsMap({ byState }: Props) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(DEFAULT_SELECTED_STATE_ABBR);
 
   const row = selected ? byState[selected] : undefined;
 
@@ -247,7 +250,7 @@ export default function GlampingIndustryUsMap({ byState }: Props) {
         <div className="min-h-0 flex-1 overflow-y-auto lg:min-h-0">
           {!selected ? (
             <p className="text-xs font-light leading-relaxed text-neutral-600">
-              Select a state on the map for property count, site count, and average retail daily rate.
+              Select a state on the map for property count, unit count, and average retail daily rate.
             </p>
           ) : (
             <div className="space-y-6">
@@ -276,15 +279,21 @@ export default function GlampingIndustryUsMap({ byState }: Props) {
                           {formatInt(row?.underConstructionProperties ?? 0)}
                         </span>
                       </li>
+                      <li>
+                        <span className="text-neutral-500">Proposed development</span>{' '}
+                        <span className="tabular-nums text-neutral-800">
+                          {formatInt(row?.proposedDevelopmentProperties ?? 0)}
+                        </span>
+                      </li>
                     </ul>
                   </dd>
                 </div>
                 <div>
                   <dt className="text-[10px] uppercase tracking-wider text-neutral-500">
-                    Site count
+                    Unit count
                   </dt>
                   <dd className="mt-1 font-light tabular-nums text-2xl tracking-tight text-neutral-900">
-                    {formatInt(row?.siteCount ?? 0)}
+                    {formatInt(row?.unitCount ?? 0)}
                   </dd>
                 </div>
                 <div>
@@ -302,7 +311,7 @@ export default function GlampingIndustryUsMap({ byState }: Props) {
                     </div>
                   </dd>
                   <p className="mt-2 text-[10px] leading-relaxed text-neutral-500">
-                    From operating properties with a recorded rate.
+                    From operating properties with a rate.
                   </p>
                 </div>
               </dl>

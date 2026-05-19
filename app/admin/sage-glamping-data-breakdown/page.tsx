@@ -5,6 +5,7 @@ import AdminColumnsView from '@/components/AdminColumnsView';
 import AdminDiscoveryPipelineStats from '@/components/AdminDiscoveryPipelineStats';
 import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
 import AdminMissingFieldsBreakdown from '@/components/AdminMissingFieldsBreakdown';
+import AdminGlampingServiceTierBreakdown from '@/components/AdminGlampingServiceTierBreakdown';
 import { adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 export const metadata: Metadata = {
@@ -46,6 +47,10 @@ export default function SageGlampingDataBreakdownPage() {
 
         <div className="mt-8">
           <AdminDiscoveryPipelineStats />
+        </div>
+
+        <div className="mt-8">
+          <AdminGlampingServiceTierBreakdown />
         </div>
 
         <div className="mt-8 mb-8">

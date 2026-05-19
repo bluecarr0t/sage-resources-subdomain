@@ -5,6 +5,14 @@ import {
   GLAMPING_IS_OPEN_VALUES,
   type GlampingIsOpenValue,
 } from '@/lib/glamping-is-open';
+import {
+  GLAMPING_PROPERTY_TYPE_FORM_OPTIONS as PROPERTY_TYPE_FORM_OPTIONS,
+  normalizePropertyTypeForForm,
+} from '@/lib/glamping-property-types';
+import {
+  GLAMPING_SERVICE_TIERS,
+  tierDisplayLabel,
+} from '@/lib/glamping-service-tier';
 import { useTranslations } from 'next-intl';
 import {
   ArrowDown,
@@ -124,6 +132,11 @@ const QUICK_COLUMNS: QuickColumn[] = [
   { key: 'is_open', label: 'Open?', width: 'w-20' },
   { key: 'property_type', label: 'Type', width: 'min-w-[160px]' },
   {
+    key: 'glamping_service_tier',
+    labelKey: 'serviceTierColumn',
+    width: 'min-w-[140px]',
+  },
+  {
     key: 'land_operator_category',
     label: 'Tenure',
     labelKey: 'landOperatorColumn',
@@ -143,29 +156,11 @@ interface FieldGroup {
     landOperatorSelect?: boolean;
     /** Canonical property types; labels from `admin.sageData.propertyType.*`. */
     propertyTypeSelect?: boolean;
+    /** `glamping_brands` picker (options loaded when modal opens). */
+    brandSelect?: boolean;
+    /** Four-tier glamping service classification. */
+    serviceTierSelect?: boolean;
   }[];
-}
-
-/** Stored `property_type` values for the Core modal (unknown / legacy → "Unknown"). */
-const PROPERTY_TYPE_FORM_OPTIONS = [
-  { value: 'Unknown', msg: 'unknown' as const },
-  { value: 'Glamping', msg: 'glamping' as const },
-  { value: 'RV Resort', msg: 'rvResort' as const },
-  { value: 'Campground', msg: 'campground' as const },
-  { value: 'Landscape Hotel', msg: 'landscapeHotel' as const },
-  { value: 'Marina', msg: 'marina' as const },
-] as const;
-
-const PROPERTY_TYPE_ALLOWED = new Set<string>(
-  PROPERTY_TYPE_FORM_OPTIONS.map((o) => o.value)
-);
-
-function normalizePropertyTypeForForm(raw: string): string {
-  const trimmed = raw.trim();
-  if (trimmed === '' || !PROPERTY_TYPE_ALLOWED.has(trimmed)) {
-    return 'Unknown';
-  }
-  return trimmed;
 }
 
 function applyPropertyTypeSelectNormalization(
@@ -205,6 +200,14 @@ const SHARED_EDIT_FIELD_GROUPS: FieldGroup[] = [
       { key: 'is_open', type: 'select', options: [...GLAMPING_IS_OPEN_VALUES] },
       { key: 'source' },
       { key: 'discovery_source' },
+      { key: 'brand_id', type: 'select', brandSelect: true },
+    ],
+  },
+  {
+    title: 'Classification',
+    fields: [
+      { key: 'glamping_service_tier', type: 'select', serviceTierSelect: true },
+      { key: 'glamping_service_tier_notes' },
     ],
   },
   {
@@ -469,16 +472,19 @@ function TableCellReadOnly({
   const t = useTranslations('admin.sageData');
   const displayValue = formatCellValue(value);
   const isPropertyTypeCol = column.key === 'property_type';
+  const isServiceTierCol = column.key === 'glamping_service_tier';
   const propertyTypeNormalized = isPropertyTypeCol
     ? normalizePropertyTypeForForm(displayValue)
     : '';
   const propertyTypeOpt = isPropertyTypeCol
     ? PROPERTY_TYPE_FORM_OPTIONS.find((o) => o.value === propertyTypeNormalized)
     : undefined;
-  const isEmpty = !isPropertyTypeCol && displayValue === '';
+  const isEmpty = !isPropertyTypeCol && !isServiceTierCol && displayValue === '';
   const cellPlainText =
-    isPropertyTypeCol && propertyTypeOpt
-      ? t(`propertyType.${propertyTypeOpt.msg}` as never)
+    isServiceTierCol && displayValue
+      ? tierDisplayLabel(displayValue, 'short')
+      : isPropertyTypeCol && propertyTypeOpt
+      ? t(`propertyType.${propertyTypeOpt.msgKey}` as never)
       : column.key === 'land_operator_category' &&
           (displayValue === 'private_commercial' ||
             displayValue === 'state_park' ||
@@ -601,6 +607,9 @@ function EditModal({
   const [deleting, setDeleting] = useState(false);
   const [removingKey, setRemovingKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [brandOptions, setBrandOptions] = useState<
+    { id: string; label: string }[]
+  >([]);
   const baselineRef = useRef<{
     shared: Record<string, string>;
     siteByDbId: Record<string, Record<string, string>>;
@@ -614,7 +623,35 @@ function EditModal({
   useEffect(() => {
     if (!open) {
       setSiblingsLoad('idle');
+      setBrandOptions([]);
       baselineRef.current = null;
+      return;
+    }
+
+    const brandController = new AbortController();
+    void (async () => {
+      try {
+        const res = await fetch('/api/admin/sage-glamping-data/brands', {
+          signal: brandController.signal,
+          cache: 'no-store',
+        });
+        const json = (await res.json()) as {
+          success?: boolean;
+          options?: { id: string; label: string }[];
+        };
+        if (res.ok && json.success && Array.isArray(json.options)) {
+          setBrandOptions(json.options.map((o) => ({ id: o.id, label: o.label })));
+        }
+      } catch {
+        /* non-blocking — brand picker stays empty until table exists */
+      }
+    })();
+
+    return () => brandController.abort();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
       return;
     }
     if (mode === 'create') {
@@ -868,6 +905,13 @@ function EditModal({
         sharedUpdates[key] = raw.trim() === '' ? null : raw;
       }
 
+      if (
+        'glamping_service_tier' in sharedUpdates ||
+        'glamping_service_tier_notes' in sharedUpdates
+      ) {
+        sharedUpdates.glamping_service_tier_source = 'manual';
+      }
+
       const rowIds = groupRowIdsFromServer();
       if (Object.keys(sharedUpdates).length > 0) {
         for (const rowId of rowIds) {
@@ -958,7 +1002,11 @@ function EditModal({
           ? t('fieldLandOperatorCategory')
           : field.key === 'property_type'
             ? t('fieldPropertyType')
-            : humanizeKey(field.key);
+            : field.key === 'glamping_service_tier'
+              ? t('fieldServiceTier')
+              : field.key === 'glamping_service_tier_notes'
+                ? t('fieldServiceTierNotes')
+                : humanizeKey(field.key);
     const showRequired = mode === 'create' && REQUIRED_FIELDS_CREATE.has(field.key);
     const disabled = busy || editBlocked;
 
@@ -1005,7 +1053,25 @@ function EditModal({
               <>
                 {PROPERTY_TYPE_FORM_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
-                    {t(`propertyType.${o.msg}` as never)}
+                    {t(`propertyType.${o.msgKey}` as never)}
+                  </option>
+                ))}
+              </>
+            ) : field.brandSelect ? (
+              <>
+                <option value="">—</option>
+                {brandOptions.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </>
+            ) : field.serviceTierSelect ? (
+              <>
+                <option value="">{t('serviceTierUnset')}</option>
+                {GLAMPING_SERVICE_TIERS.map((tier) => (
+                  <option key={tier} value={tier}>
+                    {tierDisplayLabel(tier, 'short')}
                   </option>
                 ))}
               </>
@@ -1312,13 +1378,15 @@ export default function AdminGlampingPropertiesTable() {
   const [bulkResearchStatus, setBulkResearchStatus] = useState('');
   const [bulkIsGlamping, setBulkIsGlamping] = useState('');
   const [bulkPropertyType, setBulkPropertyType] = useState('');
+  const [bulkServiceTier, setBulkServiceTier] = useState('');
   const [bulkApplying, setBulkApplying] = useState(false);
+  const [serviceTierFilter, setServiceTierFilter] = useState<string>('all');
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [search, statusFilter, countryFilter, openStatusFilter, missingDataFilter]);
+  }, [search, statusFilter, countryFilter, openStatusFilter, missingDataFilter, serviceTierFilter]);
 
   const pageRowIds = useMemo(() => rows.map((r) => String(r.id)), [rows]);
   const selectedOnPageCount = useMemo(
@@ -1361,6 +1429,7 @@ export default function AdminGlampingPropertiesTable() {
     setBulkResearchStatus('');
     setBulkIsGlamping('');
     setBulkPropertyType('');
+    setBulkServiceTier('');
   }, []);
 
   const loadProperties = useCallback(async (overridePage?: number) => {
@@ -1380,6 +1449,9 @@ export default function AdminGlampingPropertiesTable() {
       if (openStatusFilter !== 'all') params.set('is_open', openStatusFilter);
       if (missingDataFilter !== 'all') {
         params.set('missing', missingDataFilter);
+      }
+      if (serviceTierFilter !== 'all') {
+        params.set('glamping_service_tier', serviceTierFilter);
       }
 
       const res = await fetch(`/api/admin/sage-glamping-data/properties?${params.toString()}`, {
@@ -1418,6 +1490,7 @@ export default function AdminGlampingPropertiesTable() {
     countryFilter,
     openStatusFilter,
     missingDataFilter,
+    serviceTierFilter,
     sortBy,
     sortDir,
     t,
@@ -1438,6 +1511,10 @@ export default function AdminGlampingPropertiesTable() {
     }
     if (bulkPropertyType !== '') {
       updates.property_type = bulkPropertyType;
+    }
+    if (bulkServiceTier !== '') {
+      updates.glamping_service_tier = bulkServiceTier;
+      updates.glamping_service_tier_source = 'manual';
     }
     if (Object.keys(updates).length === 0) {
       setError(t('bulkNothingToApply'));
@@ -1472,6 +1549,7 @@ export default function AdminGlampingPropertiesTable() {
     bulkResearchStatus,
     bulkIsGlamping,
     bulkPropertyType,
+    bulkServiceTier,
     selectedIds,
     t,
     clearBulkSelection,
@@ -1550,6 +1628,11 @@ export default function AdminGlampingPropertiesTable() {
   const handleOpenStatusChange = (value: string) => {
     setPage(1);
     setOpenStatusFilter(value);
+  };
+
+  const handleServiceTierChange = (value: string) => {
+    setPage(1);
+    setServiceTierFilter(value);
   };
 
   const handleMissingDataChange = (value: string) => {
@@ -1796,6 +1879,26 @@ export default function AdminGlampingPropertiesTable() {
           </label>
           <label
             className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
+            htmlFor="sage-data-service-tier-filter"
+          >
+            <span>{t('serviceTierFilterLabel')}</span>
+            <select
+              id="sage-data-service-tier-filter"
+              value={serviceTierFilter}
+              onChange={(e) => handleServiceTierChange(e.target.value)}
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
+              aria-label={t('serviceTierFilterAria')}
+            >
+              <option value="all">{t('serviceTierFilterAll')}</option>
+              {GLAMPING_SERVICE_TIERS.map((tier) => (
+                <option key={tier} value={tier}>
+                  {tierDisplayLabel(tier, 'short')}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label
+            className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
             htmlFor="sage-data-country-filter"
           >
             <span>{t('countryLabel')}</span>
@@ -1984,7 +2087,29 @@ export default function AdminGlampingPropertiesTable() {
                     <option value="">{t('bulkNoChange')}</option>
                     {PROPERTY_TYPE_FORM_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
-                        {t(`propertyType.${o.msg}` as never)}
+                        {t(`propertyType.${o.msgKey}` as never)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <span>
+                    {t('fieldServiceTier')}
+                    <span className="ml-1 font-mono text-[10px] font-normal text-gray-400 dark:text-gray-500">
+                      glamping_service_tier
+                    </span>
+                  </span>
+                  <select
+                    value={bulkServiceTier}
+                    onChange={(e) => setBulkServiceTier(e.target.value)}
+                    disabled={bulkApplying}
+                    className={bulkControlClass}
+                    aria-label={t('fieldServiceTier')}
+                  >
+                    <option value="">{t('bulkNoChange')}</option>
+                    {GLAMPING_SERVICE_TIERS.map((tier) => (
+                      <option key={tier} value={tier}>
+                        {tierDisplayLabel(tier, 'short')}
                       </option>
                     ))}
                   </select>

@@ -392,6 +392,7 @@ SELECT
   )                                                                 AS address_key,
   fc.created_at                                                       AS created_at,
   'Yes'::text                                                         AS is_glamping_property,
+  NULL::text                                                          AS is_open,
   to_tsvector(
     'simple',
     COALESCE(fc.comp_name, '') || ' ' ||
@@ -509,6 +510,10 @@ SELECT
   )                                                                 AS address_key,
   COALESCE(g.created_at, g.updated_at)                                AS created_at,
   g.is_glamping_property::text                                        AS is_glamping_property,
+  CASE
+    WHEN COALESCE(NULLIF(trim(g.is_open), ''), 'Yes') IN ('No') THEN 'Closed'
+    ELSE COALESCE(NULLIF(trim(g.is_open), ''), 'Yes')
+  END                                                                 AS is_open,
   to_tsvector(
     'simple',
     COALESCE(g.property_name, '') || ' ' ||
@@ -523,7 +528,6 @@ FROM public.all_glamping_properties g
 LEFT JOIN public.property_geocode pg ON pg.property_id = g.id
 WHERE g.property_name IS NOT NULL
   AND length(trim(g.property_name)) > 0
-  AND COALESCE(g.is_open, 'Yes') NOT IN ('No', 'Closed')
 
 UNION ALL
 
@@ -606,6 +610,7 @@ SELECT
   )                                                                 AS address_key,
   COALESCE(h.created_at, h.updated_at)                                AS created_at,
   'Yes'::text                                                         AS is_glamping_property,
+  NULL::text                                                          AS is_open,
   to_tsvector(
     'simple',
     COALESCE(h.property_name, '') || ' ' ||
@@ -701,6 +706,7 @@ SELECT
   )                                                                 AS address_key,
   COALESCE(c.created_at, c.updated_at)                                AS created_at,
   'Yes'::text                                                         AS is_glamping_property,
+  NULL::text                                                          AS is_open,
   to_tsvector(
     'simple',
     COALESCE(c.property_name, '') || ' ' ||
@@ -801,6 +807,7 @@ SELECT
   )                                                                 AS address_key,
   COALESCE(rp.created_at, rp.updated_at)                              AS created_at,
   rp.is_glamping_property::text                                       AS is_glamping_property,
+  NULL::text                                                          AS is_open,
   to_tsvector(
     'simple',
     COALESCE(rp.property_name, '') || ' ' ||
@@ -831,6 +838,10 @@ CREATE INDEX unified_comps_name_trgm
 
 CREATE INDEX unified_comps_source
   ON public.unified_comps (source);
+
+CREATE INDEX unified_comps_sage_is_open
+  ON public.unified_comps (is_open)
+  WHERE source = 'all_glamping_properties' AND is_open IS NOT NULL;
 
 CREATE INDEX unified_comps_source_state
   ON public.unified_comps (source, state);

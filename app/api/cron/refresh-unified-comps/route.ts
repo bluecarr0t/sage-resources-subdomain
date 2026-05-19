@@ -23,7 +23,7 @@ import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const FACETS_CACHE_KEY = 'admin:comps-unified:facets:v2';
+const FACETS_CACHE_KEY = 'admin:comps-unified:facets:v4';
 
 async function refresh(request: NextRequest): Promise<NextResponse> {
   if (!authorizeVercelCronRequest(request)) {

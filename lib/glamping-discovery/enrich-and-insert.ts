@@ -55,7 +55,7 @@ Provide a JSON object with as much detail as possible:
 - zip_code: ZIP/postal code if available
 - url: Official website URL
 - description: 3-5 sentence description of the property, amenities, and what makes it special
-- unit_type: **Single** unit product for this row, singular label in Title Case (e.g. "Yurt", "Safari Tent", "Geodesic Dome") — not a comma list; if multiple, pick the primary / best-known offering
+- unit_type: **Single** unit product for this row, singular label in Title Case (e.g. "Yurt", "Safari Tent", "Dome") — not a comma list; if multiple, pick the primary / best-known offering
 - property_type: Type of property (e.g., "Glamping Resort", "Luxury Campground")
 - number_of_units: Integer — total glamping accommodations (tents, yurts, domes, cabins, etc.). Use a number only when you can support it from the property website, press, or other reliable sources; omit or null if unknown. Do not guess.
 - phone_number: Phone number if available
