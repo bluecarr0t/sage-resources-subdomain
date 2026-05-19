@@ -13,6 +13,8 @@ import {
   GLAMPING_SERVICE_TIERS,
   tierDisplayLabel,
 } from '@/lib/glamping-service-tier';
+import { isUnitedStatesCountryFilterValue } from '@/lib/admin/glamping-sage-data-list';
+import { US_STATES_OPTIONS } from '@/lib/us-states';
 import { useTranslations } from 'next-intl';
 import {
   ArrowDown,
@@ -1357,6 +1359,7 @@ export default function AdminGlampingPropertiesTable() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [countryFilter, setCountryFilter] = useState<string>('all');
+  const [stateFilter, setStateFilter] = useState<string>('all');
   const [openStatusFilter, setOpenStatusFilter] = useState<string>('all');
   /** `null` = list not loaded yet */
   const [countryNames, setCountryNames] = useState<string[] | null>(null);
@@ -1387,7 +1390,16 @@ export default function AdminGlampingPropertiesTable() {
 
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [search, statusFilter, countryFilter, openStatusFilter, missingDataFilter, serviceTierFilter]);
+  }, [search, statusFilter, countryFilter, stateFilter, openStatusFilter, missingDataFilter, serviceTierFilter]);
+
+  const stateFilterEnabled =
+    countryFilter === 'all' || isUnitedStatesCountryFilterValue(countryFilter);
+
+  useEffect(() => {
+    if (!stateFilterEnabled && stateFilter !== 'all') {
+      setStateFilter('all');
+    }
+  }, [stateFilterEnabled, stateFilter]);
 
   const pageRowIds = useMemo(() => rows.map((r) => String(r.id)), [rows]);
   const selectedOnPageCount = useMemo(
@@ -1447,6 +1459,9 @@ export default function AdminGlampingPropertiesTable() {
       if (search) params.set('q', search);
       if (statusFilter !== 'all') params.set('research_status', statusFilter);
       if (countryFilter !== 'all') params.set('country', countryFilter);
+      if (stateFilterEnabled && stateFilter !== 'all') {
+        params.set('state', stateFilter);
+      }
       if (openStatusFilter !== 'all') params.set('is_open', openStatusFilter);
       if (missingDataFilter !== 'all') {
         params.set('missing', missingDataFilter);
@@ -1489,6 +1504,8 @@ export default function AdminGlampingPropertiesTable() {
     search,
     statusFilter,
     countryFilter,
+    stateFilter,
+    stateFilterEnabled,
     openStatusFilter,
     missingDataFilter,
     serviceTierFilter,
@@ -1624,6 +1641,14 @@ export default function AdminGlampingPropertiesTable() {
   const handleCountryChange = (value: string) => {
     setPage(1);
     setCountryFilter(value);
+    if (value !== 'all' && !isUnitedStatesCountryFilterValue(value)) {
+      setStateFilter('all');
+    }
+  };
+
+  const handleStateChange = (value: string) => {
+    setPage(1);
+    setStateFilter(value);
   };
 
   const handleOpenStatusChange = (value: string) => {
@@ -1821,10 +1846,8 @@ export default function AdminGlampingPropertiesTable() {
           </div>
         </div>
 
-        <form
-          onSubmit={handleSearchSubmit}
-          className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-[minmax(18rem,1.4fr)_auto_minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(12rem,1fr)] xl:items-end"
-        >
+        <form onSubmit={handleSearchSubmit} className="space-y-3 p-4">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(18rem,1.4fr)_auto_minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(8rem,0.9fr)_minmax(10rem,1fr)] xl:items-end">
           <div className="space-y-1.5">
             <label
               htmlFor="sage-data-search"
@@ -1927,6 +1950,31 @@ export default function AdminGlampingPropertiesTable() {
           </label>
           <label
             className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
+            htmlFor="sage-data-state-filter"
+          >
+            <span>{t('stateLabel')}</span>
+            <select
+              id="sage-data-state-filter"
+              value={stateFilter}
+              onChange={(e) => handleStateChange(e.target.value)}
+              disabled={!stateFilterEnabled}
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
+              aria-label={t('stateFilterAria')}
+              title={!stateFilterEnabled ? t('stateFilterUsOnlyHint') : undefined}
+            >
+              <option value="all">{t('stateAll')}</option>
+              {US_STATES_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(12rem,1fr)_minmax(14rem,1.2fr)] xl:items-end xl:max-w-2xl">
+            <label
+            className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
             htmlFor="sage-data-open-status-filter"
           >
             <span>{t('openStatusLabel')}</span>
@@ -1963,6 +2011,7 @@ export default function AdminGlampingPropertiesTable() {
               ))}
             </select>
           </label>
+          </div>
         </form>
 
         {missingDataFilter === 'rates' && (

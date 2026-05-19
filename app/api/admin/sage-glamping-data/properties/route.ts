@@ -5,6 +5,7 @@
  *     q            — case-insensitive search across property_name, city, state, country
  *     research_status — exact match (e.g. 'in_progress', 'published', 'new')
  *     country      — case-insensitive exact match (ilike) on `country`
+ *     state        — USPS code (e.g. VT); matches abbrev or full state name on `state`
  *     is_open      — exact match on `is_open` when value is Yes | Under Construction | Proposed Development | Closed
  *     page         — 1-based (default 1)
  *     pageSize     — default 50, max 200
@@ -316,6 +317,7 @@ export const GET = withAdminAuth(async (request) => {
     const q = (params.get('q') ?? '').trim();
     const researchStatus = params.get('research_status');
     const country = params.get('country');
+    const state = params.get('state')?.trim() || undefined;
     const isOpenRaw = params.get('is_open')?.trim();
     const isOpenFilter: string | undefined =
       isOpenRaw &&
@@ -348,6 +350,7 @@ export const GET = withAdminAuth(async (request) => {
       q,
       researchStatus: researchStatus ?? undefined,
       country: country ?? undefined,
+      state,
       isOpen: isOpenFilter,
       missing: missingParam,
       glampingServiceTier: glampingServiceTierFilter,

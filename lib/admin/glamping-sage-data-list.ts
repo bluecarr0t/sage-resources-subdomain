@@ -1,5 +1,18 @@
+import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '@/lib/glamping-market-snapshot-region';
+import { US_STATE_NAMES, type US_STATES } from '@/lib/us-states';
+
 export function escapeIlikeTerm(term: string): string {
   return term.replace(/[%,()]/g, '').trim();
+}
+
+/** Whether a `country` filter value refers to the United States. */
+export function isUnitedStatesCountryFilterValue(country: string): boolean {
+  const t = country.trim();
+  if (!t || t === 'all') return false;
+  const lower = t.toLowerCase();
+  return GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN.some(
+    (c) => c.toLowerCase() === lower
+  );
 }
 
 export type SageDataGlampingListFilters = {
@@ -7,6 +20,8 @@ export type SageDataGlampingListFilters = {
   q: string;
   researchStatus: string | undefined;
   country: string | undefined;
+  /** USPS state code (e.g. VT) when filtering US properties by state. */
+  state: string | undefined;
   /** Exact `is_open` when set (e.g. Yes, Under Construction, Proposed Development, Closed). */
   isOpen: string | undefined;
   /** `missing` query param value, or null when unset / "all". */
@@ -48,6 +63,18 @@ export function applySageDataGlampingListFilters<T extends SageGlampingListQuery
   }
   if (filters.country && filters.country !== 'all') {
     q = q.ilike('country', filters.country);
+  }
+  if (filters.state && filters.state !== 'all') {
+    const abbr = filters.state.trim().toUpperCase();
+    const fullName =
+      abbr in US_STATE_NAMES
+        ? US_STATE_NAMES[abbr as (typeof US_STATES)[number]]
+        : null;
+    if (fullName) {
+      q = q.or(`state.eq.${abbr},state.ilike.${fullName}`);
+    } else {
+      q = q.eq('state', filters.state);
+    }
   }
   if (filters.isOpen && filters.isOpen !== 'all') {
     q = q.eq('is_open', filters.isOpen);
