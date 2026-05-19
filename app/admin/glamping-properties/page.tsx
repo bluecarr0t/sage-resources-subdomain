@@ -23,7 +23,6 @@ import {
   Map as MapIcon,
 } from 'lucide-react';
 import {
-  STATE_ABBREVIATIONS,
   formatStateAbbreviation,
   normalizeStateToCanonicalAbbrev,
 } from '@/components/map/utils/stateUtils';
@@ -41,7 +40,6 @@ import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/
 import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
 import { ADMIN_COMPS_COHORT_PROPERTY_TYPE } from '@/lib/comps-unified/admin-comps-cohort';
 import { GLAMPING_PROPERTY_TYPE_ALLOWED } from '@/lib/glamping-property-types';
-import { US_STATES } from '@/lib/us-states';
 import {
   buildCountryFilterOptions,
   DEFAULT_SELECTED_COUNTRIES,
@@ -49,9 +47,7 @@ import {
   parseCountryFilterFromUrl,
   writeCountryFilterToParams,
 } from '@/lib/comps-unified/country-filter';
-
-/** State filter on /admin/glamping-properties is US-only (excludes Canadian provinces, etc.). */
-const US_STATE_FILTER_CODES = new Set<string>([...US_STATES, 'DC']);
+import { buildUsStateFilterOptions } from '@/lib/comps-unified/us-state-filter';
 
 /** Display label for Status filter (`is_open` DB value stays `Yes`). */
 function formatIsOpenFilterLabel(value: string): string {
@@ -378,20 +374,9 @@ function ComparablesPageContent() {
           );
           setCountryOptions(buildCountryFilterOptions(data.countries || []));
           setStateOptions(
-            (data.states || [])
-              .map((s: string) => {
-                const abbr = normalizeStateToCanonicalAbbrev(s) ?? s.toUpperCase();
-                return { raw: s, abbr };
-              })
-              .filter(({ abbr }) => US_STATE_FILTER_CODES.has(abbr))
-              .map(({ raw, abbr }) => {
-                const fullName = STATE_ABBREVIATIONS[abbr] ?? raw;
-                return {
-                  value: abbr,
-                  label: fullName !== abbr ? `${fullName} (${abbr})` : abbr,
-                };
-              })
-              .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }))
+            buildUsStateFilterOptions(
+              Array.isArray(data.states) ? (data.states as string[]) : []
+            )
           );
           setKeywordOptions(
             (data.keywords || []).map((k: string) => ({ value: k, label: formatKeywordLabel(k) }))

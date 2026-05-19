@@ -133,6 +133,7 @@ const QUICK_COLUMNS: QuickColumn[] = [
   { key: 'property_type', label: 'Type', width: 'min-w-[160px]' },
   {
     key: 'glamping_service_tier',
+    label: 'Service tier',
     labelKey: 'serviceTierColumn',
     width: 'min-w-[140px]',
   },
