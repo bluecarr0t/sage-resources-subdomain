@@ -1,18 +1,31 @@
-import { GlossaryTerm } from "@/lib/glossary/index";
-import Link from "next/link";
-import Image from "next/image";
+import { GlossaryTerm } from '@/lib/glossary/index';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
   createLocaleLinks,
   localizeInternalHref,
   prefixInternalResourceHrefsInHtml,
-} from "@/lib/locale-links";
-import { generateDefinitionSchema, generateFAQSchema } from "@/lib/glossary-schema";
-import { generateSpeakableSchema } from "@/lib/schema";
-import { generateGlossaryImageAltText, generateImageTitle } from "@/lib/glossary/image-alt-text";
-import RelatedGlossaryTerms from "./RelatedGlossaryTerms";
-import GlossaryImageGallery from "./GlossaryImageGallery";
-import Footer from "./Footer";
-import FloatingHeader from "./FloatingHeader";
+} from '@/lib/locale-links';
+import { generateDefinitionSchema, generateFAQSchema } from '@/lib/glossary-schema';
+import { generateSpeakableSchema } from '@/lib/schema';
+import { generateGlossaryImageAltText, generateImageTitle } from '@/lib/glossary/image-alt-text';
+import { getGlossaryCategoryAccent } from '@/lib/glossary-category-accent';
+import RelatedGlossaryTerms from './RelatedGlossaryTerms';
+import GlossaryImageGallery from './GlossaryImageGallery';
+import Footer from './Footer';
+import FloatingHeader from './FloatingHeader';
+import { EditorialCtaBand } from '@/components/editorial/EditorialCtaBand';
+import {
+  EditorialPageShell,
+  EDITORIAL_BODY_CLASS,
+  EDITORIAL_CARD_CLASS,
+  EDITORIAL_GUIDE_PROSE_CLASS,
+  EDITORIAL_GUIDE_TITLE_CLASS,
+  EDITORIAL_H2_CLASS,
+  EDITORIAL_LINK_CLASS,
+  EDITORIAL_MAIN_WITH_HEADER_CLASS,
+  EDITORIAL_SECTION_LABEL_CLASS,
+} from '@/components/editorial/EditorialPageShell';
 
 interface GlossaryTermTemplateProps {
   term: GlossaryTerm;
@@ -20,7 +33,6 @@ interface GlossaryTermTemplateProps {
   locale: string;
 }
 
-// Helper function to determine if a term needs "an" instead of "a"
 function getArticle(term: string): string {
   const firstChar = term.trim().charAt(0).toLowerCase();
   const vowels = ['a', 'e', 'i', 'o', 'u'];
@@ -33,165 +45,146 @@ export default function GlossaryTermTemplate({
   locale,
 }: GlossaryTermTemplateProps) {
   const links = createLocaleLinks(locale);
+  const accent = getGlossaryCategoryAccent(term.category);
   const definitionSchema = generateDefinitionSchema(term);
   const faqSchema = term.faqs ? generateFAQSchema(term.faqs) : null;
-  const speakableSchema = term.faqs && term.faqs.length > 0 
-    ? generateSpeakableSchema([".speakable-answer", "h1", "h2"])
-    : null;
+  const speakableSchema =
+    term.faqs && term.faqs.length > 0
+      ? generateSpeakableSchema(['.speakable-answer', 'h1', 'h2'])
+      : null;
 
   return (
     <>
-      {/* Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(definitionSchema) }}
       />
-      {faqSchema && (
+      {faqSchema ? (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
-      )}
-      {speakableSchema && (
+      ) : null}
+      {speakableSchema ? (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
         />
-      )}
+      ) : null}
 
-      <div className="min-h-screen bg-white">
-        {/* Floating Header */}
-        <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
+      <EditorialPageShell footer={null}>
+        <FloatingHeader locale={locale} showFullNav showSpacer={false} />
 
-        {/* Breadcrumb */}
-        <nav className="bg-gray-50 border-b border-gray-200 pt-32 md:pt-36">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center space-x-2 text-sm">
-              <Link href="https://sageoutdooradvisory.com" className="text-gray-600 hover:text-gray-700">
-                Home
-              </Link>
-              <span className="text-gray-400">/</span>
-              <Link href={links.glossary} className="text-gray-600 hover:text-gray-700">
-                Glossary
-              </Link>
-              <span className="text-gray-400">/</span>
-              <span className="text-gray-900 font-medium">{term.term}</span>
-            </div>
-          </div>
-        </nav>
+        <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>
+          <nav
+            className="mb-10 text-[11px] font-light uppercase tracking-widest text-neutral-500"
+            aria-label="Breadcrumb"
+          >
+            <Link href={links.glossary} className="transition-colors hover:text-neutral-900">
+              Glossary
+            </Link>
+            <span className="mx-2 text-neutral-400" aria-hidden>
+              /
+            </span>
+            <span className="text-neutral-700">{term.term}</span>
+          </nav>
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2">
-              {/* Term Header */}
-              <div className="mb-8">
-                <div className="inline-block px-3 py-1 bg-[#00b6a6]/10 text-[#006b5f] text-sm font-semibold rounded-full mb-4">
-                  {term.category}
-                </div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  What is {getArticle(term.term)} {term.term}?
-                </h1>
-                {term.image && (
-                  <div className="mb-6 relative overflow-hidden rounded-3xl shadow-2xl border-4 border-white/20 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10">
-                    <div className="aspect-video relative">
-                      <Image
-                        src={term.image}
-                        alt={generateGlossaryImageAltText(term.term, term.definition)}
-                        fill
-                        className="object-cover"
-                        style={{ objectPosition: term.slug === 'a-frame' ? 'center 70%' : 'center bottom' }}
-                        priority
-                        fetchPriority="high"
-                        quality={90}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
-                        title={generateImageTitle(term.term)}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-                    </div>
-                  </div>
-                )}
+          <header className="mb-12 border-b border-sage-200/80 pb-10">
+            <p className={`${EDITORIAL_SECTION_LABEL_CLASS} font-medium ${accent.label}`}>
+              {term.category}
+            </p>
+            <h1 className={`mt-3 ${EDITORIAL_GUIDE_TITLE_CLASS}`}>
+              What is {getArticle(term.term)} {term.term}?
+            </h1>
+          </header>
 
-                {/* Image Gallery with Lightbox */}
-                {term.images && term.images.length > 0 && (
-                  <GlossaryImageGallery
-                    images={term.images}
-                    imageAltTexts={term.imageAltTexts}
-                    term={term.term}
-                    definition={term.definition}
+          <div className="flex flex-col gap-12 lg:flex-row lg:items-start">
+            <div className="min-w-0 flex-1">
+              {term.image ? (
+                <div className="relative mb-10 aspect-[16/10] w-full overflow-hidden border border-sage-200/90 bg-neutral-100/40">
+                  <Image
+                    src={term.image}
+                    alt={generateGlossaryImageAltText(term.term, term.definition)}
+                    fill
+                    className="object-cover"
+                    style={{
+                      objectPosition: term.slug === 'a-frame' ? 'center 70%' : 'center bottom',
+                    }}
+                    priority
+                    fetchPriority="high"
+                    quality={90}
+                    sizes="(max-width: 896px) 100vw, 896px"
+                    title={generateImageTitle(term.term)}
                   />
-                )}
-
-                <div className="bg-[#00b6a6]/10 border-l-4 border-[#00b6a6] p-6 rounded-2xl shadow-sm">
-                  <h2 className="text-lg font-bold text-[#006b5f] mb-2">Quick Answer</h2>
-                  <p className="text-lg text-gray-800 leading-relaxed speakable-answer">
-                    {term.definition}
-                  </p>
                 </div>
-              </div>
+              ) : null}
 
-              {/* Extended Definition */}
-              <section className="prose prose-lg max-w-none mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {term.images && term.images.length > 0 ? (
+                <GlossaryImageGallery
+                  images={term.images}
+                  imageAltTexts={term.imageAltTexts}
+                  term={term.term}
+                  definition={term.definition}
+                />
+              ) : null}
+
+              <section className="mb-12 border-l-4 border-sage-600 bg-white/50 px-6 py-6 sm:px-8">
+                <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Quick answer</h2>
+                <p className={`mt-4 max-w-3xl text-base font-light leading-relaxed text-neutral-800 speakable-answer`}>
+                  {term.definition}
+                </p>
+              </section>
+
+              <section className="mb-12 border-t border-sage-200/80 pt-10">
+                <h2 className="font-[Georgia] text-2xl font-light tracking-tight text-neutral-900">
                   Understanding {term.term}
                 </h2>
-                <div 
-                  className="text-gray-700 leading-relaxed"
+                <div
+                  className={`mt-6 ${EDITORIAL_GUIDE_PROSE_CLASS}`}
                   dangerouslySetInnerHTML={{
                     __html: prefixInternalResourceHrefsInHtml(
                       term.extendedDefinition.replace(/\n/g, '<br />'),
-                      locale,
+                      locale
                     ),
                   }}
                 />
               </section>
 
-              {/* Examples */}
-              {term.examples && term.examples.length > 0 && (
-                <section className="mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    Examples of {term.term}
-                  </h2>
-                  <ul className="space-y-3">
+              {term.examples && term.examples.length > 0 ? (
+                <section className="mb-12 border-t border-sage-200/80 pt-10">
+                  <h2 className={EDITORIAL_H2_CLASS}>Examples</h2>
+                  <ul className="mt-6 space-y-3 border-l border-sage-200 pl-4">
                     {term.examples.map((example, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-[#006b5f] mr-2">•</span>
-                        <span className="text-gray-700">{example}</span>
+                      <li key={index} className={EDITORIAL_BODY_CLASS}>
+                        {example}
                       </li>
                     ))}
                   </ul>
                 </section>
-              )}
+              ) : null}
 
-              {/* Use Cases */}
-              {term.useCases && term.useCases.length > 0 && (
-                <section className="mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    Common Use Cases
-                  </h2>
-                  <ul className="space-y-3">
+              {term.useCases && term.useCases.length > 0 ? (
+                <section className="mb-12 border-t border-sage-200/80 pt-10">
+                  <h2 className={EDITORIAL_H2_CLASS}>Common use cases</h2>
+                  <ul className="mt-6 space-y-3 border-l border-sage-200 pl-4">
                     {term.useCases.map((useCase, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-[#006b5f] mr-2">•</span>
-                        <span className="text-gray-700">{useCase}</span>
+                      <li key={index} className={EDITORIAL_BODY_CLASS}>
+                        {useCase}
                       </li>
                     ))}
                   </ul>
                 </section>
-              )}
+              ) : null}
 
-              {/* Internal Links */}
-              {term.internalLinks && term.internalLinks.length > 0 && (
-                <section className="mb-8 bg-gray-50 p-6 rounded-lg">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    Related Services
-                  </h2>
-                  <ul className="space-y-2">
+              {term.internalLinks && term.internalLinks.length > 0 ? (
+                <section className="mb-12 border-t border-sage-200/80 pt-10">
+                  <h2 className={EDITORIAL_H2_CLASS}>Related services</h2>
+                  <ul className="mt-6 space-y-2 border-l border-sage-200 pl-4">
                     {term.internalLinks.map((link, index) => (
                       <li key={index}>
                         <Link
                           href={localizeInternalHref(link.url, locale)}
-                          className="text-[#006b5f] hover:text-[#005a4f] underline"
+                          className={EDITORIAL_LINK_CLASS}
                         >
                           {link.text}
                         </Link>
@@ -199,74 +192,53 @@ export default function GlossaryTermTemplate({
                     ))}
                   </ul>
                 </section>
-              )}
+              ) : null}
 
-              {/* FAQs */}
-              {term.faqs && term.faqs.length > 0 && (
-                <section className="mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    Frequently Asked Questions About {term.term}
-                  </h2>
-                  <div className="space-y-4">
+              {term.faqs && term.faqs.length > 0 ? (
+                <section className="mb-12 border-t border-sage-200/80 pt-10">
+                  <h2 className={EDITORIAL_H2_CLASS}>Frequently asked questions</h2>
+                  <dl className="mt-8 space-y-8">
                     {term.faqs.map((faq, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-6">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                          {faq.question}
-                        </h3>
-                        <p 
-                          className="text-gray-700 leading-relaxed speakable-answer"
+                      <div key={index}>
+                        <dt className="text-sm font-bold text-neutral-900">{faq.question}</dt>
+                        <dd
+                          className={`mt-2 border-l border-sage-200 pl-4 ${EDITORIAL_BODY_CLASS} speakable-answer`}
                           dangerouslySetInnerHTML={{
                             __html: prefixInternalResourceHrefsInHtml(faq.answer, locale),
                           }}
                         />
                       </div>
                     ))}
-                  </div>
+                  </dl>
                 </section>
-              )}
+              ) : null}
 
-              {/* CTA */}
-              <section className="bg-[#006b5f] rounded-lg p-8 text-center mb-8">
-                <h2 className="text-2xl font-bold text-white mb-4">
-                  Need Help with Your Outdoor Hospitality Project?
-                </h2>
-                <p className="text-white/90 mb-6">
-                  Our experts can help you understand how {term.term.toLowerCase()} applies to your project.
-                </p>
-                <Link
-                  href="https://sageoutdooradvisory.com/contact-us/"
-                  className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
-                >
-                  Schedule Free Consultation
-                </Link>
-              </section>
+              <EditorialCtaBand
+                title="Need help with your outdoor hospitality project?"
+                description={`Our experts can help you understand how ${term.term.toLowerCase()} applies to your project.`}
+                buttonLabel="Schedule free consultation"
+                buttonHref="https://sageoutdooradvisory.com/contact-us/"
+                external
+              />
 
-              {/* Back to Glossary */}
-              <div className="text-center">
-                <Link
-                  href={links.glossary}
-                  className="text-[#006b5f] hover:text-[#005a4f] font-medium"
-                >
-                  ← Back to Glossary
+              <p className="mt-10 text-center">
+                <Link href={links.glossary} className={EDITORIAL_LINK_CLASS}>
+                  ← Back to glossary
                 </Link>
-              </div>
+              </p>
             </div>
 
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-4">
-                {/* Related Terms */}
-                {relatedTerms.length > 0 && (
-                  <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">
-                      Related Terms
-                    </h3>
-                    <ul className="space-y-2">
+            <aside className="lg:w-56 lg:shrink-0">
+              <div className="sticky top-28 space-y-6">
+                {relatedTerms.length > 0 ? (
+                  <div className={`${EDITORIAL_CARD_CLASS} ${accent.card} p-4`}>
+                    <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Related terms</h2>
+                    <ul className="mt-4 space-y-2">
                       {relatedTerms.map((relatedTerm) => (
                         <li key={relatedTerm.slug}>
                           <Link
                             href={links.glossaryTerm(relatedTerm.slug)}
-                            className="text-[#006b5f] hover:text-[#005a4f] underline"
+                            className={`text-sm font-light ${EDITORIAL_LINK_CLASS}`}
                           >
                             {relatedTerm.term}
                           </Link>
@@ -274,60 +246,62 @@ export default function GlossaryTermTemplate({
                       ))}
                     </ul>
                   </div>
-                )}
+                ) : null}
 
-                {/* Quick Links */}
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
-                    Quick Links
-                  </h3>
-                  <ul className="space-y-2">
+                <div className={`${EDITORIAL_CARD_CLASS} p-4`}>
+                  <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Quick links</h2>
+                  <ul className="mt-4 space-y-2 text-sm font-light">
                     <li>
-                      <Link
-                        href={links.glossary}
-                        className="text-[#006b5f] hover:text-[#005a4f] underline"
-                      >
-                        View All Terms
+                      <Link href={links.glossary} className={EDITORIAL_LINK_CLASS}>
+                        View all terms
                       </Link>
                     </li>
                     <li>
-                      <Link
+                      <Link href={links.guides} className={EDITORIAL_LINK_CLASS}>
+                        Expert guides
+                      </Link>
+                    </li>
+                    <li>
+                      <a
                         href="https://sageoutdooradvisory.com/services-overview/"
-                        className="text-[#006b5f] hover:text-[#005a4f] underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={EDITORIAL_LINK_CLASS}
                       >
-                        Our Services
-                      </Link>
+                        Our services
+                      </a>
                     </li>
                     <li>
-                      <Link
+                      <a
                         href="https://sageoutdooradvisory.com/shop/"
-                        className="text-[#006b5f] hover:text-[#005a4f] underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={EDITORIAL_LINK_CLASS}
                       >
-                        Market Reports
-                      </Link>
+                        Market reports
+                      </a>
                     </li>
                     <li>
-                      <Link
+                      <a
                         href="https://sageoutdooradvisory.com/contact-us/"
-                        className="text-[#006b5f] hover:text-[#005a4f] underline font-semibold"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={EDITORIAL_LINK_CLASS}
                       >
-                        Schedule Consultation
-                      </Link>
+                        Schedule consultation
+                      </a>
                     </li>
                   </ul>
                 </div>
               </div>
-            </div>
+            </aside>
           </div>
+
+          <RelatedGlossaryTerms currentTerm={term} locale={locale} maxTerms={8} />
         </main>
 
-        {/* Related Glossary Terms Section - Enhanced Internal Linking */}
-        <RelatedGlossaryTerms currentTerm={term} locale={locale} maxTerms={8} />
-
-        {/* Footer */}
         <Footer locale={locale} />
-      </div>
+      </EditorialPageShell>
     </>
   );
 }
-

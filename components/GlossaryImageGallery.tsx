@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { generateTipiGalleryAltText } from '@/lib/glossary/image-alt-text';
+import { EDITORIAL_H2_CLASS } from '@/components/editorial/EditorialPageShell';
 
 interface GlossaryImageGalleryProps {
   images: string[];
@@ -64,19 +65,18 @@ export default function GlossaryImageGallery({
 
   return (
     <>
-      <section className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          {term} Gallery
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <section className="mb-10">
+        <h2 className={EDITORIAL_H2_CLASS}>{term} gallery</h2>
+        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
           {images.map((imageUrl, index) => {
             const altText = getAltText(index);
             
             return (
               <button
                 key={index}
+                type="button"
                 onClick={() => setSelectedImageIndex(index)}
-                className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#006b5f] focus:ring-offset-2"
+                className="relative aspect-square overflow-hidden border border-sage-200/90 bg-neutral-100/40 transition-colors group cursor-pointer hover:border-sage-400 focus:outline-none focus:ring-1 focus:ring-sage-400"
                 aria-label={`View larger image: ${altText}`}
               >
                 <Image
@@ -190,7 +190,7 @@ export default function GlossaryImageGallery({
               alt={selectedAltText}
               width={1920}
               height={1080}
-              className="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg"
+              className="max-h-[90vh] max-w-full border border-sage-200/90 object-contain"
               priority
               quality={95}
             />

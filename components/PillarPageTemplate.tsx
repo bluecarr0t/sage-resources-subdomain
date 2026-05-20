@@ -1,15 +1,16 @@
-"use client";
+'use client';
 
-import { GuideContent, getGuideSync } from "@/lib/guides";
+import type { GuideContent } from '@/lib/guides';
+import { getAllLandingPageSlugs, getLandingPageSync } from '@/lib/landing-pages';
 import {
   createLocaleLinks,
   localizeInternalHref,
   prefixInternalResourceHrefsInHtml,
-} from "@/lib/locale-links";
-import { getRelatedServiceAnchorText } from "@/lib/related-service-anchor-text";
-import Link from "next/link";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+} from '@/lib/locale-links';
+import { getRelatedServiceAnchorText } from '@/lib/related-service-anchor-text';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 import {
   generateOrganizationSchema,
   generateGuideBreadcrumbSchema,
@@ -19,71 +20,129 @@ import {
   generateHowToSchema,
   extractHowToStepsFromGuide,
   generateItemListSchema,
-} from "@/lib/schema";
-import RelatedGuides from "./RelatedGuides";
-import Footer from "./Footer";
-import FloatingHeader from "./FloatingHeader";
+} from '@/lib/schema';
+import RelatedGuides from './RelatedGuides';
+import Footer from './Footer';
+import FloatingHeader from './FloatingHeader';
+import { EditorialCtaBand } from '@/components/editorial/EditorialCtaBand';
+import {
+  EditorialPageShell,
+  EDITORIAL_BODY_CLASS,
+  EDITORIAL_BUTTON_OUTLINE_CLASS,
+  EDITORIAL_BUTTON_PRIMARY_CLASS,
+  EDITORIAL_CARD_CLASS,
+  EDITORIAL_FILTER_ACTIVE_CLASS,
+  EDITORIAL_FILTER_IDLE_CLASS,
+  EDITORIAL_GUIDE_PROSE_CLASS,
+  EDITORIAL_GUIDE_TITLE_CLASS,
+  EDITORIAL_H2_CLASS,
+  EDITORIAL_LEAD_CLASS,
+  EDITORIAL_LINK_CLASS,
+  EDITORIAL_MAIN_WITH_HEADER_CLASS,
+  EDITORIAL_SECTION_LABEL_CLASS,
+} from '@/components/editorial/EditorialPageShell';
 
 interface PillarPageTemplateProps {
   content: GuideContent;
   locale: string;
 }
 
+const CATEGORY_LABELS: Record<GuideContent['category'], string> = {
+  feasibility: 'Feasibility',
+  appraisal: 'Appraisal',
+  industry: 'Industry',
+};
+
 export default function PillarPageTemplate({ content, locale }: PillarPageTemplateProps) {
-  const [activeSection, setActiveSection] = useState<string>("");
+  const [activeSection, setActiveSection] = useState<string>('');
   const [showTOC, setShowTOC] = useState(false);
   const links = createLocaleLinks(locale);
   const pageCanonicalUrl = `https://resources.sageoutdooradvisory.com/${locale}/guides/${content.slug}`;
 
-  // Generate structured data
   const organizationSchema = generateOrganizationSchema();
-  // Note: Removed LocalBusiness schema - guide pages are articles, not local businesses
   const breadcrumbSchema = generateGuideBreadcrumbSchema(content.slug, content.hero.headline);
   const articleSchema = generateArticleSchema(content);
   const faqSchema = content.faqs ? generateFAQSchema(content.faqs) : null;
-  // Always include Speakable schema: FAQs when present, otherwise headings and main content
-  const speakableSchema = content.faqs && content.faqs.length > 0
-    ? generateSpeakableSchema([".speakable-answer", "h1", "h2"])
-    : generateSpeakableSchema(["h1", "h2", "h3", ".prose p"]);
-  // Add HowTo schema for guides with step-by-step instructions
+  const speakableSchema =
+    content.faqs && content.faqs.length > 0
+      ? generateSpeakableSchema(['.speakable-answer', 'h1', 'h2'])
+      : generateSpeakableSchema(['h1', 'h2', 'h3', '.guide-prose p']);
   const howToSteps = content.howToSteps || extractHowToStepsFromGuide(content);
-  const howToSchema = howToSteps && howToSteps.length > 0
-    ? generateHowToSchema(howToSteps, content.hero.headline, content.metaDescription)
-    : null;
-  const keyTakeawaysSchema = content.keyTakeaways && content.keyTakeaways.length > 0
-    ? generateItemListSchema(
-        content.keyTakeaways,
-        `Key Takeaways: ${content.hero.headline}`,
-        pageCanonicalUrl
-      )
-    : null;
+  const howToSchema =
+    howToSteps && howToSteps.length > 0
+      ? generateHowToSchema(howToSteps, content.hero.headline, content.metaDescription)
+      : null;
+  const keyTakeawaysSchema =
+    content.keyTakeaways && content.keyTakeaways.length > 0
+      ? generateItemListSchema(
+          content.keyTakeaways,
+          `Key Takeaways: ${content.hero.headline}`,
+          pageCanonicalUrl
+        )
+      : null;
 
-  // Track scroll position for active section highlighting
+  const tocSectionIds = useMemo(
+    () => [
+      ...content.sections.map((s) => s.id),
+      ...(content.citations && content.citations.length > 0 ? ['references'] : []),
+    ],
+    [content.sections, content.citations]
+  );
+
   useEffect(() => {
     const handleScroll = () => {
-      const sections = [
-        ...content.sections.map((s) => s.id),
-        ...(content.citations && content.citations.length > 0 ? ['references'] : []),
-      ];
       const scrollPosition = window.scrollY + 150;
-
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const element = document.getElementById(sections[i]);
+      for (let i = tocSectionIds.length - 1; i >= 0; i--) {
+        const element = document.getElementById(tocSectionIds[i]);
         if (element && element.offsetTop <= scrollPosition) {
-          setActiveSection(sections[i]);
+          setActiveSection(tocSectionIds[i]);
           break;
         }
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Initial check
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [content.sections]);
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [tocSectionIds]);
+
+  const relatedLandingLinks = useMemo(() => {
+    if (!content.keywords?.length) return [];
+    const slugs = getAllLandingPageSlugs();
+    const seen = new Set<string>();
+    const pages: Array<{ slug: string; headline: string }> = [];
+    for (const keyword of content.keywords.slice(0, 6)) {
+      for (const slug of slugs) {
+        if (seen.has(slug)) continue;
+        const page = getLandingPageSync(slug);
+        if (!page?.keywords) continue;
+        const match = page.keywords.some(
+          (k) =>
+            k.toLowerCase().includes(keyword.toLowerCase()) ||
+            keyword.toLowerCase().includes(k.toLowerCase())
+        );
+        if (match) {
+          seen.add(slug);
+          pages.push({ slug: page.slug, headline: page.hero.headline });
+          if (pages.length >= 6) return pages;
+        }
+      }
+    }
+    return pages;
+  }, [content.keywords]);
+
+  const tocLinkClass = (anchor: string, level?: number) => {
+    const isActive = activeSection === anchor;
+    const indent = level === 2 ? 'pl-0' : level === 3 ? 'pl-3' : '';
+    return `block py-1.5 text-[11px] font-light leading-snug transition-colors ${indent} ${
+      isActive
+        ? 'font-medium text-sage-800'
+        : 'text-neutral-600 hover:text-neutral-900'
+    }`;
+  };
 
   return (
     <>
-      {/* Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -96,463 +155,363 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
-      {faqSchema && (
+      {faqSchema ? (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
-      )}
+      ) : null}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(speakableSchema) }}
       />
-      {howToSchema && (
+      {howToSchema ? (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
         />
-      )}
-      {keyTakeawaysSchema && (
+      ) : null}
+      {keyTakeawaysSchema ? (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(keyTakeawaysSchema) }}
         />
-      )}
+      ) : null}
 
-      {/* Floating CTA Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Link
-          href="https://sageoutdooradvisory.com/contact-us/"
-          className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-full shadow-2xl hover:bg-[#005a4f] transition-all transform hover:scale-105"
+      <EditorialPageShell footer={null}>
+        <FloatingHeader locale={locale} showFullNav showSpacer={false} />
+
+        <button
+          type="button"
+          onClick={() => setShowTOC(!showTOC)}
+          className={`fixed right-4 top-24 z-40 lg:hidden ${showTOC ? EDITORIAL_FILTER_ACTIVE_CLASS : EDITORIAL_FILTER_IDLE_CLASS} px-4 py-2`}
+          aria-expanded={showTOC}
         >
-          Schedule Free Call
-        </Link>
-      </div>
+          {showTOC ? 'Hide' : 'Show'} contents
+        </button>
 
-      {/* Mobile TOC Toggle */}
-      <button
-        onClick={() => setShowTOC(!showTOC)}
-        className="lg:hidden fixed top-20 right-4 z-40 bg-[#006b5f] text-white px-4 py-2 rounded-lg shadow-lg hover:bg-[#005a4f] transition-colors"
-      >
-        {showTOC ? "Hide" : "Show"} Contents
-      </button>
+        <a
+          href="https://sageoutdooradvisory.com/contact-us/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`fixed bottom-6 right-6 z-40 hidden sm:inline-block ${EDITORIAL_BUTTON_PRIMARY_CLASS}`}
+        >
+          Schedule free call
+        </a>
 
-      <div className="min-h-screen bg-white">
-        {/* Floating Header */}
-        <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
+        <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>
+          <nav
+            className="mb-10 text-[11px] font-light uppercase tracking-widest text-neutral-500"
+            aria-label="Breadcrumb"
+          >
+            <Link href={links.guides} className="transition-colors hover:text-neutral-900">
+              Guides
+            </Link>
+            <span className="mx-2 text-neutral-400" aria-hidden>
+              /
+            </span>
+            <span className="text-neutral-700">{content.hero.headline}</span>
+          </nav>
 
-        {/* Breadcrumbs */}
-        <nav className="bg-gray-50 border-b border-gray-200 py-3 pt-32 md:pt-36">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <Link href="https://sageoutdooradvisory.com" className="hover:text-[#006b5f]">
-                Home
-              </Link>
-              <span>/</span>
-              <Link href={links.guides} className="hover:text-[#006b5f]">
-                Guides
-              </Link>
-              <span>/</span>
-              <span className="text-gray-900">{content.hero.headline}</span>
+          <header className="mb-12 border-b border-sage-200/80 pb-10">
+            <p className={EDITORIAL_SECTION_LABEL_CLASS}>{CATEGORY_LABELS[content.category]}</p>
+            <h1 className={`mt-3 ${EDITORIAL_GUIDE_TITLE_CLASS}`}>{content.hero.headline}</h1>
+            {content.hero.subheadline ? (
+              <p className={EDITORIAL_LEAD_CLASS}>{content.hero.subheadline}</p>
+            ) : null}
+            {content.hero.ctaText && content.hero.ctaLink ? (
+              <a
+                href={content.hero.ctaLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${EDITORIAL_BUTTON_OUTLINE_CLASS} mt-8`}
+              >
+                {content.hero.ctaText}
+              </a>
+            ) : null}
+          </header>
+
+          {content.hero.backgroundImage ? (
+            <div className="relative mb-12 aspect-[16/10] w-full overflow-hidden border border-sage-200/90 bg-neutral-100/40">
+              <Image
+                src={content.hero.backgroundImage}
+                alt=""
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 896px) 100vw, 896px"
+                quality={90}
+              />
             </div>
-          </div>
-        </nav>
+          ) : null}
 
-        <main>
-        {/* Hero Section */}
-        <section className={`relative ${content.hero.backgroundImage ? 'pt-32 md:pt-36 pb-16 overflow-hidden' : 'bg-gradient-to-br from-blue-50 to-indigo-100 pt-32 md:pt-36 pb-16'}`}>
-          {content.hero.backgroundImage && (
-            <>
-              {/* Background Image */}
-              <div className="absolute inset-0 z-0">
-                <Image
-                  src={content.hero.backgroundImage}
-                  alt={`${content.hero.headline} background`}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="100vw"
-                  quality={90}
-                />
-                {/* Overlay for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-indigo-900/40" />
-              </div>
-            </>
-          )}
-          <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${content.hero.backgroundImage ? 'relative z-10' : ''}`}>
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className={`text-5xl font-bold mb-6 ${content.hero.backgroundImage ? 'text-white drop-shadow-lg' : 'text-gray-900'}`} style={{ fontSize: '3rem' }}>
-                {content.hero.headline}
-              </h1>
-              <p className={`text-xl mb-8 ${content.hero.backgroundImage ? 'text-white/95 drop-shadow-md' : 'text-gray-700'}`}>
-                {content.hero.subheadline}
+          {(content.quickAnswer ?? content.metaDescription) ? (
+            <section className="mb-12 border-l-4 border-sage-600 bg-white/50 px-6 py-6 sm:px-8">
+              <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Quick answer</h2>
+              <p className={`mt-4 max-w-3xl ${EDITORIAL_BODY_CLASS} speakable-answer`}>
+                {content.quickAnswer ?? content.metaDescription}
               </p>
-              {(content.quickAnswer ?? content.metaDescription) && (
-                <div className={`mb-8 p-6 rounded-xl text-left max-w-3xl mx-auto ${
-                  content.hero.backgroundImage ? 'bg-white/95 backdrop-blur-sm text-gray-800' : 'bg-[#006b5f]/5 border-l-4 border-[#006b5f]'
-                }`}>
-                  <h2 className="text-lg font-bold text-[#006b5f] mb-2">Quick Answer</h2>
-                  <p className="text-base leading-relaxed speakable-answer">
-                    {content.quickAnswer ?? content.metaDescription}
-                  </p>
-                </div>
-              )}
-              {content.hero.ctaText && content.hero.ctaLink && (
-                <Link
-                  href={content.hero.ctaLink}
-                  className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
-                >
-                  {content.hero.ctaText}
-                </Link>
-              )}
-            </div>
-          </div>
-        </section>
+            </section>
+          ) : null}
 
-        {/* Key Takeaways */}
-        {content.keyTakeaways && content.keyTakeaways.length > 0 && (
-          <section className="my-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto bg-[#006b5f]/5 border-l-4 border-[#006b5f] p-6 rounded-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Key Takeaways</h2>
-            <ul className="space-y-2">
-              {content.keyTakeaways.map((takeaway, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-[#006b5f] mr-2 font-bold">{index + 1}.</span>
-                  <span className="text-gray-700">{takeaway}</span>
-                </li>
-              ))}
-            </ul>
-            </div>
-          </section>
-        )}
+          {content.keyTakeaways && content.keyTakeaways.length > 0 ? (
+            <section className="mb-12 border border-sage-200/90 bg-white/40 px-6 py-8 sm:px-8">
+              <h2 className={EDITORIAL_H2_CLASS}>Key takeaways</h2>
+              <ol className="mt-6 space-y-3 border-l border-sage-200 pl-4">
+                {content.keyTakeaways.map((takeaway, index) => (
+                  <li key={index} className={`${EDITORIAL_BODY_CLASS} text-neutral-800`}>
+                    <span className="tabular-nums text-neutral-500">{index + 1}.</span> {takeaway}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
 
-        {/* Last Updated & Change Log */}
-        {(content.lastModified || content.changeLog) && (
-          <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 mb-8">
-            <div className="text-sm text-gray-500">
-              {content.lastModified && (
-                <p>Last updated: {new Date(content.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-              )}
-              {content.changeLog && content.changeLog.length > 0 && (
+          {(content.lastModified || content.changeLog) && (
+            <div className="mb-10 text-[11px] font-light text-neutral-500">
+              {content.lastModified ? (
+                <p>
+                  Last updated:{' '}
+                  {new Date(content.lastModified).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+              ) : null}
+              {content.changeLog && content.changeLog.length > 0 ? (
                 <details className="mt-2">
-                  <summary className="cursor-pointer text-[#006b5f] hover:underline">Change log</summary>
-                  <ul className="mt-2 space-y-1 list-disc list-inside text-gray-600">
+                  <summary className={`cursor-pointer ${EDITORIAL_LINK_CLASS}`}>Change log</summary>
+                  <ul className="mt-2 space-y-1 border-l border-sage-200 pl-4">
                     {content.changeLog.map((entry, i) => (
-                      <li key={i}>
-                        <strong>{new Date(entry.date).toLocaleDateString('en-US')}:</strong> {entry.changes.join('; ')}
+                      <li key={i} className={EDITORIAL_BODY_CLASS}>
+                        <span className="font-medium text-neutral-700">
+                          {new Date(entry.date).toLocaleDateString('en-US')}:
+                        </span>{' '}
+                        {entry.changes.join('; ')}
                       </li>
                     ))}
                   </ul>
                 </details>
-              )}
+              ) : null}
             </div>
-          </section>
-        )}
+          )}
 
-        {/* Main Content Area with TOC */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col lg:flex-row gap-12">
-            {/* Table of Contents - Sticky Sidebar */}
-            <aside
-              className={`lg:w-64 flex-shrink-0 ${
-                showTOC ? "block" : "hidden lg:block"
-              }`}
-            >
-              <div className="sticky top-24">
-                <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-900 mb-4">Table of Contents</h2>
-                    <nav className="space-y-2">
-                    {content.tableOfContents.map((item, index) => (
-                      <Link
-                        key={index}
-                        href={`#${item.anchor}`}
-                        className={`block text-sm py-2 px-3 rounded transition-colors ${
-                          activeSection === item.anchor
-                            ? "bg-[#006b5f] text-white font-semibold"
-                            : "text-gray-700 hover:bg-gray-100 hover:text-[#006b5f]"
-                        } ${
-                          item.level === 2 ? "pl-3" : item.level === 3 ? "pl-6" : ""
-                        }`}
-                      >
-                        {item.title}
-                      </Link>
-                    ))}
-                    {content.citations && content.citations.length > 0 && (
-                      <Link
-                        href="#references"
-                        className={`block text-sm py-2 px-3 rounded transition-colors ${
-                          activeSection === "references"
-                            ? "bg-[#006b5f] text-white font-semibold"
-                            : "text-gray-700 hover:bg-gray-100 hover:text-[#006b5f]"
-                        }`}
-                      >
-                        References
-                      </Link>
-                    )}
-                  </nav>
-                </div>
+          <div className="flex flex-col gap-12 lg:flex-row lg:items-start">
+            <aside className={`lg:w-56 lg:shrink-0 ${showTOC ? 'block' : 'hidden lg:block'}`}>
+              <div className={`sticky top-28 ${EDITORIAL_CARD_CLASS} p-4`}>
+                <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Contents</h2>
+                <nav className="mt-4 space-y-1" aria-label="Table of contents">
+                  {content.tableOfContents.map((item, index) => (
+                    <Link
+                      key={index}
+                      href={`#${item.anchor}`}
+                      className={tocLinkClass(item.anchor, item.level)}
+                    >
+                      {item.title}
+                    </Link>
+                  ))}
+                  {content.citations && content.citations.length > 0 ? (
+                    <Link href="#references" className={tocLinkClass('references')}>
+                      References
+                    </Link>
+                  ) : null}
+                </nav>
               </div>
             </aside>
 
-            {/* Main Content */}
-            <div className="flex-1 max-w-4xl pb-24">
-              <article className="prose prose-lg max-w-none">
+            <div className="min-w-0 flex-1">
+              <article className="guide-prose">
                 {content.sections.map((section) => (
                   <section
                     key={section.id}
                     id={section.id}
-                    className="mb-16 scroll-mt-24"
+                    className="mb-14 scroll-mt-28 border-t border-sage-200/80 pt-10 first:border-t-0 first:pt-0"
                   >
-                    <h2 className="text-3xl font-bold text-gray-900 mb-8 mt-12 first:mt-0">
+                    <h2 className="font-[Georgia] text-2xl font-light tracking-tight text-neutral-900">
                       {section.title}
                     </h2>
                     <div
-                      className="text-gray-700 leading-relaxed prose prose-lg max-w-none prose-img:rounded-3xl prose-img:shadow-2xl prose-img:border-4 prose-img:border-white/20"
+                      className={`guide-prose mt-6 ${EDITORIAL_GUIDE_PROSE_CLASS}`}
                       dangerouslySetInnerHTML={{
                         __html: prefixInternalResourceHrefsInHtml(section.content, locale),
                       }}
                     />
-                    {section.subsections && (
-                      <div className="mt-8 space-y-8">
+                    {section.subsections ? (
+                      <div className="mt-10 space-y-10">
                         {section.subsections.map((subsection) => (
-                          <div key={subsection.id} id={subsection.id} className="scroll-mt-24">
-                            <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                          <div key={subsection.id} id={subsection.id} className="scroll-mt-28">
+                            <h3 className="text-lg font-medium text-neutral-900">
                               {subsection.title}
                             </h3>
                             <div
-                              className="text-gray-700 leading-relaxed"
+                              className={`mt-4 ${EDITORIAL_GUIDE_PROSE_CLASS}`}
                               dangerouslySetInnerHTML={{
                                 __html: prefixInternalResourceHrefsInHtml(
                                   subsection.content,
-                                  locale,
+                                  locale
                                 ),
                               }}
                             />
                           </div>
                         ))}
                       </div>
-                    )}
+                    ) : null}
                   </section>
                 ))}
               </article>
 
-              {/* References / Citations */}
-              {content.citations && content.citations.length > 0 && (
-                <section id="references" className="mt-16 pt-12 border-t border-gray-200 scroll-mt-24">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">References</h2>
-                  <ol className="space-y-2 text-gray-700 list-decimal list-inside">
+              {content.citations && content.citations.length > 0 ? (
+                <section id="references" className="mt-14 scroll-mt-28 border-t border-sage-200/80 pt-12">
+                  <h2 className={EDITORIAL_H2_CLASS}>References</h2>
+                  <ol className="mt-6 space-y-3 border-l border-sage-200 pl-4">
                     {content.citations.map((cite) => (
-                      <li key={cite.id} id={`ref-${cite.id}`}>
+                      <li key={cite.id} id={`ref-${cite.id}`} className={EDITORIAL_BODY_CLASS}>
                         <a
                           href={cite.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#006b5f] hover:text-[#005a4f] underline break-all"
+                          className={EDITORIAL_LINK_CLASS}
                         >
                           {cite.title}
                         </a>
-                        {cite.accessed && (
-                          <span className="text-gray-500 text-sm ml-1">(accessed {cite.accessed})</span>
-                        )}
+                        {cite.accessed ? (
+                          <span className="text-neutral-500"> (accessed {cite.accessed})</span>
+                        ) : null}
                       </li>
                     ))}
                   </ol>
                 </section>
-              )}
+              ) : null}
 
-              {/* Cluster Pages Section */}
-              {content.clusterPages && content.clusterPages.length > 0 && (
-                <section className="mt-16 pt-12 border-t border-gray-200">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                    Related Guides & Resources
-                  </h2>
-                  <p className="text-gray-600 mb-8">
-                    Explore these related guides to dive deeper into specific topics:
+              {content.clusterPages && content.clusterPages.length > 0 ? (
+                <section className="mt-14 border-t border-sage-200/80 pt-12">
+                  <h2 className={EDITORIAL_H2_CLASS}>Related guides &amp; resources</h2>
+                  <p className={`mt-4 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>
+                    Explore these related guides to dive deeper into specific topics.
                   </p>
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="mt-8 grid gap-4 md:grid-cols-2">
                     {content.clusterPages.map((clusterPage, index) => (
                       <Link
                         key={index}
                         href={localizeInternalHref(clusterPage.url, locale)}
-                        className="block bg-gray-50 p-6 rounded-lg border border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
+                        className={`${EDITORIAL_CARD_CLASS} group`}
                       >
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        <h3 className="text-sm font-bold text-neutral-900 group-hover:text-sage-800">
                           {clusterPage.title}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-3">{clusterPage.description}</p>
-                        <span className="text-[#006b5f] hover:text-[#005a4f] font-medium text-sm">
+                        <p className={`mt-2 line-clamp-3 ${EDITORIAL_BODY_CLASS}`}>
+                          {clusterPage.description}
+                        </p>
+                        <span
+                          className={`mt-4 inline-block text-[11px] uppercase tracking-wider ${EDITORIAL_LINK_CLASS}`}
+                        >
                           Read guide →
                         </span>
                       </Link>
                     ))}
                   </div>
                 </section>
-              )}
+              ) : null}
 
-              {/* Related Guides Section */}
-              {content.relatedGuides && content.relatedGuides.length > 0 && (
-                <section className="mt-12 pt-12 border-t border-gray-200">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                    Related Comprehensive Guides
-                  </h2>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {content.relatedGuides.map((guideSlug) => {
-                      const relatedGuide = getGuideSync(guideSlug);
-                      if (!relatedGuide) return null;
-                      return (
-                        <Link
-                          key={guideSlug}
-                          href={links.guide(guideSlug)}
-                          className="block bg-white p-6 rounded-lg border-2 border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
-                        >
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                            {relatedGuide.hero.headline}
-                          </h3>
-                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                            {relatedGuide.metaDescription}
-                          </p>
-                          <span className="text-[#006b5f] hover:text-[#005a4f] font-medium text-sm">
-                            Read guide →
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
-
-              {/* Related Services Section */}
-              {content.relatedServices && content.relatedServices.services.length > 0 && (
-                <section className="mt-12 pt-12 border-t border-gray-200">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                    {content.relatedServices.title}
-                  </h2>
-                  <div className="grid md:grid-cols-3 gap-6">
+              {content.relatedServices && content.relatedServices.services.length > 0 ? (
+                <section className="mt-14 border-t border-sage-200/80 pt-12">
+                  <h2 className={EDITORIAL_H2_CLASS}>{content.relatedServices.title}</h2>
+                  <ul className="mt-8 space-y-6">
                     {content.relatedServices.services.map((service, index) => (
-                      <div
+                      <li
                         key={index}
-                        className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg hover:border-[#006b5f] transition-all"
+                        className={`${EDITORIAL_CARD_CLASS} p-5`}
                       >
-                        <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                          <Link
+                        <h3 className="text-sm font-bold text-neutral-900">
+                          <a
                             href={service.url}
-                            className="text-[#006b5f] hover:text-[#005a4f]"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={EDITORIAL_LINK_CLASS}
                           >
                             {service.name}
-                          </Link>
+                          </a>
                         </h3>
-                        <p className="text-gray-600 text-sm mb-4">{service.description}</p>
-                        <Link
+                        <p className={`mt-2 ${EDITORIAL_BODY_CLASS}`}>{service.description}</p>
+                        <a
                           href={service.url}
-                          className="inline-block text-[#006b5f] hover:text-[#005a4f] font-medium text-sm"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`mt-4 inline-block text-[11px] uppercase tracking-wider ${EDITORIAL_LINK_CLASS}`}
                         >
                           {getRelatedServiceAnchorText(service.name)} →
-                        </Link>
-                      </div>
+                        </a>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </section>
-              )}
+              ) : null}
             </div>
           </div>
-        </div>
 
-        {/* FAQ Section */}
-        {content.faqs && content.faqs.length > 0 && (
-          <section className="py-16 bg-gray-50">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-                Frequently Asked Questions
-              </h2>
-              <div className="space-y-6">
+          {content.faqs && content.faqs.length > 0 ? (
+            <section className="mt-16 border-t border-sage-200/80 pt-14">
+              <h2 className={EDITORIAL_H2_CLASS}>Frequently asked questions</h2>
+              <dl className="mt-8 space-y-8">
                 {content.faqs.map((faq, index) => (
-                  <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                      {faq.question}
-                    </h3>
-                    <div
-                      className="text-gray-700 leading-relaxed speakable-answer"
+                  <div key={index}>
+                    <dt className="text-sm font-bold text-neutral-900">{faq.question}</dt>
+                    <dd
+                      className={`mt-2 border-l border-sage-200 pl-4 ${EDITORIAL_BODY_CLASS} speakable-answer`}
                       dangerouslySetInnerHTML={{
                         __html: prefixInternalResourceHrefsInHtml(faq.answer, locale),
                       }}
                     />
                   </div>
                 ))}
-              </div>
-              <div className="mt-12 text-center">
-                <p className="text-gray-700 mb-4 text-lg">
-                  Have more questions? Let&apos;s discuss your project.
-                </p>
-                <Link
-                  href="https://sageoutdooradvisory.com/contact-us/"
-                  className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
-                >
-                  Schedule Your Free Consultation
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
+              </dl>
+              <EditorialCtaBand
+                title="Have more questions?"
+                description="Let's discuss your outdoor hospitality project."
+                buttonLabel="Schedule your free consultation"
+                buttonHref="https://sageoutdooradvisory.com/contact-us/"
+                external
+              />
+            </section>
+          ) : null}
 
-        {/* Related Guides Section - Enhanced Internal Linking */}
-        <RelatedGuides currentGuide={content} locale={locale} maxGuides={6} />
+          <RelatedGuides currentGuide={content} locale={locale} maxGuides={6} />
 
-        {/* Related Landing Pages Section - Enhanced Internal Linking */}
-        {content.keywords && (
-          <section className="py-12 bg-white border-t border-gray-200">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Related Resources
-              </h2>
-              <p className="text-gray-600 mb-6">
+          {relatedLandingLinks.length > 0 ? (
+            <section className="mt-14 border-t border-sage-200/80 pt-14">
+              <h2 className={EDITORIAL_H2_CLASS}>Related resources</h2>
+              <p className={`mt-4 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>
                 Explore related landing pages and resources for your outdoor hospitality project.
               </p>
-              <div className="flex flex-wrap gap-3">
-                {content.keywords.slice(0, 6).map((keyword) => {
-                  // Find related landing pages by keyword
-                  const allLandingPages = require("@/lib/landing-pages").getAllLandingPageSlugs()
-                    .map((slug: string) => require("@/lib/landing-pages").getLandingPageSync(slug))
-                    .filter((page: any) => page && page.keywords && page.keywords.some((k: string) => 
-                      k.toLowerCase().includes(keyword.toLowerCase()) || 
-                      keyword.toLowerCase().includes(k.toLowerCase())
-                    ));
-                  
-                  return allLandingPages.slice(0, 3).map((page: any) => (
+              <ul className="mt-6 flex flex-wrap gap-2">
+                {relatedLandingLinks.map((page) => (
+                  <li key={page.slug}>
                     <Link
-                      key={page.slug}
                       href={links.landing(page.slug)}
-                      className="inline-block px-4 py-2 bg-gray-100 hover:bg-[#00b6a6] hover:text-white text-gray-900 rounded-lg transition-colors text-sm font-medium"
+                      className={EDITORIAL_FILTER_IDLE_CLASS + ' inline-block px-4 py-2 normal-case tracking-normal'}
                     >
-                      {page.hero.headline}
+                      {page.headline}
                     </Link>
-                  ));
-                })}
-              </div>
-            </div>
-          </section>
-        )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
-        {/* CTA Section */}
-        {content.cta && (
-          <section className="py-20 bg-[#006b5f]">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <h2 className="text-4xl font-bold text-white mb-4">{content.cta.title}</h2>
-              <p className="text-xl text-white/90 mb-8">{content.cta.description}</p>
-              <Link
-                href={content.cta.buttonLink}
-                className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
-              >
-                {content.cta.buttonText}
-              </Link>
-            </div>
-          </section>
-        )}
+          {content.cta ? (
+            <EditorialCtaBand
+              title={content.cta.title}
+              description={content.cta.description}
+              buttonLabel={content.cta.buttonText}
+              buttonHref={content.cta.buttonLink}
+              external={content.cta.buttonLink.startsWith('http')}
+            />
+          ) : null}
         </main>
 
-        {/* Footer */}
         <Footer locale={locale} />
-      </div>
+      </EditorialPageShell>
     </>
   );
 }
-
