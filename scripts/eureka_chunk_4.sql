@@ -26,14 +26,14 @@ INSERT INTO public.all_glamping_properties (
   'ThinkReservations calendar row; 1-night minimum on many units; re-quote ADR in engine.',
   '2026-05-20', '2026-05-20', 'private_commercial',
   24, 1, '2',
+  '2',
   NULL, NULL, NULL,
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.')
-);
+;
 INSERT INTO public.all_glamping_properties (
   property_id, research_status, is_glamping_property, is_open,
   property_name, site_name, slug, property_type, unit_type,
@@ -62,14 +62,14 @@ INSERT INTO public.all_glamping_properties (
   'ThinkReservations calendar row; 2-night minimum on many units; re-quote ADR in engine.',
   '2026-05-20', '2026-05-20', 'private_commercial',
   24, 1, '2',
+  '2',
   NULL, NULL, NULL,
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.')
-);
+;
 INSERT INTO public.all_glamping_properties (
   property_id, research_status, is_glamping_property, is_open,
   property_name, site_name, slug, property_type, unit_type,
@@ -98,14 +98,14 @@ INSERT INTO public.all_glamping_properties (
   'ThinkReservations calendar row; 2-night minimum on many units; re-quote ADR in engine.',
   '2026-05-20', '2026-05-20', 'private_commercial',
   24, 1, '2',
+  '2',
   NULL, NULL, NULL,
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.')
-);
+;
 INSERT INTO public.all_glamping_properties (
   property_id, research_status, is_glamping_property, is_open,
   property_name, site_name, slug, property_type, unit_type,
@@ -134,11 +134,11 @@ INSERT INTO public.all_glamping_properties (
   'ThinkReservations calendar row; 2-night minimum on many units; re-quote ADR in engine.',
   '2026-05-20', '2026-05-20', 'private_commercial',
   24, 1, '2',
+  '2',
   NULL, NULL, NULL,
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.')
-);
+;

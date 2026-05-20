@@ -106,8 +106,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -128,8 +127,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -150,8 +148,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -172,8 +169,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -194,8 +190,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -216,8 +211,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -238,8 +232,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -260,8 +253,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -282,8 +274,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -304,8 +295,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -326,8 +316,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -348,8 +337,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -370,8 +358,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -392,8 +379,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -414,8 +400,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -436,8 +421,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -458,8 +442,7 @@ INSERT INTO public.all_glamping_properties (
   '{"2026":{"standard":{"base_nightly":299,"included_guests":2,"note":"ThinkReservations sample May 2026"}}}'::jsonb,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -480,8 +463,7 @@ INSERT INTO public.all_glamping_properties (
   '{"2026":{"standard":{"base_nightly":299,"included_guests":2,"note":"ThinkReservations sample May 2026"}}}'::jsonb,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -502,8 +484,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -524,8 +505,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -546,8 +526,7 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 ),
 (
@@ -568,7 +547,6 @@ INSERT INTO public.all_glamping_properties (
   NULL,
   'No', NULL, 'Yes', 'Yes', 'Yes',
   'No', 'No', 'No',
-  'Yes', 'Yes',
-  'Yes', 'Yes',
+  'Yes', 'Yes', 'Yes',
   'Jacuzzi; fireplace; seasonal A/C; kitchenette; king bed; cable/DVD; deck/patio.'
 );
