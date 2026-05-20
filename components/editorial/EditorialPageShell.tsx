@@ -125,7 +125,7 @@ export const EDITORIAL_GUIDE_TITLE_CLASS =
 
 /** Wrapper for guide HTML bodies from CMS strings */
 export const EDITORIAL_GUIDE_PROSE_CLASS =
-  'text-sm font-light leading-relaxed text-neutral-700 [&_a]:text-sage-teal-text [&_a]:underline [&_a]:decoration-sage-200 [&_a]:underline-offset-2 hover:[&_a]:text-sage-teal-text-hover [&_a]:hover:decoration-sage-400 [&_img]:my-8 [&_img]:w-full [&_img]:border [&_img]:border-sage-200/90 [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-4 [&_strong]:font-medium [&_strong]:text-neutral-900';
+  'text-sm font-light leading-relaxed text-neutral-700 [&_a]:text-sage-teal-text [&_a]:underline [&_a]:decoration-sage-200 [&_a]:underline-offset-2 hover:[&_a]:text-sage-teal-text-hover [&_a]:hover:decoration-sage-400 [&_img]:my-8 [&_img]:w-full [&_img]:border [&_img]:border-sage-200/90 [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-4 [&_h3]:font-bold [&_h3]:text-neutral-900 [&_strong]:font-medium [&_strong]:text-neutral-900';
 
 export const EDITORIAL_METRIC_VALUE_CLASS =
   'mt-3 font-light text-4xl tabular-nums tracking-tight text-neutral-900 sm:text-5xl';

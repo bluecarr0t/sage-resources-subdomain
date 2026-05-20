@@ -98,7 +98,7 @@ export default function GlossaryTermTemplate({
             </h1>
           </header>
 
-          <div className="flex flex-col gap-12 lg:flex-row lg:items-start">
+          <div className="flex flex-col gap-12 lg:flex-row">
             <div className="min-w-0 flex-1">
               {term.image ? (
                 <div className="relative mb-10 aspect-[16/10] w-full overflow-hidden border border-sage-200/90 bg-neutral-100/40">
@@ -228,8 +228,8 @@ export default function GlossaryTermTemplate({
               </p>
             </div>
 
-            <aside className="lg:w-56 lg:shrink-0">
-              <div className="sticky top-28 space-y-6">
+            <aside className="lg:w-56 lg:shrink-0 lg:self-stretch">
+              <div className="sticky top-28 z-10 max-h-[calc(100vh-7rem)] space-y-6 overflow-y-auto">
                 {relatedTerms.length > 0 ? (
                   <div className={`${EDITORIAL_CARD_CLASS} ${accent.card} p-4`}>
                     <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Related terms</h2>

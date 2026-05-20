@@ -55,7 +55,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const pathname = `/${locale}/guides/${guide.slug}`;
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
-  const imageUrl = `https://sageoutdooradvisory.com/og-image.jpg`;
+  const imageUrl =
+    guide.hero.backgroundImage ?? `https://sageoutdooradvisory.com/og-image.jpg`;
 
   const publishDate = guide.lastModified || new Date().toISOString().split('T')[0];
   const modifiedDate = guide.lastModified || publishDate;

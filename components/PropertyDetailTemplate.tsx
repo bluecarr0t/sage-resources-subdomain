@@ -431,12 +431,6 @@ export default function PropertyDetailTemplate({
                       </span>
                     </li>
                   ) : null}
-                  {unitTypes.length > 0 ? (
-                    <li>
-                      <span className="text-neutral-500">Unit types</span>{' '}
-                      <span className="text-neutral-800">{unitTypes.join(', ')}</span>
-                    </li>
-                  ) : null}
                   {otaListings.length > 0 ? (
                     <li>
                       <span className="text-neutral-500">Third-Party Listing Platforms</span>
@@ -459,23 +453,6 @@ export default function PropertyDetailTemplate({
                           </li>
                         ))}
                       </ul>
-                    </li>
-                  ) : null}
-                  {firstProperty.property_total_sites != null &&
-                  firstProperty.property_total_sites !== '' ? (
-                    <li>
-                      <span className="text-neutral-500">Total sites</span>{' '}
-                      <span className="tabular-nums text-neutral-800">
-                        {formatInt(firstProperty.property_total_sites)}
-                      </span>
-                    </li>
-                  ) : null}
-                  {firstProperty.glamping_service_tier ? (
-                    <li>
-                      <span className="text-neutral-500">Service tier</span>{' '}
-                      <span className="capitalize text-neutral-800">
-                        {firstProperty.glamping_service_tier}
-                      </span>
                     </li>
                   ) : null}
                   {firstProperty.year_site_opened ? (

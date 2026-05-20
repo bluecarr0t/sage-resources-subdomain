@@ -14,7 +14,8 @@ export const appraisalGuides: Record<string, GuideContent> = {
       subheadline: "Everything you need to know about appraisals for outdoor hospitality properties",
       ctaText: "Schedule Free Consultation",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
-      backgroundImage: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg"
+      backgroundImage:
+        "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/guides/property-appraisals-complete-guide-hero.webp"
     },
     tableOfContents: [
       { title: "Introduction", anchor: "introduction", level: 1 },

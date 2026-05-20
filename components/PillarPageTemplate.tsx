@@ -235,7 +235,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
             <div className="relative mb-12 aspect-[16/10] w-full overflow-hidden border border-sage-200/90 bg-neutral-100/40">
               <Image
                 src={content.hero.backgroundImage}
-                alt=""
+                alt={`${content.hero.headline} — white geodesic glamping dome on a deck overlooking mountains`}
                 fill
                 className="object-cover"
                 priority
@@ -297,9 +297,13 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
             </div>
           )}
 
-          <div className="flex flex-col gap-12 lg:flex-row lg:items-start">
-            <aside className={`lg:w-56 lg:shrink-0 ${showTOC ? 'block' : 'hidden lg:block'}`}>
-              <div className={`sticky top-28 ${EDITORIAL_CARD_CLASS} p-4`}>
+          <div className="flex flex-col gap-12 lg:flex-row">
+            <aside
+              className={`lg:w-56 lg:shrink-0 lg:self-stretch ${showTOC ? 'block' : 'hidden lg:block'}`}
+            >
+              <div
+                className={`sticky top-28 z-10 max-h-[calc(100vh-7rem)] overflow-y-auto ${EDITORIAL_CARD_CLASS}`}
+              >
                 <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Contents</h2>
                 <nav className="mt-4 space-y-1" aria-label="Table of contents">
                   {content.tableOfContents.map((item, index) => (
