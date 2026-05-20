@@ -21,17 +21,19 @@ describe('buildPropertyMapEmbedUrl', () => {
     expect(buildPropertyMapEmbedUrl({})).toBeNull();
   });
 
-  it('uses embed v1 API when key is set', () => {
+  it('uses embed v1 place mode with coordinates when key is set (pins exact location)', () => {
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY = 'test-key';
     const url = buildPropertyMapEmbedUrl({
       lat: 52.268,
       lon: -113.811,
       propertyName: 'Collinswood Retreat',
       addressLine: 'Red Deer, AB',
+      placeQuery: 'Collinswood Retreat, Red Deer, AB, Canada',
     });
     expect(url).toContain('maps/embed/v1/place');
     expect(url).toContain('key=test-key');
-    expect(url).toContain('Collinswood');
+    expect(url).toContain('q=52.268%2C-113.811');
+    expect(url).not.toContain('Collinswood');
   });
 
   it('embeds by place query when lat/lon are missing', () => {

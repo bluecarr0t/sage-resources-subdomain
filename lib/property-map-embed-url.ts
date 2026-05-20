@@ -48,17 +48,24 @@ export function buildPropertyGoogleMapsUrl(
 /**
  * iframe src for an embedded map. Works with coordinates and/or a place query
  * (needed when DB lat/lon are empty).
+ *
+ * When lat/lon are known, the embed uses coordinate place mode so Google drops a
+ * pin at the property instead of centering on a city-level text query.
  */
 export function buildPropertyMapEmbedUrl(params: PropertyMapEmbedParams): string | null {
   const label = buildQueryLabel(params);
   const hasCoords = hasValidCoordinates(params.lat, params.lon);
   if (!label && !hasCoords) return null;
 
-  const zoom = params.zoom ?? 14;
+  const baseZoom = params.zoom ?? 14;
+  const zoom = hasCoords ? Math.max(baseZoom, 15) : baseZoom;
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
-  const q = encodeURIComponent(label ?? `${params.lat},${params.lon}`);
 
   if (apiKey) {
+    const placeQuery = hasCoords
+      ? `${params.lat},${params.lon}`
+      : (label ?? `${params.lat},${params.lon}`);
+    const q = encodeURIComponent(placeQuery);
     return `https://www.google.com/maps/embed/v1/place?key=${encodeURIComponent(apiKey)}&q=${q}&zoom=${zoom}&maptype=roadmap`;
   }
 
@@ -66,5 +73,6 @@ export function buildPropertyMapEmbedUrl(params: PropertyMapEmbedParams): string
     return `https://www.google.com/maps?q=${params.lat},${params.lon}&z=${zoom}&output=embed`;
   }
 
+  const q = encodeURIComponent(label!);
   return `https://www.google.com/maps?q=${q}&output=embed`;
 }
