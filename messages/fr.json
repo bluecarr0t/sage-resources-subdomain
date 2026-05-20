@@ -2174,7 +2174,7 @@
     },
     "hero": {
       "headline": "Intelligence de marché pour l'hospitalité de plein air",
-      "subheadline": "Plus de 650 benchmarks en Amérique du Nord et en Europe, guides faisabilité et évaluation, terminologie pour les équipes en hospitalité de plein air.",
+      "subheadline": "Plus de {count, number} benchmarks en Amérique du Nord et en Europe, guides faisabilité et évaluation, terminologie pour les équipes en hospitalité de plein air.",
       "quickStats": {
         "properties": "Plus de 650 propriétés de référence",
         "usCanada": "Couverture États-Unis, Canada et Europe",
@@ -2228,7 +2228,7 @@
         },
         {
           "question": "How much does a glamping feasibility study cost?",
-          "answer": "Glamping feasibility studies typically cost between $5,000 and $15,000, depending on the scope, property size, and complexity. Factors include market research depth, financial modeling requirements, and site assessment needs. More comprehensive studies with detailed analysis may cost $20,000 or more."
+          "answer": "Glamping feasibility studies typically cost between $8,000 and $15,000, depending on the scope, property size, and complexity. Factors include market research depth, financial modeling requirements, and site assessment needs. More comprehensive studies with detailed analysis may cost $20,000 or more."
         },
         {
           "question": "What should I look for in a glamping property?",

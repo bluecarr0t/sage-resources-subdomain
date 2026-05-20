@@ -7,6 +7,27 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createLocaleLinks } from '@/lib/locale-links';
 import { locales } from '@/i18n';
 import { supabase } from '@/lib/supabase';
+import { EDITORIAL_BUTTON_PRIMARY_CLASS } from '@/components/editorial/EditorialPageShell';
+
+const HEADER_LOGO_URL =
+  'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/logos/sage-logo-header-nav.png';
+
+const HEADER_SHELL_CLASS = 'bg-black border-b border-gray-800/50 backdrop-blur-lg';
+
+const NAV_LINK_IDLE_CLASS =
+  'px-3 py-2 text-[11px] font-medium uppercase tracking-widest text-gray-300 transition-colors hover:bg-white/5 hover:text-white';
+
+const NAV_LINK_ACTIVE_CLASS =
+  'px-3 py-2 text-[11px] font-medium uppercase tracking-widest text-white bg-white/10';
+
+const NAV_DROPDOWN_PANEL_CLASS =
+  'absolute top-full right-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-lg border border-gray-800/50 bg-[#1a1a1a] py-1 shadow-2xl backdrop-blur-xl';
+
+const NAV_DROPDOWN_ITEM_CLASS =
+  'block px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-gray-300 transition-colors hover:bg-white/5 hover:text-white';
+
+const NAV_DROPDOWN_ITEM_ACTIVE_CLASS =
+  'block px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-white bg-white/10';
 
 interface FloatingHeaderProps {
   locale?: string;
@@ -20,11 +41,11 @@ interface FloatingHeaderProps {
   showSpacer?: boolean;
 }
 
-export default function FloatingHeader({ 
+export default function FloatingHeader({
   locale: propLocale,
   links: propLinks,
   showFullNav = true,
-  showSpacer = true
+  showSpacer = true,
 }: FloatingHeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -40,24 +61,21 @@ export default function FloatingHeader({
   const resourcesButtonRef = useRef<HTMLButtonElement>(null);
   const servicesButtonRef = useRef<HTMLButtonElement>(null);
   const lastScrollY = useRef(0);
-  const scrollThreshold = 100; // Minimum scroll distance before hiding header
+  const scrollThreshold = 100;
 
-  // Auto-detect locale from pathname if not provided
   const locale = useMemo(() => {
     if (propLocale) return propLocale;
     if (!pathname) return 'en';
     const segments = pathname.split('/').filter(Boolean);
     const firstSegment = segments[0];
-    return locales.includes(firstSegment as any) ? firstSegment : 'en';
+    return locales.includes(firstSegment as (typeof locales)[number]) ? firstSegment : 'en';
   }, [propLocale, pathname]);
 
-  // Generate links if not provided
   const links = useMemo(() => {
     if (propLinks) return propLinks;
     return createLocaleLinks(locale);
   }, [propLinks, locale]);
 
-  // Default links if not provided
   const defaultLinks = {
     guides: `/${locale}/guides`,
     glossary: `/${locale}/glossary`,
@@ -70,32 +88,26 @@ export default function FloatingHeader({
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      // Update scrolled state for styling
       setIsScrolled(currentScrollY > 20);
-      
-      // Always show header at the top of the page
+
       if (currentScrollY < scrollThreshold) {
         setIsHeaderVisible(true);
         lastScrollY.current = currentScrollY;
         return;
       }
-      
-      // Determine scroll direction
+
       const scrollingDown = currentScrollY > lastScrollY.current;
       const scrollingUp = currentScrollY < lastScrollY.current;
-      
-      // Only update if scroll direction changed significantly (prevents flickering)
+
       if (scrollingDown && currentScrollY - lastScrollY.current > 5) {
         setIsHeaderVisible(false);
       } else if (scrollingUp && lastScrollY.current - currentScrollY > 5) {
         setIsHeaderVisible(true);
       }
-      
+
       lastScrollY.current = currentScrollY;
     };
 
-    // Throttle scroll events for better performance
     let ticking = false;
     const throttledHandleScroll = () => {
       if (!ticking) {
@@ -111,29 +123,29 @@ export default function FloatingHeader({
     return () => window.removeEventListener('scroll', throttledHandleScroll);
   }, [scrollThreshold]);
 
-  // Keep header visible when dropdowns or mobile menu are open
   useEffect(() => {
     if (isResourcesOpen || isServicesOpen || isMobileMenuOpen) {
       setIsHeaderVisible(true);
     }
   }, [isResourcesOpen, isServicesOpen, isMobileMenuOpen]);
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Check authentication state
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
     };
 
     checkAuth();
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
     });
 
@@ -142,7 +154,6 @@ export default function FloatingHeader({
     };
   }, []);
 
-  // Handle sign out
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
@@ -155,7 +166,6 @@ export default function FloatingHeader({
     }
   };
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -167,7 +177,6 @@ export default function FloatingHeader({
     };
   }, [isMobileMenuOpen]);
 
-  // Handle click outside for Resources dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -191,7 +200,6 @@ export default function FloatingHeader({
     };
   }, [isResourcesOpen]);
 
-  // Handle click outside for Services dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -219,283 +227,222 @@ export default function FloatingHeader({
     return pathname === path || pathname?.startsWith(path + '/');
   };
 
+  const resourcesActive = isActive(navLinks.guides) || isActive(navLinks.glossary);
+
+  const navTriggerClass = (active: boolean) =>
+    active
+      ? `${NAV_LINK_ACTIVE_CLASS} flex items-center gap-1`
+      : `${NAV_LINK_IDLE_CLASS} flex items-center gap-1`;
+
+  const chevron = (open: boolean) => (
+    <svg
+      className={`h-3 w-3 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+
   return (
     <>
-      {/* Spacer to prevent content from going under the floating header */}
-      {showSpacer && <div className="h-24 md:h-20" />}
-      
-      {/* Floating Header */}
+      {showSpacer ? <div className="h-16 md:h-16" aria-hidden /> : null}
+
       <header
-        className={`fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-50 transition-all duration-300 ${
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${HEADER_SHELL_CLASS} ${
           isHeaderVisible
             ? 'translate-y-0 opacity-100'
             : '-translate-y-full opacity-0 pointer-events-none'
-        } ${
-          isScrolled
-            ? 'shadow-2xl backdrop-blur-xl bg-black border border-gray-800/50'
-            : 'shadow-xl backdrop-blur-lg bg-black border border-gray-800/30'
-        }`}
-        style={{
-          borderRadius: '24px',
-        }}
+        } ${isScrolled ? 'shadow-xl' : 'shadow-lg'}`}
       >
-        <div className="px-4 sm:px-6 lg:px-8 py-0">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link 
-              href={`/${locale}`}
-              className="flex items-center flex-shrink-0 hover:opacity-90 transition-opacity"
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <Link
+            href={`/${locale}`}
+            className="flex shrink-0 items-center hover:opacity-90 transition-opacity"
+          >
+            <div className="relative h-10 w-36 sm:h-11 sm:w-40">
+              <Image
+                src={HEADER_LOGO_URL}
+                alt="Sage Outdoor Advisory"
+                fill
+                className="object-contain object-left"
+                priority
+                fetchPriority="high"
+              />
+            </div>
+          </Link>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            {showFullNav ? (
+              <nav className="hidden lg:flex items-center gap-0.5">
+                <div className="relative">
+                  <button
+                    ref={resourcesButtonRef}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsResourcesOpen(!isResourcesOpen);
+                      setIsServicesOpen(false);
+                    }}
+                    className={navTriggerClass(resourcesActive)}
+                    aria-expanded={isResourcesOpen}
+                  >
+                    Resources
+                    {chevron(isResourcesOpen)}
+                  </button>
+                  {isResourcesOpen ? (
+                    <div
+                      ref={resourcesDropdownRef}
+                      className={NAV_DROPDOWN_PANEL_CLASS}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Link
+                        href={navLinks.guides}
+                        className={
+                          isActive(navLinks.guides)
+                            ? NAV_DROPDOWN_ITEM_ACTIVE_CLASS
+                            : NAV_DROPDOWN_ITEM_CLASS
+                        }
+                        onClick={() => setIsResourcesOpen(false)}
+                      >
+                        Guides
+                      </Link>
+                      <Link
+                        href={navLinks.glossary}
+                        className={
+                          isActive(navLinks.glossary)
+                            ? NAV_DROPDOWN_ITEM_ACTIVE_CLASS
+                            : NAV_DROPDOWN_ITEM_CLASS
+                        }
+                        onClick={() => setIsResourcesOpen(false)}
+                      >
+                        Industry Terms
+                      </Link>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="relative">
+                  <button
+                    ref={servicesButtonRef}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsServicesOpen(!isServicesOpen);
+                      setIsResourcesOpen(false);
+                    }}
+                    className={navTriggerClass(false)}
+                    aria-expanded={isServicesOpen}
+                  >
+                    Services
+                    {chevron(isServicesOpen)}
+                  </button>
+                  {isServicesOpen ? (
+                    <div
+                      ref={servicesDropdownRef}
+                      className={`${NAV_DROPDOWN_PANEL_CLASS} min-w-[13rem]`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Link
+                        href="https://sageoutdooradvisory.com/feasibility-study-glamping-resorts/"
+                        className={NAV_DROPDOWN_ITEM_CLASS}
+                        onClick={() => setIsServicesOpen(false)}
+                      >
+                        Feasibility Studies
+                      </Link>
+                      <Link
+                        href="https://sageoutdooradvisory.com/appraisal-glamping-resorts/"
+                        className={NAV_DROPDOWN_ITEM_CLASS}
+                        onClick={() => setIsServicesOpen(false)}
+                      >
+                        Appraisals
+                      </Link>
+                      <div className="my-1 border-t border-gray-800/50" />
+                      <Link
+                        href="https://sageoutdooradvisory.com/services-overview/"
+                        className={`${NAV_DROPDOWN_ITEM_CLASS} font-semibold`}
+                        onClick={() => setIsServicesOpen(false)}
+                      >
+                        All Services →
+                      </Link>
+                    </div>
+                  ) : null}
+                </div>
+              </nav>
+            ) : null}
+
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className={`hidden lg:flex ${NAV_LINK_IDLE_CLASS} disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isSigningOut ? 'Signing out…' : 'Sign out'}
+              </button>
+            ) : null}
+
+            <Link
+              href="https://sageoutdooradvisory.com/contact-us/"
+              className={`${EDITORIAL_BUTTON_PRIMARY_CLASS} shrink-0 px-4 py-2 text-[10px] sm:px-5 sm:text-[11px]`}
             >
-              <div className="relative w-[115px] h-[115px] md:w-36 md:h-36 flex-shrink-0 -my-4 md:-my-6">
-                <Image
-                  src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/logos/sage-logo-black-header.webp"
-                  alt="Sage Outdoor Advisory - Outdoor Hospitality Feasibility Studies and Appraisals"
-                  fill
-                  className="object-contain"
-                  priority
-                  fetchPriority="high"
-                />
-              </div>
+              Get Free Consultation
             </Link>
 
-            {/* Action Buttons and Navigation */}
-            <div className="flex items-center gap-3">
-              {/* Desktop Navigation - Resources and Services */}
-              {showFullNav && (
-                <>
-                  <nav className="hidden lg:flex items-center gap-1">
-                    {/* Resources Dropdown */}
-                    <div className="relative">
-                      <button
-                        ref={resourcesButtonRef}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setIsResourcesOpen(!isResourcesOpen);
-                        }}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
-                          isActive(navLinks.guides) || isActive(navLinks.glossary)
-                            ? 'text-white bg-white/10'
-                            : 'text-gray-300 hover:text-white hover:bg-white/5'
-                        }`}
-                      >
-                        Resources
-                        <svg
-                          className={`w-4 h-4 transition-transform duration-200 ${
-                            isResourcesOpen ? 'rotate-180' : ''
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </button>
-                      {isResourcesOpen && (
-                        <div
-                          ref={resourcesDropdownRef}
-                          className="absolute top-full right-0 mt-2 w-48 bg-[#1a1a1a] border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl z-50"
-                          onClick={(e) => {
-                            // Keep dropdown open when clicking inside
-                            e.stopPropagation();
-                          }}
-                        >
-                          <Link
-                            href={navLinks.guides}
-                            className={`block px-4 py-3 text-base font-medium transition-all ${
-                              isActive(navLinks.guides)
-                                ? 'text-white bg-white/10'
-                                : 'text-gray-300 hover:text-white hover:bg-white/5'
-                            }`}
-                            onClick={() => {
-                              // Only close when actually navigating
-                              setIsResourcesOpen(false);
-                            }}
-                          >
-                            Guides
-                          </Link>
-                          <Link
-                            href={navLinks.glossary}
-                            className={`block px-4 py-3 text-base font-medium transition-all ${
-                              isActive(navLinks.glossary)
-                                ? 'text-white bg-white/10'
-                                : 'text-gray-300 hover:text-white hover:bg-white/5'
-                            }`}
-                            onClick={() => {
-                              // Only close when actually navigating
-                              setIsResourcesOpen(false);
-                            }}
-                          >
-                            Industry Terms
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Services Dropdown - Links to Main Site */}
-                    <div className="relative">
-                      <button
-                        ref={servicesButtonRef}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setIsServicesOpen(!isServicesOpen);
-                        }}
-                        className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 text-gray-300 hover:text-white hover:bg-white/5"
-                      >
-                        Services
-                        <svg
-                          className={`w-4 h-4 transition-transform duration-200 ${
-                            isServicesOpen ? 'rotate-180' : ''
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </button>
-                      {isServicesOpen && (
-                        <div
-                          ref={servicesDropdownRef}
-                          className="absolute top-full right-0 mt-2 w-56 bg-[#1a1a1a] border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl z-50"
-                          onClick={(e) => {
-                            // Keep dropdown open when clicking inside
-                            e.stopPropagation();
-                          }}
-                        >
-                          <Link
-                            href="https://sageoutdooradvisory.com/feasibility-study-glamping-resorts/"
-                            className="block px-4 py-3 text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5"
-                            onClick={() => {
-                              // Only close when actually navigating
-                              setIsServicesOpen(false);
-                            }}
-                          >
-                            Feasibility Studies
-                          </Link>
-                          <Link
-                            href="https://sageoutdooradvisory.com/appraisal-glamping-resorts/"
-                            className="block px-4 py-3 text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5"
-                            onClick={() => {
-                              // Only close when actually navigating
-                              setIsServicesOpen(false);
-                            }}
-                          >
-                            Appraisals
-                          </Link>
-                          <div className="border-t border-gray-800/50 my-1" />
-                          <Link
-                            href="https://sageoutdooradvisory.com/services-overview/"
-                            className="block px-4 py-3 text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5 font-semibold"
-                            onClick={() => {
-                              // Only close when actually navigating
-                              setIsServicesOpen(false);
-                            }}
-                          >
-                            All Services →
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </nav>
-                </>
-              )}
-              
-              {/* Sign Out Button - Desktop */}
-              {isAuthenticated && (
-                <button
-                  onClick={handleSignOut}
-                  disabled={isSigningOut}
-                  className="hidden lg:flex px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-all duration-200 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSigningOut ? 'Signing out...' : 'Sign Out'}
-                </button>
-              )}
-
-              <Link
-                href="https://sageoutdooradvisory.com/contact-us/"
-                className="px-4 py-2 md:px-6 md:py-2.5 bg-[#006b5f] text-white text-sm font-semibold rounded-lg hover:bg-[#005a4f] transition-all duration-200 shadow-lg hover:shadow-xl flex-shrink-0"
-                style={{ borderRadius: '12px' }}
+            {showFullNav ? (
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 text-gray-300 transition-colors hover:text-white"
+                aria-label="Toggle menu"
+                aria-expanded={isMobileMenuOpen}
               >
-                Get Free Consultation
-              </Link>
-
-              {/* Mobile Menu Button */}
-              {showFullNav && (
-                <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="lg:hidden p-2 text-gray-300 hover:text-white transition-colors"
-                  aria-label="Toggle menu"
-                  aria-expanded={isMobileMenuOpen}
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    {isMobileMenuOpen ? (
-                      <path d="M6 18L18 6M6 6l12 12" />
-                    ) : (
-                      <path d="M4 6h16M4 12h16M4 18h16" />
-                    )}
-                  </svg>
-                </button>
-              )}
-            </div>
+                  {isMobileMenuOpen ? (
+                    <path d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            ) : null}
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {showFullNav && isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-800/50 px-4 py-4">
-            <nav className="flex flex-col gap-2">
-              {/* Resources Section */}
+        {showFullNav && isMobileMenuOpen ? (
+          <div className="lg:hidden border-t border-gray-800/50 bg-black px-4 py-4">
+            <nav className="flex flex-col gap-1">
               <div>
                 <button
+                  type="button"
                   onClick={() => setIsResourcesOpen(!isResourcesOpen)}
-                  className="w-full px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between"
+                  className={`${NAV_LINK_IDLE_CLASS} w-full flex items-center justify-between`}
                 >
                   Resources
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      isResourcesOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  {chevron(isResourcesOpen)}
                 </button>
-                {isResourcesOpen && (
-                  <div className="ml-4 mt-2 flex flex-col gap-1">
+                {isResourcesOpen ? (
+                  <div className="ml-2 mt-1 flex flex-col gap-0.5 border-l border-gray-700 pl-3">
                     <Link
                       href={navLinks.guides}
-                      className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
+                      className={
                         isActive(navLinks.guides)
-                          ? 'text-white bg-white/10'
-                          : 'text-gray-300 hover:text-white hover:bg-white/5'
-                      }`}
+                          ? NAV_DROPDOWN_ITEM_ACTIVE_CLASS
+                          : NAV_DROPDOWN_ITEM_CLASS
+                      }
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsResourcesOpen(false);
@@ -503,14 +450,14 @@ export default function FloatingHeader({
                     >
                       Guides
                     </Link>
-                    {navLinks.partners && (
+                    {navLinks.partners ? (
                       <Link
                         href={navLinks.partners}
-                        className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
+                        className={
                           isActive(navLinks.partners)
-                            ? 'text-white bg-white/10'
-                            : 'text-gray-300 hover:text-white hover:bg-white/5'
-                        }`}
+                            ? NAV_DROPDOWN_ITEM_ACTIVE_CLASS
+                            : NAV_DROPDOWN_ITEM_CLASS
+                        }
                         onClick={() => {
                           setIsMobileMenuOpen(false);
                           setIsResourcesOpen(false);
@@ -518,14 +465,14 @@ export default function FloatingHeader({
                       >
                         Our Partners
                       </Link>
-                    )}
+                    ) : null}
                     <Link
                       href={navLinks.glossary}
-                      className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
+                      className={
                         isActive(navLinks.glossary)
-                          ? 'text-white bg-white/10'
-                          : 'text-gray-300 hover:text-white hover:bg-white/5'
-                      }`}
+                          ? NAV_DROPDOWN_ITEM_ACTIVE_CLASS
+                          : NAV_DROPDOWN_ITEM_CLASS
+                      }
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsResourcesOpen(false);
@@ -534,37 +481,23 @@ export default function FloatingHeader({
                       Industry Terms
                     </Link>
                   </div>
-                )}
+                ) : null}
               </div>
 
-              {/* Services Section */}
               <div>
                 <button
+                  type="button"
                   onClick={() => setIsServicesOpen(!isServicesOpen)}
-                  className="w-full px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between"
+                  className={`${NAV_LINK_IDLE_CLASS} w-full flex items-center justify-between`}
                 >
                   Services
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      isServicesOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  {chevron(isServicesOpen)}
                 </button>
-                {isServicesOpen && (
-                  <div className="ml-4 mt-2 flex flex-col gap-1">
+                {isServicesOpen ? (
+                  <div className="ml-2 mt-1 flex flex-col gap-0.5 border-l border-gray-700 pl-3">
                     <Link
                       href="https://sageoutdooradvisory.com/feasibility-study-glamping-resorts/"
-                      className="px-4 py-2 rounded-lg text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5"
+                      className={NAV_DROPDOWN_ITEM_CLASS}
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsServicesOpen(false);
@@ -574,7 +507,7 @@ export default function FloatingHeader({
                     </Link>
                     <Link
                       href="https://sageoutdooradvisory.com/appraisal-glamping-resorts/"
-                      className="px-4 py-2 rounded-lg text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5"
+                      className={NAV_DROPDOWN_ITEM_CLASS}
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsServicesOpen(false);
@@ -584,7 +517,7 @@ export default function FloatingHeader({
                     </Link>
                     <Link
                       href="https://sageoutdooradvisory.com/services-overview/"
-                      className="px-4 py-2 rounded-lg text-base font-medium transition-all text-gray-300 hover:text-white hover:bg-white/5 font-semibold"
+                      className={`${NAV_DROPDOWN_ITEM_CLASS} font-semibold`}
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsServicesOpen(false);
@@ -593,25 +526,25 @@ export default function FloatingHeader({
                       All Services →
                     </Link>
                   </div>
-                )}
+                ) : null}
               </div>
 
-              {/* Sign Out Button - Mobile */}
-              {isAuthenticated && (
+              {isAuthenticated ? (
                 <button
+                  type="button"
                   onClick={() => {
                     handleSignOut();
                     setIsMobileMenuOpen(false);
                   }}
                   disabled={isSigningOut}
-                  className="w-full px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                  className={`${NAV_LINK_IDLE_CLASS} w-full text-left disabled:opacity-50`}
                 >
-                  {isSigningOut ? 'Signing out...' : 'Sign Out'}
+                  {isSigningOut ? 'Signing out…' : 'Sign out'}
                 </button>
-              )}
+              ) : null}
             </nav>
           </div>
-        )}
+        ) : null}
       </header>
     </>
   );

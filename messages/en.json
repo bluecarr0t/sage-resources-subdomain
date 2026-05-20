@@ -310,9 +310,9 @@
     },
     "hero": {
       "headline": "Outdoor hospitality market intelligence",
-      "subheadline": "650+ benchmarks across North America and Europe, feasibility and appraisal guides, and industry terms for outdoor hospitality teams.",
+      "subheadline": "{count, number}+ benchmarks across North America and Europe, feasibility and appraisal guides, and industry terms for outdoor hospitality teams.",
       "quickStats": {
-        "properties": "650+ benchmark properties",
+        "properties": "{count, number} properties on map",
         "usCanada": "US, Canada & Europe coverage",
         "verified": "Research-grade listings"
       }
@@ -364,7 +364,7 @@
         },
         {
           "question": "How much does a glamping feasibility study cost?",
-          "answer": "Glamping feasibility studies typically cost between $5,000 and $15,000, depending on the scope, property size, and complexity. Factors include market research depth, financial modeling requirements, and site assessment needs. More comprehensive studies with detailed analysis may cost $20,000 or more."
+          "answer": "Glamping feasibility studies typically cost between $8,000 and $15,000, depending on the scope, property size, and complexity. Factors include market research depth, financial modeling requirements, and site assessment needs. More comprehensive studies with detailed analysis may cost $20,000 or more."
         },
         {
           "question": "What should I look for in a glamping property?",
@@ -1016,6 +1016,7 @@
       "openStatusClosed": "Closed",
       "openStatusUnderConstruction": "Under construction",
       "openStatusProposedDevelopment": "Proposed development",
+      "openStatusTemporarilyClosed": "Temporarily closed",
       "countryAll": "All countries",
       "countriesLoading": "Loading countries…",
       "countriesFromDataEmpty": "No country values in the table yet. Only All countries is available until rows have a country set.",
@@ -1106,10 +1107,15 @@
       "addRecord": "Add record",
       "addRecordAria": "Add a new property row",
       "addPropertyTitle": "Add property",
-      "addPropertySubtitle": "Enter details below. Property name, city, state, and website are required.",
+      "addPropertySubtitle": "Enter details below. Property name, city, and state are required. Provide an official website or at least one third-party listing URL.",
       "editPropertyTitle": "Edit property",
-      "fieldWebsite": "Website",
-      "createRequiredFields": "Property name, city, state, and website are required.",
+      "fieldWebsite": "Website (official)",
+      "fieldThirdPartyHipcamp": "Hipcamp listing URL",
+      "fieldThirdPartyAirbnb": "Airbnb listing URL",
+      "fieldThirdPartyBooking": "Booking.com listing URL",
+      "fieldThirdPartyVrbo": "Vrbo listing URL",
+      "createRequiredFields": "Property name, city, and state are required.",
+      "createRequiresWebsiteOrThirdParty": "Provide an official website or at least one third-party listing URL (Hipcamp, Airbnb, Booking.com, or Vrbo).",
       "createRecord": "Create record",
       "createSaving": "Creating…",
       "createError": "Failed to create record.",

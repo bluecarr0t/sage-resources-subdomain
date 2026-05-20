@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
+import { computeMapDisplayedPropertyCount } from '@/lib/map-displayed-property-count';
 import { STATE_ABBREVIATIONS, CANADIAN_PROVINCES } from '../utils/stateUtils';
 import { normalizePropertyName } from '../utils/propertyProcessing';
 import { getMapCountryFilterKey, propertyMatchesCountryFilters } from '@/lib/map/map-country-filter';
@@ -173,25 +174,17 @@ export function useFilterComputations({
     return counts;
   }, [allProperties, filterCountry, filterUnitType, filterRateRange]);
 
-  const calculatedDisplayedCount = useMemo(() => {
-    let propertiesToCount = allProperties;
-    propertiesToCount = applyUnitTypeFilter(propertiesToCount, filterUnitType);
-    propertiesToCount = applyRateRangeFilter(propertiesToCount, filterRateRange);
-    propertiesToCount = applyStateFilter(propertiesToCount, filterState);
-
-    const propertiesWithValidCoords = filterPropertiesWithCoordinates(propertiesToCount);
-    const uniquePropertyNames = new Set<string>();
-
-    propertiesWithValidCoords.forEach((p) => {
-      const propertyName = p.property_name;
-      if (!propertyName) return;
-      if (!propertyMatchesCountryFilters(p, filterCountry)) return;
-      const normalizedName = normalizePropertyName(propertyName);
-      uniquePropertyNames.add(normalizedName);
-    });
-
-    return uniquePropertyNames.size;
-  }, [allProperties, filterCountry, filterState, filterUnitType, filterRateRange]);
+  const calculatedDisplayedCount = useMemo(
+    () =>
+      computeMapDisplayedPropertyCount(
+        allProperties,
+        filterCountry,
+        filterState,
+        filterUnitType,
+        filterRateRange
+      ),
+    [allProperties, filterCountry, filterState, filterUnitType, filterRateRange]
+  );
 
   const countryCounts = useMemo(() => {
     const counts: Record<string, number> = {};

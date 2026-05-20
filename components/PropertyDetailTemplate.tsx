@@ -2,11 +2,24 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { SageProperty } from '@/lib/types/sage';
 import { parseCoordinates } from '@/lib/types/sage';
 import RelatedPropertiesCarousel from '@/components/RelatedPropertiesCarousel';
-import FloatingHeader from './FloatingHeader';
+import FloatingHeader from '@/components/FloatingHeader';
+import {
+  EditorialMetricLeader,
+  EditorialPageShell,
+  EDITORIAL_H1_CLASS,
+  EDITORIAL_METRIC_VALUE_CLASS,
+  EDITORIAL_SECTION_LABEL_CLASS,
+} from '@/components/editorial/EditorialPageShell';
+import { createLocaleLinks } from '@/lib/locale-links';
+import { formatGlampingIsOpenPublicLabel } from '@/lib/glamping-is-open';
+import { getPropertyOtaListings } from '@/lib/property-ota-listings';
+import PropertyLocationMapEmbed from '@/components/PropertyLocationMapEmbed';
+import { buildPropertyMapEmbedUrl } from '@/lib/property-map-embed-url';
+import { buildPropertyMapQueryLabel } from '@/lib/property-map-location';
+import type { GlampingPropertyPublicImages } from '@/lib/fetch-glamping-property-public-images';
 import { GooglePlacesData } from '@/lib/google-places';
 import { useDeferredGooglePlacesFetch } from '@/lib/hooks/useDeferredGooglePlacesFetch';
 
@@ -18,726 +31,609 @@ interface PropertyDetailTemplateProps {
   googlePlacesData?: GooglePlacesData | null;
   /** Skips Places Text Search when set (from DB `google_place_id`) */
   googlePlaceId?: string | null;
+  /** When true, do not fetch or display Google ratings, reviews, or photos */
+  skipGooglePlaces?: boolean;
+  /** Sage Storage URLs (e.g. Hipcamp-sourced); preferred over Google Places photos */
+  propertyImages?: GlampingPropertyPublicImages;
   locale?: string;
   /** Visible FAQ copy aligned with JSON-LD (buildPropertyFaqEntries) */
   propertyFaqs?: Array<{ question: string; answer: string }>;
+  /** Server-resolved coordinates when DB lat/lon are empty */
+  mapCoordinates?: [number, number] | null;
 }
 
-/**
- * Generate Google Places Photo URL from photo object
- */
-function getGooglePhotoUrl(photo: {
-  name: string;
-  widthPx?: number;
-  heightPx?: number;
-}, maxWidth: number = 1200, maxHeight: number = 800): string {
-  if (!photo?.name) {
-    return '';
-  }
-  
+function getGooglePhotoUrl(
+  photo: { name: string; widthPx?: number; heightPx?: number },
+  maxWidth: number = 1200,
+  maxHeight: number = 800
+): string {
+  if (!photo?.name) return '';
   const width = photo.widthPx ? Math.min(photo.widthPx, maxWidth) : maxWidth;
   const height = photo.heightPx ? Math.min(photo.heightPx, maxHeight) : maxHeight;
-  const encodedPhotoName = encodeURIComponent(photo.name);
-  
-  return `/api/google-places-photo?photoName=${encodedPhotoName}&maxWidthPx=${width}&maxHeightPx=${height}`;
+  return `/api/google-places-photo?photoName=${encodeURIComponent(photo.name)}&maxWidthPx=${width}&maxHeightPx=${height}`;
 }
 
-/**
- * Check if an amenity field indicates the amenity is available
- */
-function hasAmenity(value: string | null | undefined): boolean {
-  if (!value) return false;
-  const lower = value.toLowerCase().trim();
-  return lower === 'yes' || lower === 'y' || lower === 'true' || lower === '1';
-}
-
-/**
- * Format phone number from "+1 844-993-9888" to "(844)-993-9888"
- */
 function formatPhoneNumber(phone: string | null | undefined): string {
   if (!phone) return '';
-  
-  // Remove "+1 " prefix if present, and remove all spaces and dashes
-  let cleaned = phone.replace(/^\+1\s*/, '').replace(/[\s-]/g, '');
-  
-  // Format as (XXX)-XXX-XXXX if we have 10 digits
+  const cleaned = phone.replace(/^\+1\s*/, '').replace(/[\s-]/g, '');
   if (cleaned.length === 10) {
     return `(${cleaned.slice(0, 3)})-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
   }
-  
-  // If it doesn't match expected format, return original
   return phone;
 }
 
-/**
- * Group properties by location (city, state) or unit type
- */
+function formatUsd(value: string | number | null | undefined): string {
+  if (value == null || value === '') return '—';
+  const n = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]/g, ''));
+  if (!Number.isFinite(n)) return '—';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(n);
+}
+
+function formatInt(value: string | number | null | undefined): string {
+  if (value == null || value === '') return '—';
+  const n = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]/g, ''));
+  if (!Number.isFinite(n)) return '—';
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);
+}
+
 function groupProperties(properties: SageProperty[]) {
   const grouped: Record<string, SageProperty[]> = {};
-  
   properties.forEach((prop) => {
     const locationKey = `${prop.city || 'Unknown'}, ${prop.state || 'Unknown'}`;
-    if (!grouped[locationKey]) {
-      grouped[locationKey] = [];
-    }
+    if (!grouped[locationKey]) grouped[locationKey] = [];
     grouped[locationKey].push(prop);
   });
-  
   return grouped;
 }
 
+const EDITORIAL_LINK_CLASS =
+  'text-neutral-700 underline decoration-neutral-300 underline-offset-2 transition-colors hover:text-neutral-900 hover:decoration-neutral-500';
+
+/** Main column padding when the floating site header is shown above editorial content */
+const EDITORIAL_MAIN_WITH_HEADER_CLASS =
+  'relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-x-visible px-6 pt-32 pb-24 sm:pt-36 sm:pb-32 md:pt-40';
+
 export default function PropertyDetailTemplate({
   properties,
-  slug,
   propertyName,
   nearbyProperties = [],
   googlePlacesData: initialGooglePlacesData,
   googlePlaceId,
-  locale,
+  skipGooglePlaces = false,
+  propertyImages,
+  locale = 'en',
   propertyFaqs = [],
+  mapCoordinates: mapCoordinatesProp = null,
 }: PropertyDetailTemplateProps) {
   const firstProperty = properties[0];
+  const links = useMemo(() => createLocaleLinks(locale), [locale]);
+  const otaListings = useMemo(() => getPropertyOtaListings(properties), [properties]);
+  const hipcampListingUrl = useMemo(
+    () => otaListings.find((l) => l.platform === 'hipcamp')?.url ?? null,
+    [otaListings]
+  );
+
+  const sagePhotoUrls = useMemo(() => {
+    const urls: string[] = [];
+    if (propertyImages?.heroUrl) urls.push(propertyImages.heroUrl);
+    for (const u of propertyImages?.galleryUrls ?? []) {
+      if (u && !urls.includes(u)) urls.push(u);
+    }
+    return urls;
+  }, [propertyImages]);
+
+  const useSagePhotos = sagePhotoUrls.length > 0;
 
   const deferredPlacesParams = useMemo(
-    () => ({
+    () =>
+      skipGooglePlaces || useSagePhotos
+        ? null
+        : {
+            propertyName,
+            city: firstProperty.city ?? null,
+            state: firstProperty.state ?? null,
+            address: firstProperty.address ?? null,
+            placeId: googlePlaceId ?? null,
+          },
+    [
+      skipGooglePlaces,
+      useSagePhotos,
       propertyName,
-      city: firstProperty.city ?? null,
-      state: firstProperty.state ?? null,
-      address: firstProperty.address ?? null,
-      placeId: googlePlaceId ?? null,
-    }),
-    [propertyName, firstProperty.city, firstProperty.state, firstProperty.address, googlePlaceId]
+      firstProperty.city,
+      firstProperty.state,
+      firstProperty.address,
+      googlePlaceId,
+    ]
   );
 
   const { googlePlacesData, phase: placesFetchPhase } = useDeferredGooglePlacesFetch(
-    initialGooglePlacesData ?? undefined,
-    initialGooglePlacesData != null ? null : deferredPlacesParams
+    skipGooglePlaces ? null : (initialGooglePlacesData ?? undefined),
+    deferredPlacesParams
   );
 
-  const showPhotoSkeleton = placesFetchPhase !== 'complete';
-  const showPhotos = placesFetchPhase === 'complete' && (googlePlacesData?.photos?.length ?? 0) > 0;
-  
-  // Use photos from Google Places API (not from database)
-  const photos = googlePlacesData?.photos || [];
-  
+  const googlePhotoUrls =
+    !skipGooglePlaces && placesFetchPhase === 'complete' && googlePlacesData?.photos?.length
+      ? googlePlacesData.photos
+          .map((p) => getGooglePhotoUrl(p, 1200, 800))
+          .filter((url) => url.length > 0)
+      : [];
+
+  const galleryUrls = useSagePhotos ? sagePhotoUrls : googlePhotoUrls;
+  const showPhotoSkeleton = !useSagePhotos && !skipGooglePlaces && placesFetchPhase !== 'complete';
+  const showPhotos = galleryUrls.length > 0;
+  const showGoogleReviews =
+    !skipGooglePlaces && !!(googlePlacesData?.rating || googlePlacesData?.userRatingCount);
+
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   useEffect(() => {
     setCurrentPhotoIndex(0);
-  }, [propertyName, placesFetchPhase]);
-  
-  // Keyboard navigation for photo carousel
+  }, [propertyName, galleryUrls.length, placesFetchPhase]);
+
   const handlePhotoKeyDown = (e: React.KeyboardEvent) => {
-    if (photos.length <= 1) return;
-    
+    if (galleryUrls.length <= 1) return;
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+      setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : galleryUrls.length - 1));
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      setCurrentPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
+      setCurrentPhotoIndex((prev) => (prev < galleryUrls.length - 1 ? prev + 1 : 0));
     }
   };
-  
-  // Build location string
+
   const locationParts: string[] = [];
   if (firstProperty.city) locationParts.push(firstProperty.city);
   if (firstProperty.state) locationParts.push(firstProperty.state);
   if (firstProperty.country) locationParts.push(firstProperty.country);
-  const location = locationParts.join(", ");
-  
-  // Group properties by location
-  const groupedProperties = groupProperties(properties);
-  
-  // Build address
+  const location = locationParts.join(', ');
+
   const addressParts: string[] = [];
   if (firstProperty.address) addressParts.push(firstProperty.address);
   if (firstProperty.city) addressParts.push(firstProperty.city);
   if (firstProperty.state) addressParts.push(firstProperty.state);
   if (firstProperty.zip_code) addressParts.push(firstProperty.zip_code);
-  const fullAddress = addressParts.join(", ");
-  
-  // Get website URL from Google Places API (not from database)
-  const websiteUrl = googlePlacesData?.websiteUri || firstProperty.url;
-  
-  // Get coordinates for map link
-  const coordinates = parseCoordinates(firstProperty.lat, firstProperty.lon);
-  const mapLink = coordinates 
-    ? `/map?lat=${coordinates[0]}&lon=${coordinates[1]}&zoom=15`
-    : '/map';
+  const fullAddress = addressParts.join(', ');
 
-  // Collect all unique unit types from all properties
+  const groupedProperties = groupProperties(properties);
+  const websiteUrl = googlePlacesData?.websiteUri || firstProperty.url;
+  const coordinates =
+    mapCoordinatesProp ?? parseCoordinates(firstProperty.lat, firstProperty.lon);
+  const mapPlaceQuery = useMemo(
+    () => buildPropertyMapQueryLabel(firstProperty),
+    [firstProperty]
+  );
+  const mapAddressLine =
+    fullAddress.trim() ||
+    [propertyName, location].filter(Boolean).join(', ') ||
+    null;
+  const mapLink = coordinates
+    ? `${links.map}?lat=${coordinates[0]}&lon=${coordinates[1]}&zoom=15`
+    : links.map;
+  const showLocationMap = useMemo(
+    () =>
+      buildPropertyMapEmbedUrl({
+        lat: coordinates?.[0],
+        lon: coordinates?.[1],
+        propertyName,
+        addressLine: mapAddressLine,
+        placeQuery: mapPlaceQuery,
+      }) != null,
+    [coordinates, propertyName, mapAddressLine, mapPlaceQuery]
+  );
+
   const unitTypes = Array.from(
     new Set(
       properties
-        .map(p => p.unit_type)
+        .map((p) => p.unit_type)
         .filter((type): type is string => type !== null && type !== undefined && type.trim() !== '')
     )
   ).sort();
 
-  // Collect all amenities from database columns ONLY
-  // Do NOT use Google Places API for amenities - only use all_glamping_properties columns
-  const amenities = {
-    privateBathroom: properties.some(p => hasAmenity(p.unit_private_bathroom)),
-    hotTub: properties.some(p => hasAmenity(p.unit_hot_tub_or_sauna)),
-    pool: properties.some(p => hasAmenity(p.property_pool)),
-    pickballCourts: properties.some(p => hasAmenity(p.property_pickball_courts)),
-    pets: properties.some(p => hasAmenity(p.unit_pets)),
-    water: properties.some(p => hasAmenity(p.unit_water)),
-    shower: properties.some(p => hasAmenity(p.unit_shower)),
-    picnicTable: properties.some(p => hasAmenity(p.unit_picnic_table)),
-    wifi: properties.some(p => hasAmenity(p.unit_wifi)),
-    laundry: properties.some(p => hasAmenity(p.property_laundry)),
-    campfires: properties.some(p => hasAmenity(p.unit_campfires)),
-    playground: properties.some(p => hasAmenity(p.property_playground)),
-    rvVehicleLength: properties.some(p => hasAmenity(p.rv_vehicle_length)),
-    rvParking: properties.some(p => hasAmenity(p.rv_parking)),
-    rvAccommodatesSlideout: properties.some(p => hasAmenity(p.rv_accommodates_slideout)),
-    rvSurfaceType: properties.some(p => hasAmenity(p.rv_surface_type)),
-    rvSurfaceLevel: properties.some(p => hasAmenity(p.rv_surface_level)),
-    rvVehiclesFifthWheels: properties.some(p => hasAmenity(p.rv_vehicles_fifth_wheels)),
-    rvVehiclesClassA: properties.some(p => hasAmenity(p.rv_vehicles_class_a_rvs)),
-    rvVehiclesClassB: properties.some(p => hasAmenity(p.rv_vehicles_class_b_rvs)),
-    rvVehiclesClassC: properties.some(p => hasAmenity(p.rv_vehicles_class_c_rvs)),
-    rvVehiclesToyHauler: properties.some(p => hasAmenity(p.rv_vehicles_toy_hauler)),
-    electricity: properties.some(p => hasAmenity(p.unit_electricity)),
-    charcoalGrill: properties.some(p => hasAmenity(p.unit_charcoal_grill)),
-    miniFridge: properties.some(p => hasAmenity(p.unit_mini_fridge)),
-    bathtub: properties.some(p => hasAmenity(p.unit_bathtub)),
-    woodBurningStove: properties.some(p => hasAmenity(p.unit_wood_burning_stove)),
-    sewerHookUp: properties.some(p => hasAmenity(p.rv_sewer_hook_up)),
-    electricalHookUp: properties.some(p => hasAmenity(p.rv_electrical_hook_up)),
-    generatorsAllowed: properties.some(p => hasAmenity(p.rv_generators_allowed)),
-    waterHookup: properties.some(p => hasAmenity(p.rv_water_hookup)),
-  };
-  
-  // Check if any amenities are present
-  const hasAnyAmenities = Object.values(amenities).some(value => value === true);
+  const hasMultipleLocations = Object.keys(groupedProperties).length > 1;
+  const avgRate = firstProperty.rate_avg_retail_daily_rate;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Floating Header */}
-      <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
+    <EditorialPageShell>
+      <FloatingHeader locale={locale} showFullNav showSpacer={false} />
+      <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>
+        <nav
+          className="mb-10 text-[11px] font-light uppercase tracking-widest text-neutral-500"
+          aria-label="Breadcrumb"
+        >
+          <Link href={links.map} className="transition-colors hover:text-neutral-900">
+            Map
+          </Link>
+          <span className="mx-2 text-neutral-400" aria-hidden>
+            /
+          </span>
+          <span className="text-neutral-700">{propertyName}</span>
+        </nav>
 
-      {/* Breadcrumbs */}
-      <nav className="bg-gray-50 border-b border-gray-200 py-3 pt-32 md:pt-36">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="https://resources.sageoutdooradvisory.com/" className="hover:text-[#006b5f]">
-              Home
-            </Link>
-            <span className="text-gray-400">/</span>
-            <Link href="/map" className="hover:text-[#006b5f]">
-              Map
-            </Link>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-900 font-medium">{propertyName}</span>
-          </div>
-        </div>
-      </nav>
+        <h1 className={EDITORIAL_H1_CLASS}>{propertyName}</h1>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero Section with Photos */}
-        <section className="mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Photos */}
-            <div className="relative">
-              {showPhotos ? (
-                <div 
-                  className="relative w-full h-96 lg:h-full min-h-[400px] rounded-lg overflow-hidden bg-gray-100 group"
-                  role="region"
-                  aria-label={`Photo gallery for ${propertyName}`}
-                  aria-live="polite"
-                  id="property-photos"
-                  tabIndex={photos.length > 1 ? 0 : -1}
-                  onKeyDown={handlePhotoKeyDown}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={getGooglePhotoUrl(photos[currentPhotoIndex], 1200, 800)}
-                    alt={`${propertyName} - ${firstProperty.city || ''} ${firstProperty.state || ''} glamping property photo ${currentPhotoIndex + 1} of ${photos.length}`}
-                    className="w-full h-full object-cover"
-                    loading={currentPhotoIndex === 0 ? "eager" : "lazy"}
-                    fetchPriority={currentPhotoIndex === 0 ? "high" : "auto"}
-                    width={1200}
-                    height={800}
-                    decoding="async"
-                  />
-                  
-                  {/* Navigation Arrows */}
-                  {photos.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1))}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-3 rounded-full transition-all z-20 focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2"
-                        aria-label={`Previous photo of ${propertyName}. Currently showing photo ${currentPhotoIndex + 1} of ${photos.length}`}
-                        aria-controls="property-photos"
-                        type="button"
-                      >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => setCurrentPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0))}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-3 rounded-full transition-all z-20 focus:outline-none focus:ring-2 focus:ring-[#00b6a6] focus:ring-offset-2"
-                        aria-label={`Next photo of ${propertyName}. Currently showing photo ${currentPhotoIndex + 1} of ${photos.length}`}
-                        aria-controls="property-photos"
-                        type="button"
-                      >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                      <div 
-                        className="absolute bottom-4 right-4 bg-black bg-opacity-60 text-white text-sm px-3 py-1 rounded z-10"
-                        role="status"
-                        aria-live="polite"
-                        aria-atomic="true"
-                      >
-                        <span className="sr-only">Photo </span>
-                        <span aria-hidden="true">{currentPhotoIndex + 1} / {photos.length}</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ) : showPhotoSkeleton ? (
-                <div
-                  className="relative w-full h-96 lg:h-full min-h-[400px] rounded-lg overflow-hidden bg-gray-200 animate-pulse"
-                  aria-busy="true"
-                  aria-label={`Loading photos for ${propertyName}`}
-                />
-              ) : (
-                <div 
-                  className="w-full h-96 lg:h-full min-h-[400px] rounded-lg bg-gray-200 flex items-center justify-center"
-                  role="img"
-                  aria-label={`No photos available for ${propertyName}`}
-                >
-                  <p className="text-gray-700">No photos available</p>
-                </div>
-              )}
-            </div>
+        {location ? (
+          <p className="mt-3 text-sm font-light leading-relaxed text-neutral-600">{location}</p>
+        ) : null}
 
-            {/* Property Header Info */}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">{propertyName}</h1>
-              
-              {location && (
-                <p className="text-xl text-gray-600 mb-4">{location}</p>
-              )}
-              
-              {fullAddress && (
-                <p className="text-gray-600 mb-4">{fullAddress}</p>
-              )}
-              
-              {/* Rating from Google Places API */}
-              {(googlePlacesData?.rating || googlePlacesData?.userRatingCount) && (
-                <div className="flex items-center gap-2 mb-4">
-                  {googlePlacesData?.rating && (
-                    <div className="flex items-center gap-1" role="img" aria-label={`Rating: ${googlePlacesData.rating.toFixed(1)} out of 5 stars`}>
-                      <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20" aria-hidden="true">
-                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                      </svg>
-                      <span className="text-lg font-semibold text-gray-900">
-                        {googlePlacesData.rating.toFixed(1)}
-                      </span>
-                    </div>
-                  )}
-                  {googlePlacesData?.userRatingCount && (
-                    <span className="text-gray-600">
-                      ({googlePlacesData.userRatingCount.toLocaleString()} {googlePlacesData.userRatingCount === 1 ? 'review' : 'reviews'})
-                    </span>
-                  )}
-                </div>
-              )}
-              
-              {/* Contact Links */}
-              <div className="flex flex-wrap gap-4 mt-6" role="group" aria-label="Property action links">
-                {websiteUrl && (
-                  <a
-                    href={websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-6 py-2 bg-[#006b5f] text-white rounded-lg hover:bg-[#005a4f] transition-colors focus:outline-none focus:ring-2 focus:ring-[#006b5f] focus:ring-offset-2"
-                    aria-label={`Visit ${propertyName}'s website (opens in new tab)`}
-                  >
-                    Visit Website
-                  </a>
-                )}
-                <Link
-                  href={mapLink}
-                  className="px-6 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-                  aria-label={`View ${propertyName} on map`}
-                >
-                  View on Map
-                </Link>
-              </div>
-              
-              {firstProperty.phone_number && (
-                <p className="text-gray-700 mt-4">
-                  <span className="font-semibold">Phone:</span>{' '}
-                  <a 
-                    href={`tel:${firstProperty.phone_number}`} 
-                    className="text-[#006b5f] hover:underline focus:outline-none focus:ring-2 focus:ring-[#006b5f] focus:ring-offset-2 rounded"
-                    aria-label={`Call ${propertyName} at ${formatPhoneNumber(firstProperty.phone_number)}`}
-                  >
-                    {formatPhoneNumber(firstProperty.phone_number)}
-                  </a>
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
+        {firstProperty.address && fullAddress ? (
+          <p className="mt-1 max-w-xl text-[11px] font-light leading-relaxed text-neutral-500">
+            {fullAddress}
+          </p>
+        ) : null}
 
-        {/* Properties/Locations List */}
-        {Object.keys(groupedProperties).length > 1 && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Locations & Units</h2>
-            <div className="space-y-6">
-              {Object.entries(groupedProperties).map(([locationKey, props]) => (
-                <div key={locationKey} className="border border-gray-200 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">{locationKey}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {props.map((prop) => {
-                      const propCoords = parseCoordinates(prop.lat, prop.lon);
-                      return (
-                        <div key={prop.id} className="border border-gray-100 rounded p-4">
-                          {(prop.site_name || prop.unit_type) && (
-                            <h4 className="font-semibold text-gray-900 mb-2">
-                              {prop.site_name || prop.unit_type || 'Unit'}
-                            </h4>
-                          )}
-                          {prop.unit_type && prop.site_name && prop.unit_type !== prop.site_name && (
-                            <p className="text-sm text-gray-600 mb-2">Unit Type: {prop.unit_type}</p>
-                          )}
-                          {/* Rate Range - Hidden */}
-                          {false && prop.rate_avg_retail_daily_rate && (
-                            <p className="text-sm text-gray-700 mb-2">
-                              <span className="font-semibold">Avg Rate:</span> ${prop.rate_avg_retail_daily_rate}
-                            </p>
-                          )}
-                          {propCoords && (
-                            <Link
-                              href={`/map?lat=${propCoords[0]}&lon=${propCoords[1]}&zoom=15`}
-                              className="text-sm text-blue-600 hover:underline"
-                            >
-                              View on Map →
-                            </Link>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+        {showGoogleReviews && (
+          <p className="mt-3 text-[11px] font-light tabular-nums text-neutral-500">
+            {googlePlacesData?.rating ? (
+              <span className="text-neutral-700">{googlePlacesData.rating.toFixed(1)}</span>
+            ) : null}
+            {googlePlacesData?.rating && googlePlacesData?.userRatingCount ? (
+              <span className="text-neutral-400"> · </span>
+            ) : null}
+            {googlePlacesData?.userRatingCount ? (
+              <span>
+                {googlePlacesData.userRatingCount.toLocaleString()}{' '}
+                {googlePlacesData.userRatingCount === 1 ? 'review' : 'reviews'} on Google
+              </span>
+            ) : null}
+          </p>
         )}
 
-        {/* Details and Amenities Grid */}
-        <div className={`grid grid-cols-1 gap-8 mb-8 ${hasAnyAmenities ? 'lg:grid-cols-3' : ''}`}>
-          {/* Left Column - Details */}
-          <div className={hasAnyAmenities ? 'lg:col-span-2 space-y-6' : 'space-y-4'}>
-            {/* Description from database column (not from Google Places API) */}
-            {firstProperty.description && firstProperty.description.trim() && (
-              <section aria-labelledby="description-heading">
-                <h2 id="description-heading" className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
-                <div className="text-gray-700 whitespace-pre-line" role="article" aria-label={`Description of ${propertyName}`}>
-                  {firstProperty.description}
-                </div>
-              </section>
-            )}
-            
-            {/* Property Details */}
-            <section aria-labelledby="property-details-heading">
-              <h2 id="property-details-heading" className="text-2xl font-bold text-gray-900 mb-4">Property Details</h2>
-              <dl className={`flex flex-col ${hasAnyAmenities ? 'gap-4' : 'gap-2'}`}>
-                {unitTypes.length > 0 && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="font-semibold text-gray-900">Unit Type(s):</dt>
-                    <dd className="text-gray-700">{unitTypes.join(', ')}</dd>
+        <section className="mt-10" aria-label={`Photos of ${propertyName}`}>
+          {showPhotos ? (
+            <div
+              className="relative aspect-[16/10] w-full overflow-hidden border border-sage-200/80 bg-neutral-100/60"
+              role="region"
+              aria-label={`Photo gallery for ${propertyName}`}
+              aria-live="polite"
+              id="property-photos"
+              tabIndex={galleryUrls.length > 1 ? 0 : -1}
+              onKeyDown={handlePhotoKeyDown}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={galleryUrls[currentPhotoIndex]}
+                alt={`${propertyName} — photo ${currentPhotoIndex + 1} of ${galleryUrls.length}`}
+                className="h-full w-full object-cover"
+                loading={currentPhotoIndex === 0 ? 'eager' : 'lazy'}
+                fetchPriority={currentPhotoIndex === 0 ? 'high' : 'auto'}
+                width={1200}
+                height={800}
+                decoding="async"
+              />
+              {galleryUrls.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPhotoIndex((prev) =>
+                        prev > 0 ? prev - 1 : galleryUrls.length - 1
+                      )
+                    }
+                    className="absolute left-3 top-1/2 -translate-y-1/2 border border-neutral-200/90 bg-[#faf9f3]/90 px-2 py-2 text-neutral-700 transition-colors hover:bg-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                    aria-label="Previous photo"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPhotoIndex((prev) =>
+                        prev < galleryUrls.length - 1 ? prev + 1 : 0
+                      )
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 border border-neutral-200/90 bg-[#faf9f3]/90 px-2 py-2 text-neutral-700 transition-colors hover:bg-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                    aria-label="Next photo"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                  <div
+                    className="absolute bottom-3 right-3 bg-[#faf9f3]/90 px-2 py-0.5 text-[10px] tabular-nums text-neutral-600"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {currentPhotoIndex + 1} / {galleryUrls.length}
                   </div>
-                )}
-                {firstProperty.year_site_opened && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="font-semibold text-gray-900">Year Opened:</dt>
-                    <dd className="text-gray-700">{firstProperty.year_site_opened}</dd>
-                  </div>
-                )}
-                {firstProperty.minimum_nights && (
-                  <div className="flex items-baseline gap-2">
-                    <dt className="font-semibold text-gray-900">Minimum Nights:</dt>
-                    <dd className="text-gray-700">{firstProperty.minimum_nights}</dd>
-                  </div>
-                )}
-              </dl>
-            </section>
-            
-            {/* Reviews Section from Google Places API */}
-            {(googlePlacesData?.rating || googlePlacesData?.userRatingCount) && (
-              <section aria-labelledby="reviews-heading">
-                <h2 id="reviews-heading" className="text-2xl font-bold text-gray-900 mb-4">Reviews</h2>
-                <div className="bg-gray-50 rounded-lg p-6" role="region" aria-label="Property reviews and ratings">
-                  <div className="flex items-center gap-4 mb-4">
-                    {googlePlacesData?.rating && (
-                      <div className="flex items-center gap-2">
-                        <svg className="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 20 20" aria-hidden="true">
-                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                        </svg>
-                        <span className="text-3xl font-bold text-gray-900" aria-label={`Rating: ${googlePlacesData.rating.toFixed(1)} out of 5 stars`}>
-                          {googlePlacesData.rating.toFixed(1)}
-                        </span>
-                      </div>
-                    )}
-                    {googlePlacesData?.userRatingCount && (
-                      <div className="flex flex-col">
-                        <span className="text-lg font-semibold text-gray-900">
-                          {googlePlacesData.userRatingCount.toLocaleString()} {googlePlacesData.userRatingCount === 1 ? 'Review' : 'Reviews'}
-                        </span>
-                        <span className="text-sm text-gray-600">Google Reviews</span>
-                      </div>
-                    )}
-                  </div>
-                  {googlePlacesData?.rating && (
-                    <div className="flex items-center gap-1" role="img" aria-label={`${Math.round(googlePlacesData.rating)} out of 5 stars`}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg
-                          key={star}
-                          className={`w-5 h-5 ${
-                            star <= Math.round(googlePlacesData.rating!)
-                              ? 'text-yellow-400 fill-current'
-                              : 'text-gray-300'
-                          }`}
-                          viewBox="0 0 20 20"
-                          aria-hidden="true"
-                        >
-                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                        </svg>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-          </div>
-
-          {/* Right Column - Amenities */}
-          {false && hasAnyAmenities && (
-            <div className="lg:col-span-1">
-              <section aria-labelledby="amenities-heading">
-                <h2 id="amenities-heading" className="text-2xl font-bold text-gray-900 mb-4">Amenities</h2>
-                <ul className="grid grid-cols-1 gap-3" role="list" aria-label="Available amenities">
-                {amenities.pool && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Pool</span>
-                  </li>
-                )}
-                {amenities.hotTub && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Hot Tub / Sauna</span>
-                  </li>
-                )}
-                {amenities.wifi && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Wi-Fi</span>
-                  </li>
-                )}
-                {amenities.pets && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Pets Allowed</span>
-                  </li>
-                )}
-                {amenities.shower && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Showers</span>
-                  </li>
-                )}
-                {amenities.laundry && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Laundry</span>
-                  </li>
-                )}
-                {/* Cooking Equipment column removed in v4 */}
-                {amenities.privateBathroom && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Private Bathroom</span>
-                  </li>
-                )}
-                {amenities.water && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Water Access</span>
-                  </li>
-                )}
-                {/* Trash Service column removed in v4 */}
-                {amenities.picnicTable && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Picnic Tables</span>
-                  </li>
-                )}
-                {amenities.campfires && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Campfires Allowed</span>
-                  </li>
-                )}
-                {amenities.playground && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Playground</span>
-                  </li>
-                )}
-                {amenities.pickballCourts && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Pickleball Courts</span>
-                  </li>
-                )}
-                {amenities.electricity && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Electricity</span>
-                  </li>
-                )}
-                {amenities.charcoalGrill && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Charcoal Grill</span>
-                  </li>
-                )}
-                {amenities.miniFridge && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Mini Fridge</span>
-                  </li>
-                )}
-                {amenities.bathtub && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Bathtub</span>
-                  </li>
-                )}
-                {amenities.woodBurningStove && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Wood Burning Stove</span>
-                  </li>
-                )}
-                {amenities.sewerHookUp && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Sewer Hookup</span>
-                  </li>
-                )}
-                {amenities.electricalHookUp && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Electrical Hookup</span>
-                  </li>
-                )}
-                {amenities.generatorsAllowed && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Generators Allowed</span>
-                  </li>
-                )}
-                {amenities.waterHookup && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">Water Hookup</span>
-                  </li>
-                )}
-                {amenities.rvParking && (
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">RV Parking</span>
-                  </li>
-                )}
-                </ul>
-              </section>
+                </>
+              )}
+            </div>
+          ) : showPhotoSkeleton ? (
+            <div
+              className="aspect-[16/10] w-full animate-pulse border border-sage-200/60 bg-neutral-200/40"
+              aria-busy="true"
+              aria-label={`Loading photos for ${propertyName}`}
+            />
+          ) : (
+            <div
+              className="flex aspect-[16/10] w-full items-center justify-center border border-dashed border-neutral-300 bg-neutral-100/40 text-xs font-light text-neutral-500"
+              role="img"
+              aria-label={`No photos available for ${propertyName}`}
+            >
+              No photos available
             </div>
           )}
+          {useSagePhotos && hipcampListingUrl ? (
+            <p className="mt-2 text-[10px] font-light text-neutral-500">
+              Photos from{' '}
+              <a
+                href={hipcampListingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-neutral-300 underline-offset-2 hover:text-neutral-800"
+              >
+                Hipcamp listing
+              </a>
+            </p>
+          ) : null}
+        </section>
+
+        <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-x-16">
+          <dl className="space-y-12">
+            {avgRate != null && avgRate !== '' ? (
+              <div>
+                <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Avg. retail daily rate</dt>
+                <dd className={EDITORIAL_METRIC_VALUE_CLASS}>{formatUsd(avgRate)}</dd>
+                <p className="mt-4 max-w-xs text-[11px] leading-relaxed text-neutral-500">
+                  Published nightly rate from Sage research; confirm on the operator&apos;s site before booking.
+                </p>
+              </div>
+            ) : null}
+
+            {unitTypes.length > 0 ? (
+              <div>
+                <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Unit types</dt>
+                <dd className="mt-3">
+                  <ul className="space-y-2 border-l border-sage-200 pl-4 text-sm font-light text-neutral-700">
+                    {unitTypes.map((type) => (
+                      <li key={type}>{type}</li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ) : null}
+
+            {firstProperty.description?.trim() ? (
+              <div>
+                <dt className={EDITORIAL_SECTION_LABEL_CLASS}>About</dt>
+                <dd className="mt-4 max-w-prose text-sm font-light leading-relaxed text-neutral-700 whitespace-pre-line">
+                  {firstProperty.description}
+                </dd>
+              </div>
+            ) : null}
+
+            <div>
+              <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Property details</dt>
+              <dd className="mt-3">
+                <ul className="space-y-2 border-l border-sage-200 pl-4 text-sm font-light">
+                  {firstProperty.is_open ? (
+                    <li>
+                      <span className="text-neutral-500">Status</span>{' '}
+                      <span className="text-neutral-800">
+                        {formatGlampingIsOpenPublicLabel(firstProperty.is_open)}
+                      </span>
+                    </li>
+                  ) : null}
+                  {unitTypes.length > 0 ? (
+                    <li>
+                      <span className="text-neutral-500">Unit types</span>{' '}
+                      <span className="text-neutral-800">{unitTypes.join(', ')}</span>
+                    </li>
+                  ) : null}
+                  {otaListings.length > 0 ? (
+                    <li>
+                      <span className="text-neutral-500">Third-Party Listing Platforms</span>
+                      <ul className="mt-1.5 space-y-2 pl-0">
+                        {otaListings.map((listing) => (
+                          <li key={listing.platform}>
+                            <a
+                              href={listing.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={EDITORIAL_LINK_CLASS}
+                            >
+                              {listing.label}
+                            </a>
+                            {listing.siteNames && listing.siteNames.length > 0 ? (
+                              <span className="mt-0.5 block text-xs font-light text-neutral-500">
+                                {listing.siteNames.join(' · ')}
+                              </span>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ) : null}
+                  {firstProperty.property_total_sites != null &&
+                  firstProperty.property_total_sites !== '' ? (
+                    <li>
+                      <span className="text-neutral-500">Total sites</span>{' '}
+                      <span className="tabular-nums text-neutral-800">
+                        {formatInt(firstProperty.property_total_sites)}
+                      </span>
+                    </li>
+                  ) : null}
+                  {firstProperty.glamping_service_tier ? (
+                    <li>
+                      <span className="text-neutral-500">Service tier</span>{' '}
+                      <span className="capitalize text-neutral-800">
+                        {firstProperty.glamping_service_tier}
+                      </span>
+                    </li>
+                  ) : null}
+                  {firstProperty.year_site_opened ? (
+                    <li>
+                      <span className="text-neutral-500">Year opened</span>{' '}
+                      <span className="tabular-nums text-neutral-800">
+                        {firstProperty.year_site_opened}
+                      </span>
+                    </li>
+                  ) : null}
+                  {firstProperty.operating_season_months ? (
+                    <li>
+                      <span className="text-neutral-500">Operating season</span>{' '}
+                      <span className="text-neutral-800">{firstProperty.operating_season_months}</span>
+                    </li>
+                  ) : null}
+                  {firstProperty.minimum_nights ? (
+                    <li>
+                      <span className="text-neutral-500">Minimum nights</span>{' '}
+                      <span className="tabular-nums text-neutral-800">{firstProperty.minimum_nights}</span>
+                    </li>
+                  ) : null}
+                </ul>
+              </dd>
+            </div>
+
+            {propertyFaqs.length > 0 ? (
+              <div aria-labelledby="property-faq-heading">
+                <dt id="property-faq-heading" className={EDITORIAL_SECTION_LABEL_CLASS}>
+                  Questions
+                </dt>
+                <dd className="mt-6 space-y-8">
+                  {propertyFaqs.map((item) => (
+                    <div key={item.question}>
+                      <p className="text-sm font-medium text-neutral-800">{item.question}</p>
+                      <p className="mt-2 text-sm font-light leading-relaxed text-neutral-600">
+                        {item.answer}
+                      </p>
+                    </div>
+                  ))}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+
+          <aside className="space-y-10 lg:border-l lg:border-sage-200 lg:pl-10">
+            <div>
+              <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Visit</h2>
+              <ul className="mt-6 space-y-3 text-sm font-light">
+                {websiteUrl ? (
+                  <li>
+                    <a
+                      href={websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={EDITORIAL_LINK_CLASS}
+                    >
+                      Visit website
+                    </a>
+                  </li>
+                ) : null}
+                {otaListings.map((listing) => (
+                  <li key={`visit-${listing.platform}`}>
+                    <a
+                      href={listing.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={EDITORIAL_LINK_CLASS}
+                    >
+                      {listing.label}
+                      {listing.siteNames && listing.siteNames.length > 0
+                        ? ` (${listing.siteNames.join(', ')})`
+                        : ''}
+                    </a>
+                  </li>
+                ))}
+                {firstProperty.phone_number ? (
+                  <li>
+                    <span className="text-neutral-500">Phone</span>{' '}
+                    <a href={`tel:${firstProperty.phone_number}`} className={EDITORIAL_LINK_CLASS}>
+                      {formatPhoneNumber(firstProperty.phone_number)}
+                    </a>
+                  </li>
+                ) : null}
+              </ul>
+
+              {showLocationMap ? (
+                <PropertyLocationMapEmbed
+                  lat={coordinates?.[0]}
+                  lon={coordinates?.[1]}
+                  propertyName={propertyName}
+                  addressLine={mapAddressLine}
+                  placeQuery={mapPlaceQuery}
+                  sageMapHref={mapLink}
+                  zoom={14}
+                  variant="sidebar"
+                />
+              ) : null}
+            </div>
+
+            {hasMultipleLocations ? (
+              <div>
+                <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Locations &amp; units</h2>
+                <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
+                  Multiple inventory rows for this property in Sage data.
+                </p>
+                <ul className="mt-6 space-y-6 text-sm">
+                  {Object.entries(groupedProperties).map(([locationKey, props]) => (
+                    <li key={locationKey}>
+                      <p className="font-medium text-neutral-800">{locationKey}</p>
+                      <ul className="mt-3 space-y-2">
+                        {props.map((prop) => {
+                          const propCoords = parseCoordinates(prop.lat, prop.lon);
+                          const unitLabel = prop.site_name || prop.unit_type || 'Unit';
+                          return (
+                            <li
+                              key={prop.id}
+                              className="flex min-w-0 items-baseline gap-x-2 font-light"
+                            >
+                              <span className="shrink-0 text-neutral-700">{unitLabel}</span>
+                              <EditorialMetricLeader />
+                              {prop.rate_avg_retail_daily_rate ? (
+                                <span className="shrink-0 tabular-nums text-neutral-900">
+                                  {formatUsd(prop.rate_avg_retail_daily_rate)}
+                                </span>
+                              ) : propCoords ? (
+                                <Link
+                                  href={`${links.map}?lat=${propCoords[0]}&lon=${propCoords[1]}&zoom=15`}
+                                  className="shrink-0 text-[11px] uppercase tracking-wider text-neutral-500 hover:text-neutral-800"
+                                >
+                                  Map
+                                </Link>
+                              ) : null}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {showGoogleReviews && (
+              <div>
+                <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Google reviews</h2>
+                <p className="mt-4 font-light text-3xl tabular-nums tracking-tight text-neutral-900">
+                  {googlePlacesData?.rating?.toFixed(1) ?? '—'}
+                </p>
+                {googlePlacesData?.userRatingCount ? (
+                  <p className="mt-2 text-xs font-light text-neutral-500">
+                    {googlePlacesData.userRatingCount.toLocaleString()}{' '}
+                    {googlePlacesData.userRatingCount === 1 ? 'review' : 'reviews'}
+                  </p>
+                ) : null}
+              </div>
+            )}
+          </aside>
         </div>
 
-        {propertyFaqs.length > 0 && (
-          <section
-            className="mt-12 pt-8 border-t border-gray-200"
-            aria-labelledby="property-faq-heading"
-          >
-            <h2 id="property-faq-heading" className="text-2xl font-bold text-gray-900 mb-6">
-              Questions about this property
-            </h2>
-            <dl className="space-y-6 max-w-3xl">
-              {propertyFaqs.map((item) => (
-                <div key={item.question}>
-                  <dt className="font-semibold text-gray-900 mb-1">{item.question}</dt>
-                  <dd className="text-gray-700 leading-relaxed">{item.answer}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        )}
-
-        {/* Related Properties Carousel */}
-        {nearbyProperties.length > 0 && (
-          <RelatedPropertiesCarousel 
+        {nearbyProperties.length > 0 ? (
+          <RelatedPropertiesCarousel
             properties={nearbyProperties}
             currentPropertyName={propertyName}
+            locale={locale}
+            variant="editorial"
           />
-        )}
+        ) : null}
       </main>
-    </div>
+    </EditorialPageShell>
   );
 }

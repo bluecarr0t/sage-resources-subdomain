@@ -65,7 +65,9 @@ async function main() {
     process.exit(1);
   }
 
-  const res = await fetch(url.trim());
+  const res = await fetch(url.trim(), {
+    headers: { 'User-Agent': 'SageOutdoorAdvisory/1.0 (property-image-backfill)' },
+  });
   if (!res.ok) {
     console.error(`Fetch failed ${res.status} ${res.statusText}`);
     process.exit(1);

@@ -1,10 +1,16 @@
 import { LandingPageContent } from "./landing-pages";
 import { GuideContent } from "./guides/types";
+import {
+  SAGE_HQ_LAT,
+  SAGE_HQ_LON,
+  SAGE_HQ_STREET_ADDRESS,
+  getSageHqGoogleMapsUrl,
+} from "@/lib/sage-headquarters-location";
 
 /** Sage HQ — reused anywhere a LocalBusiness/ProfessionalService needs a postal address */
 export const SAGE_HEADQUARTERS_POSTAL_ADDRESS = {
   "@type": "PostalAddress" as const,
-  streetAddress: "5113 South Harper, Suite 2C – #4001",
+  streetAddress: SAGE_HQ_STREET_ADDRESS,
   addressLocality: "Chicago",
   addressRegion: "Illinois",
   postalCode: "60615",
@@ -65,9 +71,10 @@ export function generateLocalBusinessSchema() {
     "address": SAGE_HEADQUARTERS_POSTAL_ADDRESS,
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": "41.7897",
-      "longitude": "-87.5994"
+      "latitude": String(SAGE_HQ_LAT),
+      "longitude": String(SAGE_HQ_LON),
     },
+    "hasMap": getSageHqGoogleMapsUrl(),
     "areaServed": {
       "@type": "Country",
       "name": "United States"
@@ -797,6 +804,8 @@ export function generatePropertyLocalBusinessSchema(property: {
   google_phone_number?: string | null;
   google_website_uri?: string | null;
   url?: string | null;
+  /** Hipcamp / Airbnb / Booking.com profile URLs for sameAs */
+  thirdPartyListingUrls?: string[] | null;
   google_rating?: number | null;
   google_user_rating_total?: number | null;
   google_photos?: Array<{
@@ -948,6 +957,7 @@ export function generatePropertyLocalBusinessSchema(property: {
       "latitude": lat.toString(),
       "longitude": lon.toString(),
     };
+    schema.hasMap = `https://www.google.com/maps?q=${lat},${lon}&z=14`;
   }
   
   // Add phone
@@ -955,10 +965,16 @@ export function generatePropertyLocalBusinessSchema(property: {
     schema.telephone = property.google_phone_number;
   }
   
-  // Add website
+  // Add website + third-party listing profiles
   const websiteUrl = property.google_website_uri || property.url;
-  if (websiteUrl) {
-    schema.sameAs = [websiteUrl];
+  const sameAs: string[] = [];
+  if (websiteUrl) sameAs.push(websiteUrl);
+  for (const listingUrl of property.thirdPartyListingUrls ?? []) {
+    const u = listingUrl?.trim();
+    if (u && !sameAs.includes(u)) sameAs.push(u);
+  }
+  if (sameAs.length > 0) {
+    schema.sameAs = sameAs;
   }
   
   // Add rating with enhanced review schema

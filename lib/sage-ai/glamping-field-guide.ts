@@ -410,7 +410,7 @@ export const GLAMPING_FIELD_GUIDE: FieldGuideEntry[] = [
       'under construction',
     ],
     tool_tip:
-      'Values: Yes (operating), Under Construction (pre-opening), Proposed Development (planned/not yet operating), Closed (not operating). Use `Yes` in filters for operating-only cohorts.',
+      'Values: Yes (operating), Under Construction (pre-opening), Proposed Development (planned/not yet operating), Temporarily closed (not currently accepting guests), Closed (not operating). Use `Yes` in filters for operating-only cohorts.',
   },
   {
     column: 'research_status',

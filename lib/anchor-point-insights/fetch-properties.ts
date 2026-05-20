@@ -28,6 +28,7 @@ export async function fetchAndNormalizeProperties(
         notNull: ['lat', 'lon'],
         neq: [
           { col: 'is_open', val: 'Closed' },
+          { col: 'is_open', val: 'Temporarily closed' },
           { col: 'is_open', val: 'Under Construction' },
           { col: 'is_open', val: 'Proposed Development' },
         ],

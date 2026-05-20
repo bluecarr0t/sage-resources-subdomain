@@ -78,11 +78,13 @@ const OPEN_STATUS_LABEL_KEYS: Record<
   | 'openStatusYes'
   | 'openStatusUnderConstruction'
   | 'openStatusProposedDevelopment'
+  | 'openStatusTemporarilyClosed'
   | 'openStatusClosed'
 > = {
   Yes: 'openStatusYes',
   'Under Construction': 'openStatusUnderConstruction',
   'Proposed Development': 'openStatusProposedDevelopment',
+  'Temporarily closed': 'openStatusTemporarilyClosed',
   Closed: 'openStatusClosed',
 };
 
@@ -149,11 +151,23 @@ const QUICK_COLUMNS: QuickColumn[] = [
   { key: 'date_updated', label: 'Updated', width: 'w-28' },
 ];
 
+const THIRD_PARTY_URL_FIELD_KEYS = [
+  'ota_url_hipcamp',
+  'ota_url_airbnb',
+  'ota_url_booking_com',
+  'ota_url_vrbo',
+] as const;
+
+function hasWebsiteOrThirdPartyListing(draft: Record<string, string>): boolean {
+  if (draft.url?.trim()) return true;
+  return THIRD_PARTY_URL_FIELD_KEYS.some((k) => Boolean(draft[k]?.trim()));
+}
+
 interface FieldGroup {
   title: string;
   fields: {
     key: string;
-    type?: 'textarea' | 'select';
+    type?: 'textarea' | 'select' | 'url';
     options?: string[];
     /** Use `admin.sageData.landOperator.*` labels for select options. */
     landOperatorSelect?: boolean;
@@ -228,10 +242,19 @@ const SHARED_EDIT_FIELD_GROUPS: FieldGroup[] = [
   {
     title: 'Contact & Description',
     fields: [
-      { key: 'url' },
+      { key: 'url', type: 'url' },
       { key: 'phone_number' },
       { key: 'description', type: 'textarea' },
       { key: 'notes', type: 'textarea' },
+    ],
+  },
+  {
+    title: 'Third-party listing platforms',
+    fields: [
+      { key: 'ota_url_hipcamp', type: 'url' },
+      { key: 'ota_url_airbnb', type: 'url' },
+      { key: 'ota_url_booking_com', type: 'url' },
+      { key: 'ota_url_vrbo', type: 'url' },
     ],
   },
   {
@@ -321,12 +344,7 @@ function emptySiteDraft(): Record<string, string> {
 }
 
 /** Fields that must be filled before creating a row (validated client + API). */
-const REQUIRED_FIELDS_CREATE = new Set([
-  'property_name',
-  'city',
-  'state',
-  'url',
-]);
+const REQUIRED_FIELDS_CREATE = new Set(['property_name', 'city', 'state']);
 
 function formatCellValue(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -410,8 +428,14 @@ function glampingYesNoPillClasses(raw: string): string {
   if (v === 'closed' || v === 'no') {
     return 'bg-red-100 text-red-900 dark:bg-red-900/40 dark:text-red-100';
   }
+  if (v === 'temporarily closed') {
+    return 'bg-orange-100 text-orange-950 dark:bg-orange-900/45 dark:text-orange-100';
+  }
   if (v === 'under construction') {
     return 'bg-amber-100 text-amber-950 dark:bg-amber-900/50 dark:text-amber-100';
+  }
+  if (v === 'proposed development') {
+    return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200';
   }
   return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
 }
@@ -863,6 +887,10 @@ function EditModal({
             return;
           }
         }
+        if (!hasWebsiteOrThirdPartyListing(sharedDraft)) {
+          setError(t('createRequiresWebsiteOrThirdParty'));
+          return;
+        }
         let newPropertyId: string | undefined;
         for (let i = 0; i < siteEntries.length; i++) {
           const payload = mergeSharedAndSiteDrafts(sharedDraft, siteEntries[i].draft);
@@ -1001,7 +1029,15 @@ function EditModal({
     const labelText =
       field.key === 'url'
         ? t('fieldWebsite')
-        : field.key === 'land_operator_category'
+        : field.key === 'ota_url_hipcamp'
+          ? t('fieldThirdPartyHipcamp')
+          : field.key === 'ota_url_airbnb'
+            ? t('fieldThirdPartyAirbnb')
+            : field.key === 'ota_url_booking_com'
+              ? t('fieldThirdPartyBooking')
+              : field.key === 'ota_url_vrbo'
+                ? t('fieldThirdPartyVrbo')
+                : field.key === 'land_operator_category'
           ? t('fieldLandOperatorCategory')
           : field.key === 'property_type'
             ? t('fieldPropertyType')
@@ -1010,7 +1046,10 @@ function EditModal({
               : field.key === 'glamping_service_tier_notes'
                 ? t('fieldServiceTierNotes')
                 : humanizeKey(field.key);
-    const showRequired = mode === 'create' && REQUIRED_FIELDS_CREATE.has(field.key);
+    const showRequired =
+      mode === 'create' &&
+      (REQUIRED_FIELDS_CREATE.has(field.key) ||
+        (field.key === 'url' && !hasWebsiteOrThirdPartyListing(sharedDraft)));
     const disabled = busy || editBlocked;
 
     return (
@@ -1096,11 +1135,14 @@ function EditModal({
         ) : (
           <input
             id={id}
-            type="text"
+            type={field.type === 'url' ? 'url' : 'text'}
             value={value}
             disabled={disabled}
             aria-required={showRequired}
-            autoComplete={field.key === 'url' ? 'url' : undefined}
+            autoComplete={field.type === 'url' ? 'url' : undefined}
+            placeholder={
+              field.type === 'url' && field.key !== 'url' ? 'https://' : undefined
+            }
             onChange={(e) =>
               setSharedDraft((prev) => ({ ...prev, [field.key]: e.target.value }))
             }

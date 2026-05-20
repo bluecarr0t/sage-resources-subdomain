@@ -6,7 +6,7 @@
  *     research_status — exact match (e.g. 'in_progress', 'published', 'new')
  *     country      — case-insensitive exact match (ilike) on `country`
  *     state        — USPS code (e.g. VT); matches abbrev or full state name on `state`
- *     is_open      — exact match on `is_open` when value is Yes | Under Construction | Proposed Development | Closed
+ *     is_open      — exact match on `is_open` when value is Yes | Under Construction | Proposed Development | Temporarily closed | Closed
  *     page         — 1-based (default 1)
  *     pageSize     — default 50, max 200
  *     sortBy       — column name (default 'date_updated')
@@ -32,7 +32,7 @@
  *         sibling group as `ids[0]` (same `property_id`; slug/name+city+state fallback if unset). Max 50 ids.
  *
  * POST /api/admin/sage-glamping-data/properties
- *   Body: fields for a new row (see EDITABLE_COLUMNS). Required: property_name, city, state, url.
+ *   Body: fields for a new row (see EDITABLE_COLUMNS). Required: property_name, city, state, and url or an OTA listing URL.
  *   Defaults: research_status in_progress, is_glamping_property Yes, is_open Yes, source Sage,
  *   date_added / date_updated today (YYYY-MM-DD).
  */
@@ -50,6 +50,11 @@ import {
 } from '@/lib/admin/glamping-property-siblings';
 import { ALL_GLAMPING_PROPERTY_COLUMNS } from '@/lib/sage-ai/all-glamping-properties-columns';
 import { isValidLandOperatorCategory } from '@/lib/glamping-land-operator-category';
+import {
+  applyOtaFieldSanitization,
+  hasOfficialWebsiteOrOtaListing,
+  THIRD_PARTY_PROPAGATE_KEYS,
+} from '@/lib/property-ota-fields';
 import {
   GLAMPING_IS_OPEN_VALUES,
   type GlampingIsOpenValue,
@@ -88,12 +93,7 @@ const EDITABLE_COLUMNS = new Set<string>(
   ALL_GLAMPING_PROPERTY_COLUMNS.filter((c) => !READ_ONLY_COLUMNS.has(c))
 );
 
-const REQUIRED_CREATE_FIELDS = [
-  'property_name',
-  'city',
-  'state',
-  'url',
-] as const;
+const REQUIRED_CREATE_SCALAR_FIELDS = ['property_name', 'city', 'state'] as const;
 
 function normalizeWebsiteUrl(raw: string): string {
   const trimmed = raw.trim();
@@ -159,7 +159,7 @@ export const POST = withAdminAuth(async (request) => {
         typeof value === 'string' && value.trim() === '' ? null : value;
     }
 
-    for (const key of REQUIRED_CREATE_FIELDS) {
+    for (const key of REQUIRED_CREATE_SCALAR_FIELDS) {
       const raw = body[key];
       if (typeof raw !== 'string' || !raw.trim()) {
         return NextResponse.json(
@@ -173,7 +173,22 @@ export const POST = withAdminAuth(async (request) => {
       insertRow[key] = raw.trim();
     }
 
-    insertRow.url = normalizeWebsiteUrl(String(insertRow.url ?? ''));
+    if ('url' in insertRow && insertRow.url != null) {
+      const u = String(insertRow.url).trim();
+      insertRow.url = u ? normalizeWebsiteUrl(u) : null;
+    }
+    applyOtaFieldSanitization(insertRow, { syncPlatformsFromUrls: true });
+
+    if (!hasOfficialWebsiteOrOtaListing(insertRow)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Provide an official website (url) or at least one third-party listing URL (Hipcamp, Airbnb, Booking.com, or Vrbo)',
+        },
+        { status: 400 }
+      );
+    }
 
     insertRow.research_status =
       typeof insertRow.research_status === 'string' &&
@@ -493,6 +508,16 @@ export const PATCH = withAdminAuth(async (request) => {
       sanitized.country = normalizeAllGlampingPropertiesCountryForDb(sanitized.country);
     }
 
+    if ('url' in sanitized && sanitized.url != null) {
+      const u = String(sanitized.url).trim();
+      sanitized.url = u ? normalizeWebsiteUrl(u) : null;
+    }
+
+    const otaTouched = THIRD_PARTY_PROPAGATE_KEYS.some((k) => k in sanitized);
+    if (otaTouched) {
+      applyOtaFieldSanitization(sanitized, { syncPlatformsFromUrls: true });
+    }
+
     if ('brand_id' in sanitized && sanitized.brand_id != null) {
       const bid = sanitized.brand_id;
       if (typeof bid !== 'string' || !isValidGlampingBrandId(bid)) {
@@ -565,7 +590,8 @@ export const PATCH = withAdminAuth(async (request) => {
       );
     }
 
-    if (data && Object.keys(tierPatch).length > 0) {
+    const propagateToSiblings = async (patch: Record<string, unknown>, label: string) => {
+      if (!data || Object.keys(patch).length === 0) return;
       try {
         const { rows } = await fetchSiblingRowsForAnchor(
           supabase,
@@ -577,18 +603,28 @@ export const PATCH = withAdminAuth(async (request) => {
         if (siblingIds.length > 0) {
           const { error: sibErr } = await supabase
             .from(TABLE)
-            .update(tierPatch)
+            .update(patch)
             .in('id', siblingIds);
           if (sibErr) {
-            console.warn(
-              '[admin/sage-data/properties] PATCH tier sibling propagate:',
-              sibErr.message
-            );
+            console.warn(`[admin/sage-data/properties] PATCH ${label} sibling propagate:`, sibErr.message);
           }
         }
       } catch (propErr) {
-        console.warn('[admin/sage-data/properties] PATCH tier propagate failed:', propErr);
+        console.warn(`[admin/sage-data/properties] PATCH ${label} propagate failed:`, propErr);
       }
+    };
+
+    if (Object.keys(tierPatch).length > 0) {
+      await propagateToSiblings(tierPatch, 'tier');
+    }
+
+    if (otaTouched) {
+      const otaPatch = Object.fromEntries(
+        Object.entries(sanitized).filter(([k]) =>
+          (THIRD_PARTY_PROPAGATE_KEYS as readonly string[]).includes(k)
+        )
+      );
+      await propagateToSiblings(otaPatch, 'ota');
     }
 
     return NextResponse.json({

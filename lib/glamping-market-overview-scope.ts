@@ -15,9 +15,7 @@ export const GLAMPING_MARKET_SCOPE_EXCLUDED = [
   'RV parks & resorts',
   'Traditional campgrounds',
   'Only listed on OTAs (e.g. Airbnb)',
-  'State Parks',
-  'National Parks',
-  'Other public land',
+  'State Parks & National Parks',
 ] as const;
 
 /** Footer note in the scope disclosure modal. */

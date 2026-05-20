@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 import { getAllPropertySlugs, getPropertiesBySlug, getNearbyProperties } from "@/lib/properties";
 import { getAllNationalParkSlugs, getNationalParkBySlug, getSlugType } from "@/lib/national-parks";
 import { parseCoordinates } from "@/lib/types/sage";
@@ -6,8 +7,12 @@ import { notFound } from "next/navigation";
 import PropertyDetailTemplate from "@/components/PropertyDetailTemplate";
 import NationalParkDetailTemplate from "@/components/NationalParkDetailTemplate";
 import { generatePropertyBreadcrumbSchema, generatePropertyLocalBusinessSchema, generatePropertyFAQSchema, generatePropertyAmenitiesSchema, buildPropertyFaqEntries } from "@/lib/schema";
+import { getPropertyOtaListings } from "@/lib/property-ota-listings";
+import { resolvePropertyMapCoordinates } from "@/lib/property-map-location";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { fetchGlampingPropertyPublicImages } from "@/lib/fetch-glamping-property-public-images";
+import { shouldSkipGooglePlacesForPropertySlug } from "@/lib/property-google-places-policy";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -318,12 +323,19 @@ export default async function PropertyPage({ params }: PageProps) {
 
   const firstProperty = properties[0];
   const propertyName = firstProperty.property_name || "Unnamed Property";
-  
-  // Get coordinates for nearby properties search
-  const coordinates = parseCoordinates(firstProperty.lat, firstProperty.lon);
+  const skipGooglePlaces = shouldSkipGooglePlacesForPropertySlug(slug);
+  const propertyRowId = typeof firstProperty.id === "number" ? firstProperty.id : Number(firstProperty.id);
+  noStore();
+  const propertyImages = Number.isFinite(propertyRowId)
+    ? await fetchGlampingPropertyPublicImages(propertyRowId)
+    : { heroUrl: null, galleryUrls: [] };
+
+  const coordinates =
+    (await resolvePropertyMapCoordinates(firstProperty)) ??
+    parseCoordinates(firstProperty.lat, firstProperty.lon);
+
   let nearbyProperties: any[] = [];
-  
-  // Fetch nearby properties if coordinates are available
+
   if (coordinates) {
     nearbyProperties = await getNearbyProperties(
       coordinates[0],
@@ -338,6 +350,9 @@ export default async function PropertyPage({ params }: PageProps) {
   const propertyForSchema = {
     ...firstProperty,
     slug: slug,
+    ...(coordinates
+      ? { lat: coordinates[0], lon: coordinates[1] }
+      : {}),
     // Google Places data is not available at build time, so use null
     google_rating: null,
     google_user_rating_total: null,
@@ -348,7 +363,11 @@ export default async function PropertyPage({ params }: PageProps) {
   
   // Generate structured data
   const breadcrumbSchema = generatePropertyBreadcrumbSchema(slug, propertyName);
-  const localBusinessSchema = generatePropertyLocalBusinessSchema(propertyForSchema);
+  const thirdPartyListingUrls = getPropertyOtaListings(properties).map((l) => l.url);
+  const localBusinessSchema = generatePropertyLocalBusinessSchema({
+    ...propertyForSchema,
+    thirdPartyListingUrls,
+  });
   const faqSchema = generatePropertyFAQSchema({
     property_name: firstProperty.property_name,
     unit_type: firstProperty.unit_type,
@@ -423,9 +442,12 @@ export default async function PropertyPage({ params }: PageProps) {
         propertyName={propertyName}
         nearbyProperties={nearbyProperties}
         googlePlacesData={null}
-        googlePlaceId={firstProperty.google_place_id ?? null}
+        googlePlaceId={null}
+        skipGooglePlaces={skipGooglePlaces}
+        propertyImages={propertyImages}
         locale={locale}
         propertyFaqs={propertyFaqEntries}
+        mapCoordinates={coordinates}
       />
     </>
   );

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import FooterLocationMap from "@/components/FooterLocationMap";
 import { defaultLocale } from "@/i18n";
 import { createLocaleLinks } from "@/lib/locale-links";
+import { generateLocalBusinessSchema } from "@/lib/schema";
 
 interface FooterProps {
   /** Subdomain routes use `/[locale]/...`; legal pages stay at site root. */
@@ -9,17 +11,24 @@ interface FooterProps {
 
 export default function Footer({ locale = defaultLocale }: FooterProps) {
   const links = createLocaleLinks(locale);
+  const localBusinessSchema = generateLocalBusinessSchema();
 
   return (
     <footer className="bg-black text-white py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4">Sage Outdoor Advisory</h3>
-            <p className="text-gray-400">
-              5113 South Harper, Suite 2C – #4001<br />
+            <address className="not-italic text-gray-400">
+              5113 South Harper, Suite 2C – #4001
+              <br />
               Chicago, Illinois 60615
-            </p>
+            </address>
+            <FooterLocationMap />
           </div>
           <div>
             <h4 className="font-semibold mb-4">Resources</h4>

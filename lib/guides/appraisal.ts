@@ -10,7 +10,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     quickAnswer: "An appraisal is a licensed specialist’s opinion of what a property is worth today. Lenders rely on it for loan sizing; buyers and sellers use it to set a fair price. Outdoor hospitality assets usually need income-based methods, not just home comps. Timelines and scope vary by property complexity.",
     category: "appraisal",
     hero: {
-      headline: "Property Appraisals Complete Guide",
+      headline: "Appraisals Complete Guide",
       subheadline: "Everything you need to know about appraisals for outdoor hospitality properties",
       ctaText: "Schedule Free Consultation",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",

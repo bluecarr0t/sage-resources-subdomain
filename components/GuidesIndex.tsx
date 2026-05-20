@@ -4,6 +4,17 @@ import { GuideContent } from "@/lib/guides";
 import Link from "next/link";
 import { useState } from "react";
 import { createLocaleLinks } from "@/lib/locale-links";
+import {
+  EDITORIAL_BODY_CLASS,
+  EDITORIAL_CARD_CLASS,
+  EDITORIAL_DIVIDER_CLASS,
+  EDITORIAL_FILTER_ACTIVE_CLASS,
+  EDITORIAL_FILTER_IDLE_CLASS,
+  EDITORIAL_H2_CLASS,
+  EDITORIAL_INPUT_CLASS,
+  EDITORIAL_LINK_CLASS,
+  EDITORIAL_SECTION_LABEL_CLASS,
+} from "@/components/editorial/EditorialPageShell";
 
 interface Category {
   id: string;
@@ -29,7 +40,6 @@ export default function GuidesIndex({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Filter guides based on search
   const filteredGuides = allGuides.filter((guide) =>
     guide.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     guide.metaDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -44,58 +54,42 @@ export default function GuidesIndex({
     : categories;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Search Bar */}
-      <div className="mb-8">
-        <div className="relative">
+    <div>
+      <div className="mb-10">
+        <label className={EDITORIAL_SECTION_LABEL_CLASS}>
+          <span className="sr-only">Search guides</span>
           <input
             type="text"
             placeholder="Search guides..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-6 py-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-[#006b5f] focus:border-[#006b5f]"
+            className={EDITORIAL_INPUT_CLASS}
           />
-          <svg
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
+        </label>
       </div>
 
-      {/* Category Filter */}
       {!searchQuery && (
-        <div className="mb-8 flex flex-wrap gap-3">
+        <div className="mb-10 flex flex-wrap gap-2">
           <button
+            type="button"
             onClick={() => setSelectedCategory(null)}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              selectedCategory === null
-                ? "bg-[#006b5f] text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
+            className={`px-4 py-2 ${selectedCategory === null ? EDITORIAL_FILTER_ACTIVE_CLASS : EDITORIAL_FILTER_IDLE_CLASS}`}
           >
-            All Guides
+            All guides
           </button>
           {categories.map((category) => (
             <button
               key={category.id}
+              type="button"
               onClick={() =>
                 setSelectedCategory(
                   selectedCategory === category.id ? null : category.id
                 )
               }
-              className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+              className={`px-4 py-2 ${
                 selectedCategory === category.id
-                  ? "bg-[#006b5f] text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? EDITORIAL_FILTER_ACTIVE_CLASS
+                  : EDITORIAL_FILTER_IDLE_CLASS
               }`}
             >
               {category.name} ({category.guides.length})
@@ -104,13 +98,12 @@ export default function GuidesIndex({
         </div>
       )}
 
-      {/* Search Results */}
       {searchQuery && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Search Results ({filteredGuides.length})
+          <h2 className={EDITORIAL_H2_CLASS}>
+            Search results ({filteredGuides.length})
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {filteredGuides.map((guide) => (
               <GuideCard key={guide.slug} guide={guide} guideLink={links.guide} />
             ))}
@@ -118,66 +111,55 @@ export default function GuidesIndex({
         </div>
       )}
 
-      {/* Guides by Category */}
       {!searchQuery &&
-        displayedCategories.map((category) => {
-          return (
-            <div key={category.id} className="mb-16">
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  {category.name}
-                </h2>
-                <p className="text-gray-600 text-lg">{category.description}</p>
-                <span className="text-gray-600 text-sm">
-                  ({category.guides.length} guides)
-                </span>
+        displayedCategories.map((category) => (
+          <section key={category.id} className="mb-14 border-t border-sage-200/80 pt-12 first:border-t-0 first:pt-0">
+            <h2 className="font-[Georgia] text-base font-medium uppercase tracking-[0.2em] text-neutral-900">
+              {category.name}
+            </h2>
+            <p className={`mt-3 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>{category.description}</p>
+            <p className="mt-1 text-[11px] text-neutral-500">
+              {category.guides.length} guides
+            </p>
+
+            {category.pillarPages.length > 0 && (
+              <div className="mt-8">
+                <h3 className={EDITORIAL_H2_CLASS}>Complete guides</h3>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  {category.pillarPages.map((guide) => (
+                    <GuideCard
+                      key={guide.slug}
+                      guide={guide}
+                      isPillar
+                      guideLink={links.guide}
+                    />
+                  ))}
+                </div>
               </div>
+            )}
 
-              {/* Pillar Pages (Complete Guides) */}
-              {category.pillarPages.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                    Complete Guides
-                  </h3>
-                  <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-6">
-                    {category.pillarPages.map((guide) => (
-                      <GuideCard
-                        key={guide.slug}
-                        guide={guide}
-                        isPillar={true}
-                        guideLink={links.guide}
-                      />
-                    ))}
-                  </div>
+            {category.clusterPages.length > 0 && (
+              <div className="mt-8">
+                <h3 className={EDITORIAL_H2_CLASS}>Related guides</h3>
+                <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {category.clusterPages.map((guide) => (
+                    <GuideCard key={guide.slug} guide={guide} guideLink={links.guide} />
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
+          </section>
+        ))}
 
-              {/* Cluster Pages */}
-              {category.clusterPages.length > 0 && (
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                    Related Guides
-                  </h3>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {category.clusterPages.map((guide) => (
-                      <GuideCard key={guide.slug} guide={guide} guideLink={links.guide} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-      {/* No Results */}
       {searchQuery && filteredGuides.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-600 text-lg">
+        <div className="py-12 text-center">
+          <p className={EDITORIAL_BODY_CLASS}>
             No guides found matching &ldquo;{searchQuery}&rdquo;
           </p>
           <button
+            type="button"
             onClick={() => setSearchQuery("")}
-            className="mt-4 text-[#006b5f] hover:text-[#005a4f] underline"
+            className={`mt-4 ${EDITORIAL_LINK_CLASS}`}
           >
             Clear search
           </button>
@@ -205,39 +187,23 @@ function GuideCard({
   return (
     <Link
       href={guideLink(guide.slug)}
-      className={`block bg-white border-2 rounded-lg p-6 hover:shadow-lg transition-all ${
-        isPillar
-          ? "border-[#006b5f] hover:border-[#005a4f]"
-          : "border-gray-200 hover:border-[#006b5f]"
-      }`}
+      className={`${EDITORIAL_CARD_CLASS} ${isPillar ? 'border-sage-400/90' : ''}`}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            {guide.hero.headline}
-          </h3>
-          {isPillar && (
-            <span className="inline-block text-xs bg-[#006b5f] text-white px-3 py-1 rounded-full font-semibold mb-2">
-              Complete Guide
-            </span>
-          )}
-        </div>
-        <span
-          className={`text-xs px-2 py-1 rounded-full ${
-            isPillar
-              ? "bg-[#006b5f]/10 text-[#006b5f]"
-              : "bg-gray-100 text-gray-700"
-          }`}
-        >
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-sm font-bold text-neutral-900">{guide.hero.headline}</h3>
+        <span className="shrink-0 text-[10px] uppercase tracking-wider text-neutral-500">
           {categoryLabels[guide.category]}
         </span>
       </div>
-      <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-        {guide.metaDescription}
-      </p>
-      <div className="flex items-center text-[#006b5f] text-sm font-medium">
-        Read guide →
-      </div>
+      {isPillar ? (
+        <span className="mt-2 inline-block text-[10px] uppercase tracking-widest text-sage-700">
+          Complete guide
+        </span>
+      ) : null}
+      <p className={`mt-3 line-clamp-3 ${EDITORIAL_BODY_CLASS}`}>{guide.metaDescription}</p>
+      <span className={`mt-4 inline-block text-[11px] uppercase tracking-wider ${EDITORIAL_LINK_CLASS}`}>
+        Read guide
+      </span>
     </Link>
   );
 }

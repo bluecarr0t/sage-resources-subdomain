@@ -4,12 +4,22 @@ import {
   propertyLevelAdrValues,
   recordPropertyAdrSample,
 } from '@/lib/fetch-glamping-industry-metrics';
-import { bucketGlampingIsOpenForMetrics } from '@/lib/glamping-is-open';
+import {
+  bucketGlampingIsOpenForMetrics,
+  formatGlampingIsOpenPublicLabel,
+} from '@/lib/glamping-is-open';
 
 describe('fetch-glamping-industry-metrics helpers', () => {
+  it('formatGlampingIsOpenPublicLabel maps Yes to Open', () => {
+    expect(formatGlampingIsOpenPublicLabel('Yes')).toBe('Open');
+    expect(formatGlampingIsOpenPublicLabel('yes')).toBe('Open');
+    expect(formatGlampingIsOpenPublicLabel('Under Construction')).toBe('Under Construction');
+  });
+
   it('bucketGlampingIsOpenForMetrics recognizes proposed development', () => {
     expect(bucketGlampingIsOpenForMetrics('Proposed Development')).toBe('proposed_development');
     expect(bucketGlampingIsOpenForMetrics('Under Construction')).toBe('under_construction');
+    expect(bucketGlampingIsOpenForMetrics('Temporarily closed')).toBe('closed');
     expect(bucketGlampingIsOpenForMetrics('Yes')).toBe('yes');
   });
 

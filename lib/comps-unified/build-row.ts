@@ -93,7 +93,7 @@ export interface UnifiedCompRow {
   property_type: string | null;
   /** Yes/No when present on matview (Sage / RoverPass); reports + OTAs may be constant Yes in SQL. */
   is_glamping_property: string | null;
-  /** Sage operational status (Yes / Under Construction / Proposed Development / Closed). */
+  /** Sage operational status (Yes / Under Construction / Proposed Development / Temporarily closed / Closed). */
   is_open: string | null;
   /** For Sage, matview merges `unit_type` + `site_name` + `property_type` so unit filters match site labels. */
   unit_type: string | null;

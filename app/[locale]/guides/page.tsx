@@ -1,13 +1,10 @@
 import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { getAllGuideSlugs, getGuidesByCategory, getGuideSync } from "@/lib/guides";
 import GuidesIndex from "@/components/GuidesIndex";
-import Footer from "@/components/Footer";
-import FloatingHeader from "@/components/FloatingHeader";
+import { EditorialCtaBand } from "@/components/editorial/EditorialCtaBand";
+import { EditorialMarketingLayout } from "@/components/editorial/EditorialMarketingLayout";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
-import { createLocaleLinks } from "@/lib/locale-links";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -74,14 +71,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function GuidesPage({ params }: PageProps) {
   const { locale } = params;
-  
-  // Validate locale
+
   if (!locales.includes(locale as Locale)) {
     notFound();
   }
-  
+
   const t = await getTranslations({ locale, namespace: 'guides' });
-  
+
   const allGuides = getAllGuideSlugs()
     .map((slug) => getGuideSync(slug))
     .filter((guide): guide is NonNullable<typeof guide> => guide !== null);
@@ -89,7 +85,6 @@ export default async function GuidesPage({ params }: PageProps) {
   const appraisalGuides = getGuidesByCategory("appraisal");
   const industryGuides = getGuidesByCategory("industry");
 
-  // Separate pillar pages (complete guides) from cluster pages for each category
   const categories = [
     {
       id: "feasibility",
@@ -129,68 +124,16 @@ export default async function GuidesPage({ params }: PageProps) {
     },
   ];
 
-  const links = createLocaleLinks(locale);
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Floating Header */}
-      <FloatingHeader locale={locale} showSpacer={false} />
-
-      {/* Hero Section */}
-      <section className="relative pt-32 md:pt-36 pb-32 md:pb-40 overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg"
-            alt="Outdoor hospitality guides background featuring scenic landscape gradient"
-            fill
-            className="object-cover"
-            priority
-            sizes="100vw"
-            quality={90}
-          />
-          {/* Overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-indigo-900/40" />
-        </div>
-        
-        {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-              {t('title')}
-            </h1>
-            <p className="text-xl text-white/95 max-w-3xl mx-auto drop-shadow-md">
-              {t('subtitle')}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <main>
-        {/* Guides Index Component */}
-        <GuidesIndex allGuides={allGuides} categories={categories} locale={locale} />
-
-        {/* CTA Section */}
-        <section className="bg-[#006b5f] py-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              {t('cta.title')}
-            </h2>
-            <p className="text-xl text-white/90 mb-8">
-              {t('cta.description')}
-            </p>
-            <Link
-              href="https://sageoutdooradvisory.com/contact-us/"
-              className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
-            >
-              {t('cta.button')}
-            </Link>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <Footer locale={locale} />
-    </div>
+    <EditorialMarketingLayout locale={locale} title={t('title')} subtitle={t('subtitle')}>
+      <GuidesIndex allGuides={allGuides} categories={categories} locale={locale} />
+      <EditorialCtaBand
+        title={t('cta.title')}
+        description={t('cta.description')}
+        buttonLabel={t('cta.button')}
+        buttonHref="https://sageoutdooradvisory.com/contact-us/"
+        external
+      />
+    </EditorialMarketingLayout>
   );
 }

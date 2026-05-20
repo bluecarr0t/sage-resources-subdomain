@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
         .eq('is_open', 'Yes')
         .neq('is_open', 'Proposed Development')
         .neq('is_open', 'Under Construction')
+        .neq('is_open', 'Temporarily closed')
         .neq('is_open', 'Closed')
         .eq('research_status', 'published')
         .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)

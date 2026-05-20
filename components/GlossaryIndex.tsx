@@ -1,9 +1,22 @@
 "use client";
 
 import { GlossaryTerm } from "@/lib/glossary/index";
+import { getGlossaryCategoryAccent } from "@/lib/glossary-category-accent";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  EDITORIAL_BODY_CLASS,
+  EDITORIAL_CARD_CLASS,
+  EDITORIAL_GLOSSARY_TERM_TITLE_CLASS,
+  EDITORIAL_DIVIDER_CLASS,
+  EDITORIAL_FILTER_ACTIVE_CLASS,
+  EDITORIAL_FILTER_IDLE_CLASS,
+  EDITORIAL_H2_CLASS,
+  EDITORIAL_INPUT_CLASS,
+  EDITORIAL_LINK_CLASS,
+  EDITORIAL_SECTION_LABEL_CLASS,
+} from "@/components/editorial/EditorialPageShell";
 
 interface GlossaryIndexProps {
   allTerms: GlossaryTerm[];
@@ -26,98 +39,78 @@ export default function GlossaryIndex({
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter terms based on search
   const filteredTerms = allTerms.filter(term =>
     term.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
     term.definition.toLowerCase().includes(searchQuery.toLowerCase()) ||
     term.seoKeywords.some(keyword => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Get letters that have terms, with "#" first for numeric terms
   const availableLetters = Object.keys(termsByLetter).sort((a, b) => {
     if (a === "#") return -1;
     if (b === "#") return 1;
     return a.localeCompare(b);
   });
 
+  const tabClass = (active: boolean) =>
+    `border-b-2 py-3 text-[11px] font-medium uppercase tracking-widest transition-colors ${
+      active
+        ? 'border-sage-600 text-neutral-900'
+        : 'border-transparent text-neutral-500 hover:text-neutral-800'
+    }`;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Search Bar */}
-      <div className="mb-8">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder={t('searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-6 py-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-[#006b5f] focus:border-[#006b5f]"
-          />
-          <svg
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
+    <div>
+      <div className="mb-10">
+        <input
+          type="text"
+          placeholder={t('searchPlaceholder')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={EDITORIAL_INPUT_CLASS}
+          aria-label={t('searchPlaceholder')}
+        />
       </div>
 
-      {/* Tabs */}
-      <div className="mb-8 border-b border-gray-200">
-        <div className="flex space-x-8">
-          <button
-            onClick={() => {
-              setActiveTab("alphabetical");
-              setSelectedCategory(null);
-            }}
-            className={`py-4 px-2 border-b-2 font-semibold ${
-              activeTab === "alphabetical"
-                ? "border-[#006b5f] text-[#006b5f]"
-                : "border-transparent text-gray-600 hover:text-gray-700"
-            }`}
-          >
-            {t('tabs.alphabetical')}
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("category");
-              setSelectedLetter(null);
-            }}
-            className={`py-4 px-2 border-b-2 font-semibold ${
-              activeTab === "category"
-                ? "border-[#006b5f] text-[#006b5f]"
-                : "border-transparent text-gray-600 hover:text-gray-700"
-            }`}
-          >
-            {t('tabs.byCategory')}
-          </button>
-        </div>
+      <div className={`mb-10 flex gap-8 border-b ${EDITORIAL_DIVIDER_CLASS}`}>
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab("alphabetical");
+            setSelectedCategory(null);
+          }}
+          className={tabClass(activeTab === "alphabetical")}
+        >
+          {t('tabs.alphabetical')}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab("category");
+            setSelectedLetter(null);
+          }}
+          className={tabClass(activeTab === "category")}
+        >
+          {t('tabs.byCategory')}
+        </button>
       </div>
 
-      {/* Alphabetical View */}
       {activeTab === "alphabetical" && (
         <div>
-          {/* Letter Navigation */}
-          <div className="mb-6 flex flex-wrap gap-2">
+          <div className="mb-8 flex flex-wrap gap-2">
             {availableLetters.map((letter) => (
               <button
                 key={letter}
+                type="button"
                 onClick={() => {
                   setSelectedLetter(selectedLetter === letter ? null : letter);
                   if (typeof document !== 'undefined') {
                     document.getElementById(`letter-${letter}`)?.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                className={`min-w-[2.25rem] px-3 py-1.5 ${
                   selectedLetter === letter
-                    ? "bg-[#006b5f] text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? EDITORIAL_FILTER_ACTIVE_CLASS
+                    : EDITORIAL_FILTER_IDLE_CLASS
                 }`}
               >
                 {letter}
@@ -125,13 +118,12 @@ export default function GlossaryIndex({
             ))}
           </div>
 
-          {/* Terms by Letter */}
           {searchQuery ? (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className={EDITORIAL_H2_CLASS}>
                 {t('searchResults', { count: filteredTerms.length })}
               </h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredTerms.map((term) => (
                   <GlossaryTermCard key={term.slug} term={term} locale={locale} />
                 ))}
@@ -142,13 +134,13 @@ export default function GlossaryIndex({
               {availableLetters.map((letter) => {
                 const terms = termsByLetter[letter];
                 if (selectedLetter && selectedLetter !== letter) return null;
-                
+
                 return (
-                  <div key={letter} id={`letter-${letter}`} className="mb-12">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-6 border-b-2 border-gray-200 pb-2">
+                  <div key={letter} id={`letter-${letter}`} className="mb-12 border-t border-sage-200/80 pt-10 first:border-t-0 first:pt-0">
+                    <h2 className="font-[Georgia] text-2xl font-light tracking-tight text-neutral-900">
                       {letter}
                     </h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {terms.map((term) => (
                         <GlossaryTermCard key={term.slug} term={term} locale={locale} />
                       ))}
@@ -161,7 +153,6 @@ export default function GlossaryIndex({
         </div>
       )}
 
-      {/* Category View */}
       {activeTab === "category" && (
         <div>
           {categories.map((category) => {
@@ -170,12 +161,14 @@ export default function GlossaryIndex({
             if (selectedCategory && selectedCategory !== category) return null;
 
             return (
-              <div key={category} className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900">{category}</h2>
-                  <span className="text-gray-600">({terms.length} terms)</span>
+              <div key={category} className="mb-12 border-t border-sage-200/80 pt-10 first:border-t-0 first:pt-0">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="font-[Georgia] text-base font-medium uppercase tracking-[0.2em] text-neutral-900">
+                    {category}
+                  </h2>
+                  <span className="text-[11px] text-neutral-500">{terms.length} terms</span>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {terms.map((term) => (
                     <GlossaryTermCard key={term.slug} term={term} locale={locale} />
                   ))}
@@ -186,13 +179,13 @@ export default function GlossaryIndex({
         </div>
       )}
 
-      {/* No Results */}
       {searchQuery && filteredTerms.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-600 text-lg">{t('noResults', { query: searchQuery })}</p>
+        <div className="py-12 text-center">
+          <p className={EDITORIAL_BODY_CLASS}>{t('noResults', { query: searchQuery })}</p>
           <button
+            type="button"
             onClick={() => setSearchQuery("")}
-            className="mt-4 text-[#006b5f] hover:text-[#005a4f] underline"
+            className={`mt-4 ${EDITORIAL_LINK_CLASS}`}
           >
             {t('clearSearch')}
           </button>
@@ -204,23 +197,27 @@ export default function GlossaryIndex({
 
 function GlossaryTermCard({ term, locale }: { term: GlossaryTerm; locale: string }) {
   const t = useTranslations('glossary');
-  
+  const accent = getGlossaryCategoryAccent(term.category);
+
   return (
     <Link
       href={`/${locale}/glossary/${term.slug}`}
-      className="block bg-white border border-gray-200 rounded-lg p-6 hover:border-[#006b5f] hover:shadow-lg transition-all"
+      className={`${EDITORIAL_CARD_CLASS} group ${accent.card}`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="text-xl font-bold text-gray-900">{term.term}</h3>
-        <span className="text-xs bg-[#006b5f]/10 text-[#006b5f] px-2 py-1 rounded-full">
+      <div className="flex items-start justify-between gap-2">
+        <h3
+          className={`${EDITORIAL_GLOSSARY_TERM_TITLE_CLASS} transition-colors group-hover:text-sage-800`}
+        >
+          {term.term}
+        </h3>
+        <span className={`shrink-0 text-[10px] font-medium uppercase tracking-wider ${accent.label}`}>
           {term.category}
         </span>
       </div>
-      <p className="text-gray-600 text-sm">{t('cardHint')}</p>
-      <div className="mt-4 flex items-center text-[#006b5f] text-sm font-medium">
-        {t('readMore')} →
-      </div>
+      <p className={`mt-3 ${EDITORIAL_BODY_CLASS}`}>{t('cardHint')}</p>
+      <span className={`mt-4 inline-block text-[11px] uppercase tracking-wider ${EDITORIAL_LINK_CLASS}`}>
+        {t('readMore')}
+      </span>
     </Link>
   );
 }
-

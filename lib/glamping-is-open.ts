@@ -6,6 +6,7 @@ export const GLAMPING_IS_OPEN_VALUES = [
   'Yes',
   'Under Construction',
   'Proposed Development',
+  'Temporarily closed',
   'Closed',
 ] as const;
 
@@ -19,6 +20,14 @@ export type GlampingIsOpenMetricsBucket =
   | 'closed'
   | 'other';
 
+/** Public-facing label for `is_open` (DB stores `Yes` for operating sites). */
+export function formatGlampingIsOpenPublicLabel(raw: string | null | undefined): string {
+  const v = (raw ?? '').trim();
+  if (!v) return '';
+  if (v.toLowerCase() === 'yes') return 'Open';
+  return v;
+}
+
 /** Classify `is_open` for published-property counts on /glamping-market-overview. */
 export function bucketGlampingIsOpenForMetrics(
   raw: string | null | undefined
@@ -27,13 +36,14 @@ export function bucketGlampingIsOpenForMetrics(
   if (v === 'yes') return 'yes';
   if (v === 'under construction') return 'under_construction';
   if (v === 'proposed development') return 'proposed_development';
-  if (v === 'closed' || v === 'no') return 'closed';
+  if (v === 'closed' || v === 'no' || v === 'temporarily closed') return 'closed';
   return 'other';
 }
 
 /** `is_open` values hidden from the public `/map` marker layer. */
 export const PUBLIC_MAP_EXCLUDED_IS_OPEN = [
   'Closed',
+  'Temporarily closed',
   'Under Construction',
   'Proposed Development',
 ] as const satisfies readonly GlampingIsOpenValue[];
@@ -56,6 +66,7 @@ export function isGlampingOperatingForAnalytics(isOpen: string | null | undefine
   if (
     v === 'no' ||
     v === 'closed' ||
+    v === 'temporarily closed' ||
     v === 'under construction' ||
     v === 'proposed development'
   ) {

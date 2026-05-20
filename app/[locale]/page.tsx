@@ -1,17 +1,36 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import dynamic from 'next/dynamic';
-import { getAllGuideSlugs, getGuideSync, getGuidesByCategory } from "@/lib/guides";
+
+const HOME_HERO_IMAGE_URL =
+  'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/tipi.jpg';
+const HOME_HERO_IMAGE_ALT =
+  'Glamping accommodation at dusk—representing outdoor hospitality supply and market research resources for developers and investors';
+import { getAllGuideSlugs, getGuideSync } from "@/lib/guides";
 import { getAllGlossaryTerms } from "@/lib/glossary/index";
-import { getAllLandingPageSlugs, getLandingPageSync } from "@/lib/landing-pages";
+import { getGlossaryCategoryAccent } from "@/lib/glossary-category-accent";
 import { generateOrganizationSchema, generateItemListSchemaWithUrls, generateFAQSchema, type FAQItem } from "@/lib/schema";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
 import { GoogleMapsProvider } from "@/components/GoogleMapsProvider";
+import CountUpMetric from "@/components/editorial/CountUpMetric";
+import { EditorialPageShell } from "@/components/editorial/EditorialPageShell";
+import {
+  EDITORIAL_BODY_CLASS,
+  EDITORIAL_BUTTON_OUTLINE_CLASS,
+  EDITORIAL_BUTTON_PRIMARY_CLASS,
+  EDITORIAL_CARD_CLASS,
+  EDITORIAL_GLOSSARY_TERM_TITLE_CLASS,
+  EDITORIAL_H2_CLASS,
+  EDITORIAL_METRIC_VALUE_CLASS,
+  EDITORIAL_SECTION_LABEL_CLASS,
+} from "@/components/editorial/EditorialPageShell";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
+import { getPublicMapDisplayedPropertyCount } from "@/lib/public-map-property-count";
+import { roundDownToStep } from "@/lib/round-down-to-step";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createServerClientWithCookies } from "@/lib/supabase-server";
@@ -20,12 +39,9 @@ import { createServerClientWithCookies } from "@/lib/supabase-server";
 const DynamicLocationSearch = dynamic(() => import('@/components/LocationSearch'), {
   ssr: false,
   loading: () => (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4 border border-white/20">
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-14 bg-gray-200 rounded-xl animate-pulse" />
-          <div className="w-32 h-14 bg-gray-200 rounded-xl animate-pulse" />
-        </div>
+    <div className="mx-auto w-full max-w-2xl">
+      <div className="animate-pulse rounded-2xl border border-white/20 bg-white/95 p-4 shadow-2xl backdrop-blur-sm">
+        <div className="h-14 rounded-xl bg-neutral-200/60" />
       </div>
     </div>
   ),
@@ -182,7 +198,6 @@ export default async function HomePage({ params }: PageProps) {
     }
     
     const pillarGuides = allGuides.filter(guide => guide?.slug.endsWith("-complete-guide")).slice(0, 3);
-    const recentGuides = allGuides.slice(0, 6);
     
     let glossaryTerms: ReturnType<typeof getAllGlossaryTerms> = [];
     try {
@@ -192,25 +207,9 @@ export default async function HomePage({ params }: PageProps) {
       glossaryTerms = [];
     }
     const featuredTerms = glossaryTerms.slice(0, 12); // Top 12 terms
-    
-    let featuredLandingPages: Array<NonNullable<ReturnType<typeof getLandingPageSync>>> = [];
-    try {
-      const landingPageSlugs = getAllLandingPageSlugs();
-      featuredLandingPages = landingPageSlugs
-        .slice(0, 6)
-        .map(slug => {
-          try {
-            return getLandingPageSync(slug);
-          } catch (error) {
-            console.error(`Error loading landing page ${slug}:`, error);
-            return null;
-          }
-        })
-        .filter((page): page is NonNullable<typeof page> => page !== null);
-    } catch (error) {
-      console.error('Error loading landing pages:', error);
-      featuredLandingPages = [];
-    }
+
+    const mapPropertyCount = await getPublicMapDisplayedPropertyCount();
+    const benchmarkCountDisplay = roundDownToStep(mapPropertyCount, 25);
 
     // Homepage FAQs from translations
     const homepageFAQs: FAQItem[] = t.raw('faq.items') as FAQItem[];
@@ -222,7 +221,7 @@ export default async function HomePage({ params }: PageProps) {
       pillarGuides
         .filter((guide): guide is NonNullable<typeof guide> => guide !== null)
         .map(guide => ({
-          name: guide.title,
+          name: guide.hero.headline,
           url: links.guide(guide.slug)
         })),
       "Featured Guides"
@@ -247,16 +246,13 @@ export default async function HomePage({ params }: PageProps) {
       />
 
       <GoogleMapsProvider>
-        <div className="min-h-screen bg-white">
-        {/* Floating Header */}
-        <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
+        <EditorialPageShell footer={null}>
+          <FloatingHeader locale={locale} showFullNav showSpacer={false} />
 
-        {/* Hero Section */}
-        <section className="relative overflow-hidden h-screen">
-          <div className="absolute inset-0 z-0">
+          <section className="relative min-h-[min(100svh,52rem)] w-full">
             <Image
-              src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/tipi.jpg"
-              alt="Glamping accommodation at dusk—representing outdoor hospitality supply and market research resources for developers and investors"
+              src={HOME_HERO_IMAGE_URL}
+              alt={HOME_HERO_IMAGE_ALT}
               fill
               className="object-cover"
               priority
@@ -264,291 +260,173 @@ export default async function HomePage({ params }: PageProps) {
               quality={90}
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#006b5f]/40 via-[#006b5f]/30 to-[#00b6a6]/40" />
-          </div>
-          <div className="relative z-10 h-full flex items-center justify-center">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-              <div className="text-center max-w-5xl mx-auto text-white">
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-2xl">
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-neutral-900/55 via-sage-900/45 to-sage-800/50"
+              aria-hidden
+            />
+            <div className="relative z-10 flex min-h-[min(100svh,52rem)] flex-col items-center justify-center px-4 pb-20 pt-28 sm:pt-36">
+              <div className="mx-auto w-full max-w-4xl text-center text-white">
+                <h1 className="text-4xl font-bold tracking-tight drop-shadow-md sm:text-5xl md:text-6xl lg:text-7xl">
                   {t('hero.headline')}
                 </h1>
-                <p className="text-xl md:text-2xl mb-10 text-white/95 drop-shadow-lg max-w-3xl mx-auto">
-                  {t('hero.subheadline')}
+                <p className="mx-auto mt-6 max-w-2xl text-lg font-light leading-relaxed text-white/95 drop-shadow sm:text-xl md:text-2xl">
+                  {t('hero.subheadline', { count: benchmarkCountDisplay })}
                 </p>
-                
-                {/* Location Search */}
-                <div className="mb-8">
-                  <DynamicLocationSearch locale={locale} />
+                <div className="mx-auto mt-10 max-w-2xl">
+                  <DynamicLocationSearch locale={locale} variant="default" />
                 </div>
-
-                {/* Quick Stats */}
-                <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-white/90">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm md:text-base">{t('hero.quickStats.properties')}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                      <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm md:text-base">{t('hero.quickStats.usCanada')}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm md:text-base">{t('hero.quickStats.verified')}</span>
-                  </div>
-                </div>
+                <ul className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[11px] font-light uppercase tracking-widest text-white/85">
+                  <li>{t('hero.quickStats.properties', { count: mapPropertyCount })}</li>
+                  <li>{t('hero.quickStats.usCanada')}</li>
+                  <li>{t('hero.quickStats.verified')}</li>
+                </ul>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Quick Stats */}
-        <section className="bg-gray-50 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-x-visible px-6 pb-20 pt-14 sm:pb-28">
+            <section className="grid gap-10 border-b border-sage-200/80 pb-14 sm:grid-cols-3">
               <div>
-                <div className="text-4xl font-bold text-[#006b5f] mb-2">{t('stats.propertiesCount')}</div>
-                <div className="text-gray-600">{t('stats.properties')}</div>
+                <p className={EDITORIAL_SECTION_LABEL_CLASS}>{t('stats.properties')}</p>
+                <CountUpMetric
+                  value={mapPropertyCount}
+                  className={EDITORIAL_METRIC_VALUE_CLASS}
+                  durationMs={2500}
+                />
               </div>
               <div>
-                <div className="text-4xl font-bold text-[#006b5f] mb-2">21</div>
-                <div className="text-gray-600">{t('stats.guides')}</div>
+                <p className={EDITORIAL_SECTION_LABEL_CLASS}>{t('stats.guides')}</p>
+                <CountUpMetric value={21} className={EDITORIAL_METRIC_VALUE_CLASS} durationMs={2500} />
               </div>
               <div>
-                <div className="text-4xl font-bold text-[#006b5f] mb-2">57+</div>
-                <div className="text-gray-600">{t('stats.glossary')}</div>
+                <p className={EDITORIAL_SECTION_LABEL_CLASS}>{t('stats.glossary')}</p>
+                <CountUpMetric
+                  value={57}
+                  className={EDITORIAL_METRIC_VALUE_CLASS}
+                  durationMs={2500}
+                />
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        {/* Featured Pillar Guides */}
-        {pillarGuides.length > 0 && (
-          <section className="py-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                  {t('sections.guides.title')}
-                </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            {pillarGuides.length > 0 && (
+              <section className="mt-14 border-b border-sage-200/80 pb-14">
+                <h2 className={EDITORIAL_H2_CLASS}>{t('sections.guides.title')}</h2>
+                <p className={`mt-4 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>
                   {t('sections.guides.description')}
                 </p>
-              </div>
-              <div className="grid md:grid-cols-3 gap-8">
-                {pillarGuides.map((guide, index) => {
-                  if (!guide) return null;
-                  const guideImages = ['https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/safari-tent.jpg', 'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/yurt.jpg', 'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/geodesic-dome.jpg'];
-                  const guideImage = guideImages[index % guideImages.length];
-                  return (
-                    <Link
-                      key={guide.slug}
-                      href={links.guide(guide.slug)}
-                      className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-[#00b6a6] hover:shadow-xl transition-all group"
-                    >
-                      <div className="relative h-48 overflow-hidden">
-                        <Image
-                          src={guideImage}
-                          alt={`${guide.title} - Expert guide on outdoor hospitality ${guide.category}`}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                        <div className="absolute top-4 left-4">
-                          <div className="inline-block px-3 py-1 bg-[#006b5f] text-white text-sm font-semibold rounded-full backdrop-blur-sm">
-                            {guide.category === 'feasibility' ? 'Feasibility' : guide.category === 'appraisal' ? 'Appraisal' : 'Industry'}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-6">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#006b5f] transition-colors">
-                          {guide.title}
-                        </h3>
-                        <p className="text-gray-600 mb-4 line-clamp-3">
-                          {guide.metaDescription}
-                        </p>
-                        <span className="text-[#006b5f] font-semibold group-hover:underline">
-                          {t('sections.guides.readGuide')}
+                <div className="mt-8 grid gap-4 md:grid-cols-3">
+                  {pillarGuides.map((guide) => {
+                    if (!guide) return null;
+                    const categoryLabel =
+                      guide.category === 'feasibility'
+                        ? 'Feasibility'
+                        : guide.category === 'appraisal'
+                          ? 'Appraisal'
+                          : 'Industry';
+                    return (
+                      <Link
+                        key={guide.slug}
+                        href={links.guide(guide.slug)}
+                        className={`${EDITORIAL_CARD_CLASS} group`}
+                      >
+                        <span className="text-[10px] uppercase tracking-wider text-neutral-500">
+                          {categoryLabel}
                         </span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-              <div className="text-center mt-8">
-                <Link
-                  href={links.guides}
-                  className="inline-block px-8 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
-                >
-                  {t('sections.guides.cta')}
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
+                        <h3 className={`mt-2 ${EDITORIAL_GLOSSARY_TERM_TITLE_CLASS} group-hover:text-sage-800`}>
+                          {guide.hero.headline}
+                        </h3>
+                        {guide.hero.subheadline ? (
+                          <p className="mt-2 line-clamp-2 text-xs font-light leading-relaxed text-neutral-600">
+                            {guide.hero.subheadline}
+                          </p>
+                        ) : null}
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="mt-8">
+                  <Link href={links.guides} className={EDITORIAL_BUTTON_OUTLINE_CLASS}>
+                    {t('sections.guides.cta')}
+                  </Link>
+                </div>
+              </section>
+            )}
 
-        {/* Property Map CTA */}
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg"
-              alt="Mountain landscape showcasing glamping properties across North America and Europe - explore 650+ outdoor hospitality destinations"
-              fill
-              className="object-cover"
-              loading="lazy"
-              quality={85}
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#006b5f]/90 via-[#006b5f]/85 to-[#00b6a6]/90" />
-          </div>
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-white text-center">
-            <h2 className="text-4xl font-bold mb-4 drop-shadow-2xl">
-              {t('sections.map.title')}
-            </h2>
-            <p className="text-xl mb-8 text-white/95 max-w-3xl mx-auto drop-shadow-lg">
-              {t('sections.map.description')}
-            </p>
-            <Link
-              href={links.map}
-              className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-2xl"
-            >
-              {t('sections.map.cta')}
-            </Link>
-          </div>
-        </section>
+            <section className="mt-14 border-b border-sage-200/80 pb-14">
+              <h2 className={EDITORIAL_H2_CLASS}>{t('sections.map.title')}</h2>
+              <p className={`mt-4 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>{t('sections.map.description')}</p>
+              <Link href={links.map} className={`${EDITORIAL_BUTTON_PRIMARY_CLASS} mt-6`}>
+                {t('sections.map.cta')}
+              </Link>
+            </section>
 
-        {/* Featured Glossary Terms */}
-        {featuredTerms.length > 0 && (
-          <section className="py-16 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                  {t('sections.glossary.title')}
-                </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            {featuredTerms.length > 0 && (
+              <section className="mt-14 border-b border-sage-200/80 pb-14">
+                <h2 className={EDITORIAL_H2_CLASS}>{t('sections.glossary.title')}</h2>
+                <p className={`mt-4 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>
                   {t('sections.glossary.description')}
                 </p>
-              </div>
-              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {featuredTerms.slice(0, 8).map((term, index) => {
-                  const glossaryImages = [
-                    'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/a-frame-cabin.jpg',
-                    'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/bell-tent.jpg',
-                    'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/canvas-tent.jpg',
-                    'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/treehouse.jpg',
-                    'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/yurt.jpg',
-                    'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/safari-tent.jpg',
-                    'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/cabin.jpg',
-                    'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/geodesic-dome.jpg'
-                  ];
-                  const termImage = term.image || glossaryImages[index % glossaryImages.length];
-                  return (
-                    <Link
-                      key={term.slug}
-                      href={links.glossaryTerm(term.slug)}
-                      className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-gray-200 hover:border-[#00b6a6] group"
-                    >
-                      {termImage && (
-                        <div className="relative h-32 overflow-hidden">
-                          <Image
-                            src={termImage}
-                            alt={`${term.term} - ${term.definition.substring(0, 60)}`}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 25vw, 300px"
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <div className="text-xs text-gray-500 mb-1">{term.category}</div>
-                        <h3 className="text-lg font-semibold text-gray-900 hover:text-[#006b5f] transition-colors">
+                <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {featuredTerms.slice(0, 8).map((term) => {
+                    const accent = getGlossaryCategoryAccent(term.category);
+                    return (
+                      <Link
+                        key={term.slug}
+                        href={links.glossaryTerm(term.slug)}
+                        className={`${EDITORIAL_CARD_CLASS} group ${accent.card}`}
+                      >
+                        <span
+                          className={`text-[10px] font-medium uppercase tracking-wider ${accent.label}`}
+                        >
+                          {term.category}
+                        </span>
+                        <h3
+                          className={`mt-2 ${EDITORIAL_GLOSSARY_TERM_TITLE_CLASS} transition-colors group-hover:text-sage-800`}
+                        >
                           {term.term}
                         </h3>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-              <div className="text-center mt-8">
-                <Link
-                  href={links.glossary}
-                  className="inline-block px-8 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
-                >
-                  {t('sections.glossary.cta')}
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* CTA Section */}
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/forest-scene.jpg"
-              alt="Natural forest setting for outdoor hospitality expert consultation - feasibility studies and appraisals"
-              fill
-              className="object-cover"
-              loading="lazy"
-              quality={85}
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-[#006b5f]/95" />
-          </div>
-          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-white text-center">
-            <h2 className="text-4xl font-bold mb-4 drop-shadow-2xl">
-              {t('sections.cta.title')}
-            </h2>
-            <p className="text-xl mb-8 text-white/95 drop-shadow-lg">
-              {t('sections.cta.description')}
-            </p>
-            <Link
-              href="https://sageoutdooradvisory.com/contact-us/"
-              className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-2xl"
-            >
-              {t('sections.cta.button')}
-            </Link>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-16 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                {t('faq.title')}
-              </h2>
-              <p className="text-xl text-gray-600">
-                {t('faq.subtitle')}
-              </p>
-            </div>
-            <div className="space-y-6">
-              {homepageFAQs.map((faq, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:border-[#00b6a6] transition-colors">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {faq.question}
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    {faq.answer}
-                  </p>
+                      </Link>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                <div className="mt-8">
+                  <Link href={links.glossary} className={EDITORIAL_BUTTON_OUTLINE_CLASS}>
+                    {t('sections.glossary.cta')}
+                  </Link>
+                </div>
+              </section>
+            )}
 
-        {/* Footer */}
-        <Footer locale={locale} />
-        </div>
+            <section className="mt-14 border border-sage-200/90 bg-white/40 px-6 py-10 sm:px-8">
+              <h2 className={EDITORIAL_H2_CLASS}>{t('sections.cta.title')}</h2>
+              <p className={`mt-4 max-w-xl ${EDITORIAL_BODY_CLASS}`}>{t('sections.cta.description')}</p>
+              <a
+                href="https://sageoutdooradvisory.com/contact-us/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${EDITORIAL_BUTTON_OUTLINE_CLASS} mt-6`}
+              >
+                {t('sections.cta.button')}
+              </a>
+            </section>
+
+            <section className="mt-14">
+              <h2 className={EDITORIAL_H2_CLASS}>{t('faq.title')}</h2>
+              <p className={`mt-4 ${EDITORIAL_BODY_CLASS}`}>{t('faq.subtitle')}</p>
+              <dl className="mt-8 space-y-8">
+                {homepageFAQs.map((faq, index) => (
+                  <div key={index}>
+                    <dt className="text-sm font-bold text-neutral-900">{faq.question}</dt>
+                    <dd className={`mt-2 border-l border-sage-200 pl-4 ${EDITORIAL_BODY_CLASS}`}>
+                      {faq.answer}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          </main>
+          <Footer locale={locale} />
+        </EditorialPageShell>
       </GoogleMapsProvider>
     </>
     );

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import * as XLSX from 'xlsx';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
+import {
+  buildUnifiedExportXlsxBuffer,
+  cellValue,
+  cellValueForXlsx,
+} from '@/lib/admin/sage-glamping-unified-export-xlsx';
 import { ALL_GLAMPING_PROPERTY_COLUMNS } from '@/lib/sage-ai/all-glamping-properties-columns';
 
 export const dynamic = 'force-dynamic';
@@ -21,8 +25,6 @@ type AugmentedExportRow = ExportRow & {
 };
 
 const PAGE_SIZE = 1000;
-/** Excel / SheetJS hard limit per cell (inclusive). Longer text throws from `aoa_to_sheet`. */
-const XLSX_MAX_CELL_TEXT = 32767;
 const XLSX_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const EXCLUDED_FROM_UNIFIED_EXPORT = new Set([
   'quality_score',
@@ -49,6 +51,7 @@ function invertOpenToClosedValue(value: unknown): ExportCell {
   if (
     low === 'no' ||
     low === 'closed' ||
+    low === 'temporarily closed' ||
     low === 'under construction' ||
     low === 'proposed development'
   ) {
@@ -90,31 +93,6 @@ function parseFormat(request: NextRequest): ExportFormat {
 function buildFilename(format: ExportFormat): string {
   const date = new Date().toISOString().slice(0, 10);
   return `glamping-and-roverpass-unified-${date}.${format}`;
-}
-
-function cellValue(value: unknown): ExportCell {
-  if (value === null || value === undefined) return '';
-  if (typeof value === 'bigint') return value.toString();
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? value : '';
-  }
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'object') {
-    try {
-      return JSON.stringify(value);
-    } catch {
-      return '';
-    }
-  }
-  return String(value);
-}
-
-function cellValueForXlsx(value: unknown): ExportCell {
-  const v = cellValue(value);
-  if (typeof v === 'string' && v.length > XLSX_MAX_CELL_TEXT) {
-    return `${v.slice(0, XLSX_MAX_CELL_TEXT - 1)}\u2026`;
-  }
-  return v;
 }
 
 function csvCell(value: unknown): string {
@@ -169,12 +147,12 @@ function normalizeRows(
   });
 }
 
-function rowsToAoa(rows: ExportRow[]): ExportCell[][] {
-  return rows.map((row) =>
-    EXPORT_COLUMNS.map((column) =>
+function* exportDataRows(rows: ExportRow[]): Generator<ExportCell[]> {
+  for (const row of rows) {
+    yield EXPORT_COLUMNS.map((column) =>
       cellValueForXlsx(getExportSourceValue(row, column))
-    )
-  );
+    );
+  }
 }
 
 function buildCsv(rows: ExportRow[]): string {
@@ -186,21 +164,6 @@ function buildCsv(rows: ExportRow[]): string {
       ).join(',')
     ),
   ].join('\r\n');
-}
-
-function buildXlsxBuffer(rows: ExportRow[]): Buffer {
-  const aoa: ExportCell[][] = [
-    [...EXPORT_OUTPUT_COLUMN_NAMES] as ExportCell[],
-    ...rowsToAoa(rows),
-  ];
-  const worksheet = XLSX.utils.aoa_to_sheet(aoa);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Combined');
-  return XLSX.write(workbook, {
-    type: 'buffer',
-    bookType: 'xlsx',
-    compression: true,
-  }) as Buffer;
 }
 
 export const GET = withAdminAuth(async (request) => {
@@ -228,7 +191,10 @@ export const GET = withAdminAuth(async (request) => {
       });
     }
 
-    const xlsxBuffer = buildXlsxBuffer(rows);
+    const xlsxBuffer = await buildUnifiedExportXlsxBuffer(
+      [...EXPORT_OUTPUT_COLUMN_NAMES] as ExportCell[],
+      exportDataRows(rows)
+    );
     return new NextResponse(new Uint8Array(xlsxBuffer), {
       status: 200,
       headers: {

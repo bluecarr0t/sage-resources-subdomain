@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 interface LocationSearchProps {
   locale: string;
   onLocationSelect?: (location: { lat: number; lng: number; name: string }) => void;
-  variant?: 'default' | 'compact';
+  variant?: 'default' | 'compact' | 'editorial';
 }
 
 export default function LocationSearch({ locale, onLocationSelect, variant = 'default' }: LocationSearchProps) {
@@ -536,15 +536,30 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   }
 
   const showDropdown = isOpen; // Show dropdown when open to display "Use Current Location" and/or predictions
-  const isCompact = variant === 'compact';
+  const isCompact = variant === 'compact' || variant === 'editorial';
+  const isEditorial = variant === 'editorial';
+  const optionSelectedClass = isEditorial
+    ? 'bg-sage-50 border-sage-200/80'
+    : 'bg-[#00b6a6]/10 border-[#00b6a6]/20';
+  const optionIdleClass = isEditorial
+    ? 'hover:bg-neutral-50 active:bg-neutral-100'
+    : 'hover:bg-[#00b6a6]/5 active:bg-[#00b6a6]/10';
+  const optionIconSelectedClass = isEditorial ? 'text-sage-600' : 'text-[#00b6a6]';
+  const optionTitleSelectedClass = isEditorial ? 'text-neutral-900' : 'text-[#006b5f]';
+  const spinnerBorderClass = isEditorial ? 'border-sage-600' : 'border-[#00b6a6]';
 
   return (
     <div ref={containerRef} className={`w-full relative ${isCompact ? '' : 'max-w-2xl mx-auto'}`}>
       <form onSubmit={handleSubmit}>
-        <div className={isCompact 
-          ? "bg-white rounded-md border border-stone-200/90 p-0.5"
-          : "bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-1 border border-white/20"
-        }>
+        <div
+          className={
+            isEditorial
+              ? 'rounded-sm border border-sage-200/90 bg-white/70 p-0.5'
+              : isCompact
+                ? 'rounded-md border border-stone-200/90 bg-white p-0.5'
+                : 'rounded-2xl border border-white/20 bg-white/95 p-1 shadow-2xl backdrop-blur-sm'
+          }
+        >
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
               <div className={`absolute top-1/2 -translate-y-1/2 text-gray-400 ${isCompact ? 'left-3' : 'left-4'}`}>
@@ -570,8 +585,12 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                 onKeyDown={handleKeyDown}
                 onFocus={handleFocus}
                 placeholder={isCompact ? t('placeholder.compact') : t('placeholder.default')}
-                className={`w-full bg-transparent border-none outline-none text-gray-900 placeholder-gray-400 ${
-                  isCompact ? 'pl-10 pr-3 py-2.5 text-sm' : 'pl-12 pr-4 py-4 text-lg'
+                className={`w-full border-none bg-transparent outline-none placeholder-neutral-400 ${
+                  isEditorial
+                    ? 'py-2.5 pl-10 pr-3 text-sm font-light text-neutral-900'
+                    : isCompact
+                      ? 'py-2.5 pl-10 pr-3 text-sm text-gray-900'
+                      : 'py-4 pl-12 pr-4 text-lg text-gray-900'
                 }`}
                 autoComplete="off"
                 role="combobox"
@@ -581,7 +600,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
               />
               {isSearching && isLoaded && (
                 <div className={`absolute top-1/2 -translate-y-1/2 ${isCompact ? 'right-3' : 'right-4'}`}>
-                  <div className={`animate-spin rounded-full border-[#00b6a6] ${isCompact ? 'h-4 w-4 border-2' : 'h-5 w-5 border-b-2'}`} />
+                  <div className={`animate-spin rounded-full ${spinnerBorderClass} ${isCompact ? 'h-4 w-4 border-2' : 'h-5 w-5 border-b-2'}`} />
                 </div>
               )}
             </div>
@@ -646,13 +665,29 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
         <div
           id="location-listbox"
           role="listbox"
-          className={`absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 z-[100] overflow-hidden flex flex-col ${
-            isCompact ? 'rounded-lg shadow-lg' : 'rounded-xl shadow-2xl'
+          className={`absolute top-full left-0 right-0 z-[100] mt-2 flex flex-col overflow-hidden border bg-white ${
+            isEditorial
+              ? 'rounded-sm border-sage-200/90 shadow-md'
+              : isCompact
+                ? 'rounded-lg border-gray-200 shadow-lg'
+                : 'rounded-xl border-gray-200 shadow-2xl'
           }`}
           style={{ maxHeight: `${dropdownMaxHeight}px` }}
         >
-          <div className={`${isCompact ? 'px-2 py-1.5' : 'px-3 py-2'} bg-gray-50 border-b border-gray-200 flex-shrink-0`}>
-            <p className={`${isCompact ? 'text-[10px]' : 'text-xs'} font-semibold text-gray-600 uppercase tracking-wide`}>
+          <div
+            className={`flex-shrink-0 border-b ${
+              isEditorial
+                ? 'border-sage-200/80 bg-neutral-50 px-2 py-1.5'
+                : `${isCompact ? 'px-2 py-1.5' : 'px-3 py-2'} border-gray-200 bg-gray-50`
+            }`}
+          >
+            <p
+              className={`uppercase ${
+                isEditorial
+                  ? 'text-[10px] font-light tracking-widest text-neutral-500'
+                  : `${isCompact ? 'text-[10px]' : 'text-xs'} font-semibold tracking-wide text-gray-600`
+              }`}
+            >
               {t('suggestions')}
             </p>
           </div>
@@ -665,16 +700,16 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
               onMouseEnter={() => setSelectedIndex(-1)}
               className={`w-full text-left transition-colors border-b border-gray-100 cursor-pointer ${
                 isCompact ? 'px-3 py-2' : 'px-4 py-3'
-              } ${
-                selectedIndex === -1
-                  ? 'bg-[#00b6a6]/10 border-[#00b6a6]/20'
-                  : 'hover:bg-[#00b6a6]/5 active:bg-[#00b6a6]/10'
-              }`}
+              } ${selectedIndex === -1 ? optionSelectedClass : optionIdleClass}`}
             >
               <div className="flex items-center gap-3">
-                <div className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${selectedIndex === -1 ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
+                <div
+                  className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${
+                    selectedIndex === -1 ? optionIconSelectedClass : 'text-gray-400'
+                  }`}
+                >
                   {isGettingLocation ? (
-                    <div className={`animate-spin rounded-full border-[#00b6a6] ${isCompact ? 'h-4 w-4 border-2' : 'h-5 w-5 border-b-2'}`} />
+                    <div className={`animate-spin rounded-full ${spinnerBorderClass} ${isCompact ? 'h-4 w-4 border-2' : 'h-5 w-5 border-b-2'}`} />
                   ) : (
                     <svg
                       className={isCompact ? "w-4 h-4" : "w-5 h-5"}
@@ -736,7 +771,11 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className={`${isCompact ? 'text-sm' : ''} font-semibold ${selectedIndex === -1 ? 'text-[#006b5f]' : 'text-gray-900'}`}>
+                  <div
+                    className={`${isCompact ? 'text-sm' : ''} ${
+                      isEditorial ? 'font-light' : 'font-semibold'
+                    } ${selectedIndex === -1 ? optionTitleSelectedClass : 'text-gray-900'}`}
+                  >
                     {isGettingLocation ? t('useCurrentLocation.loadingTitle') : t('useCurrentLocation.title')}
                   </div>
                   <div className={`${isCompact ? 'text-xs' : 'text-sm'} text-gray-500`}>
@@ -762,14 +801,14 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                   onMouseEnter={() => setSelectedIndex(index + 1)}
                   className={`w-full text-left transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer ${
                     isCompact ? 'px-3 py-2' : 'px-4 py-3'
-                  } ${
-                    selectedIndex === index + 1
-                      ? 'bg-[#00b6a6]/10 border-[#00b6a6]/20'
-                      : 'hover:bg-[#00b6a6]/5 active:bg-[#00b6a6]/10'
-                  }`}
+                  } ${selectedIndex === index + 1 ? optionSelectedClass : optionIdleClass}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${selectedIndex === index + 1 ? 'text-[#00b6a6]' : 'text-gray-400'}`}>
+                    <div
+                      className={`${isCompact ? 'mt-0' : 'mt-0.5'} flex-shrink-0 ${
+                        selectedIndex === index + 1 ? optionIconSelectedClass : 'text-gray-400'
+                      }`}
+                    >
                       <svg
                         className={isCompact ? "w-4 h-4" : "w-5 h-5"}
                         fill="none"
@@ -791,7 +830,11 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className={`${isCompact ? 'text-sm' : ''} font-semibold truncate ${selectedIndex === index + 1 ? 'text-[#006b5f]' : 'text-gray-900'}`}>
+                      <div
+                        className={`truncate ${isCompact ? 'text-sm' : ''} ${
+                          isEditorial ? 'font-light' : 'font-semibold'
+                        } ${selectedIndex === index + 1 ? optionTitleSelectedClass : 'text-gray-900'}`}
+                      >
                         {mainText}
                       </div>
                       {secondaryText && (

@@ -17,7 +17,7 @@ export interface SageProperty {
   land_operator_category: string | null;
   research_status: string | null;
   is_glamping_property: string | null;
-  /** Yes = operating; Under Construction / Proposed Development = pre-opening; Closed = not operating (non-operating values excluded from public map). */
+  /** Yes = operating; Under Construction / Proposed Development = pre-opening; Temporarily closed / Closed = not operating (non-operating values excluded from public map). */
   is_open: string | null;
 
   // SOURCE & TRACKING
@@ -120,6 +120,12 @@ export interface SageProperty {
 
   // CONTACT & INFO
   url: string | null;
+  /** Active third-party slugs: hipcamp, airbnb, booking_com, vrbo */
+  third_party_platforms: string[] | null;
+  ota_url_hipcamp: string | null;
+  ota_url_airbnb: string | null;
+  ota_url_booking_com: string | null;
+  ota_url_vrbo: string | null;
   phone_number: string | null;
   description: string | null;
   /** Internal / admin notes (Sage Data editor); not the public `description` */

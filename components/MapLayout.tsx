@@ -1,6 +1,11 @@
 'use client';
 
 import { useMapContext } from '@/components/MapContext';
+import {
+  EDITORIAL_H1_CLASS,
+  EDITORIAL_LINK_CLASS,
+  EDITORIAL_SIDEBAR_BG_STYLE,
+} from '@/components/editorial/EditorialPageShell';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -34,59 +39,52 @@ export default function MapLayout({ locale }: MapLayoutProps) {
   const tCommon = useTranslations('common');
 
   return (
-    <div className="h-screen flex flex-col md:flex-row overflow-hidden bg-stone-100/80">
+    <div className="flex h-screen flex-col overflow-hidden bg-neutral-100/40 md:flex-row">
       {/* Left Sidebar - Hidden on mobile when fullscreen */}
-      <aside 
-        className={`w-full md:w-80 lg:w-96 flex flex-col overflow-y-auto relative z-20 md:max-h-screen transition-transform duration-300 border-r border-stone-200/90 bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 ${
+      <aside
+        className={`relative z-20 flex w-full flex-col overflow-y-auto border-r border-sage-200/80 text-neutral-900 transition-transform duration-300 md:max-h-screen md:w-80 lg:w-96 ${
           isFullscreen ? 'hidden md:flex' : 'flex'
         }`}
+        style={EDITORIAL_SIDEBAR_BG_STYLE}
       >
-        <div className="p-4 md:px-4 md:pt-4 md:pb-3 border-b border-stone-300 bg-white/90 backdrop-blur-sm">
-          {/* Breadcrumb Navigation */}
-          <nav aria-label="Breadcrumb" className="mb-2">
-            <ol className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-stone-500">
+        <div className="border-b border-sage-200/80 px-4 pb-3 pt-4 md:px-5 md:pt-5">
+          <nav aria-label="Breadcrumb" className="mb-3">
+            <ol className="flex items-center text-[11px] font-light uppercase tracking-widest text-neutral-500">
               <li>
-                <Link
-                  href={`/${locale}`}
-                  className="text-stone-900 hover:text-black normal-case underline-offset-2 hover:underline transition-colors"
-                >
+                <Link href={`/${locale}`} className="transition-colors hover:text-neutral-900">
                   {tCommon('navigation.home')}
                 </Link>
               </li>
-              <li aria-hidden="true" className="text-stone-300">/</li>
-              <li className="text-stone-800 tracking-normal normal-case" aria-current="page">
+              <li aria-hidden="true" className="mx-2 text-neutral-400">
+                /
+              </li>
+              <li className="text-neutral-700" aria-current="page">
                 {tCommon('navigation.map')}
               </li>
             </ol>
           </nav>
-          
-          {/* SEO Content Section */}
-          <section className="mb-2">
-            <h1 className="text-lg font-semibold tracking-tight text-stone-900 leading-snug">
-              {t('title')}
-            </h1>
+
+          <section className="mb-4">
+            <h1 className={EDITORIAL_H1_CLASS}>{t('title')}</h1>
           </section>
-          
-          {/* Location Search Section */}
-          <section className="mb-0">
-            <DynamicLocationSearch locale={locale} variant="compact" />
+
+          <section>
+            <DynamicLocationSearch locale={locale} variant="editorial" />
           </section>
         </div>
-        
-        {/* Filters Section */}
-        <section className="pt-1 pb-4 px-4 md:pt-1.5 md:pb-4 md:px-4 flex-1 relative overflow-visible md:overflow-y-auto">
+
+        <section className="relative flex-1 overflow-visible px-4 pb-4 pt-2 md:overflow-y-auto md:px-5 md:pb-5">
           <DynamicGooglePropertyMapSidebar showMap={false} />
         </section>
-        
-        {/* Footer */}
-        <div className="py-3 px-4 border-t border-stone-100 mt-auto">
-          <p className="text-[11px] text-stone-400 text-center leading-relaxed">
+
+        <div className="mt-auto border-t border-sage-200/80 px-4 py-4 md:px-5">
+          <p className="text-center text-xs font-light leading-relaxed text-neutral-500">
             {t('poweredBy')}{' '}
             <a
               href="https://sageoutdooradvisory.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline-offset-2 hover:underline transition-colors"
+              className={EDITORIAL_LINK_CLASS}
             >
               {tCommon('siteName')}
             </a>
