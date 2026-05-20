@@ -176,6 +176,7 @@ const excludedRoutes = [
   'api',
   'landing',
   'property',
+  'brand',
   'login',
   'auth',
   'privacy-policy',
@@ -220,7 +221,7 @@ export async function middleware(request: NextRequest) {
 
     // Legacy SEO: indexed duplicates without /{locale}/ prefix → canonical /en/... (query preserved)
     if (!pathnameHasLocale) {
-      const legacyResource = pathname.match(/^\/(guides|glossary|property|partners|map)(\/.*)?$/);
+      const legacyResource = pathname.match(/^\/(guides|glossary|property|brand|partners|map)(\/.*)?$/);
       if (legacyResource) {
         const url = request.nextUrl.clone();
         url.pathname = `/en${pathname}`;

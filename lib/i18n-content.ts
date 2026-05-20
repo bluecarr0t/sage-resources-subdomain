@@ -12,6 +12,7 @@ export type ContentType =
   | 'guide'
   | 'glossary'
   | 'property'
+  | 'brand'
   | 'national-park'
   /** Glamping discovery hubs (near-national-parks, unit types): English primary body copy */
   | 'glamping';
@@ -45,6 +46,10 @@ export function getAvailableLocalesForContent(contentType: ContentType): Locale[
     case 'property':
       // Property pages are data-driven and don't need localization
       // Already optimized to only generate 'en' pages
+      return ['en'];
+
+    case 'brand':
+      // Brand portfolio pages are English-primary (data-driven listings)
       return ['en'];
     
     case 'national-park':

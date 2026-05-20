@@ -13,6 +13,7 @@ import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { fetchGlampingPropertyPublicImages } from "@/lib/fetch-glamping-property-public-images";
 import { shouldSkipGooglePlacesForPropertySlug } from "@/lib/property-google-places-policy";
+import { getBrandSummaryById } from "@/lib/brand-public-pages";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -362,7 +363,8 @@ export default async function PropertyPage({ params }: PageProps) {
   };
   
   // Generate structured data
-  const breadcrumbSchema = generatePropertyBreadcrumbSchema(slug, propertyName);
+  const brandSummary = await getBrandSummaryById(firstProperty.brand_id);
+  const breadcrumbSchema = generatePropertyBreadcrumbSchema(slug, propertyName, locale);
   const thirdPartyListingUrls = getPropertyOtaListings(properties).map((l) => l.url);
   const localBusinessSchema = generatePropertyLocalBusinessSchema({
     ...propertyForSchema,
@@ -448,6 +450,11 @@ export default async function PropertyPage({ params }: PageProps) {
         locale={locale}
         propertyFaqs={propertyFaqEntries}
         mapCoordinates={coordinates}
+        brandPage={
+          brandSummary
+            ? { slug: brandSummary.slug, displayName: brandSummary.display_name }
+            : null
+        }
       />
     </>
   );

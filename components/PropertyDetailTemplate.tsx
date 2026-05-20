@@ -40,6 +40,8 @@ interface PropertyDetailTemplateProps {
   propertyFaqs?: Array<{ question: string; answer: string }>;
   /** Server-resolved coordinates when DB lat/lon are empty */
   mapCoordinates?: [number, number] | null;
+  /** Linked public brand page when property has brand_id */
+  brandPage?: { slug: string; displayName: string } | null;
 }
 
 function getGooglePhotoUrl(
@@ -108,6 +110,7 @@ export default function PropertyDetailTemplate({
   locale = 'en',
   propertyFaqs = [],
   mapCoordinates: mapCoordinatesProp = null,
+  brandPage = null,
 }: PropertyDetailTemplateProps) {
   const firstProperty = properties[0];
   const links = useMemo(() => createLocaleLinks(locale), [locale]);
@@ -412,6 +415,14 @@ export default function PropertyDetailTemplate({
               <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Property details</dt>
               <dd className="mt-3">
                 <ul className="space-y-2 border-l border-sage-200 pl-4 text-sm font-light">
+                  {brandPage ? (
+                    <li>
+                      <span className="text-neutral-500">Brand</span>{' '}
+                      <Link href={links.brand(brandPage.slug)} className={EDITORIAL_LINK_CLASS}>
+                        {brandPage.displayName}
+                      </Link>
+                    </li>
+                  ) : null}
                   {firstProperty.is_open ? (
                     <li>
                       <span className="text-neutral-500">Status</span>{' '}
@@ -514,6 +525,13 @@ export default function PropertyDetailTemplate({
             <div>
               <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Visit</h2>
               <ul className="mt-6 space-y-3 text-sm font-light">
+                {brandPage ? (
+                  <li>
+                    <Link href={links.brand(brandPage.slug)} className={EDITORIAL_LINK_CLASS}>
+                      All {brandPage.displayName} locations
+                    </Link>
+                  </li>
+                ) : null}
                 {websiteUrl ? (
                   <li>
                     <a

@@ -764,7 +764,11 @@ export function generateDatasetSchema(
   };
 }
 
-export function generatePropertyBreadcrumbSchema(slug: string, propertyName: string) {
+export function generatePropertyBreadcrumbSchema(
+  slug: string,
+  propertyName: string,
+  locale: string = 'en'
+) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   return {
     "@context": "https://schema.org",
@@ -774,21 +778,96 @@ export function generatePropertyBreadcrumbSchema(slug: string, propertyName: str
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://sageoutdooradvisory.com"
+        "item": `${baseUrl}/${locale}`
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Map",
-        "item": `${baseUrl}/map`
+        "item": `${baseUrl}/${locale}/map`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": propertyName,
-        "item": `${baseUrl}/property/${slug}`
+        "item": `${baseUrl}/${locale}/property/${slug}`
       }
     ]
+  };
+}
+
+export function generateBrandBreadcrumbSchema(
+  slug: string,
+  brandName: string,
+  locale: string = 'en'
+) {
+  const baseUrl = 'https://resources.sageoutdooradvisory.com';
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: `${baseUrl}/${locale}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Map',
+        item: `${baseUrl}/${locale}/map`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: brandName,
+        item: `${baseUrl}/${locale}/brand/${slug}`,
+      },
+    ],
+  };
+}
+
+export function generateBrandPageSchema(params: {
+  brandName: string;
+  slug: string;
+  locale: string;
+  description: string;
+  websiteUrl?: string | null;
+  propertyCount: number;
+  listings: Array<{ name: string; url: string }>;
+}) {
+  const baseUrl = 'https://resources.sageoutdooradvisory.com';
+  const brandUrl = `${baseUrl}/${params.locale}/brand/${params.slug}`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        name: params.brandName,
+        url: params.websiteUrl || brandUrl,
+        description: params.description,
+      },
+      {
+        '@type': 'CollectionPage',
+        name: `${params.brandName} glamping locations`,
+        url: brandUrl,
+        description: params.description,
+        numberOfItems: params.propertyCount,
+      },
+      {
+        '@type': 'ItemList',
+        name: `${params.brandName} properties`,
+        numberOfItems: params.listings.length,
+        itemListElement: params.listings.map((item, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: item.name,
+          url: item.url,
+        })),
+      },
+    ],
   };
 }
 

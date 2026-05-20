@@ -27,6 +27,7 @@ const excludedRoutes = [
   'api',
   'landing',
   'property',
+  'brand',
   'sitemap.xml',
   'robots.txt',
   'favicon.ico',

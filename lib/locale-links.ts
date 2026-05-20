@@ -12,6 +12,7 @@ const LOCALE_SCOPED_ROOT_SEGMENTS = new Set([
   'map',
   'partners',
   'property',
+  'brand',
   'glamping',
   'sitemap',
   'map-sheet',
@@ -92,6 +93,7 @@ export function createLocaleLinks(locale: string) {
     sitemap: getLocalePath(locale, '/sitemap'),
     landing: (slug: string) => getLocalePath(locale, `/landing/${slug}`),
     property: (slug: string) => getLocalePath(locale, `/property/${slug}`),
+    brand: (slug: string) => getLocalePath(locale, `/brand/${slug}`),
     guide: (slug: string) => getLocalePath(guideLocale, `/guides/${slug}`),
     glossaryTerm: (slug: string) => getLocalePath(locale, `/glossary/${slug}`),
     // Glamping hub templates are English-primary; canonical URLs live under /en/

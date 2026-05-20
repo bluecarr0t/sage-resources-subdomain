@@ -22,6 +22,8 @@ const nextConfig = {
       { source: '/admin/comparables/:path+', destination: '/admin/glamping-properties/:path+', permanent: false },
       { source: '/admin/comps', destination: '/admin/glamping-properties', permanent: true },
       { source: '/admin/comps/:path+', destination: '/admin/glamping-properties/:path+', permanent: true },
+      { source: '/map', destination: '/en/map', permanent: true },
+      { source: '/map/:path*', destination: '/en/map/:path*', permanent: true },
     ];
   },
 
