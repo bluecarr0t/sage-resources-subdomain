@@ -6,6 +6,7 @@ import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { generateGeoMetadata } from "@/lib/geo-metadata";
 import { getAvailableLocalesForContent } from "@/lib/i18n-content";
+import { landingMetadataOverridesEn } from "@/lib/landing-metadata-overrides";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -55,18 +56,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const publishDate = page.lastModified || "2025-01-01";
   const modifiedDate = page.lastModified || publishDate;
-  
+  const override = locale === 'en' ? landingMetadataOverridesEn[page.slug] : undefined;
+  const title = override?.title ?? page.title;
+  const description = override?.description ?? page.metaDescription;
+
   // Add geo-location metadata for location-based pages
   const geoMetadata = generateGeoMetadata(page.location, page.slug);
 
   return {
-    title: page.title,
-    description: page.metaDescription,
+    title,
+    description,
     keywords: page.keywords?.join(", "),
     ...geoMetadata,
     openGraph: {
-      title: page.title,
-      description: page.metaDescription,
+      title,
+      description,
       url,
       siteName: "Sage Outdoor Advisory",
       images: [
@@ -85,8 +89,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: page.title,
-      description: page.metaDescription,
+      title,
+      description,
       images: [imageUrl],
     },
     alternates: {

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { getAllGlossaryTerms, getGlossaryTermsByCategory } from "@/lib/glossary/index";
 import GlossaryIndex from "@/components/GlossaryIndex";
+import { GlossaryEnglishNotice } from "@/components/glossary/GlossaryEnglishNotice";
 import { EditorialCtaBand } from "@/components/editorial/EditorialCtaBand";
 import { EditorialMarketingLayout } from "@/components/editorial/EditorialMarketingLayout";
 import { locales, type Locale } from "@/i18n";
@@ -27,14 +28,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const pathname = `/${locale}/glossary`;
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
+  const t = await getTranslations({ locale, namespace: 'glossary' });
 
   return {
-    title: "Outdoor Hospitality Glossary | Terms & Definitions | Sage Outdoor Advisory",
-    description: "Comprehensive glossary of outdoor hospitality terms. Learn definitions for glamping, RV resorts, feasibility studies, appraisals, and more.",
+    title: t('meta.title'),
+    description: t('meta.description'),
     keywords: "outdoor hospitality glossary, glamping terms, RV resort definitions, feasibility study terms, hospitality industry glossary",
     openGraph: {
-      title: "Outdoor Hospitality Glossary | Sage Outdoor Advisory",
-      description: "Comprehensive glossary of outdoor hospitality industry terms and definitions",
+      title: t('meta.title'),
+      description: t('meta.description'),
       url,
       siteName: "Sage Outdoor Advisory",
       locale: getOpenGraphLocale(locale as Locale),
@@ -170,6 +172,11 @@ export default async function GlossaryPage({ params }: PageProps) {
 
   return (
     <EditorialMarketingLayout locale={locale} title={t('title')} subtitle={t('subtitle')}>
+      <GlossaryEnglishNotice
+        locale={locale}
+        message={t('englishNotice.message')}
+        linkLabel={t('englishNotice.link')}
+      />
       <GlossaryIndex
         allTerms={allTerms}
         termsByLetter={termsByLetter}

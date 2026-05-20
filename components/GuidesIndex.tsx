@@ -3,11 +3,11 @@
 import { GuideContent } from "@/lib/guides";
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { createLocaleLinks } from "@/lib/locale-links";
 import {
   EDITORIAL_BODY_CLASS,
   EDITORIAL_CARD_CLASS,
-  EDITORIAL_DIVIDER_CLASS,
   EDITORIAL_FILTER_ACTIVE_CLASS,
   EDITORIAL_FILTER_IDLE_CLASS,
   EDITORIAL_H2_CLASS,
@@ -36,6 +36,7 @@ export default function GuidesIndex({
   categories,
   locale = "en",
 }: GuidesIndexProps) {
+  const t = useTranslations("guides.index");
   const links = createLocaleLinks(locale);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -57,10 +58,10 @@ export default function GuidesIndex({
     <div>
       <div className="mb-10">
         <label className={EDITORIAL_SECTION_LABEL_CLASS}>
-          <span className="sr-only">Search guides</span>
+          <span className="sr-only">{t("searchPlaceholder")}</span>
           <input
             type="text"
-            placeholder="Search guides..."
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={EDITORIAL_INPUT_CLASS}
@@ -75,7 +76,7 @@ export default function GuidesIndex({
             onClick={() => setSelectedCategory(null)}
             className={`px-4 py-2 ${selectedCategory === null ? EDITORIAL_FILTER_ACTIVE_CLASS : EDITORIAL_FILTER_IDLE_CLASS}`}
           >
-            All guides
+            {t("allGuides")}
           </button>
           {categories.map((category) => (
             <button
@@ -101,7 +102,7 @@ export default function GuidesIndex({
       {searchQuery && (
         <div>
           <h2 className={EDITORIAL_H2_CLASS}>
-            Search results ({filteredGuides.length})
+            {t("searchResults", { count: filteredGuides.length })}
           </h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {filteredGuides.map((guide) => (
@@ -119,12 +120,12 @@ export default function GuidesIndex({
             </h2>
             <p className={`mt-3 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>{category.description}</p>
             <p className="mt-1 text-[11px] text-neutral-500">
-              {category.guides.length} guides
+              {t("guideCount", { count: category.guides.length })}
             </p>
 
             {category.pillarPages.length > 0 && (
               <div className="mt-8">
-                <h3 className={EDITORIAL_H2_CLASS}>Complete guides</h3>
+                <h3 className={EDITORIAL_H2_CLASS}>{t("completeGuides")}</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {category.pillarPages.map((guide) => (
                     <GuideCard
@@ -140,7 +141,7 @@ export default function GuidesIndex({
 
             {category.clusterPages.length > 0 && (
               <div className="mt-8">
-                <h3 className={EDITORIAL_H2_CLASS}>Related guides</h3>
+                <h3 className={EDITORIAL_H2_CLASS}>{t("relatedGuides")}</h3>
                 <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {category.clusterPages.map((guide) => (
                     <GuideCard key={guide.slug} guide={guide} guideLink={links.guide} />
@@ -154,14 +155,14 @@ export default function GuidesIndex({
       {searchQuery && filteredGuides.length === 0 && (
         <div className="py-12 text-center">
           <p className={EDITORIAL_BODY_CLASS}>
-            No guides found matching &ldquo;{searchQuery}&rdquo;
+            {t("noResults", { query: searchQuery })}
           </p>
           <button
             type="button"
             onClick={() => setSearchQuery("")}
             className={`mt-4 ${EDITORIAL_LINK_CLASS}`}
           >
-            Clear search
+            {t("clearSearch")}
           </button>
         </div>
       )}
@@ -178,11 +179,8 @@ function GuideCard({
   isPillar?: boolean;
   guideLink: (slug: string) => string;
 }) {
-  const categoryLabels: Record<string, string> = {
-    feasibility: "Feasibility",
-    appraisal: "Appraisal",
-    industry: "Industry",
-  };
+  const t = useTranslations("guides.index");
+  const categoryLabel = t(`categoryLabels.${guide.category}` as "categoryLabels.feasibility");
 
   return (
     <Link
@@ -192,17 +190,17 @@ function GuideCard({
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-bold text-neutral-900">{guide.hero.headline}</h3>
         <span className="shrink-0 text-[10px] uppercase tracking-wider text-neutral-500">
-          {categoryLabels[guide.category]}
+          {categoryLabel}
         </span>
       </div>
       {isPillar ? (
         <span className="mt-2 inline-block text-[10px] uppercase tracking-widest text-sage-700">
-          Complete guide
+          {t("completeGuideBadge")}
         </span>
       ) : null}
       <p className={`mt-3 line-clamp-3 ${EDITORIAL_BODY_CLASS}`}>{guide.metaDescription}</p>
       <span className={`mt-4 inline-block text-[11px] uppercase tracking-wider ${EDITORIAL_LINK_CLASS}`}>
-        Read guide
+        {t("readGuide")}
       </span>
     </Link>
   );

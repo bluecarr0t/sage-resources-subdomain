@@ -1,6 +1,8 @@
 "use client";
 
 import { GlossaryTerm } from "@/lib/glossary/index";
+import { getGlossaryCategoryMessageKey } from "@/lib/glossary/category-i18n";
+import { truncateGlossaryDefinition } from "@/lib/glossary/format-html";
 import { getGlossaryCategoryAccent } from "@/lib/glossary-category-accent";
 import Link from "next/link";
 import { useState } from "react";
@@ -198,6 +200,8 @@ export default function GlossaryIndex({
 function GlossaryTermCard({ term, locale }: { term: GlossaryTerm; locale: string }) {
   const t = useTranslations('glossary');
   const accent = getGlossaryCategoryAccent(term.category);
+  const categoryLabel = t(`categories.${getGlossaryCategoryMessageKey(term.category)}`);
+  const excerpt = truncateGlossaryDefinition(term.definition);
 
   return (
     <Link
@@ -211,10 +215,10 @@ function GlossaryTermCard({ term, locale }: { term: GlossaryTerm; locale: string
           {term.term}
         </h3>
         <span className={`shrink-0 text-[10px] font-medium uppercase tracking-wider ${accent.label}`}>
-          {term.category}
+          {categoryLabel}
         </span>
       </div>
-      <p className={`mt-3 ${EDITORIAL_BODY_CLASS}`}>{t('cardHint')}</p>
+      <p className={`mt-3 ${EDITORIAL_BODY_CLASS}`}>{excerpt}</p>
       <span className={`mt-4 inline-block text-[11px] uppercase tracking-wider ${EDITORIAL_LINK_CLASS}`}>
         {t('readMore')}
       </span>

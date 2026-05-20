@@ -855,6 +855,27 @@
       "description": "Unsere Experten haben über 350 Machbarkeitsstudien und Bewertungen durchgeführt. Erhalten Sie personalisierte Beratung für Ihr Projekt.",
       "button": "Kostenlose Beratung Vereinbaren"
     },
+    "englishNotice": {
+      "message": "Leitfäden sind auf Englisch verfügbar. Die Links unten öffnen die englischen Versionen.",
+      "link": "Leitfäden auf Englisch anzeigen"
+    },
+    "index": {
+      "searchPlaceholder": "Leitfäden suchen...",
+      "allGuides": "Alle Leitfäden",
+      "searchResults": "Suchergebnisse ({count})",
+      "noResults": "Keine Leitfäden für „{query}“ gefunden",
+      "clearSearch": "Suche löschen",
+      "completeGuides": "Komplette Leitfäden",
+      "relatedGuides": "Verwandte Leitfäden",
+      "guideCount": "{count} Leitfäden",
+      "readGuide": "Leitfaden lesen",
+      "completeGuideBadge": "Kompletter Leitfaden",
+      "categoryLabels": {
+        "feasibility": "Machbarkeit",
+        "appraisal": "Bewertung",
+        "industry": "Branche"
+      }
+    },
     "feasibilityStudiesCompleteGuide": {
       "title": "Kompletter Leitfaden für Machbarkeitsstudien | 2025 | Sage Outdoor Advisory",
       "metaDescription": "Umfassender Leitfaden zu Machbarkeitsstudien für Outdoor-Hospitality-Projekte. Erfahren Sie, was Machbarkeitsstudien umfassen, wie sie funktionieren, Zeitrahmen und wie Sie einen Berater wählen. Wesentliche Lektüre für Glamping-, Wohnmobil-Resort- und Campingplatz-Entwickler.",
@@ -1163,7 +1184,7 @@
         },
         {
           "question": "Was kann eine Machbarkeitsstudie verzögern?",
-          "answer": "<p>Mehrere Faktoren können Verzögerungen im Prozess der Machbarkeitsstudie verursachen:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Verzögerungen bei Kundeninformationen:</strong> Wenn angeforderte Informationen nicht zeitnah bereitgestellt werden, kann dies die Analysephase verlangsamen</li><li><strong>Verfügbarkeit von Marktdaten:</strong> Schwer zu beschaffende oder begrenzte Marktdaten können die Recherchezeit verlängern</li><li><strong>Projektumfangsänderungen:</strong> Erhebliche Änderungen am Projektumfang während der Studie können zusätzliche Analysen erfordern</li><li><strong>Überprüfungszyklen:</strong> Verlängerte Überprüfungsperioden können die Finalisierung verzögern</li></ul><p>Um den Prozess auf Kurs zu halten, stellen Sie angeforderte Informationen zeitnah bereit und reagieren Sie schnell auf Fragen und Klärungen. Siehe unseren <a href=\"/de/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Leitfaden zu Prozess und Zeitplan</a> für weitere Details.</p>"
+          "answer": "<p>Mehrere Faktoren können Verzögerungen im Prozess der Machbarkeitsstudie verursachen:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Verzögerungen bei Kundeninformationen:</strong> Wenn angeforderte Informationen nicht zeitnah bereitgestellt werden, kann dies die Analysephase verlangsamen</li><li><strong>Verfügbarkeit von Marktdaten:</strong> Schwer zu beschaffende oder begrenzte Marktdaten können die Recherchezeit verlängern</li><li><strong>Projektumfangsänderungen:</strong> Erhebliche Änderungen am Projektumfang während der Studie können zusätzliche Analysen erfordern</li><li><strong>Überprüfungszyklen:</strong> Verlängerte Überprüfungsperioden können die Finalisierung verzögern</li></ul><p>Um den Prozess auf Kurs zu halten, stellen Sie angeforderte Informationen zeitnah bereit und reagieren Sie schnell auf Fragen und Klärungen. Siehe unseren <a href=\"/en/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Leitfaden zu Prozess und Zeitplan</a> für weitere Details.</p>"
         }
       ],
       "keywords": ["Zeitplan Machbarkeitsstudie", "Prozess Machbarkeitsstudie", "wie lange dauert eine Machbarkeitsstudie"],
@@ -1611,6 +1632,14 @@
   "glossary": {
     "title": "Outdoor-Hospitality-Glossar",
     "subtitle": "Wichtige Begriffe in klarer Sprache. Von Glamping und Camping bis zu Machbarkeit, Finanzen und Bewertung.",
+    "meta": {
+      "title": "Outdoor-Hospitality-Glossar | Begriffe & Definitionen | Sage Outdoor Advisory",
+      "description": "Glossar der Outdoor-Hospitality-Branche: Glamping, Wohnmobilparks, Machbarkeitsstudien, Bewertungen und mehr."
+    },
+    "englishNotice": {
+      "message": "Glossar-Definitionen sind derzeit auf Englisch verfügbar.",
+      "link": "Glossar auf Englisch anzeigen"
+    },
     "cardHint": "Vollständige Definition, verwandte Begriffe und Beispiele anzeigen.",
     "searchPlaceholder": "Glossar-Begriffe suchen...",
     "tabs": {
@@ -1633,6 +1662,33 @@
       "title": "Benötigen Sie Hilfe beim Verstehen dieser Begriffe?",
       "description": "Unsere Experten können Ihnen helfen zu verstehen, wie diese Branchenbegriffe auf Ihr Outdoor-Hospitality-Projekt zutreffen.",
       "button": "Kostenlose Beratung Vereinbaren"
+    },
+    "termMeta": {
+      "title": "Was ist {term}? | Definition | Sage Outdoor Advisory",
+      "notFoundTitle": "Glossar-Begriff nicht gefunden | Sage Outdoor Advisory"
+    },
+    "termPage": {
+      "breadcrumb": "Glossar",
+      "title": "Was ist {term}?",
+      "quickAnswer": "Kurzantwort",
+      "understanding": "{term} verstehen",
+      "examples": "Beispiele",
+      "useCases": "Typische Anwendungsfälle",
+      "relatedServices": "Verwandte Leistungen",
+      "faqs": "Häufig gestellte Fragen",
+      "backToGlossary": "← Zurück zum Glossar",
+      "relatedTerms": "Verwandte Begriffe",
+      "quickLinks": "Schnelllinks",
+      "viewAllTerms": "Alle Begriffe anzeigen",
+      "expertGuides": "Experten-Leitfäden",
+      "ourServices": "Unsere Leistungen",
+      "marketReports": "Marktberichte",
+      "scheduleConsultation": "Beratung vereinbaren",
+      "cta": {
+        "title": "Brauchen Sie Hilfe bei Ihrem Outdoor-Hospitality-Projekt?",
+        "description": "Unsere Experten erklären, wie {term} für Ihr Projekt relevant ist.",
+        "button": "Kostenlose Beratung Vereinbaren"
+      }
     },
     "terms": {
       "feasibilityStudy": {
@@ -1923,7 +1979,8 @@
     },
     "stats": {
       "propertiesCount": "650+",
-      "properties": "Properties",
+      "properties": "Erfasste Objekte",
+      "units": "Erfasste Einheiten",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"
     },
@@ -1976,7 +2033,7 @@
         },
         {
           "question": "Are glamping properties profitable?",
-          "answer": "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve 60-80% occupancy rates with strong seasonal demand."
+          "answer": "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve over 60% occupancy rates with strong seasonal demand."
         }
       ]
     }

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { getGlossaryTerm, getAllGlossaryTerms, getRelatedTerms } from "@/lib/glossary/index";
 import { notFound } from "next/navigation";
 import GlossaryTermTemplate from "@/components/GlossaryTermTemplate";
-import { locales, localeMetadata, type Locale } from "@/i18n";
+import { locales, type Locale } from "@/i18n";
 import {
   buildGlossaryTermMetaDescription,
   generateHreflangAlternates,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/i18n-utils";
 import { glossaryMetadataOverridesEn } from "@/lib/glossary-metadata-overrides";
 import { getAvailableLocalesForContent } from "@/lib/i18n-content";
+import { getTranslations } from "next-intl/server";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -52,23 +53,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     notFound();
   }
   
+  const tMeta = await getTranslations({ locale, namespace: "glossary.termMeta" });
   const glossaryTerm = await getGlossaryTerm(term, locale);
   
   if (!glossaryTerm) {
     return {
-      title: "Glossary Term Not Found | Sage Outdoor Advisory",
+      title: tMeta("notFoundTitle"),
     };
   }
 
   const pathname = `/${locale}/glossary/${glossaryTerm.slug}`;
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
   const override = locale === 'en' ? glossaryMetadataOverridesEn[glossaryTerm.slug] : undefined;
-  const baseTitle = `What is ${getArticle(glossaryTerm.term)} ${glossaryTerm.term}? | Definition & Guide | Sage Outdoor Advisory`;
-  const title = override?.title
-    ? override.title
-    : locale === 'en'
-      ? baseTitle
-      : `${baseTitle} (${localeMetadata[locale as Locale].nativeName})`;
+  const article = getArticle(glossaryTerm.term);
+  const title = override?.title ?? tMeta("title", { article, term: glossaryTerm.term });
   const description =
     override?.description ??
     buildGlossaryTermMetaDescription(

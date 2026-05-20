@@ -30,21 +30,25 @@ Sage Outdoor Advisory includes ADR analysis and benchmarking in our feasibility 
     seoKeywords: ["ADR", "average daily rate", "room rate", "daily rate", "revenue per room"],
     internalLinks: [
       { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
-      { text: "Data Insights", url: "https://sageoutdooradvisory.com/shop/" }
+      { text: "Feasibility Studies Complete Guide", url: "/guides/feasibility-studies-complete-guide" },
+      { text: "Revenue Projections", url: "/glossary/revenue-projections" },
     ],
     faqs: [
       {
         question: "How is ADR calculated?",
-        answer: "ADR = Total Room Revenue ÷ Number of Rooms Sold. It represents the average revenue per occupied unit per day."
+        answer:
+          "ADR = Total Room Revenue ÷ Number of Rooms Sold. It is the average revenue per occupied unit per night (or day), not per available unit.",
       },
       {
         question: "What's a good ADR for glamping?",
-        answer: "ADR varies by location and amenities. Our market reports provide ADR benchmarks by region and property type."
+        answer:
+          "ADR varies by market, unit type, and season. Sage benchmarks glamping, RV, and campground rates in feasibility studies and <a href=\"https://sageoutdooradvisory.com/shop/\">market reports</a>—contact us for regional data.",
       },
       {
         question: "How does ADR relate to profitability?",
-        answer: "ADR, combined with occupancy rate, determines RevPAR (Revenue Per Available Room), which directly impacts profitability."
-      }
+        answer:
+          "ADR and occupancy together drive RevPAR and total revenue. A high ADR with low occupancy may earn less than moderate ADR with strong occupancy—both belong in a feasibility pro forma.",
+      },
     ]
   },
     "ardr": {
@@ -207,18 +211,26 @@ Sage Outdoor Advisory includes NOI projections and analysis in our feasibility s
     ],
     seoKeywords: ["NOI", "net operating income", "operating income", "property NOI"],
     internalLinks: [
-      { text: "Appraisals", url: "https://sageoutdooradvisory.com/services-overview/" },
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
+      { text: "Property Appraisals Complete Guide", url: "/guides/property-appraisals-complete-guide" },
+      { text: "Appraisal Services", url: "https://sageoutdooradvisory.com/services-overview/" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
     ],
     faqs: [
       {
         question: "What expenses are included in NOI?",
-        answer: "NOI includes all operating expenses like utilities, maintenance, insurance, and management, but excludes debt service, taxes, and capital improvements."
+        answer:
+          "NOI includes operating expenses such as utilities, maintenance, insurance, and management. It excludes debt service, income taxes, and capital improvements—those are analyzed separately in underwriting.",
       },
       {
         question: "How is NOI used in property valuation?",
-        answer: "NOI is divided by the capitalization rate to determine property value in the income approach to valuation."
-      }
+        answer:
+          "In the income approach, Value = NOI ÷ Cap Rate. Lenders and buyers use stabilized NOI to size loans and compare outdoor hospitality assets.",
+      },
+      {
+        question: "How do I improve NOI on a glamping or RV property?",
+        answer:
+          "Focus on rate optimization, occupancy, and expense control. Sage feasibility studies model NOI sensitivity to ADR, occupancy, and cost assumptions before you expand or refinance.",
+      },
     ]
   },
     "cap-rate": {
@@ -247,17 +259,25 @@ Sage Outdoor Advisory uses cap rates in our appraisals and feasibility studies t
     ],
     seoKeywords: ["cap rate", "capitalization rate", "real estate cap rate", "investment cap rate"],
     internalLinks: [
-      { text: "Appraisals", url: "https://sageoutdooradvisory.com/services-overview/" }
+      { text: "Property Appraisals Complete Guide", url: "/guides/property-appraisals-complete-guide" },
+      { text: "Income Approach", url: "/glossary/income-approach" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
     ],
     faqs: [
       {
         question: "What's a good cap rate?",
-        answer: "Cap rates vary by property type and market. Generally, 6-10% is common for outdoor hospitality properties, with premium properties having lower rates."
+        answer:
+          "Cap rates vary by asset type, location, and risk. Outdoor hospitality assets often fall roughly in the 6–10% range, with premium glamping lower and basic campgrounds higher. Use market-derived comps, not apartment averages.",
       },
       {
         question: "How is cap rate calculated?",
-        answer: "Cap Rate = Net Operating Income ÷ Property Value (or Purchase Price)."
-      }
+        answer: "Cap Rate = Net Operating Income ÷ Property Value (or purchase price), expressed as a percentage.",
+      },
+      {
+        question: "Do cap rates rise when interest rates rise?",
+        answer:
+          "Often yes—investors demand higher returns when debt costs increase, which can push cap rates up and values down. Sage appraisals document market cap rates at the time of valuation.",
+      },
     ]
   },
     "roi": {
@@ -324,13 +344,26 @@ Sage Outdoor Advisory uses DCF analysis in our feasibility studies and appraisal
     ],
     seoKeywords: ["DCF", "discounted cash flow", "cash flow valuation", "DCF analysis"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
+      { text: "Feasibility Studies Complete Guide", url: "/guides/feasibility-studies-complete-guide" },
+      { text: "Revenue Projections", url: "/glossary/revenue-projections" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
     ],
     faqs: [
       {
         question: "What's the difference between DCF and cap rate?",
-        answer: "DCF uses detailed cash flow projections over time, while cap rate uses a single year's NOI. DCF is more detailed but requires more assumptions."
-      }
+        answer:
+          "DCF discounts a multi-year cash flow stream; cap rate values stabilized NOI in a single step. DCF fits development and ramp-up; cap rate fits mature assets.",
+      },
+      {
+        question: "When is DCF used in outdoor hospitality?",
+        answer:
+          "Development feasibility, expansions, and properties with uneven cash flows. Sage includes DCF or IRR analysis when projections need time-weighted returns.",
+      },
+      {
+        question: "What discount rate should I use?",
+        answer:
+          "Discount rates reflect risk, leverage, and investor hurdles—often higher for new builds than stabilized parks. Feasibility studies document assumptions for lender review.",
+      },
     ]
   },
     "irr": {
@@ -475,13 +508,26 @@ Sage Outdoor Advisory creates detailed pro forma financial statements as part of
     ],
     seoKeywords: ["pro forma", "pro forma financials", "financial projections", "pro forma statements"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
+      { text: "Feasibility Studies Complete Guide", url: "/guides/feasibility-studies-complete-guide" },
+      { text: "Revenue Projections", url: "/glossary/revenue-projections" },
+      { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
     ],
     faqs: [
       {
         question: "What's included in pro forma statements?",
-        answer: "Pro forma statements typically include projected income, expenses, cash flows, and balance sheets for multiple years."
-      }
+        answer:
+          "Pro formas typically include projected revenue, operating expenses, NOI, debt service, and cash flow for five to ten years, often with multiple scenarios.",
+      },
+      {
+        question: "Who uses pro forma financials?",
+        answer:
+          "Lenders, investors, and owners use them in feasibility studies, loan packages, and acquisition underwriting for glamping, RV, and campground assets.",
+      },
+      {
+        question: "How is a pro forma different from actual results?",
+        answer:
+          "Pro formas are forward-looking models; actuals reflect operations. Sage feasibility studies reconcile assumptions to market and comp data so pro formas hold up in diligence.",
+      },
     ]
   },
     "ebitda": {
@@ -509,13 +555,25 @@ Sage Outdoor Advisory includes EBITDA analysis in our feasibility studies and fi
     ],
     seoKeywords: ["EBITDA", "earnings before interest taxes", "operating profit", "EBITDA calculation"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
+      { text: "Feasibility Studies Complete Guide", url: "/guides/feasibility-studies-complete-guide" },
+      { text: "NOI (Net Operating Income)", url: "/glossary/noi" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
     ],
     faqs: [
       {
         question: "How is EBITDA calculated?",
-        answer: "EBITDA = Net Income + Interest + Taxes + Depreciation + Amortization."
-      }
+        answer: "EBITDA = Net Income + Interest + Taxes + Depreciation + Amortization.",
+      },
+      {
+        question: "How is EBITDA different from NOI?",
+        answer:
+          "NOI is property-level operating income before debt and taxes. EBITDA is a corporate metric that may include multiple properties and corporate overhead. Lenders on single assets usually focus on NOI.",
+      },
+      {
+        question: "Why do investors mention EBITDA?",
+        answer:
+          "It helps compare operating performance across companies with different depreciation and financing. For single-asset outdoor hospitality deals, NOI and cash flow remain primary.",
+      },
     ]
   },
     "operating-expenses": {
@@ -544,13 +602,26 @@ Sage Outdoor Advisory includes detailed operating expense analysis in our feasib
     ],
     seoKeywords: ["operating expenses", "property expenses", "operating costs", "property operating expenses"],
     internalLinks: [
-      { text: "Feasibility Studies", url: "https://sageoutdooradvisory.com/services-overview/" }
+      { text: "Feasibility Studies Complete Guide", url: "/guides/feasibility-studies-complete-guide" },
+      { text: "NOI (Net Operating Income)", url: "/glossary/noi" },
+      { text: "Market Reports", url: "https://sageoutdooradvisory.com/shop/" },
     ],
     faqs: [
       {
         question: "What expenses are included in operating expenses?",
-        answer: "Operating expenses include utilities, maintenance, insurance, management, marketing, and other day-to-day operational costs, but exclude debt service, taxes, and capital improvements."
-      }
+        answer:
+          "Utilities, maintenance, insurance, management, marketing, payroll, and administrative costs. Debt service, income taxes, and capital improvements are not operating expenses.",
+      },
+      {
+        question: "What percentage of revenue should operating expenses be?",
+        answer:
+          "Many outdoor hospitality properties run roughly 30–50% of revenue, depending on amenities and management model. Sage benchmarks expenses in feasibility studies for your asset type.",
+      },
+      {
+        question: "How can I reduce operating expenses?",
+        answer:
+          "Energy efficiency, staffing models, negotiated management fees, and preventive maintenance often yield the fastest savings—without cutting guest experience.",
+      },
     ]
   },
     "loan-to-value-ratio": {

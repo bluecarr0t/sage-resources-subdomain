@@ -43,7 +43,7 @@ export const industryGuides: Record<string, GuideContent> = {
       {
         id: "what-is-glamping",
         title: "What is Glamping?",
-        content: `<p><a href="/glossary/glamping" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping</a>, a portmanteau of "glamorous" and "camping," represents a fusion of outdoor experiences with luxury accommodations and amenities. Unlike traditional camping, glamping offers comfortable, often luxurious accommodations while maintaining a connection to nature.</p>
+        content: `<p><a href="/glossary/glamping" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping</a>, a combination of "glamorous" and "camping," represents a fusion of outdoor experiences with luxury accommodations and amenities. Unlike traditional camping, glamping offers comfortable, often luxurious accommodations while maintaining a connection to nature.</p>
         
         <p>Key characteristics of glamping include:</p>
         <ul class="list-disc list-inside space-y-3 ml-4">
@@ -1272,7 +1272,7 @@ export const industryGuides: Record<string, GuideContent> = {
           <li>Present a compelling case to lenders and investors</li>
         </ul>
         
-        <p>For glamping projects, feasibility studies typically take 4-6 weeks to complete. A professional study conducted by an experienced outdoor hospitality consultant can significantly increase your chances of success and financing approval.</p>
+        <p>For glamping projects, feasibility studies typically take 6–8 weeks to complete. A professional study conducted by an experienced outdoor hospitality consultant can significantly increase your chances of success and financing approval.</p>
         
         <p>See our <a href="/guides/feasibility-studies-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> for comprehensive information about feasibility studies for outdoor hospitality projects.</p>`
       },

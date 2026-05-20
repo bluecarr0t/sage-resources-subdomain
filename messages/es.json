@@ -855,6 +855,27 @@
       "description": "Nuestros expertos han completado más de 350 estudios de viabilidad y valoraciones. Obtenga orientación personalizada para su proyecto.",
       "button": "Programar Consulta Gratuita"
     },
+    "englishNotice": {
+      "message": "Los artículos de las guías están disponibles en inglés. Los enlaces siguientes abren las versiones en inglés.",
+      "link": "Ver guías en inglés"
+    },
+    "index": {
+      "searchPlaceholder": "Buscar guías...",
+      "allGuides": "Todas las guías",
+      "searchResults": "Resultados de búsqueda ({count})",
+      "noResults": "No se encontraron guías para «{query}»",
+      "clearSearch": "Borrar búsqueda",
+      "completeGuides": "Guías completas",
+      "relatedGuides": "Guías relacionadas",
+      "guideCount": "{count} guías",
+      "readGuide": "Leer guía",
+      "completeGuideBadge": "Guía completa",
+      "categoryLabels": {
+        "feasibility": "Viabilidad",
+        "appraisal": "Valoración",
+        "industry": "Industria"
+      }
+    },
     "feasibilityStudiesCompleteGuide": {
       "title": "Guía Completa de Estudios de Viabilidad | 2025 | Sage Outdoor Advisory",
       "metaDescription": "Guía completa de estudios de viabilidad para proyectos de hospitalidad al aire libre. Descubra qué incluyen los estudios de viabilidad, cómo funcionan, los plazos y cómo elegir un consultor. Lectura esencial para desarrolladores de glamping, resorts para autocaravanas y campings.",
@@ -1163,7 +1184,7 @@
         },
         {
           "question": "¿Qué puede retrasar un estudio de viabilidad?",
-          "answer": "<p>Varios factores pueden causar retrasos en el proceso del estudio de viabilidad:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Retrasos en la Información del Cliente:</strong> Si la información solicitada no se proporciona oportunamente, puede ralentizar la fase de análisis</li><li><strong>Disponibilidad de Datos del Mercado:</strong> Los datos del mercado difíciles de obtener o limitados pueden extender el tiempo de investigación</li><li><strong>Cambios en el Alcance del Proyecto:</strong> Los cambios significativos en el alcance del proyecto durante el estudio pueden requerir análisis adicional</li><li><strong>Ciclos de Revisión:</strong> Los períodos de revisión prolongados pueden retrasar la finalización</li></ul><p>Para mantener el proceso encaminado, proporcione la información solicitada oportunamente y responda a preguntas y aclaraciones rápidamente. Consulte nuestra <a href=\"/es/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía del proceso y cronograma</a> para más detalles.</p>"
+          "answer": "<p>Varios factores pueden causar retrasos en el proceso del estudio de viabilidad:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Retrasos en la Información del Cliente:</strong> Si la información solicitada no se proporciona oportunamente, puede ralentizar la fase de análisis</li><li><strong>Disponibilidad de Datos del Mercado:</strong> Los datos del mercado difíciles de obtener o limitados pueden extender el tiempo de investigación</li><li><strong>Cambios en el Alcance del Proyecto:</strong> Los cambios significativos en el alcance del proyecto durante el estudio pueden requerir análisis adicional</li><li><strong>Ciclos de Revisión:</strong> Los períodos de revisión prolongados pueden retrasar la finalización</li></ul><p>Para mantener el proceso encaminado, proporcione la información solicitada oportunamente y responda a preguntas y aclaraciones rápidamente. Consulte nuestra <a href=\"/en/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía del proceso y cronograma</a> para más detalles.</p>"
         }
       ],
       "keywords": ["cronograma estudio de viabilidad", "proceso estudio de viabilidad", "cuánto tiempo tarda un estudio de viabilidad"],
@@ -1611,6 +1632,14 @@
   "glossary": {
     "title": "Glosario de Hospitalidad al Aire Libre",
     "subtitle": "Términos clave explicados con claridad. Glamping, autocaravanas, campings, viabilidad y valoraciones.",
+    "meta": {
+      "title": "Glosario de hospitalidad al aire libre | Definiciones | Sage Outdoor Advisory",
+      "description": "Glosario de términos de hospitalidad al aire libre: glamping, parques de autocaravanas, estudios de viabilidad, valoraciones y más."
+    },
+    "englishNotice": {
+      "message": "Las definiciones del glosario están disponibles actualmente en inglés.",
+      "link": "Ver glosario en inglés"
+    },
     "cardHint": "Ver la definición completa, términos relacionados y ejemplos.",
     "searchPlaceholder": "Buscar términos del glosario...",
     "tabs": {
@@ -1633,6 +1662,33 @@
       "title": "¿Necesita Ayuda para Entender Estos Términos?",
       "description": "Nuestros expertos pueden ayudarle a entender cómo estos términos de la industria se aplican a su proyecto de hospitalidad al aire libre.",
       "button": "Programar Consulta Gratuita"
+    },
+    "termMeta": {
+      "title": "¿Qué es {term}? | Definición | Sage Outdoor Advisory",
+      "notFoundTitle": "Término no encontrado | Sage Outdoor Advisory"
+    },
+    "termPage": {
+      "breadcrumb": "Glosario",
+      "title": "¿Qué es {term}?",
+      "quickAnswer": "Respuesta rápida",
+      "understanding": "Entender {term}",
+      "examples": "Ejemplos",
+      "useCases": "Casos de uso comunes",
+      "relatedServices": "Servicios relacionados",
+      "faqs": "Preguntas frecuentes",
+      "backToGlossary": "← Volver al glosario",
+      "relatedTerms": "Términos relacionados",
+      "quickLinks": "Enlaces rápidos",
+      "viewAllTerms": "Ver todos los términos",
+      "expertGuides": "Guías expertas",
+      "ourServices": "Nuestros servicios",
+      "marketReports": "Informes de mercado",
+      "scheduleConsultation": "Programar consulta",
+      "cta": {
+        "title": "¿Necesita ayuda con su proyecto de hospitalidad al aire libre?",
+        "description": "Nuestros expertos pueden explicar cómo {term} se aplica a su proyecto.",
+        "button": "Programar Consulta Gratuita"
+      }
     },
     "terms": {
       "feasibilityStudy": {
@@ -1927,7 +1983,8 @@
     },
     "stats": {
       "propertiesCount": "650+",
-      "properties": "Properties",
+      "properties": "Propiedades registradas",
+      "units": "Unidades registradas",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"
     },
@@ -1980,7 +2037,7 @@
         },
         {
           "question": "Are glamping properties profitable?",
-          "answer": "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve 60-80% occupancy rates with strong seasonal demand."
+          "answer": "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve over 60% occupancy rates with strong seasonal demand."
         }
       ]
     }

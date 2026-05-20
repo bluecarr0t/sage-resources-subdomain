@@ -5,6 +5,10 @@ import PillarPageTemplate from "@/components/PillarPageTemplate";
 import { locales, type Locale } from "@/i18n";
 import { getOpenGraphLocale } from "@/lib/i18n-utils";
 import { getAvailableLocalesForContent } from "@/lib/i18n-content";
+import {
+  getGuideCanonicalUrl,
+  guideMetadataOverridesEn,
+} from "@/lib/guides-metadata-overrides";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -53,22 +57,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const canonicalUrl = getGuideCanonicalUrl(guide.slug);
   const pathname = `/${locale}/guides/${guide.slug}`;
-  const url = `https://resources.sageoutdooradvisory.com${pathname}`;
   const imageUrl =
     guide.hero.backgroundImage ?? `https://sageoutdooradvisory.com/og-image.jpg`;
 
   const publishDate = guide.lastModified || new Date().toISOString().split('T')[0];
   const modifiedDate = guide.lastModified || publishDate;
+  const override = locale === 'en' ? guideMetadataOverridesEn[guide.slug] : undefined;
+  const title = override?.title ?? guide.title;
+  const description = override?.description ?? guide.metaDescription;
 
   return {
-    title: guide.title,
-    description: guide.metaDescription,
+    title,
+    description,
     keywords: guide.keywords?.join(", "),
     openGraph: {
-      title: guide.title,
-      description: guide.metaDescription,
-      url,
+      title,
+      description,
+      url: canonicalUrl,
       siteName: "Sage Outdoor Advisory",
       images: [
         {
@@ -85,16 +92,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: guide.title,
-      description: guide.metaDescription,
+      title,
+      description,
       images: [imageUrl],
     },
     alternates: {
-      canonical: url,
-      // Guides are English-only - only include en in hreflang to avoid broken alternate links (500 on de/es/fr)
+      canonical: canonicalUrl,
       languages: {
-        en: `https://resources.sageoutdooradvisory.com/en/guides/${guide.slug}`,
-        'x-default': `https://resources.sageoutdooradvisory.com/en/guides/${guide.slug}`,
+        en: canonicalUrl,
+        'x-default': canonicalUrl,
       },
     },
     robots: {

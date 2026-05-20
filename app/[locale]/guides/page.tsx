@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { getAllGuideSlugs, getGuidesByCategory, getGuideSync } from "@/lib/guides";
 import GuidesIndex from "@/components/GuidesIndex";
+import { GuidesEnglishNotice } from "@/components/guides/GuidesEnglishNotice";
 import { EditorialCtaBand } from "@/components/editorial/EditorialCtaBand";
 import { EditorialMarketingLayout } from "@/components/editorial/EditorialMarketingLayout";
 import { locales, type Locale } from "@/i18n";
@@ -124,8 +125,15 @@ export default async function GuidesPage({ params }: PageProps) {
     },
   ];
 
+  const tNotice = await getTranslations({ locale, namespace: "guides.englishNotice" });
+
   return (
     <EditorialMarketingLayout locale={locale} title={t('title')} subtitle={t('subtitle')}>
+      <GuidesEnglishNotice
+        locale={locale}
+        message={tNotice("message")}
+        linkLabel={tNotice("link")}
+      />
       <GuidesIndex allGuides={allGuides} categories={categories} locale={locale} />
       <EditorialCtaBand
         title={t('cta.title')}

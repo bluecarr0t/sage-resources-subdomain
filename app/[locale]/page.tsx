@@ -30,6 +30,7 @@ import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
 import { getPublicMapDisplayedPropertyCount } from "@/lib/public-map-property-count";
+import { getPublicMapGlampingUnitCount } from "@/lib/public-map-unit-count";
 import { roundDownToStep } from "@/lib/round-down-to-step";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -208,7 +209,10 @@ export default async function HomePage({ params }: PageProps) {
     }
     const featuredTerms = glossaryTerms.slice(0, 12); // Top 12 terms
 
-    const mapPropertyCount = await getPublicMapDisplayedPropertyCount();
+    const [mapPropertyCount, glampingUnitCount] = await Promise.all([
+      getPublicMapDisplayedPropertyCount(),
+      getPublicMapGlampingUnitCount(),
+    ]);
     const benchmarkCountDisplay = roundDownToStep(mapPropertyCount, 25);
 
     // Homepage FAQs from translations
@@ -285,7 +289,7 @@ export default async function HomePage({ params }: PageProps) {
           </section>
 
           <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-x-visible px-6 pb-20 pt-14 sm:pb-28">
-            <section className="grid gap-10 border-b border-sage-200/80 pb-14 sm:grid-cols-3">
+            <section className="grid gap-10 border-b border-sage-200/80 pb-14 text-center sm:grid-cols-2 sm:text-left lg:grid-cols-4">
               <div>
                 <p className={EDITORIAL_SECTION_LABEL_CLASS}>{t('stats.properties')}</p>
                 <CountUpMetric
@@ -295,13 +299,25 @@ export default async function HomePage({ params }: PageProps) {
                 />
               </div>
               <div>
+                <p className={EDITORIAL_SECTION_LABEL_CLASS}>{t('stats.units')}</p>
+                <CountUpMetric
+                  value={glampingUnitCount}
+                  className={EDITORIAL_METRIC_VALUE_CLASS}
+                  durationMs={2500}
+                />
+              </div>
+              <div>
                 <p className={EDITORIAL_SECTION_LABEL_CLASS}>{t('stats.guides')}</p>
-                <CountUpMetric value={21} className={EDITORIAL_METRIC_VALUE_CLASS} durationMs={2500} />
+                <CountUpMetric
+                  value={allGuides.length}
+                  className={EDITORIAL_METRIC_VALUE_CLASS}
+                  durationMs={2500}
+                />
               </div>
               <div>
                 <p className={EDITORIAL_SECTION_LABEL_CLASS}>{t('stats.glossary')}</p>
                 <CountUpMetric
-                  value={57}
+                  value={glossaryTerms.length}
                   className={EDITORIAL_METRIC_VALUE_CLASS}
                   durationMs={2500}
                 />
@@ -366,7 +382,7 @@ export default async function HomePage({ params }: PageProps) {
                 <p className={`mt-4 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>
                   {t('sections.glossary.description')}
                 </p>
-                <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 [&>*:nth-child(n+4)]:hidden sm:[&>*:nth-child(n+4)]:block">
                   {featuredTerms.slice(0, 8).map((term) => {
                     const accent = getGlossaryCategoryAccent(term.category);
                     return (

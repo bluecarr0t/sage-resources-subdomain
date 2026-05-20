@@ -491,6 +491,11 @@ Sage Outdoor Advisory includes infrastructure analysis in our feasibility studie
     slug: "easement",
     term: "Easement",
     definition: "A legal right to use another person's property for a specific purpose, such as access roads, utility lines, or shared driveways, which can affect outdoor hospitality property development and operations.",
+    disambiguation: {
+      heading: "Real estate easement (legal land right)",
+      body: `<p>An <strong>easement</strong> is a recorded legal right to use someone else’s land for a specific purpose—access, utilities, drainage, or conservation limits. It is not a guest amenity, a building feature, or informal “easy access.”</p>
+      <p>For campground, glamping, and RV resort sites, easements often determine whether you can reach a landlocked parcel, run sewer or power, or build within conservation limits. They belong in <a href="/glossary/due-diligence">due diligence</a> and <a href="/glossary/feasibility-study">feasibility studies</a> before closing or breaking ground.</p>`,
+    },
     extendedDefinition: `An easement is a legal right to use another person's property for a specific purpose, without owning that property. For outdoor hospitality properties, easements are common and can significantly impact development, operations, and property value.
 
 Common types of easements affecting outdoor hospitality properties include:

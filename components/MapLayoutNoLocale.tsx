@@ -2,7 +2,7 @@
 
 import { useMapContext } from '@/components/MapContext';
 import {
-  EDITORIAL_H1_CLASS,
+  EDITORIAL_MAP_SIDEBAR_H1_CLASS,
   EDITORIAL_LINK_CLASS,
   EDITORIAL_SIDEBAR_BG_STYLE,
 } from '@/components/editorial/EditorialPageShell';
@@ -49,7 +49,7 @@ export default function MapLayoutNoLocale() {
           </nav>
 
           <section>
-            <h1 className={EDITORIAL_H1_CLASS}>Glamping Properties Map</h1>
+            <h1 className={EDITORIAL_MAP_SIDEBAR_H1_CLASS}>Glamping Properties Map</h1>
           </section>
         </div>
 

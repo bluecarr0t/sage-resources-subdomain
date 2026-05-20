@@ -1,3 +1,10 @@
+import {
+  FEASIBILITY_STUDY_COST_RANGE,
+  FEASIBILITY_STUDY_COST_RANGE_PROSE,
+  FEASIBILITY_STUDY_TIMELINE,
+  FEASIBILITY_STUDY_TIMELINE_PLAIN,
+  FEASIBILITY_STUDY_TIMELINE_PROSE,
+} from "./constants";
 import { GuideContent } from "./types";
 
 // Feasibility category guides
@@ -7,7 +14,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     slug: "feasibility-studies-complete-guide",
     title: "Feasibility Studies Complete Guide | 2025 | Sage Outdoor Advisory",
     metaDescription: "Comprehensive guide to feasibility studies for outdoor hospitality projects. Learn what feasibility studies include, how they work, timeline, and how to choose a consultant. Essential reading for glamping, RV resort, and campground developers.",
-    quickAnswer: "A feasibility study answers whether your outdoor hospitality project can work on a specific site. It reviews demand, competition, revenue and expense forecasts, and major risks. You should see occupancy and rate assumptions, operating costs, and a multi-year pro forma. It is site-specific, so it goes deeper than a broad market scan alone. Many lenders require a bank-approved study before they fund a deal. Most reports take about four to eight weeks and often range from roughly $15,000 to $50,000 depending on scope.",
+    quickAnswer: `A feasibility study answers whether your outdoor hospitality project can work on a specific site. It reviews demand, competition, revenue and expense forecasts, and major risks. You should see occupancy and rate assumptions, operating costs, and a multi-year pro forma. It is site-specific, so it goes deeper than a broad market scan alone. Many lenders require a bank-approved study before they fund a deal. Most reports take ${FEASIBILITY_STUDY_TIMELINE_PROSE} and often range from roughly ${FEASIBILITY_STUDY_COST_RANGE_PROSE} depending on scope.`,
     category: "feasibility",
     hero: {
       headline: "Feasibility Studies Complete Guide",
@@ -137,11 +144,11 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <h3>Glamping Resort Feasibility Studies</h3>
         <div class="my-8 relative overflow-hidden rounded-3xl shadow-2xl border-4 border-white/20 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10">
-          <div class="aspect-video relative w-full">
+          <div class="aspect-video relative w-full overflow-hidden">
             <img 
               src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/safari-tent.jpg" 
               alt="Luxury safari tent glamping accommodation example used in glamping resort feasibility studies and market analysis" 
-              class="absolute inset-0 w-full h-full object-cover" 
+              class="block h-full w-full object-cover" 
               loading="lazy"
               width="1920"
               height="1080"
@@ -161,11 +168,11 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
           <div class="relative overflow-hidden rounded-2xl shadow-xl border-2 border-white/30 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10 group hover:scale-105 transition-transform duration-300">
-            <div class="aspect-square relative w-full">
+            <div class="aspect-square relative w-full overflow-hidden">
               <img 
                 src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/yurt.jpg" 
                 alt="Yurt glamping accommodation - circular tent structure with wooden lattice frame used in glamping resort feasibility studies" 
-                class="absolute inset-0 w-full h-full object-cover" 
+                class="block h-full w-full object-cover" 
                 loading="lazy"
                 width="800"
                 height="800"
@@ -178,11 +185,11 @@ export const feasibilityGuides: Record<string, GuideContent> = {
             </div>
           </div>
           <div class="relative overflow-hidden rounded-2xl shadow-xl border-2 border-white/30 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10 group hover:scale-105 transition-transform duration-300">
-            <div class="aspect-square relative w-full">
+            <div class="aspect-square relative w-full overflow-hidden">
               <img 
                 src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/a-frame-cabin.jpg" 
                 alt="A-frame cabin glamping accommodation - triangular structure with steeply angled sides for glamping resort development" 
-                class="absolute inset-0 w-full h-full object-cover" 
+                class="block h-full w-full object-cover" 
                 loading="lazy"
                 width="800"
                 height="800"
@@ -195,11 +202,11 @@ export const feasibilityGuides: Record<string, GuideContent> = {
             </div>
           </div>
           <div class="relative overflow-hidden rounded-2xl shadow-xl border-2 border-white/30 backdrop-blur-sm bg-gradient-to-br from-slate-900/10 to-slate-800/10 group hover:scale-105 transition-transform duration-300">
-            <div class="aspect-square relative w-full">
+            <div class="aspect-square relative w-full overflow-hidden">
               <img 
                 src="https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/treehouse.jpg" 
                 alt="Treehouse glamping accommodation - elevated structure built among tree branches for unique glamping experiences" 
-                class="absolute inset-0 w-full h-full object-cover" 
+                class="block h-full w-full object-cover" 
                 loading="lazy"
                 width="800"
                 height="800"
@@ -410,7 +417,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         content: `<p>Understanding the feasibility study process and timeline helps you plan effectively and set appropriate expectations.</p>
         
         <h3>Typical Timeline</h3>
-        <p>Our feasibility studies typically take between <strong>4 to 8 weeks</strong> to complete, depending on the size and complexity of the property. This timeframe allows us to thoroughly review market data, inspect the property, and prepare a detailed, accurate report.</p>
+        <p>Our feasibility studies typically take between <strong>${FEASIBILITY_STUDY_TIMELINE_PLAIN}</strong> to complete, depending on the size and complexity of the property. This timeframe allows us to thoroughly review market data, inspect the property, and prepare a detailed, accurate report.</p>
         
         <p>Timelines vary based on:</p>
         <ul class="list-disc list-inside space-y-3 ml-4">
@@ -450,7 +457,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
           <li>Scenario analysis</li>
         </ul>
         
-        <h4>Phase 4: Report Preparation (Weeks 4-8)</h4>
+        <h4>Phase 4: Report Preparation (Weeks 6-8)</h4>
         <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Draft report preparation</li>
           <li>Client review and feedback</li>
@@ -458,7 +465,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
           <li>Delivery and presentation</li>
         </ul>
         
-        <p><strong>Note:</strong> The timeline for each phase may overlap, and the total duration of 4-8 weeks depends on project complexity, property size, and client responsiveness. More complex projects or those requiring extensive market research may take the full 8 weeks, while simpler projects may be completed closer to 4 weeks.</p>
+        <p><strong>Note:</strong> The timeline for each phase may overlap, and the total duration of ${FEASIBILITY_STUDY_TIMELINE} depends on project complexity, property size, and client responsiveness. More complex projects or those requiring extensive market research may take the full eight weeks, while straightforward projects are often completed closer to six weeks.</p>
         
         <h3>Client Responsibilities</h3>
         <p>To keep the process on track, clients should:</p>
@@ -469,7 +476,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
           <li>Review draft materials within agreed timeframes</li>
         </ul>
         
-        <p>For a detailed breakdown of the process, see our <a href="/guides/feasibility-study-process-timeline" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study process and timeline guide</a>.</p>`
+        <p>For the canonical week-by-week breakdown, see our dedicated <a href="/guides/feasibility-study-process-timeline" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study process & timeline guide</a> (${FEASIBILITY_STUDY_TIMELINE}).</p>`
       },
       {
         id: "choose-consultant",
@@ -601,7 +608,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       },
       {
         question: "How long does a feasibility study take?",
-        answer: `<p>Our feasibility studies typically take between <strong>4 to 8 weeks</strong> to complete, depending on the size and complexity of the property. This timeframe allows us to thoroughly review market data, inspect the property, and prepare a detailed, accurate report.</p>
+        answer: `<p>Our feasibility studies typically take between <strong>${FEASIBILITY_STUDY_TIMELINE_PLAIN}</strong> to complete, depending on the size and complexity of the property. This timeframe allows us to thoroughly review market data, inspect the property, and prepare a detailed, accurate report.</p>
         
         <p>Timelines vary based on:</p>
         <ul class="list-disc list-inside space-y-1 ml-4">
@@ -670,10 +677,11 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       "Lenders typically require bank-approved feasibility studies before financing glamping, RV resort, or campground projects.",
       "Key components include market analysis, revenue projections, operating expenses, site suitability, and a 10-year pro forma.",
       "Feasibility studies are site-specific; market analyses are broader and not tied to a particular property.",
-      "The process usually takes 4–8 weeks and costs $15,000–$50,000 depending on project scope.",
+      `The process usually takes ${FEASIBILITY_STUDY_TIMELINE} and costs ${FEASIBILITY_STUDY_COST_RANGE} depending on project scope.`,
       "Choose a consultant with outdoor hospitality experience and proprietary data on comparable properties.",
     ],
     changeLog: [
+      { date: "2026-05-20", changes: ["Standardized feasibility study timeline to 6–8 weeks and cost range to $10–$20k+ across key takeaways and body copy"] },
       { date: "2025-03-04", changes: ["Added Key Takeaways and References sections", "Added Quick Answer for GSO optimization"] },
       { date: "2025-01-15", changes: ["Comprehensive guide update", "Expanded FAQ section"] },
     ],
@@ -682,7 +690,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       { id: 2, title: "Uniform Standards of Professional Appraisal Practice (USPAP)", url: "https://www.appraisalfoundation.org/imis/TAF/Standards/Appraisal_Standards/USPAP/USPAP.aspx", accessed: "March 2025" },
       { id: 3, title: "KOA North American Camping Report", url: "https://koa.com/north-american-camping-report/", accessed: "March 2025" },
     ],
-    lastModified: "2025-03-04",
+    lastModified: "2026-05-20",
     keywords: ["feasibility study", "outdoor hospitality feasibility study", "glamping feasibility study guide", "RV resort feasibility", "campground feasibility"],
     relatedServices: {
       title: "Feasibility Study Services",
@@ -986,7 +994,8 @@ export const feasibilityGuides: Record<string, GuideContent> = {
 "feasibility-study-vs-appraisal": {
     slug: "feasibility-study-vs-appraisal",
     title: "Feasibility Study vs. Appraisal: Key Differences | Sage Outdoor Advisory",
-    metaDescription: "Understand the differences between feasibility studies and appraisals for outdoor hospitality projects. Learn when you need each and how they work together.",
+    metaDescription: "Feasibility study vs appraisal for glamping, RV resorts & campgrounds: forward-looking viability vs present property value. When lenders require both and typical timelines.",
+    quickAnswer: "A feasibility study tests whether a proposed outdoor hospitality project can succeed financially (forward-looking). An appraisal states what an existing property is worth today (present-focused). Development financing usually requires both: the feasibility study for project viability and the appraisal for collateral value.",
     category: "feasibility",
     hero: {
       headline: "Feasibility Study vs. Appraisal",
@@ -1099,7 +1108,9 @@ export const feasibilityGuides: Record<string, GuideContent> = {
           <li><strong>Both for Financing:</strong> Lenders often require both to assess project viability and property value</li>
         </ol>
         
-        <p>The feasibility study informs the appraisal by providing projected income and expenses, while the appraisal validates the property's value based on those projections.</p>`
+        <p>The feasibility study informs the appraisal by providing projected income and expenses, while the appraisal validates the property's value based on those projections.</p>
+        
+        <p>For timing context, feasibility studies typically run <strong>${FEASIBILITY_STUDY_TIMELINE}</strong> while specialized outdoor hospitality appraisals often take <strong>2–4 weeks</strong> after site access and records are provided. See our <a href="/guides/feasibility-study-process-timeline" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study timeline guide</a> and <a href="/landing/glamping-appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping appraisal services</a>.</p>`
       },
     ],
     clusterPages: [
@@ -1112,9 +1123,25 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         title: "Property Appraisals Complete Guide",
         url: "/guides/property-appraisals-complete-guide",
         description: "Comprehensive guide to property appraisals."
+      },
+      {
+        title: "Feasibility Study Process & Timeline",
+        url: "/guides/feasibility-study-process-timeline",
+        description: "Week-by-week feasibility study timeline."
       }
     ],
-    relatedGuides: ["feasibility-studies-complete-guide", "property-appraisals-complete-guide"],
+    relatedGuides: [
+      "feasibility-studies-complete-guide",
+      "property-appraisals-complete-guide",
+      "feasibility-study-process-timeline",
+    ],
+    keyTakeaways: [
+      "Feasibility studies are forward-looking and answer whether a proposed project can succeed.",
+      "Appraisals are present-focused and answer what a property is worth today for lenders or transactions.",
+      "Development financing typically requires both documents for viability and collateral.",
+      `Feasibility studies usually take ${FEASIBILITY_STUDY_TIMELINE}; appraisals often take 2–4 weeks for outdoor hospitality assets.`,
+      "Use specialized outdoor hospitality consultants—generic hotel studies rarely satisfy glamping or RV lenders.",
+    ],
     faqs: [
       {
         question: "Do I need both a feasibility study and an appraisal?",
@@ -1149,9 +1176,14 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         </ul>
         
         <p>Some lenders may require a pre-development appraisal to establish baseline value, while others will accept an appraisal closer to project completion. Your lender can clarify their specific requirements.</p>`
+      },
+      {
+        question: "How long does a feasibility study take compared to an appraisal?",
+        answer: `<p>They run on different clocks. A specialized outdoor hospitality <strong>feasibility study</strong> usually takes <strong>${FEASIBILITY_STUDY_TIMELINE}</strong> because it includes market research, financial modeling, and a bank-ready report. An <strong>appraisal</strong> of an existing or proposed stabilized asset often takes <strong>2–4 weeks</strong> once the appraiser has site access and operating data.</p>
+        <p>On development deals, the feasibility study typically starts first to validate the concept; appraisals may follow at pre-development, completion, or stabilization depending on lender requirements.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    lastModified: "2026-05-20",
     keywords: ["feasibility study vs appraisal", "difference between feasibility study and appraisal"],
     cta: {
       title: "Need Help Understanding Which You Need?",
@@ -1162,8 +1194,9 @@ export const feasibilityGuides: Record<string, GuideContent> = {
   },
 "feasibility-study-process-timeline": {
     slug: "feasibility-study-process-timeline",
-    title: "How Long Does a Feasibility Study Take? Process & Timeline (4–6 Weeks) | Sage Outdoor Advisory",
-    metaDescription: "Outdoor hospitality feasibility study timeline: kickoff, market research, financial modeling, and report delivery. Typical 4–6 weeks for glamping, RV resorts, and campgrounds—what to expect at each phase.",
+    title: `How Long Does a Feasibility Study Take? Process & Timeline (${FEASIBILITY_STUDY_TIMELINE}) | Sage Outdoor Advisory`,
+    metaDescription: `Outdoor hospitality feasibility study timeline: kickoff, market research, financial modeling, and report delivery. Typical ${FEASIBILITY_STUDY_TIMELINE} for glamping, RV resorts, and campgrounds—what to expect at each phase.`,
+    quickAnswer: `Most bank-ready outdoor hospitality feasibility studies take ${FEASIBILITY_STUDY_TIMELINE} from kickoff to draft delivery. Week 1 covers scope and site context; weeks 2–5 focus on market and financial modeling; weeks 6–8 finalize the lender-ready report. Timelines stretch when market data is thin or client inputs are delayed.`,
     category: "feasibility",
     hero: {
       headline: "Feasibility Study Process & Timeline",
@@ -1187,14 +1220,14 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         title: "Introduction",
         content: `<p>Understanding the <a href="/glossary/feasibility-study" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study</a> process helps you plan effectively and set appropriate expectations. This guide walks through each phase of the process and typical timelines.</p>
         
-        <p>Most feasibility studies take <strong>4-6 weeks</strong> to complete, though timelines vary based on project complexity and data availability.</p>
+        <p>Most feasibility studies take <strong>${FEASIBILITY_STUDY_TIMELINE}</strong> to complete, though timelines vary based on project complexity and data availability.</p>
         
         <p>See our <a href="/guides/feasibility-studies-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Feasibility Studies Complete Guide</a> for comprehensive information.</p>`
       },
       {
         id: "timeline",
         title: "Typical Timeline",
-        content: `<p>Most feasibility studies for outdoor hospitality projects take <strong>4-6 weeks</strong> to complete. Timeline factors include:</p>
+        content: `<p>Most feasibility studies for outdoor hospitality projects take <strong>${FEASIBILITY_STUDY_TIMELINE}</strong> to complete. Timeline factors include:</p>
         <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Project complexity</li>
           <li>Market data availability</li>
@@ -1237,7 +1270,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       },
       {
         id: "phase-4",
-        title: "Phase 4: Report Preparation (Weeks 4-6)",
+        title: "Phase 4: Report Preparation (Weeks 6-8)",
         content: `<p>Final phase includes:</p>
         <ul class="list-disc list-inside space-y-3 ml-4">
           <li>Draft report preparation</li>
@@ -1265,11 +1298,15 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         description: "Comprehensive guide to feasibility studies."
       }
     ],
-    relatedGuides: ["feasibility-studies-complete-guide"],
+    relatedGuides: [
+      "feasibility-studies-complete-guide",
+      "feasibility-study-vs-appraisal",
+      "what-banks-look-for-feasibility-study",
+    ],
     faqs: [
       {
         question: "How long does a feasibility study take?",
-        answer: `<p>Most feasibility studies for outdoor hospitality projects take <strong>4-6 weeks</strong> to complete, though timelines vary based on:</p>
+        answer: `<p>Most feasibility studies for outdoor hospitality projects take <strong>${FEASIBILITY_STUDY_TIMELINE}</strong> to complete, though timelines vary based on:</p>
         
         <ul class="list-disc list-inside space-y-1 ml-4">
           <li>Project complexity</li>
@@ -1282,8 +1319,8 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>Week 1:</strong> Project kickoff and information gathering</li>
           <li><strong>Weeks 2-3:</strong> Market research and analysis</li>
-          <li><strong>Weeks 3-4:</strong> Financial analysis</li>
-          <li><strong>Weeks 4-6:</strong> Report preparation and finalization</li>
+          <li><strong>Weeks 3-5:</strong> Financial analysis</li>
+          <li><strong>Weeks 6-8:</strong> Report preparation and finalization</li>
         </ul>`
       },
       {
@@ -1297,15 +1334,33 @@ export const feasibilityGuides: Record<string, GuideContent> = {
           <li><strong>Review Cycles:</strong> Extended review periods can push back finalization</li>
         </ul>
         
-        <p>To keep the process on track, provide requested information promptly and respond to questions and clarifications quickly. See our <a href="/guides/feasibility-study-process-timeline" class="text-[#006b5f] hover:text-[#005a4f] underline">process and timeline guide</a> for more details.</p>`
+        <p>To keep the process on track, provide requested information promptly and respond to questions and clarifications quickly. Review the phase breakdown in the <a href="/guides/feasibility-studies-complete-guide#timeline-process" class="text-[#006b5f] hover:text-[#005a4f] underline">complete feasibility guide timeline section</a> for related context.</p>`
       },
       {
         question: "What is the typical feasibility study timeline for glamping or RV resort financing?",
-        answer: `<p>For most outdoor hospitality projects—glamping resorts, RV parks, and campgrounds—Sage and most specialized consultants target roughly <strong>4–6 weeks</strong> from kickoff to a bank-ready draft, assuming timely data from the client and clear project scope.</p>
+        answer: `<p>For most outdoor hospitality projects—glamping resorts, RV parks, and campgrounds—Sage targets roughly <strong>${FEASIBILITY_STUDY_TIMELINE}</strong> from kickoff to a bank-ready draft, assuming timely data from the client and clear project scope.</p>
         <p>Lenders usually care most about market support, realistic ADR and occupancy assumptions, operating expense benchmarks, and a pro forma that ties back to comparable supply. Those workstreams map directly to the phase breakdown in this guide.</p>`
+      },
+      {
+        question: "How much does a feasibility study cost and how does that relate to timeline?",
+        answer: `<p>Outdoor hospitality feasibility studies commonly range from about <strong>${FEASIBILITY_STUDY_COST_RANGE_PROSE}</strong> depending on property type, unit count, market complexity, and whether the report must satisfy a specific lender checklist. The <strong>${FEASIBILITY_STUDY_TIMELINE}</strong> timeline assumes timely client data, clear scope, and efficient review cycles.</p>
+        <p>Larger glamping or RV resort projects with multiple unit types, phased development, or thin comparable markets may sit at the higher end of both cost and duration.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    howToSteps: [
+      "Week 1: Project kickoff, site context, and information gathering",
+      "Weeks 2–3: Market research, competition, and demand analysis",
+      "Weeks 3–5: Revenue, expense, and financial modeling",
+      "Weeks 6–8: Draft report, client review, and bank-ready final delivery",
+    ],
+    keyTakeaways: [
+      `Most outdoor hospitality feasibility studies take ${FEASIBILITY_STUDY_TIMELINE} from kickoff to a lender-ready draft.`,
+      "Week 1 establishes scope; weeks 2–5 cover market and financial analysis; weeks 6–8 finalize the report.",
+      "Client responsiveness and market data availability are the biggest drivers of on-time delivery.",
+      "Glamping, RV resort, and campground studies follow the same phase structure with different unit-mix emphasis.",
+      "This page is the canonical timeline reference—link here instead of duplicating week-by-week detail elsewhere.",
+    ],
+    lastModified: "2026-05-20",
     keywords: ["feasibility study timeline", "feasibility study process", "how long does a feasibility study take"],
     cta: {
       title: "Ready to Start Your Feasibility Study?",

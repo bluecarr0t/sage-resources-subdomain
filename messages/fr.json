@@ -854,6 +854,27 @@
       "title": "Besoin d'Aide pour Votre Projet d'Hospitalité de Plein Air?",
       "description": "Nos experts ont réalisé plus de 350 études de faisabilité et évaluations. Obtenez des conseils personnalisés pour votre projet.",
       "button": "Planifier une Consultation Gratuite"
+    },
+    "englishNotice": {
+      "message": "Les articles de guide sont disponibles en anglais. Les liens ci-dessous ouvrent les versions anglaises.",
+      "link": "Voir les guides en anglais"
+    },
+    "index": {
+      "searchPlaceholder": "Rechercher des guides...",
+      "allGuides": "Tous les guides",
+      "searchResults": "Résultats de recherche ({count})",
+      "noResults": "Aucun guide ne correspond à « {query} »",
+      "clearSearch": "Effacer la recherche",
+      "completeGuides": "Guides complets",
+      "relatedGuides": "Guides associés",
+      "guideCount": "{count} guides",
+      "readGuide": "Lire le guide",
+      "completeGuideBadge": "Guide complet",
+      "categoryLabels": {
+        "feasibility": "Faisabilité",
+        "appraisal": "Évaluation",
+        "industry": "Industrie"
+      }
     }
   },
   "feasibilityStudiesCompleteGuide": {
@@ -903,7 +924,7 @@
         {
           "id": "timeline-process",
           "title": "Délais et Processus",
-          "content": "<p>Comprendre le processus et les délais de l'étude de faisabilité vous aide à planifier efficacement et à fixer des attentes appropriées.</p><h3>Délai Typique</h3><p>Nos études de faisabilité prennent généralement entre <strong>4 à 8 semaines</strong> à réaliser, selon la taille et la complexité de la propriété. Ce délai nous permet d'examiner en profondeur les données du marché, d'inspecter la propriété et de préparer un rapport détaillé et précis.</p><p>Les délais varient en fonction de:</p><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>La complexité du projet</li><li>La disponibilité des données du marché</li><li>La réactivité du client</li><li>La portée de l'analyse</li><li>La taille de la propriété et le nombre de sites ou d'unités</li></ul><p>Pour un délai plus spécifique basé sur votre projet, veuillez contacter notre équipe—nous sommes heureux de discuter de vos besoins en matière d'étude de faisabilité.</p><h3>Processus d'Étude de Faisabilité</h3><p>Le processus typique comprend ces phases:</p><h4>Phase 1: Lancement du Projet et Collecte d'Informations (Semaine 1)</h4><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Consultation initiale et compréhension du projet</li><li>Visite du site et évaluation</li><li>Collecte d'informations du client</li><li>Définition de la portée du projet</li></ul><h4>Phase 2: Recherche et Analyse du Marché (Semaines 2-3)</h4><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Collecte de données du marché</li><li>Analyse des propriétés concurrentes</li><li>Analyse de la demande</li><li>Évaluation des tendances du marché</li></ul><h4>Phase 3: Analyse Financière (Semaines 3-4)</h4><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Modélisation des revenus</li><li>Estimation des dépenses</li><li>Projections financières</li><li>Analyse de scénarios</li></ul><h4>Phase 4: Préparation du Rapport (Semaines 4-8)</h4><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Préparation du rapport préliminaire</li><li>Examen et commentaires du client</li><li>Révision et finalisation du rapport</li><li>Livraison et présentation</li></ul><p><strong>Note:</strong> Le délai de chaque phase peut se chevaucher, et la durée totale de 4 à 8 semaines dépend de la complexité du projet, de la taille de la propriété et de la réactivité du client. Les projets plus complexes ou ceux nécessitant une recherche de marché approfondie peuvent prendre les 8 semaines complètes, tandis que les projets plus simples peuvent être terminés plus près de 4 semaines.</p><h3>Responsabilités du Client</h3><p>Pour maintenir le processus sur la bonne voie, les clients devraient:</p><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Fournir les informations demandées rapidement</li><li>Répondre rapidement aux questions et clarifications</li><li>Planifier et assister aux réunions nécessaires</li><li>Examiner les documents préliminaires dans les délais convenus</li></ul><p>Pour une répartition détaillée du processus, consultez notre <a href=\"/fr/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guide du processus et des délais de l'étude de faisabilité</a>.</p>"
+          "content": "<p>Comprendre le processus et les délais de l'étude de faisabilité vous aide à planifier efficacement et à fixer des attentes appropriées.</p><h3>Délai Typique</h3><p>Nos études de faisabilité prennent généralement entre <strong>4 à 8 semaines</strong> à réaliser, selon la taille et la complexité de la propriété. Ce délai nous permet d'examiner en profondeur les données du marché, d'inspecter la propriété et de préparer un rapport détaillé et précis.</p><p>Les délais varient en fonction de:</p><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>La complexité du projet</li><li>La disponibilité des données du marché</li><li>La réactivité du client</li><li>La portée de l'analyse</li><li>La taille de la propriété et le nombre de sites ou d'unités</li></ul><p>Pour un délai plus spécifique basé sur votre projet, veuillez contacter notre équipe—nous sommes heureux de discuter de vos besoins en matière d'étude de faisabilité.</p><h3>Processus d'Étude de Faisabilité</h3><p>Le processus typique comprend ces phases:</p><h4>Phase 1: Lancement du Projet et Collecte d'Informations (Semaine 1)</h4><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Consultation initiale et compréhension du projet</li><li>Visite du site et évaluation</li><li>Collecte d'informations du client</li><li>Définition de la portée du projet</li></ul><h4>Phase 2: Recherche et Analyse du Marché (Semaines 2-3)</h4><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Collecte de données du marché</li><li>Analyse des propriétés concurrentes</li><li>Analyse de la demande</li><li>Évaluation des tendances du marché</li></ul><h4>Phase 3: Analyse Financière (Semaines 3-4)</h4><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Modélisation des revenus</li><li>Estimation des dépenses</li><li>Projections financières</li><li>Analyse de scénarios</li></ul><h4>Phase 4: Préparation du Rapport (Semaines 4-8)</h4><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Préparation du rapport préliminaire</li><li>Examen et commentaires du client</li><li>Révision et finalisation du rapport</li><li>Livraison et présentation</li></ul><p><strong>Note:</strong> Le délai de chaque phase peut se chevaucher, et la durée totale de 4 à 8 semaines dépend de la complexité du projet, de la taille de la propriété et de la réactivité du client. Les projets plus complexes ou ceux nécessitant une recherche de marché approfondie peuvent prendre les 8 semaines complètes, tandis que les projets plus simples peuvent être terminés plus près de 4 semaines.</p><h3>Responsabilités du Client</h3><p>Pour maintenir le processus sur la bonne voie, les clients devraient:</p><ul class=\"list-disc list-inside space-y-3 ml-4\"><li>Fournir les informations demandées rapidement</li><li>Répondre rapidement aux questions et clarifications</li><li>Planifier et assister aux réunions nécessaires</li><li>Examiner les documents préliminaires dans les délais convenus</li></ul><p>Pour une répartition détaillée du processus, consultez notre <a href=\"/en/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guide du processus et des délais de l'étude de faisabilité</a>.</p>"
         },
         {
           "id": "choose-consultant",
@@ -1423,7 +1444,7 @@
         },
         {
           "question": "Qu'est-ce qui peut retarder une étude de faisabilité?",
-          "answer": "<p>Plusieurs facteurs peuvent causer des retards dans le processus d'étude de faisabilité:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Retards d'Informations du Client:</strong> Si les informations demandées ne sont pas fournies rapidement, cela peut ralentir la phase d'analyse</li><li><strong>Disponibilité des Données du Marché:</strong> Des données de marché difficiles à obtenir ou limitées peuvent prolonger le temps de recherche</li><li><strong>Changements de Portée du Projet:</strong> Des changements importants de la portée du projet pendant l'étude peuvent nécessiter une analyse supplémentaire</li><li><strong>Cycles d'Examen:</strong> Des périodes d'examen prolongées peuvent retarder la finalisation</li></ul><p>Pour maintenir le processus sur la bonne voie, fournissez les informations demandées rapidement et répondez aux questions et clarifications rapidement. Consultez notre <a href=\"/fr/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guide du processus et des délais</a> pour plus de détails.</p>"
+          "answer": "<p>Plusieurs facteurs peuvent causer des retards dans le processus d'étude de faisabilité:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Retards d'Informations du Client:</strong> Si les informations demandées ne sont pas fournies rapidement, cela peut ralentir la phase d'analyse</li><li><strong>Disponibilité des Données du Marché:</strong> Des données de marché difficiles à obtenir ou limitées peuvent prolonger le temps de recherche</li><li><strong>Changements de Portée du Projet:</strong> Des changements importants de la portée du projet pendant l'étude peuvent nécessiter une analyse supplémentaire</li><li><strong>Cycles d'Examen:</strong> Des périodes d'examen prolongées peuvent retarder la finalisation</li></ul><p>Pour maintenir le processus sur la bonne voie, fournissez les informations demandées rapidement et répondez aux questions et clarifications rapidement. Consultez notre <a href=\"/en/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guide du processus et des délais</a> pour plus de détails.</p>"
         }
       ],
       "keywords": ["délai étude de faisabilité", "processus étude de faisabilité", "combien de temps prend une étude de faisabilité"],
@@ -1871,6 +1892,14 @@
   "glossary": {
     "title": "Glossaire de l'Hospitalité de Plein Air",
     "subtitle": "Les termes clés expliqués simplement: glamping, resorts pour camping-cars, campings, faisabilité et évaluations.",
+    "meta": {
+      "title": "Glossaire hospitalité de plein air | Définitions | Sage Outdoor Advisory",
+      "description": "Glossaire des termes de l'hospitalité de plein air : glamping, camping-cars, études de faisabilité, évaluations et plus."
+    },
+    "englishNotice": {
+      "message": "Les définitions du glossaire sont actuellement disponibles en anglais.",
+      "link": "Voir le glossaire en anglais"
+    },
     "cardHint": "Voir la définition complète, les termes connexes et des exemples.",
     "searchPlaceholder": "Rechercher des termes du glossaire...",
     "tabs": {
@@ -1893,6 +1922,33 @@
       "title": "Besoin d'Aide pour Comprendre Ces Termes?",
       "description": "Nos experts peuvent vous aider à comprendre comment ces termes de l'industrie s'appliquent à votre projet d'hospitalité de plein air.",
       "button": "Planifier une Consultation Gratuite"
+    },
+    "termMeta": {
+      "title": "Qu'est-ce que {term} ? | Définition | Sage Outdoor Advisory",
+      "notFoundTitle": "Terme introuvable | Sage Outdoor Advisory"
+    },
+    "termPage": {
+      "breadcrumb": "Glossaire",
+      "title": "Qu'est-ce que {term} ?",
+      "quickAnswer": "Réponse rapide",
+      "understanding": "Comprendre {term}",
+      "examples": "Exemples",
+      "useCases": "Cas d'utilisation courants",
+      "relatedServices": "Services connexes",
+      "faqs": "Questions fréquentes",
+      "backToGlossary": "← Retour au glossaire",
+      "relatedTerms": "Termes connexes",
+      "quickLinks": "Liens rapides",
+      "viewAllTerms": "Voir tous les termes",
+      "expertGuides": "Guides experts",
+      "ourServices": "Nos services",
+      "marketReports": "Rapports de marché",
+      "scheduleConsultation": "Planifier une consultation",
+      "cta": {
+        "title": "Besoin d'aide pour votre projet d'hospitalité de plein air ?",
+        "description": "Nos experts peuvent vous expliquer comment {term} s'applique à votre projet.",
+        "button": "Planifier une Consultation Gratuite"
+      }
     },
     "terms": {
       "feasibilityStudy": {
@@ -2183,7 +2239,8 @@
     },
     "stats": {
       "propertiesCount": "650+",
-      "properties": "Properties",
+      "properties": "Propriétés suivies",
+      "units": "Unités suivies",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"
     },
@@ -2236,7 +2293,7 @@
         },
         {
           "question": "Are glamping properties profitable?",
-          "answer": "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve 60-80% occupancy rates with strong seasonal demand."
+          "answer": "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve over 60% occupancy rates with strong seasonal demand."
         }
       ]
     }

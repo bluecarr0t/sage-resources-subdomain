@@ -1,8 +1,10 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useMapContext } from '@/components/MapContext';
+import { createLocaleLinks } from '@/lib/locale-links';
 import {
-  EDITORIAL_H1_CLASS,
+  EDITORIAL_MAP_SIDEBAR_H1_CLASS,
   EDITORIAL_LINK_CLASS,
   EDITORIAL_SIDEBAR_BG_STYLE,
 } from '@/components/editorial/EditorialPageShell';
@@ -31,12 +33,23 @@ const DynamicLocationSearch = dynamic(() => import('@/components/LocationSearch'
 
 interface MapLayoutProps {
   locale: string;
+  /** Override sidebar H1 (state/city hub pages) */
+  pageTitle?: string;
+  /** SEO intro copy for state hub pages */
+  hubIntro?: string;
+  hubIntroSecondary?: string;
 }
 
-export default function MapLayout({ locale }: MapLayoutProps) {
+export default function MapLayout({
+  locale,
+  pageTitle,
+  hubIntro,
+  hubIntroSecondary,
+}: MapLayoutProps) {
   const { isFullscreen, toggleFullscreen } = useMapContext();
   const t = useTranslations('map');
   const tCommon = useTranslations('common');
+  const links = useMemo(() => createLocaleLinks(locale), [locale]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-neutral-100/40 md:flex-row">
@@ -65,7 +78,31 @@ export default function MapLayout({ locale }: MapLayoutProps) {
           </nav>
 
           <section className="mb-4">
-            <h1 className={EDITORIAL_H1_CLASS}>{t('title')}</h1>
+            <h1 className={EDITORIAL_MAP_SIDEBAR_H1_CLASS}>{pageTitle ?? t('title')}</h1>
+            {hubIntro ? (
+              <p className="mt-4 text-xs font-light leading-relaxed text-neutral-600">
+                {hubIntro}
+              </p>
+            ) : null}
+            {hubIntroSecondary ? (
+              <p className="mt-3 text-[11px] font-light leading-relaxed text-neutral-500">
+                {hubIntroSecondary}
+              </p>
+            ) : null}
+            {hubIntro ? (
+              <p className="mt-4 text-[11px] font-light leading-relaxed">
+                <Link
+                  href={links.guide('feasibility-studies-complete-guide')}
+                  className={EDITORIAL_LINK_CLASS}
+                >
+                  {t('hubFeasibilityLink')}
+                </Link>
+                <span className="text-neutral-400"> · </span>
+                <Link href={links.glossaryTerm('feasibility-study')} className={EDITORIAL_LINK_CLASS}>
+                  {t('hubGlossaryLink')}
+                </Link>
+              </p>
+            ) : null}
           </section>
 
           <section>

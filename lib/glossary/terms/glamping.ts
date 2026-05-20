@@ -5,14 +5,14 @@ export const glampingTerms: Record<string, GlossaryTerm> = {
     slug: "glamping",
     term: "Glamping",
     image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/safari-tent.jpg",
-    definition: "A portmanteau of 'glamorous' and 'camping,' glamping refers to luxury outdoor accommodations that combine the experience of camping with the comfort and amenities of a hotel.",
+    definition: "A combination of 'glamorous' and 'camping,' glamping refers to luxury outdoor accommodations that combine the experience of camping with the comfort and amenities of a hotel.",
     extendedDefinition: `Glamping, short for "glamorous camping," is a form of outdoor hospitality that merges the natural setting and adventure of camping with the luxury, comfort, and amenities typically found in high-end hotels. Unlike traditional camping, glamping accommodations feature real beds, electricity, heating and cooling, private bathrooms, and often include premium amenities like hot tubs, gourmet kitchens, and concierge services.
 
 Common glamping accommodations include safari tents, yurts, treehouses, Airstream trailers, tiny houses, canvas tents, and glamping pods. These structures are typically situated in scenic locations such as mountains, forests, deserts, or near national parks, offering guests an immersive outdoor experience without sacrificing comfort.
 
 The glamping industry has experienced significant growth as travelers seek unique, experiential accommodations that connect them with nature while maintaining modern conveniences. Glamping appeals to a wide demographic, from couples seeking romantic getaways to families wanting outdoor adventures with comfort.
 
-Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping properties, understanding the unique market dynamics, revenue models, and valuation methods required for these specialized accommodations. For comprehensive insights into glamping unit types, costs, and ROI considerations, see our <a href="https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/" class="text-[#006b5f] hover:text-[#005a4f] underline">Complete Guide to Glamping Unit Types</a> blog post. For current market trends and data, explore our <a href="https://sageoutdooradvisory.com/blog/glamping-market-trends-2025/" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Market Data 2025</a> blog post.`,
+Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping properties, understanding the unique market dynamics, revenue models, and valuation methods required for these specialized accommodations. For comprehensive insights into glamping unit types, costs, and ROI considerations, see our <a href="https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/">Complete Guide to Glamping Unit Types</a> on the Sage blog. For market trends and data, see our <a href="/guides/glamping-market-trends-2025">glamping market trends guide</a>.`,
     category: "Glamping",
     relatedTerms: ["glamping-resort", "safari-tent", "yurt", "outdoor-hospitality"],
     examples: [
@@ -32,7 +32,7 @@ Sage Outdoor Advisory provides feasibility studies and appraisals specifically f
       { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
       { text: "Glamping Market Report", url: "https://sageoutdooradvisory.com/shop/" },
       { text: "Complete Guide to Glamping Unit Types", url: "https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/" },
-      { text: "Glamping Market Data 2025", url: "https://sageoutdooradvisory.com/blog/glamping-market-trends-2025/" }
+      { text: "Glamping Market Trends Guide", url: "/guides/glamping-market-trends-2025" }
     ],
     faqs: [
       {
@@ -338,6 +338,11 @@ Sage Outdoor Advisory includes canvas tent accommodations in our glamping feasib
     slug: "covered-wagon",
     term: "Covered Wagon",
     definition: "A replica of traditional Conestoga wagons used during American westward expansion, adapted as stationary glamping accommodations with modern amenities, offering a nostalgic and unique lodging experience.",
+    disambiguation: {
+      heading: "Covered wagon in outdoor hospitality (not a moving pioneer wagon)",
+      body: `<p>On this site, <strong>covered wagon</strong> means a <strong>stationary glamping unit</strong> at a resort or campground—a themed sleeping structure guests book overnight. It is not a horse-drawn wagon on a trail, a parade float, or a museum artifact on the move.</p>
+      <p>Developers and lenders evaluate covered wagons like other fixed glamping inventory: capex per key, ADR premium vs cabins, maintenance, and how the unit fits the property’s brand and seasonality.</p>`,
+    },
     extendedDefinition: `A covered wagon, often referred to as a Conestoga wagon, is a replica of the traditional wagons used during the American westward expansion in the 19th century. These historical structures have been adapted into unique glamping accommodations, offering guests a nostalgic experience that combines history with modern comfort.
 
 Covered wagons feature a distinctive design with a canvas or fabric covering stretched over a wooden frame, mounted on wheels (though in glamping settings, they're typically stationary). The original Conestoga wagons were used by pioneers traveling west, and their adaptation for glamping preserves this historical aesthetic while providing contemporary amenities.
@@ -389,6 +394,16 @@ Sage Outdoor Advisory includes covered wagon and other unique glamping accommoda
     slug: "dome",
     term: "Dome",
     definition: "A geodesic dome structure composed of a network of triangles, providing a spherical glamping accommodation known for durability, panoramic views, and modern aesthetic appeal.",
+    disambiguation: {
+      heading: "Glamping dome (geodesic unit)—not every “dome”",
+      body: `<p>In outdoor hospitality, a <strong>dome</strong> usually means a <strong>geodesic or luxury glamping unit</strong> guests rent by the night—often with panoramic windows, climate control, and a premium ADR. This is different from:</p>
+      <ul class="list-disc list-inside space-y-2 ml-4">
+        <li><strong>Residential dome homes</strong> (permanent housing)</li>
+        <li><strong>Sports or event domes</strong> (large enclosed venues)</li>
+        <li><strong>Architectural “dome”</strong> as any curved roof</li>
+      </ul>
+      <p>Feasibility studies and appraisals for glamping domes focus on per-key cost, stargazing positioning, insulation, and comparable glamping supply—not unrelated building types.</p>`,
+    },
     extendedDefinition: `A dome, specifically a geodesic dome, is a spherical or partially spherical structure composed of a network of triangular elements that distribute stress evenly throughout the framework. This architectural design has gained popularity in glamping for its unique aesthetic, structural strength, and ability to provide panoramic views of the surrounding environment.
 
 Geodesic domes were popularized by architect Buckminster Fuller in the mid-20th century. The design's strength comes from its geometric structure, where triangular elements work together to distribute loads efficiently, making domes highly durable and able to withstand various weather conditions including high winds and heavy snow.

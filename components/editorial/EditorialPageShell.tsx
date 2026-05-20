@@ -119,13 +119,17 @@ export const EDITORIAL_NAV_DROPDOWN_ITEM_ACTIVE_CLASS =
 export const EDITORIAL_H1_CLASS =
   'font-[Georgia] text-sm font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg';
 
+/** Narrow sidebar titles (e.g. map) — tighter tracking so long headings stay on one line */
+export const EDITORIAL_MAP_SIDEBAR_H1_CLASS =
+  'font-[Georgia] whitespace-nowrap text-xs font-medium uppercase tracking-[0.14em] text-neutral-900 sm:text-sm';
+
 /** Long-form guide / pillar page title */
 export const EDITORIAL_GUIDE_TITLE_CLASS =
   'font-[Georgia] text-3xl font-light tracking-tight text-neutral-900 sm:text-4xl md:text-5xl';
 
 /** Wrapper for guide HTML bodies from CMS strings */
 export const EDITORIAL_GUIDE_PROSE_CLASS =
-  'text-sm font-light leading-relaxed text-neutral-700 [&_a]:text-sage-teal-text [&_a]:underline [&_a]:decoration-sage-200 [&_a]:underline-offset-2 hover:[&_a]:text-sage-teal-text-hover [&_a]:hover:decoration-sage-400 [&_img]:my-8 [&_img]:w-full [&_img]:border [&_img]:border-sage-200/90 [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-4 [&_h3]:font-bold [&_h3]:text-neutral-900 [&_strong]:font-medium [&_strong]:text-neutral-900';
+  'text-sm font-light leading-relaxed text-neutral-700 [&_a]:text-sage-teal-text [&_a]:underline [&_a]:decoration-sage-200 [&_a]:underline-offset-2 hover:[&_a]:text-sage-teal-text-hover [&_a]:hover:decoration-sage-400 [&_img]:my-8 [&_img]:w-full [&_img]:border [&_img]:border-sage-200/90 [&_.aspect-square_img]:my-0 [&_.aspect-square_img]:h-full [&_.aspect-square_img]:border-0 [&_.aspect-square_img]:object-cover [&_.aspect-video_img]:my-0 [&_.aspect-video_img]:h-full [&_.aspect-video_img]:border-0 [&_.aspect-video_img]:object-cover [&_.aspect-square]:overflow-hidden [&_.aspect-video]:overflow-hidden [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-4 [&_h3]:font-bold [&_h3]:text-neutral-900 [&_strong]:font-medium [&_strong]:text-neutral-900';
 
 export const EDITORIAL_METRIC_VALUE_CLASS =
   'mt-3 font-light text-4xl tabular-nums tracking-tight text-neutral-900 sm:text-5xl';

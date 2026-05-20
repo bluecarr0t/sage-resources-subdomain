@@ -24,6 +24,7 @@ import {
 } from "@/lib/i18n-utils";
 import { notFound } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
+import { MAP_INDEX_METADATA } from '@/lib/map-seo';
 
 interface PageProps {
   params: {
@@ -59,13 +60,13 @@ export async function generateMetadata({
   const url = hasFilterQuery ? `${baseUrl}${pathname}${queryString}` : canonicalUrl;
   const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
-  const title = `Glamping Properties Map | ${count}+ Locations | Sage Outdoor Advisory`;
-  const description = `Explore ${count}+ glamping properties across the US, Canada, and Europe on our interactive map. Compare glamping locations with population growth data to identify high-growth markets. Filter by location, unit type, and price range.`;
+  const title = MAP_INDEX_METADATA.titleTemplate(count);
+  const description = MAP_INDEX_METADATA.descriptionTemplate(count);
 
   return {
     title,
     description,
-    keywords: "glamping properties map, glamping locations, glamping sites by state, interactive glamping map, glamping near me, glamping properties USA, glamping properties Canada, glamping map North America",
+    keywords: MAP_INDEX_METADATA.keywords,
     openGraph: {
       title: `Glamping Properties Map | ${count}+ Locations | Sage`,
       description,

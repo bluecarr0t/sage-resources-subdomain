@@ -3,6 +3,7 @@ import { locales, defaultLocale, type Locale } from './i18n';
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseMiddlewareClient } from '@/lib/supabase-middleware';
 import { isLegacyUsCanadaOnlyCountryQuery } from '@/lib/map/legacy-map-country-query';
+import { GLOSSARY_SLUG_ALIASES } from '@/lib/glossary-slug-aliases';
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware({
@@ -225,6 +226,19 @@ export async function middleware(request: NextRequest) {
       if (legacyResource) {
         const url = request.nextUrl.clone();
         url.pathname = `/en${pathname}`;
+        return NextResponse.redirect(url, 301);
+      }
+    }
+
+    // Glossary slug aliases (e.g. /glossary/dscr → debt-service-coverage-ratio)
+    const glossaryAliasMatch = pathname.match(
+      /^\/(?:[a-z]{2}\/)?glossary\/([a-z0-9-]+)\/?$/
+    );
+    if (glossaryAliasMatch) {
+      const aliasTarget = GLOSSARY_SLUG_ALIASES[glossaryAliasMatch[1]];
+      if (aliasTarget) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/en/glossary/${aliasTarget}`;
         return NextResponse.redirect(url, 301);
       }
     }

@@ -33,6 +33,7 @@ import {
   getFeaturedPropertiesForState,
   getNearbyNationalParks,
 } from '@/lib/map-data-utils';
+import { getStateMapHubContent } from '@/lib/map-seo';
 
 interface PageProps {
   params: {
@@ -178,11 +179,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { state } = parsed;
     const normalizedState = normalizeStateName(state);
     const stats = await getStatePropertyStatistics(normalizedState, locale);
-    
-    const t = await getTranslations({ locale, namespace: 'map.metadata' });
-    
-    const title = `Glamping Properties in ${normalizedState} | Interactive Map`;
-    const description = `Discover ${stats.uniqueProperties}+ glamping properties in ${normalizedState}. Find luxury tents, yurts, treehouses, domes, and more on our interactive map.`;
+    const hub = getStateMapHubContent(location);
+
+    const title =
+      hub?.metaTitle ?? `Glamping in ${normalizedState} | Map & Market Data | Sage`;
+    const description =
+      hub?.metaDescription ??
+      `Discover ${stats.uniqueProperties}+ glamping properties in ${normalizedState}. Compare yurts, domes, safari tents, and ADR on Sage’s interactive outdoor hospitality map.`;
 
     return {
       title,
@@ -241,6 +244,9 @@ export default async function LocationMapPage({ params }: PageProps) {
   if (!parsed) {
     notFound();
   }
+
+  const stateHub =
+    parsed.type === 'state' ? getStateMapHubContent(location) : null;
   
   // Generate structured data based on location type
   const organizationSchema = generateOrganizationSchema();
@@ -410,7 +416,12 @@ export default async function LocationMapPage({ params }: PageProps) {
 
       <GoogleMapsProvider>
         <MapProvider>
-          <MapLayout locale={locale} />
+          <MapLayout
+            locale={locale}
+            pageTitle={stateHub?.pageTitle}
+            hubIntro={stateHub?.intro}
+            hubIntroSecondary={stateHub?.introSecondary}
+          />
         </MapProvider>
       </GoogleMapsProvider>
     </>

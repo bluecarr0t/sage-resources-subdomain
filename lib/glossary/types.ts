@@ -2,6 +2,11 @@ export interface GlossaryTerm {
   slug: string;
   term: string;
   definition: string; // Short definition for featured snippet
+  /** Outdoor-hospitality-first context when the term has other common meanings (SEO disambiguation). */
+  disambiguation?: {
+    heading: string;
+    body: string; // HTML allowed; localized at render time via prefixInternalResourceHrefsInHtml
+  };
   extendedDefinition: string; // Detailed explanation (300-500 words)
   category: "Feasibility & Appraisal" | "Glamping" | "RV & Campground" | "Financial" | "Real Estate" | "General";
   relatedTerms: string[]; // Slugs of related terms

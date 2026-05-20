@@ -33,6 +33,8 @@
   },
   "map": {
     "title": "Glamping Properties Map",
+    "hubFeasibilityLink": "Feasibility study guide",
+    "hubGlossaryLink": "Feasibility glossary",
     "loading": "Loading map...",
     "fullscreen": {
       "enter": "Enter fullscreen",
@@ -268,11 +270,40 @@
       "title": "Need Help with Your Outdoor Hospitality Project?",
       "description": "Our experts have completed over 350 feasibility studies and appraisals. Get personalized guidance for your project.",
       "button": "Schedule Free Consultation"
+    },
+    "englishNotice": {
+      "message": "Guide articles are available in English. Links below open the English versions.",
+      "link": "View guides in English"
+    },
+    "index": {
+      "searchPlaceholder": "Search guides...",
+      "allGuides": "All guides",
+      "searchResults": "Search results ({count})",
+      "noResults": "No guides found matching \"{query}\"",
+      "clearSearch": "Clear search",
+      "completeGuides": "Complete guides",
+      "relatedGuides": "Related guides",
+      "guideCount": "{count} guides",
+      "readGuide": "Read guide",
+      "completeGuideBadge": "Complete guide",
+      "categoryLabels": {
+        "feasibility": "Feasibility",
+        "appraisal": "Appraisal",
+        "industry": "Industry"
+      }
     }
   },
   "glossary": {
     "title": "Outdoor Hospitality Glossary",
     "subtitle": "Industry terms explained in plain language. Browse definitions for glamping, RV resorts, campgrounds, feasibility studies, and appraisals.",
+    "meta": {
+      "title": "Outdoor Hospitality Glossary | Terms & Definitions | Sage Outdoor Advisory",
+      "description": "Comprehensive glossary of outdoor hospitality terms. Learn definitions for glamping, RV resorts, feasibility studies, appraisals, and more."
+    },
+    "englishNotice": {
+      "message": "Glossary definitions are currently available in English.",
+      "link": "View glossary in English"
+    },
     "cardHint": "View the full definition, related terms, and examples.",
     "searchPlaceholder": "Search glossary terms...",
     "tabs": {
@@ -296,6 +327,33 @@
       "description": "Our experts can help you understand how these industry terms apply to your outdoor hospitality project.",
       "button": "Schedule Free Consultation"
     },
+    "termMeta": {
+      "title": "What is {article} {term}? | Definition & Guide | Sage Outdoor Advisory",
+      "notFoundTitle": "Glossary Term Not Found | Sage Outdoor Advisory"
+    },
+    "termPage": {
+      "breadcrumb": "Glossary",
+      "title": "What is {article} {term}?",
+      "quickAnswer": "Quick answer",
+      "understanding": "Understanding {term}",
+      "examples": "Examples",
+      "useCases": "Common use cases",
+      "relatedServices": "Related services",
+      "faqs": "Frequently asked questions",
+      "backToGlossary": "← Back to glossary",
+      "relatedTerms": "Related terms",
+      "quickLinks": "Quick links",
+      "viewAllTerms": "View all terms",
+      "expertGuides": "Expert guides",
+      "ourServices": "Our services",
+      "marketReports": "Market reports",
+      "scheduleConsultation": "Schedule consultation",
+      "cta": {
+        "title": "Need help with your outdoor hospitality project?",
+        "description": "Our experts can help you understand how {term} applies to your project.",
+        "button": "Schedule Free Consultation"
+      }
+    },
     "terms": {}
   },
   "errors": {
@@ -309,7 +367,7 @@
       "keywords": "outdoor hospitality feasibility study, glamping market research, RV resort appraisal, campground development, glamping industry data, outdoor hospitality consultants, glamping investment analysis, Europe glamping data, North America glamping map"
     },
     "hero": {
-      "headline": "Outdoor hospitality market intelligence",
+      "headline": "Outdoor Hospitality Market Intelligence",
       "subheadline": "{count, number}+ benchmarks across North America and Europe, feasibility and appraisal guides, and industry terms for outdoor hospitality teams.",
       "quickStats": {
         "properties": "{count, number} properties on map",
@@ -319,7 +377,8 @@
     },
     "stats": {
       "propertiesCount": "650+",
-      "properties": "Properties",
+      "properties": "Properties Tracked",
+      "units": "Units Tracked",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"
     },
@@ -372,9 +431,21 @@
         },
         {
           "question": "Are glamping properties profitable?",
-          "answer": "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve 60-80% occupancy rates with strong seasonal demand."
+          "answer": "Profitability varies significantly based on location, occupancy rates, pricing strategy, and operational costs. A professional feasibility study can provide market-specific revenue projections and help determine if a property will be profitable in your target market. Many successful glamping properties achieve over 60% occupancy rates with strong seasonal demand."
         }
       ]
+    }
+  },
+  "property": {
+    "resources": {
+      "title": "Planning a glamping or outdoor hospitality project?",
+      "description": "Sage publishes this map for market benchmarking. If you are developing, acquiring, or financing a resort, start with a bank-ready feasibility study and outdoor-hospitality-specific definitions.",
+      "feasibilityGuide": "Feasibility studies complete guide",
+      "timelineGuide": "How long does a feasibility study take?",
+      "feasibilityGlossary": "What is a feasibility study?",
+      "feasibilityService": "Glamping feasibility study services",
+      "glampingGlossary": "Glamping industry glossary",
+      "footnote": "Guides open in English. Sage Outdoor Advisory provides feasibility studies and appraisals for glamping, RV resorts, and campgrounds nationwide."
     }
   },
   "notFound": {

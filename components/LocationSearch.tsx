@@ -523,12 +523,17 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   }
 
   if (!isLoaded) {
+    const isHeroDefault = variant === 'default';
     return (
       <div className="w-full max-w-2xl mx-auto">
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4 border border-white/20">
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-14 bg-gray-200 rounded-xl animate-pulse" />
-            <div className="w-32 h-14 bg-gray-200 rounded-xl animate-pulse" />
+            <div
+              className={`flex-1 h-14 bg-gray-200 rounded-xl animate-pulse ${isHeroDefault ? 'hidden sm:block' : ''}`}
+            />
+            <div
+              className={`h-14 bg-gray-200 rounded-xl animate-pulse ${isHeroDefault ? 'w-full sm:w-32' : 'w-32'}`}
+            />
           </div>
         </div>
       </div>
@@ -561,7 +566,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
           }
         >
           <div className="flex items-center gap-2">
-            <div className="flex-1 relative">
+            <div className={`relative ${isCompact ? 'flex-1' : 'hidden flex-1 sm:flex'}`}>
               <div className={`absolute top-1/2 -translate-y-1/2 text-gray-400 ${isCompact ? 'left-3' : 'left-4'}`}>
                 <svg
                   className={isCompact ? "w-5 h-5" : "w-6 h-6"}
@@ -607,7 +612,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
             {!isCompact && (
               <button
                 type="submit"
-                className="px-8 py-4 bg-[#007a6e] text-white font-semibold rounded-xl hover:bg-[#006b5f] transition-colors shadow-lg hover:shadow-xl whitespace-nowrap"
+                className="w-full px-8 py-4 bg-[#007a6e] text-white font-semibold rounded-xl hover:bg-[#006b5f] transition-colors shadow-lg hover:shadow-xl whitespace-nowrap sm:w-auto"
               >
                 {t('button')}
               </button>

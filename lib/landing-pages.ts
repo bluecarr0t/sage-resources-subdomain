@@ -69,7 +69,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     slug: "glamping-feasibility-study",
     title: "Glamping Feasibility Study | Sage Outdoor Advisory",
     metaDescription: "Expert glamping feasibility studies for Texas, California & nationwide. Get comprehensive market analysis, financial projections & ROI estimates. Free consultation available.",
-    quickAnswer: "A glamping feasibility study is a professional analysis that validates whether a glamping or outdoor hospitality project is financially viable. It includes market demand research, competitive analysis of nearby glamping and RV properties, revenue projections by unit type, capital requirements, and ROI timelines. Key components are industry overview, area analysis, market analysis, revenue and expense projections, and a 10-year pro forma. Sage uses proprietary data on 600+ glamping properties across North America. Typical deliverables help secure financing, guide development decisions, and identify market gaps. Core failure points include underestimating seasonality, ignoring local permitting, and overestimating demand. Studies typically take 4–8 weeks.",
+    quickAnswer: "A glamping feasibility study is a professional analysis that validates whether a glamping or outdoor hospitality project is financially viable. It includes market demand research, competitive analysis of nearby glamping and RV properties, revenue projections by unit type, capital requirements, and ROI timelines. Key components are industry overview, area analysis, market analysis, revenue and expense projections, and a 10-year pro forma. Sage uses proprietary data on 600+ glamping properties across North America. Typical deliverables help secure financing, guide development decisions, and identify market gaps. Core failure points include underestimating seasonality, ignoring local permitting, and overestimating demand. Studies typically take 6–8 weeks.",
     hero: {
       headline: "Glamping Feasibility Study",
       subheadline: "In the rapidly growing glamping market, understanding nuances and market demands is key to success. Our feasibility studies provide a thorough examination of potential for upscale and unique outdoor accommodations.",
@@ -252,7 +252,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       "Glamping feasibility studies validate financial viability before you invest in development.",
       "Key components include industry overview, area analysis, market analysis, revenue and expense projections, and a 10-year pro forma.",
       "Sage uses proprietary data on 600+ glamping properties across North America for benchmarking.",
-      "Studies typically take 4–8 weeks and help secure financing from banks and lenders.",
+      "Studies typically take 6–8 weeks and help secure financing from banks and lenders.",
       "Core failure points: underestimating seasonality, ignoring local permitting, overestimating demand.",
     ],
     changeLog: [
@@ -467,9 +467,10 @@ export const landingPages: Record<string, LandingPageContent> = {
     slug: "glamping-appraisal",
     title: "Glamping Appraisal & Valuation | Sage Outdoor Advisory",
     metaDescription: "Professional glamping property appraisals nationwide. Bank-approved valuations for financing, acquisitions & investment decisions. Trusted by lenders. Free consultation.",
+    quickAnswer: "A glamping appraisal is a USPAP-compliant valuation of a glamping resort or outdoor hospitality asset using income, sales comparison, and cost approaches. Sage specializes in yurts, safari tents, domes, and other unique units—delivering lender-ready reports banks accept for financing, acquisitions, and refinances. Typical turnaround is 2–4 weeks after site access and financials are provided.",
     hero: {
       headline: "Glamping Property Appraisal",
-      subheadline: "Sage Outdoor Advisory offers specialized appraisal services for glamping resorts, ensuring that stakeholders receive accurate valuations that reflect the unique aspects and luxury offerings of these properties. Our appraisals are crucial for financing, selling, or expanding glamping operations, providing comprehensive assessments that consider market trends and revenue potential.",
+      subheadline: "Bank-approved glamping appraisals built for lenders—not generic hotel templates. Income, sales, and cost approaches grounded in 350+ outdoor hospitality valuations across North America.",
       ctaText: "Schedule Free Consultation",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
@@ -586,7 +587,14 @@ export const landingPages: Record<string, LandingPageContent> = {
       "350+ outdoor hospitality appraisals completed",
       "Bank-approved appraisal reports",
       "Deep glamping market expertise",
-      "Fast turnaround times",
+      "Typical 2–4 week turnaround after site access",
+    ],
+    keyTakeaways: [
+      "Glamping appraisals require outdoor hospitality expertise—generic hotel appraisals often miss unit-level revenue drivers.",
+      "Lenders typically weight the income approach using stabilized NOI, cap rates, or DCF for glamping resorts.",
+      "Appraisals differ from feasibility studies: appraisals value property; feasibility studies test proposed project viability.",
+      "Sage appraisals are USPAP-compliant and designed for bank underwriting packages.",
+      "Turnaround is usually 2–4 weeks once site access and operating data are available.",
     ],
     cta: {
       title: "Get Your Glamping Property Appraised",
@@ -601,7 +609,7 @@ export const landingPages: Record<string, LandingPageContent> = {
       },
       {
         question: "How long does the glamping appraisal process take?",
-        answer: "Our appraisals typically take between 4 to 8 weeks, depending on the size and complexity of the property. This timeframe allows us to thoroughly review market data, inspect the property, and prepare a detailed, accurate report. For a more specific timeline based on your project, please contact our team—we're happy to discuss your appraisal needs."
+        answer: "Most glamping appraisals take <strong>2–4 weeks</strong> after we have site access, financial statements, and any lease or operating agreements. Complex resorts, limited comparables, or phased developments can take longer. For feasibility studies (a separate product), Sage typically targets <strong>6–8 weeks</strong>—see our <a href='/guides/feasibility-study-process-timeline'>feasibility study timeline guide</a>."
       },
       {
         question: "What makes Sage Outdoor Advisory's appraisals different?",
@@ -625,7 +633,11 @@ export const landingPages: Record<string, LandingPageContent> = {
       }
     ],
     keywords: ["glamping appraisal", "glamping property valuation", "glamping resort appraisal", "glamping property value"],
-    relatedPillarPages: ["property-appraisals-complete-guide", "glamping-industry-complete-guide"],
+    relatedPillarPages: [
+      "property-appraisals-complete-guide",
+      "glamping-industry-complete-guide",
+      "feasibility-study-vs-appraisal",
+    ],
     relatedPages: [
       "glamping-feasibility-study",
       "how-to-finance-glamping-resort",
@@ -651,7 +663,7 @@ export const landingPages: Record<string, LandingPageContent> = {
         }
       ]
     },
-    lastModified: "2025-01-15",
+    lastModified: "2026-05-20",
     testimonials: {
       showSection: true,
       ctaText: "View All Client Testimonials",

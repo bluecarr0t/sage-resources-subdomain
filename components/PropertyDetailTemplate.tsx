@@ -22,6 +22,7 @@ import { buildPropertyMapQueryLabel } from '@/lib/property-map-location';
 import type { GlampingPropertyPublicImages } from '@/lib/fetch-glamping-property-public-images';
 import { GooglePlacesData } from '@/lib/google-places';
 import { useDeferredGooglePlacesFetch } from '@/lib/hooks/useDeferredGooglePlacesFetch';
+import PropertyDevelopmentResources from '@/components/property/PropertyDevelopmentResources';
 
 interface PropertyDetailTemplateProps {
   properties: SageProperty[];
@@ -384,7 +385,7 @@ export default function PropertyDetailTemplate({
                 <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Avg. retail daily rate</dt>
                 <dd className={EDITORIAL_METRIC_VALUE_CLASS}>{formatUsd(avgRate)}</dd>
                 <p className="mt-4 max-w-xs text-[11px] leading-relaxed text-neutral-500">
-                  Published nightly rate from Sage research; confirm on the operator&apos;s site before booking.
+                  Published average retail daily rate from Sage research.
                 </p>
               </div>
             ) : null}
@@ -619,6 +620,8 @@ export default function PropertyDetailTemplate({
             )}
           </aside>
         </div>
+
+        <PropertyDevelopmentResources locale={locale} />
 
         {nearbyProperties.length > 0 ? (
           <RelatedPropertiesCarousel

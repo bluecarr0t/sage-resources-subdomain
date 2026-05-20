@@ -1,4 +1,6 @@
 import { GlossaryTerm } from '@/lib/glossary/index';
+import { getGlossaryCategoryMessageKey } from '@/lib/glossary/category-i18n';
+import { normalizeGlossaryBodyHtml } from '@/lib/glossary/format-html';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -15,6 +17,7 @@ import GlossaryImageGallery from './GlossaryImageGallery';
 import Footer from './Footer';
 import FloatingHeader from './FloatingHeader';
 import { EditorialCtaBand } from '@/components/editorial/EditorialCtaBand';
+import { GlossaryEnglishNotice } from '@/components/glossary/GlossaryEnglishNotice';
 import {
   EditorialPageShell,
   EDITORIAL_BODY_CLASS,
@@ -26,6 +29,7 @@ import {
   EDITORIAL_MAIN_WITH_HEADER_CLASS,
   EDITORIAL_SECTION_LABEL_CLASS,
 } from '@/components/editorial/EditorialPageShell';
+import { getTranslations } from 'next-intl/server';
 
 interface GlossaryTermTemplateProps {
   term: GlossaryTerm;
@@ -39,19 +43,31 @@ function getArticle(term: string): string {
   return vowels.includes(firstChar) ? 'an' : 'a';
 }
 
-export default function GlossaryTermTemplate({
+function prepareGlossaryHtml(html: string, locale: string): string {
+  return prefixInternalResourceHrefsInHtml(normalizeGlossaryBodyHtml(html), locale);
+}
+
+export default async function GlossaryTermTemplate({
   term,
   relatedTerms,
   locale,
 }: GlossaryTermTemplateProps) {
+  const t = await getTranslations({ locale, namespace: 'glossary' });
+  const tPage = await getTranslations({ locale, namespace: 'glossary.termPage' });
   const links = createLocaleLinks(locale);
   const accent = getGlossaryCategoryAccent(term.category);
+  const categoryLabel = t(`categories.${getGlossaryCategoryMessageKey(term.category)}`);
   const definitionSchema = generateDefinitionSchema(term);
   const faqSchema = term.faqs ? generateFAQSchema(term.faqs) : null;
   const speakableSchema =
     term.faqs && term.faqs.length > 0
       ? generateSpeakableSchema(['.speakable-answer', 'h1', 'h2'])
       : null;
+
+  const extendedHtml = prepareGlossaryHtml(term.extendedDefinition.replace(/\n/g, '<br />'), locale);
+  const disambiguationHtml = term.disambiguation
+    ? prepareGlossaryHtml(term.disambiguation.body, locale)
+    : null;
 
   return (
     <>
@@ -76,12 +92,18 @@ export default function GlossaryTermTemplate({
         <FloatingHeader locale={locale} showFullNav showSpacer={false} />
 
         <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>
+          <GlossaryEnglishNotice
+            locale={locale}
+            message={t('englishNotice.message')}
+            linkLabel={t('englishNotice.link')}
+          />
+
           <nav
             className="mb-10 text-[11px] font-light uppercase tracking-widest text-neutral-500"
             aria-label="Breadcrumb"
           >
             <Link href={links.glossary} className="transition-colors hover:text-neutral-900">
-              Glossary
+              {tPage('breadcrumb')}
             </Link>
             <span className="mx-2 text-neutral-400" aria-hidden>
               /
@@ -91,10 +113,10 @@ export default function GlossaryTermTemplate({
 
           <header className="mb-12 border-b border-sage-200/80 pb-10">
             <p className={`${EDITORIAL_SECTION_LABEL_CLASS} font-medium ${accent.label}`}>
-              {term.category}
+              {categoryLabel}
             </p>
             <h1 className={`mt-3 ${EDITORIAL_GUIDE_TITLE_CLASS}`}>
-              What is {getArticle(term.term)} {term.term}?
+              {tPage('title', { article: getArticle(term.term), term: term.term })}
             </h1>
           </header>
 
@@ -129,30 +151,40 @@ export default function GlossaryTermTemplate({
               ) : null}
 
               <section className="mb-12 border-l-4 border-sage-600 bg-white/50 px-6 py-6 sm:px-8">
-                <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Quick answer</h2>
-                <p className={`mt-4 max-w-3xl text-base font-light leading-relaxed text-neutral-800 speakable-answer`}>
+                <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>{tPage('quickAnswer')}</h2>
+                <p className="mt-4 max-w-3xl text-base font-light leading-relaxed text-neutral-800 speakable-answer">
                   {term.definition}
                 </p>
               </section>
 
+              {term.disambiguation && disambiguationHtml ? (
+                <section
+                  className="mb-12 border border-sage-200/90 bg-sage-50/50 px-6 py-6 sm:px-8"
+                  aria-labelledby="glossary-disambiguation-heading"
+                >
+                  <h2 id="glossary-disambiguation-heading" className={EDITORIAL_H2_CLASS}>
+                    {term.disambiguation.heading}
+                  </h2>
+                  <div
+                    className={`mt-4 ${EDITORIAL_GUIDE_PROSE_CLASS}`}
+                    dangerouslySetInnerHTML={{ __html: disambiguationHtml }}
+                  />
+                </section>
+              ) : null}
+
               <section className="mb-12 border-t border-sage-200/80 pt-10">
                 <h2 className="font-[Georgia] text-2xl font-light tracking-tight text-neutral-900">
-                  Understanding {term.term}
+                  {tPage('understanding', { term: term.term })}
                 </h2>
                 <div
                   className={`mt-6 ${EDITORIAL_GUIDE_PROSE_CLASS}`}
-                  dangerouslySetInnerHTML={{
-                    __html: prefixInternalResourceHrefsInHtml(
-                      term.extendedDefinition.replace(/\n/g, '<br />'),
-                      locale
-                    ),
-                  }}
+                  dangerouslySetInnerHTML={{ __html: extendedHtml }}
                 />
               </section>
 
               {term.examples && term.examples.length > 0 ? (
                 <section className="mb-12 border-t border-sage-200/80 pt-10">
-                  <h2 className={EDITORIAL_H2_CLASS}>Examples</h2>
+                  <h2 className={EDITORIAL_H2_CLASS}>{tPage('examples')}</h2>
                   <ul className="mt-6 space-y-3 border-l border-sage-200 pl-4">
                     {term.examples.map((example, index) => (
                       <li key={index} className={EDITORIAL_BODY_CLASS}>
@@ -165,7 +197,7 @@ export default function GlossaryTermTemplate({
 
               {term.useCases && term.useCases.length > 0 ? (
                 <section className="mb-12 border-t border-sage-200/80 pt-10">
-                  <h2 className={EDITORIAL_H2_CLASS}>Common use cases</h2>
+                  <h2 className={EDITORIAL_H2_CLASS}>{tPage('useCases')}</h2>
                   <ul className="mt-6 space-y-3 border-l border-sage-200 pl-4">
                     {term.useCases.map((useCase, index) => (
                       <li key={index} className={EDITORIAL_BODY_CLASS}>
@@ -178,7 +210,7 @@ export default function GlossaryTermTemplate({
 
               {term.internalLinks && term.internalLinks.length > 0 ? (
                 <section className="mb-12 border-t border-sage-200/80 pt-10">
-                  <h2 className={EDITORIAL_H2_CLASS}>Related services</h2>
+                  <h2 className={EDITORIAL_H2_CLASS}>{tPage('relatedServices')}</h2>
                   <ul className="mt-6 space-y-2 border-l border-sage-200 pl-4">
                     {term.internalLinks.map((link, index) => (
                       <li key={index}>
@@ -196,7 +228,7 @@ export default function GlossaryTermTemplate({
 
               {term.faqs && term.faqs.length > 0 ? (
                 <section className="mb-12 border-t border-sage-200/80 pt-10">
-                  <h2 className={EDITORIAL_H2_CLASS}>Frequently asked questions</h2>
+                  <h2 className={EDITORIAL_H2_CLASS}>{tPage('faqs')}</h2>
                   <dl className="mt-8 space-y-8">
                     {term.faqs.map((faq, index) => (
                       <div key={index}>
@@ -204,7 +236,7 @@ export default function GlossaryTermTemplate({
                         <dd
                           className={`mt-2 border-l border-sage-200 pl-4 ${EDITORIAL_BODY_CLASS} speakable-answer`}
                           dangerouslySetInnerHTML={{
-                            __html: prefixInternalResourceHrefsInHtml(faq.answer, locale),
+                            __html: prepareGlossaryHtml(faq.answer, locale),
                           }}
                         />
                       </div>
@@ -214,16 +246,16 @@ export default function GlossaryTermTemplate({
               ) : null}
 
               <EditorialCtaBand
-                title="Need help with your outdoor hospitality project?"
-                description={`Our experts can help you understand how ${term.term.toLowerCase()} applies to your project.`}
-                buttonLabel="Schedule free consultation"
+                title={tPage('cta.title')}
+                description={tPage('cta.description', { term: term.term })}
+                buttonLabel={tPage('cta.button')}
                 buttonHref="https://sageoutdooradvisory.com/contact-us/"
                 external
               />
 
               <p className="mt-10 text-center">
                 <Link href={links.glossary} className={EDITORIAL_LINK_CLASS}>
-                  ← Back to glossary
+                  {tPage('backToGlossary')}
                 </Link>
               </p>
             </div>
@@ -232,7 +264,7 @@ export default function GlossaryTermTemplate({
               <div className="sticky top-28 z-10 max-h-[calc(100vh-7rem)] space-y-6 overflow-y-auto">
                 {relatedTerms.length > 0 ? (
                   <div className={`${EDITORIAL_CARD_CLASS} ${accent.card} p-4`}>
-                    <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Related terms</h2>
+                    <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>{tPage('relatedTerms')}</h2>
                     <ul className="mt-4 space-y-2">
                       {relatedTerms.map((relatedTerm) => (
                         <li key={relatedTerm.slug}>
@@ -249,16 +281,16 @@ export default function GlossaryTermTemplate({
                 ) : null}
 
                 <div className={`${EDITORIAL_CARD_CLASS} p-4`}>
-                  <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Quick links</h2>
+                  <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>{tPage('quickLinks')}</h2>
                   <ul className="mt-4 space-y-2 text-sm font-light">
                     <li>
                       <Link href={links.glossary} className={EDITORIAL_LINK_CLASS}>
-                        View all terms
+                        {tPage('viewAllTerms')}
                       </Link>
                     </li>
                     <li>
                       <Link href={links.guides} className={EDITORIAL_LINK_CLASS}>
-                        Expert guides
+                        {tPage('expertGuides')}
                       </Link>
                     </li>
                     <li>
@@ -268,7 +300,7 @@ export default function GlossaryTermTemplate({
                         rel="noopener noreferrer"
                         className={EDITORIAL_LINK_CLASS}
                       >
-                        Our services
+                        {tPage('ourServices')}
                       </a>
                     </li>
                     <li>
@@ -278,7 +310,7 @@ export default function GlossaryTermTemplate({
                         rel="noopener noreferrer"
                         className={EDITORIAL_LINK_CLASS}
                       >
-                        Market reports
+                        {tPage('marketReports')}
                       </a>
                     </li>
                     <li>
@@ -288,7 +320,7 @@ export default function GlossaryTermTemplate({
                         rel="noopener noreferrer"
                         className={EDITORIAL_LINK_CLASS}
                       >
-                        Schedule consultation
+                        {tPage('scheduleConsultation')}
                       </a>
                     </li>
                   </ul>
