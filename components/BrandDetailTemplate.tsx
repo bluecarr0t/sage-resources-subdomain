@@ -11,12 +11,19 @@ import {
   EDITORIAL_MAIN_WITH_HEADER_CLASS,
   EDITORIAL_SECTION_LABEL_CLASS,
 } from '@/components/editorial/EditorialPageShell';
+import { isUnitedStatesCountryFilterValue } from '@/lib/admin/glamping-sage-data-list';
 import { createLocaleLinks } from '@/lib/locale-links';
 import type {
   BrandMapPin,
   BrandPropertyListing,
   BrandPublicSummary,
 } from '@/lib/brand-public-pages';
+
+function listingIsOutsideUsa(country: string | null | undefined): boolean {
+  const value = country?.trim();
+  if (!value) return false;
+  return !isUnitedStatesCountryFilterValue(value);
+}
 
 function formatLocation(listing: BrandPropertyListing): string {
   const parts = [listing.city, listing.state].filter(
@@ -59,11 +66,22 @@ export default function BrandDetailTemplate({
 }: BrandDetailTemplateProps) {
   const links = createLocaleLinks(locale);
   const propertyCount = listings.length;
+  const hasInternationalProperties = listings.some((l) =>
+    listingIsOutsideUsa(l.country)
+  );
   const states = [
     ...new Set(
-      listings.map((l) => l.state?.trim()).filter((s): s is string => Boolean(s))
+      listings
+        .filter((l) => {
+          if (!hasInternationalProperties) return true;
+          const country = l.country?.trim();
+          return !country || isUnitedStatesCountryFilterValue(country);
+        })
+        .map((l) => l.state?.trim())
+        .filter((s): s is string => Boolean(s))
     ),
   ].sort();
+  const statesLabel = hasInternationalProperties ? 'US States' : 'States';
   const rateValues = listings
     .map((l) => {
       if (l.rate == null || l.rate === '') return null;
@@ -75,7 +93,6 @@ export default function BrandDetailTemplate({
     })
     .filter((n): n is number => n != null);
   const minRate = rateValues.length > 0 ? Math.min(...rateValues) : null;
-  const maxRate = rateValues.length > 0 ? Math.max(...rateValues) : null;
 
   const lead =
     propertyCount === 1
@@ -139,19 +156,17 @@ export default function BrandDetailTemplate({
           </div>
           {states.length > 0 ? (
             <div>
-              <dt className={EDITORIAL_SECTION_LABEL_CLASS}>States</dt>
+              <dt className={EDITORIAL_SECTION_LABEL_CLASS}>{statesLabel}</dt>
               <dd className="mt-2 text-3xl font-light tabular-nums text-neutral-900">
                 {states.length}
               </dd>
             </div>
           ) : null}
-          {minRate != null && maxRate != null ? (
+          {minRate != null ? (
             <div>
-              <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Nightly rates (research)</dt>
+              <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Rates Starting From</dt>
               <dd className="mt-2 text-lg font-light text-neutral-900">
-                {minRate === maxRate
-                  ? formatUsd(minRate)
-                  : `${formatUsd(minRate)} – ${formatUsd(maxRate)}`}
+                {formatUsd(minRate)}
               </dd>
             </div>
           ) : null}
