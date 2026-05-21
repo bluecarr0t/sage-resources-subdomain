@@ -557,7 +557,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       zoomControl: true,
       streetViewControl: false,
       mapTypeControl: !embedMode,
-      fullscreenControl: !embedMode,
+      fullscreenControl: true,
       mapTypeId: 'terrain' as const,
       gestureHandling: (isMobile && isFullscreen ? 'greedy' : 'cooperative') as 'greedy' | 'cooperative',
       draggable: true,
