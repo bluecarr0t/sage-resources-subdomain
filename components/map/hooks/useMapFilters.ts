@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useMapContext } from '@/components/MapContext';
+import { appendPreservedMapViewParams } from '@/lib/map-embed-mode';
 import { isLegacyUsCanadaOnlyCountryQuery } from '@/lib/map/legacy-map-country-query';
 
 const defaultCenter = { lat: 39.5, lng: -98.5 };
@@ -44,6 +46,7 @@ export function useMapFilters({
   hasCenteredFromUrlRef,
   hasJustFittedBoundsRef,
 }: UseMapFiltersProps) {
+  const { embedMode, clientWorkOnly } = useMapContext();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -112,6 +115,8 @@ export function useMapFilters({
   // Update URL when filters change (preserve lat/lon/zoom if they exist)
   useEffect(() => {
     if (!isClient || !urlInitialized) return;
+    // Embed / client-work views must keep ?embed=1&layer=client-work (no filter sync)
+    if (embedMode || clientWorkOnly) return;
 
     const params = new URLSearchParams();
 
@@ -135,6 +140,7 @@ export function useMapFilters({
     if (urlLat) params.set('lat', urlLat);
     if (urlLon) params.set('lon', urlLon);
     if (urlZoom) params.set('zoom', urlZoom);
+    appendPreservedMapViewParams(params, searchParams);
 
     const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     const currentUrl = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
@@ -142,7 +148,19 @@ export function useMapFilters({
     if (newUrl !== currentUrl) {
       router.replace(newUrl, { scroll: false });
     }
-  }, [filterCountry, filterState, filterUnitType, filterRateRange, isClient, urlInitialized, pathname, router, searchParams]);
+  }, [
+    filterCountry,
+    filterState,
+    filterUnitType,
+    filterRateRange,
+    isClient,
+    urlInitialized,
+    pathname,
+    router,
+    searchParams,
+    embedMode,
+    clientWorkOnly,
+  ]);
 
   // Enable fitBounds when state filter is applied, disable when cleared
   useEffect(() => {

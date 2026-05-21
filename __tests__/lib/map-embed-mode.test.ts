@@ -1,4 +1,5 @@
 import {
+  appendPreservedMapViewParams,
   getMapEmbedParam,
   getMapLayerParam,
   isMapClientWorkOnlyLayer,
@@ -35,5 +36,14 @@ describe('map-embed-mode', () => {
 
   it('reads first value when layer is an array', () => {
     expect(getMapLayerParam({ layer: ['client-work', 'other'] })).toBe('client-work');
+  });
+
+  it('copies embed and layer into URLSearchParams for filter sync', () => {
+    const source = new URLSearchParams('embed=1&layer=client-work&state=CA');
+    const target = new URLSearchParams('state=CA');
+    appendPreservedMapViewParams(target, source);
+    expect(target.get('embed')).toBe('1');
+    expect(target.get('layer')).toBe('client-work');
+    expect(target.get('state')).toBe('CA');
   });
 });

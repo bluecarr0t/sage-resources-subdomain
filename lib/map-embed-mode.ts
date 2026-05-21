@@ -35,3 +35,19 @@ export function isMapClientWorkOnlyLayer(searchParams: MapSearchParams | undefin
   const normalized = value.trim().toLowerCase().replace(/_/g, '-');
   return normalized === 'client-work' || normalized === 'clientwork';
 }
+
+/** Params that must survive filter URL sync (`useMapFilters` router.replace). */
+export const MAP_VIEW_QUERY_KEYS = ['embed', 'layer'] as const;
+
+export function appendPreservedMapViewParams(
+  target: URLSearchParams,
+  source: URLSearchParams | MapSearchParams
+): void {
+  for (const key of MAP_VIEW_QUERY_KEYS) {
+    const raw =
+      source instanceof URLSearchParams ? source.get(key) : source[key];
+    if (raw === undefined) continue;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    if (value) target.set(key, value);
+  }
+}
