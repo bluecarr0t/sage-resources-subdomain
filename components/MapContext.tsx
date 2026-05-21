@@ -15,7 +15,12 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { SageProperty } from '@/lib/types/sage';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
-import { isMapClientWorkOnlyLayer, isMapEmbedMode } from '@/lib/map-embed-mode';
+import {
+  isMapClientWorkOnlyLayer,
+  isMapEmbedMode,
+  shouldShowClientWorkInMapView,
+  shouldShowNationalParksInMapView,
+} from '@/lib/map-embed-mode';
 import { mapSearchParamsFromUrlSearchParams } from '@/lib/map-search-params';
 import MapLoading from '@/components/MapLoading';
 
@@ -74,14 +79,24 @@ function MapProviderInner({ children }: { children: ReactNode }) {
   );
   const embedMode = isMapEmbedMode(queryRecord);
   const clientWorkOnly = isMapClientWorkOnlyLayer(queryRecord);
+  const initialShowNationalParks = shouldShowNationalParksInMapView(
+    queryRecord,
+    embedMode,
+    clientWorkOnly
+  );
+  const initialShowClientWork = shouldShowClientWorkInMapView(
+    queryRecord,
+    embedMode,
+    clientWorkOnly
+  );
 
   /** Empty array = all countries in the published map dataset */
   const [filterCountry, setFilterCountry] = useState<string[]>([]);
   const [filterState, setFilterState] = useState<string[]>([]);
   const [filterUnitType, setFilterUnitType] = useState<string[]>([]);
   const [filterRateRange, setFilterRateRange] = useState<string[]>([]);
-  const [showNationalParks, setShowNationalParks] = useState<boolean>(!clientWorkOnly);
-  const [showClientWork, setShowClientWork] = useState<boolean>(true);
+  const [showNationalParks, setShowNationalParks] = useState<boolean>(initialShowNationalParks);
+  const [showClientWork, setShowClientWork] = useState<boolean>(initialShowClientWork);
   const [selectedMapLayer, setSelectedMapLayer] = useState<MapLayer>('none');
   const [populationYear, setPopulationYear] = useState<'2010' | '2020'>('2020');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);

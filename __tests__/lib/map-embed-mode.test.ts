@@ -4,6 +4,8 @@ import {
   getMapLayerParam,
   isMapClientWorkOnlyLayer,
   isMapEmbedMode,
+  shouldShowClientWorkInMapView,
+  shouldShowNationalParksInMapView,
 } from '@/lib/map-embed-mode';
 
 describe('map-embed-mode', () => {
@@ -45,5 +47,22 @@ describe('map-embed-mode', () => {
     expect(target.get('embed')).toBe('1');
     expect(target.get('layer')).toBe('client-work');
     expect(target.get('state')).toBe('CA');
+  });
+
+  it('hides overlay layers on glamping embed by default', () => {
+    const q = { embed: '1' };
+    expect(shouldShowNationalParksInMapView(q, true, false)).toBe(false);
+    expect(shouldShowClientWorkInMapView(q, true, false)).toBe(false);
+  });
+
+  it('enables overlay layers on glamping embed when query flags are set', () => {
+    const q = { embed: '1', parks: '1', clientWork: '1' };
+    expect(shouldShowNationalParksInMapView(q, true, false)).toBe(true);
+    expect(shouldShowClientWorkInMapView(q, true, false)).toBe(true);
+  });
+
+  it('shows all layers on full map', () => {
+    expect(shouldShowNationalParksInMapView({}, false, false)).toBe(true);
+    expect(shouldShowClientWorkInMapView({}, false, false)).toBe(true);
   });
 });

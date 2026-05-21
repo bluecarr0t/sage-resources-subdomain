@@ -36,8 +36,55 @@ export function isMapClientWorkOnlyLayer(searchParams: MapSearchParams | undefin
   return normalized === 'client-work' || normalized === 'clientwork';
 }
 
+function isTruthyQueryFlag(value: string | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on';
+}
+
+function getQueryFlag(
+  searchParams: MapSearchParams | undefined,
+  ...keys: string[]
+): string | undefined {
+  if (!searchParams) return undefined;
+  for (const key of keys) {
+    const raw = searchParams[key];
+    if (raw === undefined) continue;
+    return Array.isArray(raw) ? raw[0] : raw;
+  }
+  return undefined;
+}
+
+/**
+ * Glamping embed (`?embed=1`): national parks off unless `?parks=1` or `?nationalParks=1`.
+ * Full map defaults to on; client-work-only view is always off.
+ */
+export function shouldShowNationalParksInMapView(
+  searchParams: MapSearchParams | undefined,
+  embedMode: boolean,
+  clientWorkOnly: boolean
+): boolean {
+  if (clientWorkOnly) return false;
+  if (!embedMode) return true;
+  return isTruthyQueryFlag(getQueryFlag(searchParams, 'parks', 'nationalParks'));
+}
+
+/**
+ * Glamping embed (`?embed=1`): client work off unless `?clientWork=1`.
+ * Full map defaults to on; client-work-only view is always on.
+ */
+export function shouldShowClientWorkInMapView(
+  searchParams: MapSearchParams | undefined,
+  embedMode: boolean,
+  clientWorkOnly: boolean
+): boolean {
+  if (clientWorkOnly) return true;
+  if (!embedMode) return true;
+  return isTruthyQueryFlag(getQueryFlag(searchParams, 'clientWork'));
+}
+
 /** Params that must survive filter URL sync (`useMapFilters` router.replace). */
-export const MAP_VIEW_QUERY_KEYS = ['embed', 'layer'] as const;
+export const MAP_VIEW_QUERY_KEYS = ['embed', 'layer', 'parks', 'nationalParks', 'clientWork'] as const;
 
 export function appendPreservedMapViewParams(
   target: URLSearchParams,
