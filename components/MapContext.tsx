@@ -10,6 +10,8 @@ let globalAbortController: AbortController | null = null;
 export type MapLayer = 'none' | 'population' | 'tourism' | 'opportunity';
 
 interface MapContextType {
+  /** When true, only Client Work markers are shown (see `?layer=client-work`). */
+  clientWorkOnly: boolean;
   filterCountry: string[];
   filterState: string[];
   filterUnitType: string[];
@@ -47,13 +49,19 @@ interface MapContextType {
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
-export function MapProvider({ children }: { children: ReactNode }) {
+export function MapProvider({
+  children,
+  clientWorkOnly = false,
+}: {
+  children: ReactNode;
+  clientWorkOnly?: boolean;
+}) {
   /** Empty array = all countries in the published map dataset */
   const [filterCountry, setFilterCountry] = useState<string[]>([]);
   const [filterState, setFilterState] = useState<string[]>([]);
   const [filterUnitType, setFilterUnitType] = useState<string[]>([]);
   const [filterRateRange, setFilterRateRange] = useState<string[]>([]);
-  const [showNationalParks, setShowNationalParks] = useState<boolean>(true);
+  const [showNationalParks, setShowNationalParks] = useState<boolean>(!clientWorkOnly);
   const [showClientWork, setShowClientWork] = useState<boolean>(true);
   const [selectedMapLayer, setSelectedMapLayer] = useState<MapLayer>('none');
   const [populationYear, setPopulationYear] = useState<'2010' | '2020'>('2020');
@@ -92,8 +100,14 @@ export function MapProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const toggleNationalParks = () => setShowNationalParks((prev) => !prev);
-  const toggleClientWork = () => setShowClientWork((prev) => !prev);
+  const toggleNationalParks = () => {
+    if (clientWorkOnly) return;
+    setShowNationalParks((prev) => !prev);
+  };
+  const toggleClientWork = () => {
+    if (clientWorkOnly) return;
+    setShowClientWork((prev) => !prev);
+  };
   const setMapLayer = (layer: MapLayer) => setSelectedMapLayer(layer);
   const toggleFullscreen = () => setIsFullscreen((prev) => !prev);
 
@@ -114,6 +128,14 @@ export function MapProvider({ children }: { children: ReactNode }) {
   // Client-side filtering (usePropertyProcessing) handles all filter logic
   // This eliminates duplicate server/client filter logic and avoids re-fetching on filter changes
   useEffect(() => {
+    if (clientWorkOnly) {
+      setAllProperties([]);
+      setPropertiesLoading(false);
+      setPropertiesError(null);
+      setHasLoadedOnce(true);
+      return;
+    }
+
     if (globalFetchInProgress) return;
 
     if (globalAbortController) {
@@ -186,7 +208,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         fetchInProgressRef.current = false;
       }
     };
-  }, []); // Fetch once on mount - no filter dependencies
+  }, [clientWorkOnly]); // Fetch once on mount - no filter dependencies
 
   useEffect(() => {
     let cancelled = false;
@@ -214,7 +236,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
 
   return (
     <MapContext.Provider 
-      value={{ 
+      value={{
+        clientWorkOnly,
         filterCountry, filterState, filterUnitType, filterRateRange,
         showNationalParks, showClientWork, selectedMapLayer,
         showPopulationLayer, showGDPLayer, showOpportunityZones,

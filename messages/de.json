@@ -696,6 +696,11 @@
       "enter": "Vollbild",
       "exit": "Vollbild verlassen"
     },
+    "embed": {
+      "openFilters": "Filter & Suche",
+      "openAbout": "Über diese Karte",
+      "closeFilters": "Schließen"
+    },
     "poweredBy": "Unterstützt von",
     "filters": {
       "title": "Filter",

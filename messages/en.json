@@ -40,6 +40,11 @@
       "enter": "Enter fullscreen",
       "exit": "Exit fullscreen"
     },
+    "embed": {
+      "openFilters": "Filters & search",
+      "openAbout": "About this map",
+      "closeFilters": "Close"
+    },
     "poweredBy": "Powered by",
     "filters": {
       "title": "Filters",

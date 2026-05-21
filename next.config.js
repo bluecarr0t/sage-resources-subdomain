@@ -6,6 +6,25 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 const nextConfig = {
   reactStrictMode: true,
 
+  async headers() {
+    const frameAncestors = [
+      "'self'",
+      'https://sageoutdooradvisory.com',
+      'https://www.sageoutdooradvisory.com',
+    ].join(' ');
+    return [
+      {
+        source: '/:locale(en|es|fr|de)/map',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: `frame-ancestors ${frameAncestors}`,
+          },
+        ],
+      },
+    ];
+  },
+
   async redirects() {
     return [
       {

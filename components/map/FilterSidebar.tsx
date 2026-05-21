@@ -32,6 +32,7 @@ export default function FilterSidebar({
   isMobile,
 }: FilterSidebarProps) {
   const {
+    clientWorkOnly,
     filterCountry,
     filterState,
     filterUnitType,
@@ -133,6 +134,35 @@ export default function FilterSidebar({
       return () => clearTimeout(timer);
     }
   }, [calculatedDisplayedCount, displayedCount]);
+
+  if (clientWorkOnly) {
+    return (
+      <div className="w-full space-y-4">
+        <div className="flex items-baseline gap-2 border-b border-sage-200/60 pb-4" aria-live="polite">
+          <span className={EDITORIAL_METRIC_COMPACT_CLASS}>
+            {clientWorkPointsLoading ? '…' : clientWorkPoints.length}
+          </span>
+          <span className="text-[11px] font-light uppercase tracking-widest text-neutral-500">
+            {t('layers.clientWork.label')}
+          </span>
+        </div>
+        <p className="text-xs font-light leading-relaxed text-neutral-600">
+          {t.rich('layers.clientWork.description', {
+            sage: (chunks) => (
+              <a
+                href="https://sageoutdooradvisory.com/"
+                className={EDITORIAL_LINK_CLASS}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
+        </p>
+      </div>
+    );
+  }
 
   const countBlock = (
     <div className="flex items-baseline gap-2" aria-live="polite" aria-atomic="true">

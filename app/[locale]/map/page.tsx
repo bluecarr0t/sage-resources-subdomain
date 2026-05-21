@@ -2,9 +2,10 @@ import { Metadata } from "next";
 import { MapProvider } from '@/components/MapContext';
 import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
 import MapLayout from '@/components/MapLayout';
+import MapEmbedShell from '@/components/MapEmbedShell';
 import ResourceHints from '@/components/ResourceHints';
-import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache } from '@/lib/redis';
+import { createServerClient } from '@/lib/supabase';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 import {
   generateOrganizationSchema,
@@ -14,7 +15,6 @@ import {
   generateMapBreadcrumbSchema,
   generateDatasetSchema,
   generateMapFAQSchema,
-  generateTouristAttractionSchema,
 } from '@/lib/schema';
 import { locales, type Locale } from "@/i18n";
 import {
@@ -25,6 +25,7 @@ import {
 import { notFound } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
 import { MAP_INDEX_METADATA } from '@/lib/map-seo';
+import { isMapClientWorkOnlyLayer, isMapEmbedMode } from '@/lib/map-embed-mode';
 
 interface PageProps {
   params: {
@@ -56,12 +57,18 @@ export async function generateMetadata({
   const pathname = `/${locale}/map`;
   const queryString = buildStableHreflangQueryString(searchParams);
   const hasFilterQuery = queryString.length > 1;
+  const embedMode = isMapEmbedMode(searchParams);
+  const clientWorkOnly = isMapClientWorkOnlyLayer(searchParams);
   const canonicalUrl = `${baseUrl}${pathname}`;
   const url = hasFilterQuery ? `${baseUrl}${pathname}${queryString}` : canonicalUrl;
   const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
-  const title = MAP_INDEX_METADATA.titleTemplate(count);
-  const description = MAP_INDEX_METADATA.descriptionTemplate(count);
+  const title = clientWorkOnly
+    ? 'Sage Client Work Map | Outdoor Hospitality Projects'
+    : MAP_INDEX_METADATA.titleTemplate(count);
+  const description = clientWorkOnly
+    ? 'Map of selected Sage Outdoor Advisory client projects across glamping, RV resorts, campgrounds, marinas, and outdoor hospitality.'
+    : MAP_INDEX_METADATA.descriptionTemplate(count);
 
   return {
     title,
@@ -94,10 +101,10 @@ export async function generateMetadata({
       ...generateHreflangAlternates(pathname, baseUrl, hasFilterQuery ? '' : queryString),
     },
     robots: {
-      index: !hasFilterQuery,
+      index: !hasFilterQuery && !embedMode,
       follow: true,
       googleBot: {
-        index: !hasFilterQuery,
+        index: !hasFilterQuery && !embedMode,
         follow: true,
         "max-image-preview": "large",
         "max-snippet": -1,
@@ -186,7 +193,10 @@ async function getPropertyStatistics() {
   }
 }
 
-export default async function MapPage({ params }: PageProps) {
+export default async function MapPage({
+  params,
+  searchParams,
+}: PageProps & { searchParams?: MapSearchParams }) {
   const { locale } = params;
   
   // Validate locale
@@ -195,6 +205,8 @@ export default async function MapPage({ params }: PageProps) {
   }
   
   const stats = await getPropertyStatistics();
+  const embedMode = isMapEmbedMode(searchParams);
+  const clientWorkOnly = isMapClientWorkOnlyLayer(searchParams);
 
   // Generate structured data
   const organizationSchema = generateOrganizationSchema();
@@ -208,26 +220,6 @@ export default async function MapPage({ params }: PageProps) {
     locale
   );
   const faqSchema = generateMapFAQSchema(stats.uniqueProperties);
-  
-  // Optionally fetch national parks for TouristAttraction schema
-  // Limit to top 10 to avoid payload size issues
-  let touristAttractionSchemas: any[] = [];
-  try {
-    const supabase = createServerClient();
-    const { data: parks } = await supabase
-      .from('national-parks')
-      .select('*')
-      .not('latitude', 'is', null)
-      .not('longitude', 'is', null)
-      .limit(10);
-    
-    if (parks && parks.length > 0) {
-      touristAttractionSchemas = generateTouristAttractionSchema(parks);
-    }
-  } catch (error) {
-    // Silently fail - tourist attraction schema is optional
-    console.error('Error fetching parks for schema:', error);
-  }
 
   return (
     <>
@@ -263,17 +255,16 @@ export default async function MapPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      {touristAttractionSchemas.map((schema, index) => (
-        <script
-          key={`tourist-attraction-${index}`}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
-      ))}
 
       <GoogleMapsProvider>
-        <MapProvider>
-          <MapLayout locale={locale} />
+        <MapProvider clientWorkOnly={clientWorkOnly}>
+          {embedMode ? (
+            <MapEmbedShell>
+              <MapLayout locale={locale} embedMode />
+            </MapEmbedShell>
+          ) : (
+            <MapLayout locale={locale} />
+          )}
         </MapProvider>
       </GoogleMapsProvider>
     </>

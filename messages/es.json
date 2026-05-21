@@ -696,6 +696,11 @@
       "enter": "Pantalla completa",
       "exit": "Salir de pantalla completa"
     },
+    "embed": {
+      "openFilters": "Filtros y búsqueda",
+      "openAbout": "Acerca de este mapa",
+      "closeFilters": "Cerrar"
+    },
     "poweredBy": "Impulsado por",
     "filters": {
       "title": "Filtros",

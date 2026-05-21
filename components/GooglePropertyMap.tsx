@@ -62,10 +62,12 @@ interface GooglePropertyMapProps {
 
 export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapProps) {
   const {
+    clientWorkOnly,
     filterCountry, filterState, filterUnitType, filterRateRange,
     showNationalParks,
     showClientWork,
     clientWorkPoints,
+    clientWorkPointsLoading,
     selectedMapLayer,
     showPopulationLayer,
     showGDPLayer,
@@ -297,9 +299,39 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     hasCenteredFromUrlRef, hasJustFittedBoundsRef,
   });
 
+  // Client Work–only view: fit map to project markers once loaded
+  useEffect(() => {
+    if (!clientWorkOnly || !map || clientWorkPointsLoading || clientWorkPoints.length === 0) return;
+
+    const bounds = new google.maps.LatLngBounds();
+    for (const point of clientWorkPoints) {
+      bounds.extend({ lat: point.lat, lng: point.lng });
+    }
+    map.fitBounds(bounds);
+    hasJustFittedBoundsRef.current = true;
+    const timer = window.setTimeout(() => {
+      hasJustFittedBoundsRef.current = false;
+      const b = map.getBounds();
+      if (b) setMapBounds(b);
+      const c = map.getCenter();
+      const z = map.getZoom();
+      if (c) setMapCenter({ lat: c.lat(), lng: c.lng() });
+      if (z != null) setMapZoom(z);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [
+    clientWorkOnly,
+    map,
+    clientWorkPoints,
+    clientWorkPointsLoading,
+    setMapBounds,
+    setMapCenter,
+    setMapZoom,
+  ]);
+
   // Lazy load national parks
   useEffect(() => {
-    if (!showNationalParks || nationalParks.length > 0) return;
+    if (clientWorkOnly || !showNationalParks || nationalParks.length > 0) return;
     async function fetchNationalParks() {
       try {
         const supabaseClient = await getSupabaseClient();
