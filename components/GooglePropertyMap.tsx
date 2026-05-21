@@ -896,8 +896,12 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
           </div>
         )}
 
-        {/* Empty state */}
-        {!loading && !error && hasLoadedOnce && displayProperties.length === 0 && (
+        {/* Empty state — glamping dataset only; client-work embed uses clientWorkPoints */}
+        {!clientWorkOnly &&
+          !loading &&
+          !error &&
+          hasLoadedOnce &&
+          displayProperties.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-20" role="status">
             <div className="text-center p-6 bg-white rounded-xl shadow-md max-w-xs mx-4">
               <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
