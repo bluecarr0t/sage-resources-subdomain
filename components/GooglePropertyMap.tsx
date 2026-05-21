@@ -76,7 +76,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     clearFilters, hasActiveFilters,
     properties: sharedProperties, allProperties: sharedAllProperties,
     propertiesLoading: sharedPropertiesLoading, propertiesError: sharedPropertiesError,
-    hasLoadedOnce, isFullscreen, toggleFullscreen,
+    hasLoadedOnce, isFullscreen, toggleFullscreen, embedMode,
     setFilterCountry, setFilterState, setFilterUnitType, setFilterRateRange,
     toggleState, toggleUnitType, toggleRateRange,
   } = useMapContext();
@@ -556,8 +556,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       disableDefaultUI: false,
       zoomControl: true,
       streetViewControl: false,
-      mapTypeControl: true,
-      fullscreenControl: true,
+      mapTypeControl: !embedMode,
+      fullscreenControl: !embedMode,
       mapTypeId: 'terrain' as const,
       gestureHandling: (isMobile && isFullscreen ? 'greedy' : 'cooperative') as 'greedy' | 'cooperative',
       draggable: true,
@@ -569,7 +569,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       return { ...baseOptions, mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81' };
     }
     return baseOptions;
-  }, [isMobile, isFullscreen, checkWebGLSupport]);
+  }, [isMobile, isFullscreen, embedMode, checkWebGLSupport]);
 
   useEffect(() => {
     if (!map || !isClient) return;
