@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import MapPropertyDetailLink from '@/components/map/MapPropertyDetailLink';
 import { useTranslations } from 'next-intl';
 import { SageProperty } from '@/lib/types/sage';
 import { slugifyPropertyName } from '@/lib/properties';
@@ -201,12 +201,13 @@ export default function PropertyInfoWindow({
       )}
 
       {propertySlug && (
-        <Link
-          href={`/${locale}/property/${propertySlug}`}
+        <MapPropertyDetailLink
+          locale={locale}
+          slug={propertySlug}
           className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
         >
           {t('infoWindow.property.viewMore')}
-        </Link>
+        </MapPropertyDetailLink>
       )}
     </div>
   );

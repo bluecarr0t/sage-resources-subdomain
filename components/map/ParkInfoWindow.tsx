@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import MapPropertyDetailLink from '@/components/map/MapPropertyDetailLink';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { NationalParkWithCoords } from '@/lib/types/national-parks';
@@ -157,12 +157,13 @@ export default function ParkInfoWindow({
       )}
 
       {selectedPark.slug && (
-        <Link
-          href={`/${locale}/property/${selectedPark.slug}`}
+        <MapPropertyDetailLink
+          locale={locale}
+          slug={selectedPark.slug}
           className="inline-block text-sm text-blue-600 hover:text-blue-800 underline font-medium mt-2 border-t border-gray-200 pt-2 w-full text-center"
         >
           {t('infoWindow.park.viewMore')}
-        </Link>
+        </MapPropertyDetailLink>
       )}
     </div>
   );

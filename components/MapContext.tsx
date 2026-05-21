@@ -10,6 +10,8 @@ let globalAbortController: AbortController | null = null;
 export type MapLayer = 'none' | 'population' | 'tourism' | 'opportunity';
 
 interface MapContextType {
+  /** WordPress iframe (`?embed=1`) — e.g. property links open in a new tab. */
+  embedMode: boolean;
   /** When true, only Client Work markers are shown (see `?layer=client-work`). */
   clientWorkOnly: boolean;
   filterCountry: string[];
@@ -51,9 +53,11 @@ const MapContext = createContext<MapContextType | undefined>(undefined);
 
 export function MapProvider({
   children,
+  embedMode = false,
   clientWorkOnly = false,
 }: {
   children: ReactNode;
+  embedMode?: boolean;
   clientWorkOnly?: boolean;
 }) {
   /** Empty array = all countries in the published map dataset */
@@ -237,6 +241,7 @@ export function MapProvider({
   return (
     <MapContext.Provider 
       value={{
+        embedMode,
         clientWorkOnly,
         filterCountry, filterState, filterUnitType, filterRateRange,
         showNationalParks, showClientWork, selectedMapLayer,

@@ -2,6 +2,10 @@
  * Landing page locale availability based on real message file translations.
  */
 import { defaultLocale, locales, type Locale } from '@/i18n';
+import deMessages from '@/messages/de.json';
+import enMessages from '@/messages/en.json';
+import esMessages from '@/messages/es.json';
+import frMessages from '@/messages/fr.json';
 
 type MessagesLanding = Record<string, { title?: string; metaDescription?: string }>;
 
@@ -12,19 +16,15 @@ function slugToTranslationKey(slug: string): string {
     .join('');
 }
 
-function loadLandingMessages(locale: Locale): MessagesLanding {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const messages = require(`../messages/${locale}.json`) as { landing?: MessagesLanding };
-  return messages.landing ?? {};
-}
-
-const landingByLocale: Partial<Record<Locale, MessagesLanding>> = {};
+const landingByLocale: Record<Locale, MessagesLanding> = {
+  en: enMessages.landing ?? {},
+  es: esMessages.landing ?? {},
+  fr: frMessages.landing ?? {},
+  de: deMessages.landing ?? {},
+};
 
 function getLandingForLocale(locale: Locale): MessagesLanding {
-  if (!landingByLocale[locale]) {
-    landingByLocale[locale] = loadLandingMessages(locale);
-  }
-  return landingByLocale[locale]!;
+  return landingByLocale[locale];
 }
 
 /** True when messages/{locale}.json has title + metaDescription for this landing slug. */

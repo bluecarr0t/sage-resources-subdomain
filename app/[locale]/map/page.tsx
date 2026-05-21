@@ -257,7 +257,7 @@ export default async function MapPage({
       />
 
       <GoogleMapsProvider>
-        <MapProvider clientWorkOnly={clientWorkOnly}>
+        <MapProvider embedMode={embedMode} clientWorkOnly={clientWorkOnly}>
           {embedMode ? (
             <MapEmbedShell>
               <MapLayout locale={locale} embedMode />
