@@ -5,7 +5,7 @@ import MapPageClient from '@/components/MapPageClient';
 import ResourceHints from '@/components/ResourceHints';
 import { getCache, setCache } from '@/lib/redis';
 import { createServerClient } from '@/lib/supabase';
-import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
+import { applyPublicMapCohortFilters } from '@/lib/public-map-cohort-filters';
 import {
   generateOrganizationSchema,
   generateMapSchema,
@@ -137,13 +137,9 @@ async function getPropertyStatistics() {
     
     // Get all glamping properties to count unique property names
     // Operating properties only (is_open = Yes)
-    const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
-      .select('property_name, state, country')
-      .eq('is_glamping_property', 'Yes')
-      .eq('is_open', 'Yes')
-      .eq('research_status', 'published')
-      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR);
+    const { data: properties, error } = await applyPublicMapCohortFilters(
+      supabase.from('all_glamping_properties').select('property_name, state, country')
+    );
 
     if (error) {
       console.error('Error fetching property count:', error);

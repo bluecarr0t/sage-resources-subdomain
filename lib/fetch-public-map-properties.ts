@@ -1,5 +1,5 @@
 import { createServerClient } from '@/lib/supabase';
-import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
+import { applyPublicMapCohortFilters } from '@/lib/public-map-cohort-filters';
 import type { SageProperty } from '@/lib/types/sage';
 
 /** Fields loaded by MapContext for /api/properties (map markers + sidebar count). */
@@ -12,17 +12,9 @@ export const PUBLIC_MAP_PROPERTY_FIELDS =
 export async function fetchPublicMapPropertyRows(): Promise<SageProperty[]> {
   const supabase = createServerClient();
 
-  let query = supabase
-    .from('all_glamping_properties')
-    .select(PUBLIC_MAP_PROPERTY_FIELDS)
-    .eq('is_glamping_property', 'Yes')
-    .eq('is_open', 'Yes')
-    .neq('is_open', 'Proposed Development')
-    .neq('is_open', 'Under Construction')
-    .neq('is_open', 'Closed')
-    .eq('research_status', 'published')
-    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-    .limit(5000);
+  let query = applyPublicMapCohortFilters(
+    supabase.from('all_glamping_properties').select(PUBLIC_MAP_PROPERTY_FIELDS)
+  ).limit(5000);
 
   const allData: SageProperty[] = [];
   let offset = 0;

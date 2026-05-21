@@ -4,8 +4,11 @@ import { getCache, setCache, hashCacheKey, logCacheMetrics } from '@/lib/redis';
 import { filterToPublicColumns, filterRequestedFieldsToPublic } from '@/lib/property-column-privacy';
 import {
   isExcludedLandOperatorForPublicMap,
-  PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR,
 } from '@/lib/glamping-land-operator-category';
+import {
+  applyPublicMapCohortFilters,
+  isExcludedPropertyTypeForPublicMap,
+} from '@/lib/public-map-cohort-filters';
 
 /**
  * API route for fetching glamping properties with caching
@@ -34,19 +37,9 @@ export async function GET(request: NextRequest) {
     const propertyId = searchParams.get('id');
     if (propertyId) {
       const supabase = createServerClient();
-      const { data: property, error } = await supabase
-        .from('all_glamping_properties')
-        .select('*')
-        .eq('id', propertyId)
-        .eq('is_glamping_property', 'Yes')
-        .eq('is_open', 'Yes')
-        .neq('is_open', 'Proposed Development')
-        .neq('is_open', 'Under Construction')
-        .neq('is_open', 'Temporarily closed')
-        .neq('is_open', 'Closed')
-        .eq('research_status', 'published')
-        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-        .single();
+      const { data: property, error } = await applyPublicMapCohortFilters(
+        supabase.from('all_glamping_properties').select('*').eq('id', propertyId)
+      ).single();
       
       if (error || !property) {
         return NextResponse.json(
@@ -55,7 +48,12 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      if (isExcludedLandOperatorForPublicMap((property as Record<string, unknown>).land_operator_category)) {
+      if (
+        isExcludedLandOperatorForPublicMap((property as Record<string, unknown>).land_operator_category) ||
+        isExcludedPropertyTypeForPublicMap(
+          (property as Record<string, unknown>).property_type as string | null | undefined
+        )
+      ) {
         return NextResponse.json(
           { success: false, error: 'Property not found' },
           { status: 404 }
@@ -189,15 +187,7 @@ async function fetchPropertiesFromDatabase(
   // Start query - apply filters BEFORE limit for better performance
   // Filter to only show glamping properties FIRST (uses index)
   // Operating properties only — exclude closed, under construction, and proposed pipeline rows
-  let query = supabase.from('all_glamping_properties')
-    .select('*')
-    .eq('is_glamping_property', 'Yes')
-    .eq('is_open', 'Yes')
-    .neq('is_open', 'Proposed Development')
-    .neq('is_open', 'Under Construction')
-    .neq('is_open', 'Closed')
-    .eq('research_status', 'published')
-    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR);
+  let query = applyPublicMapCohortFilters(supabase.from('all_glamping_properties').select('*'));
 
   // Filter by country
   if (filterCountry.length === 0) {

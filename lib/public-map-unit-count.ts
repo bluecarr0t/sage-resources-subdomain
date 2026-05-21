@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { createServerClient } from '@/lib/supabase';
-import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
+import { applyPublicMapCohortFilters } from '@/lib/public-map-cohort-filters';
 import { parseNum } from '@/lib/comps-v2/geo';
 
 const TABLE = 'all_glamping_properties';
@@ -18,17 +18,9 @@ function unitsFromRow(quantity_of_units: unknown): number {
 async function loadPublicMapGlampingUnitCount(): Promise<number> {
   const supabase = createServerClient();
 
-  let query = supabase
-    .from(TABLE)
-    .select('quantity_of_units')
-    .eq('is_glamping_property', 'Yes')
-    .eq('is_open', 'Yes')
-    .neq('is_open', 'Proposed Development')
-    .neq('is_open', 'Under Construction')
-    .neq('is_open', 'Closed')
-    .eq('research_status', 'published')
-    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-    .limit(5000);
+  let query = applyPublicMapCohortFilters(
+    supabase.from(TABLE).select('quantity_of_units')
+  ).limit(5000);
 
   let total = 0;
   let offset = 0;
