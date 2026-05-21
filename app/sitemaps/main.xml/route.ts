@@ -6,6 +6,10 @@ import { getAllUnitTypeSlugs } from '@/lib/unit-type-config';
 import { getMostRecentContentDate } from '@/lib/sitemap-dates';
 import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 import {
+  MAIN_SITEMAP_PAGE_PATHS,
+  getLocalesForMainSitemapPage,
+} from '@/lib/sitemap-main-pages';
+import {
   generateEnOnlyHreflangTags,
   generateHreflangTags,
 } from '@/lib/sitemap-hreflang';
@@ -21,17 +25,19 @@ export async function GET() {
   const contentLastmod = getMostRecentContentDate();
   const glampingLocales = getAvailableLocalesForContent('glamping');
 
-  // Generate main pages for all locales with hreflang
-  const mainPages = ['', '/guides', '/glossary', '/partners', '/map', '/sitemap'];
-  
-  for (const pagePath of mainPages) {
-    for (const locale of locales) {
+  // Hub pages: only list locales that return 200 (guides/glossary redirect non-en to /en)
+  for (const pagePath of MAIN_SITEMAP_PAGE_PATHS) {
+    const pageLocales = getLocalesForMainSitemapPage(pagePath);
+    const hreflangFn =
+      pageLocales.length === 1 ? generateEnOnlyHreflangTags : generateHreflangTags;
+
+    for (const locale of pageLocales) {
       const fullPath = `/${locale}${pagePath}`;
-      const hreflangs = generateHreflangTags(fullPath);
+      const hreflangs = hreflangFn(fullPath);
       const lastmod = contentLastmod;
       const priority = getMainPageSitemapPriority(pagePath);
       const changefreq = pagePath === '/partners' ? 'monthly' : 'weekly';
-      
+
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
     <lastmod>${lastmod}</lastmod>

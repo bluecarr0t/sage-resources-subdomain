@@ -6,6 +6,9 @@ import {
   SAGE_HQ_STREET_ADDRESS,
   getSageHqGoogleMapsUrl,
 } from "@/lib/sage-headquarters-location";
+import { generateSageContentAuthorSchema } from "@/lib/sage-content-author";
+
+export { generateSageContentAuthorSchema, generateSageGuideAuthorPerson } from "@/lib/sage-content-author";
 
 /** Sage HQ — reused anywhere a LocalBusiness/ProfessionalService needs a postal address */
 export const SAGE_HEADQUARTERS_POSTAL_ADDRESS = {
@@ -22,7 +25,7 @@ export interface FAQItem {
   answer: string;
 }
 
-export function generateOrganizationSchema(includeRating: boolean = true) {
+export function generateOrganizationSchema(includeRating: boolean = false) {
   const schema: any = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -291,21 +294,6 @@ export function extractHowToStepsFromGuide(guide: GuideContent): string[] | null
   return steps.length > 0 ? steps : null;
 }
 
-/** E-E-A-T: Person author for expert guides (worksFor Sage organization). */
-export function generateSageGuideAuthorPerson() {
-  return {
-    "@type": "Person",
-    name: "Sage Outdoor Advisory",
-    jobTitle: "Outdoor Hospitality Consultant",
-    url: "https://sageoutdooradvisory.com",
-    worksFor: {
-      "@type": "Organization",
-      name: "Sage Outdoor Advisory",
-      url: "https://sageoutdooradvisory.com",
-    },
-  };
-}
-
 export function generateArticleSchema(content: GuideContent) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const url = `${baseUrl}/en/guides/${content.slug}`;
@@ -319,7 +307,7 @@ export function generateArticleSchema(content: GuideContent) {
     "url": url,
     "datePublished": publishDate,
     "dateModified": content.lastModified || publishDate,
-    "author": generateSageGuideAuthorPerson(),
+    "author": generateSageContentAuthorSchema(),
     "publisher": {
       "@type": "Organization",
       "name": "Sage Outdoor Advisory",
@@ -376,11 +364,7 @@ export function generateLandingPageArticleSchema(content: LandingPageContent) {
     "url": url,
     "datePublished": publishDate,
     "dateModified": modifiedDate,
-    "author": {
-      "@type": "Organization",
-      "name": "Sage Outdoor Advisory",
-      "url": "https://sageoutdooradvisory.com"
-    },
+    "author": generateSageContentAuthorSchema(),
     "publisher": {
       "@type": "Organization",
       "name": "Sage Outdoor Advisory",
@@ -617,14 +601,6 @@ function buildMapSoftwareApplicationLd(
     operatingSystem: "Web",
     url,
     ...(options?.description ? { description: options.description } : {}),
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      ratingCount: "89",
-      reviewCount: "89",
-      bestRating: "5",
-      worstRating: "1",
-    },
     offers: {
       "@type": "Offer",
       price: "0",

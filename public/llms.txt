@@ -1,33 +1,25 @@
 # Sage Outdoor Advisory – Resources
 
-> Sage Outdoor Advisory's resources subdomain provides outdoor hospitality industry data, expert guides, and marketing landing pages. It hosts an interactive Glamping Map with 600+ properties across North America, 21+ guides on feasibility studies and appraisals, a glossary of 57+ industry terms, and service landing pages for glamping, RV resort, and campground feasibility studies and appraisals.
+> Outdoor hospitality data, expert guides, and property discovery. Interactive glamping map (1,266+ properties), 19+ guides, 57+ glossary terms, and feasibility/appraisal service pages.
 
 ## Key Pages
 
-- [Glamping Map](/map): Interactive map of glamping properties with filters by unit type, rate category, and location
-- [Guides](/guides): Expert guides on feasibility studies, appraisals, and outdoor hospitality
-- [Glossary](/glossary): Industry terms and definitions
-- [Partners](/partners): Partner organizations and resources
-- [Landing Pages](/landing/glamping-feasibility-study): Service landing pages for feasibility studies and appraisals
+- [Home](https://resources.sageoutdooradvisory.com/en): Resources hub
+- [Glamping Map](https://resources.sageoutdooradvisory.com/en/map): Interactive map with location, unit type, and rate filters
+- [Guides](https://resources.sageoutdooradvisory.com/en/guides): Feasibility, appraisal, and industry guides
+- [Glossary](https://resources.sageoutdooradvisory.com/en/glossary): Industry term definitions
+- [Partners](https://resources.sageoutdooradvisory.com/en/partners): Partner organizations
+- [Glamping Feasibility Study](https://resources.sageoutdooradvisory.com/en/landing/glamping-feasibility-study): Service overview
+- [Sitemap](https://resources.sageoutdooradvisory.com/sitemap.xml): Full URL index
 
 ## Services
 
 - Glamping feasibility studies
 - RV resort feasibility studies
 - Campground feasibility studies
-- Glamping appraisals
-- RV resort and campground appraisals
+- Glamping, RV resort, and campground appraisals
 
 ## Contact
 
 - Website: https://sageoutdooradvisory.com
 - Contact: https://sageoutdooradvisory.com/contact-us
-
-## Tech Stack
-
-- Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
-- Supabase (property data)
-- Google Maps (map display)
-- Vercel (hosting)

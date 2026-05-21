@@ -16,6 +16,8 @@ import {
   generateSpeakableSchema,
   generateReviewSchema,
 } from "@/lib/schema";
+import { SAGE_LANDING_TESTIMONIALS } from "@/lib/content-testimonials";
+import ContentAuthorByline from "@/components/ContentAuthorByline";
 import TableOfContents from "@/components/TableOfContents";
 import RelatedLandingPages from "@/components/RelatedLandingPages";
 import Footer from "./Footer";
@@ -40,7 +42,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
   const links = createLocaleLinks(locale);
   const pageCanonicalUrl = `https://resources.sageoutdooradvisory.com/${locale}/landing/${content.slug}`;
   // Generate structured data
-  const organizationSchema = generateOrganizationSchema();
+  const organizationSchema = generateOrganizationSchema(false);
   const localBusinessSchema = generateLocalBusinessSchema();
   const breadcrumbSchema = generateBreadcrumbSchema(content.slug, content.hero.headline);
   const serviceSchema = generateServiceSchema(content);
@@ -143,6 +145,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
             >
               {content.hero.ctaText}
             </Link>
+            <ContentAuthorByline lastUpdated={content.lastModified} className="mt-8 text-center" />
           </div>
         </div>
       </section>
@@ -275,25 +278,22 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
       {/* Testimonials Section */}
       {content.testimonials && content.testimonials.showSection && (
         <section className="py-16 bg-white">
-          {/* Review Schema for Testimonials */}
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(generateReviewSchema({
-              author: "Randy Knapp",
-              rating: 5,
-              reviewBody: "Sage's feasibility study was essential to the success of the first phases of development at our Margaritaville RV Resort in Auburndale. They continue to provide valuable market and financial insights for several of our other new projects. Their unparalleled knowledge of the industry and their unwavering commitment to their clients make them a true asset.",
-              datePublished: "2024-01-15"
-            })) }}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(generateReviewSchema({
-              author: "Bygnal Dutson",
-              rating: 5,
-              reviewBody: "Sage creates win-win scenarios for hoteliers and bankers or investors who want to get into the unconventional glamping space. Open Sky is currently in its second season of operations, in large part, thanks to the relationship with Sage. They provided a thorough and realistic appraisal of our glamping property, which in turn, allowed Open Sky to secure traditional bank funding for our pre-planned & designed build out.",
-              datePublished: "2024-06-01"
-            })) }}
-          />
+          {SAGE_LANDING_TESTIMONIALS.map((testimonial) => (
+            <script
+              key={testimonial.author}
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(
+                  generateReviewSchema({
+                    author: testimonial.author,
+                    rating: testimonial.rating,
+                    reviewBody: testimonial.reviewBody,
+                    datePublished: testimonial.datePublished,
+                  })
+                ),
+              }}
+            />
+          ))}
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
               Trusted by Industry Leaders
@@ -301,25 +301,22 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
             <p className="text-center text-gray-700 mb-8">
               See how Sage Outdoor Advisory has helped successful outdoor hospitality projects across the United States.
             </p>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-lg mb-8">
-              <blockquote className="text-lg text-gray-800 italic mb-4">
-                &ldquo;Sage&apos;s feasibility study was essential to the success of the first phases of development at our Margaritaville RV Resort in Auburndale. They continue to provide valuable market and financial insights for several of our other new projects. Their unparalleled knowledge of the industry and their unwavering commitment to their clients make them a true asset.&rdquo;
-              </blockquote>
-              <p className="text-gray-700 font-semibold">
-                — Randy Knapp, Owner – Margaritaville RV Resort, Auburndale FL
-              </p>
-              <p className="text-sm text-gray-600 mt-2">
-                Recipient of &apos;Top 10&apos; Awards from USA Today, Campendium, RV Share and Traveler&apos;s Choice
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-lg mb-8">
-              <blockquote className="text-lg text-gray-800 italic mb-4">
-                &ldquo;Sage creates win-win scenarios for hoteliers and bankers or investors who want to get into the unconventional glamping space. Open Sky is currently in its second season of operations, in large part, thanks to the relationship with Sage. They provided a thorough and realistic appraisal of our glamping property, which in turn, allowed Open Sky to secure traditional bank funding for our pre-planned & designed build out.&rdquo;
-              </blockquote>
-              <p className="text-gray-700 font-semibold">
-                — Bygnal Dutson, Founder of Open Sky, Zion, UT
-              </p>
-            </div>
+            {SAGE_LANDING_TESTIMONIALS.map((testimonial) => (
+              <div
+                key={testimonial.author}
+                className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-lg mb-8"
+              >
+                <blockquote className="text-lg text-gray-800 italic mb-4">
+                  &ldquo;{testimonial.reviewBody}&rdquo;
+                </blockquote>
+                <p className="text-gray-700 font-semibold">
+                  — {testimonial.author}, {testimonial.role}
+                </p>
+                {testimonial.footnote ? (
+                  <p className="text-sm text-gray-600 mt-2">{testimonial.footnote}</p>
+                ) : null}
+              </div>
+            ))}
             <div className="text-center">
               <Link
                 href={content.testimonials.ctaLink || "https://sageoutdooradvisory.com/clients/"}

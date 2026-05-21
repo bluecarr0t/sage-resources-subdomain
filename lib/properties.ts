@@ -59,10 +59,14 @@ export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
 }
 
 /** Published property slugs that pass index tier gate (excludes tier C thin pages). */
-export async function getIndexedPropertySlugEntries(): Promise<PropertySlugIndexEntry[]> {
+export async function getIndexedPropertySlugEntries(
+  fallbackLastmod?: string
+): Promise<PropertySlugIndexEntry[]> {
   try {
     const anchors = await fetchPublishedPropertyAnchors();
-    return buildPublishedPropertySlugIndex(anchors);
+    const { getMostRecentContentDate } = await import('@/lib/sitemap-dates');
+    const fallback = fallbackLastmod ?? getMostRecentContentDate();
+    return buildPublishedPropertySlugIndex(anchors, fallback);
   } catch (error) {
     console.error('Error in getIndexedPropertySlugEntries:', error);
     return [];

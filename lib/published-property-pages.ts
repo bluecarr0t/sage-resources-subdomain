@@ -24,12 +24,44 @@ const PAGE_SIZE = 1000;
 export type PropertyAnchorRow = PropertyAnchorSeoFields & {
   id: number;
   property_id?: string | null;
+  updated_at?: string | null;
 };
 
 export type PropertySlugIndexEntry = {
   slug: string;
   tier: PropertyIndexTier;
+  /** ISO 8601 for sitemap lastmod */
+  lastmod: string;
 };
+
+function dedupeAnchorsForPublicPages(rows: PropertyAnchorRow[]): PropertyAnchorRow[] {
+  const byKey = new Map<string, PropertyAnchorRow>();
+
+  for (const row of rows) {
+    const key = propertyListGroupKey(row);
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, row);
+      continue;
+    }
+
+    const rowUpdated = row.updated_at ? new Date(row.updated_at).getTime() : 0;
+    const existingUpdated = existing.updated_at ? new Date(existing.updated_at).getTime() : 0;
+    const latestUpdated =
+      rowUpdated > existingUpdated ? row.updated_at : existing.updated_at;
+
+    const pickRow = Number(row.id) < Number(existing.id) ? row : existing;
+    byKey.set(key, { ...pickRow, updated_at: latestUpdated ?? pickRow.updated_at });
+  }
+
+  return [...byKey.values()];
+}
+
+function formatLastmod(iso: string | null | undefined, fallback: string): string {
+  if (!iso) return fallback;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? fallback : d.toISOString();
+}
 
 /** Resolve URL slug for a published anchor row; disambiguate collisions when slug column is empty. */
 export function resolvePublicSlugForAnchor(
@@ -59,13 +91,17 @@ export function resolvePublicSlugForAnchor(
 }
 
 /** One slug per published logical property (matches admin list anchor grouping). */
-export function buildPublishedPropertySlugList(anchors: PropertyAnchorRow[]): string[] {
-  return buildPublishedPropertySlugIndex(anchors).map((e) => e.slug);
+export function buildPublishedPropertySlugList(
+  anchors: PropertyAnchorRow[],
+  fallbackLastmod = new Date().toISOString()
+): string[] {
+  return buildPublishedPropertySlugIndex(anchors, fallbackLastmod).map((e) => e.slug);
 }
 
 /** Slugs with index tier for sitemap and robots metadata. */
 export function buildPublishedPropertySlugIndex(
-  anchors: PropertyAnchorRow[]
+  anchors: PropertyAnchorRow[],
+  fallbackLastmod: string
 ): PropertySlugIndexEntry[] {
   const usedSlugs = new Set<string>();
   const entries: PropertySlugIndexEntry[] = [];
@@ -77,6 +113,7 @@ export function buildPublishedPropertySlugIndex(
     entries.push({
       slug,
       tier: evaluatePropertyIndexTier(anchor),
+      lastmod: formatLastmod(anchor.updated_at, fallbackLastmod),
     });
   }
 
@@ -94,7 +131,7 @@ export async function fetchPublishedPropertyAnchors(): Promise<PropertyAnchorRow
     const { data, error } = await supabase
       .from(TABLE)
       .select(
-        'id, property_name, slug, property_id, city, state, description, lat, lon, rate_avg_retail_daily_rate, brand_id, url'
+        'id, property_name, slug, property_id, city, state, description, lat, lon, rate_avg_retail_daily_rate, brand_id, url, updated_at'
       )
       .eq('research_status', PUBLISHED_RESEARCH_STATUS)
       .not('property_name', 'is', null)
@@ -111,7 +148,7 @@ export async function fetchPublishedPropertyAnchors(): Promise<PropertyAnchorRow
     from += PAGE_SIZE;
   }
 
-  return dedupeRowsToPropertyAnchors(all) as PropertyAnchorRow[];
+  return dedupeAnchorsForPublicPages(all as PropertyAnchorRow[]);
 }
 
 export function parseLegacyGroupKey(key: string): { name: string; city: string; state: string } | null {

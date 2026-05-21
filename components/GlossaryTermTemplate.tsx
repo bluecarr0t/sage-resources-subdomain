@@ -18,6 +18,7 @@ import Footer from './Footer';
 import FloatingHeader from './FloatingHeader';
 import { EditorialCtaBand } from '@/components/editorial/EditorialCtaBand';
 import { GlossaryEnglishNotice } from '@/components/glossary/GlossaryEnglishNotice';
+import ContentAuthorByline from '@/components/ContentAuthorByline';
 import {
   EditorialPageShell,
   EDITORIAL_BODY_CLASS,
@@ -118,6 +119,7 @@ export default async function GlossaryTermTemplate({
             <h1 className={`mt-3 ${EDITORIAL_GUIDE_TITLE_CLASS}`}>
               {tPage('title', { article: getArticle(term.term), term: term.term })}
             </h1>
+            <ContentAuthorByline className="mt-6" />
           </header>
 
           <div className="flex flex-col gap-12 lg:flex-row">

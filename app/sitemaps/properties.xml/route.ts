@@ -11,13 +11,14 @@ const baseUrl = "https://resources.sageoutdooradvisory.com";
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const contentFallback = getMostRecentContentDate();
   const [propertyEntries, nationalParkSlugs, maxPropertyUpdated] = await Promise.all([
-    getIndexedPropertySlugEntries(),
+    getIndexedPropertySlugEntries(contentFallback),
     getAllNationalParkSlugs(),
     getMaxPropertyUpdatedAt(),
   ]);
   const urls: string[] = [];
-  const defaultDate = maxPropertyUpdated ?? getMostRecentContentDate();
+  const nationalParkLastmod = maxPropertyUpdated ?? contentFallback;
   const propertyLocales = getAvailableLocalesForContent('property');
 
   for (const item of propertyEntries) {
@@ -28,7 +29,7 @@ export async function GET() {
 
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
-    <lastmod>${defaultDate}</lastmod>
+    <lastmod>${item.lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>${priority}</priority>
 ${hreflangs}
@@ -43,7 +44,7 @@ ${hreflangs}
 
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
-    <lastmod>${defaultDate}</lastmod>
+    <lastmod>${nationalParkLastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
 ${hreflangs}

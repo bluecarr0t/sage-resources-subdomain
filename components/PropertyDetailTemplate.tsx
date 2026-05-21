@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { SageProperty } from '@/lib/types/sage';
 import { parseCoordinates } from '@/lib/types/sage';
@@ -43,6 +43,10 @@ interface PropertyDetailTemplateProps {
   mapCoordinates?: [number, number] | null;
   /** Linked public brand page when property has brand_id */
   brandPage?: { slug: string; displayName: string } | null;
+  /** When true, header/FAQs are rendered server-side in PropertyDetailServerSummary */
+  serverSummaryRendered?: boolean;
+  /** SSR property overview (pass from server page) */
+  serverSummary?: ReactNode;
 }
 
 function getGooglePhotoUrl(
@@ -112,6 +116,8 @@ export default function PropertyDetailTemplate({
   propertyFaqs = [],
   mapCoordinates: mapCoordinatesProp = null,
   brandPage = null,
+  serverSummaryRendered = false,
+  serverSummary = null,
 }: PropertyDetailTemplateProps) {
   const firstProperty = properties[0];
   const links = useMemo(() => createLocaleLinks(locale), [locale]);
@@ -257,16 +263,22 @@ export default function PropertyDetailTemplate({
           <span className="text-neutral-700">{propertyName}</span>
         </nav>
 
-        <h1 className={EDITORIAL_H1_CLASS}>{propertyName}</h1>
+        {serverSummary}
 
-        {location ? (
-          <p className="mt-3 text-sm font-light leading-relaxed text-neutral-600">{location}</p>
-        ) : null}
+        {!serverSummaryRendered ? (
+          <>
+            <h1 className={EDITORIAL_H1_CLASS}>{propertyName}</h1>
 
-        {firstProperty.address && fullAddress ? (
-          <p className="mt-1 max-w-xl text-[11px] font-light leading-relaxed text-neutral-500">
-            {fullAddress}
-          </p>
+            {location ? (
+              <p className="mt-3 text-sm font-light leading-relaxed text-neutral-600">{location}</p>
+            ) : null}
+
+            {firstProperty.address && fullAddress ? (
+              <p className="mt-1 max-w-xl text-[11px] font-light leading-relaxed text-neutral-500">
+                {fullAddress}
+              </p>
+            ) : null}
+          </>
         ) : null}
 
         {showGoogleReviews && (
@@ -480,7 +492,7 @@ export default function PropertyDetailTemplate({
               </dd>
             </div>
 
-            {propertyFaqs.length > 0 ? (
+            {!serverSummaryRendered && propertyFaqs.length > 0 ? (
               <div aria-labelledby="property-faq-heading">
                 <dt id="property-faq-heading" className={EDITORIAL_SECTION_LABEL_CLASS}>
                   Questions

@@ -21,6 +21,7 @@ import {
   extractHowToStepsFromGuide,
   generateItemListSchema,
 } from '@/lib/schema';
+import ContentAuthorByline from '@/components/ContentAuthorByline';
 import RelatedGuides from './RelatedGuides';
 import Footer from './Footer';
 import FloatingHeader from './FloatingHeader';
@@ -59,7 +60,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
   const links = createLocaleLinks(locale);
   const pageCanonicalUrl = `https://resources.sageoutdooradvisory.com/${locale}/guides/${content.slug}`;
 
-  const organizationSchema = generateOrganizationSchema();
+  const organizationSchema = generateOrganizationSchema(false);
   const breadcrumbSchema = generateGuideBreadcrumbSchema(content.slug, content.hero.headline);
   const articleSchema = generateArticleSchema(content);
   const faqSchema = content.faqs ? generateFAQSchema(content.faqs) : null;
@@ -229,6 +230,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
                 {content.hero.ctaText}
               </a>
             ) : null}
+            <ContentAuthorByline lastUpdated={content.lastModified} className="mt-6" />
           </header>
 
           {content.hero.backgroundImage ? (

@@ -1,4 +1,5 @@
 import { GlossaryTerm } from "./glossary/index";
+import { generateSageContentAuthorSchema } from "@/lib/sage-content-author";
 
 interface FAQItem {
   question: string;
@@ -16,7 +17,8 @@ export function generateDefinitionSchema(term: GlossaryTerm) {
       "name": "Sage Outdoor Advisory Glossary",
       "url": "https://resources.sageoutdooradvisory.com/glossary"
     },
-    "url": `https://resources.sageoutdooradvisory.com/glossary/${term.slug}`
+    "url": `https://resources.sageoutdooradvisory.com/en/glossary/${term.slug}`,
+    "author": generateSageContentAuthorSchema(),
   };
   
   // Add image if available
