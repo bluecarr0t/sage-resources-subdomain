@@ -40,7 +40,7 @@ export function classifySeoPageSection(pathname: string): SeoPageSection {
   if (path.startsWith('/glossary/')) return 'glossary';
   if (path === '/glossary') return 'glossary';
   if (path.startsWith('/property/')) return 'property';
-  if (path.startsWith('/brand/')) return 'brand';
+  if (path === '/brands' || path.startsWith('/brand/')) return 'brand';
   if (path.startsWith('/glamping/')) return 'glamping_hub';
   if (path === '/glamping-market-overview' || path.startsWith('/glamping-market-overview')) {
     return 'market_overview';

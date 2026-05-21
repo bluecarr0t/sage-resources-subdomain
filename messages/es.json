@@ -2048,8 +2048,9 @@
     }
   },
   "notFound": {
-    "title": "Página no encontrada",
-    "description": "La página que buscas no existe o ha sido movida.",
+    "eyebrow": "404 — Fuera del mapa",
+    "title": "Este sendero no existe",
+    "description": "La página que buscas ya hizo check-out. Nuestra investigación sobre glamping real sigue muy disponible.",
     "homeLink": "Volver al inicio",
     "mapLink": "Explorar mapa de glamping"
   },

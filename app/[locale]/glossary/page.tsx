@@ -171,7 +171,12 @@ export default async function GlossaryPage({ params }: PageProps) {
   );
 
   return (
-    <EditorialMarketingLayout locale={locale} title={t('title')} subtitle={t('subtitle')}>
+    <EditorialMarketingLayout
+      locale={locale}
+      title={t('title')}
+      subtitle={t('subtitle')}
+      solidPageBackground
+    >
       <GlossaryEnglishNotice
         locale={locale}
         message={t('englishNotice.message')}

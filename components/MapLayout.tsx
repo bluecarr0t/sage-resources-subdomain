@@ -6,7 +6,6 @@ import { createLocaleLinks } from '@/lib/locale-links';
 import {
   EDITORIAL_MAP_SIDEBAR_H1_CLASS,
   EDITORIAL_LINK_CLASS,
-  EDITORIAL_SIDEBAR_BG_STYLE,
 } from '@/components/editorial/EditorialPageShell';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
@@ -156,20 +155,18 @@ export default function MapLayout({
       {embedMode ? (
         <aside
           id="map-embed-filters"
-          className={`fixed inset-y-0 left-0 z-40 flex w-[min(100%,20rem)] flex-col overflow-y-auto border-r border-sage-200/80 text-neutral-900 shadow-xl transition-transform duration-300 md:w-80 lg:w-96 ${
+          className={`fixed inset-y-0 left-0 z-40 flex w-[min(100%,20rem)] flex-col overflow-y-auto border-r border-sage-200/80 bg-[#faf9f3] text-neutral-900 shadow-xl transition-transform duration-300 md:w-80 lg:w-96 ${
             embedPanelOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none'
           }`}
-          style={EDITORIAL_SIDEBAR_BG_STYLE}
           aria-hidden={!embedPanelOpen}
         >
           {filterPanel}
         </aside>
       ) : (
         <aside
-          className={`relative z-20 flex w-full flex-col overflow-y-auto border-r border-sage-200/80 text-neutral-900 transition-transform duration-300 md:max-h-screen md:w-80 lg:w-96 ${
+          className={`relative z-20 flex w-full flex-col overflow-y-auto border-r border-sage-200/80 bg-[#faf9f3] text-neutral-900 transition-transform duration-300 md:max-h-screen md:w-80 lg:w-96 ${
             isFullscreen ? 'hidden md:flex' : 'flex'
           }`}
-          style={EDITORIAL_SIDEBAR_BG_STYLE}
         >
           {filterPanel}
         </aside>

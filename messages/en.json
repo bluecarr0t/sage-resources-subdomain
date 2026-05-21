@@ -454,8 +454,9 @@
     }
   },
   "notFound": {
-    "title": "Page Not Found",
-    "description": "The page you're looking for doesn't exist or has been moved.",
+    "eyebrow": "404 — Off the grid",
+    "title": "This trail doesn't exist",
+    "description": "The page you're looking for checked out early. Our research on real glamping locations is still very much on the books.",
     "homeLink": "Back to Home",
     "mapLink": "Explore Glamping Map"
   },

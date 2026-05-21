@@ -704,6 +704,9 @@ function ComparablesPageContent() {
               <Download className="w-4 h-4 mr-1.5" />
               Export Excel
             </Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push('/admin/brand-assignments')}>
+              Brand assignments
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => router.push('/glamping-market-overview')}>
               Analytics
             </Button>

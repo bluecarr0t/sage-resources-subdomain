@@ -16,6 +16,7 @@ describe('stripLocaleFromPathname', () => {
     expect(stripLocaleFromPathname('/glamping-market-overview')).toBe(
       '/glamping-market-overview'
     );
+    expect(stripLocaleFromPathname('/brands')).toBe('/brands');
   });
 });
 
@@ -28,6 +29,7 @@ describe('classifySeoPageSection', () => {
     expect(classifySeoPageSection('/en/guides/feasibility-studies-complete-guide')).toBe('guides');
     expect(classifySeoPageSection('/en/glossary/adr')).toBe('glossary');
     expect(classifySeoPageSection('/en/property/some-resort')).toBe('property');
+    expect(classifySeoPageSection('/brands')).toBe('brand');
     expect(classifySeoPageSection('/en/brand/under-canvas')).toBe('brand');
     expect(classifySeoPageSection('/en/glamping/yurts')).toBe('glamping_hub');
     expect(classifySeoPageSection('/glamping-market-overview')).toBe('market_overview');

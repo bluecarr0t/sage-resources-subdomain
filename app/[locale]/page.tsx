@@ -250,10 +250,10 @@ export default async function HomePage({ params }: PageProps) {
       />
 
       <GoogleMapsProvider>
-        <EditorialPageShell footer={null}>
+        <EditorialPageShell footer={null} topoOpacity={3}>
           <FloatingHeader locale={locale} showFullNav showSpacer={false} />
 
-          <section className="relative min-h-[min(100svh,52rem)] w-full">
+          <section className="relative min-h-[min(100svh,52rem)] w-full lg:min-h-[100svh] lg:min-h-[100dvh]">
             <Image
               src={HOME_HERO_IMAGE_URL}
               alt={HOME_HERO_IMAGE_ALT}
@@ -268,7 +268,7 @@ export default async function HomePage({ params }: PageProps) {
               className="absolute inset-0 bg-gradient-to-br from-neutral-900/55 via-sage-900/45 to-sage-800/50"
               aria-hidden
             />
-            <div className="relative z-10 flex min-h-[min(100svh,52rem)] flex-col items-center justify-center px-4 pb-20 pt-28 sm:pt-36">
+            <div className="relative z-10 flex min-h-[min(100svh,52rem)] flex-col items-center justify-center px-4 pb-20 pt-28 sm:pt-36 lg:min-h-[100svh] lg:min-h-[100dvh]">
               <div className="mx-auto w-full max-w-4xl text-center text-white">
                 <h1 className="text-4xl font-bold tracking-tight drop-shadow-md sm:text-5xl md:text-6xl lg:text-7xl">
                   {t('hero.headline')}

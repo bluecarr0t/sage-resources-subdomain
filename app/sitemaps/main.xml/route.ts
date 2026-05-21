@@ -92,6 +92,13 @@ ${hreflangs}
 
   // Glamping market overview — original research (English only, priority 0.9)
   urls.push(`  <url>
+    <loc>${baseUrl}/brands</loc>
+    <lastmod>${contentLastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+${generateEnOnlyHreflangTags('/brands')}
+  </url>
+  <url>
     <loc>${baseUrl}/glamping-market-overview</loc>
     <lastmod>${contentLastmod}</lastmod>
     <changefreq>weekly</changefreq>

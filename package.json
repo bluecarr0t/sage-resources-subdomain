@@ -20,6 +20,8 @@
     "benchmark:rv-industry-overview": "tsx scripts/benchmark-rv-industry-overview.ts",
     "analyze:cce-component-scope": "tsx scripts/analyze-cce-component-outdoor-scope.ts",
     "analyze:glamping-brands": "tsx scripts/analyze-glamping-brand-chains.ts",
+    "audit:brands": "tsx scripts/audit-glamping-brand-assignments.ts",
+    "audit:brands:apply": "tsx scripts/audit-glamping-brand-assignments.ts --apply",
     "add:wander-camp-locations": "tsx scripts/add-wander-camp-missing-locations.ts",
     "add:timberline-locations": "tsx scripts/add-timberline-glamping-missing-locations.ts",
     "add:autocamp-locations": "tsx scripts/add-autocamp-missing-locations.ts",

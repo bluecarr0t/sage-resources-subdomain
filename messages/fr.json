@@ -2304,8 +2304,9 @@
     }
   },
   "notFound": {
-    "title": "Page non trouvée",
-    "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "eyebrow": "404 — Hors réseau",
+    "title": "Ce sentier n'existe pas",
+    "description": "La page que vous cherchez a déjà plié bagage. Nos recherches sur de vrais sites de glamping sont toujours bien réservées.",
     "homeLink": "Retour à l'accueil",
     "mapLink": "Explorer la carte de glamping"
   },

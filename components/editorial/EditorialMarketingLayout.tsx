@@ -16,6 +16,10 @@ type EditorialMarketingLayoutProps = {
   /** Use full site footer with links; default minimal shell footer */
   footerVariant?: 'full' | 'minimal';
   showFullNav?: boolean;
+  /** Topo line-art opacity (e.g. 2.5 = 2.5%). Omit for default gradient background. */
+  topoOpacity?: number;
+  /** Solid cream background with no topo image */
+  solidPageBackground?: boolean;
 };
 
 /**
@@ -28,9 +32,15 @@ export function EditorialMarketingLayout({
   children,
   footerVariant = 'full',
   showFullNav = true,
+  topoOpacity,
+  solidPageBackground,
 }: EditorialMarketingLayoutProps) {
   return (
-    <EditorialPageShell footer={footerVariant === 'minimal' ? undefined : null}>
+    <EditorialPageShell
+      footer={footerVariant === 'minimal' ? undefined : null}
+      topoOpacity={topoOpacity}
+      solidPageBackground={solidPageBackground}
+    >
       <FloatingHeader locale={locale} showFullNav={showFullNav} showSpacer={false} />
       <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>
         <header className="mb-12 border-b border-sage-200/80 pb-10">

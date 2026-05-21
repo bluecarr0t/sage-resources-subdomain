@@ -117,6 +117,12 @@ export default function BrandDetailTemplate({
               </Link>
             </li>
             <li aria-hidden="true">/</li>
+            <li>
+              <Link href="/brands" className={EDITORIAL_LINK_CLASS}>
+                Brands
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
             <li className="text-neutral-800">{brand.display_name}</li>
           </ol>
         </nav>

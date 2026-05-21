@@ -1,10 +1,11 @@
 /**
  * Public brand listing pages: `/[locale]/brand/[slug]`
  */
+import { unstable_noStore as noStore } from 'next/cache';
 import { createServerClient } from '@/lib/supabase';
 import {
-  dedupeRowsToPropertyAnchors,
-  propertyListGroupKey,
+  dedupeRowsToOutpostAnchors,
+  propertyOutpostGroupKey,
 } from '@/lib/admin/glamping-list-anchor-key';
 import { PUBLISHED_RESEARCH_STATUS, resolvePublicSlugForAnchor } from '@/lib/published-property-pages';
 import { parseCoordinates, type SageProperty } from '@/lib/types/sage';
@@ -149,17 +150,17 @@ async function fetchPublishedRowsForBrandIds(brandIds: string[]): Promise<SagePr
 }
 
 function buildListingsFromRows(rows: SageProperty[]): BrandPropertyListing[] {
-  const anchors = dedupeRowsToPropertyAnchors(
+  const anchors = dedupeRowsToOutpostAnchors(
     rows as Array<SageProperty & Record<string, unknown>>
   ) as SageProperty[];
   const usedSlugs = new Set<string>();
   const listings: BrandPropertyListing[] = [];
 
   for (const anchor of anchors) {
+    const groupKey = propertyOutpostGroupKey(anchor);
+    const groupRows = rows.filter((r) => propertyOutpostGroupKey(r) === groupKey);
     const publicSlug = resolvePublicSlugForAnchor(anchor, usedSlugs);
     usedSlugs.add(publicSlug);
-    const groupKey = propertyListGroupKey(anchor);
-    const groupRows = rows.filter((r) => propertyListGroupKey(r) === groupKey);
     const unitTypes = [
       ...new Set(
         groupRows
@@ -213,6 +214,8 @@ export async function getBrandPageData(slug: string): Promise<{
   mapPins: BrandMapPin[];
   includeSubBrandRollup: boolean;
 } | null> {
+  // Avoid stale empty Supabase responses cached before brand backfill/publish.
+  noStore();
   const allBrands = await fetchAllBrands();
   const brand = allBrands.find((b) => b.slug === slug.trim());
   if (!brand) return null;
@@ -273,6 +276,7 @@ export async function getBrandPageData(slug: string): Promise<{
 
 /** Brand slugs that have at least one published property (rollup-aware). */
 export async function getAllPublicBrandSlugs(): Promise<Array<{ slug: string }>> {
+  noStore();
   const allBrands = await fetchAllBrands();
   const slugs: string[] = [];
 

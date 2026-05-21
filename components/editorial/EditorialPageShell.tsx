@@ -24,19 +24,45 @@ export const EDITORIAL_METRIC_COMPACT_CLASS =
 type EditorialPageShellProps = {
   children: ReactNode;
   footer?: ReactNode;
+  /** Solid cream page background with no topo image */
+  solidPageBackground?: boolean;
+  /** When set (e.g. 5), topo line art is rendered at this opacity over #faf9f3 */
+  topoOpacity?: number;
 };
 
 /**
  * Full-page editorial shell shared with glamping market overview pages:
  * warm topo background, centered column, optional footer.
  */
-export function EditorialPageShell({ children, footer }: EditorialPageShellProps) {
+export function EditorialPageShell({
+  children,
+  footer,
+  solidPageBackground = false,
+  topoOpacity,
+}: EditorialPageShellProps) {
+  const useTopoLayer = topoOpacity != null && topoOpacity >= 0 && topoOpacity <= 100;
+  const useSolidCream = solidPageBackground || useTopoLayer;
+
   return (
     <div
-      className="relative flex min-h-screen flex-col bg-cover bg-center bg-no-repeat text-neutral-900"
-      style={EDITORIAL_PAGE_BG_STYLE}
+      className={`relative flex min-h-screen flex-col text-neutral-900 ${
+        useSolidCream ? 'bg-[#faf9f3]' : 'bg-cover bg-center bg-no-repeat'
+      }`}
+      style={useSolidCream ? undefined : EDITORIAL_PAGE_BG_STYLE}
     >
-      {children}
+      {useTopoLayer ? (
+        <div
+          className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${EDITORIAL_TOPO_BG_URL})`,
+            opacity: topoOpacity / 100,
+          }}
+          aria-hidden
+        />
+      ) : null}
+      <div className={useSolidCream ? 'relative z-10 flex flex-col flex-1' : 'contents'}>
+        {children}
+      </div>
       {footer ?? (
         <footer className="relative z-10 mt-auto w-full py-6 text-center">
           <div className="mx-auto max-w-4xl px-6">

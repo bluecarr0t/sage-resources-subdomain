@@ -1,6 +1,8 @@
 import {
+  dedupeRowsToOutpostAnchors,
   dedupeRowsToPropertyAnchors,
   propertyListGroupKey,
+  propertyOutpostGroupKey,
 } from '@/lib/admin/glamping-list-anchor-key';
 
 describe('glamping-list-anchor-key', () => {
@@ -19,5 +21,63 @@ describe('glamping-list-anchor-key', () => {
     ]);
     expect(rows).toHaveLength(1);
     expect(rows[0]?.id).toBe(11582);
+  });
+});
+
+describe('propertyOutpostGroupKey / dedupeRowsToOutpostAnchors', () => {
+  it('collapses unit-level property_id rows for the same outpost', () => {
+    const rows = [
+      {
+        id: 11501,
+        property_id: 'unit-c',
+        slug: 'timberline-glamping-at-birmingham-standard-safari-tent',
+        property_name: 'Timberline Glamping at Birmingham',
+        city: 'Birmingham',
+        state: 'AL',
+      },
+      {
+        id: 11499,
+        property_id: 'unit-a',
+        slug: 'timberline-glamping-at-birmingham-deluxe-safari-tent',
+        property_name: 'Timberline Glamping at Birmingham',
+        city: 'Birmingham',
+        state: 'AL',
+      },
+      {
+        id: 11500,
+        property_id: 'unit-b',
+        slug: 'timberline-glamping-at-birmingham-double-safari-tent',
+        property_name: 'Timberline Glamping at Birmingham',
+        city: 'Birmingham',
+        state: 'AL',
+      },
+    ];
+
+    expect(propertyOutpostGroupKey(rows[0])).toBe(
+      'legacy:timberline glamping at birmingham|birmingham|al'
+    );
+    const anchors = dedupeRowsToOutpostAnchors(rows);
+    expect(anchors).toHaveLength(1);
+    expect(anchors[0]?.id).toBe(11499);
+  });
+
+  it('keeps separate outposts with different names', () => {
+    const anchors = dedupeRowsToOutpostAnchors([
+      {
+        id: 1,
+        property_id: 'a',
+        property_name: 'Timberline Glamping at Birmingham',
+        city: 'Birmingham',
+        state: 'AL',
+      },
+      {
+        id: 2,
+        property_id: 'b',
+        property_name: 'Timberline Glamping at Cheaha',
+        city: 'Lineville',
+        state: 'AL',
+      },
+    ]);
+    expect(anchors).toHaveLength(2);
   });
 });

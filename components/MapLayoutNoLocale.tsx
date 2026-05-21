@@ -4,7 +4,6 @@ import { useMapContext } from '@/components/MapContext';
 import {
   EDITORIAL_MAP_SIDEBAR_H1_CLASS,
   EDITORIAL_LINK_CLASS,
-  EDITORIAL_SIDEBAR_BG_STYLE,
 } from '@/components/editorial/EditorialPageShell';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -26,10 +25,9 @@ export default function MapLayoutNoLocale() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-neutral-100/40 md:flex-row">
       <aside
-        className={`relative z-20 flex w-full flex-col overflow-y-auto border-r border-sage-200/80 text-neutral-900 transition-transform duration-300 md:max-h-screen md:w-80 lg:w-96 ${
+        className={`relative z-20 flex w-full flex-col overflow-y-auto border-r border-sage-200/80 bg-[#faf9f3] text-neutral-900 transition-transform duration-300 md:max-h-screen md:w-80 lg:w-96 ${
           isFullscreen ? 'hidden md:flex' : 'flex'
         }`}
-        style={EDITORIAL_SIDEBAR_BG_STYLE}
       >
         <div className="border-b border-sage-200/80 px-4 pb-3 pt-4 md:px-5 md:pt-5">
           <nav aria-label="Breadcrumb" className="mb-3">

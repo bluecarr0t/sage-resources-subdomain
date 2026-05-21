@@ -88,7 +88,7 @@ export default async function GlossaryTermTemplate({
         />
       ) : null}
 
-      <EditorialPageShell footer={null}>
+      <EditorialPageShell footer={null} solidPageBackground>
         <FloatingHeader locale={locale} showFullNav showSpacer={false} />
 
         <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>

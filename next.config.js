@@ -28,6 +28,11 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/brand',
+        destination: '/brands',
+        permanent: true,
+      },
+      {
         source: '/glamping-industry',
         destination: '/glamping-market-overview',
         permanent: true,

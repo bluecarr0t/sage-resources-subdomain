@@ -178,6 +178,7 @@ const excludedRoutes = [
   'landing',
   'property',
   'brand',
+  'brands',
   'login',
   'auth',
   'privacy-policy',
@@ -220,9 +221,27 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    // Locale-free overview pages (same pattern as glamping-market-overview)
+    if (pathname === '/brands') {
+      return NextResponse.next();
+    }
+
+    if (pathname === '/brand') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/brands';
+      return NextResponse.redirect(url, 301);
+    }
+
     // Legacy SEO: indexed duplicates without /{locale}/ prefix → canonical /en/... (query preserved)
     if (!pathnameHasLocale) {
-      const legacyResource = pathname.match(/^\/(guides|glossary|property|brand|partners|map)(\/.*)?$/);
+      const legacyBrandDetail = pathname.match(/^\/brand\/(.+)$/);
+      if (legacyBrandDetail) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/en${pathname}`;
+        return NextResponse.redirect(url, 301);
+      }
+
+      const legacyResource = pathname.match(/^\/(guides|glossary|property|partners|map)(\/.*)?$/);
       if (legacyResource) {
         const url = request.nextUrl.clone();
         url.pathname = `/en${pathname}`;
@@ -337,7 +356,22 @@ export async function middleware(request: NextRequest) {
       pathname.includes('.') // Skip static files (images, etc.)
     ) {
         // For sitemap, robots.txt, login, admin, and legal pages, skip i18n middleware entirely
-        if (pathname === '/sitemap.xml' || pathname.startsWith('/sitemaps/') || pathname === '/robots.txt' || pathname === '/llms.txt' || pathname === '/login' || pathname.startsWith('/auth') || pathname.startsWith('/admin') || pathname === '/privacy-policy' || pathname === '/terms-of-service' || pathname === '/glamping-market-overview' || pathname === '/glamping-market-snapshot') {
+        if (
+          pathname.startsWith('/images/') ||
+          pathname.startsWith('/logos/') ||
+          pathname === '/sitemap.xml' ||
+          pathname.startsWith('/sitemaps/') ||
+          pathname === '/robots.txt' ||
+          pathname === '/llms.txt' ||
+          pathname === '/login' ||
+          pathname.startsWith('/auth') ||
+          pathname.startsWith('/admin') ||
+          pathname === '/privacy-policy' ||
+          pathname === '/terms-of-service' ||
+          pathname === '/glamping-market-overview' ||
+          pathname === '/glamping-market-snapshot' ||
+          pathname === '/brands'
+        ) {
           return NextResponse.next();
         }
       // Still apply i18n middleware for other excluded routes

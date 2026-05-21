@@ -178,7 +178,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
         />
       ) : null}
 
-      <EditorialPageShell footer={null}>
+      <EditorialPageShell footer={null} solidPageBackground>
         <FloatingHeader locale={locale} showFullNav showSpacer={false} />
 
         <button

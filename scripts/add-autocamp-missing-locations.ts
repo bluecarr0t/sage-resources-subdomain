@@ -2,9 +2,10 @@
 /**
  * Insert AutoCamp properties from autocamp.com that are missing in `all_glamping_properties`.
  *
- * Researched May 2026: official locations index (autocamp.com/locations) includes
- * AutoCamp Sonoma (Guerneville, CA) as distinct from AutoCamp Russian River in the same town.
- * Address and phone from autocamp.com/sonoma/.
+ * Researched May 2026: autocamp.com lists Sonoma separately, but it is the same camp as
+ * AutoCamp Russian River (14120 Old Cazadero Rd). Do NOT insert Sonoma — see
+ * scripts/migrations/clean-autocamp-postcard-wander-duplicates.sql and
+ * scripts/migrations/add-hilton-autocamp-outdoor-2026-05-21.sql.
  *
  * Unit rows mirror AutoCamp Russian River patterns (Airstream, premium cabin, safari tent, Happier Camper).
  *

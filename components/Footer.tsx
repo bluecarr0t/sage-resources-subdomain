@@ -14,7 +14,7 @@ export default function Footer({ locale = defaultLocale }: FooterProps) {
   const localBusinessSchema = generateLocalBusinessSchema();
 
   return (
-    <footer className="bg-black text-white py-12">
+    <footer className="relative z-20 isolate bg-[#000000] text-white py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
@@ -30,7 +30,7 @@ export default function Footer({ locale = defaultLocale }: FooterProps) {
             </address>
             <FooterLocationMap />
           </div>
-          <div>
+          <div className="md:pl-10 lg:pl-16">
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
