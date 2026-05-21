@@ -1,42 +1,34 @@
 import { NextResponse } from 'next/server';
 import { getAllLandingPageSlugs, getLandingPageSync } from '@/lib/landing-pages';
-import { locales } from '@/i18n';
+import { getLandingLocalesForSlug } from '@/lib/landing-i18n';
+import { generateHreflangTagsForLocales } from '@/lib/sitemap-hreflang';
+import { getLandingSitemapPriority } from '@/lib/sitemap-priority';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
-// Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic';
-
-function generateHreflangTags(path: string): string {
-  const hreflangs: string[] = [];
-  for (const locale of locales) {
-    const localePath = path.replace(/^\/[a-z]{2}(\/|$)/, `/${locale}$1`);
-    hreflangs.push(`    <xhtml:link rel="alternate" hreflang="${locale}" href="${baseUrl}${localePath}" />`);
-  }
-  hreflangs.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path.replace(/^\/[a-z]{2}(\/|$)/, '/en$1')}" />`);
-  return hreflangs.join('\n');
-}
 
 export async function GET() {
   const landingPageSlugs = getAllLandingPageSlugs();
   const urls: string[] = [];
 
-  // Generate landing pages for all locales with hreflang
   for (const slug of landingPageSlugs) {
     const page = getLandingPageSync(slug);
-    const lastModified = page?.lastModified 
+    const lastModified = page?.lastModified
       ? new Date(page.lastModified).toISOString()
       : new Date("2025-01-01").toISOString();
-    
-    for (const locale of locales) {
+    const availableLocales = getLandingLocalesForSlug(slug);
+    const priority = getLandingSitemapPriority(slug);
+
+    for (const locale of availableLocales) {
       const fullPath = `/${locale}/landing/${slug}`;
-      const hreflangs = generateHreflangTags(fullPath);
-      
+      const hreflangs = generateHreflangTagsForLocales(fullPath, availableLocales);
+
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
     <lastmod>${lastModified}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>${priority}</priority>
 ${hreflangs}
   </url>`);
     }

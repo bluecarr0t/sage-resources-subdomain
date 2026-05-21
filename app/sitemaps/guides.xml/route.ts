@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAllGuideSlugs, getGuideSync } from '@/lib/guides';
 import { getAvailableLocalesForContent } from '@/lib/i18n-content';
+import { getGuideSitemapPriority } from '@/lib/sitemap-priority';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
@@ -15,10 +16,10 @@ export async function GET() {
 
   for (const slug of guideSlugs) {
     const guide = getGuideSync(slug);
-    const isPillarPage = slug.endsWith("-complete-guide");
     const lastModified = guide?.lastModified 
       ? new Date(guide.lastModified).toISOString()
       : new Date("2025-01-15").toISOString();
+    const priority = getGuideSitemapPriority(slug);
     
     for (const locale of availableLocales) {
       const fullPath = `/${locale}/guides/${slug}`;
@@ -27,7 +28,7 @@ export async function GET() {
     <loc>${baseUrl}${fullPath}</loc>
     <lastmod>${lastModified}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>${isPillarPage ? '0.9' : '0.8'}</priority>
+    <priority>${priority}</priority>
   </url>`);
     }
   }

@@ -78,6 +78,37 @@ export function generateHreflangAlternates(
  * hreflang for routes that exist only in English (e.g. glamping discovery hubs).
  * Avoids signaling alternate URLs that 301 to /en anyway.
  */
+/** hreflang for pages only available in specific locales (e.g. partial landing translations). */
+export function generateHreflangAlternatesForLocales(
+  pathname: string,
+  availableLocales: readonly Locale[],
+  baseUrl: string = 'https://resources.sageoutdooradvisory.com',
+  queryString: string = ''
+): Metadata['alternates'] {
+  const qs =
+    !queryString || queryString === '?'
+      ? ''
+      : queryString.startsWith('?')
+        ? queryString
+        : `?${queryString}`;
+
+  const languages: Record<string, string> = {};
+  for (const locale of availableLocales) {
+    const localePath = pathname.replace(/^\/[a-z]{2}(\/|$)/, `/${locale}$1`);
+    languages[locale] = `${baseUrl}${localePath}${qs}`;
+  }
+  const defaultLocale = availableLocales.includes('en')
+    ? 'en'
+    : availableLocales[0];
+  const defaultPath = pathname.replace(
+    /^\/[a-z]{2}(\/|$)/,
+    `/${defaultLocale}$1`
+  );
+  languages['x-default'] = `${baseUrl}${defaultPath}${qs}`;
+
+  return { languages };
+}
+
 export function generateEnOnlyHreflangAlternates(
   pathnameEn: string,
   baseUrl: string = 'https://resources.sageoutdooradvisory.com',

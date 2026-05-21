@@ -291,9 +291,24 @@ export function extractHowToStepsFromGuide(guide: GuideContent): string[] | null
   return steps.length > 0 ? steps : null;
 }
 
+/** E-E-A-T: Person author for expert guides (worksFor Sage organization). */
+export function generateSageGuideAuthorPerson() {
+  return {
+    "@type": "Person",
+    name: "Sage Outdoor Advisory",
+    jobTitle: "Outdoor Hospitality Consultant",
+    url: "https://sageoutdooradvisory.com",
+    worksFor: {
+      "@type": "Organization",
+      name: "Sage Outdoor Advisory",
+      url: "https://sageoutdooradvisory.com",
+    },
+  };
+}
+
 export function generateArticleSchema(content: GuideContent) {
   const baseUrl = "https://resources.sageoutdooradvisory.com";
-  const url = `${baseUrl}/guides/${content.slug}`;
+  const url = `${baseUrl}/en/guides/${content.slug}`;
   const publishDate = content.lastModified || new Date().toISOString().split('T')[0];
   
   return {
@@ -304,11 +319,7 @@ export function generateArticleSchema(content: GuideContent) {
     "url": url,
     "datePublished": publishDate,
     "dateModified": content.lastModified || publishDate,
-    "author": {
-      "@type": "Organization",
-      "name": "Sage Outdoor Advisory",
-      "url": "https://sageoutdooradvisory.com"
-    },
+    "author": generateSageGuideAuthorPerson(),
     "publisher": {
       "@type": "Organization",
       "name": "Sage Outdoor Advisory",

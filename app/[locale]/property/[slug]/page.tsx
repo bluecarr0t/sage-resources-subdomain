@@ -10,7 +10,8 @@ import { generatePropertyBreadcrumbSchema, generatePropertyLocalBusinessSchema, 
 import { getPropertyOtaListings } from "@/lib/property-ota-listings";
 import { resolvePropertyMapCoordinates } from "@/lib/property-map-location";
 import { locales, type Locale } from "@/i18n";
-import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { generateEnOnlyHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { evaluatePropertyIndexTier, propertyTierShouldIndex } from "@/lib/property-seo-index";
 import { fetchGlampingPropertyPublicImages } from "@/lib/fetch-glamping-property-public-images";
 import { shouldSkipGooglePlacesForPropertySlug } from "@/lib/property-google-places-policy";
 import { getBrandSummaryById } from "@/lib/brand-public-pages";
@@ -130,7 +131,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
       alternates: {
         canonical: url,
-        ...generateHreflangAlternates(pathname),
+        ...generateEnOnlyHreflangAlternates(pathname),
       },
       robots: {
         index: true,
@@ -145,7 +146,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
     };
   }
-  
+
   // Handle glamping properties (existing logic)
   const properties = await getPropertiesBySlug(slug);
   
@@ -237,7 +238,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const pathname = `/${locale}/property/${slug}`;
   const url = `${baseUrl}${pathname}`;
-  
+  const indexTier = evaluatePropertyIndexTier(firstProperty);
+  const shouldIndex = propertyTierShouldIndex(indexTier);
+
   // Use fallback OG image (Google Places photos fetched client-side)
   const imageUrl = "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg";
 
@@ -269,13 +272,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: url,
-      ...generateHreflangAlternates(pathname),
+      ...generateEnOnlyHreflangAlternates(pathname),
     },
     robots: {
-      index: true,
+      index: shouldIndex,
       follow: true,
       googleBot: {
-        index: true,
+        index: shouldIndex,
         follow: true,
         "max-video-preview": -1,
         "max-image-preview": "large",

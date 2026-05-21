@@ -6,6 +6,7 @@
  */
 
 import { locales, type Locale } from '@/i18n';
+import { getLandingLocalesForSlug } from '@/lib/landing-i18n';
 
 export type ContentType =
   | 'landing'
@@ -29,8 +30,8 @@ export type ContentType =
 export function getAvailableLocalesForContent(contentType: ContentType): Locale[] {
   switch (contentType) {
     case 'landing':
-      // Landing pages now have translations for all locales
-      return [...locales];
+      // Default for sitemap/static params without a slug; prefer getLandingLocalesForSlug(slug)
+      return ['en'];
     
     case 'guide':
       // Temporarily disable multi-language guide pages due to build errors
@@ -78,4 +79,9 @@ export function hasLocaleTranslation(
 ): boolean {
   const availableLocales = getAvailableLocalesForContent(contentType);
   return availableLocales.includes(locale);
+}
+
+/** Locales with real landing copy for a slug (not English fallback). */
+export function getAvailableLocalesForLandingSlug(slug: string): Locale[] {
+  return getLandingLocalesForSlug(slug);
 }

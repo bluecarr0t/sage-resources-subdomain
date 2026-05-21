@@ -8,7 +8,7 @@ This guide documents the enhanced GA4 implementation for the Sage Outdoor Adviso
 
 ### ✅ Automatic Tracking
 
-1. **Page Views** - Automatically tracked on all route changes
+1. **Page Views** - Automatically tracked on all route changes, with `seo_section` and `seo_content_slug` params for organic dashboards (see [PHASE_0_INSTRUMENTATION.md](../seo/PHASE_0_INSTRUMENTATION.md))
 2. **Scroll Depth** - Tracks when users scroll 25%, 50%, 75%, and 90% of the page
 3. **Time on Page** - Tracks engagement time (tracks every 30 seconds and on page exit)
 4. **Outbound Links** - Automatically tracks clicks to external domains (e.g., sageoutdooradvisory.com)

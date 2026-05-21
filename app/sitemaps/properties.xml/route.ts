@@ -1,57 +1,51 @@
 import { NextResponse } from 'next/server';
-import { getAllPropertySlugs, getMaxPropertyUpdatedAt } from '@/lib/properties';
+import { getIndexedPropertySlugEntries, getMaxPropertyUpdatedAt } from '@/lib/properties';
 import { getAllNationalParkSlugs } from '@/lib/national-parks';
 import { getMostRecentContentDate } from '@/lib/sitemap-dates';
 import { getAvailableLocalesForContent } from '@/lib/i18n-content';
+import { generateEnOnlyHreflangTags } from '@/lib/sitemap-hreflang';
+import { getPropertySitemapPriority } from '@/lib/sitemap-priority';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
-// Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic';
 
-function generateEnOnlyHreflangTags(path: string): string {
-  return `    <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${path}" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path}" />`;
-}
-
 export async function GET() {
-  const [propertySlugs, nationalParkSlugs, maxPropertyUpdated] = await Promise.all([
-    getAllPropertySlugs(),
+  const [propertyEntries, nationalParkSlugs, maxPropertyUpdated] = await Promise.all([
+    getIndexedPropertySlugEntries(),
     getAllNationalParkSlugs(),
     getMaxPropertyUpdatedAt(),
   ]);
   const urls: string[] = [];
   const defaultDate = maxPropertyUpdated ?? getMostRecentContentDate();
-
   const propertyLocales = getAvailableLocalesForContent('property');
 
-  // Generate property pages for indexed locales with hreflang
-  for (const item of propertySlugs) {
+  for (const item of propertyEntries) {
     for (const locale of propertyLocales) {
       const fullPath = `/${locale}/property/${item.slug}`;
       const hreflangs = generateEnOnlyHreflangTags(fullPath);
-      
+      const priority = getPropertySitemapPriority(item.tier === 'a' ? 'a' : 'b');
+
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
     <lastmod>${defaultDate}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>${priority}</priority>
 ${hreflangs}
   </url>`);
     }
   }
 
-  // Generate national park pages for indexed locales
   for (const item of nationalParkSlugs) {
     for (const locale of propertyLocales) {
       const fullPath = `/${locale}/property/${item.slug}`;
       const hreflangs = generateEnOnlyHreflangTags(fullPath);
-      
+
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
     <lastmod>${defaultDate}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.75</priority>
 ${hreflangs}
   </url>`);
     }

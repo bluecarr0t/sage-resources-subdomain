@@ -3,7 +3,11 @@
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-import { trackScrollDepth, trackPageEngagement } from '@/lib/analytics';
+import {
+  getSeoPageContextParams,
+  trackScrollDepth,
+  trackPageEngagement,
+} from '@/lib/analytics';
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
@@ -17,10 +21,12 @@ export default function GoogleAnalytics() {
 
     const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
 
-    // Track page view
+    // Track page view + SEO section (Phase 0 organic dashboards)
     if (typeof window !== 'undefined' && (window as any).gtag) {
+      const seoContext = getSeoPageContextParams(pathname);
       (window as any).gtag('config', GA_MEASUREMENT_ID, {
         page_path: url,
+        ...seoContext,
         // Enhanced measurement settings
         send_page_view: true,
         // Enable enhanced measurement features

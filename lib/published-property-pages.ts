@@ -8,6 +8,12 @@ import {
   propertyListGroupKey,
 } from '@/lib/admin/glamping-list-anchor-key';
 import { slugifyPropertyName } from '@/lib/property-slug';
+import {
+  evaluatePropertyIndexTier,
+  propertyTierShouldIndex,
+  type PropertyAnchorSeoFields,
+  type PropertyIndexTier,
+} from '@/lib/property-seo-index';
 import type { SageProperty } from '@/lib/types/sage';
 
 export const PUBLISHED_RESEARCH_STATUS = 'published';
@@ -15,13 +21,14 @@ export const PUBLISHED_RESEARCH_STATUS = 'published';
 const TABLE = 'all_glamping_properties';
 const PAGE_SIZE = 1000;
 
-export type PropertyAnchorRow = {
+export type PropertyAnchorRow = PropertyAnchorSeoFields & {
   id: number;
-  property_name?: string | null;
-  slug?: string | null;
   property_id?: string | null;
-  city?: string | null;
-  state?: string | null;
+};
+
+export type PropertySlugIndexEntry = {
+  slug: string;
+  tier: PropertyIndexTier;
 };
 
 /** Resolve URL slug for a published anchor row; disambiguate collisions when slug column is empty. */
@@ -53,17 +60,29 @@ export function resolvePublicSlugForAnchor(
 
 /** One slug per published logical property (matches admin list anchor grouping). */
 export function buildPublishedPropertySlugList(anchors: PropertyAnchorRow[]): string[] {
+  return buildPublishedPropertySlugIndex(anchors).map((e) => e.slug);
+}
+
+/** Slugs with index tier for sitemap and robots metadata. */
+export function buildPublishedPropertySlugIndex(
+  anchors: PropertyAnchorRow[]
+): PropertySlugIndexEntry[] {
   const usedSlugs = new Set<string>();
-  const slugs: string[] = [];
+  const entries: PropertySlugIndexEntry[] = [];
 
   for (const anchor of anchors) {
     const slug = resolvePublicSlugForAnchor(anchor, usedSlugs);
     if (!slug) continue;
     usedSlugs.add(slug);
-    slugs.push(slug);
+    entries.push({
+      slug,
+      tier: evaluatePropertyIndexTier(anchor),
+    });
   }
 
-  return [...new Set(slugs)].sort();
+  return entries
+    .filter((e) => propertyTierShouldIndex(e.tier))
+    .sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
 export async function fetchPublishedPropertyAnchors(): Promise<PropertyAnchorRow[]> {
@@ -74,7 +93,9 @@ export async function fetchPublishedPropertyAnchors(): Promise<PropertyAnchorRow
   while (true) {
     const { data, error } = await supabase
       .from(TABLE)
-      .select('id, property_name, slug, property_id, city, state')
+      .select(
+        'id, property_name, slug, property_id, city, state, description, lat, lon, rate_avg_retail_daily_rate, brand_id, url'
+      )
       .eq('research_status', PUBLISHED_RESEARCH_STATUS)
       .not('property_name', 'is', null)
       .range(from, from + PAGE_SIZE - 1);

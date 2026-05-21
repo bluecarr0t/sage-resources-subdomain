@@ -3,9 +3,13 @@ import { getLandingPage, getAllLandingPageSlugs } from "@/lib/landing-pages";
 import { notFound } from "next/navigation";
 import LandingPageTemplate from "@/components/LandingPageTemplate";
 import { locales, type Locale } from "@/i18n";
-import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import {
+  generateHreflangAlternatesForLocales,
+  getOpenGraphLocale,
+} from "@/lib/i18n-utils";
 import { generateGeoMetadata } from "@/lib/geo-metadata";
-import { getAvailableLocalesForContent } from "@/lib/i18n-content";
+import { getAvailableLocalesForLandingSlug } from "@/lib/i18n-content";
+import { landingSlugHasLocaleTranslation } from "@/lib/landing-i18n";
 import { landingMetadataOverridesEn } from "@/lib/landing-metadata-overrides";
 
 // ISR: Revalidate pages every 24 hours
@@ -20,17 +24,14 @@ interface PageProps {
 
 export async function generateStaticParams() {
   const slugs = getAllLandingPageSlugs();
-  // Only generate for locales that have translations (currently only 'en')
-  const availableLocales = getAvailableLocalesForContent('landing');
   const params: Array<{ locale: string; slug: string }> = [];
-  
-  // Generate params only for available locales
-  for (const locale of availableLocales) {
-    for (const slug of slugs) {
+
+  for (const slug of slugs) {
+    for (const locale of getAvailableLocalesForLandingSlug(slug)) {
       params.push({ locale, slug });
     }
   }
-  
+
   return params;
 }
 
@@ -50,8 +51,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const translatedLocales = getAvailableLocalesForLandingSlug(page.slug);
+  const isIndexable = landingSlugHasLocaleTranslation(page.slug, locale as Locale);
+  const canonicalLocale = 'en';
   const pathname = `/${locale}/landing/${page.slug}`;
+  const canonicalPath = `/${canonicalLocale}/landing/${page.slug}`;
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
+  const canonicalUrl = `https://resources.sageoutdooradvisory.com${canonicalPath}`;
   const imageUrl = `https://sageoutdooradvisory.com/og-image.jpg`;
 
   const publishDate = page.lastModified || "2025-01-01";
@@ -94,14 +100,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       images: [imageUrl],
     },
     alternates: {
-      canonical: url,
-      ...generateHreflangAlternates(pathname),
+      canonical: canonicalUrl,
+      ...generateHreflangAlternatesForLocales(canonicalPath, translatedLocales),
     },
     robots: {
-      index: true,
+      index: isIndexable,
       follow: true,
       googleBot: {
-        index: true,
+        index: isIndexable,
         follow: true,
         "max-video-preview": -1,
         "max-image-preview": "large",

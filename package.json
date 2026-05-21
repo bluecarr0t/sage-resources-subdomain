@@ -8,6 +8,8 @@
     "prebuild": "node scripts/ensure-indexnow-key.js && node scripts/ensure-feasibility-template.js && node scripts/ensure-market-report-template.js && node scripts/ensure-pyodide.js",
     "build": "next build",
     "indexnow:submit": "tsx scripts/submit-indexnow.ts",
+    "seo:audit-instrumentation": "tsx scripts/audit-seo-instrumentation.ts",
+    "seo:audit-instrumentation:baseline": "tsx scripts/audit-seo-instrumentation.ts --write-baseline",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",

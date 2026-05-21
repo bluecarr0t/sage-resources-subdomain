@@ -16,6 +16,12 @@ declare global {
   }
 }
 
+import {
+  classifySeoPageSection,
+  extractSeoContentSlug,
+  type SeoPageSection,
+} from '@/lib/seo-page-section';
+
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 /**
@@ -194,6 +200,38 @@ export function trackLandingPageView(
   trackEvent('landing_page_view', {
     page_slug: slug,
     content_type: contentType,
+  });
+}
+
+/** Params for GA4 Explore / organic section reports (register as custom dimensions). */
+export function getSeoPageContextParams(pathname: string): {
+  seo_section: SeoPageSection;
+  seo_content_slug?: string;
+} {
+  const seo_section = classifySeoPageSection(pathname);
+  const slug = extractSeoContentSlug(pathname);
+  return slug ? { seo_section, seo_content_slug: slug } : { seo_section };
+}
+
+/**
+ * Service-site CTA clicks (subdomain → sageoutdooradvisory.com).
+ */
+export function trackSeoConversionClick(
+  ctaText: string,
+  ctaLocation: string,
+  destination: string
+): void {
+  trackEvent('seo_conversion_click', {
+    cta_text: ctaText,
+    cta_location: ctaLocation,
+    destination,
+    link_domain: (() => {
+      try {
+        return new URL(destination).hostname;
+      } catch {
+        return destination;
+      }
+    })(),
   });
 }
 

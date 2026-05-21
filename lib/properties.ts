@@ -3,12 +3,15 @@
  */
 import { createServerClient } from '@/lib/supabase';
 import {
+  buildPublishedPropertySlugIndex,
   buildPublishedPropertySlugList,
   fetchPublishedPropertyAnchors,
   fetchPublishedRowsByGroupKey,
   findPublishedGroupKeyBySlug,
   PUBLISHED_RESEARCH_STATUS,
+  type PropertySlugIndexEntry,
 } from '@/lib/published-property-pages';
+import { evaluatePropertyIndexTier } from '@/lib/property-seo-index';
 import { slugifyPropertyName } from '@/lib/property-slug';
 import { SageProperty } from '@/lib/types/sage';
 
@@ -51,14 +54,27 @@ export async function getUniquePropertyNames(): Promise<string[]> {
  * Map markers use a narrower filter in /api/properties — not all published rows appear on the map.
  */
 export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
+  const indexed = await getIndexedPropertySlugEntries();
+  return indexed.map(({ slug }) => ({ slug }));
+}
+
+/** Published property slugs that pass index tier gate (excludes tier C thin pages). */
+export async function getIndexedPropertySlugEntries(): Promise<PropertySlugIndexEntry[]> {
   try {
     const anchors = await fetchPublishedPropertyAnchors();
-    const slugs = buildPublishedPropertySlugList(anchors);
-    return slugs.map((slug) => ({ slug }));
+    return buildPublishedPropertySlugIndex(anchors);
   } catch (error) {
-    console.error('Error in getAllPropertySlugs:', error);
+    console.error('Error in getIndexedPropertySlugEntries:', error);
     return [];
   }
+}
+
+/** Index tier for a public property slug (defaults to c when missing). */
+export async function getPropertyIndexTierForSlug(
+  slug: string
+): Promise<'a' | 'b' | 'c'> {
+  const properties = await getPropertiesBySlug(slug);
+  return evaluatePropertyIndexTier(properties[0]);
 }
 
 /**

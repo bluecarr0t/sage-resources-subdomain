@@ -1,0 +1,29 @@
+{
+  "checkedAt": "YYYY-MM-DDTHH:mm:ss.sssZ",
+  "siteUrl": "https://resources.sageoutdooradvisory.com",
+  "note": "Copy to instrumentation-baseline.json after first audit with --write-baseline",
+  "sitemap": {
+    "totalUrls": 0,
+    "children": []
+  },
+  "weeklyKpis": {
+    "gsc": {
+      "clicks": null,
+      "impressions": null,
+      "avgPosition": null,
+      "indexedPages": null
+    },
+    "ga4Organic": {
+      "sessions": null,
+      "bySection": {
+        "landing": null,
+        "guides": null,
+        "glossary": null,
+        "property": null,
+        "map": null,
+        "map_location": null,
+        "other": null
+      }
+    }
+  }
+}

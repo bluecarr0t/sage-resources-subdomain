@@ -50,3 +50,7 @@ next-env.d.ts
 # self-hosted Pyodide runtime (downloaded by scripts/ensure-pyodide.js)
 /public/pyodide/
 
+# SEO weekly baseline exports (optional local snapshots)
+/docs/seo/baselines/instrumentation-baseline.json
+/docs/seo/baselines/gsc/
+

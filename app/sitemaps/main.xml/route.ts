@@ -5,27 +5,16 @@ import { getNationalParksWithCoordinates } from '@/lib/national-parks';
 import { getAllUnitTypeSlugs } from '@/lib/unit-type-config';
 import { getMostRecentContentDate } from '@/lib/sitemap-dates';
 import { getAvailableLocalesForContent } from '@/lib/i18n-content';
+import {
+  generateEnOnlyHreflangTags,
+  generateHreflangTags,
+} from '@/lib/sitemap-hreflang';
+import { getMainPageSitemapPriority } from '@/lib/sitemap-priority';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
 // Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic';
-
-function generateHreflangTags(path: string): string {
-  const hreflangs: string[] = [];
-  for (const locale of locales) {
-    const localePath = path.replace(/^\/[a-z]{2}(\/|$)/, `/${locale}$1`) || `/${locale}`;
-    hreflangs.push(`    <xhtml:link rel="alternate" hreflang="${locale}" href="${baseUrl}${localePath}" />`);
-  }
-  hreflangs.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path.replace(/^\/[a-z]{2}(\/|$)/, '/en$1') || '/en'}" />`);
-  return hreflangs.join('\n');
-}
-
-/** Glamping hub URLs are English-only in the index; avoid hreflang to locales that 301 to /en. */
-function generateEnOnlyHreflangTags(path: string): string {
-  return `    <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${path}" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${path}" />`;
-}
 
 export async function GET() {
   const urls: string[] = [];
@@ -40,7 +29,7 @@ export async function GET() {
       const fullPath = `/${locale}${pagePath}`;
       const hreflangs = generateHreflangTags(fullPath);
       const lastmod = contentLastmod;
-      const priority = pagePath === '' ? '1.0' : pagePath === '/partners' ? '0.8' : '0.9';
+      const priority = getMainPageSitemapPriority(pagePath);
       const changefreq = pagePath === '/partners' ? 'monthly' : 'weekly';
       
       urls.push(`  <url>
@@ -100,6 +89,15 @@ ${hreflangs}
   } catch (error) {
     console.error('Error generating city pages for sitemap:', error);
   }
+
+  // Glamping market overview — original research (English only, priority 0.9)
+  urls.push(`  <url>
+    <loc>${baseUrl}/glamping-market-overview</loc>
+    <lastmod>${contentLastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+${generateEnOnlyHreflangTags('/glamping-market-overview')}
+  </url>`);
 
   // Add glamping near national parks index (priority 0.8)
   for (const locale of glampingLocales) {

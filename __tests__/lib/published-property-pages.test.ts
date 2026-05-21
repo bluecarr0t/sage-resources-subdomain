@@ -29,10 +29,22 @@ describe('published-property-pages', () => {
     expect(second).toBe('serenity-ridge-denver');
   });
 
-  it('returns one slug per anchor', () => {
+  it('returns one slug per indexable anchor', () => {
     const slugs = buildPublishedPropertySlugList([
-      { id: 1, property_name: 'Alpha Camp', slug: 'alpha-camp' },
-      { id: 2, property_name: 'Beta Lodge', slug: 'beta-lodge' },
+      {
+        id: 1,
+        property_name: 'Alpha Camp',
+        slug: 'alpha-camp',
+        city: 'Austin',
+        state: 'TX',
+      },
+      {
+        id: 2,
+        property_name: 'Beta Lodge',
+        slug: 'beta-lodge',
+        city: 'Denver',
+        state: 'CO',
+      },
     ]);
     expect(slugs).toEqual(['alpha-camp', 'beta-lodge']);
   });

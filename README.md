@@ -114,6 +114,14 @@ In Vercel:
 2. Add your subdomain (e.g., `resources.sageoutdooradvisory.com`)
 3. Update DNS records as instructed by Vercel
 
+### SEO instrumentation (Phase 0)
+
+```bash
+npm run seo:audit-instrumentation
+```
+
+Verifies sitemap, robots, GSC/IndexNow/GA4 env vars, and prints sitemap URL counts. See [docs/seo/PHASE_0_INSTRUMENTATION.md](./docs/seo/PHASE_0_INSTRUMENTATION.md).
+
 ### Environment Variables
 
 Add the following environment variables in Vercel (Project Settings → Environment Variables):
@@ -130,6 +138,14 @@ Add the following environment variables in Vercel (Project Settings → Environm
 5. Copy the Measurement ID (starts with `G-`)
 
 **Note:** The `NEXT_PUBLIC_` prefix makes this variable available to the client-side code, which is required for Google Analytics tracking.
+
+**SEO / indexing (recommended):**
+
+- `NEXT_PUBLIC_GOOGLE_VERIFICATION_CODE` — GSC HTML-tag verification (or use `public/google*.html`)
+- `INDEXNOW_KEY` — Bing/Yandex indexing (`openssl rand -hex 16`)
+- `CRON_SECRET` — Secures `/api/indexnow` daily cron
+
+See [docs/seo/ENV.example](./docs/seo/ENV.example) and [docs/seo/PHASE_0_INSTRUMENTATION.md](./docs/seo/PHASE_0_INSTRUMENTATION.md).
 
 #### Optional (for Redis Caching)
 
