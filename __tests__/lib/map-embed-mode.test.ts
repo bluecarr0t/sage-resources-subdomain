@@ -1,5 +1,6 @@
 import {
   appendPreservedMapViewParams,
+  buildFullMapPath,
   getMapEmbedParam,
   getMapLayerParam,
   isMapClientWorkOnlyLayer,
@@ -64,5 +65,12 @@ describe('map-embed-mode', () => {
   it('shows all layers on full map', () => {
     expect(shouldShowNationalParksInMapView({}, false, false)).toBe(true);
     expect(shouldShowClientWorkInMapView({}, false, false)).toBe(true);
+  });
+
+  it('builds full map paths without embed param', () => {
+    expect(buildFullMapPath('en')).toBe('/en/map');
+    expect(buildFullMapPath('en', { clientWorkOnly: true })).toBe(
+      '/en/map?layer=client-work'
+    );
   });
 });

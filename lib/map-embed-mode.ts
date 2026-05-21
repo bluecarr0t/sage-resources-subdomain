@@ -83,6 +83,19 @@ export function shouldShowClientWorkInMapView(
   return isTruthyQueryFlag(getQueryFlag(searchParams, 'clientWork'));
 }
 
+/** Full map path for embed footers — drops `embed` and other embed-only flags. */
+export function buildFullMapPath(
+  locale: string,
+  options?: { clientWorkOnly?: boolean }
+): string {
+  const params = new URLSearchParams();
+  if (options?.clientWorkOnly) {
+    params.set('layer', 'client-work');
+  }
+  const qs = params.toString();
+  return `/${locale}/map${qs ? `?${qs}` : ''}`;
+}
+
 /** Params that must survive filter URL sync (`useMapFilters` router.replace). */
 export const MAP_VIEW_QUERY_KEYS = ['embed', 'layer', 'parks', 'nationalParks', 'clientWork'] as const;
 

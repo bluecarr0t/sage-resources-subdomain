@@ -128,7 +128,7 @@ export default async function GuidesPage({ params }: PageProps) {
   const tNotice = await getTranslations({ locale, namespace: "guides.englishNotice" });
 
   return (
-    <EditorialMarketingLayout locale={locale} title={t('title')} subtitle={t('subtitle')} topoOpacity={2.5}>
+    <EditorialMarketingLayout locale={locale} title={t('title')} subtitle={t('subtitle')} topoOpacity={2}>
       <GuidesEnglishNotice
         locale={locale}
         message={tNotice("message")}

@@ -699,7 +699,9 @@
     "embed": {
       "openFilters": "Filtros y búsqueda",
       "openAbout": "Acerca de este mapa",
-      "closeFilters": "Cerrar"
+      "closeFilters": "Cerrar",
+      "openFullMap": "Abrir mapa interactivo completo ↗",
+      "openFullClientWork": "Abrir mapa completo de trabajos con clientes ↗"
     },
     "poweredBy": "Impulsado por",
     "filters": {

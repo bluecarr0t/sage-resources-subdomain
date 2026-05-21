@@ -699,7 +699,9 @@
     "embed": {
       "openFilters": "Filtres et recherche",
       "openAbout": "À propos de cette carte",
-      "closeFilters": "Fermer"
+      "closeFilters": "Fermer",
+      "openFullMap": "Ouvrir la carte interactive complète ↗",
+      "openFullClientWork": "Ouvrir la carte complète des projets clients ↗"
     },
     "poweredBy": "Propulsé par",
     "filters": {

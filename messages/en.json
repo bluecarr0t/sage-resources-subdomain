@@ -43,7 +43,9 @@
     "embed": {
       "openFilters": "Filters & search",
       "openAbout": "About this map",
-      "closeFilters": "Close"
+      "closeFilters": "Close",
+      "openFullMap": "Open full interactive map ↗",
+      "openFullClientWork": "Open full client work map ↗"
     },
     "poweredBy": "Powered by",
     "filters": {

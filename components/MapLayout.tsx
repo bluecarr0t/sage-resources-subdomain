@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import MapLoading from './MapLoading';
+import MapEmbedOpenFullLink from '@/components/map/MapEmbedOpenFullLink';
 
 // Single dynamic import — one Maps bundle for sidebar + main (avoids double download)
 const DynamicGooglePropertyMap = dynamic(() => import('@/components/GooglePropertyMap'), {
@@ -195,15 +196,22 @@ export default function MapLayout({
         <DynamicGooglePropertyMap showMap={true} />
 
         {embedMode ? (
-          <button
-            type="button"
-            onClick={() => setEmbedPanelOpen(true)}
-            className="absolute left-4 top-4 z-30 rounded-lg border border-neutral-200 bg-white/95 px-3 py-2 text-sm font-medium text-neutral-800 shadow-md transition-colors hover:bg-white"
-            aria-expanded={embedPanelOpen}
-            aria-controls="map-embed-filters"
-          >
-            {clientWorkOnly ? t('embed.openAbout') : t('embed.openFilters')}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => setEmbedPanelOpen(true)}
+              className="absolute left-4 top-4 z-30 rounded-lg border border-neutral-200 bg-white/95 px-3 py-2 text-sm font-medium text-neutral-800 shadow-md transition-colors hover:bg-white"
+              aria-expanded={embedPanelOpen}
+              aria-controls="map-embed-filters"
+            >
+              {clientWorkOnly ? t('embed.openAbout') : t('embed.openFilters')}
+            </button>
+            <p className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center pb-3">
+              <span className="pointer-events-auto rounded-lg border border-neutral-200/90 bg-white/95 px-3 py-2 text-center text-sm font-medium shadow-md">
+                <MapEmbedOpenFullLink locale={locale} className="text-neutral-800 hover:text-neutral-950" />
+              </span>
+            </p>
+          </>
         ) : (
           <button
             onClick={toggleFullscreen}
