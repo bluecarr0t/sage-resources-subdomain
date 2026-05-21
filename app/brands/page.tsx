@@ -1,14 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { GlampingMarketScopeDisclosure } from '@/components/glamping-industry/GlampingMarketScopeDisclosure';
+import { EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
 import {
   fetchTopGlampingBrands,
   formatRetailDailyRate,
   TOP_GLAMPING_BRANDS_COUNT,
 } from '@/lib/fetch-top-glamping-brands';
-
-/** Olympic National Park topo line art — shared with glamping market overview */
-const SNAPSHOT_TOPO_BG_URL = '/images/glamping-market-snapshot-topo.png';
 
 /** Fixed columns: rank · brand name · props · units · avg. retail daily rate */
 const BRANDS_TABLE_GRID_CLASS =
@@ -42,13 +40,12 @@ export default async function BrandOverviewPage() {
   const result = await fetchTopGlampingBrands(TOP_GLAMPING_BRANDS_COUNT);
 
   return (
-    <div
-      className="relative flex min-h-screen flex-col bg-cover bg-center bg-no-repeat text-neutral-900"
-      style={{
-        backgroundColor: '#faf9f3',
-        backgroundImage: `linear-gradient(to bottom, rgb(250 249 243 / 0.55), rgb(250 249 243 / 0.9)), url(${SNAPSHOT_TOPO_BG_URL})`,
-      }}
-    >
+    <div className="relative flex min-h-screen flex-col bg-[#faf9f3] text-neutral-900">
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.02]"
+        style={{ backgroundImage: `url(${EDITORIAL_TOPO_BG_URL})` }}
+        aria-hidden
+      />
       <main className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-x-visible px-6 pt-16 pb-24 sm:pt-24 sm:pb-32">
         <h1 className="font-[Georgia] text-sm font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg">
           Top Glamping Brands

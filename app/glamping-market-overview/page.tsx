@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import nextDynamic from 'next/dynamic';
+import { EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
 import { GlampingMarketClassificationFilter } from '@/components/glamping-industry/GlampingMarketClassificationFilter';
 import { GlampingMarketScopeDisclosure } from '@/components/glamping-industry/GlampingMarketScopeDisclosure';
 import { GlampingMarketSnapshotToggle } from '@/components/glamping-industry/GlampingMarketSnapshotToggle';
@@ -26,9 +27,6 @@ function SidebarMetricLeader() {
     />
   );
 }
-
-/** Olympic National Park topo line art — `public/images/glamping-market-snapshot-topo.png` */
-const SNAPSHOT_TOPO_BG_URL = '/images/glamping-market-snapshot-topo.png';
 
 const GlampingIndustryUsMap = nextDynamic(
   () => import('@/components/glamping-industry/GlampingIndustryUsMap'),
@@ -127,13 +125,12 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
       : [];
 
   return (
-    <div
-      className="relative flex min-h-screen flex-col bg-cover bg-center bg-no-repeat text-neutral-900"
-      style={{
-        backgroundColor: '#faf9f3',
-        backgroundImage: `linear-gradient(to bottom, rgb(250 249 243 / 0.55), rgb(250 249 243 / 0.9)), url(${SNAPSHOT_TOPO_BG_URL})`,
-      }}
-    >
+    <div className="relative flex min-h-screen flex-col bg-[#faf9f3] text-neutral-900">
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.02]"
+        style={{ backgroundImage: `url(${EDITORIAL_TOPO_BG_URL})` }}
+        aria-hidden
+      />
       <main className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-x-visible px-6 pt-16 pb-24 sm:pt-24 sm:pb-32">
         <h1 className="font-[Georgia] text-sm font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg">
           Glamping Market Overview

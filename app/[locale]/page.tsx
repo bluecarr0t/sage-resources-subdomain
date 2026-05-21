@@ -250,7 +250,7 @@ export default async function HomePage({ params }: PageProps) {
       />
 
       <GoogleMapsProvider>
-        <EditorialPageShell footer={null} topoOpacity={3}>
+        <EditorialPageShell footer={null} topoOpacity={2}>
           <FloatingHeader locale={locale} showFullNav showSpacer={false} />
 
           <section className="relative min-h-[min(100svh,52rem)] w-full lg:min-h-[100svh] lg:min-h-[100dvh]">
