@@ -3,6 +3,9 @@
  * Prefers Maps Embed API when NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is set.
  */
 
+/** Default embed zoom (lower = wider area; 9 shows broader regional context). */
+export const DEFAULT_PROPERTY_MAP_ZOOM = 9;
+
 export type PropertyMapEmbedParams = {
   lat?: number | null;
   lon?: number | null;
@@ -41,7 +44,7 @@ export function buildPropertyGoogleMapsUrl(
   if ('placeQuery' in coords) {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coords.placeQuery)}`;
   }
-  const zoom = coords.zoom ?? 15;
+  const zoom = coords.zoom ?? DEFAULT_PROPERTY_MAP_ZOOM;
   return `https://www.google.com/maps?q=${coords.lat},${coords.lon}&z=${zoom}`;
 }
 
@@ -57,8 +60,7 @@ export function buildPropertyMapEmbedUrl(params: PropertyMapEmbedParams): string
   const hasCoords = hasValidCoordinates(params.lat, params.lon);
   if (!label && !hasCoords) return null;
 
-  const baseZoom = params.zoom ?? 14;
-  const zoom = hasCoords ? Math.max(baseZoom, 15) : baseZoom;
+  const zoom = params.zoom ?? DEFAULT_PROPERTY_MAP_ZOOM;
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
 
   if (apiKey) {

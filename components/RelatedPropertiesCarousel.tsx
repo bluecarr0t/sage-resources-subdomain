@@ -92,7 +92,7 @@ export default function RelatedPropertiesCarousel({
             </div>
           ) : null}
         </div>
-        <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
+        <p className="mt-2 text-[10px] leading-relaxed text-neutral-500">
           Other properties within ~50 miles of {currentPropertyName}.
         </p>
         <ul className="mt-6 space-y-3 text-sm">

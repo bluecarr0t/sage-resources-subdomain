@@ -1,0 +1,348 @@
+-- andBeyond portfolio screening: Glamping Resort, Landscape Hotel, Outdoor Boutique Hotel (May 2026).
+-- Source: https://www.andbeyond.com/our-lodges/ — see .firecrawl/andbeyond-portfolio-outdoor-hospitality-screening.md
+-- Skips Punakha (already published). Excludes yachts, Amazon Explorer (pre-launch), conventional safari lodges.
+-- discovery_source = web_research_andbeyond_portfolio_2026_05
+-- research_status = in_progress (property-level anchors; site enrichment later)
+
+INSERT INTO public.glamping_brands (slug, display_name, brand_tier, legacy_chain_key, website_url)
+VALUES ('andbeyond', 'andBeyond', 'standalone', 'andbeyond', 'https://www.andbeyond.com/')
+ON CONFLICT (slug) DO UPDATE SET display_name = EXCLUDED.display_name, updated_at = now();
+
+INSERT INTO public.all_glamping_properties (
+  research_status,
+  is_glamping_property,
+  is_open,
+  property_name,
+  site_name,
+  slug,
+  property_type,
+  unit_type,
+  source,
+  discovery_source,
+  brand_id,
+  country,
+  state,
+  city,
+  address,
+  lat,
+  lon,
+  url,
+  phone_number,
+  description,
+  notes,
+  date_added,
+  date_updated,
+  land_operator_category,
+  glamping_service_tier,
+  glamping_service_tier_source,
+  glamping_service_tier_notes
+)
+SELECT
+  v.research_status,
+  v.is_glamping_property,
+  v.is_open,
+  v.property_name,
+  v.site_name,
+  v.slug,
+  v.property_type,
+  v.unit_type,
+  v.source,
+  v.discovery_source,
+  (SELECT id FROM public.glamping_brands WHERE slug = 'andbeyond'),
+  v.country,
+  v.state,
+  v.city,
+  v.address,
+  v.lat,
+  v.lon,
+  v.url,
+  v.phone_number,
+  v.description,
+  v.notes,
+  v.date_added,
+  v.date_updated,
+  v.land_operator_category,
+  v.glamping_service_tier,
+  v.glamping_service_tier_source,
+  v.glamping_service_tier_notes
+FROM (
+  VALUES
+  -- Glamping Resort (8)
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Ngala Tented Camp', NULL,
+    'andbeyond-ngala-tented-camp-kruger-za',
+    'Glamping Resort', 'Safari Tent',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'South Africa', 'Mpumalanga', 'Kruger National Park',
+    'Ngala Private Game Reserve, Kruger National Park, South Africa',
+    -24.250::numeric, 31.450::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/south-africa/kruger-national-park/ngala-private-game-reserve/andbeyond-ngala-tented-camp/',
+    '+1-800-998-6634',
+    $$Romantic canvas sanctuary along the Timbavati riverbed in Ngala Private Game Reserve. Luxury tented suites for Big Five safari; andBeyond portfolio (May 2026 directory).$$,
+    $$Screened May 2026: Glamping Resort. Site/rate enrichment pending.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — tented camp (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Serengeti Under Canvas', NULL,
+    'andbeyond-serengeti-under-canvas-serengeti-tz',
+    'Glamping Resort', 'Safari Tent',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Tanzania', 'Serengeti', 'Serengeti National Park',
+    'Serengeti National Park, Tanzania',
+    -2.350::numeric, 34.850::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/tanzania/serengeti-national-park/andbeyond-serengeti-under-canvas/',
+    '+1-800-998-6634',
+    $$Immersive mobile tented safari camp that relocates with the Great Migration in the Serengeti. Seasonal canvas luxury with andBeyond guiding.$$,
+    $$Screened May 2026: Glamping Resort. Mobile camp — verify seasonal locations and rates.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — under canvas (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Sandibe and Nxabega Under Canvas', NULL,
+    'andbeyond-sandibe-nxabega-under-canvas-okavango-bw',
+    'Glamping Resort', 'Safari Tent',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Botswana', 'Okavango Delta', 'Okavango Delta',
+    'Okavango Delta, Botswana',
+    -19.280::numeric, 23.120::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/botswana/okavango-delta/andbeyond-sandibe-and-nxabega-under-canvas/',
+    '+1-800-998-6634',
+    $$Dual immersive under-canvas safari camps in the Okavango Delta (Sandibe and Nxabega), positioned close to nature with luxury tented accommodation.$$,
+    $$Screened May 2026: Glamping Resort. Two camp product — confirm unit counts per camp.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — under canvas (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Chobe Under Canvas', NULL,
+    'andbeyond-chobe-under-canvas-chobe-bw',
+    'Glamping Resort', 'Safari Tent',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Botswana', 'Chobe', 'Chobe National Park',
+    'Chobe National Park, Botswana',
+    -17.850::numeric, 25.150::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/botswana/chobe-national-park/andbeyond-chobe-under-canvas/',
+    '+1-800-998-6634',
+    $$Tented canvas luxury as close to nature as possible on the Chobe River — seasonal mobile-style camp experience with andBeyond service.$$,
+    $$Screened May 2026: Glamping Resort.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — under canvas (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Nxabega Okavango Tented Camp', NULL,
+    'andbeyond-nxabega-okavango-tented-camp-bw',
+    'Glamping Resort', 'Safari Tent',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Botswana', 'Okavango Delta', 'Okavango Delta',
+    'Okavango Delta, Botswana',
+    -19.270::numeric, 23.140::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/botswana/okavango-delta/andbeyond-nxabega-okavango-tented-camp/',
+    '+1-800-998-6634',
+    $$Rustic tented camp with contemporary safari elegance in the Okavango Delta. Permanent tented suites with delta wildlife and water activities.$$,
+    $$Screened May 2026: Glamping Resort. Distinct from Nxabega Under Canvas mobile product.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — tented camp (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Xaranna Okavango Delta Camp', NULL,
+    'andbeyond-xaranna-okavango-delta-camp-bw',
+    'Glamping Resort', 'Safari Tent',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Botswana', 'Okavango Delta', 'Okavango Delta',
+    'Okavango Delta, Botswana',
+    -19.300::numeric, 23.100::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/botswana/okavango-delta/andbeyond-xaranna-okavango-delta-camp/',
+    '+1-800-998-6634',
+    $$Romantic tented camp inspired by water-lily hues in a private Okavango Delta concession. Intimate canvas suites with mokoro and game drives.$$,
+    $$Screened May 2026: Glamping Resort.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — tented camp (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Kichwa Tembo Tented Camp', NULL,
+    'andbeyond-kichwa-tembo-tented-camp-mara-ke',
+    'Glamping Resort', 'Safari Tent',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Kenya', 'Masai Mara', 'Masai Mara National Reserve',
+    'Masai Mara National Reserve, Kenya',
+    -1.280::numeric, 35.020::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/kenya/masai-mara-national-park/andbeyond-kichwa-tembo-tented-camp/',
+    '+1-800-998-6634',
+    $$Quintessential Big Five tented camp on the western Mara with spacious classic safari tents, private concession access, and andBeyond guiding.$$,
+    $$Screened May 2026: Glamping Resort. Condé Nast Readers' Choice 2025.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — tented camp (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Lake Manyara Tree Lodge', NULL,
+    'andbeyond-lake-manyara-tree-lodge-tz',
+    'Glamping Resort', 'Treehouse',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Tanzania', 'Manyara', 'Lake Manyara National Park',
+    'Lake Manyara National Park, Tanzania',
+    -3.370::numeric, 35.830::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/tanzania/lake-manyara-national-park/andbeyond-lake-manyara-tree-lodge/',
+    '+1-800-998-6634',
+    $$Only lodge inside Lake Manyara National Park — treehouse-style suites elevated among towering mahogany forest with park wildlife at the doorstep.$$,
+    $$Screened May 2026: Glamping Resort (treehouse inventory).$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — tree lodge (May 2026).'
+  ),
+  -- Landscape Hotel (5)
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Sossusvlei Desert Lodge', NULL,
+    'andbeyond-sossusvlei-desert-lodge-namibia-na',
+    'Landscape Hotel', 'Suite',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Namibia', 'Hardap', 'Sossusvlei',
+    'andBeyond Sossusvlei Private Desert Reserve, Namibia',
+    -24.780::numeric, 15.920::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/namibia/sossusvlei-desert/andbeyond-sossusvlei-desert-lodge/',
+    '+1-800-998-6634',
+    $$Desert lodge on a private reserve bordering NamibRand — stone, glass and light suites designed to blend into the dunes ("invisible by design"). Ten suites plus family suite; skylights, plunge pools, stargazing.$$,
+    $$Screened May 2026: Landscape Hotel. Condé Nast Readers' Choice 2025.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — landscape-integrated desert suites (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'No',
+    'andBeyond Ngorongoro Crater Lodge', NULL,
+    'andbeyond-ngorongoro-crater-lodge-tz',
+    'Landscape Hotel', 'Suite',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Tanzania', 'Ngorongoro', 'Ngorongoro Conservation Area',
+    'Ngorongoro Conservation Area, Tanzania',
+    -3.170::numeric, 35.550::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/tanzania/ngorongoro-crater/andbeyond-ngorongoro-crater-lodge/',
+    '+1-800-998-6634',
+    $$Iconic crater-rim lodge with dramatic Maasai-inspired architecture perched above the Ngorongoro Crater floor. Temporarily closed for significant refurbishment (May 2026 directory).$$,
+    $$Screened May 2026: Landscape Hotel. is_open=No until refurbishment completes.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — crater-rim architecture (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Sandibe Okavango Safari Lodge', NULL,
+    'andbeyond-sandibe-okavango-safari-lodge-bw',
+    'Landscape Hotel', 'Suite',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Botswana', 'Okavango Delta', 'Okavango Delta',
+    'Okavango Delta, Botswana',
+    -19.275::numeric, 23.125::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/botswana/okavango-delta/andbeyond-sandibe-okavango-safari-lodge/',
+    '+1-800-998-6634',
+    $$Nature-inspired Okavango lodge with warm wooden forms sculpted like a pangolin into the delta — biomimicry design integrating building with landscape.$$,
+    $$Screened May 2026: Landscape Hotel. Distinct from Sandibe Under Canvas.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — delta biomimicry lodge (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Phinda Rock Lodge', NULL,
+    'andbeyond-phinda-rock-lodge-kzn-za',
+    'Landscape Hotel', 'Suite',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'South Africa', 'KwaZulu-Natal', 'Phinda Private Game Reserve',
+    'Phinda Private Game Reserve, KwaZulu-Natal, South Africa',
+    -27.850::numeric, 32.320::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/south-africa/kwazulu-natal/phinda-private-game-reserve/andbeyond-phinda-rock-lodge/',
+    '+1-800-998-6634',
+    $$Intimate stone-and-glass suites set into a rocky outcrop with dramatic views across the Zululand valley in Phinda Private Game Reserve.$$,
+    $$Screened May 2026: Landscape Hotel. Condé Nast Readers' Choice 2025.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — cliff-integrated suites (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Suyian Lodge', NULL,
+    'andbeyond-suyian-lodge-laikipia-ke',
+    'Landscape Hotel', 'Lodge',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Kenya', 'Laikipia', 'Suyian Conservancy',
+    'Suyian Conservancy, Laikipia, Kenya',
+    0.050::numeric, 36.850::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/kenya/laikipia/suyian-conservancy/andbeyond-suyian-lodge/',
+    '+1-800-998-6634',
+    $$Intimate Laikipia safari escape rooted in ancient stone and vast wild spaces — low-impact lodge architecture in a private conservancy setting.$$,
+    $$Screened May 2026: Landscape Hotel.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — stone/conservancy lodge (May 2026).'
+  ),
+  -- Outdoor Boutique Hotel (3)
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Vira Vira', NULL,
+    'andbeyond-vira-vira-lake-district-cl',
+    'Outdoor Boutique Hotel', 'Lodge',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Chile', 'Los Ríos', 'Pucon',
+    'Liucura River, Lake District, Chile',
+    -39.350::numeric, -71.920::numeric,
+    'https://www.andbeyond.com/our-lodges/south-america/chile/lake-district/andbeyond-vira-vira/',
+    '+1-800-998-6634',
+    $$Soulful riverside farm lodge in Chile's Lake District — working organic farm, spa, and adventure base (volcanoes, rivers, forests) with boutique villa rooms.$$,
+    $$Screened May 2026: Outdoor Boutique Hotel. Condé Nast Readers' Choice 2024. Not safari tents.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — South America farm lodge (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Phinda Forest Lodge', NULL,
+    'andbeyond-phinda-forest-lodge-kzn-za',
+    'Outdoor Boutique Hotel', 'Suite',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'South Africa', 'KwaZulu-Natal', 'Phinda Private Game Reserve',
+    'Phinda Private Game Reserve, KwaZulu-Natal, South Africa',
+    -27.870::numeric, 32.300::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/south-africa/kwazulu-natal/phinda-private-game-reserve/andbeyond-phinda-forest-lodge/',
+    '+1-800-998-6634',
+    $$Rare sand-forest retreat at Phinda with suites designed to be lived from within the forest canopy — intimate boutique safari lodge in a unique ecosystem.$$,
+    $$Screened May 2026: Outdoor Boutique Hotel. Condé Nast Readers' Choice 2025.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — sand forest suites (May 2026).'
+  ),
+  (
+    'in_progress', 'Yes', 'Yes',
+    'andBeyond Mnemba Island Lodge', NULL,
+    'andbeyond-mnemba-island-zanzibar-tz',
+    'Outdoor Boutique Hotel', 'Villa',
+    'Sage', 'web_research_andbeyond_portfolio_2026_05',
+    'Tanzania', 'Zanzibar', 'Mnemba Island',
+    'Mnemba Island, off northeast Zanzibar, Tanzania',
+    -5.820::numeric, 39.350::numeric,
+    'https://www.andbeyond.com/our-lodges/africa/andbeyond-mnemba-island/',
+    '+1-800-998-6634',
+    $$Barefoot private island paradise with exclusive beach bandas/villas, diving, and Indian Ocean experiences — boutique island lodge, not tented safari.$$,
+    $$Screened May 2026: Outdoor Boutique Hotel. Condé Nast Readers' Choice 2024.$$,
+    '2026-05-21', '2026-05-21', 'private_commercial', 'luxury', 'manual',
+    'andBeyond portfolio — private island (May 2026).'
+  )
+) AS v(
+  research_status, is_glamping_property, is_open,
+  property_name, site_name, slug, property_type, unit_type,
+  source, discovery_source,
+  country, state, city, address, lat, lon, url, phone_number,
+  description, notes, date_added, date_updated, land_operator_category,
+  glamping_service_tier, glamping_service_tier_source, glamping_service_tier_notes
+)
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM public.all_glamping_properties p
+  WHERE lower(btrim(COALESCE(p.slug, ''))) = lower(btrim(v.slug))
+     OR (
+       public.sage_normalize_property_name_key(p.property_name)
+         = public.sage_normalize_property_name_key(v.property_name)
+       AND lower(btrim(COALESCE(p.unit_type, ''))) = lower(btrim(COALESCE(v.unit_type, '')))
+       AND lower(btrim(COALESCE(p.country, ''))) = lower(btrim(COALESCE(v.country, '')))
+       AND COALESCE(upper(btrim(p.state)), '') = COALESCE(upper(btrim(v.state)), '')
+     )
+);

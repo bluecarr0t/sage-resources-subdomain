@@ -1,3 +1,6 @@
+'use client';
+
+import type { ReactNode } from 'react';
 import Image from 'next/image';
 import type { SageProperty } from '@/lib/types/sage';
 import type { GlampingPropertyPublicImages } from '@/lib/fetch-glamping-property-public-images';
@@ -6,13 +9,36 @@ import {
   EDITORIAL_METRIC_VALUE_CLASS,
   EDITORIAL_SECTION_LABEL_CLASS,
 } from '@/components/editorial/EditorialPageShell';
+import StarRatingDisplay from '@/components/property/StarRatingDisplay';
+import { getPropertyTypeDotColor } from '@/lib/property-type-dot-color';
+import { getUnitTypeDotColor } from '@/lib/unit-type-dot-color';
+
+function SummaryMetricDotValue({
+  children,
+  dotColor,
+}: {
+  children: ReactNode;
+  dotColor: string;
+}) {
+  return (
+    <dd className="mt-1 flex items-center gap-2 text-neutral-800">
+      <span
+        className="h-2 w-2 shrink-0 rounded-full"
+        style={{ backgroundColor: dotColor }}
+        aria-hidden
+      />
+      <span>{children}</span>
+    </dd>
+  );
+}
 
 type PropertyDetailServerSummaryProps = {
   propertyName: string;
   property: SageProperty;
   propertyImages?: GlampingPropertyPublicImages;
-  /** Visible FAQ copy (aligned with JSON-LD) */
-  propertyFaqs?: Array<{ question: string; answer: string }>;
+  showGoogleRating?: boolean;
+  googleRating?: number | null;
+  googleReviewCount?: number | null;
 };
 
 function formatUsd(value: string | number | null | undefined): string | null {
@@ -35,27 +61,22 @@ function buildLocation(property: SageProperty): string {
   return parts.join(', ');
 }
 
-function buildDescription(property: SageProperty): string | null {
-  const raw =
-    property.description?.trim() ||
-    property.google_description?.trim() ||
-    null;
-  if (!raw || raw.length < 40) return null;
-  return raw.length > 500 ? `${raw.slice(0, 497)}...` : raw;
-}
-
 /** Crawler-visible property facts (SSR) — interactive UI loads in PropertyDetailTemplate. */
 export default function PropertyDetailServerSummary({
   propertyName,
   property,
   propertyImages,
-  propertyFaqs = [],
+  showGoogleRating = false,
+  googleRating = null,
+  googleReviewCount = null,
 }: PropertyDetailServerSummaryProps) {
   const location = buildLocation(property);
   const rate = formatUsd(property.rate_avg_retail_daily_rate);
-  const description = buildDescription(property);
   const heroUrl = propertyImages?.heroUrl ?? propertyImages?.galleryUrls?.[0] ?? null;
   const unitType = property.unit_type?.trim();
+  const propertyType = property.property_type?.trim();
+  const unitTypeDotColor = unitType ? getUnitTypeDotColor(unitType) : null;
+  const propertyTypeDotColor = propertyType ? getPropertyTypeDotColor(propertyType) : null;
 
   return (
     <section
@@ -69,15 +90,6 @@ export default function PropertyDetailServerSummary({
         <p className="mt-3 text-sm font-light leading-relaxed text-neutral-600">{location}</p>
       ) : null}
 
-      {property.address ? (
-        <p className="mt-1 max-w-xl text-[11px] font-light leading-relaxed text-neutral-500">
-          {property.address}
-          {property.city || property.state
-            ? `, ${[property.city, property.state, property.zip_code].filter(Boolean).join(', ')}`
-            : ''}
-        </p>
-      ) : null}
-
       <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-[11px] font-light text-neutral-600">
         {rate ? (
           <div>
@@ -85,25 +97,43 @@ export default function PropertyDetailServerSummary({
             <dd className={`mt-1 ${EDITORIAL_METRIC_VALUE_CLASS}`}>{rate}</dd>
           </div>
         ) : null}
-        {unitType ? (
+        {unitType && unitTypeDotColor ? (
           <div>
             <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Unit type</dt>
-            <dd className="mt-1 text-neutral-800">{unitType}</dd>
+            <SummaryMetricDotValue dotColor={unitTypeDotColor}>{unitType}</SummaryMetricDotValue>
           </div>
         ) : null}
-        {property.property_type ? (
+        {propertyType && propertyTypeDotColor ? (
           <div>
             <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Property type</dt>
-            <dd className="mt-1 text-neutral-800">{property.property_type}</dd>
+            <SummaryMetricDotValue dotColor={propertyTypeDotColor}>
+              {propertyType}
+            </SummaryMetricDotValue>
+          </div>
+        ) : null}
+        {showGoogleRating && (googleRating != null || googleReviewCount != null) ? (
+          <div>
+            <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Google rating</dt>
+            <dd className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-light tabular-nums text-neutral-500">
+              {googleRating != null ? (
+                <>
+                  <StarRatingDisplay rating={googleRating} />
+                  <span className="text-neutral-700">{googleRating.toFixed(1)}</span>
+                </>
+              ) : null}
+              {googleRating != null && googleReviewCount != null ? (
+                <span className="text-neutral-400"> · </span>
+              ) : null}
+              {googleReviewCount != null ? (
+                <span>
+                  {googleReviewCount.toLocaleString()}{' '}
+                  {googleReviewCount === 1 ? 'review' : 'reviews'} on Google
+                </span>
+              ) : null}
+            </dd>
           </div>
         ) : null}
       </dl>
-
-      {description ? (
-        <p className="mt-6 max-w-3xl text-sm font-light leading-relaxed text-neutral-700">
-          {description}
-        </p>
-      ) : null}
 
       {heroUrl ? (
         <div className="relative mt-8 aspect-[16/10] w-full max-w-3xl overflow-hidden border border-neutral-200/90 bg-neutral-100">
@@ -115,22 +145,6 @@ export default function PropertyDetailServerSummary({
             sizes="(max-width: 768px) 100vw, 672px"
             priority
           />
-        </div>
-      ) : null}
-
-      {propertyFaqs.length > 0 ? (
-        <div className="mt-10 max-w-3xl">
-          <h2 className={EDITORIAL_SECTION_LABEL_CLASS}>Frequently asked questions</h2>
-          <dl className="mt-4 space-y-4">
-            {propertyFaqs.map((faq) => (
-              <div key={faq.question}>
-                <dt className="text-sm font-medium text-neutral-900">{faq.question}</dt>
-                <dd className="mt-1 text-sm font-light leading-relaxed text-neutral-700">
-                  {faq.answer}
-                </dd>
-              </div>
-            ))}
-          </dl>
         </div>
       ) : null}
     </section>

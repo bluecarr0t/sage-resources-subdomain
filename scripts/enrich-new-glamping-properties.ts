@@ -17,6 +17,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 import { OpenAI } from 'openai';
 import { createClient } from '@supabase/supabase-js';
+import { applyGlampingRatesToUsd } from '../lib/glamping-rates-usd';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
@@ -332,7 +333,8 @@ async function main() {
       if (!dryRun) {
         update.research_status = 'in_progress';
         update.date_updated = new Date().toISOString().split('T')[0];
-        const { error: upErr } = await supabase.from(TABLE).update(update).eq('id', p.id);
+        const { row: updateUsd } = applyGlampingRatesToUsd(update);
+        const { error: upErr } = await supabase.from(TABLE).update(updateUsd).eq('id', p.id);
         if (upErr) {
           console.log('update failed:', upErr.message);
           err++;

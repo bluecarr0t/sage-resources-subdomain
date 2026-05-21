@@ -62,6 +62,7 @@ import {
 import { normalizeAllGlampingPropertiesCountryForDb } from '@/lib/all-glamping-properties-country';
 import { isValidGlampingBrandId } from '@/lib/glamping-brands';
 import { isGlampingServiceTier } from '@/lib/glamping-service-tier';
+import { applyGlampingRatesToUsd } from '@/lib/glamping-rates-usd';
 
 export const dynamic = 'force-dynamic';
 
@@ -224,6 +225,9 @@ export const POST = withAdminAuth(async (request) => {
     ) {
       insertRow.date_updated = today;
     }
+
+    const { row: insertRowUsd } = applyGlampingRatesToUsd(insertRow);
+    Object.assign(insertRow, insertRowUsd);
 
     if (Object.prototype.hasOwnProperty.call(body, 'property_id')) {
       const rawPid = body.property_id;
@@ -561,6 +565,9 @@ export const PATCH = withAdminAuth(async (request) => {
     }
 
     sanitized.date_updated = new Date().toISOString().split('T')[0];
+
+    const { row: sanitizedUsd } = applyGlampingRatesToUsd(sanitized);
+    Object.assign(sanitized, sanitizedUsd);
 
     const supabase = createServerClient();
 

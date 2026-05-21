@@ -1,6 +1,10 @@
 'use client';
 
-import { buildPropertyGoogleMapsUrl, buildPropertyMapEmbedUrl } from '@/lib/property-map-embed-url';
+import {
+  buildPropertyGoogleMapsUrl,
+  buildPropertyMapEmbedUrl,
+  DEFAULT_PROPERTY_MAP_ZOOM,
+} from '@/lib/property-map-embed-url';
 
 export type PropertyLocationMapEmbedProps = {
   lat?: number | null;
@@ -22,7 +26,7 @@ export default function PropertyLocationMapEmbed({
   addressLine,
   placeQuery,
   sageMapHref,
-  zoom = 14,
+  zoom = DEFAULT_PROPERTY_MAP_ZOOM,
   variant = 'default',
 }: PropertyLocationMapEmbedProps) {
   const embedSrc = buildPropertyMapEmbedUrl({

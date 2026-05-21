@@ -5,7 +5,8 @@ import { getAllNationalParkSlugs, getNationalParkBySlug, getSlugType } from "@/l
 import { parseCoordinates } from "@/lib/types/sage";
 import { notFound } from "next/navigation";
 import PropertyDetailTemplate from "@/components/PropertyDetailTemplate";
-import PropertyDetailServerSummary from "@/components/PropertyDetailServerSummary";
+import PropertyDetailServerFaqs from "@/components/PropertyDetailServerFaqs";
+import PropertyDetailServerAddress from "@/components/PropertyDetailServerAddress";
 import NationalParkDetailTemplate from "@/components/NationalParkDetailTemplate";
 import { generatePropertyBreadcrumbSchema, generatePropertyLocalBusinessSchema, generatePropertyFAQSchema, generatePropertyAmenitiesSchema, buildPropertyFaqEntries } from "@/lib/schema";
 import { getPropertyOtaListings } from "@/lib/property-ota-listings";
@@ -452,17 +453,10 @@ export default async function PropertyPage({ params }: PageProps) {
         skipGooglePlaces={skipGooglePlaces}
         propertyImages={propertyImages}
         locale={locale}
-        propertyFaqs={propertyFaqEntries}
         mapCoordinates={coordinates}
         serverSummaryRendered
-        serverSummary={
-          <PropertyDetailServerSummary
-            propertyName={propertyName}
-            property={firstProperty}
-            propertyImages={propertyImages}
-            propertyFaqs={propertyFaqEntries}
-          />
-        }
+        serverFaqs={<PropertyDetailServerFaqs propertyFaqs={propertyFaqEntries} />}
+        serverAddress={<PropertyDetailServerAddress property={firstProperty} />}
         brandPage={
           brandSummary
             ? { slug: brandSummary.slug, displayName: brandSummary.display_name }

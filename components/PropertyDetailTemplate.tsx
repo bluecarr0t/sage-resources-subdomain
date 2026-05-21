@@ -10,19 +10,25 @@ import {
   EditorialMetricLeader,
   EditorialPageShell,
   EDITORIAL_H1_CLASS,
-  EDITORIAL_METRIC_VALUE_CLASS,
   EDITORIAL_SECTION_LABEL_CLASS,
 } from '@/components/editorial/EditorialPageShell';
 import { createLocaleLinks } from '@/lib/locale-links';
 import { formatGlampingIsOpenPublicLabel } from '@/lib/glamping-is-open';
 import { getPropertyOtaListings } from '@/lib/property-ota-listings';
 import PropertyLocationMapEmbed from '@/components/PropertyLocationMapEmbed';
-import { buildPropertyMapEmbedUrl } from '@/lib/property-map-embed-url';
+import {
+  buildPropertyMapEmbedUrl,
+  DEFAULT_PROPERTY_MAP_ZOOM,
+} from '@/lib/property-map-embed-url';
 import { buildPropertyMapQueryLabel } from '@/lib/property-map-location';
 import type { GlampingPropertyPublicImages } from '@/lib/fetch-glamping-property-public-images';
 import { GooglePlacesData } from '@/lib/google-places';
 import { useDeferredGooglePlacesFetch } from '@/lib/hooks/useDeferredGooglePlacesFetch';
 import PropertyDevelopmentResources from '@/components/property/PropertyDevelopmentResources';
+import PropertyDetailFaqsSection from '@/components/property/PropertyDetailFaqsSection';
+import PropertyDetailServerSummary from '@/components/PropertyDetailServerSummary';
+import { formatPropertyMailingLine, splitPropertyMailingAddress } from '@/lib/format-property-mailing-line';
+import PropertyMailingAddress from '@/components/property/PropertyMailingAddress';
 
 interface PropertyDetailTemplateProps {
   properties: SageProperty[];
@@ -43,10 +49,12 @@ interface PropertyDetailTemplateProps {
   mapCoordinates?: [number, number] | null;
   /** Linked public brand page when property has brand_id */
   brandPage?: { slug: string; displayName: string } | null;
-  /** When true, header/FAQs are rendered server-side in PropertyDetailServerSummary */
+  /** When true, header and summary metrics use PropertyDetailServerSummary */
   serverSummaryRendered?: boolean;
-  /** SSR property overview (pass from server page) */
-  serverSummary?: ReactNode;
+  /** SSR full-width FAQs section (below the two-column grid) */
+  serverFaqs?: ReactNode;
+  /** SSR mailing line below the location map (Visit column) */
+  serverAddress?: ReactNode;
 }
 
 function getGooglePhotoUrl(
@@ -117,7 +125,8 @@ export default function PropertyDetailTemplate({
   mapCoordinates: mapCoordinatesProp = null,
   brandPage = null,
   serverSummaryRendered = false,
-  serverSummary = null,
+  serverFaqs = null,
+  serverAddress = null,
 }: PropertyDetailTemplateProps) {
   const firstProperty = properties[0];
   const links = useMemo(() => createLocaleLinks(locale), [locale]);
@@ -201,12 +210,8 @@ export default function PropertyDetailTemplate({
   if (firstProperty.country) locationParts.push(firstProperty.country);
   const location = locationParts.join(', ');
 
-  const addressParts: string[] = [];
-  if (firstProperty.address) addressParts.push(firstProperty.address);
-  if (firstProperty.city) addressParts.push(firstProperty.city);
-  if (firstProperty.state) addressParts.push(firstProperty.state);
-  if (firstProperty.zip_code) addressParts.push(firstProperty.zip_code);
-  const fullAddress = addressParts.join(', ');
+  const mailingLine = formatPropertyMailingLine(firstProperty);
+  const mailingAddressLines = splitPropertyMailingAddress(firstProperty);
 
   const groupedProperties = groupProperties(properties);
   const websiteUrl = googlePlacesData?.websiteUri || firstProperty.url;
@@ -217,7 +222,7 @@ export default function PropertyDetailTemplate({
     [firstProperty]
   );
   const mapAddressLine =
-    fullAddress.trim() ||
+    mailingLine?.trim() ||
     [propertyName, location].filter(Boolean).join(', ') ||
     null;
   const mapLink = coordinates
@@ -244,7 +249,6 @@ export default function PropertyDetailTemplate({
   ).sort();
 
   const hasMultipleLocations = Object.keys(groupedProperties).length > 1;
-  const avgRate = firstProperty.rate_avg_retail_daily_rate;
 
   return (
     <EditorialPageShell solidPageBackground>
@@ -263,7 +267,16 @@ export default function PropertyDetailTemplate({
           <span className="text-neutral-700">{propertyName}</span>
         </nav>
 
-        {serverSummary}
+        {serverSummaryRendered ? (
+          <PropertyDetailServerSummary
+            propertyName={propertyName}
+            property={firstProperty}
+            propertyImages={propertyImages}
+            showGoogleRating={showGoogleReviews}
+            googleRating={googlePlacesData?.rating ?? null}
+            googleReviewCount={googlePlacesData?.userRatingCount ?? null}
+          />
+        ) : null}
 
         {!serverSummaryRendered ? (
           <>
@@ -272,31 +285,8 @@ export default function PropertyDetailTemplate({
             {location ? (
               <p className="mt-3 text-sm font-light leading-relaxed text-neutral-600">{location}</p>
             ) : null}
-
-            {firstProperty.address && fullAddress ? (
-              <p className="mt-1 max-w-xl text-[11px] font-light leading-relaxed text-neutral-500">
-                {fullAddress}
-              </p>
-            ) : null}
           </>
         ) : null}
-
-        {showGoogleReviews && (
-          <p className="mt-3 text-[11px] font-light tabular-nums text-neutral-500">
-            {googlePlacesData?.rating ? (
-              <span className="text-neutral-700">{googlePlacesData.rating.toFixed(1)}</span>
-            ) : null}
-            {googlePlacesData?.rating && googlePlacesData?.userRatingCount ? (
-              <span className="text-neutral-400"> · </span>
-            ) : null}
-            {googlePlacesData?.userRatingCount ? (
-              <span>
-                {googlePlacesData.userRatingCount.toLocaleString()}{' '}
-                {googlePlacesData.userRatingCount === 1 ? 'review' : 'reviews'} on Google
-              </span>
-            ) : null}
-          </p>
-        )}
 
         <section className="mt-10" aria-label={`Photos of ${propertyName}`}>
           {showPhotos ? (
@@ -392,34 +382,14 @@ export default function PropertyDetailTemplate({
 
         <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-x-16">
           <dl className="space-y-12">
-            {avgRate != null && avgRate !== '' ? (
-              <div>
-                <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Avg. retail daily rate</dt>
-                <dd className={EDITORIAL_METRIC_VALUE_CLASS}>{formatUsd(avgRate)}</dd>
-                <p className="mt-4 max-w-xs text-[11px] leading-relaxed text-neutral-500">
-                  Published average retail daily rate from Sage research.
-                </p>
-              </div>
-            ) : null}
-
             {unitTypes.length > 0 ? (
               <div>
-                <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Unit types</dt>
-                <dd className="mt-3">
-                  <ul className="space-y-2 border-l border-sage-200 pl-4 text-sm font-light text-neutral-700">
-                    {unitTypes.map((type) => (
-                      <li key={type}>{type}</li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
-            ) : null}
-
-            {firstProperty.description?.trim() ? (
-              <div>
-                <dt className={EDITORIAL_SECTION_LABEL_CLASS}>About</dt>
-                <dd className="mt-4 max-w-prose text-sm font-light leading-relaxed text-neutral-700 whitespace-pre-line">
-                  {firstProperty.description}
+                <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Unit Details</dt>
+                <dd className="mt-3 border-l border-sage-200 pl-4">
+                  <p className="text-sm font-light">
+                    <span className="text-neutral-500">Unit Type</span>{' '}
+                    <span className="text-neutral-700">{unitTypes.join(' · ')}</span>
+                  </p>
                 </dd>
               </div>
             ) : null}
@@ -492,20 +462,11 @@ export default function PropertyDetailTemplate({
               </dd>
             </div>
 
-            {!serverSummaryRendered && propertyFaqs.length > 0 ? (
-              <div aria-labelledby="property-faq-heading">
-                <dt id="property-faq-heading" className={EDITORIAL_SECTION_LABEL_CLASS}>
-                  Questions
-                </dt>
-                <dd className="mt-6 space-y-8">
-                  {propertyFaqs.map((item) => (
-                    <div key={item.question}>
-                      <p className="text-sm font-medium text-neutral-800">{item.question}</p>
-                      <p className="mt-2 text-sm font-light leading-relaxed text-neutral-600">
-                        {item.answer}
-                      </p>
-                    </div>
-                  ))}
+            {firstProperty.description?.trim() ? (
+              <div>
+                <dt className={EDITORIAL_SECTION_LABEL_CLASS}>About</dt>
+                <dd className="mt-4 max-w-prose text-sm font-light leading-relaxed text-neutral-700 whitespace-pre-line">
+                  {firstProperty.description}
                 </dd>
               </div>
             ) : null}
@@ -567,10 +528,12 @@ export default function PropertyDetailTemplate({
                   addressLine={mapAddressLine}
                   placeQuery={mapPlaceQuery}
                   sageMapHref={mapLink}
-                  zoom={14}
+                  zoom={DEFAULT_PROPERTY_MAP_ZOOM}
                   variant="sidebar"
                 />
               ) : null}
+
+              {serverAddress ?? <PropertyMailingAddress lines={mailingAddressLines} />}
             </div>
 
             {hasMultipleLocations ? (
@@ -632,6 +595,8 @@ export default function PropertyDetailTemplate({
             )}
           </aside>
         </div>
+
+        {serverFaqs ?? (propertyFaqs.length > 0 ? <PropertyDetailFaqsSection propertyFaqs={propertyFaqs} /> : null)}
 
         <PropertyDevelopmentResources locale={locale} />
 

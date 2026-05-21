@@ -15,6 +15,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 import { OpenAI } from 'openai';
 import { createClient } from '@supabase/supabase-js';
+import { applyGlampingRatesToUsd } from '../lib/glamping-rates-usd';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
@@ -191,9 +192,10 @@ async function main() {
         continue;
       }
 
+      const { row: updateUsd } = applyGlampingRatesToUsd(update);
       const { error: updateError } = await supabase
         .from(TABLE)
-        .update(update)
+        .update(updateUsd)
         .eq('id', row.id);
 
       if (updateError) {

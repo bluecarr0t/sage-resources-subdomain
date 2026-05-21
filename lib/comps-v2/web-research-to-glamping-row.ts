@@ -4,6 +4,7 @@
  */
 
 import type { CompsV2Candidate } from '@/lib/comps-v2/types';
+import { applyGlampingRatesToUsd } from '@/lib/glamping-rates-usd';
 
 const WEB_PIPELINE_SOURCES = new Set(['tavily_gap_fill', 'firecrawl_gap_fill']);
 
@@ -25,7 +26,7 @@ export function compsV2WebCandidateToGlampingRow(c: CompsV2Candidate): Record<st
   const descParts = [c.description?.trim(), c.location_detail?.trim()].filter(Boolean);
   const description = descParts.length ? descParts.join('\n\n') : null;
 
-  return {
+  const baseRow = {
     research_status: 'new',
     is_glamping_property: 'Yes',
     is_open: 'Yes',
@@ -167,6 +168,8 @@ export function compsV2WebCandidateToGlampingRow(c: CompsV2Candidate): Record<st
     setting_mountainous: null,
     quality_score: null,
   };
+
+  return applyGlampingRatesToUsd(baseRow).row;
 }
 
 export function webPipelineSourceForCandidate(c: CompsV2Candidate): 'tavily_gap_fill' | 'firecrawl_gap_fill' | null {

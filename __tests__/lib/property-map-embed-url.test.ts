@@ -1,6 +1,7 @@
 import {
   buildPropertyGoogleMapsUrl,
   buildPropertyMapEmbedUrl,
+  DEFAULT_PROPERTY_MAP_ZOOM,
 } from '@/lib/property-map-embed-url';
 import { buildPropertyMapQueryLabel } from '@/lib/property-map-location';
 
@@ -33,6 +34,7 @@ describe('buildPropertyMapEmbedUrl', () => {
     expect(url).toContain('maps/embed/v1/place');
     expect(url).toContain('key=test-key');
     expect(url).toContain('q=52.268%2C-113.811');
+    expect(url).toContain(`zoom=${DEFAULT_PROPERTY_MAP_ZOOM}`);
     expect(url).not.toContain('Collinswood');
   });
 
