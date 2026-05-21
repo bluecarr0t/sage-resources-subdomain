@@ -1,8 +1,23 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useRef, useEffect, type Dispatch, type SetStateAction } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useRef,
+  useEffect,
+  useMemo,
+  Suspense,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SageProperty } from '@/lib/types/sage';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
+import { isMapClientWorkOnlyLayer, isMapEmbedMode } from '@/lib/map-embed-mode';
+import { mapSearchParamsFromUrlSearchParams } from '@/lib/map-search-params';
+import MapLoading from '@/components/MapLoading';
 
 let globalFetchInProgress = false;
 let globalAbortController: AbortController | null = null;
@@ -51,15 +66,15 @@ interface MapContextType {
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
-export function MapProvider({
-  children,
-  embedMode = false,
-  clientWorkOnly = false,
-}: {
-  children: ReactNode;
-  embedMode?: boolean;
-  clientWorkOnly?: boolean;
-}) {
+function MapProviderInner({ children }: { children: ReactNode }) {
+  const urlSearchParams = useSearchParams();
+  const queryRecord = useMemo(
+    () => mapSearchParamsFromUrlSearchParams(urlSearchParams),
+    [urlSearchParams]
+  );
+  const embedMode = isMapEmbedMode(queryRecord);
+  const clientWorkOnly = isMapClientWorkOnlyLayer(queryRecord);
+
   /** Empty array = all countries in the published map dataset */
   const [filterCountry, setFilterCountry] = useState<string[]>([]);
   const [filterState, setFilterState] = useState<string[]>([]);
@@ -114,6 +129,12 @@ export function MapProvider({
   };
   const setMapLayer = (layer: MapLayer) => setSelectedMapLayer(layer);
   const toggleFullscreen = () => setIsFullscreen((prev) => !prev);
+
+  useEffect(() => {
+    if (clientWorkOnly) {
+      setShowNationalParks(false);
+    }
+  }, [clientWorkOnly]);
 
   const clearFilters = () => {
     setFilterCountry([]);
@@ -261,6 +282,20 @@ export function MapProvider({
     >
       {children}
     </MapContext.Provider>
+  );
+}
+
+export function MapProvider({ children }: { children: ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen w-full items-center justify-center bg-neutral-100/40">
+          <MapLoading />
+        </div>
+      }
+    >
+      <MapProviderInner>{children}</MapProviderInner>
+    </Suspense>
   );
 }
 

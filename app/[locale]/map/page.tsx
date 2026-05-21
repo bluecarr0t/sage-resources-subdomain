@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import { MapProvider } from '@/components/MapContext';
 import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
-import MapLayout from '@/components/MapLayout';
-import MapEmbedShell from '@/components/MapEmbedShell';
+import MapPageClient from '@/components/MapPageClient';
 import ResourceHints from '@/components/ResourceHints';
 import { getCache, setCache } from '@/lib/redis';
 import { createServerClient } from '@/lib/supabase';
@@ -38,6 +37,9 @@ type MapSearchParams = Record<string, string | string[] | undefined>;
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
+
+/** Query params (?embed=1, ?layer=client-work) must be read per request, not at build time. */
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -257,14 +259,8 @@ export default async function MapPage({
       />
 
       <GoogleMapsProvider>
-        <MapProvider embedMode={embedMode} clientWorkOnly={clientWorkOnly}>
-          {embedMode ? (
-            <MapEmbedShell>
-              <MapLayout locale={locale} embedMode />
-            </MapEmbedShell>
-          ) : (
-            <MapLayout locale={locale} />
-          )}
+        <MapProvider>
+          <MapPageClient locale={locale} />
         </MapProvider>
       </GoogleMapsProvider>
     </>

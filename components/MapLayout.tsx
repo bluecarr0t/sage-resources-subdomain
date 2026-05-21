@@ -27,8 +27,6 @@ const DynamicLocationSearch = dynamic(() => import('@/components/LocationSearch'
 
 interface MapLayoutProps {
   locale: string;
-  /** WordPress / homepage iframe: map-first, filters in a slide-over panel */
-  embedMode?: boolean;
   /** Override sidebar H1 (state/city hub pages) */
   pageTitle?: string;
   /** SEO intro copy for state hub pages */
@@ -38,12 +36,11 @@ interface MapLayoutProps {
 
 export default function MapLayout({
   locale,
-  embedMode = false,
   pageTitle,
   hubIntro,
   hubIntroSecondary,
 }: MapLayoutProps) {
-  const { isFullscreen, toggleFullscreen, clientWorkOnly } = useMapContext();
+  const { isFullscreen, toggleFullscreen, clientWorkOnly, embedMode } = useMapContext();
   const [embedPanelOpen, setEmbedPanelOpen] = useState(false);
   const t = useTranslations('map');
   const mapTitle = pageTitle ?? (clientWorkOnly ? t('layers.clientWork.label') : t('title'));

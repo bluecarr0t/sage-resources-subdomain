@@ -345,7 +345,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   }, [showNationalParks, nationalParks.length]);
 
   const processedProperties = usePropertyProcessing(properties, filterState, filterCountry, filterUnitType, filterRateRange);
-  const displayProperties = processedProperties;
+  const displayProperties = clientWorkOnly ? [] : processedProperties;
   const propertiesWithCoords = useMemo(() => filterPropertiesWithCoordinates(displayProperties), [displayProperties]);
 
   const { markersRef, parkMarkersRef, clientWorkMarkersRef } = useMapMarkers({
