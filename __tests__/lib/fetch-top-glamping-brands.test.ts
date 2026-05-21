@@ -1,7 +1,9 @@
 import {
   aggregateTopGlampingBrands,
+  formatPartnerBrandNote,
   formatRetailDailyRate,
   formatSubBrandNote,
+  rankingRootBrandId,
   TOP_GLAMPING_BRANDS_COUNT,
 } from '@/lib/fetch-top-glamping-brands';
 import type { GlampingBrand } from '@/lib/glamping-brands';
@@ -107,6 +109,137 @@ describe('aggregateTopGlampingBrands', () => {
     expect(result.brandsWithPublishedProperties).toBe(2);
   });
 
+  it('ranks AutoCamp standalone with a Hilton partnership note instead of rolling into Hilton', () => {
+    const hiltonId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+    const autocampId = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+    const outsetId = 'ffffffff-ffff-4fff-8fff-ffffffffffff';
+
+    const hiltonBrands: GlampingBrand[] = [
+      brand({
+        id: hiltonId,
+        slug: 'hilton',
+        display_name: 'Hilton',
+        brand_tier: 'portfolio',
+      }),
+      brand({
+        id: autocampId,
+        slug: 'autocamp',
+        display_name: 'AutoCamp',
+        brand_tier: 'sub_brand',
+        parent_brand_id: hiltonId,
+      }),
+      brand({
+        id: outsetId,
+        slug: 'hilton-outset-collection',
+        display_name: 'Outset Collection by Hilton',
+        brand_tier: 'sub_brand',
+        parent_brand_id: hiltonId,
+      }),
+    ];
+
+    const rows = [
+      {
+        id: 30,
+        property_id: 'ac1',
+        slug: null,
+        property_name: 'AutoCamp Zion',
+        city: 'Springdale',
+        state: 'UT',
+        brand_id: autocampId,
+        quantity_of_units: 8,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 350,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 31,
+        property_id: 'sl1',
+        slug: null,
+        property_name: 'Slackline Moab',
+        city: 'Moab',
+        state: 'UT',
+        brand_id: outsetId,
+        quantity_of_units: 4,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 400,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const byId = new Map(hiltonBrands.map((b) => [b.id, b]));
+    expect(rankingRootBrandId(autocampId, byId)).toBe(autocampId);
+    expect(rankingRootBrandId(outsetId, byId)).toBe(hiltonId);
+
+    const result = aggregateTopGlampingBrands(hiltonBrands, rows, TOP_GLAMPING_BRANDS_COUNT);
+
+    expect(result.brands).toHaveLength(2);
+    expect(result.brands.find((r) => r.slug === 'autocamp')).toMatchObject({
+      displayName: 'AutoCamp',
+      propertyCount: 1,
+      subBrandNote: 'Partnered with Hilton',
+    });
+    expect(result.brands.find((r) => r.slug === 'hilton')).toMatchObject({
+      displayName: 'Hilton',
+      propertyCount: 1,
+      subBrandNote: 'Includes Outset Collection by Hilton',
+    });
+    expect(result.brands.some((r) => r.subBrandNote?.includes('AutoCamp'))).toBe(false);
+  });
+
+  it('includes child sub-brands when properties are tagged to the parent portfolio brand', () => {
+    const marriottId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    const outdoorId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+    const postcardId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+
+    const marriottBrands: GlampingBrand[] = [
+      brand({
+        id: marriottId,
+        slug: 'marriott',
+        display_name: 'Marriott',
+        brand_tier: 'portfolio',
+      }),
+      brand({
+        id: outdoorId,
+        slug: 'marriott-outdoor-collection',
+        display_name: 'Outdoor Collection by Marriott Bonvoy',
+        brand_tier: 'sub_brand',
+        parent_brand_id: marriottId,
+      }),
+      brand({
+        id: postcardId,
+        slug: 'postcard-cabins',
+        display_name: 'Postcard Cabins',
+        brand_tier: 'sub_brand',
+        parent_brand_id: outdoorId,
+      }),
+    ];
+
+    const rows = [
+      {
+        id: 20,
+        property_id: 'pc1',
+        slug: null,
+        property_name: 'Postcard Cabins Big Bear',
+        city: 'Big Bear',
+        state: 'CA',
+        brand_id: outdoorId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 300,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(marriottBrands, rows, TOP_GLAMPING_BRANDS_COUNT);
+
+    expect(result.brands[0]?.subBrandNote).toBe(
+      'Includes Outdoor Collection by Marriott Bonvoy, Postcard Cabins'
+    );
+  });
+
   it('dedupes multiple rows for the same logical property', () => {
     const rows = [
       {
@@ -153,6 +286,12 @@ describe('formatRetailDailyRate', () => {
 
   it('returns em dash when rate is missing', () => {
     expect(formatRetailDailyRate(null)).toBe('—');
+  });
+});
+
+describe('formatPartnerBrandNote', () => {
+  it('formats the partnership line', () => {
+    expect(formatPartnerBrandNote('Hilton')).toBe('Partnered with Hilton');
   });
 });
 

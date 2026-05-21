@@ -17,6 +17,9 @@ const PAGE_SIZE = 1000;
 
 export const TOP_GLAMPING_BRANDS_COUNT = 10;
 
+/** Sub-brands that rank on `/brands` at their own row (portfolio parent is a partnership only). */
+export const TOP_BRANDS_STANDALONE_PARTNER_SLUGS = new Set<string>(['autocamp']);
+
 export type TopGlampingBrandRow = {
   slug: string;
   displayName: string;
@@ -48,19 +51,43 @@ export function formatSubBrandNote(subBrandDisplayNames: readonly string[]): str
   return `Includes ${subBrandDisplayNames.join(', ')}`;
 }
 
+/** Partnership line for brands that rank standalone while retaining a portfolio parent link. */
+export function formatPartnerBrandNote(parentDisplayName: string): string {
+  return `Partnered with ${parentDisplayName}`;
+}
+
 function subBrandNamesForRollup(
   rootId: string,
   contributingBrandIds: Set<string>,
-  byId: Map<string, BrandRow>
+  byId: Map<string, BrandRow>,
+  propertyNamesInRollup: readonly string[]
 ): string[] {
-  const names: string[] = [];
+  const names = new Set<string>();
+
+  const addPathToRoot = (brandId: string) => {
+    let current = byId.get(brandId);
+    while (current && current.id !== rootId) {
+      names.add(current.display_name);
+      if (!current.parent_brand_id) break;
+      current = byId.get(current.parent_brand_id);
+    }
+  };
+
   for (const id of contributingBrandIds) {
-    if (id === rootId) continue;
-    const b = byId.get(id);
-    if (!b) continue;
-    names.push(b.display_name);
+    if (id !== rootId) addPathToRoot(id);
   }
-  return [...new Set(names)].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+
+  // Properties may be tagged to a parent portfolio brand while names still identify a child sub-brand.
+  for (const child of byId.values()) {
+    if (!child.parent_brand_id || !contributingBrandIds.has(child.parent_brand_id)) continue;
+    const prefix = child.display_name.toLowerCase();
+    const hasNamedProperty = propertyNamesInRollup.some((name) =>
+      name.toLowerCase().startsWith(prefix)
+    );
+    if (hasNamedProperty) names.add(child.display_name);
+  }
+
+  return [...names].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
 }
 
 export type TopGlampingBrandsOverview = {
@@ -113,12 +140,30 @@ function parseRate(value: string | number | null | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-function rootBrandId(brandId: string, byId: Map<string, BrandRow>): string {
+/** Rollup root for `/brands` ranking — stops at standalone partner brands (e.g. AutoCamp). */
+export function rankingRootBrandId(brandId: string, byId: Map<string, BrandRow>): string {
   let current = byId.get(brandId);
-  while (current?.parent_brand_id) {
-    current = byId.get(current.parent_brand_id);
+  if (!current) return brandId;
+
+  while (true) {
+    if (TOP_BRANDS_STANDALONE_PARTNER_SLUGS.has(current.slug)) return current.id;
+    if (!current.parent_brand_id) return current.id;
+    const parent = byId.get(current.parent_brand_id);
+    if (!parent) return current.id;
+    current = parent;
   }
-  return current?.id ?? brandId;
+}
+
+function partnerBrandNoteForRankingRoot(
+  rankingRootId: string,
+  byId: Map<string, BrandRow>
+): string | null {
+  const brand = byId.get(rankingRootId);
+  if (!brand?.parent_brand_id) return null;
+  if (!TOP_BRANDS_STANDALONE_PARTNER_SLUGS.has(brand.slug)) return null;
+  const parent = byId.get(brand.parent_brand_id);
+  if (!parent) return null;
+  return formatPartnerBrandNote(parent.display_name);
 }
 
 function latestTimestamp(rows: PropertyRow[]): string {
@@ -189,6 +234,7 @@ export function aggregateTopGlampingBrands(
   type PropertyAgg = {
     rootBrandId: string;
     leafBrandId: string;
+    propertyName: string;
     units: number;
     rate: number | null;
   };
@@ -211,8 +257,9 @@ export function aggregateTopGlampingBrands(
         : parseRate(anchor.rate_avg_retail_daily_rate);
 
     byProperty.set(key, {
-      rootBrandId: rootBrandId(brandId, byId),
+      rootBrandId: rankingRootBrandId(brandId, byId),
       leafBrandId: brandId,
+      propertyName: anchor.property_name?.trim() ?? '',
       units,
       rate,
     });
@@ -223,6 +270,7 @@ export function aggregateTopGlampingBrands(
     unitCount: number;
     rates: number[];
     contributingBrandIds: Set<string>;
+    propertyNames: string[];
   };
 
   const byBrand = new Map<string, BrandAgg>();
@@ -233,11 +281,13 @@ export function aggregateTopGlampingBrands(
       unitCount: 0,
       rates: [],
       contributingBrandIds: new Set<string>(),
+      propertyNames: [],
     };
     existing.propertyCount += 1;
     existing.unitCount += agg.units;
     if (agg.rate != null) existing.rates.push(agg.rate);
     existing.contributingBrandIds.add(agg.leafBrandId);
+    if (agg.propertyName) existing.propertyNames.push(agg.propertyName);
     byBrand.set(agg.rootBrandId, existing);
   }
 
@@ -249,9 +299,11 @@ export function aggregateTopGlampingBrands(
         agg.rates.length > 0
           ? agg.rates.reduce((sum, n) => sum + n, 0) / agg.rates.length
           : null;
-      const subBrandNote = formatSubBrandNote(
-        subBrandNamesForRollup(id, agg.contributingBrandIds, byId)
-      );
+      const subBrandNote =
+        partnerBrandNoteForRankingRoot(id, byId) ??
+        formatSubBrandNote(
+          subBrandNamesForRollup(id, agg.contributingBrandIds, byId, agg.propertyNames)
+        );
 
       return {
         slug: brand.slug,

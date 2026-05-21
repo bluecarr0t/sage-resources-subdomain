@@ -100,7 +100,7 @@ export default function BrandDetailTemplate({
       : `${propertyCount} published glamping ${propertyCount === 1 ? 'property' : 'properties'} in Sage research for ${brand.display_name}${states.length > 0 ? ` across ${states.length} ${states.length === 1 ? 'state' : 'states'}` : ''}.`;
 
   return (
-    <EditorialPageShell>
+    <EditorialPageShell solidPageBackground>
       <FloatingHeader locale={locale} showFullNav showSpacer={false} />
       <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>
         <nav aria-label="Breadcrumb" className="mb-8 text-xs font-light text-neutral-500">

@@ -241,7 +241,7 @@ export default function PropertyDetailTemplate({
   const avgRate = firstProperty.rate_avg_retail_daily_rate;
 
   return (
-    <EditorialPageShell>
+    <EditorialPageShell solidPageBackground>
       <FloatingHeader locale={locale} showFullNav showSpacer={false} />
       <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>
         <nav

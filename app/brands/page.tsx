@@ -107,8 +107,8 @@ export default async function BrandOverviewPage() {
                 Top brands
               </h2>
               <p className="mt-2 max-w-md text-[10px] leading-relaxed text-neutral-500">
-                Published properties per brand; portfolio rollups include sub-brands. Avg. retail
-                daily rate is the mean across published locations where nightly rates are available.
+                Props per brand; rollups include sub-brands. Avg. retail rate is the mean where
+                nightly rates are published.
               </p>
               {result.data.brands.length > 0 ? (
                 <ul className="mt-6 w-full min-w-0 space-y-4 text-sm">
