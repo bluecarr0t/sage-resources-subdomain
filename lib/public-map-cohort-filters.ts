@@ -33,8 +33,7 @@ type CohortQueryable = {
   or: (filters: string) => CohortQueryable;
 };
 
-/** Published/open glamping cohort (map + map counts). */
-export function applyPublicMapOperationalCohortFilters<Q extends CohortQueryable>(query: Q): Q {
+function applyOperationalCohortFilters(query: CohortQueryable): CohortQueryable {
   return query
     .eq('is_glamping_property', 'Yes')
     .eq('is_open', 'Yes')
@@ -42,13 +41,21 @@ export function applyPublicMapOperationalCohortFilters<Q extends CohortQueryable
     .neq('is_open', 'Under Construction')
     .neq('is_open', 'Closed')
     .eq('research_status', 'published')
-    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR) as Q;
+    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR);
+}
+
+/** Published/open glamping cohort (map + map counts). */
+export function applyPublicMapOperationalCohortFilters<T>(query: T): T {
+  return applyOperationalCohortFilters(query as unknown as CohortQueryable) as unknown as T;
 }
 
 /**
  * Map marker cohort: operational filters + hide Campground, RV Resort, Outdoor Boutique Hotel, Unknown.
  * Property listing pages are unaffected.
  */
-export function applyPublicMapCohortFilters<Q extends CohortQueryable>(query: Q): Q {
-  return applyPublicMapOperationalCohortFilters(query).or(PUBLIC_MAP_PROPERTY_TYPE_OR) as Q;
+export function applyPublicMapCohortFilters<T>(query: T): T {
+  const filtered = applyOperationalCohortFilters(query as unknown as CohortQueryable).or(
+    PUBLIC_MAP_PROPERTY_TYPE_OR
+  );
+  return filtered as unknown as T;
 }
