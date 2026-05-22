@@ -1,13 +1,24 @@
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 
-/** Property types hidden on the public /map (markers, counts, detail by id). */
-export const PUBLIC_MAP_EXCLUDED_PROPERTY_TYPES = ['Campground', 'RV Resort'] as const;
+/**
+ * Map-only cohort filters. Do not use for `/property/[slug]` pages, sitemaps, or
+ * `lib/published-property-pages.ts` — those use published listing queries without
+ * `property_type` exclusions so SEO URLs stay live.
+ */
+
+/** Property types hidden on the public /map (markers, counts, map API list). */
+export const PUBLIC_MAP_EXCLUDED_PROPERTY_TYPES = [
+  'Campground',
+  'RV Resort',
+  'Outdoor Boutique Hotel',
+  'Unknown',
+] as const;
 
 /**
- * PostgREST `.or()` — allow null/empty `property_type`; exclude Campground & RV Resort.
+ * PostgREST `.or()` — allow null/empty `property_type`; exclude non-map product types.
  */
 export const PUBLIC_MAP_PROPERTY_TYPE_OR =
-  'property_type.is.null,property_type.not.in.(Campground,RV Resort)';
+  'property_type.is.null,property_type.not.in.(Campground,"RV Resort","Outdoor Boutique Hotel",Unknown)';
 
 export function isExcludedPropertyTypeForPublicMap(
   propertyType: string | null | undefined
@@ -22,8 +33,8 @@ type CohortQueryable = {
   or: (filters: string) => CohortQueryable;
 };
 
-/** Shared Supabase filters for the public map property cohort. */
-export function applyPublicMapCohortFilters<Q extends CohortQueryable>(query: Q): Q {
+/** Published/open glamping cohort (map + map counts). */
+export function applyPublicMapOperationalCohortFilters<Q extends CohortQueryable>(query: Q): Q {
   return query
     .eq('is_glamping_property', 'Yes')
     .eq('is_open', 'Yes')
@@ -31,6 +42,13 @@ export function applyPublicMapCohortFilters<Q extends CohortQueryable>(query: Q)
     .neq('is_open', 'Under Construction')
     .neq('is_open', 'Closed')
     .eq('research_status', 'published')
-    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-    .or(PUBLIC_MAP_PROPERTY_TYPE_OR) as Q;
+    .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR) as Q;
+}
+
+/**
+ * Map marker cohort: operational filters + hide Campground, RV Resort, Outdoor Boutique Hotel, Unknown.
+ * Property listing pages are unaffected.
+ */
+export function applyPublicMapCohortFilters<Q extends CohortQueryable>(query: Q): Q {
+  return applyPublicMapOperationalCohortFilters(query).or(PUBLIC_MAP_PROPERTY_TYPE_OR) as Q;
 }

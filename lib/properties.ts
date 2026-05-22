@@ -51,7 +51,9 @@ export async function getUniquePropertyNames(): Promise<string[]> {
 
 /**
  * All public listing slugs: one per published logical property (property_id / slug / name+city+state).
- * Map markers use a narrower filter in /api/properties — not all published rows appear on the map.
+ * Map markers use a narrower filter in /api/properties (excludes Campground, RV Resort,
+ * Outdoor Boutique Hotel, Unknown) — not all published rows appear on the map. Listing
+ * pages and sitemap URLs remain active for those property types.
  */
 export async function getAllPropertySlugs(): Promise<Array<{ slug: string }>> {
   const indexed = await getIndexedPropertySlugEntries();
