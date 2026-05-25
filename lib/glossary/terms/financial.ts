@@ -13,7 +13,8 @@ ADR is crucial for revenue management and pricing strategy. It helps property ow
 
 In outdoor hospitality, ADR is often higher for glamping accommodations compared to traditional campgrounds due to the luxury positioning and amenities. Understanding ADR benchmarks for your market and property type is essential for financial planning and feasibility analysis.
 
-Sage Outdoor Advisory includes ADR analysis and benchmarking in our feasibility studies, helping clients understand market rates and optimize pricing strategies.`,
+Sage Outdoor Advisory includes ADR analysis and benchmarking in our feasibility studies, helping clients understand market rates and optimize pricing strategies.
+`,
     category: "Financial",
     relatedTerms: ["ardr", "revpar", "occupancy-rate", "revenue-projections", "noi", "revenue-management"],
     examples: [
@@ -63,7 +64,8 @@ This metric is valuable for understanding pricing positioning in the marketplace
 
 In outdoor hospitality, ARDR can differ from actual ADR due to discounts, promotions, last-minute pricing adjustments, or commission structures. Understanding the gap between ARDR and ADR helps property owners optimize pricing strategies and revenue management.
 
-Sage Outdoor Advisory uses ARDR analysis in market research and feasibility studies to help clients understand competitive pricing positioning and optimize their listing strategies across distribution channels.`,
+Sage Outdoor Advisory uses ARDR analysis in market research and feasibility studies to help clients understand competitive pricing positioning and optimize their listing strategies across distribution channels.
+`,
     category: "Financial",
     relatedTerms: ["adr", "revpar", "revenue-projections", "competitive-analysis"],
     examples: [
@@ -111,7 +113,8 @@ Occupancy rate is critical for understanding demand, pricing effectiveness, and 
 
 In outdoor hospitality, occupancy rates often vary seasonally. For example, properties near national parks may have 90%+ occupancy in summer but 30% in winter. Understanding seasonal patterns is essential for financial planning and feasibility analysis.
 
-Sage Outdoor Advisory includes occupancy rate analysis and forecasting in our feasibility studies, helping clients understand demand patterns and optimize revenue management strategies.`,
+Sage Outdoor Advisory includes occupancy rate analysis and forecasting in our feasibility studies, helping clients understand demand patterns and optimize revenue management strategies.
+`,
     category: "Financial",
     relatedTerms: ["adr", "revpar", "revenue-projections", "seasonality", "revenue-management"],
     examples: [
@@ -155,7 +158,8 @@ RevPAR provides a single metric that combines both pricing and occupancy perform
 
 For example, if a glamping resort has an ADR of $200 and 75% occupancy, the RevPAR would be $150 ($200 × 0.75). This means the property generates $150 per available unit, regardless of whether it's occupied.
 
-Sage Outdoor Advisory includes RevPAR analysis and benchmarking in our feasibility studies, helping clients understand revenue potential and optimize performance.`,
+Sage Outdoor Advisory includes RevPAR analysis and benchmarking in our feasibility studies, helping clients understand revenue potential and optimize performance.
+`,
     category: "Financial",
     relatedTerms: ["adr", "occupancy-rate", "revenue-projections", "noi", "revenue-management"],
     examples: [
@@ -195,7 +199,8 @@ NOI is calculated by subtracting operating expenses from gross operating income.
 
 NOI is critical for property valuation, as it's used in the income approach to determine property value. It's also used to calculate the capitalization rate (cap rate) and assess a property's ability to service debt.
 
-Sage Outdoor Advisory includes NOI projections and analysis in our feasibility studies and appraisals, helping clients understand property profitability and value.`,
+Sage Outdoor Advisory includes NOI projections and analysis in our feasibility studies and appraisals, helping clients understand property profitability and value.
+`,
     category: "Financial",
     relatedTerms: ["cap-rate", "revenue-projections", "operating-expenses", "appraisal"],
     examples: [
@@ -243,7 +248,8 @@ Cap rates indicate the expected rate of return on an investment property, assumi
 
 For outdoor hospitality properties, cap rates vary by property type, location, and market conditions. Premium glamping resorts in desirable locations may have lower cap rates (5-7%), while basic campgrounds may have higher cap rates (8-12%).
 
-Sage Outdoor Advisory uses cap rates in our appraisals and feasibility studies to help clients understand investment returns and property values.`,
+Sage Outdoor Advisory uses cap rates in our appraisals and feasibility studies to help clients understand investment returns and property values.
+`,
     category: "Financial",
     relatedTerms: ["noi", "appraisal", "roi", "income-approach"],
     examples: [
@@ -454,7 +460,8 @@ Lenders typically require a DSCR of 1.25 to 1.5 or higher, meaning the property'
 
 For outdoor hospitality properties, DSCR is particularly important due to seasonal income variations. Lenders want assurance that the property can service debt even during slower periods.
 
-Sage Outdoor Advisory includes DSCR analysis in our feasibility studies, helping clients understand loan requirements and optimize financing structures.`,
+Sage Outdoor Advisory includes DSCR analysis in our feasibility studies, helping clients understand loan requirements and optimize financing structures.
+`,
     category: "Financial",
     relatedTerms: ["noi", "feasibility-study", "roi"],
     examples: [
@@ -492,7 +499,8 @@ For outdoor hospitality projects, pro forma statements are essential for feasibi
 
 Pro forma statements help investors, lenders, and developers understand the expected financial performance of a project and make informed decisions. They're based on market analysis, competitive research, and industry benchmarks.
 
-Sage Outdoor Advisory creates detailed pro forma financial statements as part of our feasibility studies, providing clients with comprehensive financial projections for their projects.`,
+Sage Outdoor Advisory creates detailed pro forma financial statements as part of our feasibility studies, providing clients with comprehensive financial projections for their projects.
+`,
     category: "Financial",
     relatedTerms: ["revenue-projections", "feasibility-study", "noi"],
     examples: [

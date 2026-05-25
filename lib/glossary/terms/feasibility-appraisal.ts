@@ -28,7 +28,8 @@ export const feasibilityAppraisalTerms: Record<string, GlossaryTerm> = {
 
 The study typically includes market analysis, competitive assessment, revenue and expense forecasts, site evaluation, and strategic recommendations. Lenders often require a bank-approved feasibility study before financing development or acquisition.
 
-Sage Outdoor Advisory has completed more than 350 feasibility studies and appraisals for outdoor hospitality assets nationwide. Our bank-approved reports help investors, developers, and lenders make confident go/no-go decisions. For a deeper walkthrough of the process, see our <a href="/guides/feasibility-studies-complete-guide">complete guide to feasibility studies</a>. For industry context, read the <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/">Outdoor Hospitality Industry Overview</a> on the Sage blog.`,
+Sage Outdoor Advisory has completed more than 350 feasibility studies and appraisals for outdoor hospitality assets nationwide. Our bank-approved reports help investors, developers, and lenders make confident go/no-go decisions. For a deeper walkthrough of the process, see our <a href="/guides/feasibility-studies-complete-guide">complete guide to feasibility studies</a>. For industry context, read the <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/">Outdoor Hospitality Industry Overview</a> on the Sage blog.
+`,
     category: "Feasibility & Appraisal",
     relatedTerms: [
       "market-analysis",
@@ -105,7 +106,8 @@ Appraisers typically use three approaches: sales comparison (recent comparable s
 
 Specialized outdoor hospitality appraisals account for unit mix, seasonality, franchise or management agreements, and limited comp pools. Generic residential or commercial appraisals can misstate value and create financing delays.
 
-Sage Outdoor Advisory provides appraisals designed for glamping, RV, and campground assets, with documentation lenders and investors expect. Learn more in our <a href="/guides/property-appraisals-complete-guide">property appraisals complete guide</a>, or <a href="https://sageoutdooradvisory.com/contact-us/">schedule a consultation</a> to discuss your property.`,
+Sage Outdoor Advisory provides appraisals designed for glamping, RV, and campground assets, with documentation lenders and investors expect. Learn more in our <a href="/guides/property-appraisals-complete-guide">property appraisals complete guide</a>, or <a href="https://sageoutdooradvisory.com/contact-us/">schedule a consultation</a> to discuss your property.
+`,
     category: "Feasibility & Appraisal",
     relatedTerms: ["feasibility-study", "cap-rate", "noi", "income-approach", "zoning", "due-diligence"],
     examples: [
@@ -158,7 +160,8 @@ Strong market analysis for glamping, RV parks, and campgrounds goes beyond popul
 
 Market analysis is a core section of every Sage feasibility study. We benchmark against proprietary outdoor hospitality data from hundreds of completed engagements so projections reflect how these assets actually perform—not generic lodging averages.
 
-Pair market analysis with our <a href="/guides/feasibility-studies-complete-guide">feasibility studies guide</a> or explore <a href="https://sageoutdooradvisory.com/shop/">market reports</a> for regional benchmarks.`,
+Pair market analysis with our <a href="/guides/feasibility-studies-complete-guide">feasibility studies guide</a> or explore <a href="https://sageoutdooradvisory.com/shop/">market reports</a> for regional benchmarks.
+`,
     category: "Feasibility & Appraisal",
     relatedTerms: ["feasibility-study", "competitive-analysis", "revenue-projections", "occupancy-rate"],
     examples: [
@@ -208,7 +211,8 @@ An effective competitive analysis documents unit types, amenities, published rat
 
 Sage Outdoor Advisory benchmarks competitors using field research, OTA data, and our database of outdoor hospitality properties. That evidence supports realistic ADR and occupancy assumptions in feasibility studies and equips operators with a clear positioning strategy.
 
-See how competitive analysis fits into planning in our <a href="/guides/feasibility-studies-complete-guide">feasibility studies guide</a>, or use our <a href="/map">interactive glamping map</a> to explore competitors by market.`,
+See how competitive analysis fits into planning in our <a href="/guides/feasibility-studies-complete-guide">feasibility studies guide</a>, or use our <a href="/map">interactive glamping map</a> to explore competitors by market.
+`,
     category: "Feasibility & Appraisal",
     relatedTerms: ["market-analysis", "feasibility-study", "revenue-projections", "adr"],
     examples: [
@@ -253,7 +257,8 @@ Feasibility studies usually model five to ten years with base, upside, and downs
 
 Sage revenue projections tie directly to our market research and benchmark data from 350+ outdoor hospitality engagements. That linkage makes forecasts defensible in loan committees and investor meetings.
 
-Understand the inputs in our <a href="/glossary/adr">ADR</a> and <a href="/glossary/occupancy-rate">occupancy rate</a> glossary entries, or start a <a href="/landing/glamping-feasibility-study">glamping feasibility study</a> engagement.`,
+Understand the inputs in our <a href="/glossary/adr">ADR</a> and <a href="/glossary/occupancy-rate">occupancy rate</a> glossary entries, or start a <a href="/landing/glamping-feasibility-study">glamping feasibility study</a> engagement.
+`,
     category: "Feasibility & Appraisal",
     relatedTerms: ["adr", "occupancy-rate", "revpar", "feasibility-study", "noi"],
     examples: [
@@ -298,7 +303,8 @@ For glamping resorts, RV parks, and campgrounds, the income approach is often th
 
 The income approach works alongside sales comparison and cost approaches. Sage reconciles all three in outdoor hospitality appraisals so clients—and lenders—receive a well-supported value conclusion.
 
-Review <a href="/glossary/noi">NOI</a> and <a href="/glossary/cap-rate">cap rate</a> definitions, or read our <a href="/guides/property-appraisals-complete-guide">property appraisals complete guide</a>.`,
+Review <a href="/glossary/noi">NOI</a> and <a href="/glossary/cap-rate">cap rate</a> definitions, or read our <a href="/guides/property-appraisals-complete-guide">property appraisals complete guide</a>.
+`,
     category: "Feasibility & Appraisal",
     relatedTerms: ["appraisal", "noi", "cap-rate", "dcf"],
     examples: [

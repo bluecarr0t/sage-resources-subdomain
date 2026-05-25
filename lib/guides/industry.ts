@@ -219,7 +219,7 @@ export const industryGuides: Record<string, GuideContent> = {
       {
         id: "case-studies",
         title: "Case Studies & Examples",
-        content: `        <p>Successful glamping projects demonstrate the potential of well-executed glamping businesses. For example, Open Sky in Zion, UT, successfully secured traditional bank funding with Sage's appraisal services, demonstrating that glamping projects can access conventional financing when properly analyzed. For operator perspectives on scaling iconic outdoor hospitality brands, listen to <a href="https://sageoutdooradvisory.com/blog/the-unique-hospitality-podcast-lessons-in-launching-paws-up-autocamp-wildhaven/" class="text-[#006b5f] hover:text-[#005a4f] underline">The Unique Hospitality Podcast: Lessons from Paws Up, AutoCamp & Wildhaven</a>.</p>
+        content: `        <p>Successful glamping projects demonstrate the potential of well-executed glamping businesses. For example, Open Sky in Zion, UT, successfully secured traditional bank funding with Sage's appraisal services, demonstrating that glamping projects can access conventional financing when properly analyzed.</p>
         
         <p>Key success factors from successful glamping projects include:</p>
         <ul class="list-disc list-inside space-y-3 ml-4">
@@ -1188,7 +1188,7 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <p>This comprehensive guide walks you through each phase of starting your glamping business, from initial research and planning to marketing and launch. Whether you're planning a small boutique property or a larger glamping resort, this step-by-step approach will help you navigate the complexities of launching a successful glamping venture.</p>
         
-        <p>Starting a glamping business typically requires an initial investment ranging from $50,000 for a basic setup to over $500,000 for a high-end resort, depending on location, accommodation types, and amenities. Success depends on careful planning, market understanding, quality accommodations, and exceptional guest experiences. For real-world insights from experienced operators, check out <a href="https://sageoutdooradvisory.com/blog/the-unique-hospitality-podcast-lessons-in-launching-paws-up-autocamp-wildhaven/" class="text-[#006b5f] hover:text-[#005a4f] underline">The Unique Hospitality Podcast: Lessons in Launching Paws Up, AutoCamp & Wildhaven</a> featuring lessons from industry leaders.</p>
+        <p>Starting a glamping business typically requires an initial investment ranging from $50,000 for a basic setup to over $500,000 for a high-end resort, depending on location, accommodation types, and amenities. Success depends on careful planning, market understanding, quality accommodations, and exceptional guest experiences.</p>
         
         <p>See our <a href="/guides/glamping-industry-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Industry Complete Guide</a> for comprehensive information about the glamping industry, market trends, and business models.</p>`
       },

@@ -12,7 +12,8 @@ Common glamping accommodations include safari tents, yurts, treehouses, Airstrea
 
 The glamping industry has experienced significant growth as travelers seek unique, experiential accommodations that connect them with nature while maintaining modern conveniences. Glamping appeals to a wide demographic, from couples seeking romantic getaways to families wanting outdoor adventures with comfort.
 
-Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping properties, understanding the unique market dynamics, revenue models, and valuation methods required for these specialized accommodations. For comprehensive insights into glamping unit types, costs, and ROI considerations, see our <a href="https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/">Complete Guide to Glamping Unit Types</a> on the Sage blog. For market trends and data, see our <a href="/guides/glamping-market-trends-2025">glamping market trends guide</a>.`,
+Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping properties, understanding the unique market dynamics, revenue models, and valuation methods required for these specialized accommodations. For comprehensive insights into glamping unit types, costs, and ROI considerations, see our <a href="https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/">Complete Guide to Glamping Unit Types</a> on the Sage blog. For market trends and data, see our <a href="/guides/glamping-market-trends-2025">glamping market trends guide</a>.
+`,
     category: "Glamping",
     relatedTerms: ["glamping-resort", "safari-tent", "yurt", "outdoor-hospitality"],
     examples: [
@@ -62,7 +63,8 @@ Unlike basic campgrounds that require guests to bring their own equipment, glamp
 
 Glamping resorts appeal to travelers who want to connect with nature without sacrificing comfort, and they typically command rates between traditional camping and hotel accommodations, varying based on the quality level and amenities offered.
 
-Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping resorts across all price points, understanding the unique market dynamics, revenue models, and operational considerations of these properties.`,
+Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping resorts across all price points, understanding the unique market dynamics, revenue models, and operational considerations of these properties.
+`,
     category: "Glamping",
     relatedTerms: ["glamping", "safari-tent", "yurt", "adr", "occupancy-rate", "amenities"],
     examples: [

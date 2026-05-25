@@ -1,3 +1,5 @@
+import type { GlossaryPodcastPlacement } from '@/lib/podcast-types';
+
 export interface GlossaryTerm {
   slug: string;
   term: string;
@@ -17,6 +19,8 @@ export interface GlossaryTerm {
     text: string;
     url: string;
   }[];
+  /** Optional override; default mappings live in lib/glossary-podcast-links.ts */
+  podcastLinks?: GlossaryPodcastPlacement;
   faqs?: {
     question: string;
     answer: string;

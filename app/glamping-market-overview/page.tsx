@@ -43,7 +43,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Glamping Market Overview',
   description:
-    'US and Canada glamping metrics for private commercial operators. Excludes RV parks, campgrounds, booking marketplaces, and public-land stays.',
+    'US and Canada glamping metrics for private commercial operators with property type Glamping only. Excludes other product types, booking marketplaces, and public-land stays.',
   robots: { index: true, follow: true },
 };
 
@@ -127,7 +127,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
   return (
     <div className="relative flex min-h-screen flex-col bg-[#faf9f3] text-neutral-900">
       <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.02]"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.015]"
         style={{ backgroundImage: `url(${EDITORIAL_TOPO_BG_URL})` }}
         aria-hidden
       />

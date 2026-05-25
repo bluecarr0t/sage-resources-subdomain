@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Top Glamping Brands',
   description:
-    'Rankings of the largest US and Canada glamping brands in Sage Outdoor Advisory research by published property count, units, and average nightly rates.',
+    'Rankings of the largest US and Canada glamping brands by published Glamping property type only — property count, units, and average nightly rates.',
   robots: { index: true, follow: true },
 };
 
@@ -42,7 +42,7 @@ export default async function BrandOverviewPage() {
   return (
     <div className="relative flex min-h-screen flex-col bg-[#faf9f3] text-neutral-900">
       <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.02]"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.015]"
         style={{ backgroundImage: `url(${EDITORIAL_TOPO_BG_URL})` }}
         aria-hidden
       />
@@ -58,8 +58,8 @@ export default async function BrandOverviewPage() {
         ) : null}
 
         <p className="mt-6 max-w-xl text-sm font-light leading-relaxed text-neutral-600">
-          Largest multi-property glamping operators in Sage research, ranked by published property
-          count. Portfolio brands include sub-brand locations in their totals.
+          Largest multi-property glamping operators in Sage research, ranked by published Glamping
+          property count. Portfolio brands include sub-brand locations in their totals.
         </p>
 
         <GlampingMarketScopeDisclosure />
@@ -75,8 +75,8 @@ export default async function BrandOverviewPage() {
                   {formatInt(result.data.brands.length)}
                 </dd>
                 <p className="mt-4 max-w-xs text-[11px] leading-relaxed text-neutral-500">
-                  Top {TOP_GLAMPING_BRANDS_COUNT} by published properties with an assigned brand in
-                  Sage research.
+                  Top {TOP_GLAMPING_BRANDS_COUNT} by published Glamping properties with an assigned
+                  brand in Sage research.
                 </p>
               </div>
 

@@ -19,6 +19,16 @@
       "defaultDescription": "Leading consultancy for feasibility studies and appraisals in the outdoor hospitality industry"
     }
   },
+  "podcast": {
+    "name": "The Outdoor Hospitality Podcast",
+    "footerLabel": "The Outdoor Hospitality Podcast",
+    "secondaryCta": {
+      "title": "Learn from industry operators",
+      "description": "Hear from glamping, RV, and outdoor hospitality leaders on launch strategy, pricing, operations, and exits—interviews and roundtables from the team behind Sage Outdoor Advisory.",
+      "button": "Listen to the podcast"
+    },
+    "glossarySidebarLink": "Outdoor Hospitality Podcast"
+  },
   "landing": {
     "glampingFeasibilityStudy": {
       "title": "Glamping Feasibility Study | Sage Outdoor Advisory",

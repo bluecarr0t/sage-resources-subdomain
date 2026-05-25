@@ -11,6 +11,10 @@ import {
   applyGlampingMarketSnapshotTierToQuery,
   type GlampingMarketSnapshotTierFilter,
 } from '@/lib/glamping-market-snapshot-classification';
+import {
+  applyGlampingOnlyPropertyTypeFilter,
+  isGlampingMarketSnapshotPropertyType,
+} from '@/lib/glamping-market-snapshot-property-type-filter';
 import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 import { normalizeCaProvinceToCode } from '@/lib/normalize-ca-province-key';
 
@@ -18,6 +22,7 @@ const PAGE_SIZE = 1000;
 
 type Row = {
   property_name: string | null;
+  property_type: string | null;
   unit_type: string | null;
   state: string | null;
   country: string | null;
@@ -82,13 +87,15 @@ export async function fetchGlampingIndustryCaProvinceMetrics(
 
   let offset = 0;
   for (;;) {
-    let query = supabase
-      .from('all_glamping_properties')
-      .select(GLAMPING_MARKET_SNAPSHOT_CA_PROVINCE_SELECT)
-      .eq('is_glamping_property', 'Yes')
-      .eq('research_status', 'published')
-      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .in('country', [...GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN]);
+    let query = applyGlampingOnlyPropertyTypeFilter(
+      supabase
+        .from('all_glamping_properties')
+        .select(GLAMPING_MARKET_SNAPSHOT_CA_PROVINCE_SELECT)
+        .eq('is_glamping_property', 'Yes')
+        .eq('research_status', 'published')
+        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
+        .in('country', [...GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN])
+    );
     query = applyGlampingMarketSnapshotTierToQuery(query, tier);
     const { data, error } = await query
       .order('id', { ascending: true })
@@ -102,6 +109,7 @@ export async function fetchGlampingIndustryCaProvinceMetrics(
     if (batch.length === 0) break;
 
     for (const row of batch) {
+      if (!isGlampingMarketSnapshotPropertyType(row.property_type)) continue;
       if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
       if (!isCanadaRow(row.country)) continue;
       const code = normalizeCaProvinceToCode(row.state);

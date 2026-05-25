@@ -1,3 +1,5 @@
+import type { GuidePodcastPlacement } from '@/lib/podcast-types';
+
 export interface FAQItem {
   question: string;
   answer: string;
@@ -70,5 +72,7 @@ export interface GuideContent {
   changeLog?: Array<{ date: string; changes: string[] }>;
   /** Primary source citations. Displayed in References section. Use [1], [2] in content to cite. */
   citations?: Array<{ id: number; title: string; url: string; accessed?: string }>;
+  /** Optional override; default mappings live in lib/guide-podcast-links.ts */
+  podcastPlacements?: GuidePodcastPlacement[];
 }
 

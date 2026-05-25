@@ -12,6 +12,9 @@ import { generateDefinitionSchema, generateFAQSchema } from '@/lib/glossary-sche
 import { generateSpeakableSchema } from '@/lib/schema';
 import { generateGlossaryImageAltText, generateImageTitle } from '@/lib/glossary/image-alt-text';
 import { getGlossaryCategoryAccent } from '@/lib/glossary-category-accent';
+import { PodcastContextLinks } from '@/components/podcast/PodcastContextLinks';
+import { getGlossaryPodcastPlacement } from '@/lib/glossary-podcast-links';
+import { getPodcastStartHereUrl } from '@/lib/outdoor-hospitality-podcast';
 import RelatedGlossaryTerms from './RelatedGlossaryTerms';
 import GlossaryImageGallery from './GlossaryImageGallery';
 import Footer from './Footer';
@@ -55,8 +58,10 @@ export default async function GlossaryTermTemplate({
 }: GlossaryTermTemplateProps) {
   const t = await getTranslations({ locale, namespace: 'glossary' });
   const tPage = await getTranslations({ locale, namespace: 'glossary.termPage' });
+  const tPodcast = await getTranslations({ locale, namespace: 'podcast' });
   const links = createLocaleLinks(locale);
   const accent = getGlossaryCategoryAccent(term.category);
+  const podcastPlacement = term.podcastLinks ?? getGlossaryPodcastPlacement(term.slug);
   const categoryLabel = t(`categories.${getGlossaryCategoryMessageKey(term.category)}`);
   const definitionSchema = generateDefinitionSchema(term);
   const faqSchema = term.faqs ? generateFAQSchema(term.faqs) : null;
@@ -178,10 +183,18 @@ export default async function GlossaryTermTemplate({
                 <h2 className="font-[Georgia] text-2xl font-light tracking-tight text-neutral-900">
                   {tPage('understanding', { term: term.term })}
                 </h2>
-                <div
-                  className={`mt-6 ${EDITORIAL_GUIDE_PROSE_CLASS}`}
-                  dangerouslySetInnerHTML={{ __html: extendedHtml }}
-                />
+                <div className={`mt-6 ${EDITORIAL_GUIDE_PROSE_CLASS}`}>
+                  <div dangerouslySetInnerHTML={{ __html: extendedHtml }} />
+                  {podcastPlacement ? (
+                    <PodcastContextLinks
+                      links={podcastPlacement.links}
+                      contentSlug={term.slug}
+                      medium="glossary-term"
+                      variant="glossary"
+                      intro={podcastPlacement.intro}
+                    />
+                  ) : null}
+                </div>
               </section>
 
               {term.examples && term.examples.length > 0 ? (
@@ -294,6 +307,16 @@ export default async function GlossaryTermTemplate({
                       <Link href={links.guides} className={EDITORIAL_LINK_CLASS}>
                         {tPage('expertGuides')}
                       </Link>
+                    </li>
+                    <li>
+                      <a
+                        href={getPodcastStartHereUrl(term.slug)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={EDITORIAL_LINK_CLASS}
+                      >
+                        {tPodcast('glossarySidebarLink')}
+                      </a>
                     </li>
                     <li>
                       <a

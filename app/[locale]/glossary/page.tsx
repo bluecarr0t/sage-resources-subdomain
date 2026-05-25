@@ -4,6 +4,8 @@ import GlossaryIndex from "@/components/GlossaryIndex";
 import { GlossaryEnglishNotice } from "@/components/glossary/GlossaryEnglishNotice";
 import { EditorialCtaBand } from "@/components/editorial/EditorialCtaBand";
 import { EditorialMarketingLayout } from "@/components/editorial/EditorialMarketingLayout";
+import { PodcastSecondaryCta } from "@/components/editorial/PodcastSecondaryCta";
+import { buildPodcastUrl } from "@/lib/outdoor-hospitality-podcast";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { notFound } from "next/navigation";
@@ -78,8 +80,10 @@ export default async function GlossaryPage({ params }: PageProps) {
   }
 
   let t;
+  let tPodcast;
   try {
     t = await getTranslations({ locale, namespace: 'glossary' });
+    tPodcast = await getTranslations({ locale, namespace: 'podcast' });
   } catch (error) {
     console.error('Error loading translations:', error);
     throw new Error(`Failed to load translations for locale: ${locale}`);
@@ -195,6 +199,12 @@ export default async function GlossaryPage({ params }: PageProps) {
         buttonLabel={t('cta.button')}
         buttonHref="https://sageoutdooradvisory.com/contact-us/"
         external
+      />
+      <PodcastSecondaryCta
+        title={tPodcast('secondaryCta.title')}
+        description={tPodcast('secondaryCta.description')}
+        buttonLabel={tPodcast('secondaryCta.button')}
+        buttonHref={buildPodcastUrl({ medium: 'glossary-index' })}
       />
     </EditorialMarketingLayout>
   );

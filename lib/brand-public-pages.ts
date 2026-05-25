@@ -10,6 +10,7 @@ import {
 import { PUBLISHED_RESEARCH_STATUS, resolvePublicSlugForAnchor } from '@/lib/published-property-pages';
 import { parseCoordinates, type SageProperty } from '@/lib/types/sage';
 import type { GlampingBrand, GlampingBrandTier } from '@/lib/glamping-brands';
+import { applyGlampingOnlyPropertyTypeFilter } from '@/lib/glamping-market-snapshot-property-type-filter';
 
 const PROPERTIES_TABLE = 'all_glamping_properties';
 const BRANDS_TABLE = 'glamping_brands';
@@ -128,12 +129,13 @@ async function fetchPublishedRowsForBrandIds(brandIds: string[]): Promise<SagePr
     const chunk = brandIds.slice(i, i + 100);
     let from = 0;
     while (true) {
-      const { data, error } = await supabase
-        .from(PROPERTIES_TABLE)
-        .select('*')
-        .eq('research_status', PUBLISHED_RESEARCH_STATUS)
-        .in('brand_id', chunk)
-        .range(from, from + PAGE_SIZE - 1);
+      const { data, error } = await applyGlampingOnlyPropertyTypeFilter(
+        supabase
+          .from(PROPERTIES_TABLE)
+          .select('*')
+          .eq('research_status', PUBLISHED_RESEARCH_STATUS)
+          .in('brand_id', chunk)
+      ).range(from, from + PAGE_SIZE - 1);
 
       if (error) {
         console.error('[fetchPublishedRowsForBrandIds]', error);

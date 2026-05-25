@@ -12,6 +12,7 @@ export const GLAMPING_MARKET_SCOPE_INCLUDED = [
 ] as const;
 
 export const GLAMPING_MARKET_SCOPE_EXCLUDED = [
+  'Non-glamping property types (hotels, campgrounds, marinas, etc.)',
   'RV parks & resorts',
   'Traditional campgrounds',
   'Only listed on OTAs (e.g. Airbnb)',
@@ -20,4 +21,4 @@ export const GLAMPING_MARKET_SCOPE_EXCLUDED = [
 
 /** Footer note in the scope disclosure modal. */
 export const GLAMPING_MARKET_SCOPE_FOOTNOTE =
-  'Counts and rates on this page reflect professionalized glamping properties: a majority of units are glamping inventory, the operator maintains a business website, and the property has at least 3 units. Tier filters (Luxury, Upscale, etc.) narrow within this cohort—they do not change who qualifies.';
+  'Counts and rates on this page include only published properties classified as Glamping (property type), with glamping unit inventory, a business website, and at least 3 units where applicable. Tier filters (Luxury, Upscale, etc.) narrow within this cohort—they do not change who qualifies.';

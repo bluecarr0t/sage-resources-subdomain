@@ -26,6 +26,8 @@ import RelatedGuides from './RelatedGuides';
 import Footer from './Footer';
 import FloatingHeader from './FloatingHeader';
 import { EditorialCtaBand } from '@/components/editorial/EditorialCtaBand';
+import { PodcastContextLinks } from '@/components/podcast/PodcastContextLinks';
+import { getGuidePodcastPlacement } from '@/lib/guide-podcast-links';
 import {
   EditorialPageShell,
   EDITORIAL_BODY_CLASS,
@@ -328,7 +330,11 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
 
             <div className="min-w-0 flex-1">
               <article className="guide-prose">
-                {content.sections.map((section) => (
+                {content.sections.map((section) => {
+                  const podcastPlacement =
+                    content.podcastPlacements?.find((p) => p.sectionId === section.id) ??
+                    getGuidePodcastPlacement(content.slug, section.id);
+                  return (
                   <section
                     key={section.id}
                     id={section.id}
@@ -337,12 +343,24 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
                     <h2 className="font-[Georgia] text-2xl font-light tracking-tight text-neutral-900">
                       {section.title}
                     </h2>
-                    <div
-                      className={`guide-prose mt-6 ${EDITORIAL_GUIDE_PROSE_CLASS}`}
-                      dangerouslySetInnerHTML={{
-                        __html: prefixInternalResourceHrefsInHtml(section.content, locale),
-                      }}
-                    />
+                    <div className={`guide-prose mt-6 ${EDITORIAL_GUIDE_PROSE_CLASS}`}>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: prefixInternalResourceHrefsInHtml(section.content, locale),
+                        }}
+                      />
+                      {podcastPlacement ? (
+                        <PodcastContextLinks
+                          links={podcastPlacement.links}
+                          contentSlug={content.slug}
+                          medium="guides-page"
+                          variant="guide"
+                          intro={podcastPlacement.intro}
+                          linkJoiner={podcastPlacement.linkJoiner}
+                          outro={podcastPlacement.outro}
+                        />
+                      ) : null}
+                    </div>
                     {section.subsections ? (
                       <div className="mt-10 space-y-10">
                         {section.subsections.map((subsection) => (
@@ -364,7 +382,8 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
                       </div>
                     ) : null}
                   </section>
-                ))}
+                  );
+                })}
               </article>
 
               {content.citations && content.citations.length > 0 ? (

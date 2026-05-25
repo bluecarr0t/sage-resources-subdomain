@@ -4,6 +4,8 @@ import GuidesIndex from "@/components/GuidesIndex";
 import { GuidesEnglishNotice } from "@/components/guides/GuidesEnglishNotice";
 import { EditorialCtaBand } from "@/components/editorial/EditorialCtaBand";
 import { EditorialMarketingLayout } from "@/components/editorial/EditorialMarketingLayout";
+import { PodcastSecondaryCta } from "@/components/editorial/PodcastSecondaryCta";
+import { buildPodcastUrl } from "@/lib/outdoor-hospitality-podcast";
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { notFound } from "next/navigation";
@@ -78,6 +80,7 @@ export default async function GuidesPage({ params }: PageProps) {
   }
 
   const t = await getTranslations({ locale, namespace: 'guides' });
+  const tPodcast = await getTranslations({ locale, namespace: 'podcast' });
 
   const allGuides = getAllGuideSlugs()
     .map((slug) => getGuideSync(slug))
@@ -141,6 +144,12 @@ export default async function GuidesPage({ params }: PageProps) {
         buttonLabel={t('cta.button')}
         buttonHref="https://sageoutdooradvisory.com/contact-us/"
         external
+      />
+      <PodcastSecondaryCta
+        title={tPodcast('secondaryCta.title')}
+        description={tPodcast('secondaryCta.description')}
+        buttonLabel={tPodcast('secondaryCta.button')}
+        buttonHref={buildPodcastUrl({ medium: 'guides-index' })}
       />
     </EditorialMarketingLayout>
   );

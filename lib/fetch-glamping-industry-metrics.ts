@@ -10,6 +10,10 @@ import {
   applyGlampingMarketSnapshotTierToQuery,
   type GlampingMarketSnapshotTierFilter,
 } from '@/lib/glamping-market-snapshot-classification';
+import {
+  applyGlampingOnlyPropertyTypeFilter,
+  isGlampingMarketSnapshotPropertyType,
+} from '@/lib/glamping-market-snapshot-property-type-filter';
 import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
 
@@ -42,6 +46,7 @@ export type GlampingIndustryMetrics = {
 
 type Row = {
   property_name: string | null;
+  property_type: string | null;
   unit_type: string | null;
   is_open: string | null;
   quantity_of_units: string | number | null;
@@ -121,7 +126,8 @@ export function meanAndMedianAdr(samples: number[]): {
  * Published commercial-glamping universe (same land-tenure scope as the public map),
  * filtered to {@link GlampingMarketSnapshotMarket}: United States or Canada.
  * Rows whose `unit_type` is tent-site, RV, or vehicle inventory are omitted
- * ({@link isExcludedGlampingMarketSnapshotUnitType}).
+ * ({@link isExcludedGlampingMarketSnapshotUnitType}), and rows whose `property_type`
+ * must have `property_type` = Glamping ({@link isGlampingMarketSnapshotPropertyType}).
  */
 export async function fetchGlampingIndustryMetrics(
   market: GlampingMarketSnapshotMarket = 'us',
@@ -148,15 +154,17 @@ export async function fetchGlampingIndustryMetrics(
 
   let offset = 0;
   for (;;) {
-    let query = supabase
-      .from('all_glamping_properties')
-      .select(
-        'property_name, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, updated_at, created_at'
-      )
-      .eq('is_glamping_property', 'Yes')
-      .eq('research_status', 'published')
-      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .in('country', countryIn);
+    let query = applyGlampingOnlyPropertyTypeFilter(
+      supabase
+        .from('all_glamping_properties')
+        .select(
+          'property_name, property_type, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, updated_at, created_at'
+        )
+        .eq('is_glamping_property', 'Yes')
+        .eq('research_status', 'published')
+        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
+        .in('country', countryIn)
+    );
     query = applyGlampingMarketSnapshotTierToQuery(query, tier);
     const { data, error } = await query
       .order('id', { ascending: true })
@@ -170,6 +178,7 @@ export async function fetchGlampingIndustryMetrics(
     if (batch.length === 0) break;
 
     for (const row of batch) {
+      if (!isGlampingMarketSnapshotPropertyType(row.property_type)) continue;
       if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
 
       const u = parseTimestampMs(row.updated_at);

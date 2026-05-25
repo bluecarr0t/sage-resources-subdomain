@@ -2,6 +2,7 @@ import Link from "next/link";
 import FooterLocationMap from "@/components/FooterLocationMap";
 import { defaultLocale } from "@/i18n";
 import { createLocaleLinks } from "@/lib/locale-links";
+import { buildPodcastUrl } from "@/lib/outdoor-hospitality-podcast";
 import { generateLocalBusinessSchema } from "@/lib/schema";
 
 interface FooterProps {
@@ -87,6 +88,16 @@ export default function Footer({ locale = defaultLocale }: FooterProps) {
                 <Link href="https://sageoutdooradvisory.com/blog" className="hover:text-white">
                   Blog
                 </Link>
+              </li>
+              <li>
+                <a
+                  href={buildPodcastUrl({ medium: 'footer' })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white"
+                >
+                  The Outdoor Hospitality Podcast
+                </a>
               </li>
             </ul>
           </div>

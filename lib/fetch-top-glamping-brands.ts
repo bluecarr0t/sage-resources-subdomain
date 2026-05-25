@@ -8,6 +8,10 @@ import {
   propertyOutpostGroupKey,
 } from '@/lib/admin/glamping-list-anchor-key';
 import type { GlampingBrand, GlampingBrandTier } from '@/lib/glamping-brands';
+import {
+  applyGlampingOnlyPropertyTypeFilter,
+  isGlampingMarketSnapshotPropertyType,
+} from '@/lib/glamping-market-snapshot-property-type-filter';
 import { PUBLISHED_RESEARCH_STATUS } from '@/lib/published-property-pages';
 import type { SageProperty } from '@/lib/types/sage';
 
@@ -109,6 +113,7 @@ type PropertyRow = Pick<
   | 'property_id'
   | 'slug'
   | 'property_name'
+  | 'property_type'
   | 'city'
   | 'state'
   | 'brand_id'
@@ -199,14 +204,15 @@ async function fetchPublishedBrandedRows(): Promise<PropertyRow[]> {
   let from = 0;
 
   while (true) {
-    const { data, error } = await supabase
-      .from(PROPERTIES_TABLE)
-      .select(
-        'id, property_id, slug, property_name, city, state, brand_id, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, updated_at, created_at'
-      )
-      .eq('research_status', PUBLISHED_RESEARCH_STATUS)
-      .not('brand_id', 'is', null)
-      .range(from, from + PAGE_SIZE - 1);
+    const { data, error } = await applyGlampingOnlyPropertyTypeFilter(
+      supabase
+        .from(PROPERTIES_TABLE)
+        .select(
+          'id, property_id, slug, property_name, property_type, city, state, brand_id, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, updated_at, created_at'
+        )
+        .eq('research_status', PUBLISHED_RESEARCH_STATUS)
+        .not('brand_id', 'is', null)
+    ).range(from, from + PAGE_SIZE - 1);
 
     if (error) {
       console.error('[fetchPublishedBrandedRows]', error);
@@ -226,9 +232,12 @@ export function aggregateTopGlampingBrands(
   rows: PropertyRow[],
   limit = TOP_GLAMPING_BRANDS_COUNT
 ): TopGlampingBrandsOverview {
+  const glampingRows = rows.filter((row) =>
+    isGlampingMarketSnapshotPropertyType(row.property_type)
+  );
   const byId = new Map(brands.map((b) => [b.id, b]));
   const anchors = dedupeRowsToOutpostAnchors(
-    rows as Array<PropertyRow & Record<string, unknown>>
+    glampingRows as Array<PropertyRow & Record<string, unknown>>
   ) as PropertyRow[];
 
   type PropertyAgg = {
@@ -246,7 +255,7 @@ export function aggregateTopGlampingBrands(
     if (!brandId || !byId.has(brandId)) continue;
 
     const key = propertyOutpostGroupKey(anchor);
-    const groupRows = rows.filter((r) => propertyOutpostGroupKey(r) === key);
+    const groupRows = glampingRows.filter((r) => propertyOutpostGroupKey(r) === key);
     const units = groupRows.reduce((sum, r) => sum + unitsForRow(r), 0);
     const rates = groupRows
       .map((r) => parseRate(r.rate_avg_retail_daily_rate))
@@ -338,7 +347,7 @@ export function aggregateTopGlampingBrands(
     totalBrandedProperties,
     totalBrandedUnits,
     brandsWithPublishedProperties: byBrand.size,
-    asOf: latestTimestamp(rows),
+    asOf: latestTimestamp(glampingRows),
   };
 }
 

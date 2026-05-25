@@ -54,6 +54,7 @@ describe('aggregateTopGlampingBrands', () => {
         property_id: 'p1',
         slug: null,
         property_name: 'Under Canvas Zion',
+        property_type: 'Glamping',
         city: 'Springdale',
         state: 'UT',
         brand_id: underCanvasId,
@@ -68,6 +69,7 @@ describe('aggregateTopGlampingBrands', () => {
         property_id: 'p2',
         slug: null,
         property_name: 'ULUM Moab',
+        property_type: 'Glamping',
         city: 'Moab',
         state: 'UT',
         brand_id: ulumId,
@@ -82,6 +84,7 @@ describe('aggregateTopGlampingBrands', () => {
         property_id: 'p3',
         slug: null,
         property_name: 'AutoCamp Zion',
+        property_type: 'Glamping',
         city: 'Springdale',
         state: 'UT',
         brand_id: autocampId,
@@ -143,6 +146,7 @@ describe('aggregateTopGlampingBrands', () => {
         property_id: 'ac1',
         slug: null,
         property_name: 'AutoCamp Zion',
+        property_type: 'Glamping',
         city: 'Springdale',
         state: 'UT',
         brand_id: autocampId,
@@ -157,6 +161,7 @@ describe('aggregateTopGlampingBrands', () => {
         property_id: 'sl1',
         slug: null,
         property_name: 'Slackline Moab',
+        property_type: 'Glamping',
         city: 'Moab',
         state: 'UT',
         brand_id: outsetId,
@@ -222,6 +227,7 @@ describe('aggregateTopGlampingBrands', () => {
         property_id: 'pc1',
         slug: null,
         property_name: 'Postcard Cabins Big Bear',
+        property_type: 'Glamping',
         city: 'Big Bear',
         state: 'CA',
         brand_id: outdoorId,
@@ -240,6 +246,48 @@ describe('aggregateTopGlampingBrands', () => {
     );
   });
 
+  it('excludes rows whose property_type is not Glamping', () => {
+    const rows = [
+      {
+        id: 1,
+        property_id: 'g1',
+        slug: null,
+        property_name: 'Glamping Camp',
+        property_type: 'Glamping',
+        city: 'Denver',
+        state: 'CO',
+        brand_id: autocampId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 400,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 2,
+        property_id: 'rv1',
+        slug: null,
+        property_name: 'RV Resort Same Brand',
+        property_type: 'RV Resort',
+        city: 'Boulder',
+        state: 'CO',
+        brand_id: autocampId,
+        quantity_of_units: 50,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 120,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT);
+
+    expect(result.brands[0]?.propertyCount).toBe(1);
+    expect(result.brands[0]?.unitCount).toBe(10);
+    expect(result.totalBrandedProperties).toBe(1);
+    expect(result.totalBrandedUnits).toBe(10);
+  });
+
   it('dedupes multiple rows for the same logical property', () => {
     const rows = [
       {
@@ -247,6 +295,7 @@ describe('aggregateTopGlampingBrands', () => {
         property_id: 'same',
         slug: null,
         property_name: 'Camp A',
+        property_type: 'Glamping',
         city: 'Denver',
         state: 'CO',
         brand_id: autocampId,
@@ -261,6 +310,7 @@ describe('aggregateTopGlampingBrands', () => {
         property_id: 'same',
         slug: null,
         property_name: 'Camp A',
+        property_type: 'Glamping',
         city: 'Denver',
         state: 'CO',
         brand_id: autocampId,

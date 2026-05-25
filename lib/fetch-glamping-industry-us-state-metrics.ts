@@ -13,12 +13,17 @@ import {
   applyGlampingMarketSnapshotTierToQuery,
   type GlampingMarketSnapshotTierFilter,
 } from '@/lib/glamping-market-snapshot-classification';
+import {
+  applyGlampingOnlyPropertyTypeFilter,
+  isGlampingMarketSnapshotPropertyType,
+} from '@/lib/glamping-market-snapshot-property-type-filter';
 import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 
 const PAGE_SIZE = 1000;
 
 type Row = {
   property_name: string | null;
+  property_type: string | null;
   unit_type: string | null;
   state: string | null;
   country: string | null;
@@ -86,13 +91,15 @@ export async function fetchGlampingIndustryUsStateMetrics(
 
   let offset = 0;
   for (;;) {
-    let query = supabase
-      .from('all_glamping_properties')
-      .select(GLAMPING_MARKET_SNAPSHOT_US_STATE_SELECT)
-      .eq('is_glamping_property', 'Yes')
-      .eq('research_status', 'published')
-      .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .in('country', [...GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN]);
+    let query = applyGlampingOnlyPropertyTypeFilter(
+      supabase
+        .from('all_glamping_properties')
+        .select(GLAMPING_MARKET_SNAPSHOT_US_STATE_SELECT)
+        .eq('is_glamping_property', 'Yes')
+        .eq('research_status', 'published')
+        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
+        .in('country', [...GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN])
+    );
     query = applyGlampingMarketSnapshotTierToQuery(query, tier);
     const { data, error } = await query
       .order('id', { ascending: true })
@@ -106,6 +113,7 @@ export async function fetchGlampingIndustryUsStateMetrics(
     if (batch.length === 0) break;
 
     for (const row of batch) {
+      if (!isGlampingMarketSnapshotPropertyType(row.property_type)) continue;
       if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
       if (!isUsRow(row.country)) continue;
       const abbr = normalizeDbStateToUspsAbbr(row.state);

@@ -9,7 +9,8 @@ export const rvCampgroundTerms: Record<string, GlossaryTerm> = {
 
 RV resorts are positioned as destinations rather than just overnight stops, often located in desirable locations near attractions, beaches, or scenic areas. They command higher rates than basic RV parks and appeal to travelers seeking a more luxurious RV experience.
 
-Sage Outdoor Advisory provides feasibility studies and appraisals for RV resorts, understanding the premium positioning, amenities, and revenue potential of these properties.`,
+Sage Outdoor Advisory provides feasibility studies and appraisals for RV resorts, understanding the premium positioning, amenities, and revenue potential of these properties.
+`,
     category: "RV & Campground",
     relatedTerms: ["rv-park", "full-hookup", "campground", "adr", "amenities"],
     examples: [
@@ -73,7 +74,8 @@ Sage Outdoor Advisory provides feasibility studies and appraisals for RV parks, 
 
 Campgrounds are typically located in scenic natural settings such as forests, mountains, or near lakes and rivers. They appeal to campers seeking an authentic outdoor experience, often at lower price points than glamping or RV resorts.
 
-Sage Outdoor Advisory provides feasibility studies and appraisals for campgrounds, understanding the market demand, operational requirements, and revenue potential of these outdoor hospitality properties.`,
+Sage Outdoor Advisory provides feasibility studies and appraisals for campgrounds, understanding the market demand, operational requirements, and revenue potential of these outdoor hospitality properties.
+`,
     category: "RV & Campground",
     relatedTerms: ["rv-park", "primitive-camping", "glamping", "occupancy-rate"],
     examples: [

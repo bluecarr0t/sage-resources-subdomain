@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '../lib/glamping-land-operator-category';
 import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '../lib/glamping-market-snapshot-region';
+import { isGlampingMarketSnapshotPropertyType } from '../lib/glamping-market-snapshot-property-type-filter';
 import { isExcludedGlampingMarketSnapshotUnitType } from '../lib/glamping-market-snapshot-unit-filter';
 import {
   meanAndMedianAdr,
@@ -33,7 +34,7 @@ async function main() {
   const { data, error } = await supabase
     .from('all_glamping_properties')
     .select(
-      'property_name, site_name, unit_type, is_open, quantity_of_units, rate_avg_retail_daily_rate'
+      'property_name, site_name, property_type, unit_type, is_open, quantity_of_units, rate_avg_retail_daily_rate'
     )
     .eq('is_glamping_property', 'Yes')
     .eq('research_status', 'published')
@@ -55,7 +56,10 @@ async function main() {
       row.rate_avg_retail_daily_rate != null
         ? Number(row.rate_avg_retail_daily_rate)
         : null;
-    if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) {
+    if (
+      !isGlampingMarketSnapshotPropertyType(row.property_type) ||
+      isExcludedGlampingMarketSnapshotUnitType(row.unit_type)
+    ) {
       excluded.push({
         name: `${row.property_name} / ${row.site_name}`,
         unit: String(row.unit_type),
