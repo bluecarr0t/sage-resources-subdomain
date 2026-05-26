@@ -4,6 +4,7 @@ Property-level classification of **what kind of glamping experience** a property
 
 | Field | Purpose |
 |-------|---------|
+| `property_type` | **Product / business model** (Glamping, Campground, …) — see [OUTDOOR_HOSPITALITY_TAXONOMY.md](./OUTDOOR_HOSPITALITY_TAXONOMY.md) |
 | `rate_category` | ADR **price buckets** (`≤$149`, `$150–$249`, …) — see [RATE_CATEGORY_MIGRATION.md](./RATE_CATEGORY_MIGRATION.md) |
 | Comps v2 `QUALITY_TIERS` | Five-tier ADR heuristic for **comp search** only (`lib/comps-v2/types.ts`) |
 | `glamping_brands.brand_tier` | Portfolio / sub-brand hierarchy |

@@ -11,7 +11,7 @@ Project documentation organized by category.
 | **audit** | Audits (SEO, performance, API security, site design, etc.) |
 | **biz-strategy** | Business strategy, roadmaps, revenue projections |
 | **content** | Content strategy, landing pages, property pages, guides |
-| **data** | Data pipelines, CSV uploads, RoverPass, comparables, coordinates, benchmarks |
+| **data** | Data pipelines, CSV uploads, RoverPass, comparables, coordinates, benchmarks, outdoor hospitality taxonomy |
 | **domain** | Domain configuration, SSL, root domain, subdomain |
 | **glossary** | Glossary terms, refactoring plans |
 | **google** | Google APIs, Places, Maps, Sheets, OAuth |
