@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react';
+import type { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
 import { NationalPark, filterParksWithCoordinates } from '@/lib/types/national-parks';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
 
 type PropertyWithCoords = SageProperty & { coordinates: [number, number] };
 type NationalParkWithCoords = NationalPark & { coordinates: [number, number] };
+
+const MARKER_BATCH_SIZE = 80;
 
 interface UseMapMarkersProps {
   map: google.maps.Map | null;
@@ -18,6 +21,18 @@ interface UseMapMarkersProps {
   setSelectedPark: (park: NationalParkWithCoords | null) => void;
   setSelectedClientWork: (point: ClientWorkMapPoint | null) => void;
   markerClickTimeRef: React.MutableRefObject<number>;
+}
+
+function clearPropertyMarkers(
+  markersRef: React.MutableRefObject<google.maps.marker.AdvancedMarkerElement[]>,
+  clustererRef: React.MutableRefObject<MarkerClusterer | null>
+) {
+  clustererRef.current?.clearMarkers();
+  clustererRef.current = null;
+  markersRef.current.forEach((marker) => {
+    marker.map = null;
+  });
+  markersRef.current = [];
 }
 
 /**
@@ -37,6 +52,7 @@ export function useMapMarkers({
   markerClickTimeRef,
 }: UseMapMarkersProps) {
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const clustererRef = useRef<MarkerClusterer | null>(null);
   const parkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const clientWorkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const propertyIdsRef = useRef<Set<string | number>>(new Set());
@@ -45,135 +61,151 @@ export function useMapMarkers({
     id: string | number;
     timestamp: number;
   } | null>(null);
+  const propertyMarkersGenerationRef = useRef(0);
 
-  // Filter properties with coordinates
   const propertiesWithCoords = filterPropertiesWithCoordinates(properties);
 
-  // Manage property markers
+  // Manage property markers (clustered AdvancedMarkerElement pins)
   useEffect(() => {
     if (!map || !isClient) {
-      markersRef.current.forEach(marker => {
-        marker.map = null;
-      });
-      markersRef.current = [];
+      clearPropertyMarkers(markersRef, clustererRef);
       propertyIdsRef.current.clear();
       return;
     }
 
     if (propertiesWithCoords.length === 0) {
-      markersRef.current.forEach(marker => {
-        marker.map = null;
-      });
-      markersRef.current = [];
+      clearPropertyMarkers(markersRef, clustererRef);
       propertyIdsRef.current.clear();
       return;
     }
 
-    // Check if property list has changed
-    const currentPropertyIds = new Set(propertiesWithCoords.map(p => p.id));
-    const idsMatch = 
+    const currentPropertyIds = new Set(propertiesWithCoords.map((p) => p.id));
+    const idsMatch =
       currentPropertyIds.size === propertyIdsRef.current.size &&
-      Array.from(currentPropertyIds).every(id => propertyIdsRef.current.has(id));
-    
+      Array.from(currentPropertyIds).every((id) => propertyIdsRef.current.has(id));
+
     if (idsMatch && markersRef.current.length > 0) {
       return;
     }
 
-    // Clean up old markers
-    markersRef.current.forEach(marker => {
-      marker.map = null;
-    });
-    markersRef.current = [];
+    clearPropertyMarkers(markersRef, clustererRef);
     propertyIdsRef.current = currentPropertyIds;
 
-    // Create markers using AdvancedMarkerElement
+    const generation = ++propertyMarkersGenerationRef.current;
+    let cancelled = false;
+
     const createMarkers = async () => {
-      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
+      const [{ AdvancedMarkerElement, PinElement }, { MarkerClusterer }] = await Promise.all([
+        google.maps.importLibrary('marker') as Promise<google.maps.MarkerLibrary>,
+        import('@googlemaps/markerclusterer'),
+      ]);
 
-      const markers = propertiesWithCoords.map((property) => {
-        const bluePin = new PinElement({
-          background: '#3B82F6',
-          borderColor: '#FFFFFF',
-          glyphColor: '#FFFFFF',
-          scale: 1.0,
-        });
-        
-        const markerTitle = property.property_name || 'Glamping property';
-        bluePin.element.setAttribute('aria-label', markerTitle);
-        bluePin.element.setAttribute('role', 'button');
-        bluePin.element.setAttribute('tabindex', '0');
-        
-        const marker = new AdvancedMarkerElement({
-          map: map,
-          position: {
-            lat: property.coordinates[0],
-            lng: property.coordinates[1],
-          },
-          title: markerTitle,
-          content: bluePin.element,
-        });
+      if (cancelled || generation !== propertyMarkersGenerationRef.current) return;
 
-        marker.addEventListener('click', (event: any) => {
-          const clickTimestamp = Date.now();
-          
-          // Check if another marker was clicked very recently (within 50ms)
-          // If so, and it's a different marker, ignore this click to prevent conflicts
-          if (lastClickedMarkerRef.current && 
+      const markers: google.maps.marker.AdvancedMarkerElement[] = [];
+
+      for (let i = 0; i < propertiesWithCoords.length; i += MARKER_BATCH_SIZE) {
+        if (cancelled || generation !== propertyMarkersGenerationRef.current) return;
+
+        const batch = propertiesWithCoords.slice(i, i + MARKER_BATCH_SIZE);
+        for (const property of batch) {
+          const bluePin = new PinElement({
+            background: '#3B82F6',
+            borderColor: '#FFFFFF',
+            glyphColor: '#FFFFFF',
+            scale: 1.0,
+          });
+
+          const markerTitle = property.property_name || 'Glamping property';
+          bluePin.element.setAttribute('aria-label', markerTitle);
+          bluePin.element.setAttribute('role', 'button');
+          bluePin.element.setAttribute('tabindex', '0');
+
+          const marker = new AdvancedMarkerElement({
+            map: null,
+            position: {
+              lat: property.coordinates[0],
+              lng: property.coordinates[1],
+            },
+            title: markerTitle,
+            content: bluePin.element,
+            gmpClickable: true,
+          });
+
+          marker.addEventListener('click', (event: Event) => {
+            const domEvent = event as Event & {
+              stopPropagation?: () => void;
+              stopImmediatePropagation?: () => void;
+              preventDefault?: () => void;
+            };
+            const clickTimestamp = Date.now();
+
+            if (
+              lastClickedMarkerRef.current &&
               clickTimestamp - lastClickedMarkerRef.current.timestamp < 50 &&
-              (lastClickedMarkerRef.current.type !== 'property' || lastClickedMarkerRef.current.id !== property.id)) {
-            // Another marker was clicked very recently, ignore this one
-            if (event.domEvent) {
-              event.domEvent.stopPropagation();
-              event.domEvent.stopImmediatePropagation();
+              (lastClickedMarkerRef.current.type !== 'property' ||
+                lastClickedMarkerRef.current.id !== property.id)
+            ) {
+              domEvent.stopPropagation?.();
+              domEvent.stopImmediatePropagation?.();
+              return;
             }
-            if (event.stop) {
-              event.stop();
-            }
-            return;
-          }
-          
-          // Record this as the last clicked marker
-          lastClickedMarkerRef.current = {
-            type: 'property',
-            id: property.id,
-            timestamp: clickTimestamp,
-          };
-          
-          // Immediately stop all event propagation to prevent other markers from responding
-          if (event.domEvent) {
-            event.domEvent.stopPropagation();
-            event.domEvent.stopImmediatePropagation();
-            event.domEvent.preventDefault();
-          }
-          if (event.stop) {
-            event.stop();
-          }
-          
-          // Update click time ref to prevent data layer clicks
-          markerClickTimeRef.current = clickTimestamp;
-          
-          // Clear any other selections first
-          setSelectedPark(null);
-          setSelectedClientWork(null);
 
-          // Immediately set the selected property to the one that was actually clicked
-          // This ensures the correct info window is displayed
-          setSelectedProperty(property as PropertyWithCoords);
+            lastClickedMarkerRef.current = {
+              type: 'property',
+              id: property.id,
+              timestamp: clickTimestamp,
+            };
+
+            domEvent.stopPropagation?.();
+            domEvent.stopImmediatePropagation?.();
+            domEvent.preventDefault?.();
+
+            markerClickTimeRef.current = clickTimestamp;
+            setSelectedPark(null);
+            setSelectedClientWork(null);
+            setSelectedProperty(property as PropertyWithCoords);
+          });
+
+          markers.push(marker);
+        }
+
+        if (i + MARKER_BATCH_SIZE < propertiesWithCoords.length) {
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        }
+      }
+
+      if (cancelled || generation !== propertyMarkersGenerationRef.current || !map) {
+        markers.forEach((m) => {
+          m.map = null;
         });
-
-        return marker;
-      });
+        return;
+      }
 
       markersRef.current = markers;
+      clustererRef.current = new MarkerClusterer({ map, markers });
     };
 
     createMarkers().catch(console.error);
-  }, [map, isClient, propertiesWithCoords, setSelectedProperty, setSelectedPark, setSelectedClientWork, markerClickTimeRef]);
+
+    return () => {
+      cancelled = true;
+      clearPropertyMarkers(markersRef, clustererRef);
+    };
+  }, [
+    map,
+    isClient,
+    propertiesWithCoords,
+    setSelectedProperty,
+    setSelectedPark,
+    setSelectedClientWork,
+    markerClickTimeRef,
+  ]);
 
   // Manage national park markers
   useEffect(() => {
     if (!map || !isClient) {
-      parkMarkersRef.current.forEach(marker => {
+      parkMarkersRef.current.forEach((marker) => {
         marker.map = null;
       });
       parkMarkersRef.current = [];
@@ -181,7 +213,7 @@ export function useMapMarkers({
     }
 
     if (!showNationalParks) {
-      parkMarkersRef.current.forEach(marker => {
+      parkMarkersRef.current.forEach((marker) => {
         marker.map = null;
       });
       parkMarkersRef.current = [];
@@ -191,14 +223,15 @@ export function useMapMarkers({
 
     const parksWithCoords = filterParksWithCoordinates(nationalParks);
 
-    // Clean up old park markers
-    parkMarkersRef.current.forEach(marker => {
+    parkMarkersRef.current.forEach((marker) => {
       marker.map = null;
     });
     parkMarkersRef.current = [];
 
     const createParkMarkers = async () => {
-      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
+      const { AdvancedMarkerElement, PinElement } = (await google.maps.importLibrary(
+        'marker'
+      )) as google.maps.MarkerLibrary;
 
       const parkMarkers = parksWithCoords.map((park) => {
         const greenPin = new PinElement({
@@ -207,12 +240,12 @@ export function useMapMarkers({
           glyphColor: '#FFFFFF',
           scale: 0.8,
         });
-        
+
         const parkTitle = park.name || 'National Park';
         greenPin.element.setAttribute('aria-label', parkTitle);
         greenPin.element.setAttribute('role', 'button');
         greenPin.element.setAttribute('tabindex', '0');
-        
+
         const marker = new AdvancedMarkerElement({
           map: map,
           position: {
@@ -221,53 +254,40 @@ export function useMapMarkers({
           },
           title: parkTitle,
           content: greenPin.element,
+          gmpClickable: true,
         });
 
-        marker.addEventListener('click', (event: any) => {
+        marker.addEventListener('click', (event: Event) => {
+          const domEvent = event as Event & {
+            stopPropagation?: () => void;
+            stopImmediatePropagation?: () => void;
+            preventDefault?: () => void;
+          };
           const clickTimestamp = Date.now();
-          
-          // Check if another marker was clicked very recently (within 50ms)
-          // If so, and it's a different marker, ignore this click to prevent conflicts
-          if (lastClickedMarkerRef.current && 
-              clickTimestamp - lastClickedMarkerRef.current.timestamp < 50 &&
-              (lastClickedMarkerRef.current.type !== 'park' || lastClickedMarkerRef.current.id !== park.id)) {
-            // Another marker was clicked very recently, ignore this one
-            if (event.domEvent) {
-              event.domEvent.stopPropagation();
-              event.domEvent.stopImmediatePropagation();
-            }
-            if (event.stop) {
-              event.stop();
-            }
+
+          if (
+            lastClickedMarkerRef.current &&
+            clickTimestamp - lastClickedMarkerRef.current.timestamp < 50 &&
+            (lastClickedMarkerRef.current.type !== 'park' || lastClickedMarkerRef.current.id !== park.id)
+          ) {
+            domEvent.stopPropagation?.();
+            domEvent.stopImmediatePropagation?.();
             return;
           }
-          
-          // Record this as the last clicked marker
+
           lastClickedMarkerRef.current = {
             type: 'park',
             id: park.id,
             timestamp: clickTimestamp,
           };
-          
-          // Immediately stop all event propagation to prevent other markers from responding
-          if (event.domEvent) {
-            event.domEvent.stopPropagation();
-            event.domEvent.stopImmediatePropagation();
-            event.domEvent.preventDefault();
-          }
-          if (event.stop) {
-            event.stop();
-          }
-          
-          // Update click time ref to prevent data layer clicks
+
+          domEvent.stopPropagation?.();
+          domEvent.stopImmediatePropagation?.();
+          domEvent.preventDefault?.();
+
           markerClickTimeRef.current = clickTimestamp;
-          
-          // Clear any other selections first
           setSelectedProperty(null);
           setSelectedClientWork(null);
-
-          // Immediately set the selected park to the one that was actually clicked
-          // This ensures the correct info window is displayed
           setSelectedPark(park as NationalParkWithCoords);
         });
 
@@ -327,9 +347,15 @@ export function useMapMarkers({
           position: { lat: point.lat, lng: point.lng },
           title,
           content: goldPin.element,
+          gmpClickable: true,
         });
 
-        marker.addEventListener('click', (event: any) => {
+        marker.addEventListener('click', (event: Event) => {
+          const domEvent = event as Event & {
+            stopPropagation?: () => void;
+            stopImmediatePropagation?: () => void;
+            preventDefault?: () => void;
+          };
           const clickTimestamp = Date.now();
 
           if (
@@ -338,13 +364,8 @@ export function useMapMarkers({
             (lastClickedMarkerRef.current.type !== 'clientWork' ||
               lastClickedMarkerRef.current.id !== point.id)
           ) {
-            if (event.domEvent) {
-              event.domEvent.stopPropagation();
-              event.domEvent.stopImmediatePropagation();
-            }
-            if (event.stop) {
-              event.stop();
-            }
+            domEvent.stopPropagation?.();
+            domEvent.stopImmediatePropagation?.();
             return;
           }
 
@@ -354,14 +375,9 @@ export function useMapMarkers({
             timestamp: clickTimestamp,
           };
 
-          if (event.domEvent) {
-            event.domEvent.stopPropagation();
-            event.domEvent.stopImmediatePropagation();
-            event.domEvent.preventDefault();
-          }
-          if (event.stop) {
-            event.stop();
-          }
+          domEvent.stopPropagation?.();
+          domEvent.stopImmediatePropagation?.();
+          domEvent.preventDefault?.();
 
           markerClickTimeRef.current = clickTimestamp;
           setSelectedProperty(null);
@@ -387,5 +403,5 @@ export function useMapMarkers({
     markerClickTimeRef,
   ]);
 
-  return { markersRef, parkMarkersRef, clientWorkMarkersRef };
+  return { markersRef, parkMarkersRef, clientWorkMarkersRef, clustererRef };
 }

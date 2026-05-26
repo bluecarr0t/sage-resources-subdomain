@@ -30,6 +30,82 @@ export function getRateCategory(rate: number | null): string | null {
 }
 
 /**
+ * Faster dedupe for map markers when unit-type / rate filters are off.
+ * Skips per-property rate aggregation and all_unit_types collection.
+ */
+export function processPropertiesForMapMarkers(
+  properties: SageProperty[],
+  filterState: string[],
+  filterCountry: string[],
+  filterUnitType: string[] = [],
+  filterRateRange: string[] = []
+): SageProperty[] {
+  if (filterUnitType.length > 0 || filterRateRange.length > 0) {
+    return processProperties(
+      properties,
+      filterState,
+      filterCountry,
+      filterUnitType,
+      filterRateRange
+    );
+  }
+  if (!properties?.length) return [];
+
+  const filterStateSet = createStateFilterSet(filterState);
+  const propertyMap = new Map<string, SageProperty>();
+
+  for (const item of properties) {
+    const openStatus = item.is_open;
+    if (
+      openStatus != null &&
+      String(openStatus).trim() !== '' &&
+      !isGlampingVisibleOnPublicMap(openStatus)
+    ) {
+      continue;
+    }
+
+    const propertyName = item.property_name;
+    if (!propertyName) continue;
+
+    if (filterState.length > 0 && !stateMatchesFilter(item.state, filterStateSet)) {
+      continue;
+    }
+    if (
+      filterCountry.length > 0 &&
+      !propertyMatchesCountryFilters(item, filterCountry)
+    ) {
+      continue;
+    }
+
+    const coords = getPropertyCoordinates(item);
+    if (!coords) continue;
+
+    const normalizedName = normalizePropertyName(propertyName);
+    const existing = propertyMap.get(normalizedName);
+    if (!existing) {
+      propertyMap.set(normalizedName, item);
+      continue;
+    }
+
+    const existingCoords = getPropertyCoordinates(existing);
+    const existingMatchesState = stateMatchesFilter(existing.state, filterStateSet);
+    const itemMatchesState = stateMatchesFilter(item.state, filterStateSet);
+
+    if (itemMatchesState && !existingMatchesState) {
+      propertyMap.set(normalizedName, item);
+    } else if (
+      itemMatchesState === existingMatchesState &&
+      coords &&
+      !existingCoords
+    ) {
+      propertyMap.set(normalizedName, item);
+    }
+  }
+
+  return Array.from(propertyMap.values());
+}
+
+/**
  * Process and deduplicate properties
  * Groups by property name, aggregates unit types and rates, applies all filters
  * Single source of truth for client-side filtering (B3)

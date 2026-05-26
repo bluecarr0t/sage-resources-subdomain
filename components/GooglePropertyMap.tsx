@@ -278,7 +278,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
   }, [selectedClientWork]);
 
-  const clustererRef = useRef<any | null>(null);
   const hasCenteredFromUrlRef = useRef<boolean>(false);
   const hasJustFittedBoundsRef = useRef<boolean>(false);
   const markerClickTimeRef = useRef<number>(0);
@@ -505,6 +504,14 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
     map.setMapTypeId('terrain');
+    map.setOptions({ clickableIcons: false });
+    // Belt-and-suspenders: suppress default Google place/region info windows when a click
+    // has a placeId (e.g. state labels, national parks) so only our marker InfoWindows show.
+    map.addListener('click', (event: google.maps.MapMouseEvent & { placeId?: string }) => {
+      if (event.placeId && typeof event.stop === 'function') {
+        event.stop();
+      }
+    });
     const urlLat = searchParams.get('lat');
     const urlLon = searchParams.get('lon');
     if (!urlLat || !urlLon) {
@@ -525,7 +532,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   }, [map, mapCenter, mapZoom, shouldFitBounds]);
 
   const onUnmount = useCallback(() => {
-    if (clustererRef.current) { clustererRef.current.clearMarkers(); clustererRef.current = null; }
     if (markersRef.current) { markersRef.current.forEach((marker) => { marker.map = null; }); markersRef.current = []; }
     if (parkMarkersRef.current) {
       parkMarkersRef.current.forEach((marker) => {
@@ -559,6 +565,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       mapTypeControl: !embedMode,
       fullscreenControl: true,
       mapTypeId: 'terrain' as const,
+      /** Avoid Google's default POI/region popups competing with property marker InfoWindows. */
+      clickableIcons: false,
       gestureHandling: (isMobile && isFullscreen ? 'greedy' : 'cooperative') as 'greedy' | 'cooperative',
       draggable: true,
       scrollwheel: !isMobile,
@@ -573,7 +581,11 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
   useEffect(() => {
     if (!map || !isClient) return;
-    map.setOptions({ gestureHandling: isMobile && isFullscreen ? 'greedy' : 'cooperative', scrollwheel: !isMobile });
+    map.setOptions({
+      gestureHandling: isMobile && isFullscreen ? 'greedy' : 'cooperative',
+      scrollwheel: !isMobile,
+      clickableIcons: false,
+    });
   }, [map, isClient, isMobile, isFullscreen]);
 
   // Fullscreen change sync

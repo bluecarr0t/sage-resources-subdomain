@@ -1403,8 +1403,10 @@ export default function AdminGlampingPropertiesTable() {
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [stateFilter, setStateFilter] = useState<string>('all');
   const [openStatusFilter, setOpenStatusFilter] = useState<string>('all');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
   /** `null` = list not loaded yet */
   const [countryNames, setCountryNames] = useState<string[] | null>(null);
+  const [discoverySourceNames, setDiscoverySourceNames] = useState<string[] | null>(null);
   const [missingDataFilter, setMissingDataFilter] = useState<MissingDataFilter>('all');
   const [sortBy, setSortBy] = useState<string>('date_updated');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -1432,7 +1434,7 @@ export default function AdminGlampingPropertiesTable() {
 
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [search, statusFilter, countryFilter, stateFilter, openStatusFilter, missingDataFilter, serviceTierFilter]);
+  }, [search, statusFilter, countryFilter, stateFilter, openStatusFilter, sourceFilter, missingDataFilter, serviceTierFilter]);
 
   const stateFilterEnabled =
     countryFilter === 'all' || isUnitedStatesCountryFilterValue(countryFilter);
@@ -1505,6 +1507,7 @@ export default function AdminGlampingPropertiesTable() {
         params.set('state', stateFilter);
       }
       if (openStatusFilter !== 'all') params.set('is_open', openStatusFilter);
+      if (sourceFilter !== 'all') params.set('discovery_source', sourceFilter);
       if (missingDataFilter !== 'all') {
         params.set('missing', missingDataFilter);
       }
@@ -1549,6 +1552,7 @@ export default function AdminGlampingPropertiesTable() {
     stateFilter,
     stateFilterEnabled,
     openStatusFilter,
+    sourceFilter,
     missingDataFilter,
     serviceTierFilter,
     sortBy,
@@ -1653,6 +1657,30 @@ export default function AdminGlampingPropertiesTable() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/sage-glamping-data/glamping-discovery-sources');
+        const json = (await res.json()) as {
+          success?: boolean;
+          discoverySources?: string[];
+        };
+        if (cancelled) return;
+        if (res.ok && json.success && Array.isArray(json.discoverySources)) {
+          setDiscoverySourceNames(json.discoverySources);
+        } else {
+          setDiscoverySourceNames([]);
+        }
+      } catch {
+        if (!cancelled) setDiscoverySourceNames([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const countrySelectOptions = useMemo(() => {
     const allLabel = t('countryAll');
     const names = countryNames ?? [];
@@ -1668,6 +1696,19 @@ export default function AdminGlampingPropertiesTable() {
     }
     return opts;
   }, [countryNames, countryFilter, t]);
+
+  const sourceSelectOptions = useMemo(() => {
+    const allLabel = t('sourceFilterAll');
+    const names = discoverySourceNames ?? [];
+    const opts: { value: string; label: string }[] = [
+      { value: 'all', label: allLabel },
+      ...names.map((s) => ({ value: s, label: s })),
+    ];
+    if (sourceFilter !== 'all' && !opts.some((o) => o.value === sourceFilter)) {
+      opts.push({ value: sourceFilter, label: sourceFilter });
+    }
+    return opts;
+  }, [discoverySourceNames, sourceFilter, t]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1696,6 +1737,11 @@ export default function AdminGlampingPropertiesTable() {
   const handleOpenStatusChange = (value: string) => {
     setPage(1);
     setOpenStatusFilter(value);
+  };
+
+  const handleSourceChange = (value: string) => {
+    setPage(1);
+    setSourceFilter(value);
   };
 
   const handleServiceTierChange = (value: string) => {
@@ -2014,7 +2060,7 @@ export default function AdminGlampingPropertiesTable() {
           </label>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(12rem,1fr)_minmax(14rem,1.2fr)] xl:items-end xl:max-w-2xl">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(12rem,1fr)_minmax(12rem,1fr)_minmax(14rem,1.2fr)] xl:items-end xl:max-w-4xl">
             <label
             className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
             htmlFor="sage-data-open-status-filter"
@@ -2030,6 +2076,33 @@ export default function AdminGlampingPropertiesTable() {
               {OPEN_STATUS_FILTER_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {t(opt.labelKey)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label
+            className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
+            htmlFor="sage-data-source-filter"
+          >
+            <span>{t('sourceFilterLabel')}</span>
+            <select
+              id="sage-data-source-filter"
+              value={sourceFilter}
+              onChange={(e) => handleSourceChange(e.target.value)}
+              disabled={discoverySourceNames === null}
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
+              aria-label={t('sourceFilterAria')}
+              title={
+                discoverySourceNames === null
+                  ? t('sourcesLoading')
+                  : discoverySourceNames.length === 0
+                    ? t('sourcesFromDataEmpty')
+                    : undefined
+              }
+            >
+              {sourceSelectOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
             </select>

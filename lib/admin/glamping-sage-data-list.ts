@@ -24,6 +24,8 @@ export type SageDataGlampingListFilters = {
   state: string | undefined;
   /** Exact `is_open` when set (e.g. Yes, Under Construction, Proposed Development, Temporarily closed, Closed). */
   isOpen: string | undefined;
+  /** Exact `discovery_source` when set (shown as "Source" in the Sage Data table). */
+  discoverySource: string | undefined;
   /** `missing` query param value, or null when unset / "all". */
   missing: string | null;
   /** Exact `glamping_service_tier` when set (luxury | upscale | midscale | rustic). */
@@ -78,6 +80,9 @@ export function applySageDataGlampingListFilters<T extends SageGlampingListQuery
   }
   if (filters.isOpen && filters.isOpen !== 'all') {
     q = q.eq('is_open', filters.isOpen);
+  }
+  if (filters.discoverySource && filters.discoverySource !== 'all') {
+    q = q.eq('discovery_source', filters.discoverySource);
   }
   if (filters.glampingServiceTier && filters.glampingServiceTier !== 'all') {
     q = q.eq('glamping_service_tier', filters.glampingServiceTier);

@@ -9,6 +9,8 @@ import {
   applyPublicMapCohortFilters,
   isExcludedPropertyTypeForPublicMap,
 } from '@/lib/public-map-cohort-filters';
+import { PUBLIC_COLUMNS } from '@/lib/property-column-privacy';
+import { PUBLIC_MAP_PROPERTY_FIELDS } from '@/lib/fetch-public-map-properties';
 
 /**
  * API route for fetching glamping properties with caching
@@ -183,11 +185,17 @@ async function fetchPropertiesFromDatabase(
   requestedFields: string[] | null = null
 ) {
   const supabase = createServerClient();
-  
-  // Start query - apply filters BEFORE limit for better performance
-  // Filter to only show glamping properties FIRST (uses index)
-  // Operating properties only — exclude closed, under construction, and proposed pipeline rows
-  let query = applyPublicMapCohortFilters(supabase.from('all_glamping_properties').select('*'));
+
+  const mapMarkerFieldList = PUBLIC_MAP_PROPERTY_FIELDS.split(',');
+  const selectColumns =
+    requestedFields && requestedFields.length > 0
+      ? [...new Set([...mapMarkerFieldList, ...requestedFields])].join(',')
+      : [...PUBLIC_COLUMNS].join(',');
+
+  // Project only public/map columns at the database — avoids shipping full rows over the wire.
+  let query = applyPublicMapCohortFilters(
+    supabase.from('all_glamping_properties').select(selectColumns)
+  );
 
   // Filter by country
   if (filterCountry.length === 0) {

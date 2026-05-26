@@ -27,6 +27,38 @@ import MapLoading from '@/components/MapLoading';
 let globalFetchInProgress = false;
 let globalAbortController: AbortController | null = null;
 
+const MAP_PROPERTIES_SESSION_KEY = 'sage-map-properties-v2';
+const MAP_PROPERTIES_SESSION_MAX_AGE_MS = 5 * 60 * 1000;
+
+function readMapPropertiesSessionCache(): SageProperty[] | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(MAP_PROPERTIES_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { at?: number; data?: SageProperty[] };
+    if (!parsed.at || !Array.isArray(parsed.data)) return null;
+    if (Date.now() - parsed.at > MAP_PROPERTIES_SESSION_MAX_AGE_MS) {
+      sessionStorage.removeItem(MAP_PROPERTIES_SESSION_KEY);
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeMapPropertiesSessionCache(data: SageProperty[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(
+      MAP_PROPERTIES_SESSION_KEY,
+      JSON.stringify({ at: Date.now(), data })
+    );
+  } catch {
+    // Quota or private mode — ignore
+  }
+}
+
 export type MapLayer = 'none' | 'population' | 'tourism' | 'opportunity';
 
 interface MapContextType {
@@ -192,16 +224,22 @@ function MapProviderInner({ children }: { children: ReactNode }) {
 
     async function fetchAllProperties() {
       try {
-        setPropertiesLoading(true);
         setPropertiesError(null);
+
+        const sessionCached = readMapPropertiesSessionCache();
+        if (sessionCached?.length) {
+          setAllProperties(sessionCached);
+          setHasLoadedOnce(true);
+          setPropertiesLoading(false);
+        } else {
+          setPropertiesLoading(true);
+        }
 
         const params = new URLSearchParams();
         params.append('fields', 'id,property_name,lat,lon,state,country,unit_type,rate_category');
 
         const response = await fetch(`/api/properties?${params.toString()}`, {
           signal: abortController.signal,
-          // Do not reuse a long-lived browser cache of the full map payload (CDN uses Cache-Control from the API).
-          cache: 'no-store',
         });
 
         if (abortController.signal.aborted) return;
@@ -219,6 +257,7 @@ function MapProviderInner({ children }: { children: ReactNode }) {
         if (!abortController.signal.aborted) {
           setAllProperties(data);
           setHasLoadedOnce(true);
+          writeMapPropertiesSessionCache(data);
         }
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;

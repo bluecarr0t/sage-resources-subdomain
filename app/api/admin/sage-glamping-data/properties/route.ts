@@ -7,6 +7,7 @@
  *     country      — case-insensitive exact match (ilike) on `country`
  *     state        — USPS code (e.g. VT); matches abbrev or full state name on `state`
  *     is_open      — exact match on `is_open` when value is Yes | Under Construction | Proposed Development | Temporarily closed | Closed
+ *     discovery_source — exact match on `discovery_source` (Sage Data table "Source" column)
  *     page         — 1-based (default 1)
  *     pageSize     — default 50, max 200
  *     sortBy       — column name (default 'date_updated')
@@ -343,6 +344,11 @@ export const GET = withAdminAuth(async (request) => {
       (GLAMPING_IS_OPEN_VALUES as readonly string[]).includes(isOpenRaw)
         ? (isOpenRaw as GlampingIsOpenValue)
         : undefined;
+    const discoverySourceRaw = params.get('discovery_source')?.trim();
+    const discoverySourceFilter =
+      discoverySourceRaw && discoverySourceRaw !== 'all'
+        ? discoverySourceRaw
+        : undefined;
     const missingParam = params.get('missing');
     const glampingServiceTierRaw = params.get('glamping_service_tier')?.trim();
     const glampingServiceTierFilter =
@@ -371,6 +377,7 @@ export const GET = withAdminAuth(async (request) => {
       country: country ?? undefined,
       state,
       isOpen: isOpenFilter,
+      discoverySource: discoverySourceFilter,
       missing: missingParam,
       glampingServiceTier: glampingServiceTierFilter,
     };

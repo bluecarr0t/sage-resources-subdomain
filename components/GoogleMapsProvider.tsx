@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useLoadScript } from '@react-google-maps/api';
 
 interface GoogleMapsContextType {
@@ -22,6 +22,13 @@ export function GoogleMapsProvider({ children }: { children: ReactNode }) {
     googleMapsApiKey: apiKey,
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
+
+  useEffect(() => {
+    if (!isLoaded || typeof window === 'undefined' || !window.google?.maps?.importLibrary) {
+      return;
+    }
+    void window.google.maps.importLibrary('marker');
+  }, [isLoaded]);
 
   return (
     <GoogleMapsContext.Provider value={{ isLoaded, loadError }}>

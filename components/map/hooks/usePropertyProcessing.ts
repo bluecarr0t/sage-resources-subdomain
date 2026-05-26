@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { SageProperty } from '@/lib/types/sage';
-import { processProperties } from '../utils/propertyProcessing';
+import { processPropertiesForMapMarkers } from '../utils/propertyProcessing';
 
 /**
  * Hook to process and deduplicate properties with caching
@@ -31,7 +31,13 @@ export function usePropertyProcessing(
       }
     }
     
-    const processed = processProperties(properties, filterState, filterCountry, filterUnitType, filterRateRange);
+    const processed = processPropertiesForMapMarkers(
+      properties,
+      filterState,
+      filterCountry,
+      filterUnitType,
+      filterRateRange
+    );
     
     cacheRef.current.set(cacheKey, processed);
     lastFiltersRef.current = cacheKey;
