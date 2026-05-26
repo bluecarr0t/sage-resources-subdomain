@@ -23,7 +23,7 @@ import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const FACETS_CACHE_KEY = 'admin:comps-unified:facets:v4';
+import { COMPS_UNIFIED_FACETS_CACHE_KEYS } from '@/lib/comps-unified/facets-cache-keys';
 
 async function refresh(request: NextRequest): Promise<NextResponse> {
   if (!authorizeVercelCronRequest(request)) {
@@ -60,7 +60,7 @@ async function refresh(request: NextRequest): Promise<NextResponse> {
     // Invalidate the facets cache so fresh values appear on the next page load.
     const redis = getRedis();
     if (redis) {
-      await redis.del(FACETS_CACHE_KEY);
+      await Promise.all(COMPS_UNIFIED_FACETS_CACHE_KEYS.map((key) => redis.del(key)));
     }
 
     return NextResponse.json({

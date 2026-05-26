@@ -1,5 +1,7 @@
 #!/usr/bin/env npx tsx
 /**
+ * @deprecated Use `npm run sync:do` (SQL sync). Only invoked via migrate:legacy:csv-export with ALLOW_LEGACY_CSV_MIGRATION=1.
+ *
  * Export data from legacy campings DB to CSV files.
  * Writes to scripts/migrate-legacy-to-supabase/data/
  *

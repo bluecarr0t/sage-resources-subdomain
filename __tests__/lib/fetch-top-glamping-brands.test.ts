@@ -241,9 +241,58 @@ describe('aggregateTopGlampingBrands', () => {
 
     const result = aggregateTopGlampingBrands(marriottBrands, rows, TOP_GLAMPING_BRANDS_COUNT);
 
-    expect(result.brands[0]?.subBrandNote).toBe(
-      'Includes Outdoor Collection by Marriott Bonvoy, Postcard Cabins'
-    );
+    expect(result.brands[0]).toMatchObject({
+      slug: 'postcard-cabins',
+      displayName: 'Postcard Cabins',
+      subBrandNote: 'Owned by Marriott',
+    });
+  });
+
+  it('lists Best Western portfolio under WorldHotels Backdrop with an ownership note', () => {
+    const bestWesternId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+    const backdropId = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+
+    const bestWesternBrands: GlampingBrand[] = [
+      brand({
+        id: bestWesternId,
+        slug: 'best-western',
+        display_name: 'Best Western',
+        brand_tier: 'portfolio',
+      }),
+      brand({
+        id: backdropId,
+        slug: 'worldhotels-backdrop',
+        display_name: 'WorldHotels Backdrop',
+        brand_tier: 'sub_brand',
+        parent_brand_id: bestWesternId,
+      }),
+    ];
+
+    const rows = [
+      {
+        id: 30,
+        property_id: 'whb1',
+        slug: null,
+        property_name: 'WorldHotels Backdrop Asheville River Cabins',
+        property_type: 'Glamping',
+        city: 'Asheville',
+        state: 'NC',
+        brand_id: backdropId,
+        quantity_of_units: 29,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 275,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(bestWesternBrands, rows, TOP_GLAMPING_BRANDS_COUNT);
+
+    expect(result.brands[0]).toMatchObject({
+      slug: 'worldhotels-backdrop',
+      displayName: 'WorldHotels Backdrop',
+      subBrandNote: 'Owned by Best Western',
+    });
   });
 
   it('excludes rows whose property_type is not Glamping', () => {

@@ -1,5 +1,7 @@
 #!/usr/bin/env npx tsx
 /**
+ * @deprecated Use `npm run sync:do` / `sync:do:full`. Only invoked via migrate:legacy:csv with ALLOW_LEGACY_CSV_MIGRATION=1.
+ *
  * Orchestrate legacy campings DB to Supabase migration.
  *
  * Steps:

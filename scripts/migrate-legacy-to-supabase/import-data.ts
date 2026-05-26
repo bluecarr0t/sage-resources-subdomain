@@ -1,5 +1,7 @@
 #!/usr/bin/env npx tsx
 /**
+ * @deprecated Use `npm run sync:do` (SQL sync). Only invoked via migrate:legacy:csv-import with ALLOW_LEGACY_CSV_MIGRATION=1.
+ *
  * Import data from CSV files into Supabase.
  * Reads from scripts/migrate-legacy-to-supabase/data/
  *

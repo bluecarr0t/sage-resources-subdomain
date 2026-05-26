@@ -19,7 +19,9 @@ import { getRedis } from '@/lib/upstash';
 import { normalizeStateToCanonicalAbbrev, STATE_ABBREVIATIONS } from '@/components/map/utils/stateUtils';
 import { buildCountryFilterOptions } from '@/lib/comps-unified/country-filter';
 
-const CACHE_KEY = 'admin:comps-unified:facets:v5';
+import { COMPS_UNIFIED_FACETS_CACHE_KEY } from '@/lib/comps-unified/facets-cache-keys';
+
+const CACHE_KEY = COMPS_UNIFIED_FACETS_CACHE_KEY;
 const CACHE_TTL_SECONDS = 24 * 60 * 60;
 
 interface FacetsPayload {

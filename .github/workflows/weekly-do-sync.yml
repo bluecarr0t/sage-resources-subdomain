@@ -1,0 +1,91 @@
+name: Weekly DO to Supabase sync
+
+on:
+  schedule:
+  # Mondays 08:00 UTC — after weekend DO scrapes
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+    inputs:
+      databases:
+        description: 'Comma-separated DO databases (campings,hipcamp,campspot)'
+        required: false
+        default: 'campings'
+      include_large:
+        description: 'Include large tables (sites, propertys). Set false to use --no-large.'
+        type: boolean
+        default: true
+      no_large:
+        description: 'Skip large tables (overrides include_large)'
+        type: boolean
+        default: false
+      full:
+        description: 'Full reload (ignore watermarks)'
+        type: boolean
+        default: false
+      flat_transform:
+        description: 'After sync, rebuild public.hipcamp/campspot (Phase 3 SQL)'
+        type: boolean
+        default: false
+      downstream_refresh:
+        description: 'After flat transform (or alone), refresh unified_comps + RV overview cache'
+        type: boolean
+        default: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Sync DigitalOcean to Supabase (read-only on DO)
+        env:
+          DIGITALOCEAN_DB_HOST: '146.190.212.63'
+          DIGITALOCEAN_DB_PORT: '5432'
+          DIGITALOCEAN_DB_USER: 'rou'
+          DIGITALOCEAN_DB_PASSWORD: ${{ secrets.DIGITALOCEAN_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SYNC_INCLUDE_LARGE_DEFAULT: '1'
+        run: |
+          ARGS="--databases=${{ github.event.inputs.databases || 'campings' }}"
+          if [ "${{ github.event.inputs.no_large }}" = "true" ]; then
+            ARGS="$ARGS --no-large"
+          elif [ "${{ github.event.inputs.include_large }}" != "false" ]; then
+            ARGS="$ARGS --include-large"
+          fi
+          if [ "${{ github.event.inputs.full }}" = "true" ]; then
+            ARGS="$ARGS --full"
+          fi
+          npx tsx scripts/sync-do-to-supabase/run-sync.ts $ARGS
+      - name: Flat sites transform (Phase 3)
+        if: github.event.inputs.flat_transform == 'true'
+        env:
+          DIGITALOCEAN_DB_HOST: '146.190.212.63'
+          DIGITALOCEAN_DB_PORT: '5432'
+          DIGITALOCEAN_DB_USER: 'rou'
+          DIGITALOCEAN_DB_PASSWORD: ${{ secrets.DIGITALOCEAN_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: npx tsx scripts/flat-sites-transform/run-flat-transform.ts
+      - name: Downstream refresh (Phase 4)
+        if: >
+          github.event.inputs.downstream_refresh == 'true' ||
+          github.event.inputs.flat_transform == 'true'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+        run: |
+          if [ "${{ github.event.inputs.flat_transform }}" = "true" ]; then
+            echo "Downstream refresh already ran with transform:flat-sites (--skip-downstream not used)"
+            exit 0
+          fi
+          npx tsx scripts/downstream-refresh/run-downstream-refresh.ts

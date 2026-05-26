@@ -6,6 +6,12 @@
 export const SAGE_CHAIN_LABEL_PREFIXES = [
   'outdoor collection by marriott bonvoy',
   'collective retreats',
+  'nightfall camp',
+  'paperbark camp',
+  'tanja lagoon camp',
+  'eco retreat',
+  'tathaastu',
+  'the bubble retreat',
   'postcard cabins',
   'rvc outdoor destinations',
   'sundance by basecamp',
@@ -66,6 +72,14 @@ export function chainLabelFromPropertyName(name: string | null | undefined): str
     ) {
       return p;
     }
+  }
+
+  if (
+    ln.startsWith('collective ') &&
+    !ln.includes('elemental collective') &&
+    !ln.includes('glamping collective')
+  ) {
+    return 'collective retreats';
   }
 
   const dashPatterns = [' — ', ' – ', ' - '] as const;

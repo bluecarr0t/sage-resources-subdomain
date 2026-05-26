@@ -30,4 +30,14 @@ describe('chainLabelFromPropertyName', () => {
     expect(ulumIdx).toBeLessThan(ucIdx);
     expect(chainLabelFromPropertyName('ULUM Moab')).toBe('ulum');
   });
+
+  it('maps Collective Vail variants to collective retreats', () => {
+    expect(chainLabelFromPropertyName('Collective Vail')).toBe('collective retreats');
+    expect(chainLabelFromPropertyName('Collective Yellowstone')).toBe('collective retreats');
+  });
+
+  it('maps new international brand prefixes', () => {
+    expect(chainLabelFromPropertyName('Nightfall Camp')).toBe('nightfall camp');
+    expect(chainLabelFromPropertyName('Eco Retreat Konark')).toBe('eco retreat');
+  });
 });

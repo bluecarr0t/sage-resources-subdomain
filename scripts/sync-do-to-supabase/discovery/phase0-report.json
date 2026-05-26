@@ -1,0 +1,940 @@
+{
+  "generatedAt": "2026-05-25T23:04:17.065Z",
+  "discoveries": [
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "importedsites",
+      "targetSchema": "hipcamp",
+      "targetTable": "importedsites",
+      "rowCount": 12291,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 0,
+      "minUpdatedAt": "2024-11-26T09:19:16.782Z",
+      "maxUpdatedAt": "2025-12-12T03:11:58.987Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 0,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "imports",
+      "targetSchema": "hipcamp",
+      "targetTable": "imports",
+      "rowCount": 21,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 0,
+      "minUpdatedAt": "2024-11-26T07:28:20.588Z",
+      "maxUpdatedAt": "2026-04-07T19:23:15.617Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 37,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "old_data_table",
+      "targetSchema": "hipcamp",
+      "targetTable": "old_data_table",
+      "rowCount": 71031,
+      "primaryKey": [],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": true,
+      "supabaseRowCount": 71031,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "propertydetails",
+      "targetSchema": "hipcamp",
+      "targetTable": "propertydetails",
+      "rowCount": 39865,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 27977,
+      "minUpdatedAt": "2024-11-25T12:08:17.638Z",
+      "maxUpdatedAt": "2026-05-25T02:16:35.189Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 53172,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "propertys",
+      "targetSchema": "hipcamp",
+      "targetTable": "propertys",
+      "rowCount": 13197138,
+      "primaryKey": [
+        "id",
+        "scraping_id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 194525,
+      "minUpdatedAt": "2024-11-25T12:03:50.545Z",
+      "maxUpdatedAt": "2026-05-25T02:16:35.186Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 1450000,
+      "sizeCategory": "xlarge",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "scrapings",
+      "targetSchema": "hipcamp",
+      "targetTable": "scrapings",
+      "rowCount": 565,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 7,
+      "minUpdatedAt": "2024-11-25T16:38:23.517Z",
+      "maxUpdatedAt": "2026-05-25T02:16:35.458Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 1055,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "sitedetails",
+      "targetSchema": "hipcamp",
+      "targetTable": "sitedetails",
+      "rowCount": 130543,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 73205,
+      "minUpdatedAt": "2024-11-25T12:06:33.102Z",
+      "maxUpdatedAt": "2026-05-25T02:16:35.220Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 118382,
+      "sizeCategory": "medium",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "sites",
+      "targetSchema": "hipcamp",
+      "targetTable": "sites",
+      "rowCount": 33444605,
+      "primaryKey": [
+        "id",
+        "scraping_id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 483716,
+      "minUpdatedAt": "2024-11-25T12:03:50.545Z",
+      "maxUpdatedAt": "2026-05-25T02:16:35.186Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 2300000,
+      "sizeCategory": "xlarge",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "sourceTable": "siteseasonals",
+      "targetSchema": "hipcamp",
+      "targetTable": "siteseasonals",
+      "rowCount": 1186802,
+      "primaryKey": [
+        "id",
+        "scraping_id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 0,
+      "minUpdatedAt": "2025-01-12T18:59:16.203Z",
+      "maxUpdatedAt": "2026-05-01T05:06:36.092Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 1049334,
+      "sizeCategory": "large",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "sourceTable": "old_data_table",
+      "targetSchema": "campspot",
+      "targetTable": "old_data_table",
+      "rowCount": 589802,
+      "primaryKey": [],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": true,
+      "supabaseRowCount": 1123250,
+      "sizeCategory": "medium",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "sourceTable": "propertydetails",
+      "targetSchema": "campspot",
+      "targetTable": "propertydetails",
+      "rowCount": 3578,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 3199,
+      "minUpdatedAt": "2025-01-27T10:52:43.354Z",
+      "maxUpdatedAt": "2026-05-25T00:23:35.760Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 3325,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "sourceTable": "propertys",
+      "targetSchema": "campspot",
+      "targetTable": "propertys",
+      "rowCount": 1433496,
+      "primaryKey": [
+        "id",
+        "scraping_id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 22360,
+      "minUpdatedAt": "2024-12-07T18:02:29.701Z",
+      "maxUpdatedAt": "2026-05-25T00:23:35.754Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 2188423,
+      "sizeCategory": "large",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "sourceTable": "scrapings",
+      "targetSchema": "campspot",
+      "targetTable": "scrapings",
+      "rowCount": 508,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 7,
+      "minUpdatedAt": "2024-12-09T11:53:09.851Z",
+      "maxUpdatedAt": "2026-05-25T00:23:36.087Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 941,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "sourceTable": "sitedetails",
+      "targetSchema": "campspot",
+      "targetTable": "sitedetails",
+      "rowCount": 332871,
+      "primaryKey": [
+        "id",
+        "property_id",
+        "is_parent"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 265248,
+      "minUpdatedAt": "2025-01-27T10:51:15.212Z",
+      "maxUpdatedAt": "2026-05-25T00:23:36.030Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 308246,
+      "sizeCategory": "medium",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "sourceTable": "sites",
+      "targetSchema": "campspot",
+      "targetTable": "sites",
+      "rowCount": 107311540,
+      "primaryKey": [
+        "id",
+        "scraping_id",
+        "is_parent",
+        "property_id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 1847564,
+      "minUpdatedAt": "2025-01-27T10:07:08.526Z",
+      "maxUpdatedAt": "2026-05-25T00:23:35.754Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 15659793,
+      "sizeCategory": "xlarge",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "sourceTable": "siteseasonals",
+      "targetSchema": "campspot",
+      "targetTable": "siteseasonals",
+      "rowCount": 321565,
+      "primaryKey": [
+        "id",
+        "scraping_id",
+        "property_id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 0,
+      "minUpdatedAt": "2024-12-07T18:02:29.701Z",
+      "maxUpdatedAt": "2026-05-02T01:08:58.393Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 292220,
+      "sizeCategory": "medium",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "bookoutdoors",
+      "sourceTable": "propertys",
+      "targetSchema": "bookoutdoors",
+      "targetTable": "propertys",
+      "rowCount": 8527,
+      "primaryKey": [
+        "id",
+        "scraping_id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 0,
+      "minUpdatedAt": "2024-09-21T07:25:01.284Z",
+      "maxUpdatedAt": "2024-10-17T07:47:10.204Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 8527,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "bookoutdoors",
+      "sourceTable": "scrapings",
+      "targetSchema": "bookoutdoors",
+      "targetTable": "scrapings",
+      "rowCount": 3,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 0,
+      "minUpdatedAt": "2024-09-21T08:07:17.705Z",
+      "maxUpdatedAt": "2024-10-17T07:47:10.215Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 3,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "bookoutdoors",
+      "sourceTable": "sites",
+      "targetSchema": "bookoutdoors",
+      "targetTable": "sites",
+      "rowCount": 48174,
+      "primaryKey": [
+        "id",
+        "scraping_id"
+      ],
+      "hasCreatedAt": true,
+      "hasUpdatedAt": true,
+      "changedLast7Days": 0,
+      "minUpdatedAt": "2024-09-21T07:25:01.284Z",
+      "maxUpdatedAt": "2024-10-17T07:47:10.204Z",
+      "supabaseExists": true,
+      "supabaseRowCount": 48174,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "incremental"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "average",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "average",
+      "rowCount": 18180039,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "xlarge",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "average_general",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "average_general",
+      "rowCount": 114036,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "medium",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "cache",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "cache",
+      "rowCount": 0,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "dates",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "dates",
+      "rowCount": 400,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "listings",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "listings",
+      "rowCount": 5613542,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "large",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "old_average_data",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "old_average_data",
+      "rowCount": 0,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "password",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "password",
+      "rowCount": 1,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "sites",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "sites",
+      "rowCount": 21741590,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "xlarge",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "sourceTable": "sites_reserve",
+      "targetSchema": "hipcamp_public",
+      "targetTable": "sites_reserve",
+      "rowCount": 0,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "average",
+      "targetSchema": "campspot_public",
+      "targetTable": "average",
+      "rowCount": 61552558,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "xlarge",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "average_general",
+      "targetSchema": "campspot_public",
+      "targetTable": "average_general",
+      "rowCount": 227511,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "medium",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "cache",
+      "targetSchema": "campspot_public",
+      "targetTable": "cache",
+      "rowCount": 42,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "campsites",
+      "targetSchema": "campspot_public",
+      "targetTable": "campsites",
+      "rowCount": 0,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "dates",
+      "targetSchema": "campspot_public",
+      "targetTable": "dates",
+      "rowCount": 458,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "exports",
+      "targetSchema": "campspot_public",
+      "targetTable": "exports",
+      "rowCount": 455,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "listings",
+      "targetSchema": "campspot_public",
+      "targetTable": "listings",
+      "rowCount": 907115,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "medium",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "old_average_data",
+      "targetSchema": "campspot_public",
+      "targetTable": "old_average_data",
+      "rowCount": 12990,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "sites",
+      "targetSchema": "campspot_public",
+      "targetTable": "sites",
+      "rowCount": 59541243,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "xlarge",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "spatial_ref_sys",
+      "targetSchema": "campspot_public",
+      "targetTable": "spatial_ref_sys",
+      "rowCount": 8500,
+      "primaryKey": [
+        "srid"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "sourceTable": "year_prices",
+      "targetSchema": "campspot_public",
+      "targetTable": "year_prices",
+      "rowCount": 50291,
+      "primaryKey": [
+        "id"
+      ],
+      "hasCreatedAt": false,
+      "hasUpdatedAt": false,
+      "changedLast7Days": null,
+      "minUpdatedAt": null,
+      "maxUpdatedAt": null,
+      "supabaseExists": false,
+      "supabaseRowCount": null,
+      "sizeCategory": "small",
+      "weeklySyncRecommendation": "full"
+    }
+  ],
+  "matviews": [
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "name": "latest_sites",
+      "kind": "matview",
+      "rowCount": 130543,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "name": "property_yearly_analytics",
+      "kind": "view",
+      "rowCount": 63783,
+      "inSupabase": false,
+      "syncNote": "Create matching view definition on Supabase after base tables sync"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "name": "seasonal_daily_stats_agg",
+      "kind": "matview",
+      "rowCount": 713225,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "name": "site_monthly_analytics",
+      "kind": "matview",
+      "rowCount": 2008411,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "hipcamp",
+      "name": "site_yearly_analytics",
+      "kind": "matview",
+      "rowCount": 264467,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "name": "daily_occupancy",
+      "kind": "matview",
+      "rowCount": 98483383,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "name": "daily_stats",
+      "kind": "matview",
+      "rowCount": 86339542,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "name": "latest_parents",
+      "kind": "matview",
+      "rowCount": 25154,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "name": "latest_sites",
+      "kind": "matview",
+      "rowCount": 303352,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "name": "property_yearly_analytics",
+      "kind": "view",
+      "rowCount": 11563,
+      "inSupabase": false,
+      "syncNote": "Create matching view definition on Supabase after base tables sync"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "name": "seasonal_daily_stats_agg",
+      "kind": "matview",
+      "rowCount": 1933418,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "name": "site_monthly_analytics",
+      "kind": "matview",
+      "rowCount": 3387028,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "campings",
+      "sourceSchema": "campspot",
+      "name": "site_yearly_analytics",
+      "kind": "matview",
+      "rowCount": 803395,
+      "inSupabase": false,
+      "syncNote": "Copy as table or REFRESH from upstream on Supabase; not a base table on DO"
+    },
+    {
+      "sourceDatabase": "hipcamp",
+      "sourceSchema": "public",
+      "name": "sites_w_dates",
+      "kind": "view",
+      "rowCount": 21741590,
+      "inSupabase": false,
+      "syncNote": "Create matching view definition on Supabase after base tables sync"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "name": "geography_columns",
+      "kind": "view",
+      "rowCount": 0,
+      "inSupabase": false,
+      "syncNote": "Create matching view definition on Supabase after base tables sync"
+    },
+    {
+      "sourceDatabase": "campspot",
+      "sourceSchema": "public",
+      "name": "geometry_columns",
+      "kind": "view",
+      "rowCount": 1,
+      "inSupabase": false,
+      "syncNote": "Create matching view definition on Supabase after base tables sync"
+    }
+  ]
+}

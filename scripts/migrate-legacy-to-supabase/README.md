@@ -1,85 +1,62 @@
-# Legacy Campings DB to Supabase Migration
+# Legacy Campings DB → Supabase (CSV path — deprecated)
 
-Migrates `hipcamp` and `campspot` schemas from the legacy campings database (DigitalOcean) to Supabase.
-
-## Prerequisites
-
-1. **Supabase**: Enable PostGIS in Supabase SQL Editor:
-   ```sql
-   CREATE EXTENSION IF NOT EXISTS postgis;
-   ```
-
-2. **Environment**: Add to `.env.local`:
-   ```
-   SUPABASE_DB_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
-   ```
-   Get from: Supabase Dashboard → Project Settings → Database → Connection string (URI, Transaction mode).
-
-## Usage
-
-### Full migration (schema + export + import)
+> **Ongoing sync:** use [`sync:do`](../sync-do-to-supabase/README.md) instead.  
+> Direct SQL from DigitalOcean (read-only) → Supabase upsert. No CSV files.
 
 ```bash
-npm run migrate:legacy
+npm run sync:do          # weekly incremental
+npm run sync:do:full     # full backfill
 ```
 
-Or step by step:
+The commands `migrate:legacy`, `migrate:legacy-export`, and `migrate:legacy-import` now **print a deprecation message and exit**. They do not run the CSV pipeline unless you set `ALLOW_LEGACY_CSV_MIGRATION=1` and use the `migrate:legacy:csv-*` scripts.
+
+---
+
+## What still lives here
+
+| Script | Purpose |
+|--------|---------|
+| `export-legacy-schema.ts` / `npm run migrate:legacy-schema` | One-off DDL from DO → `schema-hipcamp.sql`, `schema-campspot.sql` |
+| `01-enable-postgis.sql`, `02-create-public-views.sql`, `03-create-rls-policies.sql` | Supabase setup SQL |
+| `export-data.ts` / `import-data.ts` | **Deprecated** CSV export/import (escape hatch only) |
+
+## Escape hatch (CSV, not recommended)
 
 ```bash
-# 1. Export schema DDL from legacy DB
-npm run migrate:legacy-schema
-
-# 2. Run schema in Supabase (01-enable-postgis.sql first, then schema-hipcamp.sql, schema-campspot.sql)
-# Or use run-migration.ts which does this automatically
-
-# 3. Export data (excludes large tables: sites, hipcamp.propertys)
-npm run migrate:legacy-export
-
-# 4. Import data to Supabase
-npm run migrate:legacy-import
+ALLOW_LEGACY_CSV_MIGRATION=1 npm run migrate:legacy:csv-export
+ALLOW_LEGACY_CSV_MIGRATION=1 npm run migrate:legacy:csv-import
 ```
 
-### Options
+Or the full old orchestrator:
 
-- `run-migration.ts --schema-only`: Create schema only, skip export/import
-- `run-migration.ts --skip-export`: Use existing exported data
-- `run-migration.ts --skip-import`: Export only, don't import
-- `export-data.ts --tables=propertydetails,imports`: Export specific tables
-- `export-data.ts --exclude-large`: Skip sites and hipcamp.propertys (default in migrate:legacy)
+```bash
+ALLOW_LEGACY_CSV_MIGRATION=1 npm run migrate:legacy:csv
+```
 
-## Scale considerations
+## Why CSV was replaced
 
-- **sites** (88M campspot, 28M hipcamp): Excluded by default. Use streaming/COPY for full migration.
-- **hipcamp.propertys** (11M rows): Excluded by default.
-- Smaller tables (propertydetails, imports, scrapings, etc.) are exported and imported.
+- Extra disk step (`data/*.csv`), no incremental watermarks
+- Blind `INSERT` on import (duplicates vs `sync:do` upsert)
+- Large tables excluded by default
 
-## Public views (Option 1)
+`sync:do` uses the same schemas (`hipcamp`, `campspot`, `bookoutdoors`) with incremental `updated_at` sync and composite-key upserts.
 
-Tables live in `hipcamp` and `campspot` schemas. For visibility in the Supabase Table Editor, public views are created automatically:
+## Prerequisites (schema one-off)
 
-- `public.hipcamp_imports` → `hipcamp.imports`
-- `public.hipcamp_propertydetails` → `hipcamp.propertydetails`
-- ... (one view per table)
-
-Use the `public.*` views for browsing; use `hipcamp.*` / `campspot.*` in SQL when you need the canonical tables.
-
-## RLS policies
-
-`03-create-rls-policies.sql` enables Row Level Security on all hipcamp and campspot tables with policies that allow `SELECT` for authenticated users. The service_role bypasses RLS by default (for migrations and backend).
+1. PostGIS: `01-enable-postgis.sql` in Supabase SQL Editor  
+2. `.env.local`: `SUPABASE_DB_URL`, `DIGITALOCEAN_DB_*` / `LEGACY_CAMPING_DB_*`
 
 ## File structure
 
 ```
 scripts/migrate-legacy-to-supabase/
-├── 01-enable-postgis.sql       # Run in Supabase first
-├── 02-create-public-views.sql   # Public views for Table Editor
-├── 03-create-rls-policies.sql   # RLS policies (authenticated read)
-├── export-legacy-schema.ts      # Generate schema DDL
-├── schema-hipcamp.sql           # Generated
-├── schema-campspot.sql          # Generated
-├── export-data.ts               # Export to CSV
-├── import-data.ts               # Import from CSV
-├── run-migration.ts             # Orchestrator
-├── README.md
-└── data/                        # Exported CSVs (gitignored)
+├── deprecated-csv.ts            # Blocks migrate:legacy-* unless env override
+├── export-legacy-schema.ts      # Still supported
+├── export-data.ts               # CSV export (escape hatch)
+├── import-data.ts               # CSV import (escape hatch)
+├── run-migration.ts             # CSV orchestrator (escape hatch)
+├── 01-enable-postgis.sql
+├── 02-create-public-views.sql
+├── 03-create-rls-policies.sql
+└── data/                        # gitignored CSV staging
 ```

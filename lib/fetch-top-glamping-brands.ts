@@ -24,6 +24,23 @@ export const TOP_GLAMPING_BRANDS_COUNT = 10;
 /** Sub-brands that rank on `/brands` at their own row (portfolio parent is a partnership only). */
 export const TOP_BRANDS_STANDALONE_PARTNER_SLUGS = new Set<string>(['autocamp']);
 
+/**
+ * Portfolio roots that list under a lead consumer sub-brand on `/brands`.
+ * Rollup counts still include the full portfolio; only label and link change.
+ */
+export const TOP_BRANDS_LEAD_DISPLAY_BY_ROOT_SLUG: Readonly<
+  Record<string, { leadSlug: string; ownerNote: string }>
+> = {
+  marriott: {
+    leadSlug: 'postcard-cabins',
+    ownerNote: 'Owned by Marriott',
+  },
+  'best-western': {
+    leadSlug: 'worldhotels-backdrop',
+    ownerNote: 'Owned by Best Western',
+  },
+};
+
 export type TopGlampingBrandRow = {
   slug: string;
   displayName: string;
@@ -157,6 +174,21 @@ export function rankingRootBrandId(brandId: string, byId: Map<string, BrandRow>)
     if (!parent) return current.id;
     current = parent;
   }
+}
+
+function leadDisplayForRankingRoot(
+  rootBrand: BrandRow,
+  byId: Map<string, BrandRow>
+): Pick<TopGlampingBrandRow, 'slug' | 'displayName' | 'subBrandNote'> | null {
+  const config = TOP_BRANDS_LEAD_DISPLAY_BY_ROOT_SLUG[rootBrand.slug];
+  if (!config) return null;
+  const lead = [...byId.values()].find((b) => b.slug === config.leadSlug);
+  if (!lead) return null;
+  return {
+    slug: lead.slug,
+    displayName: lead.display_name,
+    subBrandNote: config.ownerNote,
+  };
 }
 
 function partnerBrandNoteForRankingRoot(
@@ -308,15 +340,17 @@ export function aggregateTopGlampingBrands(
         agg.rates.length > 0
           ? agg.rates.reduce((sum, n) => sum + n, 0) / agg.rates.length
           : null;
+      const leadDisplay = leadDisplayForRankingRoot(brand, byId);
       const subBrandNote =
+        leadDisplay?.subBrandNote ??
         partnerBrandNoteForRankingRoot(id, byId) ??
         formatSubBrandNote(
           subBrandNamesForRollup(id, agg.contributingBrandIds, byId, agg.propertyNames)
         );
 
       return {
-        slug: brand.slug,
-        displayName: brand.display_name,
+        slug: leadDisplay?.slug ?? brand.slug,
+        displayName: leadDisplay?.displayName ?? brand.display_name,
         brandTier: brand.brand_tier,
         websiteUrl: brand.website_url,
         reportedLocationCount: brand.reported_location_count,
