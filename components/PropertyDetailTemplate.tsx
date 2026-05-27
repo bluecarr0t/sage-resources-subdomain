@@ -29,6 +29,7 @@ import PropertyDetailFaqsSection from '@/components/property/PropertyDetailFaqsS
 import PropertyDetailServerSummary from '@/components/PropertyDetailServerSummary';
 import { formatPropertyMailingLine, splitPropertyMailingAddress } from '@/lib/format-property-mailing-line';
 import PropertyMailingAddress from '@/components/property/PropertyMailingAddress';
+import { collectDistinctUnitTypes } from '@/lib/property-unit-types';
 
 interface PropertyDetailTemplateProps {
   properties: SageProperty[];
@@ -240,13 +241,7 @@ export default function PropertyDetailTemplate({
     [coordinates, propertyName, mapAddressLine, mapPlaceQuery]
   );
 
-  const unitTypes = Array.from(
-    new Set(
-      properties
-        .map((p) => p.unit_type)
-        .filter((type): type is string => type !== null && type !== undefined && type.trim() !== '')
-    )
-  ).sort();
+  const unitTypes = collectDistinctUnitTypes(properties);
 
   const hasMultipleLocations = Object.keys(groupedProperties).length > 1;
 
@@ -271,6 +266,7 @@ export default function PropertyDetailTemplate({
           <PropertyDetailServerSummary
             propertyName={propertyName}
             property={firstProperty}
+            properties={properties}
             propertyImages={propertyImages}
             showGoogleRating={showGoogleReviews}
             googleRating={googlePlacesData?.rating ?? null}

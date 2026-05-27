@@ -12,6 +12,7 @@ import {
 import StarRatingDisplay from '@/components/property/StarRatingDisplay';
 import { getPropertyTypeDotColor } from '@/lib/property-type-dot-color';
 import { getUnitTypeDotColor } from '@/lib/unit-type-dot-color';
+import { collectDistinctUnitTypes } from '@/lib/property-unit-types';
 
 function SummaryMetricDotValue({
   children,
@@ -35,6 +36,8 @@ function SummaryMetricDotValue({
 type PropertyDetailServerSummaryProps = {
   propertyName: string;
   property: SageProperty;
+  /** All published rows for the property; used to show every unit type when set */
+  properties?: SageProperty[];
   propertyImages?: GlampingPropertyPublicImages;
   showGoogleRating?: boolean;
   googleRating?: number | null;
@@ -65,6 +68,7 @@ function buildLocation(property: SageProperty): string {
 export default function PropertyDetailServerSummary({
   propertyName,
   property,
+  properties,
   propertyImages,
   showGoogleRating = false,
   googleRating = null,
@@ -73,9 +77,8 @@ export default function PropertyDetailServerSummary({
   const location = buildLocation(property);
   const rate = formatUsd(property.rate_avg_retail_daily_rate);
   const heroUrl = propertyImages?.heroUrl ?? propertyImages?.galleryUrls?.[0] ?? null;
-  const unitType = property.unit_type?.trim();
+  const unitTypes = collectDistinctUnitTypes(properties ?? [property]);
   const propertyType = property.property_type?.trim();
-  const unitTypeDotColor = unitType ? getUnitTypeDotColor(unitType) : null;
   const propertyTypeDotColor = propertyType ? getPropertyTypeDotColor(propertyType) : null;
 
   return (
@@ -97,10 +100,21 @@ export default function PropertyDetailServerSummary({
             <dd className={`mt-1 ${EDITORIAL_METRIC_VALUE_CLASS}`}>{rate}</dd>
           </div>
         ) : null}
-        {unitType && unitTypeDotColor ? (
+        {unitTypes.length > 0 ? (
           <div>
-            <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Unit type</dt>
-            <SummaryMetricDotValue dotColor={unitTypeDotColor}>{unitType}</SummaryMetricDotValue>
+            <dt className={EDITORIAL_SECTION_LABEL_CLASS}>
+              {unitTypes.length === 1 ? 'Unit type' : 'Unit types'}
+            </dt>
+            <dd className="mt-1 space-y-1.5">
+              {unitTypes.map((unitType) => (
+                <SummaryMetricDotValue
+                  key={unitType}
+                  dotColor={getUnitTypeDotColor(unitType)}
+                >
+                  {unitType}
+                </SummaryMetricDotValue>
+              ))}
+            </dd>
           </div>
         ) : null}
         {propertyType && propertyTypeDotColor ? (

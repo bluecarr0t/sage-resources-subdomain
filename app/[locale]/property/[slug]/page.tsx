@@ -17,6 +17,10 @@ import { evaluatePropertyIndexTier, propertyTierShouldIndex } from "@/lib/proper
 import { fetchGlampingPropertyPublicImages } from "@/lib/fetch-glamping-property-public-images";
 import { shouldSkipGooglePlacesForPropertySlug } from "@/lib/property-google-places-policy";
 import { getBrandSummaryById } from "@/lib/brand-public-pages";
+import {
+  collectDistinctUnitTypes,
+  formatUnitTypesDisplay,
+} from "@/lib/property-unit-types";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -159,6 +163,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const firstProperty = properties[0];
+  const propertyUnitTypes = collectDistinctUnitTypes(properties);
+  const propertyUnitTypesLabel = formatUnitTypesDisplay(propertyUnitTypes);
   const propertyName = firstProperty.property_name || "Unnamed Property";
   
   // Build location string
@@ -203,7 +209,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   // Build optimized title for search intent
   // Format: Property Name - [Unit Type] in City, State | Rates & Reviews
-  const unitType = firstProperty.unit_type || '';
+  const unitType = propertyUnitTypesLabel ?? '';
   const cityState = location ? location.split(',').slice(0, 2).join(', ') : '';
   
   let title = propertyName;
@@ -328,6 +334,8 @@ export default async function PropertyPage({ params }: PageProps) {
   }
 
   const firstProperty = properties[0];
+  const propertyUnitTypes = collectDistinctUnitTypes(properties);
+  const propertyUnitTypesLabel = formatUnitTypesDisplay(propertyUnitTypes);
   const propertyName = firstProperty.property_name || "Unnamed Property";
   const skipGooglePlaces = shouldSkipGooglePlacesForPropertySlug(slug);
   const propertyRowId = typeof firstProperty.id === "number" ? firstProperty.id : Number(firstProperty.id);
@@ -377,7 +385,7 @@ export default async function PropertyPage({ params }: PageProps) {
   });
   const faqSchema = generatePropertyFAQSchema({
     property_name: firstProperty.property_name,
-    unit_type: firstProperty.unit_type,
+    unit_type: propertyUnitTypesLabel,
     city: firstProperty.city,
     state: firstProperty.state,
     operating_season_months: firstProperty.operating_season_months,
@@ -391,7 +399,7 @@ export default async function PropertyPage({ params }: PageProps) {
 
   const propertyFaqEntries = buildPropertyFaqEntries({
     property_name: firstProperty.property_name,
-    unit_type: firstProperty.unit_type,
+    unit_type: propertyUnitTypesLabel,
     city: firstProperty.city,
     state: firstProperty.state,
     operating_season_months: firstProperty.operating_season_months,
