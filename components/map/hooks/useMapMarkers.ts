@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
 import { NationalPark, filterParksWithCoordinates } from '@/lib/types/national-parks';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
+import { mapMarkerPropertySyncKey } from '../utils/mapMarkerSyncKey';
 
 type PropertyWithCoords = SageProperty & { coordinates: [number, number] };
 type NationalParkWithCoords = NationalPark & { coordinates: [number, number] };
@@ -58,9 +59,18 @@ export function useMapMarkers({
   } | null>(null);
   const propertyMarkersGenerationRef = useRef(0);
 
-  const propertiesWithCoords = filterPropertiesWithCoordinates(properties);
+  const propertiesWithCoords = useMemo(
+    () => filterPropertiesWithCoordinates(properties),
+    [properties]
+  );
+  const propertyMarkerSyncKey = useMemo(
+    () => mapMarkerPropertySyncKey(propertiesWithCoords),
+    [propertiesWithCoords]
+  );
 
-  // Manage property markers (one AdvancedMarkerElement per property)
+  // Manage property markers (one AdvancedMarkerElement per property).
+  // Depends on propertyMarkerSyncKey only — not propertiesWithCoords (new array ref each
+  // render would re-run cleanup, clear markers, and skip recreate on click/zoom panes).
   useEffect(() => {
     if (!map || !isClient) {
       clearPropertyMarkers(markersRef);
@@ -181,7 +191,7 @@ export function useMapMarkers({
   }, [
     map,
     isClient,
-    propertiesWithCoords,
+    propertyMarkerSyncKey,
     setSelectedProperty,
     setSelectedPark,
     setSelectedClientWork,
