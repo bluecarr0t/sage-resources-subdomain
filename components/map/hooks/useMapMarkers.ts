@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import type { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { SageProperty, filterPropertiesWithCoordinates } from '@/lib/types/sage';
 import { NationalPark, filterParksWithCoordinates } from '@/lib/types/national-parks';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
@@ -24,11 +23,8 @@ interface UseMapMarkersProps {
 }
 
 function clearPropertyMarkers(
-  markersRef: React.MutableRefObject<google.maps.marker.AdvancedMarkerElement[]>,
-  clustererRef: React.MutableRefObject<MarkerClusterer | null>
+  markersRef: React.MutableRefObject<google.maps.marker.AdvancedMarkerElement[]>
 ) {
-  clustererRef.current?.clearMarkers();
-  clustererRef.current = null;
   markersRef.current.forEach((marker) => {
     marker.map = null;
   });
@@ -52,7 +48,6 @@ export function useMapMarkers({
   markerClickTimeRef,
 }: UseMapMarkersProps) {
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
-  const clustererRef = useRef<MarkerClusterer | null>(null);
   const parkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const clientWorkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const propertyIdsRef = useRef<Set<string | number>>(new Set());
@@ -65,16 +60,16 @@ export function useMapMarkers({
 
   const propertiesWithCoords = filterPropertiesWithCoordinates(properties);
 
-  // Manage property markers (clustered AdvancedMarkerElement pins)
+  // Manage property markers (one AdvancedMarkerElement per property)
   useEffect(() => {
     if (!map || !isClient) {
-      clearPropertyMarkers(markersRef, clustererRef);
+      clearPropertyMarkers(markersRef);
       propertyIdsRef.current.clear();
       return;
     }
 
     if (propertiesWithCoords.length === 0) {
-      clearPropertyMarkers(markersRef, clustererRef);
+      clearPropertyMarkers(markersRef);
       propertyIdsRef.current.clear();
       return;
     }
@@ -88,17 +83,16 @@ export function useMapMarkers({
       return;
     }
 
-    clearPropertyMarkers(markersRef, clustererRef);
+    clearPropertyMarkers(markersRef);
     propertyIdsRef.current = currentPropertyIds;
 
     const generation = ++propertyMarkersGenerationRef.current;
     let cancelled = false;
 
     const createMarkers = async () => {
-      const [{ AdvancedMarkerElement, PinElement }, { MarkerClusterer }] = await Promise.all([
-        google.maps.importLibrary('marker') as Promise<google.maps.MarkerLibrary>,
-        import('@googlemaps/markerclusterer'),
-      ]);
+      const { AdvancedMarkerElement, PinElement } = (await google.maps.importLibrary(
+        'marker'
+      )) as google.maps.MarkerLibrary;
 
       if (cancelled || generation !== propertyMarkersGenerationRef.current) return;
 
@@ -122,7 +116,7 @@ export function useMapMarkers({
           bluePin.element.setAttribute('tabindex', '0');
 
           const marker = new AdvancedMarkerElement({
-            map: null,
+            map,
             position: {
               lat: property.coordinates[0],
               lng: property.coordinates[1],
@@ -170,27 +164,19 @@ export function useMapMarkers({
           markers.push(marker);
         }
 
+        markersRef.current = markers;
+
         if (i + MARKER_BATCH_SIZE < propertiesWithCoords.length) {
           await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         }
       }
-
-      if (cancelled || generation !== propertyMarkersGenerationRef.current || !map) {
-        markers.forEach((m) => {
-          m.map = null;
-        });
-        return;
-      }
-
-      markersRef.current = markers;
-      clustererRef.current = new MarkerClusterer({ map, markers });
     };
 
     createMarkers().catch(console.error);
 
     return () => {
       cancelled = true;
-      clearPropertyMarkers(markersRef, clustererRef);
+      clearPropertyMarkers(markersRef);
     };
   }, [
     map,
@@ -403,5 +389,5 @@ export function useMapMarkers({
     markerClickTimeRef,
   ]);
 
-  return { markersRef, parkMarkersRef, clientWorkMarkersRef, clustererRef };
+  return { markersRef, parkMarkersRef, clientWorkMarkersRef };
 }

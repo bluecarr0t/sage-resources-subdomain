@@ -22,7 +22,6 @@ import {
   shouldShowNationalParksInMapView,
 } from '@/lib/map-embed-mode';
 import { mapSearchParamsFromUrlSearchParams } from '@/lib/map-search-params';
-import MapLoading from '@/components/MapLoading';
 
 let globalFetchInProgress = false;
 let globalAbortController: AbortController | null = null;
@@ -342,11 +341,7 @@ function MapProviderInner({ children }: { children: ReactNode }) {
 export function MapProvider({ children }: { children: ReactNode }) {
   return (
     <Suspense
-      fallback={
-        <div className="flex h-screen w-full items-center justify-center bg-neutral-100/40">
-          <MapLoading />
-        </div>
-      }
+      fallback={<div className="h-screen w-full bg-neutral-100/40" aria-busy="true" />}
     >
       <MapProviderInner>{children}</MapProviderInner>
     </Suspense>

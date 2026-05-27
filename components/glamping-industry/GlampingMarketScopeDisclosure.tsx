@@ -4,8 +4,8 @@ import { useCallback, useId, useState } from 'react';
 import { Modal, ModalContent } from '@/components/ui/Modal';
 import {
   GLAMPING_MARKET_SCOPE_EXCLUDED,
-  GLAMPING_MARKET_SCOPE_FOOTNOTE,
   GLAMPING_MARKET_SCOPE_INCLUDED,
+  GLAMPING_MARKET_SCOPE_INCLUDED_INTRO,
   GLAMPING_MARKET_SCOPE_SHORT_LABEL,
 } from '@/lib/glamping-market-overview-scope';
 
@@ -80,6 +80,9 @@ function ScopePanel({
             <h3 className="text-[11px] font-medium uppercase tracking-widest text-neutral-500">
               Included
             </h3>
+            <p className="mt-3 text-sm font-light leading-relaxed text-neutral-700">
+              {GLAMPING_MARKET_SCOPE_INCLUDED_INTRO}
+            </p>
             <ScopeList items={included} />
           </section>
           <section>
@@ -89,9 +92,6 @@ function ScopePanel({
             <ScopeList items={excluded} />
           </section>
         </div>
-        <p className="mt-8 border-t border-neutral-200/80 pt-4 text-xs font-light leading-relaxed text-neutral-500">
-          {GLAMPING_MARKET_SCOPE_FOOTNOTE}
-        </p>
       </div>
     </div>
   );

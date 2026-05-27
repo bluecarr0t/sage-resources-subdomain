@@ -59,3 +59,13 @@ export function applyPublicMapCohortFilters<T>(query: T): T {
   );
   return filtered as unknown as T;
 }
+
+/**
+ * `/brands` and `/brand/[slug]` — exclude state/federal/other public land (same as map).
+ * Pair with `applyGlampingOnlyPropertyTypeFilter` and published status filters.
+ */
+export function applyBrandsPageLandOperatorFilter<T>(query: T): T {
+  return (query as unknown as CohortQueryable).or(
+    PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR
+  ) as unknown as T;
+}

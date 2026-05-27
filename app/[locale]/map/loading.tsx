@@ -1,10 +1,4 @@
-import MapLoading from '@/components/MapLoading';
-
-/** Route-level loading UI while map data and client bundles hydrate. */
+/** Route transition shell — client MapPageLoadingOverlay owns the spinner. */
 export default function MapRouteLoading() {
-  return (
-    <div className="flex h-screen w-full items-center justify-center bg-neutral-100/40">
-      <MapLoading />
-    </div>
-  );
+  return <div className="h-screen w-full bg-neutral-100/40" aria-busy="true" />;
 }

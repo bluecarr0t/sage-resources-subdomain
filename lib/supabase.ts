@@ -91,7 +91,8 @@ export const supabase = new Proxy({} as SupabaseClient, {
  * NEVER expose this key to the client
  */
 export function createServerClient(): SupabaseClient {
-  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
+  const supabaseSecretKey =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   // During build time, if environment variables aren't set, create a placeholder client
   // This allows static generation to proceed without errors

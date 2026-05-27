@@ -55,6 +55,19 @@ export function isGlampingVisibleOnPublicMap(isOpen: string | null | undefined):
   return isGlampingOperatingForAnalytics(isOpen);
 }
 
+/** True when `is_open` is stored as not operating (Closed or legacy No). */
+export function isGlampingClosedIsOpenStatus(isOpen: string | null | undefined): boolean {
+  const v = (isOpen ?? '').trim().toLowerCase();
+  return v === 'closed' || v === 'no';
+}
+
+/** Drop rows with `is_open` = Closed (or legacy No) from public brand pages and map lists. */
+export function excludeClosedGlampingRows<T extends { is_open?: string | null }>(
+  rows: readonly T[]
+): T[] {
+  return rows.filter((row) => !isGlampingClosedIsOpenStatus(row.is_open));
+}
+
 /**
  * True when a row should be treated as **operating** for analytics, market cohorts,
  * and nearby-property tooling (excludes closed, pre-opening, and proposed sites).

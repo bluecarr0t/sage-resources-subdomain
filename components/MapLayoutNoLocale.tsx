@@ -7,7 +7,7 @@ import {
 } from '@/components/editorial/EditorialPageShell';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import MapLoading from './MapLoading';
+import MapPageLoadingOverlay from '@/components/map/MapPageLoadingOverlay';
 
 const DynamicGooglePropertyMapSidebar = dynamic(() => import('@/components/GooglePropertyMap'), {
   ssr: false,
@@ -16,7 +16,7 @@ const DynamicGooglePropertyMapSidebar = dynamic(() => import('@/components/Googl
 
 const DynamicGooglePropertyMap = dynamic(() => import('@/components/GooglePropertyMap'), {
   ssr: false,
-  loading: () => <MapLoading />,
+  loading: () => null,
 });
 
 export default function MapLayoutNoLocale() {
@@ -76,6 +76,7 @@ export default function MapLayoutNoLocale() {
         }`}
         style={isFullscreen ? { minHeight: '100vh', height: '100vh' } : undefined}
       >
+        <MapPageLoadingOverlay />
         <DynamicGooglePropertyMap showMap={true} />
 
         <button

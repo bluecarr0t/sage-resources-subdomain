@@ -3,7 +3,9 @@ import {
   formatPartnerBrandNote,
   formatRetailDailyRate,
   formatSubBrandNote,
+  propertyMatchesBrandsMarket,
   rankingRootBrandId,
+  TOP_BRANDS_MIN_PROPERTY_COUNT,
   TOP_GLAMPING_BRANDS_COUNT,
 } from '@/lib/fetch-top-glamping-brands';
 import type { GlampingBrand } from '@/lib/glamping-brands';
@@ -18,6 +20,20 @@ const brand = (overrides: Partial<GlampingBrand>): GlampingBrand => ({
   website_url: null,
   reported_location_count: null,
   notes: null,
+});
+
+describe('propertyMatchesBrandsMarket', () => {
+  it('defaults missing country to United States cohort', () => {
+    expect(propertyMatchesBrandsMarket(null, 'us')).toBe(true);
+    expect(propertyMatchesBrandsMarket(null, 'ca')).toBe(false);
+  });
+
+  it('matches Canada and United States spellings', () => {
+    expect(propertyMatchesBrandsMarket('Canada', 'ca')).toBe(true);
+    expect(propertyMatchesBrandsMarket('Canada', 'us')).toBe(false);
+    expect(propertyMatchesBrandsMarket('United States', 'us')).toBe(true);
+    expect(propertyMatchesBrandsMarket('US', 'us')).toBe(true);
+  });
 });
 
 describe('aggregateTopGlampingBrands', () => {
@@ -96,7 +112,7 @@ describe('aggregateTopGlampingBrands', () => {
       },
     ];
 
-    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT);
+    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
 
     expect(result.brands).toHaveLength(2);
     expect(result.brands[0]?.slug).toBe('under-canvas');
@@ -110,6 +126,51 @@ describe('aggregateTopGlampingBrands', () => {
     expect(result.brands[1]?.subBrandNote).toBeNull();
     expect(result.totalBrandedProperties).toBe(3);
     expect(result.brandsWithPublishedProperties).toBe(2);
+  });
+
+  it('counts only properties in the selected market', () => {
+    const rows = [
+      {
+        id: 1,
+        property_id: 'us1',
+        slug: null,
+        property_name: 'Under Canvas Utah',
+        property_type: 'Glamping',
+        city: 'Moab',
+        state: 'UT',
+        country: 'United States',
+        brand_id: underCanvasId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 400,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 2,
+        property_id: 'ca1',
+        slug: null,
+        property_name: 'Under Canvas Ontario',
+        property_type: 'Glamping',
+        city: 'Toronto',
+        state: 'ON',
+        country: 'Canada',
+        brand_id: underCanvasId,
+        quantity_of_units: 8,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 350,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const usResult = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
+    const caResult = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT, 'ca', 1);
+
+    expect(usResult.brands[0]?.propertyCount).toBe(1);
+    expect(usResult.brands[0]?.unitCount).toBe(10);
+    expect(caResult.brands[0]?.propertyCount).toBe(1);
+    expect(caResult.brands[0]?.unitCount).toBe(8);
   });
 
   it('ranks AutoCamp standalone with a Hilton partnership note instead of rolling into Hilton', () => {
@@ -177,7 +238,7 @@ describe('aggregateTopGlampingBrands', () => {
     expect(rankingRootBrandId(autocampId, byId)).toBe(autocampId);
     expect(rankingRootBrandId(outsetId, byId)).toBe(hiltonId);
 
-    const result = aggregateTopGlampingBrands(hiltonBrands, rows, TOP_GLAMPING_BRANDS_COUNT);
+    const result = aggregateTopGlampingBrands(hiltonBrands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
 
     expect(result.brands).toHaveLength(2);
     expect(result.brands.find((r) => r.slug === 'autocamp')).toMatchObject({
@@ -191,6 +252,99 @@ describe('aggregateTopGlampingBrands', () => {
       subBrandNote: 'Includes Outset Collection by Hilton',
     });
     expect(result.brands.some((r) => r.subBrandNote?.includes('AutoCamp'))).toBe(false);
+  });
+
+  it('ranks Postcard Cabins on its own row when properties are tagged to Outdoor Collection', () => {
+    const marriottId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    const outdoorId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+    const postcardId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+
+    const marriottBrands: GlampingBrand[] = [
+      brand({
+        id: marriottId,
+        slug: 'marriott',
+        display_name: 'Marriott',
+        brand_tier: 'portfolio',
+      }),
+      brand({
+        id: outdoorId,
+        slug: 'marriott-outdoor-collection',
+        display_name: 'Outdoor Collection by Marriott Bonvoy',
+        brand_tier: 'sub_brand',
+        parent_brand_id: marriottId,
+      }),
+      brand({
+        id: postcardId,
+        slug: 'postcard-cabins',
+        display_name: 'Postcard Cabins',
+        brand_tier: 'sub_brand',
+        parent_brand_id: outdoorId,
+      }),
+    ];
+
+    const rows = [
+      {
+        id: 20,
+        property_id: 'pc1',
+        slug: null,
+        property_name: 'Postcard Cabins Big Bear',
+        property_type: 'Glamping',
+        city: 'Big Bear',
+        state: 'CA',
+        brand_id: outdoorId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 300,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 21,
+        property_id: 'pc2',
+        slug: null,
+        property_name: 'Postcard Cabins Hill Country',
+        property_type: 'Glamping',
+        city: 'Wimberley',
+        state: 'TX',
+        brand_id: outdoorId,
+        quantity_of_units: 8,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 280,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 22,
+        property_id: 'tb1',
+        slug: null,
+        property_name: 'Trailborn Grand Canyon',
+        property_type: 'Glamping',
+        city: 'Williams',
+        state: 'AZ',
+        brand_id: outdoorId,
+        quantity_of_units: 6,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 400,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(
+      marriottBrands,
+      rows,
+      TOP_GLAMPING_BRANDS_COUNT,
+      'us',
+      TOP_BRANDS_MIN_PROPERTY_COUNT
+    );
+
+    expect(result.brands).toHaveLength(1);
+    expect(result.brands[0]).toMatchObject({
+      slug: 'postcard-cabins',
+      displayName: 'Postcard Cabins',
+      propertyCount: 2,
+      subBrandNote: 'Owned by Marriott',
+    });
   });
 
   it('includes child sub-brands when properties are tagged to the parent portfolio brand', () => {
@@ -239,11 +393,12 @@ describe('aggregateTopGlampingBrands', () => {
       },
     ];
 
-    const result = aggregateTopGlampingBrands(marriottBrands, rows, TOP_GLAMPING_BRANDS_COUNT);
+    const result = aggregateTopGlampingBrands(marriottBrands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
 
     expect(result.brands[0]).toMatchObject({
       slug: 'postcard-cabins',
       displayName: 'Postcard Cabins',
+      propertyCount: 1,
       subBrandNote: 'Owned by Marriott',
     });
   });
@@ -286,13 +441,67 @@ describe('aggregateTopGlampingBrands', () => {
       },
     ];
 
-    const result = aggregateTopGlampingBrands(bestWesternBrands, rows, TOP_GLAMPING_BRANDS_COUNT);
+    const result = aggregateTopGlampingBrands(bestWesternBrands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
 
     expect(result.brands[0]).toMatchObject({
       slug: 'worldhotels-backdrop',
       displayName: 'WorldHotels Backdrop',
       subBrandNote: 'Owned by Best Western',
     });
+  });
+
+  it('excludes Glamping Resort rows from brand counts', () => {
+    const wildhavenId = '99999999-9999-4999-8999-999999999999';
+    const wildhavenBrands: GlampingBrand[] = [
+      brand({
+        id: wildhavenId,
+        slug: 'wildhaven-glamping',
+        display_name: 'Wildhaven Glamping',
+        brand_tier: 'standalone',
+      }),
+    ];
+    const rows = [
+      {
+        id: 1,
+        property_id: 'wh1',
+        slug: null,
+        property_name: 'Wildhaven Sonoma',
+        property_type: 'Glamping Resort',
+        city: 'Healdsburg',
+        state: 'CA',
+        brand_id: wildhavenId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 400,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 2,
+        property_id: 'wh2',
+        slug: null,
+        property_name: 'Wildhaven Yosemite',
+        property_type: 'Glamping Resort',
+        city: 'Mariposa',
+        state: 'CA',
+        brand_id: wildhavenId,
+        quantity_of_units: 8,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 350,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(
+      wildhavenBrands,
+      rows,
+      TOP_GLAMPING_BRANDS_COUNT
+    );
+
+    expect(result.brands).toHaveLength(0);
+    expect(result.totalBrandedProperties).toBe(0);
+    expect(result.totalBrandedUnits).toBe(0);
   });
 
   it('excludes rows whose property_type is not Glamping', () => {
@@ -329,7 +538,7 @@ describe('aggregateTopGlampingBrands', () => {
       },
     ];
 
-    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT);
+    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
 
     expect(result.brands[0]?.propertyCount).toBe(1);
     expect(result.brands[0]?.unitCount).toBe(10);
@@ -371,10 +580,140 @@ describe('aggregateTopGlampingBrands', () => {
       },
     ];
 
-    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT);
+    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
 
     expect(result.brands[0]?.propertyCount).toBe(1);
     expect(result.brands[0]?.unitCount).toBe(5);
+  });
+
+  it('excludes state-park concessions from brand property and unit counts', () => {
+    const timberlineId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    const timberlineBrands: GlampingBrand[] = [
+      brand({
+        id: timberlineId,
+        slug: 'timberline-glamping-co',
+        display_name: 'Timberline Glamping Co.',
+        brand_tier: 'standalone',
+      }),
+    ];
+    const rows = [
+      {
+        id: 100,
+        property_id: 'park',
+        slug: null,
+        property_name: 'Timberline Glamping at Unicoi State Park',
+        property_type: 'Glamping',
+        city: 'Helen',
+        state: 'GA',
+        country: 'United States',
+        brand_id: timberlineId,
+        quantity_of_units: 4,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 200,
+        land_operator_category: 'state_park',
+        updated_at: '2026-05-26T00:00:00Z',
+        created_at: '2026-05-26T00:00:00Z',
+      },
+      {
+        id: 101,
+        property_id: 'private',
+        slug: null,
+        property_name: 'Timberline Glamping at Pine Acres',
+        property_type: 'Glamping',
+        city: 'Acworth',
+        state: 'GA',
+        country: 'United States',
+        brand_id: timberlineId,
+        quantity_of_units: 4,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 162,
+        land_operator_category: 'private_commercial',
+        updated_at: '2026-05-26T00:00:00Z',
+        created_at: '2026-05-26T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(
+      timberlineBrands,
+      rows,
+      TOP_GLAMPING_BRANDS_COUNT,
+      'us',
+      1
+    );
+
+    expect(result.brands).toHaveLength(1);
+    expect(result.brands[0]?.propertyCount).toBe(1);
+    expect(result.brands[0]?.unitCount).toBe(4);
+    expect(result.brands[0]?.avgRetailDailyRate).toBe(162);
+  });
+
+  it('omits brands with fewer than TOP_BRANDS_MIN_PROPERTY_COUNT locations', () => {
+    const soloId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    const duoId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+    const soloBrands: GlampingBrand[] = [
+      brand({ id: soloId, slug: 'the-glamping-collective', display_name: 'The Glamping Collective' }),
+      brand({ id: duoId, slug: 'worldhotels-backdrop', display_name: 'WorldHotels Backdrop' }),
+    ];
+    const rows = [
+      {
+        id: 1,
+        property_id: 'solo',
+        slug: null,
+        property_name: 'The Glamping Collective',
+        property_type: 'Glamping',
+        city: 'Clyde',
+        state: 'NC',
+        brand_id: soloId,
+        quantity_of_units: 20,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 500,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 2,
+        property_id: 'duo1',
+        slug: null,
+        property_name: 'WorldHotels Backdrop Asheville',
+        property_type: 'Glamping',
+        city: 'Asheville',
+        state: 'NC',
+        brand_id: duoId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 275,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 3,
+        property_id: 'duo2',
+        slug: null,
+        property_name: 'WorldHotels Backdrop Smoky Mountains',
+        property_type: 'Glamping',
+        city: 'Townsend',
+        state: 'TN',
+        brand_id: duoId,
+        quantity_of_units: 12,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 280,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(
+      soloBrands,
+      rows,
+      TOP_GLAMPING_BRANDS_COUNT,
+      'us',
+      TOP_BRANDS_MIN_PROPERTY_COUNT
+    );
+
+    expect(TOP_BRANDS_MIN_PROPERTY_COUNT).toBe(2);
+    expect(result.brands).toHaveLength(1);
+    expect(result.brands[0]?.slug).toBe('worldhotels-backdrop');
+    expect(result.brands.some((r) => r.slug === 'the-glamping-collective')).toBe(false);
   });
 });
 

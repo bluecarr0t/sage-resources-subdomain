@@ -7,7 +7,6 @@ import {
   formatRetailDailyRate,
   TOP_GLAMPING_BRANDS_COUNT,
 } from '@/lib/fetch-top-glamping-brands';
-
 /** Fixed columns: rank · brand name · props · units · avg. retail daily rate */
 const BRANDS_TABLE_GRID_CLASS =
   'grid grid-cols-[1.25rem_minmax(0,1fr)_3.25rem_3.25rem_minmax(5.5rem,auto)] items-baseline gap-x-2';
@@ -18,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Top Glamping Brands',
   description:
-    'Rankings of the largest US and Canada glamping brands by published Glamping property type only — property count, units, and average nightly rates.',
+    'Rankings of the largest United States glamping brands by published property count (property type Glamping only), units, and average nightly rates.',
   robots: { index: true, follow: true },
 };
 
@@ -37,7 +36,7 @@ function formatLastUpdatedDate(iso: string): string {
 }
 
 export default async function BrandOverviewPage() {
-  const result = await fetchTopGlampingBrands(TOP_GLAMPING_BRANDS_COUNT);
+  const result = await fetchTopGlampingBrands(TOP_GLAMPING_BRANDS_COUNT, 'us');
 
   return (
     <div className="relative flex min-h-screen flex-col bg-[#faf9f3] text-neutral-900">
@@ -58,8 +57,9 @@ export default async function BrandOverviewPage() {
         ) : null}
 
         <p className="mt-6 max-w-xl text-sm font-light leading-relaxed text-neutral-600">
-          Largest multi-property glamping operators in Sage research, ranked by published Glamping
-          property count. Portfolio brands include sub-brand locations in their totals.
+          Largest multi-property glamping operators in the United States in Sage research, ranked by
+          published location count (minimum two locations). Portfolio brands include sub-brand
+          locations in their totals.
         </p>
 
         <GlampingMarketScopeDisclosure />
@@ -75,8 +75,7 @@ export default async function BrandOverviewPage() {
                   {formatInt(result.data.brands.length)}
                 </dd>
                 <p className="mt-4 max-w-xs text-[11px] leading-relaxed text-neutral-500">
-                  Top {TOP_GLAMPING_BRANDS_COUNT} by published Glamping properties with an assigned
-                  brand in Sage research.
+                  Top {TOP_GLAMPING_BRANDS_COUNT} by published Glamping properties.
                 </p>
               </div>
 
@@ -97,7 +96,7 @@ export default async function BrandOverviewPage() {
                   {formatInt(result.data.totalBrandedUnits)}
                 </dd>
                 <p className="mt-4 max-w-xs text-[11px] leading-relaxed text-neutral-500">
-                  Unit totals use quantity of units or property total sites per published location.
+                  Unit totals use quantity of units per property.
                 </p>
               </div>
             </dl>

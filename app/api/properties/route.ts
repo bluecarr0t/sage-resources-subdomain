@@ -5,6 +5,7 @@ import { filterToPublicColumns, filterRequestedFieldsToPublic } from '@/lib/prop
 import {
   isExcludedLandOperatorForPublicMap,
 } from '@/lib/glamping-land-operator-category';
+import { excludeClosedGlampingRows } from '@/lib/glamping-is-open';
 import {
   applyPublicMapCohortFilters,
   isExcludedPropertyTypeForPublicMap,
@@ -307,8 +308,9 @@ async function fetchPropertiesFromDatabase(
     }
   }
   
+  let filteredData = excludeClosedGlampingRows(allData || []);
+
   // Filter by bounds if provided (after fetching to avoid complex PostGIS queries)
-  let filteredData = allData || [];
   if (bounds) {
     filteredData = filteredData.filter((item: any) => {
       const lat = typeof item.lat === 'number' ? item.lat : parseFloat(String(item.lat));

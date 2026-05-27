@@ -1,10 +1,11 @@
 import { createServerClient } from '@/lib/supabase';
+import { excludeClosedGlampingRows } from '@/lib/glamping-is-open';
 import { applyPublicMapCohortFilters } from '@/lib/public-map-cohort-filters';
 import type { SageProperty } from '@/lib/types/sage';
 
 /** Fields loaded by MapContext for /api/properties (map markers + sidebar count). */
 export const PUBLIC_MAP_PROPERTY_FIELDS =
-  'id,property_name,lat,lon,state,country,unit_type,rate_category';
+  'id,property_name,lat,lon,state,country,unit_type,rate_category,is_open';
 
 /**
  * Fetch all rows in the public map cohort (same filters as GET /api/properties with no query params).
@@ -34,5 +35,5 @@ export async function fetchPublicMapPropertyRows(): Promise<SageProperty[]> {
     offset += batchSize;
   }
 
-  return allData;
+  return excludeClosedGlampingRows(allData);
 }

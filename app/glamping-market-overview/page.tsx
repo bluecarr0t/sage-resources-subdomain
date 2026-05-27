@@ -8,7 +8,7 @@ import { parseGlampingMarketSnapshotTierFilter } from '@/lib/glamping-market-sna
 import { fetchGlampingIndustryCaProvinceMetrics } from '@/lib/fetch-glamping-industry-ca-province-metrics';
 import { fetchGlampingIndustryMetrics } from '@/lib/fetch-glamping-industry-metrics';
 import { fetchGlampingIndustryUsStateMetrics } from '@/lib/fetch-glamping-industry-us-state-metrics';
-import type { GlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapshot-region';
+import { parseGlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapshot-region';
 import { CA_PROVINCE_DISPLAY_NAME } from '@/lib/normalize-ca-province-key';
 import { US_STATE_NAMES } from '@/lib/us-states';
 
@@ -70,16 +70,12 @@ function formatLastUpdatedDate(iso: string): string {
   });
 }
 
-function parseMarket(raw: string | undefined): GlampingMarketSnapshotMarket {
-  return raw?.toLowerCase() === 'ca' ? 'ca' : 'us';
-}
-
 type PageProps = {
   searchParams: { market?: string; tier?: string };
 };
 
 export default async function GlampingMarketOverviewPage({ searchParams }: PageProps) {
-  const market = parseMarket(searchParams.market);
+  const market = parseGlampingMarketSnapshotMarket(searchParams.market);
   const tier = parseGlampingMarketSnapshotTierFilter(searchParams.tier);
 
   const [result, usStates, caProvinces] = await Promise.all([

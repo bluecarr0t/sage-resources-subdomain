@@ -48,4 +48,24 @@ describe('processPropertiesForMapMarkers', () => {
     const full = processProperties([...rows], [], [], ['yurt']);
     expect(fast).toEqual(full);
   });
+
+  it('excludes properties with is_open Closed', () => {
+    const withClosed = [
+      ...rows,
+      {
+        id: 4,
+        property_name: 'Closed Collective',
+        lat: 39,
+        lon: -106,
+        state: 'CO',
+        country: 'United States',
+        unit_type: 'tent',
+        rate_category: '$150-$249',
+        is_open: 'Closed',
+      },
+    ];
+    const result = processPropertiesForMapMarkers([...withClosed], [], []);
+    expect(result.some((p) => p.property_name === 'Closed Collective')).toBe(false);
+    expect(result).toHaveLength(2);
+  });
 });

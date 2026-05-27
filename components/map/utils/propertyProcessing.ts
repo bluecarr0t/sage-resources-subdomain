@@ -1,5 +1,5 @@
 import { SageProperty } from '@/lib/types/sage';
-import { isGlampingVisibleOnPublicMap } from '@/lib/glamping-is-open';
+import { isGlampingClosedIsOpenStatus } from '@/lib/glamping-is-open';
 import { propertyMatchesCountryFilters } from '@/lib/map/map-country-filter';
 import { createStateFilterSet, stateMatchesFilter } from './stateUtils';
 import { getPropertyCoordinates } from './coordinateUtils';
@@ -55,12 +55,7 @@ export function processPropertiesForMapMarkers(
   const propertyMap = new Map<string, SageProperty>();
 
   for (const item of properties) {
-    const openStatus = item.is_open;
-    if (
-      openStatus != null &&
-      String(openStatus).trim() !== '' &&
-      !isGlampingVisibleOnPublicMap(openStatus)
-    ) {
+    if (isGlampingClosedIsOpenStatus(item.is_open)) {
       continue;
     }
 
@@ -134,12 +129,7 @@ export function processProperties(
   const propertyDataCache = new Map<any, { coords: { lat: number; lon: number } | null; hasCoords: boolean; matchesState: boolean }>();
   
   properties.forEach((item: any) => {
-    const openStatus = item.is_open;
-    if (
-      openStatus != null &&
-      String(openStatus).trim() !== '' &&
-      !isGlampingVisibleOnPublicMap(openStatus)
-    ) {
+    if (isGlampingClosedIsOpenStatus(item.is_open)) {
       return;
     }
 

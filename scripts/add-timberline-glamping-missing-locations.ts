@@ -72,6 +72,12 @@ type LocationDef = {
   description: string;
 };
 
+/** Timberline "at" outposts on private land (not state-park concessions). */
+const PRIVATE_LAND_PROPERTY_NAMES = new Set([
+  'Timberline Glamping at Kingston Downs',
+  'Timberline Glamping at Lula',
+]);
+
 /**
  * Researched from https://www.timberlineglamping.com/locations (May 2026).
  * Coordinates are approximate park/city anchors for mapping.
@@ -449,6 +455,9 @@ async function main() {
       unit_capacity: u.unit_capacity,
       number_of_locations: BRAND_LOCATIONS,
       year_site_opened: loc.year_site_opened,
+      land_operator_category: PRIVATE_LAND_PROPERTY_NAMES.has(loc.property_name)
+        ? null
+        : 'state_park',
     }));
 
     if (DRY_RUN) {

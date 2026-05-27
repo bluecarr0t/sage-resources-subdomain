@@ -666,19 +666,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
   }, [isLoaded, loadError, apiKey]);
 
-  // Early returns for loading/error states
-  if (!isClient && showMap) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">{t('errors.initializing')}</p>
-        </div>
-      </div>
-    );
-  }
-
   if (!isClient && !showMap) return <div className="w-full space-y-6" />;
+  if (!isClient && showMap) return null;
 
   if (!apiKey) {
     return (
@@ -701,16 +690,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     );
   }
 
-  if (!isLoaded && showMap) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">{t('errors.loadingMaps')}</p>
-        </div>
-      </div>
-    );
-  }
+  if (!isLoaded && showMap) return null;
 
   // Render FilterSidebar when showMap is false
   if (!showMap) {
@@ -747,19 +727,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             <div className="bg-white border border-red-200 rounded-lg p-6 m-4 max-w-md">
               <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Map</h3>
               <p className="text-red-600">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {!isLoaded && !error && (
-          <div
-            className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 md:z-50"
-            style={{ width: '100%', height: '100%', aspectRatio: '16/9' }}
-          >
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-              <p className="text-gray-600">{t('errors.loadingScript')}</p>
-              <p className="text-sm text-gray-500 mt-2">{t('errors.loadingScriptHint')}</p>
             </div>
           </div>
         )}
@@ -896,15 +863,6 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
               )}
             </GoogleMap>
 
-            {/* Loading overlay */}
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-30 pointer-events-none">
-                <div className="text-center">
-                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600" />
-                  <p className="text-gray-600 font-medium mt-4">{t('errors.loadingProperties')}</p>
-                </div>
-              </div>
-            )}
           </div>
         )}
 

@@ -11,38 +11,35 @@ import * as fs from 'fs';
 import {
   applyBrandBackfill,
   buildBrandAssignmentAudit,
+  createBrandAuditSupabaseClient,
   fetchPropertiesForBrandAudit,
 } from '@/lib/brand-assignment-audit';
-import { createClient } from '@supabase/supabase-js';
-
 dotenv.config({ path: '.env.local' });
 dotenv.config();
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
-
-if (!supabaseUrl || !secretKey) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY');
-  process.exit(1);
-}
-
-async function fetchBrands() {
-  const supabase = createClient(supabaseUrl!, secretKey!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { data, error } = await supabase
-    .from('glamping_brands')
-    .select('id, slug, display_name, legacy_chain_key, parent_brand_id');
-  if (error) throw error;
-  return data ?? [];
-}
 
 async function main() {
   const writeJson = process.argv.includes('--write-json');
   const jsonPath = process.argv[process.argv.indexOf('--write-json') + 1];
   const apply = process.argv.includes('--apply');
 
-  const [brands, rows] = await Promise.all([fetchBrands(), fetchPropertiesForBrandAudit('published')]);
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !(process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
+  ) {
+    console.error(
+      'Missing NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY'
+    );
+    process.exit(1);
+  }
+
+  const rows = await fetchPropertiesForBrandAudit('published');
+  const brands = await createBrandAuditSupabaseClient()
+    .from('glamping_brands')
+    .select('id, slug, display_name, legacy_chain_key, parent_brand_id')
+    .then(({ data, error }) => {
+      if (error) throw error;
+      return data ?? [];
+    });
   const report = buildBrandAssignmentAudit(brands, rows);
 
   console.log('\n=== PUBLISHED BRAND COVERAGE (deduped properties) ===');

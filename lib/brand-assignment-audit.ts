@@ -1,7 +1,7 @@
 /**
  * Brand assignment audit + backfill helpers (admin + CLI).
  */
-import { createServerClient } from '@/lib/supabase';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   chainLabelFromPropertyName,
   CHAIN_KEY_TO_BRAND_SLUG,
@@ -67,8 +67,23 @@ type BrandRow = Pick<
   'id' | 'slug' | 'display_name' | 'legacy_chain_key' | 'parent_brand_id'
 >;
 
+/** Service-role client for audits/CLI (avoids placeholder fallback in createServerClient). */
+export function createBrandAuditSupabaseClient(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error(
+      'Missing NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY'
+    );
+  }
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
 async function fetchAllBrands(): Promise<BrandRow[]> {
-  const supabase = createServerClient();
+  const supabase = createBrandAuditSupabaseClient();
   const { data, error } = await supabase
     .from(BRANDS_TABLE)
     .select('id, slug, display_name, legacy_chain_key, parent_brand_id');
@@ -79,7 +94,7 @@ async function fetchAllBrands(): Promise<BrandRow[]> {
 export async function fetchPropertiesForBrandAudit(
   researchStatus: 'published' | 'all' = 'published'
 ): Promise<BrandAuditPropertyRow[]> {
-  const supabase = createServerClient();
+  const supabase = createBrandAuditSupabaseClient();
   const all: BrandAuditPropertyRow[] = [];
   let from = 0;
 
@@ -241,7 +256,7 @@ export async function applyBrandBackfill(options: {
     ? audit.backfillCandidates.filter((c) => options.brandSlugs!.includes(c.brandSlug))
     : audit.backfillCandidates;
 
-  const supabase = createServerClient();
+  const supabase = createBrandAuditSupabaseClient();
   let updatedRowCount = 0;
   const byBrand: ApplyBrandBackfillResult['byBrand'] = [];
 

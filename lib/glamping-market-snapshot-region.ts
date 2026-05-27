@@ -23,3 +23,18 @@ export const GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN = [
 export const GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN = ['Canada', 'CA'] as const;
 
 export type GlampingMarketSnapshotMarket = 'us' | 'ca';
+
+export function parseGlampingMarketSnapshotMarket(
+  raw: string | string[] | undefined
+): GlampingMarketSnapshotMarket {
+  const s = Array.isArray(raw) ? raw[0] : raw;
+  return s?.toLowerCase() === 'ca' ? 'ca' : 'us';
+}
+
+export function countryValuesForGlampingMarketSnapshot(
+  market: GlampingMarketSnapshotMarket
+): readonly string[] {
+  return market === 'ca'
+    ? GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN
+    : GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN;
+}

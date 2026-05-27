@@ -10,13 +10,13 @@ import {
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import MapLoading from './MapLoading';
 import MapEmbedOpenFullLink from '@/components/map/MapEmbedOpenFullLink';
+import MapPageLoadingOverlay from '@/components/map/MapPageLoadingOverlay';
 
 // Single dynamic import — one Maps bundle for sidebar + main (avoids double download)
 const DynamicGooglePropertyMap = dynamic(() => import('@/components/GooglePropertyMap'), {
   ssr: false,
-  loading: () => <MapLoading />,
+  loading: () => null,
 });
 
 // Dynamically import LocationSearch component
@@ -193,6 +193,7 @@ export default function MapLayout({
                 }
         }
       >
+        <MapPageLoadingOverlay />
         <DynamicGooglePropertyMap showMap={true} />
 
         {embedMode ? (

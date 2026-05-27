@@ -9,12 +9,37 @@ import {
 } from '@/lib/admin/glamping-list-anchor-key';
 import { PUBLISHED_RESEARCH_STATUS, resolvePublicSlugForAnchor } from '@/lib/published-property-pages';
 import { parseCoordinates, type SageProperty } from '@/lib/types/sage';
+import { chainLabelFromPropertyName } from '@/lib/brand-chain-label';
 import type { GlampingBrand, GlampingBrandTier } from '@/lib/glamping-brands';
-import { applyGlampingOnlyPropertyTypeFilter } from '@/lib/glamping-market-snapshot-property-type-filter';
+import { excludeClosedGlampingRows } from '@/lib/glamping-is-open';
+import { applyBrandsPagePropertyTypeFilter } from '@/lib/glamping-market-snapshot-property-type-filter';
+import { isExcludedLandOperatorForPublicMap } from '@/lib/glamping-land-operator-category';
+import { applyBrandsPageLandOperatorFilter } from '@/lib/public-map-cohort-filters';
 
 const PROPERTIES_TABLE = 'all_glamping_properties';
 const BRANDS_TABLE = 'glamping_brands';
 const PAGE_SIZE = 1000;
+
+/** Slugs blocked from public `/brand/[slug]` pages (empty unless a page must stay hidden). */
+export const EXCLUDED_PUBLIC_BRAND_PAGE_SLUGS = new Set<string>();
+
+export function isPublicBrandPageSlug(slug: string): boolean {
+  return !EXCLUDED_PUBLIC_BRAND_PAGE_SLUGS.has(slug.trim());
+}
+
+/**
+ * Outdoor Collection shares `brand_id` with Postcard Cabins rows; exclude Postcard-named
+ * outposts here so `/brand/postcard-cabins` and `/brand/marriott-outdoor-collection` stay distinct.
+ */
+export function filterRowsForPublicBrandPage(
+  brandSlug: string,
+  rows: SageProperty[]
+): SageProperty[] {
+  if (brandSlug !== 'marriott-outdoor-collection') return rows;
+  return rows.filter(
+    (row) => !(row.property_name ?? '').trim().toLowerCase().startsWith('postcard cabins')
+  );
+}
 
 export type BrandPublicSummary = {
   id: string;
@@ -53,6 +78,34 @@ export function shouldRollupSubBrands(
 ): boolean {
   if (brand.brand_tier === 'portfolio') return true;
   return allBrands.some((b) => b.parent_brand_id === brand.id);
+}
+
+/** Top portfolio company for the "Part of …" line (skips intermediate sub-brands). */
+export function portfolioParentBrandForDisplay(
+  brand: Pick<GlampingBrand, 'parent_brand_id'>,
+  allBrands: readonly GlampingBrand[]
+): GlampingBrand | null {
+  if (!brand.parent_brand_id) return null;
+  let current = allBrands.find((b) => b.id === brand.parent_brand_id) ?? null;
+  if (!current) return null;
+  while (current.parent_brand_id) {
+    const next = allBrands.find((b) => b.id === current!.parent_brand_id);
+    if (!next) break;
+    current = next;
+  }
+  return current;
+}
+
+function toBrandPublicSummary(brand: GlampingBrand): BrandPublicSummary {
+  return {
+    id: brand.id,
+    slug: brand.slug,
+    display_name: brand.display_name,
+    brand_tier: brand.brand_tier,
+    parent_brand_id: brand.parent_brand_id,
+    website_url: brand.website_url,
+    reported_location_count: brand.reported_location_count,
+  };
 }
 
 async function fetchAllBrands(): Promise<GlampingBrand[]> {
@@ -129,12 +182,16 @@ async function fetchPublishedRowsForBrandIds(brandIds: string[]): Promise<SagePr
     const chunk = brandIds.slice(i, i + 100);
     let from = 0;
     while (true) {
-      const { data, error } = await applyGlampingOnlyPropertyTypeFilter(
-        supabase
-          .from(PROPERTIES_TABLE)
-          .select('*')
-          .eq('research_status', PUBLISHED_RESEARCH_STATUS)
-          .in('brand_id', chunk)
+      const { data, error } = await applyBrandsPageLandOperatorFilter(
+        applyBrandsPagePropertyTypeFilter(
+          supabase
+            .from(PROPERTIES_TABLE)
+            .select('*')
+            .eq('research_status', PUBLISHED_RESEARCH_STATUS)
+            .neq('is_open', 'Closed')
+            .neq('is_open', 'No')
+            .in('brand_id', chunk)
+        )
       ).range(from, from + PAGE_SIZE - 1);
 
       if (error) {
@@ -151,16 +208,55 @@ async function fetchPublishedRowsForBrandIds(brandIds: string[]): Promise<SagePr
   return all;
 }
 
+/** Properties tagged to a parent portfolio but named for a child sub-brand chain key. */
+export function filterPublishedRowsForSubBrandChainKey(
+  rows: SageProperty[],
+  legacyChainKey: string | null | undefined
+): SageProperty[] {
+  const key = legacyChainKey?.trim().toLowerCase();
+  if (!key) return [];
+  return rows.filter((row) => chainLabelFromPropertyName(row.property_name) === key);
+}
+
+async function fetchPublishedRowsForBrand(
+  brand: GlampingBrand,
+  allBrands: GlampingBrand[]
+): Promise<SageProperty[]> {
+  const includeSubBrands = shouldRollupSubBrands(brand, allBrands);
+  const brandIds = await brandIdsForSlugRollup(brand.slug, includeSubBrands);
+  const directRows = await fetchPublishedRowsForBrandIds(brandIds);
+  if (directRows.length > 0) return directRows;
+
+  if (!brand.legacy_chain_key?.trim()) return directRows;
+
+  let parentId = brand.parent_brand_id;
+  while (parentId) {
+    const parent = allBrands.find((b) => b.id === parentId);
+    if (!parent) break;
+    const parentIncludeSub = shouldRollupSubBrands(parent, allBrands);
+    const parentIds = await brandIdsForSlugRollup(parent.slug, parentIncludeSub);
+    const parentRows = await fetchPublishedRowsForBrandIds(parentIds);
+    const matched = filterPublishedRowsForSubBrandChainKey(parentRows, brand.legacy_chain_key);
+    if (matched.length > 0) return matched;
+    parentId = parent.parent_brand_id;
+  }
+
+  return directRows;
+}
+
 function buildListingsFromRows(rows: SageProperty[]): BrandPropertyListing[] {
+  const openRows = excludeClosedGlampingRows(rows).filter(
+    (row) => !isExcludedLandOperatorForPublicMap(row.land_operator_category)
+  );
   const anchors = dedupeRowsToOutpostAnchors(
-    rows as Array<SageProperty & Record<string, unknown>>
+    openRows as Array<SageProperty & Record<string, unknown>>
   ) as SageProperty[];
   const usedSlugs = new Set<string>();
   const listings: BrandPropertyListing[] = [];
 
   for (const anchor of anchors) {
     const groupKey = propertyOutpostGroupKey(anchor);
-    const groupRows = rows.filter((r) => propertyOutpostGroupKey(r) === groupKey);
+    const groupRows = openRows.filter((r) => propertyOutpostGroupKey(r) === groupKey);
     const publicSlug = resolvePublicSlugForAnchor(anchor, usedSlugs);
     usedSlugs.add(publicSlug);
     const unitTypes = [
@@ -216,59 +312,36 @@ export async function getBrandPageData(slug: string): Promise<{
   mapPins: BrandMapPin[];
   includeSubBrandRollup: boolean;
 } | null> {
+  const normalizedSlug = slug.trim();
+  if (!isPublicBrandPageSlug(normalizedSlug)) return null;
+
   // Avoid stale empty Supabase responses cached before brand backfill/publish.
   noStore();
   const allBrands = await fetchAllBrands();
-  const brand = allBrands.find((b) => b.slug === slug.trim());
+  const brand = allBrands.find((b) => b.slug === normalizedSlug);
   if (!brand) return null;
 
   const includeSubBrands = shouldRollupSubBrands(brand, allBrands);
-  const brandIds = await brandIdsForSlugRollup(brand.slug, includeSubBrands);
-  const rows = await fetchPublishedRowsForBrandIds(brandIds);
+  const rows = filterRowsForPublicBrandPage(
+    normalizedSlug,
+    await fetchPublishedRowsForBrand(brand, allBrands)
+  );
   const listings = buildListingsFromRows(rows);
 
   if (listings.length === 0) return null;
 
-  const parentBrand = brand.parent_brand_id
-    ? allBrands.find((b) => b.id === brand.parent_brand_id) ?? null
-    : null;
+  const portfolioParent = portfolioParentBrandForDisplay(brand, allBrands);
 
   const subBrands = includeSubBrands
     ? allBrands
         .filter((b) => b.parent_brand_id === brand.id)
-        .map((b) => ({
-          id: b.id,
-          slug: b.slug,
-          display_name: b.display_name,
-          brand_tier: b.brand_tier,
-          parent_brand_id: b.parent_brand_id,
-          website_url: b.website_url,
-          reported_location_count: b.reported_location_count,
-        }))
+        .map((b) => toBrandPublicSummary(b))
         .sort((a, b) => a.display_name.localeCompare(b.display_name, 'en', { sensitivity: 'base' }))
     : [];
 
   return {
-    brand: {
-      id: brand.id,
-      slug: brand.slug,
-      display_name: brand.display_name,
-      brand_tier: brand.brand_tier,
-      parent_brand_id: brand.parent_brand_id,
-      website_url: brand.website_url,
-      reported_location_count: brand.reported_location_count,
-    },
-    parentBrand: parentBrand
-      ? {
-          id: parentBrand.id,
-          slug: parentBrand.slug,
-          display_name: parentBrand.display_name,
-          brand_tier: parentBrand.brand_tier,
-          parent_brand_id: parentBrand.parent_brand_id,
-          website_url: parentBrand.website_url,
-          reported_location_count: parentBrand.reported_location_count,
-        }
-      : null,
+    brand: toBrandPublicSummary(brand),
+    parentBrand: portfolioParent ? toBrandPublicSummary(portfolioParent) : null,
     subBrands,
     listings,
     mapPins: listingsToMapPins(listings),
@@ -288,16 +361,25 @@ export async function getAllPublicBrandSlugs(): Promise<Array<{ slug: string }>>
     if (brandIds.length === 0) continue;
 
     const supabase = createServerClient();
-    const { count, error } = await supabase
-      .from(PROPERTIES_TABLE)
-      .select('id', { count: 'exact', head: true })
-      .eq('research_status', PUBLISHED_RESEARCH_STATUS)
-      .in('brand_id', brandIds.slice(0, 100));
+    const { count, error } = await applyBrandsPageLandOperatorFilter(
+      applyBrandsPagePropertyTypeFilter(
+        supabase
+          .from(PROPERTIES_TABLE)
+          .select('id', { count: 'exact', head: true })
+          .eq('research_status', PUBLISHED_RESEARCH_STATUS)
+          .neq('is_open', 'Closed')
+          .neq('is_open', 'No')
+          .in('brand_id', brandIds.slice(0, 100))
+      )
+    );
 
-    if (!error && count && count > 0) {
+    if (!error && count && count > 0 && isPublicBrandPageSlug(brand.slug)) {
       slugs.push(brand.slug);
     }
   }
 
-  return [...new Set(slugs)].sort().map((slug) => ({ slug }));
+  return [...new Set(slugs)]
+    .filter(isPublicBrandPageSlug)
+    .sort()
+    .map((slug) => ({ slug }));
 }

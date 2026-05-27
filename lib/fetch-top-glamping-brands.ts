@@ -12,6 +12,13 @@ import {
   applyGlampingOnlyPropertyTypeFilter,
   isGlampingMarketSnapshotPropertyType,
 } from '@/lib/glamping-market-snapshot-property-type-filter';
+import { applyBrandsPageLandOperatorFilter } from '@/lib/public-map-cohort-filters';
+import { isExcludedLandOperatorForPublicMap } from '@/lib/glamping-land-operator-category';
+import { isUnitedStatesCountryFilterValue } from '@/lib/admin/glamping-sage-data-list';
+import {
+  countryValuesForGlampingMarketSnapshot,
+  type GlampingMarketSnapshotMarket,
+} from '@/lib/glamping-market-snapshot-region';
 import { PUBLISHED_RESEARCH_STATUS } from '@/lib/published-property-pages';
 import type { SageProperty } from '@/lib/types/sage';
 
@@ -20,6 +27,9 @@ const PROPERTIES_TABLE = 'all_glamping_properties';
 const PAGE_SIZE = 1000;
 
 export const TOP_GLAMPING_BRANDS_COUNT = 10;
+
+/** Brands need at least this many published outposts to rank on `/brands`. */
+export const TOP_BRANDS_MIN_PROPERTY_COUNT = 2;
 
 /** Sub-brands that rank on `/brands` at their own row (portfolio parent is a partnership only). */
 export const TOP_BRANDS_STANDALONE_PARTNER_SLUGS = new Set<string>(['autocamp']);
@@ -31,14 +41,16 @@ export const TOP_BRANDS_STANDALONE_PARTNER_SLUGS = new Set<string>(['autocamp'])
 export const TOP_BRANDS_LEAD_DISPLAY_BY_ROOT_SLUG: Readonly<
   Record<string, { leadSlug: string; ownerNote: string }>
 > = {
-  marriott: {
-    leadSlug: 'postcard-cabins',
-    ownerNote: 'Owned by Marriott',
-  },
   'best-western': {
     leadSlug: 'worldhotels-backdrop',
     ownerNote: 'Owned by Best Western',
   },
+};
+
+/** Sub-brands that rank on their own `/brands` row with a portfolio ownership line. */
+export const TOP_BRANDS_OWNERSHIP_NOTE_BY_SLUG: Readonly<Record<string, string>> = {
+  'postcard-cabins': 'Owned by Marriott',
+  'marriott-outdoor-collection': 'Owned by Marriott',
 };
 
 export type TopGlampingBrandRow = {
@@ -133,10 +145,12 @@ type PropertyRow = Pick<
   | 'property_type'
   | 'city'
   | 'state'
+  | 'country'
   | 'brand_id'
   | 'quantity_of_units'
   | 'property_total_sites'
   | 'rate_avg_retail_daily_rate'
+  | 'land_operator_category'
   | 'updated_at'
   | 'created_at'
 >;
@@ -155,6 +169,21 @@ function unitsForRow(row: PropertyRow): number {
   return Math.round(fromUnits ?? fromTotal ?? 0);
 }
 
+/** Whether a published property counts toward `/brands` for the selected market. */
+export function propertyMatchesBrandsMarket(
+  country: string | null | undefined,
+  market: GlampingMarketSnapshotMarket
+): boolean {
+  const trimmed = country?.trim();
+  if (!trimmed) return market === 'us';
+  if (market === 'ca') {
+    return countryValuesForGlampingMarketSnapshot('ca').some(
+      (c) => c.toLowerCase() === trimmed.toLowerCase()
+    );
+  }
+  return isUnitedStatesCountryFilterValue(trimmed);
+}
+
 function parseRate(value: string | number | null | undefined): number | null {
   if (value == null || value === '') return null;
   const n =
@@ -162,8 +191,26 @@ function parseRate(value: string | number | null | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-/** Rollup root for `/brands` ranking — stops at standalone partner brands (e.g. AutoCamp). */
-export function rankingRootBrandId(brandId: string, byId: Map<string, BrandRow>): string {
+function findBrandBySlug(byId: Map<string, BrandRow>, slug: string): BrandRow | undefined {
+  return [...byId.values()].find((b) => b.slug === slug);
+}
+
+/**
+ * Rollup root for `/brands` ranking — stops at standalone partner brands (e.g. AutoCamp).
+ * Postcard-named rows rank as Postcard Cabins even when tagged to Outdoor Collection.
+ */
+export function rankingRootBrandId(
+  brandId: string,
+  byId: Map<string, BrandRow>,
+  propertyName?: string | null
+): string {
+  const ln = (propertyName ?? '').trim().toLowerCase();
+
+  if (ln.startsWith('postcard cabins')) {
+    const postcard = findBrandBySlug(byId, 'postcard-cabins');
+    if (postcard) return postcard.id;
+  }
+
   let current = byId.get(brandId);
   if (!current) return brandId;
 
@@ -172,8 +219,14 @@ export function rankingRootBrandId(brandId: string, byId: Map<string, BrandRow>)
     if (!current.parent_brand_id) return current.id;
     const parent = byId.get(current.parent_brand_id);
     if (!parent) return current.id;
+    // Trailborn and other Outdoor Collection properties rank separately from Postcard.
+    if (current.slug === 'marriott-outdoor-collection') return current.id;
     current = parent;
   }
+}
+
+function ownershipNoteForRankingSlug(slug: string): string | null {
+  return TOP_BRANDS_OWNERSHIP_NOTE_BY_SLUG[slug] ?? null;
 }
 
 function leadDisplayForRankingRoot(
@@ -230,20 +283,26 @@ async function fetchAllBrands(): Promise<BrandRow[]> {
   return (data ?? []) as BrandRow[];
 }
 
-async function fetchPublishedBrandedRows(): Promise<PropertyRow[]> {
+async function fetchPublishedBrandedRows(
+  market: GlampingMarketSnapshotMarket
+): Promise<PropertyRow[]> {
   const supabase = createServerClient();
+  const countryIn = [...countryValuesForGlampingMarketSnapshot(market)];
   const all: PropertyRow[] = [];
   let from = 0;
 
   while (true) {
-    const { data, error } = await applyGlampingOnlyPropertyTypeFilter(
-      supabase
-        .from(PROPERTIES_TABLE)
-        .select(
-          'id, property_id, slug, property_name, property_type, city, state, brand_id, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, updated_at, created_at'
-        )
-        .eq('research_status', PUBLISHED_RESEARCH_STATUS)
-        .not('brand_id', 'is', null)
+    const { data, error } = await applyBrandsPageLandOperatorFilter(
+      applyGlampingOnlyPropertyTypeFilter(
+        supabase
+          .from(PROPERTIES_TABLE)
+          .select(
+            'id, property_id, slug, property_name, property_type, city, state, country, brand_id, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, land_operator_category, updated_at, created_at'
+          )
+          .eq('research_status', PUBLISHED_RESEARCH_STATUS)
+          .not('brand_id', 'is', null)
+          .in('country', countryIn)
+      )
     ).range(from, from + PAGE_SIZE - 1);
 
     if (error) {
@@ -262,10 +321,15 @@ async function fetchPublishedBrandedRows(): Promise<PropertyRow[]> {
 export function aggregateTopGlampingBrands(
   brands: BrandRow[],
   rows: PropertyRow[],
-  limit = TOP_GLAMPING_BRANDS_COUNT
+  limit = TOP_GLAMPING_BRANDS_COUNT,
+  market: GlampingMarketSnapshotMarket = 'us',
+  minPropertyCount = TOP_BRANDS_MIN_PROPERTY_COUNT
 ): TopGlampingBrandsOverview {
-  const glampingRows = rows.filter((row) =>
-    isGlampingMarketSnapshotPropertyType(row.property_type)
+  const glampingRows = rows.filter(
+    (row) =>
+      isGlampingMarketSnapshotPropertyType(row.property_type) &&
+      propertyMatchesBrandsMarket(row.country, market) &&
+      !isExcludedLandOperatorForPublicMap(row.land_operator_category)
   );
   const byId = new Map(brands.map((b) => [b.id, b]));
   const anchors = dedupeRowsToOutpostAnchors(
@@ -298,7 +362,7 @@ export function aggregateTopGlampingBrands(
         : parseRate(anchor.rate_avg_retail_daily_rate);
 
     byProperty.set(key, {
-      rootBrandId: rankingRootBrandId(brandId, byId),
+      rootBrandId: rankingRootBrandId(brandId, byId, anchor.property_name),
       leafBrandId: brandId,
       propertyName: anchor.property_name?.trim() ?? '',
       units,
@@ -341,15 +405,17 @@ export function aggregateTopGlampingBrands(
           ? agg.rates.reduce((sum, n) => sum + n, 0) / agg.rates.length
           : null;
       const leadDisplay = leadDisplayForRankingRoot(brand, byId);
+      const displaySlug = leadDisplay?.slug ?? brand.slug;
       const subBrandNote =
         leadDisplay?.subBrandNote ??
+        ownershipNoteForRankingSlug(displaySlug) ??
         partnerBrandNoteForRankingRoot(id, byId) ??
         formatSubBrandNote(
           subBrandNamesForRollup(id, agg.contributingBrandIds, byId, agg.propertyNames)
         );
 
       return {
-        slug: leadDisplay?.slug ?? brand.slug,
+        slug: displaySlug,
         displayName: leadDisplay?.displayName ?? brand.display_name,
         brandTier: brand.brand_tier,
         websiteUrl: brand.website_url,
@@ -361,6 +427,7 @@ export function aggregateTopGlampingBrands(
       };
     })
     .filter((row): row is Omit<TopGlampingBrandRow, 'rank'> => row != null)
+    .filter((row) => row.propertyCount >= minPropertyCount)
     .sort((a, b) => {
       if (b.propertyCount !== a.propertyCount) return b.propertyCount - a.propertyCount;
       if (b.unitCount !== a.unitCount) return b.unitCount - a.unitCount;
@@ -390,14 +457,18 @@ export type FetchTopGlampingBrandsResult =
   | { ok: false; error: string };
 
 export async function fetchTopGlampingBrands(
-  limit = TOP_GLAMPING_BRANDS_COUNT
+  limit = TOP_GLAMPING_BRANDS_COUNT,
+  market: GlampingMarketSnapshotMarket = 'us'
 ): Promise<FetchTopGlampingBrandsResult> {
   try {
-    const [brands, rows] = await Promise.all([fetchAllBrands(), fetchPublishedBrandedRows()]);
+    const [brands, rows] = await Promise.all([
+      fetchAllBrands(),
+      fetchPublishedBrandedRows(market),
+    ]);
     if (brands.length === 0) {
       return { ok: false, error: 'Brand registry is unavailable.' };
     }
-    return { ok: true, data: aggregateTopGlampingBrands(brands, rows, limit) };
+    return { ok: true, data: aggregateTopGlampingBrands(brands, rows, limit, market) };
   } catch (err) {
     console.error('[fetchTopGlampingBrands]', err);
     return { ok: false, error: 'Unable to load brand rankings.' };
