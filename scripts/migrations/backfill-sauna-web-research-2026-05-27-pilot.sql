@@ -1,0 +1,2 @@
+-- Sauna web research pilot (2026-05-27) — 19 row updates applied live via CLI.
+-- Full batch SQL: backfill-sauna-web-research-2026-05-27-batch.sql
