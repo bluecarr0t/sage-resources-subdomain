@@ -6,15 +6,17 @@ import {
 } from '@/lib/public-map-cohort-filters';
 
 describe('public-map-cohort-filters', () => {
-  it('excludes Campground, RV Resort, Outdoor Boutique Hotel, and Unknown', () => {
+  it('excludes Campground, RV Resort, RV Park, Outdoor Boutique Hotel, and Unknown', () => {
     expect(PUBLIC_MAP_EXCLUDED_PROPERTY_TYPES).toEqual([
       'Campground',
       'RV Resort',
+      'RV Park',
       'Outdoor Boutique Hotel',
       'Unknown',
     ]);
     expect(isExcludedPropertyTypeForPublicMap('Campground')).toBe(true);
     expect(isExcludedPropertyTypeForPublicMap('RV Resort')).toBe(true);
+    expect(isExcludedPropertyTypeForPublicMap('RV Park')).toBe(true);
     expect(isExcludedPropertyTypeForPublicMap('Outdoor Boutique Hotel')).toBe(true);
     expect(isExcludedPropertyTypeForPublicMap('Unknown')).toBe(true);
     expect(isExcludedPropertyTypeForPublicMap('Glamping')).toBe(false);

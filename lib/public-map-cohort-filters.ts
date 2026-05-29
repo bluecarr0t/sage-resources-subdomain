@@ -10,6 +10,7 @@ import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-lan
 export const PUBLIC_MAP_EXCLUDED_PROPERTY_TYPES = [
   'Campground',
   'RV Resort',
+  'RV Park',
   'Outdoor Boutique Hotel',
   'Unknown',
 ] as const;
@@ -18,7 +19,7 @@ export const PUBLIC_MAP_EXCLUDED_PROPERTY_TYPES = [
  * PostgREST `.or()` — allow null/empty `property_type`; exclude non-map product types.
  */
 export const PUBLIC_MAP_PROPERTY_TYPE_OR =
-  'property_type.is.null,property_type.not.in.(Campground,"RV Resort","Outdoor Boutique Hotel",Unknown)';
+  'property_type.is.null,property_type.not.in.(Campground,"RV Resort","RV Park","Outdoor Boutique Hotel",Unknown)';
 
 export function isExcludedPropertyTypeForPublicMap(
   propertyType: string | null | undefined

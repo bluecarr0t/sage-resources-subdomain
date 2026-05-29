@@ -8,6 +8,7 @@ export const GLAMPING_PROPERTY_TYPE_FORM_OPTIONS = [
   { value: 'Glamping', msgKey: 'glamping' as const },
   { value: 'Outdoor Boutique Hotel', msgKey: 'outdoorBoutiqueHotel' as const },
   { value: 'RV Resort', msgKey: 'rvResort' as const },
+  { value: 'RV Park', msgKey: 'rvPark' as const },
   { value: 'Campground', msgKey: 'campground' as const },
   { value: 'Landscape Hotel', msgKey: 'landscapeHotel' as const },
   { value: 'Marina', msgKey: 'marina' as const },
