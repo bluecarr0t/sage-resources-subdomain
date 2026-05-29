@@ -1,5 +1,9 @@
 import OpenAI from 'openai';
-import type { HotTubCohortRow, HotTubPropertyExtraction } from '@/lib/glamping-hot-tub-research/types';
+import type {
+  HotTubCohortRow,
+  HotTubConfidence,
+  HotTubPropertyExtraction,
+} from '@/lib/glamping-hot-tub-research/types';
 import { normalizeYesNo } from '@/lib/glamping-hot-tub-research/normalize';
 
 const SYSTEM_PROMPT = `You extract hot tub and sauna facts for a glamping property database from scraped website text.
@@ -25,6 +29,13 @@ function buildUnitInventory(rows: HotTubCohortRow[]): string {
     .join('\n');
 }
 
+function parseConfidence(value: unknown): HotTubConfidence {
+  if (value === 'high') return 'high';
+  if (value === 'medium') return 'medium';
+  if (value === 'low') return 'low';
+  return 'low';
+}
+
 function parseExtraction(raw: string): HotTubPropertyExtraction | null {
   let parsed: Record<string, unknown>;
   try {
@@ -35,15 +46,12 @@ function parseExtraction(raw: string): HotTubPropertyExtraction | null {
     parsed = JSON.parse(m[0]);
   }
 
-  const conf = parsed.confidence;
-  const confidence =
-    conf === 'high' || conf === 'medium' || conf === 'low' ? conf : 'low';
+  const confidence = parseConfidence(parsed.confidence);
 
   const unitsRaw = Array.isArray(parsed.units) ? parsed.units : [];
   const units = unitsRaw.map((u) => {
     const item = u as Record<string, unknown>;
     const match = (item.match ?? {}) as Record<string, unknown>;
-    const uc = item.confidence;
     return {
       match: {
         site_name: match.site_name != null ? String(match.site_name) : null,
@@ -52,8 +60,7 @@ function parseExtraction(raw: string): HotTubPropertyExtraction | null {
       unit_hot_tub: normalizeYesNo(item.unit_hot_tub),
       unit_sauna: normalizeYesNo(item.unit_sauna),
       evidence: String(item.evidence ?? '').slice(0, 500),
-      confidence:
-        uc === 'high' || uc === 'medium' || uc === 'low' ? uc : 'low',
+      confidence: parseConfidence(item.confidence),
     };
   });
 
