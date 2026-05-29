@@ -41,7 +41,8 @@ function buildBrandMetaDescription(
     states.length > 0
       ? ` across ${states.slice(0, 5).join(', ')}${states.length > 5 ? ' and more' : ''}`
       : '';
-  const base = `Browse ${propertyCount} published ${brandName} glamping ${propertyCount === 1 ? 'location' : 'locations'}${statePart}. Map, nightly rates, and unit types from Sage Outdoor Advisory research.`;
+  const locationNoun = propertyCount === 1 ? 'location' : 'locations';
+  const base = `Browse ${propertyCount} published ${brandName} ${locationNoun}${statePart}. Map, nightly rates, and unit types from Sage Outdoor Advisory research.`;
   if (base.length <= 160) return base;
   return base.substring(0, 157) + '...';
 }
@@ -67,7 +68,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const pathname = `/${locale}/brand/${slug}`;
   const baseUrl = 'https://resources.sageoutdooradvisory.com';
   const url = `${baseUrl}${pathname}`;
-  const title = `${brand.display_name} Glamping Locations (${listings.length}) | Sage Outdoor Advisory`;
+  const title = `${brand.display_name} Locations (${listings.length}) | Sage Outdoor Advisory`;
   const description = buildBrandMetaDescription(brand.display_name, listings.length, states);
   const imageUrl =
     'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg';
@@ -75,11 +76,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    keywords: `${brand.display_name}, glamping brand, glamping locations, ${states.join(', ')}, outdoor hospitality`
+    keywords: `${brand.display_name}, outdoor hospitality brand, ${states.join(', ')}, glamping and campground locations`
       .replace(/,\s*,/g, ',')
       .trim(),
     openGraph: {
-      title: `${brand.display_name} glamping locations`,
+      title: `${brand.display_name} locations`,
       description,
       url,
       siteName: 'Sage Outdoor Advisory',
@@ -89,7 +90,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${brand.display_name} glamping`,
+      title: `${brand.display_name} locations`,
       description,
       images: [imageUrl],
     },

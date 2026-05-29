@@ -12,7 +12,6 @@ import { parseCoordinates, type SageProperty } from '@/lib/types/sage';
 import { chainLabelFromPropertyName } from '@/lib/brand-chain-label';
 import type { GlampingBrand, GlampingBrandTier } from '@/lib/glamping-brands';
 import { excludeClosedGlampingRows } from '@/lib/glamping-is-open';
-import { applyBrandsPagePropertyTypeFilter } from '@/lib/glamping-market-snapshot-property-type-filter';
 import { isExcludedLandOperatorForPublicMap } from '@/lib/glamping-land-operator-category';
 import { applyBrandsPageLandOperatorFilter } from '@/lib/public-map-cohort-filters';
 
@@ -183,15 +182,13 @@ async function fetchPublishedRowsForBrandIds(brandIds: string[]): Promise<SagePr
     let from = 0;
     while (true) {
       const { data, error } = await applyBrandsPageLandOperatorFilter(
-        applyBrandsPagePropertyTypeFilter(
-          supabase
-            .from(PROPERTIES_TABLE)
-            .select('*')
-            .eq('research_status', PUBLISHED_RESEARCH_STATUS)
-            .neq('is_open', 'Closed')
-            .neq('is_open', 'No')
-            .in('brand_id', chunk)
-        )
+        supabase
+          .from(PROPERTIES_TABLE)
+          .select('*')
+          .eq('research_status', PUBLISHED_RESEARCH_STATUS)
+          .neq('is_open', 'Closed')
+          .neq('is_open', 'No')
+          .in('brand_id', chunk)
       ).range(from, from + PAGE_SIZE - 1);
 
       if (error) {
@@ -362,15 +359,13 @@ export async function getAllPublicBrandSlugs(): Promise<Array<{ slug: string }>>
 
     const supabase = createServerClient();
     const { count, error } = await applyBrandsPageLandOperatorFilter(
-      applyBrandsPagePropertyTypeFilter(
-        supabase
-          .from(PROPERTIES_TABLE)
-          .select('id', { count: 'exact', head: true })
-          .eq('research_status', PUBLISHED_RESEARCH_STATUS)
-          .neq('is_open', 'Closed')
-          .neq('is_open', 'No')
-          .in('brand_id', brandIds.slice(0, 100))
-      )
+      supabase
+        .from(PROPERTIES_TABLE)
+        .select('id', { count: 'exact', head: true })
+        .eq('research_status', PUBLISHED_RESEARCH_STATUS)
+        .neq('is_open', 'Closed')
+        .neq('is_open', 'No')
+        .in('brand_id', brandIds.slice(0, 100))
     );
 
     if (!error && count && count > 0 && isPublicBrandPageSlug(brand.slug)) {

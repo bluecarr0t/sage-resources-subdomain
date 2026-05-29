@@ -96,8 +96,8 @@ export default function BrandDetailTemplate({
 
   const lead =
     propertyCount === 1
-      ? `One published glamping property in Sage Outdoor Advisory research for ${brand.display_name}.`
-      : `${propertyCount} published glamping ${propertyCount === 1 ? 'property' : 'properties'} in Sage research for ${brand.display_name}${states.length > 0 ? ` across ${states.length} ${states.length === 1 ? 'state' : 'states'}` : ''}.`;
+      ? `One published property in Sage Outdoor Advisory research for ${brand.display_name}.`
+      : `${propertyCount} published properties in Sage research for ${brand.display_name}${states.length > 0 ? ` across ${states.length} ${states.length === 1 ? 'state' : 'states'}` : ''}.`;
 
   return (
     <EditorialPageShell solidPageBackground>

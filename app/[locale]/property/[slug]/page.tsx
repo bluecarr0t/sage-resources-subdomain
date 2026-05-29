@@ -21,6 +21,8 @@ import {
   collectDistinctUnitTypes,
   formatUnitTypesDisplay,
 } from "@/lib/property-unit-types";
+import { buildPropertyPageMetaDescription } from "@/lib/property-page-meta-description";
+import { buildPropertyPageTitle } from "@/lib/property-page-title";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -164,84 +166,33 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const firstProperty = properties[0];
   const propertyUnitTypes = collectDistinctUnitTypes(properties);
-  const propertyUnitTypesLabel = formatUnitTypesDisplay(propertyUnitTypes);
   const propertyName = firstProperty.property_name || "Unnamed Property";
   
-  // Build location string
   const locationParts: string[] = [];
   if (firstProperty.city) locationParts.push(firstProperty.city);
   if (firstProperty.state) locationParts.push(firstProperty.state);
   if (firstProperty.country) locationParts.push(firstProperty.country);
   const location = locationParts.join(", ") || "";
-  
-  // Build optimized description with key information (without Google Places data - fetched client-side)
-  const descriptionParts: string[] = [];
-  
-  // Add location
-  if (location) {
-    descriptionParts.push(`in ${location}`);
-  }
-  
-  // Add price range if available
-  if (firstProperty.rate_avg_retail_daily_rate) {
-    descriptionParts.push(`from $${firstProperty.rate_avg_retail_daily_rate}/night`);
-  }
-  
-  // Add key amenities (currently hidden)
-  // const topAmenities: string[] = [];
-  // if (firstProperty.property_pool === 'yes' || firstProperty.property_pool === 'Yes' || firstProperty.property_pool === 'Y') topAmenities.push('pool');
-  // if (firstProperty.unit_hot_tub_or_sauna === 'yes' || firstProperty.unit_hot_tub_or_sauna === 'Yes' || firstProperty.unit_hot_tub_or_sauna === 'Y') topAmenities.push('hot tub');
-  // if (firstProperty.unit_wifi === 'yes' || firstProperty.unit_wifi === 'Yes' || firstProperty.unit_wifi === 'Y') topAmenities.push('WiFi');
-  // if (topAmenities.length > 0 && topAmenities.length <= 2) {
-  //   descriptionParts.push(`with ${topAmenities.join(' & ')}`);
-  // }
-  
-  let description = propertyName;
-  if (descriptionParts.length > 0) {
-    description += `: ${descriptionParts.join(' • ')}.`;
-  }
-  description += ` View photos, rates, and book directly.`;
-  
-  // Ensure description is 150-160 characters (optimal length)
-  if (description.length > 160) {
-    description = description.substring(0, 157) + '...';
-  }
-  
-  // Build optimized title for search intent
-  // Format: Property Name - [Unit Type] in City, State | Rates & Reviews
-  const unitType = propertyUnitTypesLabel ?? '';
-  const cityState = location ? location.split(',').slice(0, 2).join(', ') : '';
-  
-  let title = propertyName;
-  
-  // Prioritize: Property Name - Unit Type in Location | Rates & Reviews
-  if (unitType && cityState) {
-    title = `${propertyName} - ${unitType} in ${cityState} | Rates & Reviews`;
-  } else if (cityState) {
-    title = `${propertyName} in ${cityState} | Rates & Reviews`;
-  } else if (unitType) {
-    title = `${propertyName} - ${unitType} | Glamping Property`;
-  } else {
-    title = `${propertyName} | Glamping Property`;
-  }
-  
-  // Ensure title doesn't exceed 60 characters for optimal display
-  if (title.length > 60) {
-    // Try to truncate location first
-    if (cityState && title.includes(cityState)) {
-      const cityOnly = cityState.split(',')[0];
-      if (cityOnly) {
-        title = `${propertyName} - ${unitType || 'Glamping'} in ${cityOnly} | Rates & Reviews`;
-        if (title.length > 60) {
-          title = title.substring(0, 57) + '...';
-        }
-      } else {
-        title = title.substring(0, 57) + '...';
-      }
-    } else {
-      title = title.substring(0, 57) + '...';
-    }
-  }
+
+  const description = buildPropertyPageMetaDescription({
+    propertyName,
+    propertyType: firstProperty.property_type,
+    unitTypes: propertyUnitTypes,
+    city: firstProperty.city,
+    state: firstProperty.state,
+    country: firstProperty.country,
+    description: firstProperty.description,
+    rateAvgRetailDailyRate: firstProperty.rate_avg_retail_daily_rate,
+  });
+
+  const title = buildPropertyPageTitle({
+    propertyName,
+    city: firstProperty.city,
+    state: firstProperty.state,
+    country: firstProperty.country,
+    propertyType: firstProperty.property_type,
+    unitTypes: propertyUnitTypes,
+  });
   
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const pathname = `/${locale}/property/${slug}`;
