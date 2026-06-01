@@ -29,16 +29,16 @@ const NORTHEAST = new Set([
   'MD', 'DE', 'NJ', 'PA', 'NY', 'CT', 'RI', 'MA', 'VT', 'NH', 'ME',
 ]);
 
-/** Fill colors (SVG) — west dark orange, southwest light yellow, midwest green, southeast dark orange, northeast blue */
+/** Fill colors (SVG) — west dark orange, southwest yellow, midwest green, southeast amber, northeast blue */
 export const RV_REGION_FILL: Record<RvIndustryRegionId, string> = {
   west: '#c2410c',
-  southwest: '#fde047',
+  southwest: '#facc15',
   midwest: '#15803d',
-  southeast: '#9a3412',
+  southeast: '#f97316',
   northeast: '#1d4ed8',
 };
 
-/** Regional stat overlay text on the map (light fills need dark type). */
+/** Regional stat overlay text on the map (lighter fills need dark type). */
 export function rvRegionMapLabelStyle(regionId: RvIndustryRegionId): {
   fill: string;
   stroke: string;
