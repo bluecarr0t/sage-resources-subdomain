@@ -1,6 +1,6 @@
 /**
  * Row-level data-quality bands applied consistently across RV Industry Overview
- * (every unit-type slice and every chart fed by `campspot-rv-overview-page-data`).
+ * (every unit-type slice and every chart fed by `campspot-rv-overview-page-data`, Campspot + RoverPass rows).
  *
  * Documented for admins in `messages/en.json` under `admin.rvIndustryOverview.standardFilters`.
  */

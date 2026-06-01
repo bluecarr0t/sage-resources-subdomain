@@ -1,9 +1,8 @@
 /**
- * Regional mean ADR and occupancy from campspot (2025 columns only).
+ * Regional mean ADR and occupancy (2025 columns). Used by map fold types and tests.
+ * Production data uses unified page scan in `campspot-rv-overview-page-data.ts`.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { createServerClient } from '@/lib/supabase';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
 import {
   meanRounded,
@@ -14,14 +13,11 @@ import {
   passesStandardCampspotOccupancyPercent,
   passesStandardCampspotRetailRateUsd,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import {
   type RvIndustryRegionId,
   RV_INDUSTRY_REGION_IDS,
   getRvIndustryRegionForStateAbbr,
 } from '@/lib/rv-industry-overview/us-rv-regions';
-
-const PAGE_SIZE = 1000;
 
 export type RegionalAggregateRow = {
   regionId: RvIndustryRegionId;
@@ -103,58 +99,4 @@ export function aggregateCampspotRowsToRegions(
   const accum = emptyAccum();
   foldCampspotRows(accum, rows);
   return accumToByRegion(accum);
-}
-
-export async function fetchCampspotRegionalAggregates(
-  supabase: SupabaseClient
-): Promise<CampspotRegionalAggregatesResult> {
-  const accum = emptyAccum();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select('state, avg_retail_daily_rate_2025, occupancy_rate_2025')
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        byRegion: emptyByRegion(),
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldCampspotRows(accum, data as CampspotAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return { byRegion: accumToByRegion(accum), rowsScanned, error: null };
-}
-
-function emptyByRegion(): Record<RvIndustryRegionId, RegionalAggregateRow> {
-  return RV_INDUSTRY_REGION_IDS.reduce(
-    (acc, id) => {
-      acc[id] = {
-        regionId: id,
-        meanAdr: null,
-        meanOccupancyPct: null,
-        siteCount: 0,
-      };
-      return acc;
-    },
-    {} as Record<RvIndustryRegionId, RegionalAggregateRow>
-  );
-}
-
-/** Convenience for Server Components */
-export async function getCampspotRegionalAggregates(): Promise<CampspotRegionalAggregatesResult> {
-  return fetchCampspotRegionalAggregates(createServerClient());
 }

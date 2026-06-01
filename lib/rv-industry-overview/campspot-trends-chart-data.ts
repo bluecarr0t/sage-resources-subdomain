@@ -1,11 +1,10 @@
 /**
- * Regional + U.S. aggregates for the RV trends combo chart (2024 vs 2025, Campspot only).
+ * Regional + U.S. aggregates for the RV trends combo chart (2024 vs 2025).
  * 2024: occupancy_rate_2024 + avg_retail_daily_rate_2024 (same-row cohort).
  * 2025: occupancy_rate_2025 + avg_retail_daily_rate_2025 (same-row cohort).
+ * Fed by unified page scan in `campspot-rv-overview-page-data.ts` (Campspot + RoverPass).
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { createServerClient } from '@/lib/supabase';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
 import {
   meanRounded,
@@ -17,13 +16,10 @@ import {
   passesStandardCampspotOccupancyPercent,
   passesStandardCampspotRetailRateUsd,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import {
   type RvIndustryRegionId,
   getRvIndustryRegionForStateAbbr,
 } from '@/lib/rv-industry-overview/us-rv-regions';
-
-const PAGE_SIZE = 1000;
 
 export const TRENDS_CHART_CATEGORY_KEYS = [
   'us',
@@ -41,6 +37,8 @@ type Bucket = {
   adr2024: number[];
   occ2025: number[];
   adr2025: number[];
+  /** Sum of quantity_of_units (min 1 per row) for classified rows in region. */
+  siteCount: number;
 };
 
 export type TrendsChartRow = {
@@ -51,6 +49,7 @@ export type TrendsChartRow = {
   adr2025: number | null;
   n2024: number;
   n2025: number;
+  siteCount: number;
 };
 
 export type CampspotTrendsChartResult = {
@@ -61,11 +60,19 @@ export type CampspotTrendsChartResult = {
 
 export type CampspotTrendsAggRow = {
   state: string | null;
+  quantity_of_units?: string | null;
   occupancy_rate_2024: string | null;
   avg_retail_daily_rate_2024: string | null;
   occupancy_rate_2025: string | null;
   avg_retail_daily_rate_2025: string | null;
 };
+
+/** Sites/units weight for a classified inventory row (matches unit-type chart logic). */
+export function trendsRowSiteWeight(row: CampspotTrendsAggRow): number {
+  const q = parseCampspotNumber(row.quantity_of_units);
+  if (q != null && q >= 1) return Math.min(10_000, Math.round(q));
+  return 1;
+}
 
 function emptyBuckets(): Record<TrendsChartCategoryKey, Bucket> {
   const b = (): Bucket => ({
@@ -73,6 +80,7 @@ function emptyBuckets(): Record<TrendsChartCategoryKey, Bucket> {
     adr2024: [],
     occ2025: [],
     adr2025: [],
+    siteCount: 0,
   });
   return {
     us: b(),
@@ -103,6 +111,10 @@ export function foldTrendsRows(
     if (!regionId) continue;
 
     const targets: TrendsChartCategoryKey[] = ['us', regionId];
+    const weight = trendsRowSiteWeight(row);
+    for (const k of targets) {
+      buckets[k].siteCount += weight;
+    }
 
     const o4 = parseCampspotOccupancyPercent(row.occupancy_rate_2024);
     const a4 = parseCampspotNumber(row.avg_retail_daily_rate_2024);
@@ -157,6 +169,7 @@ function bucketsToRows(
       adr2025: meanRounded(b.adr2025),
       n2024,
       n2025,
+      siteCount: b.siteCount,
     };
   });
 }
@@ -167,45 +180,4 @@ export function aggregateCampspotRowsToTrendsChart(
   const buckets = emptyBuckets();
   foldTrendsRows(buckets, rows);
   return bucketsToRows(buckets);
-}
-
-export async function fetchCampspotTrendsChartData(
-  supabase: SupabaseClient
-): Promise<CampspotTrendsChartResult> {
-  const buckets = emptyBuckets();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select(
-        'state, occupancy_rate_2024, avg_retail_daily_rate_2024, ' +
-          'occupancy_rate_2025, avg_retail_daily_rate_2025'
-      )
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        rows: bucketsToRows(emptyBuckets()),
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldTrendsRows(buckets, data as unknown as CampspotTrendsAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return { rows: bucketsToRows(buckets), rowsScanned, error: null };
-}
-
-export async function getCampspotTrendsChartData(): Promise<CampspotTrendsChartResult> {
-  return fetchCampspotTrendsChartData(createServerClient());
 }

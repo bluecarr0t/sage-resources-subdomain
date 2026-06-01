@@ -1,9 +1,3 @@
-/**
- * Max rows to scan when paginating `campspot` for RV Industry Overview aggregates.
- * Set above current table size so all rows are included (no mock data — only real rows).
- */
-export const CAMPSPOT_RV_OVERVIEW_MAX_ROWS = 400_000;
-
 function envInt(name: string, fallback: number, min: number, max: number): number {
   if (typeof process === 'undefined') return fallback;
   const raw = process.env[name];
@@ -12,6 +6,24 @@ function envInt(name: string, fallback: number, min: number, max: number): numbe
   if (!Number.isFinite(n)) return fallback;
   return Math.min(max, Math.max(min, n));
 }
+
+/**
+ * Max rows to scan per source table for RV Industry Overview aggregates.
+ * Tune via env (defaults match prior fixed Campspot 400k / RoverPass 250k caps).
+ */
+export const CAMPSPOT_RV_OVERVIEW_MAX_ROWS = envInt(
+  'CAMPSPOT_RV_OVERVIEW_MAX_ROWS',
+  400_000,
+  1_000,
+  500_000
+);
+
+export const ROVERPASS_RV_OVERVIEW_MAX_ROWS = envInt(
+  'ROVERPASS_RV_OVERVIEW_MAX_ROWS',
+  250_000,
+  1_000,
+  500_000
+);
 
 /**
  * Rows per Supabase range() request. Default 1000 matches typical PostgREST max_rows; if you raise

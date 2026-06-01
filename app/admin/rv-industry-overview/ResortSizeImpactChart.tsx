@@ -18,6 +18,9 @@ import {
   type SizeTierChartRow,
   type SizeTierKey,
 } from '@/lib/rv-industry-overview/campspot-size-tier-chart-data';
+import { RV_OVERVIEW_CHART_HEADING_CLASS } from './VisualizationJpgDownload';
+import type { RvOverviewYearEmphasisKey } from '@/lib/rv-industry-overview/rv-overview-display-preferences';
+import { rvOverviewYearSeriesOpacity } from '@/lib/rv-industry-overview/rv-overview-year-emphasis';
 
 type ChartDatum = {
   name: string;
@@ -34,6 +37,7 @@ type ChartDatum = {
 
 type Props = {
   rows: SizeTierChartRow[];
+  yearEmphasis?: RvOverviewYearEmphasisKey;
   /** Omit title, intro, body, table heading & footnote (for JPEG: chart + data table only) */
   variant?: 'default' | 'compact';
 };
@@ -51,9 +55,17 @@ function pctChange(from: number | null, to: number | null): number | null {
   return Math.round(((to - from) / from) * 1000) / 10;
 }
 
-export default function ResortSizeImpactChart({ rows, variant = 'default' }: Props) {
+export default function ResortSizeImpactChart({
+  rows,
+  yearEmphasis = 'both',
+  variant = 'default',
+}: Props) {
   const t = useTranslations('admin.rvIndustryOverview.sizeImpact');
   const compact = variant === 'compact';
+  const occ2024Opacity = rvOverviewYearSeriesOpacity('2024', yearEmphasis);
+  const occ2025Opacity = rvOverviewYearSeriesOpacity('2025', yearEmphasis);
+  const adr2024Opacity = rvOverviewYearSeriesOpacity('2024', yearEmphasis);
+  const adr2025Opacity = rvOverviewYearSeriesOpacity('2025', yearEmphasis);
 
   const data = useMemo((): ChartDatum[] => {
     const byKey = new Map(rows.map((r) => [r.tierKey, r]));
@@ -167,6 +179,7 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
               dataKey="occ2024"
               name={t('series.occ2024')}
               fill="#2563eb"
+              fillOpacity={occ2024Opacity}
               radius={[4, 4, 0, 0]}
               maxBarSize={40}
             />
@@ -175,6 +188,7 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
               dataKey="occ2025"
               name={t('series.occ2025')}
               fill="#16a34a"
+              fillOpacity={occ2025Opacity}
               radius={[4, 4, 0, 0]}
               maxBarSize={40}
             />
@@ -184,6 +198,7 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
               dataKey="adr2024"
               name={t('series.adr2024')}
               stroke="#dc2626"
+              strokeOpacity={adr2024Opacity}
               strokeWidth={3}
               dot={{ r: 4, strokeWidth: 2, fill: '#ffffff', stroke: '#dc2626' }}
               activeDot={{ r: 5 }}
@@ -194,6 +209,7 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
               dataKey="adr2025"
               name={t('series.adr2025')}
               stroke="#7c3aed"
+              strokeOpacity={adr2025Opacity}
               strokeWidth={3}
               dot={{ r: 4, strokeWidth: 2, fill: '#ffffff', stroke: '#7c3aed' }}
               activeDot={{ r: 5 }}
@@ -257,9 +273,7 @@ export default function ResortSizeImpactChart({ rows, variant = 'default' }: Pro
 
   return (
     <div className="w-full">
-      <h2 className="text-center text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">
-        {t('chartTitle')}
-      </h2>
+      <h2 className={RV_OVERVIEW_CHART_HEADING_CLASS}>{t('chartTitle')}</h2>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 max-w-4xl mx-auto text-center">
         {t('intro')}
       </p>

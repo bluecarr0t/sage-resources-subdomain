@@ -1,11 +1,9 @@
 /**
- * Resort size tiers vs occupancy & ADR (Campspot). 2024 full-year fields;
+ * Resort size tiers vs occupancy & ADR. 2024 full-year fields;
  * 2025 uses full-year avg_retail_daily_rate_2025 and occupancy_rate_2025 (not YTD rate).
+ * Fed by unified page scan in `campspot-rv-overview-page-data.ts`.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { createServerClient } from '@/lib/supabase';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import {
   meanRounded,
   parseCampspotNumber,
@@ -15,8 +13,6 @@ import {
   passesStandardCampspotOccupancyPercent,
   passesStandardCampspotRetailRateUsd,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-
-const PAGE_SIZE = 1000;
 
 export const SIZE_TIER_KEYS = ['large', 'medium', 'small'] as const;
 export type SizeTierKey = (typeof SIZE_TIER_KEYS)[number];
@@ -143,46 +139,4 @@ export function aggregateCampspotRowsToSizeTierChart(
   const buckets = emptyBuckets();
   foldSizeTierRows(buckets, rows);
   return bucketsToRows(buckets);
-}
-
-export async function fetchCampspotSizeTierChartData(
-  supabase: SupabaseClient
-): Promise<CampspotSizeTierChartResult> {
-  const buckets = emptyBuckets();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select(
-        'property_total_sites, quantity_of_units, ' +
-          'occupancy_rate_2024, avg_retail_daily_rate_2024, ' +
-          'occupancy_rate_2025, avg_retail_daily_rate_2025'
-      )
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        rows: bucketsToRows(emptyBuckets()),
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldSizeTierRows(buckets, data as unknown as CampspotSizeTierAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return { rows: bucketsToRows(buckets), rowsScanned, error: null };
-}
-
-export async function getCampspotSizeTierChartData(): Promise<CampspotSizeTierChartResult> {
-  return fetchCampspotSizeTierChartData(createServerClient());
 }

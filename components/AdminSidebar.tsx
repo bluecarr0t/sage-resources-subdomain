@@ -27,6 +27,7 @@ import {
   Wrench,
   ChevronDown,
   FileBarChart,
+  LineChart,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSidebar } from '@/lib/sidebar-context';
@@ -46,6 +47,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/glamping-properties')) return 'comps';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/market-report')) return 'market-report';
+  if (pathname.startsWith('/admin/rv-industry-overview')) return 'rv-industry-overview';
   if (pathname.startsWith('/admin/rv-site-setup') || pathname.startsWith('/admin/site-design')) return 'site-design';
   if (pathname.startsWith('/admin/site-builder')) return 'site-builder';
   if (pathname.startsWith('/admin/sage-ai')) return 'sage-ai';
@@ -58,6 +60,7 @@ function getActivePageId(pathname: string): string {
 const TOOLS_PAGE_IDS = new Set([
   'proximity-insights',
   'market-report',
+  'rv-industry-overview',
   'site-design',
   'site-builder',
   'sage-ai',
@@ -392,6 +395,14 @@ export default function AdminSidebar() {
                           isCollapsed={false}
                         />
                         <NavLink
+                          href="/admin/rv-industry-overview"
+                          label={tSidebar('rvIndustryOverview')}
+                          icon={LineChart}
+                          pageId="rv-industry-overview"
+                          isActive={activePageId === 'rv-industry-overview'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
                           href="/admin/sage-ai"
                           label={tSidebar('sageAi')}
                           icon={Bot}
@@ -467,6 +478,19 @@ export default function AdminSidebar() {
                         >
                           <FileBarChart className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                           {tSidebar('marketReport')}
+                        </Link>
+                        <Link
+                          href="/admin/rv-industry-overview"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'rv-industry-overview'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <LineChart className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('rvIndustryOverview')}
                         </Link>
                         <Link
                           href="/admin/sage-ai"

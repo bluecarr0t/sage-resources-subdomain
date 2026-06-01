@@ -29,14 +29,25 @@ const NORTHEAST = new Set([
   'MD', 'DE', 'NJ', 'PA', 'NY', 'CT', 'RI', 'MA', 'VT', 'NH', 'ME',
 ]);
 
-/** Fill colors (SVG) — dark orange, yellow, green, amber, blue */
+/** Fill colors (SVG) — west dark orange, southwest light yellow, midwest green, southeast dark orange, northeast blue */
 export const RV_REGION_FILL: Record<RvIndustryRegionId, string> = {
   west: '#c2410c',
-  southwest: '#ca8a04',
+  southwest: '#fde047',
   midwest: '#15803d',
-  southeast: '#f59e0b',
+  southeast: '#9a3412',
   northeast: '#1d4ed8',
 };
+
+/** Regional stat overlay text on the map (light fills need dark type). */
+export function rvRegionMapLabelStyle(regionId: RvIndustryRegionId): {
+  fill: string;
+  stroke: string;
+} {
+  if (regionId === 'southwest') {
+    return { fill: '#1f2937', stroke: 'rgba(255,255,255,0.9)' };
+  }
+  return { fill: '#ffffff', stroke: 'rgba(0,0,0,0.35)' };
+}
 
 const ABBR_TO_REGION: Record<string, RvIndustryRegionId> = {};
 for (const abbr of WEST) ABBR_TO_REGION[abbr] = 'west';
@@ -63,8 +74,16 @@ export const EXCLUDE_FROM_MAP_ABBR = new Set(['HI']);
 /** Pixel nudge for Alaska’s Albers inset (east/right). Hawaii label uses the same so “AK” stays centered on the state. */
 export const ALASKA_ALBERS_INSET_NUDGE = { x: 18, y: 0 } as const;
 
-/** CSS translateX(px) for the Hawaii Mercator overlay — negative moves it left, away from Alaska. */
-export const HAWAII_INSET_TRANSLATE_X_PX = -14;
+/** CSS translate for the Hawaii Mercator overlay (negative x = left, negative y = up). */
+export const HAWAII_INSET_TRANSLATE_PX = { x: -32, y: -14 } as const;
+
+/** @deprecated Prefer `HAWAII_INSET_TRANSLATE_PX.x` */
+export const HAWAII_INSET_TRANSLATE_X_PX = HAWAII_INSET_TRANSLATE_PX.x;
+
+export function hawaiiInsetTransformCss(): string {
+  const { x, y } = HAWAII_INSET_TRANSLATE_PX;
+  return `translate(${x}px, ${y}px)`;
+}
 
 /** Approximate region centroids [lon, lat] for Albers USA labels */
 export const RV_REGION_LABEL_COORDS: Record<RvIndustryRegionId, [number, number]> = {

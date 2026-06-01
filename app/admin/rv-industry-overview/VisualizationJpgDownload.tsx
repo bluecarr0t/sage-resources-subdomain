@@ -11,71 +11,103 @@ import {
 import { useTranslations } from 'next-intl';
 import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
+import {
+  captureElementAsJpeg,
+  captureElementAsImageBlob,
+  captureElementAsJpegBlob,
+  type ImageBlobFormat,
+  type JpegBlobCaptureResult,
+  type JpegCaptureProfile,
+  type JpegDownloadResult,
+} from '@/lib/rv-industry-overview/jpeg-capture';
+import type { VisualizationJpgDownloadHandle } from '@/lib/rv-industry-overview/visualization-export';
+import { sanitizeAdminDisplayError } from '@/lib/admin-display-error';
 
-export type VisualizationJpgDownloadHandle = {
-  /** Capture and trigger download without toggling this block’s button loading state. */
-  downloadJpeg: () => Promise<void>;
-};
+export type { VisualizationJpgDownloadHandle };
+
+/** Matches Regional ARDR and occupancy (2025) — use for all RV overview export headings. */
+export const RV_OVERVIEW_CHART_HEADING_CLASS =
+  'text-center text-xl font-bold tracking-tight text-gray-900 mb-4';
 
 type Props = {
-  /** Shown in the JPEG and as the visible heading above the visualization */
   exportTitle: string;
-  /** Extra classes for the capture heading (e.g. font-serif) */
   headingClassName?: string;
-  /** Optional subtitle below the title (included in JPEG) */
   exportSubtitle?: ReactNode;
-  /** Optional id for the title heading (e.g. section aria-labelledby) */
   headingId?: string;
-  /** Filename without extension */
   fileStem: string;
-  /** Page-only copy below the export area (not included in JPEG) */
   captionBelow?: ReactNode;
-  /** e.g. rows scanned, not included in JPEG */
   footerBelow?: ReactNode;
+  /** `map` prefetches embedded TopoJSON before capture (reliable SVG rasterization). */
+  captureProfile?: JpegCaptureProfile;
+  /** Rendered below the export capture area (excluded from JPEG). */
+  sourceTransparency?: ReactNode;
   children: ReactNode;
 };
 
 const VisualizationJpgDownload = forwardRef<VisualizationJpgDownloadHandle, Props>(
   function VisualizationJpgDownload(
-    { exportTitle, headingClassName, exportSubtitle, headingId, fileStem, captionBelow, footerBelow, children },
+    {
+      exportTitle,
+      headingClassName,
+      exportSubtitle,
+      headingId,
+      fileStem,
+      captionBelow,
+      footerBelow,
+      captureProfile = 'chart',
+      sourceTransparency,
+      children,
+    },
     ref
   ) {
     const t = useTranslations('admin.rvIndustryOverview');
     const captureRef = useRef<HTMLDivElement>(null);
     const [busy, setBusy] = useState(false);
+    const [lastError, setLastError] = useState<string | null>(null);
 
-    const runDownload = useCallback(async () => {
-      const el = captureRef.current;
-      if (!el) return;
-      const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
+    const runCaptureBlob = useCallback(
+      async (format: ImageBlobFormat = 'jpeg'): Promise<JpegBlobCaptureResult> => {
+        const el = captureRef.current;
+        if (!el) {
+          return { ok: false, error: 'Export area is not ready' };
+        }
+        return captureElementAsImageBlob(el, fileStem, captureProfile, format);
+      },
+      [fileStem, captureProfile]
+    );
+
+    const runDownload = useCallback(async (): Promise<JpegDownloadResult> => {
+      const result = await runCaptureBlob();
+      if (!result.ok) {
+        console.error('[VisualizationJpgDownload]', result.error);
+        return { ok: false, error: result.error, blankCapture: result.blankCapture };
+      }
       const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/jpeg', 0.92);
-      const safe = fileStem.replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/^-|-$/g, '') || 'chart';
-      link.download = `${safe}.jpg`;
+      link.href = URL.createObjectURL(result.blob);
+      link.download = result.fileName;
       link.click();
-    }, [fileStem]);
+      URL.revokeObjectURL(link.href);
+      return { ok: true };
+    }, [runCaptureBlob]);
 
     useImperativeHandle(
       ref,
       () => ({
         downloadJpeg: () => runDownload(),
+        captureJpegBlob: () => runCaptureBlob('jpeg'),
+        captureImageBlob: (format) => runCaptureBlob(format ?? 'jpeg'),
       }),
-      [runDownload]
+      [runDownload, runCaptureBlob]
     );
 
     const handleDownload = useCallback(async () => {
       setBusy(true);
+      setLastError(null);
       try {
-        await runDownload();
-      } catch (err) {
-        console.error('[VisualizationJpgDownload]', err);
+        const result = await runDownload();
+        if (!result.ok) {
+          setLastError(sanitizeAdminDisplayError(result.error, { fallback: t('downloadJpgError') }));
+        }
       } finally {
         setBusy(false);
       }
@@ -83,7 +115,7 @@ const VisualizationJpgDownload = forwardRef<VisualizationJpgDownloadHandle, Prop
 
     return (
       <div className="space-y-3">
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
           <Button
             type="button"
             variant="secondary"
@@ -99,18 +131,20 @@ const VisualizationJpgDownload = forwardRef<VisualizationJpgDownloadHandle, Prop
             )}
             {busy ? t('downloadJpgLoading') : t('downloadJpg')}
           </Button>
+          {lastError ? (
+            <p className="max-w-md text-right text-xs text-red-600 dark:text-red-400" role="alert">
+              {lastError}
+            </p>
+          ) : null}
         </div>
 
-        <div
-          ref={captureRef}
-          className="rounded-lg bg-white p-4 text-gray-900"
-        >
+        <div ref={captureRef} className="rounded-lg bg-white p-4 text-gray-900">
           <h2
             id={headingId}
             className={
               headingClassName
-                ? `text-center font-bold tracking-tight text-gray-900 mb-4 ${headingClassName}`
-                : 'text-center text-xl font-bold tracking-tight text-gray-900 mb-4'
+                ? `${RV_OVERVIEW_CHART_HEADING_CLASS} ${headingClassName}`
+                : RV_OVERVIEW_CHART_HEADING_CLASS
             }
           >
             {exportTitle}
@@ -122,6 +156,8 @@ const VisualizationJpgDownload = forwardRef<VisualizationJpgDownloadHandle, Prop
             {children}
           </div>
         </div>
+
+        {sourceTransparency ? <div>{sourceTransparency}</div> : null}
 
         {captionBelow ? <div className="text-sm text-gray-600 dark:text-gray-400">{captionBelow}</div> : null}
         {footerBelow ? <div className="text-xs text-gray-500 dark:text-gray-400">{footerBelow}</div> : null}

@@ -18,6 +18,10 @@ import {
   type TrendsChartCategoryKey,
   type TrendsChartRow,
 } from '@/lib/rv-industry-overview/campspot-trends-chart-data';
+import type { RvOverviewYearEmphasisKey } from '@/lib/rv-industry-overview/rv-overview-display-preferences';
+import type { RvOverviewUnitFilterKey } from '@/lib/rv-industry-overview/rv-overview-unit-filter';
+import { rvOverviewYearSeriesOpacity } from '@/lib/rv-industry-overview/rv-overview-year-emphasis';
+import { RV_OVERVIEW_CHART_HEADING_CLASS } from './VisualizationJpgDownload';
 
 type ChartDatum = {
   name: string;
@@ -30,10 +34,13 @@ type ChartDatum = {
   occ2025Null: boolean;
   adr2024Null: boolean;
   adr2025Null: boolean;
+  siteCount: number;
 };
 
 type Props = {
   rows: TrendsChartRow[];
+  unitFilter: RvOverviewUnitFilterKey;
+  yearEmphasis?: RvOverviewYearEmphasisKey;
   /** Omit title, intro, and methodology (for JPEG export shell) */
   variant?: 'default' | 'compact';
 };
@@ -46,9 +53,20 @@ function niceCeil(step: number, cap: number, ...vals: (number | null | undefined
   return Math.ceil(m / step) * step;
 }
 
-export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: Props) {
+export default function OccupancyAdrTrendsChart({
+  rows,
+  unitFilter,
+  yearEmphasis = 'both',
+  variant = 'default',
+}: Props) {
   const t = useTranslations('admin.rvIndustryOverview.trends');
+  const tOverview = useTranslations('admin.rvIndustryOverview');
+  const unitTypeLabel = tOverview(`unitFilter.${unitFilter}`);
   const compact = variant === 'compact';
+  const occ2024Opacity = rvOverviewYearSeriesOpacity('2024', yearEmphasis);
+  const occ2025Opacity = rvOverviewYearSeriesOpacity('2025', yearEmphasis);
+  const adr2024Opacity = rvOverviewYearSeriesOpacity('2024', yearEmphasis);
+  const adr2025Opacity = rvOverviewYearSeriesOpacity('2025', yearEmphasis);
 
   const data = useMemo((): ChartDatum[] => {
     const byKey = new Map(rows.map((r) => [r.categoryKey, r]));
@@ -69,6 +87,7 @@ export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: P
         occ2025Null: occ2025 == null,
         adr2024Null: adr2024 == null,
         adr2025Null: adr2025 == null,
+        siteCount: r?.siteCount ?? 0,
       };
     });
   }, [rows, t]);
@@ -142,6 +161,12 @@ export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: P
                     <div className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{d.name}</div>
                     <div className="text-gray-700 dark:text-gray-300 space-y-0.5">
                       <div>
+                        {t('tooltipSiteCount', {
+                          count: d.siteCount,
+                          unitType: unitTypeLabel,
+                        })}
+                      </div>
+                      <div>
                         {t('series.occ2024')}: {fmt(d.occ2024, d.occ2024Null, '%')}
                       </div>
                       <div>
@@ -164,6 +189,7 @@ export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: P
               dataKey="occ2024"
               name={t('series.occ2024')}
               fill="#1d4ed8"
+              fillOpacity={occ2024Opacity}
               radius={[3, 3, 0, 0]}
               maxBarSize={36}
             />
@@ -172,6 +198,7 @@ export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: P
               dataKey="occ2025"
               name={t('series.occ2025')}
               fill="#dc2626"
+              fillOpacity={occ2025Opacity}
               radius={[3, 3, 0, 0]}
               maxBarSize={36}
             />
@@ -181,6 +208,7 @@ export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: P
               dataKey="adr2024"
               name={t('series.adr2024')}
               stroke="#15803d"
+              strokeOpacity={adr2024Opacity}
               strokeWidth={3}
               dot={{ r: 4, strokeWidth: 2, fill: '#ffffff', stroke: '#15803d' }}
               activeDot={{ r: 5 }}
@@ -191,6 +219,7 @@ export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: P
               dataKey="adr2025"
               name={t('series.adr2025')}
               stroke="#7c3aed"
+              strokeOpacity={adr2025Opacity}
               strokeWidth={3}
               dot={{ r: 4, strokeWidth: 2, fill: '#ffffff', stroke: '#7c3aed' }}
               activeDot={{ r: 5 }}
@@ -206,9 +235,7 @@ export default function OccupancyAdrTrendsChart({ rows, variant = 'default' }: P
 
   return (
     <div className="w-full">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
-        {t('chartTitle')}
-      </h2>
+      <h2 className={RV_OVERVIEW_CHART_HEADING_CLASS}>{t('chartTitle')}</h2>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-4xl">
         {t('intro')}
       </p>

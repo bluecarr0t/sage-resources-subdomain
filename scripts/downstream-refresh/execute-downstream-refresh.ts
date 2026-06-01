@@ -157,21 +157,36 @@ export async function executeDownstreamRefresh(
         steps.push({
           step: 'rv_overview',
           status: 'skipped',
-          detail: { message: 'would recompute campspot_rv_overview_cache from public.campspot' },
+          detail: {
+            message:
+              'would recompute campspot_rv_overview_cache from Campspot + RoverPass and POST invalidate-next-cache',
+          },
         });
       } else {
         try {
-          console.log('\nRefreshing RV Industry Overview cache (campspot scan)...');
+          console.log('\nRefreshing RV Industry Overview cache (Campspot + RoverPass scan)...');
           const result = await refreshRvOverviewCache();
+          const nextCacheNote = result.nextCacheInvalidated
+            ? ', Next.js tag rv-industry-overview invalidated'
+            : result.nextCacheInvalidateSkipped
+              ? ', Next.js tag not invalidated (skipped — set SITE_URL + RV_INDUSTRY_OVERVIEW_REFRESH_SECRET)'
+              : `, Next.js tag NOT invalidated: ${result.nextCacheInvalidateError ?? 'unknown'}`;
           console.log(
             `  rv_overview: scanned ${result.rowsScanned.toLocaleString()} rows, ${result.durationMs}ms` +
-              (result.mapError ? `, map error: ${result.mapError}` : '')
+              (result.mapError ? `, map error: ${result.mapError}` : '') +
+              nextCacheNote
           );
           steps.push({
             step: 'rv_overview',
             status: 'success',
             durationMs: result.durationMs,
-            detail: { rowsScanned: result.rowsScanned, mapError: result.mapError },
+            detail: {
+              rowsScanned: result.rowsScanned,
+              mapError: result.mapError,
+              nextCacheInvalidated: result.nextCacheInvalidated,
+              nextCacheInvalidateSkipped: result.nextCacheInvalidateSkipped,
+              nextCacheInvalidateError: result.nextCacheInvalidateError,
+            },
           });
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);

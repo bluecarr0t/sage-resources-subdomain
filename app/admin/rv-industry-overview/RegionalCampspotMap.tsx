@@ -14,20 +14,20 @@ import type { StateRvMetrics } from '@/lib/rv-industry-overview/campspot-rv-map-
 import {
   ALASKA_ALBERS_INSET_NUDGE,
   EXCLUDE_FROM_MAP_ABBR,
-  HAWAII_INSET_TRANSLATE_X_PX,
+  hawaiiInsetTransformCss,
   RV_INDUSTRY_REGION_IDS,
   RV_REGION_FILL,
   RV_REGION_LABEL_COORDS,
+  rvRegionMapLabelStyle,
   fullStateNameToUspsAbbr,
   getRvIndustryRegionForStateAbbr,
   type RvIndustryRegionId,
 } from '@/lib/rv-industry-overview/us-rv-regions';
 import { US_STATE_NAMES } from '@/lib/us-states';
+import { useUsStatesTopology } from '@/lib/rv-industry-overview/use-us-states-topology';
 import { Button } from '@/components/ui/Button';
 import { Modal, ModalContent } from '@/components/ui/Modal';
-
-const US_STATES_TOPO_URL =
-  'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
+import { mapStateGeographyA11yProps } from './map-geography-a11y';
 
 const MAP_W = 960;
 const MAP_H = 580;
@@ -139,6 +139,7 @@ type Props = {
 type TipState = { abbr: string; clientX: number; clientY: number };
 
 export default function RegionalCampspotMap({ byRegion, byState }: Props) {
+  const { geography } = useUsStatesTopology();
   const t = useTranslations('admin.rvIndustryOverview');
   const ts = useTranslations('admin.rvIndustryOverview.mapState');
 
@@ -188,7 +189,7 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
         className="w-full h-auto max-h-[min(70vh,640px)] cursor-default [&_.rsm-geography]:cursor-pointer [&_.rsm-geography]:outline-none focus-visible:[&_.rsm-geography]:ring-2 focus-visible:[&_.rsm-geography]:ring-sage-500"
       >
         <Geographies
-          geography={US_STATES_TOPO_URL}
+          geography={geography}
           parseGeographies={(geos) =>
             (geos as GeoJSON.Feature[]).filter((g) => {
               const name = (g.properties as { name?: string })?.name;
@@ -213,9 +214,9 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
                 if (!abbr) return null;
                 const geoProps = {
                   geography: geo,
-                  'aria-label': ts('selectAria', {
-                    state: stateDisplayName(abbr),
-                  }),
+                  ...mapStateGeographyA11yProps(
+                    ts('selectAria', { state: stateDisplayName(abbr) })
+                  ),
                   onMouseEnter: (e: { clientX: number; clientY: number }) => {
                     setTip({
                       abbr,
@@ -294,17 +295,18 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
               {RV_INDUSTRY_REGION_IDS.map((regionId) => {
                 const stats = byRegion[regionId];
                 const coords = RV_REGION_LABEL_COORDS[regionId];
+                const labelStyle = rvRegionMapLabelStyle(regionId);
                 return (
                   <Marker key={`reg-${regionId}`} coordinates={coords}>
                     <text
                       textAnchor="middle"
                       pointerEvents="none"
                       style={{
-                        fill: '#ffffff',
+                        fill: labelStyle.fill,
                         fontSize: 12,
                         fontWeight: 700,
                         paintOrder: 'stroke',
-                        stroke: 'rgba(0,0,0,0.35)',
+                        stroke: labelStyle.stroke,
                         strokeWidth: 3,
                       }}
                     >
@@ -325,7 +327,7 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
 
       <div
         className="pointer-events-none absolute z-10 left-[0.75%] bottom-[4%] w-[min(14vw,132px)] max-[480px]:left-[1%] max-[480px]:bottom-[6%]"
-        style={{ transform: `translateX(${HAWAII_INSET_TRANSLATE_X_PX}px)` }}
+        style={{ transform: hawaiiInsetTransformCss() }}
       >
         <div className="pointer-events-auto w-full [&_svg]:h-auto [&_svg]:w-full">
           <ComposableMap
@@ -338,7 +340,7 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
             height={HAWAII_INSET_H}
           >
             <Geographies
-              geography={US_STATES_TOPO_URL}
+              geography={geography}
               parseGeographies={(geos) => parseOnlyHawaii(geos as GeoJSON.Feature[])}
             >
               {({ geographies }) => (
@@ -349,9 +351,9 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
                       <Geography
                         key={`hi-${geo.rsmKey}`}
                         geography={geo}
-                        aria-label={ts('selectAria', {
-                          state: stateDisplayName('HI'),
-                        })}
+                        {...mapStateGeographyA11yProps(
+                          ts('selectAria', { state: stateDisplayName('HI') })
+                        )}
                         onMouseEnter={(e) => {
                           setTip({
                             abbr: 'HI',

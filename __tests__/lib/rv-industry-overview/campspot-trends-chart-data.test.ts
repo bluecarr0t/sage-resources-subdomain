@@ -1,5 +1,6 @@
 import {
   aggregateCampspotRowsToTrendsChart,
+  trendsRowSiteWeight,
   type CampspotTrendsAggRow,
 } from '@/lib/rv-industry-overview/campspot-trends-chart-data';
 
@@ -42,6 +43,42 @@ describe('aggregateCampspotRowsToTrendsChart', () => {
     const sw = out.find((r) => r.categoryKey === 'southwest')!;
     expect(sw.n2024).toBe(1);
     expect(sw.occ2024).toBe(40);
+  });
+
+  it('sums site/unit counts per region for the folded cohort', () => {
+    const rows: CampspotTrendsAggRow[] = [
+      {
+        state: 'CA',
+        quantity_of_units: '3',
+        occupancy_rate_2024: '50',
+        avg_retail_daily_rate_2024: '100',
+        occupancy_rate_2025: '55',
+        avg_retail_daily_rate_2025: '110',
+      },
+      {
+        state: 'CA',
+        quantity_of_units: null,
+        occupancy_rate_2024: '60',
+        avg_retail_daily_rate_2024: '120',
+        occupancy_rate_2025: '56',
+        avg_retail_daily_rate_2025: '90',
+      },
+      {
+        state: 'TX',
+        quantity_of_units: '2',
+        occupancy_rate_2024: '40',
+        avg_retail_daily_rate_2024: '80',
+        occupancy_rate_2025: '45',
+        avg_retail_daily_rate_2025: '85',
+      },
+    ];
+    const out = aggregateCampspotRowsToTrendsChart(rows);
+    const us = out.find((r) => r.categoryKey === 'us')!;
+    expect(us.siteCount).toBe(3 + 1 + 2);
+    const west = out.find((r) => r.categoryKey === 'west')!;
+    expect(west.siteCount).toBe(4);
+    expect(trendsRowSiteWeight(rows[0]!)).toBe(3);
+    expect(trendsRowSiteWeight(rows[1]!)).toBe(1);
   });
 
   it('uses avg_retail_daily_rate_2025 only for 2025 ADR', () => {

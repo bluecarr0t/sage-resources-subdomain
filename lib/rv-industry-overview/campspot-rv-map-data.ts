@@ -1,10 +1,8 @@
 /**
- * Single Campspot scan for the RV regional map: regional 2025 means (map coloring)
- * plus per-state 2024 vs 2025 metrics on a matched cohort only (same ARDR rules as the trends chart).
+ * RV regional map: regional 2025 means (map coloring) plus per-state 2024 vs 2025 matched cohort.
+ * Fed by unified page scan in `campspot-rv-overview-page-data.ts` (Campspot + RoverPass).
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { createServerClient } from '@/lib/supabase';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
 import {
   meanRounded,
@@ -19,15 +17,12 @@ import {
   passesStandardCampspotOccupancyPercent,
   passesStandardCampspotRetailRateUsd,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import {
   type RvIndustryRegionId,
   RV_INDUSTRY_REGION_IDS,
   getRvIndustryRegionForStateAbbr,
 } from '@/lib/rv-industry-overview/us-rv-regions';
 import type { RegionalAggregateRow } from '@/lib/rv-industry-overview/campspot-regional-aggregates';
-
-const PAGE_SIZE = 1000;
 
 /**
  * Upper ARDR bound for five-region labels + state ADR choropleth on the regional map (2025).
@@ -360,60 +355,4 @@ function emptyByRegion(): Record<RvIndustryRegionId, RegionalAggregateRow> {
     },
     {} as Record<RvIndustryRegionId, RegionalAggregateRow>
   );
-}
-
-export async function fetchCampspotRvMapData(
-  supabase: SupabaseClient
-): Promise<CampspotRvMapDataResult> {
-  const regional = emptyRegionalAccum();
-  const stateBuckets = new Map<string, StateBucket>();
-  const stateAdrChoropleth = new Map<string, number[]>();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select(
-        'state, avg_retail_daily_rate_2025, occupancy_rate_2025, ' +
-          'occupancy_rate_2024, avg_retail_daily_rate_2024'
-      )
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        byRegion: emptyByRegion(),
-        byState: {},
-        stateAdrChoropleth: {},
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldRvMapRows(
-      regional,
-      stateBuckets,
-      stateAdrChoropleth,
-      data as unknown as CampspotRvMapAggRow[]
-    );
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return {
-    byRegion: regionalToByRegion(regional),
-    byState: stateBucketsToByState(stateBuckets),
-    stateAdrChoropleth: stateAdrMapToChoropleth(stateAdrChoropleth),
-    rowsScanned,
-    error: null,
-  };
-}
-
-export async function getCampspotRvMapData(): Promise<CampspotRvMapDataResult> {
-  return fetchCampspotRvMapData(createServerClient());
 }

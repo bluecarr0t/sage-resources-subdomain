@@ -32,6 +32,8 @@ After `public.hipcamp` / `public.campspot` are updated (Phase 3 SQL transform or
 | `SUPABASE_DB_URL` | `unified_comps` refresh (direct Postgres) |
 | `NEXT_PUBLIC_SUPABASE_URL` | RV overview scan |
 | `SUPABASE_SECRET_KEY` | RV overview scan (service role) |
+| `SITE_URL` (or `VERCEL_URL`) | RV overview Next.js tag invalidation after `refresh:rv-overview` |
+| `RV_INDUSTRY_OVERVIEW_REFRESH_SECRET` | Bearer auth for `invalidate-next-cache` / refresh API from CI |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Facets cache invalidation (optional) |
 
 ## Audit
@@ -62,8 +64,38 @@ Required secrets for Phase 4: `SUPABASE_DB_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SU
 
 The RV overview script updates **Postgres** (`campspot_rv_overview_cache`). Next.js `unstable_cache` tag `rv-industry-overview` is cleared when you:
 
-- POST `/api/admin/rv-industry-overview/refresh-cache` (admin session or `RV_INDUSTRY_OVERVIEW_REFRESH_SECRET`), or
+- `npm run refresh:rv-overview` or `refresh:downstream` (after Postgres upsert, calls `POST /api/admin/rv-industry-overview/invalidate-next-cache` when `SITE_URL` + `RV_INDUSTRY_OVERVIEW_REFRESH_SECRET` are set), or
+- POST `/api/admin/rv-industry-overview/refresh-cache` (full re-scan + tag invalidation; admin session or bearer secret), or
 - Redeploy production.
+
+### RV Industry Overview — security notes
+
+- `/admin/*` is gated by admin layout + middleware (session + `managed_users`).
+- Refresh / invalidate APIs accept either that session or `Authorization: Bearer <RV_INDUSTRY_OVERVIEW_REFRESH_SECRET>` for cron/ETL.
+- Page metadata sets `robots: { index: false, follow: false }`.
+- Chart and API error strings are passed through `sanitizeAdminDisplayError` before UI/JSON (stacks, connection URLs, and tokens are redacted; full errors stay in server logs only).
+
+Page loads **do not** scan `campspot` / RoverPass on cache miss (avoids serverless timeouts). Set `RV_OVERVIEW_ALLOW_LIVE_SCAN=1` locally only if you need a dev fallback.
+
+### RV Industry Overview — snapshot versioning
+
+After deploys that change the payload shape (e.g. `rowsScannedRoverpass`, `campspotOnly`, `scanMeta`, chart source transparency), **run a refresh** so `campspot_rv_overview_cache` is rebuilt:
+
+1. `npm run refresh:rv-overview` or `refresh:downstream`, or  
+2. `POST /api/admin/rv-industry-overview/refresh-cache` (admin session or bearer secret).
+
+The Next.js `unstable_cache` key in `campspot-rv-overview-page-data.ts` (`RV_OVERVIEW_CACHE_KEY`, currently `v19-campspot-only-export-pack`) is bumped when the in-memory payload contract changes; that only invalidates the **Next** layer — Postgres snapshot must still be recomputed.
+
+Loaded snapshots are passed through `sanitizeRvOverviewPageDataPayload` on read so legacy `error` strings in JSON are redacted before the client sees them.
+
+### Row scan caps (monitoring)
+
+| Env | Default | Purpose |
+|-----|---------|---------|
+| `CAMPSPOT_RV_OVERVIEW_MAX_ROWS` | 400000 | Max `campspot` rows per refresh |
+| `ROVERPASS_RV_OVERVIEW_MAX_ROWS` | 250000 | Max open RoverPass rows per refresh |
+
+`POST /api/admin/rv-industry-overview/refresh-cache` returns `scanMeta` per source and `hitRowCap: true` when either cap was reached (table may have more rows). Check this in ETL logs after weekly loads.
 
 Daily Vercel cron `0 9 * * *` on `/api/cron/refresh-unified-comps` remains a fallback if pg_cron is disabled; weekly ETL should run `refresh:downstream` after data loads so comps stay same-day fresh.
 

@@ -1,23 +1,19 @@
 /**
- * RV parking type distribution (pie) and mean ADR for pull-thru vs back-in only (bar), Campspot.
+ * RV parking type distribution (pie) and mean ADR for pull-thru vs back-in only (bar).
+ * Fed by unified page scan in `campspot-rv-overview-page-data.ts`.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
-import { createServerClient } from '@/lib/supabase';
 import {
   classifyCampspotUnitChartBucket,
   type CampspotUnitTypeAggRow,
 } from '@/lib/rv-industry-overview/campspot-unit-type-chart-data';
 import { meanRounded } from '@/lib/rv-industry-overview/campspot-field-parse';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import {
   parseCampspotAdr2025FromAnnualColumn,
   rowPassesStandardCampspot2025Quality,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
-
-const PAGE_SIZE = 1000;
 
 export const RV_PARKING_DIST_KEYS = ['back_in', 'pull_thru', 'not_listed'] as const;
 export type RvParkingDistKey = (typeof RV_PARKING_DIST_KEYS)[number];
@@ -159,56 +155,4 @@ export function aggregateCampspotRowsToRvParkingCharts(
     rateBars: rateBucketsToBars(rateBuckets),
     totalRvRows,
   };
-}
-
-const SELECT_FIELDS =
-  'state, city, unit_type, description, property_name, quantity_of_units, occupancy_rate_2025, ' +
-  'avg_retail_daily_rate_2025, rv_parking';
-
-export async function fetchCampspotRvParkingChartsData(
-  supabase: SupabaseClient
-): Promise<CampspotRvParkingChartsResult> {
-  const distCounts = emptyDistCounts();
-  const rateBuckets = emptyRateBuckets();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select(SELECT_FIELDS)
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        distribution: distCountsToSlices(emptyDistCounts()),
-        rateBars: rateBucketsToBars(emptyRateBuckets()),
-        totalRvRows: 0,
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldRvParkingRows(distCounts, rateBuckets, data as unknown as CampspotRvParkingAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  const totalRvRows = RV_PARKING_DIST_KEYS.reduce((s, k) => s + distCounts[k], 0);
-  return {
-    distribution: distCountsToSlices(distCounts),
-    rateBars: rateBucketsToBars(rateBuckets),
-    totalRvRows,
-    rowsScanned,
-    error: null,
-  };
-}
-
-export async function getCampspotRvParkingChartsData(): Promise<CampspotRvParkingChartsResult> {
-  return fetchCampspotRvParkingChartsData(createServerClient());
 }

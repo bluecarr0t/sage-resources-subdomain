@@ -1,10 +1,9 @@
 /**
- * Mean 2025 ARDR for RV site rows only, split by with vs without each amenity (Campspot).
+ * Mean 2025 ARDR for RV site rows only, split by with vs without each amenity.
+ * Fed by unified page scan in `campspot-rv-overview-page-data.ts`.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
-import { createServerClient } from '@/lib/supabase';
 import {
   classifyCampspotUnitChartBucket,
   type CampspotUnitTypeAggRow,
@@ -14,10 +13,7 @@ import {
   parseCampspotAdr2025FromAnnualColumn,
   passesStandardCampspotRetailRateUsd,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
-
-const PAGE_SIZE = 1000;
 
 /** X-axis order matches reference chart */
 export const AMENITY_ADR_CHART_KEYS = [
@@ -145,46 +141,4 @@ export function aggregateCampspotRowsToAmenityAdrChart(
   const buckets = emptyPairBuckets();
   foldAmenityAdrRows(buckets, rows);
   return bucketsToRows(buckets);
-}
-
-const SELECT_FIELDS =
-  'state, city, unit_type, description, property_name, quantity_of_units, avg_retail_daily_rate_2025, ' +
-  'sewer_hook_up, water_hookup, hot_tub_sauna, pool';
-
-export async function fetchCampspotAmenityAdrChartData(
-  supabase: SupabaseClient
-): Promise<CampspotAmenityAdrChartResult> {
-  const buckets = emptyPairBuckets();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select(SELECT_FIELDS)
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        rows: bucketsToRows(emptyPairBuckets()),
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldAmenityAdrRows(buckets, data as unknown as CampspotAmenityAdrAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return { rows: bucketsToRows(buckets), rowsScanned, error: null };
-}
-
-export async function getCampspotAmenityAdrChartData(): Promise<CampspotAmenityAdrChartResult> {
-  return fetchCampspotAmenityAdrChartData(createServerClient());
 }

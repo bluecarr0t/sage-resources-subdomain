@@ -18,12 +18,10 @@ import {
   EXCLUDE_FROM_MAP_ABBR,
   fullStateNameToUspsAbbr,
   getRvIndustryRegionForStateAbbr,
-  HAWAII_INSET_TRANSLATE_X_PX,
+  hawaiiInsetTransformCss,
 } from '@/lib/rv-industry-overview/us-rv-regions';
 import { US_STATE_NAMES } from '@/lib/us-states';
-
-const US_STATES_TOPO_URL =
-  'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
+import { useUsStatesTopology } from '@/lib/rv-industry-overview/use-us-states-topology';
 
 const MAP_W = 960;
 const MAP_H = 580;
@@ -127,6 +125,7 @@ type Props = {
 };
 
 export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
+  const { geography } = useUsStatesTopology();
   const t = useTranslations('admin.rvIndustryOverview.stateAdrChoropleth');
   const minN = STATE_ADR_CHOROPLETH_MIN_N;
 
@@ -158,7 +157,7 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
             className="w-full h-auto max-h-[min(70vh,640px)] [&_.rsm-geography]:outline-none"
           >
             <Geographies
-              geography={US_STATES_TOPO_URL}
+              geography={geography}
               parseGeographies={(geos) =>
                 (geos as GeoJSON.Feature[]).filter((g) => {
                   const name = (g.properties as { name?: string })?.name;
@@ -300,7 +299,7 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
 
           <div
             className="pointer-events-none absolute z-10 left-[0.75%] bottom-[4%] w-[min(14vw,132px)] max-[480px]:left-[1%] max-[480px]:bottom-[6%]"
-            style={{ transform: `translateX(${HAWAII_INSET_TRANSLATE_X_PX}px)` }}
+            style={{ transform: hawaiiInsetTransformCss() }}
           >
             <div className="pointer-events-auto w-full [&_svg]:h-auto [&_svg]:w-full">
               <ComposableMap
@@ -313,7 +312,7 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
                 height={HAWAII_INSET_H}
               >
                 <Geographies
-                  geography={US_STATES_TOPO_URL}
+                  geography={geography}
                   parseGeographies={(geos) => parseOnlyHawaii(geos as GeoJSON.Feature[])}
                 >
                   {({ geographies }) => (

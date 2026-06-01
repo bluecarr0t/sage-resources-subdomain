@@ -1,11 +1,11 @@
 -- RV Industry Overview: materialized JSON snapshot of server-built aggregates.
 -- Full aggregation logic stays in TypeScript (regex-based unit typing, cohort rules).
--- This table stores one row so page loads can use a single SELECT instead of scanning `campspot`.
+-- This table stores one row so page loads can use a single SELECT instead of scanning `campspot` + RoverPass.
 --
 -- After Campspot ETL, call:
---   POST /api/admin/rv-industry-overview/refresh-cache
--- with a logged-in admin session, or Authorization: Bearer <RV_INDUSTRY_OVERVIEW_REFRESH_SECRET>
--- (then `revalidateTag('rv-industry-overview')` runs in that route).
+--   npm run refresh:rv-overview  (upserts this table + POST invalidate-next-cache), or
+--   POST /api/admin/rv-industry-overview/refresh-cache  (full scan + revalidateTag)
+-- Bearer: RV_INDUSTRY_OVERVIEW_REFRESH_SECRET when using the API from automation.
 --
 -- Optional: raise PostgREST max_rows (Supabase Dashboard → Project Settings → API) if you set
 -- CAMPSPOT_RV_OVERVIEW_PAGE_SIZE above the default cap (~1000).

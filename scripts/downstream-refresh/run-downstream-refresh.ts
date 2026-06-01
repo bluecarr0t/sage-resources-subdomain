@@ -90,7 +90,7 @@ async function main(): Promise<void> {
     console.log(`  Audit: downstream_refresh_runs id=${result.runId}`);
   }
   console.log(
-    '  Note: Next.js tag rv-industry-overview revalidates on deploy or POST /api/admin/rv-industry-overview/refresh-cache'
+    '  Note: refresh:rv-overview also POSTs /api/admin/rv-industry-overview/invalidate-next-cache when SITE_URL + RV_INDUSTRY_OVERVIEW_REFRESH_SECRET are set'
   );
 }
 

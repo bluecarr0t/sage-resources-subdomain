@@ -1,25 +1,20 @@
 /**
- * Unit-type bar charts (avg 2025 ARDR by type; % mix averaged per property), Campspot only.
- * Priority tuned for overview slices: vacation → tent → glamping → generic site (excluded) → RV.
- * Glamping before RV so hookup tokens (30/50 amp) on cabins/yurts stay in Lodging; cabin rule must not
- * treat “RV” in a property name (e.g. “… RV Resort”) as disqualifying.
+ * Unit-type bar charts (avg 2025 ARDR by type; % mix averaged per property).
+ * Classification uses Campspot + RoverPass text fields. Fed by unified page scan.
+ * Priority: vacation → tent → glamping → generic site (excluded) → RV.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
-import { createServerClient } from '@/lib/supabase';
 import {
   meanRounded,
   parseCampspotNumber,
 } from '@/lib/rv-industry-overview/campspot-field-parse';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
 import {
   parseCampspotAdr2025FromAnnualColumn,
   rowPassesStandardCampspot2025Quality,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-
-const PAGE_SIZE = 1000;
+import type { ChartSourceBreakdown } from '@/lib/rv-industry-overview/rv-overview-chart-transparency';
 
 export const UNIT_TYPE_CHART_BUCKET_KEYS = ['glamping', 'rv', 'tent'] as const;
 export type UnitTypeChartBucketKey = (typeof UNIT_TYPE_CHART_BUCKET_KEYS)[number];
@@ -47,11 +42,17 @@ export type UnitTypeDistributionChartRow = {
   nProperties: number;
 };
 
+export type UnitTypeComparisonChartSourceTransparency = {
+  unitTypeRate: ChartSourceBreakdown;
+  unitTypeDistribution: ChartSourceBreakdown;
+};
+
 export type CampspotUnitTypeChartsResult = {
   rateRows: UnitTypeRateChartRow[];
   distributionRows: UnitTypeDistributionChartRow[];
   rowsScanned: number;
   error: string | null;
+  chartSourceTransparency?: UnitTypeComparisonChartSourceTransparency;
 };
 
 type PropAcc = { glamping: number; rv: number; tent: number };
@@ -309,57 +310,4 @@ function rateRowsFromAdrBuckets(adrBuckets: Record<UnitTypeChartBucketKey, numbe
     avgAdr2025: meanRounded(adrBuckets[bucketKey]),
     n: adrBuckets[bucketKey].length,
   }));
-}
-
-export async function fetchCampspotUnitTypeChartsData(
-  supabase: SupabaseClient
-): Promise<CampspotUnitTypeChartsResult> {
-  const adrBuckets: Record<UnitTypeChartBucketKey, number[]> = {
-    glamping: [],
-    rv: [],
-    tent: [],
-  };
-  const byProp = new Map<string, PropAcc>();
-
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select(
-        'unit_type, property_name, city, state, description, quantity_of_units, ' +
-          'occupancy_rate_2025, avg_retail_daily_rate_2025'
-      )
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        rateRows: emptyRateRows(),
-        distributionRows: emptyDistributionRows(),
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldUnitTypeRows(adrBuckets, byProp, data as unknown as CampspotUnitTypeAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return {
-    rateRows: rateRowsFromAdrBuckets(adrBuckets),
-    distributionRows: distributionFromPropMap(byProp),
-    rowsScanned,
-    error: null,
-  };
-}
-
-export async function getCampspotUnitTypeChartsData(): Promise<CampspotUnitTypeChartsResult> {
-  return fetchCampspotUnitTypeChartsData(createServerClient());
 }

@@ -1,19 +1,15 @@
 /**
- * Mean 2025 ARDR by RV site surface type (campspot.rv_surface_type → three display buckets).
+ * Mean 2025 ARDR by RV site surface type (rv_surface_type → three display buckets).
+ * Fed by unified page scan in `campspot-rv-overview-page-data.ts`.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
-import { createServerClient } from '@/lib/supabase';
 import { meanRounded } from '@/lib/rv-industry-overview/campspot-field-parse';
 import {
   parseCampspotAdr2025FromAnnualColumn,
   passesStandardCampspotRetailRateUsd,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
-
-const PAGE_SIZE = 1000;
 
 /** Display order: Concrete Pad, Loose Gravel, Grass or Field */
 export const SURFACE_CHART_BUCKET_KEYS = ['concrete_pad', 'loose_gravel', 'grass_or_field'] as const;
@@ -125,42 +121,4 @@ export function aggregateCampspotRowsToSurfaceRates(
   const buckets = emptyBuckets();
   foldSurfaceRows(buckets, rows);
   return bucketsToRows(buckets);
-}
-
-export async function fetchCampspotSurfaceRatesChartData(
-  supabase: SupabaseClient
-): Promise<CampspotSurfaceRatesChartResult> {
-  const buckets = emptyBuckets();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select('state, rv_surface_type, avg_retail_daily_rate_2025')
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        rows: bucketsToRows(emptyBuckets()),
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldSurfaceRows(buckets, data as unknown as CampspotSurfaceRatesAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return { rows: bucketsToRows(buckets), rowsScanned, error: null };
-}
-
-export async function getCampspotSurfaceRatesChartData(): Promise<CampspotSurfaceRatesChartResult> {
-  return fetchCampspotSurfaceRatesChartData(createServerClient());
 }

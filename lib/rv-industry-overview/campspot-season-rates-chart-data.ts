@@ -1,16 +1,12 @@
 /**
- * Mean seasonal weekday/weekend retail rates from Campspot (winter–fall columns).
+ * Mean seasonal weekday/weekend retail rates (winter–fall columns).
+ * Fed by unified page scan in `campspot-rv-overview-page-data.ts`.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
-import { createServerClient } from '@/lib/supabase';
 import { meanRounded, parseCampspotNumber } from '@/lib/rv-industry-overview/campspot-field-parse';
 import { passesStandardCampspotRetailRateUsd } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
-
-const PAGE_SIZE = 1000;
 
 export const SEASON_RATE_KEYS = [
   'winter_weekday',
@@ -107,42 +103,4 @@ export function aggregateCampspotRowsToSeasonRates(
   const buckets = emptyBuckets();
   foldSeasonRateRows(buckets, rows);
   return bucketsToRows(buckets);
-}
-
-export async function fetchCampspotSeasonRatesChartData(
-  supabase: SupabaseClient
-): Promise<CampspotSeasonRatesChartResult> {
-  const buckets = emptyBuckets();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select(SELECT_FIELDS)
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        rows: bucketsToRows(emptyBuckets()),
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldSeasonRateRows(buckets, data as unknown as CampspotSeasonRatesAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return { rows: bucketsToRows(buckets), rowsScanned, error: null };
-}
-
-export async function getCampspotSeasonRatesChartData(): Promise<CampspotSeasonRatesChartResult> {
-  return fetchCampspotSeasonRatesChartData(createServerClient());
 }

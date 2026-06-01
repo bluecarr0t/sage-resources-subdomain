@@ -1,15 +1,11 @@
 /**
- * % of distinct properties (by name/state/city) that have each amenity, Campspot rows in U.S. RV regions.
+ * % of distinct properties (by name/state/city) that have each amenity in U.S. RV regions.
+ * Fed by unified page scan in `campspot-rv-overview-page-data.ts`.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
-import { createServerClient } from '@/lib/supabase';
-import { CAMPSPOT_RV_OVERVIEW_MAX_ROWS } from '@/lib/rv-industry-overview/campspot-fetch-cap';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
 import { rowPassesStandardCampspot2025Quality } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-
-const PAGE_SIZE = 1000;
 
 export const AMENITY_PROPERTY_CHART_KEYS = [
   'hot_tub_sauna',
@@ -163,46 +159,4 @@ export function aggregateCampspotRowsToAmenityPropertyPcts(
   const byProp = new Map<string, PropFlags>();
   foldAmenityPropertyRows(byProp, rows);
   return countsToRows(byProp);
-}
-
-const SELECT_FIELDS =
-  'property_name, city, state, occupancy_rate_2025, avg_retail_daily_rate_2025, ' +
-  'hot_tub_sauna, pool, electrical_hook_up, sewer_hook_up, water_hookup';
-
-export async function fetchCampspotAmenityPropertiesChartData(
-  supabase: SupabaseClient
-): Promise<CampspotAmenityPropertiesChartResult> {
-  const byProp = new Map<string, PropFlags>();
-  let offset = 0;
-  let rowsScanned = 0;
-
-  while (rowsScanned < CAMPSPOT_RV_OVERVIEW_MAX_ROWS) {
-    const { data, error } = await supabase
-      .from('campspot')
-      .select(SELECT_FIELDS)
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return {
-        rows: countsToRows(new Map()),
-        rowsScanned,
-        error: error.message,
-      };
-    }
-
-    if (!data?.length) break;
-
-    foldAmenityPropertyRows(byProp, data as unknown as CampspotAmenityPropertiesAggRow[]);
-
-    rowsScanned += data.length;
-    if (data.length < PAGE_SIZE) break;
-    offset += data.length;
-  }
-
-  return { rows: countsToRows(byProp), rowsScanned, error: null };
-}
-
-export async function getCampspotAmenityPropertiesChartData(): Promise<CampspotAmenityPropertiesChartResult> {
-  return fetchCampspotAmenityPropertiesChartData(createServerClient());
 }
