@@ -118,7 +118,7 @@ export default function BrandDetailTemplate({
             </li>
             <li aria-hidden="true">/</li>
             <li>
-              <Link href="/brands" className={EDITORIAL_LINK_CLASS}>
+              <Link href="/glamping-market-overview/brands" className={EDITORIAL_LINK_CLASS}>
                 Brands
               </Link>
             </li>

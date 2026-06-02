@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseMiddlewareClient } from '@/lib/supabase-middleware';
 import { isLegacyUsCanadaOnlyCountryQuery } from '@/lib/map/legacy-map-country-query';
 import { GLOSSARY_SLUG_ALIASES } from '@/lib/glossary-slug-aliases';
+import { relocateAuthCodeToCallbackUrl } from '@/lib/gated-access';
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware({
@@ -178,7 +179,6 @@ const excludedRoutes = [
   'landing',
   'property',
   'brand',
-  'brands',
   'login',
   'auth',
   'privacy-policy',
@@ -198,6 +198,12 @@ const excludedRoutes = [
 export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
+
+    // Supabase may send PKCE `code` to Site URL (e.g. /en) instead of /auth/callback.
+    const authCallbackUrl = relocateAuthCodeToCallbackUrl(request.nextUrl);
+    if (authCallbackUrl) {
+      return NextResponse.redirect(authCallbackUrl);
+    }
 
     const pathnameHasLocale = locales.some(
       (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
@@ -221,14 +227,10 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // Locale-free overview pages (same pattern as glamping-market-overview)
-    if (pathname === '/brands') {
-      return NextResponse.next();
-    }
-
-    if (pathname === '/brand') {
+    // Legacy /brands and /brand index → nested market overview path
+    if (pathname === '/brands' || pathname === '/brand') {
       const url = request.nextUrl.clone();
-      url.pathname = '/brands';
+      url.pathname = '/glamping-market-overview/brands';
       return NextResponse.redirect(url, 301);
     }
 
@@ -369,8 +371,8 @@ export async function middleware(request: NextRequest) {
           pathname === '/privacy-policy' ||
           pathname === '/terms-of-service' ||
           pathname === '/glamping-market-overview' ||
-          pathname === '/glamping-market-snapshot' ||
-          pathname === '/brands'
+          pathname.startsWith('/glamping-market-overview/') ||
+          pathname === '/glamping-market-snapshot'
         ) {
           return NextResponse.next();
         }

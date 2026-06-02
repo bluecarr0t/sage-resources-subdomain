@@ -30,7 +30,13 @@ export default function PrivacyPolicyPage() {
                 Sage Outdoor Advisory (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy.
               </p>
               <p className="text-gray-700 mb-4">
-                This Privacy Policy explains how we collect, use, share, and protect your information when you use our website and services.
+                This Privacy Policy explains how we collect, use, share, and protect your information when you visit our website, request access to gated content or market reports, or otherwise use our services (collectively, the &quot;Services&quot;).
+              </p>
+              <p className="text-gray-700 mb-4">
+                By accessing or using the Services, you acknowledge that you have read and understood this Privacy Policy. If you do not agree with it, please do not use the Services. This Privacy Policy is incorporated into and subject to any applicable terms of service or other agreements between you and Sage Outdoor Advisory.
+              </p>
+              <p className="text-gray-700 mb-4">
+                Our website, market data, and reports are provided for general informational purposes only and do not constitute investment, financial, legal, appraisal, or other professional advice. This Privacy Policy describes our data practices and does not expand any warranties or obligations beyond those set out in our other agreements.
               </p>
             </section>
 
@@ -42,6 +48,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
                 <li><strong>Sign in via Google OAuth:</strong> If you sign in with Google, we receive your email, name, and profile photo from Google.</li>
+                <li><strong>Request access to gated market reports:</strong> When you request access to gated content (such as our Glamping Market Overview), we collect your name and email and send a magic sign-in link via Supabase. We retain this information to verify access and to follow up with you about relevant Sage Outdoor Advisory services.</li>
                 <li><strong>Create an account:</strong> We store your account information in our database, including your user ID, email address, and account status</li>
                 <li><strong>Contact us:</strong> If you contact us through our website, we collect the information you provide, such as your name and email address</li>
                 <li><strong>Use our services:</strong> We collect information about how you interact with our website and services</li>
@@ -74,12 +81,18 @@ export default function PrivacyPolicyPage() {
               <p className="text-gray-700 mb-4">We use the information we collect to:</p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
                 <li>Provide, maintain, and improve our services</li>
+                <li>Verify access to gated content and market reports</li>
                 <li>Process and respond to your inquiries</li>
                 <li>Send you administrative information and updates</li>
-                <li>Monitor and analyze usage patterns and trends</li>
-                <li>Detect, prevent, and address technical issues</li>
+                <li>Send you marketing, promotional, and follow-up communications about Sage Outdoor Advisory services, where permitted by law (you may opt out at any time)</li>
+                <li>Monitor and analyze usage patterns and trends, and create aggregated or de-identified data and insights</li>
+                <li>Detect, prevent, and address technical issues, fraud, abuse, and security incidents</li>
+                <li>Establish, exercise, or defend legal claims and enforce our agreements</li>
                 <li>Comply with legal obligations</li>
               </ul>
+              <p className="text-gray-700 mb-4">
+                <strong>Marketing communications:</strong> You can opt out of marketing emails at any time by using the unsubscribe link in those emails or by contacting us at <a href="mailto:contact@sageoutdooradvisory.com" className="text-[#006b5f] hover:underline">contact@sageoutdooradvisory.com</a>. We may still send you non-promotional messages related to your account, access, or transactions.
+              </p>
             </section>
 
             <section className="mb-8">
@@ -98,9 +111,33 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">How We Share Your Information</h2>
+              <p className="text-gray-700 mb-4">
+                We do not sell your personal information. We may share your information in the following limited circumstances:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
+                <li><strong>Service providers:</strong> With vendors and partners who perform services on our behalf (such as hosting, authentication, email delivery, and analytics) and who are authorized to use your information only as needed to provide those services.</li>
+                <li><strong>Legal and regulatory:</strong> When we believe in good faith that disclosure is necessary to comply with applicable law, regulation, legal process, subpoena, or governmental request, or to cooperate with law enforcement.</li>
+                <li><strong>Protection of rights:</strong> To enforce our agreements and policies; to investigate, prevent, or address fraud, security, or technical issues; and to protect the rights, property, or safety of Sage Outdoor Advisory, our users, or others.</li>
+                <li><strong>Business transfers:</strong> In connection with, or during negotiations of, any merger, acquisition, financing, reorganization, sale of assets, or other business transaction, your information may be transferred to a successor or affiliate as part of that transaction.</li>
+                <li><strong>With your consent:</strong> For any other purpose disclosed to you with your consent.</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Aggregated and De-Identified Data</h2>
+              <p className="text-gray-700 mb-4">
+                We may create and use aggregated, anonymized, or de-identified data that does not directly identify you. This includes market data, statistics, benchmarks, and insights derived from usage of our Services. We may use, retain, license, and disclose such data for any lawful business purpose, including improving and marketing our Services, without restriction under this Privacy Policy. We will not attempt to re-identify de-identified data except as permitted by law.
+              </p>
+            </section>
+
+            <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Data Security</h2>
               <p className="text-gray-700 mb-4">
-                We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.
+                We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security. Any transmission of personal information is at your own risk.
+              </p>
+              <p className="text-gray-700 mb-4">
+                You are responsible for maintaining the confidentiality of any sign-in links, credentials, or access you receive, and for any activity that occurs through your access. Please notify us promptly if you believe your access has been compromised.
               </p>
             </section>
 
@@ -223,6 +260,27 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Cookies</h2>
               <p className="text-gray-700 mb-4">
                 We use cookies and similar tracking technologies to track activity on our website and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our service.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Third-Party Links and Content</h2>
+              <p className="text-gray-700 mb-4">
+                Our Services may contain links to third-party websites, properties, brands, or resources that we do not own or control. This Privacy Policy does not apply to those third parties, and we are not responsible for their content, privacy practices, or accuracy. We encourage you to review the privacy policies of any third-party sites you visit.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Do Not Track</h2>
+              <p className="text-gray-700 mb-4">
+                Some browsers offer a &quot;Do Not Track&quot; (DNT) setting. There is currently no industry-standard response to DNT signals, and our Services may not respond to them. We describe the choices available to you regarding analytics and cookies in the relevant sections of this Privacy Policy.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Governing Law</h2>
+              <p className="text-gray-700 mb-4">
+                This Privacy Policy and any dispute arising out of or relating to it are governed by the laws of the United States and the State of Utah, without regard to conflict-of-laws principles, except where applicable data protection laws (such as those of your country or state of residence) provide otherwise. Nothing in this Privacy Policy limits any non-waivable rights you may have under those laws.
               </p>
             </section>
 

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: 'Top Glamping Brands',
   description:
     'Rankings of the largest United States glamping brands by published property count (property type Glamping only), units, and average nightly rates.',
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 function formatInt(n: number): string {

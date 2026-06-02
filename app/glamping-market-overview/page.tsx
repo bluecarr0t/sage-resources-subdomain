@@ -44,7 +44,8 @@ export const metadata: Metadata = {
   title: 'Glamping Market Overview',
   description:
     'US and Canada glamping metrics for private commercial operators with property type Glamping only. Excludes other product types, booking marketplaces, and public-land stays.',
-  robots: { index: true, follow: true },
+  // Gated behind a Supabase magic-link sign-in; don't index the access wall.
+  robots: { index: false, follow: false },
 };
 
 function formatInt(n: number): string {

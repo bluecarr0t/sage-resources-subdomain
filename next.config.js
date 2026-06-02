@@ -29,7 +29,12 @@ const nextConfig = {
     return [
       {
         source: '/brand',
-        destination: '/brands',
+        destination: '/glamping-market-overview/brands',
+        permanent: true,
+      },
+      {
+        source: '/brands',
+        destination: '/glamping-market-overview/brands',
         permanent: true,
       },
       {
