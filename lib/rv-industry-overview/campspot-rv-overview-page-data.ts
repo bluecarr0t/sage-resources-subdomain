@@ -604,7 +604,7 @@ async function scanOverviewSourceTable(
         break;
       }
 
-      const wide = (data as Record<string, unknown>[]).map(config.mapRow);
+      const wide = (data as unknown as Record<string, unknown>[]).map(config.mapRow);
       onRows(wide);
 
       rowsScanned += data.length;
