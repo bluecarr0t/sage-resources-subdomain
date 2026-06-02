@@ -10,15 +10,26 @@ import {
 } from 'react-simple-maps';
 import { geoCentroid } from 'd3-geo';
 import {
+  GLAMPING_STATE_ADR_CHOROPLETH_MIN_N,
   STATE_ADR_CHOROPLETH_MIN_N,
   type StateAdrChoroplethEntry,
 } from '@/lib/rv-industry-overview/campspot-rv-map-data';
+import {
+  adrChoroplethFill,
+  deriveGlampingAdrColorRange,
+  legendTickValues,
+  normalizeStateAdrChoroplethEntry,
+  normalizeStateAdrChoroplethMap,
+  stateAdrChoroplethDisplayKind,
+  type StateAdrChoroplethDisplayKind,
+} from '@/lib/rv-industry-overview/state-adr-choropleth-display';
 import {
   ALASKA_ALBERS_INSET_NUDGE,
   EXCLUDE_FROM_MAP_ABBR,
   fullStateNameToUspsAbbr,
   getRvIndustryRegionForStateAbbr,
-  hawaiiInsetTransformCss,
+  hawaiiInsetSlotInnerStyle,
+  hawaiiInsetSlotOuterStyle,
 } from '@/lib/rv-industry-overview/us-rv-regions';
 import { US_STATE_NAMES } from '@/lib/us-states';
 import { useUsStatesTopology } from '@/lib/rv-industry-overview/use-us-states-topology';
@@ -28,8 +39,8 @@ const MAP_H = 580;
 const HAWAII_INSET_W = 124;
 const HAWAII_INSET_H = 80;
 
-const ADR_COLOR_LO = 40;
-const ADR_COLOR_HI = 80;
+const ADR_COLOR_LO_RV = 40;
+const ADR_COLOR_HI_RV = 80;
 
 /** East-coast / small states: labels and leader lines in the right column (order top → bottom). */
 const CALLOUT_STATE_ORDER = [
@@ -49,44 +60,20 @@ const CALLOUT_STATE_ORDER = [
 
 const CALLOUT_SET = new Set<string>(CALLOUT_STATE_ORDER);
 
-type DisplayKind = 'ok' | 'insufficient' | 'na';
-
-function adrToFill(adr: number): string {
-  const t = Math.min(
-    1,
-    Math.max(0, (adr - ADR_COLOR_LO) / (ADR_COLOR_HI - ADR_COLOR_LO))
-  );
-  const r = Math.round(254 + t * (165 - 254));
-  const g = Math.round(229 + t * (15 - 229));
-  const b = Math.round(217 + t * (21 - 217));
-  return `rgb(${r},${g},${b})`;
-}
-
 function stateDisplayName(abbr: string): string {
   return US_STATE_NAMES[abbr as keyof typeof US_STATE_NAMES] ?? abbr;
 }
 
-function getEntry(
-  byStateAdr: Record<string, StateAdrChoroplethEntry>,
-  abbr: string
-): StateAdrChoroplethEntry {
-  return byStateAdr[abbr] ?? { n: 0, meanAdr: null };
-}
-
-function displayKind(
-  entry: StateAdrChoroplethEntry,
-  minN: number
-): DisplayKind {
-  if (entry.n === 0) return 'na';
-  if (entry.n < minN) return 'insufficient';
-  return 'ok';
-}
-
-function fillForKind(kind: DisplayKind, meanAdr: number | null): string {
+function fillForKind(
+  kind: StateAdrChoroplethDisplayKind,
+  meanAdr: number | null,
+  colorLo: number,
+  colorHi: number
+): string {
   if (kind === 'na') return '#e5e7eb';
   if (kind === 'insufficient') return '#d1d5db';
   if (meanAdr == null) return '#e5e7eb';
-  return adrToFill(meanAdr);
+  return adrChoroplethFill(meanAdr, colorLo, colorHi);
 }
 
 function geographyChoroStyle(fill: string) {
@@ -122,34 +109,61 @@ function parseOnlyHawaii(geos: GeoJSON.Feature[]) {
 
 type Props = {
   byStateAdr: Record<string, StateAdrChoroplethEntry>;
+  productVariant?: 'rv' | 'glamping';
 };
 
-export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
+export default function StateAdrChoroplethMap({
+  byStateAdr,
+  productVariant = 'rv',
+}: Props) {
   const { geography } = useUsStatesTopology();
-  const t = useTranslations('admin.rvIndustryOverview.stateAdrChoropleth');
-  const minN = STATE_ADR_CHOROPLETH_MIN_N;
+  const t = useTranslations(
+    productVariant === 'glamping'
+      ? 'admin.glampingIndustryOverview.stateAdrChoropleth'
+      : 'admin.rvIndustryOverview.stateAdrChoropleth'
+  );
+  const minN =
+    productVariant === 'glamping'
+      ? GLAMPING_STATE_ADR_CHOROPLETH_MIN_N
+      : STATE_ADR_CHOROPLETH_MIN_N;
+
+  const byState = useMemo(
+    () => normalizeStateAdrChoroplethMap(byStateAdr),
+    [byStateAdr]
+  );
+
+  const { colorLo, colorHi } = useMemo(() => {
+    if (productVariant === 'glamping') {
+      return deriveGlampingAdrColorRange(byState, minN);
+    }
+    return { colorLo: ADR_COLOR_LO_RV, colorHi: ADR_COLOR_HI_RV };
+  }, [byState, minN, productVariant]);
 
   const legendTicks = useMemo(
-    () => [40, 50, 60, 70, 80].map((v) => ({ v, label: t('legendTick', { n: v }) })),
-    [t]
+    () =>
+      legendTickValues(colorLo, colorHi).map((v) => ({
+        v,
+        label: t('legendTick', { n: v }),
+      })),
+    [colorLo, colorHi, t]
   );
 
   const calloutRows = useMemo(() => {
     return CALLOUT_STATE_ORDER.map((abbr) => {
-      const entry = getEntry(byStateAdr, abbr);
-      const kind = displayKind(entry, minN);
+      const entry = normalizeStateAdrChoroplethEntry(byState[abbr]);
+      const kind = stateAdrChoroplethDisplayKind(entry, minN);
       let valueLabel: string;
       if (kind === 'na') valueLabel = t('na');
       else if (kind === 'insufficient') valueLabel = t('insufficientData');
       else valueLabel = `$${Math.round(entry.meanAdr!)}`;
       return { abbr, name: stateDisplayName(abbr), valueLabel, kind };
     });
-  }, [byStateAdr, minN, t]);
+  }, [byState, minN, t]);
 
   return (
     <div className="rounded-lg bg-white px-3 py-4 sm:px-5 sm:py-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-        <div className="relative min-w-0 flex-1 overflow-hidden rounded-lg bg-white pb-3">
+        <div className="relative min-w-0 flex-1 overflow-visible rounded-lg bg-white pb-3">
           <ComposableMap
             projection="geoAlbersUsa"
             width={MAP_W}
@@ -176,13 +190,13 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
                     const inRegion = abbr
                       ? getRvIndustryRegionForStateAbbr(abbr) != null
                       : false;
-                    const entry = abbr ? getEntry(byStateAdr, abbr) : null;
+                    const entry = abbr ? normalizeStateAdrChoroplethEntry(byState[abbr]) : null;
                     const kind =
                       entry && inRegion
-                        ? displayKind(entry, minN)
-                        : ('na' as DisplayKind);
+                        ? stateAdrChoroplethDisplayKind(entry, minN)
+                        : ('na' as StateAdrChoroplethDisplayKind);
                     const fill = inRegion
-                      ? fillForKind(kind, entry?.meanAdr ?? null)
+                      ? fillForKind(kind, entry?.meanAdr ?? null, colorLo, colorHi)
                       : '#d1d5db';
                     if (!abbr) return null;
                     if (abbr === 'AK') {
@@ -209,8 +223,8 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
                     if (!abbr || CALLOUT_SET.has(abbr)) return null;
                     const inRegion = getRvIndustryRegionForStateAbbr(abbr) != null;
                     if (!inRegion) return null;
-                    const entry = getEntry(byStateAdr, abbr);
-                    const kind = displayKind(entry, minN);
+                    const entry = normalizeStateAdrChoroplethEntry(byState[abbr]);
+                    const kind = stateAdrChoroplethDisplayKind(entry, minN);
                     let label: string;
                     if (kind === 'na') label = `${stateDisplayName(abbr)} ${t('na')}`;
                     else if (kind === 'insufficient')
@@ -298,10 +312,13 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
           </ComposableMap>
 
           <div
-            className="pointer-events-none absolute z-10 left-[0.75%] bottom-[4%] w-[min(14vw,132px)] max-[480px]:left-[1%] max-[480px]:bottom-[6%]"
-            style={{ transform: hawaiiInsetTransformCss() }}
+            className="pointer-events-none absolute z-10 max-[480px]:bottom-[6%]"
+            style={hawaiiInsetSlotOuterStyle(HAWAII_INSET_W)}
           >
-            <div className="pointer-events-auto w-full [&_svg]:h-auto [&_svg]:w-full">
+            <div
+              className="pointer-events-auto w-[min(14vw,132px)] [&_svg]:h-auto [&_svg]:w-full"
+              style={hawaiiInsetSlotInnerStyle()}
+            >
               <ComposableMap
                 projection="geoMercator"
                 projectionConfig={{
@@ -318,9 +335,9 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
                   {({ geographies }) => (
                     <>
                       {geographies.map((geo) => {
-                        const entry = getEntry(byStateAdr, 'HI');
-                        const kind = displayKind(entry, minN);
-                        const fill = fillForKind(kind, entry.meanAdr);
+                        const entry = normalizeStateAdrChoroplethEntry(byState.HI);
+                        const kind = stateAdrChoroplethDisplayKind(entry, minN);
+                        const fill = fillForKind(kind, entry.meanAdr, colorLo, colorHi);
                         return (
                           <Geography
                             key={`hi-${geo.rsmKey}`}
@@ -337,8 +354,8 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
                             geometry: geo.geometry as GeoJSON.Geometry,
                           } as GeoJSON.Feature);
                           if (!c || c.length < 2) return null;
-                          const entry = getEntry(byStateAdr, 'HI');
-                          const kind = displayKind(entry, minN);
+                          const entry = normalizeStateAdrChoroplethEntry(byState.HI);
+                          const kind = stateAdrChoroplethDisplayKind(entry, minN);
                           let label: string;
                           if (kind === 'na') label = `HI ${t('na')}`;
                           else if (kind === 'insufficient')
@@ -395,7 +412,7 @@ export default function StateAdrChoroplethMap({ byStateAdr }: Props) {
         <div
           className="h-3 w-[min(100%,360px)] max-w-md rounded-sm"
           style={{
-            background: `linear-gradient(to right, ${adrToFill(ADR_COLOR_LO)}, ${adrToFill(ADR_COLOR_HI)})`,
+            background: `linear-gradient(to right, ${adrChoroplethFill(colorLo, colorLo, colorHi)}, ${adrChoroplethFill(colorHi, colorLo, colorHi)})`,
           }}
           aria-hidden
         />

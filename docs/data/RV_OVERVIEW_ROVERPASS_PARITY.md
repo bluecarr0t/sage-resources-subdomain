@@ -5,7 +5,7 @@
 | Source | Table | Notes |
 |--------|--------|--------|
 | Campspot | `campspot` | Annual `occupancy_rate_2024/2025`, `avg_retail_daily_rate_2024/2025`, seasonal columns |
-| RoverPass | `all_roverpass_data_new` | Open listings only (`is_closed != 'Yes'`). Single occupancy + retail rate; mapped to 2025 (or 2024 when `roverpass_occupancy_year` = 2024). No 2024 annual pair. |
+| RoverPass | `all_roverpass_data_new` | Open listings only (`is_closed != 'Yes'`). Single occupancy + retail rate. When `roverpass_occupancy_year` = 2024, occupancy is written to both `occupancy_rate_2024` and `occupancy_rate_2025` so 2025-only charts (regional map) can use the snapshot; Campspot-style 2024 annual ADR is still absent. |
 
 ## Year-over-year (YoY) charts
 

@@ -8,17 +8,40 @@ import {
 
 describe('finalizeChartSourceBreakdown', () => {
   it('returns null percentages when no rows used', () => {
-    expect(finalizeChartSourceBreakdown({ campspot: 0, roverpass: 0 })).toEqual({
+    expect(
+      finalizeChartSourceBreakdown(createChartTransparencyAccum().regionalMap)
+    ).toEqual({
+      countKind: 'units',
       rowsUsed: 0,
       campspotRows: 0,
       roverpassRows: 0,
       campspotPct: null,
       roverpassPct: null,
+      propertiesUsed: 0,
+      propertiesCampspot: 0,
+      propertiesRoverpass: 0,
+      propertiesCampspotPct: null,
+      propertiesRoverpassPct: null,
     });
   });
 
+  it('computes property counts separately from unit rows', () => {
+    const counter = createChartTransparencyAccum().stateAdrChoropleth;
+    counter.campspot = 4;
+    counter.campspotPropertyKeys.add('a|ca|');
+    counter.campspotPropertyKeys.add('b|ca|');
+    const b = finalizeChartSourceBreakdown(counter, 'properties');
+    expect(b.rowsUsed).toBe(4);
+    expect(b.propertiesUsed).toBe(2);
+    expect(b.propertiesCampspot).toBe(2);
+    expect(b.countKind).toBe('properties');
+  });
+
   it('computes rounded one-decimal source mix', () => {
-    const b = finalizeChartSourceBreakdown({ campspot: 7, roverpass: 3 });
+    const counter = createChartTransparencyAccum().trends;
+    counter.campspot = 7;
+    counter.roverpass = 3;
+    const b = finalizeChartSourceBreakdown(counter);
     expect(b.rowsUsed).toBe(10);
     expect(b.campspotRows).toBe(7);
     expect(b.roverpassRows).toBe(3);
@@ -27,7 +50,10 @@ describe('finalizeChartSourceBreakdown', () => {
   });
 
   it('percentages sum to 100 for uneven splits', () => {
-    const b = finalizeChartSourceBreakdown({ campspot: 1, roverpass: 2 });
+    const counter = createChartTransparencyAccum().trends;
+    counter.campspot = 1;
+    counter.roverpass = 2;
+    const b = finalizeChartSourceBreakdown(counter);
     expect(b.campspotPct! + b.roverpassPct!).toBe(100);
   });
 });

@@ -22,6 +22,7 @@ import {
 } from '@/lib/rv-industry-overview/jpeg-capture';
 import type { VisualizationJpgDownloadHandle } from '@/lib/rv-industry-overview/visualization-export';
 import { sanitizeAdminDisplayError } from '@/lib/admin-display-error';
+import { IndustryOverviewChartDetails } from '@/components/admin/industry-overview/IndustryOverviewChartDetails';
 
 export type { VisualizationJpgDownloadHandle };
 
@@ -41,6 +42,8 @@ type Props = {
   captureProfile?: JpegCaptureProfile;
   /** Rendered below the export capture area (excluded from JPEG). */
   sourceTransparency?: ReactNode;
+  /** i18n namespace for collapsed chart details summary (RV vs glamping). */
+  detailsMessagesNamespace?: 'admin.rvIndustryOverview' | 'admin.glampingIndustryOverview';
   children: ReactNode;
 };
 
@@ -56,6 +59,7 @@ const VisualizationJpgDownload = forwardRef<VisualizationJpgDownloadHandle, Prop
       footerBelow,
       captureProfile = 'chart',
       sourceTransparency,
+      detailsMessagesNamespace = 'admin.rvIndustryOverview',
       children,
     },
     ref
@@ -157,10 +161,17 @@ const VisualizationJpgDownload = forwardRef<VisualizationJpgDownloadHandle, Prop
           </div>
         </div>
 
-        {sourceTransparency ? <div>{sourceTransparency}</div> : null}
-
-        {captionBelow ? <div className="text-sm text-gray-600 dark:text-gray-400">{captionBelow}</div> : null}
-        {footerBelow ? <div className="text-xs text-gray-500 dark:text-gray-400">{footerBelow}</div> : null}
+        {sourceTransparency || captionBelow || footerBelow ? (
+          <IndustryOverviewChartDetails messagesNamespace={detailsMessagesNamespace}>
+            {sourceTransparency ? <div>{sourceTransparency}</div> : null}
+            {captionBelow ? (
+              <div className="text-sm text-gray-600 dark:text-gray-400">{captionBelow}</div>
+            ) : null}
+            {footerBelow ? (
+              <div className="text-xs text-gray-500 dark:text-gray-400">{footerBelow}</div>
+            ) : null}
+          </IndustryOverviewChartDetails>
+        ) : null}
       </div>
     );
   }

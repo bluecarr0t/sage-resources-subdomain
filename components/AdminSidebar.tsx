@@ -27,6 +27,7 @@ import {
   Wrench,
   ChevronDown,
   FileBarChart,
+  Files,
   LineChart,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -47,6 +48,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/glamping-properties')) return 'comps';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/market-report')) return 'market-report';
+  if (pathname.startsWith('/admin/glamping-industry-overview')) return 'glamping-industry-overview';
   if (pathname.startsWith('/admin/rv-industry-overview')) return 'rv-industry-overview';
   if (pathname.startsWith('/admin/rv-site-setup') || pathname.startsWith('/admin/site-design')) return 'site-design';
   if (pathname.startsWith('/admin/site-builder')) return 'site-builder';
@@ -57,10 +59,15 @@ function getActivePageId(pathname: string): string {
   return '';
 }
 
-const TOOLS_PAGE_IDS = new Set([
-  'proximity-insights',
+const REPORTS_PAGE_IDS = new Set([
+  'past-reports',
   'market-report',
   'rv-industry-overview',
+  'glamping-industry-overview',
+]);
+
+const TOOLS_PAGE_IDS = new Set([
+  'proximity-insights',
   'site-design',
   'site-builder',
   'sage-ai',
@@ -126,7 +133,13 @@ export default function AdminSidebar() {
   const [mounted, setMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
   const activePageId = getActivePageId(pathname || '');
+  const reportsSectionActive = REPORTS_PAGE_IDS.has(activePageId);
   const toolsSectionActive = TOOLS_PAGE_IDS.has(activePageId);
+  const [reportsMenuOpen, setReportsMenuOpen] = useState(() => reportsSectionActive);
+  const [reportsFlyoutOpen, setReportsFlyoutOpen] = useState(false);
+  const reportsFlyoutRef = useRef<HTMLDivElement>(null);
+  const reportsSubmenuRef = useRef<HTMLDivElement>(null);
+  const prevReportsSectionActiveRef = useRef<boolean | null>(null);
   const [toolsMenuOpen, setToolsMenuOpen] = useState(() => toolsSectionActive);
   const [toolsFlyoutOpen, setToolsFlyoutOpen] = useState(false);
   const toolsFlyoutRef = useRef<HTMLDivElement>(null);
@@ -136,6 +149,23 @@ export default function AdminSidebar() {
 
   const showCollapsed = isDesktop && isCollapsed;
   const tSidebar = useTranslations('admin.sidebar');
+
+  useEffect(() => {
+    const prev = prevReportsSectionActiveRef.current;
+    prevReportsSectionActiveRef.current = reportsSectionActive;
+
+    if (prev === null) {
+      if (reportsSectionActive) setReportsMenuOpen(true);
+      return;
+    }
+
+    if (reportsSectionActive) {
+      if (!prev) setReportsMenuOpen(true);
+      return;
+    }
+
+    if (prev) setReportsMenuOpen(false);
+  }, [reportsSectionActive]);
 
   useEffect(() => {
     const prev = prevToolsSectionActiveRef.current;
@@ -155,13 +185,32 @@ export default function AdminSidebar() {
   }, [toolsSectionActive]);
 
   useLayoutEffect(() => {
+    if (!reportsMenuOpen || showCollapsed || !reportsSubmenuRef.current) return;
+    reportsSubmenuRef.current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [reportsMenuOpen, showCollapsed]);
+
+  useLayoutEffect(() => {
     if (!toolsMenuOpen || showCollapsed || !toolsSubmenuRef.current) return;
     toolsSubmenuRef.current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }, [toolsMenuOpen, showCollapsed]);
 
   useEffect(() => {
-    if (!showCollapsed) setToolsFlyoutOpen(false);
+    if (!showCollapsed) {
+      setReportsFlyoutOpen(false);
+      setToolsFlyoutOpen(false);
+    }
   }, [showCollapsed]);
+
+  useEffect(() => {
+    if (!reportsFlyoutOpen || !showCollapsed) return;
+    const close = (e: MouseEvent) => {
+      if (reportsFlyoutRef.current && !reportsFlyoutRef.current.contains(e.target as Node)) {
+        setReportsFlyoutOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [reportsFlyoutOpen, showCollapsed]);
 
   useEffect(() => {
     if (!toolsFlyoutOpen || !showCollapsed) return;
@@ -327,14 +376,6 @@ export default function AdminSidebar() {
                   isCollapsed={showCollapsed}
                 />
                 <NavLink
-                  href="/admin/past-reports"
-                  label="Past Reports"
-                  icon={FileText}
-                  pageId="past-reports"
-                  isActive={activePageId === 'past-reports'}
-                  isCollapsed={showCollapsed}
-                />
-                <NavLink
                   href="/admin/cost-explorer"
                   label="Cost Explorer"
                   icon={Calculator}
@@ -343,6 +384,164 @@ export default function AdminSidebar() {
                   isCollapsed={showCollapsed}
                 />
                 {/* Report Builder hidden from menu — page still accessible via direct URL */}
+                {!showCollapsed ? (
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => setReportsMenuOpen((o) => !o)}
+                      className={`nav-item flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 ease-out ${
+                        reportsSectionActive
+                          ? 'bg-neutral-100/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100 font-medium'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
+                      }`}
+                      aria-expanded={reportsMenuOpen}
+                      aria-controls="admin-reports-submenu"
+                      id="admin-reports-trigger"
+                    >
+                      <Files
+                        className={`h-5 w-5 flex-shrink-0 ${
+                          reportsSectionActive
+                            ? 'text-neutral-700 dark:text-neutral-200'
+                            : 'text-neutral-500 dark:text-neutral-500'
+                        }`}
+                        aria-hidden
+                      />
+                      <span className="min-w-0 flex-1 truncate text-sm">{tSidebar('reports')}</span>
+                      <ChevronDown
+                        className={`h-4 w-4 flex-shrink-0 text-neutral-400 transition-transform duration-200 ${
+                          reportsMenuOpen ? 'rotate-180' : ''
+                        }`}
+                        aria-hidden
+                      />
+                    </button>
+                    {reportsMenuOpen ? (
+                      <div
+                        ref={reportsSubmenuRef}
+                        id="admin-reports-submenu"
+                        role="region"
+                        aria-labelledby="admin-reports-trigger"
+                        className="ml-3 space-y-1 border-l border-neutral-200/80 py-0.5 pl-3 dark:border-neutral-800"
+                      >
+                        <NavLink
+                          href="/admin/past-reports"
+                          label={tSidebar('pastReports')}
+                          icon={FileText}
+                          pageId="past-reports"
+                          isActive={activePageId === 'past-reports'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/market-report"
+                          label={tSidebar('marketReport')}
+                          icon={FileBarChart}
+                          pageId="market-report"
+                          isActive={activePageId === 'market-report'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/rv-industry-overview"
+                          label={tSidebar('rvIndustryOverview')}
+                          icon={LineChart}
+                          pageId="rv-industry-overview"
+                          isActive={activePageId === 'rv-industry-overview'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/glamping-industry-overview"
+                          label={tSidebar('glampingIndustryOverview')}
+                          icon={LineChart}
+                          pageId="glamping-industry-overview"
+                          isActive={activePageId === 'glamping-industry-overview'}
+                          isCollapsed={false}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="relative flex justify-center" ref={reportsFlyoutRef}>
+                    <button
+                      type="button"
+                      onClick={() => setReportsFlyoutOpen((o) => !o)}
+                      className={`nav-item flex items-center justify-center rounded-md px-2 py-2 transition-colors duration-150 ease-out ${
+                        reportsSectionActive
+                          ? 'bg-neutral-100/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
+                      }`}
+                      aria-expanded={reportsFlyoutOpen}
+                      aria-haspopup="menu"
+                      aria-label={tSidebar('reportsMenu')}
+                      title={tSidebar('reports')}
+                    >
+                      <Files
+                        className={`h-5 w-5 flex-shrink-0 ${
+                          reportsSectionActive
+                            ? 'text-neutral-700 dark:text-neutral-200'
+                            : 'text-neutral-500 dark:text-neutral-500'
+                        }`}
+                      />
+                    </button>
+                    {reportsFlyoutOpen ? (
+                      <div
+                        role="menu"
+                        aria-label={tSidebar('reportsMenu')}
+                        className="absolute left-full top-0 z-[60] ml-1 min-w-[13.5rem] rounded-md border border-neutral-200/80 bg-white py-1 dark:border-neutral-800 dark:bg-neutral-950"
+                      >
+                        <Link
+                          href="/admin/past-reports"
+                          role="menuitem"
+                          onClick={() => setReportsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'past-reports'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <FileText className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('pastReports')}
+                        </Link>
+                        <Link
+                          href="/admin/market-report"
+                          role="menuitem"
+                          onClick={() => setReportsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'market-report'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <FileBarChart className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('marketReport')}
+                        </Link>
+                        <Link
+                          href="/admin/rv-industry-overview"
+                          role="menuitem"
+                          onClick={() => setReportsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'rv-industry-overview'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <LineChart className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('rvIndustryOverview')}
+                        </Link>
+                        <Link
+                          href="/admin/glamping-industry-overview"
+                          role="menuitem"
+                          onClick={() => setReportsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'glamping-industry-overview'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <LineChart className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('glampingIndustryOverview')}
+                        </Link>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
                 {!showCollapsed ? (
                   <div className="space-y-1">
                     <button
@@ -386,22 +585,6 @@ export default function AdminSidebar() {
                         aria-labelledby="admin-tools-trigger"
                         className="ml-3 space-y-1 border-l border-neutral-200/80 py-0.5 pl-3 dark:border-neutral-800"
                       >
-                        <NavLink
-                          href="/admin/market-report"
-                          label={tSidebar('marketReport')}
-                          icon={FileBarChart}
-                          pageId="market-report"
-                          isActive={activePageId === 'market-report'}
-                          isCollapsed={false}
-                        />
-                        <NavLink
-                          href="/admin/rv-industry-overview"
-                          label={tSidebar('rvIndustryOverview')}
-                          icon={LineChart}
-                          pageId="rv-industry-overview"
-                          isActive={activePageId === 'rv-industry-overview'}
-                          isCollapsed={false}
-                        />
                         <NavLink
                           href="/admin/sage-ai"
                           label={tSidebar('sageAi')}
@@ -466,32 +649,6 @@ export default function AdminSidebar() {
                         aria-label={tSidebar('toolsMenu')}
                         className="absolute left-full top-0 z-[60] ml-1 min-w-[13.5rem] rounded-md border border-neutral-200/80 bg-white py-1 dark:border-neutral-800 dark:bg-neutral-950"
                       >
-                        <Link
-                          href="/admin/market-report"
-                          role="menuitem"
-                          onClick={() => setToolsFlyoutOpen(false)}
-                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
-                            activePageId === 'market-report'
-                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
-                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
-                          }`}
-                        >
-                          <FileBarChart className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-                          {tSidebar('marketReport')}
-                        </Link>
-                        <Link
-                          href="/admin/rv-industry-overview"
-                          role="menuitem"
-                          onClick={() => setToolsFlyoutOpen(false)}
-                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
-                            activePageId === 'rv-industry-overview'
-                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
-                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
-                          }`}
-                        >
-                          <LineChart className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-                          {tSidebar('rvIndustryOverview')}
-                        </Link>
                         <Link
                           href="/admin/sage-ai"
                           role="menuitem"

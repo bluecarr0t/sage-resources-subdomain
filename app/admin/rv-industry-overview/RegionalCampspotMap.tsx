@@ -10,11 +10,16 @@ import {
 } from 'react-simple-maps';
 import { geoCentroid } from 'd3-geo';
 import type { RegionalAggregateRow } from '@/lib/rv-industry-overview/campspot-regional-aggregates';
-import type { StateRvMetrics } from '@/lib/rv-industry-overview/campspot-rv-map-data';
+import type {
+  StateAdrChoroplethEntry,
+  StateRvMetrics,
+} from '@/lib/rv-industry-overview/campspot-rv-map-data';
+import { STATE_ADR_CHOROPLETH_MIN_N } from '@/lib/rv-industry-overview/campspot-rv-map-data';
 import {
   ALASKA_ALBERS_INSET_NUDGE,
   EXCLUDE_FROM_MAP_ABBR,
-  hawaiiInsetTransformCss,
+  hawaiiInsetSlotInnerStyle,
+  hawaiiInsetSlotOuterStyle,
   RV_INDUSTRY_REGION_IDS,
   RV_REGION_FILL,
   RV_REGION_LABEL_COORDS,
@@ -131,17 +136,37 @@ function clamp(n: number, lo: number, hi: number): number {
   return Math.min(Math.max(n, lo), hi);
 }
 
+export type RegionalMapStateHoverMode = 'yoy_matched' | 'adr2025_only';
+
+type MapStateMessagesNamespace =
+  | 'admin.rvIndustryOverview.mapState'
+  | 'admin.glampingIndustryOverview.mapState';
+
 type Props = {
   byRegion: Record<RvIndustryRegionId, RegionalAggregateRow>;
   byState: Record<string, StateRvMetrics>;
+  /** When false (Sage-only glamping), regional labels show ARDR only. */
+  showOccupancy?: boolean;
+  /** Per-state 2025 ARDR for hover when `stateHoverMode` is `adr2025_only`. */
+  stateAdrChoropleth?: Record<string, StateAdrChoroplethEntry>;
+  stateHoverMode?: RegionalMapStateHoverMode;
+  mapStateMessagesNamespace?: MapStateMessagesNamespace;
 };
 
 type TipState = { abbr: string; clientX: number; clientY: number };
 
-export default function RegionalCampspotMap({ byRegion, byState }: Props) {
+export default function RegionalCampspotMap({
+  byRegion,
+  byState,
+  showOccupancy = true,
+  stateAdrChoropleth,
+  stateHoverMode = 'yoy_matched',
+  mapStateMessagesNamespace = 'admin.rvIndustryOverview.mapState',
+}: Props) {
   const { geography } = useUsStatesTopology();
   const t = useTranslations('admin.rvIndustryOverview');
-  const ts = useTranslations('admin.rvIndustryOverview.mapState');
+  const ts = useTranslations(mapStateMessagesNamespace);
+  const adr2025Hover = stateHoverMode === 'adr2025_only';
 
   const [tip, setTip] = useState<TipState | null>(null);
   const [modalAbbr, setModalAbbr] = useState<string | null>(null);
@@ -160,6 +185,14 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
 
   const modalMetrics = modalAbbr ? byState[modalAbbr] : undefined;
   const tipMetrics = tip ? byState[tip.abbr] : undefined;
+  const tipChoropleth = tip ? stateAdrChoropleth?.[tip.abbr] : undefined;
+  const modalChoropleth = modalAbbr ? stateAdrChoropleth?.[modalAbbr] : undefined;
+
+  const choroplethReady = (entry: StateAdrChoroplethEntry | undefined) =>
+    entry != null && entry.n >= STATE_ADR_CHOROPLETH_MIN_N && entry.meanAdr != null;
+
+  const choroplethPartial = (entry: StateAdrChoroplethEntry | undefined) =>
+    entry != null && entry.n > 0 && entry.n < STATE_ADR_CHOROPLETH_MIN_N;
 
   const modalOccTone = modalMetrics
     ? deltaTone(modalMetrics.meanOcc2024, modalMetrics.meanOcc2025)
@@ -179,9 +212,10 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-lg bg-white pb-3 dark:bg-white"
+      className="relative w-full overflow-visible rounded-lg bg-white pb-3 dark:bg-white"
       onMouseLeave={() => setTip(null)}
     >
+      <div className="overflow-hidden rounded-lg">
       <ComposableMap
         projection="geoAlbersUsa"
         width={MAP_W}
@@ -310,10 +344,12 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
                         strokeWidth: 3,
                       }}
                     >
-                      <tspan x={0} dy="0">
-                        {t('occupancyShort')}: {formatPct(stats.meanOccupancyPct)}
-                      </tspan>
-                      <tspan x={0} dy="15">
+                      {showOccupancy ? (
+                        <tspan x={0} dy="0">
+                          {t('occupancyShort')}: {formatPct(stats.meanOccupancyPct)}
+                        </tspan>
+                      ) : null}
+                      <tspan x={0} dy={showOccupancy ? '15' : '0'}>
                         {t('adrShort')}: {formatAdr(stats.meanAdr)}
                       </tspan>
                     </text>
@@ -324,12 +360,16 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
           )}
         </Geographies>
       </ComposableMap>
+      </div>
 
       <div
-        className="pointer-events-none absolute z-10 left-[0.75%] bottom-[4%] w-[min(14vw,132px)] max-[480px]:left-[1%] max-[480px]:bottom-[6%]"
-        style={{ transform: hawaiiInsetTransformCss() }}
+        className="pointer-events-none absolute z-10 max-[480px]:bottom-[6%]"
+        style={hawaiiInsetSlotOuterStyle(HAWAII_INSET_W)}
       >
-        <div className="pointer-events-auto w-full [&_svg]:h-auto [&_svg]:w-full">
+        <div
+          className="pointer-events-auto w-[min(14vw,132px)] [&_svg]:h-auto [&_svg]:w-full"
+          style={hawaiiInsetSlotInnerStyle()}
+        >
           <ComposableMap
             projection="geoMercator"
             projectionConfig={{
@@ -436,27 +476,56 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
           <div className="text-sm font-semibold text-gray-900">
             {ts('tooltipTitle', { state: stateDisplayName(tip.abbr) })}
           </div>
-          {hasStateMetrics(tipMetrics) ? (
-            <div className="mt-2 space-y-3 text-[11px] leading-snug text-gray-800">
-              <div>
-                <div className="font-semibold text-gray-900">{t('occupancyShort')}</div>
-                <dl className="mt-1 grid grid-cols-[minmax(0,4.25rem)_1fr] gap-x-2 gap-y-1">
-                  <dt className="text-gray-500">{ts('tooltipYear2024')}</dt>
+          {adr2025Hover ? (
+            choroplethReady(tipChoropleth) ? (
+              <div className="mt-2 space-y-1 text-[11px] leading-snug text-gray-800">
+                <div className="font-semibold text-gray-900">{t('adrShort')}</div>
+                <p className="tabular-nums font-medium">{formatAdr(tipChoropleth!.meanAdr)}</p>
+                <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-gray-600">
+                  <dt>{ts('choroplethProperties')}</dt>
                   <dd className="text-right font-medium tabular-nums text-gray-900">
-                    {formatPct(tipMetrics!.meanOcc2024)}
+                    {tipChoropleth!.nProperties.toLocaleString()}
                   </dd>
-                  <dt className="text-gray-500">{ts('tooltipYear2025')}</dt>
+                  <dt>{ts('choroplethUnits')}</dt>
                   <dd className="text-right font-medium tabular-nums text-gray-900">
-                    {formatPct(tipMetrics!.meanOcc2025)}
-                  </dd>
-                  <dt className="text-gray-500">{ts('tooltipDelta')}</dt>
-                  <dd
-                    className={`text-right font-semibold tabular-nums ${deltaToneTextClass(tipOccTone)}`}
-                  >
-                    {formatOccDelta(tipMetrics!.meanOcc2024, tipMetrics!.meanOcc2025)} {ts('pp')}
+                    {tipChoropleth!.nUnits.toLocaleString()}
                   </dd>
                 </dl>
+                <p className="text-[10px] text-gray-500">{ts('adr2025CohortHint')}</p>
               </div>
+            ) : choroplethPartial(tipChoropleth) ? (
+              <p className="mt-2 text-[11px] text-gray-600">
+                {ts('insufficientAdr2025', {
+                  count: tipChoropleth!.n,
+                  min: STATE_ADR_CHOROPLETH_MIN_N,
+                })}
+              </p>
+            ) : (
+              <p className="mt-2 text-[11px] text-gray-600">{ts('noDataAdr2025')}</p>
+            )
+          ) : hasStateMetrics(tipMetrics) ? (
+            <div className="mt-2 space-y-3 text-[11px] leading-snug text-gray-800">
+              {showOccupancy ? (
+                <div>
+                  <div className="font-semibold text-gray-900">{t('occupancyShort')}</div>
+                  <dl className="mt-1 grid grid-cols-[minmax(0,4.25rem)_1fr] gap-x-2 gap-y-1">
+                    <dt className="text-gray-500">{ts('tooltipYear2024')}</dt>
+                    <dd className="text-right font-medium tabular-nums text-gray-900">
+                      {formatPct(tipMetrics!.meanOcc2024)}
+                    </dd>
+                    <dt className="text-gray-500">{ts('tooltipYear2025')}</dt>
+                    <dd className="text-right font-medium tabular-nums text-gray-900">
+                      {formatPct(tipMetrics!.meanOcc2025)}
+                    </dd>
+                    <dt className="text-gray-500">{ts('tooltipDelta')}</dt>
+                    <dd
+                      className={`text-right font-semibold tabular-nums ${deltaToneTextClass(tipOccTone)}`}
+                    >
+                      {formatOccDelta(tipMetrics!.meanOcc2024, tipMetrics!.meanOcc2025)} {ts('pp')}
+                    </dd>
+                  </dl>
+                </div>
+              ) : null}
               <div>
                 <div className="font-semibold text-gray-900">{t('adrShort')}</div>
                 <dl className="mt-1 grid grid-cols-[minmax(0,4.25rem)_1fr] gap-x-2 gap-y-1">
@@ -518,28 +587,62 @@ export default function RegionalCampspotMap({ byRegion, byState }: Props) {
                   {ts('close')}
                 </Button>
               </div>
-              {hasStateMetrics(modalMetrics) ? (
+              {adr2025Hover ? (
+                choroplethReady(modalChoropleth) ? (
+                  <div className="mt-4 space-y-3">
+                    <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-sm">
+                      <dt className="text-gray-600 dark:text-gray-400">{ts('adr2025')}</dt>
+                      <dd className="text-right font-medium text-gray-900 dark:text-gray-100">
+                        {formatAdr(modalChoropleth!.meanAdr)}
+                      </dd>
+                      <dt className="text-gray-600 dark:text-gray-400">{ts('choroplethProperties')}</dt>
+                      <dd className="text-right font-medium tabular-nums text-gray-900 dark:text-gray-100">
+                        {modalChoropleth!.nProperties.toLocaleString()}
+                      </dd>
+                      <dt className="text-gray-600 dark:text-gray-400">{ts('choroplethUnits')}</dt>
+                      <dd className="text-right font-medium tabular-nums text-gray-900 dark:text-gray-100">
+                        {modalChoropleth!.nUnits.toLocaleString()}
+                      </dd>
+                    </dl>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{ts('adr2025CohortHint')}</p>
+                  </div>
+                ) : choroplethPartial(modalChoropleth) ? (
+                  <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    {ts('insufficientAdr2025', {
+                      count: modalChoropleth!.n,
+                      min: STATE_ADR_CHOROPLETH_MIN_N,
+                    })}
+                  </p>
+                ) : (
+                  <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">{ts('noDataAdr2025')}</p>
+                )
+              ) : hasStateMetrics(modalMetrics) ? (
                 <div className="mt-4 space-y-4">
                   <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-sm">
-                    <dt className="text-gray-600 dark:text-gray-400">{ts('occ2024')}</dt>
-                    <dd className="text-right font-medium text-gray-900 dark:text-gray-100">
-                      {formatPct(modalMetrics!.meanOcc2024)}
-                    </dd>
-                    <dt className="text-gray-600 dark:text-gray-400">{ts('occ2025')}</dt>
-                    <dd className="text-right font-medium text-gray-900 dark:text-gray-100">
-                      {formatPct(modalMetrics!.meanOcc2025)}
-                    </dd>
-                    <dt className="text-gray-600 dark:text-gray-400">{ts('occChange')}</dt>
-                    <dd
-                      className={`text-right font-medium tabular-nums ${deltaToneTextClass(modalOccTone)}`}
-                    >
-                      {formatOccDelta(modalMetrics!.meanOcc2024, modalMetrics!.meanOcc2025)} {ts('pp')}
-                    </dd>
+                    {showOccupancy ? (
+                      <>
+                        <dt className="text-gray-600 dark:text-gray-400">{ts('occ2024')}</dt>
+                        <dd className="text-right font-medium text-gray-900 dark:text-gray-100">
+                          {formatPct(modalMetrics!.meanOcc2024)}
+                        </dd>
+                        <dt className="text-gray-600 dark:text-gray-400">{ts('occ2025')}</dt>
+                        <dd className="text-right font-medium text-gray-900 dark:text-gray-100">
+                          {formatPct(modalMetrics!.meanOcc2025)}
+                        </dd>
+                        <dt className="text-gray-600 dark:text-gray-400">{ts('occChange')}</dt>
+                        <dd
+                          className={`text-right font-medium tabular-nums ${deltaToneTextClass(modalOccTone)}`}
+                        >
+                          {formatOccDelta(modalMetrics!.meanOcc2024, modalMetrics!.meanOcc2025)}{' '}
+                          {ts('pp')}
+                        </dd>
+                      </>
+                    ) : null}
                     <dt className="text-gray-600 dark:text-gray-400">{ts('adr2024')}</dt>
                     <dd className="text-right font-medium text-gray-900 dark:text-gray-100">
                       {formatAdr(modalMetrics!.meanAdr2024)}
                     </dd>
-                    <dt className="text-gray-600 dark:text-gray-400">{ts('adr2025')}</dt>
+                    <dt className="text-gray-600 dark:text-gray-400">{ts('adr2025YoY')}</dt>
                     <dd className="text-right font-medium text-gray-900 dark:text-gray-100">
                       {formatAdr(modalMetrics!.meanAdr2025)}
                     </dd>

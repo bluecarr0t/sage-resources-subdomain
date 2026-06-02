@@ -7,9 +7,11 @@ import { normalizeState } from '@/lib/anchor-point-insights/utils';
 import { parseCampspotNumber, parseCampspotOccupancyPercent } from '@/lib/rv-industry-overview/campspot-field-parse';
 import {
   regionalMapLabelDiagnostics,
+  rowQualifiesForStateAdrChoropleth,
   RV_MAP_REGIONAL_RATE_BANDS_DEFAULT,
   RV_MAP_REGIONAL_RATE_BANDS_GLAMPING,
   type CampspotRvMapAggRow,
+  type RegionalMapLabelMode,
   type RvMapRegionalRateBands,
 } from '@/lib/rv-industry-overview/campspot-rv-map-data';
 import {
@@ -67,12 +69,21 @@ export const RV_OVERVIEW_CHART_TRANSPARENCY_KEYS: RvOverviewChartTransparencyKey
   'rvParking',
 ];
 
+export type ChartEntityCountKind = 'units' | 'properties';
+
 export type ChartSourceBreakdown = {
+  /** Primary entity for glamping UI labels (units vs distinct properties). */
+  countKind: ChartEntityCountKind;
   rowsUsed: number;
   campspotRows: number;
   roverpassRows: number;
   campspotPct: number | null;
   roverpassPct: number | null;
+  propertiesUsed: number;
+  propertiesCampspot: number;
+  propertiesRoverpass: number;
+  propertiesCampspotPct: number | null;
+  propertiesRoverpassPct: number | null;
 };
 
 export type RvOverviewScanTransparency = {
@@ -84,14 +95,24 @@ export type RvOverviewChartTransparencyMap = Record<
   ChartSourceBreakdown
 >;
 
-type SourceCounter = { campspot: number; roverpass: number };
+type SourceCounter = {
+  campspot: number;
+  roverpass: number;
+  campspotPropertyKeys: Set<string>;
+  roverpassPropertyKeys: Set<string>;
+};
 
 export type ChartTransparencyAccum = Record<RvOverviewChartTransparencyKey, SourceCounter>;
 
 export type UnclassifiedAccum = { campspot: number; roverpass: number };
 
 function emptyCounter(): SourceCounter {
-  return { campspot: 0, roverpass: 0 };
+  return {
+    campspot: 0,
+    roverpass: 0,
+    campspotPropertyKeys: new Set(),
+    roverpassPropertyKeys: new Set(),
+  };
 }
 
 export function createChartTransparencyAccum(): ChartTransparencyAccum {
@@ -105,29 +126,74 @@ export function createUnclassifiedAccum(): UnclassifiedAccum {
   return { campspot: 0, roverpass: 0 };
 }
 
-function bump(counter: SourceCounter, source: RvOverviewDataSource): void {
+function bump(
+  counter: SourceCounter,
+  source: RvOverviewDataSource,
+  row?: RvOverviewWideRow,
+  trackProperty?: boolean
+): void {
   counter[source] += 1;
+  if (!trackProperty || !row) return;
+  const pk = amenityPropertyGroupKey(row);
+  if (!pk) return;
+  if (source === 'campspot') counter.campspotPropertyKeys.add(pk);
+  else counter.roverpassPropertyKeys.add(pk);
 }
 
-export function finalizeChartSourceBreakdown(counter: SourceCounter): ChartSourceBreakdown {
-  const rowsUsed = counter.campspot + counter.roverpass;
-  if (rowsUsed === 0) {
-    return {
-      rowsUsed: 0,
-      campspotRows: 0,
-      roverpassRows: 0,
-      campspotPct: null,
-      roverpassPct: null,
-    };
-  }
-  const campspotPct = Math.round((1000 * counter.campspot) / rowsUsed) / 10;
-  const roverpassPct = Math.round((1000 * counter.roverpass) / rowsUsed) / 10;
+function sourceMixPct(numerator: number, denominator: number): number {
+  return Math.round((1000 * numerator) / denominator) / 10;
+}
+
+function emptyChartSourceBreakdown(
+  countKind: ChartEntityCountKind
+): ChartSourceBreakdown {
   return {
+    countKind,
+    rowsUsed: 0,
+    campspotRows: 0,
+    roverpassRows: 0,
+    campspotPct: null,
+    roverpassPct: null,
+    propertiesUsed: 0,
+    propertiesCampspot: 0,
+    propertiesRoverpass: 0,
+    propertiesCampspotPct: null,
+    propertiesRoverpassPct: null,
+  };
+}
+
+export function finalizeChartSourceBreakdown(
+  counter: SourceCounter,
+  countKind: ChartEntityCountKind = 'units'
+): ChartSourceBreakdown {
+  const rowsUsed = counter.campspot + counter.roverpass;
+  const propertiesCampspot = counter.campspotPropertyKeys.size;
+  const propertiesRoverpass = counter.roverpassPropertyKeys.size;
+  const propertiesUsed = propertiesCampspot + propertiesRoverpass;
+
+  if (rowsUsed === 0 && propertiesUsed === 0) {
+    return emptyChartSourceBreakdown(countKind);
+  }
+
+  const campspotPct = rowsUsed > 0 ? sourceMixPct(counter.campspot, rowsUsed) : null;
+  const roverpassPct = rowsUsed > 0 ? sourceMixPct(counter.roverpass, rowsUsed) : null;
+  const propertiesCampspotPct =
+    propertiesUsed > 0 ? sourceMixPct(propertiesCampspot, propertiesUsed) : null;
+  const propertiesRoverpassPct =
+    propertiesUsed > 0 ? sourceMixPct(propertiesRoverpass, propertiesUsed) : null;
+
+  return {
+    countKind,
     rowsUsed,
     campspotRows: counter.campspot,
     roverpassRows: counter.roverpass,
     campspotPct,
     roverpassPct,
+    propertiesUsed,
+    propertiesCampspot,
+    propertiesRoverpass,
+    propertiesCampspotPct,
+    propertiesRoverpassPct,
   };
 }
 
@@ -196,23 +262,22 @@ function rowInUsRegion(row: { state?: string | null }): boolean {
   return Boolean(stateAbbr && getRvIndustryRegionForStateAbbr(stateAbbr));
 }
 
-function rowContributesToRegionalMap(
+export function rowContributesToRegionalMap(
   row: CampspotRvMapAggRow,
-  bands: RvMapRegionalRateBands
+  bands: RvMapRegionalRateBands,
+  labelMode: RegionalMapLabelMode = 'paired_adr_occ'
 ): boolean {
   if (!rowInUsRegion(row)) return false;
-  return regionalMapLabelDiagnostics(row, bands).included;
+  return regionalMapLabelDiagnostics(row, bands, labelMode).included;
 }
 
 function rowContributesToStateAdrChoropleth(
   row: CampspotRvMapAggRow,
-  bands: RvMapRegionalRateBands
+  bands: RvMapRegionalRateBands,
+  labelMode: RegionalMapLabelMode = 'paired_adr_occ'
 ): boolean {
   if (!rowInUsRegion(row)) return false;
-  const diag = regionalMapLabelDiagnostics(row, bands);
-  return (
-    diag.adr2025 != null && passesRegionalMapRetailRateUsd(diag.adr2025, bands)
-  );
+  return rowQualifiesForStateAdrChoropleth(row, bands, labelMode);
 }
 
 function rowContributesToTrends(row: CampspotTrendsAggRow): boolean {
@@ -317,6 +382,19 @@ function rowContributesToRvParking(row: CampspotRvParkingAggRow): boolean {
   return true;
 }
 
+export type RecordUnitSliceChartTransparencyOptions = {
+  /** Glamping overview uses ADR-only Sage rows in trends; RV keeps paired cohort. */
+  contributesToTrends?: (row: CampspotTrendsAggRow) => boolean;
+  /** Override regional map inclusion (e.g. glamping Sage uses `adr_only` label mode). */
+  contributesToRegionalMap?: (row: CampspotRvMapAggRow) => boolean;
+  /** Glamping overview uses site-level glamping amenity ADR cohort (not RV-only). */
+  contributesToAmenityAdr?: (row: CampspotAmenityAdrAggRow) => boolean;
+  /** Glamping overview uses lower unit-count size tiers (not RV 25+/50+/100+). */
+  contributesToResortSize?: (row: CampspotSizeTierAggRow) => boolean;
+  /** Glamping state choropleth uses `adr_only` + glamping rate bands when Sage-only. */
+  contributesToStateAdrChoropleth?: (row: CampspotRvMapAggRow) => boolean;
+};
+
 /**
  * Record per-chart source counts for one classified row in a unit-filter bundle.
  */
@@ -324,18 +402,33 @@ export function recordUnitSliceChartTransparency(
   accum: ChartTransparencyAccum,
   row: RvOverviewWideRow,
   source: RvOverviewDataSource,
-  unitFilter: RvOverviewUnitFilterKey
+  unitFilter: RvOverviewUnitFilterKey,
+  options?: RecordUnitSliceChartTransparencyOptions
 ): void {
   const bands = regionalBandsForUnitFilter(unitFilter);
+  const contributesToTrends = options?.contributesToTrends ?? rowContributesToTrends;
+  const contributesToRegionalMap =
+    options?.contributesToRegionalMap ?? ((r) => rowContributesToRegionalMap(r, bands));
+  const contributesToAmenityAdr =
+    options?.contributesToAmenityAdr ?? rowContributesToAmenityAdr;
+  const contributesToResortSize =
+    options?.contributesToResortSize ?? rowContributesToResortSize;
+  const contributesToStateAdrChoropleth =
+    options?.contributesToStateAdrChoropleth ??
+    ((r) => rowContributesToStateAdrChoropleth(r, bands));
 
-  if (rowContributesToRegionalMap(row, bands)) bump(accum.regionalMap, source);
-  if (rowContributesToStateAdrChoropleth(row, bands)) bump(accum.stateAdrChoropleth, source);
-  if (rowContributesToTrends(row)) bump(accum.trends, source);
-  if (rowContributesToResortSize(row)) bump(accum.resortSize, source);
+  if (contributesToRegionalMap(row)) bump(accum.regionalMap, source);
+  if (contributesToStateAdrChoropleth(row)) {
+    bump(accum.stateAdrChoropleth, source, row, true);
+  }
+  if (contributesToTrends(row)) bump(accum.trends, source);
+  if (contributesToResortSize(row)) bump(accum.resortSize, source);
   if (rowContributesToSeasonRates(row)) bump(accum.seasonRates, source);
   if (rowContributesToSurfaceRates(row)) bump(accum.surfaceRates, source);
-  if (rowContributesToAmenityPropertyPct(row)) bump(accum.amenityPropertyPct, source);
-  if (rowContributesToAmenityAdr(row)) bump(accum.amenityAdr, source);
+  if (rowContributesToAmenityPropertyPct(row)) {
+    bump(accum.amenityPropertyPct, source, row, true);
+  }
+  if (contributesToAmenityAdr(row)) bump(accum.amenityAdr, source);
   if (rowContributesToRvParking(row)) bump(accum.rvParking, source);
 }
 

@@ -3,6 +3,7 @@ import type {
   CampspotRvOverviewPageData,
   CampspotRvOverviewSlice,
   RvOverviewScanTransparency,
+  RvOverviewSnapshotInventory,
   RvOverviewSnapshotMeta,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-page-data';
 import type { CampspotUnitTypeChartsResult } from '@/lib/rv-industry-overview/campspot-unit-type-chart-data';
@@ -26,7 +27,7 @@ export type RvIndustryOverviewClientProps = {
   rowsScannedRoverpass: number;
   scanTransparency?: RvOverviewScanTransparency;
   snapshotMeta: RvOverviewSnapshotMeta;
-  nextCacheRevalidateDays: number;
+  snapshotInventory?: RvOverviewSnapshotInventory;
 };
 
 export function buildRvIndustryOverviewClientProps(
@@ -34,8 +35,7 @@ export function buildRvIndustryOverviewClientProps(
   unitFilter: RvOverviewUnitFilterKey,
   sourceFilter: RvOverviewDataSourceFilterKey,
   displayPreferences: RvOverviewDisplayPreferences,
-  snapshotMeta: RvOverviewSnapshotMeta,
-  nextCacheRevalidateDays: number
+  snapshotMeta: RvOverviewSnapshotMeta
 ): RvIndustryOverviewClientProps {
   const resolved = resolveRvOverviewPayload(pageData, unitFilter, sourceFilter);
   const rvParkingChartsResult =
@@ -56,6 +56,6 @@ export function buildRvIndustryOverviewClientProps(
     rowsScannedRoverpass: resolved.rowsScannedRoverpass,
     scanTransparency: resolved.scanTransparency,
     snapshotMeta,
-    nextCacheRevalidateDays,
+    snapshotInventory: pageData.snapshotInventory,
   };
 }

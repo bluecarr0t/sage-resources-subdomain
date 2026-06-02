@@ -48,67 +48,55 @@ import type {
 } from '@/lib/rv-industry-overview/rv-overview-chart-transparency';
 import { sanitizeAdminDisplayError } from '@/lib/admin-display-error';
 import { RV_OVERVIEW_CHART_ERROR_FALLBACK } from '@/lib/rv-industry-overview/rv-overview-display-error';
+import {
+  IndustryOverviewChartLoading,
+  IndustryOverviewMapLoading,
+} from '@/components/admin/industry-overview/IndustryOverviewLoading';
+
+const rvChartLoading = () => (
+  <IndustryOverviewChartLoading messagesNamespace="admin.rvIndustryOverview" />
+);
+const rvMapLoading = () => <IndustryOverviewMapLoading messagesNamespace="admin.rvIndustryOverview" />;
 
 const RegionalCampspotMap = dynamic(
   () => import('./RegionalCampspotMap'),
-  { ssr: false, loading: () => <MapSkeleton /> }
+  { ssr: false, loading: rvMapLoading }
 );
 
 const StateAdrChoroplethMap = dynamic(
   () => import('./StateAdrChoroplethMap'),
-  { ssr: false, loading: () => <MapSkeleton /> }
+  { ssr: false, loading: rvMapLoading }
 );
 
 /** Code-split Recharts so the initial admin JS bundle stays smaller; loads in parallel per chart. */
 const OccupancyAdrTrendsChart = dynamic(() => import('./OccupancyAdrTrendsChart'), {
-  loading: () => <RechartsMountSkeleton />,
+  loading: rvChartLoading,
 });
 const ResortSizeImpactChart = dynamic(() => import('./ResortSizeImpactChart'), {
-  loading: () => <RechartsMountSkeleton />,
+  loading: rvChartLoading,
 });
 const UnitTypeByRateChart = dynamic(() => import('./UnitTypeByRateChart'), {
-  loading: () => <RechartsMountSkeleton />,
+  loading: rvChartLoading,
 });
 const UnitTypeDistributionChart = dynamic(() => import('./UnitTypeDistributionChart'), {
-  loading: () => <RechartsMountSkeleton />,
+  loading: rvChartLoading,
 });
 const RatesBySeasonChart = dynamic(() => import('./RatesBySeasonChart'), {
-  loading: () => <RechartsMountSkeleton />,
+  loading: rvChartLoading,
 });
 const SiteSurfaceRatesChart = dynamic(() => import('./SiteSurfaceRatesChart'), {
-  loading: () => <RechartsMountSkeleton />,
+  loading: rvChartLoading,
 });
 const AmenitiesByPropertyPctChart = dynamic(() => import('./AmenitiesByPropertyPctChart'), {
-  loading: () => <RechartsMountSkeleton />,
+  loading: rvChartLoading,
 });
 const AmenitiesByAvgAdrChart = dynamic(() => import('./AmenitiesByAvgAdrChart'), {
-  loading: () => <RechartsMountSkeleton />,
+  loading: rvChartLoading,
 });
 const RvSiteTypesDistributionRatesCharts = dynamic(
   () => import('./RvSiteTypesDistributionRatesCharts'),
-  { loading: () => <RechartsMountSkeleton /> }
+  { loading: rvChartLoading }
 );
-
-function RechartsMountSkeleton() {
-  return (
-    <div
-      className="flex min-h-[280px] w-full items-center justify-center rounded-md bg-neutral-50/80 dark:bg-neutral-950/55"
-      aria-hidden
-    >
-      <div className="h-48 w-full max-w-lg animate-pulse rounded bg-gray-200/90 dark:bg-gray-800" />
-    </div>
-  );
-}
-
-function MapSkeleton() {
-  return (
-    <div
-      className="w-full rounded-lg bg-white dark:bg-white animate-pulse"
-      style={{ aspectRatio: '960/580', minHeight: 280 }}
-      aria-hidden
-    />
-  );
-}
 
 type Props = RvIndustryOverviewClientProps;
 
@@ -127,7 +115,7 @@ export default function RvIndustryOverviewClient({
   rowsScannedRoverpass,
   scanTransparency,
   snapshotMeta,
-  nextCacheRevalidateDays,
+  snapshotInventory,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -590,15 +578,14 @@ export default function RvIndustryOverviewClient({
 
       <RvIndustryOverviewCacheBar
         initialMeta={snapshotMeta}
-        payloadRowsScannedTotal={rowsScannedTotal}
+        snapshotInventory={snapshotInventory}
+        rowsScannedTotal={rowsScannedTotal}
         rowsScannedCampspot={rowsScannedCampspot}
         rowsScannedRoverpass={rowsScannedRoverpass}
-        nextCacheRevalidateDays={nextCacheRevalidateDays}
       />
 
       <RvOverviewAnalystControls
         sourceFilter={sourceFilter}
-        displayPreferences={displayPreferences}
         campspotOnlyUnavailable={campspotOnlyUnavailable}
       />
 

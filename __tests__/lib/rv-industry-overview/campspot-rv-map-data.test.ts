@@ -5,6 +5,7 @@ import {
   regionalMapLabelDiagnostics,
   type CampspotRvMapAggRow,
 } from '@/lib/rv-industry-overview/campspot-rv-map-data';
+import { normalizeRoverpassRowToOverviewWide } from '@/lib/rv-industry-overview/rv-overview-wide-row';
 
 describe('aggregateCampspotRowsToRvMapData', () => {
   it('uses avg_retail_daily_rate_2025 only for regional 2025 ARDR and choropleth (ignores YTD in source)', () => {
@@ -20,7 +21,12 @@ describe('aggregateCampspotRowsToRvMapData', () => {
     const { byRegion, stateAdrChoropleth } = aggregateCampspotRowsToRvMapData(rows);
     expect(byRegion.west.meanAdr).toBe(100);
     expect(byRegion.west.meanOccupancyPct).toBe(50);
-    expect(stateAdrChoropleth.CA).toEqual({ n: 1, meanAdr: 100 });
+    expect(stateAdrChoropleth.CA).toEqual({
+      n: 1,
+      nUnits: 1,
+      nProperties: 0,
+      meanAdr: 100,
+    });
   });
 
   it('parses 2025 ARDR with currency and thousands separators (headline columns)', () => {
@@ -67,7 +73,92 @@ describe('aggregateCampspotRowsToRvMapData', () => {
     const { byState, stateAdrChoropleth } = aggregateCampspotRowsToRvMapData(rows);
     expect(byState.CA.meanAdr2025).toBe(100);
     expect(byState.CA.meanOcc2025).toBe(50);
-    expect(stateAdrChoropleth.CA).toEqual({ n: 1, meanAdr: 100 });
+    expect(stateAdrChoropleth.CA).toEqual({
+      n: 1,
+      nUnits: 1,
+      nProperties: 0,
+      meanAdr: 100,
+    });
+  });
+
+  it('sums quantity_of_units on state ADR choropleth when unit count mode is quantity_of_units', () => {
+    const rows: CampspotRvMapAggRow[] = [
+      {
+        state: 'TX',
+        property_name: 'Ranch',
+        city: 'Austin',
+        quantity_of_units: '10',
+        avg_retail_daily_rate_2025: '100',
+        occupancy_rate_2025: null,
+        occupancy_rate_2024: null,
+        avg_retail_daily_rate_2024: null,
+      },
+      {
+        state: 'TX',
+        property_name: 'Ranch',
+        city: 'Austin',
+        quantity_of_units: '5',
+        avg_retail_daily_rate_2025: '200',
+        occupancy_rate_2025: null,
+        occupancy_rate_2024: null,
+        avg_retail_daily_rate_2024: null,
+      },
+    ];
+    const { stateAdrChoropleth } = aggregateCampspotRowsToRvMapData(
+      rows,
+      RV_MAP_REGIONAL_RATE_BANDS_GLAMPING,
+      'adr_only',
+      'quantity_of_units'
+    );
+    expect(stateAdrChoropleth.TX).toEqual({
+      n: 2,
+      nUnits: 15,
+      nProperties: 1,
+      meanAdr: 150,
+    });
+  });
+
+  it('counts distinct properties and units on state ADR choropleth', () => {
+    const rows: CampspotRvMapAggRow[] = [
+      {
+        state: 'CA',
+        property_name: 'Alpine',
+        city: 'Bend',
+        avg_retail_daily_rate_2025: '100',
+        occupancy_rate_2025: null,
+        occupancy_rate_2024: null,
+        avg_retail_daily_rate_2024: null,
+      },
+      {
+        state: 'CA',
+        property_name: 'Alpine',
+        city: 'Bend',
+        avg_retail_daily_rate_2025: '200',
+        occupancy_rate_2025: null,
+        occupancy_rate_2024: null,
+        avg_retail_daily_rate_2024: null,
+      },
+      {
+        state: 'CA',
+        property_name: 'Coastal',
+        city: 'SF',
+        avg_retail_daily_rate_2025: '300',
+        occupancy_rate_2025: null,
+        occupancy_rate_2024: null,
+        avg_retail_daily_rate_2024: null,
+      },
+    ];
+    const { stateAdrChoropleth } = aggregateCampspotRowsToRvMapData(
+      rows,
+      RV_MAP_REGIONAL_RATE_BANDS_GLAMPING,
+      'adr_only'
+    );
+    expect(stateAdrChoropleth.CA).toEqual({
+      n: 3,
+      nUnits: 3,
+      nProperties: 2,
+      meanAdr: 200,
+    });
   });
 
   it('accumulates state ADR choropleth without occupancy (regional map still excludes row)', () => {
@@ -82,7 +173,32 @@ describe('aggregateCampspotRowsToRvMapData', () => {
     ];
     const { byRegion, stateAdrChoropleth } = aggregateCampspotRowsToRvMapData(rows);
     expect(byRegion.west.siteCount).toBe(0);
-    expect(stateAdrChoropleth.OR).toEqual({ n: 1, meanAdr: 55 });
+    expect(stateAdrChoropleth.OR).toEqual({
+      n: 1,
+      nUnits: 1,
+      nProperties: 0,
+      meanAdr: 55,
+    });
+  });
+
+  it('includes regional ARDR label without occupancy when labelMode is adr_only', () => {
+    const rows: CampspotRvMapAggRow[] = [
+      {
+        state: 'OR',
+        avg_retail_daily_rate_2025: '155',
+        occupancy_rate_2025: null,
+        occupancy_rate_2024: null,
+        avg_retail_daily_rate_2024: null,
+      },
+    ];
+    const { byRegion } = aggregateCampspotRowsToRvMapData(
+      rows,
+      RV_MAP_REGIONAL_RATE_BANDS_GLAMPING,
+      'adr_only'
+    );
+    expect(byRegion.west.siteCount).toBe(1);
+    expect(byRegion.west.meanAdr).toBe(155);
+    expect(byRegion.west.meanOccupancyPct).toBeNull();
   });
 
   it('state ADR choropleth counts multiple rows for the same state', () => {
@@ -256,6 +372,21 @@ describe('regionalMapLabelDiagnostics', () => {
       reason: 'missing_occupancy',
       adr2025: 55,
       occ2025: null,
+    });
+  });
+
+  it('includes RoverPass rows when occupancy is tagged 2024 but mirrored to 2025', () => {
+    const row = normalizeRoverpassRowToOverviewWide({
+      state: 'TX',
+      unit_type: 'RV Site',
+      roverpass_occupancy_rate: 62,
+      roverpass_occupancy_year: 2024,
+      rate_avg_retail_daily_rate: 95,
+    });
+    expect(regionalMapLabelDiagnostics(row)).toEqual({
+      included: true,
+      adr2025: 95,
+      occ2025: 62,
     });
   });
 });

@@ -9,8 +9,12 @@ export type RvOverviewUnitFilterKey = UnitTypeChartBucketKey;
 export const RV_OVERVIEW_UNIT_FILTER_KEYS: readonly RvOverviewUnitFilterKey[] =
   UNIT_TYPE_CHART_BUCKET_KEYS;
 
-/** URL query order for RV / Tent / Lodging toggles. */
-export const RV_OVERVIEW_UNIT_FILTER_TOGGLE_ORDER = RV_OVERVIEW_UNIT_FILTER_KEYS;
+/** UI toggle order: RV Sites, Tent Sites, Lodging (chart bucket keys unchanged). */
+export const RV_OVERVIEW_UNIT_FILTER_TOGGLE_ORDER: readonly RvOverviewUnitFilterKey[] = [
+  'rv',
+  'tent',
+  'glamping',
+];
 
 const UNIT_SET = new Set<string>(RV_OVERVIEW_UNIT_FILTER_KEYS);
 

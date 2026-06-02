@@ -34,7 +34,7 @@ describe('normalizeRoverpassRowToOverviewWide', () => {
     expect(wide.electrical_hook_up).toBe('50 Amp');
   });
 
-  it('routes occupancy to 2024 when roverpass_occupancy_year is 2024', () => {
+  it('mirrors 2024-tagged RoverPass occupancy to 2025 for regional map and trends', () => {
     const wide = normalizeRoverpassRowToOverviewWide({
       state: 'CO',
       roverpass_occupancy_rate: 55,
@@ -43,6 +43,6 @@ describe('normalizeRoverpassRowToOverviewWide', () => {
     });
 
     expect(wide.occupancy_rate_2024).toBe('55');
-    expect(wide.occupancy_rate_2025).toBeNull();
+    expect(wide.occupancy_rate_2025).toBe('55');
   });
 });

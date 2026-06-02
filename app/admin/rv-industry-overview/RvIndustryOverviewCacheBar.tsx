@@ -5,15 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui';
-import type { RvOverviewSnapshotMeta } from '@/lib/rv-industry-overview/campspot-rv-overview-page-data';
+import { IndustryOverviewSnapshotCounts } from '@/components/admin/industry-overview/IndustryOverviewSnapshotCounts';
+import type {
+  RvOverviewSnapshotInventory,
+  RvOverviewSnapshotMeta,
+} from '@/lib/rv-industry-overview/campspot-rv-overview-page-data';
 import { rvOverviewApiDisplayError } from '@/lib/rv-industry-overview/rv-overview-display-error';
 
 type Props = {
   initialMeta: RvOverviewSnapshotMeta;
-  payloadRowsScannedTotal: number;
+  snapshotInventory?: RvOverviewSnapshotInventory;
+  rowsScannedTotal: number;
   rowsScannedCampspot: number;
   rowsScannedRoverpass: number;
-  nextCacheRevalidateDays: number;
 };
 
 type RefreshResponse = {
@@ -27,10 +31,10 @@ type RefreshResponse = {
 
 export default function RvIndustryOverviewCacheBar({
   initialMeta,
-  payloadRowsScannedTotal,
+  snapshotInventory,
+  rowsScannedTotal,
   rowsScannedCampspot,
   rowsScannedRoverpass,
-  nextCacheRevalidateDays,
 }: Props) {
   const t = useTranslations('admin.rvIndustryOverview.cacheHealth');
   const format = useFormatter();
@@ -47,6 +51,13 @@ export default function RvIndustryOverviewCacheBar({
           timeStyle: 'short',
         })
       : null;
+
+  const propertyCount = snapshotInventory?.propertyCount ?? null;
+  const unitSiteCount = snapshotInventory?.unitSiteCount ?? rowsScannedTotal;
+  const unitSiteCampspot =
+    snapshotInventory?.unitSiteCountCampspot ?? rowsScannedCampspot;
+  const unitSiteRoverpass =
+    snapshotInventory?.unitSiteCountRoverpass ?? rowsScannedRoverpass;
 
   const handleRefresh = useCallback(async () => {
     setRefreshBusy(true);
@@ -91,33 +102,25 @@ export default function RvIndustryOverviewCacheBar({
               {meta.present && computedLabel ? computedLabel : t('snapshotMissing')}
             </dd>
           </div>
-          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-            <dt className="text-neutral-500 dark:text-neutral-400">{t('snapshotRows')}</dt>
-            <dd className="text-neutral-700 dark:text-neutral-300">
-              {meta.present && meta.rowsScanned != null
-                ? format.number(meta.rowsScanned, { maximumFractionDigits: 0 })
-                : t('notAvailable')}
-              {meta.present ? (
-                <span className="text-neutral-500 dark:text-neutral-400">
-                  {' '}
-                  ({t('payloadRows', {
-                    total: format.number(payloadRowsScannedTotal, {
-                      maximumFractionDigits: 0,
-                    }),
-                    campspot: format.number(rowsScannedCampspot, { maximumFractionDigits: 0 }),
-                    roverpass: format.number(rowsScannedRoverpass, { maximumFractionDigits: 0 }),
-                  })}
-                  )
-                </span>
-              ) : null}
-            </dd>
-          </div>
-          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-            <dt className="text-neutral-500 dark:text-neutral-400">{t('nextCacheTtl')}</dt>
-            <dd className="text-neutral-600 dark:text-neutral-400">
-              {t('nextCacheTtlValue', { days: nextCacheRevalidateDays })}
-            </dd>
-          </div>
+          {meta.present ? (
+            <IndustryOverviewSnapshotCounts
+              propertyCount={propertyCount}
+              unitSiteCount={unitSiteCount}
+              sources={{
+                primaryLabel: 'Campspot',
+                primaryCount: unitSiteCampspot,
+                secondaryLabel: 'Roverpass',
+                secondaryCount: unitSiteRoverpass,
+              }}
+              notAvailableLabel={t('notAvailable')}
+              propertyCountLabel={t('propertyCount')}
+              unitSiteCountLabel={t('unitSiteCount')}
+              sourceSplitLabel={({ primary, secondary }) =>
+                t('sourceSplit', { primary, secondary })
+              }
+              format={format}
+            />
+          ) : null}
         </dl>
 
         <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">

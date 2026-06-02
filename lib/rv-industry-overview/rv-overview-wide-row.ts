@@ -61,10 +61,14 @@ export function normalizeRoverpassRowToOverviewWide(
   let occupancy_rate_2025: string | null = null;
   let occupancy_rate_2024: string | null = null;
   if (occ != null && occ !== '') {
+    const occStr = String(occ);
     if (occYear === 2024) {
-      occupancy_rate_2024 = String(occ);
+      // RoverPass has one occupancy snapshot; preserve 2024 for YoY gates that need annual 2024.
+      occupancy_rate_2024 = occStr;
+      // 2025-only charts (regional map labels, trends 2025 bucket) still need a 2025 column.
+      occupancy_rate_2025 = occStr;
     } else {
-      occupancy_rate_2025 = String(occ);
+      occupancy_rate_2025 = occStr;
     }
   }
 

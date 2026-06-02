@@ -74,15 +74,36 @@ export const EXCLUDE_FROM_MAP_ABBR = new Set(['HI']);
 /** Pixel nudge for Alaska’s Albers inset (east/right). Hawaii label uses the same so “AK” stays centered on the state. */
 export const ALASKA_ALBERS_INSET_NUDGE = { x: 18, y: 0 } as const;
 
-/** CSS translate for the Hawaii Mercator overlay (negative x = left, negative y = up). */
-export const HAWAII_INSET_TRANSLATE_PX = { x: -32, y: -14 } as const;
+/** Vertical nudge for the Hawaii Mercator overlay (negative = up). */
+export const HAWAII_INSET_TRANSLATE_Y_PX = -30;
 
-/** @deprecated Prefer `HAWAII_INSET_TRANSLATE_PX.x` */
-export const HAWAII_INSET_TRANSLATE_X_PX = HAWAII_INSET_TRANSLATE_PX.x;
+/**
+ * Pull islands left within a wider absolute slot (same visual gap from Alaska as
+ * `translateX(-shift)` but keeps the “HI” label inside the map bounds).
+ */
+export const HAWAII_INSET_SHIFT_LEFT_PX = 56;
 
-export function hawaiiInsetTransformCss(): string {
-  const { x, y } = HAWAII_INSET_TRANSLATE_PX;
-  return `translate(${x}px, ${y}px)`;
+/** @deprecated Use `HAWAII_INSET_SHIFT_LEFT_PX` */
+export const HAWAII_INSET_TRANSLATE_X_PX = -HAWAII_INSET_SHIFT_LEFT_PX;
+
+export type HawaiiInsetSlotStyle = {
+  left: string;
+  bottom: string;
+  transform: string;
+  width: string;
+};
+
+export function hawaiiInsetSlotOuterStyle(insetWidthPx = 132): HawaiiInsetSlotStyle {
+  return {
+    left: 'max(8px, 0.75%)',
+    bottom: '4%',
+    transform: `translateY(${HAWAII_INSET_TRANSLATE_Y_PX}px)`,
+    width: `calc(min(14vw, ${insetWidthPx}px) + ${HAWAII_INSET_SHIFT_LEFT_PX}px)`,
+  };
+}
+
+export function hawaiiInsetSlotInnerStyle(): { marginLeft: number } {
+  return { marginLeft: -HAWAII_INSET_SHIFT_LEFT_PX };
 }
 
 /** Approximate region centroids [lon, lat] for Albers USA labels */

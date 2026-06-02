@@ -40,6 +40,10 @@ type Props = {
   yearEmphasis?: RvOverviewYearEmphasisKey;
   /** Omit title, intro, body, table heading & footnote (for JPEG: chart + data table only) */
   variant?: 'default' | 'compact';
+  /** Glamping Sage-only: hide occupancy bars and left axis. */
+  showOccupancy?: boolean;
+  /** Glamping uses smaller unit-count tiers and glamping copy. */
+  productVariant?: 'rv' | 'glamping';
 };
 
 function niceCeil(step: number, cap: number, ...vals: (number | null | undefined)[]) {
@@ -59,8 +63,14 @@ export default function ResortSizeImpactChart({
   rows,
   yearEmphasis = 'both',
   variant = 'default',
+  showOccupancy = true,
+  productVariant = 'rv',
 }: Props) {
-  const t = useTranslations('admin.rvIndustryOverview.sizeImpact');
+  const t = useTranslations(
+    productVariant === 'glamping'
+      ? 'admin.glampingIndustryOverview.sizeImpact'
+      : 'admin.rvIndustryOverview.sizeImpact'
+  );
   const compact = variant === 'compact';
   const occ2024Opacity = rvOverviewYearSeriesOpacity('2024', yearEmphasis);
   const occ2025Opacity = rvOverviewYearSeriesOpacity('2025', yearEmphasis);
@@ -116,31 +126,33 @@ export default function ResortSizeImpactChart({
               className="text-gray-700 dark:text-gray-300"
               interval={0}
             />
+            {showOccupancy ? (
+              <YAxis
+                yAxisId="left"
+                orientation="left"
+                domain={[0, occMax]}
+                tickFormatter={(v) => `${v}%`}
+                tick={{ fontSize: 11, fill: 'currentColor' }}
+                className="text-gray-700 dark:text-gray-300"
+                label={{
+                  value: t('axisOccupancy'),
+                  angle: -90,
+                  position: 'insideLeft',
+                  style: { fontSize: 11, fill: 'currentColor' },
+                }}
+              />
+            ) : null}
             <YAxis
-              yAxisId="left"
-              orientation="left"
-              domain={[0, occMax]}
-              tickFormatter={(v) => `${v}%`}
-              tick={{ fontSize: 11, fill: 'currentColor' }}
-              className="text-gray-700 dark:text-gray-300"
-              label={{
-                value: t('axisOccupancy'),
-                angle: -90,
-                position: 'insideLeft',
-                style: { fontSize: 11, fill: 'currentColor' },
-              }}
-            />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
+              yAxisId={showOccupancy ? 'right' : 'left'}
+              orientation={showOccupancy ? 'right' : 'left'}
               domain={[0, adrMax]}
               tickFormatter={(v) => `$${v}`}
               tick={{ fontSize: 11, fill: 'currentColor' }}
               className="text-gray-700 dark:text-gray-300"
               label={{
                 value: t('axisAdr'),
-                angle: 90,
-                position: 'insideRight',
+                angle: showOccupancy ? 90 : -90,
+                position: showOccupancy ? 'insideRight' : 'insideLeft',
                 style: { fontSize: 11, fill: 'currentColor' },
               }}
             />
@@ -156,12 +168,16 @@ export default function ResortSizeImpactChart({
                   <div className="rounded-md border border-neutral-200/75 dark:border-neutral-700 bg-white dark:bg-neutral-950 px-3 py-2 text-xs shadow-md">
                     <div className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{d.name}</div>
                     <div className="text-gray-700 dark:text-gray-300 space-y-0.5">
-                      <div>
-                        {t('series.occ2024')}: {fmtOcc(d.occ2024, d.occ2024Null)}
-                      </div>
-                      <div>
-                        {t('series.occ2025')}: {fmtOcc(d.occ2025, d.occ2025Null)}
-                      </div>
+                      {showOccupancy ? (
+                        <>
+                          <div>
+                            {t('series.occ2024')}: {fmtOcc(d.occ2024, d.occ2024Null)}
+                          </div>
+                          <div>
+                            {t('series.occ2025')}: {fmtOcc(d.occ2025, d.occ2025Null)}
+                          </div>
+                        </>
+                      ) : null}
                       <div>
                         {t('series.adr2024')}: {fmtAdr(d.adr2024, d.adr2024Null)}
                       </div>
@@ -174,26 +190,30 @@ export default function ResortSizeImpactChart({
               }}
             />
             <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
-            <Bar
-              yAxisId="left"
-              dataKey="occ2024"
-              name={t('series.occ2024')}
-              fill="#2563eb"
-              fillOpacity={occ2024Opacity}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={40}
-            />
-            <Bar
-              yAxisId="left"
-              dataKey="occ2025"
-              name={t('series.occ2025')}
-              fill="#16a34a"
-              fillOpacity={occ2025Opacity}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={40}
-            />
+            {showOccupancy ? (
+              <>
+                <Bar
+                  yAxisId="left"
+                  dataKey="occ2024"
+                  name={t('series.occ2024')}
+                  fill="#2563eb"
+                  fillOpacity={occ2024Opacity}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={40}
+                />
+                <Bar
+                  yAxisId="left"
+                  dataKey="occ2025"
+                  name={t('series.occ2025')}
+                  fill="#16a34a"
+                  fillOpacity={occ2025Opacity}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={40}
+                />
+              </>
+            ) : null}
             <Line
-              yAxisId="right"
+              yAxisId={showOccupancy ? 'right' : 'left'}
               type="monotone"
               dataKey="adr2024"
               name={t('series.adr2024')}
@@ -204,7 +224,7 @@ export default function ResortSizeImpactChart({
               activeDot={{ r: 5 }}
             />
             <Line
-              yAxisId="right"
+              yAxisId={showOccupancy ? 'right' : 'left'}
               type="monotone"
               dataKey="adr2025"
               name={t('series.adr2025')}
@@ -229,8 +249,12 @@ export default function ResortSizeImpactChart({
             <thead className="bg-neutral-50/80 dark:bg-neutral-950/55/80 text-gray-700 dark:text-gray-300">
               <tr>
                 <th className="px-3 py-2 font-semibold">{t('tableColTier')}</th>
-                <th className="px-3 py-2 font-semibold">{t('tableColOcc2024')}</th>
-                <th className="px-3 py-2 font-semibold">{t('tableColOcc2025')}</th>
+                {showOccupancy ? (
+                  <>
+                    <th className="px-3 py-2 font-semibold">{t('tableColOcc2024')}</th>
+                    <th className="px-3 py-2 font-semibold">{t('tableColOcc2025')}</th>
+                  </>
+                ) : null}
                 <th className="px-3 py-2 font-semibold">{t('tableColAdr2024')}</th>
                 <th className="px-3 py-2 font-semibold">{t('tableColAdr2025')}</th>
                 <th className="px-3 py-2 font-semibold">{t('tableColAdrChange')}</th>
@@ -245,8 +269,12 @@ export default function ResortSizeImpactChart({
                 return (
                   <tr key={d.tierKey}>
                     <td className="px-3 py-2 font-medium">{d.name}</td>
-                    <td className="px-3 py-2">{d.occ2024Null ? '-' : `${d.occ2024.toFixed(1)}%`}</td>
-                    <td className="px-3 py-2">{d.occ2025Null ? '-' : `${d.occ2025.toFixed(1)}%`}</td>
+                    {showOccupancy ? (
+                      <>
+                        <td className="px-3 py-2">{d.occ2024Null ? '-' : `${d.occ2024.toFixed(1)}%`}</td>
+                        <td className="px-3 py-2">{d.occ2025Null ? '-' : `${d.occ2025.toFixed(1)}%`}</td>
+                      </>
+                    ) : null}
                     <td className="px-3 py-2">{d.adr2024Null ? '-' : `$${d.adr2024.toFixed(2)}`}</td>
                     <td className="px-3 py-2">{d.adr2025Null ? '-' : `$${d.adr2025.toFixed(2)}`}</td>
                     <td className="px-3 py-2">{ch == null ? '-' : `${ch >= 0 ? '+' : ''}${ch.toFixed(1)}%`}</td>

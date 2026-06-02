@@ -28,6 +28,11 @@ export type CampspotAmenityPropertiesAggRow = {
   electrical_hook_up: string | null;
   sewer_hook_up: string | null;
   water_hookup: string | null;
+  /** Glamping Sage / Hipcamp split flags (optional on wide rows). */
+  unit_hot_tub?: string | null;
+  property_hot_tub?: string | null;
+  unit_sauna?: string | null;
+  property_sauna?: string | null;
 };
 
 export type AmenityPropertyPctRow = {
@@ -46,7 +51,7 @@ export type CampspotAmenityPropertiesChartResult = {
 
 type PropFlags = Record<AmenityPropertyChartKey, boolean>;
 
-function campspotTruthyAmenity(val: unknown): boolean {
+export function campspotTruthyAmenity(val: unknown): boolean {
   if (val == null || val === '') return false;
   const s = String(val).trim().toLowerCase();
   if (!s || s === 'no data') return false;

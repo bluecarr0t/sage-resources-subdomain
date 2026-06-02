@@ -1,14 +1,18 @@
 import { Metadata } from 'next';
-import RvIndustryOverviewClient from './RvIndustryOverviewClient';
+import dynamic from 'next/dynamic';
 import { buildRvIndustryOverviewClientProps } from '@/lib/rv-industry-overview/rv-overview-client-props';
 import {
-  getCampspotRvOverviewPageData,
-  getRvOverviewSnapshotMeta,
+  getRvIndustryOverviewPageLoad,
   RV_INDUSTRY_OVERVIEW_REVALIDATE_SECONDS,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-page-data';
 import { parseRvOverviewDataSourceFilterKey } from '@/lib/rv-industry-overview/rv-overview-data-source-filter';
 import { parseRvOverviewDisplayPreferences } from '@/lib/rv-industry-overview/rv-overview-display-preferences';
 import { parseRvOverviewUnitFilterKey } from '@/lib/rv-industry-overview/rv-overview-unit-filter';
+import { IndustryOverviewPageLoading } from '@/components/admin/industry-overview/IndustryOverviewLoading';
+
+const RvIndustryOverviewClient = dynamic(() => import('./RvIndustryOverviewClient'), {
+  loading: () => <IndustryOverviewPageLoading messagesNamespace="admin.rvIndustryOverview" />,
+});
 
 /** Aligns full route ISR with the `unstable_cache` TTL in the data layer. */
 export const revalidate = RV_INDUSTRY_OVERVIEW_REVALIDATE_SECONDS;
@@ -22,10 +26,6 @@ export const metadata: Metadata = {
   },
 };
 
-const NEXT_CACHE_REVALIDATE_DAYS = Math.round(
-  RV_INDUSTRY_OVERVIEW_REVALIDATE_SECONDS / (24 * 60 * 60)
-);
-
 type PageProps = {
   searchParams?: { unit?: string; source?: string; year?: string; rate?: string };
 };
@@ -38,18 +38,14 @@ export default async function RvIndustryOverviewPage({ searchParams }: PageProps
     rate: searchParams?.rate,
   });
 
-  const [pageData, snapshotMeta] = await Promise.all([
-    getCampspotRvOverviewPageData(),
-    getRvOverviewSnapshotMeta(),
-  ]);
+  const { pageData, snapshotMeta } = await getRvIndustryOverviewPageLoad();
 
   const clientProps = buildRvIndustryOverviewClientProps(
     pageData,
     unitFilter,
     sourceFilter,
     displayPreferences,
-    snapshotMeta,
-    NEXT_CACHE_REVALIDATE_DAYS
+    snapshotMeta
   );
 
   return (

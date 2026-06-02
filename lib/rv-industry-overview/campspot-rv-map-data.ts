@@ -51,22 +51,62 @@ function passesRegionalMapRetailRateUsd(
   );
 }
 
-/** Min Campspot rows with positive 2025 ARDR (`avg_retail_daily_rate_2025`) per state to show a rate on the state ADR choropleth. */
+/** Min site rows per state to show a mean on the RV state ADR choropleth. */
 export const STATE_ADR_CHOROPLETH_MIN_N = 8;
+
+/** Glamping cohorts are smaller per state — use a lower gate so Sage/Hipcamp coverage is visible. */
+export const GLAMPING_STATE_ADR_CHOROPLETH_MIN_N = 3;
 
 export type StateAdrChoroplethEntry = {
   /** Unweighted mean of row-level 2025 ARDR when n > 0; null when n === 0. */
   meanAdr: number | null;
+  /** Qualifying inventory rows in state (min-N gate and partial labels). */
   n: number;
+  /** Distinct properties (name + state + city) with at least one qualifying unit row. */
+  nProperties: number;
+  /**
+   * Unit count for display: qualifying rows (`rows`) or sum of `quantity_of_units` (`quantity_of_units`).
+   */
+  nUnits: number;
 };
+
+/** How state ADR choropleth totals units on the regional map. */
+export type RvMapChoroplethUnitCountMode = 'rows' | 'quantity_of_units';
 
 export type CampspotRvMapAggRow = {
   state: string | null;
+  property_name?: string | null;
+  city?: string | null;
+  quantity_of_units?: string | null;
   avg_retail_daily_rate_2025: string | null;
   occupancy_rate_2025: string | null;
   occupancy_rate_2024: string | null;
   avg_retail_daily_rate_2024: string | null;
 };
+
+type StateAdrChoroplethAccum = {
+  adrs: number[];
+  propertyKeys: Set<string>;
+  unitCount: number;
+};
+
+export function choroplethUnitWeightForRow(
+  row: CampspotRvMapAggRow,
+  mode: RvMapChoroplethUnitCountMode
+): number {
+  if (mode === 'rows') return 1;
+  const q = parseCampspotNumber(row.quantity_of_units);
+  if (q != null && q >= 1) return Math.round(q);
+  return 0;
+}
+
+function mapChoroplethPropertyKey(row: CampspotRvMapAggRow): string | null {
+  const name = (row.property_name ?? '').trim().toLowerCase();
+  const city = (row.city ?? '').trim().toLowerCase();
+  const st = normalizeState(row.state);
+  if (!name || !st) return null;
+  return `${name}|${st}|${city}`;
+}
 
 export type StateRvMetrics = {
   meanOcc2024: number | null;
@@ -128,6 +168,13 @@ function adr2025AnnualForMatchedCohortRow(row: CampspotRvMapAggRow): number | nu
   return null;
 }
 
+/**
+ * How five-region map labels include rows.
+ * - `paired_adr_occ`: 2025 ARDR and occupancy in standard bands (RV / Hipcamp default).
+ * - `adr_only`: 2025 ARDR in band only (Sage glamping — no occupancy field).
+ */
+export type RegionalMapLabelMode = 'paired_adr_occ' | 'adr_only';
+
 /** Why a row is omitted from the five-region ARDR + occupancy labels on the regional map (2025 gate). */
 export type RegionalMapLabelExclusionReason =
   | 'missing_2025_adr'
@@ -151,9 +198,24 @@ export type RegionalMapLabelDiagnostics =
  * Explains whether a row counts toward regional map label means (same logic as `foldRvMapRows`).
  * Choropleth ADR uses `adr2025` when non-null and in the regional rate band (no occupancy gate).
  */
+/** Whether a row counts toward per-state ADR choropleth (ADR in regional band; occupancy optional). */
+export function rowQualifiesForStateAdrChoropleth(
+  row: CampspotRvMapAggRow,
+  bands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT,
+  labelMode: RegionalMapLabelMode = 'paired_adr_occ'
+): boolean {
+  const stateAbbr = normalizeState(row.state);
+  if (!stateAbbr || !getRvIndustryRegionForStateAbbr(stateAbbr)) return false;
+  const diag = regionalMapLabelDiagnostics(row, bands, labelMode);
+  return (
+    diag.adr2025 != null && passesRegionalMapRetailRateUsd(diag.adr2025, bands)
+  );
+}
+
 export function regionalMapLabelDiagnostics(
   row: CampspotRvMapAggRow,
-  bands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT
+  bands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT,
+  labelMode: RegionalMapLabelMode = 'paired_adr_occ'
 ): RegionalMapLabelDiagnostics {
   const adrRegional = adr2025ForRow(row);
   const occ = parseCampspotOccupancyPercent(row.occupancy_rate_2025);
@@ -171,6 +233,9 @@ export function regionalMapLabelDiagnostics(
       adr2025: adrRegional,
       occ2025: occ,
     };
+  }
+  if (labelMode === 'adr_only') {
+    return { included: true, adr2025: adrRegional, occ2025: occ };
   }
   if (occ == null) {
     return { included: false, reason: 'missing_occupancy', adr2025: adrRegional, occ2025: null };
@@ -192,30 +257,42 @@ export function regionalMapLabelDiagnostics(
 export function foldRvMapRows(
   regional: RegionalAccum,
   stateBuckets: Map<string, StateBucket>,
-  stateAdrChoropleth: Map<string, number[]>,
+  stateAdrChoropleth: Map<string, StateAdrChoroplethAccum>,
   rows: CampspotRvMapAggRow[],
-  regionalRateBands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT
+  regionalRateBands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT,
+  regionalLabelMode: RegionalMapLabelMode = 'paired_adr_occ',
+  choroplethUnitCountMode: RvMapChoroplethUnitCountMode = 'rows'
 ): void {
   for (const row of rows) {
     const stateAbbr = normalizeState(row.state);
     if (!stateAbbr) continue;
 
     const regionId = getRvIndustryRegionForStateAbbr(stateAbbr);
+    const labelDiag = regionalMapLabelDiagnostics(row, regionalRateBands, regionalLabelMode);
+
+    if (
+      regionId &&
+      labelDiag.adr2025 != null &&
+      passesRegionalMapRetailRateUsd(labelDiag.adr2025, regionalRateBands)
+    ) {
+      let accum = stateAdrChoropleth.get(stateAbbr);
+      if (!accum) {
+        accum = { adrs: [], propertyKeys: new Set(), unitCount: 0 };
+        stateAdrChoropleth.set(stateAbbr, accum);
+      }
+      accum.adrs.push(labelDiag.adr2025);
+      accum.unitCount += choroplethUnitWeightForRow(row, choroplethUnitCountMode);
+      const pk = mapChoroplethPropertyKey(row);
+      if (pk) accum.propertyKeys.add(pk);
+    }
+
     if (regionId) {
-      const labelDiag = regionalMapLabelDiagnostics(row, regionalRateBands);
       if (labelDiag.included) {
         const bucket = regional[regionId];
         bucket.adr.push(labelDiag.adr2025);
-        bucket.occ.push(labelDiag.occ2025);
-      }
-
-      if (
-        labelDiag.adr2025 != null &&
-        passesRegionalMapRetailRateUsd(labelDiag.adr2025, regionalRateBands)
-      ) {
-        const arr = stateAdrChoropleth.get(stateAbbr) ?? [];
-        arr.push(labelDiag.adr2025);
-        stateAdrChoropleth.set(stateAbbr, arr);
+        if (labelDiag.occ2025 != null && passesStandardCampspotOccupancyPercent(labelDiag.occ2025)) {
+          bucket.occ.push(labelDiag.occ2025);
+        }
       }
     }
 
@@ -277,11 +354,22 @@ function stateBucketsToByState(stateBuckets: Map<string, StateBucket>): Record<s
   return byState;
 }
 
-export function createRvMapFoldState() {
+export type CreateRvMapFoldStateOptions = {
+  regionalLabelMode?: RegionalMapLabelMode;
+  choroplethUnitCountMode?: RvMapChoroplethUnitCountMode;
+};
+
+export function createRvMapFoldState(
+  options: CreateRvMapFoldStateOptions | RegionalMapLabelMode = 'paired_adr_occ'
+) {
+  const opts: CreateRvMapFoldStateOptions =
+    typeof options === 'string' ? { regionalLabelMode: options } : options;
   return {
     regional: emptyRegionalAccum(),
     stateBuckets: new Map<string, StateBucket>(),
-    stateAdrChoropleth: new Map<string, number[]>(),
+    stateAdrChoropleth: new Map<string, StateAdrChoroplethAccum>(),
+    regionalLabelMode: opts.regionalLabelMode ?? 'paired_adr_occ',
+    choroplethUnitCountMode: opts.choroplethUnitCountMode ?? 'rows',
   };
 }
 
@@ -304,19 +392,30 @@ export function finalizeRvMapFoldState(
   return {
     byRegion: regionalToByRegion(state.regional),
     byState: stateBucketsToByState(state.stateBuckets),
-    stateAdrChoropleth: stateAdrMapToChoropleth(state.stateAdrChoropleth),
+    stateAdrChoropleth: stateAdrMapToChoropleth(
+      state.stateAdrChoropleth,
+      state.choroplethUnitCountMode
+    ),
     rowsScanned,
     error: null,
   };
 }
 
-function stateAdrMapToChoropleth(m: Map<string, number[]>): Record<string, StateAdrChoroplethEntry> {
+function stateAdrMapToChoropleth(
+  m: Map<string, StateAdrChoroplethAccum>,
+  choroplethUnitCountMode: RvMapChoroplethUnitCountMode = 'rows'
+): Record<string, StateAdrChoroplethEntry> {
   const out: Record<string, StateAdrChoroplethEntry> = {};
-  for (const [abbr, vals] of m) {
-    const n = vals.length;
+  for (const [abbr, accum] of m) {
+    const nRows = accum.adrs.length;
+    const nUnits =
+      choroplethUnitCountMode === 'quantity_of_units' ? accum.unitCount : nRows;
+    const nProperties = accum.propertyKeys.size;
     out[abbr] = {
-      n,
-      meanAdr: n > 0 ? meanRounded(vals) : null,
+      n: nRows,
+      nUnits,
+      nProperties,
+      meanAdr: nRows > 0 ? meanRounded(accum.adrs) : null,
     };
   }
   return out;
@@ -325,7 +424,9 @@ function stateAdrMapToChoropleth(m: Map<string, number[]>): Record<string, State
 /** Pure aggregation for tests */
 export function aggregateCampspotRowsToRvMapData(
   rows: CampspotRvMapAggRow[],
-  regionalRateBands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT
+  regionalRateBands: RvMapRegionalRateBands = RV_MAP_REGIONAL_RATE_BANDS_DEFAULT,
+  regionalLabelMode: RegionalMapLabelMode = 'paired_adr_occ',
+  choroplethUnitCountMode: RvMapChoroplethUnitCountMode = 'rows'
 ): {
   byRegion: Record<RvIndustryRegionId, RegionalAggregateRow>;
   byState: Record<string, StateRvMetrics>;
@@ -333,12 +434,20 @@ export function aggregateCampspotRowsToRvMapData(
 } {
   const regional = emptyRegionalAccum();
   const stateBuckets = new Map<string, StateBucket>();
-  const stateAdrChoropleth = new Map<string, number[]>();
-  foldRvMapRows(regional, stateBuckets, stateAdrChoropleth, rows, regionalRateBands);
+  const stateAdrChoropleth = new Map<string, StateAdrChoroplethAccum>();
+  foldRvMapRows(
+    regional,
+    stateBuckets,
+    stateAdrChoropleth,
+    rows,
+    regionalRateBands,
+    regionalLabelMode,
+    choroplethUnitCountMode
+  );
   return {
     byRegion: regionalToByRegion(regional),
     byState: stateBucketsToByState(stateBuckets),
-    stateAdrChoropleth: stateAdrMapToChoropleth(stateAdrChoropleth),
+    stateAdrChoropleth: stateAdrMapToChoropleth(stateAdrChoropleth, choroplethUnitCountMode),
   };
 }
 

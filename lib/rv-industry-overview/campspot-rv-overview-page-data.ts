@@ -4,6 +4,11 @@
  */
 
 import { unstable_cache } from 'next/cache';
+import { cache as reactCache } from 'react';
+import {
+  industryOverviewSnapshotMetaFromRow,
+  type IndustryOverviewCacheRow,
+} from '@/lib/industry-overview/industry-overview-cache-row';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@/lib/supabase';
 import {
@@ -104,6 +109,12 @@ import {
 import type { CampspotRvParkingChartsResult } from '@/lib/rv-industry-overview/campspot-rv-parking-charts-data';
 import { RvOverviewSnapshotMissingError } from '@/lib/rv-industry-overview/rv-overview-errors';
 import {
+  createRvOverviewSnapshotInventoryAccum,
+  finalizeRvOverviewSnapshotInventory,
+  recordRvOverviewSnapshotInventoryRow,
+  type RvOverviewSnapshotInventory,
+} from '@/lib/rv-industry-overview/rv-overview-snapshot-inventory';
+import {
   createChartTransparencyAccum,
   createUnclassifiedAccum,
   finalizeChartTransparencyAccum,
@@ -197,7 +208,11 @@ export type CampspotRvOverviewPageData = {
   campspotOnly?: RvOverviewCampspotOnlyPayload;
   /** Per-source scan caps (omitted on snapshots before v19+). */
   scanMeta?: RvOverviewScanMeta;
+  /** Distinct properties and unit/site rows in the last snapshot scan (omitted on older snapshots). */
+  snapshotInventory?: RvOverviewSnapshotInventory;
 };
+
+export type { RvOverviewSnapshotInventory } from '@/lib/rv-industry-overview/rv-overview-snapshot-inventory';
 
 export type { RvOverviewScanMeta, RvOverviewSourceScanMeta } from '@/lib/rv-industry-overview/rv-overview-scan-meta';
 
@@ -238,7 +253,14 @@ function foldWideRowIntoBundle(
     unitFilter === 'glamping'
       ? RV_MAP_REGIONAL_RATE_BANDS_GLAMPING
       : RV_MAP_REGIONAL_RATE_BANDS_DEFAULT;
-  foldRvMapRows(b.rvMap.regional, b.rvMap.stateBuckets, b.rvMap.stateAdrChoropleth, [row], regionalBands);
+  foldRvMapRows(
+    b.rvMap.regional,
+    b.rvMap.stateBuckets,
+    b.rvMap.stateAdrChoropleth,
+    [row],
+    regionalBands,
+    b.rvMap.regionalLabelMode
+  );
   foldTrendsRows(b.trends, [row]);
   foldSizeTierRows(b.sizeTier, [row]);
   foldSeasonRateRows(b.season, [row]);
@@ -405,43 +427,60 @@ function isValidRvOverviewPayload(v: unknown): v is CampspotRvOverviewPageData {
   return true;
 }
 
-/**
- * Fresh read of snapshot metadata for admin cache health UI (bypasses `unstable_cache`).
- */
-export async function getRvOverviewSnapshotMeta(): Promise<RvOverviewSnapshotMeta> {
-  const supabase = createServerClient();
+const RV_OVERVIEW_CACHE_ROW_SELECT = 'payload, computed_at, rows_scanned';
+
+async function readRvOverviewCacheRow(
+  supabase: SupabaseClient
+): Promise<IndustryOverviewCacheRow | null> {
   const { data, error } = await supabase
     .from(CAMPSPOT_RV_OVERVIEW_CACHE_TABLE)
-    .select('computed_at, rows_scanned')
+    .select(RV_OVERVIEW_CACHE_ROW_SELECT)
     .eq('id', 1)
     .maybeSingle();
 
-  if (error || !data) {
-    return { present: false, computedAt: null, rowsScanned: null };
-  }
-
+  if (error || !data) return null;
   return {
-    present: true,
-    computedAt: data.computed_at ?? null,
-    rowsScanned:
-      typeof data.rows_scanned === 'number' ? data.rows_scanned : null,
+    payload: data.payload ?? null,
+    computed_at: data.computed_at ?? null,
+    rows_scanned: typeof data.rows_scanned === 'number' ? data.rows_scanned : null,
   };
 }
+
+function rvOverviewSnapshotMetaFromCacheRow(
+  row: IndustryOverviewCacheRow | null
+): RvOverviewSnapshotMeta {
+  return industryOverviewSnapshotMetaFromRow(row);
+}
+
+function parseRvOverviewPayloadFromCacheRow(
+  row: IndustryOverviewCacheRow | null
+): CampspotRvOverviewPageData | null {
+  if (!row?.payload) return null;
+  if (!isValidRvOverviewPayload(row.payload)) return null;
+  const normalized = normalizeRvOverviewPayloadFromCache(row.payload);
+  return sanitizeRvOverviewPageDataPayload(normalized);
+}
+
+/** Fresh Postgres read for admin cache health UI (bypasses `unstable_cache`). */
+export const getRvOverviewSnapshotMeta = reactCache(
+  async (): Promise<RvOverviewSnapshotMeta> => {
+    const supabase = createServerClient();
+    const row = await readRvOverviewCacheRow(supabase);
+    return rvOverviewSnapshotMetaFromCacheRow(row);
+  }
+);
 
 async function readRvOverviewPayloadFromPg(
   supabase: SupabaseClient
 ): Promise<CampspotRvOverviewPageData | null> {
-  const { data, error } = await supabase
-    .from(CAMPSPOT_RV_OVERVIEW_CACHE_TABLE)
-    .select('payload')
-    .eq('id', 1)
-    .maybeSingle();
-
-  if (error || !data?.payload) return null;
-  if (!isValidRvOverviewPayload(data.payload)) return null;
-  const normalized = normalizeRvOverviewPayloadFromCache(data.payload);
-  return sanitizeRvOverviewPageDataPayload(normalized);
+  const row = await readRvOverviewCacheRow(supabase);
+  return parseRvOverviewPayloadFromCacheRow(row);
 }
+
+export type RvIndustryOverviewPageLoad = {
+  pageData: CampspotRvOverviewPageData;
+  snapshotMeta: RvOverviewSnapshotMeta;
+};
 
 async function writeRvOverviewPayloadToPg(
   supabase: SupabaseClient,
@@ -607,6 +646,7 @@ export async function fetchCampspotRvOverviewPageDataUncached(
   const unitTypeComparisonFoldCampspotOnly = createUnitTypeComparisonFoldState();
   const unclassifiedAccum = createUnclassifiedAccum();
   const unclassifiedCampspotOnly = createUnclassifiedAccum();
+  const inventoryAccum = createRvOverviewSnapshotInventoryAccum();
 
   const campspotScan = await scanOverviewSourceTable(
     supabase,
@@ -617,6 +657,9 @@ export async function fetchCampspotRvOverviewPageDataUncached(
       mapRow: (row) => row as RvOverviewWideRow,
     },
     (rows) => {
+      for (const row of rows) {
+        recordRvOverviewSnapshotInventoryRow(inventoryAccum, row, 'campspot');
+      }
       foldOverviewWideRows(rows, byFilter, unitTypeComparisonFold, unclassifiedAccum, 'campspot');
       foldOverviewWideRows(
         rows,
@@ -653,8 +696,12 @@ export async function fetchCampspotRvOverviewPageDataUncached(
       maxRows: ROVERPASS_RV_OVERVIEW_MAX_ROWS,
       mapRow: normalizeRoverpassRowToOverviewWide,
     },
-    (rows) =>
-      foldOverviewWideRows(rows, byFilter, unitTypeComparisonFold, unclassifiedAccum, 'roverpass')
+    (rows) => {
+      for (const row of rows) {
+        recordRvOverviewSnapshotInventoryRow(inventoryAccum, row, 'roverpass');
+      }
+      foldOverviewWideRows(rows, byFilter, unitTypeComparisonFold, unclassifiedAccum, 'roverpass');
+    }
   );
 
   const rowsScannedTotal = campspotScan.rowsScanned + roverpassScan.rowsScanned;
@@ -706,6 +753,7 @@ export async function fetchCampspotRvOverviewPageDataUncached(
     rowsScannedCampspot: campspotScan.rowsScanned,
     rowsScannedRoverpass: roverpassScan.rowsScanned,
     scanMeta,
+    snapshotInventory: finalizeRvOverviewSnapshotInventory(inventoryAccum),
     scanTransparency: finalizeUnclassifiedAccum(unclassifiedAccum),
     unitTypeComparisonResult: {
       rateRows: unitTypeCompFinal.rateRows,
@@ -752,10 +800,14 @@ export async function fetchCampspotRvOverviewPageDataUncached(
  * Postgres snapshot of the TS-built payload (one row). Avoids streaming `campspot` on every cold Next miss.
  * Aggregation rules remain in TypeScript; the table stores the materialized JSON only.
  */
-async function loadCampspotRvOverviewPageData(): Promise<CampspotRvOverviewPageData> {
+async function resolveRvIndustryOverviewPageLoad(): Promise<RvIndustryOverviewPageLoad> {
   const supabase = createServerClient();
-  const fromPg = await readRvOverviewPayloadFromPg(supabase);
-  if (fromPg) return fromPg;
+  const row = await readRvOverviewCacheRow(supabase);
+  const snapshotMeta = rvOverviewSnapshotMetaFromCacheRow(row);
+  const fromPg = parseRvOverviewPayloadFromCacheRow(row);
+  if (fromPg) {
+    return { pageData: fromPg, snapshotMeta };
+  }
 
   if (!rvOverviewLiveScanAllowed()) {
     throw new RvOverviewSnapshotMissingError(
@@ -768,11 +820,18 @@ async function loadCampspotRvOverviewPageData(): Promise<CampspotRvOverviewPageD
   if (!computed.byUnitFilter.rv.mapResult.error) {
     await writeRvOverviewPayloadToPg(supabase, computed);
   }
-  return computed;
+  return {
+    pageData: computed,
+    snapshotMeta: {
+      present: true,
+      computedAt: new Date().toISOString(),
+      rowsScanned: computed.rowsScannedTotal,
+    },
+  };
 }
 
 const RV_OVERVIEW_CACHE_KEY =
-  'campspot-rv-industry-overview-page-v19-campspot-only-export-pack';
+  'campspot-rv-industry-overview-page-v22-roverpass-regional-occ-2025';
 
 /** ~90 days — source data is updated on a quarterly cadence; avoids repeated full-table scans. */
 export const RV_INDUSTRY_OVERVIEW_REVALIDATE_SECONDS = 90 * 24 * 60 * 60;
@@ -780,13 +839,22 @@ export const RV_INDUSTRY_OVERVIEW_REVALIDATE_SECONDS = 90 * 24 * 60 * 60;
 /** Tag for `revalidateTag('rv-industry-overview')` when Campspot data is refreshed early. */
 export const RV_INDUSTRY_OVERVIEW_CACHE_TAG = 'rv-industry-overview';
 
-const getCachedCampspotRvOverviewPageData = unstable_cache(loadCampspotRvOverviewPageData, [RV_OVERVIEW_CACHE_KEY], {
-  revalidate: RV_INDUSTRY_OVERVIEW_REVALIDATE_SECONDS,
-  tags: [RV_INDUSTRY_OVERVIEW_CACHE_TAG],
-});
+const getCachedRvIndustryOverviewPageLoad = unstable_cache(
+  resolveRvIndustryOverviewPageLoad,
+  [RV_OVERVIEW_CACHE_KEY],
+  {
+    revalidate: RV_INDUSTRY_OVERVIEW_REVALIDATE_SECONDS,
+    tags: [RV_INDUSTRY_OVERVIEW_CACHE_TAG],
+  }
+);
+
+/** One Postgres read + Next cache for admin page render (payload and cache-bar meta). */
+export const getRvIndustryOverviewPageLoad = reactCache(
+  async (): Promise<RvIndustryOverviewPageLoad> => getCachedRvIndustryOverviewPageLoad()
+);
 
 export async function getCampspotRvOverviewPageData(): Promise<CampspotRvOverviewPageData> {
-  return getCachedCampspotRvOverviewPageData();
+  return (await getRvIndustryOverviewPageLoad()).pageData;
 }
 
 /**

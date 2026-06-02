@@ -23,5 +23,6 @@ export function parseCampspotOccupancyPercent(raw: unknown): number | null {
 export function meanRounded(nums: number[]): number | null {
   if (nums.length === 0) return null;
   const s = nums.reduce((a, b) => a + b, 0);
-  return Math.round((s / nums.length) * 100) / 100;
+  const mean = Math.round((s / nums.length) * 100) / 100;
+  return Number.isFinite(mean) ? mean : null;
 }

@@ -12,11 +12,16 @@ import {
   YAxis,
 } from 'recharts';
 import {
+  AMENITY_PROPERTY_CHART_KEYS,
   type AmenityPropertyChartKey,
   type AmenityPropertyPctRow,
 } from '@/lib/rv-industry-overview/campspot-amenity-properties-chart-data';
+import {
+  GLAMPING_AMENITY_PROPERTY_CHART_KEYS,
+  type GlampingAmenityPropertyChartKey,
+} from '@/lib/glamping-industry-overview/glamping-amenity-properties-chart-data';
 
-const BAR_FILL: Record<AmenityPropertyChartKey, string> = {
+const RV_BAR_FILL: Record<AmenityPropertyChartKey, string> = {
   hot_tub_sauna: '#b8953a',
   pool: '#f97316',
   fifty_amp_electrical: '#c9986b',
@@ -24,15 +29,27 @@ const BAR_FILL: Record<AmenityPropertyChartKey, string> = {
   water_hookup: '#6d8c62',
 };
 
+const GLAMPING_BAR_FILL: Record<GlampingAmenityPropertyChartKey, string> = {
+  unit_hot_tub: '#b8953a',
+  property_hot_tub: '#9a7b2e',
+  unit_sauna: '#7c6b9e',
+  property_sauna: '#5c4d78',
+  pool: '#f97316',
+  hot_tub_sauna: '#c4a24a',
+};
+
 type Datum = {
-  amenityKey: AmenityPropertyChartKey;
+  amenityKey: string;
   name: string;
   pct: number;
   labelText: string;
 };
 
 type Props = {
-  rows: AmenityPropertyPctRow[];
+  rows: Array<{ amenityKey: string; pct: number | null; nProperties: number; nWithAmenity: number }>;
+  variant?: 'rv' | 'glamping';
+  /** When set, only these keys are shown (in order). */
+  chartKeys?: readonly string[];
 };
 
 function niceCeil(step: number, floor: number, ...vals: number[]) {
@@ -40,13 +57,29 @@ function niceCeil(step: number, floor: number, ...vals: number[]) {
   return Math.ceil(m / step) * step;
 }
 
-export default function AmenitiesByPropertyPctChart({ rows }: Props) {
-  const t = useTranslations('admin.rvIndustryOverview.amenitiesByPropertyPct');
+export default function AmenitiesByPropertyPctChart({
+  rows,
+  variant = 'rv',
+  chartKeys,
+}: Props) {
+  const t = useTranslations(
+    variant === 'glamping'
+      ? 'admin.glampingIndustryOverview.amenitiesByPropertyPct'
+      : 'admin.rvIndustryOverview.amenitiesByPropertyPct'
+  );
+
+  const barFill = variant === 'glamping' ? GLAMPING_BAR_FILL : RV_BAR_FILL;
+  const defaultKeys =
+    variant === 'glamping' ? GLAMPING_AMENITY_PROPERTY_CHART_KEYS : AMENITY_PROPERTY_CHART_KEYS;
+  const keys = chartKeys ?? defaultKeys;
 
   const nProperties = rows[0]?.nProperties ?? 0;
 
   const { data, xMax, ticks } = useMemo(() => {
-    const withPct = rows.filter((r) => r.pct != null) as Array<AmenityPropertyPctRow & { pct: number }>;
+    const keySet = new Set(keys);
+    const withPct = rows.filter(
+      (r) => r.pct != null && keySet.has(r.amenityKey)
+    ) as Array<AmenityPropertyPctRow & { pct: number }>;
     const sorted = [...withPct].sort((a, b) => a.pct - b.pct);
     const chartData: Datum[] = sorted.map((r) => ({
       amenityKey: r.amenityKey,
@@ -61,7 +94,7 @@ export default function AmenitiesByPropertyPctChart({ rows }: Props) {
       tickList.push(v);
     }
     return { data: chartData, xMax: xMaxVal, ticks: tickList };
-  }, [rows, t]);
+  }, [rows, t, keys]);
 
   const hasAnyData = nProperties > 0 && data.length > 0;
 
@@ -120,7 +153,12 @@ export default function AmenitiesByPropertyPctChart({ rows }: Props) {
               />
               <Bar dataKey="pct" radius={[0, 3, 3, 0]} barSize={22} isAnimationActive={false}>
                 {data.map((d) => (
-                  <Cell key={d.amenityKey} fill={BAR_FILL[d.amenityKey]} />
+                  <Cell
+                    key={d.amenityKey}
+                    fill={
+                      barFill[d.amenityKey as keyof typeof barFill] ?? '#94a3b8'
+                    }
+                  />
                 ))}
                 <LabelList
                   dataKey="labelText"

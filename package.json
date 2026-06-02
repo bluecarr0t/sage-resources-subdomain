@@ -36,6 +36,7 @@
     "bulk-upload:past-2026": "tsx scripts/bulk-upload-past-reports-2026.ts",
     "research:ski-resorts": "tsx scripts/research-ski-resorts-openai.ts",
     "research:wineries": "tsx scripts/research-wineries-openai.ts",
+    "export:proximity-missing-winter-rates": "tsx scripts/export-proximity-insights-missing-winter-rates.ts",
     "research:glamping-resorts": "tsx scripts/research-glamping-resorts-openai.ts",
     "discover:glamping": "tsx scripts/discover-glamping-from-news.ts --tavily",
     "discover:glamping:once": "tsx scripts/discover-glamping-from-news.ts --tavily --limit 1",
@@ -65,6 +66,7 @@
     "refresh:downstream:dry-run": "tsx scripts/downstream-refresh/run-downstream-refresh.ts --dry-run",
     "refresh:unified-comps": "tsx scripts/downstream-refresh/run-downstream-refresh.ts --only=unified_comps,facets_cache",
     "refresh:rv-overview": "tsx scripts/downstream-refresh/run-downstream-refresh.ts --only=rv_overview",
+    "refresh:glamping-overview": "tsx scripts/downstream-refresh/run-glamping-overview-refresh.ts",
     "export:glamping-roverpass-unified-xlsx": "tsx scripts/export-glamping-roverpass-unified-xlsx.ts"
   },
   "dependencies": {

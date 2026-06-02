@@ -43,6 +43,10 @@ type Props = {
   yearEmphasis?: RvOverviewYearEmphasisKey;
   /** Omit title, intro, and methodology (for JPEG export shell) */
   variant?: 'default' | 'compact';
+  /** Glamping overview: Sage has rates only — hide occupancy bars and axis. */
+  showOccupancy?: boolean;
+  /** Defaults to RV overview trends copy. */
+  messagesNamespace?: 'admin.rvIndustryOverview.trends' | 'admin.glampingIndustryOverview.trends';
 };
 
 function niceCeil(step: number, cap: number, ...vals: (number | null | undefined)[]) {
@@ -58,9 +62,15 @@ export default function OccupancyAdrTrendsChart({
   unitFilter,
   yearEmphasis = 'both',
   variant = 'default',
+  showOccupancy = true,
+  messagesNamespace = 'admin.rvIndustryOverview.trends',
 }: Props) {
-  const t = useTranslations('admin.rvIndustryOverview.trends');
-  const tOverview = useTranslations('admin.rvIndustryOverview');
+  const t = useTranslations(messagesNamespace);
+  const tOverview = useTranslations(
+    messagesNamespace === 'admin.glampingIndustryOverview.trends'
+      ? 'admin.glampingIndustryOverview'
+      : 'admin.rvIndustryOverview'
+  );
   const unitTypeLabel = tOverview(`unitFilter.${unitFilter}`);
   const compact = variant === 'compact';
   const occ2024Opacity = rvOverviewYearSeriesOpacity('2024', yearEmphasis);
@@ -122,31 +132,33 @@ export default function OccupancyAdrTrendsChart({
               height={68}
               tickMargin={12}
             />
+            {showOccupancy ? (
+              <YAxis
+                yAxisId="left"
+                orientation="left"
+                domain={[0, occMax]}
+                tickFormatter={(v) => `${v}%`}
+                tick={{ fontSize: 11, fill: 'currentColor' }}
+                className="text-gray-700 dark:text-gray-300"
+                label={{
+                  value: t('axisOccupancy'),
+                  angle: -90,
+                  position: 'insideLeft',
+                  style: { fontSize: 11, fill: 'currentColor' },
+                }}
+              />
+            ) : null}
             <YAxis
-              yAxisId="left"
-              orientation="left"
-              domain={[0, occMax]}
-              tickFormatter={(v) => `${v}%`}
-              tick={{ fontSize: 11, fill: 'currentColor' }}
-              className="text-gray-700 dark:text-gray-300"
-              label={{
-                value: t('axisOccupancy'),
-                angle: -90,
-                position: 'insideLeft',
-                style: { fontSize: 11, fill: 'currentColor' },
-              }}
-            />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
+              yAxisId={showOccupancy ? 'right' : 'left'}
+              orientation={showOccupancy ? 'right' : 'left'}
               domain={[0, adrMax]}
               tickFormatter={(v) => `$${v}`}
               tick={{ fontSize: 11, fill: 'currentColor' }}
               className="text-gray-700 dark:text-gray-300"
               label={{
                 value: t('axisAdr'),
-                angle: 90,
-                position: 'insideRight',
+                angle: showOccupancy ? 90 : -90,
+                position: showOccupancy ? 'insideRight' : 'insideLeft',
                 style: { fontSize: 11, fill: 'currentColor' },
               }}
             />
@@ -166,12 +178,16 @@ export default function OccupancyAdrTrendsChart({
                           unitType: unitTypeLabel,
                         })}
                       </div>
-                      <div>
-                        {t('series.occ2024')}: {fmt(d.occ2024, d.occ2024Null, '%')}
-                      </div>
-                      <div>
-                        {t('series.occ2025')}: {fmt(d.occ2025, d.occ2025Null, '%')}
-                      </div>
+                      {showOccupancy ? (
+                        <>
+                          <div>
+                            {t('series.occ2024')}: {fmt(d.occ2024, d.occ2024Null, '%')}
+                          </div>
+                          <div>
+                            {t('series.occ2025')}: {fmt(d.occ2025, d.occ2025Null, '%')}
+                          </div>
+                        </>
+                      ) : null}
                       <div>
                         {t('series.adr2024')}: {d.adr2024Null ? t('tooltipNoData') : `$${d.adr2024.toFixed(2)}`}
                       </div>
@@ -184,26 +200,30 @@ export default function OccupancyAdrTrendsChart({
               }}
             />
             <Legend wrapperStyle={{ paddingTop: 16, fontSize: 12 }} />
-            <Bar
-              yAxisId="left"
-              dataKey="occ2024"
-              name={t('series.occ2024')}
-              fill="#1d4ed8"
-              fillOpacity={occ2024Opacity}
-              radius={[3, 3, 0, 0]}
-              maxBarSize={36}
-            />
-            <Bar
-              yAxisId="left"
-              dataKey="occ2025"
-              name={t('series.occ2025')}
-              fill="#dc2626"
-              fillOpacity={occ2025Opacity}
-              radius={[3, 3, 0, 0]}
-              maxBarSize={36}
-            />
+            {showOccupancy ? (
+              <>
+                <Bar
+                  yAxisId="left"
+                  dataKey="occ2024"
+                  name={t('series.occ2024')}
+                  fill="#1d4ed8"
+                  fillOpacity={occ2024Opacity}
+                  radius={[3, 3, 0, 0]}
+                  maxBarSize={36}
+                />
+                <Bar
+                  yAxisId="left"
+                  dataKey="occ2025"
+                  name={t('series.occ2025')}
+                  fill="#dc2626"
+                  fillOpacity={occ2025Opacity}
+                  radius={[3, 3, 0, 0]}
+                  maxBarSize={36}
+                />
+              </>
+            ) : null}
             <Line
-              yAxisId="right"
+              yAxisId={showOccupancy ? 'right' : 'left'}
               type="monotone"
               dataKey="adr2024"
               name={t('series.adr2024')}
@@ -214,7 +234,7 @@ export default function OccupancyAdrTrendsChart({
               activeDot={{ r: 5 }}
             />
             <Line
-              yAxisId="right"
+              yAxisId={showOccupancy ? 'right' : 'left'}
               type="monotone"
               dataKey="adr2025"
               name={t('series.adr2025')}
