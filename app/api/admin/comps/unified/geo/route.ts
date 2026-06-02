@@ -535,7 +535,6 @@ export const GET = withAdminAuth(async (request) => {
       return NextResponse.json(
         {
           success: true,
-          format: 'cols' as const,
           ...columnar,
           total: totalMarkers,
           geocoded_by_source: geocodedBySource,
