@@ -11,7 +11,8 @@
  * Response shape:
  *   {
  *     success: true,
- *     points: Array<[lat, lon, sourceIndex, id, name, avgAdr, website, totalSites, numUnits, isGlamping1]>,
+ *     points: Array<[lat, lon, sourceIndex, id, name, avgAdr, website, totalSites, numUnits, isGlamping1, unitTypesEncoded, studyId, reportYear]>,
+ *     — or with `?format=cols`, columnar arrays (`lat`, `lon`, `si`, `id`, …) instead of `points`
  *     sources: string[],                    // index → source key lookup
  *     total: number,                        // geocoded markers (DB-exact via RPC when deployed)
  *     geocoded_by_source: Record<string, number>, // per-source marker counts (same as `total` split)
@@ -20,6 +21,9 @@
  *   }
  *   Tuple tail: avg_adr (nullable), website_url (nullable), total_sites (nullable), num_units (nullable),
  *   is_glamping_1 (0|1) — num_units in radius scorecard counts only rows where this is 1.
+ *   unit_types_encoded (string|null) — distinct matview unit_type values joined with GEO_MAP_UNIT_TYPES_SEP.
+ *   study_id (string|null) — feasibility study id for Past Reports detail link.
+ *   report_year (string|null) — display year (study-id prefix or report_date).
  *
  * Performance:
  *  - Columns: id, name, source, lat, lon + popup fields + `address_key` + `is_glamping_property`.
@@ -59,22 +63,41 @@ import {
   unifiedPropertyGroupKey,
 } from '@/lib/comps-unified/sage-property-group-key';
 import { UNIFIED_SOURCES } from '@/lib/comps-unified/build-row';
+import { collectMergedUnitTypes } from '@/lib/comps-unified/collapse-property-rows';
+import { encodeGeoMapUnitTypes } from '@/lib/comps-unified/geo-map-unit-types';
+import { resolveReportYear } from '@/lib/report-year-from-study-id';
+import {
+  buildGeoMapColumnarFromTuples,
+  type GeoMapTupleRow,
+} from '@/lib/comps-unified/geo-map-columnar';
+import {
+  canonicalGeoQueryKey,
+  geoApiCacheHeaders,
+  geoApiNotModifiedHeaders,
+  geoResponseWeakEtag,
+} from '@/lib/comps-unified/geo-api-cache';
 
 const MAX_POINTS = 150_000;
 const CHUNK_SIZE = 10_000;
 
 /** Full matview row shape (see `scripts/migrations/unified-comps-matview.sql`). */
 const GEO_SELECT_WITH_GLAMP =
-  'id,property_name,source,state,country,lat,lon,avg_adr,website_url,total_sites,num_units,address_key,is_glamping_property';
+  'id,property_name,source,state,country,lat,lon,avg_adr,website_url,total_sites,num_units,unit_type,study_id,address_key,is_glamping_property';
 
 /** Older deployments before `is_glamping_property` was added to `unified_comps`. */
 const GEO_SELECT_LEGACY =
-  'id,property_name,source,state,country,lat,lon,avg_adr,website_url,total_sites,num_units,address_key';
+  'id,property_name,source,state,country,lat,lon,avg_adr,website_url,total_sites,num_units,unit_type,study_id,address_key';
 
-type GeoSelectMeta = { selectList: string; includeGlampColumn: boolean };
+/** Bump when `GEO_SELECT_*` column lists change so dev hot-reload does not serve stale selects. */
+const GEO_SELECT_CACHE_REV = 4;
+
+type GeoSelectMeta = { rev: number; selectList: string; includeGlampColumn: boolean };
 
 function getCachedGeoSelectMeta(): GeoSelectMeta | undefined {
-  return (globalThis as unknown as { __unifiedCompsGeoSelect?: GeoSelectMeta }).__unifiedCompsGeoSelect;
+  const cached = (globalThis as unknown as { __unifiedCompsGeoSelect?: GeoSelectMeta })
+    .__unifiedCompsGeoSelect;
+  if (cached?.rev === GEO_SELECT_CACHE_REV) return cached;
+  return undefined;
 }
 
 function setCachedGeoSelectMeta(meta: GeoSelectMeta): void {
@@ -83,7 +106,7 @@ function setCachedGeoSelectMeta(meta: GeoSelectMeta): void {
 
 /**
  * Detect whether `unified_comps` exposes `is_glamping_property` (older matviews do not).
- * Result is cached per Node process so we only probe once.
+ * Result is cached per Node process so we only probe once per `GEO_SELECT_CACHE_REV`.
  */
 async function resolveGeoRowSelect(supabase: SupabaseClient): Promise<GeoSelectMeta> {
   const cached = getCachedGeoSelectMeta();
@@ -92,8 +115,8 @@ async function resolveGeoRowSelect(supabase: SupabaseClient): Promise<GeoSelectM
   const { error } = await supabase.from('unified_comps').select('is_glamping_property').limit(1);
   const meta: GeoSelectMeta =
     error?.code === '42703'
-      ? { selectList: GEO_SELECT_LEGACY, includeGlampColumn: false }
-      : { selectList: GEO_SELECT_WITH_GLAMP, includeGlampColumn: true };
+      ? { rev: GEO_SELECT_CACHE_REV, selectList: GEO_SELECT_LEGACY, includeGlampColumn: false }
+      : { rev: GEO_SELECT_CACHE_REV, selectList: GEO_SELECT_WITH_GLAMP, includeGlampColumn: true };
   setCachedGeoSelectMeta(meta);
   return meta;
 }
@@ -110,6 +133,8 @@ interface GeoRow {
   website_url: string | null;
   total_sites: number | string | null;
   num_units: number | string | null;
+  unit_type: string | null;
+  study_id: string | null;
   address_key: string | null;
   /** Yes/No from underlying sources (Sage, RoverPass); OTAs/reports default Yes in matview. */
   is_glamping_property?: string | null;
@@ -153,6 +178,7 @@ function mergePropertyGroup(rows: GeoRow[], includeGlampColumn: boolean): GeoRow
   let anyUnit = false;
   const adrs: number[] = [];
   let website: string | null = null;
+  let studyId: string | null = null;
   let glampingYes = false;
 
   for (const r of rows) {
@@ -170,6 +196,9 @@ function mergePropertyGroup(rows: GeoRow[], includeGlampColumn: boolean): GeoRow
     if (!website && r.website_url?.trim()) {
       website = r.website_url.trim();
     }
+    if (!studyId && r.study_id?.trim()) {
+      studyId = r.study_id.trim();
+    }
     if (flagGlampingForMarker(r, includeGlampColumn)) glampingYes = true;
   }
 
@@ -183,6 +212,7 @@ function mergePropertyGroup(rows: GeoRow[], includeGlampColumn: boolean): GeoRow
     id: first.id,
     avg_adr: avgAdr,
     website_url: website,
+    study_id: studyId ?? first.study_id,
     total_sites: maxSites,
     num_units: anyUnit ? sumUnits : null,
     is_glamping_property: glampingYes ? 'Yes' : 'No',
@@ -213,7 +243,12 @@ function parseGeoMarkerCountRpc(data: unknown): Record<string, number> | null {
   return out;
 }
 
-function collapseToOneRowPerProperty(rows: GeoRow[], includeGlampColumn: boolean): GeoRow[] {
+type CollapsedGeoRow = GeoRow & { mergedUnitTypes: string[] };
+
+function collapseToOneRowPerProperty(
+  rows: GeoRow[],
+  includeGlampColumn: boolean
+): CollapsedGeoRow[] {
   const groups = new Map<string, GeoRow[]>();
   for (const r of rows) {
     const k = addressKeyGroupKey(r);
@@ -221,9 +256,58 @@ function collapseToOneRowPerProperty(rows: GeoRow[], includeGlampColumn: boolean
     if (g) g.push(r);
     else groups.set(k, [r]);
   }
-  const out: GeoRow[] = [];
+  const out: CollapsedGeoRow[] = [];
   for (const group of groups.values()) {
-    out.push(group.length === 1 ? group[0] : mergePropertyGroup(group, includeGlampColumn));
+    const mergedUnitTypes = collectMergedUnitTypes(
+      group.map((r) => ({ unit_type: r.unit_type ?? null }))
+    );
+    const row =
+      group.length === 1 ? group[0] : mergePropertyGroup(group, includeGlampColumn);
+    out.push({ ...row, mergedUnitTypes });
+  }
+  return out;
+}
+
+/** One calendar year per study_id for Past Reports map popups. */
+async function buildReportYearByStudyId(
+  supabase: SupabaseClient,
+  rows: CollapsedGeoRow[]
+): Promise<Map<string, string | null>> {
+  const studyIds = [
+    ...new Set(
+      rows
+        .filter((r) => r.source === 'reports')
+        .map((r) => r.study_id?.trim())
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+  const out = new Map<string, string | null>();
+  if (studyIds.length === 0) return out;
+
+  const { data, error } = await supabase
+    .from('reports')
+    .select('study_id, report_date')
+    .in('study_id', studyIds);
+
+  if (error) {
+    console.warn('[comps/unified/geo] report year lookup failed:', error.message);
+    for (const sid of studyIds) out.set(sid, resolveReportYear(sid));
+    return out;
+  }
+
+  const reportDateByStudy = new Map<string, string | null>();
+  for (const row of data ?? []) {
+    const sid =
+      row && typeof row === 'object' && typeof (row as { study_id?: unknown }).study_id === 'string'
+        ? (row as { study_id: string }).study_id.trim()
+        : '';
+    if (!sid || reportDateByStudy.has(sid)) continue;
+    const rd = (row as { report_date?: string | null }).report_date;
+    reportDateByStudy.set(sid, rd ?? null);
+  }
+
+  for (const sid of studyIds) {
+    out.set(sid, resolveReportYear(sid, reportDateByStudy.get(sid)));
   }
   return out;
 }
@@ -232,6 +316,9 @@ export const GET = withAdminAuth(async (request) => {
   try {
     const supabase = createServerClient();
     const { searchParams } = new URL(request.url);
+    const useColumnar = searchParams.get('format') === 'cols';
+    const canonicalQuery = canonicalGeoQueryKey(searchParams);
+    const ifNoneMatch = request.headers.get('if-none-match');
     const opts = withAdminCompsCohortFilters(parseUnifiedFilterOptions(searchParams));
     const cohortRpc = adminCompsCohortRpcParams();
 
@@ -363,24 +450,12 @@ export const GET = withAdminAuth(async (request) => {
     const geocodedBySourceFromRpc = markerRpcErr ? null : parseGeoMarkerCountRpc(markerRpcData);
 
     const forPoints = collapseToOneRowPerProperty(collectedWithSagePid, includeGlampColumn);
+    const reportYearByStudyId = await buildReportYearByStudyId(supabase, forPoints);
 
     // Build compact payload: source name → index table to compress repeats.
     const sourceIndex = new Map<string, number>();
     const sources: string[] = [];
-    const points: Array<
-      [
-        number,
-        number,
-        number,
-        string,
-        string,
-        number | null,
-        string | null,
-        number | null,
-        number | null,
-        0 | 1,
-      ]
-    > = [];
+    const points: GeoMapTupleRow[] = [];
     /** Exact per-source marker totals from DB when RPC is deployed; else derived from `points`. */
     const geocodedBySource: Record<string, number> =
       geocodedBySourceFromRpc != null ? { ...geocodedBySourceFromRpc } : {};
@@ -422,21 +497,69 @@ export const GET = withAdminAuth(async (request) => {
         numOrNull(r.total_sites),
         numOrNull(r.num_units),
         flagGlampingForMarker(r, includeGlampColumn) ? 1 : 0,
+        encodeGeoMapUnitTypes(r.mergedUnitTypes),
+        r.study_id?.trim() || null,
+        r.source === 'reports' && r.study_id?.trim()
+          ? reportYearByStudyId.get(r.study_id.trim()) ?? null
+          : null,
       ]);
     }
 
     const totalMarkers =
       geocodedBySourceFromRpc != null ? totalGeocodedExact : points.length;
 
-    return NextResponse.json({
-      success: true,
-      points,
-      sources,
+    const sampleIds: string[] = [];
+    if (points.length > 0) {
+      sampleIds.push(String(points[0][3]));
+      if (points.length > 1) sampleIds.push(String(points[points.length - 1][3]));
+      if (points.length > 2) sampleIds.push(String(points[Math.floor(points.length / 2)][3]));
+    }
+
+    const etag = geoResponseWeakEtag({
+      canonicalQuery,
+      pointCount: points.length,
       total: totalMarkers,
-      geocoded_by_source: geocodedBySource,
       capped,
-      limit: MAX_POINTS,
+      sampleIds,
     });
+
+    if (ifNoneMatch && ifNoneMatch === etag) {
+      return new NextResponse(null, {
+        status: 304,
+        headers: geoApiNotModifiedHeaders(etag),
+      });
+    }
+
+    const cacheHeaders = geoApiCacheHeaders(etag);
+
+    if (useColumnar) {
+      const columnar = buildGeoMapColumnarFromTuples(points, sources);
+      return NextResponse.json(
+        {
+          success: true,
+          format: 'cols' as const,
+          ...columnar,
+          total: totalMarkers,
+          geocoded_by_source: geocodedBySource,
+          capped,
+          limit: MAX_POINTS,
+        },
+        { headers: cacheHeaders }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        points,
+        sources,
+        total: totalMarkers,
+        geocoded_by_source: geocodedBySource,
+        capped,
+        limit: MAX_POINTS,
+      },
+      { headers: cacheHeaders }
+    );
   } catch (err) {
     console.error('[comps/unified/geo] error:', err);
     return NextResponse.json(

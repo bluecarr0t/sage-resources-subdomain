@@ -62,6 +62,11 @@ export interface UnifiedFilterOptions {
   isGlampingProperty: string[];
   /** When set, Sage (`all_glamping_properties`) rows must match this `research_status`. */
   sageResearchStatus: string | null;
+  /**
+   * When true with `propertyTypes` set, rows with `source = reports` bypass the property_type
+   * filter (admin cohort: Past Reports comparables often have NULL property_type).
+   */
+  exemptReportsFromPropertyTypeFilter?: boolean;
   /** Sage `is_open` values (Yes, Under Construction, etc.). Applied when non-empty. */
   openStatuses: string[];
   keywordFilters: string[];
@@ -142,6 +147,7 @@ export function parseUnifiedFilterOptions(
     propertyTypes,
     isGlampingProperty: [],
     sageResearchStatus: null,
+    exemptReportsFromPropertyTypeFilter: false,
     openStatuses,
     keywordFilters,
     parsedMinAdr,
@@ -172,7 +178,12 @@ export function applyUnifiedBaseFilters(q: any, opts: UnifiedFilterOptions): any
     out = out.or(ors.join(','));
   }
   if (opts.propertyTypes.length > 0) {
-    out = out.in('property_type', opts.propertyTypes);
+    if (opts.exemptReportsFromPropertyTypeFilter) {
+      const typeOrs = opts.propertyTypes.map((t) => `property_type.eq.${t}`).join(',');
+      out = out.or(`source.eq.reports,${typeOrs}`);
+    } else {
+      out = out.in('property_type', opts.propertyTypes);
+    }
   }
   if (opts.isGlampingProperty.length > 0) {
     out = out.in('is_glamping_property', opts.isGlampingProperty);

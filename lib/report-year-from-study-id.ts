@@ -10,3 +10,15 @@ export function reportYearFromStudyId(studyId: string | null | undefined): strin
   if (Number.isNaN(yy) || yy < 0 || yy > 99) return null;
   return String(2000 + yy);
 }
+
+/** Study-id prefix first; else calendar year from `report_date` (YYYY-MM-DD). */
+export function resolveReportYear(
+  studyId: string | null | undefined,
+  reportDate?: string | null | undefined
+): string | null {
+  const fromId = reportYearFromStudyId(studyId);
+  if (fromId) return fromId;
+  const d = String(reportDate ?? '').trim();
+  if (/^\d{4}/.test(d)) return d.slice(0, 4);
+  return null;
+}

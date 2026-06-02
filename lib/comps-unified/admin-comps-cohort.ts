@@ -1,6 +1,10 @@
 /**
  * Default Sage cohort for /admin/glamping-properties: published glamping properties only.
  * Enforced server-side on list, geo, and aggregate RPCs.
+ *
+ * Past Reports (`source = reports`) skip `property_type = Glamping` (often NULL on comparables)
+ * but still require `is_glamping_property = Yes`. See
+ * `unified-comps-admin-cohort-reports-property-type-2026-06-01.sql`.
  */
 
 import type { UnifiedFilterOptions } from '@/lib/comps-unified/apply-filters';
@@ -21,6 +25,8 @@ export function withAdminCompsCohortFilters(opts: UnifiedFilterOptions): Unified
     propertyTypes: [ADMIN_COMPS_COHORT_PROPERTY_TYPE],
     isGlampingProperty: [ADMIN_COMPS_COHORT_IS_GLAMPING],
     sageResearchStatus: ADMIN_COMPS_COHORT_SAGE_RESEARCH_STATUS,
+    /** Geo PostgREST: `source = reports` OR `property_type` in cohort list (matches RPC). */
+    exemptReportsFromPropertyTypeFilter: true,
   };
 }
 

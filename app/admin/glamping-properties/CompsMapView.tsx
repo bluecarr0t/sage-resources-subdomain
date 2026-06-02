@@ -10,12 +10,28 @@ import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'rea
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { GoogleMap } from '@react-google-maps/api';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { ChevronDown, Maximize2, Minimize2 } from 'lucide-react';
 import { GoogleMapsProvider, useGoogleMaps } from '@/components/GoogleMapsProvider';
-import Supercluster from 'supercluster';
-import type { PointFeature, ClusterFeature, AnyProps } from 'supercluster';
 import { unifiedSourceLabel } from '@/lib/comps-unified/build-row';
-import { distanceMiles } from '@/lib/geo/haversine';
+import {
+  buildGeoMapDataFromApiBody,
+  geoMapQueryWithColumnarFormat,
+} from '@/lib/comps-unified/build-geo-map-data';
+import type { CompsMapRadiusSpatialIndex } from '@/lib/comps-unified/comps-map-radius-index';
+import {
+  createCompsMapClusterIndex,
+  type CompsMapClusterIndex,
+} from '@/lib/comps-unified/comps-map-cluster-client';
+import {
+  clusterCountBounds,
+  CompsMapMarkerLayer,
+} from '@/lib/comps-unified/comps-map-marker-layer';
+import type { CompsMapGeoPointRow, CompsMapLeafProps } from '@/lib/comps-unified/comps-map-types';
+import { compsMapViewportRenderKey } from '@/lib/comps-unified/comps-map-viewport';
+import { createCompsMapRenderScheduler } from '@/lib/comps-unified/schedule-comps-map-render';
+import { formatGeoMapUnitTypesDisplay } from '@/lib/comps-unified/geo-map-unit-types';
+import { glampingPastReportDetailUrl } from '@/lib/comps-unified/glamping-past-report-detail-path';
+import { panMapToFitInfoWindowIfNeeded } from '@/components/map/utils/panInfoWindowIntoView';
 
 /** Tuple payload from /api/admin/comps/unified/geo (see geo route JSDoc). */
 type GeoTuple = [
@@ -29,6 +45,9 @@ type GeoTuple = [
   number | null,
   number | null,
   0 | 1,
+  string | null,
+  string | null,
+  string | null,
 ];
 
 interface GeoResponse {
@@ -43,33 +62,18 @@ interface GeoResponse {
   message?: string;
 }
 
-interface LeafProps {
-  id: string;
-  name: string;
-  sourceIdx: number;
-  avgAdr: number | null;
-  website: string | null;
-  totalSites: number | null;
-  numUnits: number | null;
-  /** When false, exclude num_units from glamping-only radius totals. */
-  isGlamping: boolean;
-}
-
-interface GeoPointRow {
-  lat: number;
-  lng: number;
-  leaf: LeafProps;
-}
-
 interface MapPopupLabels {
   avgRetail: string;
   website: string;
+  pastReport: string;
+  reportYear: string;
+  viewReportTemplate: string;
   unitsSites: string;
+  unitTypes: string;
   websiteOpen: string;
+  pastReportOpen: string;
   empty: string;
 }
-
-type ClusterProps = Supercluster.ClusterProperties & { point_count: number };
 
 const MAP_HEIGHT_PX = 640;
 
@@ -97,36 +101,6 @@ function sourceHex(source: string): string {
     default:
       return '#64748b';
   }
-}
-
-function isGlampingFromTupleFlag(flag: unknown): boolean {
-  if (flag === 0) return false;
-  if (flag === 1) return true;
-  return true;
-}
-
-function formatCount(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k`;
-  return String(n);
-}
-
-/**
- * Normalize cluster size to [0,1] within the current viewport using log1p so
- * small clusters still spread across the cool→warm range when counts vary widely.
- */
-function clusterNormT(count: number, minInView: number, maxInView: number): number {
-  if (maxInView <= minInView) return 0.5;
-  const lo = Math.log1p(minInView);
-  const hi = Math.log1p(maxInView);
-  if (hi <= lo) return 0.5;
-  return Math.max(0, Math.min(1, (Math.log1p(count) - lo) / (hi - lo)));
-}
-
-/** Cool (blue, low count) → warm (red, high count) for cluster circle fill. */
-function clusterCoolWarmFill(count: number, minInView: number, maxInView: number): string {
-  const t = clusterNormT(count, minInView, maxInView);
-  const hue = 240 - t * 240;
-  return `hsl(${hue}, 76%, 44%)`;
 }
 
 function escapeHtml(s: string): string {
@@ -172,7 +146,8 @@ function formatSitesUnits(ts: number | null, nu: number | null): string | null {
 }
 
 function buildLeafPopupHtml(
-  leaf: LeafProps,
+  leaf: CompsMapLeafProps,
+  sourceKey: string,
   sourceLabel: string,
   sourceHexColor: string,
   labels: MapPopupLabels
@@ -182,6 +157,7 @@ function buildLeafPopupHtml(
   const href = normalizePropertyWebsiteUrl(leaf.website);
   const sites = formatSitesUnits(leaf.totalSites, leaf.numUnits);
   const empty = labels.empty;
+  const isPastReport = sourceKey === 'reports';
 
   const row = (label: string, value: string, isHtmlValue = false) =>
     `<div style="margin-top:6px;font-size:12px;line-height:1.35;">
@@ -195,7 +171,27 @@ function buildLeafPopupHtml(
   } else {
     extra += row(labels.avgRetail, empty, false);
   }
-  if (href) {
+  if (isPastReport) {
+    const studyId = leaf.studyId?.trim() ?? '';
+    if (studyId) {
+      const href = escapeHtml(glampingPastReportDetailUrl(studyId));
+      const linkText = escapeHtml(
+        labels.viewReportTemplate.includes('{studyId}')
+          ? labels.viewReportTemplate.replace('{studyId}', studyId)
+          : `${labels.viewReportTemplate} ${studyId}`
+      );
+      const open = escapeHtml(labels.pastReportOpen);
+      extra += row(
+        labels.pastReport,
+        `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:underline;cursor:pointer;" title="${open}">${linkText}</a>`,
+        true
+      );
+    } else {
+      extra += row(labels.pastReport, empty, false);
+    }
+    const year = leaf.reportYear?.trim();
+    extra += row(labels.reportYear, year || empty, false);
+  } else if (href) {
     const host = escapeHtml(formatWebsiteHostname(href));
     const safeHref = escapeHtml(href);
     const open = escapeHtml(labels.websiteOpen);
@@ -211,6 +207,12 @@ function buildLeafPopupHtml(
     extra += row(labels.unitsSites, sites, false);
   } else {
     extra += row(labels.unitsSites, empty, false);
+  }
+  const unitTypesLabel = formatGeoMapUnitTypesDisplay(leaf.unitTypes);
+  if (unitTypesLabel) {
+    extra += row(labels.unitTypes, unitTypesLabel, false);
+  } else {
+    extra += row(labels.unitTypes, empty, false);
   }
 
   return `
@@ -236,30 +238,45 @@ function CompsMapInner({
   const searchParams = useSearchParams();
 
   const mapRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const clusterIndexRef = useRef<Supercluster<LeafProps, ClusterProps> | null>(null);
+  const clusterIndexRef = useRef<CompsMapClusterIndex | null>(null);
+  const markerLayerRef = useRef(new CompsMapMarkerLayer());
+  const clustersRequestIdRef = useRef(0);
+  const renderSchedulerRef = useRef<ReturnType<typeof createCompsMapRenderScheduler> | null>(null);
   const customMilesInputRef = useRef<HTMLInputElement>(null);
   const sourcesRef = useRef<string[]>([]);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+  const openLeafPopupRef = useRef<{
+    lat: number;
+    lng: number;
+    leaf: CompsMapLeafProps;
+    srcKey: string;
+  } | null>(null);
+  const lastViewportRenderKeyRef = useRef<string | null>(null);
   const renderVisibleRef = useRef<() => void>(() => {});
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const mapPopupLabelsRef = useRef<MapPopupLabels>({
     avgRetail: '',
     website: '',
+    pastReport: '',
+    reportYear: '',
+    viewReportTemplate: '',
     unitsSites: '',
+    unitTypes: '',
     websiteOpen: '',
+    pastReportOpen: '',
     empty: '',
   });
-  const allGeoPointsRef = useRef<GeoPointRow[]>([]);
+  const allGeoPointsRef = useRef<CompsMapGeoPointRow[]>([]);
+  const radiusIndexRef = useRef<CompsMapRadiusSpatialIndex | null>(null);
   const circleRef = useRef<google.maps.Circle | null>(null);
   const radiusCenterMarkerRef = useRef<google.maps.Marker | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
   const [geocodedBySource, setGeocodedBySource] = useState<Record<string, number>>({});
-  const [capped, setCapped] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [legendPanelOpen, setLegendPanelOpen] = useState(true);
+  const [radiusPanelOpen, setRadiusPanelOpen] = useState(false);
   const [radiusEnabled, setRadiusEnabled] = useState(false);
   const [radiusPreset, setRadiusPreset] = useState<RadiusPresetMiles>(50);
   const [customMilesInput, setCustomMilesInput] = useState('');
@@ -305,20 +322,46 @@ function CompsMapInner({
   mapPopupLabelsRef.current = {
     avgRetail: t('mapPopupAvgRetailDailyRate'),
     website: t('mapPopupWebsite'),
+    pastReport: t('mapPopupPastReport'),
+    reportYear: t('mapPopupReportYear'),
+    viewReportTemplate: t('mapPopupViewReport'),
     unitsSites: t('mapPopupUnitsSites'),
+    unitTypes: t('mapPopupUnitTypes'),
     websiteOpen: t('mapPopupWebsiteOpenNewTab'),
+    pastReportOpen: t('mapPopupPastReportOpenNewTab'),
     empty: t('mapPopupEmpty'),
   };
 
-  const renderVisible = useCallback(() => {
+  const openLeafInfoWindow = useCallback(
+    (
+      infoWindow: google.maps.InfoWindow,
+      map: google.maps.Map,
+      lat: number,
+      lng: number,
+      leaf: CompsMapLeafProps,
+      srcKey: string
+    ) => {
+      const label = unifiedSourceLabel(srcKey);
+      const color = sourceHex(srcKey);
+      infoWindow.setContent(
+        buildLeafPopupHtml(leaf, srcKey, label, color, mapPopupLabelsRef.current)
+      );
+      infoWindow.setPosition({ lat, lng });
+      // Position-only open (no marker anchor) so the popup survives marker rebuild on map idle.
+      infoWindow.open({ map });
+    },
+    []
+  );
+
+  const renderVisible = useCallback(async () => {
     const map = mapRef.current;
     const cluster = clusterIndexRef.current;
+    const layer = markerLayerRef.current;
     if (!map || !cluster) return;
 
-    for (const m of markersRef.current) {
-      m.setMap(null);
-    }
-    markersRef.current = [];
+    const viewportKey = compsMapViewportRenderKey(map, CONTIGUOUS_US_OVERVIEW_ZOOM);
+    if (viewportKey && viewportKey === lastViewportRenderKeyRef.current) return;
+    lastViewportRenderKeyRef.current = viewportKey;
 
     const bounds = map.getBounds();
     if (!bounds) return;
@@ -330,87 +373,46 @@ function CompsMapInner({
       bounds.getNorthEast().lat(),
     ];
     const zoom = Math.round(map.getZoom() ?? CONTIGUOUS_US_OVERVIEW_ZOOM);
-    const items = cluster.getClusters(bbox, zoom) as Array<
-      ClusterFeature<ClusterProps> | PointFeature<LeafProps & AnyProps>
-    >;
+    const requestId = ++clustersRequestIdRef.current;
 
-    const MAX_RENDERED = 4_000;
-    const slice = items.length > MAX_RENDERED ? items.slice(0, MAX_RENDERED) : items;
+    const items = await cluster.getClusters(bbox, zoom);
+    if (requestId !== clustersRequestIdRef.current) return;
 
-    const clusterCounts: number[] = [];
-    for (const f of slice) {
-      const p = f.properties as Partial<ClusterProps> & Partial<LeafProps>;
-      if (p && p.cluster) clusterCounts.push(p.point_count ?? 0);
-    }
-    const minCluster =
-      clusterCounts.length > 0 ? Math.min(...clusterCounts) : 0;
-    const maxCluster =
-      clusterCounts.length > 0 ? Math.max(...clusterCounts) : 1;
+    const { minCluster, maxCluster } = clusterCountBounds(items);
 
     if (!infoWindowRef.current) {
-      infoWindowRef.current = new google.maps.InfoWindow();
+      infoWindowRef.current = new google.maps.InfoWindow({ disableAutoPan: true });
     }
     const infoWindow = infoWindowRef.current;
 
-    for (const f of slice) {
-      const [lng, lat] = f.geometry.coordinates;
-      const props = f.properties as Partial<ClusterProps> & Partial<LeafProps>;
-
-      if (props && props.cluster) {
-        const count = props.point_count ?? 0;
-        const size = count >= 1000 ? 44 : count >= 100 ? 36 : count >= 10 ? 30 : 26;
-        const text = formatCount(count);
-        const fill = clusterCoolWarmFill(count, minCluster, maxCluster);
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
-  <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}" fill="${fill}" stroke="#ffffff" stroke-width="2"/>
-  <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="white" font-size="12" font-weight="bold" font-family="system-ui,sans-serif">${escapeHtml(text)}</text>
-</svg>`;
-        const icon: google.maps.Icon = {
-          url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-          scaledSize: new google.maps.Size(size, size),
-          anchor: new google.maps.Point(size / 2, size / 2),
-        };
-
-        const marker = new google.maps.Marker({
-          position: { lat, lng },
-          map,
-          icon,
-          optimized: true,
-        });
-        marker.addListener('click', () => {
-          const clusterId = (f as ClusterFeature<ClusterProps>).properties.cluster_id;
-          const expansion = Math.min(cluster.getClusterExpansionZoom(clusterId), 18);
+    layer.sync(map, items, sourcesRef.current, minCluster, maxCluster, sourceHex, {
+      onClusterClick: (clusterId, lat, lng) => {
+        openLeafPopupRef.current = null;
+        infoWindow.close();
+        void cluster.getClusterExpansionZoom(clusterId).then((expansion) => {
           map.setCenter({ lat, lng });
-          map.setZoom(expansion);
+          map.setZoom(Math.min(expansion, 18));
         });
-        markersRef.current.push(marker);
-      } else {
-        const leaf = props as LeafProps;
-        const srcKey = sourcesRef.current[leaf.sourceIdx] ?? '';
-        const color = sourceHex(srcKey);
-        const marker = new google.maps.Marker({
-          position: { lat, lng },
-          map,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 5,
-            fillColor: color,
-            fillOpacity: 0.95,
-            strokeColor: '#ffffff',
-            strokeWeight: 1,
-          },
-          optimized: true,
-        });
-        marker.addListener('click', () => {
-          const label = unifiedSourceLabel(srcKey);
-          infoWindow.setContent(buildLeafPopupHtml(leaf, label, color, mapPopupLabelsRef.current));
-          infoWindow.setPosition({ lat, lng });
-          infoWindow.open({ map, anchor: marker });
-        });
-        markersRef.current.push(marker);
-      }
+      },
+      onLeafClick: (leaf, srcKey, lat, lng) => {
+        openLeafPopupRef.current = { lat, lng, leaf, srcKey };
+        openLeafInfoWindow(infoWindow, map, lat, lng, leaf, srcKey);
+        void panMapToFitInfoWindowIfNeeded(map, { lat, lng });
+      },
+    });
+
+    const pendingPopup = openLeafPopupRef.current;
+    if (pendingPopup) {
+      openLeafInfoWindow(
+        infoWindow,
+        map,
+        pendingPopup.lat,
+        pendingPopup.lng,
+        pendingPopup.leaf,
+        pendingPopup.srcKey
+      );
     }
-  }, []);
+  }, [openLeafInfoWindow]);
 
   renderVisibleRef.current = renderVisible;
 
@@ -419,21 +421,42 @@ function CompsMapInner({
       mapRef.current = map;
       setMapReadyTick((x) => x + 1);
       if (!infoWindowRef.current) {
-        infoWindowRef.current = new google.maps.InfoWindow();
+        infoWindowRef.current = new google.maps.InfoWindow({ disableAutoPan: true });
+        infoWindowRef.current.addListener('closeclick', () => {
+          openLeafPopupRef.current = null;
+        });
       }
-      map.addListener('idle', () => {
-        renderVisibleRef.current();
+      map.addListener('click', () => {
+        openLeafPopupRef.current = null;
+        infoWindowRef.current?.close();
       });
-      renderVisibleRef.current();
+      if (!renderSchedulerRef.current) {
+        renderSchedulerRef.current = createCompsMapRenderScheduler(() => {
+          void renderVisibleRef.current();
+        });
+      }
+      map.addListener('dragstart', () => {
+        clustersRequestIdRef.current += 1;
+      });
+      map.addListener('idle', () => {
+        renderSchedulerRef.current?.schedule();
+      });
+      map.addListener('zoom_changed', () => {
+        lastViewportRenderKeyRef.current = null;
+        renderSchedulerRef.current?.schedule();
+      });
+      lastViewportRenderKeyRef.current = null;
+      void renderVisibleRef.current();
     },
     []
   );
 
   const onMapUnmount = useCallback(() => {
-    for (const m of markersRef.current) {
-      m.setMap(null);
-    }
-    markersRef.current = [];
+    clustersRequestIdRef.current += 1;
+    renderSchedulerRef.current?.cancel();
+    markerLayerRef.current.clear();
+    clusterIndexRef.current?.terminate();
+    clusterIndexRef.current = null;
     if (circleRef.current) {
       circleRef.current.setMap(null);
       circleRef.current = null;
@@ -451,8 +474,9 @@ function CompsMapInner({
     setLoading(true);
     setError(null);
 
-    fetch(`/api/admin/comps/unified/geo?${queryString}`, {
+    fetch(`/api/admin/comps/unified/geo?${geoMapQueryWithColumnarFormat(queryString)}`, {
       signal: controller.signal,
+      cache: 'default',
     })
       .then(async (res) => {
         const data = (await res.json()) as GeoResponse;
@@ -464,67 +488,35 @@ function CompsMapInner({
       .then((data) => {
         if (cancelled) return;
         sourcesRef.current = data.sources;
-        setTotal(typeof data.total === 'number' && Number.isFinite(data.total) ? data.total : 0);
         setGeocodedBySource(
           data.geocoded_by_source && typeof data.geocoded_by_source === 'object'
             ? data.geocoded_by_source
             : {}
         );
-        setCapped(data.capped === true);
 
-        const features: Array<PointFeature<LeafProps>> = data.points.map(
-          ([lat, lon, sourceIdx, id, name, avgAdr, website, totalSites, numUnits, glamp1]) => ({
-            type: 'Feature',
-            properties: {
-              id,
-              name,
-              sourceIdx,
-              avgAdr: avgAdr ?? null,
-              website: website ?? null,
-              totalSites: totalSites ?? null,
-              numUnits: numUnits ?? null,
-              isGlamping: isGlampingFromTupleFlag(glamp1),
-            },
-            geometry: { type: 'Point', coordinates: [lon, lat] },
-          })
-        );
+        const { features, allGeoPoints, radiusIndex } = buildGeoMapDataFromApiBody(data);
 
-        const cluster = new Supercluster<LeafProps, ClusterProps>({
-          radius: 60,
-          // Un-cluster above this zoom so source-colored pins appear at city zoom (~12+).
-          maxZoom: 12,
-          minPoints: 3,
+        clusterIndexRef.current?.terminate();
+        const clusterIndex = createCompsMapClusterIndex();
+        clusterIndexRef.current = clusterIndex;
+
+        void clusterIndex.load(features).then(() => {
+          if (cancelled) return;
+          allGeoPointsRef.current = allGeoPoints;
+          radiusIndexRef.current = radiusIndex;
+          setGeoPointsEpoch((e) => e + 1);
+          lastViewportRenderKeyRef.current = null;
+          renderSchedulerRef.current?.flush();
         });
-        cluster.load(features);
-        clusterIndexRef.current = cluster;
-
-        allGeoPointsRef.current = data.points.map(
-          ([lat, lon, sourceIdx, id, name, avgAdr, website, totalSites, numUnits, glamp1]) => ({
-            lat: Number(lat),
-            lng: Number(lon),
-            leaf: {
-              id,
-              name,
-              sourceIdx,
-              avgAdr: avgAdr ?? null,
-              website: website ?? null,
-              totalSites: totalSites ?? null,
-              numUnits: numUnits ?? null,
-              isGlamping: isGlampingFromTupleFlag(glamp1),
-            },
-          })
-        );
-        setGeoPointsEpoch((e) => e + 1);
-
-        renderVisibleRef.current();
       })
       .catch((err: unknown) => {
         if (cancelled) return;
         if (err instanceof Error && err.name === 'AbortError') return;
-        setTotal(0);
+        clusterIndexRef.current?.terminate();
+        clusterIndexRef.current = null;
         setGeocodedBySource({});
-        setCapped(false);
         allGeoPointsRef.current = [];
+        radiusIndexRef.current = null;
         setGeoPointsEpoch((e) => e + 1);
         setError(err instanceof Error ? err.message : 'Failed to load map');
       })
@@ -535,6 +527,8 @@ function CompsMapInner({
     return () => {
       cancelled = true;
       controller.abort();
+      clusterIndexRef.current?.terminate();
+      clusterIndexRef.current = null;
     };
   }, [queryString]);
 
@@ -601,29 +595,14 @@ function CompsMapInner({
       setRadiusStats(null);
       return;
     }
-    const rows = allGeoPointsRef.current;
-    let count = 0;
-    let sumUnits = 0;
-    let sumSites = 0;
-    const adrValues: number[] = [];
-    const bySource: Record<string, number> = {};
-    for (const row of rows) {
-      if (!Number.isFinite(row.lat) || !Number.isFinite(row.lng)) continue;
-      const d = distanceMiles(radiusCenter.lat, radiusCenter.lng, row.lat, row.lng);
-      if (d > effectiveRadiusMiles) continue;
-      count += 1;
-      const nu = row.leaf.numUnits;
-      if (row.leaf.isGlamping && nu != null && Number.isFinite(nu)) sumUnits += Number(nu);
-      const ts = row.leaf.totalSites;
-      if (ts != null && Number.isFinite(ts)) sumSites += Number(ts);
-      const adr = row.leaf.avgAdr;
-      if (adr != null && Number.isFinite(adr)) adrValues.push(Number(adr));
-      const srcKey = sourcesRef.current[row.leaf.sourceIdx] ?? 'unknown';
-      bySource[srcKey] = (bySource[srcKey] ?? 0) + 1;
+    const index = radiusIndexRef.current;
+    if (!index) {
+      setRadiusStats(null);
+      return;
     }
-    const avgAdr =
-      adrValues.length > 0 ? adrValues.reduce((a, b) => a + b, 0) / adrValues.length : null;
-    setRadiusStats({ count, sumUnits, sumSites, avgAdr, bySource });
+    setRadiusStats(
+      index.query(radiusCenter.lat, radiusCenter.lng, effectiveRadiusMiles, sourcesRef.current)
+    );
   }, [radiusEnabled, effectiveRadiusMiles, radiusCenter, geoPointsEpoch]);
 
   useEffect(() => {
@@ -707,8 +686,9 @@ function CompsMapInner({
   useEffect(() => {
     if (!mapRef.current || !isLoaded) return;
     const id = window.setTimeout(() => {
+      lastViewportRenderKeyRef.current = null;
       google.maps.event.trigger(mapRef.current!, 'resize');
-      renderVisibleRef.current();
+      renderSchedulerRef.current?.flush();
     }, 150);
     return () => clearTimeout(id);
   }, [isFullscreen, isLoaded]);
@@ -772,15 +752,17 @@ function CompsMapInner({
   const exportRadiusCsv = useCallback(() => {
     if (!radiusEnabled || !radiusCenter) return;
     const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
-    const rows = allGeoPointsRef.current;
+    const index = radiusIndexRef.current;
+    const exportRows =
+      index?.exportRowsInRadius(
+        radiusCenter.lat,
+        radiusCenter.lng,
+        effectiveRadiusMiles,
+        sourcesRef.current
+      ) ?? [];
     const lines: string[] = ['id,name,source'];
-    for (const row of rows) {
-      if (!Number.isFinite(row.lat) || !Number.isFinite(row.lng)) continue;
-      if (distanceMiles(radiusCenter.lat, radiusCenter.lng, row.lat, row.lng) > effectiveRadiusMiles) continue;
-      const src = sourcesRef.current[row.leaf.sourceIdx] ?? '';
-      const id = row.leaf.id ?? '';
-      const name = row.leaf.name ?? '';
-      lines.push(`${esc(id)},${esc(name)},${esc(src)}`);
+    for (const row of exportRows) {
+      lines.push(`${esc(row.id)},${esc(row.name)},${esc(row.sourceKey)}`);
     }
     const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -863,61 +845,102 @@ function CompsMapInner({
         ) : error ? (
           <span className="text-red-600 dark:text-red-400">{error}</span>
         ) : (
-          <div className="flex flex-col gap-1">
-            {listTotalProperties != null && (
-              <div className="font-semibold text-gray-900 dark:text-gray-100">
-                <span className="text-sage-600 dark:text-sage-400">
-                  {t('summaryUniqueProperties', { count: listTotalProperties })}
-                </span>
-                <span className="text-gray-500 dark:text-gray-400 font-normal">{t('mapListSuffix')}</span>
+          <>
+            <button
+              type="button"
+              onClick={() => setLegendPanelOpen((open) => !open)}
+              aria-expanded={legendPanelOpen}
+              aria-controls="comps-map-legend-panel"
+              className="flex w-full items-center justify-between gap-2 text-left font-semibold text-gray-900 dark:text-gray-100 hover:text-sage-700 dark:hover:text-sage-300"
+            >
+              <span className="min-w-0 truncate">
+                {listTotalProperties != null ? (
+                  <>
+                    <span className="text-sage-600 dark:text-sage-400">
+                      {t('summaryUniqueProperties', { count: listTotalProperties })}
+                    </span>
+                    <span className="font-normal text-gray-500 dark:text-gray-400">{t('mapListSuffix')}</span>
+                  </>
+                ) : (
+                  t('mapLegendTitle')
+                )}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-gray-500 transition-transform duration-200 ${legendPanelOpen ? 'rotate-180' : ''}`}
+                aria-hidden
+              />
+            </button>
+            {legendPanelOpen ? (
+              <div id="comps-map-legend-panel" className="mt-2 flex flex-col gap-1 border-t border-neutral-200/75 dark:border-neutral-700 pt-2">
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
+                  {t('mapGeocodedVersusListHint')}
+                </p>
+                <div className="flex flex-col gap-0.5 text-gray-700 dark:text-gray-300">
+                  {legend.map((s) => {
+                    const n = geocodedBySource[s] ?? 0;
+                    return (
+                      <div key={s} className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5 min-w-0">
+                          <span
+                            className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: sourceHex(s) }}
+                          />
+                          <span className="truncate">{unifiedSourceLabel(s)}</span>
+                        </span>
+                        <span className="text-gray-500 dark:text-gray-400 tabular-nums shrink-0">
+                          {n.toLocaleString()}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="mt-1.5 pt-1.5 border-t border-neutral-200/75 dark:border-neutral-700 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
+                  {t('mapPinVersusClusterHint')}
+                </p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
+                  {t('mapClusterColorHint')}
+                </p>
+                <div
+                  className="mt-1 h-1.5 w-full rounded-full shrink-0"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, hsl(240,76%,44%) 0%, hsl(120,76%,44%) 50%, hsl(0,76%,44%) 100%)',
+                  }}
+                  aria-hidden
+                />
               </div>
-            )}
-            <div className="font-semibold text-gray-900 dark:text-gray-100">
-              {t('mapGeocodedCount', { count: Number.isFinite(total) ? total : 0 })}
-              {capped ? ` ${t('mapGeocodedCapped')}` : ''}
-            </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
-              {t('mapGeocodedVersusListHint')}
-            </p>
-            <div className="flex flex-col gap-0.5 text-gray-700 dark:text-gray-300">
-              {legend.map((s) => {
-                const n = geocodedBySource[s] ?? 0;
-                return (
-                  <div key={s} className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 min-w-0">
-                      <span
-                        className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: sourceHex(s) }}
-                      />
-                      <span className="truncate">{unifiedSourceLabel(s)}</span>
-                    </span>
-                    <span className="text-gray-500 dark:text-gray-400 tabular-nums shrink-0">
-                      {n.toLocaleString()}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="mt-1.5 pt-1.5 border-t border-neutral-200/75 dark:border-neutral-700 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
-              {t('mapPinVersusClusterHint')}
-            </p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
-              {t('mapClusterColorHint')}
-            </p>
-            <div
-              className="mt-1 h-1.5 w-full rounded-full shrink-0"
-              style={{
-                background:
-                  'linear-gradient(90deg, hsl(240,76%,44%) 0%, hsl(120,76%,44%) 50%, hsl(0,76%,44%) 100%)',
-              }}
-              aria-hidden
-            />
-          </div>
+            ) : null}
+          </>
         )}
       </div>
 
-      <div className="absolute bottom-3 right-3 z-[1000] max-w-[min(100%-1.5rem,300px)] max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain rounded-md bg-white/95 dark:bg-gray-900/95 shadow-md border border-neutral-200/75 dark:border-neutral-800 px-3 py-2.5 text-xs space-y-2">
-        <div className="font-semibold text-gray-900 dark:text-gray-100">{t('mapRadiusTitle')}</div>
+      <div
+        className={`absolute bottom-3 right-3 z-[1000] max-w-[min(100%-1.5rem,300px)] rounded-md bg-white/95 dark:bg-gray-900/95 shadow-md border border-neutral-200/75 dark:border-neutral-800 px-3 py-2 text-xs ${
+          radiusPanelOpen ? 'max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain py-2.5' : ''
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setRadiusPanelOpen((open) => !open)}
+          aria-expanded={radiusPanelOpen}
+          aria-controls="comps-map-radius-panel"
+          className="flex w-full items-center justify-between gap-2 text-left font-semibold text-gray-900 dark:text-gray-100 hover:text-sage-700 dark:hover:text-sage-300"
+        >
+          <span className="min-w-0 truncate">{t('mapRadiusTitle')}</span>
+          <span className="flex shrink-0 items-center gap-1.5">
+            {!radiusPanelOpen && radiusEnabled && effectiveRadiusMiles > 0 ? (
+              <span className="text-[10px] font-medium tabular-nums text-sage-700 dark:text-sage-300">
+                {Math.round(effectiveRadiusMiles * 100) / 100} mi
+              </span>
+            ) : null}
+            <ChevronDown
+              className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${radiusPanelOpen ? 'rotate-180' : ''}`}
+              aria-hidden
+            />
+          </span>
+        </button>
+        {radiusPanelOpen ? (
+          <div id="comps-map-radius-panel" className="mt-2 space-y-2 border-t border-neutral-200/75 dark:border-neutral-700 pt-2">
         <label className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200">
           <input
             id="comps-map-radius-enabled"
@@ -1105,6 +1128,8 @@ function CompsMapInner({
             </button>
           </div>
         )}
+          </div>
+        ) : null}
       </div>
 
       <GoogleMap

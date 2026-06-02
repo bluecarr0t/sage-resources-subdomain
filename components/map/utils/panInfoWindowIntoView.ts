@@ -85,6 +85,43 @@ export function markerScreenDeltaToPanBy(dx: number, dy: number): { x: number; y
   return { x: -dx, y: -dy };
 }
 
+/** Shared InfoWindow options: no Google auto-pan/zoom; we pan only when clipped. */
+export const infoWindowDisableAutoPanOptions = {
+  disableAutoPan: true,
+} as const;
+
+/**
+ * Pan the map by the minimum amount so an estimated InfoWindow card fits in view.
+ * Does not change zoom.
+ */
+export async function panMapToFitInfoWindowIfNeeded(
+  map: google.maps.Map,
+  latLng: google.maps.LatLngLiteral,
+  options?: { isMobile?: boolean; padding?: InfoWindowViewportPadding }
+): Promise<void> {
+  const div = map.getDiv();
+  const w = div.clientWidth;
+  const h = div.clientHeight;
+  if (w < 1 || h < 1) return;
+
+  const pixel = await getMarkerContainerPixel(map, latLng);
+  if (!pixel) return;
+
+  const padding = options?.padding ?? defaultInfoWindowPadding(options?.isMobile ?? false);
+  const { dx, dy } = computeMarkerPixelDeltaToFitPopup({
+    markerX: pixel.x,
+    markerY: pixel.y,
+    mapWidth: w,
+    mapHeight: h,
+    padding,
+  });
+
+  if (dx === 0 && dy === 0) return;
+
+  const pan = markerScreenDeltaToPanBy(dx, dy);
+  map.panBy(pan.x, pan.y);
+}
+
 export function getMarkerContainerPixel(
   map: google.maps.Map,
   latLng: google.maps.LatLngLiteral

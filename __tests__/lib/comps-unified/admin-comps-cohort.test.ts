@@ -25,5 +25,6 @@ describe('admin-comps-cohort', () => {
     expect(out.propertyTypes).toEqual([ADMIN_COMPS_COHORT_PROPERTY_TYPE]);
     expect(out.isGlampingProperty).toEqual(['Yes']);
     expect(out.sageResearchStatus).toBe('published');
+    expect(out.exemptReportsFromPropertyTypeFilter).toBe(true);
   });
 });
