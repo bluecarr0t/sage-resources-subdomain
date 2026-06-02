@@ -86,7 +86,7 @@ export function buildStateAdrChoroplethFallbackSvg(
   const rowH = 22;
   entries.forEach(([abbr, v], i) => {
     const y = 96 + i * rowH;
-    const name = US_STATE_NAMES[abbr] ?? abbr;
+    const name = US_STATE_NAMES[abbr as keyof typeof US_STATE_NAMES] ?? abbr;
     rows += `
       <text x="80" y="${y}" font-size="12" fill="#222" font-family="system-ui,sans-serif">${esc(name)} (${esc(abbr)})</text>
       <text x="420" y="${y}" font-size="12" fill="#222" font-family="system-ui,sans-serif">${fmtUsd(v.meanAdr)}</text>
