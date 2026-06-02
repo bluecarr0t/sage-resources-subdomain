@@ -185,7 +185,7 @@ export type RegionalMapLabelExclusionReason =
   | 'occupancy_at_or_above_100_pct';
 
 export type RegionalMapLabelDiagnostics =
-  | { included: true; adr2025: number; occ2025: number }
+  | { included: true; adr2025: number; occ2025: number | null }
   | {
       included: false;
       reason: RegionalMapLabelExclusionReason;

@@ -375,6 +375,21 @@ describe('regionalMapLabelDiagnostics', () => {
     });
   });
 
+  it('includes Sage glamping rows without occupancy when label mode is adr_only', () => {
+    const row: CampspotRvMapAggRow = {
+      state: 'OR',
+      avg_retail_daily_rate_2025: '55',
+      occupancy_rate_2025: null,
+      occupancy_rate_2024: null,
+      avg_retail_daily_rate_2024: null,
+    };
+    expect(regionalMapLabelDiagnostics(row, RV_MAP_REGIONAL_RATE_BANDS_GLAMPING, 'adr_only')).toEqual({
+      included: true,
+      adr2025: 55,
+      occ2025: null,
+    });
+  });
+
   it('includes RoverPass rows when occupancy is tagged 2024 but mirrored to 2025', () => {
     const row = normalizeRoverpassRowToOverviewWide({
       state: 'TX',
