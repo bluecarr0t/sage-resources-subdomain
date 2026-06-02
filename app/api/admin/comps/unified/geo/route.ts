@@ -258,9 +258,7 @@ function collapseToOneRowPerProperty(
   }
   const out: CollapsedGeoRow[] = [];
   for (const group of groups.values()) {
-    const mergedUnitTypes = collectMergedUnitTypes(
-      group.map((r) => ({ unit_type: r.unit_type ?? null }))
-    );
+    const mergedUnitTypes = collectMergedUnitTypes(group);
     const row =
       group.length === 1 ? group[0] : mergePropertyGroup(group, includeGlampColumn);
     out.push({ ...row, mergedUnitTypes });

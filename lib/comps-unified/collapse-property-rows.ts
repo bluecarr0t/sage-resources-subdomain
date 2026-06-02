@@ -42,7 +42,9 @@ function mergeUnitCategories(rows: UnifiedCompRow[]): string[] | null {
 }
 
 /** Distinct non-empty unit_type labels across site rows (display order preserved). */
-export function collectMergedUnitTypes(rows: UnifiedCompRow[]): string[] {
+export function collectMergedUnitTypes(
+  rows: ReadonlyArray<Pick<UnifiedCompRow, 'unit_type'>>
+): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const r of rows) {
