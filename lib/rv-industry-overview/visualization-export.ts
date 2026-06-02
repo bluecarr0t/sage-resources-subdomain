@@ -1,11 +1,11 @@
-import type { JpegBlobCaptureResult, JpegDownloadResult } from '@/lib/rv-industry-overview/jpeg-capture';
-
-export type {
+import type {
   ImageBlobFormat,
   JpegBlobCaptureResult,
-  JpegDownloadResult,
   JpegCaptureProfile,
+  JpegDownloadResult,
 } from '@/lib/rv-industry-overview/jpeg-capture';
+
+export type { ImageBlobFormat, JpegBlobCaptureResult, JpegDownloadResult, JpegCaptureProfile };
 
 export type VisualizationJpgDownloadHandle = {
   downloadJpeg: () => Promise<JpegDownloadResult>;
