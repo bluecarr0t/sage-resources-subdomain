@@ -19,6 +19,7 @@ import {
   trendsRowSiteWeight,
   type CampspotTrendsAggRow,
   type TrendsChartCategoryKey,
+  type TrendsChartRow,
 } from '@/lib/rv-industry-overview/campspot-trends-chart-data';
 import { getRvIndustryRegionForStateAbbr } from '@/lib/rv-industry-overview/us-rv-regions';
 

@@ -141,10 +141,10 @@ export function sageRetailRateFieldsForOverview(
 }
 
 /** Wide row for state ADR choropleth — fills 2025 on legacy Sage rows without affecting YoY folds. */
-export function wideRowForGlampingStateAdrChoropleth(
-  row: { avg_retail_daily_rate_2025: string | null },
+export function wideRowForGlampingStateAdrChoropleth<T extends { avg_retail_daily_rate_2025: string | null }>(
+  row: T,
   raw: Record<string, unknown>
-): { avg_retail_daily_rate_2025: string | null } {
+): T {
   const mapRates = sageRetailRateFieldsForOverview(raw, { choropleth2025: true });
   return {
     ...row,

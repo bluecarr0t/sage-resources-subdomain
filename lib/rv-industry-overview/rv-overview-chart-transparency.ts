@@ -388,7 +388,7 @@ export type RecordUnitSliceChartTransparencyOptions = {
   /** Override regional map inclusion (e.g. glamping Sage uses `adr_only` label mode). */
   contributesToRegionalMap?: (row: CampspotRvMapAggRow) => boolean;
   /** Glamping overview uses site-level glamping amenity ADR cohort (not RV-only). */
-  contributesToAmenityAdr?: (row: CampspotAmenityAdrAggRow) => boolean;
+  contributesToAmenityAdr?: (row: RvOverviewWideRow) => boolean;
   /** Glamping overview uses lower unit-count size tiers (not RV 25+/50+/100+). */
   contributesToResortSize?: (row: CampspotSizeTierAggRow) => boolean;
   /** Glamping state choropleth uses `adr_only` + glamping rate bands when Sage-only. */

@@ -43,6 +43,7 @@ import {
 } from '@/lib/rv-industry-overview/campspot-trends-chart-data';
 import type { CampspotTrendsChartResult } from '@/lib/rv-industry-overview/campspot-trends-chart-data';
 import {
+  aggregateGlampingRowsToTrendsChart,
   foldGlampingTrendsRows,
   rowContributesToGlampingTrends,
 } from '@/lib/glamping-industry-overview/glamping-trends-chart-data';
@@ -235,7 +236,7 @@ function foldGlampingWideRowIntoBundle(
     contributesToTrends: rowContributesToGlampingTrends,
     contributesToRegionalMap: (r) =>
       rowContributesToRegionalMap(r, RV_MAP_REGIONAL_RATE_BANDS_GLAMPING, b.rvMap.regionalLabelMode),
-    contributesToAmenityAdr: rowContributesToGlampingAmenityAdr,
+    contributesToAmenityAdr: (r) => rowContributesToGlampingAmenityAdr(r),
     contributesToResortSize: (r) =>
       rowContributesToGlampingResortSize(r, {
         adrOnly2025: b.sageAdrOnlyMetrics === true,
@@ -310,8 +311,12 @@ function bundleErrorSlice(rowsScanned: number, message: string): GlampingIndustr
   const emptyRv = aggregateCampspotRowsToRvParkingCharts([]);
   return {
     mapResult: { ...aggregateCampspotRowsToRvMapData([]), rowsScanned, error: message },
-    trendsResult: { rows: aggregateCampspotRowsToTrendsChart([]), rowsScanned, error: message },
-    sizeResult: { rows: aggregateCampspotRowsToSizeTierChart([]), rowsScanned, error: message },
+    trendsResult: { rows: aggregateGlampingRowsToTrendsChart([]), rowsScanned, error: message },
+    sizeResult: {
+      rows: finalizeGlampingSizeTierFoldState(createGlampingSizeTierFoldState()),
+      rowsScanned,
+      error: message,
+    },
     seasonRatesResult: { rows: aggregateCampspotRowsToSeasonRates([]), rowsScanned, error: message },
     surfaceRatesResult: { rows: aggregateCampspotRowsToSurfaceRates([]), rowsScanned, error: message },
     amenityPropsResult: {

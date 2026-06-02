@@ -10,7 +10,10 @@ import {
   passesStandardCampspotOccupancyPercent,
   passesStandardCampspotRetailRateUsd,
 } from '@/lib/rv-industry-overview/campspot-rv-overview-standard-filters';
-import { campspotTruthyAmenity } from '@/lib/rv-industry-overview/campspot-amenity-properties-chart-data';
+import {
+  campspotTruthyAmenity,
+  type CampspotAmenityPropertiesAggRow,
+} from '@/lib/rv-industry-overview/campspot-amenity-properties-chart-data';
 
 /** Hipcamp needs paired 2025 occ + ARDR; Sage may contribute with ARDR only. */
 export function rowPassesGlampingAmenityCohort(row: GlampingAmenityPropertiesAggRow): boolean {
@@ -42,19 +45,8 @@ export const GLAMPING_AMENITY_PROPERTY_CHART_KEYS_SAGE = [
 
 export type GlampingAmenityPropertyChartKey = (typeof GLAMPING_AMENITY_PROPERTY_CHART_KEYS)[number];
 
-export type GlampingAmenityPropertiesAggRow = {
-  property_name: string | null;
-  city: string | null;
-  state: string | null;
-  occupancy_rate_2025: string | null;
-  avg_retail_daily_rate_2025: string | null;
-  unit_hot_tub: string | null;
-  property_hot_tub: string | null;
-  unit_sauna: string | null;
-  property_sauna: string | null;
-  pool: string | null;
-  hot_tub_sauna: string | null;
-};
+/** Same wide-row amenity fields as RV overview (`unit_hot_tub`, etc. optional on Campspot). */
+export type GlampingAmenityPropertiesAggRow = CampspotAmenityPropertiesAggRow;
 
 export type GlampingAmenityPropertyPctRow = {
   amenityKey: GlampingAmenityPropertyChartKey;
