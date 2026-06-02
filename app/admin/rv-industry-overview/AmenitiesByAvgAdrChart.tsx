@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
   type LabelProps as RechartsLabelProps,
+  type XAxisTickContentProps,
 } from 'recharts';
 import { AMENITY_ADR_CHART_KEYS } from '@/lib/rv-industry-overview/campspot-amenity-adr-chart-data';
 import { GLAMPING_AMENITY_ADR_CHART_KEYS } from '@/lib/glamping-industry-overview/glamping-amenity-adr-chart-data';
@@ -195,28 +196,23 @@ function createWithBarLabel() {
 /**
  * Rendered on the without (left) bar so x/y/width/height match that bar; with bar geometry is derived.
  */
-function AmenityCategoryAxisTick({
-  x,
-  y,
-  payload,
-}: {
-  x?: number;
-  y?: number;
-  payload?: { value: string };
-}) {
-  if (x == null || y == null || payload?.value == null) return null;
-  const anchorY = y + X_AXIS_TICK_DY;
+function AmenityCategoryAxisTick({ x, y, payload }: XAxisTickContentProps) {
+  const value = payload?.value;
+  if (value == null) return null;
+  const xN = labelCoord(x);
+  const yN = labelCoord(y);
+  const anchorY = yN + X_AXIS_TICK_DY;
   return (
     <text
-      x={x}
+      x={xN}
       y={anchorY}
       fill="#111827"
       fontSize={10}
       fontFamily="system-ui, sans-serif"
       textAnchor="end"
-      transform={`rotate(${X_AXIS_TICK_ANGLE}, ${x}, ${anchorY})`}
+      transform={`rotate(${X_AXIS_TICK_ANGLE}, ${xN}, ${anchorY})`}
     >
-      {payload.value}
+      {String(value)}
     </text>
   );
 }
