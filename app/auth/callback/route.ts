@@ -74,12 +74,34 @@ async function upsertGatedLead(
   }
 }
 
+/**
+ * Where to send the visitor when something goes wrong. Gated magic-link users
+ * are lead-capture only — they must never be bounced to `/login` (the admin
+ * sign-in). Instead, return them to the gated page with `?access=link-expired`
+ * so the access modal can prompt a fresh sign-in link. Only non-gated (admin)
+ * flows fall back to `/login`.
+ */
+function buildFailureRedirect(
+  request: NextRequest,
+  gatedSlug: string | null,
+  loginError: string
+): NextResponse {
+  if (gatedSlug) {
+    const path = `${getGatedPageRedirectPath(gatedSlug)}?access=link-expired`;
+    return NextResponse.redirect(new URL(path, request.url));
+  }
+  return NextResponse.redirect(
+    new URL(`/login?error=${encodeURIComponent(loginError)}`, request.url)
+  );
+}
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const redirectParam = requestUrl.searchParams.get('redirect');
 
   const destination = getSafeRedirect(redirectParam);
+  const gatedSlug = gatedSlugForRedirect(destination);
 
   if (code) {
     try {
@@ -88,29 +110,24 @@ export async function GET(request: NextRequest) {
 
       if (error) {
         console.error('[auth/callback] Code exchange failed:', error);
-        return NextResponse.redirect(
-          new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url)
-        );
+        return buildFailureRedirect(request, gatedSlug, error.message);
       }
 
       // For gated content pages, record the verified lead before redirecting.
-      const gatedSlug = gatedSlugForRedirect(destination);
       if (gatedSlug) {
         const {
           data: { user },
         } = await supabase.auth.getUser();
         if (user) {
           await upsertGatedLead(supabase, user, gatedSlug);
-          return NextResponse.redirect(
-            new URL(getGatedPageRedirectPath(gatedSlug), request.url)
-          );
         }
+        return NextResponse.redirect(
+          new URL(getGatedPageRedirectPath(gatedSlug), request.url)
+        );
       }
     } catch (err) {
       console.error('[auth/callback] Error:', err);
-      return NextResponse.redirect(
-        new URL('/login?error=Authentication+failed', request.url)
-      );
+      return buildFailureRedirect(request, gatedSlug, 'Authentication failed');
     }
   }
 

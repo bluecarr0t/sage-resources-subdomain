@@ -83,7 +83,7 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(res.headers.get('location')).toMatch(/\/glamping-market-overview$/);
   });
 
-  it('redirects to login when code exchange fails', async () => {
+  it('returns gated users to the gated page (not /login) when code exchange fails', async () => {
     mockExchangeCodeForSession.mockResolvedValueOnce({
       error: { message: 'invalid code' },
     });
@@ -92,6 +92,26 @@ describe('GET /auth/callback — gated magic link', () => {
       callbackUrl({
         code: 'bad-code',
         redirect: '/glamping-market-overview',
+      })
+    );
+
+    expect(res.status).toBe(307);
+    const location = res.headers.get('location') ?? '';
+    expect(location).toContain('/glamping-market-overview');
+    expect(location).toContain('access=link-expired');
+    expect(location).not.toContain('/login');
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
+
+  it('redirects admin flows to /login when code exchange fails', async () => {
+    mockExchangeCodeForSession.mockResolvedValueOnce({
+      error: { message: 'invalid code' },
+    });
+
+    const res = await GET(
+      callbackUrl({
+        code: 'bad-code',
+        redirect: '/admin/dashboard',
       })
     );
 

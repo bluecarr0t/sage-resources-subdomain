@@ -357,6 +357,22 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/api') ||
       pathname.includes('.') // Skip static files (images, etc.)
     ) {
+        // Gated content pages: refresh the Supabase session so returning
+        // magic-link users stay unlocked. Reading the user here lets
+        // @supabase/ssr rotate the access/refresh tokens and write them back
+        // onto the response (a Server Component layout cannot persist cookies),
+        // so access survives past the ~1h access-token expiry without forcing
+        // a new magic link.
+        if (
+          pathname === '/glamping-market-overview' ||
+          pathname.startsWith('/glamping-market-overview/')
+        ) {
+          const response = NextResponse.next({ request });
+          const supabase = createSupabaseMiddlewareClient(request, response);
+          await supabase.auth.getUser();
+          return response;
+        }
+
         // For sitemap, robots.txt, login, admin, and legal pages, skip i18n middleware entirely
         if (
           pathname.startsWith('/images/') ||
@@ -370,8 +386,6 @@ export async function middleware(request: NextRequest) {
           pathname.startsWith('/admin') ||
           pathname === '/privacy-policy' ||
           pathname === '/terms-of-service' ||
-          pathname === '/glamping-market-overview' ||
-          pathname.startsWith('/glamping-market-overview/') ||
           pathname === '/glamping-market-snapshot'
         ) {
           return NextResponse.next();

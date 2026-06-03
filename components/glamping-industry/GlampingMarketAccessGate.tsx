@@ -23,6 +23,7 @@ export function GlampingMarketAccessGate({
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const emailOnly = formMode === 'email-only';
 
@@ -32,6 +33,23 @@ export function GlampingMarketAccessGate({
     return () => {
       document.body.style.overflow = prev;
     };
+  }, []);
+
+  // The auth callback returns here with `?access=link-expired` when a magic
+  // link could not be verified (expired, already used, or opened on a
+  // different device than it was requested). Prompt for a fresh link and
+  // default to the email-only mode since they already submitted their details.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('access') === 'link-expired') {
+      setNotice(
+        'That sign-in link has expired or was already used. Request a new one below, and open it on this device.'
+      );
+      setFormMode('email-only');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('access');
+      window.history.replaceState({}, '', url.toString());
+    }
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -56,6 +74,7 @@ export function GlampingMarketAccessGate({
         return;
       }
       void fireGateAccessConfetti();
+      setNotice(null);
       setStep('sent');
     } catch {
       setError('Network error. Please try again.');
@@ -67,6 +86,7 @@ export function GlampingMarketAccessGate({
   function switchMode(mode: FormMode) {
     setFormMode(mode);
     setError(null);
+    setNotice(null);
     if (mode === 'email-only') {
       setName('');
     }
@@ -91,6 +111,11 @@ export function GlampingMarketAccessGate({
 
         {step === 'form' ? (
           <>
+            {notice ? (
+              <p className="mt-4 border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800">
+                {notice}
+              </p>
+            ) : null}
             <p className="mt-4 text-sm font-light leading-relaxed text-neutral-600">
               {emailOnly
                 ? 'Enter your work email and we\u2019ll send a secure sign-in link. No password required.'

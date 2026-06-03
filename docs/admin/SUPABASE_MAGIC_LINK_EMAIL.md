@@ -7,14 +7,28 @@ Branded HTML templates for gated-access sign-in live in the repo:
 | Magic link (OTP / sign-in) | [`docs/email-templates/supabase-magic-link.html`](../email-templates/supabase-magic-link.html) | **Authentication → Email Templates → Magic Link** |
 | Confirm signup (if users see “Confirm your signup”) | [`docs/email-templates/supabase-confirm-signup.html`](../email-templates/supabase-confirm-signup.html) | **Authentication → Email Templates → Confirm signup** |
 
+## Recommended setup (one email)
+
+The gated form calls `signInWithOtp` (passwordless), so the **Magic Link** template
+is the email that fires. For a clean lead-capture flow you only need **one** email:
+
+1. **Authentication → Providers → Email** → turn **OFF** "Confirm email".
+   With it off, new and returning leads both get the **Magic Link** template
+   (no separate "Confirm your signup" email). Clicking the magic link is the
+   email verification.
+2. Brand only the **Magic Link** template (below).
+
+Keep **Confirm signup** branded too only if you intentionally leave "Confirm email"
+on — then first-time addresses may receive it instead of the magic link.
+
 ## Apply in Supabase
 
 1. Open [Supabase Dashboard](https://app.supabase.com) → project **sage-outdoor-advisory**.
 2. Go to **Authentication** → **Email Templates**.
-3. Select **Magic Link** (and **Confirm signup** if new users get that email instead).
-4. Set **Subject** (suggestions):
-   - Magic Link: `Your Sage sign-in link`
-   - Confirm signup: `Confirm your email for Sage Resources`
+3. Select **Magic Link** (and **Confirm signup** only if "Confirm email" is left on).
+4. Set **Subject**:
+   - **Magic Link:** `Your sign-in link for the Glamping Market Overview`
+   - **Confirm signup:** `Confirm your email — Sage Outdoor Advisory`
 5. Paste the **entire HTML** from the matching file into the message body (Source / HTML view if available).
 6. Save.
 
