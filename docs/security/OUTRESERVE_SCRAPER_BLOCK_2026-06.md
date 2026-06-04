@@ -12,7 +12,22 @@
 |-------|----------|
 | Blocklist (UA + IP) | `lib/public-map-api-guard.ts` |
 | Middleware (early 403) | `middleware.ts` for `/api/properties`, `/api/google-places` |
-| Route handlers | Same guard + rate limits on both routes |
+| Route handlers | Same origin guard (defense in depth) |
+| Per-IP rate limits | `lib/public-map-api-rate-limit.ts` + middleware (minute, hour, Google Places cap) |
+
+### Per-IP rate limits (defaults)
+
+Counts are **shared** across `/api/properties` and `/api/google-places` so scrapers cannot double throughput by alternating paths.
+
+| Bucket | Default | Env override |
+|--------|---------|----------------|
+| All public map APIs | 60 / minute / IP | `PUBLIC_MAP_API_RATELIMIT_PER_MIN` |
+| All public map APIs | 300 / hour / IP | `PUBLIC_MAP_API_RATELIMIT_PER_HOUR` |
+| Google Places only | 30 / minute / IP (additional) | `GOOGLE_PLACES_PUBLIC_ROUTE_RATELIMIT_PER_MIN` |
+
+Uses **Redis** when `REDIS_URL` (or `REDIS_HOST`) is configured so limits apply across all Vercel instances; otherwise falls back to in-memory per instance.
+
+Trusted bypass headers skip rate limits (same as origin bypass).
 
 ### Environment variables
 
@@ -23,7 +38,9 @@
 | `PUBLIC_MAP_API_BLOCK_UA_SUBSTRINGS` | Comma-separated extra UA substrings to block |
 | `PUBLIC_MAP_API_BLOCK_IPS` | Comma-separated extra IPs to block |
 | `PUBLIC_MAP_API_ALLOWED_ORIGINS` | Comma-separated extra allowed origins (preview hosts) |
-| `PROPERTIES_PUBLIC_ROUTE_RATELIMIT_PER_MIN` | Default `90` requests/min/IP for `/api/properties` |
+| `PUBLIC_MAP_API_RATELIMIT_PER_MIN` | Combined minute cap (default `60`) |
+| `PUBLIC_MAP_API_RATELIMIT_PER_HOUR` | Combined hour cap (default `300`) |
+| `GOOGLE_PLACES_PUBLIC_ROUTE_RATELIMIT_PER_MIN` | Extra Google Places minute cap (default `30`) |
 
 Legitimate browser traffic from the map must send an **Origin** or **Referer** from `resources.sageoutdooradvisory.com` (or `SITE_URL` / `VERCEL_URL` on previews).
 

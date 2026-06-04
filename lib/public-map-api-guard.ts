@@ -102,7 +102,8 @@ function matchesAllowedOrigin(value: string | null): boolean {
   );
 }
 
-function hasTrustedBypass(request: PublicMapApiRequestLike): boolean {
+/** Scripts, cron, and internal callers skip origin + rate limits when configured. */
+export function hasTrustedPublicMapApiBypass(request: PublicMapApiRequestLike): boolean {
   const bypassSecret = process.env.PUBLIC_MAP_API_BYPASS_SECRET;
   if (bypassSecret && request.headers.get('x-public-map-api-key') === bypassSecret) {
     return true;
@@ -136,7 +137,7 @@ export function isAllowedPublicMapApiCaller(request: PublicMapApiRequestLike): b
     return false;
   }
 
-  if (hasTrustedBypass(request)) {
+  if (hasTrustedPublicMapApiBypass(request)) {
     return true;
   }
 
