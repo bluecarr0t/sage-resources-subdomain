@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache, hashCacheKey, logCacheMetrics } from '@/lib/redis';
+import { isAllowedPublicMapApiCaller } from '@/lib/public-map-api-guard';
+import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { filterToPublicColumns, filterRequestedFieldsToPublic } from '@/lib/property-column-privacy';
 import {
   isExcludedLandOperatorForPublicMap,
@@ -34,6 +36,33 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    if (!isAllowedPublicMapApiCaller(request)) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    const limitPerMin = Math.max(
+      1,
+      Math.min(500, Number(process.env.PROPERTIES_PUBLIC_ROUTE_RATELIMIT_PER_MIN ?? 90))
+    );
+    const rl = await checkRateLimitAsync(
+      `properties_public:${getRateLimitKey(request)}`,
+      limitPerMin,
+      60_000
+    );
+    if (!rl.allowed) {
+      const retrySec = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(retrySec) },
+        }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     
     // Check if fetching single property by ID

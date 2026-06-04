@@ -5,6 +5,10 @@ import { createSupabaseMiddlewareClient } from '@/lib/supabase-middleware';
 import { isLegacyUsCanadaOnlyCountryQuery } from '@/lib/map/legacy-map-country-query';
 import { GLOSSARY_SLUG_ALIASES } from '@/lib/glossary-slug-aliases';
 import { relocateAuthCodeToCallbackUrl } from '@/lib/gated-access';
+import {
+  guardPublicMapApiResponse,
+  isPublicMapApiPath,
+} from '@/lib/public-map-api-guard';
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware({
@@ -198,6 +202,15 @@ const excludedRoutes = [
 export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
+
+    // Block scrapers on public map JSON APIs before route handlers (and Google Places spend).
+    if (isPublicMapApiPath(pathname)) {
+      const denied = guardPublicMapApiResponse(request);
+      if (denied) {
+        return denied;
+      }
+      return NextResponse.next();
+    }
 
     // Supabase may send PKCE `code` to Site URL (e.g. /en) instead of /auth/callback.
     const authCallbackUrl = relocateAuthCodeToCallbackUrl(request.nextUrl);
@@ -431,6 +444,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/api/properties',
+    '/api/google-places',
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)
