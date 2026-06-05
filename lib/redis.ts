@@ -503,6 +503,88 @@ export async function checkRateLimitRedis(
 }
 
 /**
+ * Increment a counter and (on first write) set a TTL. Returns the new count,
+ * or null when Redis is unavailable.
+ */
+export async function incrementCounterWithTtl(
+  key: string,
+  ttlSeconds: number
+): Promise<number | null> {
+  const client = await getRedisClient();
+  if (!client) return null;
+
+  try {
+    const count = await client.incr(key);
+    if (count === 1) {
+      await client.expire(key, ttlSeconds);
+    }
+    return count;
+  } catch (error) {
+    console.error(`[Redis] incrementCounterWithTtl error for ${key}:`, error);
+    return null;
+  }
+}
+
+/** Add a member to a Redis set. Returns false when Redis is unavailable. */
+export async function addToSet(key: string, member: string): Promise<boolean> {
+  const client = await getRedisClient();
+  if (!client) return false;
+  try {
+    await client.sAdd(key, member);
+    return true;
+  } catch (error) {
+    console.error(`[Redis] addToSet error for ${key}:`, error);
+    return false;
+  }
+}
+
+/** Read all members of a Redis set. Returns [] when Redis is unavailable. */
+export async function getSetMembers(key: string): Promise<string[]> {
+  const client = await getRedisClient();
+  if (!client) return [];
+  try {
+    return await client.sMembers(key);
+  } catch (error) {
+    console.error(`[Redis] getSetMembers error for ${key}:`, error);
+    return [];
+  }
+}
+
+/** Remove a member from a Redis set. */
+export async function removeFromSet(key: string, member: string): Promise<boolean> {
+  const client = await getRedisClient();
+  if (!client) return false;
+  try {
+    await client.sRem(key, member);
+    return true;
+  } catch (error) {
+    console.error(`[Redis] removeFromSet error for ${key}:`, error);
+    return false;
+  }
+}
+
+/**
+ * Set a key only if it does not already exist (atomic SET NX), with TTL.
+ * Returns true when the key was newly created (i.e. caller "won" the claim),
+ * false when it already existed or Redis is unavailable.
+ */
+export async function setIfNotExists(
+  key: string,
+  value: string,
+  ttlSeconds: number
+): Promise<boolean> {
+  const client = await getRedisClient();
+  if (!client) return false;
+  try {
+    const result = await client.set(key, value, { NX: true, EX: ttlSeconds });
+    return result === 'OK';
+  } catch (error) {
+    console.error(`[Redis] setIfNotExists error for ${key}:`, error);
+    return false;
+  }
+}
+
+/**
  * Check if Redis is available and connected
  * @returns true if Redis is available, false otherwise
  */

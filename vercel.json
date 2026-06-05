@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/refresh-unified-comps",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/ban-abusive-ips",
+      "schedule": "*/10 * * * *"
     }
   ],
   "redirects": [

@@ -97,6 +97,54 @@ curl -sI -H "x-public-map-api-key: YOUR_SECRET" \
   "https://resources.sageoutdooradvisory.com/api/properties?fields=id" | head -1
 ```
 
+## Automatic IP banning (opt-in)
+
+Repeat abusers can be promoted to the **Vercel Firewall IP block list** with no
+manual intervention.
+
+### How it works
+
+1. The per-IP rate limiter records each 429 as an "offense" in Redis
+   (`lib/public-map-api-abuse.ts`).
+2. Once an IP exceeds `PUBLIC_MAP_API_ABUSE_BAN_THRESHOLD` offenses within 1h, it
+   is added to a Redis candidate set.
+3. The cron `/api/cron/ban-abusive-ips` (every 10 min) drains the candidate set
+   and submits each IP to the Vercel Firewall via the REST API
+   (`ip.insert`, action `deny`, `hostname: *`) — `lib/vercel-firewall.ts`.
+4. Each IP is claimed atomically (Redis `SET NX`) so it is submitted only once,
+   capped at 25 bans/run.
+
+The hot request path only does a cheap Redis `INCR`; the slower Vercel API calls
+happen in the cron, off the request path.
+
+### Setup (all required for auto-ban)
+
+| Variable | Purpose |
+|----------|---------|
+| `PUBLIC_MAP_API_AUTO_BAN_ENABLED` | `true` to enable (master switch; default off) |
+| `PUBLIC_MAP_API_ABUSE_BAN_THRESHOLD` | Offenses within 1h before queuing a ban (default `10`) |
+| `VERCEL_FIREWALL_API_TOKEN` | Vercel API token with firewall write access (or reuse `VERCEL_TOKEN`) |
+| `VERCEL_PROJECT_ID` | Target project |
+| `VERCEL_TEAM_ID` | Required for team-scoped projects |
+| `CRON_SECRET` | Authorizes the cron route |
+| Redis (`REDIS_URL`/`REDIS_HOST`) | Required to track offenses across instances |
+
+Create the token at **Vercel → Account Settings → Tokens**. Find project/team IDs
+under **Project → Settings → General** (or run `vercel project ls`).
+
+### Operating notes
+
+- **Disabled by default.** With `PUBLIC_MAP_API_AUTO_BAN_ENABLED` unset, the cron
+  returns `{ enabled: false }` and bans nothing.
+- Banned IPs appear in **Firewall → IP Blocking** with an `Auto-banned: ...` note.
+- To unban: remove the IP in the Vercel dashboard, and delete the Redis key
+  `public_map_api:abuse:banned:<ip>` so it isn't re-submitted.
+- Manual trigger / dry-run:
+  ```bash
+  curl -s -H "Authorization: Bearer $CRON_SECRET" \
+    https://resources.sageoutdooradvisory.com/api/cron/ban-abusive-ips | jq
+  ```
+
 ## Follow-up
 
 - Preserve access logs / Vercel observability exports for potential ToS review

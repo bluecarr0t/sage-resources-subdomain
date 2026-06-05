@@ -4,6 +4,7 @@ import {
   hasTrustedPublicMapApiBypass,
   type PublicMapApiRequestLike,
 } from '@/lib/public-map-api-guard';
+import { recordPublicMapApiAbuse } from '@/lib/public-map-api-abuse';
 
 export type PublicMapApiRateLimitRoute = 'properties' | 'google-places';
 
@@ -52,11 +53,7 @@ export async function enforcePublicMapApiRateLimits(
     60_000
   );
   if (!minuteRl.allowed) {
-    return {
-      allowed: false,
-      retryAfterSec: retryAfterSeconds(minuteRl.resetAt),
-      scope: 'minute',
-    };
+    return blocked(ipKey, retryAfterSeconds(minuteRl.resetAt), 'minute');
   }
 
   const hourRl = await checkRateLimitAsync(
@@ -65,11 +62,7 @@ export async function enforcePublicMapApiRateLimits(
     3_600_000
   );
   if (!hourRl.allowed) {
-    return {
-      allowed: false,
-      retryAfterSec: retryAfterSeconds(hourRl.resetAt),
-      scope: 'hour',
-    };
+    return blocked(ipKey, retryAfterSeconds(hourRl.resetAt), 'hour');
   }
 
   if (route === 'google-places') {
@@ -84,15 +77,32 @@ export async function enforcePublicMapApiRateLimits(
       60_000
     );
     if (!googleRl.allowed) {
-      return {
-        allowed: false,
-        retryAfterSec: retryAfterSeconds(googleRl.resetAt),
-        scope: 'google_places_minute',
-      };
+      return blocked(
+        ipKey,
+        retryAfterSeconds(googleRl.resetAt),
+        'google_places_minute'
+      );
     }
   }
 
   return { allowed: true };
+}
+
+/**
+ * Build a blocked result and record the offense for auto-ban tracking.
+ * Offense recording is best-effort and never blocks the response.
+ */
+async function blocked(
+  ipKey: string,
+  retryAfterSec: number,
+  scope: Extract<PublicMapApiRateLimitResult, { allowed: false }>['scope']
+): Promise<PublicMapApiRateLimitResult> {
+  try {
+    await recordPublicMapApiAbuse(ipKey);
+  } catch {
+    // Never let abuse tracking break the rate-limit response.
+  }
+  return { allowed: false, retryAfterSec, scope };
 }
 
 export function publicMapApiRateLimitResponse(
