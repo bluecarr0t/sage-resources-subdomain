@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchGooglePlacesDataCached } from '@/lib/google-places-cache';
 import { normalizePlacesApiPlaceId } from '@/lib/google-places-place-id';
 import { isAllowedPublicMapApiCaller } from '@/lib/public-map-api-guard';
+import {
+  enforcePublicMapApiRateLimits,
+  publicMapApiRateLimitResponse,
+} from '@/lib/public-map-api-rate-limit';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -17,6 +21,11 @@ export async function GET(request: NextRequest) {
         { error: 'Forbidden' },
         { status: 403, headers: { 'Cache-Control': 'no-store' } }
       );
+    }
+
+    const rateLimit = await enforcePublicMapApiRateLimits(request, 'google-places');
+    if (!rateLimit.allowed) {
+      return publicMapApiRateLimitResponse(rateLimit, { error: 'Too many requests' });
     }
 
     const searchParams = request.nextUrl.searchParams;

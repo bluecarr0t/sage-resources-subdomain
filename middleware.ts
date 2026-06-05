@@ -9,10 +9,6 @@ import {
   guardPublicMapApiResponse,
   isPublicMapApiPath,
 } from '@/lib/public-map-api-guard';
-import {
-  enforcePublicMapApiRateLimits,
-  publicMapApiRateLimitResponse,
-} from '@/lib/public-map-api-rate-limit';
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware({
@@ -207,24 +203,13 @@ export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
 
-    // Block scrapers + per-IP rate limits on public map JSON APIs before route handlers.
+    // Block scrapers on public map JSON APIs at the edge (header-only checks, no Node deps).
+    // Per-IP rate limiting (Redis) runs in the route handlers, which use the Node runtime.
     if (isPublicMapApiPath(pathname)) {
       const denied = guardPublicMapApiResponse(request);
       if (denied) {
         return denied;
       }
-
-      const route =
-        pathname === '/api/google-places' ? 'google-places' : 'properties';
-      const rateLimit = await enforcePublicMapApiRateLimits(request, route);
-      if (!rateLimit.allowed) {
-        const body =
-          route === 'google-places'
-            ? { error: 'Too many requests' }
-            : { success: false, error: 'Too many requests' };
-        return publicMapApiRateLimitResponse(rateLimit, body);
-      }
-
       return NextResponse.next();
     }
 

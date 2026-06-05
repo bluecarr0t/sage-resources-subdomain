@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache, hashCacheKey, logCacheMetrics } from '@/lib/redis';
 import { isAllowedPublicMapApiCaller } from '@/lib/public-map-api-guard';
+import {
+  enforcePublicMapApiRateLimits,
+  publicMapApiRateLimitResponse,
+} from '@/lib/public-map-api-rate-limit';
 import { filterToPublicColumns, filterRequestedFieldsToPublic } from '@/lib/property-column-privacy';
 import {
   isExcludedLandOperatorForPublicMap,
@@ -40,6 +44,14 @@ export async function GET(request: NextRequest) {
         { success: false, error: 'Forbidden' },
         { status: 403, headers: { 'Cache-Control': 'no-store' } }
       );
+    }
+
+    const rateLimit = await enforcePublicMapApiRateLimits(request, 'properties');
+    if (!rateLimit.allowed) {
+      return publicMapApiRateLimitResponse(rateLimit, {
+        success: false,
+        error: 'Too many requests',
+      });
     }
 
     const searchParams = request.nextUrl.searchParams;

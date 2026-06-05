@@ -10,10 +10,14 @@
 
 | Layer | Location |
 |-------|----------|
-| Blocklist (UA + IP) | `lib/public-map-api-guard.ts` |
-| Middleware (early 403) | `middleware.ts` for `/api/properties`, `/api/google-places` |
-| Route handlers | Same origin guard (defense in depth) |
-| Per-IP rate limits | `lib/public-map-api-rate-limit.ts` + middleware (minute, hour, Google Places cap) |
+| Blocklist (UA + IP) + origin guard | `lib/public-map-api-guard.ts` (header/env only, Edge-safe) |
+| Middleware (early 403) | `middleware.ts` runs the guard on `/api/properties`, `/api/google-places` |
+| Per-IP rate limits | `lib/public-map-api-rate-limit.ts`, called from the **route handlers** (Node runtime — Redis is not available in Edge middleware) |
+
+> Note: rate limiting must NOT run in `middleware.ts`. Middleware uses the Edge
+> runtime, and `lib/redis.ts` imports Node-only modules (`redis`, `crypto`,
+> `zlib`). Importing it into middleware causes `MIDDLEWARE_INVOCATION_FAILED`
+> and 500s the whole site.
 
 ### Per-IP rate limits (defaults)
 
