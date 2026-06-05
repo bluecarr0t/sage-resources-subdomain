@@ -6,6 +6,12 @@
 - **IP:** `212.83.77.168` (Netherlands)
 - **Targets:** `GET /api/properties`, `GET /api/google-places` (structured data + Google Places billing)
 
+### Additional blocked crawlers
+
+- **PetalBot** (Huawei Clouds, IP range `114.119.x.x`) — added to the default UA
+  blocklist after appearing in Vercel Firewall traffic (Jun 4 2026). Crawler,
+  not a targeted API scrape, but blocked from the public map APIs anyway.
+
 ## Code protections (deployed with app)
 
 | Layer | Location |

@@ -3,7 +3,11 @@ export type PublicMapApiRequestLike = {
 };
 
 /** Known scraper user-agent substrings (case-insensitive). */
-export const DEFAULT_BLOCKED_USER_AGENT_SUBSTRINGS = ['OutReserveBot', 'OutReserve'];
+export const DEFAULT_BLOCKED_USER_AGENT_SUBSTRINGS = [
+  'OutReserveBot',
+  'OutReserve',
+  'PetalBot',
+];
 
 /** IPs observed scraping public map APIs (Jun 2026). */
 export const DEFAULT_BLOCKED_IPS = ['212.83.77.168'];

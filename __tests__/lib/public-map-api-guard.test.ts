@@ -41,6 +41,16 @@ describe('public-map-api-guard', () => {
     expect(isAllowedPublicMapApiCaller(req)).toBe(false);
   });
 
+  it('blocks PetalBot user agent', () => {
+    const req = requestWith({
+      'user-agent':
+        'Mozilla/5.0 (compatible; PetalBot;+https://webmaster.petalsearch.com/site/petalbot)',
+      origin: 'https://resources.sageoutdooradvisory.com',
+    });
+    expect(isBlockedScraperRequest(req)).toBe(true);
+    expect(isAllowedPublicMapApiCaller(req)).toBe(false);
+  });
+
   it('blocks known scraper IP', () => {
     const req = requestWith({
       'x-forwarded-for': '212.83.77.168, 1.2.3.4',
