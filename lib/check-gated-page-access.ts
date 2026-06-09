@@ -5,11 +5,12 @@
  * - They completed the magic-link flow (`gated_content_leads` with `verified_at`).
  */
 
-import type { SupabaseClient, User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import { isAllowedEmailDomain, isManagedUser } from '@/lib/auth-helpers';
+import { createServerClient } from '@/lib/supabase';
 
 export async function checkGatedPageAccess(
-  supabase: SupabaseClient,
+  _supabase: unknown,
   user: User | null | undefined,
   pageSlug: string
 ): Promise<boolean> {
@@ -19,8 +20,10 @@ export async function checkGatedPageAccess(
     return true;
   }
 
+  const admin = createServerClient();
+
   if (user.id) {
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from('gated_content_leads')
       .select('id')
       .eq('page_slug', pageSlug)
@@ -33,7 +36,7 @@ export async function checkGatedPageAccess(
   }
 
   if (user.email) {
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from('gated_content_leads')
       .select('id')
       .eq('page_slug', pageSlug)

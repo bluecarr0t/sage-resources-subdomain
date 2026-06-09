@@ -9,13 +9,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import type { SupabaseClient, User } from '@supabase/supabase-js';
-import { createServerClientWithCookies } from '@/lib/supabase-server';
+import type { User } from '@supabase/supabase-js';
+import { createServerClient } from '@/lib/supabase';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import {
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   getGatedPageRedirectPath,
   isGatedPageSlug,
 } from '@/lib/gated-access';
+import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,29 +50,35 @@ function gatedSlugForRedirect(redirect: string): string | null {
  * Record the lead for a gated-page magic-link sign-in. Best-effort: a failure
  * here must never block the user from reaching the page.
  */
-async function upsertGatedLead(
-  supabase: SupabaseClient,
-  user: User,
-  pageSlug: string
-): Promise<void> {
+async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
   const name =
     (typeof user.user_metadata?.full_name === 'string'
       ? user.user_metadata.full_name
       : null) ?? null;
 
-  const { error } = await supabase.from('gated_content_leads').upsert(
+  const verifiedAt = new Date().toISOString();
+  const email = user.email ?? '';
+
+  const { error } = await createServerClient().from('gated_content_leads').upsert(
     {
       user_id: user.id,
-      email: user.email ?? '',
+      email,
       name,
       page_slug: pageSlug,
-      verified_at: new Date().toISOString(),
+      verified_at: verifiedAt,
     },
     { onConflict: 'email,page_slug' }
   );
 
   if (error) {
     console.error('[auth/callback] gated lead upsert failed:', error.message);
+  } else if (email) {
+    notifyZapierGatedLead({
+      email,
+      name,
+      page_slug: pageSlug,
+      verified_at: verifiedAt,
+    });
   }
 }
 
@@ -104,31 +112,34 @@ export async function GET(request: NextRequest) {
   const gatedSlug = gatedSlugForRedirect(destination);
 
   if (code) {
+    const redirectTarget = gatedSlug
+      ? getGatedPageRedirectPath(gatedSlug)
+      : destination;
+    const response = NextResponse.redirect(new URL(redirectTarget, request.url));
+
     try {
-      const supabase = await createServerClientWithCookies();
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const supabase = createSupabaseRouteHandlerClient(request, response);
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
         console.error('[auth/callback] Code exchange failed:', error);
         return buildFailureRedirect(request, gatedSlug, error.message);
       }
 
-      // For gated content pages, record the verified lead before redirecting.
-      if (gatedSlug) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user) {
-          await upsertGatedLead(supabase, user, gatedSlug);
-        }
-        return NextResponse.redirect(
-          new URL(getGatedPageRedirectPath(gatedSlug), request.url)
-        );
+      const user = data.session?.user ?? data.user;
+      if (gatedSlug && user) {
+        await upsertGatedLead(user, gatedSlug);
       }
+
+      return response;
     } catch (err) {
       console.error('[auth/callback] Error:', err);
       return buildFailureRedirect(request, gatedSlug, 'Authentication failed');
     }
+  }
+
+  if (gatedSlug) {
+    return buildFailureRedirect(request, gatedSlug, 'Sign-in link is missing or invalid');
   }
 
   return NextResponse.redirect(new URL(destination, request.url));

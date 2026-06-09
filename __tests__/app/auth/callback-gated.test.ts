@@ -6,15 +6,18 @@
 import { NextRequest } from 'next/server';
 
 const mockExchangeCodeForSession = jest.fn();
-const mockGetUser = jest.fn();
 const mockUpsert = jest.fn();
 
 jest.mock('@/lib/supabase-server', () => ({
-  createServerClientWithCookies: jest.fn(async () => ({
+  createSupabaseRouteHandlerClient: jest.fn(() => ({
     auth: {
       exchangeCodeForSession: (...args: unknown[]) => mockExchangeCodeForSession(...args),
-      getUser: (...args: unknown[]) => mockGetUser(...args),
     },
+  })),
+}));
+
+jest.mock('@/lib/supabase', () => ({
+  createServerClient: jest.fn(() => ({
     from: () => ({
       upsert: (...args: unknown[]) => mockUpsert(...args),
     }),
@@ -28,18 +31,18 @@ function callbackUrl(params: Record<string, string>): NextRequest {
   return new NextRequest(`https://resources.sageoutdooradvisory.com/auth/callback?${qs}`);
 }
 
+const mockUser = {
+  id: 'user-uuid-1',
+  email: 'jane@example.com',
+  user_metadata: { full_name: 'Jane Doe' },
+};
+
 describe('GET /auth/callback — gated magic link', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockExchangeCodeForSession.mockResolvedValue({ error: null });
-    mockGetUser.mockResolvedValue({
-      data: {
-        user: {
-          id: 'user-uuid-1',
-          email: 'jane@example.com',
-          user_metadata: { full_name: 'Jane Doe' },
-        },
-      },
+    mockExchangeCodeForSession.mockResolvedValue({
+      error: null,
+      data: { session: { user: mockUser } },
     });
     mockUpsert.mockResolvedValue({ error: null });
   });
@@ -86,6 +89,7 @@ describe('GET /auth/callback — gated magic link', () => {
   it('returns gated users to the gated page (not /login) when code exchange fails', async () => {
     mockExchangeCodeForSession.mockResolvedValueOnce({
       error: { message: 'invalid code' },
+      data: { session: null },
     });
 
     const res = await GET(
@@ -106,6 +110,7 @@ describe('GET /auth/callback — gated magic link', () => {
   it('redirects admin flows to /login when code exchange fails', async () => {
     mockExchangeCodeForSession.mockResolvedValueOnce({
       error: { message: 'invalid code' },
+      data: { session: null },
     });
 
     const res = await GET(
@@ -134,5 +139,19 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toMatch(/\/admin\/dashboard$/);
     expect(mockUpsert).not.toHaveBeenCalled();
+  });
+
+  it('returns gated users with link-expired when callback has no code', async () => {
+    const res = await GET(
+      callbackUrl({
+        redirect: '/glamping-market-overview',
+      })
+    );
+
+    expect(res.status).toBe(307);
+    const location = res.headers.get('location') ?? '';
+    expect(location).toContain('/glamping-market-overview');
+    expect(location).toContain('access=link-expired');
+    expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
   });
 });
