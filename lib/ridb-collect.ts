@@ -67,7 +67,7 @@ function hasJsonArray(value: unknown): boolean {
 }
 
 function getApiCampsiteFields(campsite: RIDBCampsite): Record<string, unknown> {
-  return campsite as Record<string, unknown>;
+  return campsite as unknown as Record<string, unknown>;
 }
 
 export function campsiteHasAttributes(campsite: RIDBCampsite): boolean {
@@ -87,7 +87,7 @@ export function campsiteHasMedia(campsite: RIDBCampsite): boolean {
 
 export function facilityNeedsDetailFetch(facility: RIDBFacility | null): boolean {
   if (!facility?.FacilityID) return false;
-  const api = facility as Record<string, unknown>;
+  const api = facility as unknown as Record<string, unknown>;
   const hasLink = hasJsonArray(api.LINK);
   const hasAddresses = hasJsonArray(facility.FacilityAddresses);
   const hasFee = Boolean(facility.FacilityUseFeeDescription);

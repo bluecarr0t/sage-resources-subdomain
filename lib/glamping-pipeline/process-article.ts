@@ -19,7 +19,7 @@ import {
 import { matchStatusUpdatesToProperties } from './match-status-updates';
 import { PIPELINE_PROCESSED_URLS_TABLE } from './constants';
 import type { PipelineSegment } from './constants';
-import type { PipelinePropertyRef } from './types';
+import type { PipelineExtractedProperty, PipelinePropertyRef } from './types';
 import {
   passesRvPipelineInclusionCriteria,
   passesRvPipelinePostEnrichmentCriteria,
@@ -86,7 +86,10 @@ export async function processPipelineArticle(
     segment
   );
 
-  const newProps = filterNewProperties(new_properties, dbPropertyNames);
+  const newProps = filterNewProperties(
+    new_properties,
+    dbPropertyNames
+  ) as PipelineExtractedProperty[];
 
   const passing = newProps.filter((p) => {
     const result =
@@ -105,8 +108,9 @@ export async function processPipelineArticle(
         : passesPostEnrichmentUnitCriteria(enriched);
     if (!post.pass) continue;
 
-    const pipelineProp = {
+    const pipelineProp: PipelineExtractedProperty = {
       ...enriched,
+      property_name: prop.property_name,
       is_open: prop.is_open,
       property_type: prop.property_type ?? enriched.property_type,
       number_of_units: enriched.number_of_units ?? prop.number_of_units,

@@ -2,6 +2,8 @@
  * Type definitions for RIDB API responses and database records
  */
 
+export type RidbSyncMode = 'full' | 'incremental';
+
 // RIDB API Response Types
 export interface RIDBCampsite {
   CampsiteID: string;
