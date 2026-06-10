@@ -102,6 +102,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [useControlledMapViewport, setUseControlledMapViewport] = useState(true);
   /** True after the map's first idle — Advanced Markers paint reliably only then. */
   const [mapViewportReady, setMapViewportReady] = useState(false);
+  /** Camera captured just before dropping controlled center/zoom, so it can be restored. */
+  const cameraBeforeUncontrolledRef = useRef<{ center: google.maps.LatLngLiteral; zoom: number } | null>(null);
 
   const {
     populationLookup, populationFipsLookup, populationLoading, populationLayerKey,
@@ -365,6 +367,17 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     setMapViewportReady(false);
   }, [mapFilterKey]);
 
+  // Restore the camera wiped by the controlled→uncontrolled center/zoom flip (see onLoad).
+  // Must run before marker creation so Advanced Markers can be projected onto the map.
+  useEffect(() => {
+    if (!map || useControlledMapViewport) return;
+    const saved = cameraBeforeUncontrolledRef.current;
+    if (!saved) return;
+    if (!map.getCenter() || map.getZoom() == null) {
+      map.moveCamera({ center: saved.center, zoom: saved.zoom });
+    }
+  }, [map, useControlledMapViewport]);
+
   const { markersRef, parkMarkersRef, clientWorkMarkersRef } = useMapMarkers({
     map,
     isClient,
@@ -498,16 +511,21 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     }
     setTimeout(() => { const bounds = map.getBounds(); if (bounds) setMapBounds(bounds); }, 200);
     google.maps.event.addListenerOnce(map, 'idle', () => {
+      // Capture the camera before the center/zoom props flip to undefined:
+      // @react-google-maps/api then calls map.setCenter(undefined)/setZoom(undefined),
+      // wiping the camera. The basemap keeps its last frame, but Advanced Markers can
+      // no longer be projected, so pins stay invisible until a user gesture restores
+      // the camera. We restore it ourselves in the effect below.
+      const idleCenter = map.getCenter();
+      const idleZoom = map.getZoom();
+      if (idleCenter && idleZoom != null) {
+        cameraBeforeUncontrolledRef.current = {
+          center: { lat: idleCenter.lat(), lng: idleCenter.lng() },
+          zoom: idleZoom,
+        };
+      }
       setUseControlledMapViewport(false);
-      let viewportReady = false;
-      const markViewportReady = () => {
-        if (viewportReady) return;
-        viewportReady = true;
-        setMapViewportReady(true);
-      };
-      // Advanced Markers need a layout pass after we drop controlled center/zoom.
-      google.maps.event.addListenerOnce(map, 'idle', markViewportReady);
-      window.setTimeout(markViewportReady, 250);
+      setMapViewportReady(true);
     });
   }, [searchParams, setMapBounds]);
 

@@ -9,10 +9,6 @@ type NationalParkWithCoords = NationalPark & { coordinates: [number, number] };
 
 const MARKER_BATCH_SIZE = 80;
 
-function nudgeMapRepaint(map: google.maps.Map): void {
-  google.maps.event.trigger(map, 'resize');
-}
-
 interface UseMapMarkersProps {
   map: google.maps.Map | null;
   isClient: boolean;
@@ -200,10 +196,6 @@ export function useMapMarkers({
           await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         }
       }
-
-      if (!cancelled && generation === propertyMarkersGenerationRef.current) {
-        nudgeMapRepaint(map);
-      }
     };
 
     createMarkers().catch((err) => {
@@ -322,7 +314,6 @@ export function useMapMarkers({
       });
 
       parkMarkersRef.current = parkMarkers;
-      nudgeMapRepaint(map);
     };
 
     createParkMarkers().catch(console.error);
@@ -429,7 +420,6 @@ export function useMapMarkers({
       });
 
       clientWorkMarkersRef.current = cwMarkers;
-      nudgeMapRepaint(map);
     };
 
     createClientWorkMarkers().catch(console.error);
