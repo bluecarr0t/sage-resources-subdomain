@@ -61,6 +61,7 @@ export function useMapMarkers({
     timestamp: number;
   } | null>(null);
   const propertyMarkersGenerationRef = useRef(0);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
 
   const propertiesWithCoords = useMemo(
     () => filterPropertiesWithCoordinates(properties),
@@ -78,6 +79,7 @@ export function useMapMarkers({
     if (!map || !isClient) {
       clearPropertyMarkers(markersRef);
       propertyIdsRef.current.clear();
+      mapInstanceRef.current = null;
       return;
     }
 
@@ -92,7 +94,14 @@ export function useMapMarkers({
       currentPropertyIds.size === propertyIdsRef.current.size &&
       Array.from(currentPropertyIds).every((id) => propertyIdsRef.current.has(id));
 
-    if (idsMatch && markersRef.current.length > 0) {
+    const mapInstanceChanged = mapInstanceRef.current !== map;
+    mapInstanceRef.current = map;
+
+    const markersAttachedToCurrentMap =
+      markersRef.current.length > 0 &&
+      markersRef.current.every((marker) => marker.map === map);
+
+    if (idsMatch && markersAttachedToCurrentMap && !mapInstanceChanged) {
       return;
     }
 
@@ -186,11 +195,15 @@ export function useMapMarkers({
       }
     };
 
-    createMarkers().catch(console.error);
+    createMarkers().catch((err) => {
+      console.error('[useMapMarkers] Failed to create property markers:', err);
+      propertyIdsRef.current.clear();
+    });
 
     return () => {
       cancelled = true;
       clearPropertyMarkers(markersRef);
+      propertyIdsRef.current.clear();
     };
   }, [
     map,

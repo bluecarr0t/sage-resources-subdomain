@@ -61,12 +61,16 @@ AS $$
       GREATEST(COALESCE(g.quantity_of_units, 1), 1)::numeric AS wgt,
       g.season_open_month  AS som,
       g.season_close_month AS scm,
-      g.rate_winter_weekday, g.rate_winter_weekend,
-      g.rate_spring_weekday, g.rate_spring_weekend,
-      g.rate_summer_weekday, g.rate_summer_weekend,
-      g.rate_fall_weekday,   g.rate_fall_weekend,
-      NULLIF(g.rate_avg_retail_daily_rate, 0)::numeric AS avg_fallback
-    FROM all_glamping_properties g
+      NULLIF(public.safe_numeric(g.rate_winter_weekday), 0)::numeric AS rate_winter_weekday,
+      NULLIF(public.safe_numeric(g.rate_winter_weekend), 0)::numeric AS rate_winter_weekend,
+      NULLIF(public.safe_numeric(g.rate_spring_weekday), 0)::numeric AS rate_spring_weekday,
+      NULLIF(public.safe_numeric(g.rate_spring_weekend), 0)::numeric AS rate_spring_weekend,
+      NULLIF(public.safe_numeric(g.rate_summer_weekday), 0)::numeric AS rate_summer_weekday,
+      NULLIF(public.safe_numeric(g.rate_summer_weekend), 0)::numeric AS rate_summer_weekend,
+      NULLIF(public.safe_numeric(g.rate_fall_weekday), 0)::numeric AS rate_fall_weekday,
+      NULLIF(public.safe_numeric(g.rate_fall_weekend), 0)::numeric AS rate_fall_weekend,
+      NULLIF(public.safe_numeric(g.rate_avg_retail_daily_rate::text), 0)::numeric AS avg_fallback
+    FROM all_sage_data g
     WHERE lower(public.sage_chain_label_from_property_name(g.property_name))
         = ANY(p_chain_keys)
   ),

@@ -29,45 +29,45 @@ BEGIN
 
   -- Main metrics: only include is_glamping_property='Yes', is_open='Yes', research_status='published'
   SELECT COUNT(DISTINCT property_name) INTO usa_property_count
-  FROM all_glamping_properties
+  FROM all_sage_data
   WHERE UPPER(TRIM(COALESCE(country, ''))) IN ('USA', 'US', 'UNITED STATES', 'UNITED STATES OF AMERICA')
     AND LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'published';
 
   SELECT COALESCE(SUM(quantity_of_units::BIGINT), 0) INTO usa_unit_count
-  FROM all_glamping_properties
+  FROM all_sage_data
   WHERE UPPER(TRIM(COALESCE(country, ''))) IN ('USA', 'US', 'UNITED STATES', 'UNITED STATES OF AMERICA')
     AND LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'published';
 
   SELECT COUNT(DISTINCT property_name) INTO total_property_count
-  FROM all_glamping_properties
+  FROM all_sage_data
   WHERE LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'published';
 
   SELECT COALESCE(SUM(quantity_of_units::BIGINT), 0) INTO total_unit_count
-  FROM all_glamping_properties
+  FROM all_sage_data
   WHERE LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'published';
 
   SELECT COUNT(DISTINCT property_name) INTO status_new_count
-  FROM all_glamping_properties
+  FROM all_sage_data
   WHERE LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'new';
 
   SELECT COUNT(DISTINCT property_name) INTO status_in_progress_count
-  FROM all_glamping_properties
+  FROM all_sage_data
   WHERE LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'in_progress';
 
   SELECT COUNT(DISTINCT property_name) INTO status_published_count
-  FROM all_glamping_properties
+  FROM all_sage_data
   WHERE LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'published';

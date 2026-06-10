@@ -26,7 +26,7 @@ import { mapSearchParamsFromUrlSearchParams } from '@/lib/map-search-params';
 let globalFetchInProgress = false;
 let globalAbortController: AbortController | null = null;
 
-const MAP_PROPERTIES_SESSION_KEY = 'sage-map-properties-v2';
+const MAP_PROPERTIES_SESSION_KEY = 'sage-map-properties-v3';
 const MAP_PROPERTIES_SESSION_MAX_AGE_MS = 5 * 60 * 1000;
 
 function readMapPropertiesSessionCache(): SageProperty[] | null {

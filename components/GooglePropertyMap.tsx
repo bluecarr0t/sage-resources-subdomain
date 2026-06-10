@@ -524,23 +524,16 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     setMap(null);
   }, [markersRef, parkMarkersRef, clientWorkMarkersRef]);
 
-  const checkWebGLSupport = useCallback(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') || canvas.getContext('webgl2');
-      return !!gl;
-    } catch { return false; }
-  }, []);
-
   const mapOptions = useMemo(() => {
-    const baseOptions = {
+    return {
       disableDefaultUI: false,
       zoomControl: true,
       streetViewControl: false,
       mapTypeControl: !embedMode,
       fullscreenControl: true,
       mapTypeId: 'terrain' as const,
+      /** Required for AdvancedMarkerElement pins on the public map. */
+      mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81',
       /** Avoid Google's default POI/region popups competing with property marker InfoWindows. */
       clickableIcons: false,
       gestureHandling: (isMobile && isFullscreen ? 'greedy' : 'cooperative') as 'greedy' | 'cooperative',
@@ -548,12 +541,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       scrollwheel: !isMobile,
       keyboardShortcuts: true,
     };
-    const hasWebGL = checkWebGLSupport();
-    if (hasWebGL) {
-      return { ...baseOptions, mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'a17afb5a01f9ebd9f8514b81' };
-    }
-    return baseOptions;
-  }, [isMobile, isFullscreen, embedMode, checkWebGLSupport]);
+  }, [isMobile, isFullscreen, embedMode]);
 
   useEffect(() => {
     if (!map || !isClient) return;

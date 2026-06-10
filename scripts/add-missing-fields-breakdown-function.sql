@@ -1,4 +1,4 @@
--- Function to get counts of records missing key fields in all_glamping_properties
+-- Function to get counts of records missing key fields in all_sage_data
 -- Run in Supabase SQL Editor
 -- Requires caller to be authenticated and in managed_users (is_active=true)
 
@@ -42,7 +42,7 @@ BEGIN
     missing_unit_private_bathroom,
     missing_url,
     missing_description
-  FROM all_glamping_properties
+  FROM all_sage_data
   WHERE LOWER(TRIM(COALESCE(is_glamping_property, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(is_open, ''))) = 'yes'
     AND LOWER(TRIM(COALESCE(research_status, ''))) = 'published';

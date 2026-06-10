@@ -62,10 +62,10 @@ BEGIN
     
     -- Check if this property_name already has a slug in the database
     -- If so, use that slug to ensure consistency
-    -- UPDATED: Now references all_glamping_properties instead of sage-glamping-data
+    -- UPDATED: references all_sage_data
     IF NEW.slug IS NOT NULL AND NEW.slug != '' THEN
       SELECT slug INTO NEW.slug
-      FROM "all_glamping_properties"
+      FROM all_sage_data
       WHERE property_name = NEW.property_name
         AND slug IS NOT NULL
         AND slug != ''
@@ -81,21 +81,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Update triggers to use all_glamping_properties table
-DROP TRIGGER IF EXISTS set_slug_before_insert ON "all_glamping_properties";
+-- Update triggers to use all_sage_data table
+DROP TRIGGER IF EXISTS set_slug_before_insert ON all_sage_data;
 CREATE TRIGGER set_slug_before_insert
-BEFORE INSERT ON "all_glamping_properties"
+BEFORE INSERT ON all_sage_data
 FOR EACH ROW
 EXECUTE FUNCTION generate_slug_from_property_name();
 
 -- Create trigger for UPDATE (only if property_name changes)
-DROP TRIGGER IF EXISTS set_slug_before_update ON "all_glamping_properties";
+DROP TRIGGER IF EXISTS set_slug_before_update ON all_sage_data;
 CREATE TRIGGER set_slug_before_update
-BEFORE UPDATE ON "all_glamping_properties"
+BEFORE UPDATE ON all_sage_data
 FOR EACH ROW
 WHEN (NEW.property_name IS DISTINCT FROM OLD.property_name OR (NEW.slug IS NULL AND OLD.slug IS NOT NULL))
 EXECUTE FUNCTION generate_slug_from_property_name();
 
 -- Add comment
 COMMENT ON FUNCTION generate_slug_from_property_name() IS 
-'Auto-generates slug from property_name if slug is NULL. Ensures records with same property_name share the same slug. Updated to use all_glamping_properties table.';
+'Auto-generates slug from property_name if slug is NULL. Ensures records with same property_name share the same slug. Uses all_sage_data.';
