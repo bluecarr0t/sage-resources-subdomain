@@ -5,6 +5,7 @@
  */
 
 import type { Anchor, NormalizedProperty, PropertyWithProximity } from './types';
+import { anchorUsesYearAvgStateRate, type AnchorPointAnchorType } from './anchor-type';
 import { fetchAnchors } from './fetch-anchors';
 import { fetchAndNormalizeProperties } from './fetch-properties';
 import { filterByPropertyType, type PropertyTypeFilter } from './property-type-filter';
@@ -21,21 +22,31 @@ import {
   buildTrends,
   buildPropertySample,
   buildAnchorsWithCounts,
+  buildDataQuality,
   buildMapData,
   buildSummary,
 } from './aggregate';
 import { buildEmptyResponse, buildInsightsPayload } from './response-builder';
+import {
+  filterAnchorsByArea,
+  filterPropertiesByArea,
+  type ProximityAreaFilter,
+} from './area-filter';
 
 export interface ComputeInsightsParams {
   stateFilter: string | null;
-  anchorType: 'ski' | 'national-parks';
+  anchorType: AnchorPointAnchorType;
   anchorId: number | null;
   anchorSlug: string | null;
   /** Property type filter: glamping (default), rv, or all */
   propertyTypeFilter?: PropertyTypeFilter;
   /** Custom distance band thresholds (miles), e.g. [10, 25, 50] for 0-10, 10-25, 25-50, 50+ */
   distanceBandThresholds?: number[] | null;
+  /** Only include properties (and map anchors) within this circle from a geocoded city/ZIP */
+  areaFilter?: ProximityAreaFilter | null;
 }
+
+export type { ProximityAreaFilter } from './area-filter';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -50,19 +61,29 @@ export async function computeAnchorPointInsights(
     anchorSlug,
     propertyTypeFilter = 'glamping',
     distanceBandThresholds,
+    areaFilter = null,
   } = params;
-  const isNationalParks = anchorType === 'national-parks';
 
-  const anchors = await fetchAnchors(supabase, isNationalParks);
+  const useYearAvgRate = anchorUsesYearAvgStateRate(anchorType);
+
+  let anchors = await fetchAnchors(supabase, anchorType);
   if (anchors.length === 0) {
-    return buildEmptyResponse(isNationalParks);
+    return buildEmptyResponse(anchorType);
   }
 
   const normalized = await fetchAndNormalizeProperties(supabase, stateFilter);
   const hipcampAggregated = aggregateHipcampByPropertyMaxRate(normalized);
   const filtered = filterByPropertyType(hipcampAggregated, propertyTypeFilter);
   const dedupedCoords = deduplicateByCoords(filtered);
-  const deduped = deduplicateByNameAndState(dedupedCoords);
+  let deduped = deduplicateByNameAndState(dedupedCoords);
+
+  if (areaFilter) {
+    deduped = filterPropertiesByArea(deduped, areaFilter);
+    anchors = filterAnchorsByArea(anchors, areaFilter);
+    if (deduped.length === 0) {
+      return buildEmptyResponse(anchorType, areaFilter);
+    }
+  }
   const withProximity = computeProximity(deduped, anchors, distanceBandThresholds);
 
   const { proximityForAggregation, selectedAnchor } = applyAnchorFilter(
@@ -70,7 +91,7 @@ export async function computeAnchorPointInsights(
     anchors,
     anchorId,
     anchorSlug,
-    isNationalParks
+    anchorType
   );
 
   const withinMiThreshold =
@@ -86,10 +107,11 @@ export async function computeAnchorPointInsights(
 
   const byBand = aggregateByBand(proximityForAggregation, distanceBandThresholds);
   const bySource = aggregateBySource(filteredForAggregation);
-  const byState = aggregateByState(filteredForAggregation, countyLookups, isNationalParks);
+  const byState = aggregateByState(filteredForAggregation, countyLookups, useYearAvgRate);
   const trends = buildTrends(filteredForAggregation);
   const propertySample = buildPropertySample(filteredForAggregation, countyLookups, withinMiThreshold);
-  const anchorsWithPropertyCounts = buildAnchorsWithCounts(anchors, withProximity);
+  const { top: anchorsTop, all: anchorsForSelect } = buildAnchorsWithCounts(anchors, withProximity);
+  const dataQuality = buildDataQuality(filteredForAggregation, useYearAvgRate);
   const { mapProperties, mapAnchors } = buildMapData(
     filteredForAggregation,
     anchors,
@@ -101,20 +123,24 @@ export async function computeAnchorPointInsights(
     anchors,
     selectedAnchor,
     countyLookups,
-    withinMiThreshold
+    withinMiThreshold,
+    useYearAvgRate
   );
 
   return buildInsightsPayload({
-    isNationalParks,
+    anchorType,
     summary,
     byBand,
     bySource,
     byState,
     trends,
     propertySample,
-    anchorsWithPropertyCounts,
+    anchorsTop,
+    anchorsForSelect,
+    dataQuality,
     mapProperties,
     mapAnchors,
     selectedAnchor,
+    areaFilter,
   });
 }

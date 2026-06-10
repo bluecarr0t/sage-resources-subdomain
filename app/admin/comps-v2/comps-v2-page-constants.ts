@@ -2,7 +2,7 @@ import { COMPS_V2_LEGEND_WEB_RESEARCH } from '@/lib/comps-v2/source-marker-color
 
 export const DATA_SOURCE_KEYS = [
   'pastReports',
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'all_roverpass_data_new',
   'campspot',
@@ -16,7 +16,7 @@ export const DEFAULT_COMPS_V2_LOCATION_LINE = 'Johnson City, TX 78636, USA';
 export const DEFAULT_COMPS_V2_PLACE_ANCHOR = { lat: 30.2769, lng: -98.4119 };
 
 export const COMPS_V2_COUNT_KEY_ORDER = [
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'all_roverpass_data_new',
   'campspot',
@@ -32,7 +32,7 @@ export const COMPS_V2_COUNT_KEYS_HIDDEN_FROM_COMPOSITION = new Set([
 
 /** `source_table` values shown in results Data source filter (stable order). */
 export const RESULTS_SOURCE_TABLE_FILTER_ORDER = [
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'all_roverpass_data_new',
   'campspot',

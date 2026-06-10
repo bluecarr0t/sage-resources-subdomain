@@ -21,6 +21,8 @@ interface UseMapMarkersProps {
   setSelectedPark: (park: NationalParkWithCoords | null) => void;
   setSelectedClientWork: (point: ClientWorkMapPoint | null) => void;
   markerClickTimeRef: React.MutableRefObject<number>;
+  /** Call before opening an InfoWindow so controlled map center/zoom match the live viewport. */
+  onBeforeMarkerSelect?: () => void;
 }
 
 function clearPropertyMarkers(
@@ -47,6 +49,7 @@ export function useMapMarkers({
   setSelectedPark,
   setSelectedClientWork,
   markerClickTimeRef,
+  onBeforeMarkerSelect,
 }: UseMapMarkersProps) {
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const parkMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -166,6 +169,7 @@ export function useMapMarkers({
             domEvent.preventDefault?.();
 
             markerClickTimeRef.current = clickTimestamp;
+            onBeforeMarkerSelect?.();
             setSelectedPark(null);
             setSelectedClientWork(null);
             setSelectedProperty(property as PropertyWithCoords);
@@ -196,6 +200,7 @@ export function useMapMarkers({
     setSelectedPark,
     setSelectedClientWork,
     markerClickTimeRef,
+    onBeforeMarkerSelect,
   ]);
 
   // Manage national park markers
@@ -282,6 +287,7 @@ export function useMapMarkers({
           domEvent.preventDefault?.();
 
           markerClickTimeRef.current = clickTimestamp;
+          onBeforeMarkerSelect?.();
           setSelectedProperty(null);
           setSelectedClientWork(null);
           setSelectedPark(park as NationalParkWithCoords);
@@ -294,7 +300,17 @@ export function useMapMarkers({
     };
 
     createParkMarkers().catch(console.error);
-  }, [map, isClient, nationalParks, showNationalParks, setSelectedProperty, setSelectedPark, setSelectedClientWork, markerClickTimeRef]);
+  }, [
+    map,
+    isClient,
+    nationalParks,
+    showNationalParks,
+    setSelectedProperty,
+    setSelectedPark,
+    setSelectedClientWork,
+    markerClickTimeRef,
+    onBeforeMarkerSelect,
+  ]);
 
   // Client Work markers (static gold pins)
   useEffect(() => {
@@ -376,6 +392,7 @@ export function useMapMarkers({
           domEvent.preventDefault?.();
 
           markerClickTimeRef.current = clickTimestamp;
+          onBeforeMarkerSelect?.();
           setSelectedProperty(null);
           setSelectedPark(null);
           setSelectedClientWork(point);
@@ -397,6 +414,7 @@ export function useMapMarkers({
     setSelectedPark,
     setSelectedClientWork,
     markerClickTimeRef,
+    onBeforeMarkerSelect,
   ]);
 
   return { markersRef, parkMarkersRef, clientWorkMarkersRef };

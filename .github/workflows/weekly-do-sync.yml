@@ -1,9 +1,14 @@
 name: Weekly DO to Supabase sync
 
 on:
-  schedule:
-  # Mondays 08:00 UTC — after weekend DO scrapes
-    - cron: '0 8 * * 1'
+  # NOTE: GitHub-hosted runners cannot reach the DigitalOcean DB (Trusted Sources
+  # IP allowlist), so the scheduled cron is disabled. The weekly sync now runs
+  # locally via launchd (~/Library/LaunchAgents/com.sage.do-supabase-sync.plist
+  # -> scripts/sync-do-to-supabase/run-local-sync.sh) from a whitelisted IP.
+  # Manual dispatch is kept for use from a self-hosted/whitelisted runner only.
+  # schedule:
+  # # Mondays 08:00 UTC — after weekend DO scrapes
+  #   - cron: '0 8 * * 1'
   workflow_dispatch:
     inputs:
       databases:

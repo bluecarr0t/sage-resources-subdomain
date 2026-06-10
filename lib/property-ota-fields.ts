@@ -1,5 +1,5 @@
 /**
- * DB + admin sanitization for OTA columns on all_glamping_properties.
+ * DB + admin sanitization for OTA columns on all_sage_data.
  */
 
 import {

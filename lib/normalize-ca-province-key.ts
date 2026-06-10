@@ -1,5 +1,5 @@
 /**
- * Normalize `all_glamping_properties.state` for Canadian rows to a two-letter province/territory code.
+ * Normalize `all_sage_data.state` for Canadian rows to a two-letter province/territory code.
  */
 
 const CA_CODES = new Set([

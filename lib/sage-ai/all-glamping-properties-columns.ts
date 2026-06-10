@@ -1,5 +1,5 @@
 /**
- * Column inventory for public.all_glamping_properties (Sage v4+ schema).
+ * Column inventory for public.all_sage_data (Sage v4+ schema).
  * Keep aligned with lib/types/sage.ts and real Postgres — query tools use this
  * to validate selects, filters, and RPC allowlists.
  */
@@ -12,6 +12,7 @@ export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'research_status',
   'is_glamping_property',
   'is_open',
+  'planned_open_date',
   'property_name',
   'site_name',
   'slug',

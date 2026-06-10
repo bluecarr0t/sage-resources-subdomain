@@ -13,7 +13,7 @@ describe('comps-unified/build-row', () => {
     it('contains the five expected sources in fixed order', () => {
       expect(UNIFIED_SOURCES).toEqual([
         'reports',
-        'all_glamping_properties',
+        'all_sage_data',
         'hipcamp',
         'campspot',
         'all_roverpass_data_new',
@@ -47,7 +47,7 @@ describe('comps-unified/build-row', () => {
   describe('unifiedSourceLabel', () => {
     it('maps each known source to a human label', () => {
       expect(unifiedSourceLabel('reports')).toBe('Past Reports');
-      expect(unifiedSourceLabel('all_glamping_properties')).toBe('Sage');
+      expect(unifiedSourceLabel('all_sage_data')).toBe('Sage');
       expect(unifiedSourceLabel('hipcamp')).toBe('Hipcamp');
       expect(unifiedSourceLabel('campspot')).toBe('Campspot');
       expect(unifiedSourceLabel('all_roverpass_data_new')).toBe('RoverPass');
@@ -70,7 +70,7 @@ describe('comps-unified/build-row', () => {
 
   describe('shouldShowUnifiedCompsOccupancy', () => {
     it('is hidden for Sage-only and Past Reports filters', () => {
-      expect(shouldShowUnifiedCompsOccupancy(['all_glamping_properties'])).toBe(false);
+      expect(shouldShowUnifiedCompsOccupancy(['all_sage_data'])).toBe(false);
       expect(shouldShowUnifiedCompsOccupancy(['reports'])).toBe(false);
     });
 
@@ -80,7 +80,7 @@ describe('comps-unified/build-row', () => {
       expect(shouldShowUnifiedCompsOccupancy(['all_roverpass_data_new'])).toBe(true);
       expect(shouldShowUnifiedCompsOccupancy([])).toBe(true);
       expect(
-        shouldShowUnifiedCompsOccupancy(['all_glamping_properties', 'hipcamp'])
+        shouldShowUnifiedCompsOccupancy(['all_sage_data', 'hipcamp'])
       ).toBe(true);
     });
   });

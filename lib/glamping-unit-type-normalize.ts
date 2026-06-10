@@ -1,5 +1,5 @@
 /**
- * Normalizes `unit_type` for `all_glamping_properties` storage:
+ * Normalizes `unit_type` for `all_sage_data` storage:
  * one product label per row (first segment when lists were joined) and singular wording.
  *
  * Used by discovery inserts, admin approval flows, and batch cleanup scripts.
@@ -54,8 +54,8 @@ const PHRASE_CANONICAL: Record<string, string> = {
   "shepherd's huts": "Shepherd's Hut",
   'glamping pod': 'Glamping Pod',
   'glamping pods': 'Glamping Pod',
-  'glamping tent': 'Glamping Tent',
-  'glamping tents': 'Glamping Tent',
+  'glamping tent': 'Canvas Tent',
+  'glamping tents': 'Canvas Tent',
   'bell tent': 'Bell Tent',
   'bell tents': 'Bell Tent',
   'wall tent': 'Wall Tent',
@@ -72,6 +72,8 @@ const PHRASE_CANONICAL: Record<string, string> = {
   'floating tents': 'Floating Tent',
   'bubble tent': 'Bubble Tent',
   'bubble tents': 'Bubble Tent',
+  'bubble dome': 'Bubble Tent',
+  'bubble domes': 'Bubble Tent',
   'luxury tent': 'Luxury Tent',
   'luxury tents': 'Luxury Tent',
   'luxury room': 'Luxury Room',
@@ -104,9 +106,14 @@ const PHRASE_CANONICAL: Record<string, string> = {
   'beach houses': 'Beach House',
   'beach lodge': 'Beach Lodge',
   'beach lodges': 'Beach Lodge',
+  cave: 'Cave House',
+  caves: 'Cave House',
   'cave room': 'Cave Room',
   'cave rooms': 'Cave Room',
   'cave house': 'Cave House',
+  'hobbit home': 'Hobbit House',
+  'hobbit homes': 'Hobbit House',
+  'hobbit house': 'Hobbit House',
   'mobile home': 'Mobile Home',
   'mobile homes': 'Mobile Home',
   'lodge tent': 'Lodge Tent',

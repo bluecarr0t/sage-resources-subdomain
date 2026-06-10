@@ -21,16 +21,13 @@ import {
   GATED_ACCESS_NAME_MIN_LENGTH,
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   buildMagicLinkRedirectUrl,
+  formatGatedAccessOtpErrorMessage,
+  parseSupabaseOtpCooldownSeconds,
   isEmailOnlyGatedRequest,
   isGatedPageSlug,
-  isOtpUserMissingError,
-  isSupabaseOtpRateLimitError,
   isValidEmail,
   normalizeAuthSiteOrigin,
 } from '@/lib/gated-access';
-
-const RATE_LIMIT_USER_MESSAGE =
-  'Too many sign-in emails were requested recently. Please wait about an hour, or check your inbox (and spam) for an earlier link.';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,30 +110,32 @@ export async function POST(request: NextRequest) {
     await supabase.auth.signOut();
 
     const leadName = name || (emailOnly ? await lookupLeadName(email, pageSlug) : null);
-    const otpOptions = {
-      shouldCreateUser: !emailOnly,
-      data: {
-        ...(leadName ? { full_name: leadName } : {}),
-        gated_page: pageSlug,
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        // Always allow account creation so we never need a second OTP call in the
+        // same request (Supabase enforces a short cooldown between sends).
+        shouldCreateUser: true,
+        data: {
+          ...(leadName ? { full_name: leadName } : {}),
+          gated_page: pageSlug,
+        },
+        emailRedirectTo: buildMagicLinkRedirectUrl(getRequestOrigin(request), pageSlug),
       },
-      emailRedirectTo: buildMagicLinkRedirectUrl(getRequestOrigin(request), pageSlug),
-    };
-
-    let { error } = await supabase.auth.signInWithOtp({ email, options: otpOptions });
-
-    // First-time visitor used "email only" — create the account and send the link.
-    if (emailOnly && error && isOtpUserMissingError(error.message)) {
-      ({ error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { ...otpOptions, shouldCreateUser: true },
-      }));
-    }
+    });
 
     if (error) {
       console.error('[gated-access/request] signInWithOtp failed:', error.message);
-      if (isSupabaseOtpRateLimitError(error.message)) {
+      const otpErrorMessage = formatGatedAccessOtpErrorMessage(error.message);
+      if (otpErrorMessage) {
         return NextResponse.json(
-          { ok: false, error: RATE_LIMIT_USER_MESSAGE, code: 'email_rate_limited' },
+          {
+            ok: false,
+            error: otpErrorMessage,
+            code: parseSupabaseOtpCooldownSeconds(error.message) !== null
+              ? 'email_cooldown'
+              : 'email_rate_limited',
+          },
           { status: 429 }
         );
       }

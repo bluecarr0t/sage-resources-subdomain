@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Search, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Search, ChevronDown, Loader2 } from 'lucide-react';
 
 interface AnchorOption {
   anchor_id?: number;
@@ -13,7 +13,7 @@ interface AnchorOption {
 
 interface SearchableAnchorSelectProps {
   anchors: AnchorOption[];
-  anchorType: 'ski' | 'national-parks';
+  anchorType: 'ski' | 'national-parks' | 'wineries';
   value: string;
   onChange: (value: string) => void;
   allLabel: string;
@@ -21,6 +21,9 @@ interface SearchableAnchorSelectProps {
   searchPlaceholder?: string;
   className?: string;
   'aria-label'?: string;
+  /** When set, queries this after `remoteSearchMinChars` characters (merges with local filter). */
+  onRemoteSearch?: (query: string) => Promise<AnchorOption[]>;
+  remoteSearchMinChars?: number;
 }
 
 export default function SearchableAnchorSelect({
@@ -33,17 +36,21 @@ export default function SearchableAnchorSelect({
   searchPlaceholder = 'Search...',
   className = '',
   'aria-label': ariaLabel,
+  onRemoteSearch,
+  remoteSearchMinChars = 2,
 }: SearchableAnchorSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [remoteResults, setRemoteResults] = useState<AnchorOption[]>([]);
+  const [remoteLoading, setRemoteLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const filtered = anchors
+  const filteredLocal = anchors
     .filter(
       (a) =>
-        (anchorType === 'ski' && a.anchor_id != null) ||
-        (anchorType === 'national-parks' && a.anchor_slug)
+        (anchorType === 'national-parks' && a.anchor_slug) ||
+        ((anchorType === 'ski' || anchorType === 'wineries') && a.anchor_id != null)
     )
     .filter(
       (a) =>
@@ -52,13 +59,59 @@ export default function SearchableAnchorSelect({
     )
     .sort((a, b) => a.anchor_name.localeCompare(b.anchor_name, undefined, { sensitivity: 'base' }));
 
-  const selectedAnchor = value
-    ? anchors.find(
-        (a) =>
-          (value.startsWith('id:') && a.anchor_id === parseInt(value.slice(3), 10)) ||
-          (value.startsWith('slug:') && a.anchor_slug === value.slice(5))
-      )
-    : null;
+  useEffect(() => {
+    if (!onRemoteSearch || !isOpen) {
+      setRemoteResults([]);
+      setRemoteLoading(false);
+      return;
+    }
+    const q = searchQuery.trim();
+    if (q.length < remoteSearchMinChars) {
+      setRemoteResults([]);
+      setRemoteLoading(false);
+      return;
+    }
+    const ac = new AbortController();
+    const timer = setTimeout(() => {
+      setRemoteLoading(true);
+      void onRemoteSearch(q)
+        .then((results) => {
+          if (!ac.signal.aborted) setRemoteResults(results);
+        })
+        .catch(() => {
+          if (!ac.signal.aborted) setRemoteResults([]);
+        })
+        .finally(() => {
+          if (!ac.signal.aborted) setRemoteLoading(false);
+        });
+    }, 280);
+    return () => {
+      clearTimeout(timer);
+      ac.abort();
+    };
+  }, [searchQuery, onRemoteSearch, remoteSearchMinChars, isOpen]);
+
+  const useRemoteList =
+    Boolean(onRemoteSearch) && searchQuery.trim().length >= remoteSearchMinChars;
+
+  const filtered = useMemo(() => {
+    if (useRemoteList) return remoteResults;
+    return filteredLocal;
+  }, [useRemoteList, remoteResults, filteredLocal]);
+
+  const findAnchor = useCallback(
+    (opts: AnchorOption[]) =>
+      value
+        ? opts.find(
+            (a) =>
+              (value.startsWith('id:') && a.anchor_id === parseInt(value.slice(3), 10)) ||
+              (value.startsWith('slug:') && a.anchor_slug === value.slice(5))
+          )
+        : null,
+    [value]
+  );
+
+  const selectedAnchor = findAnchor(anchors) ?? findAnchor(remoteResults);
 
   const displayCount = (a: AnchorOption) => a.units_count_15_mi ?? a.property_count_15_mi ?? 0;
   const displayLabel = selectedAnchor
@@ -139,10 +192,10 @@ export default function SearchableAnchorSelect({
             </button>
             {filtered.map((a) => {
               const optValue =
-                anchorType === 'ski' && a.anchor_id != null
-                  ? `id:${a.anchor_id}`
-                  : a.anchor_slug
-                    ? `slug:${a.anchor_slug}`
+                anchorType === 'national-parks' && a.anchor_slug
+                  ? `slug:${a.anchor_slug}`
+                  : a.anchor_id != null
+                    ? `id:${a.anchor_id}`
                     : '';
               if (!optValue) return null;
               const isSelected = value === optValue;
@@ -157,11 +210,18 @@ export default function SearchableAnchorSelect({
                   role="option"
                   aria-selected={isSelected}
                 >
-                  {a.anchor_name} ({displayCount(a)})
+                  {a.anchor_name}
+                  {displayCount(a) > 0 ? ` (${displayCount(a)})` : ''}
                 </button>
               );
             })}
-            {filtered.length === 0 && (
+            {remoteLoading && (
+              <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Searching…
+              </div>
+            )}
+            {!remoteLoading && filtered.length === 0 && (
               <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                 No matches
               </div>

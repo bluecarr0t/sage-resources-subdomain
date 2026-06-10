@@ -10,6 +10,10 @@ import { Button } from '@/components/ui';
 import MultiSelect from '@/components/MultiSelect';
 import { canonicalReportService, reportServiceLabel } from '@/lib/report-service-display';
 import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
+import {
+  infoWindowDisableAutoPanOptions,
+  panMapToFitInfoWindowIfNeeded,
+} from '@/components/map/utils/panInfoWindowIntoView';
 
 interface ReportMarker {
   id: string;
@@ -172,22 +176,9 @@ function ClientMapContent() {
     []
   );
 
-  /** Pan to marker when opening its InfoWindow; keep current zoom (no jump to street level). */
-  const focusMapOnReport = useCallback(
-    (report: ReportMarker) => {
-      if (!map) return;
-      map.panTo({ lat: report.lat, lng: report.lng });
-    },
-    [map]
-  );
-
-  const handleMarkerClick = useCallback(
-    (report: ReportMarker) => {
-      setSelectedReport(report);
-      focusMapOnReport(report);
-    },
-    [focusMapOnReport]
-  );
+  const handleMarkerClick = useCallback((report: ReportMarker) => {
+    setSelectedReport(report);
+  }, []);
 
   useEffect(() => {
     if (map && reportToFocus) {
@@ -196,6 +187,31 @@ function ClientMapContent() {
       map.setZoom(12);
     }
   }, [map, reportToFocus]);
+
+  /** Pan only if the InfoWindow would clip; never change zoom on marker click. */
+  useEffect(() => {
+    if (!map || !selectedReport) return;
+    let imageLayoutTimeout: number | null = null;
+    let idleListener: google.maps.MapsEventListener | null = null;
+    let cancelled = false;
+
+    const marker = { lat: selectedReport.lat, lng: selectedReport.lng };
+    const runAdjust = () => {
+      if (cancelled) return;
+      void panMapToFitInfoWindowIfNeeded(map, marker);
+    };
+
+    idleListener = google.maps.event.addListenerOnce(map, 'idle', () => {
+      runAdjust();
+      imageLayoutTimeout = window.setTimeout(runAdjust, 700);
+    });
+
+    return () => {
+      cancelled = true;
+      if (idleListener) google.maps.event.removeListener(idleListener);
+      if (imageLayoutTimeout) clearTimeout(imageLayoutTimeout);
+    };
+  }, [map, selectedReport]);
 
   const onUnmount = useCallback(() => {
     setMap(null);
@@ -340,6 +356,7 @@ function ClientMapContent() {
                   <InfoWindow
                     key={report.id}
                     onCloseClick={() => setSelectedReport(null)}
+                    options={infoWindowDisableAutoPanOptions}
                   >
                     <div className="p-2 min-w-[200px]">
                       {!(report.hasDocx ?? false) && !(report.hasXlsx ?? false) && (

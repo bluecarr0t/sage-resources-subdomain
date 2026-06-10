@@ -9,7 +9,7 @@ import type { CohortPropertyRow } from '@/lib/market-report/types';
 
 function baseRow(over: Partial<CohortPropertyRow>): CohortPropertyRow {
   return {
-    source: 'all_glamping_properties',
+    source: 'all_sage_data',
     sourceId: '1',
     geo_lat: 35.5,
     geo_lng: -97.3,
@@ -44,7 +44,7 @@ describe('listing-identity', () => {
   });
 
   it('treats same listing on different sources as distinct keys', () => {
-    const a = baseRow({ source: 'all_glamping_properties', property_name: 'Ridge Camp' });
+    const a = baseRow({ source: 'all_sage_data', property_name: 'Ridge Camp' });
     const b = baseRow({ source: 'hipcamp', property_name: 'Ridge Camp' });
     expect(cohortListingIdentityKey(a)).not.toBe(cohortListingIdentityKey(b));
     expect(countDistinctListings([a, b])).toBe(2);

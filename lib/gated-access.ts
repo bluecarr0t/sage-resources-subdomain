@@ -100,13 +100,50 @@ export function isOtpUserMissingError(message: string): boolean {
   );
 }
 
-/** Supabase Auth rejected the OTP/magic-link send (hourly cap or short cooldown). */
-export function isSupabaseOtpRateLimitError(message: string): boolean {
+const SUPABASE_OTP_COOLDOWN_REGEX = /only request this after (\d+) second/i;
+
+/** Seconds until Supabase allows another OTP send (short per-address cooldown). */
+export function parseSupabaseOtpCooldownSeconds(message: string): number | null {
+  const match = message.match(SUPABASE_OTP_COOLDOWN_REGEX);
+  if (!match) return null;
+  const seconds = Number.parseInt(match[1] ?? '', 10);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : null;
+}
+
+/** Supabase Auth hourly / project email cap (not the short between-request cooldown). */
+export function isSupabaseOtpHourlyRateLimitError(message: string): boolean {
+  if (parseSupabaseOtpCooldownSeconds(message) !== null) return false;
   const lower = message.toLowerCase();
   return (
     lower.includes('rate limit') ||
     lower.includes('over_email_send_rate_limit') ||
-    lower.includes('only request this after') ||
     lower.includes('too many requests')
   );
+}
+
+/** Supabase Auth rejected the OTP/magic-link send (hourly cap or short cooldown). */
+export function isSupabaseOtpRateLimitError(message: string): boolean {
+  return (
+    parseSupabaseOtpCooldownSeconds(message) !== null ||
+    isSupabaseOtpHourlyRateLimitError(message)
+  );
+}
+
+const HOURLY_OTP_RATE_LIMIT_MESSAGE =
+  'Too many sign-in emails were requested recently. Please wait about an hour, or check your inbox (and spam) for an earlier link.';
+
+/** User-facing copy for Supabase OTP throttling; null when the error is unrelated. */
+export function formatGatedAccessOtpErrorMessage(message: string): string | null {
+  const cooldownSeconds = parseSupabaseOtpCooldownSeconds(message);
+  if (cooldownSeconds !== null) {
+    if (cooldownSeconds <= 60) {
+      return `Please wait ${cooldownSeconds} seconds before requesting another sign-in link. Check your inbox (and spam) for an earlier link.`;
+    }
+    const minutes = Math.ceil(cooldownSeconds / 60);
+    return `Please wait about ${minutes} minute${minutes === 1 ? '' : 's'} before requesting another sign-in link. Check your inbox (and spam) for an earlier link.`;
+  }
+  if (isSupabaseOtpHourlyRateLimitError(message)) {
+    return HOURLY_OTP_RATE_LIMIT_MESSAGE;
+  }
+  return null;
 }

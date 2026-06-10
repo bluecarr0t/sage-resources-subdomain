@@ -69,7 +69,7 @@ describe('filterHipcampMajorityTentSiteProperties', () => {
 
   it('passes through non-hipcamp rows unchanged', () => {
     const sage: CohortPropertyRow = {
-      source: 'all_glamping_properties',
+      source: 'all_sage_data',
       sourceId: '9',
       geo_lat: 44,
       geo_lng: -121,

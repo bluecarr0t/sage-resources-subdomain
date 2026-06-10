@@ -3,7 +3,7 @@ import { MARKET_REPORT_MAP_PINS_CAP, buildMapPinsFromRows } from '@/lib/market-r
 
 function baseRow(over: Partial<CohortPropertyRow> & Pick<CohortPropertyRow, 'property_name' | 'sourceId'>): CohortPropertyRow {
   return {
-    source: 'all_glamping_properties',
+    source: 'all_sage_data',
     geo_lat: 35.5,
     geo_lng: -97.3,
     city: 'A',

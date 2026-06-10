@@ -13,12 +13,20 @@
       "schedule": "0 15 * * 1"
     },
     {
+      "path": "/api/cron/discover-glamping-pipeline",
+      "schedule": "0 16 * * 1"
+    },
+    {
       "path": "/api/cron/refresh-unified-comps",
       "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/ban-abusive-ips",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/flip-planned-open-properties",
+      "schedule": "0 8 * * *"
     }
   ],
   "redirects": [

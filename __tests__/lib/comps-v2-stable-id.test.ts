@@ -3,8 +3,8 @@ import { parsePropertyKinds, parseQualityTiers } from '@/lib/comps-v2/parse-body
 
 describe('comps-v2 stable id', () => {
   it('is deterministic for same inputs', () => {
-    const a = stableCandidateId('all_glamping_properties', '12', 'Foo Resort');
-    const b = stableCandidateId('all_glamping_properties', '12', 'Foo Resort');
+    const a = stableCandidateId('all_sage_data', '12', 'Foo Resort');
+    const b = stableCandidateId('all_sage_data', '12', 'Foo Resort');
     expect(a).toBe(b);
     expect(a.length).toBe(20);
   });

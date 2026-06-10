@@ -262,7 +262,7 @@ export function buildApplyResult(
 
 export function applyResultToSqlUpdates(
   applied: RowUpdatePayload[],
-  table = 'all_glamping_properties'
+  table = 'all_sage_data'
 ): string {
   const lines: string[] = [
     '-- Auto-generated hot tub backfill (review before apply)',

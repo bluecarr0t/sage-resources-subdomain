@@ -2,6 +2,17 @@
  * Map page SEO: metadata overrides and state hub intro copy for high-impression regions.
  */
 
+import { roundDownToStep } from '@/lib/round-down-to-step';
+
+/** Marketing count for map index titles (floor to nearest 25, e.g. 718 → 700). */
+export function mapIndexPropertyCountDisplay(rawCount: number): number {
+  return roundDownToStep(rawCount, 25);
+}
+
+export function mapIndexLocationsTitle(count: number): string {
+  return `Glamping Properties Map | ${count}+ Locations`;
+}
+
 export type MapStateHubContent = {
   /** Optional override for <title> (state pages only) */
   metaTitle?: string;
@@ -17,7 +28,7 @@ export type MapStateHubContent = {
 /** Main /[locale]/map index metadata (English). */
 export const MAP_INDEX_METADATA = {
   titleTemplate: (count: number) =>
-    `Glamping Map: ${count}+ Properties by State | Sage Outdoor Advisory`,
+    `${mapIndexLocationsTitle(count)} | Sage Outdoor Advisory`,
   descriptionTemplate: (count: number) =>
     `Interactive glamping map with ${count}+ verified resorts, yurts, domes, and safari tents across the U.S. and Canada. Filter by state, unit type, and ADR—benchmark markets for feasibility and development.`,
   keywords:

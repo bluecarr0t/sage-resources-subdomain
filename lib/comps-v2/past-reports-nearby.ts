@@ -39,7 +39,7 @@ async function tryMatchGlampingCoords(
   const short = shortNameForMatch(propertyName);
   if (short.length < 3) return null;
   const { data, error } = await supabase
-    .from('all_glamping_properties' as never)
+    .from('all_sage_data' as never)
     .select('lat, lon')
     .ilike('property_name', `%${short}%`)
     .eq('state', stateAbbr)

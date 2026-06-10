@@ -1,5 +1,5 @@
 /**
- * Property-type cohorts for market snapshot and `/brands` rankings (Glamping only).
+ * Property-type cohorts for market snapshot and brand rankings (Glamping only).
  * Public `/brand/[slug]` detail pages include all published `property_type` values.
  */
 

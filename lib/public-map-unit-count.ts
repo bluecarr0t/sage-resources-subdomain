@@ -3,7 +3,7 @@ import { createServerClient } from '@/lib/supabase';
 import { applyPublicMapCohortFilters } from '@/lib/public-map-cohort-filters';
 import { parseNum } from '@/lib/comps-v2/geo';
 
-const TABLE = 'all_glamping_properties';
+const TABLE = 'all_sage_data';
 
 function unitsFromRow(quantity_of_units: unknown): number {
   const n = parseNum(quantity_of_units);

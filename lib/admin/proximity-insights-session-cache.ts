@@ -3,7 +3,7 @@ import type { AnchorType, InsightsData, PropertyTypeFilter } from '@/app/admin/p
 /** Align with server `CACHE_TTL_SECONDS` (5 minutes). */
 export const PROXIMITY_INSIGHTS_SESSION_CACHE_MS = 5 * 60 * 1000;
 
-const STORAGE_KEY_PREFIX = 'proximity-insights-v1:';
+const STORAGE_KEY_PREFIX = 'proximity-insights-v2:';
 
 /** Minimal surface used from `useSearchParams()` for building cache keys. */
 export type SearchParamsLike = Pick<URLSearchParams, 'get'>;
@@ -13,6 +13,16 @@ export type ProximityInsightsSessionPayload =
   | { mode: 'compare'; insights_a: InsightsData; insights_b: InsightsData };
 
 export type ProximityInsightsSessionEntry = { savedAt: number } & ProximityInsightsSessionPayload;
+
+const SESSION_MAP_PROPERTY_CAP = 100;
+
+/** Trim map payload for sessionStorage; full map reloads on forced refresh. */
+export function stripInsightsForSessionCache(insights: InsightsData): InsightsData {
+  return {
+    ...insights,
+    map_properties: (insights.map_properties ?? []).slice(0, SESSION_MAP_PROPERTY_CAP),
+  };
+}
 
 export function buildProximityInsightsApiQueryString(opts: {
   searchParams: SearchParamsLike;
@@ -28,6 +38,10 @@ export function buildProximityInsightsApiQueryString(opts: {
   if (stateFilter) params.set('state', stateFilter);
   const appliedBands = searchParams.get('distance_bands')?.trim();
   if (appliedBands) params.set('distance_bands', appliedBands);
+  const location = searchParams.get('location')?.trim();
+  if (location) params.set('location', location);
+  const radiusMi = searchParams.get('radius_mi')?.trim();
+  if (radiusMi) params.set('radius_mi', radiusMi);
 
   if (compareMode) {
     params.set('compare', 'true');
@@ -79,7 +93,15 @@ export function writeProximityInsightsSessionCache(
 ): void {
   if (typeof window === 'undefined') return;
   try {
-    const entry: ProximityInsightsSessionEntry = { savedAt: Date.now(), ...payload };
+    const stripped: ProximityInsightsSessionPayload =
+      payload.mode === 'single'
+        ? { mode: 'single', insights: stripInsightsForSessionCache(payload.insights) }
+        : {
+            mode: 'compare',
+            insights_a: stripInsightsForSessionCache(payload.insights_a),
+            insights_b: stripInsightsForSessionCache(payload.insights_b),
+          };
+    const entry: ProximityInsightsSessionEntry = { savedAt: Date.now(), ...stripped };
     sessionStorage.setItem(storageKey(queryString), JSON.stringify(entry));
   } catch {
     // Quota or private mode — ignore

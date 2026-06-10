@@ -1,7 +1,7 @@
 /**
  * GET /api/admin/sage-glamping-data/glamping-countries
  * Returns a sorted, deduplicated list of `country` values that actually exist in
- * `all_glamping_properties` (for the Sage Data table filter only).
+ * `all_sage_data` (for the Sage Data table filter only).
  */
 
 import { NextResponse } from 'next/server';
@@ -10,7 +10,7 @@ import { withAdminAuth } from '@/lib/require-admin-auth';
 
 export const dynamic = 'force-dynamic';
 
-const TABLE = 'all_glamping_properties';
+const TABLE = 'all_sage_data';
 const PAGE_SIZE = 3000;
 
 export const GET = withAdminAuth(async () => {

@@ -60,15 +60,69 @@ Under **Authentication → Providers → Email**:
 - Email enabled
 - For passwordless magic links, **Confirm email** can stay on; new users may receive **Confirm signup** until confirmed—brand that template too.
 
+## Email rate limit: set to **30 / hour** (required for production)
+
+Supabase’s **built-in** mail is capped at **2 emails/hour** for the whole project. You
+cannot type a higher number until custom SMTP (or a Send Email hook) is configured.
+The dashboard shows: *“Custom SMTP or Send Email hook is required to update this configuration.”*
+
+### Step 1 — Fix SMTP (pick one)
+
+**Option A — Use built-in mail only (quick test, still 2/h max)**
+
+1. **Authentication → Emails → SMTP**
+2. Turn **OFF** “Enable custom SMTP” (do not leave it ON with placeholder values like `your.smtp.host.com`).
+3. Save.
+
+You stay at **2 emails/hour**. Fine for a single test; not enough for real traffic or QA.
+
+**Option B — Custom SMTP (recommended; unlocks **30/h**)**
+
+1. Create an SMTP provider account (e.g. [Resend](https://resend.com), SendGrid, Postmark, or Google Workspace).
+2. Verify the sending domain (e.g. `sageoutdooradvisory.com`) and create an API key / SMTP password.
+3. **Authentication → Emails → SMTP** → turn **ON** “Enable custom SMTP” and fill **real** values:
+
+   | Field | Example |
+   | ----- | ------- |
+   | Sender email | `noreply@sageoutdooradvisory.com` (must be allowed by your provider) |
+   | Sender name | `Sage Outdoor Advisory` |
+   | Host | Provider host (e.g. Resend: `smtp.resend.com`) |
+   | Port | `465` (SSL) or `587` (TLS) per provider docs |
+   | Username | Provider SMTP user (often `resend` or your API key user) |
+   | Password | Provider SMTP password / API key |
+   | Minimum interval per user | `60` seconds |
+
+4. Save and send a test from the provider dashboard if available.
+
+**Important:** If custom SMTP is ON but host/user/password are still placeholders, auth emails may fail even when the UI shows success.
+
+### Step 2 — Set project email rate to **30**
+
+1. **Authentication → Rate Limits**
+2. **Rate limit for sending emails** → change **2** to **30** `emails/h`
+3. Click **Save changes**
+
+Our app also limits **3 requests per email per hour** (Upstash), which stays below the 30/h project cap.
+
+### When rate limited
+
+Auth logs show `over_email_send_rate_limit` / `429: email rate limit exceeded` and **no** `mail.send`.
+
+- Wait for the hourly window to reset, or test with a fresh address.
+- Do not submit the form more than once per minute per address (Supabase per-user cooldown).
+
+The app returns HTTP **429** with a clear message when Supabase reports a rate limit (instead of “Check your email” with no email sent).
+
 ## Custom sender (optional)
 
-Default sender is `Supabase Auth <noreply@mail.app.supabase.io>`. For a `@sageoutdooradvisory.com` From address, configure [custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) in Supabase (e.g. Google Workspace, SendGrid, Resend).
+Default sender is `Supabase Auth <noreply@mail.app.supabase.io>`. For a `@sageoutdooradvisory.com` From address, use custom SMTP (Option B above). See [Supabase auth SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
 
 ## Test
 
 1. Request access on `/glamping-market-overview` with a test inbox.
 2. Confirm subject, logo, button, and link land on `/auth/callback?redirect=/glamping-market-overview`.
 3. Click the link in the **same browser** used to submit the form (PKCE).
+4. If no email arrives, check Supabase → Logs → Auth for `mail.send` vs `over_email_send_rate_limit`.
 
 ## Template variables
 

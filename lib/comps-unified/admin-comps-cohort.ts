@@ -9,7 +9,7 @@
 
 import type { UnifiedFilterOptions } from '@/lib/comps-unified/apply-filters';
 
-/** Canonical `all_glamping_properties.property_type` for the public glamping map cohort. */
+/** Canonical `all_sage_data.property_type` for the public glamping map cohort. */
 export const ADMIN_COMPS_COHORT_PROPERTY_TYPE = 'Glamping';
 
 export const ADMIN_COMPS_COHORT_IS_GLAMPING = 'Yes';

@@ -32,7 +32,7 @@
  *    alone — overlapping listings across sources must stay visible). Merged metrics:
  *    max sites, sum units, mean ADR.
  *  - Source names are de-duplicated into an index array so each point
- *    carries a small int rather than repeating `"all_glamping_properties"`.
+ *    carries a small int rather than repeating `"all_sage_data"`.
  *  - Hard-capped at MAX_POINTS to bound worst-case payload size.
  *  - Rows are fetched **per source** with an even budget (`MAX_POINTS / N`).
  *    Ordering only by synthetic `id` would otherwise return every `camp:` row

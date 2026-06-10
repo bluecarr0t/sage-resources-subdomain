@@ -1,5 +1,5 @@
 /**
- * Amenity-related columns on all_glamping_properties (Sage glamping dataset).
+ * Amenity-related columns on all_sage_data (Sage glamping dataset).
  * Used to cross-reference the Site Builder cost catalog with property/unit/RV fields.
  *
  * @see scripts/migrations/reorder-all-glamping-properties-by-prefix.sql

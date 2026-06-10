@@ -50,7 +50,7 @@ export function sitesExportUseLatLonNumericGeo(): boolean {
 export const SITE_EXPORT_TABLES = [
   'hipcamp',
   'campspot',
-  'all_glamping_properties',
+  'all_sage_data',
   'all_roverpass_data_new',
 ] as const;
 

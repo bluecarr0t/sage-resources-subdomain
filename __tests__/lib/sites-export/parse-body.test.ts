@@ -105,7 +105,7 @@ describe('parseSitesExportBody', () => {
 
   it('allows empty zip and null radius', () => {
     const b = parseSitesExportBody({
-      sources: ['all_glamping_properties'],
+      sources: ['all_sage_data'],
       countries: ['United States'],
       states: [],
       unitTypes: [],

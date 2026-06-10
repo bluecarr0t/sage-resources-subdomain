@@ -41,7 +41,7 @@ export function sitesExportUnitTypeOptionValuesForTable(table: SiteExportTable):
     case 'campspot':
       return [...SITES_EXPORT_UNIT_TYPE_FILTER_VALUES];
     case 'hipcamp':
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return [...HIPCAMP_SAGE_UNIT_TYPES];
     case 'all_roverpass_data_new':
       return [...ROVERPASS_UNIT_TYPES];

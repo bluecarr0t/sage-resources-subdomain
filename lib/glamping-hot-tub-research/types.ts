@@ -3,7 +3,7 @@ export type HotTubConfidence = 'high' | 'medium' | 'low';
 
 export type YesNo = 'Yes' | 'No';
 
-/** One row from `all_glamping_properties` in the research cohort. */
+/** One row from `all_sage_data` in the research cohort. */
 export type HotTubCohortRow = {
   id: number;
   property_id: string;

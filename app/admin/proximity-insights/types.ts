@@ -1,9 +1,28 @@
-export type AnchorType = 'ski' | 'national-parks';
+import type { AnchorPointAnchorType } from '@/lib/anchor-point-insights/anchor-type';
+import type { DataQualityMetrics } from '@/lib/anchor-point-insights/aggregate';
+
+export type AnchorType = AnchorPointAnchorType;
 export type PropertyTypeFilter = 'glamping' | 'rv' | 'all';
 export type Season = 'winter' | 'spring' | 'summer' | 'fall';
 
+export type AnchorWithCount = {
+  anchor_id?: number;
+  anchor_name: string;
+  anchor_slug?: string;
+  property_count_15_mi: number;
+  units_count_15_mi?: number;
+};
+
+export type ProximityAreaFilterView = {
+  lat: number;
+  lng: number;
+  radius_mi: number;
+  label: string;
+};
+
 export interface InsightsData {
   anchor_type?: AnchorType;
+  area_filter?: ProximityAreaFilterView | null;
   summary: {
     total_properties: number;
     total_units: number;
@@ -14,6 +33,8 @@ export interface InsightsData {
     units_with_winter_rates?: number;
     anchors_count: number;
     avg_winter_rate: number | null;
+    avg_rate?: number | null;
+    uses_blended_seasonal_rate?: boolean;
     data_sources: number;
     avg_state_population_2020?: number | null;
     combined_state_gdp_2023?: number | null;
@@ -61,13 +82,9 @@ export interface InsightsData {
     state_population_2020?: number | null;
     state_gdp_2023?: number | null;
   }>;
-  anchors_with_property_counts: Array<{
-    anchor_id?: number;
-    anchor_name: string;
-    anchor_slug?: string;
-    property_count_15_mi: number;
-    units_count_15_mi?: number;
-  }>;
+  anchors_with_property_counts: AnchorWithCount[];
+  anchors_for_select?: AnchorWithCount[];
+  data_quality?: DataQualityMetrics;
   map_properties?: Array<{
     lat: number;
     lon: number;

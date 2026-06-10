@@ -1,6 +1,6 @@
 -- =============================================================================
 -- ARDR driver analysis — LinkedIn post "The Numbers Behind the Number"
--- Source: Supabase `public.all_glamping_properties` (sage-outdoor-advisory)
+-- Source: Supabase `public.all_sage_data` (sage-outdoor-advisory)
 -- Run quarterly via Supabase SQL editor or MCP execute_sql (read-only).
 --
 -- Cohort (US private-commercial published Glamping, is_open = Yes):
@@ -41,7 +41,7 @@ SELECT
   g.rate_summer_weekday,
   g.rate_summer_weekend,
   g.date_updated
-FROM all_glamping_properties g
+FROM all_sage_data g
 WHERE g.is_glamping_property = 'Yes'
   AND g.research_status = 'published'
   AND (g.land_operator_category IS NULL OR g.land_operator_category = 'private_commercial')

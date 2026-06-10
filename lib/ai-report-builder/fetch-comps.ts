@@ -1,7 +1,7 @@
 /**
  * Fetch comparable properties from Supabase by proximity.
  *
- * Glamping: all_glamping_properties + hipcamp
+ * Glamping: all_sage_data + hipcamp
  * RV:      all_roverpass_data_new + campspot
  *
  * Uses Haversine distance, filtered by bounding box for performance.
@@ -41,7 +41,7 @@ export interface FetchCompsOptions {
 
 /**
  * Fetch and merge comparables from all available sources:
- * 1. Supabase market tables (hipcamp, all_glamping_properties, campspot, all_roverpass_data_new)
+ * 1. Supabase market tables (hipcamp, all_sage_data, campspot, all_roverpass_data_new)
  * 2. Past Sage reports (feasibility_comparables + feasibility_comp_units)
  * 3. Tavily web research
  *

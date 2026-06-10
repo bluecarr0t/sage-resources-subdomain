@@ -67,7 +67,7 @@ function rowToGlampingComp(
       url: (r.url as string) ?? null,
       description: (r.description as string) ?? null,
       distance_miles: Math.round(dist * 10) / 10,
-      source_table: 'all_glamping_properties',
+      source_table: 'all_sage_data',
       geo_lat: rLat,
       geo_lng: rLon,
     },
@@ -85,7 +85,7 @@ export async function fetchGlampingPropsNumeric(
   const bb = getBoundingBox(lat, lng, radiusMiles);
 
   const { data, error } = await supabase
-    .from('all_glamping_properties' as never)
+    .from('all_sage_data' as never)
     .select(
       'id, property_type, property_name, city, state, unit_type, property_total_sites, quantity_of_units, ' +
         'rate_avg_retail_daily_rate, rate_winter_weekday, rate_winter_weekend, ' +
@@ -104,7 +104,7 @@ export async function fetchGlampingPropsNumeric(
     .limit(rowLimit);
 
   if (error || !data) {
-    console.warn('[market-fetch] all_glamping_properties error:', error?.message);
+    console.warn('[market-fetch] all_sage_data error:', error?.message);
     return [];
   }
 

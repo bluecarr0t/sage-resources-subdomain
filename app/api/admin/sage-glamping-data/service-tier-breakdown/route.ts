@@ -13,8 +13,8 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const LIST_ANCHORS_VIEW = 'all_glamping_properties_list_anchors';
-const TABLE = 'all_glamping_properties';
+const LIST_ANCHORS_VIEW = 'all_sage_data_list_anchors';
+const TABLE = 'all_sage_data';
 
 type AnchorRow = {
   glamping_service_tier: string | null;

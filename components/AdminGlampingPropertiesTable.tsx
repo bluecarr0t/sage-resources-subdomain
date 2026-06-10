@@ -78,12 +78,14 @@ const OPEN_STATUS_LABEL_KEYS: Record<
   | 'openStatusYes'
   | 'openStatusUnderConstruction'
   | 'openStatusProposedDevelopment'
+  | 'openStatusCancelled'
   | 'openStatusTemporarilyClosed'
   | 'openStatusClosed'
 > = {
   Yes: 'openStatusYes',
   'Under Construction': 'openStatusUnderConstruction',
   'Proposed Development': 'openStatusProposedDevelopment',
+  Cancelled: 'openStatusCancelled',
   'Temporarily closed': 'openStatusTemporarilyClosed',
   Closed: 'openStatusClosed',
 };
@@ -167,7 +169,7 @@ interface FieldGroup {
   title: string;
   fields: {
     key: string;
-    type?: 'textarea' | 'select' | 'url';
+    type?: 'textarea' | 'select' | 'url' | 'date';
     options?: string[];
     /** Use `admin.sageData.landOperator.*` labels for select options. */
     landOperatorSelect?: boolean;
@@ -215,6 +217,7 @@ const SHARED_EDIT_FIELD_GROUPS: FieldGroup[] = [
       },
       { key: 'is_glamping_property', type: 'select', options: ['Yes', 'No'] },
       { key: 'is_open', type: 'select', options: [...GLAMPING_IS_OPEN_VALUES] },
+      { key: 'planned_open_date', type: 'date' },
       { key: 'source' },
       { key: 'discovery_source' },
       { key: 'brand_id', type: 'select', brandSelect: true },
@@ -276,7 +279,7 @@ const SHARED_EDIT_FIELD_GROUPS: FieldGroup[] = [
   },
 ];
 
-/** Per-site / per-row sections (one collapsible card per `all_glamping_properties` row). */
+/** Per-site / per-row sections (one collapsible card per `all_sage_data` row). */
 const SITE_FIELD_GROUPS: FieldGroup[] = [
   {
     title: 'Site',
@@ -1133,21 +1136,40 @@ function EditModal({
             )}
           </select>
         ) : (
-          <input
-            id={id}
-            type={field.type === 'url' ? 'url' : 'text'}
-            value={value}
-            disabled={disabled}
-            aria-required={showRequired}
-            autoComplete={field.type === 'url' ? 'url' : undefined}
-            placeholder={
-              field.type === 'url' && field.key !== 'url' ? 'https://' : undefined
-            }
-            onChange={(e) =>
-              setSharedDraft((prev) => ({ ...prev, [field.key]: e.target.value }))
-            }
-            className={inputClasses}
-          />
+          <>
+            <input
+              id={id}
+              type={
+                field.type === 'url'
+                  ? 'url'
+                  : field.type === 'date'
+                    ? 'date'
+                    : 'text'
+              }
+              value={value}
+              disabled={
+                disabled ||
+                (field.key === 'planned_open_date' &&
+                  sharedDraft.is_open !== 'Under Construction')
+              }
+              aria-required={showRequired}
+              autoComplete={field.type === 'url' ? 'url' : undefined}
+              placeholder={
+                field.type === 'url' && field.key !== 'url' ? 'https://' : undefined
+              }
+              onChange={(e) =>
+                setSharedDraft((prev) => ({ ...prev, [field.key]: e.target.value }))
+              }
+              className={inputClasses}
+            />
+            {field.key === 'planned_open_date' ? (
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                {sharedDraft.is_open === 'Under Construction'
+                  ? 'Auto-flips to Open on this date (daily cron).'
+                  : 'Only used when Open? is Under Construction.'}
+              </p>
+            ) : null}
+          </>
         )}
       </div>
     );

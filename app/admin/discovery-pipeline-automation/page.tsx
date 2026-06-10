@@ -53,7 +53,7 @@ const STEPS = [
     title: 'Deduplicate',
     subtitle: 'Skip properties we already have',
     description:
-      'Extracted property names are compared to the existing database (all_glamping_properties). Fuzzy matching helps avoid duplicates with slight name differences. Only properties that are not already in the database move on to the next step.',
+      'Extracted property names are compared to the existing database (all_sage_data). Fuzzy matching helps avoid duplicates with slight name differences. Only properties that are not already in the database move on to the next step.',
     icon: Filter,
     color: 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200',
   },
@@ -71,7 +71,7 @@ const STEPS = [
     title: 'Insert into database',
     subtitle: 'Save with discovery source',
     description:
-      'Enriched records are inserted into all_glamping_properties with research_status = "in_progress". Each row is tagged with its discovery source (e.g. "Google News RSS", "Tavily Search", "Manual Article") so we can see where new properties came from. Processed article URLs are stored so we don’t re-run them. New properties do not appear on the public map until they are approved.',
+      'Enriched records are inserted into all_sage_data with research_status = "in_progress". Each row is tagged with its discovery source (e.g. "Google News RSS", "Tavily Search", "Manual Article") so we can see where new properties came from. Processed article URLs are stored so we don’t re-run them. New properties do not appear on the public map until they are approved.',
     icon: Database,
     color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200',
   },
@@ -114,7 +114,7 @@ const TECH = [
   { name: 'Cheerio', purpose: 'Parse HTML and extract main article text from web pages' },
   { name: 'OpenAI (GPT-4o)', purpose: 'Extract property names/details from text; enrich with research-style prompts' },
   { name: 'Tavily', purpose: 'Optional web search to find glamping-related news article URLs' },
-  { name: 'Supabase', purpose: 'Store properties in all_glamping_properties and track processed URLs' },
+  { name: 'Supabase', purpose: 'Store properties in all_sage_data and track processed URLs' },
 ];
 
 export default function DiscoveryPipelineAutomationPage() {

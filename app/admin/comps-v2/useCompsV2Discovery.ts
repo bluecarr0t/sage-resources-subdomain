@@ -190,7 +190,7 @@ export function useCompsV2Discovery({
           stream: true,
           sources: {
             pastReports: dataSources.has('pastReports'),
-            all_glamping_properties: dataSources.has('all_glamping_properties'),
+            all_sage_data: dataSources.has('all_sage_data'),
             hipcamp: dataSources.has('hipcamp'),
             all_roverpass_data_new:
               !glampingStrictOnlyRun && dataSources.has('all_roverpass_data_new'),

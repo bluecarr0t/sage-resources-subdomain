@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui';
 import { MapPin, Mountain, DollarSign, TrendingUp } from 'lucide-react';
+import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
 import { AnchorPointMap } from '@/components/AnchorPointMap';
 import {
   BarChart,
@@ -17,7 +18,15 @@ import {
   Line,
 } from 'recharts';
 import { StatCard } from './StatCard';
-import type { InsightsData, Season } from '../types';
+import type { AnchorType, InsightsData, Season } from '../types';
+import {
+  anchorTypePluralLabel,
+  anchorTypeSingularLabel,
+  anchorTypeWithinMiLabel,
+  anchorUsesYearAvgCharts,
+  summaryAvgRateLabel,
+  summaryAvgRateValue,
+} from '../anchor-type-labels';
 import { MAX_STATE_ROWS } from '@/lib/anchor-point-insights/constants';
 
 interface InsightsColumnProps {
@@ -27,7 +36,7 @@ interface InsightsColumnProps {
   colHasOccupancyData: boolean;
   colLabel: string | null;
   typeLabel: string;
-  colAnchorType: 'ski' | 'national-parks';
+  colAnchorType: AnchorType;
   compareMode: boolean;
   season: Season;
   setSeason: (s: Season) => void;
@@ -50,6 +59,10 @@ export function InsightsColumn({
   onAnchorClick,
 }: InsightsColumnProps) {
   const t = useTranslations('anchorPointInsights');
+  const typePlural = anchorTypePluralLabel(colAnchorType, t);
+  const typeSingular = anchorTypeSingularLabel(colAnchorType, t);
+  const withinMiType = anchorTypeWithinMiLabel(colAnchorType, t);
+  const useYearAvg = anchorUsesYearAvgCharts(colAnchorType);
 
   return (
     <div className={compareMode ? 'min-w-0' : ''}>
@@ -62,26 +75,33 @@ export function InsightsColumn({
         <StatCard
           label={t('withinXMi', {
             distance: colData.summary.within_mi_threshold ?? 30,
-            type: colAnchorType === 'national-parks' ? t('parks') : t('ski'),
+            type: withinMiType,
           })}
           value={colData.summary.units_within_x_mi ?? colData.summary.properties_within_30_mi}
           icon={Mountain}
         />
         <StatCard
-          label={colAnchorType === 'national-parks' ? t('nationalParks') : t('skiResorts')}
+          label={typePlural}
           value={colData.summary.anchors_count}
           icon={Mountain}
         />
         <StatCard
-          label={t('avgWinterRate')}
-          value={colData.summary.avg_winter_rate != null ? `$${colData.summary.avg_winter_rate}` : '—'}
+          label={summaryAvgRateLabel(colAnchorType, t)}
+          value={
+            summaryAvgRateValue(colData.summary) != null
+              ? `$${summaryAvgRateValue(colData.summary)}`
+              : '—'
+          }
           icon={DollarSign}
           tooltip={
             colData.summary.units_with_winter_rates != null && colData.summary.total_units > 0
-              ? t('avgWinterRateTooltip', {
-                  withRates: colData.summary.units_with_winter_rates,
-                  total: colData.summary.total_units,
-                })
+              ? t(
+                  useYearAvg ? 'avgRateTooltip' : 'avgWinterRateTooltip',
+                  {
+                    withRates: colData.summary.units_with_winter_rates,
+                    total: colData.summary.total_units,
+                  }
+                )
               : undefined
           }
         />
@@ -92,15 +112,17 @@ export function InsightsColumn({
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             {t('propertiesAndAnchors', {
-              type: colAnchorType === 'national-parks' ? t('nationalParks') : t('skiResorts'),
+              type: typePlural,
             })}
           </h2>
-          <AnchorPointMap
-            mapProperties={colData.map_properties ?? []}
-            mapAnchors={colData.map_anchors ?? []}
-            anchorsWithCounts={colData.anchors_with_property_counts}
-            onAnchorClick={onAnchorClick}
-          />
+          <GoogleMapsProvider>
+            <AnchorPointMap
+              mapProperties={colData.map_properties ?? []}
+              mapAnchors={colData.map_anchors ?? []}
+              anchorsWithCounts={colData.anchors_with_property_counts}
+              onAnchorClick={onAnchorClick}
+            />
+          </GoogleMapsProvider>
         </div>
       ) : null}
 
@@ -278,7 +300,7 @@ export function InsightsColumn({
 
         <Card>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            {colAnchorType === 'national-parks' ? t('avgRateByState') : t('avgWinterRateByState')}
+            {useYearAvg ? t('avgRateByState') : t('avgWinterRateByState')}
           </h2>
           {colData.by_state.length === 0 ? (
             <p className="text-gray-400 text-sm py-8 text-center">{t('noDataYet')}</p>
@@ -286,7 +308,7 @@ export function InsightsColumn({
             <div
               role="img"
               aria-label={
-                colAnchorType === 'national-parks' ? t('avgRateByState') : t('avgWinterRateByState')
+                useYearAvg ? t('avgRateByState') : t('avgWinterRateByState')
               }
             >
               <ResponsiveContainer width="100%" height={280}>
@@ -303,12 +325,12 @@ export function InsightsColumn({
                   <Tooltip
                     formatter={(value: number | undefined) => [
                       value != null ? `$${value}` : '-',
-                      colAnchorType === 'national-parks' ? t('avgRate') : t('avgWinterRate'),
+                      useYearAvg ? t('avgRate') : t('avgWinterRate'),
                     ]}
                   />
                   <Bar
-                    dataKey={colAnchorType === 'national-parks' ? 'avg_rate' : 'avg_winter_rate'}
-                    name={colAnchorType === 'national-parks' ? t('avgRate') : t('avgWinterRate')}
+                    dataKey={useYearAvg ? 'avg_rate' : 'avg_winter_rate'}
+                    name={useYearAvg ? t('avgRate') : t('avgWinterRate')}
                     fill="#0891b2"
                     radius={[4, 4, 0, 0]}
                   />
@@ -336,7 +358,7 @@ export function InsightsColumn({
                     {t('properties')}
                   </th>
                   <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                    {colAnchorType === 'national-parks' ? t('avgRate') : t('avgWinterRate')}
+                    {useYearAvg ? t('avgRate') : t('avgWinterRate')}
                   </th>
                   <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
                     {t('population2020')}
@@ -479,7 +501,7 @@ export function InsightsColumn({
         <Card>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             {t('anchorsWithUnits', {
-              type: colAnchorType === 'national-parks' ? t('nationalParks') : t('skiResorts'),
+              type: typePlural,
             })}
           </h2>
           <div className="overflow-x-auto">
@@ -487,7 +509,7 @@ export function InsightsColumn({
               <thead>
                 <tr className="border-b border-neutral-200/75 dark:border-neutral-800">
                   <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                    {colAnchorType === 'national-parks' ? t('nationalPark') : t('skiResort')}
+                    {typeSingular}
                   </th>
                   <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
                     {t('units15Mi')}
@@ -500,9 +522,7 @@ export function InsightsColumn({
                     <td colSpan={2} className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
                       {t('noAnchorsWithUnits', {
                         type:
-                          colAnchorType === 'national-parks'
-                            ? t('nationalParks').toLowerCase()
-                            : t('skiResorts').toLowerCase(),
+                          typePlural.toLowerCase(),
                       })}
                     </td>
                   </tr>

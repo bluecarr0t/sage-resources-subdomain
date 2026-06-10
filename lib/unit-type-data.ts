@@ -41,7 +41,7 @@ export async function getPropertiesByUnitType(
       .join(',');
 
     const { data: rows, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('is_glamping_property', 'Yes')
       .neq('is_open', 'Closed')

@@ -22,6 +22,8 @@ export interface SageAiUsageLogParams {
   messageCount: number;
   toolCallCount: number;
   correlationId?: string;
+  /** Persisted chat session id when the client sends it (for per-thread cost). */
+  sessionId?: string | null;
   /** Short machine-readable code when the request failed mid-stream. */
   errorCode?: string | null;
 }
@@ -48,6 +50,7 @@ export async function logSageAiUsage(params: SageAiUsageLogParams): Promise<void
         message_count: params.messageCount,
         tool_call_count: params.toolCallCount,
         correlation_id: params.correlationId ?? null,
+        session_id: params.sessionId ?? null,
         error_code: params.errorCode ?? null,
       },
     } as never);

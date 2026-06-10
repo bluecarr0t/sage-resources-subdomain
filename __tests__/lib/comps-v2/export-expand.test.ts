@@ -61,7 +61,7 @@ describe('siteCountForPropertyExport', () => {
     expect(
       siteCountForPropertyExport(
         baseCandidate({
-          source_table: 'all_glamping_properties',
+          source_table: 'all_sage_data',
           quantity_of_units: null,
           property_total_sites: 3,
         })

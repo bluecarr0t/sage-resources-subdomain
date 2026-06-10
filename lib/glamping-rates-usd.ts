@@ -1,8 +1,10 @@
 /**
  * Normalize glamping nightly rate columns to USD before persisting to
- * `all_glamping_properties`. Preserves original currency amounts in
+ * `all_sage_data`. Preserves original currency amounts in
  * `rate_unit_rates_by_year` metadata when conversion runs.
  */
+
+import { isSeasonRateClosedLiteral, parseSeasonRateNumeric } from '@/lib/glamping-seasonal-rate';
 
 /** ISO 4217 code → USD per 1 unit of foreign currency (fixed reference rates). */
 export const FX_TO_USD_MULTIPLIER: Readonly<Record<string, number>> = {
@@ -288,15 +290,11 @@ export function applyGlampingRatesToUsd(
   let converted = false;
   for (const col of GLAMPING_DAILY_RATE_COLUMNS) {
     const raw = out[col];
-    if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) {
-      out[col] = convertAmountToUsd(raw, sourceCurrency);
+    if (isSeasonRateClosedLiteral(raw)) continue;
+    const n = parseSeasonRateNumeric(raw);
+    if (n != null && n > 0) {
+      out[col] = convertAmountToUsd(n, sourceCurrency);
       converted = true;
-    } else if (typeof raw === 'string' && raw.trim() !== '') {
-      const n = Number(raw.replace(/[$,\s]/g, ''));
-      if (Number.isFinite(n) && n > 0) {
-        out[col] = convertAmountToUsd(n, sourceCurrency);
-        converted = true;
-      }
     }
   }
 

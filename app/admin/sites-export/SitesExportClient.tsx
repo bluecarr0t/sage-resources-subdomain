@@ -156,7 +156,7 @@ export default function SitesExportClient() {
       { value: ALL_TOKEN, label: t('sourceAll') },
       { value: 'hipcamp', label: t('sourceHipcamp') },
       { value: 'campspot', label: t('sourceCampspot') },
-      { value: 'all_glamping_properties', label: t('sourceSage') },
+      { value: 'all_sage_data', label: t('sourceSage') },
       { value: 'all_roverpass_data_new', label: t('sourceRoverpass') },
     ],
     [t]

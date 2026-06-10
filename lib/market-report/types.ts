@@ -2,7 +2,7 @@ export type MarketReportSegment = 'glamping' | 'rv_resort';
 
 /** Normalized row for aggregation (all segments). */
 export interface CohortPropertyRow {
-  source: 'all_glamping_properties' | 'all_roverpass_data_new' | 'campspot' | 'hipcamp';
+  source: 'all_sage_data' | 'all_roverpass_data_new' | 'campspot' | 'hipcamp';
   sourceId: string | null;
   /** Property coordinates (for dedupe keys and future map). */
   geo_lat: number;
@@ -79,7 +79,7 @@ export interface MarketReportMeta {
   radiusMiles: number;
   segment: MarketReportSegment;
   /**
-   * Cohort inventory rows after load (Sage: every `all_glamping_properties` row;
+   * Cohort inventory rows after load (Sage: every `all_sage_data` row;
    * other sources: collapsed to one row per property × unit type). Legacy field
    * name for API consumers.
    */

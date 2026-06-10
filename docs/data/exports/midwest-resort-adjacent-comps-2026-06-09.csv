@@ -1,0 +1,16 @@
+property_name,site_name,city,state,property_type,is_glamping_property,is_open,research_status,unit_type,qty,adr,url,classification_notes
+Sundara Inn & Spa,Spa Suites,Wisconsin Dells,WI,Outdoor Boutique Hotel,No,Yes,published,Suite,26,425,https://www.sundaraspa.com/,Destination spa — wellness comp; not glamping
+Sundara Inn & Spa,Villa Suite & Lifestyle Villa,Wisconsin Dells,WI,Outdoor Boutique Hotel,No,Yes,published,Villa,12,575,https://www.sundaraspa.com/stay/,Villa/condo inventory; phone booking common
+Sundara Inn & Spa,Vanya & GolfSide Reserve,Wisconsin Dells,WI,Outdoor Boutique Hotel,No,Yes,published,Suite,2,675,https://www.sundaraspa.com/stay/reserves/,Premium woodland reserve with private hot soak
+Timber Ridge Outpost & Cabins,White Oak Treehouse,Karbers Ridge,IL,Glamping Resort,Yes,Yes,published,Treehouse,1,219,https://timberridgeoutpost.com/treehouse/,Operator-branded glamping; $209-229 + $33 cleaning
+Timber Ridge Outpost & Cabins,Maple Oak Treehouse,Karbers Ridge,IL,Glamping Resort,Yes,Yes,published,Treehouse,1,189,https://timberridgeoutpost.com/treehouse/, $179-199 + cleaning
+Timber Ridge Outpost & Cabins,Twin Oaks Log Cabin,Karbers Ridge,IL,Glamping Resort,Yes,Yes,published,Cabin,1,174,https://timberridgeoutpost.com/log-cabin/,Antique log cabin circa 1852
+Timber Ridge Outpost & Cabins,Cottonwood Log Cabin,Karbers Ridge,IL,Glamping Resort,Yes,Yes,published,Cabin,1,134,https://timberridgeoutpost.com/log-cabin/,
+Timber Ridge Outpost & Cabins,Sassafras Ridge Log Cabin,Karbers Ridge,IL,Glamping Resort,Yes,Yes,published,Cabin,1,164,https://timberridgeoutpost.com/log-cabin/,
+Timber Ridge Outpost & Cabins,Hickory Hollow Log Cabin,Karbers Ridge,IL,Glamping Resort,Yes,Yes,published,Cabin,1,134,https://timberridgeoutpost.com/log-cabin/,
+Pepin Forest Treehouse,Pepin Forest Treehouse,Pepin,WI,Glamping Resort,Yes,Yes,published,Treehouse,1,275,https://www.pepinforesttreehouse.com/,Driftless WI treehouse comp
+Pepin Forest Treehouse,Moonhaven Treehouse,Pepin,WI,Glamping Resort,Yes,Yes,in_progress,Treehouse,1,569,https://www.pepinforesttreehouse.com/moonhaven,Opening Fall 2026; from $569/night
+Pepin Forest Treehouse,The Sleeping Fox Suite,Pepin,WI,Outdoor Boutique Hotel,No,Yes,published,Cabin,1,225,https://www.pepinforesttreehouse.com/sleepingfox,Ground-level suite — not treehouse
+Lakewood Farms,Luxury Log Cabin,Mukwonago,WI,Outdoor Boutique Hotel,No,Yes,published,Cabin,1,,https://lakewoodfarmswi.com/,Wedding package lodging; not nightly glamping
+Lakewood Farms,Lake House,Mukwonago,WI,Outdoor Boutique Hotel,No,Yes,published,Cottage,1,,https://lakewoodfarmswi.com/lake-house,Event/vacation rental; pricing on request
+Lakewood Farms,Guest House,Mukwonago,WI,Outdoor Boutique Hotel,No,Yes,published,Cottage,1,,https://lakewoodfarmswi.com/lake-house,Bundled with lake house hill package

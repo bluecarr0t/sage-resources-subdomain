@@ -1,6 +1,6 @@
 /**
  * Geography scope for `/glamping-market-overview` aggregates (national + unit types).
- * Matches common `all_glamping_properties.country` spellings for the United States and Canada.
+ * Matches common `all_sage_data.country` spellings for the United States and Canada.
  */
 export const GLAMPING_MARKET_SNAPSHOT_COUNTRY_IN = [
   'United States',

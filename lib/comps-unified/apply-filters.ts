@@ -60,7 +60,7 @@ export interface UnifiedFilterOptions {
   propertyTypes: string[];
   /** Matview `is_glamping_property` (e.g. Yes). Applied when non-empty. */
   isGlampingProperty: string[];
-  /** When set, Sage (`all_glamping_properties`) rows must match this `research_status`. */
+  /** When set, Sage (`all_sage_data`) rows must match this `research_status`. */
   sageResearchStatus: string | null;
   /**
    * When true with `propertyTypes` set, rows with `source = reports` bypass the property_type

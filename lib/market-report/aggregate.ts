@@ -38,7 +38,7 @@ const TOP_UNIT_TYPE_COHORT_DETAIL_CAP = 200;
 
 const SAMPLE_CAP = 25;
 const SOURCE_BREAKDOWN_ORDER: CohortPropertyRow['source'][] = [
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'all_roverpass_data_new',
   'campspot',

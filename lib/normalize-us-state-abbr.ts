@@ -4,7 +4,7 @@ import { US_STATES } from '@/lib/us-states';
 const USPS = new Set<string>(US_STATES);
 
 /**
- * Map `all_glamping_properties.state` (abbrev or full name) to USPS code, or null.
+ * Map `all_sage_data.state` (abbrev or full name) to USPS code, or null.
  */
 export function normalizeDbStateToUspsAbbr(raw: string | null | undefined): string | null {
   if (raw == null) return null;

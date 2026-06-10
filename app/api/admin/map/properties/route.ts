@@ -1,9 +1,9 @@
 /**
- * API Route: Get property markers for map (read-only from all_glamping_properties)
+ * API Route: Get property markers for map (read-only from all_sage_data)
  * GET /api/admin/map/properties
  * Query params: property_type, unit_type, min_rate, max_rate, min_occupancy, max_occupancy, min_sites, max_sites, state, source[], north, south, east, west, limit
  *
- * Each marker includes `id` (all_glamping_properties.id) and optional `sage_hero_image_url`
+ * Each marker includes `id` (all_sage_data.id) and optional `sage_hero_image_url`
  * when a row with kind `hero` exists in `glamping_property_images`.
  */
 
@@ -28,7 +28,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
 
     const supabase = createServerClient();
     let query = supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select(
         'id, property_name, lat, lon, city, state, property_type, unit_type, avg__retail_daily_rate_2024, occupancy_rate_2024, property__total_sites'
       )

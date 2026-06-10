@@ -31,11 +31,11 @@ import ParkInfoWindow from './map/ParkInfoWindow';
 import ClientWorkInfoWindow from './map/ClientWorkInfoWindow';
 import type { ClientWorkMapPoint } from '@/lib/map/client-work-locations';
 import {
-  computeMarkerPixelDeltaToFitPopup,
-  defaultInfoWindowPadding,
-  getMarkerContainerPixel,
-  markerScreenDeltaToPanBy,
+  infoWindowDisableAutoPanOptions,
+  panMapToFitInfoWindowIfNeeded,
 } from './map/utils/panInfoWindowIntoView';
+
+const INFO_WINDOW_PIXEL_OFFSET = { width: 0, height: -10 } as const;
 
 const PopulationLayer = dynamic(() => import('./PopulationLayer'), {
   ssr: false,
@@ -98,6 +98,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [mapZoom, setMapZoom] = useState<number>(defaultZoom);
   const [shouldFitBounds, setShouldFitBounds] = useState(false);
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
+  /** After load, avoid controlled center/zoom so marker InfoWindows do not snap the viewport. */
+  const [useControlledMapViewport, setUseControlledMapViewport] = useState(true);
 
   const {
     populationLookup, populationFipsLookup, populationLoading, populationLayerKey,
@@ -347,6 +349,19 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const displayProperties = clientWorkOnly ? [] : processedProperties;
   const propertiesWithCoords = useMemo(() => filterPropertiesWithCoordinates(displayProperties), [displayProperties]);
 
+  const syncMapViewportFromMap = useCallback(() => {
+    if (!map) return;
+    const c = map.getCenter();
+    const z = map.getZoom();
+    if (c) setMapCenter({ lat: c.lat(), lng: c.lng() });
+    if (z != null) setMapZoom(z);
+  }, [map]);
+
+  const mapFilterKey = `${filterState.join(',')}-${filterUnitType.join(',')}-${filterRateRange.join(',')}`;
+  useEffect(() => {
+    setUseControlledMapViewport(true);
+  }, [mapFilterKey]);
+
   const { markersRef, parkMarkersRef, clientWorkMarkersRef } = useMapMarkers({
     map,
     isClient,
@@ -359,9 +374,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     setSelectedPark,
     setSelectedClientWork,
     markerClickTimeRef,
+    onBeforeMarkerSelect: syncMapViewportFromMap,
   });
 
-  // Pan only when the InfoWindow would overflow the padded viewport (typical map UX).
+  // Pan only when the InfoWindow would overflow the padded viewport (no zoom change).
   useEffect(() => {
     if (!map) return;
 
@@ -376,63 +392,21 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
 
     if (!marker) return;
 
-    // React state often still has default zoom while the user has zoomed the map; syncing
-    // here keeps controlled <GoogleMap zoom={mapZoom}> from snapping back to default.
-    const liveZoom = map.getZoom();
-    if (liveZoom != null) setMapZoom(liveZoom);
-
-    // Browser timers are numeric IDs; Node typings overload `setTimeout` as `Timeout`.
-    let syncTimeout: number | null = null;
     let imageLayoutTimeout: number | null = null;
     let idleListener: google.maps.MapsEventListener | null = null;
     let cancelled = false;
 
-    const syncFromMap = () => {
+    const runAdjust = () => {
       if (cancelled) return;
-      const c = map.getCenter();
-      if (c) setMapCenter({ lat: c.lat(), lng: c.lng() });
-    };
-
-    const runAdjust = async () => {
-      if (cancelled) return;
-      const div = map.getDiv();
-      const w = div.clientWidth;
-      const h = div.clientHeight;
-      if (w < 1 || h < 1) return;
-
-      const pixel = await getMarkerContainerPixel(map, marker);
-      if (cancelled || !pixel) {
-        syncFromMap();
-        return;
-      }
-
-      const padding = defaultInfoWindowPadding(isMobile);
-      const { dx, dy } = computeMarkerPixelDeltaToFitPopup({
-        markerX: pixel.x,
-        markerY: pixel.y,
-        mapWidth: w,
-        mapHeight: h,
-        padding,
-      });
-
-      if (dx === 0 && dy === 0) {
-        syncFromMap();
-        return;
-      }
-
-      const pan = markerScreenDeltaToPanBy(dx, dy);
-      map.panBy(pan.x, pan.y);
-      google.maps.event.addListenerOnce(map, 'idle', () => {
-        syncTimeout = window.setTimeout(syncFromMap, 50);
-      });
+      void panMapToFitInfoWindowIfNeeded(map, marker, { isMobile });
     };
 
     const onIdleAfterSelection = () => {
       if (cancelled) return;
-      void runAdjust();
+      runAdjust();
       imageLayoutTimeout = window.setTimeout(() => {
         if (cancelled) return;
-        void runAdjust();
+        runAdjust();
       }, 700);
     };
 
@@ -441,10 +415,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     return () => {
       cancelled = true;
       if (idleListener) google.maps.event.removeListener(idleListener);
-      if (syncTimeout) clearTimeout(syncTimeout);
       if (imageLayoutTimeout) clearTimeout(imageLayoutTimeout);
     };
-  }, [map, selectedProperty, selectedPark, selectedClientWork, setMapCenter, setMapZoom, isMobile]);
+  }, [map, selectedProperty, selectedPark, selectedClientWork, isMobile]);
 
   const isNearMarker = useCallback((lat: number, lng: number, threshold: number = 0.002): boolean => {
     const timeSinceMarkerClick = Date.now() - markerClickTimeRef.current;
@@ -520,6 +493,9 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       map.setZoom(isMobileCheck ? defaultZoomMobile : defaultZoom);
     }
     setTimeout(() => { const bounds = map.getBounds(); if (bounds) setMapBounds(bounds); }, 200);
+    google.maps.event.addListenerOnce(map, 'idle', () => {
+      setUseControlledMapViewport(false);
+    });
   }, [searchParams, setMapBounds]);
 
   const onIdle = useCallback(() => onIdleFromHook(), [onIdleFromHook]);
@@ -740,10 +716,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
             }
           >
             <GoogleMap
-              key={`map-${filterState.join(',')}-${filterUnitType.join(',')}-${filterRateRange.join(',')}`}
+              key={`map-${mapFilterKey}`}
               mapContainerStyle={{ width: '100%', height: '100%', ...(shouldUseFullHeight ? { minHeight: '100vh' } : {}) }}
-              center={mapCenter}
-              zoom={mapZoom}
+              center={useControlledMapViewport ? mapCenter : undefined}
+              zoom={useControlledMapViewport ? mapZoom : undefined}
               onLoad={onLoad}
               onIdle={onIdle}
               onUnmount={onUnmount}
@@ -755,7 +731,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                   key={selectedClientWork.id}
                   position={{ lat: selectedClientWork.lat, lng: selectedClientWork.lng }}
                   onCloseClick={() => setSelectedClientWork(null)}
-                  options={{ pixelOffset: new google.maps.Size(0, -10) }}
+                  options={{
+                    ...infoWindowDisableAutoPanOptions,
+                    pixelOffset: new google.maps.Size(INFO_WINDOW_PIXEL_OFFSET.width, INFO_WINDOW_PIXEL_OFFSET.height),
+                  }}
                 >
                   <ClientWorkInfoWindow point={selectedClientWork} />
                 </InfoWindow>
@@ -771,7 +750,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     setCurrentParkPhotoIndex(0);
                     setParkGooglePlacesData(null);
                   }}
-                  options={{ pixelOffset: new google.maps.Size(0, -10) }}
+                  options={{
+                    ...infoWindowDisableAutoPanOptions,
+                    pixelOffset: new google.maps.Size(INFO_WINDOW_PIXEL_OFFSET.width, INFO_WINDOW_PIXEL_OFFSET.height),
+                  }}
                 >
                   <ParkInfoWindow
                     selectedPark={selectedPark}
@@ -801,7 +783,10 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     setCurrentPhotoIndex(0);
                     setFullPropertyDetails(null);
                   }}
-                  options={{ pixelOffset: new google.maps.Size(0, -10) }}
+                  options={{
+                    ...infoWindowDisableAutoPanOptions,
+                    pixelOffset: new google.maps.Size(INFO_WINDOW_PIXEL_OFFSET.width, INFO_WINDOW_PIXEL_OFFSET.height),
+                  }}
                 >
                   <PropertyInfoWindow
                     selectedProperty={selectedProperty}

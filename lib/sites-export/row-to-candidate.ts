@@ -133,7 +133,7 @@ export function glampingRowToCandidate(r: AnyRow): CompsV2Candidate | null {
     url: (r.url as string) ?? null,
     description: (r.description as string) ?? null,
     distance_miles: null,
-    source_table: 'all_glamping_properties',
+    source_table: 'all_sage_data',
     geo_lat: lat,
     geo_lng: lon,
     location_detail: locationDetail(r),
@@ -188,7 +188,7 @@ export function tableRowToCandidate(
       return hipcampCampspotRowToCandidate(r, 'hipcamp');
     case 'campspot':
       return hipcampCampspotRowToCandidate(r, 'campspot');
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return glampingRowToCandidate(r);
     case 'all_roverpass_data_new':
       return roverpassRowToCandidate(r);

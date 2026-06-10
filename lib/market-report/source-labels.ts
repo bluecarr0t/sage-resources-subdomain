@@ -4,7 +4,7 @@ import type { CohortPropertyRow, MarketReportSegment } from '@/lib/market-report
 export type MarketReportDataSourceKey = CohortPropertyRow['source'];
 
 const LABEL: Record<MarketReportDataSourceKey, string> = {
-  all_glamping_properties: 'Sage',
+  all_sage_data: 'Sage',
   all_roverpass_data_new: 'RoverPass',
   campspot: 'Campspot',
   hipcamp: 'Hipcamp',
@@ -18,7 +18,7 @@ export function marketReportSourceLabel(internal: string): string {
 /** Human-readable names for fetch-stats / debug table ids. */
 export function marketReportFetchTableDisplayName(table: string): string {
   switch (table) {
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return 'Sage';
     case 'all_roverpass_data_new':
       return 'RoverPass';

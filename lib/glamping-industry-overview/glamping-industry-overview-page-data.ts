@@ -1,5 +1,5 @@
 /**
- * Paginated scans over `hipcamp` and `all_glamping_properties` for Glamping Industry Overview.
+ * Paginated scans over `hipcamp` and `all_sage_data` for Glamping Industry Overview.
  * Reuses RV overview chart fold logic with Hipcamp + Sage row normalization.
  */
 
@@ -480,7 +480,7 @@ type SourceScanResult = {
 async function scanGlampingOverviewTable(
   supabase: SupabaseClient,
   config: {
-    table: 'hipcamp' | 'all_glamping_properties';
+    table: 'hipcamp' | 'all_sage_data';
     select: string;
     maxRows: number;
     mapRow: (row: Record<string, unknown>) => RvOverviewWideRow;
@@ -584,7 +584,7 @@ export async function fetchGlampingIndustryOverviewPageDataUncached(
     scanGlampingOverviewTable(
       supabase,
       {
-        table: 'all_glamping_properties',
+        table: 'all_sage_data',
         select: SAGE_GLAMPING_OVERVIEW_SELECT,
         maxRows: SAGE_GLAMPING_OVERVIEW_MAX_ROWS,
         mapRow: normalizeSageRowToGlampingOverviewWide,

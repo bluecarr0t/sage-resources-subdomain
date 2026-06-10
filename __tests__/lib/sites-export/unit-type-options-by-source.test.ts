@@ -16,7 +16,7 @@ describe('sitesExportUnitTypeOptionValuesForTable', () => {
 
   it('returns glamping catalog list for hipcamp and sage', () => {
     const hip = sitesExportUnitTypeOptionValuesForTable('hipcamp');
-    const sage = sitesExportUnitTypeOptionValuesForTable('all_glamping_properties');
+    const sage = sitesExportUnitTypeOptionValuesForTable('all_sage_data');
     expect(hip.length).toBeGreaterThan(10);
     expect(sage).toEqual(hip);
     expect(hip).toContain('Yurt');

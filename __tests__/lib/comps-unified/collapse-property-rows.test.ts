@@ -8,7 +8,7 @@ import type { UnifiedCompRow } from '@/lib/comps-unified/build-row';
 function baseRow(overrides: Partial<UnifiedCompRow>): UnifiedCompRow {
   return {
     id: 'glamp:1',
-    source: 'all_glamping_properties',
+    source: 'all_sage_data',
     source_row_id: '1',
     property_name: 'Timberline',
     city: 'Elverson',

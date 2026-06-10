@@ -26,7 +26,7 @@ function row(
 }
 
 describe('CompsMapRadiusSpatialIndex', () => {
-  const sources = ['all_glamping_properties', 'reports'];
+  const sources = ['all_sage_data', 'reports'];
 
   it('counts only points within radius', () => {
     const index = CompsMapRadiusSpatialIndex.fromGeoRows([
@@ -38,7 +38,7 @@ describe('CompsMapRadiusSpatialIndex', () => {
     expect(stats.sumUnits).toBe(2);
     expect(stats.sumSites).toBe(5);
     expect(stats.avgAdr).toBe(100);
-    expect(stats.bySource.all_glamping_properties).toBe(1);
+    expect(stats.bySource.all_sage_data).toBe(1);
   });
 
   it('exportRowsInRadius returns matching ids', () => {

@@ -74,8 +74,12 @@ Tracks collection progress to enable resume capability.
 - `collection_type` (TEXT) - 'campsites'
 - `last_processed_facility_id` (TEXT) - Last facility ID processed
 - `last_processed_campsite_id` (TEXT) - Last campsite ID processed
-- `total_facilities_processed` (INTEGER) - Count of facilities processed
-- `total_campsites_processed` (INTEGER) - Count of campsites processed
+- `last_facility_page` (INTEGER) - 1-based page for logging (derived from offset)
+- `last_facility_offset` (INTEGER) - RIDB `/facilities` API offset to resume from
+- `sync_mode` (TEXT) - `full` or `incremental`
+- `last_incremental_sync_at` (TIMESTAMPTZ) - Set when an incremental run completes
+- `total_facilities_processed` (INTEGER) - Running counter (not distinct DB count)
+- `total_campsites_processed` (INTEGER) - Running counter (not distinct DB count)
 - `last_updated` (TIMESTAMP) - Last progress update
 - `status` (TEXT) - 'in_progress', 'completed', 'paused', 'error'
 - `error_message` (TEXT) - Last error if status is 'error'
@@ -96,13 +100,22 @@ Tracks collection progress to enable resume capability.
 ### Step 2: Run Collection Script
 
 ```bash
-npx tsx scripts/collect-ridb-campsites.ts
+# Full sync (resume from saved facility offset)
+npx tsx scripts/collect-ridb-campsites.ts --mode=full
+
+# Incremental — skip campsites whose RIDB LastUpdatedDate matches DB
+npx tsx scripts/collect-ridb-campsites.ts --mode=incremental
+
+# Start over from facility offset 0
+npx tsx scripts/collect-ridb-campsites.ts --reset-progress
 ```
+
+**Production note (2026-05):** `ridb_collection_progress` was added via migration `20260529_create_ridb_collection_progress.sql`. Existing `ridb_campsites` rows (~90k) were seeded into progress as `paused` at offset 0.
 
 ### Collection Workflow
 
-1. **Load Progress** - Checks `ridb_collection_progress` table to resume from last position
-2. **Fetch All Facilities** - Gets all facilities from RIDB API (with pagination)
+1. **Load Progress** - Reads `ridb_collection_progress` (`last_facility_offset`, facility/campsite IDs)
+2. **Fetch Facilities** - Paginates `/facilities` via `RIDBApiClient.getFacilitiesPage` starting at saved offset
 3. **Filter Camping Facilities** - Filters facilities by type to only process camping-related facilities:
    - Facility types: "Campground", "Camping", "RV Campground", "Tent Camping", etc.
    - Skips non-camping facilities (trails, visitor centers, etc.)
@@ -112,15 +125,15 @@ npx tsx scripts/collect-ridb-campsites.ts
    - Media (images/videos)
    - Parent Facility data (if not already fetched)
    - Parent RecArea data (if facility has parent)
-6. **Batch Insert** - Collects campsites in batches (200 at a time) and inserts using batch upsert
-7. **Update Progress** - After each batch, updates `ridb_collection_progress` table
+6. **Batch Insert** - Upserts campsites in batches of **25** (`DEFAULT_BATCH_SIZE`)
+7. **Update Progress** - After each batch and each facility page, updates offset + IDs in `ridb_collection_progress`
 
 ## Features
 
 ### Batching
 
-- **Collection Batch**: Collects 100-500 campsites in memory before inserting
-- **Insert Batch**: Inserts 100-200 campsites per database operation
+- **Insert batch**: 25 campsites per upsert (`DEFAULT_BATCH_SIZE`)
+- **Memory guard**: Forces insert at 100 campsites (`DEFAULT_COLLECTION_BATCH_SIZE`)
 - **Memory Management**: Clears batches after successful insert to manage memory
 
 ### Progress Tracking
@@ -134,10 +147,15 @@ npx tsx scripts/collect-ridb-campsites.ts
 
 ### Resume Capability
 
-- On script start, checks progress table
-- If progress exists and status is 'in_progress' or 'error', resumes from last position
-- Skips all facilities/campsites already processed
-- Continues from next unprocessed item
+- Persists `last_facility_offset` (RIDB API offset) so restarts do not re-fetch facility pages from 0
+- Within a facility, skips campsites until `last_processed_campsite_id` when resuming mid-facility
+- Use `--reset-progress` to clear offset and IDs
+
+### Incremental sync
+
+- `--mode=incremental` compares each campsite's RIDB `LastUpdatedDate` to `ridb_campsites.last_updated_date`
+- Unchanged campsites skip enrich + upsert (fewer API calls)
+- Weekly GitHub Action: `.github/workflows/weekly-ridb-sync.yml` (requires `RIDB_API_KEY`, `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_SUPABASE_URL` secrets)
 
 ### Error Handling
 
@@ -289,9 +307,13 @@ Monitor collection progress:
 ## Files
 
 - `scripts/create-ridb-campsites-table.sql` - Database schema
+- `scripts/migrations/20260529_create_ridb_collection_progress.sql` - Progress table + seed
 - `scripts/collect-ridb-campsites.ts` - Main collection script
+- `lib/ridb-api.ts` - RIDB API client (`unwrapRidbRecord`, `getFacilitiesPage`)
+- `lib/ridb-collect.ts` - Enrich/transform helpers
 - `lib/types/ridb.ts` - TypeScript type definitions
-- `lib/ridb-api.ts` - RIDB API client utility
+- `queries/ridb_pipeline_health.sql` - Operator health queries
+- `scripts/verify-ridb-setup.ts` - Pre-flight checks
 
 ## Success Criteria
 

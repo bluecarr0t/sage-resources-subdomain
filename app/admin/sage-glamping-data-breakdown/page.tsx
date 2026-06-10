@@ -10,7 +10,7 @@ import { adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 export const metadata: Metadata = {
   title: 'Sage Glamping Data Breakdown - Sage Admin',
-  description: 'View all columns from the all_glamping_properties table',
+  description: 'View all columns from the all_sage_data table',
   robots: {
     index: false,
     follow: false,

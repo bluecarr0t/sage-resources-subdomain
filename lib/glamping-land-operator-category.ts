@@ -1,5 +1,5 @@
 /**
- * Land tenure / operator class for `all_glamping_properties.land_operator_category`.
+ * Land tenure / operator class for `all_sage_data.land_operator_category`.
  * Null = unset (treated like private commercial for public map + private comps cohorts).
  */
 

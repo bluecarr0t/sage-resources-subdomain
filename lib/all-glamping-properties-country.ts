@@ -1,5 +1,5 @@
 /**
- * Canonical `country` value for US rows in `public.all_glamping_properties`.
+ * Canonical `country` value for US rows in `public.all_sage_data`.
  * Do not store "USA" — use "United States" (see `.cursor/rules/all-glamping-properties-country.mdc`).
  */
 export const ALL_GLAMPING_US_COUNTRY_CANONICAL = 'United States' as const;

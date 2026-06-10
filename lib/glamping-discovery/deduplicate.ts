@@ -1,12 +1,12 @@
 /**
- * Deduplicate extracted properties against all_glamping_properties
+ * Deduplicate extracted properties against all_sage_data
  * Adapted from process-afar-article-text.ts
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ExtractedProperty } from './extract-properties';
 
-const TABLE_NAME = 'all_glamping_properties';
+const TABLE_NAME = 'all_sage_data';
 
 // Normalize property name for comparison
 export function normalizePropertyName(name: string): string {

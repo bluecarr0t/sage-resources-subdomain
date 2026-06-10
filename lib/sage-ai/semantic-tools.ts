@@ -1,5 +1,5 @@
 /**
- * Sage AI — semantic search over all_glamping_properties.
+ * Sage AI — semantic search over all_sage_data.
  *
  * Backed by the property_embeddings table and the semantic_search_properties_v1
  * RPC (see scripts/migrations/sage-ai-property-embeddings.sql).

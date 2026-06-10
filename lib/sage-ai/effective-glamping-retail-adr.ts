@@ -1,8 +1,11 @@
+import { parseSeasonRateNumeric } from '@/lib/glamping-seasonal-rate';
+
 /**
- * Seasonal rate columns on `all_glamping_properties` — same set as
+ * Seasonal rate columns on `all_sage_data` — same set as
  * `calc_avg_retail_daily_rate` / `sync_season_rates_from_latest_year` in Postgres.
  * When any are present, their average is the authoritative “retail ADR” for that
  * line; `rate_avg_retail_daily_rate` can be stale or wrong vs seasons.
+ * Literal `closed` is excluded from averages.
  */
 export const GLAMPING_SEASONAL_RATE_COLUMN_KEYS = [
   'rate_winter_weekday',
@@ -23,13 +26,8 @@ export const GLAMPING_SEASONAL_RATE_COLUMN_KEYS = [
 export function effectiveGlampingRetailAdrFromRow(row: Record<string, unknown>): number | null {
   const seasonal: number[] = [];
   for (const k of GLAMPING_SEASONAL_RATE_COLUMN_KEYS) {
-    const v = row[k];
-    if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
-      seasonal.push(v);
-    } else if (typeof v === 'string' && v.trim() !== '') {
-      const n = Number(v);
-      if (Number.isFinite(n) && n > 0) seasonal.push(n);
-    }
+    const n = parseSeasonRateNumeric(row[k]);
+    if (n != null && n > 0) seasonal.push(n);
   }
   if (seasonal.length > 0) {
     const s = seasonal.reduce((a, b) => a + b, 0) / seasonal.length;

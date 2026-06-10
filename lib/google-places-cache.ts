@@ -72,7 +72,7 @@ async function getPlaceIdFromDatabase(
     const supabase = createServerClient();
     
     let query = supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('google_place_id')
       .eq('property_name', propertyName.trim());
     

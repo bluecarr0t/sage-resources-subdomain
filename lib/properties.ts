@@ -26,7 +26,7 @@ export async function getUniquePropertyNames(): Promise<string[]> {
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('property_name');
 
     if (error) {
@@ -91,7 +91,7 @@ export async function getMaxPropertyUpdatedAt(): Promise<string | null> {
   try {
     const supabase = createServerClient();
     const { data, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('updated_at')
       .eq('research_status', PUBLISHED_RESEARCH_STATUS)
       .not('updated_at', 'is', null)
@@ -114,7 +114,7 @@ export async function getPropertiesByName(propertyName: string): Promise<SagePro
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('property_name', propertyName.trim());
 
@@ -153,7 +153,7 @@ export async function getPropertyNameToSlugMap(): Promise<Map<string, string>> {
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('property_name, slug')
       .not('property_name', 'is', null)
       .not('slug', 'is', null)
@@ -228,7 +228,7 @@ export async function getNearbyProperties(
       // This prevents JSON parsing errors with very large responses
       // Exclude closed properties
       const { data: properties, error } = await supabase
-        .from('all_glamping_properties')
+        .from('all_sage_data')
         .select('slug, property_name, lat, lon, city, state, country, unit_type, rate_category, url, phone_number')
         .not('lat', 'is', null)
         .not('lon', 'is', null)

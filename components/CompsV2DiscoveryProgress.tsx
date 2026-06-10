@@ -138,7 +138,7 @@ async function sleepUpTo(
 
 const MARKET_COUNT_KEYS = [
   'past_reports',
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'all_roverpass_data_new',
   'campspot',

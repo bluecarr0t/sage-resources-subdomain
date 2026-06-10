@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { computeAnchorPointInsights, type ComputeInsightsParams } from './index';
+import { areaFilterCacheKeyPart } from './area-filter';
 import { CACHE_TTL_SECONDS } from './constants';
 
 function bandsKeyFromParams(params: ComputeInsightsParams): string {
@@ -9,7 +10,7 @@ function bandsKeyFromParams(params: ComputeInsightsParams): string {
 }
 
 function buildUnstableCacheKeyParts(params: ComputeInsightsParams): string[] {
-  const { stateFilter, anchorType, anchorId, anchorSlug, propertyTypeFilter = 'glamping' } = params;
+  const { stateFilter, anchorType, anchorId, anchorSlug, propertyTypeFilter = 'glamping', areaFilter } = params;
   return [
     'anchor-point-insights-compute',
     anchorType,
@@ -17,6 +18,7 @@ function buildUnstableCacheKeyParts(params: ComputeInsightsParams): string[] {
     anchorId != null ? `id:${anchorId}` : anchorSlug ? `slug:${anchorSlug}` : 'all',
     bandsKeyFromParams(params),
     propertyTypeFilter,
+    areaFilterCacheKeyPart(areaFilter),
   ];
 }
 

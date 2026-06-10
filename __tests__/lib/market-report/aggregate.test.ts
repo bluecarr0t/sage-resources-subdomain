@@ -30,7 +30,7 @@ describe('market-report normalize helpers', () => {
 
 function row(over: Partial<CohortPropertyRow> & Pick<CohortPropertyRow, 'property_name'>): CohortPropertyRow {
   return {
-    source: 'all_glamping_properties',
+    source: 'all_sage_data',
     sourceId: '1',
     geo_lat: 35.5,
     geo_lng: -97.3,
@@ -328,7 +328,7 @@ describe('buildMarketReportSections', () => {
       row({ property_name: 'a' }),
       row({ property_name: 'b', source: 'campspot', raw: null }),
     ]);
-    const sage = sections.marketSummary.sourceCounts.find((s) => s.source === 'all_glamping_properties');
+    const sage = sections.marketSummary.sourceCounts.find((s) => s.source === 'all_sage_data');
     const camp = sections.marketSummary.sourceCounts.find((s) => s.source === 'campspot');
     expect(sage?.sourceLabel).toBe('Sage');
     expect(camp?.sourceLabel).toBe('Campspot');
@@ -342,7 +342,7 @@ describe('buildMarketReportSections', () => {
     ]);
     const bd = sections.marketSummary.sourceBreakdown;
     expect(bd).toHaveLength(2);
-    const sage = bd.find((r) => r.source === 'all_glamping_properties');
+    const sage = bd.find((r) => r.source === 'all_sage_data');
     const rp = bd.find((r) => r.source === 'all_roverpass_data_new');
     expect(sage?.inventoryRowCount).toBe(1);
     expect(sage?.distinctListingCount).toBe(1);

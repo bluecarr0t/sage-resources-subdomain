@@ -57,6 +57,18 @@ describe('normalizeGlampingUnitTypeForStorage', () => {
     expect(normalizeGlampingUnitTypeForStorage('Geodesic Domes')).toBe('Dome');
     expect(normalizeGlampingUnitTypeForStorage('geodome')).toBe('Dome');
   });
+
+  it('maps bubble dome marketing labels to Bubble Tent', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Bubble Dome')).toBe('Bubble Tent');
+    expect(normalizeGlampingUnitTypeForStorage('bubble domes')).toBe('Bubble Tent');
+  });
+
+  it('maps hobbit home, cave, and glamping tent to canonical labels', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Hobbit Home')).toBe('Hobbit House');
+    expect(normalizeGlampingUnitTypeForStorage('cave')).toBe('Cave House');
+    expect(normalizeGlampingUnitTypeForStorage('Cave Room')).toBe('Cave Room');
+    expect(normalizeGlampingUnitTypeForStorage('glamping tent')).toBe('Canvas Tent');
+  });
 });
 
 describe('normalizeGlampingUnitTypeForDisplay', () => {

@@ -90,7 +90,7 @@ function sourceHex(source: string): string {
   switch (source) {
     case 'reports':
       return '#475569';
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return '#10b981';
     case 'hipcamp':
       return '#f97316';
@@ -797,7 +797,7 @@ function CompsMapInner({
   const legend = useMemo(() => {
     return [
       'reports',
-      'all_glamping_properties',
+      'all_sage_data',
       'hipcamp',
       'campspot',
       'all_roverpass_data_new',

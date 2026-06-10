@@ -69,6 +69,56 @@ export async function GET(
   });
 }
 
+const MAX_TITLE_LENGTH = 200;
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const authResult = await requireAdminAuth();
+  if (!authResult.ok) {
+    return authResult.response;
+  }
+
+  const { id } = await params;
+  let body: { title?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const title = typeof body.title === 'string' ? body.title.trim() : '';
+  if (!title) {
+    return NextResponse.json({ error: 'title is required' }, { status: 400 });
+  }
+  if (title.length > MAX_TITLE_LENGTH) {
+    return NextResponse.json(
+      { error: `title must be at most ${MAX_TITLE_LENGTH} characters` },
+      { status: 400 }
+    );
+  }
+
+  const { data, error } = await authResult.supabase
+    .from('sage_ai_sessions')
+    .update({ title, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('user_id', authResult.session.user.id)
+    .select('id, title, created_at, updated_at')
+    .maybeSingle();
+
+  if (error) {
+    console.error('[sage-ai/sessions] PATCH error:', error);
+    return NextResponse.json({ error: 'Failed to update session' }, { status: 500 });
+  }
+
+  if (!data) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
+  return NextResponse.json({ session: data });
+}
+
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

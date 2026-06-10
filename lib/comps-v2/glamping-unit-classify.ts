@@ -2,7 +2,7 @@ import type { CompsV2Candidate } from '@/lib/comps-v2/types';
 
 export type UnitExperienceBucket = 'glamping' | 'rv' | 'tent' | 'campground' | 'vacation' | 'unknown';
 
-const GLAMPING_SOURCES = new Set(['all_glamping_properties', 'hipcamp']);
+const GLAMPING_SOURCES = new Set(['all_sage_data', 'hipcamp']);
 
 /** Strong RV / trailer park positioning in the listing name (exclude from glamping discovery). */
 export function isRvHeavyPropertyName(propertyName: string): boolean {
@@ -75,7 +75,7 @@ export function rowPassesGlampingUnitGate(c: CompsV2Candidate): boolean {
   if (b === 'rv' || b === 'tent' || b === 'campground' || b === 'vacation') return false;
 
   if (b === 'unknown') {
-    if (c.source_table === 'all_glamping_properties') return true;
+    if (c.source_table === 'all_sage_data') return true;
     if (c.source_table === 'hipcamp') {
       return (
         /\b(glamp|yurt|cabin|safari|canvas|dome|tree\s*house|treehouse|tiny|pod|retreat|eco|resort|lodge|ranch|outdoor|hideaway)\b/i.test(

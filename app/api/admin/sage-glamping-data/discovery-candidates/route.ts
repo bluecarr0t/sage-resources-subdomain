@@ -123,7 +123,7 @@ export const POST = withAdminAuth(async (request) => {
         site_name: null,
       };
 
-      const { error: insertError } = await supabase.from('all_glamping_properties').insert(row);
+      const { error: insertError } = await supabase.from('all_sage_data').insert(row);
       if (insertError) {
         console.error('[discovery-candidates] Insert error:', insertError);
         return NextResponse.json({ success: false, error: insertError.message }, { status: 500 });

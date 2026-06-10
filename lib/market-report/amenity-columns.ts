@@ -1,5 +1,5 @@
 /**
- * `property_*` amenity columns on `all_glamping_properties` used for Market Report amenity share.
+ * `property_*` amenity columns on `all_sage_data` used for Market Report amenity share.
  * Keep in sync with {@link SageProperty} in lib/types/sage.ts.
  */
 export const GLAMPING_PROPERTY_AMENITY_COLUMNS = [

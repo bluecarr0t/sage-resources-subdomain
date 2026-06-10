@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     
     // Get the property
     const { data: properties, error: fetchError } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('id, property_name, google_place_id, google_photos')
       .ilike('property_name', propertyName)
       .limit(1);
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     
     // Update the database
     const { error: updateError } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .update({
         google_photos: freshPhotos,
         google_rating: placeData.rating,

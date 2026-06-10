@@ -19,7 +19,7 @@ WITH cohort AS (
     lower(btrim(coalesce(g.property_sauna, ''))) AS property_sauna,
     lower(btrim(coalesce(g.unit_hot_tub_or_sauna, ''))) AS unit_hot_tub_or_sauna,
     g.rate_avg_retail_daily_rate
-  FROM all_glamping_properties g
+  FROM all_sage_data g
   WHERE g.is_glamping_property = 'Yes'
     AND g.research_status = 'published'
     AND (g.land_operator_category IS NULL OR g.land_operator_category = 'private_commercial')

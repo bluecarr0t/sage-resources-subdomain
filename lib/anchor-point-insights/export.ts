@@ -5,6 +5,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AnchorPointAnchorType } from './anchor-type';
 import type { PropertyWithProximity } from './types';
 import { fetchAnchors } from './fetch-anchors';
 import { fetchAndNormalizeProperties } from './fetch-properties';
@@ -16,14 +17,19 @@ import {
   applyAnchorFilter,
 } from './aggregate';
 import { filterByPropertyType, type PropertyTypeFilter } from './property-type-filter';
+import {
+  filterPropertiesByArea,
+  type ProximityAreaFilter,
+} from './area-filter';
 
 export interface ExportAnchorPointInsightsParams {
   stateFilter: string | null;
-  anchorType: 'ski' | 'national-parks';
+  anchorType: AnchorPointAnchorType;
   anchorId: number | null;
   anchorSlug: string | null;
   propertyTypeFilter?: PropertyTypeFilter;
   distanceBandThresholds?: number[] | null;
+  areaFilter?: ProximityAreaFilter | null;
   page?: number;
   limit?: number;
 }
@@ -51,13 +57,12 @@ export async function exportAnchorPointInsightsRaw(
     anchorSlug,
     propertyTypeFilter = 'glamping',
     distanceBandThresholds,
+    areaFilter = null,
     page = DEFAULT_PAGE,
     limit = Math.min(DEFAULT_LIMIT, MAX_LIMIT),
   } = params;
 
-  const isNationalParks = anchorType === 'national-parks';
-
-  const anchors = await fetchAnchors(supabase, isNationalParks);
+  const anchors = await fetchAnchors(supabase, anchorType);
   if (anchors.length === 0) {
     return { rows: [], total_count: 0, has_more: false, page, limit };
   }
@@ -66,7 +71,10 @@ export async function exportAnchorPointInsightsRaw(
   const hipcampAggregated = aggregateHipcampByPropertyMaxRate(normalized);
   const filtered = filterByPropertyType(hipcampAggregated, propertyTypeFilter);
   const dedupedCoords = deduplicateByCoords(filtered);
-  const deduped = deduplicateByNameAndState(dedupedCoords);
+  let deduped = deduplicateByNameAndState(dedupedCoords);
+  if (areaFilter) {
+    deduped = filterPropertiesByArea(deduped, areaFilter);
+  }
   const withProximity = computeProximity(deduped, anchors, distanceBandThresholds);
 
   const { proximityForAggregation } = applyAnchorFilter(
@@ -74,7 +82,7 @@ export async function exportAnchorPointInsightsRaw(
     anchors,
     anchorId,
     anchorSlug,
-    isNationalParks
+    anchorType
   );
 
   // When custom bands are used, filter to within max threshold (matches main insights pipeline)

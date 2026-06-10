@@ -236,7 +236,7 @@ export default function AdminColumnsView() {
     const fetchColumns = async () => {
       try {
         const { data, error } = await supabase
-          .from('all_glamping_properties')
+          .from('all_sage_data')
           .select('*')
           .limit(1);
 

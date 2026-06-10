@@ -24,7 +24,7 @@ const mockImagesSelectChain = jest.fn();
 jest.mock('@/lib/supabase', () => ({
   createServerClient: jest.fn(() => ({
     from: jest.fn((table: string) => {
-      if (table === 'all_glamping_properties') {
+      if (table === 'all_sage_data') {
         return {
           select: () => ({
             eq: () => ({

@@ -3,7 +3,7 @@ import type { ComparableProperty } from '@/lib/ai-report-builder/types';
 import { rowPassesGlampingUnitGate } from '@/lib/comps-v2/glamping-unit-classify';
 import type { CompsV2Candidate } from '@/lib/comps-v2/types';
 
-const GLAMP_SIDE = new Set(['all_glamping_properties', 'hipcamp']);
+const GLAMP_SIDE = new Set(['all_sage_data', 'hipcamp']);
 const RV_SIDE = new Set(['all_roverpass_data_new', 'campspot']);
 
 function textBlob(c: ComparableProperty, propertyType: string | null): string {

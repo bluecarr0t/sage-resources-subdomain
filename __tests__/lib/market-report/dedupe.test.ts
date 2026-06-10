@@ -3,7 +3,7 @@ import type { CohortPropertyRow } from '@/lib/market-report/types';
 
 function makeRow(overrides: Partial<CohortPropertyRow> = {}): CohortPropertyRow {
   return {
-    source: 'all_glamping_properties',
+    source: 'all_sage_data',
     sourceId: '1',
     geo_lat: 42.5,
     geo_lng: -88.4,
@@ -107,12 +107,12 @@ describe('dedupeCohortRows', () => {
 
   it('does not merge rows from different sources', () => {
     const rows = [
-      makeRow({ source: 'all_glamping_properties', property_name: 'Yogi Bear', unit_type: 'Cabin' }),
+      makeRow({ source: 'all_sage_data', property_name: 'Yogi Bear', unit_type: 'Cabin' }),
       makeRow({ source: 'campspot', property_name: 'Yogi Bear', unit_type: 'Cabin' }),
     ];
     const { rows: out, stats } = dedupeCohortRows(rows);
     expect(out).toHaveLength(2);
-    expect(stats.bySource['all_glamping_properties']!.collapsed).toBe(1);
+    expect(stats.bySource['all_sage_data']!.collapsed).toBe(1);
     expect(stats.bySource['campspot']!.collapsed).toBe(1);
   });
 
@@ -225,7 +225,7 @@ describe('dedupeCohortRowsPreservingSage', () => {
       makeRow({ property_name: 'Camp Fimfo', unit_type: 'Tiny Home', rate_avg: 250, distance_miles: 11 }),
     ];
     const { rows } = dedupeCohortRowsPreservingSage([...sageDupes, ...hipDupes]);
-    expect(rows.filter((r) => r.source === 'all_glamping_properties')).toHaveLength(2);
+    expect(rows.filter((r) => r.source === 'all_sage_data')).toHaveLength(2);
     const hipOut = rows.filter((r) => r.source === 'hipcamp');
     expect(hipOut).toHaveLength(1);
     expect(hipOut[0]!.rate_avg).toBe(200);

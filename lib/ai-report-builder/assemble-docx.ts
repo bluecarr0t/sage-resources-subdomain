@@ -179,7 +179,7 @@ function buildComparablesAnalysis(input: EnrichedInput): string {
     }
 
     const sourceMap: Record<string, string> = {
-      all_glamping_properties: 'Glamping DB',
+      all_sage_data: 'Glamping DB',
       hipcamp: 'Hipcamp',
       all_roverpass_data_new: 'RoverPass',
       campspot: 'Campspot',

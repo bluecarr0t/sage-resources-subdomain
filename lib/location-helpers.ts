@@ -142,7 +142,7 @@ export async function getCityCoordinates(
     const supabase = createServerClient();
     
     const { data, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('lat, lon')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
@@ -212,7 +212,7 @@ export async function getTopStates(count: number = 50): Promise<Array<{ state: s
     
     // Get all properties with states
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('property_name, state')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
@@ -295,7 +295,7 @@ export async function getTopCities(count: number = 100): Promise<Array<{
     
     // Get all properties with cities and coordinates
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('property_name, city, state, lat, lon')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')

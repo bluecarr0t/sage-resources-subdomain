@@ -1,5 +1,5 @@
 /**
- * Map Hipcamp + Sage (`all_glamping_properties`) rows into the RV overview wide shape
+ * Map Hipcamp + Sage (`all_sage_data`) rows into the RV overview wide shape
  * so existing chart fold functions apply unchanged.
  */
 

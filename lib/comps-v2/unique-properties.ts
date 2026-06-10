@@ -15,7 +15,7 @@ export function normalizePropertyGroupKey(c: CompsV2Candidate): string {
 }
 
 const SOURCE_PRIORITY: Record<string, number> = {
-  all_glamping_properties: 0,
+  all_sage_data: 0,
   hipcamp: 1,
   past_reports: 2,
   tavily_gap_fill: 3,

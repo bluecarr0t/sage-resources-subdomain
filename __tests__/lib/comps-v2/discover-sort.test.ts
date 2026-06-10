@@ -67,7 +67,7 @@ describe('compareCompsV2Candidates merge order', () => {
   });
 
   it('treats firecrawl_gap_fill same as tavily for source group (after market, with web)', () => {
-    const glamp = baseRow('all_glamping_properties', { stable_id: 'g' });
+    const glamp = baseRow('all_sage_data', { stable_id: 'g' });
     const fc = baseRow('firecrawl_gap_fill', { stable_id: 'fc' });
     expect(compareCompsV2Candidates(glamp, fc)).toBeLessThan(0);
   });

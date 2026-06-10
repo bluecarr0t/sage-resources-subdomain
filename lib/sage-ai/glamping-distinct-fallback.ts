@@ -1,7 +1,7 @@
 /**
  * When `distinct_column_values` RPC is still the narrow allowlist (base
  * `sage-ai-aggregation-rpc.sql`), amenity column distincts fail. This scans
- * `all_glamping_properties` in pages and counts in memory — same behavior as
+ * `all_sage_data` in pages and counts in memory — same behavior as
  * the extended RPC (non-null values only, ordered by frequency).
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -33,7 +33,7 @@ export async function scanGlampingColumnDistinctFrequencies(
   let rowsScanned = 0;
   for (let offset = 0; offset < MAX_ROWS_TO_SCAN; offset += PAGE) {
     const { data, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select(column)
       .range(offset, offset + PAGE - 1);
     if (error) throw new Error(error.message);

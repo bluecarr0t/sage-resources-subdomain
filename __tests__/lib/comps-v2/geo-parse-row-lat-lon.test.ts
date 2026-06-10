@@ -20,11 +20,11 @@ describe('parseRowLatLon', () => {
     expect(parseRowLatLon({ lat: '', lon: '' })).toBeNull();
   });
 
-  it('all_glamping_properties: uses lat/lon only (ignores lat_num/lon_num)', () => {
+  it('all_sage_data: uses lat/lon only (ignores lat_num/lon_num)', () => {
     expect(
       parseRowLatLon(
         { lat_num: 0, lon_num: 0, lat: 41.5, lon: -122.25 },
-        { columns: 'all_glamping_properties' }
+        { columns: 'all_sage_data' }
       )
     ).toEqual({ lat: 41.5, lon: -122.25 });
   });

@@ -1,7 +1,7 @@
 /**
  * Collapse rate-tier / duplicate rows to one canonical row per (source, property, unit_type).
  *
- * Rationale: tables like `all_glamping_properties` average 1.62 rows per property — many
+ * Rationale: tables like `all_sage_data` average 1.62 rows per property — many
  * "extra" rows are different rate tiers of the same unit type (e.g. 7 Tiny Home rows
  * for Camp Fimfo at $162–$499) or near-duplicates (43 vs 44 total_sites). Counting them
  * as separate properties overstates competitor density and confuses ADR rollups.
@@ -21,7 +21,7 @@
  * Keeps the existing `CohortPropertyRow` shape so downstream aggregation in
  * {@link buildMarketReportSections} is unchanged.
  *
- * **Sage (`all_glamping_properties`):** cohort assembly uses
+ * **Sage (`all_sage_data`):** cohort assembly uses
  * {@link dedupeCohortRowsPreservingSage} instead of this function alone, so every
  * Supabase row is kept (no rate-tier collapse) while other sources still dedupe here.
  */
@@ -227,7 +227,7 @@ export function dedupeCohortRows(rows: CohortPropertyRow[]): DedupeResult {
   };
 }
 
-const SAGE_GLAMPING_SOURCE: CohortPropertyRow['source'] = 'all_glamping_properties';
+const SAGE_GLAMPING_SOURCE: CohortPropertyRow['source'] = 'all_sage_data';
 
 function sageRowAsDedupedShape(r: CohortPropertyRow): DedupedCohortRow {
   return {
@@ -249,7 +249,7 @@ function distinctPropertyTriples(rows: DedupedCohortRow[]): number {
 }
 
 /**
- * Like {@link dedupeCohortRows}, but **`all_glamping_properties` rows are not merged** —
+ * Like {@link dedupeCohortRows}, but **`all_sage_data` rows are not merged** —
  * every Sage table row is emitted as its own `DedupedCohortRow` (each with
  * `rateTierRows: 1` and `rateLow`/`rateHigh` = that row’s `rate_avg`). All other
  * sources are deduped normally.

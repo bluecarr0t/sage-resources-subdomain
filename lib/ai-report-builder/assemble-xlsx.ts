@@ -216,7 +216,7 @@ const COMPS_HEADERS = [
 
 function sourceLabel(s: string): string {
   switch (s) {
-    case 'all_glamping_properties': return 'Glamping DB';
+    case 'all_sage_data': return 'Glamping DB';
     case 'hipcamp': return 'Hipcamp';
     case 'all_roverpass_data_new': return 'RoverPass';
     case 'campspot': return 'Campspot';

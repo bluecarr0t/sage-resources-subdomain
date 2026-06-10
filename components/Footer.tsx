@@ -1,5 +1,6 @@
 import Link from "next/link";
 import FooterLocationMap from "@/components/FooterLocationMap";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { defaultLocale } from "@/i18n";
 import { createLocaleLinks } from "@/lib/locale-links";
 import { buildPodcastUrl } from "@/lib/outdoor-hospitality-podcast";
@@ -103,6 +104,7 @@ export default function Footer({ locale = defaultLocale }: FooterProps) {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-800">
+          <NewsletterSignup source="footer" className="mb-8" />
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-gray-400">
             <p>&copy; {new Date().getFullYear()} Sage Outdoor Advisory. All rights reserved.</p>
             <div className="flex gap-6">

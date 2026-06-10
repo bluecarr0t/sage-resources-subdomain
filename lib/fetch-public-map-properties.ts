@@ -14,7 +14,7 @@ export async function fetchPublicMapPropertyRows(): Promise<SageProperty[]> {
   const supabase = createServerClient();
 
   let query = applyPublicMapCohortFilters(
-    supabase.from('all_glamping_properties').select(PUBLIC_MAP_PROPERTY_FIELDS)
+    supabase.from('all_sage_data').select(PUBLIC_MAP_PROPERTY_FIELDS)
   ).limit(5000);
 
   const allData: SageProperty[] = [];

@@ -1,5 +1,5 @@
 /**
- * Integration-style tests: discovery article pipeline → all_glamping_properties or candidates.
+ * Integration-style tests: discovery article pipeline → all_sage_data or candidates.
  * Mocks OpenAI + Supabase (no network). Uses fake timers to skip enrichment delay.
  *
  * @jest-environment node
@@ -9,7 +9,7 @@ import type { OpenAI } from 'openai';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { processDiscoveryArticle } from '@/lib/glamping-discovery/process-discovery-article';
 
-const ALL_GLAMPING = 'all_glamping_properties';
+const ALL_GLAMPING = 'all_sage_data';
 const CANDIDATES = 'glamping_discovery_candidates';
 
 type InsertCall = { table: string; rows: unknown[] };
@@ -72,7 +72,7 @@ describe('processDiscoveryArticle', () => {
     jest.useRealTimers();
   });
 
-  it('inserts a new North American glamping resort into all_glamping_properties with discovery_source', async () => {
+  it('inserts a new North American glamping resort into all_sage_data with discovery_source', async () => {
     const { supabase, insertCalls } = createRecordingSupabase();
     const openai = createSequentialOpenAI([
       JSON.stringify({
@@ -127,7 +127,7 @@ describe('processDiscoveryArticle', () => {
     expect(dbPropertyNames.has('willow creek glamping resort 2026')).toBe(true);
   });
 
-  it('does not insert into all_glamping_properties on dry run but still returns queued rows', async () => {
+  it('does not insert into all_sage_data on dry run but still returns queued rows', async () => {
     const { supabase, insertCalls } = createRecordingSupabase();
     const openai = createSequentialOpenAI([
       JSON.stringify({

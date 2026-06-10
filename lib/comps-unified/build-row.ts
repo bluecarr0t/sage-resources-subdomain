@@ -8,14 +8,14 @@
 
 export const UNIFIED_SOURCES = [
   'reports',
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'campspot',
   'all_roverpass_data_new',
 ] as const;
 
 /** Matview `source` value for the Sage glamping database. */
-export const SAGE_UNIFIED_SOURCE = 'all_glamping_properties' as const;
+export const SAGE_UNIFIED_SOURCE = 'all_sage_data' as const;
 
 export function isSageOnlyUnifiedSourceFilter(sources: string[]): boolean {
   return sources.length === 1 && sources[0] === SAGE_UNIFIED_SOURCE;
@@ -47,7 +47,7 @@ export function unifiedSourceLabel(source: string): string {
   switch (source) {
     case 'reports':
       return 'Past Reports';
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return 'Sage';
     case 'hipcamp':
       return 'Hipcamp';
@@ -65,7 +65,7 @@ export function unifiedSourceBadgeClass(source: string): string {
   switch (source) {
     case 'reports':
       return 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200';
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200';
     case 'hipcamp':
       return 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200';
@@ -116,7 +116,7 @@ export interface UnifiedCompRow {
   website_url: string | null;
   /** Dedupe key for distinct property counts (address / geocode–based; see matview). */
   address_key: string;
-  /** Sage `all_glamping_properties.property_id` when present (list/map dedupe by property). */
+  /** Sage `all_sage_data.property_id` when present (list/map dedupe by property). */
   sage_property_id?: string | null;
   created_at: string;
   /** Site/unit matview rows merged into this property row (list view only). */

@@ -92,7 +92,7 @@ export default function AdminGlampingServiceTierBreakdown() {
           Property-level experience classification from amenities and max site ADR. Distinct from{' '}
           <span className="font-mono text-[11px]">rate_category</span> (price buckets) and comps-v2
           quality tiers. Stored on{' '}
-          <span className="font-mono text-[11px]">all_glamping_properties</span>; editable in{' '}
+          <span className="font-mono text-[11px]">all_sage_data</span>; editable in{' '}
           <Link
             href="/admin/sage-data"
             className="text-sage-600 dark:text-sage-400 hover:underline"

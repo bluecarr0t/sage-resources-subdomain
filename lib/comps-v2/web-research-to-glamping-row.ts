@@ -1,5 +1,5 @@
 /**
- * Map comps v2 web gap-fill candidates into rows compatible with `all_glamping_properties`
+ * Map comps v2 web gap-fill candidates into rows compatible with `all_sage_data`
  * for `comps_v2_web_research_finds` inserts (plus run_id / comps_stable_id / pipeline_source).
  */
 

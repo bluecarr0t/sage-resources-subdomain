@@ -44,7 +44,7 @@ async function fetchGloballySharedSagePropertyIds(
   if (unique.length === 0) return new Set();
 
   const { data, error } = await supabase
-    .from('all_glamping_properties')
+    .from('all_sage_data')
     .select('property_id')
     .in('property_id', unique);
 
@@ -86,7 +86,7 @@ export async function attachSagePropertyIds<T extends { id: string; source: stri
   }
 
   const { data, error } = await supabase
-    .from('all_glamping_properties')
+    .from('all_sage_data')
     .select('id, property_id')
     .in('id', sageNumericIds);
 

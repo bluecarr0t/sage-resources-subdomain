@@ -34,7 +34,7 @@ function baseCandidate(over: Partial<CompsV2Candidate>): CompsV2Candidate {
     url: 'https://example.com/park',
     description: 'A nice place.',
     distance_miles: 12,
-    source_table: 'all_glamping_properties',
+    source_table: 'all_sage_data',
     ...over,
   } as CompsV2Candidate;
 }

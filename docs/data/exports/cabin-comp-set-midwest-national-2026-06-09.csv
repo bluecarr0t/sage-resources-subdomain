@@ -1,0 +1,43 @@
+comp_group,property_name,state,city,service_tier,unit_mix,hard_walled_units,total_units,hard_walled_avg_adr,summer_weekend_rate,winter_weekday_rate,fnb_on_site,sauna,gym,retail_store,pool_or_hot_tub,url
+Midwest,Blue Bell Lodge,SD,Custer,luxury,Cabin x10,10,10,512,512,,Yes,,,Yes,,https://www.custerresorts.com/lodging/cabins/blue-bell/commissioners
+Midwest,Sundance Ranch KC,MO,Excelsior Springs,midscale,Bell Tent x1; Cabin x4,4,5,498,395,370,No,,,,,https://www.sundancekc.com
+Midwest,The Mohicans Treehouse Resort,OH,Glenmont,midscale,Cabin x4; Treehouse x9,13,13,486,595,424,No,,,,,https://www.themohicans.net
+Midwest,The Inn & Spa at Cedar Falls,OH,Logan,midscale,Cabin x6; Dome x3; Other x12; Yurt x3,12,48,389,445,,,,,,,https://innatcedarfalls.com/
+Midwest,Cuyuna Cove,MN,Crosby,midscale,Cabin x5; Tiny Home x5,10,10,381,415,293,No,Yes,,,,https://www.cuyunacove.com
+Midwest,Kimberly Creek Retreat,NE,Ashland,upscale,Cabin x1; Dome x1; Tiny Home x3,6,8,333,322,297,Yes,,,,Yes,https://www.kimberlycreekretreat.com/
+Midwest,Valley Overlook,OH,Peninsula,midscale,Cabin x5; Safari Tent x16,5,21,297,227,,,,,,,https://www.valleyoverlook.com/
+Midwest,Cedar Pass Lodge,SD,Interior,upscale,Cabin x6; Cottage x1,15,15,269,,,Yes,,,,,https://staybadlands.com/stay/
+Midwest,Postcard Cabins Kettle River,MN,Willow River,midscale,Tiny Home x49,49,49,257,160,118,Yes,,,,,https://www.marriott.com/en-us/hotels/dlhkr-postcard-cabins-kettle-river-outdoor-collection-bonvoy/overview/
+Midwest,Mohican Adventures,OH,Loudonville,midscale,Cabin x36,45,45,246,265,127,No,,,,,https://www.mohicanadventures.com/
+Midwest,The Fields of Michigan,MI,South Haven,midscale,Cabin x1; Safari Tent x1,3,6,242,308,246,,,,,,https://www.thefieldsofmichigan.com/
+Midwest,At Boulders Edge,OH,Rockbridge,midscale,Cabin x3; Tipi x3,4,7,241,194,174,No,,,,,https://www.atbouldersedge.com/
+Midwest,The Woods Luxury Camping,MI,Fennville,midscale,Cabin x19,19,19,230,260,200,,,,,,http://bookthewoods.com/
+Midwest,Highland Meadows Resort,SD,Hot Springs,midscale,Cabin x4; Tipi x2,4,6,225,205,175,,,,,,http://www.highlandmeadowsresort.com/
+Midwest,Postcard Cabins Barber Creek,MI,Grand Junction,midscale,Tiny Home x41,41,41,207,175,135,Yes,,,,,https://www.marriott.com/en-us/hotels/azobc-postcard-cabins-barber-creek-outdoor-collection-bonvoy/overview/
+Midwest,Postcard Cabins Starved Rock,IL,Ottawa,midscale,Tiny Home x58,58,58,206,191,135,Yes,,,,Yes,https://www.marriott.com/en-us/hotels/bmisr-postcard-cabins-starved-rock-outdoor-collection-bonvoy/overview/
+Midwest,Buffalo Ridge Camp Resort,SD,Custer,upscale,Cabin x5; Safari Tent x5; Tiny Home x4; Tipi x5,14,24,149,201,249,Yes,,,,Yes,https://custerhospitality.com/buffalo-ridge-camp-resort/
+National,Castle Hot Springs,AZ,Morristown,luxury,Cabin x30,30,30,1504,1500,1433,,,,,,https://www.castlehotsprings.com
+National,Blackberry Mountain,TN,Walland,luxury,Cabin x3,3,3,1500,1500,1500,Yes,Yes,Yes,No,Yes,https://www.blackberrymountain.com
+National,Ambiente,AZ,Sedona,luxury,Tiny Home x40,40,40,1419,1349,1147,Yes,,,,Yes,https://www.ambientesedona.com/
+National,Lone Mountain Ranch,MT,Big Sky,luxury,Cabin/Lodge x26,26,26,1400,,,Yes,Yes,,,Yes,https://lonemountainranch.com/cabins/aspen/
+National,Goosewing Ranch,WY,Kelly,luxury,Cabin x11; Covered Wagon x7,11,18,1230,1631,533,Yes,,,,,https://goosewingranch.com/
+National,Sonoma Zipline Adventure,CA,Occidental,luxury,Treehouse x6,6,6,1145,1257,1046,,,,,,https://www.sonomacanopytours.com/
+National,The Glamping Collective,NC,Clyde,luxury,Cabin x3; Dome x3,3,6,752,1183,839,,,,,Yes,https://www.theglampingcollective.com/
+National,Glen Oaks Big Sur,CA,Big Sur,luxury,Cabin x2; Tiny Home x10,12,12,714,813,520,Yes,,,,,http://glenoaksbigsur.com/
+National,Skamania Lodge,WA,Stevenson,upscale,Safari Tent x1; Treehouse x6,6,7,695,822,300,Yes,Yes,,,,https://www.skamania.com
+National,Gather Greene,NY,Coxsackie,midscale,Tiny Home x17,17,17,596,,,No,,,,,https://www.gathergreene.com/
+National,Piaule Catskill,NY,Catskill,upscale,Tiny Home x24,24,24,544,615,422,Yes,Yes,,,Yes,https://www.piaule.com/booking
+National,Firefall Ranch,CA,Groveland,midscale,Cabin x55+,385,385,542,675,,,,,,Yes,https://www.firefallranch.com/
+National,El Capitan Canyon,CA,Santa Barbara,luxury,Cabin x13; Safari Tent x1; Yurt x5,13,19,527,330,362,Yes,,,,Yes,https://elcapitancanyon.com/
+National,A Tiny Home Resort,NY,South Cairo,upscale,Tiny Home x15,15,15,508,659,391,Yes,,,,,https://www.atinyhouseresort.com/index.php
+National,Carson Ridge Luxury Cabins,WA,Carson,midscale,Cabin x10,10,10,507,,,No,,,,,https://carsonridgecabins.com/
+National,Alpine Lakes Lodge,WA,Easton,luxury,Cabin x7,7,7,495,495,,,,,,,https://alpinelakeslodge.com/
+National,Eastwind Hotels Windham,NY,Windham,upscale,Cabin x7; Tiny Home x3,10,10,471,,249,Yes,Yes,,,,https://www.eastwindhotels.com/windham
+National,Onera Wimberley,TX,Wimberley,upscale,Treehouse x28,28,28,463,602,361,Yes,,,,Yes,https://stayonera.com/locations/wimberley/
+National,Zion Ponderosa,UT,Orderville,midscale,Tiny Home x10,10,11,456,,519,Yes,,,,Yes,https://www.zionponderosa.com
+National,TreeHouse Point,WA,Fall City,upscale,Treehouse x13,13,13,453,487,434,Yes,No,No,No,No,https://www.treehousepoint.com
+National,Moose Creek Ranch,ID,Victor,midscale,Cabin x10; Safari Tent x5; Airstream x1,10,16,440,489,179,No,,,,,https://www.moosecreekranch.com/
+National,Camp Fimfo,TX,New Braunfels,upscale,Cabin x12; Tiny Home x29,45,45,335,415,167,Yes,,,,,https://campfimfo.com/texas-hill-country
+National,Fireside Resort - Jackson Hole,WY,Wilson,midscale,Tiny Home x25,25,25,344,400,300,No,,,,Yes,https://www.firesidejacksonhole.com/
+National,Postcard Cabins Eastern Catskills,NY,Catskill,midscale,Tiny Home x52,52,52,316,425,197,Yes,,,,,https://www.marriott.com/en-us/hotels/albec-postcard-cabins-eastern-catskills-outdoor-collection-bonvoy/overview/
+National,Postcard Cabins Big Bear,CA,Running Springs,midscale,Cabin x40; Tiny Home x21,82,82,313,390,254,Yes,,,,,https://postcardcabins.com/los-angeles/

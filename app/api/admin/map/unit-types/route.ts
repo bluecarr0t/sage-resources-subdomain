@@ -13,7 +13,7 @@ export const GET = withAdminAuth(async (_request, _auth) => {
   try {
     const supabase = createServerClient();
     const { data, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('unit_type')
       .eq('is_glamping_property', 'Yes')
       .neq('is_open', 'Closed')

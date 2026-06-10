@@ -15,6 +15,10 @@ import {
   compsV2MapMarkerColorForCandidate,
   compsV2SourceTableMarkerColor,
 } from '@/lib/comps-v2/source-marker-color';
+import {
+  infoWindowDisableAutoPanOptions,
+  panMapToFitInfoWindowIfNeeded,
+} from '@/components/map/utils/panInfoWindowIntoView';
 
 const MAP_HEIGHT_PX = 520;
 const DEFAULT_CENTER = { lat: 39.8283, lng: -98.5795 };
@@ -92,7 +96,7 @@ async function geocodeWithMapsJs(
 
 /** Legend order (matches results source filter where possible). Web rows appear even without map pins. */
 const LEGEND_SOURCE_ORDER = [
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'all_roverpass_data_new',
   'campspot',
@@ -325,6 +329,38 @@ export default function CompsV2ResultsMapView({
     closeAllInfo();
   }, [closeAllInfo]);
 
+  const activeInfoLatLng = useMemo(() => {
+    if (showAnchorInfo && searchCenter) return searchCenter;
+    if (infoStableId) {
+      const c = plotted.find((x) => x.stable_id === infoStableId);
+      if (c) return positionFor(c);
+    }
+    return null;
+  }, [showAnchorInfo, searchCenter, infoStableId, plotted, positionFor]);
+
+  useEffect(() => {
+    if (!map || !activeInfoLatLng) return;
+    let imageLayoutTimeout: number | null = null;
+    let idleListener: google.maps.MapsEventListener | null = null;
+    let cancelled = false;
+
+    const runAdjust = () => {
+      if (cancelled) return;
+      void panMapToFitInfoWindowIfNeeded(map, activeInfoLatLng);
+    };
+
+    idleListener = google.maps.event.addListenerOnce(map, 'idle', () => {
+      runAdjust();
+      imageLayoutTimeout = window.setTimeout(runAdjust, 700);
+    });
+
+    return () => {
+      cancelled = true;
+      if (idleListener) google.maps.event.removeListener(idleListener);
+      if (imageLayoutTimeout) clearTimeout(imageLayoutTimeout);
+    };
+  }, [map, activeInfoLatLng]);
+
   useEffect(() => {
     if (!map || !isLoaded) return;
 
@@ -460,7 +496,10 @@ export default function CompsV2ResultsMapView({
               }}
             >
               {showAnchorInfo ? (
-                <InfoWindow onCloseClick={() => setShowAnchorInfo(false)}>
+                <InfoWindow
+                  onCloseClick={() => setShowAnchorInfo(false)}
+                  options={infoWindowDisableAutoPanOptions}
+                >
                   <div className="max-w-[280px] text-gray-900 text-sm leading-snug pr-1">
                     <p className="text-xs font-medium text-gray-500 m-0 mb-1">{t('resultsMapSearchLocationLegend')}</p>
                     <p className="font-semibold m-0 text-gray-900">{anchorTitle}</p>
@@ -482,7 +521,10 @@ export default function CompsV2ResultsMapView({
               }}
             >
               {infoStableId === c.stable_id ? (
-                <InfoWindow onCloseClick={() => setInfoStableId(null)}>
+                <InfoWindow
+                  onCloseClick={() => setInfoStableId(null)}
+                  options={infoWindowDisableAutoPanOptions}
+                >
                   <div className="max-w-[260px] text-gray-900 text-sm leading-snug pr-1">
                     <p className="font-semibold m-0 mb-2">{c.property_name}</p>
                     <dl className="m-0 space-y-1.5">

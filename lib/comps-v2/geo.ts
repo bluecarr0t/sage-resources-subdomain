@@ -53,15 +53,15 @@ export function parseNum(v: unknown): number | null {
 
 export type ParseRowLatLonOptions = {
   /**
-   * `all_glamping_properties` uses `lat` / `lon` column headers only (ignore `lat_num`/`lon_num`
+   * `all_sage_data` uses `lat` / `lon` column headers only (ignore `lat_num`/`lon_num`
    * if those columns are ever added). Hipcamp/Campspot prefer `lat_num`/`lon_num` with text fallback.
    */
-  columns?: 'hipcamp_campspot' | 'all_glamping_properties';
+  columns?: 'hipcamp_campspot' | 'all_sage_data';
 };
 
 /**
  * Parse coordinates from a market row. Default (`hipcamp_campspot`): prefer `lat_num`/`lon_num`,
- * else text `lat`/`lon`. For Sage (`all_glamping_properties`), pass `{ columns: 'all_glamping_properties' }`
+ * else text `lat`/`lon`. For Sage (`all_sage_data`), pass `{ columns: 'all_sage_data' }`
  * to use only `lat`/`lon`.
  */
 export function parseRowLatLon(
@@ -70,11 +70,11 @@ export function parseRowLatLon(
 ): { lat: number; lon: number } | null {
   const mode = options?.columns ?? 'hipcamp_campspot';
   const lat =
-    mode === 'all_glamping_properties'
+    mode === 'all_sage_data'
       ? parseNum(row.lat)
       : parseNum(row.lat_num) ?? parseNum(row.lat);
   const lon =
-    mode === 'all_glamping_properties'
+    mode === 'all_sage_data'
       ? parseNum(row.lon)
       : parseNum(row.lon_num) ?? parseNum(row.lon);
   if (lat == null || lon == null) return null;

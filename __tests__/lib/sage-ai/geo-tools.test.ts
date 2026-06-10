@@ -115,13 +115,13 @@ describe('geocode_property — tiered cascade', () => {
     expect(res.data.source).toBe('db');
     expect(res.data.latitude).toBeCloseTo(30.2672);
     expect(res.data.longitude).toBeCloseTo(-97.7431);
-    expect(calls.filter((c) => c.kind === 'from' && c.table === 'all_glamping_properties')).toHaveLength(0);
+    expect(calls.filter((c) => c.kind === 'from' && c.table === 'all_sage_data')).toHaveLength(0);
   });
 
   it('falls through to DB lat/lon when cache is empty and writes cache', async () => {
     const { supabase, setTableResult } = makeSupabase();
     setTableResult('property_geocode', { data: null, error: null });
-    setTableResult('all_glamping_properties', {
+    setTableResult('all_sage_data', {
       data: {
         id: 42,
         property_name: 'Test Cabin',
@@ -243,7 +243,7 @@ describe('query_properties — near branch', () => {
       ],
       error: null,
     });
-    setTableResult('all_glamping_properties', {
+    setTableResult('all_sage_data', {
       data: [
         {
           id: 7,

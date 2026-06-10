@@ -1,5 +1,5 @@
 /**
- * Enrich extracted properties via OpenAI and insert into all_glamping_properties
+ * Enrich extracted properties via OpenAI and insert into all_sage_data
  */
 
 import type { OpenAI } from 'openai';
@@ -7,7 +7,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ExtractedProperty } from './extract-properties';
 import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
 
-const TABLE_NAME = 'all_glamping_properties';
+const TABLE_NAME = 'all_sage_data';
 const DELAY_MS = 2000;
 
 function slugifyPropertyName(name: string): string {

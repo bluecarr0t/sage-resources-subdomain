@@ -89,7 +89,7 @@ export async function fetchGlampingIndustryCaProvinceMetrics(
   for (;;) {
     let query = applyGlampingOnlyPropertyTypeFilter(
       supabase
-        .from('all_glamping_properties')
+        .from('all_sage_data')
         .select(GLAMPING_MARKET_SNAPSHOT_CA_PROVINCE_SELECT)
         .eq('is_glamping_property', 'Yes')
         .eq('research_status', 'published')

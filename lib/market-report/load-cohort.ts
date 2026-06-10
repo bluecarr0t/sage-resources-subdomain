@@ -77,7 +77,7 @@ export function cohortSiteUnitMetric(
 
 /**
  * Drop properties below the min site/unit threshold (applied after dedupe).
- * For glamping, Sage rows (`all_glamping_properties`) are always exempt.
+ * For glamping, Sage rows (`all_sage_data`) are always exempt.
  * Hipcamp rows are exempt for **national** scope only: after dedupe each row
  * is one unit-type bucket, so a per-property-style minimum would incorrectly
  * drop almost the entire Hipcamp cohort. Local glamping still applies the
@@ -92,7 +92,7 @@ export function applyMinSiteUnitCountFilter(
   if (minCount <= 0) return rows;
   const scope = options?.scope ?? "local";
   return rows.filter((r) => {
-    if (segment === "glamping" && r.source === "all_glamping_properties") {
+    if (segment === "glamping" && r.source === "all_sage_data") {
       return true;
     }
     if (
@@ -344,7 +344,7 @@ function mapGlampingRow(
   if (dist > radiusMiles) return null;
   const raw: Record<string, unknown> = { ...r };
   return {
-    source: "all_glamping_properties",
+    source: "all_sage_data",
     sourceId: r.id != null ? String(r.id) : null,
     geo_lat: lat,
     geo_lng: lon,
@@ -570,7 +570,7 @@ export function filterHipcampMajorityTentSiteProperties(rows: CohortPropertyRow[
 
 const GLAMPING_VEHICLE_MAJORITY_SOURCES = new Set<CohortPropertyRow["source"]>([
   "hipcamp",
-  "all_glamping_properties",
+  "all_sage_data",
 ]);
 
 /**
@@ -579,7 +579,7 @@ const GLAMPING_VEHICLE_MAJORITY_SOURCES = new Set<CohortPropertyRow["source"]>([
  * reports and property tables match structure-first glamping (not drive-in
  * vehicle camping).
  *
- * Applies to Hipcamp and Sage (`all_glamping_properties`) rows; other sources
+ * Applies to Hipcamp and Sage (`all_sage_data`) rows; other sources
  * pass through unchanged.
  *
  * @internal Exported for unit tests.
@@ -778,7 +778,7 @@ async function fetchGlampingCohort(
 
   for (let chunk = 0; chunk < MARKET_REPORT_MAX_ID_CHUNKS; chunk++) {
     let q = supabase
-      .from("all_glamping_properties")
+      .from("all_sage_data")
       .select(GLAMPING_SELECT)
       .eq("is_glamping_property", "Yes")
       .or("is_open.is.null,is_open.eq.Yes")
@@ -996,7 +996,7 @@ async function paginateNationalGlampingScopedRaw(
   let hitRowCap = false;
 
   for (let chunk = 0; chunk < maxChunks; chunk++) {
-    let q: any = supabase.from("all_glamping_properties").select(GLAMPING_SELECT);
+    let q: any = supabase.from("all_sage_data").select(GLAMPING_SELECT);
     q = applyUsScope(q);
     q = q
       .eq("is_glamping_property", "Yes")
@@ -1465,7 +1465,7 @@ export async function loadMarketReportCohort(
     Math.min(100_000, Math.floor(params.minSiteUnitCount ?? 0)),
   );
 
-  // National scope: skip bbox; merge cohort (Sage: every `all_glamping_properties` row;
+  // National scope: skip bbox; merge cohort (Sage: every `all_sage_data` row;
   // Hipcamp deduped), then filters.
   if (scope === "national") {
     if (segment === "glamping") {
@@ -1504,7 +1504,7 @@ export async function loadMarketReportCohort(
     };
   }
 
-  // Local scope: bbox + Haversine, then cohort merge (Sage: all `all_glamping_properties`
+  // Local scope: bbox + Haversine, then cohort merge (Sage: all `all_sage_data`
   // rows; Hipcamp deduped), ADR filter in TS.
   const rowLimit = bboxFetchLimitForRadius(radiusMiles);
 

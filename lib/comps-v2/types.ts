@@ -23,7 +23,7 @@ export interface CompsV2Candidate extends ComparableProperty {
 
 export interface SourceToggles {
   pastReports: boolean;
-  all_glamping_properties: boolean;
+  all_sage_data: boolean;
   hipcamp: boolean;
   all_roverpass_data_new: boolean;
   campspot: boolean;
@@ -34,7 +34,7 @@ export interface SourceToggles {
 /** All sources off — API merges this with `parseSourceToggles` (opt-in per flag). */
 export const ALL_SOURCES_DISABLED: SourceToggles = {
   pastReports: false,
-  all_glamping_properties: false,
+  all_sage_data: false,
   hipcamp: false,
   all_roverpass_data_new: false,
   campspot: false,
@@ -44,7 +44,7 @@ export const ALL_SOURCES_DISABLED: SourceToggles = {
 /** Default for admin UI: every source enabled until the user toggles. */
 export const DEFAULT_SOURCE_TOGGLES: SourceToggles = {
   pastReports: true,
-  all_glamping_properties: true,
+  all_sage_data: true,
   hipcamp: true,
   all_roverpass_data_new: true,
   campspot: true,

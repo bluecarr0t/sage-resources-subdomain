@@ -138,6 +138,9 @@ npx tsx scripts/research-wineries-openai.ts --no-web-search
 
 # Skip Firecrawl (useful when FIRECRAWL_API_KEY not set, or to reduce cost)
 npx tsx scripts/research-wineries-openai.ts --no-firecrawl
+
+# Curated famous wineries (skips GPT discovery; uses scripts/data/*.json seed)
+npx tsx scripts/research-wineries-openai.ts --seed-file scripts/data/famous-us-wineries-tier1-seed.json
 ```
 
 ## Cost Estimates (per run, ~30 wineries)

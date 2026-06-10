@@ -62,8 +62,8 @@ export function applyPublicMapCohortFilters<T>(query: T): T {
 }
 
 /**
- * `/brands` rankings and `/brand/[slug]` detail pages — exclude state/federal/other public land.
- * `/brands` rankings also use `applyGlampingOnlyPropertyTypeFilter`; brand detail pages include all property types.
+ * `/glamping-market-overview/brands` rankings and `/brand/[slug]` detail pages — exclude state/federal/other public land.
+ * Brand rankings also use `applyGlampingOnlyPropertyTypeFilter`; brand detail pages include all property types.
  */
 export function applyBrandsPageLandOperatorFilter<T>(query: T): T {
   return (query as unknown as CohortQueryable).or(

@@ -7,7 +7,7 @@ export { sageRowIdFromUnifiedId };
 
 /**
  * When cohort requires Sage `research_status = published`, drop matview rows whose
- * underlying `all_glamping_properties` row is not in the allowed id set.
+ * underlying `all_sage_data` row is not in the allowed id set.
  */
 export async function filterGeoRowsToPublishedSageIds<T extends { id: string; source: string }>(
   supabase: SupabaseClient,
@@ -23,7 +23,7 @@ export async function filterGeoRowsToPublishedSageIds<T extends { id: string; so
   if (sageNumericIds.length === 0) return rows;
 
   const { data, error } = await supabase
-    .from('all_glamping_properties')
+    .from('all_sage_data')
     .select('id')
     .in('id', sageNumericIds)
     .eq('research_status', sageResearchStatus);

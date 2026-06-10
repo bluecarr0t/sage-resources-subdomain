@@ -2,7 +2,7 @@ import { marketReportFetchTableDisplayName, marketReportQueriedSources, marketRe
 
 describe('marketReportSourceLabel', () => {
   it('maps internal table keys to product names', () => {
-    expect(marketReportSourceLabel('all_glamping_properties')).toBe('Sage');
+    expect(marketReportSourceLabel('all_sage_data')).toBe('Sage');
     expect(marketReportSourceLabel('all_roverpass_data_new')).toBe('RoverPass');
     expect(marketReportSourceLabel('campspot')).toBe('Campspot');
     expect(marketReportSourceLabel('hipcamp')).toBe('Hipcamp');
@@ -23,7 +23,7 @@ describe('marketReportQueriedSources', () => {
 
 describe('marketReportFetchTableDisplayName', () => {
   it('maps fetch meta table ids', () => {
-    expect(marketReportFetchTableDisplayName('all_glamping_properties')).toBe('Sage');
+    expect(marketReportFetchTableDisplayName('all_sage_data')).toBe('Sage');
     expect(marketReportFetchTableDisplayName('campspot')).toBe('Campspot');
     expect(marketReportFetchTableDisplayName('hipcamp')).toBe('Hipcamp');
   });

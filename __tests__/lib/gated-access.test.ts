@@ -4,8 +4,11 @@ import {
   getGatedPageRedirectPath,
   isGatedPageSlug,
   isEmailOnlyGatedRequest,
+  formatGatedAccessOtpErrorMessage,
   isOtpUserMissingError,
+  isSupabaseOtpHourlyRateLimitError,
   isSupabaseOtpRateLimitError,
+  parseSupabaseOtpCooldownSeconds,
   isValidEmail,
   normalizeAuthSiteOrigin,
   relocateAuthCodeToCallbackUrl,
@@ -119,8 +122,19 @@ describe('gated-access helpers', () => {
     });
   });
 
+  describe('parseSupabaseOtpCooldownSeconds', () => {
+    it('extracts the cooldown interval from Supabase messages', () => {
+      expect(
+        parseSupabaseOtpCooldownSeconds(
+          'For security purposes, you can only request this after 35 seconds.'
+        )
+      ).toBe(35);
+      expect(parseSupabaseOtpCooldownSeconds('429: email rate limit exceeded')).toBeNull();
+    });
+  });
+
   describe('isSupabaseOtpRateLimitError', () => {
-    it('detects Supabase OTP email rate limits', () => {
+    it('detects Supabase OTP email rate limits and cooldowns', () => {
       expect(isSupabaseOtpRateLimitError('429: email rate limit exceeded')).toBe(true);
       expect(
         isSupabaseOtpRateLimitError(
@@ -128,6 +142,29 @@ describe('gated-access helpers', () => {
         )
       ).toBe(true);
       expect(isSupabaseOtpRateLimitError('unexpected')).toBe(false);
+    });
+
+    it('treats cooldown separately from hourly caps', () => {
+      expect(
+        isSupabaseOtpHourlyRateLimitError(
+          'For security purposes, you can only request this after 35 seconds.'
+        )
+      ).toBe(false);
+      expect(isSupabaseOtpHourlyRateLimitError('429: email rate limit exceeded')).toBe(true);
+    });
+  });
+
+  describe('formatGatedAccessOtpErrorMessage', () => {
+    it('shows seconds for short cooldowns instead of the hourly message', () => {
+      expect(
+        formatGatedAccessOtpErrorMessage(
+          'For security purposes, you can only request this after 35 seconds.'
+        )
+      ).toMatch(/35 seconds/i);
+      expect(
+        formatGatedAccessOtpErrorMessage('429: email rate limit exceeded')
+      ).toMatch(/about an hour/i);
+      expect(formatGatedAccessOtpErrorMessage('unexpected')).toBeNull();
     });
   });
 

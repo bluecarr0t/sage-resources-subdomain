@@ -14,7 +14,7 @@ function mockQuery() {
 }
 
 const baseOpts: UnifiedFilterOptions = {
-  sources: ['reports', 'all_glamping_properties'],
+  sources: ['reports', 'all_sage_data'],
   expandedStateValues: ['TX'],
   expandedCountryValues: ['USA'],
   unitCategories: [],

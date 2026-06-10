@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 type ExportFormat = 'csv' | 'xlsx';
-type ExportTable = 'all_glamping_properties' | 'all_roverpass_data_new';
+type ExportTable = 'all_sage_data' | 'all_roverpass_data_new';
 type ExportRow = Record<string, unknown>;
 type ExportCell = string | number | boolean;
 
@@ -172,7 +172,7 @@ export const GET = withAdminAuth(async (request) => {
     const supabase = createServerClient();
 
     const [glampingRows, roverpassRows] = await Promise.all([
-      fetchAllRows(supabase, 'all_glamping_properties'),
+      fetchAllRows(supabase, 'all_sage_data'),
       fetchAllRows(supabase, 'all_roverpass_data_new'),
     ]);
     const rows = [

@@ -17,7 +17,6 @@ describe('isExcludedGlampingMarketSnapshotUnitType', () => {
   it('keeps structure and glamping tent product types', () => {
     expect(isExcludedGlampingMarketSnapshotUnitType('Safari Tent')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Bell Tent')).toBe(false);
-    expect(isExcludedGlampingMarketSnapshotUnitType('Glamping Tent')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Yurt')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Cabin')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Canvas Tent')).toBe(false);

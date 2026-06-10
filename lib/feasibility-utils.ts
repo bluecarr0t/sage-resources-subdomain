@@ -183,7 +183,7 @@ export function filterValidCompUnits<T extends { unit_type?: string | null; num_
 /**
  * Normalizes a stored quality score to a 0–5 display scale (star rating).
  * - Past-report comparables / feasibility: typically 0–10 → divide by 2.
- * - Sage `all_glamping_properties` / similar: 1–100 data-completeness → divide by 20.
+ * - Sage `all_sage_data` / similar: 1–100 data-completeness → divide by 20.
  * - Already 0–5: unchanged.
  */
 export function qualityScoreToDisplay(score: number | string | null | undefined): number | null {

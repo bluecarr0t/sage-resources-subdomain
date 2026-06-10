@@ -296,7 +296,7 @@ describe('createSageAiTools', () => {
     // tool to fall through to the regular filtered query.
     expect(rpcCalls).toHaveLength(0);
     // The filter-branch table query MUST run.
-    expect(fromCalls).toEqual(['all_glamping_properties']);
+    expect(fromCalls).toEqual(['all_sage_data']);
     // State filter normalized to "TX" via .ilike('state', ...).
     const ilikeCall = calls.find((c) => c.method === 'ilike');
     expect(ilikeCall?.args).toEqual(['state', 'TX']);
@@ -369,7 +369,7 @@ describe('createSageAiTools', () => {
     expect(typed.total_count).toBe(2);
   });
 
-  it('accepts near with column_eq_filters after hydrating full rows from all_glamping_properties', async () => {
+  it('accepts near with column_eq_filters after hydrating full rows from all_sage_data', async () => {
     const rpcRows = [
       { id: 42, property_name: 'Pool Place', state: 'CO', distance_km: 2 },
     ];
@@ -527,7 +527,7 @@ describe('createSageAiTools', () => {
     );
     const res = await tools.count_rows.execute!(
       {
-        table: 'all_glamping_properties',
+        table: 'all_sage_data',
         filters: { state: 'TX', 'drop table; --': 'x', price: '100' },
       },
       { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
@@ -588,7 +588,7 @@ describe('createSageAiTools', () => {
       supabase as unknown as Parameters<typeof createSageAiTools>[0]
     );
     const res = await tools.count_rows.execute!(
-      { table: 'all_glamping_properties', filters: { state: 'TX' } },
+      { table: 'all_sage_data', filters: { state: 'TX' } },
       { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
     );
     expect(res).toMatchObject({ count: 0 });

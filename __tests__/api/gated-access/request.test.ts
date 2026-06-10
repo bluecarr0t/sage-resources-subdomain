@@ -66,6 +66,7 @@ describe('POST /api/gated-access/request', () => {
     const arg = mockSignInWithOtp.mock.calls[0][0];
     expect(arg.email).toBe('jane@example.com');
     expect(arg.options.shouldCreateUser).toBe(true);
+    expect(arg.options.data.gated_page).toBe('glamping-market-overview');
     expect(arg.options.data.full_name).toBe('Jane Doe');
     expect(arg.options.emailRedirectTo).toContain('/auth/callback?redirect=');
   });
@@ -85,23 +86,18 @@ describe('POST /api/gated-access/request', () => {
     expect(mockSignInWithOtp).toHaveBeenCalledTimes(1);
     const arg = mockSignInWithOtp.mock.calls[0][0];
     expect(arg.email).toBe('returning@example.com');
-    expect(arg.options.shouldCreateUser).toBe(false);
+    expect(arg.options.shouldCreateUser).toBe(true);
     expect(arg.options.data.full_name).toBeUndefined();
     expect(arg.options.data.gated_page).toBe('glamping-market-overview');
   });
 
-  it('retries email-only with shouldCreateUser when the address is new', async () => {
-    mockSignInWithOtp
-      .mockResolvedValueOnce({ error: { message: 'User not found' } })
-      .mockResolvedValueOnce({ error: null });
-
+  it('sends only one OTP for email-only sign-in (no retry double-send)', async () => {
     const res = await POST(
       makeRequest({ email: 'new@example.com', emailOnly: true })
     );
     expect(res.status).toBe(200);
-    expect(mockSignInWithOtp).toHaveBeenCalledTimes(2);
-    expect(mockSignInWithOtp.mock.calls[0][0].options.shouldCreateUser).toBe(false);
-    expect(mockSignInWithOtp.mock.calls[1][0].options.shouldCreateUser).toBe(true);
+    expect(mockSignInWithOtp).toHaveBeenCalledTimes(1);
+    expect(mockSignInWithOtp.mock.calls[0][0].options.shouldCreateUser).toBe(true);
   });
 
   it('includes stored lead name on email-only resend when available', async () => {
@@ -127,7 +123,7 @@ describe('POST /api/gated-access/request', () => {
     expect(mockSignInWithOtp).not.toHaveBeenCalled();
   });
 
-  it('returns 429 when Supabase email rate limit is hit', async () => {
+  it('returns 429 when Supabase hourly email rate limit is hit', async () => {
     mockSignInWithOtp.mockResolvedValueOnce({
       error: { message: '429: email rate limit exceeded' },
     });
@@ -137,6 +133,21 @@ describe('POST /api/gated-access/request', () => {
     expect(body.ok).toBe(false);
     expect(body.code).toBe('email_rate_limited');
     expect(body.error).toMatch(/Too many sign-in emails/i);
+  });
+
+  it('returns 429 with a short cooldown message when Supabase enforces seconds between sends', async () => {
+    mockSignInWithOtp.mockResolvedValueOnce({
+      error: {
+        message: 'For security purposes, you can only request this after 42 seconds.',
+      },
+    });
+    const res = await POST(makeRequest({ name: 'Jane Doe', email: 'jane@example.com' }));
+    expect(res.status).toBe(429);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.code).toBe('email_cooldown');
+    expect(body.error).toMatch(/42 seconds/i);
+    expect(body.error).not.toMatch(/about an hour/i);
   });
 
   it('returns generic success for non-rate-limit Supabase errors (no enumeration)', async () => {

@@ -15,7 +15,7 @@ export const HIPCAMP_GLAMPING_OVERVIEW_MAX_ROWS = envInt(
   500_000
 );
 
-/** Max rows to scan from `all_glamping_properties` (Sage). */
+/** Max rows to scan from `all_sage_data` (Sage). */
 export const SAGE_GLAMPING_OVERVIEW_MAX_ROWS = envInt(
   'SAGE_GLAMPING_OVERVIEW_MAX_ROWS',
   250_000,

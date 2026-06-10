@@ -60,6 +60,7 @@ export const UNIT_TYPE_DOT_COLORS: Record<string, string> = {
   'Cave House': '#6e6560',
   'A-Frame': '#8b7355',
   'Mixed Glamping': '#5c7a5c',
+  'Other Glamping': '#5c7a5c',
 };
 
 function colorFromKeyword(lower: string): string | null {

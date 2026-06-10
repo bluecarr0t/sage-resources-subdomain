@@ -35,7 +35,7 @@ async function assertPropertyExists(
   propertyId: number
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from('all_glamping_properties')
+    .from('all_sage_data')
     .select('id')
     .eq('id', propertyId)
     .maybeSingle();

@@ -1,12 +1,12 @@
 /**
- * API Route: all_glamping_properties CRUD for the Sage Data admin editor.
+ * API Route: all_sage_data CRUD for the Sage Data admin editor.
  * GET   /api/admin/sage-glamping-data/properties
  *   Query params:
  *     q            — case-insensitive search across property_name, city, state, country
  *     research_status — exact match (e.g. 'in_progress', 'published', 'new')
  *     country      — case-insensitive exact match (ilike) on `country`
  *     state        — USPS code (e.g. VT); matches abbrev or full state name on `state`
- *     is_open      — exact match on `is_open` when value is Yes | Under Construction | Proposed Development | Temporarily closed | Closed
+ *     is_open      — exact match on `is_open` when value is Yes | Under Construction | Proposed Development | Cancelled | Temporarily closed | Closed
  *     discovery_source — exact match on `discovery_source` (Sage Data table "Source" column)
  *     page         — 1-based (default 1)
  *     pageSize     — default 50, max 200
@@ -20,7 +20,7 @@
  *     siblingOf    — optional: when set (row id), returns all sibling rows for the multi-site editor:
  *                    `{ success, anchorId, rows, capped? }` (same `property_id`; slug/name+city+state fallback only if unset).
  *                    Max 50 rows (`capped: true` if more exist).
- *   List response: `total` = property count from `all_glamping_properties_list_anchors`
+ *   List response: `total` = property count from `all_sage_data_list_anchors`
  *   (one row per logical property). Falls back to site-level rows only if the view is missing.
  *
  * PATCH /api/admin/sage-glamping-data/properties
@@ -64,16 +64,19 @@ import { normalizeAllGlampingPropertiesCountryForDb } from '@/lib/all-glamping-p
 import { isValidGlampingBrandId } from '@/lib/glamping-brands';
 import { isGlampingServiceTier } from '@/lib/glamping-service-tier';
 import { applyGlampingRatesToUsd } from '@/lib/glamping-rates-usd';
+import { sanitizePlannedOpenDatePatch } from '@/lib/glamping-planned-open';
+import { sanitizeGlampingSeasonRateUpdates } from '@/lib/glamping-seasonal-rate';
+import { applyIsOpenChangeWithHistory } from '@/lib/glamping-pipeline/status-history';
 
 export const dynamic = 'force-dynamic';
 
-const TABLE = 'all_glamping_properties';
+const TABLE = 'all_sage_data';
 
 /**
  * Read-only view: one row per logical property (same grouping as sibling editor).
- * If missing in a database, the list GET falls back to `all_glamping_properties` and logs a warning.
+ * If missing in a database, the list GET falls back to `all_sage_data` and logs a warning.
  */
-const LIST_ANCHORS_VIEW = 'all_glamping_properties_list_anchors';
+const LIST_ANCHORS_VIEW = 'all_sage_data_list_anchors';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -262,6 +265,13 @@ export const POST = withAdminAuth(async (request) => {
       if (slugSibling?.property_id) {
         insertRow.property_id = slugSibling.property_id;
       }
+    }
+
+    try {
+      Object.assign(insertRow, sanitizeGlampingSeasonRateUpdates(insertRow));
+    } catch (rateErr) {
+      const message = rateErr instanceof Error ? rateErr.message : 'Invalid seasonal rate';
+      return NextResponse.json({ success: false, error: message }, { status: 400 });
     }
 
     const { data, error } = await supabase
@@ -571,12 +581,83 @@ export const PATCH = withAdminAuth(async (request) => {
       );
     }
 
+    const supabase = createServerClient();
+
+    if ('planned_open_date' in sanitized || 'is_open' in sanitized) {
+      const { data: currentRow, error: currentErr } = await supabase
+        .from(TABLE)
+        .select('slug, is_open')
+        .eq('id', id)
+        .maybeSingle();
+      if (currentErr) {
+        return NextResponse.json(
+          { success: false, error: currentErr.message },
+          { status: 500 }
+        );
+      }
+      const plannedResult = sanitizePlannedOpenDatePatch(
+        sanitized,
+        currentRow?.is_open as string | null | undefined
+      );
+      if (!plannedResult.ok) {
+        return NextResponse.json(
+          { success: false, error: plannedResult.error },
+          { status: 400 }
+        );
+      }
+
+      if ('is_open' in sanitized && sanitized.is_open != null) {
+        const nextRaw = String(sanitized.is_open).trim();
+        if (!(GLAMPING_IS_OPEN_VALUES as readonly string[]).includes(nextRaw)) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `is_open must be one of: ${GLAMPING_IS_OPEN_VALUES.join(', ')}`,
+            },
+            { status: 400 }
+          );
+        }
+        const nextIsOpen = nextRaw as GlampingIsOpenValue;
+        const currentIsOpen = (currentRow?.is_open as string | null | undefined) ?? '';
+        const slug = (currentRow?.slug as string | null | undefined) ?? '';
+
+        if (slug && currentIsOpen.trim() !== nextIsOpen) {
+          try {
+            await applyIsOpenChangeWithHistory(supabase, {
+              propertyId: Number(id),
+              slug,
+              previousIsOpen: currentIsOpen,
+              nextIsOpen,
+              changeSource: 'admin_patch',
+            });
+          } catch (historyErr) {
+            const message =
+              historyErr instanceof Error ? historyErr.message : String(historyErr);
+            console.error('[admin/sage-data/properties] is_open history:', message);
+            return NextResponse.json(
+              { success: false, error: message },
+              { status: 500 }
+            );
+          }
+        }
+
+        delete sanitized.is_open;
+      }
+    }
+
     sanitized.date_updated = new Date().toISOString().split('T')[0];
+
+    let sanitizedRates: Record<string, unknown>;
+    try {
+      sanitizedRates = sanitizeGlampingSeasonRateUpdates(sanitized);
+    } catch (rateErr) {
+      const message = rateErr instanceof Error ? rateErr.message : 'Invalid seasonal rate';
+      return NextResponse.json({ success: false, error: message }, { status: 400 });
+    }
+    Object.assign(sanitized, sanitizedRates);
 
     const { row: sanitizedUsd } = applyGlampingRatesToUsd(sanitized);
     Object.assign(sanitized, sanitizedUsd);
-
-    const supabase = createServerClient();
 
     const tierPropagateKeys = [
       'glamping_service_tier',

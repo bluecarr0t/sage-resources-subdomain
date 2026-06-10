@@ -111,7 +111,7 @@ export function useCompsV2PageState() {
   const dataSourceOptions = useMemo(
     () => [
       { value: 'pastReports' as const, label: t('sourcePastReports') },
-      { value: 'all_glamping_properties' as const, label: t('sourceGlamping') },
+      { value: 'all_sage_data' as const, label: t('sourceGlamping') },
       { value: 'hipcamp' as const, label: t('sourceHipcamp') },
       { value: 'all_roverpass_data_new' as const, label: t('sourceRoverpass') },
       { value: 'campspot' as const, label: t('sourceCampspot') },
@@ -209,7 +209,7 @@ export function useCompsV2PageState() {
   const compositionRawRowsTotal = useMemo(() => {
     if (!counts) return 0;
     const keys = [
-      'all_glamping_properties',
+      'all_sage_data',
       'hipcamp',
       'all_roverpass_data_new',
       'campspot',

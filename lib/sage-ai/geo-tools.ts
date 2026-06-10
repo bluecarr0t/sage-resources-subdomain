@@ -125,7 +125,7 @@ async function fetchPropertyForGeocode(
   propertyId: number
 ): Promise<PropertyRow | null> {
   const { data, error } = await supabase
-    .from('all_glamping_properties')
+    .from('all_sage_data')
     .select('id, property_name, address, city, state, zip_code, country, lat, lon')
     .eq('id', propertyId)
     .maybeSingle();
@@ -242,7 +242,7 @@ Use this before calling nearest_attractions or query_properties with the 'near' 
             .int()
             .positive()
             .optional()
-            .describe('Exact id from all_glamping_properties.'),
+            .describe('Exact id from all_sage_data.'),
           property_name: z
             .string()
             .min(2)
@@ -292,7 +292,7 @@ Use this before calling nearest_attractions or query_properties with the 'near' 
         let resolvedId = property_id ?? null;
         if (!resolvedId && property_name) {
           const { data: match, error: matchErr } = await supabase
-            .from('all_glamping_properties')
+            .from('all_sage_data')
             .select('id')
             .ilike('property_name', `%${property_name}%`)
             .limit(1)

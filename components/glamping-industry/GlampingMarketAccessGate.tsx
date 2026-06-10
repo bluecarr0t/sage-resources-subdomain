@@ -8,6 +8,7 @@ import {
 } from '@/components/editorial/EditorialPageShell';
 import { fireGateAccessConfetti } from '@/lib/gate-access-confetti';
 import { GATED_PAGE_GLAMPING_MARKET_OVERVIEW } from '@/lib/gated-access';
+import { supabase } from '@/lib/supabase';
 
 type GateStep = 'form' | 'sent';
 type FormMode = 'lead' | 'email-only';
@@ -57,13 +58,19 @@ export function GlampingMarketAccessGate({
     setError(null);
     setSubmitting(true);
     try {
+      // Drop any stale browser session so the server can issue a fresh magic link
+      // (returning-user email-only sign-in often fails to send when a session exists).
+      await supabase.auth.signOut();
+
       const res = await fetch('/api/gated-access/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           email,
           pageSlug,
-          ...(emailOnly ? { emailOnly: true } : { name }),
+          emailOnly,
+          ...(emailOnly ? {} : { name }),
         }),
       });
       const data = (await res.json().catch(() => null)) as
@@ -245,7 +252,9 @@ export function GlampingMarketAccessGate({
               device to unlock the Glamping Market Overview.
             </p>
             <p className="mt-4 text-[11px] leading-relaxed text-neutral-500">
-              The link expires shortly. Don&apos;t see it? Check spam, or{' '}
+              Open the link on <span className="font-medium text-neutral-700">this device</span>{' '}
+              (the same browser you used here). The link expires shortly. Don&apos;t see it? Check
+              spam, or{' '}
               <button
                 type="button"
                 onClick={() => {

@@ -5,7 +5,7 @@ import {
 import type { UnifiedFilterOptions } from '@/lib/comps-unified/apply-filters';
 
 const baseOpts: UnifiedFilterOptions = {
-  sources: ['all_glamping_properties'],
+  sources: ['all_sage_data'],
   expandedStateValues: [],
   expandedCountryValues: ['USA'],
   unitCategories: [],

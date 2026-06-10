@@ -15,7 +15,7 @@ const t = (key: string) => {
 
 describe('compsV2SourceTableLabel', () => {
   it('maps known tables to i18n', () => {
-    expect(compsV2SourceTableLabel('all_glamping_properties', t)).toBe('GL');
+    expect(compsV2SourceTableLabel('all_sage_data', t)).toBe('GL');
     expect(compsV2SourceTableLabel('web_search', t)).toBe('WR');
     expect(compsV2SourceTableLabel('comps_v2_deep_enrich', t)).toBe('DE');
   });

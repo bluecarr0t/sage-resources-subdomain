@@ -1,6 +1,10 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import {
+  infoWindowDisableAutoPanOptions,
+  panMapToFitInfoWindowIfNeeded,
+} from '@/components/map/utils/panInfoWindowIntoView';
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { useGoogleMaps } from '@/components/GoogleMapsProvider';
 
@@ -51,6 +55,7 @@ export function AnchorPointMap({ mapProperties, mapAnchors, anchorsWithCounts, o
   const { isLoaded, loadError } = useGoogleMaps();
   const [selectedProperty, setSelectedProperty] = useState<MapProperty | null>(null);
   const [selectedAnchor, setSelectedAnchor] = useState<MapAnchor | null>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const getAnchorCount = (anchorName: string) =>
     anchorsWithCounts.find((a) => a.anchor_name === anchorName)?.units_count_15_mi ??
@@ -58,6 +63,7 @@ export function AnchorPointMap({ mapProperties, mapAnchors, anchorsWithCounts, o
     0;
 
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
+    setMap(mapInstance);
     // Fit bounds to show all markers if we have data
     if (mapProperties.length > 0 || mapAnchors.length > 0) {
       const bounds = new google.maps.LatLngBounds();
@@ -66,6 +72,35 @@ export function AnchorPointMap({ mapProperties, mapAnchors, anchorsWithCounts, o
       mapInstance.fitBounds(bounds, 50);
     }
   }, [mapProperties, mapAnchors]);
+
+  const activeInfoLatLng = selectedProperty
+    ? { lat: selectedProperty.lat, lng: selectedProperty.lon }
+    : selectedAnchor
+      ? { lat: selectedAnchor.lat, lng: selectedAnchor.lon }
+      : null;
+
+  useEffect(() => {
+    if (!map || !activeInfoLatLng) return;
+    let imageLayoutTimeout: number | null = null;
+    let idleListener: google.maps.MapsEventListener | null = null;
+    let cancelled = false;
+
+    const runAdjust = () => {
+      if (cancelled) return;
+      void panMapToFitInfoWindowIfNeeded(map, activeInfoLatLng);
+    };
+
+    idleListener = google.maps.event.addListenerOnce(map, 'idle', () => {
+      runAdjust();
+      imageLayoutTimeout = window.setTimeout(runAdjust, 700);
+    });
+
+    return () => {
+      cancelled = true;
+      if (idleListener) google.maps.event.removeListener(idleListener);
+      if (imageLayoutTimeout) clearTimeout(imageLayoutTimeout);
+    };
+  }, [map, activeInfoLatLng]);
 
   if (loadError) {
     return (
@@ -135,6 +170,7 @@ export function AnchorPointMap({ mapProperties, mapAnchors, anchorsWithCounts, o
           <InfoWindow
             position={{ lat: selectedProperty.lat, lng: selectedProperty.lon }}
             onCloseClick={() => setSelectedProperty(null)}
+            options={infoWindowDisableAutoPanOptions}
           >
             <div className="p-3 min-w-[240px] max-w-[320px]">
               <h3 className="font-semibold text-gray-900 mb-2 text-base leading-tight">
@@ -196,6 +232,7 @@ export function AnchorPointMap({ mapProperties, mapAnchors, anchorsWithCounts, o
           <InfoWindow
             position={{ lat: selectedAnchor.lat, lng: selectedAnchor.lon }}
             onCloseClick={() => setSelectedAnchor(null)}
+            options={infoWindowDisableAutoPanOptions}
           >
             <div className="p-2 min-w-[180px]">
               <h3 className="font-semibold text-gray-900 mb-1">{selectedAnchor.name}</h3>

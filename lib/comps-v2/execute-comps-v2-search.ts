@@ -35,7 +35,7 @@ import type { SearchStreamSuccessPayload } from '@/lib/comps-v2/search-stream-ev
 
 function buildMarketWarnings(sources: SourceToggles, counts: Record<string, number>): string[] {
   const w: string[] = [];
-  if (sources.all_glamping_properties && (counts.all_glamping_properties ?? 0) === 0) {
+  if (sources.all_sage_data && (counts.all_sage_data ?? 0) === 0) {
     w.push('Sage Glamping Data returned 0 rows for this area and filters.');
   }
   if (sources.hipcamp && (counts.hipcamp ?? 0) === 0) {

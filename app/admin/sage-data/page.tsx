@@ -6,7 +6,7 @@ import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/
 
 export const metadata: Metadata = {
   title: 'Sage Data Editor - Sage Admin',
-  description: 'Inline editor for the all_glamping_properties table',
+  description: 'Inline editor for the all_sage_data table',
   robots: {
     index: false,
     follow: false,
@@ -30,7 +30,7 @@ export default function SageDataPage() {
             Sage Data Editor
           </h1>
           <p className={`${adminPageDescription} mt-2`}>
-            Browse and edit rows in <code className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">all_glamping_properties</code>.
+            Browse and edit rows in <code className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">all_sage_data</code>.
             <span className="font-medium">Click a row</span> to open the editor, or use keyboard (focus a row, then Enter or Space). Follow URL links to open the site; they do not open the editor.
           </p>
         </div>

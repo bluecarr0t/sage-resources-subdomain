@@ -1,5 +1,5 @@
 /**
- * Column-level privacy for all_glamping_properties
+ * Column-level privacy for all_sage_data
  *
  * Only columns displayed on the Map (and its InfoWindow) are exposed via the public API.
  * Everything else is private. Add columns here only when the Map needs to display them.

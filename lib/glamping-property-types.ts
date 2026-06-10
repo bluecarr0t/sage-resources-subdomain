@@ -1,5 +1,5 @@
 /**
- * Canonical `all_glamping_properties.property_type` values for admin forms
+ * Canonical `all_sage_data.property_type` values for admin forms
  * (Property Edit modal, /admin/glamping-properties Property Type filter).
  */
 

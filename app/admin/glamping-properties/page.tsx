@@ -48,6 +48,11 @@ import {
   writeCountryFilterToParams,
 } from '@/lib/comps-unified/country-filter';
 import { buildUsStateFilterOptions } from '@/lib/comps-unified/us-state-filter';
+import {
+  readUnifiedCompsFacetsClientCache,
+  writeUnifiedCompsFacetsClientCache,
+  type UnifiedCompsFacetsClientPayload,
+} from '@/lib/comps-unified/facets-client-cache';
 
 /** Display label for Status filter (`is_open` DB value stays `Yes`). */
 function formatIsOpenFilterLabel(value: string): string {
@@ -57,7 +62,7 @@ function formatIsOpenFilterLabel(value: string): string {
 const PER_PAGE = 50;
 
 /** Default Source filter on /admin/glamping-properties (Sage glamping database). */
-const DEFAULT_SELECTED_SOURCES = ['all_glamping_properties'] as const;
+const DEFAULT_SELECTED_SOURCES = ['all_sage_data'] as const;
 
 /** Server-enforced cohort; kept in the URL for clarity. */
 const DEFAULT_SELECTED_PROPERTY_TYPES = [ADMIN_COMPS_COHORT_PROPERTY_TYPE] as const;
@@ -192,7 +197,7 @@ const BASE_TABLE_COLUMNS: Array<{
   { key: 'property_name', label: 'Property', align: 'left', sortKey: 'property_name' },
   { key: 'source', label: 'Source', align: 'left', sortKey: null },
   { key: 'state', label: 'State', align: 'left', sortKey: 'state' },
-  { key: 'total_sites', label: 'Sites', align: 'center', sortKey: 'total_sites' },
+  { key: 'total_sites', label: 'Units', align: 'center', sortKey: 'total_sites' },
   { key: 'unit_type', label: 'Unit Type', align: 'center', sortKey: null },
   { key: 'adr', label: 'ARDR Range', align: 'right', sortKey: 'low_adr' },
   { key: 'occupancy', label: 'Occupancy', align: 'right', sortKey: null },
@@ -354,37 +359,55 @@ function ComparablesPageContent() {
 
   const debouncedSearch = useDebounce(search, 300);
 
+  const applyFacetsPayload = useCallback((data: UnifiedCompsFacetsClientPayload) => {
+    setUnitCategoryOptions(
+      (data.unit_categories || [])
+        .map((c: string) => {
+          const words = c.replace(/_/g, ' ').split(/\s+/);
+          const label = words
+            .map((w) =>
+              w.toLowerCase() === 'rv' ? 'RV' : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+            )
+            .join(' ');
+          return { value: c, label };
+        })
+        .sort((a: { value: string; label: string }, b: { value: string; label: string }) =>
+          a.label.localeCompare(b.label)
+        )
+    );
+    setCountryOptions(buildCountryFilterOptions(data.countries || []));
+    setStateOptions(
+      buildUsStateFilterOptions(Array.isArray(data.states) ? (data.states as string[]) : [])
+    );
+    setKeywordOptions(
+      (data.keywords || []).map((k: string) => ({ value: k, label: formatKeywordLabel(k) }))
+    );
+  }, []);
+
   useEffect(() => {
-    fetch('/api/admin/comps/unified/facets')
+    const cached = readUnifiedCompsFacetsClientCache();
+    if (cached) {
+      applyFacetsPayload(cached);
+    }
+
+    const controller = new AbortController();
+    fetch('/api/admin/comps/unified/facets', { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          setUnitCategoryOptions(
-            (data.unit_categories || [])
-              .map((c: string) => {
-                const words = c.replace(/_/g, ' ').split(/\s+/);
-                const label = words
-                  .map((w) => (w.toLowerCase() === 'rv' ? 'RV' : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()))
-                  .join(' ');
-                return { value: c, label };
-              })
-              .sort((a: { value: string; label: string }, b: { value: string; label: string }) =>
-                a.label.localeCompare(b.label)
-              )
-          );
-          setCountryOptions(buildCountryFilterOptions(data.countries || []));
-          setStateOptions(
-            buildUsStateFilterOptions(
-              Array.isArray(data.states) ? (data.states as string[]) : []
-            )
-          );
-          setKeywordOptions(
-            (data.keywords || []).map((k: string) => ({ value: k, label: formatKeywordLabel(k) }))
-          );
+          const payload: UnifiedCompsFacetsClientPayload = {
+            unit_categories: data.unit_categories,
+            countries: data.countries,
+            states: data.states,
+            keywords: data.keywords,
+          };
+          writeUnifiedCompsFacetsClientCache(payload);
+          applyFacetsPayload(payload);
         }
       })
       .catch(() => {});
-  }, []);
+    return () => controller.abort();
+  }, [applyFacetsPayload]);
 
   useEffect(() => {
     if (!showSageOnlyFilters && selectedOpenStatuses.length > 0) {
@@ -525,51 +548,82 @@ function ComparablesPageContent() {
 
   const hasCompletedInitialLoad = useRef(false);
   const prevSearchSortForPageReset = useRef<{ debouncedSearch: string; sortBy: string; sortDir: string } | null>(null);
+  const prevFilterFingerprintRef = useRef<string | null>(null);
 
-  const loadRows = useCallback(async () => {
+  const filterFingerprint = useMemo(
+    () =>
+      JSON.stringify({
+        sources: selectedSources,
+        countries: selectedCountries,
+        states: selectedStates,
+        unitCategories: selectedUnitCategories,
+        keywords: selectedKeywords,
+        propertyTypes: selectedPropertyTypes,
+        openStatuses: selectedOpenStatuses,
+      }),
+    [
+      selectedSources,
+      selectedCountries,
+      selectedStates,
+      selectedUnitCategories,
+      selectedKeywords,
+      selectedPropertyTypes,
+      selectedOpenStatuses,
+    ]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(`/api/admin/comps/unified?${queryString}`);
-      const data = await res.json();
-      if (data.success) {
-        setRows(data.rows || []);
-        setTotal(data.pagination.total);
-        setTotalPages(data.pagination.total_pages);
-        setTotalSiteUnits(
-          typeof data.pagination?.total_site_units === 'number'
-            ? data.pagination.total_site_units
-            : data.pagination.total
-        );
-        setTotalProperties(
-          typeof data.pagination?.total_properties === 'number'
-            ? data.pagination.total_properties
-            : data.pagination.total
-        );
-        setIsFuzzyResults(data.pagination?.fuzzy === true);
-        setError(null);
-      } else {
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/admin/comps/unified?${queryString}`);
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.success) {
+          setRows(data.rows || []);
+          setTotal(data.pagination.total);
+          setTotalPages(data.pagination.total_pages);
+          setTotalSiteUnits(
+            typeof data.pagination?.total_site_units === 'number'
+              ? data.pagination.total_site_units
+              : data.pagination.total
+          );
+          setTotalProperties(
+            typeof data.pagination?.total_properties === 'number'
+              ? data.pagination.total_properties
+              : data.pagination.total
+          );
+          setIsFuzzyResults(data.pagination?.fuzzy === true);
+          setError(null);
+        } else {
+          setRows([]);
+          setIsFuzzyResults(false);
+          setTotalProperties(null);
+          setTotalSiteUnits(0);
+          setError(data.message || 'Failed to load comps');
+        }
+      } catch (err) {
+        if (cancelled) return;
         setRows([]);
         setIsFuzzyResults(false);
         setTotalProperties(null);
         setTotalSiteUnits(0);
-        setError(data.message || 'Failed to load comps');
+        setError(err instanceof Error ? err.message : 'Failed to load comps');
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          hasCompletedInitialLoad.current = true;
+        }
       }
-    } catch (err) {
-      setRows([]);
-      setIsFuzzyResults(false);
-      setTotalProperties(null);
-      setTotalSiteUnits(0);
-      setError(err instanceof Error ? err.message : 'Failed to load comps');
-    } finally {
-      setLoading(false);
-      hasCompletedInitialLoad.current = true;
-    }
-  }, [queryString]);
+    })();
 
-  useEffect(() => {
-    loadRows();
-  }, [loadRows]);
+    return () => {
+      cancelled = true;
+    };
+  }, [queryString]);
 
   useEffect(() => {
     if (!hasCompletedInitialLoad.current) return;
@@ -582,16 +636,14 @@ function ComparablesPageContent() {
   }, [debouncedSearch, sortBy, sortDir]);
 
   useEffect(() => {
+    if (prevFilterFingerprintRef.current === null) {
+      prevFilterFingerprintRef.current = filterFingerprint;
+      return;
+    }
+    if (prevFilterFingerprintRef.current === filterFingerprint) return;
+    prevFilterFingerprintRef.current = filterFingerprint;
     setPage(1);
-  }, [
-    selectedSources,
-    selectedCountries,
-    selectedStates,
-    selectedUnitCategories,
-    selectedKeywords,
-    selectedPropertyTypes,
-    selectedOpenStatuses,
-  ]);
+  }, [filterFingerprint]);
 
   useEffect(() => {
     setExpandedIds(new Set());
@@ -704,18 +756,12 @@ function ComparablesPageContent() {
               <Download className="w-4 h-4 mr-1.5" />
               Export Excel
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push('/admin/brand-assignments')}>
-              Brand assignments
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push('/glamping-market-overview')}>
-              Analytics
-            </Button>
           </div>
         </div>
 
         <Card className="mb-6">
-          <div className="flex flex-wrap gap-4 items-end">
-            <div className="flex-1 min-w-0 max-w-md">
+          <div className="grid grid-cols-1 gap-4 items-end sm:grid-cols-2 xl:grid-cols-4">
+            <div className="w-full min-w-[16rem] sm:col-span-2 xl:col-span-2">
               <label htmlFor="comps-search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Search
               </label>
@@ -727,18 +773,24 @@ function ComparablesPageContent() {
                   placeholder="Property, city, state, unit type, keywords..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className={`w-full pl-10 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${search || isDebouncing || loading ? 'pr-24' : 'pr-4'}`}
+                  className={`w-full pl-10 py-2 text-sm border border-neutral-300/80 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 ${
+                    search && isDebouncing ? 'pr-24' : search ? 'pr-10' : isDebouncing ? 'pr-20' : 'pr-4'
+                  }`}
                 />
-                {(isDebouncing || loading) && (
-                  <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400 pointer-events-none">
-                    {loading ? 'Loading...' : 'Searching...'}
+                {isDebouncing ? (
+                  <span
+                    className={`absolute top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400 pointer-events-none ${
+                      search ? 'right-10' : 'right-3'
+                    }`}
+                  >
+                    Searching...
                   </span>
-                )}
+                ) : null}
                 {search ? (
                   <button
                     type="button"
                     onClick={() => { setSearch(''); setPage(1); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-neutral-800"
                     aria-label="Clear search"
                   >
                     <X className="w-4 h-4" />
@@ -746,7 +798,7 @@ function ComparablesPageContent() {
                 ) : null}
               </div>
             </div>
-            <div className="w-full sm:w-48">
+            <div className="w-full min-w-0">
               <MultiSelect
                 id="source-filter"
                 label={t('sourceFilterLabel')}
@@ -769,7 +821,7 @@ function ComparablesPageContent() {
               />
             </div>
             {showSageOnlyFilters ? (
-              <div className="w-full sm:w-48">
+              <div className="w-full min-w-0">
                 <MultiSelect
                   id="status-filter"
                   label="Status"
@@ -787,7 +839,7 @@ function ComparablesPageContent() {
                 />
               </div>
             ) : null}
-            <div className="w-full sm:w-48">
+            <div className="w-full min-w-0">
               <MultiSelect
                 id="unit-type-filter"
                 label="Unit Type"
@@ -802,7 +854,7 @@ function ComparablesPageContent() {
                 activeColor="sage"
               />
             </div>
-            <div className="w-full sm:w-48">
+            <div className="w-full min-w-0">
               <SearchableMultiSelect
                 id="country-filter"
                 label="Country"
@@ -818,7 +870,7 @@ function ComparablesPageContent() {
                 maxDropdownHeightPx={520}
               />
             </div>
-            <div className="w-full sm:w-48">
+            <div className="w-full min-w-0">
               <SearchableMultiSelect
                 id="state-filter"
                 label="State"
@@ -834,7 +886,7 @@ function ComparablesPageContent() {
                 maxDropdownHeightPx={520}
               />
             </div>
-            <div className="w-full sm:w-48">
+            <div className="w-full min-w-0">
               <SearchableMultiSelect
                 id="keywords-filter"
                 label="Amenities"

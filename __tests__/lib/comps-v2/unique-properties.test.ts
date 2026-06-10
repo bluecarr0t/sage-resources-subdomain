@@ -51,7 +51,7 @@ describe('dedupeUniqueProperties', () => {
   it('sets web_research_supplement when merging market row with gap-fill web row', () => {
     const market = base({
       stable_id: 'm',
-      source_table: 'all_glamping_properties',
+      source_table: 'all_sage_data',
       property_name: 'Oak Glamp',
       geo_lat: 30.1,
       geo_lng: -97.9,
@@ -66,7 +66,7 @@ describe('dedupeUniqueProperties', () => {
     });
     const out = dedupeUniqueProperties([market, web]);
     expect(out).toHaveLength(1);
-    expect(out[0].source_table).toBe('all_glamping_properties');
+    expect(out[0].source_table).toBe('all_sage_data');
     expect(out[0].web_research_supplement).toBe(true);
     expect(out[0].geo_lat).toBe(30.1);
   });

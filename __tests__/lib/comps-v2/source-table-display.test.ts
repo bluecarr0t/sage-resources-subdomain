@@ -5,8 +5,8 @@
 import { compsV2FriendlySourceTable } from '@/lib/comps-v2/source-table-display';
 
 describe('compsV2FriendlySourceTable', () => {
-  it('maps all_glamping_properties to Sage Glamping Data', () => {
-    expect(compsV2FriendlySourceTable('all_glamping_properties')).toBe('Sage Glamping Data');
+  it('maps all_sage_data to Sage Data', () => {
+    expect(compsV2FriendlySourceTable('all_sage_data')).toBe('Sage Data');
   });
 
   it('title-cases unknown snake_case', () => {

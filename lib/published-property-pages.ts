@@ -19,7 +19,7 @@ import type { SageProperty } from '@/lib/types/sage';
 
 export const PUBLISHED_RESEARCH_STATUS = 'published';
 
-const TABLE = 'all_glamping_properties';
+const TABLE = 'all_sage_data';
 const PAGE_SIZE = 1000;
 
 export type PropertyAnchorRow = PropertyAnchorSeoFields & {

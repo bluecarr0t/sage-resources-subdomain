@@ -107,7 +107,7 @@ describe('/api/admin/comps-v2/search', () => {
         radiusMiles: 100,
         sources: {
           pastReports: true,
-          all_glamping_properties: true,
+          all_sage_data: true,
           hipcamp: true,
           all_roverpass_data_new: true,
           campspot: true,
@@ -149,7 +149,7 @@ describe('/api/admin/comps-v2/search', () => {
         stream: true,
         sources: {
           pastReports: true,
-          all_glamping_properties: true,
+          all_sage_data: true,
           hipcamp: true,
           all_roverpass_data_new: true,
           campspot: true,
@@ -202,7 +202,7 @@ describe('/api/admin/comps-v2/search', () => {
       expect.objectContaining({
         sources: {
           pastReports: false,
-          all_glamping_properties: false,
+          all_sage_data: false,
           hipcamp: false,
           all_roverpass_data_new: false,
           campspot: false,
@@ -223,7 +223,7 @@ describe('/api/admin/comps-v2/search', () => {
         state: 'TX',
         sources: {
           pastReports: true,
-          all_glamping_properties: true,
+          all_sage_data: true,
           hipcamp: true,
           all_roverpass_data_new: true,
           campspot: true,

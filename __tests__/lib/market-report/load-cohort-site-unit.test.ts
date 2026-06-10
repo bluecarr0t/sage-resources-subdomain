@@ -27,7 +27,7 @@ describe('cohort site/unit metric and min filter', () => {
 
   it('applyMinSiteUnitCountFilter keeps glamping Sage rows below threshold', () => {
     const sage = {
-      source: 'all_glamping_properties',
+      source: 'all_sage_data',
       property_total_sites: 1,
       quantity_of_units: 1,
     } as DedupedCohortRow;
@@ -54,7 +54,7 @@ describe('cohort site/unit metric and min filter', () => {
 
   it('applyMinSiteUnitCountFilter still applies to all sources for rv_resort', () => {
     const sageRv = {
-      source: 'all_glamping_properties',
+      source: 'all_sage_data',
       property_total_sites: 2,
       quantity_of_units: null,
     } as DedupedCohortRow;

@@ -21,8 +21,10 @@ export const SAGE_AI_MODEL_STORAGE_KEY = 'sage-ai-model-selection-v1';
  */
 export const SAGE_AI_PREMIUM_MODELS_STORAGE_KEY = 'sage-ai-premium-models-unlocked-v1';
 
+import { SAGE_AI_WEB_RESEARCH_UI_ENABLED } from '@/lib/sage-ai/server-capabilities';
+
 /** When true, the Web Research toggle is interactive; server also requires `SAGE_AI_WEB_RESEARCH_ENABLED=true`. */
-export const SAGE_AI_WEB_RESEARCH_UI_ENABLED = true;
+export { SAGE_AI_WEB_RESEARCH_UI_ENABLED };
 
 /** Legacy `{ k: 'auto' | 'premium' | 'm', id? }` or current `{ modelId }`. */
 type StoredSelection =
@@ -96,6 +98,8 @@ export function sageAiTriggerLabel(
 type SageAiModelPickerProps = {
   selection: SageAiModelSelection;
   onSelectionChange: (next: SageAiModelSelection) => void;
+  /** When false, the web research row is hidden (server env not enabled). */
+  webResearchServerEnabled?: boolean;
   /** Controlled Web Research toggle (default off in parent). */
   webResearchEnabled: boolean;
   onWebResearchChange: (next: boolean) => void;
@@ -112,6 +116,7 @@ type SageAiModelPickerProps = {
 export function SageAiModelPicker({
   selection,
   onSelectionChange,
+  webResearchServerEnabled = false,
   webResearchEnabled,
   onWebResearchChange,
   premiumModelsUnlocked,
@@ -157,63 +162,43 @@ export function SageAiModelPicker({
           <div
             className="absolute bottom-full left-0 z-[100] mb-1.5 w-[min(calc(100vw-2rem),320px)] overflow-hidden rounded-xl border border-neutral-200/70 bg-white py-1 shadow-xl ring-1 ring-black/5 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-white/10"
           >
-            <div
-              className={`border-b border-gray-200 px-2 pb-2 pt-1 dark:border-neutral-800 ${
-                SAGE_AI_WEB_RESEARCH_UI_ENABLED ? '' : 'cursor-not-allowed opacity-50'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3 rounded-md px-2 py-2">
-                <div className="flex min-w-0 items-center gap-2">
-                  <Globe className="h-3.5 w-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
-                  <span
-                    className={`text-sm font-medium ${
-                      SAGE_AI_WEB_RESEARCH_UI_ENABLED
-                        ? 'text-gray-900 dark:text-gray-100'
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}
-                  >
-                    {t('webResearchLabel')}
-                  </span>
-                  {SAGE_AI_WEB_RESEARCH_UI_ENABLED ? (
+            {webResearchServerEnabled ? (
+              <div className="border-b border-gray-200 px-2 pb-2 pt-1 dark:border-neutral-800">
+                <div className="flex items-center justify-between gap-3 rounded-md px-2 py-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Globe className="h-3.5 w-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {t('webResearchLabel')}
+                    </span>
                     <span
                       className="flex-shrink-0 text-xs font-semibold text-amber-600 dark:text-amber-400"
                       aria-label={t('webResearchCostAria')}
                     >
                       $$$$
                     </span>
-                  ) : null}
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={webResearchEnabled}
-                  disabled={!SAGE_AI_WEB_RESEARCH_UI_ENABLED}
-                  aria-label={
-                    SAGE_AI_WEB_RESEARCH_UI_ENABLED
-                      ? t('webResearchAria')
-                      : t('webResearchAriaDisabled')
-                  }
-                  title={
-                    SAGE_AI_WEB_RESEARCH_UI_ENABLED ? undefined : t('webResearchAriaDisabled')
-                  }
-                  onClick={() => {
-                    if (SAGE_AI_WEB_RESEARCH_UI_ENABLED) onWebResearchChange(!webResearchEnabled);
-                  }}
-                  className={`relative h-6 w-10 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed ${
-                    webResearchEnabled && SAGE_AI_WEB_RESEARCH_UI_ENABLED
-                      ? 'bg-sage-600 dark:bg-sage-600'
-                      : 'bg-gray-200 dark:bg-gray-700'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none absolute left-0.5 top-0.5 block h-5 w-5 rounded-full bg-white shadow-sm ring-1 ring-black/5 transition-transform dark:ring-white/10 ${
-                      webResearchEnabled && SAGE_AI_WEB_RESEARCH_UI_ENABLED ? 'translate-x-4' : 'translate-x-0'
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={webResearchEnabled}
+                    aria-label={t('webResearchAria')}
+                    onClick={() => onWebResearchChange(!webResearchEnabled)}
+                    className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${
+                      webResearchEnabled
+                        ? 'bg-sage-600 dark:bg-sage-600'
+                        : 'bg-gray-200 dark:bg-gray-700'
                     }`}
-                    aria-hidden
-                  />
-                </button>
+                  >
+                    <span
+                      className={`pointer-events-none absolute left-0.5 top-0.5 block h-5 w-5 rounded-full bg-white shadow-sm ring-1 ring-black/5 transition-transform dark:ring-white/10 ${
+                        webResearchEnabled ? 'translate-x-4' : 'translate-x-0'
+                      }`}
+                      aria-hidden
+                    />
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : null}
             <div className="border-b border-gray-200 px-2 pb-2 pt-1 dark:border-neutral-800">
               <div className="flex items-center justify-between gap-3 rounded-md px-2 py-2">
                 <div className="flex min-w-0 items-center gap-2">

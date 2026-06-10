@@ -32,7 +32,7 @@ export const GET = withAdminAuth(async () => {
 
     const [propsResult, pendingCandidatesResult, totalCandidatesResult] = await Promise.all([
       supabase
-        .from('all_glamping_properties')
+        .from('all_sage_data')
         .select('discovery_source, created_at, date_added')
         .in('discovery_source', DISCOVERY_SOURCES),
       supabase

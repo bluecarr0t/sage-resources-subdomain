@@ -7,6 +7,7 @@ import { useGoogleMaps } from '@/components/GoogleMapsProvider';
 import { formatCurrency, humanLabel } from '@/lib/market-report/format-labels';
 import { marketReportSourceLabel } from '@/lib/market-report/source-labels';
 import type { MarketReportMapPin } from '@/lib/market-report/types';
+import { panMapToFitInfoWindowIfNeeded } from '@/components/map/utils/panInfoWindowIntoView';
 
 const MAP_HEIGHT_PX = 500;
 const MILES_TO_METERS = 1609.34;
@@ -248,7 +249,9 @@ export function MarketReportMapPreview({
     propertyMarkersRef.current = [];
 
     if (!infoWindowRef.current) {
-      infoWindowRef.current = new google.maps.InfoWindow();
+      infoWindowRef.current = new google.maps.InfoWindow({
+        disableAutoPan: true,
+      });
     }
     const infoWindow = infoWindowRef.current;
 
@@ -266,6 +269,7 @@ export function MarketReportMapPreview({
           buildInfoWindowHtml(p, { presenterMode, anonymizePins, listingIndex: index }),
         );
         infoWindow.open({ map, anchor: marker });
+        void panMapToFitInfoWindowIfNeeded(map, { lat: p.lat, lng: p.lng });
       });
       return marker;
     });

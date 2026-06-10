@@ -56,7 +56,7 @@ Use this INSTEAD of generate_python_code when the user wants charts, KPI tiles, 
 CRITICAL — chart cells need real \`rows\`:
 - \`stat\` cells use \`value\` / \`value_format\` only; they do **not** need \`rows\`.
 - Every **bar / line / area / pie / scatter** cell MUST include a **non-empty** \`rows\` array. If you omit \`rows\` or pass \`[]\`, the chart shows **"No data"** in the UI — this is not a model bug; the payload was incomplete.
-- After \`aggregate_properties\`, copy the tool's \`aggregates\` array into each chart cell as \`rows\` (same objects). Set \`x_key\` to the \`group_by\` column name (e.g. \`unit_type\`, \`state\`). Set \`y_keys\` to the metric keys on each row; **rate breakdowns should include \`avg_daily_rate\` and \`median_daily_rate\`** (server already applies **IQR(1.5) outlier screening** + **unit weighting** on effective ADR; do not re-average raw \`rate_avg_retail_daily_rate\` in the UI). For **glamping / \`all_glamping_properties\`**, also include \`["properties"]\` (distinct **addresses** per group, not unit-line rows) and \`["total_units"]\` for inventory; **do not** plot or label \`total_sites\` (it is null — use **units** only). Example for unit_type breakdown: \`rows\` = aggregates, \`x_key\` = "unit_type", \`y_keys\` = ["total_units", "avg_daily_rate", "median_daily_rate"].
+- After \`aggregate_properties\`, copy the tool's \`aggregates\` array into each chart cell as \`rows\` (same objects). Set \`x_key\` to the \`group_by\` column name (e.g. \`unit_type\`, \`state\`). Set \`y_keys\` to the metric keys on each row; **rate breakdowns should include \`avg_daily_rate\` and \`median_daily_rate\`** (server already applies **IQR(1.5) outlier screening** + **unit weighting** on effective ADR; do not re-average raw \`rate_avg_retail_daily_rate\` in the UI). For **glamping / \`all_sage_data\`**, also include \`["properties"]\` (distinct **addresses** per group, not unit-line rows) and \`["total_units"]\` for inventory; **do not** plot or label \`total_sites\` (it is null — use **units** only). Example for unit_type breakdown: \`rows\` = aggregates, \`x_key\` = "unit_type", \`y_keys\` = ["total_units", "avg_daily_rate", "median_daily_rate"].
 
 After you call this tool, keep your **chat prose** to about **4-5 short bullets or sentences** — do not repeat every KPI and segment the dashboard already shows. Put methodology, filter notes, and source wording in \`description\` / \`footer_note\` / cell subtitles instead.
 
@@ -65,7 +65,7 @@ Rules:
 - Kinds available: ${DASHBOARD_CHART_KINDS.join(', ')}. Use \`stat\` for big-number KPI tiles.
 - Keep \`cells.length\` <= 8. Aim for 2–4 cells for most asks.
 - For \`scatter\`, \`x_key\` may be categorical; the client infers axis type. Y values may be numbers or numeric strings.
-- \`stat\` cells for **unit totals / inventory** on \`all_glamping_properties\` must use **sum of \`quantity_of_units\`** (e.g. \`count_unique_properties.total_units\`); never use raw row count as "units".
+- \`stat\` cells for **unit totals / inventory** on \`all_sage_data\` must use **sum of \`quantity_of_units\`** (e.g. \`count_unique_properties.total_units\`); never use raw row count as "units".
 - \`span\` is on a 12-col grid; use 6 for two-up, 12 for full-width, 4 for triple KPI rows.
 - Use \`value_format='currency_usd'\` when a series is money and \`'percent'\` when it's a ratio in [0,1].
 - Do NOT include PII or raw URLs in cell payloads.`,

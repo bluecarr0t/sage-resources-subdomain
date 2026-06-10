@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { HotTubCohortRow } from '@/lib/glamping-hot-tub-research/types';
 
-export const HOT_TUB_TABLE = 'all_glamping_properties';
+export const HOT_TUB_TABLE = 'all_sage_data';
 
 const SELECT_COLS =
   'id, property_id, property_name, site_name, unit_type, url, ota_url_hipcamp, ota_url_airbnb, description, amenities_raw, unit_hot_tub, property_hot_tub, unit_hot_tub_or_sauna, unit_sauna, discovery_source, notes, quantity_of_units';

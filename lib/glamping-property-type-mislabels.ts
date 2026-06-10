@@ -31,7 +31,6 @@ export const GLAMPING_UNIT_TYPE_DISPLAY_LABELS: readonly string[] = [
   'Eco-suite',
   'Floating Tent',
   'Glamping Pod',
-  'Glamping Tent',
   'Hut',
   'Igloo',
   'Lodge',

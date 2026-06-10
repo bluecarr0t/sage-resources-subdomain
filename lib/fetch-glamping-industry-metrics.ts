@@ -16,6 +16,10 @@ import {
 } from '@/lib/glamping-market-snapshot-property-type-filter';
 import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
+import {
+  glampingMarketSnapshotUnitsForRow,
+  parseGlampingMarketSnapshotPositiveNumber,
+} from '@/lib/glamping-market-snapshot/site-units-for-row';
 
 const PAGE_SIZE = 1000;
 
@@ -56,25 +60,10 @@ type Row = {
   created_at: string | null;
 };
 
-function parsePositiveNumber(value: unknown): number | null {
-  if (value == null) return null;
-  if (typeof value === 'number' && Number.isFinite(value) && value > 0) return value;
-  const n = parseFloat(String(value).replace(/[$,]/g, '').trim());
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return n;
-}
-
 function parseTimestampMs(value: string | null | undefined): number | null {
   if (value == null || !String(value).trim()) return null;
   const ms = Date.parse(String(value));
   return Number.isFinite(ms) ? ms : null;
-}
-
-function unitsForRow(row: Row): number {
-  const fromUnits = parsePositiveNumber(row.quantity_of_units);
-  const fromTotal = parsePositiveNumber(row.property_total_sites);
-  const n = fromUnits ?? fromTotal ?? 0;
-  return Math.round(n);
 }
 
 /** Median of a non-empty sorted array (ascending). */
@@ -156,7 +145,7 @@ export async function fetchGlampingIndustryMetrics(
   for (;;) {
     let query = applyGlampingOnlyPropertyTypeFilter(
       supabase
-        .from('all_glamping_properties')
+        .from('all_sage_data')
         .select(
           'property_name, property_type, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, updated_at, created_at'
         )
@@ -195,7 +184,7 @@ export async function fetchGlampingIndustryMetrics(
         if (openState === 'proposed_development') proposedDevelopmentNames.add(name);
       }
 
-      const rowUnits = unitsForRow(row);
+      const rowUnits = glampingMarketSnapshotUnitsForRow(row);
       totalUnits += rowUnits;
 
       const primaryLabel = normalizeGlampingUnitTypeForStorage(row.unit_type);
@@ -207,7 +196,7 @@ export async function fetchGlampingIndustryMetrics(
       }
 
       if (bucketGlampingIsOpenForMetrics(row.is_open) === 'yes') {
-        const adr = parsePositiveNumber(row.rate_avg_retail_daily_rate);
+        const adr = parseGlampingMarketSnapshotPositiveNumber(row.rate_avg_retail_daily_rate);
         if (adr != null) {
           if (name) recordPropertyAdrSample(adrByProperty, name, adr);
           if (primaryLabel) {

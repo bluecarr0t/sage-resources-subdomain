@@ -15,6 +15,7 @@ import type {
   Anchor,
   PropertySource,
 } from './types';
+import { anchorUsesSlugFilter, type AnchorPointAnchorType } from './anchor-type';
 import {
   DEGREES_PRE_FILTER,
   COORD_PRECISION,
@@ -26,6 +27,11 @@ import {
 } from './constants';
 import { normalizeState } from './utils';
 import type { CountyLookups } from './fetch-county-data';
+import {
+  isAnySeasonRateMissing,
+  isWinterSeasonRateMissing,
+  type SeasonRateKey,
+} from '@/lib/glamping-seasonal-rate';
 
 function toOccupancyPct(v: number | null): number | null {
   if (v === null || v === undefined) return null;
@@ -106,8 +112,8 @@ export function deduplicateByNameAndState(properties: NormalizedProperty[]): Nor
       continue;
     }
     // Prefer property with winter rate; then prefer hipcamp (has year-specific occupancy)
-    const pHasRate = (p.winter_weekday ?? p.winter_weekend) != null;
-    const existingHasRate = (existing.winter_weekday ?? existing.winter_weekend) != null;
+    const pHasRate = !isWinterSeasonRateMissing(p, p.season_closed);
+    const existingHasRate = !isWinterSeasonRateMissing(existing, existing.season_closed);
     if (pHasRate && !existingHasRate) byKey.set(key, p);
     else if (pHasRate === existingHasRate && p.source === 'hipcamp' && existing.source === 'sage_glamping')
       byKey.set(key, p);
@@ -174,7 +180,7 @@ export function applyAnchorFilter(
   anchors: Anchor[],
   anchorId: number | null,
   anchorSlug: string | null,
-  isNationalParks: boolean
+  anchorType: AnchorPointAnchorType
 ): {
   proximityForAggregation: PropertyWithProximity[];
   selectedAnchor: { id: number; name: string; lat: number; lon: number; slug?: string } | null;
@@ -182,13 +188,13 @@ export function applyAnchorFilter(
   let selectedAnchor: { id: number; name: string; lat: number; lon: number; slug?: string } | null = null;
   let proximityForAggregation = withProximity;
 
-  if (isNationalParks && anchorSlug) {
+  if (anchorUsesSlugFilter(anchorType) && anchorSlug) {
     const match = anchors.find((a) => a.slug === anchorSlug);
     if (match) {
       selectedAnchor = { id: match.id, name: match.name, lat: match.lat, lon: match.lon, slug: match.slug };
       proximityForAggregation = withProximity.filter((p) => p.nearest_anchor === match.name);
     }
-  } else if (!isNationalParks && anchorId != null && !isNaN(anchorId)) {
+  } else if (!anchorUsesSlugFilter(anchorType) && anchorId != null && !isNaN(anchorId)) {
     const match = anchors.find((a) => a.id === anchorId);
     if (match) {
       selectedAnchor = { id: match.id, name: match.name, lat: match.lat, lon: match.lon };
@@ -296,7 +302,7 @@ export function aggregateBySource(proximityForAggregation: PropertyWithProximity
   });
 }
 
-function getPropertyRateForState(p: PropertyWithProximity, useYearAvg: boolean): number | null {
+export function getPropertyRateForState(p: PropertyWithProximity, useYearAvg: boolean): number | null {
   if (useYearAvg) {
     const rates = [
       p.winter_weekday, p.winter_weekend,
@@ -308,6 +314,30 @@ function getPropertyRateForState(p: PropertyWithProximity, useYearAvg: boolean):
     return rates.reduce((a, b) => a + b, 0) / rates.length;
   }
   return p.winter_weekday ?? p.winter_weekend ?? null;
+}
+
+/** Data quality: true when no numeric or `closed` documentation for required seasons. */
+export function isPropertyRateMissingForQuality(
+  p: PropertyWithProximity,
+  useYearAvg: boolean
+): boolean {
+  if (useYearAvg) {
+    const numeric = {
+      winter_weekday: p.winter_weekday,
+      winter_weekend: p.winter_weekend,
+      spring_weekday: p.spring_weekday,
+      spring_weekend: p.spring_weekend,
+      summer_weekday: p.summer_weekday,
+      summer_weekend: p.summer_weekend,
+      fall_weekday: p.fall_weekday,
+      fall_weekend: p.fall_weekend,
+    } satisfies Record<SeasonRateKey, number | null>;
+    return isAnySeasonRateMissing(numeric, p.season_closed);
+  }
+  return isWinterSeasonRateMissing(
+    { winter_weekday: p.winter_weekday, winter_weekend: p.winter_weekend },
+    p.season_closed
+  );
 }
 
 export function aggregateByState(
@@ -403,10 +433,18 @@ export function buildPropertySample(
     });
 }
 
+export type AnchorWithCount = {
+  anchor_id?: number;
+  anchor_name: string;
+  anchor_slug?: string;
+  property_count_15_mi: number;
+  units_count_15_mi: number;
+};
+
 export function buildAnchorsWithCounts(
   anchors: Anchor[],
   withProximityAll: PropertyWithProximity[]
-) {
+): { top: AnchorWithCount[]; all: AnchorWithCount[] } {
   const anchorsWithCounts = anchors.map((anchor) => {
     const within15 = withProximityAll.filter((p) => {
       const d = calculateDistance(p.lat, p.lon, anchor.lat, anchor.lon);
@@ -421,10 +459,69 @@ export function buildAnchorsWithCounts(
       units_count_15_mi: units,
     };
   });
-  return anchorsWithCounts
+  const all = anchorsWithCounts
     .filter((s) => s.units_count_15_mi > 0)
-    .sort((a, b) => b.units_count_15_mi - a.units_count_15_mi)
-    .slice(0, MAX_ANCHORS_WITH_COUNTS);
+    .sort((a, b) => b.units_count_15_mi - a.units_count_15_mi);
+  return {
+    all,
+    top: all.slice(0, MAX_ANCHORS_WITH_COUNTS),
+  };
+}
+
+export interface DataQualityMetrics {
+  total_properties: number;
+  total_units: number;
+  properties_with_rate: number;
+  properties_missing_rate: number;
+  properties_missing_unit_fields: number;
+  properties_zero_units: number;
+  by_source: Array<{
+    source: string;
+    total: number;
+    missing_rate: number;
+    missing_unit_fields: number;
+  }>;
+}
+
+export function buildDataQuality(
+  properties: PropertyWithProximity[],
+  useYearAvgRate: boolean
+): DataQualityMetrics {
+  const sources: PropertySource[] = ['hipcamp', 'sage_glamping'];
+  const bySource = sources.map((source) => {
+    const rows = properties.filter((p) => p.source === source);
+    let missingRate = 0;
+    let missingUnitFields = 0;
+    for (const p of rows) {
+      if (isPropertyRateMissingForQuality(p, useYearAvgRate)) missingRate++;
+      if (p.quantity_of_units == null && p.property_total_sites == null) missingUnitFields++;
+    }
+    return {
+      source: source === 'hipcamp' ? 'Hipcamp' : 'Sage Glamping',
+      total: rows.length,
+      missing_rate: missingRate,
+      missing_unit_fields: missingUnitFields,
+    };
+  });
+
+  let propertiesWithRate = 0;
+  let missingUnitFields = 0;
+  let zeroUnits = 0;
+  for (const p of properties) {
+    if (!isPropertyRateMissingForQuality(p, useYearAvgRate)) propertiesWithRate++;
+    if (p.quantity_of_units == null && p.property_total_sites == null) missingUnitFields++;
+    if (toUnits(p) === 0) zeroUnits++;
+  }
+
+  return {
+    total_properties: properties.length,
+    total_units: properties.reduce((sum, p) => sum + toUnits(p), 0),
+    properties_with_rate: propertiesWithRate,
+    properties_missing_rate: properties.length - propertiesWithRate,
+    properties_missing_unit_fields: missingUnitFields,
+    properties_zero_units: zeroUnits,
+    by_source: bySource,
+  };
 }
 
 export function buildMapData(
@@ -472,10 +569,11 @@ export function buildSummary(
   anchors: Anchor[],
   selectedAnchor: { id: number; name: string; lat: number; lon: number; slug?: string } | null,
   { statePopulationLookup, stateGDPLookup }: CountyLookups,
-  withinMiThreshold: number = 30
+  withinMiThreshold: number = 30,
+  useYearAvgRate: boolean = false
 ) {
   const allRates = proximityForAggregation
-    .map((p) => p.winter_weekday ?? p.winter_weekend)
+    .map((p) => getPropertyRateForState(p, useYearAvgRate))
     .filter((v): v is number => v !== null);
   const statesWithProps = new Set(
     proximityForAggregation.map((p) => normalizeState(p.state)).filter((s): s is string => s != null)
@@ -490,25 +588,29 @@ export function buildSummary(
     if (pop?.population_2020) { totalStatePop += pop.population_2020; popCount++; }
     if (gdp?.gdp_2023) { totalStateGDP += gdp.gdp_2023; gdpCount++; }
   }
-  const propertiesWithWinterRates = allRates.length;
+  const propertiesWithRates = allRates.length;
   const withinCount = proximityForAggregation.filter((p) => p.distance_miles <= withinMiThreshold).length;
   const totalUnits = proximityForAggregation.reduce((sum, p) => sum + toUnits(p), 0);
   const withinProps = proximityForAggregation.filter((p) => p.distance_miles <= withinMiThreshold);
   const unitsWithinXMi = withinProps.reduce((sum, p) => sum + toUnits(p), 0);
-  const unitsWithWinterRates = proximityForAggregation.reduce((sum, p) => {
-    const hasRate = (p.winter_weekday ?? p.winter_weekend) != null;
+  const unitsWithRates = proximityForAggregation.reduce((sum, p) => {
+    const hasRate = getPropertyRateForState(p, useYearAvgRate) != null;
     return sum + (hasRate ? toUnits(p) : 0);
   }, 0);
+  const avgRate =
+    propertiesWithRates > 0 ? Math.round(allRates.reduce((a, b) => a + b, 0) / propertiesWithRates) : null;
   return {
     total_properties: proximityForAggregation.length,
     total_units: totalUnits,
     properties_within_30_mi: withinCount,
     units_within_x_mi: unitsWithinXMi,
     within_mi_threshold: withinMiThreshold,
-    properties_with_winter_rates: propertiesWithWinterRates,
-    units_with_winter_rates: unitsWithWinterRates,
+    properties_with_winter_rates: propertiesWithRates,
+    units_with_winter_rates: unitsWithRates,
     anchors_count: selectedAnchor ? 1 : anchors.length,
-    avg_winter_rate: propertiesWithWinterRates > 0 ? Math.round(allRates.reduce((a, b) => a + b, 0) / propertiesWithWinterRates) : null,
+    avg_winter_rate: useYearAvgRate ? null : avgRate,
+    avg_rate: useYearAvgRate ? avgRate : null,
+    uses_blended_seasonal_rate: useYearAvgRate,
     data_sources: 2,
     avg_state_population_2020: popCount > 0 ? Math.round(totalStatePop / popCount) : null,
     combined_state_gdp_2023: gdpCount > 0 ? Math.round(totalStateGDP) : null,

@@ -1,7 +1,8 @@
 /**
- * Fetch anchors (ski resorts or national parks) from Supabase
+ * Fetch anchors (ski resorts, national parks, or wineries) from Supabase
  */
 
+import type { AnchorPointAnchorType } from './anchor-type';
 import type { Anchor } from './types';
 import { parseCoord } from './utils';
 
@@ -9,11 +10,11 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export async function fetchAnchors(
   supabase: SupabaseClient,
-  isNationalParks: boolean
+  anchorType: AnchorPointAnchorType
 ): Promise<Anchor[]> {
   const anchors: Anchor[] = [];
 
-  if (isNationalParks) {
+  if (anchorType === 'national-parks') {
     const { data: parkRows, error: parkError } = await supabase
       .from('national-parks')
       .select('id, name, latitude, longitude, slug')
@@ -32,6 +33,21 @@ export async function fetchAnchors(
           lon,
           slug: r.slug ? String(r.slug).trim() : undefined,
         });
+      }
+    }
+  } else if (anchorType === 'wineries') {
+    const { data: wineryRows, error: wineryError } = await supabase
+      .from('wineries')
+      .select('id, name, lat, lon')
+      .not('lat', 'is', null)
+      .not('lon', 'is', null);
+
+    if (wineryError) throw wineryError;
+    for (const r of wineryRows || []) {
+      const lat = parseCoord(r.lat);
+      const lon = parseCoord(r.lon);
+      if (lat !== null && lon !== null && r.name) {
+        anchors.push({ id: r.id, name: r.name, lat, lon });
       }
     }
   } else {

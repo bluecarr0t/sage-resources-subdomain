@@ -23,10 +23,10 @@ describe('assembleMarketReportDocx', () => {
         inventoryRowCount: 1,
         radiusMiles: 25,
         segment: 'glamping',
-        sourceCounts: [{ source: 'all_glamping_properties', sourceLabel: 'Sage', count: 1 }],
+        sourceCounts: [{ source: 'all_sage_data', sourceLabel: 'Sage', count: 1 }],
         sourceBreakdown: [
           {
-            source: 'all_glamping_properties',
+            source: 'all_sage_data',
             sourceLabel: 'Sage',
             inventoryRowCount: 1,
             distinctListingCount: 1,
@@ -63,7 +63,7 @@ describe('assembleMarketReportDocx', () => {
             property_total_sites: 10,
             property_type: 'Resort',
             unit_type: 'Yurt',
-            source: 'all_glamping_properties',
+            source: 'all_sage_data',
             sourceLabel: 'Sage',
             rate_avg: 100,
             url: null,

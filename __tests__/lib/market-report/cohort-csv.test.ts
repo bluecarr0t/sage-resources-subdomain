@@ -10,7 +10,7 @@ import type { DedupedCohortRow } from '@/lib/market-report/dedupe';
 
 function makeRow(overrides: Partial<DedupedCohortRow> = {}): DedupedCohortRow {
   return {
-    source: 'all_glamping_properties',
+    source: 'all_sage_data',
     sourceId: '1',
     property_name: 'Test Lodge',
     city: 'Bend',
@@ -85,7 +85,7 @@ describe('buildCohortCsv', () => {
     expect(csv).toContain('425.79');
     // Source label resolution should yield "Sage" or similar — at minimum it
     // must NOT be the bare table key when fed through marketReportSourceLabel.
-    expect(csv).toMatch(/all_glamping_properties/);
+    expect(csv).toMatch(/all_sage_data/);
     expect(csv).toContain('Test Lodge');
     expect(csv).toContain('Safari Tent');
   });

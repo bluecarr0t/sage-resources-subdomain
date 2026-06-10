@@ -35,7 +35,7 @@ export function compsV2MapMarkerColorForCandidate(c: {
 /** Marker fill colors for Google Maps (comps v2 results), keyed by `source_table` or legend key. */
 export function compsV2SourceTableMarkerColor(sourceTable: string): string {
   switch (sourceTable) {
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return '#1b4332';
     case 'hipcamp':
       return '#e85d04';

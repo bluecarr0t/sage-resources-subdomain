@@ -43,7 +43,7 @@ export function parseSourceToggles(raw: unknown): SourceToggles {
   const o = raw as Record<string, unknown>;
   return {
     pastReports: o.pastReports === true,
-    all_glamping_properties: o.all_glamping_properties === true,
+    all_sage_data: o.all_sage_data === true,
     hipcamp: o.hipcamp === true,
     all_roverpass_data_new: o.all_roverpass_data_new === true,
     campspot: o.campspot === true,

@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     if (propertyId) {
       const supabase = createServerClient();
       const { data: property, error } = await applyPublicMapCohortFilters(
-        supabase.from('all_glamping_properties').select('*').eq('id', propertyId)
+        supabase.from('all_sage_data').select('*').eq('id', propertyId)
       ).single();
       
       if (error || !property) {
@@ -215,7 +215,7 @@ async function fetchPropertiesFromDatabase(
 
   // Project only public/map columns at the database — avoids shipping full rows over the wire.
   let query = applyPublicMapCohortFilters(
-    supabase.from('all_glamping_properties').select(selectColumns)
+    supabase.from('all_sage_data').select(selectColumns)
   );
 
   // Filter by country

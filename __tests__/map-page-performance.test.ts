@@ -109,7 +109,7 @@ describe('Map Page Performance Audit', () => {
       
       const dbStartTime = Date.now();
       const { data: properties, error } = await supabase
-        .from('all_glamping_properties')
+        .from('all_sage_data')
         .select('*')
         .eq('is_glamping_property', 'Yes')
         .in('country', ['USA', 'United States', 'US', 'Canada', 'CA'])
@@ -313,7 +313,7 @@ describe('Map Page Performance Audit', () => {
     // Test 1: Query without filters (worst case)
     const start1 = Date.now();
     const { data: allProps } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('is_glamping_property', 'Yes')
       .limit(100);
@@ -322,7 +322,7 @@ describe('Map Page Performance Audit', () => {
     // Test 2: Query with country filter
     const start2 = Date.now();
     const { data: filteredProps } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('is_glamping_property', 'Yes')
       .in('country', ['USA', 'United States', 'US', 'Canada', 'CA'])
@@ -332,7 +332,7 @@ describe('Map Page Performance Audit', () => {
     // Test 3: Query with selected fields only
     const start3 = Date.now();
     const { data: minimalProps } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('id, property_name, lat, lon, state, country')
       .eq('is_glamping_property', 'Yes')
       .in('country', ['USA', 'United States', 'US', 'Canada', 'CA'])

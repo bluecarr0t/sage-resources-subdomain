@@ -148,7 +148,7 @@ function baseQuery(
   const sel = page.selectColumns ?? '*';
   let q = supabase.from(table as never).select(sel);
 
-  if (table === 'all_glamping_properties') {
+  if (table === 'all_sage_data') {
     q = q.eq('is_open', 'Yes').eq('is_glamping_property', 'Yes');
   }
   if (table === 'all_roverpass_data_new') {
@@ -173,7 +173,7 @@ function baseQuery(
   const geo = sitesExportZipRadiusGeoActive(parsed);
   const bboxMiles = geo ? (parsed.radiusMilesResolved ?? parsed.radiusMiles)! : 0;
 
-  if (geo && (table === 'all_glamping_properties' || table === 'all_roverpass_data_new')) {
+  if (geo && (table === 'all_sage_data' || table === 'all_roverpass_data_new')) {
     const bb = getBoundingBox(parsed.centerLat!, parsed.centerLng!, bboxMiles);
     q = q
       .gte('lat', bb.minLat)

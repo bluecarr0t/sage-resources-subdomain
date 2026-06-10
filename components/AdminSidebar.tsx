@@ -68,6 +68,7 @@ const REPORTS_PAGE_IDS = new Set([
 
 const TOOLS_PAGE_IDS = new Set([
   'proximity-insights',
+  'cost-explorer',
   'site-design',
   'site-builder',
   'sage-ai',
@@ -375,14 +376,6 @@ export default function AdminSidebar() {
                   isActive={activePageId === 'comps'}
                   isCollapsed={showCollapsed}
                 />
-                <NavLink
-                  href="/admin/cost-explorer"
-                  label="Cost Explorer"
-                  icon={Calculator}
-                  pageId="cost-explorer"
-                  isActive={activePageId === 'cost-explorer'}
-                  isCollapsed={showCollapsed}
-                />
                 {/* Report Builder hidden from menu — page still accessible via direct URL */}
                 {!showCollapsed ? (
                   <div className="space-y-1">
@@ -564,12 +557,7 @@ export default function AdminSidebar() {
                         }`}
                         aria-hidden
                       />
-                      <span className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-sm">
-                        <span className="truncate">{tSidebar('tools')}</span>
-                        <span className="shrink-0 rounded-full border border-orange-200/90 bg-orange-100 px-1 py-px text-[8px] font-semibold uppercase leading-none tracking-wide text-orange-900 dark:border-orange-800/80 dark:bg-orange-950/80 dark:text-orange-200">
-                          {tSidebar('beta')}
-                        </span>
-                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm">{tSidebar('tools')}</span>
                       <ChevronDown
                         className={`h-4 w-4 flex-shrink-0 text-neutral-400 transition-transform duration-200 ${
                           toolsMenuOpen ? 'rotate-180' : ''
@@ -592,6 +580,7 @@ export default function AdminSidebar() {
                           pageId="sage-ai"
                           isActive={activePageId === 'sage-ai'}
                           isCollapsed={false}
+                          showBeta
                         />
                         <NavLink
                           href="/admin/proximity-insights"
@@ -599,6 +588,14 @@ export default function AdminSidebar() {
                           icon={MapPin}
                           pageId="proximity-insights"
                           isActive={activePageId === 'proximity-insights'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/cost-explorer"
+                          label={tSidebar('costExplorer')}
+                          icon={Calculator}
+                          pageId="cost-explorer"
+                          isActive={activePageId === 'cost-explorer'}
                           isCollapsed={false}
                         />
                         <NavLink
@@ -632,8 +629,8 @@ export default function AdminSidebar() {
                       }`}
                       aria-expanded={toolsFlyoutOpen}
                       aria-haspopup="menu"
-                      aria-label={`${tSidebar('tools')} (${tSidebar('beta')})`}
-                      title={`${tSidebar('tools')} (${tSidebar('beta')})`}
+                      aria-label={tSidebar('tools')}
+                      title={tSidebar('tools')}
                     >
                       <Wrench
                         className={`h-5 w-5 flex-shrink-0 ${
@@ -660,7 +657,12 @@ export default function AdminSidebar() {
                           }`}
                         >
                           <Bot className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-                          {tSidebar('sageAi')}
+                          <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
+                            <span className="truncate">{tSidebar('sageAi')}</span>
+                            <span className="shrink-0 rounded-full border border-orange-200/90 bg-orange-100 px-1 py-px text-[8px] font-semibold uppercase leading-none tracking-wide text-orange-900 dark:border-orange-800/80 dark:bg-orange-950/80 dark:text-orange-200">
+                              {tSidebar('beta')}
+                            </span>
+                          </span>
                         </Link>
                         <Link
                           href="/admin/proximity-insights"
@@ -674,6 +676,19 @@ export default function AdminSidebar() {
                         >
                           <MapPin className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                           {tSidebar('proximityInsights')}
+                        </Link>
+                        <Link
+                          href="/admin/cost-explorer"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'cost-explorer'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <Calculator className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('costExplorer')}
                         </Link>
                         <Link
                           href="/admin/rv-site-setup"

@@ -36,7 +36,7 @@ import {
 } from '@/lib/sage-ai/glamping-field-guide';
 import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
 
-/** `all_glamping_properties.is_open` filter values (Yes / Under Construction / Proposed Development / Temporarily closed / Closed). */
+/** `all_sage_data.is_open` filter values (Yes / Under Construction / Proposed Development / Temporarily closed / Closed). */
 const zGlampingIsOpen = z.enum(GLAMPING_IS_OPEN_VALUES);
 
 /** PostgREST often returns `numeric` columns as strings; keep aggregates numeric for UI. */
@@ -138,7 +138,7 @@ async function quotaGate(
 }
 
 const ALLOWED_TABLES = [
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'campspot',
   'all_roverpass_data_new',
@@ -293,7 +293,7 @@ const COLUMN_ALLOWLIST_BY_TABLE: Record<
   AllowedTable,
   readonly string[] | 'dynamic'
 > = {
-  all_glamping_properties: PROPERTIES_COLUMN_ALLOWLIST,
+  all_sage_data: PROPERTIES_COLUMN_ALLOWLIST,
   hipcamp: HIPCAMP_COLUMN_ALLOWLIST,
   reports: REPORTS_COLUMN_ALLOWLIST,
   'county-population': COUNTY_POPULATION_COLUMN_ALLOWLIST,
@@ -563,7 +563,7 @@ export function createSageAiTools(
         return {
           tables: [
             {
-              name: 'all_glamping_properties',
+              name: 'all_sage_data',
               description:
                 'Glamping properties (unit-level rows). Features/amenities are many `unit_*`, `property_*`, `activities_*`, `setting_*`, `rv_*` columns — not one `amenities` field. Use `column_eq_filters` or `get_column_values` on a specific flag column.',
               row_count_estimate: 'thousands',
@@ -625,12 +625,12 @@ export function createSageAiTools(
 
     query_properties: tool({
       description:
-        'Query the all_glamping_properties table with optional filters. **Data grain:** rows are **by unit** (unit-type / unit offering at a physical **`address`**), not one row per property — the same resort may appear on multiple rows. For **property counts**, dedupe by **`address`** (trimmed); if `address` is null/empty, use **`property_name` + `city` + `state` + `country`**. **`quantity_of_units` is the authoritative per-row physical unit count** — for **any** total units, inventory, or unit-weighted calculation, **always sum `quantity_of_units`** over the result set (do not use `len(rows)` or `property_total_sites` unless the user explicitly asked for rows or sites). Returns name, location, pricing, and related fields. Use filters (state/city/country/unit_type/etc.) to narrow results. Limit defaults to 50.\n\n' +
+        'Query the all_sage_data table with optional filters. **Data grain:** rows are **by unit** (unit-type / unit offering at a physical **`address`**), not one row per property — the same resort may appear on multiple rows. For **property counts**, dedupe by **`address`** (trimmed); if `address` is null/empty, use **`property_name` + `city` + `state` + `country`**. **`quantity_of_units` is the authoritative per-row physical unit count** — for **any** total units, inventory, or unit-weighted calculation, **always sum `quantity_of_units`** over the result set (do not use `len(rows)` or `property_total_sites` unless the user explicitly asked for rows or sites). Returns name, location, pricing, and related fields. Use filters (state/city/country/unit_type/etc.) to narrow results. Limit defaults to 50.\n\n' +
         '**AMENITIES & FEATURES —** ' +
         GLAMPING_AMENITIES_SCHEMA_BLURB +
         ' Use `column_eq_filters` for exact matches, e.g. `[{ column: "property_pool", value: "Yes" }]`, optionally combined with `filters.state` / `filters.country`.\n\n' +
         'STATE & REGION QUERIES — use the `filters.state` field, NOT the `near` parameter. Example: { filters: { state: "Texas" } }. The `state` filter accepts both 2-letter codes ("TX") and full names ("Texas") and is normalized server-side.\n\n' +
-        'PROXIMITY QUERIES — only set `near` when the user asked for results within a radius of a specific point (e.g. "within 50 km of Austin", "near Collective Retreats Vail"). When `near` is set, you MUST first call geocode_property (or have the user supply real lat/lng); NEVER hand-write coordinates and NEVER pass {latitude:0, longitude:0} as a placeholder — that is dropped server-side. You **may** combine `near` with `column_eq_filters` (e.g. amenity flags) or rate-related columns: the tool loads full `all_glamping_properties` rows for the in-radius ids and applies those filters in memory. Closest-`limit` matches from the RPC are still the candidate set before that filter, so a tight radius with many `column_eq` constraints can return 0 rows — widen the radius if needed.\n\n' +
+        'PROXIMITY QUERIES — only set `near` when the user asked for results within a radius of a specific point (e.g. "within 50 km of Austin", "near Collective Retreats Vail"). When `near` is set, you MUST first call geocode_property (or have the user supply real lat/lng); NEVER hand-write coordinates and NEVER pass {latitude:0, longitude:0} as a placeholder — that is dropped server-side. You **may** combine `near` with `column_eq_filters` (e.g. amenity flags) or rate-related columns: the tool loads full `all_sage_data` rows for the in-radius ids and applies those filters in memory. Closest-`limit` matches from the RPC are still the candidate set before that filter, so a tight radius with many `column_eq` constraints can return 0 rows — widen the radius if needed.\n\n' +
         '**PRICING / RETAIL ADR** — each row includes `rate_avg_retail_daily_rate` and a server-computed **`effective_retail_adr`** (USD/night, two decimals). When the average is null or stale, `effective_retail_adr` uses the seasonal `rate_winter_*` / `rate_spring_*` / `rate_summer_*` / `rate_fall_*` fields when any are present (same rules as `count_unique_properties`). For questions like "any units over $X/night", prefer **`effective_retail_adr`** over `rate_avg_retail_daily_rate` alone.',
       inputSchema: z.object({
         filters: z
@@ -720,7 +720,7 @@ export function createSageAiTools(
         // and silently match zero rows).
         filters = stripEmptyFilters(filters) as typeof filters;
         const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
-          'all_glamping_properties',
+          'all_sage_data',
           columns
         );
         const selectColumns = allowedCols.length
@@ -753,7 +753,7 @@ export function createSageAiTools(
         }
 
         // Proximity: `properties_within_radius` for distance-ordered ids (PostGIS),
-        // then re-fetch full all_glamping_properties rows so `column_eq_filters`
+        // then re-fetch full all_sage_data rows so `column_eq_filters`
         // and `filters.is_glamping_property` / `is_open` match the non-near path.
         if (near) {
           const baseSelectCols: string[] = allowedCols.length
@@ -838,7 +838,7 @@ export function createSageAiTools(
           }
 
           const { data: fullRows, error: fullErr } = await supabase
-            .from('all_glamping_properties')
+            .from('all_sage_data')
             .select(nearSelectString)
             .in('id', idOrder);
           if (fullErr) {
@@ -957,14 +957,14 @@ export function createSageAiTools(
           !(PROPERTIES_COLUMN_ALLOWLIST as readonly string[]).includes(order_by)
         ) {
           return {
-            error: `order_by column "${order_by}" is not in the allowlist for all_glamping_properties`,
+            error: `order_by column "${order_by}" is not in the allowlist for all_sage_data`,
             data: null,
             total_count: 0,
           };
         }
 
         let query = supabase
-          .from('all_glamping_properties')
+          .from('all_sage_data')
           .select(selectColumns, { count: 'exact' })
           .range(offset ?? 0, (offset ?? 0) + (limit ?? 50) - 1);
 
@@ -1023,7 +1023,7 @@ export function createSageAiTools(
               ? {
                   near_placeholder_dropped: true,
                   note:
-                    'Ignored placeholder near={latitude:0, longitude:0} and ran a state/filter-only query against all_glamping_properties. ' +
+                    'Ignored placeholder near={latitude:0, longitude:0} and ran a state/filter-only query against all_sage_data. ' +
                     'For state- or country-level questions, OMIT the `near` parameter — proximity (`near`) is only for "within X km of [coordinate/place]" questions.',
                 }
               : {}),
@@ -1461,10 +1461,10 @@ export function createSageAiTools(
         'envelope includes a `scope` ("whole_table" | "filtered") and a ' +
         '`summary` string you must repeat verbatim (or paraphrase faithfully) ' +
         'when citing the number.\n\n' +
-        'TABLE GRAIN — `all_glamping_properties`: rows are **unit-level** (unit-type lines tied to an `address`). ' +
+        'TABLE GRAIN — `all_sage_data`: rows are **unit-level** (unit-type lines tied to an `address`). ' +
         'This tool counts **rows**, not unique properties or total units. For "how many properties", count **distinct addresses** ' +
         '(fallback: `property_name`+`city`+`state`+`country` when `address` is empty) via `query_properties` and dedupe in your reasoning. ' +
-        'For "how many units" or any **unit inventory** total on `all_glamping_properties`, you must **sum `quantity_of_units`** (or call `count_unique_properties` for `total_units`). **Never** use this tool\'s row `count` as unit count; `quantity_of_units` is the per-record unit count.',
+        'For "how many units" or any **unit inventory** total on `all_sage_data`, you must **sum `quantity_of_units`** (or call `count_unique_properties` for `total_units`). **Never** use this tool\'s row `count` as unit count; `quantity_of_units` is the per-record unit count.',
       inputSchema: z.object({
         table: z.enum(ALLOWED_TABLES).describe('Table to count rows from'),
         filters: z
@@ -1497,7 +1497,7 @@ export function createSageAiTools(
           .map(([k, v]) => `${k}=${v}`)
           .join(', ');
         const glampingGrainNote =
-          table === 'all_glamping_properties'
+          table === 'all_sage_data'
             ? ' Unit-grain table: this is ROWS (unit-type records per address), not unique properties; for property counts use distinct `address` (or name+city+state+country fallback). For unit totals, sum `quantity_of_units`.'
             : '';
 
@@ -1514,7 +1514,7 @@ export function createSageAiTools(
           filters: allowedFilters,
           scope,
           summary,
-          ...(table === 'all_glamping_properties'
+          ...(table === 'all_sage_data'
             ? {
                 data_grain:
                   'Unit-level rows tied to `address`. `count` = database rows. Unique properties = distinct `address` (trimmed), or `property_name|city|state|country` when address missing. Units in scope = sum of `quantity_of_units`.',
@@ -1527,7 +1527,7 @@ export function createSageAiTools(
 
     get_column_values: tool({
       description:
-        'Get distinct values for a column on `all_glamping_properties` (ordered by frequency). Use for `research_status`, `unit_type`, or any **allowlisted** feature column — e.g. `unit_private_bathroom` (private/ensuite bathroom on the unit), `unit_hot_tub`, `property_pool` — typically "Yes" / "No" / null. ' +
+        'Get distinct values for a column on `all_sage_data` (ordered by frequency). Use for `research_status`, `unit_type`, or any **allowlisted** feature column — e.g. `unit_private_bathroom` (private/ensuite bathroom on the unit), `unit_hot_tub`, `property_pool` — typically "Yes" / "No" / null. ' +
         GLAMPING_AMENITIES_SCHEMA_BLURB,
       inputSchema: z.object({
         column: z
@@ -1536,7 +1536,7 @@ export function createSageAiTools(
           .max(64)
           .refine((c) => isGlampingDistinctColumn(c), {
             message:
-              'Unknown or unsupported column for distinct values on all_glamping_properties (long-text / JSON columns are excluded).',
+              'Unknown or unsupported column for distinct values on all_sage_data (long-text / JSON columns are excluded).',
           })
           .describe('Column name (e.g. research_status, property_pool, activities_hiking).'),
         limit: z.number().min(1).max(100).optional().default(50),
@@ -1603,7 +1603,7 @@ export function createSageAiTools(
 
     find_glamping_columns: tool({
       description:
-        '**Team-friendly column lookup (no database access required).** Map plain-language features or questions to real `all_glamping_properties` column names. ' +
+        '**Team-friendly column lookup (no database access required).** Map plain-language features or questions to real `all_sage_data` column names. ' +
         'Call this when the user mentions amenities in conversational language ("private bath", "dog park", "waterfront", "hiking", "true glamping") and you are not 100% sure of the exact `unit_*` / `property_*` / `activities_*` / `setting_*` name. ' +
         'Returns ranked matches with `column`, human `label`, and a short `how_to_filter` string. ' +
         'After resolving the column, use `get_column_values` to see actual values, then `query_properties` with `column_eq_filters` or `aggregate_properties` with `group_by`. ' +
@@ -1655,7 +1655,7 @@ export function createSageAiTools(
           return { error: 'Must provide either id or property_name', data: null };
         }
 
-        let query = supabase.from('all_glamping_properties').select('*');
+        let query = supabase.from('all_sage_data').select('*');
 
         if (id) {
           query = query.eq('id', id);
@@ -1688,7 +1688,7 @@ export function createSageAiTools(
         '**Each group includes:** **`properties`** (distinct **properties** in that group using the same dedupe key as `count_unique_properties`: trimmed lowercase `address`, else `property_name|city|state|country`), **`total_units` (sum of `quantity_of_units` — the inventory field for glamping)**, `avg_daily_rate` (**IQR-robust, unit-weighted** “normal” mean: per row **effective** ADR = average of the eight `rate_*_weekday/weekend` when any are set, else `rate_avg_retail_daily_rate` → then Tukey IQR(1.5) outlier screen per group on positive effective ADRs when the group has ≥4 rated lines and non-zero IQR, else no dropping → unit-weighted mean; if the screen would remove every line, the mean/median use all rated lines in that group), and **`median_daily_rate`** (median of those same per-row eff values after the same IQR set). **Always show both** when you narrate rate breakdowns. ' +
         '**`total_sites` is always `null` in the returned payload** (the RPC can sum `property_total_sites`, but that is a per-property, often whole-park, site count: repeating it on every unit-type row means grouped “sites” are **not** comparable to glamping **units**). **For all glamping Q&A, tables, and charts, use and label `total_units` only — never “sites” from this tool.** ' +
         'You may also `group_by` amenity / feature flag columns (e.g. `property_pool`, `unit_hot_tub`, `activities_hiking`) to see **how many properties** and units fall under each value. ' +
-        '**Grain:** `all_glamping_properties` is **unit-level** (multiple rows per resort are normal); `properties` in each group is **not** a raw row count — it is how many **unique physical locations** in that group. For **unit inventory, "how many units", or any total that should reflect physical units**, use **`total_units` from this tool** (or sum `quantity_of_units` from query results) — **do not** use `property_total_sites` as a substitute for glamping unit inventory. ' +
+        '**Grain:** `all_sage_data` is **unit-level** (multiple rows per resort are normal); `properties` in each group is **not** a raw row count — it is how many **unique physical locations** in that group. For **unit inventory, "how many units", or any total that should reflect physical units**, use **`total_units` from this tool** (or sum `quantity_of_units` from query results) — **do not** use `property_total_sites` as a substitute for glamping unit inventory. ' +
         'IMPORTANT — country vs state: pass country names ("Canada", "Mexico", "United States") in `filters.country`, NEVER in `filters.state`. ' +
         'The `state` filter only matches US state codes/names (CO, Colorado, …) and Canadian province codes (BC, ON, AB, QC, NS, NB, MB, SK, PE, NL, YT, NT, NU). ' +
         'The result envelope echoes `applied_filters` and a `summary` string — cite those when narrating the result so you do not misattribute the slice.',
@@ -1699,7 +1699,7 @@ export function createSageAiTools(
           .max(64)
           .refine((c) => isGlampingGroupByColumn(c), {
             message:
-              'group_by must be an allowlisted all_glamping_properties column. For amenity pivots use real column names (e.g. property_pool, unit_wifi), not "amenities".',
+              'group_by must be an allowlisted all_sage_data column. For amenity pivots use real column names (e.g. property_pool, unit_wifi), not "amenities".',
           })
           .describe('Column to group by (state, unit_type, property_pool, activities_hiking, …)'),
         filters: z
@@ -1831,13 +1831,13 @@ export function createSageAiTools(
           filterEntries.length === 0 ? 'whole_table' : 'filtered';
         const summary =
           aggregates.length === 0
-            ? `Aggregated all_glamping_properties grouped by ${group_by} ` +
+            ? `Aggregated all_sage_data grouped by ${group_by} ` +
               (scope === 'whole_table'
                 ? '(no filters)'
                 : `where ${filterPretty}`) +
               ` → 0 groups. Likely the filters did not match any rows; ` +
               `verify them via get_column_values or count_rows before reporting "no data".`
-            : `Aggregated all_glamping_properties grouped by ${group_by} ` +
+            : `Aggregated all_sage_data grouped by ${group_by} ` +
               (scope === 'whole_table'
                 ? '(no filters)'
                 : `where ${filterPretty}`) +
@@ -1867,7 +1867,7 @@ export function createSageAiTools(
 
     top_multi_location_chains: tool({
       description:
-        'Rank approximate **multi-location glamping chains / operators** using `all_glamping_properties`. ' +
+        'Rank approximate **multi-location glamping chains / operators** using `all_sage_data`. ' +
         'Sorts by the researched **`number_of_locations`** field (brand-reported footprint, not counted from Sage rows). ' +
         'Builds a **chain label** from **`property_name`**: text before a spaced hyphen (` - `), en dash (`–`), or em dash (`—`) when present (e.g. `Brand — Outpost` → `Brand`); otherwise the full trimmed name forms its own group. ' +
         'Dedupes physical resorts with the same **`address`** key used elsewhere (else **`property_name|city|state|country`**). ' +
@@ -2013,7 +2013,7 @@ export function createSageAiTools(
 
     chain_retail_rate_kpis: tool({
       description:
-        '**Brand / chain retail rate card (simple definitions).** Calls Postgres `sage_chain_retail_rate_kpis` on `all_glamping_properties` rows grouped by `sage_chain_label_from_property_name` (same chain keys as `top_multi_location_chains`). ' +
+        '**Brand / chain retail rate card (simple definitions).** Calls Postgres `sage_chain_retail_rate_kpis` on `all_sage_data` rows grouped by `sage_chain_label_from_property_name` (same chain keys as `top_multi_location_chains`). ' +
         'For each chain returns: **`avg_rate_all_filled_seasonal`** = unit-weighted mean of per-row **average of every non-null positive** `rate_winter_*` … `rate_fall_*` cell (same as `effectiveGlampingRetailAdrFromRow`); **`peak_summer_rate`** = unit-weighted mean of per-row **average of `rate_summer_weekday` + `rate_summer_weekend`** when either is set, else the **max** of all filled seasonal cells for that row. ' +
         'Also returns **`distinct_properties`**, **`total_unit_weight`** (sum of `GREATEST(quantity_of_units,1)`), and **`sku_row_count`**. ' +
         'Use this for end-user questions like “what is Under Canvas peak vs average rate?” — **do not** invent **calendar-year** or **`operating_season_months ÷ 12`** blends unless the user explicitly asks for annualization; those confuse readers. ' +
@@ -2108,7 +2108,7 @@ export function createSageAiTools(
 
     count_unique_properties: tool({
       description:
-        'Server-side **distinct-property** count for `all_glamping_properties`. ' +
+        'Server-side **distinct-property** count for `all_sage_data`. ' +
         'Use this whenever the user asks "how many properties / locations / resorts" — never count rows yourself, and never hand-count from a returned list. ' +
         'For **named multi-brand retail rate cards** (Postcard Cabins, Under Canvas, AutoCamp, Huttopia, Wander Camp peak vs average of filled seasonal rates), call **`chain_retail_rate_kpis`** instead of inventing calendar-year blends. ' +
         'Dedupe key: trimmed lowercase `address`. When `address` is null/empty, falls back to `property_name|city|state|country` (also trimmed/lowercased). ' +
@@ -2153,7 +2153,7 @@ export function createSageAiTools(
         for (const { column, value } of column_eq_filters ?? []) {
           if (!isGlampingEqFilterColumn(column)) {
             return {
-              error: `Invalid column_eq_filters.column "${column}" — not an allowlisted filter column on all_glamping_properties.`,
+              error: `Invalid column_eq_filters.column "${column}" — not an allowlisted filter column on all_sage_data.`,
               unique_properties: null,
               applied_filters: cleaned,
             };
@@ -2200,7 +2200,7 @@ export function createSageAiTools(
         const collected: Row[] = [];
         for (let page = 0; page < MAX_PAGES; page += 1) {
           let q = supabase
-            .from('all_glamping_properties')
+            .from('all_sage_data')
             .select(
               `address, property_name, city, state, country, quantity_of_units, rate_avg_retail_daily_rate, ${seasonSelect}`
             )
@@ -2274,7 +2274,7 @@ export function createSageAiTools(
         const rateCount = robust.ratedCount;
         const outlierDrop = robust.droppedAsOutliers;
         const summary =
-          `Counted distinct addresses in all_glamping_properties ` +
+          `Counted distinct addresses in all_sage_data ` +
           (scope === 'whole_table' ? '(no filters)' : `where ${filterPretty}`) +
           ` → ${seen.size} unique properties from ${collected.length} unit-level rows ` +
           `(${usedFallback} used name+city+state+country fallback). ` +
@@ -2328,7 +2328,7 @@ NOT AVAILABLE (do not import or attempt to use):
 
 IMPORTANT RULES:
 - If you need data from a previous query, use the special variable 'data' which will contain the query results as a list of dictionaries.
-- When analyzing all_glamping_properties rows: quantity_of_units is the exact unit count per record — sum it for total units or unit-weighted metrics; do not substitute row count unless the user asked for row/listing counts.
+- When analyzing all_sage_data rows: quantity_of_units is the exact unit count per record — sum it for total units or unit-weighted metrics; do not substitute row count unless the user asked for row/listing counts.
 - For **retail ADR / rate averages and medians**, do not re-invent the pipeline in Python: \`aggregate_properties\` and \`count_unique_properties\` already return **IQR-robust, unit-weighted** effective ADR. For **headline chain / brand** peak vs simple seasonal averages, use \`chain_retail_rate_kpis\` (explicit peak + avg of filled cells, no calendar-year blend). If you must average rates in \`data\` yourself, weight by \`quantity_of_units\` and say your number is an unaudited recompute (and prefer calling the tools instead).
 - For charts, use matplotlib and call plt.show() at the end.
 - Use print() for any text output you want to display.

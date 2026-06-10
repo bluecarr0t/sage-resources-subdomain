@@ -1,5 +1,5 @@
 /**
- * Human-friendly map from questions / phrases → real `all_glamping_properties`
+ * Human-friendly map from questions / phrases → real `all_sage_data`
  * column names. Kept in sync with `all-glamping-properties-columns` allowlists.
  * UI + `find_glamping_columns` tool share this list.
  */
@@ -527,7 +527,7 @@ export function fieldGuideByCategory(
 if (process.env.NODE_ENV === 'development') {
   for (const e of GLAMPING_FIELD_GUIDE) {
     if (!isKnownGlampingColumn(e.column)) {
-      throw new Error(`glamping-field-guide: "${e.column}" is not a known all_glamping_properties column`);
+      throw new Error(`glamping-field-guide: "${e.column}" is not a known all_sage_data column`);
     }
   }
 }

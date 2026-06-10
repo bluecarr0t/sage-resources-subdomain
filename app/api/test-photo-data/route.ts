@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     
     // Fetch the property with its Google photos
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('property_name, google_place_id, google_photos, google_rating, google_user_rating_total')
       .ilike('property_name', propertyName)
       .limit(1);

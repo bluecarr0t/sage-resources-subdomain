@@ -1,0 +1,17 @@
+property_name,site_name,city,state,is_open,research_status,unit_type,quantity_of_units,rate_avg_retail_daily_rate,url,notes
+Camp Wandawega,Lakeview Cabin,Elkhorn,WI,Yes,published,Cabin,1,612.50,https://www.wandawega.com/bookyourstay,Anchor SKU; winterized 3BR lake cabin
+Camp Wandawega,Hillhouse,Elkhorn,WI,Yes,published,Cabin,1,700.00,https://www.wandawega.com/bookyourstay,Winterized hilltop cabin; sleeps 6
+Camp Wandawega,Large GSA Cabin,Elkhorn,WI,Yes,published,Cabin,2,575.00,https://www.wandawega.com/bookyourstay,Historic Girl Scout log cabins
+Camp Wandawega,Small GSA Cabin,Elkhorn,WI,Yes,published,Cabin,2,487.50,https://www.wandawega.com/bookyourstay,Paired-booking zoning
+Camp Wandawega,Side-by-Side Cabins (Cedar + Log),Elkhorn,WI,Yes,published,Cabin,1,800.00,https://www.wandawega.com/bookyourstay,Paired Cedar + Log booking
+Camp Wandawega,Bunkhouse Top Level,Elkhorn,WI,Yes,published,Lodge,1,675.00,https://www.wandawega.com/bookyourstay,Winterized
+Camp Wandawega,Bunkhouse Mid & Lower Level,Elkhorn,WI,Yes,published,Lodge,1,775.00,https://www.wandawega.com/bookyourstay,Winterized large-group SKU
+Camp Wandawega,Sterlingworth Cabin,Elkhorn,WI,Yes,published,Cabin,1,450.00,https://www.wandawega.com/bookyourstay,Rustic cluster
+Camp Wandawega,A-Frame,Elkhorn,WI,Yes,published,A-Frame,1,400.00,https://www.wandawega.com/bookyourstay,Rustic cluster
+Camp Wandawega,Hickory Tent,Elkhorn,WI,Yes,published,Canvas Tent,1,437.50,https://www.wandawega.com/bookyourstay,Canvas comp context
+Glamping Loft Lake Geneva,Main Street Loft (12 Tent Suites),Lake Geneva,WI,Yes,published,Canvas Tent,12,737.50,https://www.genevalakesvacations.com/vrp/unit/Main_Street_Loft-95-15/,Group-only downtown loft; 12 tent suites
+The Preserve at Williams Bay,Detached Cottages (1–3 BR),Williams Bay,WI,Proposed Development,in_progress,Cottage,28,500.00,https://www.thepreservewilliamsbay.com/,Pipeline; target 2027 opening
+The Preserve at Williams Bay,Central Lodge Rooms & Suites,Williams Bay,WI,Proposed Development,in_progress,Lodge,40,,https://www.thepreservewilliamsbay.com/,Pipeline lodge inventory
+Grand Geneva Resort Glamping,Premium Glamping Sites,Lake Geneva,WI,Proposed Development,in_progress,Cabin,14,505.00,https://www.grandgeneva.com/,Client subject property Phase 1
+Grand Geneva Resort Glamping,Wooded Glamping Sites,Lake Geneva,WI,Proposed Development,in_progress,Cabin,22,487.50,https://www.grandgeneva.com/,Client subject property Phase 1
+Grand Geneva Resort Glamping,Safari Tent Test Units (Phase 1),Lake Geneva,WI,Proposed Development,in_progress,Safari Tent,2,425.00,https://www.grandgeneva.com/,Optional Phase 1 test units

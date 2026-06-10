@@ -1,5 +1,5 @@
 /**
- * Helpers for grouping `all_glamping_properties` rows that represent one logical
+ * Helpers for grouping `all_sage_data` rows that represent one logical
  * property (multiple unit/site lines). Used by the Sage Data admin API.
  */
 

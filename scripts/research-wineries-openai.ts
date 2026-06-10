@@ -23,9 +23,11 @@
  *   npx tsx scripts/research-wineries-openai.ts --enrich-only       # Re-enrich existing rows
  *   npx tsx scripts/research-wineries-openai.ts --no-web-search     # GPT-only (skip Tavily)
  *   npx tsx scripts/research-wineries-openai.ts --no-firecrawl     # Skip Firecrawl pass (boutique tasting fees)
+ *   npx tsx scripts/research-wineries-openai.ts --seed-file scripts/data/famous-us-wineries-tier1-seed.json
  */
 
 import { config } from 'dotenv';
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { OpenAI } from 'openai';
 import { createClient } from '@supabase/supabase-js';
@@ -777,8 +779,34 @@ function toDbRow(r: WineryRecord): Record<string, string | null> {
 }
 
 async function existingWinery(name: string, _state: string, country: string): Promise<boolean> {
-  const { data } = await supabase.from(TABLE).select('id').ilike('name', name).eq('country', country).limit(1);
+  const countryVariants = /^canada$/i.test(country)
+    ? ['Canada']
+    : ['USA', 'US', 'United States'];
+  const { data } = await supabase
+    .from(TABLE)
+    .select('id')
+    .ilike('name', name)
+    .in('country', countryVariants)
+    .limit(1);
   return (data?.length ?? 0) > 0;
+}
+
+function loadSeedWineries(seedPath: string): WineryRecord[] {
+  const abs = resolve(process.cwd(), seedPath);
+  const raw = readFileSync(abs, 'utf8');
+  const parsed = JSON.parse(raw) as { wineries?: WineryRecord[] };
+  const arr = parsed.wineries ?? [];
+  if (!Array.isArray(arr) || !arr.length) {
+    throw new Error(`Seed file ${seedPath} has no wineries array`);
+  }
+  return arr
+    .filter((r) => r && typeof r.name === 'string' && String(r.name).trim())
+    .map((r) => ({
+      ...r,
+      country: String(r.country || 'USA').trim(),
+      state_province: r.state_province ? String(r.state_province).trim() : r.state_province,
+      city: r.city ? String(r.city).trim() : r.city,
+    }));
 }
 
 // ── Main ───────────────────────────────────────────────────────
@@ -801,12 +829,15 @@ async function main() {
   const tierIdx = process.argv.indexOf('--tier');
   const tier = (tierIdx >= 0 ? parseInt(process.argv[tierIdx + 1] || '1', 10) : 1) as DiscoveryTier;
   const discoveryTier = tier >= 1 && tier <= 3 ? tier : 1;
+  const seedIdx = process.argv.indexOf('--seed-file');
+  const seedFile = seedIdx >= 0 ? String(process.argv[seedIdx + 1] || '').trim() : null;
 
   console.log('🍷  Winery Research Pipeline\n');
   console.log(`   Model: ${gptModel}  Tavily: ${tavilyClient ? '✓' : '✗ (set TAVILY_API_KEY)'}  Firecrawl: ${firecrawl && useFirecrawl ? '✓' : firecrawl ? '✗ (--no-firecrawl)' : '✗ (set FIRECRAWL_API_KEY)'}`);
   console.log(`   Pipeline: Tavily multi-search → GPT structured output → Validation → Supabase`);
   console.log(`   Mode: ${dryRun ? 'DRY RUN' : discoverOnly ? 'DISCOVER ONLY' : enrichOnly ? 'ENRICH ONLY' : 'FULL PIPELINE'}`);
-  if (!enrichOnly) console.log(`   Discovery tier: ${discoveryTier} (1=major AVAs, 2=regional, 3=smaller)\n`);
+  if (!enrichOnly && !seedFile) console.log(`   Discovery tier: ${discoveryTier} (1=major AVAs, 2=regional, 3=smaller)\n`);
+  if (seedFile) console.log(`   Seed file: ${seedFile}\n`);
   if (statesCsv) console.log(`   State filter (discovery): ${statesCsv}\n`);
 
   if (!dryRun && !discoverOnly) {
@@ -840,20 +871,35 @@ async function main() {
     return;
   }
 
-  // ── Discovery ───
+  // ── Discovery or seed file ───
   const allWineries: WineryRecord[] = [];
-  for (const country of countries) {
-    console.log(`\n📋 Discovering ${country} wineries...`);
-    await new Promise(r => setTimeout(r, DELAY_MS));
-    const discovered = await discoverWineries(
-      country,
-      limit ?? 0,
-      useWebSearch,
-      discoveryTier,
-      statesCsv
-    );
-    console.log(`   Found ${discovered.length} wineries`);
-    allWineries.push(...discovered);
+  if (seedFile) {
+    const seeded = loadSeedWineries(seedFile);
+    const isUsa = (c: string) => /^(USA|US|UNITED STATES)$/i.test(c);
+    const isCanada = (c: string) => /^CANADA$/i.test(c);
+    let byCountry = seeded;
+    if (countryFilter === 'USA') {
+      byCountry = seeded.filter((r) => isUsa(String(r.country || 'USA')));
+    } else if (countryFilter === 'CANADA') {
+      byCountry = seeded.filter((r) => isCanada(String(r.country || '')));
+    }
+    const capped = limit ? byCountry.slice(0, limit) : byCountry;
+    console.log(`\n📋 Loaded ${capped.length} wineries from seed (${seeded.length} in file)`);
+    allWineries.push(...capped);
+  } else {
+    for (const country of countries) {
+      console.log(`\n📋 Discovering ${country} wineries...`);
+      await new Promise(r => setTimeout(r, DELAY_MS));
+      const discovered = await discoverWineries(
+        country,
+        limit ?? 0,
+        useWebSearch,
+        discoveryTier,
+        statesCsv
+      );
+      console.log(`   Found ${discovered.length} wineries`);
+      allWineries.push(...discovered);
+    }
   }
 
   if (discoverOnly) {

@@ -7,7 +7,7 @@
  *                  full state names, unit_type, study_id, amenity_keywords). Falls back
  *                  to ILIKE on property_name, city, overview, state when FTS returns no rows
  *                  (e.g. matview not yet refreshed with state full names).
- *   source       - comma-separated source filter: reports | all_glamping_properties |
+ *   source       - comma-separated source filter: reports | all_sage_data |
  *                  hipcamp | campspot | all_roverpass_data_new
  *   state        - comma-separated state filter (abbreviations; expanded server-side
  *                  to match full names and casing variants in the matview)
@@ -27,7 +27,8 @@
  *
  * Pagination metadata:
  *   - `total` — distinct properties (one row per source + address_key in the list).
- *   - `total_site_units` — matview site/unit rows matching filters.
+ *   - `total_site_units` — Sage-only: sum of quantity_of_units / property_total_sites
+ *     (glamping market overview rules). Other sources: matview row count.
  *   - `total_properties` — same as `total` when the aggregate RPC succeeds.
  */
 
@@ -40,9 +41,11 @@ import { withAdminAuth } from '@/lib/require-admin-auth';
 import { parsePaginationParams } from '@/lib/validate-pagination';
 import {
   UNIFIED_SORT_COLUMNS,
+  isSageOnlyUnifiedSourceFilter,
   type UnifiedCompRow,
   type UnifiedSortKey,
 } from '@/lib/comps-unified/build-row';
+import { countSageMarketSnapshotSiteUnits } from '@/lib/comps-unified/count-sage-market-snapshot-site-units';
 import {
   adminCompsCohortRpcParams,
   withAdminCompsCohortFilters,
@@ -53,6 +56,11 @@ import {
 } from '@/lib/comps-unified/apply-filters';
 import { collapseUnifiedCompRowsToProperties } from '@/lib/comps-unified/collapse-property-rows';
 import { mapPropertyListRpcToUnifiedRows } from '@/lib/comps-unified/map-property-list-rpc';
+import {
+  buildUnifiedCompsFilterRpcArgs,
+  buildUnifiedCompsListPropertiesRpcArgs,
+  type UnifiedCompsSearchMode,
+} from '@/lib/comps-unified/property-list-rpc-args';
 
 const FUZZY_SIMILARITY_THRESHOLD = 0.4;
 const FUZZY_RPC_LIMIT = 500;
@@ -113,52 +121,36 @@ export const GET = withAdminAuth(async (request) => {
       opts.searchTerms.every((t) => t.length >= 2);
 
     async function loadPropertyPage(
-      searchMode: 'none' | 'fts' | 'ilike'
+      searchMode: UnifiedCompsSearchMode
     ): Promise<{ listRows: UnifiedCompRow[]; siteUnits: number; properties: number | null }> {
-      const { data: listData, error: listErr } = await supabase.rpc('unified_comps_list_properties', {
-        p_sources: opts.sources.length > 0 ? opts.sources : null,
-        p_states: opts.expandedStateValues.length > 0 ? opts.expandedStateValues : null,
-        p_countries: opts.expandedCountryValues.length > 0 ? opts.expandedCountryValues : null,
-        p_keywords: opts.keywordFilters.length > 0 ? opts.keywordFilters : null,
-        p_min_adr:
-          opts.parsedMinAdr !== null && !Number.isNaN(opts.parsedMinAdr) ? opts.parsedMinAdr : null,
-        p_max_adr:
-          opts.parsedMaxAdr !== null && !Number.isNaN(opts.parsedMaxAdr) ? opts.parsedMaxAdr : null,
-        p_unit_categories: opts.unitCategories.length > 0 ? opts.unitCategories : null,
-        p_property_types: opts.propertyTypes.length > 0 ? opts.propertyTypes : null,
-        p_is_open: opts.openStatuses.length > 0 ? opts.openStatuses : null,
-        p_tsquery: searchMode === 'fts' ? tsq : null,
-        p_ilike_terms: searchMode === 'ilike' ? opts.searchTerms : null,
-        p_page: page,
-        p_per_page: perPage,
-        p_sort_by: sortBy,
-        p_sort_asc: ascending,
-        ...cohortRpc,
-      });
+      const filterArgs = buildUnifiedCompsFilterRpcArgs(opts, cohortRpc, searchMode, tsq);
+      const listArgs = buildUnifiedCompsListPropertiesRpcArgs(
+        filterArgs,
+        page,
+        perPage,
+        sortBy,
+        ascending
+      );
+
+      const [listResult, aggResult] = await Promise.all([
+        supabase.rpc('unified_comps_list_properties', listArgs),
+        supabase.rpc('unified_comps_aggregate_counts', filterArgs),
+      ]);
+
+      const { data: listData, error: listErr } = listResult;
 
       if (listErr) {
-        console.warn('[comps/unified] unified_comps_list_properties RPC failed:', listErr.message);
-        return { listRows: [], siteUnits: 0, properties: null };
+        console.error('[comps/unified] unified_comps_list_properties RPC failed:', listErr.message);
+        throw new Error(
+          listErr.message.includes('unified_comps')
+            ? 'Unified comps index is unavailable. Run refresh:downstream or apply the unified_comps matview migration.'
+            : listErr.message
+        );
       }
 
       const listRows = mapPropertyListRpcToUnifiedRows(listData);
 
-      const { data: agg, error: aggErr } = await supabase.rpc('unified_comps_aggregate_counts', {
-        p_sources: opts.sources.length > 0 ? opts.sources : null,
-        p_states: opts.expandedStateValues.length > 0 ? opts.expandedStateValues : null,
-        p_countries: opts.expandedCountryValues.length > 0 ? opts.expandedCountryValues : null,
-        p_keywords: opts.keywordFilters.length > 0 ? opts.keywordFilters : null,
-        p_min_adr:
-          opts.parsedMinAdr !== null && !Number.isNaN(opts.parsedMinAdr) ? opts.parsedMinAdr : null,
-        p_max_adr:
-          opts.parsedMaxAdr !== null && !Number.isNaN(opts.parsedMaxAdr) ? opts.parsedMaxAdr : null,
-        p_unit_categories: opts.unitCategories.length > 0 ? opts.unitCategories : null,
-        p_property_types: opts.propertyTypes.length > 0 ? opts.propertyTypes : null,
-        p_is_open: opts.openStatuses.length > 0 ? opts.openStatuses : null,
-        p_tsquery: searchMode === 'fts' ? tsq : null,
-        p_ilike_terms: searchMode === 'ilike' ? opts.searchTerms : null,
-        ...cohortRpc,
-      });
+      const { data: agg, error: aggErr } = aggResult;
 
       let siteUnits = 0;
       let properties: number | null = null;
@@ -191,6 +183,10 @@ export const GET = withAdminAuth(async (request) => {
     rows = primary.listRows;
     totalSiteUnits = primary.siteUnits;
     totalProperties = primary.properties;
+
+    if (isSageOnlyUnifiedSourceFilter(opts.sources) && opts.searchTerms.length === 0) {
+      totalSiteUnits = await countSageMarketSnapshotSiteUnits(supabase, opts);
+    }
 
     if (rows.length === 0 && shouldFuzzy && page === 1) {
       const { data: fuzzyData, error: fuzzyError } = await supabase.rpc(

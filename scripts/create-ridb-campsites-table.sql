@@ -65,10 +65,14 @@ CREATE TABLE IF NOT EXISTS "ridb_collection_progress" (
   collection_type TEXT NOT NULL DEFAULT 'campsites' UNIQUE,
   last_processed_facility_id TEXT,
   last_processed_campsite_id TEXT,
+  last_facility_page INTEGER NOT NULL DEFAULT 1,
+  last_facility_offset INTEGER NOT NULL DEFAULT 0,
+  sync_mode TEXT NOT NULL DEFAULT 'full',
+  last_incremental_sync_at TIMESTAMP WITH TIME ZONE,
   total_facilities_processed INTEGER DEFAULT 0,
   total_campsites_processed INTEGER DEFAULT 0,
   last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  status TEXT DEFAULT 'in_progress',
+  status TEXT DEFAULT 'paused',
   error_message TEXT
 );
 

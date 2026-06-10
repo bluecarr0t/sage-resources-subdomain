@@ -1,5 +1,5 @@
 /**
- * Type definitions for the all_glamping_properties table from Supabase
+ * Type definitions for the all_sage_data table from Supabase
  * Updated to match v4 column rename/reorder (unit_/property_/activities_/setting_ prefixes)
  */
 export interface SageProperty {
@@ -19,6 +19,8 @@ export interface SageProperty {
   is_glamping_property: string | null;
   /** Yes = operating; Under Construction / Proposed Development = pre-opening; Temporarily closed / Closed = not operating (non-operating values excluded from public map). */
   is_open: string | null;
+  /** When is_open = Under Construction, cron flips to Yes on this date (YYYY-MM-DD). */
+  planned_open_date: string | null;
 
   // SOURCE & TRACKING
   source: string | null;

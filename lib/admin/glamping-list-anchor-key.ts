@@ -1,6 +1,6 @@
 /**
  * Canonical grouping key for one logical property in the Sage Data admin list.
- * Matches `all_glamping_properties_list_anchors` view logic.
+ * Matches `all_sage_data_list_anchors` view logic.
  */
 
 function legacyPropertyListGroupKey(row: {

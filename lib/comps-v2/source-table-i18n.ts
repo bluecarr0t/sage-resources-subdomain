@@ -15,7 +15,7 @@ export function compsV2SourceTableFallbackLabel(table: string): string {
  */
 export function compsV2SourceTableLabel(table: string, t: CompsV2Translate): string {
   switch (table) {
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return t('sourceGlamping');
     case 'hipcamp':
       return t('sourceHipcamp');

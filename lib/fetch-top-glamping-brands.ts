@@ -1,6 +1,6 @@
 /**
  * Top glamping brands by published property count (portfolio rollup to root brand).
- * Powers `/brands` overview page.
+ * Powers `/glamping-market-overview/brands` overview page.
  */
 import { createServerClient } from '@/lib/supabase';
 import {
@@ -23,19 +23,19 @@ import { PUBLISHED_RESEARCH_STATUS } from '@/lib/published-property-pages';
 import type { SageProperty } from '@/lib/types/sage';
 
 const BRANDS_TABLE = 'glamping_brands';
-const PROPERTIES_TABLE = 'all_glamping_properties';
+const PROPERTIES_TABLE = 'all_sage_data';
 const PAGE_SIZE = 1000;
 
 export const TOP_GLAMPING_BRANDS_COUNT = 10;
 
-/** Brands need at least this many published outposts to rank on `/brands`. */
+/** Brands need at least this many published outposts to rank on `/glamping-market-overview/brands`. */
 export const TOP_BRANDS_MIN_PROPERTY_COUNT = 2;
 
-/** Sub-brands that rank on `/brands` at their own row (portfolio parent is a partnership only). */
+/** Sub-brands that rank on `/glamping-market-overview/brands` at their own row (portfolio parent is a partnership only). */
 export const TOP_BRANDS_STANDALONE_PARTNER_SLUGS = new Set<string>(['autocamp']);
 
 /**
- * Portfolio roots that list under a lead consumer sub-brand on `/brands`.
+ * Portfolio roots that list under a lead consumer sub-brand on `/glamping-market-overview/brands`.
  * Rollup counts still include the full portfolio; only label and link change.
  */
 export const TOP_BRANDS_LEAD_DISPLAY_BY_ROOT_SLUG: Readonly<
@@ -47,7 +47,7 @@ export const TOP_BRANDS_LEAD_DISPLAY_BY_ROOT_SLUG: Readonly<
   },
 };
 
-/** Sub-brands that rank on their own `/brands` row with a portfolio ownership line. */
+/** Sub-brands that rank on their own `/glamping-market-overview/brands` row with a portfolio ownership line. */
 export const TOP_BRANDS_OWNERSHIP_NOTE_BY_SLUG: Readonly<Record<string, string>> = {
   'postcard-cabins': 'Owned by Marriott',
   'marriott-outdoor-collection': 'Owned by Marriott',
@@ -169,7 +169,7 @@ function unitsForRow(row: PropertyRow): number {
   return Math.round(fromUnits ?? fromTotal ?? 0);
 }
 
-/** Whether a published property counts toward `/brands` for the selected market. */
+/** Whether a published property counts toward `/glamping-market-overview/brands` for the selected market. */
 export function propertyMatchesBrandsMarket(
   country: string | null | undefined,
   market: GlampingMarketSnapshotMarket
@@ -196,7 +196,7 @@ function findBrandBySlug(byId: Map<string, BrandRow>, slug: string): BrandRow | 
 }
 
 /**
- * Rollup root for `/brands` ranking — stops at standalone partner brands (e.g. AutoCamp).
+ * Rollup root for `/glamping-market-overview/brands` ranking — stops at standalone partner brands (e.g. AutoCamp).
  * Postcard-named rows rank as Postcard Cabins even when tagged to Outdoor Collection.
  */
 export function rankingRootBrandId(

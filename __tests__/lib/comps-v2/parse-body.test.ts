@@ -20,7 +20,7 @@ describe('parseSourceToggles', () => {
   it('returns all false when sources missing', () => {
     expect(parseSourceToggles(undefined)).toEqual({
       pastReports: false,
-      all_glamping_properties: false,
+      all_sage_data: false,
       hipcamp: false,
       all_roverpass_data_new: false,
       campspot: false,
@@ -31,7 +31,7 @@ describe('parseSourceToggles', () => {
   it('requires explicit true for each flag', () => {
     expect(parseSourceToggles({ hipcamp: true, web_search: false })).toEqual({
       pastReports: false,
-      all_glamping_properties: false,
+      all_sage_data: false,
       hipcamp: true,
       all_roverpass_data_new: false,
       campspot: false,

@@ -1,6 +1,9 @@
 import {
+  bucketGlampingIsOpenForMetrics,
   excludeClosedGlampingRows,
+  isGlampingCancelledIsOpenStatus,
   isGlampingClosedIsOpenStatus,
+  isGlampingOperatingForAnalytics,
 } from '@/lib/glamping-is-open';
 
 describe('isGlampingClosedIsOpenStatus', () => {
@@ -17,12 +20,36 @@ describe('isGlampingClosedIsOpenStatus', () => {
   });
 });
 
+describe('isGlampingCancelledIsOpenStatus', () => {
+  it('treats Cancelled and US spelling canceled as cancelled pipeline outcomes', () => {
+    expect(isGlampingCancelledIsOpenStatus('Cancelled')).toBe(true);
+    expect(isGlampingCancelledIsOpenStatus('canceled')).toBe(true);
+    expect(isGlampingCancelledIsOpenStatus('Closed')).toBe(false);
+  });
+});
+
+describe('bucketGlampingIsOpenForMetrics', () => {
+  it('buckets Cancelled separately from Closed', () => {
+    expect(bucketGlampingIsOpenForMetrics('Cancelled')).toBe('cancelled');
+    expect(bucketGlampingIsOpenForMetrics('Closed')).toBe('closed');
+  });
+});
+
+describe('isGlampingOperatingForAnalytics', () => {
+  it('excludes Cancelled pipeline projects', () => {
+    expect(isGlampingOperatingForAnalytics('Cancelled')).toBe(false);
+  });
+});
+
 describe('excludeClosedGlampingRows', () => {
-  it('removes closed rows only', () => {
+  it('removes closed and cancelled rows', () => {
     const rows = [
       { property_name: 'Open Camp', is_open: 'Yes' },
       { property_name: 'Closed Camp', is_open: 'Closed' },
+      { property_name: 'Shelved Camp', is_open: 'Cancelled' },
     ];
-    expect(excludeClosedGlampingRows(rows)).toEqual([{ property_name: 'Open Camp', is_open: 'Yes' }]);
+    expect(excludeClosedGlampingRows(rows)).toEqual([
+      { property_name: 'Open Camp', is_open: 'Yes' },
+    ]);
   });
 });

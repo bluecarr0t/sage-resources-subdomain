@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { SaunaCohortRow } from '@/lib/glamping-sauna-research/types';
 
-export const SAUNA_TABLE = 'all_glamping_properties';
+export const SAUNA_TABLE = 'all_sage_data';
 
 const SELECT_COLS =
   'id, property_id, property_name, site_name, unit_type, url, ota_url_hipcamp, ota_url_airbnb, description, amenities_raw, unit_sauna, property_sauna, unit_hot_tub_or_sauna, discovery_source, notes, quantity_of_units';

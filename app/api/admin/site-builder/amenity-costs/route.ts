@@ -1,6 +1,6 @@
 /**
  * GET /api/admin/site-builder/amenity-costs
- * List all rows from amenities (catalog slugs + all_glamping_properties dataset fields).
+ * List all rows from amenities (catalog slugs + all_sage_data dataset fields).
  */
 
 import { NextRequest, NextResponse } from 'next/server';

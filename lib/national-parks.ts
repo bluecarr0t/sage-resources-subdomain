@@ -145,7 +145,7 @@ export async function getSlugType(slug: string): Promise<'national-park' | 'glam
 
     // Check glamping properties
     const { data: property, error: propertyError } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('id')
       .eq('slug', slug.trim())
       .limit(1)

@@ -2,7 +2,7 @@ import type { CompsV2Candidate } from '@/lib/comps-v2/types';
 
 /** Sage Glamping Data, Hipcamp, Campspot: export one row per site (unit). */
 export const SOURCES_ONE_ROW_PER_SITE = new Set([
-  'all_glamping_properties',
+  'all_sage_data',
   'hipcamp',
   'campspot',
 ]);
@@ -24,7 +24,7 @@ export type CompsV2ExportRow = CompsV2Candidate & {
  * - **Hipcamp / Campspot:** Each DB row is already one site (or site-type) line. Use `quantity_of_units`
  *   only when it counts identical units for that line. Do **not** fall back to `property_total_sites`—that
  *   is the whole-property total and would repeat the same row hundreds of times per line item.
- * - **Sage glamping (`all_glamping_properties`):** Rows are often property-level; fall back to
+ * - **Sage glamping (`all_sage_data`):** Rows are often property-level; fall back to
  *   `property_total_sites` when quantity is missing.
  */
 export function siteCountForPropertyExport(c: CompsV2Candidate): number {

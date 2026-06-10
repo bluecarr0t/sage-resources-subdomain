@@ -144,7 +144,7 @@ async function computeFacetsPaginated(supabase: ReturnType<typeof createServerCl
           if (t) kwSet.add(t);
         }
       }
-      if (src === 'all_glamping_properties') {
+      if (src === 'all_sage_data') {
         const pt = String(row.property_type ?? '').trim();
         if (pt) sagePropertyTypeSet.add(pt);
       }

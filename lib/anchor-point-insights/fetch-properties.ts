@@ -1,12 +1,37 @@
 /**
- * Fetch and normalize properties from Hipcamp and all_glamping_properties
+ * Fetch and normalize properties from Hipcamp and all_sage_data
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { NormalizedProperty } from './types';
 import { MAX_PER_TABLE } from './constants';
 import { parseNum, parseCoord, normalizeState, fetchAllRows } from './utils';
+import {
+  buildSeasonClosedFlags,
+  parseSeasonRateNumeric,
+  type SeasonRateKey,
+} from '@/lib/glamping-seasonal-rate';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
+
+const EMPTY_SEASON_CLOSED = {} as const;
+
+function sageSeasonRates(r: Record<string, unknown>): {
+  season_closed: ReturnType<typeof buildSeasonClosedFlags>;
+  rates: Record<SeasonRateKey, number | null>;
+} {
+  const season_closed = buildSeasonClosedFlags(r, 'rate_');
+  const rates = {
+    winter_weekday: parseSeasonRateNumeric(r.rate_winter_weekday),
+    winter_weekend: parseSeasonRateNumeric(r.rate_winter_weekend),
+    spring_weekday: parseSeasonRateNumeric(r.rate_spring_weekday),
+    spring_weekend: parseSeasonRateNumeric(r.rate_spring_weekend),
+    summer_weekday: parseSeasonRateNumeric(r.rate_summer_weekday),
+    summer_weekend: parseSeasonRateNumeric(r.rate_summer_weekend),
+    fall_weekday: parseSeasonRateNumeric(r.rate_fall_weekday),
+    fall_weekend: parseSeasonRateNumeric(r.rate_fall_weekend),
+  };
+  return { season_closed, rates };
+}
 
 export async function fetchAndNormalizeProperties(
   supabase: SupabaseClient,
@@ -22,7 +47,7 @@ export async function fetchAndNormalizeProperties(
     ),
     fetchAllRows<Record<string, unknown>>(
       supabase,
-      'all_glamping_properties',
+      'all_sage_data',
       'id, property_name, lat, lon, state, property_type, property_total_sites, quantity_of_units, unit_type, is_glamping_property, rate_winter_weekday, rate_winter_weekend, rate_spring_weekday, rate_spring_weekend, rate_summer_weekday, rate_summer_weekend, rate_fall_weekday, rate_fall_weekend, roverpass_occupancy_rate, roverpass_occupancy_year',
       {
         notNull: ['lat', 'lon'],
@@ -45,8 +70,11 @@ export async function fetchAndNormalizeProperties(
     const lon = parseCoord(r.lon);
     if (lat === null || lon === null) continue;
     if (stateFilter && normalizeState(r.state as string | null | undefined) !== stateFilter) continue;
+    const hipcampId = parseNum(r.id);
+    if (hipcampId == null) continue;
     normalized.push({
       source: 'hipcamp',
+      source_row_id: hipcampId,
       property_name: String(r.property_name || '').trim() || 'Unknown',
       state: r.state ? String(r.state).trim() : null,
       lat,
@@ -63,6 +91,7 @@ export async function fetchAndNormalizeProperties(
       summer_weekend: parseNum(r.summer_weekend),
       fall_weekday: parseNum(r.fall_weekday),
       fall_weekend: parseNum(r.fall_weekend),
+      season_closed: EMPTY_SEASON_CLOSED,
       occupancy_2024: parseNum(r.occupancy_rate_2024),
       occupancy_2025: parseNum(r.occupancy_rate_2025),
       occupancy_2026: parseNum(r.occupancy_rate_2026),
@@ -83,8 +112,12 @@ export async function fetchAndNormalizeProperties(
     const occ2024 = occYear === 2024 || occYear == null ? occ : null;
     const occ2025 = occYear === 2025 ? occ : null;
     const occ2026 = occYear === 2026 ? occ : null;
+    const glampingId = parseNum(r.id);
+    if (glampingId == null) continue;
+    const { season_closed, rates } = sageSeasonRates(r);
     normalized.push({
       source: 'sage_glamping',
+      source_row_id: glampingId,
       property_name: String(r.property_name || '').trim() || 'Unknown',
       state: r.state ? String(r.state).trim() : null,
       lat,
@@ -94,14 +127,8 @@ export async function fetchAndNormalizeProperties(
       quantity_of_units: parseNum(r.quantity_of_units),
       unit_type: r.unit_type ? String(r.unit_type).trim() : null,
       is_glamping_property: r.is_glamping_property ? String(r.is_glamping_property).trim() : null,
-      winter_weekday: parseNum(r.rate_winter_weekday),
-      winter_weekend: parseNum(r.rate_winter_weekend),
-      spring_weekday: parseNum(r.rate_spring_weekday),
-      spring_weekend: parseNum(r.rate_spring_weekend),
-      summer_weekday: parseNum(r.rate_summer_weekday),
-      summer_weekend: parseNum(r.rate_summer_weekend),
-      fall_weekday: parseNum(r.rate_fall_weekday),
-      fall_weekend: parseNum(r.rate_fall_weekend),
+      ...rates,
+      season_closed,
       occupancy_2024: occ2024,
       occupancy_2025: occ2025,
       occupancy_2026: occ2026,

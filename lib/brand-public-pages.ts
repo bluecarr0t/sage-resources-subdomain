@@ -15,7 +15,7 @@ import { excludeClosedGlampingRows } from '@/lib/glamping-is-open';
 import { isExcludedLandOperatorForPublicMap } from '@/lib/glamping-land-operator-category';
 import { applyBrandsPageLandOperatorFilter } from '@/lib/public-map-cohort-filters';
 
-const PROPERTIES_TABLE = 'all_glamping_properties';
+const PROPERTIES_TABLE = 'all_sage_data';
 const BRANDS_TABLE = 'glamping_brands';
 const PAGE_SIZE = 1000;
 

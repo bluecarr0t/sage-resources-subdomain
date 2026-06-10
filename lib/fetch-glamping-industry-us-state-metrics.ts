@@ -18,6 +18,10 @@ import {
   isGlampingMarketSnapshotPropertyType,
 } from '@/lib/glamping-market-snapshot-property-type-filter';
 import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
+import {
+  glampingMarketSnapshotUnitsForRow,
+  parseGlampingMarketSnapshotPositiveNumber,
+} from '@/lib/glamping-market-snapshot/site-units-for-row';
 
 const PAGE_SIZE = 1000;
 
@@ -32,21 +36,6 @@ type Row = {
   property_total_sites: string | number | null;
   rate_avg_retail_daily_rate: string | number | null;
 };
-
-function parsePositiveNumber(value: unknown): number | null {
-  if (value == null) return null;
-  if (typeof value === 'number' && Number.isFinite(value) && value > 0) return value;
-  const n = parseFloat(String(value).replace(/[$,]/g, '').trim());
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return n;
-}
-
-function unitsForRow(row: Row): number {
-  const fromUnits = parsePositiveNumber(row.quantity_of_units);
-  const fromTotal = parsePositiveNumber(row.property_total_sites);
-  const n = fromUnits ?? fromTotal ?? 0;
-  return Math.round(n);
-}
 
 function isUsRow(country: string | null | undefined): boolean {
   const u = (country ?? '').trim().toUpperCase();
@@ -93,7 +82,7 @@ export async function fetchGlampingIndustryUsStateMetrics(
   for (;;) {
     let query = applyGlampingOnlyPropertyTypeFilter(
       supabase
-        .from('all_glamping_properties')
+        .from('all_sage_data')
         .select(GLAMPING_MARKET_SNAPSHOT_US_STATE_SELECT)
         .eq('is_glamping_property', 'Yes')
         .eq('research_status', 'published')
@@ -138,10 +127,10 @@ export async function fetchGlampingIndustryUsStateMetrics(
       if (name && status === 'yes') agg.openNames.add(name);
       if (name && status === 'under_construction') agg.underConstructionNames.add(name);
       if (name && status === 'proposed_development') agg.proposedDevelopmentNames.add(name);
-      agg.units += unitsForRow(row);
+      agg.units += glampingMarketSnapshotUnitsForRow(row);
 
       if (status === 'yes' && name) {
-        const adr = parsePositiveNumber(row.rate_avg_retail_daily_rate);
+        const adr = parseGlampingMarketSnapshotPositiveNumber(row.rate_avg_retail_daily_rate);
         if (adr != null) recordPropertyAdrSample(agg.adrByProperty, name, adr);
       }
     }

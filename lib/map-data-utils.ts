@@ -61,7 +61,7 @@ export async function getStatePropertyStatistics(
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('property_name, rate_avg_retail_daily_rate, rate_unit_rates_by_year, unit_type')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
@@ -166,7 +166,7 @@ export async function getCityPropertyStatistics(
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('property_name, rate_avg_retail_daily_rate, rate_unit_rates_by_year, unit_type')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
@@ -270,7 +270,7 @@ export async function getFeaturedPropertiesForState(
     const supabase = createServerClient();
     
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
@@ -351,7 +351,7 @@ export async function getFeaturedPropertiesForCity(
     
     // Get all properties in the state
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
@@ -516,7 +516,7 @@ export async function getPropertiesNearNationalPark(
     const maxLon = parkLon + deltaLon;
 
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
@@ -594,7 +594,7 @@ export async function getStateProperties(
     const supabase = createServerClient();
     
     let query = supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')
@@ -638,7 +638,7 @@ export async function getCityProperties(
     
     // Get all properties in the state
     const { data: properties, error } = await supabase
-      .from('all_glamping_properties')
+      .from('all_sage_data')
       .select('*')
       .eq('is_glamping_property', 'Yes')
       .eq('is_open', 'Yes')

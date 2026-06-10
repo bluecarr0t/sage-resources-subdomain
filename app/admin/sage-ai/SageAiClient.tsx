@@ -66,29 +66,30 @@ import {
   sageAiSelectionToStorage,
   SAGE_AI_MODEL_STORAGE_KEY,
   SAGE_AI_PREMIUM_MODELS_STORAGE_KEY,
-  SAGE_AI_WEB_RESEARCH_UI_ENABLED,
 } from './SageAiModelPicker';
+import { useSageAiServerCapabilities } from './useSageAiServerCapabilities';
+import { isSageAiTimeoutError } from '@/lib/sage-ai/chat-limits';
 import { SageAiFieldGuidePanel } from './SageAiFieldGuidePanel';
+import { SageAiCapabilitiesBanner } from './SageAiCapabilitiesBanner';
+import { SageAiConfirmDialog } from './SageAiConfirmDialog';
+import { SageAiSessionTitleEditor } from './SageAiSessionTitleEditor';
+import { SageAiThreadUsageBar } from './SageAiThreadUsageBar';
+import { useSageAiSessions } from './useSageAiSessions';
+import {
+  SAGE_AI_SESSION_SEARCH_PARAM,
+  sageAiPathWithSession,
+} from '@/lib/sage-ai/session-url';
 import {
   readAndConsumeSageAiMarketReportBootstrap,
   SAGE_AI_FROM_MARKET_REPORT_SEARCH_PARAM,
   SAGE_AI_FROM_MARKET_REPORT_SEARCH_VALUE,
 } from '@/lib/sage-ai/market-report-bootstrap';
+import { SAGE_AI_CLIENT_STREAM_RESUME_ENABLED } from '@/lib/sage-ai/server-capabilities';
 
-interface Session {
-  id: string;
-  title: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface SavedQuery {
-  id: string;
-  name: string;
-  query: string;
-  use_count: number;
-  created_at: string;
-}
+type SageAiPendingConfirm =
+  | { kind: 'deleteSession'; sessionId: string; title: string }
+  | { kind: 'clearHistory' }
+  | { kind: 'deleteSavedQuery'; queryId: string; name: string };
 
 /**
  * Whitelist of HTML tags / attributes the assistant is allowed to render via
@@ -120,17 +121,6 @@ const SAGE_AI_MARKDOWN_SANITIZE_SCHEMA = {
   },
 };
 
-function formatSessionDate(dateStr: string, t: ReturnType<typeof useTranslations>): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return t('today');
-  if (diffDays === 1) return t('yesterday');
-  if (diffDays < 7) return t('thisWeek');
-  return t('older');
-}
-
 type SidebarTab = 'history' | 'saved';
 
 function userMessagePlainText(message: UIMessage): string {
@@ -156,9 +146,8 @@ export default function SageAiClient() {
   const [input, setInput] = useState('');
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('history');
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [sessionsLoading, setSessionsLoading] = useState(false);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [pendingConfirm, setPendingConfirm] = useState<SageAiPendingConfirm | null>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
   /**
    * Stable id for `useChat` / transport (must not be `undefined` in the options object — that
    * triggers Chat recreation every render). Separate from `currentSessionId` so the first
@@ -167,11 +156,6 @@ export default function SageAiClient() {
    * `currentSessionId` when loading history from the sidebar (`handleLoadSession`).
    */
   const [chatTransportId, setChatTransportId] = useState(() => generateUniqueId());
-  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
-  const [savedQueriesLoading, setSavedQueriesLoading] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [saveQueryName, setSaveQueryName] = useState('');
-  const [queryToSave, setQueryToSave] = useState('');
   const [lastQueryData, setLastQueryData] = useState<Record<string, unknown>[] | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -184,8 +168,10 @@ export default function SageAiClient() {
   });
   /** Tavily/Firecrawl; only sent to API when UI flag allows and server env permits. */
   const [webResearchEnabled, setWebResearchEnabled] = useState(false);
+  const serverCapabilities = useSageAiServerCapabilities();
+  const webResearchServerEnabled = serverCapabilities?.webResearchServer ?? false;
   const webResearchRef = useRef(false);
-  webResearchRef.current = webResearchEnabled && SAGE_AI_WEB_RESEARCH_UI_ENABLED;
+  webResearchRef.current = webResearchEnabled && webResearchServerEnabled;
   /**
    * Whether the user has opted in to selecting higher-cost premium models
    * (Claude Opus 4.7, Sonnet 4.5). Persisted in localStorage so the choice
@@ -195,8 +181,6 @@ export default function SageAiClient() {
   const [premiumModelsUnlocked, setPremiumModelsUnlocked] = useState(false);
   const [modelPrefsLoaded, setModelPrefsLoaded] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [sessionsError, setSessionsError] = useState<string | null>(null);
-  const [savedQueriesError, setSavedQueriesError] = useState<string | null>(null);
   const [stickyUserPrompt, setStickyUserPrompt] = useState<string | null>(null);
   const [feedbackBySessionMessage, setFeedbackBySessionMessage] = useState<
     Record<string, { rating: 1 | -1 }>
@@ -209,8 +193,6 @@ export default function SageAiClient() {
   const messagesRef = useRef<UIMessage[]>([]);
   const stickyScrollRafRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const currentSessionIdRef = useRef<string | null>(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   /** Last `part.output` reference we stored into `lastQueryData`; used for debugging / future guards. */
   const lastQueryDataSourceRef = useRef<unknown>(null);
   /**
@@ -259,6 +241,59 @@ export default function SageAiClient() {
     setEditingDraft('');
   }, []);
 
+  const showToast = useCallback((msg: string) => setToastMessage(msg), []);
+
+  const resetChatSurfaceRef = useRef<() => void>(() => {});
+  const onSessionLoadedRef = useRef<(sessionId: string, messages: UIMessage[]) => void>(() => {});
+  const stopChatRef = useRef<() => void>(() => {});
+
+  const {
+    sessions,
+    sessionsLoading,
+    sessionsError,
+    loadSessions,
+    currentSessionId,
+    setCurrentSessionId,
+    currentSessionIdRef,
+    saveSession,
+    saveTimeoutRef,
+    handleLoadSession,
+    deleteSession,
+    clearAllHistory,
+    groupedSessions,
+    currentSessionTitle,
+    savedQueries,
+    savedQueriesLoading,
+    savedQueriesError,
+    loadSavedQueries,
+    showSaveDialog,
+    setShowSaveDialog,
+    saveQueryName,
+    setSaveQueryName,
+    queryToSave,
+    openSaveQueryDialog,
+    handleSaveQuery,
+    handleUseSavedQuery,
+    deleteSavedQuery,
+    updateSessionTitle,
+  } = useSageAiSessions({
+    showToast,
+    onChatReset: () => resetChatSurfaceRef.current(),
+    onSessionLoaded: (sessionId, hydratedMessages) =>
+      onSessionLoadedRef.current(sessionId, hydratedMessages),
+    onSessionFeedbackLoaded: setFeedbackBySessionMessage,
+    stopActiveStream: () => stopChatRef.current(),
+    focusInput: () => inputRef.current?.focus(),
+    setSidebarOpen: setShowSidebar,
+  });
+
+  const sessionIdForChatRef = useRef<string | null>(null);
+  sessionIdForChatRef.current = currentSessionId;
+
+  const [usageRefreshKey, setUsageRefreshKey] = useState(0);
+  const deepLinkSessionHandledRef = useRef<string | null>(null);
+  const prevChatStatusRef = useRef<string>('ready');
+  const earlySessionSaveRef = useRef(false);
 
   const transport = useMemo(
     () =>
@@ -279,42 +314,67 @@ export default function SageAiClient() {
             messageId,
             model: resolveSageAiGatewayModelId(modelSelectionRef.current),
             webResearch: webResearchRef.current,
+            sessionId: sessionIdForChatRef.current,
           },
         }),
-        prepareReconnectToStreamRequest: ({ id, api }) => ({
-          api: `${api}/${encodeURIComponent(id)}/resume`,
-        }),
+        ...(SAGE_AI_CLIENT_STREAM_RESUME_ENABLED
+          ? {
+              prepareReconnectToStreamRequest: ({ id, api }: { id: string; api: string }) => ({
+                api: `${api}/${encodeURIComponent(id)}/resume`,
+              }),
+            }
+          : {}),
       }),
     []
   );
 
   const showToastRef = useRef<(msg: string) => void>(() => {});
-  const { messages, sendMessage, status, setMessages, stop, resumeStream } = useChat({
+  showToastRef.current = showToast;
+
+  const { messages, sendMessage, status, setMessages, stop } = useChat({
     id: chatTransportId,
     transport,
     onError: (err) => {
-      showToastRef.current(err.message ?? t('toastChatRequestFailed'));
+      const raw = err.message ?? '';
+      const msg = isSageAiTimeoutError(raw)
+        ? tRef.current('toastChatTimeout')
+        : raw || tRef.current('toastChatRequestFailed');
+      showToastRef.current(msg);
     },
   });
   const sendMessageRef = useRef(sendMessage);
   sendMessageRef.current = sendMessage;
-  // useChat re-exposes `resumeStream` with a new function identity every render
-  // (see @ai-sdk/react: `resumeStream: chatRef.current.resumeStream`). A
-  // useEffect that lists `resumeStream` in its deps will run on every
-  // render, call `resumeStream()`, and trigger a state update → infinite
-  // loop (React #185 "Maximum update depth exceeded"). Re-run only when
-  // the transport id changes.
-  const resumeStreamRef = useRef(resumeStream);
-  resumeStreamRef.current = resumeStream;
 
-  // When a session is loaded/selected, probe the resume endpoint so a still-
-  // in-flight stream will reattach automatically after a reload. No-ops when
-  // the server returns 204 (nothing to resume).
-  useEffect(() => {
-    resumeStreamRef.current().catch((err) => {
-      console.debug('[sage-ai] resumeStream noop', err);
-    });
-  }, [chatTransportId]);
+  stopChatRef.current = stop;
+
+  const resetChatSurface = useCallback(() => {
+    abortAllPythonBlockRuns();
+    setMessages([]);
+    lastQueryDataSourceRef.current = null;
+    lastQueryDataFingerprintRef.current = null;
+    setLastQueryData(null);
+    setChatTransportId(generateUniqueId());
+    setShowSidebar(false);
+    pythonAutoFixSentRef.current = 0;
+    setPythonRetryCount(0);
+    setFeedbackBySessionMessage({});
+    userMessageRowRefs.current.clear();
+    setEditingMessageId(null);
+    setEditingDraft('');
+    setWebResearchEnabled(false);
+    earlySessionSaveRef.current = false;
+    inputRef.current?.focus();
+  }, [setMessages]);
+  resetChatSurfaceRef.current = resetChatSurface;
+
+  onSessionLoadedRef.current = (_sessionId, hydratedMessages) => {
+    lastQueryDataSourceRef.current = null;
+    lastQueryDataFingerprintRef.current = null;
+    setLastQueryData(null);
+    setMessages(hydratedMessages);
+    pythonAutoFixSentRef.current = 0;
+    setPythonRetryCount(0);
+  };
 
   messagesRef.current = messages;
 
@@ -324,17 +384,46 @@ export default function SageAiClient() {
   const showComposerStop = isLoading || anyPythonBlockRunActive;
 
   useEffect(() => {
-    currentSessionIdRef.current = currentSessionId;
-  }, [currentSessionId]);
+    const wasBusy =
+      prevChatStatusRef.current === 'streaming' ||
+      prevChatStatusRef.current === 'submitted';
+    prevChatStatusRef.current = status;
+    if (wasBusy && status === 'ready' && currentSessionId) {
+      setUsageRefreshKey((k) => k + 1);
+    }
+  }, [status, currentSessionId]);
+
+  useEffect(() => {
+    const linkedId = searchParams.get(SAGE_AI_SESSION_SEARCH_PARAM);
+    if (!linkedId) {
+      deepLinkSessionHandledRef.current = null;
+      return;
+    }
+    if (currentSessionId === linkedId) {
+      deepLinkSessionHandledRef.current = linkedId;
+      return;
+    }
+    if (deepLinkSessionHandledRef.current === linkedId) return;
+    deepLinkSessionHandledRef.current = linkedId;
+    void handleLoadSession(linkedId);
+  }, [searchParams, currentSessionId, handleLoadSession]);
+
+  useEffect(() => {
+    const path = pathname && pathname.startsWith('/') ? pathname : '/admin/sage-ai';
+    const linkedId = searchParams.get(SAGE_AI_SESSION_SEARCH_PARAM);
+    if (linkedId === currentSessionId || (!linkedId && !currentSessionId)) {
+      return;
+    }
+    router.replace(sageAiPathWithSession(path, currentSessionId, searchParams.toString()), {
+      scroll: false,
+    });
+  }, [currentSessionId, pathname, router, searchParams]);
 
   useEffect(() => {
     if (!toastMessage) return;
     const timer = setTimeout(() => setToastMessage(null), 4000);
     return () => clearTimeout(timer);
   }, [toastMessage]);
-
-  const showToast = useCallback((msg: string) => setToastMessage(msg), []);
-  showToastRef.current = showToast;
 
   /** Stable ref for `PythonCodeBlock` so `handleRun` is not re-created on every parent render. */
   const getInjectedQueryData = useCallback((): Record<string, unknown>[] | null => {
@@ -377,126 +466,11 @@ export default function SageAiClient() {
     sendMessage({ text: draft });
   }, [editingDraft, editingMessageId, sendMessage, setMessages]);
 
-  const loadSessions = useCallback(async () => {
-    setSessionsLoading(true);
-    setSessionsError(null);
-    try {
-      const res = await fetch('/api/admin/sage-ai/sessions');
-      if (res.ok) {
-        const data = await res.json();
-        setSessions(data.sessions ?? []);
-      } else {
-        setSessionsError('Failed to load chat history');
-      }
-    } catch {
-      setSessionsError('Failed to load chat history');
-    } finally {
-      setSessionsLoading(false);
+  useEffect(() => {
+    if (!webResearchServerEnabled && webResearchEnabled) {
+      setWebResearchEnabled(false);
     }
-  }, []);
-
-  const loadSavedQueries = useCallback(async () => {
-    setSavedQueriesLoading(true);
-    setSavedQueriesError(null);
-    try {
-      const res = await fetch('/api/admin/sage-ai/saved-queries');
-      if (res.ok) {
-        const data = await res.json();
-        setSavedQueries(data.queries ?? []);
-      } else {
-        setSavedQueriesError('Failed to load saved queries');
-      }
-    } catch {
-      setSavedQueriesError('Failed to load saved queries');
-    } finally {
-      setSavedQueriesLoading(false);
-    }
-  }, []);
-
-  const saveSession = useCallback(async (msgs: UIMessage[], sessionId: string | null) => {
-    if (msgs.length === 0) return;
-
-    try {
-      const res = await fetch('/api/admin/sage-ai/sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: sessionId, messages: msgs }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (!sessionId && data.id) {
-          setCurrentSessionId(data.id);
-        }
-        loadSessions();
-      } else {
-        showToast(tRef.current('toastFailedSaveSession'));
-      }
-    } catch {
-      showToast(tRef.current('toastFailedSaveSession'));
-    }
-  }, [loadSessions, showToast]);
-
-  const handleSaveQuery = async () => {
-    if (!saveQueryName.trim() || !queryToSave.trim()) return;
-
-    try {
-      const res = await fetch('/api/admin/sage-ai/saved-queries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: saveQueryName, query: queryToSave }),
-      });
-      if (res.ok) {
-        loadSavedQueries();
-        setShowSaveDialog(false);
-        setSaveQueryName('');
-        setQueryToSave('');
-        showToast(t('toastQuerySaved'));
-      } else {
-        showToast(t('toastFailedSaveQuery'));
-      }
-    } catch {
-      showToast(t('toastFailedSaveQuery'));
-    }
-  };
-
-  const handleUseSavedQuery = async (query: SavedQuery) => {
-    setInput(query.query);
-    setShowSidebar(false);
-    inputRef.current?.focus();
-
-    try {
-      await fetch(`/api/admin/sage-ai/saved-queries/${query.id}`, {
-        method: 'POST',
-      });
-      loadSavedQueries();
-    } catch {
-      // Non-critical: silently fail use-count increment
-    }
-  };
-
-  const handleDeleteSavedQuery = async (queryId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm(t('deleteConfirm'))) return;
-
-    try {
-      const res = await fetch(`/api/admin/sage-ai/saved-queries/${queryId}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        setSavedQueries((prev) => prev.filter((q) => q.id !== queryId));
-      } else {
-        showToast(t('toastFailedDeleteQuery'));
-      }
-    } catch {
-      showToast(t('toastFailedDeleteQuery'));
-    }
-  };
-
-  const openSaveQueryDialog = (query: string) => {
-    setQueryToSave(query);
-    setSaveQueryName('');
-    setShowSaveDialog(true);
-  };
+  }, [webResearchServerEnabled, webResearchEnabled]);
 
   useEffect(() => {
     if (messages.length > 0 && status === 'ready') {
@@ -510,10 +484,14 @@ export default function SageAiClient() {
     };
   }, [messages, status, saveSession]);
 
+  /** Persist session on first user turn so feedback works on the first assistant reply. */
   useEffect(() => {
-    loadSessions();
-    loadSavedQueries();
-  }, [loadSessions, loadSavedQueries]);
+    if (currentSessionIdRef.current || earlySessionSaveRef.current) return;
+    if (status !== 'submitted' && status !== 'streaming') return;
+    if (!messages.some((m) => m.role === 'user')) return;
+    earlySessionSaveRef.current = true;
+    void saveSession(messages, null);
+  }, [messages, status, saveSession]);
 
   useEffect(() => {
     try {
@@ -774,25 +752,26 @@ export default function SageAiClient() {
   };
 
   const handleNewChat = useCallback(() => {
-    abortAllPythonBlockRuns();
-    setMessages([]);
-    lastQueryDataSourceRef.current = null;
-    lastQueryDataFingerprintRef.current = null;
-    setLastQueryData(null);
+    resetChatSurface();
     setCurrentSessionId(null);
-    setChatTransportId(generateUniqueId());
-    setShowSidebar(false);
-    pythonAutoFixSentRef.current = 0;
-    setPythonRetryCount(0);
-    setFeedbackBySessionMessage({});
-    // Drop stale DOM references when we wipe the list so the Map doesn't
-    // grow unbounded across many session swaps in a long-lived tab.
-    userMessageRowRefs.current.clear();
-    setEditingMessageId(null);
-    setEditingDraft('');
-    setWebResearchEnabled(false);
-    inputRef.current?.focus();
-  }, [setMessages]);
+  }, [resetChatSurface, setCurrentSessionId]);
+
+  const runPendingConfirm = useCallback(async () => {
+    if (!pendingConfirm) return;
+    setConfirmBusy(true);
+    try {
+      if (pendingConfirm.kind === 'deleteSession') {
+        await deleteSession(pendingConfirm.sessionId);
+      } else if (pendingConfirm.kind === 'clearHistory') {
+        await clearAllHistory();
+      } else if (pendingConfirm.kind === 'deleteSavedQuery') {
+        await deleteSavedQuery(pendingConfirm.queryId);
+      }
+      setPendingConfirm(null);
+    } finally {
+      setConfirmBusy(false);
+    }
+  }, [pendingConfirm, deleteSession, clearAllHistory, deleteSavedQuery]);
 
   useEffect(() => {
     if (marketReportBootstrapHandledRef.current) return;
@@ -803,7 +782,7 @@ export default function SageAiClient() {
 
     const payload = readAndConsumeSageAiMarketReportBootstrap();
     const path = pathname && pathname.startsWith('/') ? pathname : '/admin/sage-ai';
-    router.replace(path);
+    router.replace(sageAiPathWithSession(path, null, searchParams.toString()));
 
     if (!payload) return;
 
@@ -846,114 +825,6 @@ export default function SageAiClient() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [editingMessageId, handleNewChat]);
-
-  const handleLoadSession = async (sessionId: string) => {
-    try {
-      const res = await fetch(`/api/admin/sage-ai/sessions/${sessionId}`);
-      if (res.ok) {
-        const data = await res.json();
-        // Defense in depth: even though the API now backfills `id`, never trust
-        // the server completely. useChat silently drops messages without an id
-        // (React loses the key) and the UI falls back to the empty welcome
-        // state — which was the bug that brought us here.
-        const rawMessages = Array.isArray(data?.session?.messages)
-          ? (data.session.messages as Array<Partial<UIMessage>>)
-          : [];
-        const hydratedMessages: UIMessage[] = rawMessages.map((m, idx) => ({
-          ...(m as UIMessage),
-          id:
-            typeof m.id === 'string' && m.id.length > 0
-              ? m.id
-              : `${sessionId}-${idx}`,
-          parts: Array.isArray(m.parts) ? m.parts : [],
-        }));
-        // IMPORTANT: Do NOT call `setChatTransportId(sessionId)` here.
-        // `useChat` recreates its internal Chat instance whenever `id` changes
-        // (@ai-sdk/react), which resets messages to []. That runs in the same
-        // render as these updates, wiping the history we just loaded. Keep
-        // `chatTransportId` stable (see comment on state above); `currentSessionId`
-        // drives which row we persist to in `saveSession`.
-        stop();
-        abortAllPythonBlockRuns();
-        lastQueryDataSourceRef.current = null;
-        lastQueryDataFingerprintRef.current = null;
-        setLastQueryData(null);
-        setMessages(hydratedMessages);
-        setCurrentSessionId(sessionId);
-        setShowSidebar(false);
-        pythonAutoFixSentRef.current = 0;
-        setPythonRetryCount(0);
-      } else {
-        console.error('Failed to load session:', res.status, res.statusText);
-        showToast(t('loadSessionError'));
-      }
-    } catch (e) {
-      console.error('Failed to load session:', e);
-      showToast(t('loadSessionError'));
-    }
-
-    try {
-      const res = await fetch(
-        `/api/admin/sage-ai/feedback?sessionId=${encodeURIComponent(sessionId)}`
-      );
-      if (res.ok) {
-        const data: {
-          feedback?: Array<{ message_id: string; rating: number }>;
-        } = await res.json();
-        const map: Record<string, { rating: 1 | -1 }> = {};
-        for (const row of data.feedback ?? []) {
-          if (row.rating === 1 || row.rating === -1) {
-            map[row.message_id] = { rating: row.rating };
-          }
-        }
-        setFeedbackBySessionMessage(map);
-      }
-    } catch (e) {
-      console.error('Failed to load feedback:', e);
-    }
-  };
-
-  const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm(t('deleteConfirm'))) return;
-
-    try {
-      const res = await fetch(`/api/admin/sage-ai/sessions/${sessionId}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-        if (currentSessionId === sessionId) {
-          setMessages([]);
-          setCurrentSessionId(null);
-          setChatTransportId(generateUniqueId());
-          pythonAutoFixSentRef.current = 0;
-          setPythonRetryCount(0);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to delete session:', e);
-    }
-  };
-
-  const handleClearAllHistory = useCallback(async () => {
-    if (sessions.length === 0) return;
-    if (!confirm(t('clearHistoryConfirm'))) return;
-
-    try {
-      const res = await fetch('/api/admin/sage-ai/sessions', { method: 'DELETE' });
-      if (!res.ok) {
-        showToast(t('toastClearHistoryFailed'));
-        return;
-      }
-      setSessions([]);
-      handleNewChat();
-      showToast(t('toastHistoryCleared'));
-    } catch (e) {
-      console.error('Failed to clear history:', e);
-      showToast(t('toastClearHistoryFailed'));
-    }
-  }, [sessions.length, t, showToast, handleNewChat]);
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -1006,18 +877,6 @@ export default function SageAiClient() {
     return false;
   };
 
-  const groupedSessions = useMemo(() => {
-    const groups: Record<string, Session[]> = {};
-    for (const session of sessions) {
-      const group = formatSessionDate(session.updated_at, t);
-      if (!groups[group]) groups[group] = [];
-      groups[group].push(session);
-    }
-    return groups;
-  }, [sessions, t]);
-
-  const currentSessionTitle = sessions.find(s => s.id === currentSessionId)?.title;
-
   return (
     <div className="flex h-full overflow-hidden">
       {/* Sidebar */}
@@ -1059,6 +918,16 @@ export default function SageAiClient() {
           {sidebarTab === 'history' && (
             <>
               <div className="p-2">
+                {currentSessionId && currentSessionTitle ? (
+                  <div className="mb-2 rounded-lg border border-neutral-200/75 bg-neutral-50/80 px-1 py-1 dark:border-neutral-800 dark:bg-neutral-900/50">
+                    <SageAiSessionTitleEditor
+                      sessionId={currentSessionId}
+                      title={currentSessionTitle}
+                      onRenamed={(title) => updateSessionTitle(currentSessionId, title)}
+                      showToast={showToast}
+                    />
+                  </div>
+                ) : null}
                 <button
                   onClick={handleNewChat}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200/75 dark:border-neutral-800 hover:bg-neutral-50/90 dark:hover:bg-neutral-800/50 transition-colors"
@@ -1068,7 +937,7 @@ export default function SageAiClient() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleClearAllHistory}
+                  onClick={() => setPendingConfirm({ kind: 'clearHistory' })}
                   disabled={sessionsLoading || sessions.length === 0}
                   aria-label={t('clearAllHistoryAria')}
                   className="mt-2 w-full px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-40 disabled:pointer-events-none transition-colors"
@@ -1123,7 +992,14 @@ export default function SageAiClient() {
                             </button>
                             <button
                               type="button"
-                              onClick={(e) => handleDeleteSession(session.id, e)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPendingConfirm({
+                                  kind: 'deleteSession',
+                                  sessionId: session.id,
+                                  title: session.title,
+                                });
+                              }}
                               aria-label={t('deleteSessionAria', { title: session.title })}
                               className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 mr-1 hover:text-red-500 transition-opacity rounded focus:outline-none focus:ring-2 focus:ring-sage-500"
                             >
@@ -1163,7 +1039,7 @@ export default function SageAiClient() {
                   >
                     <button
                       type="button"
-                      onClick={() => handleUseSavedQuery(query)}
+                      onClick={() => handleUseSavedQuery(query, setInput)}
                       className="flex-1 min-w-0 text-left px-2 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sage-500"
                     >
                       <span className="flex items-center gap-1">
@@ -1178,7 +1054,14 @@ export default function SageAiClient() {
                     </button>
                     <button
                       type="button"
-                      onClick={(e) => handleDeleteSavedQuery(query.id, e)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPendingConfirm({
+                          kind: 'deleteSavedQuery',
+                          queryId: query.id,
+                          name: query.name,
+                        });
+                      }}
                       aria-label={t('deleteSavedQueryAria', { name: query.name })}
                       className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 mr-1 mt-2 hover:text-red-500 rounded focus:outline-none focus:ring-2 focus:ring-sage-500"
                     >
@@ -1255,6 +1138,25 @@ export default function SageAiClient() {
         </ModalContent>
       </Modal>
 
+      <SageAiConfirmDialog
+        open={pendingConfirm !== null}
+        title={
+          pendingConfirm?.kind === 'clearHistory'
+            ? t('clearHistoryConfirm')
+            : pendingConfirm?.kind === 'deleteSavedQuery'
+              ? t('deleteSavedQueryConfirm', { name: pendingConfirm.name })
+              : t('deleteConfirm')
+        }
+        description={
+          pendingConfirm?.kind === 'deleteSession' ? pendingConfirm.title : undefined
+        }
+        busy={confirmBusy}
+        onClose={() => {
+          if (!confirmBusy) setPendingConfirm(null);
+        }}
+        onConfirm={() => void runPendingConfirm()}
+      />
+
       {/* Main Chat Area — overflow-visible so model picker popover can extend above the composer */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-visible bg-white dark:bg-neutral-950">
         {/* Header */}
@@ -1269,14 +1171,22 @@ export default function SageAiClient() {
               </button>
             )}
             <SageAiFieldGuidePanel setInput={setInput} inputRef={inputRef} />
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-medium text-gray-900 dark:text-gray-100">Sage Outdoor Advisory</span>
-              {currentSessionTitle && (
+            <div className="flex min-w-0 items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <span className="shrink-0 font-medium text-gray-900 dark:text-gray-100">
+                Sage Outdoor Advisory
+              </span>
+              {currentSessionId && currentSessionTitle ? (
                 <>
-                  <span className="text-gray-300 dark:text-gray-600">/</span>
-                  <span>{currentSessionTitle}</span>
+                  <span className="shrink-0 text-gray-300 dark:text-gray-600">/</span>
+                  <SageAiSessionTitleEditor
+                    sessionId={currentSessionId}
+                    title={currentSessionTitle}
+                    onRenamed={(title) => updateSessionTitle(currentSessionId, title)}
+                    showToast={showToast}
+                    compact
+                  />
                 </>
-              )}
+              ) : null}
             </div>
           </div>
           {messages.length > 0 && (
@@ -1289,6 +1199,8 @@ export default function SageAiClient() {
             </button>
           )}
         </div>
+
+        <SageAiCapabilitiesBanner />
 
         {/* Messages */}
         <div
@@ -2161,6 +2073,7 @@ export default function SageAiClient() {
         <div className="relative z-20 border-t border-gray-100 bg-white pb-[50px] dark:border-gray-800 dark:bg-gray-950">
           <div className="max-w-3xl mx-auto px-4 py-4">
             <form onSubmit={handleSubmit}>
+              <SageAiThreadUsageBar sessionId={currentSessionId} refreshKey={usageRefreshKey} />
               <div className="rounded-xl border border-neutral-200/70 bg-white shadow-sm dark:border-gray-800 dark:bg-neutral-950 overflow-visible">
                 <textarea
                   ref={inputRef}
@@ -2177,6 +2090,7 @@ export default function SageAiClient() {
                   <SageAiModelPicker
                     selection={modelSelection}
                     onSelectionChange={setModelSelection}
+                    webResearchServerEnabled={webResearchServerEnabled}
                     webResearchEnabled={webResearchEnabled}
                     onWebResearchChange={setWebResearchEnabled}
                     premiumModelsUnlocked={premiumModelsUnlocked}

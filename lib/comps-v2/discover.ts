@@ -127,9 +127,9 @@ export async function discoverCompsV2(
 
   const tasks: Promise<void>[] = [];
 
-  if (src.all_glamping_properties) {
+  if (src.all_sage_data) {
     tasks.push(
-      trackTiming(sourceTimingsMs, 'all_glamping_properties', fetchGlampingPropsNumeric(
+      trackTiming(sourceTimingsMs, 'all_sage_data', fetchGlampingPropsNumeric(
         supabase,
         lat,
         lng,
@@ -137,7 +137,7 @@ export async function discoverCompsV2(
         radiusMiles,
         rowLimitPerTable
       )).then((rows) => {
-        counts.all_glamping_properties = rows.length;
+        counts.all_sage_data = rows.length;
         metas.push(...rows);
       })
     );

@@ -6,8 +6,8 @@ import { COMPS_V2_LEGEND_WEB_RESEARCH } from './source-marker-color';
  */
 export function compsV2FriendlySourceTable(table: string): string {
   switch (table) {
-    case 'all_glamping_properties':
-      return 'Sage Glamping Data';
+    case 'all_sage_data':
+      return 'Sage Data';
     case 'hipcamp':
       return 'Hipcamp';
     case 'all_roverpass_data_new':

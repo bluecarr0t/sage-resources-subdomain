@@ -2,10 +2,14 @@
  * Types for Anchor Point Insights
  */
 
+import type { SeasonClosedFlags } from '@/lib/glamping-seasonal-rate';
+
 export type PropertySource = 'hipcamp' | 'sage_glamping';
 
 export interface NormalizedProperty {
   source: PropertySource;
+  /** Primary key from `hipcamp` or `all_sage_data` for the source row. */
+  source_row_id: number;
   property_name: string;
   state: string | null;
   lat: number;
@@ -24,6 +28,8 @@ export interface NormalizedProperty {
   summer_weekend: number | null;
   fall_weekday: number | null;
   fall_weekend: number | null;
+  /** Explicit `closed` on seasonal cells (Sage rows). */
+  season_closed: SeasonClosedFlags;
   occupancy_2024: number | null;
   occupancy_2025: number | null;
   occupancy_2026: number | null;
@@ -47,9 +53,11 @@ export interface Anchor {
   slug?: string;
 }
 
+import type { AnchorPointAnchorType } from './anchor-type';
+
 export interface InsightsParams {
   stateFilter: string | null;
-  anchorType: 'ski' | 'national-parks';
+  anchorType: AnchorPointAnchorType;
   anchorId: number | null;
   anchorSlug: string | null;
 }

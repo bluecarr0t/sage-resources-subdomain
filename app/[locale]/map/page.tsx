@@ -23,8 +23,13 @@ import {
 } from "@/lib/i18n-utils";
 import { notFound } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
-import { MAP_INDEX_METADATA } from '@/lib/map-seo';
+import {
+  MAP_INDEX_METADATA,
+  mapIndexLocationsTitle,
+  mapIndexPropertyCountDisplay,
+} from '@/lib/map-seo';
 import { isMapClientWorkOnlyLayer, isMapEmbedMode } from '@/lib/map-embed-mode';
+import { getPublicMapDisplayedPropertyCount } from '@/lib/public-map-property-count';
 
 interface PageProps {
   params: {
@@ -52,8 +57,8 @@ export async function generateMetadata({
     notFound();
   }
   
-  const stats = await getPropertyStatistics();
-  const count = stats.uniqueProperties;
+  const mapPropertyCount = await getPublicMapDisplayedPropertyCount();
+  const count = mapIndexPropertyCountDisplay(mapPropertyCount);
   
   const baseUrl = "https://resources.sageoutdooradvisory.com";
   const pathname = `/${locale}/map`;
@@ -77,7 +82,7 @@ export async function generateMetadata({
     description,
     keywords: MAP_INDEX_METADATA.keywords,
     openGraph: {
-      title: `Glamping Properties Map | ${count}+ Locations | Sage`,
+      title: `${mapIndexLocationsTitle(count)} | Sage`,
       description,
       url,
       siteName: "Sage Outdoor Advisory",
@@ -94,7 +99,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `Glamping Properties Map | ${count}+ Locations`,
+      title: mapIndexLocationsTitle(count),
       description: `Explore ${count}+ glamping properties and compare with population growth data to identify high-growth markets`,
       images: [imageUrl],
     },
@@ -138,7 +143,7 @@ async function getPropertyStatistics() {
     // Get all glamping properties to count unique property names
     // Operating properties only (is_open = Yes)
     const { data: properties, error } = await applyPublicMapCohortFilters(
-      supabase.from('all_glamping_properties').select('property_name, state, country')
+      supabase.from('all_sage_data').select('property_name, state, country')
     );
 
     if (error) {
@@ -202,22 +207,26 @@ export default async function MapPage({
     notFound();
   }
   
-  const stats = await getPropertyStatistics();
+  const [stats, mapPropertyCount] = await Promise.all([
+    getPropertyStatistics(),
+    getPublicMapDisplayedPropertyCount(),
+  ]);
+  const displayPropertyCount = mapIndexPropertyCountDisplay(mapPropertyCount);
   const embedMode = isMapEmbedMode(searchParams);
   const clientWorkOnly = isMapClientWorkOnlyLayer(searchParams);
 
   // Generate structured data
   const organizationSchema = generateOrganizationSchema();
   const mapSchema = generateMapSchema(locale);
-  const itemListSchema = generateMapItemListSchema(stats.uniqueProperties, locale);
+  const itemListSchema = generateMapItemListSchema(displayPropertyCount, locale);
   const webApplicationSchema = generateMapWebApplicationSchema(locale);
   const breadcrumbSchema = generateMapBreadcrumbSchema(locale);
   const datasetSchema = generateDatasetSchema(
-    stats.uniqueProperties,
+    displayPropertyCount,
     { states: stats.states, countries: stats.countries, provinces: stats.provinces },
     locale
   );
-  const faqSchema = generateMapFAQSchema(stats.uniqueProperties);
+  const faqSchema = generateMapFAQSchema(displayPropertyCount);
 
   return (
     <>

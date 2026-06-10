@@ -207,7 +207,7 @@ function propertyTypeExport(r: CompsV2ExportRow): string {
   const p = r.property_type?.trim();
   if (p) return p;
   switch (r.source_table) {
-    case 'all_glamping_properties':
+    case 'all_sage_data':
       return 'Glamping';
     case 'hipcamp':
       return 'Glamping';

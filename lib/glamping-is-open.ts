@@ -1,11 +1,12 @@
 /**
- * Stored values for `all_glamping_properties.is_open` (admin UI + PostgREST).
+ * Stored values for `all_sage_data.is_open` (admin UI + PostgREST).
  * Order matches Property Edit modal and list filters.
  */
 export const GLAMPING_IS_OPEN_VALUES = [
   'Yes',
   'Under Construction',
   'Proposed Development',
+  'Cancelled',
   'Temporarily closed',
   'Closed',
 ] as const;
@@ -17,6 +18,7 @@ export type GlampingIsOpenMetricsBucket =
   | 'yes'
   | 'under_construction'
   | 'proposed_development'
+  | 'cancelled'
   | 'closed'
   | 'other';
 
@@ -36,6 +38,7 @@ export function bucketGlampingIsOpenForMetrics(
   if (v === 'yes') return 'yes';
   if (v === 'under construction') return 'under_construction';
   if (v === 'proposed development') return 'proposed_development';
+  if (v === 'cancelled' || v === 'canceled') return 'cancelled';
   if (v === 'closed' || v === 'no' || v === 'temporarily closed') return 'closed';
   return 'other';
 }
@@ -43,6 +46,7 @@ export function bucketGlampingIsOpenForMetrics(
 /** `is_open` values hidden from the public `/map` marker layer. */
 export const PUBLIC_MAP_EXCLUDED_IS_OPEN = [
   'Closed',
+  'Cancelled',
   'Temporarily closed',
   'Under Construction',
   'Proposed Development',
@@ -61,11 +65,24 @@ export function isGlampingClosedIsOpenStatus(isOpen: string | null | undefined):
   return v === 'closed' || v === 'no';
 }
 
-/** Drop rows with `is_open` = Closed (or legacy No) from public brand pages and map lists. */
+/**
+ * True when a pre-opening pipeline project was cancelled or abandoned before opening.
+ * Distinct from `Closed` (operating sites that shut down).
+ */
+export function isGlampingCancelledIsOpenStatus(isOpen: string | null | undefined): boolean {
+  const v = (isOpen ?? '').trim().toLowerCase();
+  return v === 'cancelled' || v === 'canceled';
+}
+
+/** Drop permanently offline rows from public brand pages and map lists. */
 export function excludeClosedGlampingRows<T extends { is_open?: string | null }>(
   rows: readonly T[]
 ): T[] {
-  return rows.filter((row) => !isGlampingClosedIsOpenStatus(row.is_open));
+  return rows.filter(
+    (row) =>
+      !isGlampingClosedIsOpenStatus(row.is_open) &&
+      !isGlampingCancelledIsOpenStatus(row.is_open)
+  );
 }
 
 /**
@@ -81,7 +98,9 @@ export function isGlampingOperatingForAnalytics(isOpen: string | null | undefine
     v === 'closed' ||
     v === 'temporarily closed' ||
     v === 'under construction' ||
-    v === 'proposed development'
+    v === 'proposed development' ||
+    v === 'cancelled' ||
+    v === 'canceled'
   ) {
     return false;
   }
