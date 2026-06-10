@@ -100,6 +100,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
   /** After load, avoid controlled center/zoom so marker InfoWindows do not snap the viewport. */
   const [useControlledMapViewport, setUseControlledMapViewport] = useState(true);
+  /** True after the map's first idle — Advanced Markers paint reliably only then. */
+  const [mapViewportReady, setMapViewportReady] = useState(false);
 
   const {
     populationLookup, populationFipsLookup, populationLoading, populationLayerKey,
@@ -360,11 +362,13 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
   const mapFilterKey = `${filterState.join(',')}-${filterUnitType.join(',')}-${filterRateRange.join(',')}`;
   useEffect(() => {
     setUseControlledMapViewport(true);
+    setMapViewportReady(false);
   }, [mapFilterKey]);
 
   const { markersRef, parkMarkersRef, clientWorkMarkersRef } = useMapMarkers({
     map,
     isClient,
+    mapViewportReady,
     properties: displayProperties,
     nationalParks,
     showNationalParks,
@@ -495,6 +499,15 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     setTimeout(() => { const bounds = map.getBounds(); if (bounds) setMapBounds(bounds); }, 200);
     google.maps.event.addListenerOnce(map, 'idle', () => {
       setUseControlledMapViewport(false);
+      let viewportReady = false;
+      const markViewportReady = () => {
+        if (viewportReady) return;
+        viewportReady = true;
+        setMapViewportReady(true);
+      };
+      // Advanced Markers need a layout pass after we drop controlled center/zoom.
+      google.maps.event.addListenerOnce(map, 'idle', markViewportReady);
+      window.setTimeout(markViewportReady, 250);
     });
   }, [searchParams, setMapBounds]);
 
@@ -522,6 +535,7 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
       clientWorkMarkersRef.current = [];
     }
     setMap(null);
+    setMapViewportReady(false);
   }, [markersRef, parkMarkersRef, clientWorkMarkersRef]);
 
   const mapOptions = useMemo(() => {

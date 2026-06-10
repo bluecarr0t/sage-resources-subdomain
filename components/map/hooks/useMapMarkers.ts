@@ -9,9 +9,15 @@ type NationalParkWithCoords = NationalPark & { coordinates: [number, number] };
 
 const MARKER_BATCH_SIZE = 80;
 
+function nudgeMapRepaint(map: google.maps.Map): void {
+  google.maps.event.trigger(map, 'resize');
+}
+
 interface UseMapMarkersProps {
   map: google.maps.Map | null;
   isClient: boolean;
+  /** Wait until the map has idled once so Advanced Markers paint without user zoom. */
+  mapViewportReady?: boolean;
   properties: SageProperty[];
   nationalParks: NationalPark[];
   showNationalParks: boolean;
@@ -40,6 +46,7 @@ function clearPropertyMarkers(
 export function useMapMarkers({
   map,
   isClient,
+  mapViewportReady = true,
   properties,
   nationalParks,
   showNationalParks,
@@ -76,7 +83,7 @@ export function useMapMarkers({
   // Depends on propertyMarkerSyncKey only — not propertiesWithCoords (new array ref each
   // render would re-run cleanup, clear markers, and skip recreate on click/zoom panes).
   useEffect(() => {
-    if (!map || !isClient) {
+    if (!map || !isClient || !mapViewportReady) {
       clearPropertyMarkers(markersRef);
       propertyIdsRef.current.clear();
       mapInstanceRef.current = null;
@@ -193,6 +200,10 @@ export function useMapMarkers({
           await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         }
       }
+
+      if (!cancelled && generation === propertyMarkersGenerationRef.current) {
+        nudgeMapRepaint(map);
+      }
     };
 
     createMarkers().catch((err) => {
@@ -208,6 +219,7 @@ export function useMapMarkers({
   }, [
     map,
     isClient,
+    mapViewportReady,
     propertyMarkerSyncKey,
     setSelectedProperty,
     setSelectedPark,
@@ -218,7 +230,7 @@ export function useMapMarkers({
 
   // Manage national park markers
   useEffect(() => {
-    if (!map || !isClient) {
+    if (!map || !isClient || !mapViewportReady) {
       parkMarkersRef.current.forEach((marker) => {
         marker.map = null;
       });
@@ -310,12 +322,14 @@ export function useMapMarkers({
       });
 
       parkMarkersRef.current = parkMarkers;
+      nudgeMapRepaint(map);
     };
 
     createParkMarkers().catch(console.error);
   }, [
     map,
     isClient,
+    mapViewportReady,
     nationalParks,
     showNationalParks,
     setSelectedProperty,
@@ -327,7 +341,7 @@ export function useMapMarkers({
 
   // Client Work markers (static gold pins)
   useEffect(() => {
-    if (!map || !isClient) {
+    if (!map || !isClient || !mapViewportReady) {
       clientWorkMarkersRef.current.forEach((marker) => {
         marker.map = null;
       });
@@ -415,12 +429,14 @@ export function useMapMarkers({
       });
 
       clientWorkMarkersRef.current = cwMarkers;
+      nudgeMapRepaint(map);
     };
 
     createClientWorkMarkers().catch(console.error);
   }, [
     map,
     isClient,
+    mapViewportReady,
     clientWorkPoints,
     showClientWork,
     setSelectedProperty,
