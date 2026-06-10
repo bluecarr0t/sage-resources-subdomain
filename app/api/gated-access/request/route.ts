@@ -14,16 +14,23 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClientWithCookies } from '@/lib/supabase-server';
+import { createServerClient } from '@/lib/supabase';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { limit } from '@/lib/upstash';
 import {
   GATED_ACCESS_NAME_MIN_LENGTH,
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   buildMagicLinkRedirectUrl,
+  isEmailOnlyGatedRequest,
   isGatedPageSlug,
+  isOtpUserMissingError,
+  isSupabaseOtpRateLimitError,
   isValidEmail,
   normalizeAuthSiteOrigin,
 } from '@/lib/gated-access';
+
+const RATE_LIMIT_USER_MESSAGE =
+  'Too many sign-in emails were requested recently. Please wait about an hour, or check your inbox (and spam) for an earlier link.';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +49,22 @@ function getRequestOrigin(request: NextRequest): string {
   return normalizeAuthSiteOrigin(new URL(request.url).origin);
 }
 
+async function lookupLeadName(email: string, pageSlug: string): Promise<string | null> {
+  try {
+    const admin = createServerClient();
+    const { data } = await admin
+      .from('gated_content_leads')
+      .select('name')
+      .eq('email', email)
+      .eq('page_slug', pageSlug)
+      .maybeSingle();
+    const name = typeof data?.name === 'string' ? data.name.trim() : '';
+    return name.length >= GATED_ACCESS_NAME_MIN_LENGTH ? name : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   let body: { name?: unknown; email?: unknown; pageSlug?: unknown; emailOnly?: unknown };
   try {
@@ -50,7 +73,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Invalid request body' }, { status: 400 });
   }
 
-  const emailOnly = body.emailOnly === true;
+  const emailOnly = isEmailOnlyGatedRequest(body.emailOnly);
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   const pageSlug = isGatedPageSlug(body.pageSlug)
@@ -81,26 +104,46 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const response = NextResponse.json({ ok: true });
+  const supabase = createSupabaseRouteHandlerClient(request, response);
+
   try {
-    const supabase = await createServerClientWithCookies();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: true,
-        data: {
-          ...(name ? { full_name: name } : {}),
-          gated_page: pageSlug,
-        },
-        emailRedirectTo: buildMagicLinkRedirectUrl(getRequestOrigin(request), pageSlug),
+    // Clear any stale session so Supabase always sends a fresh magic link
+    // (returning-user sign-in can noop when a partial session is present).
+    await supabase.auth.signOut();
+
+    const leadName = name || (emailOnly ? await lookupLeadName(email, pageSlug) : null);
+    const otpOptions = {
+      shouldCreateUser: !emailOnly,
+      data: {
+        ...(leadName ? { full_name: leadName } : {}),
+        gated_page: pageSlug,
       },
-    });
+      emailRedirectTo: buildMagicLinkRedirectUrl(getRequestOrigin(request), pageSlug),
+    };
+
+    let { error } = await supabase.auth.signInWithOtp({ email, options: otpOptions });
+
+    // First-time visitor used "email only" — create the account and send the link.
+    if (emailOnly && error && isOtpUserMissingError(error.message)) {
+      ({ error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { ...otpOptions, shouldCreateUser: true },
+      }));
+    }
+
     if (error) {
-      // Log server-side but still return generic success to avoid enumeration.
       console.error('[gated-access/request] signInWithOtp failed:', error.message);
+      if (isSupabaseOtpRateLimitError(error.message)) {
+        return NextResponse.json(
+          { ok: false, error: RATE_LIMIT_USER_MESSAGE, code: 'email_rate_limited' },
+          { status: 429 }
+        );
+      }
     }
   } catch (err) {
     console.error('[gated-access/request] Unexpected error:', err);
   }
 
-  return NextResponse.json({ ok: true });
+  return response;
 }

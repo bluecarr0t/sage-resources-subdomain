@@ -79,3 +79,34 @@ export function isValidEmail(value: string): boolean {
 }
 
 export const GATED_ACCESS_NAME_MIN_LENGTH = 2;
+
+/** True when the client is requesting a returning-user (email-only) sign-in link. */
+export function isEmailOnlyGatedRequest(emailOnly: unknown): boolean {
+  return emailOnly === true || emailOnly === 'true';
+}
+
+/**
+ * Supabase may return these when `shouldCreateUser: false` but the address has
+ * never completed the lead form — retry with `shouldCreateUser: true`.
+ */
+export function isOtpUserMissingError(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (
+    lower.includes('user not found') ||
+    lower.includes('signup') ||
+    lower.includes('sign up') ||
+    lower.includes('not registered') ||
+    lower.includes('no user')
+  );
+}
+
+/** Supabase Auth rejected the OTP/magic-link send (hourly cap or short cooldown). */
+export function isSupabaseOtpRateLimitError(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (
+    lower.includes('rate limit') ||
+    lower.includes('over_email_send_rate_limit') ||
+    lower.includes('only request this after') ||
+    lower.includes('too many requests')
+  );
+}

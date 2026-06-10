@@ -3,6 +3,9 @@ import {
   buildMagicLinkRedirectUrl,
   getGatedPageRedirectPath,
   isGatedPageSlug,
+  isEmailOnlyGatedRequest,
+  isOtpUserMissingError,
+  isSupabaseOtpRateLimitError,
   isValidEmail,
   normalizeAuthSiteOrigin,
   relocateAuthCodeToCallbackUrl,
@@ -93,6 +96,38 @@ describe('gated-access helpers', () => {
         'https://resources.sageoutdooradvisory.com/auth/callback?code=abc&redirect=%2Fglamping-market-overview'
       );
       expect(relocateAuthCodeToCallbackUrl(input)).toBeNull();
+    });
+  });
+
+  describe('isEmailOnlyGatedRequest', () => {
+    it('accepts boolean true and string "true"', () => {
+      expect(isEmailOnlyGatedRequest(true)).toBe(true);
+      expect(isEmailOnlyGatedRequest('true')).toBe(true);
+    });
+
+    it('rejects falsey and other values', () => {
+      expect(isEmailOnlyGatedRequest(false)).toBe(false);
+      expect(isEmailOnlyGatedRequest('false')).toBe(false);
+      expect(isEmailOnlyGatedRequest(undefined)).toBe(false);
+    });
+  });
+
+  describe('isOtpUserMissingError', () => {
+    it('detects user-not-found style messages', () => {
+      expect(isOtpUserMissingError('User not found')).toBe(true);
+      expect(isOtpUserMissingError('Signups not allowed for otp')).toBe(true);
+    });
+  });
+
+  describe('isSupabaseOtpRateLimitError', () => {
+    it('detects Supabase OTP email rate limits', () => {
+      expect(isSupabaseOtpRateLimitError('429: email rate limit exceeded')).toBe(true);
+      expect(
+        isSupabaseOtpRateLimitError(
+          'For security purposes, you can only request this after 35 seconds.'
+        )
+      ).toBe(true);
+      expect(isSupabaseOtpRateLimitError('unexpected')).toBe(false);
     });
   });
 
