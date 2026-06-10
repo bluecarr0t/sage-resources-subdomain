@@ -6,6 +6,7 @@
 
 import { createServerClient as createSSRClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import type { NextRequest, NextResponse } from 'next/server';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey =
@@ -33,6 +34,29 @@ export async function createServerClientWithCookies() {
         } catch {
           // Ignore in Server Components
         }
+      },
+    },
+  });
+}
+
+/**
+ * Supabase client for Route Handlers that must persist auth cookies on the
+ * response (e.g. signInWithOtp PKCE verifier). Pass the same `NextResponse` you
+ * return from the handler so `setAll` writes Set-Cookie headers correctly.
+ */
+export function createSupabaseRouteHandlerClient(
+  request: NextRequest,
+  response: NextResponse
+) {
+  return createSSRClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
       },
     },
   });
