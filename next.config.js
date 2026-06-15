@@ -47,6 +47,16 @@ const nextConfig = {
         destination: '/glamping-market-overview',
         permanent: true,
       },
+      {
+        source: '/glamping-pipeline-quarterly',
+        destination: '/outdoor-hospitality-pipeline',
+        permanent: true,
+      },
+      {
+        source: '/glamping-pipeline-quarterly/:path*',
+        destination: '/outdoor-hospitality-pipeline/:path*',
+        permanent: true,
+      },
       { source: '/admin/comparables', destination: '/admin/glamping-properties', permanent: false },
       { source: '/admin/comparables/:path+', destination: '/admin/glamping-properties/:path+', permanent: false },
       { source: '/admin/comps', destination: '/admin/glamping-properties', permanent: true },

@@ -8,9 +8,18 @@ import type { GlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapsho
 type Props = {
   market: GlampingMarketSnapshotMarket;
   tier: GlampingMarketSnapshotTierFilter;
+  /** Override link target (e.g. Pipeline Quarterly uses the same filters on a different route). */
+  pathForMarketTier?: (
+    market: GlampingMarketSnapshotMarket,
+    tier: GlampingMarketSnapshotTierFilter
+  ) => string;
 };
 
-export function GlampingMarketSnapshotToggle({ market, tier }: Props) {
+export function GlampingMarketSnapshotToggle({
+  market,
+  tier,
+  pathForMarketTier = glampingMarketOverviewPath,
+}: Props) {
   const active =
     'rounded-sm bg-sage-600 px-4 py-2 text-[11px] font-medium tracking-wide text-white';
   const idle =
@@ -23,7 +32,7 @@ export function GlampingMarketSnapshotToggle({ market, tier }: Props) {
       aria-label="Market"
     >
       <Link
-        href={glampingMarketOverviewPath('us', tier)}
+        href={pathForMarketTier('us', tier)}
         scroll={false}
         className={market === 'us' ? active : idle}
         role="tab"
@@ -32,7 +41,7 @@ export function GlampingMarketSnapshotToggle({ market, tier }: Props) {
         United States
       </Link>
       <Link
-        href={glampingMarketOverviewPath('ca', tier)}
+        href={pathForMarketTier('ca', tier)}
         scroll={false}
         className={market === 'ca' ? active : idle}
         role="tab"

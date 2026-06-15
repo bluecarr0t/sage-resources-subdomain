@@ -17,6 +17,7 @@ import {
   getGatedPageRedirectPath,
   isGatedPageSlug,
 } from '@/lib/gated-access';
+import { logGatedContentEvent } from '@/lib/gated-content-events';
 import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
 
 export const dynamic = 'force-dynamic';
@@ -73,6 +74,13 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
   if (error) {
     console.error('[auth/callback] gated lead upsert failed:', error.message);
   } else if (email) {
+    void logGatedContentEvent({
+      eventType: 'auth_verified',
+      email,
+      pageSlug,
+      userId: user.id,
+      metadata: name ? { name } : undefined,
+    });
     notifyZapierGatedLead({
       email,
       name,

@@ -1,5 +1,6 @@
 import {
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
+  GATED_PAGE_PIPELINE_QUARTERLY,
   buildMagicLinkRedirectUrl,
   getGatedPageRedirectPath,
   isGatedPageSlug,
@@ -16,8 +17,9 @@ import {
 
 describe('gated-access helpers', () => {
   describe('isGatedPageSlug', () => {
-    it('recognizes the glamping market overview slug', () => {
+    it('recognizes gated page slugs', () => {
       expect(isGatedPageSlug(GATED_PAGE_GLAMPING_MARKET_OVERVIEW)).toBe(true);
+      expect(isGatedPageSlug(GATED_PAGE_PIPELINE_QUARTERLY)).toBe(true);
     });
 
     it('rejects unknown slugs and nullish values', () => {

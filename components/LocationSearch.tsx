@@ -426,6 +426,7 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
   };
 
   const handleFocus = () => {
+    if (!isLoaded) return;
     // Always show dropdown on focus to display "Use Current Location" option
     setIsOpen(true);
     // Updated to require 3 characters minimum
@@ -522,27 +523,24 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
     );
   }
 
-  if (!isLoaded) {
-    const isHeroDefault = variant === 'default';
+  const isCompact = variant === 'compact' || variant === 'editorial';
+  const isEditorial = variant === 'editorial';
+
+  // Hero landing page only — sidebar map search renders the real input shell immediately.
+  if (!isLoaded && variant === 'default') {
     return (
       <div className="w-full max-w-2xl mx-auto">
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4 border border-white/20">
           <div className="flex items-center gap-3">
-            <div
-              className={`flex-1 h-14 bg-gray-200 rounded-xl animate-pulse ${isHeroDefault ? 'hidden sm:block' : ''}`}
-            />
-            <div
-              className={`h-14 bg-gray-200 rounded-xl animate-pulse ${isHeroDefault ? 'w-full sm:w-32' : 'w-32'}`}
-            />
+            <div className="hidden flex-1 h-14 bg-gray-200 rounded-xl animate-pulse sm:block" />
+            <div className="h-14 w-full bg-gray-200 rounded-xl animate-pulse sm:w-32" />
           </div>
         </div>
       </div>
     );
   }
 
-  const showDropdown = isOpen; // Show dropdown when open to display "Use Current Location" and/or predictions
-  const isCompact = variant === 'compact' || variant === 'editorial';
-  const isEditorial = variant === 'editorial';
+  const showDropdown = isOpen && isLoaded; // Show dropdown when open to display "Use Current Location" and/or predictions
   const optionSelectedClass = isEditorial
     ? 'bg-sage-50 border-sage-200/80'
     : 'bg-[#00b6a6]/10 border-[#00b6a6]/20';

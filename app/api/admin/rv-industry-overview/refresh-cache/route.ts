@@ -6,6 +6,9 @@ import { recomputeCampspotRvOverviewPageData } from '@/lib/rv-industry-overview/
 import { rvOverviewApiDisplayError } from '@/lib/rv-industry-overview/rv-overview-display-error';
 import { rvOverviewScanMetaAnyHitCap } from '@/lib/rv-industry-overview/rv-overview-scan-meta';
 
+/** Campspot + RoverPass full-table scans can exceed the default serverless limit. */
+export const maxDuration = 300;
+
 /**
  * Re-scan `campspot`, rebuild aggregates in Node, upsert `campspot_rv_overview_cache`,
  * and invalidate Next.js data tag `rv-industry-overview`.

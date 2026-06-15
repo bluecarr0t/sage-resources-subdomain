@@ -37,6 +37,32 @@ export function todayUtcDateString(now = new Date()): string {
   return now.toISOString().slice(0, 10);
 }
 
+/** Parse Sage / Postgres date fields (`YYYY-MM-DD` or ISO timestamp) for display. */
+export function parsePlannedOpenDateField(
+  raw: string | null | undefined
+): string | null {
+  if (raw == null) return null;
+  const trimmed = String(raw).trim();
+  if (!trimmed) return null;
+  return normalizePlannedOpenDate(trimmed.slice(0, 10));
+}
+
+/** Human-readable label for pipeline tables and exports. */
+export function formatPlannedOpenDateLabel(
+  raw: string | null | undefined
+): string {
+  const iso = parsePlannedOpenDateField(raw);
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(dt);
+}
+
 export function isPlannedOpenDateDue(
   plannedOpenDate: string | null | undefined,
   asOfDate: string

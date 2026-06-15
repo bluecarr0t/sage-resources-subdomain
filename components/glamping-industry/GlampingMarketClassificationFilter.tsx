@@ -9,9 +9,17 @@ import type { GlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapsho
 type Props = {
   market: GlampingMarketSnapshotMarket;
   tier: GlampingMarketSnapshotTierFilter;
+  pathForMarketTier?: (
+    market: GlampingMarketSnapshotMarket,
+    tier: GlampingMarketSnapshotTierFilter
+  ) => string;
 };
 
-export function GlampingMarketClassificationFilter({ market, tier }: Props) {
+export function GlampingMarketClassificationFilter({
+  market,
+  tier,
+  pathForMarketTier = glampingMarketOverviewPath,
+}: Props) {
   const active =
     'rounded-sm bg-sage-600 px-3 py-2 text-[11px] font-medium tracking-wide text-white';
   const idle =
@@ -26,7 +34,7 @@ export function GlampingMarketClassificationFilter({ market, tier }: Props) {
       {GLAMPING_MARKET_CLASSIFICATION_FILTER_OPTIONS.map((opt) => (
         <Link
           key={opt.value}
-          href={glampingMarketOverviewPath(market, opt.value)}
+          href={pathForMarketTier(market, opt.value)}
           scroll={false}
           className={tier === opt.value ? active : idle}
           aria-current={tier === opt.value ? 'true' : undefined}

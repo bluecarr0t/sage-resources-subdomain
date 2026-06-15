@@ -23,6 +23,6 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "scripts", "**/__tests__/**"]
+  "exclude": ["node_modules", "scripts", "**/__tests__/**", "**/* 2.ts", "**/* 2.tsx"]
 }
 

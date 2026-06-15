@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import nextDynamic from 'next/dynamic';
-import { EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
+import { EDITORIAL_LINK_CLASS, EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
 import { GlampingMarketClassificationFilter } from '@/components/glamping-industry/GlampingMarketClassificationFilter';
 import { GlampingMarketScopeDisclosure } from '@/components/glamping-industry/GlampingMarketScopeDisclosure';
 import { GlampingMarketSnapshotToggle } from '@/components/glamping-industry/GlampingMarketSnapshotToggle';
@@ -204,6 +205,22 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                 <p className="mt-4 max-w-xs text-[11px] leading-relaxed text-neutral-500">
                   Mean and median use operating properties with a recorded nightly rate.
                 </p>
+                {market === 'us' ? (
+                  <div className="mt-8">
+                    <h2 className="text-[11px] uppercase tracking-widest text-neutral-500">
+                      Top brands
+                    </h2>
+                    <p className="mt-3 max-w-xs text-[11px] leading-relaxed text-neutral-500">
+                      Largest US glamping operators by location count.
+                    </p>
+                    <Link
+                      href="/glamping-market-overview/brands"
+                      className={`mt-3 inline-block text-sm font-light ${EDITORIAL_LINK_CLASS}`}
+                    >
+                      View top brands →
+                    </Link>
+                  </div>
+                ) : null}
               </div>
             </dl>
 

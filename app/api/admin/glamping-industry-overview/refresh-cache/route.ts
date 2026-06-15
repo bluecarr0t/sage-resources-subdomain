@@ -6,6 +6,9 @@ import { recomputeGlampingIndustryOverviewPageData } from '@/lib/glamping-indust
 import { rvOverviewApiDisplayError } from '@/lib/rv-industry-overview/rv-overview-display-error';
 import { rvOverviewScanMetaAnyHitCap } from '@/lib/rv-industry-overview/rv-overview-scan-meta';
 
+/** Hipcamp + Sage full-table scans can exceed the default serverless limit. */
+export const maxDuration = 300;
+
 export async function POST(request: NextRequest) {
   const refreshSecret = process.env.GLAMPING_INDUSTRY_OVERVIEW_REFRESH_SECRET;
   const authHeader = request.headers.get('authorization');

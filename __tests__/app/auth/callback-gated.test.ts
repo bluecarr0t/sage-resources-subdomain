@@ -7,6 +7,11 @@ import { NextRequest } from 'next/server';
 
 const mockExchangeCodeForSession = jest.fn();
 const mockUpsert = jest.fn();
+const mockLogGatedContentEvent = jest.fn();
+
+jest.mock('@/lib/gated-content-events', () => ({
+  logGatedContentEvent: (...args: unknown[]) => mockLogGatedContentEvent(...args),
+}));
 
 jest.mock('@/lib/supabase-server', () => ({
   createSupabaseRouteHandlerClient: jest.fn(() => ({
@@ -45,6 +50,7 @@ describe('GET /auth/callback — gated magic link', () => {
       data: { session: { user: mockUser } },
     });
     mockUpsert.mockResolvedValue({ error: null });
+    mockLogGatedContentEvent.mockResolvedValue(undefined);
   });
 
   it('exchanges code, upserts lead, and redirects to glamping market overview', async () => {
@@ -70,6 +76,13 @@ describe('GET /auth/callback — gated magic link', () => {
       }),
       { onConflict: 'email,page_slug' }
     );
+    expect(mockLogGatedContentEvent).toHaveBeenCalledWith({
+      eventType: 'auth_verified',
+      email: 'jane@example.com',
+      pageSlug: 'glamping-market-overview',
+      userId: 'user-uuid-1',
+      metadata: { name: 'Jane Doe' },
+    });
   });
 
   it('still redirects to overview when lead upsert fails', async () => {
@@ -84,6 +97,7 @@ describe('GET /auth/callback — gated magic link', () => {
 
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toMatch(/\/glamping-market-overview$/);
+    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
   });
 
   it('returns gated users to the gated page (not /login) when code exchange fails', async () => {
@@ -105,6 +119,7 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(location).toContain('access=link-expired');
     expect(location).not.toContain('/login');
     expect(mockUpsert).not.toHaveBeenCalled();
+    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
   });
 
   it('redirects admin flows to /login when code exchange fails', async () => {

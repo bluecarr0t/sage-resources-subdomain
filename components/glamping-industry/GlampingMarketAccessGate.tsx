@@ -7,17 +7,32 @@ import {
   EDITORIAL_INPUT_CLASS,
 } from '@/components/editorial/EditorialPageShell';
 import { fireGateAccessConfetti } from '@/lib/gate-access-confetti';
-import { GATED_PAGE_GLAMPING_MARKET_OVERVIEW } from '@/lib/gated-access';
+import {
+  GATED_ACCESS_EXISTING_LEAD_CODE,
+  GATED_ACCESS_REQUIRE_LEAD_FORM_CODE,
+  GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
+} from '@/lib/gated-access';
 import { supabase } from '@/lib/supabase';
 
 type GateStep = 'form' | 'sent';
 type FormMode = 'lead' | 'email-only';
 
+export type GlampingMarketAccessGateCopy = {
+  title?: string;
+  leadDescription?: string;
+  emailOnlyDescription?: string;
+  successDescription?: string;
+};
+
 export function GlampingMarketAccessGate({
   pageSlug = GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
+  title = 'Glamping Market Overview',
+  leadDescription = 'Enter your name and work email to unlock US & Canada glamping metrics. We\u2019ll send a secure sign-in link to your inbox. No password required.',
+  emailOnlyDescription = 'Enter your work email and we\u2019ll send a secure sign-in link. No password required.',
+  successDescription = 'Open it on this device to unlock the Glamping Market Overview.',
 }: {
   pageSlug?: string;
-}) {
+} & GlampingMarketAccessGateCopy) {
   const [step, setStep] = useState<GateStep>('form');
   const [formMode, setFormMode] = useState<FormMode>('lead');
   const [name, setName] = useState('');
@@ -74,9 +89,24 @@ export function GlampingMarketAccessGate({
         }),
       });
       const data = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string }
+        | { ok?: boolean; error?: string; code?: string; name?: string | null }
         | null;
       if (!res.ok || !data?.ok) {
+        if (data?.code === GATED_ACCESS_REQUIRE_LEAD_FORM_CODE) {
+          setFormMode('lead');
+          setNotice(data.error ?? null);
+          setError(null);
+          return;
+        }
+        if (data?.code === GATED_ACCESS_EXISTING_LEAD_CODE) {
+          setFormMode('lead');
+          setNotice(data.error ?? null);
+          setError(null);
+          if (typeof data.name === 'string' && data.name.trim().length > 0) {
+            setName(data.name.trim());
+          }
+          return;
+        }
         setError(data?.error ?? 'Something went wrong. Please try again.');
         return;
       }
@@ -113,7 +143,7 @@ export function GlampingMarketAccessGate({
           id="gate-dialog-title"
           className={`${EDITORIAL_H1_CLASS} sm:whitespace-nowrap sm:tracking-[0.22em]`}
         >
-          Glamping Market Overview
+          {title}
         </h1>
 
         {step === 'form' ? (
@@ -124,9 +154,7 @@ export function GlampingMarketAccessGate({
               </p>
             ) : null}
             <p className="mt-4 text-sm font-light leading-relaxed text-neutral-600">
-              {emailOnly
-                ? 'Enter your work email and we\u2019ll send a secure sign-in link. No password required.'
-                : 'Enter your name and work email to unlock US & Canada glamping metrics. We\u2019ll send a secure sign-in link to your inbox. No password required.'}
+              {emailOnly ? emailOnlyDescription : leadDescription}
             </p>
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -248,8 +276,7 @@ export function GlampingMarketAccessGate({
             <h2 className="mt-4 text-base font-medium text-neutral-900">Check your email</h2>
             <p className="mt-3 text-sm font-light leading-relaxed text-neutral-600">
               We&apos;ve sent a secure sign-in link to{' '}
-              <span className="font-medium text-neutral-900">{email}</span>. Open it on this
-              device to unlock the Glamping Market Overview.
+              <span className="font-medium text-neutral-900">{email}</span>. {successDescription}
             </p>
             <p className="mt-4 text-[11px] leading-relaxed text-neutral-500">
               Open the link on <span className="font-medium text-neutral-700">this device</span>{' '}

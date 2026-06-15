@@ -9,6 +9,11 @@ const mockSignInWithOtp = jest.fn();
 const mockSignOut = jest.fn();
 const mockLimit = jest.fn();
 const mockMaybeSingle = jest.fn();
+const mockLogGatedContentEvent = jest.fn();
+
+jest.mock('@/lib/gated-content-events', () => ({
+  logGatedContentEvent: (...args: unknown[]) => mockLogGatedContentEvent(...args),
+}));
 
 jest.mock('@/lib/supabase-server', () => ({
   createSupabaseRouteHandlerClient: jest.fn(() => ({
@@ -54,6 +59,7 @@ describe('POST /api/gated-access/request', () => {
     mockSignInWithOtp.mockResolvedValue({ error: null });
     mockSignOut.mockResolvedValue({ error: null });
     mockMaybeSingle.mockResolvedValue({ data: null });
+    mockLogGatedContentEvent.mockResolvedValue(undefined);
   });
 
   it('sends a magic link for a valid name + email', async () => {
@@ -69,15 +75,24 @@ describe('POST /api/gated-access/request', () => {
     expect(arg.options.data.gated_page).toBe('glamping-market-overview');
     expect(arg.options.data.full_name).toBe('Jane Doe');
     expect(arg.options.emailRedirectTo).toContain('/auth/callback?redirect=');
+    expect(mockLogGatedContentEvent).toHaveBeenCalledWith({
+      eventType: 'form_submit',
+      email: 'jane@example.com',
+      pageSlug: 'glamping-market-overview',
+      metadata: { email_only: false },
+    });
   });
 
   it('rejects a missing/short name with 400 and does not send a link', async () => {
     const res = await POST(makeRequest({ name: 'J', email: 'jane@example.com' }));
     expect(res.status).toBe(400);
     expect(mockSignInWithOtp).not.toHaveBeenCalled();
+    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
   });
 
   it('sends a magic link for email-only sign-in (returning user, no auto-signup)', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({ data: { name: 'Jane Doe' } });
+
     const res = await POST(
       makeRequest({ email: 'returning@example.com', emailOnly: true })
     );
@@ -89,11 +104,29 @@ describe('POST /api/gated-access/request', () => {
     expect(arg.options.shouldCreateUser).toBe(true);
     expect(arg.options.data.full_name).toBeUndefined();
     expect(arg.options.data.gated_page).toBe('glamping-market-overview');
+    expect(mockLogGatedContentEvent).toHaveBeenCalledWith({
+      eventType: 'form_submit',
+      email: 'returning@example.com',
+      pageSlug: 'glamping-market-overview',
+      metadata: { email_only: true },
+    });
   });
 
-  it('sends only one OTP for email-only sign-in (no retry double-send)', async () => {
+  it('requires the lead form when email-only is used for an unknown email', async () => {
+    const res = await POST(makeRequest({ email: 'new@example.com', emailOnly: true }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.code).toBe('require_lead_form');
+    expect(mockSignInWithOtp).not.toHaveBeenCalled();
+    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
+  });
+
+  it('sends only one OTP for email-only sign-in when the lead already exists', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({ data: { name: 'Jane Doe' } });
+
     const res = await POST(
-      makeRequest({ email: 'new@example.com', emailOnly: true })
+      makeRequest({ email: 'returning@example.com', emailOnly: true })
     );
     expect(res.status).toBe(200);
     expect(mockSignInWithOtp).toHaveBeenCalledTimes(1);
@@ -101,13 +134,28 @@ describe('POST /api/gated-access/request', () => {
   });
 
   it('includes stored lead name on email-only resend when available', async () => {
-    mockMaybeSingle.mockResolvedValueOnce({ data: { name: 'Jane Doe' } });
+    mockMaybeSingle.mockResolvedValue({ data: { name: 'Jane Doe' } });
 
     const res = await POST(
       makeRequest({ email: 'returning@example.com', emailOnly: true })
     );
     expect(res.status).toBe(200);
     expect(mockSignInWithOtp.mock.calls[0][0].options.data.full_name).toBe('Jane Doe');
+  });
+
+  it('returns existing_lead when the lead form is used for a registered email', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({ data: { name: 'Jane Doe' } });
+
+    const res = await POST(
+      makeRequest({ name: 'Jane Doe', email: 'returning@example.com' })
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.code).toBe('existing_lead');
+    expect(body.name).toBe('Jane Doe');
+    expect(mockSignInWithOtp).not.toHaveBeenCalled();
+    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
   });
 
   it('rejects an invalid email with 400', async () => {
@@ -121,6 +169,7 @@ describe('POST /api/gated-access/request', () => {
     const res = await POST(makeRequest({ name: 'Jane Doe', email: 'jane@example.com' }));
     expect(res.status).toBe(429);
     expect(mockSignInWithOtp).not.toHaveBeenCalled();
+    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
   });
 
   it('returns 429 when Supabase hourly email rate limit is hit', async () => {
@@ -133,6 +182,12 @@ describe('POST /api/gated-access/request', () => {
     expect(body.ok).toBe(false);
     expect(body.code).toBe('email_rate_limited');
     expect(body.error).toMatch(/Too many sign-in emails/i);
+    expect(mockLogGatedContentEvent).toHaveBeenCalledWith({
+      eventType: 'form_submit',
+      email: 'jane@example.com',
+      pageSlug: 'glamping-market-overview',
+      metadata: { email_only: false },
+    });
   });
 
   it('returns 429 with a short cooldown message when Supabase enforces seconds between sends', async () => {

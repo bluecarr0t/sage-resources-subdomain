@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { GlampingMarketScopeDisclosure } from '@/components/glamping-industry/GlampingMarketScopeDisclosure';
-import { EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
+import {
+  EDITORIAL_LINK_CLASS,
+  EDITORIAL_TOPO_BG_URL,
+} from '@/components/editorial/EditorialPageShell';
 import {
   fetchTopGlampingBrands,
   formatRetailDailyRate,
@@ -46,7 +48,13 @@ export default async function BrandOverviewPage() {
         aria-hidden
       />
       <main className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-x-visible px-6 pt-16 pb-24 sm:pt-24 sm:pb-32">
-        <h1 className="font-[Georgia] text-sm font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg">
+        <Link
+          href="/glamping-market-overview"
+          className={`inline-block text-sm font-light ${EDITORIAL_LINK_CLASS}`}
+        >
+          ← Glamping Market Overview
+        </Link>
+        <h1 className="mt-6 font-[Georgia] text-sm font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg">
           Top Glamping Brands
         </h1>
 
@@ -57,12 +65,9 @@ export default async function BrandOverviewPage() {
         ) : null}
 
         <p className="mt-6 max-w-xl text-sm font-light leading-relaxed text-neutral-600">
-          Largest multi-property glamping operators in the United States in Sage research, ranked by
-          published location count (minimum two locations). Portfolio brands include sub-brand
-          locations in their totals.
+          Largest multi-property glamping operators in the United States in Sage research. Portfolio
+          brands include sub-brand locations in their totals.
         </p>
-
-        <GlampingMarketScopeDisclosure />
 
         {result.ok ? (
           <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,13.5rem)_minmax(0,1fr)] lg:items-start lg:gap-x-12">
@@ -106,7 +111,7 @@ export default async function BrandOverviewPage() {
                 Top brands
               </h2>
               <p className="mt-2 max-w-md text-[10px] leading-relaxed text-neutral-500">
-                Props per brand; rollups include sub-brands. Avg. retail rate is the mean where
+                Properties per brand; rollups include sub-brands. Avg. retail rate is the mean where
                 nightly rates are published.
               </p>
               {result.data.brands.length > 0 ? (

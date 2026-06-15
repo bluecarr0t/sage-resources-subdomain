@@ -4,7 +4,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
-import { cache as reactCache } from 'react';
+import { requestCache } from '@/lib/request-cache';
 import {
   industryOverviewSnapshotMetaFromRow,
   type IndustryOverviewCacheRow,
@@ -462,7 +462,7 @@ function parseRvOverviewPayloadFromCacheRow(
 }
 
 /** Fresh Postgres read for admin cache health UI (bypasses `unstable_cache`). */
-export const getRvOverviewSnapshotMeta = reactCache(
+export const getRvOverviewSnapshotMeta = requestCache(
   async (): Promise<RvOverviewSnapshotMeta> => {
     const supabase = createServerClient();
     const row = await readRvOverviewCacheRow(supabase);
@@ -849,7 +849,7 @@ const getCachedRvIndustryOverviewPageLoad = unstable_cache(
 );
 
 /** One Postgres read + Next cache for admin page render (payload and cache-bar meta). */
-export const getRvIndustryOverviewPageLoad = reactCache(
+export const getRvIndustryOverviewPageLoad = requestCache(
   async (): Promise<RvIndustryOverviewPageLoad> => getCachedRvIndustryOverviewPageLoad()
 );
 

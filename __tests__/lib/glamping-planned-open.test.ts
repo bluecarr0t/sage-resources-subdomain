@@ -1,7 +1,9 @@
 import {
   buildPlannedOpenFlipPatch,
+  formatPlannedOpenDateLabel,
   isPlannedOpenDateDue,
   normalizePlannedOpenDate,
+  parsePlannedOpenDateField,
   sanitizePlannedOpenDatePatch,
 } from '@/lib/glamping-planned-open';
 
@@ -56,6 +58,22 @@ describe('buildPlannedOpenFlipPatch', () => {
       '2026-06-18'
     );
     expect(patch.year_site_opened).toBeUndefined();
+  });
+});
+
+describe('parsePlannedOpenDateField', () => {
+  it('parses Postgres date strings and ISO timestamps', () => {
+    expect(parsePlannedOpenDateField('2026-06-30')).toBe('2026-06-30');
+    expect(parsePlannedOpenDateField('2026-06-30T00:00:00+00:00')).toBe(
+      '2026-06-30'
+    );
+  });
+});
+
+describe('formatPlannedOpenDateLabel', () => {
+  it('formats valid dates and falls back for empty values', () => {
+    expect(formatPlannedOpenDateLabel('2026-06-30')).toBe('Jun 30, 2026');
+    expect(formatPlannedOpenDateLabel(null)).toBe('—');
   });
 });
 

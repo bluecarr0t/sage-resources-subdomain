@@ -79,16 +79,29 @@ WITH hc AS (
     AND COALESCE(country, 'United States') IN ('USA', 'United States', 'US')
 )
 SELECT scope,
-  COUNT(*) FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99) AS n25,
-  ROUND(100 * AVG(occ25) FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99), 1) AS avg_occ25,
+  COUNT(*) FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99
+    AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000) AS n_aligned_2025,
+  ROUND(100 * AVG(occ25) FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99
+    AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000), 1) AS avg_occ25,
   ROUND(100 * (PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY occ25)
-    FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99))::numeric, 1) AS med_occ25,
-  ROUND(100 * AVG(occ24) FILTER (WHERE occ24 BETWEEN 0.10 AND 0.99), 1) AS avg_occ24,
-  ROUND(100 * AVG(occ26) FILTER (WHERE occ26 BETWEEN 0.10 AND 0.99), 1) AS avg_occ26_ytd,
-  ROUND(AVG(adr25) FILTER (WHERE adr25 BETWEEN 10 AND 3000), 0) AS avg_adr25,
-  ROUND(AVG(revpar25) FILTER (WHERE revpar25 BETWEEN 1 AND 3000), 0) AS avg_revpar25,
-  ROUND(100 * AVG(hi_occ25) FILTER (WHERE hi_occ25 BETWEEN 0.10 AND 1), 1) AS avg_high_month_occ25,
-  ROUND(100 * AVG(lo_occ25) FILTER (WHERE lo_occ25 BETWEEN 0 AND 1), 1) AS avg_low_month_occ25
+    FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99
+      AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000))::numeric, 1) AS med_occ25,
+  ROUND(100 * AVG(occ24) FILTER (WHERE occ24 BETWEEN 0.10 AND 0.99
+    AND occ25 BETWEEN 0.10 AND 0.99
+    AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000), 1) AS avg_occ24,
+  ROUND(100 * AVG(occ26) FILTER (WHERE occ26 BETWEEN 0.10 AND 0.99
+    AND occ25 BETWEEN 0.10 AND 0.99
+    AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000), 1) AS avg_occ26_ytd,
+  ROUND(AVG(adr25) FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99
+    AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000), 0) AS avg_adr25,
+  ROUND(AVG(revpar25) FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99
+    AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000), 0) AS avg_revpar25,
+  ROUND(100 * AVG(hi_occ25) FILTER (WHERE hi_occ25 BETWEEN 0.10 AND 1
+    AND occ25 BETWEEN 0.10 AND 0.99
+    AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000), 1) AS avg_high_month_occ25,
+  ROUND(100 * AVG(lo_occ25) FILTER (WHERE lo_occ25 BETWEEN 0 AND 1
+    AND occ25 BETWEEN 0.10 AND 0.99
+    AND adr25 BETWEEN 10 AND 3000 AND revpar25 BETWEEN 1 AND 3000), 1) AS avg_low_month_occ25
 FROM (
   SELECT 'US' AS scope, * FROM hc
   UNION ALL
@@ -131,6 +144,9 @@ FROM b GROUP BY band ORDER BY band;
 
 -- ============================================================================
 -- 5. Cabin occupancy by Midwest state (Hipcamp)
+-- ADR, occupancy, and RevPAR share one aligned 2025 cohort per listing:
+--   occ 10–99%, ADR $10–$3k, RevPAR $1–$3k on the same row.
+-- RevPAR is avg(stored revpar_2025), not avg(ADR) × avg(occ).
 -- ============================================================================
 WITH hc AS (
   SELECT state,
@@ -144,18 +160,24 @@ WITH hc AS (
     AND COALESCE(country, 'United States') IN ('USA', 'United States', 'US')
     AND state IN ('Illinois','Indiana','Iowa','Kansas','Michigan','Minnesota','Missouri',
                   'Nebraska','North Dakota','Ohio','South Dakota','Wisconsin')
+), aligned AS (
+  SELECT *,
+    occ25 BETWEEN 0.10 AND 0.99
+      AND adr25 BETWEEN 10 AND 3000
+      AND revpar25 BETWEEN 1 AND 3000 AS has_aligned_2025
+  FROM hc
 )
 SELECT state, COUNT(*) AS sites,
-  COUNT(*) FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99) AS n_occ25,
-  ROUND(100 * AVG(occ25) FILTER (WHERE occ25 BETWEEN 0.10 AND 0.99), 1) AS avg_occ25,
-  ROUND(100 * AVG(occ24) FILTER (WHERE occ24 BETWEEN 0.10 AND 0.99), 1) AS avg_occ24,
-  ROUND(AVG(adr25) FILTER (WHERE adr25 BETWEEN 10 AND 3000), 0) AS avg_adr25,
-  ROUND(AVG(revpar25) FILTER (WHERE revpar25 BETWEEN 1 AND 3000), 0) AS avg_revpar25,
+  COUNT(*) FILTER (WHERE has_aligned_2025) AS n_aligned_2025,
+  ROUND(100 * AVG(occ25) FILTER (WHERE has_aligned_2025), 1) AS avg_occ25,
+  ROUND(100 * AVG(occ24) FILTER (WHERE has_aligned_2025 AND occ24 BETWEEN 0.10 AND 0.99), 1) AS avg_occ24,
+  ROUND(AVG(adr25) FILTER (WHERE has_aligned_2025), 0) AS avg_adr25,
+  ROUND(AVG(revpar25) FILTER (WHERE has_aligned_2025), 0) AS avg_revpar25,
   MODE() WITHIN GROUP (ORDER BY high_month_2025)
-    FILTER (WHERE COALESCE(high_month_2025, '') NOT IN ('', 'No data')) AS typical_high_month,
+    FILTER (WHERE has_aligned_2025 AND COALESCE(high_month_2025, '') NOT IN ('', 'No data')) AS typical_high_month,
   MODE() WITHIN GROUP (ORDER BY low_month_2025)
-    FILTER (WHERE COALESCE(low_month_2025, '') NOT IN ('', 'No data')) AS typical_low_month
-FROM hc GROUP BY state ORDER BY sites DESC;
+    FILTER (WHERE has_aligned_2025 AND COALESCE(low_month_2025, '') NOT IN ('', 'No data')) AS typical_low_month
+FROM aligned GROUP BY state ORDER BY sites DESC;
 
 -- ============================================================================
 -- 6. Unit-type comparison — Sage inventory + ADR side

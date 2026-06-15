@@ -4,7 +4,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
-import { cache as reactCache } from 'react';
+import { requestCache } from '@/lib/request-cache';
 import {
   industryOverviewSnapshotMetaFromRow,
   type IndustryOverviewCacheRow,
@@ -432,7 +432,7 @@ function parseGlampingOverviewPayloadFromCacheRow(
 }
 
 /** Fresh Postgres read for admin cache health UI (bypasses `unstable_cache`). */
-export const getGlampingOverviewSnapshotMeta = reactCache(
+export const getGlampingOverviewSnapshotMeta = requestCache(
   async (): Promise<GlampingOverviewSnapshotMeta> => {
     const supabase = createServerClient();
     const row = await readGlampingOverviewCacheRow(supabase);
@@ -747,7 +747,7 @@ const getCachedGlampingIndustryOverviewPageLoad = unstable_cache(
 );
 
 /** One Postgres read + Next cache for admin page render (payload and cache-bar meta). */
-export const getGlampingIndustryOverviewPageLoad = reactCache(
+export const getGlampingIndustryOverviewPageLoad = requestCache(
   async (): Promise<GlampingIndustryOverviewPageLoad> =>
     getCachedGlampingIndustryOverviewPageLoad()
 );

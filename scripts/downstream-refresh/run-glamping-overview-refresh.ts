@@ -1,7 +1,11 @@
 #!/usr/bin/env npx tsx
-import { refreshGlampingOverviewCache } from './refresh-glamping-overview';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+config({ path: resolve(process.cwd(), '.env.local') });
 
 async function main() {
+  const { refreshGlampingOverviewCache } = await import('./refresh-glamping-overview');
   const result = await refreshGlampingOverviewCache();
   console.log(
     JSON.stringify(

@@ -10,9 +10,13 @@
 
 export const GATED_PAGE_GLAMPING_MARKET_OVERVIEW = 'glamping-market-overview';
 
+/** Paid Pipeline Quarterly product (MVP — preview/staging only until launch). */
+export const GATED_PAGE_PIPELINE_QUARTERLY = 'outdoor-hospitality-pipeline';
+
 /** Every slug we currently gate, mapped to the path it unlocks. */
 const GATED_PAGE_PATHS: Record<string, string> = {
   [GATED_PAGE_GLAMPING_MARKET_OVERVIEW]: '/glamping-market-overview',
+  [GATED_PAGE_PIPELINE_QUARTERLY]: '/outdoor-hospitality-pipeline',
 };
 
 export type GatedPageSlug = keyof typeof GATED_PAGE_PATHS;
@@ -79,6 +83,20 @@ export function isValidEmail(value: string): boolean {
 }
 
 export const GATED_ACCESS_NAME_MIN_LENGTH = 2;
+
+/** User-facing copy when email-only sign-in is used before a lead row exists. */
+export const GATED_ACCESS_REQUIRE_LEAD_FORM_MESSAGE =
+  'First-time access requires your name. Please complete the form below to request access.';
+
+/** API response code: switch the gate UI to the name + email form. */
+export const GATED_ACCESS_REQUIRE_LEAD_FORM_CODE = 'require_lead_form';
+
+/** API response code: email already registered; stay on the name + email form. */
+export const GATED_ACCESS_EXISTING_LEAD_CODE = 'existing_lead';
+
+/** User-facing copy when a returning email is submitted on the lead form. */
+export const GATED_ACCESS_EXISTING_LEAD_MESSAGE =
+  'This email is already registered. Use “Sign in with email only” below to request a sign-in link.';
 
 /** True when the client is requesting a returning-user (email-only) sign-in link. */
 export function isEmailOnlyGatedRequest(emailOnly: unknown): boolean {

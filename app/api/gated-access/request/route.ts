@@ -14,11 +14,16 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
 import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import { limit } from '@/lib/upstash';
+import { logGatedContentEvent } from '@/lib/gated-content-events';
+import { lookupGatedLead } from '@/lib/gated-access-lead';
 import {
+  GATED_ACCESS_EXISTING_LEAD_CODE,
+  GATED_ACCESS_EXISTING_LEAD_MESSAGE,
   GATED_ACCESS_NAME_MIN_LENGTH,
+  GATED_ACCESS_REQUIRE_LEAD_FORM_CODE,
+  GATED_ACCESS_REQUIRE_LEAD_FORM_MESSAGE,
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   buildMagicLinkRedirectUrl,
   formatGatedAccessOtpErrorMessage,
@@ -47,19 +52,9 @@ function getRequestOrigin(request: NextRequest): string {
 }
 
 async function lookupLeadName(email: string, pageSlug: string): Promise<string | null> {
-  try {
-    const admin = createServerClient();
-    const { data } = await admin
-      .from('gated_content_leads')
-      .select('name')
-      .eq('email', email)
-      .eq('page_slug', pageSlug)
-      .maybeSingle();
-    const name = typeof data?.name === 'string' ? data.name.trim() : '';
-    return name.length >= GATED_ACCESS_NAME_MIN_LENGTH ? name : null;
-  } catch {
-    return null;
-  }
+  const lead = await lookupGatedLead(email, pageSlug);
+  const name = lead.name?.trim() ?? '';
+  return name.length >= GATED_ACCESS_NAME_MIN_LENGTH ? name : null;
 }
 
 export async function POST(request: NextRequest) {
@@ -87,6 +82,33 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (emailOnly) {
+    const lead = await lookupGatedLead(email, pageSlug);
+    if (!lead.exists) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: GATED_ACCESS_REQUIRE_LEAD_FORM_CODE,
+          error: GATED_ACCESS_REQUIRE_LEAD_FORM_MESSAGE,
+        },
+        { status: 400 }
+      );
+    }
+  } else {
+    const lead = await lookupGatedLead(email, pageSlug);
+    if (lead.exists) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: GATED_ACCESS_EXISTING_LEAD_CODE,
+          error: GATED_ACCESS_EXISTING_LEAD_MESSAGE,
+          name: lead.name,
+        },
+        { status: 400 }
+      );
+    }
+  }
+
   // Rate limits: 3 / email / hour and 10 / IP / hour. Fail open if Upstash is
   // unavailable. Return generic 429 without leaking which limit was hit.
   const ip = getClientIp(request);
@@ -100,6 +122,13 @@ export async function POST(request: NextRequest) {
       { status: 429 }
     );
   }
+
+  void logGatedContentEvent({
+    eventType: 'form_submit',
+    email,
+    pageSlug,
+    metadata: { email_only: emailOnly },
+  });
 
   const response = NextResponse.json({ ok: true });
   const supabase = createSupabaseRouteHandlerClient(request, response);

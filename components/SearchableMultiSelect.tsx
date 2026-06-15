@@ -27,6 +27,7 @@ interface SearchableMultiSelectProps {
    * Default 420; pass a larger value for long lists (e.g. state filters).
    */
   maxDropdownHeightPx?: number;
+  variant?: 'default' | 'minimal' | 'editorial';
 }
 
 export default function SearchableMultiSelect({
@@ -42,6 +43,7 @@ export default function SearchableMultiSelect({
   disabled = false,
   disabledTitle,
   maxDropdownHeightPx = 420,
+  variant = 'default',
 }: SearchableMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -146,14 +148,26 @@ export default function SearchableMultiSelect({
     ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-900/50 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-500'
     : '';
 
+  const isNeutralChrome = variant === 'minimal' || variant === 'editorial';
+  const editorialActive = 'border-sage-300 bg-white/80 text-neutral-900';
+  const editorialInactive = 'border-sage-200/90 bg-white/50 text-neutral-600';
+  const editorialFocus =
+    'focus:outline-none focus:ring-1 focus:ring-sage-400/40 focus:border-sage-300';
+
   return (
     <div className={`relative ${isOpen && !disabled ? 'z-50' : 'z-auto'}`} ref={containerRef}>
       <label
         htmlFor={id}
-        className={`block text-sm font-medium mb-1 ${
-          disabled
-            ? 'text-gray-400 dark:text-gray-500'
-            : 'text-gray-700 dark:text-gray-300'
+        className={`mb-1 block ${
+          variant === 'editorial'
+            ? 'text-[11px] uppercase tracking-widest text-neutral-500'
+            : variant === 'minimal'
+              ? 'text-[11px] font-medium uppercase tracking-[0.14em] text-stone-500'
+              : `text-sm font-medium ${
+                  disabled
+                    ? 'text-gray-400 dark:text-gray-500'
+                    : 'text-gray-700 dark:text-gray-300'
+                }`
         }`}
       >
         {label}
@@ -173,12 +187,18 @@ export default function SearchableMultiSelect({
           e.preventDefault();
           e.stopPropagation();
         }}
-        className={`w-full px-3 py-2 border rounded-lg text-sm transition-all text-left flex items-center justify-between ${
+        className={`flex w-full items-center justify-between border px-3 py-2 text-left text-sm transition-all ${
           disabled
             ? disabledClasses
-            : `cursor-pointer bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:border-sage-500 ${
-                isActive ? `${colorClasses} font-medium` : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
-              }`
+            : variant === 'editorial'
+              ? `cursor-pointer rounded-sm bg-transparent font-light ${editorialFocus} ${
+                  isActive ? `${editorialActive} font-normal` : editorialInactive
+                }`
+              : `cursor-pointer rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:border-sage-500 dark:bg-gray-800 dark:text-gray-100 ${
+                  isActive
+                    ? `${colorClasses} font-medium`
+                    : 'border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400'
+                }`
         }`}
       >
         <span className="truncate flex-1">
@@ -191,7 +211,13 @@ export default function SearchableMultiSelect({
                 : `${selectedValues.length} selected`}
         </span>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ml-2 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
+          className={`ml-2 h-5 w-5 flex-shrink-0 transition-transform ${
+            isNeutralChrome
+              ? variant === 'editorial'
+                ? 'text-neutral-400'
+                : 'text-stone-400'
+              : 'text-gray-400'
+          } ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -204,7 +230,13 @@ export default function SearchableMultiSelect({
         createPortal(
           <div
             ref={dropdownRef}
-            className="fixed z-[9999] overflow-hidden bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl"
+            className={`fixed z-[9999] overflow-hidden border bg-white dark:bg-gray-800 ${
+              variant === 'editorial'
+                ? 'rounded-sm border-sage-200 shadow-md'
+                : variant === 'minimal'
+                  ? 'rounded-md border-stone-200 shadow-lg'
+                  : 'rounded-lg border-gray-300 shadow-2xl dark:border-gray-600'
+            }`}
             style={{
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`,
@@ -216,16 +248,30 @@ export default function SearchableMultiSelect({
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div
+              className={`border-b bg-white p-2 dark:bg-gray-800 ${
+                variant === 'editorial'
+                  ? 'border-sage-200'
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
+            >
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search
+                  className={`absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 ${
+                    variant === 'editorial' ? 'text-neutral-400' : 'text-gray-400'
+                  }`}
+                />
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sage-500"
+                  className={`w-full py-2 pl-8 pr-3 text-sm focus:outline-none ${
+                    variant === 'editorial'
+                      ? 'rounded-sm border border-sage-200/90 bg-white/80 font-light text-neutral-800 focus:border-sage-300 focus:ring-1 focus:ring-sage-400/40'
+                      : 'rounded-md border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-sage-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'
+                  }`}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -244,7 +290,11 @@ export default function SearchableMultiSelect({
                   return (
                     <label
                       key={option.value}
-                      className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-md cursor-pointer transition-colors"
+                      className={`flex cursor-pointer items-start gap-2 rounded-sm px-3 py-2 transition-colors ${
+                        variant === 'editorial'
+                          ? 'hover:bg-[#faf9f3] dark:hover:bg-gray-800/80'
+                          : 'rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                      }`}
                       onClick={(e) => e.stopPropagation()}
                       onMouseDown={(e) => e.stopPropagation()}
                     >
@@ -254,9 +304,21 @@ export default function SearchableMultiSelect({
                         onChange={() => onToggle(option.value)}
                         onClick={(e) => e.stopPropagation()}
                         onMouseDown={(e) => e.stopPropagation()}
-                        className="w-4 h-4 text-sage-600 border-gray-300 dark:border-gray-600 rounded focus:ring-sage-500 cursor-pointer"
+                        className={`mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-gray-300 focus:ring-2 dark:border-gray-600 ${
+                          variant === 'editorial'
+                            ? 'accent-sage-700 text-sage-700 focus:ring-sage-400/40'
+                            : 'text-sage-600 focus:ring-sage-500'
+                        }`}
                       />
-                      <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
+                      <span
+                        className={`min-w-0 flex-1 text-sm ${
+                          variant === 'editorial'
+                            ? 'font-light text-neutral-700'
+                            : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        {option.label}
+                      </span>
                     </label>
                   );
                 })

@@ -59,6 +59,21 @@ export function arrayToCsv(data: Record<string, unknown>[]): string {
 /**
  * Trigger a CSV download in the browser from an array of objects.
  */
+export function downloadCsvText(csv: string, filename: string): void {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename.endsWith('.csv') ? filename : `${filename}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Trigger a CSV download in the browser from an array of objects.
+ */
 export function downloadCsvFromData(
   data: Record<string, unknown>[],
   filename = 'sage-ai-export.csv'
@@ -68,18 +83,59 @@ export function downloadCsvFromData(
     return;
   }
 
-  const csv = arrayToCsv(data);
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
+  downloadCsvText(arrayToCsv(data), filename);
+}
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename.endsWith('.csv') ? filename : `${filename}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+export type SpreadsheetExportSheet = {
+  name: string;
+  data: Record<string, unknown>[];
+};
 
-  URL.revokeObjectURL(url);
+function recordsToAoa(data: Record<string, unknown>[]): unknown[][] {
+  if (!data.length) return [];
+  const headers = collectAllKeys(data);
+  return [
+    headers,
+    ...data.map((row) =>
+      headers.map((header) => {
+        const value = row[header];
+        if (value == null) return '';
+        return typeof value === 'object' ? normalizeCell(value) : value;
+      })
+    ),
+  ];
+}
+
+/**
+ * Trigger an XLSX download with multiple worksheets.
+ */
+export async function downloadXlsxFromSheets(
+  sheets: SpreadsheetExportSheet[],
+  filename = 'sage-ai-export.xlsx'
+): Promise<void> {
+  if (!sheets.length || sheets.every((sheet) => sheet.data.length === 0)) {
+    console.warn('No data to export');
+    return;
+  }
+
+  let XLSX: typeof import('xlsx');
+  try {
+    XLSX = await import('xlsx');
+  } catch {
+    throw new Error(
+      'Failed to load the Excel export library. Please try CSV export instead.'
+    );
+  }
+
+  const wb = XLSX.utils.book_new();
+  for (const sheet of sheets) {
+    const aoa = recordsToAoa(sheet.data);
+    const ws = aoa.length > 0 ? XLSX.utils.aoa_to_sheet(aoa) : XLSX.utils.aoa_to_sheet([[]]);
+    XLSX.utils.book_append_sheet(wb, ws, sheet.name.slice(0, 31));
+  }
+
+  const finalFilename = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
+  XLSX.writeFile(wb, finalFilename);
 }
 
 /**

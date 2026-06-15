@@ -188,6 +188,7 @@ const excludedRoutes = [
   'privacy-policy',
   'terms-of-service',
   'glamping-market-overview',
+  'outdoor-hospitality-pipeline',
   'glamping-market-snapshot',
   'admin',
   'sitemap',
@@ -364,11 +365,21 @@ export async function middleware(request: NextRequest) {
     // Check if pathname is just a locale (e.g., /en, /es, /fr, /de)
     const isLocaleOnly = locales.some((locale) => pathname === `/${locale}`);
 
+    // API routes: skip i18n and refresh session for gated pipeline exports.
+    if (pathname.startsWith('/api')) {
+      if (pathname.startsWith('/api/pipeline-quarterly/')) {
+        const response = NextResponse.next({ request });
+        const supabase = createSupabaseMiddlewareClient(request, response);
+        await supabase.auth.getUser();
+        return response;
+      }
+      return NextResponse.next();
+    }
+
     // Skip middleware for excluded routes, static files, and Next.js internals
     if (
       excludedRoutes.some(route => pathname.startsWith(`/${route}`)) ||
       pathname.startsWith('/_next') ||
-      pathname.startsWith('/api') ||
       pathname.includes('.') // Skip static files (images, etc.)
     ) {
         // Gated content pages: refresh the Supabase session so returning
@@ -379,7 +390,9 @@ export async function middleware(request: NextRequest) {
         // a new magic link.
         if (
           pathname === '/glamping-market-overview' ||
-          pathname.startsWith('/glamping-market-overview/')
+          pathname.startsWith('/glamping-market-overview/') ||
+          pathname === '/outdoor-hospitality-pipeline' ||
+          pathname.startsWith('/outdoor-hospitality-pipeline/')
         ) {
           const response = NextResponse.next({ request });
           const supabase = createSupabaseMiddlewareClient(request, response);
