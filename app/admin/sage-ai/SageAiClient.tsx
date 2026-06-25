@@ -70,7 +70,6 @@ import {
 import { useSageAiServerCapabilities } from './useSageAiServerCapabilities';
 import { isSageAiTimeoutError } from '@/lib/sage-ai/chat-limits';
 import { SageAiFieldGuidePanel } from './SageAiFieldGuidePanel';
-import { SageAiCapabilitiesBanner } from './SageAiCapabilitiesBanner';
 import { SageAiConfirmDialog } from './SageAiConfirmDialog';
 import { SageAiSessionTitleEditor } from './SageAiSessionTitleEditor';
 import { SageAiThreadUsageBar } from './SageAiThreadUsageBar';
@@ -1199,8 +1198,6 @@ export default function SageAiClient() {
             </button>
           )}
         </div>
-
-        <SageAiCapabilitiesBanner />
 
         {/* Messages */}
         <div
