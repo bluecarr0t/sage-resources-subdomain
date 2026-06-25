@@ -2,7 +2,6 @@ import { extractNameAliases, isJobAuthoredByConsultant } from '@/lib/project-pip
 import { isJobAssignedToUser } from '@/lib/project-pipeline/filter-jobs';
 import { isManagedUserAdmin } from '@/lib/project-pipeline/job-edit-permissions';
 import type { ManagedUser } from '@/lib/auth-helpers';
-import type { ManagedUser } from '@/lib/auth-helpers';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 import {
   DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER,

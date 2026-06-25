@@ -73,7 +73,6 @@ async function runFilteredQuery(
 ): Promise<SagePropertySearchRow[]> {
   const listFilters = buildListFilters(search);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let q: any = supabase
     .from(LIST_ANCHORS_VIEW)
     .select(SEARCH_SELECT)
@@ -83,7 +82,6 @@ async function runFilteredQuery(
 
   let { data, error } = await q;
   if (error && isMissingListViewError(error.message)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let tableQuery: any = supabase
       .from(TABLE)
       .select(SEARCH_SELECT)
@@ -130,7 +128,6 @@ async function fetchFallbackCandidates(
 
   const listFilters = buildListFilters({ ...search, queryText: '' });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let q: any = supabase
     .from(LIST_ANCHORS_VIEW)
     .select(SEARCH_SELECT)
@@ -141,7 +138,6 @@ async function fetchFallbackCandidates(
 
   let { data, error } = await q;
   if (error && isMissingListViewError(error.message)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let tableQuery: any = supabase
       .from(TABLE)
       .select(SEARCH_SELECT)

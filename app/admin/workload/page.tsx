@@ -15,7 +15,7 @@ import type {
   PipelineWorkloadView,
   ProjectPipelineWorkloadApiResponse,
 } from '@/lib/project-pipeline/build-workload-api-response';
-import { DEFAULT_PROJECT_PIPELINE_SHEET_TAB, formatProjectPipelineSheetYearLabel } from '@/lib/project-pipeline/sheet-tabs';
+import { DEFAULT_PROJECT_PIPELINE_SHEET_TAB, formatProjectPipelineSheetYearLabel, resolveProjectPipelineSheetTab, type ProjectPipelineSheetTab } from '@/lib/project-pipeline/sheet-tabs';
 import {
   DEFAULT_PIPELINE_WORKLOAD_SEGMENT_FILTER,
   type PipelineWorkloadSegmentFilter,
@@ -39,7 +39,7 @@ async function readJsonResponse<T>(res: Response): Promise<T & { error?: string;
 export default function PipelineWorkloadPage() {
   const t = useTranslations('admin.pipelineWorkload');
   const [activeTab, setActiveTab] = useState<WorkloadTab>('charts');
-  const [sheetName, setSheetName] = useState(DEFAULT_PROJECT_PIPELINE_SHEET_TAB);
+  const [sheetName, setSheetName] = useState<ProjectPipelineSheetTab>(DEFAULT_PROJECT_PIPELINE_SHEET_TAB);
   const [segmentFilter, setSegmentFilter] = useState<PipelineWorkloadSegmentFilter>(
     DEFAULT_PIPELINE_WORKLOAD_SEGMENT_FILTER
   );
@@ -109,7 +109,7 @@ export default function PipelineWorkloadPage() {
 
         setData(body);
         if (!body.requiresOAuth && (body.view === 'byYear' || body.view === 'charts') && body.sheetName) {
-          setSheetName(body.sheetName);
+          setSheetName(resolveProjectPipelineSheetTab(body.sheetName));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : t('loadError'));
@@ -191,7 +191,7 @@ export default function PipelineWorkloadPage() {
               <div className="w-full sm:w-36">
                 <Select
                   value={sheetName}
-                  onChange={(e) => setSheetName(e.target.value)}
+                  onChange={(e) => setSheetName(resolveProjectPipelineSheetTab(e.target.value))}
                   aria-label={t('filterSheetYear')}
                   className="h-10 text-sm"
                 >

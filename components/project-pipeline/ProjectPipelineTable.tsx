@@ -9,6 +9,7 @@ import {
   getProjectPipelineSegmentDotClassName,
   jobMatchesProjectPipelineSegment,
   PROJECT_PIPELINE_SEGMENTS,
+  type ProjectPipelineSegment,
 } from '@/lib/project-pipeline/segment';
 import { PROJECT_PIPELINE_SERVICES } from '@/lib/project-pipeline/services';
 import { isOutdoorJobDueWithin30Days, isOutdoorJobPastDue } from '@/lib/project-pipeline/metrics';
@@ -98,7 +99,10 @@ function filterProjectPipelineJobs(
     }
     if (
       filters.segmentFilter &&
-      !jobMatchesProjectPipelineSegment(job.commercialOutdoor, filters.segmentFilter)
+      !jobMatchesProjectPipelineSegment(
+        job.commercialOutdoor,
+        filters.segmentFilter as ProjectPipelineSegment
+      )
     ) {
       return false;
     }

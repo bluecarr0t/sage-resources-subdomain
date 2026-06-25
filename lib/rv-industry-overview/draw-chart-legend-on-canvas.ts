@@ -13,24 +13,23 @@ const LEGEND_BAND_PADDING_PX = 10;
 
 export function parseRvOverviewLegendItems(root: HTMLElement): RvOverviewLegendItem[] {
   const nodes = root.querySelectorAll('[data-rv-legend-item]');
-  return Array.from(nodes)
-    .map((node) => {
-      const el = node as HTMLElement;
-      const label = el.dataset.rvLegendLabel?.trim() ?? '';
-      if (!label) return null;
-      const kind = el.dataset.rvLegendKind === 'bar' ? 'bar' : 'line';
-      const color = el.dataset.rvLegendColor?.trim() || '#111827';
-      const opacityRaw = el.dataset.rvLegendOpacity;
-      const opacity =
-        opacityRaw != null && opacityRaw !== '' ? Number.parseFloat(opacityRaw) : undefined;
-      return {
-        label,
-        kind,
-        color,
-        opacity: opacity != null && Number.isFinite(opacity) ? opacity : undefined,
-      } satisfies RvOverviewLegendItem;
-    })
-    .filter((item): item is RvOverviewLegendItem => item != null);
+  return Array.from(nodes).flatMap((node) => {
+    const el = node as HTMLElement;
+    const label = el.dataset.rvLegendLabel?.trim() ?? '';
+    if (!label) return [];
+    const kind = el.dataset.rvLegendKind === 'bar' ? 'bar' : 'line';
+    const color = el.dataset.rvLegendColor?.trim() || '#111827';
+    const opacityRaw = el.dataset.rvLegendOpacity;
+    const opacity =
+      opacityRaw != null && opacityRaw !== '' ? Number.parseFloat(opacityRaw) : undefined;
+    const item: RvOverviewLegendItem = {
+      label,
+      kind,
+      color,
+      ...(opacity != null && Number.isFinite(opacity) ? { opacity } : {}),
+    };
+    return [item];
+  });
 }
 
 function drawBarSwatch(

@@ -1,4 +1,4 @@
-import type { ProjectPipelineJob } from './types';
+import type { ProjectPipelineJob, ProjectPipelineSheetField } from './types';
 import { buildFieldColumnMap } from './column-map';
 import {
   resolveCommercialOutdoor,
@@ -64,10 +64,10 @@ export function parseProjectPipelineSheet(
 
   const headerRow = rows[0].map((cell) => cellToString(cell));
   const fieldColumnMap = buildFieldColumnMap(headerRow);
-  const columnIndexToField = new Map(
+  const columnIndexToField = new Map<number, ProjectPipelineSheetField>(
     Object.entries(fieldColumnMap).map(([field, index]) => [
       index,
-      field as keyof typeof fieldColumnMap,
+      field as ProjectPipelineSheetField,
     ])
   );
 

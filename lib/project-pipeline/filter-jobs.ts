@@ -8,7 +8,7 @@ export interface FilterJobsForUserInput {
 }
 
 export function isJobAssignedToUser(
-  job: ProjectPipelineJob,
+  job: Pick<ProjectPipelineJob, 'appraiserConsultant' | 'projMgr'>,
   displayName: string | null | undefined
 ): boolean {
   const aliases = extractNameAliases(displayName);

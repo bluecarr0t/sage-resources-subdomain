@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { formatProjectPipelineSheetDate } from '@/lib/project-pipeline/due-date-emphasis';
-import type { PipelineWorkloadPersonRow } from '@/lib/project-pipeline/workload';
+import type { PipelineWorkloadPersonJob, PipelineWorkloadPersonRow } from '@/lib/project-pipeline/workload';
 
 type PersonRole = 'appraiser' | 'projMgr';
 
@@ -17,7 +17,7 @@ function WorkloadPersonJobRows({
   role,
   t,
 }: {
-  jobs: readonly PipelineWorkloadPersonRow['jobs'];
+  jobs: readonly PipelineWorkloadPersonJob[];
   role: PersonRole;
   t: ReturnType<typeof useTranslations>;
 }) {

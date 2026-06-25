@@ -13,6 +13,7 @@ import { jobMatchesProjectPipelineSegment } from '@/lib/project-pipeline/segment
 import { isConsultantWorkloadVisibleProjectStatus } from '@/lib/project-pipeline/project-status';
 import { withDerivedProjectPipelineProjectStatus } from '@/lib/project-pipeline/derive-project-status';
 import { workloadConsultantBucketNames } from '@/lib/project-pipeline/workload-co-consultants';
+import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 
 export type PipelineConsultantJobGroup = {
   consultantName: string;

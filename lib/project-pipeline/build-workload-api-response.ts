@@ -97,9 +97,19 @@ export async function buildProjectPipelineWorkloadApiResponse(input: {
 
   if (!configured || !authMode) {
     if (view === 'charts') {
-      return { ...baseMeta, configured: false, ...emptyChartsWorkload(sheetName) };
+      return {
+        ...baseMeta,
+        configured: false,
+        view: 'charts',
+        ...emptyChartsWorkload(sheetName),
+      };
     }
-    return { ...baseMeta, configured: false, ...emptyByYearWorkload(sheetName) };
+    return {
+      ...baseMeta,
+      configured: false,
+      view: 'byYear',
+      ...emptyByYearWorkload(sheetName),
+    };
   }
 
   const accessToken = input.allowOAuthSheets ? input.accessToken?.trim() : undefined;
@@ -124,6 +134,7 @@ export async function buildProjectPipelineWorkloadApiResponse(input: {
           configured: true,
           requiresOAuth: true,
           oauthClientId,
+          view: 'charts',
           ...emptyChartsWorkload(sheetName),
         };
       }
@@ -132,6 +143,7 @@ export async function buildProjectPipelineWorkloadApiResponse(input: {
         configured: true,
         requiresOAuth: true,
         oauthClientId,
+        view: 'byYear',
         ...emptyByYearWorkload(sheetName),
       };
     }

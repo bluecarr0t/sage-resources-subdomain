@@ -51,7 +51,7 @@ export type ProjectPipelineFieldColumnMap = Partial<
   Record<ProjectPipelineEditableField, number>
 >;
 
-export const PROJECT_PIPELINE_JOB_FIELDS: readonly ProjectPipelineEditableField[] = [
+export const PROJECT_PIPELINE_JOB_FIELDS = [
   'jobNumber',
   'client',
   'propertyLocation',
@@ -67,7 +67,10 @@ export const PROJECT_PIPELINE_JOB_FIELDS: readonly ProjectPipelineEditableField[
   'sentToClient',
   'authorSlackUsername',
   'clientEmail',
-] as const;
+] as const satisfies readonly ProjectPipelineEditableField[];
+
+/** String fields mapped from Google Sheet columns (subset of editable fields). */
+export type ProjectPipelineSheetField = (typeof PROJECT_PIPELINE_JOB_FIELDS)[number];
 
 export type ProjectPipelineAuthMode = 'service_account' | 'oauth';
 

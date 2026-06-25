@@ -25,6 +25,7 @@ import {
 import {
   DEFAULT_PROJECT_PIPELINE_VIEW_SHEET_FILTER,
   isProjectPipelineAllSheetsTab,
+  resolveProjectPipelineSheetSelection,
   resolveProjectPipelineSheetTab,
 } from '@/lib/project-pipeline/sheet-tabs';
 
@@ -122,8 +123,9 @@ export default function ProjectPipelinePage() {
 
   const handleSheetNameChange = useCallback(
     (value: string) => {
-      setSheetName(value);
-      writePersistedSheetFilter(value, { pathname, router });
+      const selection = resolveProjectPipelineSheetSelection(value);
+      setSheetName(selection);
+      writePersistedSheetFilter(selection, { pathname, router });
     },
     [pathname, router]
   );
@@ -598,7 +600,7 @@ export default function ProjectPipelinePage() {
   const jobsLoading =
     loading && Boolean(data) && !data?.requiresOAuth && displayJobs.length === 0;
 
-  if (isInitialLoad && !data?.requiresOAuth) {
+  if (isInitialLoad) {
     return (
       <main className="pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
