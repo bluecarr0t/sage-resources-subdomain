@@ -30,6 +30,7 @@ interface Report {
   service?: string | null;
   has_comparables?: boolean;
   report_date?: string | null;
+  sage_data_anchor_id?: number | null;
 }
 
 interface Client {
@@ -447,7 +448,10 @@ export default function PastReportsPage() {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                   <thead className="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      <th className="w-8 py-3 pl-6 pr-1 text-left">
+                        <span className="sr-only">Sage property link</span>
+                      </th>
+                      <th className="py-3 pl-3 pr-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Report Details
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -480,7 +484,26 @@ export default function PastReportsPage() {
                           }
                         }}
                       >
-                        <td className="px-6 py-4">
+                        <td className="w-8 py-4 pl-6 pr-1">
+                          <span
+                            className={`inline-block h-2.5 w-2.5 rounded-full ${
+                              report.sage_data_anchor_id != null
+                                ? 'bg-green-500'
+                                : 'bg-red-500'
+                            }`}
+                            title={
+                              report.sage_data_anchor_id != null
+                                ? 'Linked to Sage property'
+                                : 'No Sage property linked'
+                            }
+                            aria-label={
+                              report.sage_data_anchor_id != null
+                                ? 'Linked to Sage property'
+                                : 'No Sage property linked'
+                            }
+                          />
+                        </td>
+                        <td className="py-4 pl-3 pr-6">
                           <div className="font-medium text-gray-900 dark:text-gray-100">
                             {report.title || 'Untitled'}
                           </div>

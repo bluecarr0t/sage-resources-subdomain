@@ -35,6 +35,7 @@ import { roundDownToStep } from "@/lib/round-down-to-step";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createServerClientWithCookies } from "@/lib/supabase-server";
+import { DEFAULT_ADMIN_PATH } from "@/lib/admin-ui";
 
 // Dynamically import LocationSearch to prevent SSR issues
 const DynamicLocationSearch = dynamic(() => import('@/components/LocationSearch'), {
@@ -163,7 +164,7 @@ export default async function HomePage({ params }: PageProps) {
     // Check if user has access (domain + managed_users)
     const { isManagedUser, isAllowedEmailDomain } = await import('@/lib/auth-helpers');
     if (isAllowedEmailDomain(session.user.email) && await isManagedUser(session.user.id)) {
-      redirect('/admin/dashboard');
+      redirect(DEFAULT_ADMIN_PATH);
     }
   }
   

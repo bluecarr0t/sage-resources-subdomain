@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   GLAMPING_IS_OPEN_VALUES,
   type GlampingIsOpenValue,
@@ -1411,6 +1412,8 @@ function EditModal({
 }
 
 export default function AdminGlampingPropertiesTable() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('q')?.trim() ?? '';
   const t = useTranslations('admin.sageData');
   const [rows, setRows] = useState<PropertyRow[]>([]);
   const [total, setTotal] = useState(0);
@@ -1419,8 +1422,8 @@ export default function AdminGlampingPropertiesTable() {
 
   const [page, setPage] = useState(1);
   const [pageSize] = useState(50);
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState(initialSearch);
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [stateFilter, setStateFilter] = useState<string>('all');

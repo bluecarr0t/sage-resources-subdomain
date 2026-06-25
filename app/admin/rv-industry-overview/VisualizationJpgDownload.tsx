@@ -156,7 +156,7 @@ const VisualizationJpgDownload = forwardRef<VisualizationJpgDownloadHandle, Prop
           {exportSubtitle ? (
             <p className="text-center text-sm font-sans text-gray-800 mb-4">{exportSubtitle}</p>
           ) : null}
-          <div className="text-gray-900 [&_svg]:text-gray-900 [&_.recharts-cartesian-axis-tick_text]:fill-gray-800 [&_.recharts-legend-item-text]:!text-gray-800">
+          <div className="text-gray-900 [&_svg]:text-gray-900 [&_.recharts-cartesian-axis-tick_text]:fill-gray-800 [&_.rv-overview-html-legend]:text-gray-800">
             {children}
           </div>
         </div>

@@ -59,6 +59,7 @@ export const GET = withAdminAuth(async (_request, auth) => {
         has_comparables: r.has_comparables ?? false,
         report_date: r.report_date ?? null,
         service: r.service ?? null,
+        sage_data_anchor_id: r.sage_data_anchor_id ?? null,
       };
     });
 

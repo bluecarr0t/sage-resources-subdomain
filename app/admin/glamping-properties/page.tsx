@@ -36,6 +36,7 @@ import {
   type UnifiedCompRow,
   type UnifiedSource,
 } from '@/lib/comps-unified/build-row';
+import { unifiedCompDisplayUnits } from '@/lib/comps-unified/display-units';
 import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 import { GLAMPING_IS_OPEN_VALUES } from '@/lib/glamping-is-open';
 import { ADMIN_COMPS_COHORT_PROPERTY_TYPE } from '@/lib/comps-unified/admin-comps-cohort';
@@ -1271,7 +1272,7 @@ function ComparablesPageContent() {
                               {formatStateAbbreviation(r.state)}
                             </td>
                             <td className="px-4 py-3 text-center text-gray-700 dark:text-gray-300">
-                              {r.total_sites ?? '-'}
+                              {unifiedCompDisplayUnits(r) ?? '-'}
                             </td>
                             <td className="px-4 py-3 text-center">
                               {r.unit_type ? (
@@ -1317,7 +1318,7 @@ function ComparablesPageContent() {
                                     </div>
                                     <div>
                                       <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Units</p>
-                                      <p className="text-gray-800 dark:text-gray-200">{r.num_units ?? '-'}</p>
+                                      <p className="text-gray-800 dark:text-gray-200">{unifiedCompDisplayUnits(r) ?? '-'}</p>
                                     </div>
                                     <div>
                                       <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Property Type</p>
@@ -1476,7 +1477,7 @@ function ComparablesPageContent() {
                         { key: 'state', label: 'State', get: (r: UnifiedCompRow) => formatStateAbbreviation(r.state) },
                         { key: 'city', label: 'City', get: (r: UnifiedCompRow) => r.city ?? '-' },
                         { key: 'sites', label: 'Sites', get: (r: UnifiedCompRow) => String(r.total_sites ?? '-') },
-                        { key: 'units', label: 'Units', get: (r: UnifiedCompRow) => String(r.num_units ?? '-') },
+                        { key: 'units', label: 'Units', get: (r: UnifiedCompRow) => String(unifiedCompDisplayUnits(r) ?? '-') },
                         {
                           key: 'unit_type',
                           label: 'Unit Type',

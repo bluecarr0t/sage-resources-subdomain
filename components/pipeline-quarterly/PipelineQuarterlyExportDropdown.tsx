@@ -65,7 +65,9 @@ async function openInGoogleSheets(
     if (!options.oauthClientId) {
       throw new Error('Google OAuth client ID is not configured');
     }
-    accessToken = await requestGoogleSheetsAccessToken(options.oauthClientId);
+    accessToken = (
+      await requestGoogleSheetsAccessToken(options.oauthClientId)
+    ).accessToken;
   }
 
   const response = await fetch('/api/pipeline-quarterly/export-to-sheets', {

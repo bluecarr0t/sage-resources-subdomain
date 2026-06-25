@@ -6,7 +6,6 @@ import {
   Bar,
   CartesianGrid,
   ComposedChart,
-  Legend,
   Line,
   ResponsiveContainer,
   Tooltip,
@@ -22,6 +21,9 @@ import type { RvOverviewYearEmphasisKey } from '@/lib/rv-industry-overview/rv-ov
 import type { RvOverviewUnitFilterKey } from '@/lib/rv-industry-overview/rv-overview-unit-filter';
 import { rvOverviewYearSeriesOpacity } from '@/lib/rv-industry-overview/rv-overview-year-emphasis';
 import { RV_OVERVIEW_CHART_HEADING_CLASS } from './VisualizationJpgDownload';
+import RvOverviewChartLegend, {
+  type RvOverviewLegendItem,
+} from './RvOverviewChartLegend';
 
 type ChartDatum = {
   name: string;
@@ -111,12 +113,54 @@ export default function OccupancyAdrTrendsChart({
     [data]
   );
 
+  const legendItems = useMemo((): RvOverviewLegendItem[] => {
+    const items: RvOverviewLegendItem[] = [
+      {
+        label: t('series.adr2024'),
+        kind: 'line',
+        color: '#15803d',
+        opacity: adr2024Opacity,
+      },
+      {
+        label: t('series.adr2025'),
+        kind: 'line',
+        color: '#7c3aed',
+        opacity: adr2025Opacity,
+      },
+    ];
+    if (showOccupancy) {
+      items.push(
+        {
+          label: t('series.occ2024'),
+          kind: 'bar',
+          color: '#1d4ed8',
+          opacity: occ2024Opacity,
+        },
+        {
+          label: t('series.occ2025'),
+          kind: 'bar',
+          color: '#dc2626',
+          opacity: occ2025Opacity,
+        }
+      );
+    }
+    return items;
+  }, [
+    t,
+    showOccupancy,
+    adr2024Opacity,
+    adr2025Opacity,
+    occ2024Opacity,
+    occ2025Opacity,
+  ]);
+
   const chartBlock = (
-    <div className="w-full h-[min(480px,70vh)] min-h-[360px]">
+    <div className="w-full">
+      <div className="h-[min(480px,70vh)] min-h-[360px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={data}
-            margin={{ top: 16, right: 28, left: 8, bottom: 72 }}
+            margin={{ top: 16, right: 28, left: 8, bottom: 24 }}
             barCategoryGap="18%"
             barGap={6}
           >
@@ -199,7 +243,6 @@ export default function OccupancyAdrTrendsChart({
                 );
               }}
             />
-            <Legend wrapperStyle={{ paddingTop: 16, fontSize: 12 }} />
             {showOccupancy ? (
               <>
                 <Bar
@@ -246,6 +289,8 @@ export default function OccupancyAdrTrendsChart({
             />
           </ComposedChart>
         </ResponsiveContainer>
+      </div>
+      <RvOverviewChartLegend items={legendItems} />
     </div>
   );
 

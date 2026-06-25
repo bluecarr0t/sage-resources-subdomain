@@ -4,17 +4,18 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { isAllowedEmailDomain } from '@/lib/auth-helpers';
+import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
 interface LoginFormProps {
   locale: string;
 }
 
 function getSafeRedirect(redirect: string | null): string {
-  if (!redirect) return '/admin/dashboard';
+  if (!redirect) return DEFAULT_ADMIN_PATH;
   if (redirect.startsWith('/') && !redirect.startsWith('//') && !redirect.includes(':')) {
     return redirect;
   }
-  return '/admin/dashboard';
+  return DEFAULT_ADMIN_PATH;
 }
 
 export default function LoginForm({ locale }: LoginFormProps) {
@@ -152,7 +153,7 @@ export default function LoginForm({ locale }: LoginFormProps) {
       // The server exchanges the code for a session, then redirects to the destination.
       const redirectPath = getSafeRedirect(searchParams.get('redirect'));
       const redirectTo = typeof window !== 'undefined'
-        ? `${window.location.origin}/auth/callback${redirectPath !== '/admin/dashboard' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`
+        ? `${window.location.origin}/auth/callback${redirectPath !== DEFAULT_ADMIN_PATH ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`
         : '/auth/callback';
 
       const oauthPromise = supabase.auth.signInWithOAuth({

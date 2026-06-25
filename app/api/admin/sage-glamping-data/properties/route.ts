@@ -385,6 +385,7 @@ export const GET = withAdminAuth(async (request) => {
       q,
       researchStatus: researchStatus ?? undefined,
       country: country ?? undefined,
+      city: undefined,
       state,
       isOpen: isOpenFilter,
       discoverySource: discoverySourceFilter,

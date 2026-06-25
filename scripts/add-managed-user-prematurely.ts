@@ -39,7 +39,7 @@ const supabase = createClient(supabaseUrl, supabaseSecretKey, {
 
 async function addManagedUserPrematurely(
   email: string,
-  role: string = 'user',
+  role: string = 'author',
   displayName?: string
 ) {
   try {
@@ -149,12 +149,12 @@ if (args.length === 0) {
 }
 
 const email = args[0];
-const role = args[1] || 'user';
+const role = args[1] || 'author';
 const displayName = args[2];
 
 // Validate role
-if (!['user', 'admin', 'editor'].includes(role)) {
-  console.error(`Error: Invalid role "${role}". Must be one of: user, admin, editor`);
+if (!['admin', 'author'].includes(role)) {
+  console.error(`Error: Invalid role "${role}". Must be one of: admin, author`);
   process.exit(1);
 }
 

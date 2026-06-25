@@ -11,6 +11,7 @@
 import { streamText, convertToModelMessages, stepCountIs, gateway } from 'ai';
 import { requireAdminAuth } from '@/lib/require-admin-auth';
 import { getManagedUser } from '@/lib/auth-helpers';
+import { normalizeManagedUserRole } from '@/lib/managed-user-roles';
 import { createSageAiTools } from '@/lib/sage-ai/tools';
 import { logSageAiUsage } from '@/lib/sage-ai/log-usage';
 import {
@@ -185,7 +186,7 @@ export async function POST(request: Request) {
     : null;
   const tools = createSageAiTools(authResult.supabase, {
     userId: authResult.session.user.id,
-    userRole: managed?.role ?? null,
+    userRole: managed ? normalizeManagedUserRole(managed.role) : null,
     correlationId,
     webResearchEnabled,
     geoToolsEnabled,

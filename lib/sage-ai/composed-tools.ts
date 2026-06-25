@@ -212,7 +212,7 @@ async function scrapeFirstUrl(
 
 export interface ComposedToolsOptions {
   userId: string | undefined;
-  userRole?: 'user' | 'admin' | 'editor' | null;
+  userRole?: 'admin' | 'author' | null;
 }
 
 export function createComposedTools(

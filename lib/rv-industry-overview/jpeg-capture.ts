@@ -56,6 +56,25 @@ function inlineExternalImagesInClone(clonedDoc: Document): void {
   });
 }
 
+/** Recharts legend wrappers break html2canvas layout even with custom HTML content. */
+function stripRechartsLegendWrappers(clonedDoc: Document): void {
+  clonedDoc.querySelectorAll('.recharts-legend-wrapper').forEach((el) => {
+    el.remove();
+  });
+}
+
+import {
+  paintRvOverviewLegendOnCanvas,
+  parseRvOverviewLegendItems,
+} from '@/lib/rv-industry-overview/draw-chart-legend-on-canvas';
+
+function hideHtmlLegendForExport(clonedDoc: Document): void {
+  clonedDoc.querySelectorAll('.rv-overview-html-legend').forEach((el) => {
+    const node = el as HTMLElement;
+    node.style.visibility = 'hidden';
+  });
+}
+
 async function renderElementToCanvas(
   element: HTMLElement,
   profile: JpegCaptureProfile
@@ -67,8 +86,10 @@ async function renderElementToCanvas(
     await new Promise<void>((resolve) => setTimeout(resolve, 120));
   }
 
+  const legendItems = profile === 'chart' ? parseRvOverviewLegendItems(element) : [];
+
   const html2canvas = (await import('html2canvas')).default;
-  return html2canvas(element, {
+  const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
     allowTaint: profile === 'map',
@@ -77,8 +98,18 @@ async function renderElementToCanvas(
     foreignObjectRendering: false,
     onclone: (clonedDoc) => {
       inlineExternalImagesInClone(clonedDoc);
+      stripRechartsLegendWrappers(clonedDoc);
+      if (legendItems.length > 0) {
+        hideHtmlLegendForExport(clonedDoc);
+      }
     },
   });
+
+  if (legendItems.length > 0) {
+    paintRvOverviewLegendOnCanvas(canvas, legendItems, 2);
+  }
+
+  return canvas;
 }
 
 function canvasToImageBlob(

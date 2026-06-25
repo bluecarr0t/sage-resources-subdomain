@@ -114,6 +114,28 @@ type GoogleClients = {
   drive: drive_v3.Drive;
 };
 
+/** Service-account Sheets API client for read operations (e.g. Project Pipeline). */
+export function createGoogleSheetsReadClient(): sheets_v4.Sheets {
+  const credentials = parseGoogleServiceAccountFromEnv();
+  if (!credentials) {
+    throw new Error('Google Sheets service account is not configured');
+  }
+  return createGoogleClients(credentials).sheets;
+}
+
+/** OAuth Sheets API client for read operations (user must have sheet access). */
+export function createGoogleSheetsReadClientFromAccessToken(
+  accessToken: string
+): sheets_v4.Sheets {
+  return createGoogleClientsFromAccessToken(accessToken).sheets;
+}
+
+export function isGoogleSheetsServiceAccountConfigured(
+  env: NodeJS.ProcessEnv = process.env
+): boolean {
+  return parseGoogleServiceAccountFromEnv(env) !== null;
+}
+
 function createGoogleClients(credentials: GoogleServiceAccountCredentials): GoogleClients {
   const auth = new google.auth.JWT({
     email: credentials.client_email,

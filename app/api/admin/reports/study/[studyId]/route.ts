@@ -9,8 +9,31 @@ export const dynamic = 'force-dynamic';
 
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { logAdminAudit } from '@/lib/admin-audit';
+import {
+  flattenLinkedSageProperty,
+  resolveSageDataAnchorId,
+  SAGE_PROPERTY_SELECT_FIELDS,
+} from '@/lib/admin/resolve-sage-data-anchor-id';
+import { ALL_SAGE_DATA_TABLE } from '@/lib/all-sage-data-table';
 
 type ParamsContext = { params: Promise<{ studyId: string }> };
+
+async function fetchLinkedSageProperty(
+  supabase: Parameters<Parameters<typeof withAdminAuth>[0]>[1]['supabase'],
+  anchorId: number | null | undefined
+) {
+  if (anchorId == null) return null;
+  const { data, error } = await supabase
+    .from(ALL_SAGE_DATA_TABLE)
+    .select(SAGE_PROPERTY_SELECT_FIELDS)
+    .eq('id', anchorId)
+    .maybeSingle();
+  if (error) {
+    console.warn('[reports/study] Linked sage property fetch error:', error.message);
+    return null;
+  }
+  return data;
+}
 
 export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) => {
   const { studyId } = await context!.params;
@@ -48,6 +71,10 @@ export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) 
     }
 
     const client = Array.isArray(report.clients) ? report.clients[0] : report.clients;
+    const sageProperty = await fetchLinkedSageProperty(
+      auth.supabase,
+      report.sage_data_anchor_id as number | null | undefined
+    );
 
     return NextResponse.json({
       success: true,
@@ -55,6 +82,7 @@ export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) 
         ...report,
         client_name: client?.name ?? null,
         client_company: client?.company ?? null,
+        sage_property: flattenLinkedSageProperty(sageProperty),
       },
     });
   } catch (error) {
@@ -68,7 +96,7 @@ export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) 
 
 /**
  * PATCH /api/admin/reports/study/[studyId]
- * Update report fields: title, location, report_date, client_entity, market_type, total_sites
+ * Update report fields: title, location, report_date, client_entity, market_type, total_sites, sage_data_anchor_id
  */
 export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context) => {
   const { studyId } = await context!.params;
@@ -80,7 +108,6 @@ export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context)
     if (body.title !== undefined) updates.title = body.title;
     if (body.location !== undefined) {
       updates.location = body.location;
-      // Parse "City, ST" or "City, ST 12345" into city, state, zip_code
       const loc = String(body.location || '').trim();
       if (loc) {
         const parts = loc.split(',').map((p: string) => p.trim());
@@ -118,6 +145,20 @@ export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context)
     if (body.total_sites !== undefined) {
       const num = Number(body.total_sites);
       updates.total_sites = Number.isNaN(num) ? null : num;
+    }
+    if (body.sage_data_anchor_id !== undefined) {
+      if (body.sage_data_anchor_id === null) {
+        updates.sage_data_anchor_id = null;
+      } else {
+        const resolved = await resolveSageDataAnchorId(auth.supabase, body.sage_data_anchor_id);
+        if (!resolved.ok) {
+          return NextResponse.json(
+            { success: false, error: resolved.error },
+            { status: resolved.status }
+          );
+        }
+        updates.sage_data_anchor_id = resolved.anchorId;
+      }
     }
 
     if (Object.keys(updates).length === 0) {
@@ -172,7 +213,18 @@ export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context)
       request
     );
 
-    return NextResponse.json({ success: true, report: data });
+    const sageProperty = await fetchLinkedSageProperty(
+      auth.supabase,
+      data.sage_data_anchor_id as number | null | undefined
+    );
+
+    return NextResponse.json({
+      success: true,
+      report: {
+        ...data,
+        sage_property: flattenLinkedSageProperty(sageProperty),
+      },
+    });
   } catch (error) {
     console.error('[reports/study] PATCH Error:', error);
     return NextResponse.json(

@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import {
-  BarChart2,
   Map,
   FileText,
   User,
@@ -29,10 +28,17 @@ import {
   FileBarChart,
   Files,
   LineChart,
+  Briefcase,
+  Table2,
+  ScrollText,
+  Shield,
+  Users,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSidebar } from '@/lib/sidebar-context';
 import { supabase } from '@/lib/supabase';
+import { DEFAULT_ADMIN_PATH, JOB_PIPELINE_ADMIN_PATH } from '@/lib/admin-ui';
+import { isManagedUsersAdminEmail } from '@/lib/managed-users-admin';
 
 const LOGO_LIGHT =
   'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/admin-logos/sage-logo-light.png';
@@ -41,7 +47,13 @@ const LOGO_DARK =
 
 function getActivePageId(pathname: string): string {
   if (!pathname) return '';
-  if (pathname.startsWith('/admin/dashboard')) return 'dashboard';
+  if (
+    pathname.startsWith(JOB_PIPELINE_ADMIN_PATH) ||
+    pathname.startsWith('/admin/active-jobs') ||
+    pathname.startsWith('/admin/project-pipeline')
+  ) {
+    return 'job-pipeline';
+  }
   if (pathname === '/map' || pathname.startsWith('/en/map')) return 'map';
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
@@ -56,6 +68,11 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/audit-log')) return 'audit-log';
   if (pathname.startsWith('/admin/cost-explorer')) return 'cost-explorer';
   if (pathname.startsWith('/admin/sites-export')) return 'sites-export';
+  if (pathname.startsWith('/admin/sage-glamping-data-breakdown')) return 'sage-glamping-data-breakdown';
+  if (pathname.startsWith('/admin/users')) return 'managed-users';
+  if (pathname.startsWith('/admin/account')) return 'account';
+  if (pathname.startsWith('/admin/workload')) return 'pipeline-workload';
+  if (pathname.startsWith('/admin/job-activity')) return 'job-activity';
   return '';
 }
 
@@ -72,7 +89,10 @@ const TOOLS_PAGE_IDS = new Set([
   'site-design',
   'site-builder',
   'sage-ai',
+  'sage-glamping-data-breakdown',
 ]);
+
+const ADMIN_PAGE_IDS = new Set(['managed-users', 'pipeline-workload', 'job-activity']);
 
 function NavLink({
   href,
@@ -82,6 +102,7 @@ function NavLink({
   isActive,
   isCollapsed,
   showBeta,
+  badgeCount = 0,
 }: {
   href: string;
   label: string;
@@ -90,11 +111,30 @@ function NavLink({
   isActive: boolean;
   isCollapsed?: boolean;
   showBeta?: boolean;
+  badgeCount?: number;
 }) {
   const tSidebar = useTranslations('admin.sidebar');
   const collapsed = isCollapsed ?? false;
-  const collapsedTitle =
-    collapsed && showBeta ? `${label} (${tSidebar('beta')})` : collapsed ? label : undefined;
+  const collapsedTitle = collapsed
+    ? badgeCount > 0
+      ? `${label} (${badgeCount})`
+      : showBeta
+        ? `${label} (${tSidebar('beta')})`
+        : label
+    : undefined;
+
+  const badge =
+    badgeCount > 0 ? (
+      <span
+        className={`inline-flex shrink-0 items-center justify-center rounded-full bg-red-600 px-1.5 text-[10px] font-semibold leading-5 text-white ${
+          badgeCount > 9 ? 'min-w-[1.375rem]' : 'h-5 min-w-[1.25rem]'
+        }`}
+        aria-label={tSidebar('reviewTodoBadge', { count: badgeCount })}
+      >
+        {badgeCount > 99 ? '99+' : badgeCount}
+      </span>
+    ) : null;
+
   return (
     <Link
       href={href}
@@ -106,11 +146,16 @@ function NavLink({
           : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
       }`}
     >
-      <Icon
-        className={`w-5 h-5 flex-shrink-0 ${
-          isActive ? 'text-neutral-700 dark:text-neutral-200' : 'text-neutral-500 dark:text-neutral-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
-        }`}
-      />
+      <span className="relative inline-flex shrink-0">
+        <Icon
+          className={`w-5 h-5 flex-shrink-0 ${
+            isActive ? 'text-neutral-700 dark:text-neutral-200' : 'text-neutral-500 dark:text-neutral-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
+          }`}
+        />
+        {collapsed && badge ? (
+          <span className="absolute -right-1.5 -top-1.5">{badge}</span>
+        ) : null}
+      </span>
       {!collapsed && (
         <span className="text-sm inline-flex items-center gap-1.5 min-w-0 flex-1">
           <span className="truncate">{label}</span>
@@ -119,6 +164,7 @@ function NavLink({
               {tSidebar('beta')}
             </span>
           ) : null}
+          {badge}
         </span>
       )}
     </Link>
@@ -130,12 +176,15 @@ export default function AdminSidebar() {
   const { setTheme, resolvedTheme } = useTheme();
   const { isCollapsed, toggleCollapsed } = useSidebar();
   const [userEmail, setUserEmail] = useState<string>('Loading...');
+  const [userRole, setUserRole] = useState<'admin' | 'author' | null>(null);
+  const [jobPipelineReviewTodoCount, setJobPipelineReviewTodoCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
   const activePageId = getActivePageId(pathname || '');
   const reportsSectionActive = REPORTS_PAGE_IDS.has(activePageId);
   const toolsSectionActive = TOOLS_PAGE_IDS.has(activePageId);
+  const adminSectionActive = ADMIN_PAGE_IDS.has(activePageId);
   const [reportsMenuOpen, setReportsMenuOpen] = useState(() => reportsSectionActive);
   const [reportsFlyoutOpen, setReportsFlyoutOpen] = useState(false);
   const reportsFlyoutRef = useRef<HTMLDivElement>(null);
@@ -147,9 +196,24 @@ export default function AdminSidebar() {
   const toolsSubmenuRef = useRef<HTMLDivElement>(null);
   /** Previous `toolsSectionActive` after each toolsSectionActive effect run (null = not yet mounted). */
   const prevToolsSectionActiveRef = useRef<boolean | null>(null);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(() => adminSectionActive);
+  const [adminFlyoutOpen, setAdminFlyoutOpen] = useState(false);
+  const adminFlyoutRef = useRef<HTMLDivElement>(null);
+  const adminSubmenuRef = useRef<HTMLDivElement>(null);
+  const prevAdminSectionActiveRef = useRef<boolean | null>(null);
 
   const showCollapsed = isDesktop && isCollapsed;
+  const showManagedUsersAdminNav = isManagedUsersAdminEmail(userEmail);
+  const isLoggedInManagedUser =
+    userEmail !== 'Loading...' &&
+    userEmail !== 'Not logged in' &&
+    userEmail !== 'Error loading user';
+  const showAdminNav = isLoggedInManagedUser;
   const tSidebar = useTranslations('admin.sidebar');
+  const tAccount = useTranslations('admin.account');
+  const userRoleLabel =
+    userRole === 'admin' ? tAccount('roleAdmin') : userRole === 'author' ? tAccount('roleAuthor') : '';
+  const isAccountPage = activePageId === 'account';
 
   useEffect(() => {
     const prev = prevReportsSectionActiveRef.current;
@@ -185,6 +249,23 @@ export default function AdminSidebar() {
     if (prev) setToolsMenuOpen(false);
   }, [toolsSectionActive]);
 
+  useEffect(() => {
+    const prev = prevAdminSectionActiveRef.current;
+    prevAdminSectionActiveRef.current = adminSectionActive;
+
+    if (prev === null) {
+      if (adminSectionActive) setAdminMenuOpen(true);
+      return;
+    }
+
+    if (adminSectionActive) {
+      if (!prev) setAdminMenuOpen(true);
+      return;
+    }
+
+    if (prev) setAdminMenuOpen(false);
+  }, [adminSectionActive]);
+
   useLayoutEffect(() => {
     if (!reportsMenuOpen || showCollapsed || !reportsSubmenuRef.current) return;
     reportsSubmenuRef.current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
@@ -195,10 +276,16 @@ export default function AdminSidebar() {
     toolsSubmenuRef.current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }, [toolsMenuOpen, showCollapsed]);
 
+  useLayoutEffect(() => {
+    if (!adminMenuOpen || showCollapsed || !adminSubmenuRef.current) return;
+    adminSubmenuRef.current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [adminMenuOpen, showCollapsed]);
+
   useEffect(() => {
     if (!showCollapsed) {
       setReportsFlyoutOpen(false);
       setToolsFlyoutOpen(false);
+      setAdminFlyoutOpen(false);
     }
   }, [showCollapsed]);
 
@@ -225,6 +312,17 @@ export default function AdminSidebar() {
   }, [toolsFlyoutOpen, showCollapsed]);
 
   useEffect(() => {
+    if (!adminFlyoutOpen || !showCollapsed) return;
+    const close = (e: MouseEvent) => {
+      if (adminFlyoutRef.current && !adminFlyoutRef.current.contains(e.target as Node)) {
+        setAdminFlyoutOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [adminFlyoutOpen, showCollapsed]);
+
+  useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)');
     const handler = () => setIsDesktop(mq.matches);
     handler(); // set initial
@@ -240,15 +338,66 @@ export default function AdminSidebar() {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user?.email) {
           setUserEmail(session.user.email);
+          try {
+            const res = await fetch('/api/admin/account', { credentials: 'include' });
+            if (res.ok) {
+              const body = (await res.json()) as { role?: 'admin' | 'author' };
+              if (body.role === 'admin' || body.role === 'author') {
+                setUserRole(body.role);
+              }
+            }
+          } catch {
+            // Role label falls back to author
+          }
         } else {
           setUserEmail('Not logged in');
+          setUserRole(null);
         }
       } catch {
         setUserEmail('Error loading user');
+        setUserRole(null);
       }
     };
     loadUser();
   }, []);
+
+  useEffect(() => {
+    if (!userEmail || userEmail === 'Loading...' || userEmail === 'Not logged in') {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    const loadReviewTodoCount = async () => {
+      try {
+        const res = await fetch('/api/admin/project-pipeline/review-todos', {
+          credentials: 'include',
+        });
+        if (!res.ok) return;
+        const body = (await res.json()) as { count?: number };
+        if (!cancelled) {
+          setJobPipelineReviewTodoCount(
+            typeof body.count === 'number' && body.count > 0 ? body.count : 0
+          );
+        }
+      } catch {
+        // Ignore — badge is best-effort
+      }
+    };
+
+    void loadReviewTodoCount();
+    const interval = window.setInterval(loadReviewTodoCount, 60_000);
+    const onTodosChanged = () => void loadReviewTodoCount();
+    window.addEventListener('project-pipeline-review-todos-changed', onTodosChanged);
+    window.addEventListener('focus', onTodosChanged);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener('project-pipeline-review-todos-changed', onTodosChanged);
+      window.removeEventListener('focus', onTodosChanged);
+    };
+  }, [userEmail]);
 
   const handleLogout = async () => {
     if (!confirm('Are you sure you want to logout?')) return;
@@ -292,7 +441,7 @@ export default function AdminSidebar() {
             className={`relative flex shrink-0 items-center justify-center border-b border-neutral-200/75 dark:border-neutral-800 py-0 ${showCollapsed ? 'pt-8' : ''}`}
           >
             <Link
-              href="/admin/dashboard"
+              href={DEFAULT_ADMIN_PATH}
               className={`flex items-center justify-center ${showCollapsed ? 'w-11 h-11' : 'w-36 h-36'}`}
             >
               <Image
@@ -327,15 +476,15 @@ export default function AdminSidebar() {
 
           {/* Navigation — min-h-0 so flex-1 can shrink and overflow-y-auto scrolls when Tools expands */}
           <nav className="relative z-10 min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-4 pb-32 pt-2">
-            {/* Dashboard - top-level */}
             <div className="py-2">
               <NavLink
-                href="/admin/dashboard"
-                label="Dashboard"
-                icon={BarChart2}
-                pageId="dashboard"
-                isActive={activePageId === 'dashboard'}
+                href={JOB_PIPELINE_ADMIN_PATH}
+                label={tSidebar('projectPipeline')}
+                icon={Briefcase}
+                pageId="job-pipeline"
+                isActive={activePageId === 'job-pipeline'}
                 isCollapsed={showCollapsed}
+                badgeCount={jobPipelineReviewTodoCount}
               />
             </div>
 
@@ -614,6 +763,14 @@ export default function AdminSidebar() {
                           isActive={activePageId === 'site-builder'}
                           isCollapsed={false}
                         />
+                        <NavLink
+                          href="/admin/sage-glamping-data-breakdown"
+                          label={tSidebar('sageDataResearch')}
+                          icon={Table2}
+                          pageId="sage-glamping-data-breakdown"
+                          isActive={activePageId === 'sage-glamping-data-breakdown'}
+                          isCollapsed={false}
+                        />
                       </div>
                     ) : null}
                   </div>
@@ -716,10 +873,170 @@ export default function AdminSidebar() {
                           <Home className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                           {tSidebar('siteBuilder')}
                         </Link>
+                        <Link
+                          href="/admin/sage-glamping-data-breakdown"
+                          role="menuitem"
+                          onClick={() => setToolsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'sage-glamping-data-breakdown'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <Table2 className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('sageDataResearch')}
+                        </Link>
                       </div>
                     ) : null}
                   </div>
                 )}
+                {showAdminNav ? (
+                  !showCollapsed ? (
+                    <div className="space-y-1">
+                      <button
+                        type="button"
+                        onClick={() => setAdminMenuOpen((o) => !o)}
+                        className={`nav-item flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 ease-out ${
+                          adminSectionActive
+                            ? 'bg-neutral-100/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100 font-medium'
+                            : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
+                        }`}
+                        aria-expanded={adminMenuOpen}
+                        aria-controls="admin-admin-submenu"
+                        id="admin-admin-trigger"
+                      >
+                        <Shield
+                          className={`h-5 w-5 flex-shrink-0 ${
+                            adminSectionActive
+                              ? 'text-neutral-700 dark:text-neutral-200'
+                              : 'text-neutral-500 dark:text-neutral-500'
+                          }`}
+                          aria-hidden
+                        />
+                        <span className="min-w-0 flex-1 truncate text-sm">{tSidebar('admin')}</span>
+                        <ChevronDown
+                          className={`h-4 w-4 flex-shrink-0 text-neutral-400 transition-transform duration-200 ${
+                            adminMenuOpen ? 'rotate-180' : ''
+                          }`}
+                          aria-hidden
+                        />
+                      </button>
+                      {adminMenuOpen ? (
+                        <div
+                          ref={adminSubmenuRef}
+                          id="admin-admin-submenu"
+                          role="region"
+                          aria-labelledby="admin-admin-trigger"
+                          className="ml-3 space-y-1 border-l border-neutral-200/80 py-0.5 pl-3 dark:border-neutral-800"
+                        >
+                          {showManagedUsersAdminNav ? (
+                            <NavLink
+                              href="/admin/users"
+                              label={tSidebar('managedUsers')}
+                              icon={Users}
+                              pageId="managed-users"
+                              isActive={activePageId === 'managed-users'}
+                              isCollapsed={false}
+                            />
+                          ) : null}
+                          <NavLink
+                            href="/admin/job-activity"
+                            label={tSidebar('jobActivity')}
+                            icon={ScrollText}
+                            pageId="job-activity"
+                            isActive={activePageId === 'job-activity'}
+                            isCollapsed={false}
+                          />
+                          {showManagedUsersAdminNav ? (
+                            <NavLink
+                              href="/admin/workload"
+                              label={tSidebar('pipelineWorkload')}
+                              icon={Briefcase}
+                              pageId="pipeline-workload"
+                              isActive={activePageId === 'pipeline-workload'}
+                              isCollapsed={false}
+                            />
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="relative flex justify-center" ref={adminFlyoutRef}>
+                      <button
+                        type="button"
+                        onClick={() => setAdminFlyoutOpen((o) => !o)}
+                        className={`nav-item flex items-center justify-center rounded-md px-2 py-2 transition-colors duration-150 ease-out ${
+                          adminSectionActive
+                            ? 'bg-neutral-100/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100'
+                            : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 hover:text-neutral-900 dark:hover:text-neutral-100'
+                        }`}
+                        aria-expanded={adminFlyoutOpen}
+                        aria-haspopup="menu"
+                        aria-label={tSidebar('admin')}
+                        title={tSidebar('admin')}
+                      >
+                        <Shield
+                          className={`h-5 w-5 flex-shrink-0 ${
+                            adminSectionActive
+                              ? 'text-neutral-700 dark:text-neutral-200'
+                              : 'text-neutral-500 dark:text-neutral-500'
+                          }`}
+                        />
+                      </button>
+                      {adminFlyoutOpen ? (
+                        <div
+                          role="menu"
+                          aria-label={tSidebar('adminMenu')}
+                          className="absolute left-full top-0 z-[60] ml-1 min-w-[13.5rem] rounded-md border border-neutral-200/80 bg-white py-1 dark:border-neutral-800 dark:bg-neutral-950"
+                        >
+                          {showManagedUsersAdminNav ? (
+                            <Link
+                              href="/admin/users"
+                              role="menuitem"
+                              onClick={() => setAdminFlyoutOpen(false)}
+                              className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                                activePageId === 'managed-users'
+                                  ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                                  : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                              }`}
+                            >
+                              <Users className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                              {tSidebar('managedUsers')}
+                            </Link>
+                          ) : null}
+                          <Link
+                            href="/admin/job-activity"
+                            role="menuitem"
+                            onClick={() => setAdminFlyoutOpen(false)}
+                            className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                              activePageId === 'job-activity'
+                                ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                                : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                            }`}
+                          >
+                            <ScrollText className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                            {tSidebar('jobActivity')}
+                          </Link>
+                          {showManagedUsersAdminNav ? (
+                            <Link
+                              href="/admin/workload"
+                              role="menuitem"
+                              onClick={() => setAdminFlyoutOpen(false)}
+                              className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                                activePageId === 'pipeline-workload'
+                                  ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                                  : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                              }`}
+                            >
+                              <Briefcase className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                              {tSidebar('pipelineWorkload')}
+                            </Link>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  )
+                ) : null}
                 {/* Sites Export hidden from menu — page still accessible via direct URL */}
               </div>
             </div>
@@ -774,11 +1091,19 @@ export default function AdminSidebar() {
             </div>
             <div className={`flex items-center ${showCollapsed ? 'justify-center gap-1' : 'justify-between gap-2'} pt-3 border-t border-neutral-200/75 dark:border-neutral-800`}>
               {!showCollapsed && (
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <Link
+                  href="/admin/account"
+                  title={tAccount('title')}
+                  className={`flex min-w-0 flex-1 items-center space-x-3 rounded-md transition-colors ${
+                    isAccountPage
+                      ? 'bg-neutral-100/90 dark:bg-neutral-900/60'
+                      : 'hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40'
+                  }`}
+                >
                   <div className="w-8 h-8 bg-neutral-200/80 dark:bg-neutral-800 rounded-full flex items-center justify-center flex-shrink-0">
                     <User className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 py-1">
                     <p
                       id="userEmail"
                       className="text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate"
@@ -786,17 +1111,24 @@ export default function AdminSidebar() {
                     >
                       {userEmail}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-500 truncate">Administrator</p>
+                    {userRoleLabel ? (
+                      <p className="text-xs text-neutral-500 dark:text-neutral-500 truncate">
+                        {userRoleLabel}
+                      </p>
+                    ) : null}
                   </div>
-                </div>
+                </Link>
               )}
               {showCollapsed && (
-                <div
-                  className="w-8 h-8 bg-neutral-200/80 dark:bg-neutral-800 rounded-full flex items-center justify-center flex-shrink-0"
+                <Link
+                  href="/admin/account"
                   title={userEmail}
+                  className={`w-8 h-8 bg-neutral-200/80 dark:bg-neutral-800 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isAccountPage ? 'ring-2 ring-sage-600/40' : 'hover:bg-neutral-300/80 dark:hover:bg-neutral-700'
+                  }`}
                 >
                   <User className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
-                </div>
+                </Link>
               )}
               <button
                 onClick={handleLogout}

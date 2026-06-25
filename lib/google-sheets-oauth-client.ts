@@ -4,8 +4,14 @@ import { googleSheetsExportOAuthScopeString } from '@/lib/google-sheets-oauth-sc
 
 type TokenClientCallbackResponse = {
   access_token?: string;
+  expires_in?: number;
   error?: string;
   error_description?: string;
+};
+
+export type GoogleSheetsAccessTokenResult = {
+  accessToken: string;
+  expiresIn: number;
 };
 
 type TokenClient = {
@@ -67,7 +73,10 @@ function loadGoogleIdentityServices(): Promise<void> {
  * Prompt the user to authorize Google Sheets access and return a short-lived token.
  * Requires a Web application OAuth client ID (not a service account key).
  */
-export async function requestGoogleSheetsAccessToken(clientId: string): Promise<string> {
+export async function requestGoogleSheetsAccessToken(
+  clientId: string,
+  scope: string = googleSheetsExportOAuthScopeString()
+): Promise<GoogleSheetsAccessTokenResult> {
   await loadGoogleIdentityServices();
 
   const oauth2 = window.google?.accounts?.oauth2;
@@ -78,7 +87,7 @@ export async function requestGoogleSheetsAccessToken(clientId: string): Promise<
   return new Promise((resolve, reject) => {
     const client = oauth2.initTokenClient({
       client_id: clientId,
-      scope: googleSheetsExportOAuthScopeString(),
+      scope,
       callback: (response) => {
         if (response.error) {
           reject(
@@ -97,7 +106,13 @@ export async function requestGoogleSheetsAccessToken(clientId: string): Promise<
           return;
         }
 
-        resolve(accessToken);
+        resolve({
+          accessToken,
+          expiresIn:
+            typeof response.expires_in === 'number' && response.expires_in > 0
+              ? response.expires_in
+              : 3600,
+        });
       },
     });
 

@@ -67,7 +67,7 @@ describe('build_feasibility_brief', () => {
     const { supabase, getLastReportsInsert } = makeSupabase();
     const tools = createSageAiTools(
       supabase as unknown as Parameters<typeof createSageAiTools>[0],
-      { userId: 'u1', userRole: 'user', composedToolsEnabled: true }
+      { userId: 'u1', userRole: 'author', composedToolsEnabled: true }
     );
 
     const res = (await tools.build_feasibility_brief.execute!(
@@ -141,7 +141,7 @@ describe('generate_feasibility_section', () => {
     const { supabase } = makeSupabase();
     const tools = createSageAiTools(
       supabase as unknown as Parameters<typeof createSageAiTools>[0],
-      { userId: 'u1', userRole: 'user', composedToolsEnabled: true }
+      { userId: 'u1', userRole: 'author', composedToolsEnabled: true }
     );
 
     const res = (await tools.generate_feasibility_section.execute!(

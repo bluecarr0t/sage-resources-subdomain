@@ -28,6 +28,8 @@ import Link from 'next/link';
 import { UNIT_TYPES } from '@/lib/unit-types';
 import { AMENITIES } from '@/lib/amenities';
 import { adminPageTitle } from '@/lib/admin-ui';
+import ReportSagePropertyLinker from '@/components/admin/ReportSagePropertyLinker';
+import type { LinkedSageProperty } from '@/lib/admin/resolve-sage-data-anchor-id';
 
 interface ReportDetail {
   id: string;
@@ -48,6 +50,7 @@ interface ReportDetail {
   report_purpose: string | null;
   address_1: string | null;
   zip_code: string | null;
+  country?: string | null;
   executive_summary: string | null;
   swot: {
     strengths: string[];
@@ -74,6 +77,8 @@ interface ReportDetail {
   comp_unit_count: number | null;
   latitude: number | null;
   longitude: number | null;
+  sage_data_anchor_id?: number | null;
+  sage_property?: LinkedSageProperty | null;
 }
 
 /** Parse date string as local midnight to avoid timezone shift */
@@ -779,6 +784,28 @@ export default function ReportDetailPage() {
                   <DetailRow label="Resort Type" value={report.resort_type} />
                 )}
               </div>
+              <ReportSagePropertyLinker
+                studyId={studyId}
+                sageDataAnchorId={report.sage_data_anchor_id}
+                sageProperty={report.sage_property}
+                suggestQuery={report.property_name || null}
+                suggestCity={report.city}
+                suggestState={report.state}
+                reportPrefill={{
+                  property_name: report.property_name,
+                  address_1: report.address_1,
+                  city: report.city,
+                  state: report.state,
+                  zip_code: report.zip_code,
+                  country: report.country,
+                  latitude: report.latitude,
+                  longitude: report.longitude,
+                  total_sites: report.total_sites,
+                  market_type: report.market_type,
+                  resort_type: report.resort_type,
+                }}
+                onLinked={loadReport}
+              />
             </Card>
 
             {/* Quick Stats */}

@@ -8,7 +8,7 @@
  * the stream.
  */
 
-export type UserRole = 'user' | 'admin' | 'editor';
+export type UserRole = 'admin' | 'author';
 
 export interface ToolRoleContext {
   userRole?: UserRole | null;
@@ -21,15 +21,14 @@ export interface RoleDenied {
 }
 
 /**
- * Require `required` role or higher. Admin is the highest; editor > user.
- * Returns a denial envelope when the check fails, or null on success.
+ * Require `required` role. Admin-only tools reject authors.
  */
 export function assertToolRole(
   ctx: ToolRoleContext,
   required: UserRole
 ): RoleDenied | null {
-  const order: Record<UserRole, number> = { user: 0, editor: 1, admin: 2 };
-  const actual = ctx.userRole ?? 'user';
+  const order: Record<UserRole, number> = { author: 0, admin: 1 };
+  const actual = ctx.userRole ?? 'author';
   if (order[actual] >= order[required]) {
     return null;
   }

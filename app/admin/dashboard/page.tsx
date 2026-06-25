@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import DashboardClient from './DashboardClient';
+import { redirect } from 'next/navigation';
+import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
 export const metadata: Metadata = {
   title: 'Dashboard - Sage Admin',
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardPage() {
-  return <DashboardClient />;
+  redirect(DEFAULT_ADMIN_PATH);
 }

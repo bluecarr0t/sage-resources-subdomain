@@ -27,7 +27,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={`rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+        className={`inline-flex items-center justify-center rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
         {...props}
       />
     );

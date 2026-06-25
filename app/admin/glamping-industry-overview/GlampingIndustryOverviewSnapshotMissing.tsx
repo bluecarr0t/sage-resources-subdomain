@@ -6,7 +6,7 @@ import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
-import { adminPageDescription, adminPageTitle } from '@/lib/admin-ui';
+import { adminPageDescription, adminPageTitle, DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 import { rvOverviewApiDisplayError } from '@/lib/rv-industry-overview/rv-overview-display-error';
 
 type RefreshResponse = {
@@ -87,7 +87,7 @@ export default function GlampingIndustryOverviewSnapshotMissing() {
           {busy ? t('refreshLoading') : t('refreshData')}
         </Button>
         <Link
-          href="/admin/dashboard"
+          href={DEFAULT_ADMIN_PATH}
           className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/50"
         >
           {t('backToDashboard')}

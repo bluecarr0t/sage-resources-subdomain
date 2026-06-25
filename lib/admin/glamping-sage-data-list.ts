@@ -1,5 +1,6 @@
 import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '@/lib/glamping-market-snapshot-region';
 import { US_STATE_NAMES, type US_STATES } from '@/lib/us-states';
+import { applyFuzzySageDataSearch } from '@/lib/admin/sage-data-fuzzy-search';
 
 export function escapeIlikeTerm(term: string): string {
   return term.replace(/[%,()]/g, '').trim();
@@ -20,6 +21,8 @@ export type SageDataGlampingListFilters = {
   q: string;
   researchStatus: string | undefined;
   country: string | undefined;
+  /** Case-insensitive partial match on `city`. */
+  city: string | undefined;
   /** USPS state code (e.g. VT) when filtering US properties by state. */
   state: string | undefined;
   /** Exact `is_open` when set (e.g. Yes, Under Construction, Proposed Development, Temporarily closed, Closed). */
@@ -46,18 +49,7 @@ export function applySageDataGlampingListFilters<T extends SageGlampingListQuery
   let q: SageGlampingListQuery = query;
   const trimmedQ = filters.q.trim();
   if (trimmedQ.length > 0) {
-    const term = escapeIlikeTerm(trimmedQ);
-    if (term.length > 0) {
-      const pattern = `%${term}%`;
-      q = q.or(
-        [
-          `property_name.ilike.${pattern}`,
-          `city.ilike.${pattern}`,
-          `state.ilike.${pattern}`,
-          `country.ilike.${pattern}`,
-        ].join(',')
-      );
-    }
+    q = applyFuzzySageDataSearch(q, trimmedQ);
   }
 
   if (filters.researchStatus && filters.researchStatus !== 'all') {
@@ -65,6 +57,12 @@ export function applySageDataGlampingListFilters<T extends SageGlampingListQuery
   }
   if (filters.country && filters.country !== 'all') {
     q = q.ilike('country', filters.country);
+  }
+  if (filters.city && filters.city !== 'all') {
+    const cityTerm = escapeIlikeTerm(filters.city);
+    if (cityTerm.length > 0) {
+      q = q.ilike('city', `%${cityTerm}%`);
+    }
   }
   if (filters.state && filters.state !== 'all') {
     const abbr = filters.state.trim().toUpperCase();

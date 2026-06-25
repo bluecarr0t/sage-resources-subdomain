@@ -68,7 +68,7 @@ export interface SageAiToolsContext {
    * managed_users.role for the calling user. Used to gate admin-only tools
    * like build_feasibility_brief. Defaults to 'user' when omitted.
    */
-  userRole?: 'user' | 'admin' | 'editor' | null;
+  userRole?: 'admin' | 'author' | null;
   /** Correlation id to stitch tool events to the chat turn. */
   correlationId?: string;
   /**

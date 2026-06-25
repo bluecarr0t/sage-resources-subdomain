@@ -19,21 +19,22 @@ import {
 } from '@/lib/gated-access';
 import { logGatedContentEvent } from '@/lib/gated-content-events';
 import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
+import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
 function getSafeRedirect(redirect: string | null): string {
-  if (!redirect) return '/admin/dashboard';
+  if (!redirect) return DEFAULT_ADMIN_PATH;
   if (redirect.startsWith('/') && !redirect.startsWith('//') && !redirect.includes(':')) {
     return redirect;
   }
-  return '/admin/dashboard';
+  return DEFAULT_ADMIN_PATH;
 }
 
 /**
  * Map a redirect path back to a gated page slug (the inverse of
  * `getGatedPageRedirectPath`). Returns null when the destination is not a
- * gated content page (e.g. the admin dashboard).
+ * gated content page (e.g. the admin project pipeline).
  */
 function gatedSlugForRedirect(redirect: string): string | null {
   const path = redirect.split('?')[0]?.replace(/\/+$/, '') || redirect;

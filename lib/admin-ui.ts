@@ -1,8 +1,11 @@
 /**
- * Admin design system — modern minimalist (aligned with /admin/dashboard).
+ * Admin design system — modern minimalist (aligned with /admin/job-pipeline).
  * Prefer these tokens in new admin UI; legacy pages can use matching Tailwind
  * or the `admin-*` classes from globals.css `@layer components`.
  */
+export const JOB_PIPELINE_ADMIN_PATH = '/admin/job-pipeline';
+export const DEFAULT_ADMIN_PATH = JOB_PIPELINE_ADMIN_PATH;
+
 export const adminRoot = 'admin-root';
 
 export const adminSurface =

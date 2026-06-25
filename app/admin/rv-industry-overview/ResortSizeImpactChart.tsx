@@ -6,7 +6,6 @@ import {
   Bar,
   CartesianGrid,
   ComposedChart,
-  Legend,
   Line,
   ResponsiveContainer,
   Tooltip,
@@ -19,6 +18,9 @@ import {
   type SizeTierKey,
 } from '@/lib/rv-industry-overview/campspot-size-tier-chart-data';
 import { RV_OVERVIEW_CHART_HEADING_CLASS } from './VisualizationJpgDownload';
+import RvOverviewChartLegend, {
+  type RvOverviewLegendItem,
+} from './RvOverviewChartLegend';
 import type { RvOverviewYearEmphasisKey } from '@/lib/rv-industry-overview/rv-overview-display-preferences';
 import { rvOverviewYearSeriesOpacity } from '@/lib/rv-industry-overview/rv-overview-year-emphasis';
 
@@ -109,12 +111,54 @@ export default function ResortSizeImpactChart({
     [data]
   );
 
+  const legendItems = useMemo((): RvOverviewLegendItem[] => {
+    const items: RvOverviewLegendItem[] = [
+      {
+        label: t('series.adr2024'),
+        kind: 'line',
+        color: '#dc2626',
+        opacity: adr2024Opacity,
+      },
+      {
+        label: t('series.adr2025'),
+        kind: 'line',
+        color: '#7c3aed',
+        opacity: adr2025Opacity,
+      },
+    ];
+    if (showOccupancy) {
+      items.push(
+        {
+          label: t('series.occ2024'),
+          kind: 'bar',
+          color: '#2563eb',
+          opacity: occ2024Opacity,
+        },
+        {
+          label: t('series.occ2025'),
+          kind: 'bar',
+          color: '#16a34a',
+          opacity: occ2025Opacity,
+        }
+      );
+    }
+    return items;
+  }, [
+    t,
+    showOccupancy,
+    adr2024Opacity,
+    adr2025Opacity,
+    occ2024Opacity,
+    occ2025Opacity,
+  ]);
+
   const chartBlock = (
-    <div className="w-full h-[min(420px,65vh)] min-h-[320px]">
+    <div className="w-full">
+      <div className="h-[min(420px,65vh)] min-h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={data}
-            margin={{ top: 12, right: 32, left: 4, bottom: 48 }}
+            margin={{ top: 12, right: 32, left: 4, bottom: 16 }}
             barCategoryGap="20%"
             barGap={8}
           >
@@ -189,7 +233,6 @@ export default function ResortSizeImpactChart({
                 );
               }}
             />
-            <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
             {showOccupancy ? (
               <>
                 <Bar
@@ -236,6 +279,8 @@ export default function ResortSizeImpactChart({
             />
           </ComposedChart>
         </ResponsiveContainer>
+      </div>
+      <RvOverviewChartLegend items={legendItems} />
     </div>
   );
 

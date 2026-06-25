@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS managed_users (
   is_active BOOLEAN DEFAULT true NOT NULL,
   
   -- Optional: Role/permission level (for future use)
-  role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin', 'editor')),
+  role TEXT DEFAULT 'author' CHECK (role IN ('admin', 'author')),
   
   -- Audit fields
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
@@ -107,7 +107,7 @@ COMMENT ON COLUMN managed_users.is_active IS
 'Whether the user account is active. Set to false to temporarily disable access without deleting.';
 
 COMMENT ON COLUMN managed_users.role IS 
-'User role/permission level: user (default), admin, or editor';
+'Access level: admin or author (default author for new users).';
 
 COMMENT ON COLUMN managed_users.created_by IS 
 'ID of the user/admin who added this user to the managed_users table';

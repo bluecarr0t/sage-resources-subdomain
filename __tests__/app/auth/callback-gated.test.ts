@@ -30,6 +30,7 @@ jest.mock('@/lib/supabase', () => ({
 }));
 
 import { GET } from '@/app/auth/callback/route';
+import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
 function callbackUrl(params: Record<string, string>): NextRequest {
   const qs = new URLSearchParams(params).toString();
@@ -131,7 +132,7 @@ describe('GET /auth/callback — gated magic link', () => {
     const res = await GET(
       callbackUrl({
         code: 'bad-code',
-        redirect: '/admin/dashboard',
+        redirect: DEFAULT_ADMIN_PATH,
       })
     );
 
@@ -140,19 +141,19 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(mockUpsert).not.toHaveBeenCalled();
   });
 
-  it('blocks open redirects and uses admin dashboard default', async () => {
+  it('blocks open redirects and uses admin default path', async () => {
     const res = await GET(callbackUrl({ redirect: 'https://evil.example/phish' }));
 
     expect(res.status).toBe(307);
-    expect(res.headers.get('location')).toMatch(/\/admin\/dashboard$/);
+    expect(res.headers.get('location')).toMatch(/\/admin\/job-pipeline$/);
     expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
   });
 
-  it('admin OAuth flow without redirect param still goes to dashboard', async () => {
+  it('admin OAuth flow without redirect param still goes to active jobs', async () => {
     const res = await GET(callbackUrl({ code: 'google-oauth-code' }));
 
     expect(res.status).toBe(307);
-    expect(res.headers.get('location')).toMatch(/\/admin\/dashboard$/);
+    expect(res.headers.get('location')).toMatch(/\/admin\/job-pipeline$/);
     expect(mockUpsert).not.toHaveBeenCalled();
   });
 
