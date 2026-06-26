@@ -79,6 +79,14 @@ describe('createSageAiTools', () => {
     expect(top?.[0]?.column).toBe('unit_private_bathroom');
   });
 
+  it('exposes export_ota_property_monthly_rates for zip-radius monthly OTA exports', () => {
+    const { supabase } = makeSupabaseStub({ data: [], error: null, count: 0 });
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    expect(Object.keys(tools)).toContain('export_ota_property_monthly_rates');
+  });
+
   it('calls top_multi_location_chains RPC with expected parameters', async () => {
     const rpcLog: Array<{ name: string; args: Record<string, unknown> }> = [];
     const supabase = {
@@ -735,6 +743,52 @@ describe('createSageAiTools', () => {
     };
     expect(typed.rejected_columns).toEqual(['1bad']);
     expect(typed.rejected_filters).toEqual(['foo bar']);
+  });
+
+  it('query_raw_ota_table queries hipcamp_sites with dynamic columns', async () => {
+    const { supabase, fromCalls } = makeSupabaseStub({
+      data: [{ site_id: '1', state: 'TX' }],
+      error: null,
+      count: 1,
+    });
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    expect(Object.keys(tools)).toContain('query_raw_ota_table');
+    const res = await tools.query_raw_ota_table.execute!(
+      {
+        table: 'hipcamp_sites',
+        columns: ['site_id', 'state'],
+        filters: { state: 'TX' },
+        limit: 10,
+        offset: 0,
+      },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    expect(fromCalls).toEqual(['hipcamp_sites']);
+    const typed = res as { table?: string; data?: unknown[]; total_count?: number };
+    expect(typed.table).toBe('hipcamp_sites');
+    expect(typed.data).toHaveLength(1);
+    expect(typed.total_count).toBe(1);
+  });
+
+  it('count_rows accepts raw OTA table names', async () => {
+    const { supabase, fromCalls } = makeSupabaseStub({
+      data: null,
+      error: null,
+      count: 42,
+    });
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    const res = await tools.count_rows.execute!(
+      { table: 'campspot_sites' },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    expect(fromCalls).toEqual(['campspot_sites']);
+    const typed = res as { table?: string; count?: number };
+    expect(typed.table).toBe('campspot_sites');
+    expect(typed.count).toBe(42);
   });
 
   it('clarifying_question deduplicates and normalizes options, caps at 6', async () => {

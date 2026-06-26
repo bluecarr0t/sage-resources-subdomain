@@ -47,7 +47,13 @@ import { Modal, ModalContent } from '@/components/ui/Modal';
 import { CollapsibleMarkdownPre } from '@/lib/sage-ai/CollapsibleMarkdownPre';
 import { FeedbackControls } from './FeedbackControls';
 import { linkifyPastReportRefsInMarkdown } from '@/lib/sage-ai/linkify-past-report-refs';
-import { downloadCsvFromData, downloadXlsxFromData, generateExportFilename } from '@/lib/sage-ai/csv-download';
+import {
+  downloadCsvFromData,
+  downloadXlsxFromData,
+  downloadXlsxFromSheets,
+  generateExportFilename,
+  type SpreadsheetExportSheet,
+} from '@/lib/sage-ai/csv-download';
 import { PythonCodeBlock } from '@/lib/sage-ai/pyodide/PythonCodeBlock';
 import { isPyodideEnvironmentError } from '@/lib/sage-ai/pyodide/is-pyodide-environment-error';
 import {
@@ -848,23 +854,53 @@ export default function SageAiClient() {
     return [];
   };
 
+  const otaExportFilenameStem = (data: unknown, toolName: string): string => {
+    if (
+      toolName === 'export_ota_property_monthly_rates' &&
+      data &&
+      typeof data === 'object' &&
+      'zip' in data &&
+      'radius_miles' in data
+    ) {
+      const { zip, radius_miles } = data as { zip: string; radius_miles: number };
+      return `ota-monthly-${zip}-${radius_miles}mi`;
+    }
+    return generateExportFilename(`sage-ai-${toolName}`);
+  };
+
+  const extractExportSheets = (data: unknown): SpreadsheetExportSheet[] => {
+    if (!data || typeof data !== 'object' || !('export_sheets' in data)) return [];
+    const sheets = (data as { export_sheets: unknown }).export_sheets;
+    if (!Array.isArray(sheets)) return [];
+    return sheets.flatMap((sheet) => {
+      if (!sheet || typeof sheet !== 'object') return [];
+      const { name, data: rows } = sheet as { name?: unknown; data?: unknown };
+      if (typeof name !== 'string' || !Array.isArray(rows) || rows.length === 0) return [];
+      return [{ name, data: rows as Record<string, unknown>[] }];
+    });
+  };
+
   const handleDownloadCsv = (data: unknown, toolName: string) => {
     const exportData = extractExportData(data);
     if (exportData.length > 0) {
-      const filename = generateExportFilename(`sage-ai-${toolName}`);
-      downloadCsvFromData(exportData, `${filename}.csv`);
+      downloadCsvFromData(exportData, `${otaExportFilenameStem(data, toolName)}.csv`);
     }
   };
 
   const handleDownloadXlsx = async (data: unknown, toolName: string) => {
+    const exportSheets = extractExportSheets(data);
     const exportData = extractExportData(data);
-    if (exportData.length > 0) {
-      try {
-        const filename = generateExportFilename(`sage-ai-${toolName}`);
-        await downloadXlsxFromData(exportData, `${filename}.xlsx`);
-      } catch (err) {
-        showToast(err instanceof Error ? err.message : t('toastFailedExportXlsx'));
+    if (exportSheets.length === 0 && exportData.length === 0) return;
+
+    try {
+      const stem = otaExportFilenameStem(data, toolName);
+      if (exportSheets.length > 0) {
+        await downloadXlsxFromSheets(exportSheets, `${stem}.xlsx`);
+      } else {
+        await downloadXlsxFromData(exportData, `${stem}.xlsx`);
       }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : t('toastFailedExportXlsx'));
     }
   };
 
@@ -873,6 +909,7 @@ export default function SageAiClient() {
     if ('data' in output && Array.isArray((output as { data: unknown }).data) && (output as { data: unknown[] }).data.length > 0) return true;
     if ('aggregates' in output && Array.isArray((output as { aggregates: unknown }).aggregates) && (output as { aggregates: unknown[] }).aggregates.length > 0) return true;
     if ('values' in output && Array.isArray((output as { values: unknown }).values) && (output as { values: unknown[] }).values.length > 0) return true;
+    if (extractExportSheets(output).length > 0) return true;
     return false;
   };
 

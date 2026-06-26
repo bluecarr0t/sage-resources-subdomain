@@ -12,6 +12,7 @@ import { createGeoTools } from '@/lib/sage-ai/geo-tools';
 import { createSemanticTools } from '@/lib/sage-ai/semantic-tools';
 import { createComposedTools } from '@/lib/sage-ai/composed-tools';
 import { createVisualizationTools } from '@/lib/sage-ai/visualization-tools';
+import { createOtaMonthlyExportTool } from '@/lib/sage-ai/ota-monthly-export-tool';
 import { fetchWithTimeout } from '@/lib/sage-ai/fetch-with-timeout';
 import { normalizeState } from '@/lib/anchor-point-insights/utils';
 import {
@@ -137,10 +138,39 @@ async function quotaGate(
   return null;
 }
 
+/** Normalized scrape-layer views (`hipcamp.*` / `campspot.*` exposed in public). */
+export const HIPCAMP_RAW_TABLES = [
+  'hipcamp_old_data_table',
+  'hipcamp_propertydetails',
+  'hipcamp_propertys',
+  'hipcamp_scrapings',
+  'hipcamp_sitedetails',
+  'hipcamp_sites',
+  'hipcamp_siteseasonals',
+] as const;
+
+export const CAMPSPOT_RAW_TABLES = [
+  'campspot_old_data_table',
+  'campspot_propertydetails',
+  'campspot_propertys',
+  'campspot_scrapings',
+  'campspot_sitedetails',
+  'campspot_sites',
+  'campspot_siteseasonals',
+] as const;
+
+export const RAW_OTA_TABLES = [
+  ...HIPCAMP_RAW_TABLES,
+  ...CAMPSPOT_RAW_TABLES,
+] as const;
+
+export type RawOtaTable = (typeof RAW_OTA_TABLES)[number];
+
 const ALLOWED_TABLES = [
   'all_sage_data',
   'hipcamp',
   'campspot',
+  ...RAW_OTA_TABLES,
   'all_roverpass_data_new',
   'reports',
   'county-population',
@@ -149,6 +179,23 @@ const ALLOWED_TABLES = [
 ] as const;
 
 type AllowedTable = (typeof ALLOWED_TABLES)[number];
+
+const RAW_OTA_TABLE_DESCRIPTIONS: Record<RawOtaTable, string> = {
+  hipcamp_old_data_table: 'Legacy Hipcamp archive rows (pre-normalized scrape).',
+  hipcamp_propertydetails: 'Hipcamp property-level detail records from scrape pipeline.',
+  hipcamp_propertys: 'Hipcamp property/park records (normalized `hipcamp.propertys`).',
+  hipcamp_scrapings: 'Hipcamp scrape run metadata (import batches, timestamps).',
+  hipcamp_sitedetails: 'Hipcamp site-level detail records from scrape pipeline.',
+  hipcamp_sites: 'Hipcamp individual site rows (normalized `hipcamp.sites`).',
+  hipcamp_siteseasonals: 'Hipcamp seasonal pricing / availability per site.',
+  campspot_old_data_table: 'Legacy Campspot archive rows (pre-normalized scrape).',
+  campspot_propertydetails: 'Campspot property-level detail records from scrape pipeline.',
+  campspot_propertys: 'Campspot property/park records (normalized `campspot.propertys`).',
+  campspot_scrapings: 'Campspot scrape run metadata (import batches, timestamps).',
+  campspot_sitedetails: 'Campspot site-level detail records from scrape pipeline.',
+  campspot_sites: 'Campspot individual site rows (normalized `campspot.sites`).',
+  campspot_siteseasonals: 'Campspot seasonal pricing / availability per site.',
+};
 
 const PROPERTIES_FILTERABLE_COLUMNS = [
   'state',
@@ -289,6 +336,10 @@ const NATIONAL_PARKS_COLUMN_ALLOWLIST = [
   'url',
 ] as const;
 
+const RAW_OTA_COLUMN_POLICY = Object.fromEntries(
+  RAW_OTA_TABLES.map((table) => [table, 'dynamic' as const])
+) as Record<RawOtaTable, 'dynamic'>;
+
 const COLUMN_ALLOWLIST_BY_TABLE: Record<
   AllowedTable,
   readonly string[] | 'dynamic'
@@ -302,6 +353,7 @@ const COLUMN_ALLOWLIST_BY_TABLE: Record<
   // Schema of these scraped sources drifts; restrict to safe identifiers only.
   campspot: 'dynamic',
   all_roverpass_data_new: 'dynamic',
+  ...RAW_OTA_COLUMN_POLICY,
 };
 
 /** Accept only Postgres-safe identifiers (no quotes, no dots, no whitespace). */
@@ -579,10 +631,17 @@ export function createSageAiTools(
             {
               name: 'campspot',
               description:
-                '**Primary** Sage dataset for **RV** parks and RV site supply (use with `all_roverpass_data_new` for RV market work).',
+                '**Primary** Sage dataset for **RV** parks and RV site supply (use with `all_roverpass_data_new` for RV market work). Flat table rebuilt from raw scrape views.',
               row_count_estimate: 'thousands',
               category: 'RV',
             },
+            ...RAW_OTA_TABLES.map((name) => ({
+              name,
+              description:
+                `${RAW_OTA_TABLE_DESCRIPTIONS[name]} Query via \`query_raw_ota_table\`. For market summaries prefer flat \`hipcamp\` / \`campspot\` + \`query_hipcamp\` / \`query_campspot\`.`,
+              row_count_estimate: 'thousands' as const,
+              category: name.startsWith('hipcamp_') ? 'Hipcamp (raw)' : 'Campspot (raw)',
+            })),
             {
               name: 'all_roverpass_data_new',
               description:
@@ -1189,6 +1248,70 @@ export function createSageAiTools(
           'query_roverpass',
           { filters, columns, limit, offset },
           {
+            data: data ?? [],
+            total_count: count ?? 0,
+            returned_count: data?.length ?? 0,
+            ...(rejectedCols.length ? { rejected_columns: rejectedCols } : {}),
+            ...(rejectedFilters.length ? { rejected_filters: rejectedFilters } : {}),
+          },
+          (data?.length ?? 0) === 0,
+          'Run without filters first to discover available column values.'
+        );
+      },
+    }),
+
+    query_raw_ota_table: tool({
+      description:
+        'Query **raw** Hipcamp or Campspot normalized scrape tables (`hipcamp_*` / `campspot_*` views). ' +
+        'Use when you need site-level rows, seasonal rate tables, scrape metadata, or fields not present on the flat `hipcamp` / `campspot` tables. ' +
+        'For RV market summaries and comps, prefer `query_campspot` + `query_roverpass` on the flat tables unless the user asks for raw scrape data. ' +
+        'Query without filters first (limit 10–20) to discover columns, then filter.',
+      inputSchema: z.object({
+        table: z
+          .enum(RAW_OTA_TABLES)
+          .describe(
+            'Raw table/view name, e.g. hipcamp_sites, campspot_siteseasonals, hipcamp_scrapings.'
+          ),
+        filters: z
+          .record(z.string())
+          .optional()
+          .describe('Key-value filters (ilike partial match). Discover columns with an unfiltered sample first.'),
+        columns: z
+          .array(z.string())
+          .optional()
+          .describe('Specific columns to return. Leave empty to see all columns.'),
+        limit: z.number().min(1).max(500).optional().default(20),
+        offset: z.number().min(0).optional().default(0),
+      }),
+      execute: async ({ table, filters, columns, limit, offset }) => {
+        const { allowed: allowedCols, rejected: rejectedCols } = validateColumns(
+          table,
+          columns
+        );
+        const { allowed: allowedFilters, rejected: rejectedFilters } =
+          validateFilterKeys(table, filters);
+        const selectColumns = allowedCols.length ? allowedCols.join(', ') : '*';
+
+        let query = supabase
+          .from(table)
+          .select(selectColumns, { count: 'exact' })
+          .range(offset ?? 0, (offset ?? 0) + (limit ?? 20) - 1);
+
+        for (const [key, value] of Object.entries(allowedFilters)) {
+          query = query.ilike(key, `%${value}%`);
+        }
+
+        const { data, error, count } = await query;
+
+        if (error) {
+          return { error: error.message, data: null, total_count: 0, table };
+        }
+
+        return handleEmptyResult(
+          'query_raw_ota_table',
+          { table, filters, columns, limit, offset },
+          {
+            table,
             data: data ?? [],
             total_count: count ?? 0,
             returned_count: data?.length ?? 0,
@@ -2959,9 +3082,11 @@ ${GOOGLE_PLACE_DETAILS_ALLOWED_FIELDS.join(', ')}.`,
   const visualizationTools = context?.visualizationToolsEnabled
     ? createVisualizationTools()
     : {};
+  const otaMonthlyExportTools = createOtaMonthlyExportTool();
 
   const toolSet = {
     ...baseTools,
+    ...otaMonthlyExportTools,
     ...(context?.webResearchEnabled ? webResearchTools : {}),
     ...geoTools,
     ...semanticTools,

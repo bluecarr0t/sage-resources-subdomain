@@ -137,6 +137,15 @@ function compactToolOutput(output: unknown, max: number): unknown {
 
   compactNestedVisualizationRows(clone, max);
 
+  if (Array.isArray(clone.export_sheets)) {
+    clone.export_sheets = clone.export_sheets.map((sheet) => {
+      if (!sheet || typeof sheet !== 'object') return sheet;
+      const s = { ...(sheet as Record<string, unknown>) };
+      truncateArrayField(s, 'data', max);
+      return s;
+    });
+  }
+
   return clampLongStringsInToolJson(clone, 0);
 }
 
