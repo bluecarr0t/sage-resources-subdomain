@@ -67,11 +67,9 @@ import {
 } from '@/lib/sage-ai/sage-ai-chat-models';
 import { generateUniqueId } from '@/lib/random-id';
 import {
-  SageAiModelPicker,
   sageAiSelectionFromStorage,
   sageAiSelectionToStorage,
   SAGE_AI_MODEL_STORAGE_KEY,
-  SAGE_AI_PREMIUM_MODELS_STORAGE_KEY,
 } from './SageAiModelPicker';
 import { useSageAiServerCapabilities } from './useSageAiServerCapabilities';
 import { isSageAiTimeoutError } from '@/lib/sage-ai/chat-limits';
@@ -177,13 +175,6 @@ export default function SageAiClient() {
   const webResearchServerEnabled = serverCapabilities?.webResearchServer ?? false;
   const webResearchRef = useRef(false);
   webResearchRef.current = webResearchEnabled && webResearchServerEnabled;
-  /**
-   * Whether the user has opted in to selecting higher-cost premium models
-   * (Claude Opus 4.7, Sonnet 4.5). Persisted in localStorage so the choice
-   * sticks across reloads. Server still validates the model id against the
-   * allowlist in `parseSageAiChatModelId`, so this is purely a UI gate.
-   */
-  const [premiumModelsUnlocked, setPremiumModelsUnlocked] = useState(false);
   const [modelPrefsLoaded, setModelPrefsLoaded] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [stickyUserPrompt, setStickyUserPrompt] = useState<string | null>(null);
@@ -508,12 +499,6 @@ export default function SageAiClient() {
     } catch {
       /* ignore */
     }
-    try {
-      const rawPremium = localStorage.getItem(SAGE_AI_PREMIUM_MODELS_STORAGE_KEY);
-      if (rawPremium === 'true') setPremiumModelsUnlocked(true);
-    } catch {
-      /* ignore */
-    }
     setModelPrefsLoaded(true);
   }, []);
 
@@ -528,18 +513,6 @@ export default function SageAiClient() {
       /* ignore */
     }
   }, [modelSelection, modelPrefsLoaded]);
-
-  useEffect(() => {
-    if (!modelPrefsLoaded) return;
-    try {
-      localStorage.setItem(
-        SAGE_AI_PREMIUM_MODELS_STORAGE_KEY,
-        premiumModelsUnlocked ? 'true' : 'false'
-      );
-    } catch {
-      /* ignore */
-    }
-  }, [premiumModelsUnlocked, modelPrefsLoaded]);
 
   const updateStickyUserPrompt = useCallback(() => {
     const container = messagesContainerRef.current;
@@ -855,49 +828,75 @@ export default function SageAiClient() {
   };
 
   const otaExportFilenameStem = (data: unknown, toolName: string): string => {
-    if (
-      toolName === 'export_ota_property_monthly_rates' &&
-      data &&
-      typeof data === 'object' &&
-      'zip' in data &&
-      'radius_miles' in data
-    ) {
-      const { zip, radius_miles } = data as { zip: string; radius_miles: number };
-      return `ota-monthly-${zip}-${radius_miles}mi`;
+    if (toolName === 'export_ota_property_monthly_rates' && data && typeof data === 'object') {
+      const o = data as {
+        location_label?: string;
+        zip?: string | null;
+        radius_miles?: number;
+      };
+      const location = o.location_label || o.zip || 'export';
+      const radius = o.radius_miles ?? 50;
+      const slug = String(location)
+        .replace(/[^\w]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      return `ota-monthly-${slug}-${radius}mi`;
     }
     return generateExportFilename(`sage-ai-${toolName}`);
   };
 
-  const extractExportSheets = (data: unknown): SpreadsheetExportSheet[] => {
-    if (!data || typeof data !== 'object' || !('export_sheets' in data)) return [];
-    const sheets = (data as { export_sheets: unknown }).export_sheets;
-    if (!Array.isArray(sheets)) return [];
-    return sheets.flatMap((sheet) => {
-      if (!sheet || typeof sheet !== 'object') return [];
-      const { name, data: rows } = sheet as { name?: unknown; data?: unknown };
-      if (typeof name !== 'string' || !Array.isArray(rows) || rows.length === 0) return [];
-      return [{ name, data: rows as Record<string, unknown>[] }];
-    });
+  const resolveDownloadPayload = async (
+    data: unknown,
+  ): Promise<{ rows: Record<string, unknown>[]; sheets: SpreadsheetExportSheet[] }> => {
+    if (data && typeof data === 'object' && 'export_fetch' in data) {
+      const fetchParams = (data as { export_fetch: unknown }).export_fetch;
+      if (fetchParams && typeof fetchParams === 'object') {
+        const res = await fetch('/api/admin/sage-ai/ota-monthly-export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(fetchParams),
+        });
+        if (!res.ok) {
+          const err = (await res.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(err?.error ?? 'Failed to load export data');
+        }
+        const full = (await res.json()) as {
+          data?: Record<string, unknown>[];
+          export_sheets?: SpreadsheetExportSheet[];
+        };
+        return {
+          rows: full.data ?? [],
+          sheets: full.export_sheets ?? [],
+        };
+      }
+    }
+
+    return {
+      rows: extractExportData(data),
+      sheets: extractExportSheets(data),
+    };
   };
 
-  const handleDownloadCsv = (data: unknown, toolName: string) => {
-    const exportData = extractExportData(data);
-    if (exportData.length > 0) {
-      downloadCsvFromData(exportData, `${otaExportFilenameStem(data, toolName)}.csv`);
+  const handleDownloadCsv = async (data: unknown, toolName: string) => {
+    try {
+      const { rows } = await resolveDownloadPayload(data);
+      if (rows.length > 0) {
+        downloadCsvFromData(rows, `${otaExportFilenameStem(data, toolName)}.csv`);
+      }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : t('toastFailedExportXlsx'));
     }
   };
 
   const handleDownloadXlsx = async (data: unknown, toolName: string) => {
-    const exportSheets = extractExportSheets(data);
-    const exportData = extractExportData(data);
-    if (exportSheets.length === 0 && exportData.length === 0) return;
-
     try {
+      const { rows, sheets } = await resolveDownloadPayload(data);
+      if (sheets.length === 0 && rows.length === 0) return;
+
       const stem = otaExportFilenameStem(data, toolName);
-      if (exportSheets.length > 0) {
-        await downloadXlsxFromSheets(exportSheets, `${stem}.xlsx`);
+      if (sheets.length > 0) {
+        await downloadXlsxFromSheets(sheets, `${stem}.xlsx`);
       } else {
-        await downloadXlsxFromData(exportData, `${stem}.xlsx`);
+        await downloadXlsxFromData(rows, `${stem}.xlsx`);
       }
     } catch (err) {
       showToast(err instanceof Error ? err.message : t('toastFailedExportXlsx'));
@@ -906,10 +905,17 @@ export default function SageAiClient() {
 
   const hasExportableData = (output: unknown): boolean => {
     if (!output || typeof output !== 'object') return false;
+    if ('export_fetch' in output && (output as { export_fetch?: unknown }).export_fetch) return true;
+    if (
+      'total_row_count' in output &&
+      typeof (output as { total_row_count: unknown }).total_row_count === 'number' &&
+      (output as { total_row_count: number }).total_row_count > 0
+    ) {
+      return true;
+    }
     if ('data' in output && Array.isArray((output as { data: unknown }).data) && (output as { data: unknown[] }).data.length > 0) return true;
     if ('aggregates' in output && Array.isArray((output as { aggregates: unknown }).aggregates) && (output as { aggregates: unknown[] }).aggregates.length > 0) return true;
     if ('values' in output && Array.isArray((output as { values: unknown }).values) && (output as { values: unknown[] }).values.length > 0) return true;
-    if (extractExportSheets(output).length > 0) return true;
     return false;
   };
 
@@ -1278,93 +1284,51 @@ export default function SageAiClient() {
                 </p>
                 
                 {/* Quick Start Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-5xl mx-auto text-left items-stretch">
                   <button
-                    onClick={() => sendMessage({ text: t('quickStartRatePrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
-                  >
-                    <span className="text-lg">📊</span>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartRateTitle')}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {t('quickStartRateDesc')}
-                      </div>
-                    </div>
-                  </button>
-                  
-                  <button
-                    onClick={() => sendMessage({ text: t('quickStartRvPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
-                  >
-                    <span className="text-lg">🎯</span>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartRvTitle')}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {t('quickStartRvDesc')}
-                      </div>
-                    </div>
-                  </button>
-                  
-                  <button
-                    onClick={() => sendMessage({ text: t('quickStartUnitPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
-                  >
-                    <span className="text-lg">🏕️</span>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartUnitTitle')}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {t('quickStartUnitDesc')}
-                      </div>
-                    </div>
-                  </button>
-                  
-                  <button
-                    onClick={() => sendMessage({ text: t('quickStartParksPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
-                  >
-                    <span className="text-lg">🗺️</span>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartParksTitle')}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {t('quickStartParksDesc')}
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => sendMessage({ text: t('quickStartTexasReportsPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                    type="button"
+                    onClick={() => sendMessage({ text: t('quickStartMarketReportPrompt') })}
+                    className="flex h-full flex-col items-start gap-2 rounded-xl border border-neutral-200/75 p-4 transition-all hover:border-sage-300 hover:bg-sage-50 group dark:border-neutral-800 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
                   >
                     <span className="text-lg">📋</span>
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartTexasReportsTitle')}
+                        {t('quickStartMarketReportTitle')}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {t('quickStartTexasReportsDesc')}
+                      <div className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                        {t('quickStartMarketReportDesc')}
                       </div>
                     </div>
                   </button>
 
                   <button
-                    onClick={() => sendMessage({ text: t('quickStartUsaTrendsPrompt') })}
-                    className="flex items-start gap-3 p-4 text-left rounded-xl border border-neutral-200/75 dark:border-neutral-800 hover:border-sage-300 dark:hover:border-sage-700 hover:bg-sage-50 dark:hover:bg-sage-900/20 transition-all group"
+                    type="button"
+                    onClick={() => sendMessage({ text: t('quickStartMonthlyRatesPrompt') })}
+                    className="flex h-full flex-col items-start gap-2 rounded-xl border border-neutral-200/75 p-4 transition-all hover:border-sage-300 hover:bg-sage-50 group dark:border-neutral-800 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
                   >
-                    <span className="text-lg">📈</span>
-                    <div>
+                    <span className="text-lg">📊</span>
+                    <div className="min-w-0">
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartUsaTrendsTitle')}
+                        {t('quickStartMonthlyRatesTitle')}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {t('quickStartUsaTrendsDesc')}
+                      <div className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                        {t('quickStartMonthlyRatesDesc')}
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => sendMessage({ text: t('quickStartUnitTypePrompt') })}
+                    className="flex h-full flex-col items-start gap-2 rounded-xl border border-neutral-200/75 p-4 transition-all hover:border-sage-300 hover:bg-sage-50 group dark:border-neutral-800 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
+                  >
+                    <span className="text-lg">🏕️</span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
+                        {t('quickStartUnitTypeTitle')}
+                      </div>
+                      <div className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                        {t('quickStartUnitTypeDesc')}
                       </div>
                     </div>
                   </button>
@@ -1611,7 +1575,7 @@ export default function SageAiClient() {
                                       {hasExportableData(innerOutput) && (
                                         <div className="flex items-center gap-1">
                                           <button
-                                            onClick={() => handleDownloadCsv(innerOutput, innerToolName)}
+                                            onClick={() => void handleDownloadCsv(innerOutput, innerToolName)}
                                             className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
                                           >
                                             <Download className="w-3 h-3" />
@@ -2108,7 +2072,7 @@ export default function SageAiClient() {
           <div className="max-w-3xl mx-auto px-4 py-4">
             <form onSubmit={handleSubmit}>
               <SageAiThreadUsageBar sessionId={currentSessionId} refreshKey={usageRefreshKey} />
-              <div className="rounded-xl border border-neutral-200/70 bg-white shadow-sm dark:border-gray-800 dark:bg-neutral-950 overflow-visible">
+              <div className="flex items-end gap-1 rounded-xl border border-neutral-200/70 bg-white px-2 py-2 shadow-sm dark:border-gray-800 dark:bg-neutral-950">
                 <textarea
                   ref={inputRef}
                   value={input}
@@ -2116,45 +2080,32 @@ export default function SageAiClient() {
                   onKeyDown={handleKeyDown}
                   placeholder={t('inputPlaceholder')}
                   rows={1}
-                  className="w-full resize-none rounded-t-xl border-0 bg-transparent px-4 py-3 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-0 dark:text-gray-100 dark:placeholder:text-gray-500"
-                  style={{ minHeight: '48px', maxHeight: '200px' }}
+                  className="min-w-0 flex-1 resize-none border-0 bg-transparent px-2 py-2 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-0 dark:text-gray-100 dark:placeholder:text-gray-500"
+                  style={{ minHeight: '40px', maxHeight: '200px' }}
                   disabled={isLoading}
                 />
-                <div className="flex items-center gap-1 rounded-b-xl border-t border-gray-100 px-2 py-1.5 dark:border-gray-800">
-                  <SageAiModelPicker
-                    selection={modelSelection}
-                    onSelectionChange={setModelSelection}
-                    webResearchServerEnabled={webResearchServerEnabled}
-                    webResearchEnabled={webResearchEnabled}
-                    onWebResearchChange={setWebResearchEnabled}
-                    premiumModelsUnlocked={premiumModelsUnlocked}
-                    onPremiumModelsUnlockedChange={setPremiumModelsUnlocked}
-                    disabled={isLoading}
-                  />
-                  <div className="flex-1" />
-                  {showComposerStop ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void stop();
-                        abortAllPythonBlockRuns();
-                      }}
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-900 transition-colors hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300"
-                      title={t('stopGenerating')}
-                    >
-                      <Square className="h-3 w-3 fill-current text-white dark:text-gray-900" />
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={!input.trim()}
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:opacity-40 disabled:hover:bg-transparent dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
-                      aria-label={t('inputPlaceholder')}
-                    >
-                      <Send className="h-5 w-5" />
-                    </button>
-                  )}
-                </div>
+                {showComposerStop ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void stop();
+                      abortAllPythonBlockRuns();
+                    }}
+                    className="mb-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-900 transition-colors hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300"
+                    title={t('stopGenerating')}
+                  >
+                    <Square className="h-3 w-3 fill-current text-white dark:text-gray-900" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!input.trim()}
+                    className="mb-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:opacity-40 disabled:hover:bg-transparent dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                    aria-label={t('inputPlaceholder')}
+                  >
+                    <Send className="h-5 w-5" />
+                  </button>
+                )}
               </div>
             </form>
           </div>

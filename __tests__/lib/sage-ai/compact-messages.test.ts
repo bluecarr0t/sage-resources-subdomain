@@ -105,6 +105,22 @@ describe('compactMessages', () => {
     expect(note).toMatch(/\+\d+ chars\)$/);
   });
 
+  it('strips full OTA export rows when export_fetch is present', () => {
+    const heavy = toolMsg('export_ota_property_monthly_rates', {
+      total_row_count: 1656,
+      export_fetch: { zip: '34205', radius_miles: 50, years: [2025, 2026], sources: ['hipcamp'] },
+      data: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+      export_sheets: [{ name: 'combined', data: Array.from({ length: 100 }, (_, i) => ({ id: i })) }],
+      sample_rows: [{ property_id: '1' }],
+    });
+    const out = compactMessages([heavy], { recentTurns: 1, maxRowsPerToolResultRecent: 16 });
+    const part = (out[0] as unknown as { parts: Array<{ output: Record<string, unknown> }> }).parts[0];
+    expect(part.output.data).toBeUndefined();
+    expect(part.output.export_sheets).toBeUndefined();
+    expect(part.output.sample_rows).toHaveLength(1);
+    expect(part.output.export_fetch).toBeDefined();
+  });
+
   it('tightens row caps until hard payload budget is met', () => {
     const long = 'a'.repeat(400);
     const rows = Array.from({ length: 50 }, (_, i) => ({ id: i, blob: long }));

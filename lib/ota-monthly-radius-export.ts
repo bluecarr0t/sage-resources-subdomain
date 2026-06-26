@@ -4,6 +4,7 @@
  */
 
 import { query } from '@/lib/legacy-camping-db';
+import { geocodeCityStateUsa } from '@/lib/geocode';
 import { geocodeZipForSitesExport } from '@/lib/sites-export/geocode-zip';
 
 export const OTA_MONTHLY_EXPORT_COLUMNS = [
@@ -35,10 +36,29 @@ export type OtaMonthlySource = 'hipcamp' | 'campspot';
 export type OtaMonthlyExportRow = Record<OtaMonthlyExportColumn, string>;
 
 export type OtaMonthlyRadiusExportOptions = {
-  zip: string;
+  /** US/CAN postal code center point. Provide this OR `city` + `state`. */
+  zip?: string;
+  city?: string;
+  state?: string;
   radiusMiles?: number;
   years?: number[];
   sources?: OtaMonthlySource[];
+};
+
+export type OtaMonthlyExportLocation = {
+  location_label: string;
+  zip: string | null;
+  city: string | null;
+  state: string | null;
+};
+
+export type OtaMonthlyExportFetchParams = {
+  zip?: string;
+  city?: string;
+  state?: string;
+  radius_miles: number;
+  years: number[];
+  sources: OtaMonthlySource[];
 };
 
 export type OtaMonthlySourceSummary = {
@@ -47,8 +67,7 @@ export type OtaMonthlySourceSummary = {
   row_count: number;
 };
 
-export type OtaMonthlyRadiusExportResult = {
-  zip: string;
+export type OtaMonthlyRadiusExportResult = OtaMonthlyExportLocation & {
   radius_miles: number;
   years: number[];
   center: { lat: number; lon: number };
@@ -92,10 +111,40 @@ type PropertyMonthlyRow = {
   distance_miles: string;
 };
 
-async function getZipCenter(zip: string): Promise<{ lat: number; lon: number }> {
-  const center = await geocodeZipForSitesExport(zip, []);
-  if (!center) throw new Error(`Could not geocode zip ${zip}`);
-  return { lat: center.lat, lon: center.lng };
+async function resolveExportCenter(
+  options: Pick<OtaMonthlyRadiusExportOptions, 'zip' | 'city' | 'state'>,
+): Promise<OtaMonthlyExportLocation & { lat: number; lon: number }> {
+  const zip = options.zip?.trim() ?? '';
+  const city = options.city?.trim() ?? '';
+  const state = options.state?.trim() ?? '';
+
+  if (zip) {
+    const center = await geocodeZipForSitesExport(zip, []);
+    if (!center) throw new Error(`Could not geocode zip ${zip}`);
+    return {
+      location_label: zip,
+      zip,
+      city: null,
+      state: null,
+      lat: center.lat,
+      lon: center.lng,
+    };
+  }
+
+  if (city && state) {
+    const center = await geocodeCityStateUsa(city, state);
+    if (!center) throw new Error(`Could not geocode ${city}, ${state}`);
+    return {
+      location_label: `${city}, ${state}`,
+      zip: null,
+      city,
+      state,
+      lat: center.lat,
+      lon: center.lng,
+    };
+  }
+
+  throw new Error('Provide a zip code or city and state for the export center point.');
 }
 
 async function getPropertyIdsInRadius(
@@ -278,14 +327,11 @@ export function countUniqueProperties(rows: OtaMonthlyExportRow[]): number {
 export async function exportOtaPropertyMonthlyByRadius(
   options: OtaMonthlyRadiusExportOptions,
 ): Promise<OtaMonthlyRadiusExportResult> {
-  const zip = options.zip.trim();
-  if (!zip) throw new Error('zip is required');
-
   const radiusMiles = options.radiusMiles ?? DEFAULT_RADIUS_MILES;
   const years = options.years?.length ? [...options.years] : [...DEFAULT_YEARS];
   const sources = options.sources?.length ? options.sources : [...DEFAULT_SOURCES];
 
-  const { lat, lon } = await getZipCenter(zip);
+  const { lat, lon, location_label, zip, city, state } = await resolveExportCenter(options);
 
   const sourceSummaries: OtaMonthlyRadiusExportResult['sources'] = [];
   const exportSheets: Array<{ name: string; data: OtaMonthlyExportRow[] }> = [];
@@ -315,7 +361,10 @@ export async function exportOtaPropertyMonthlyByRadius(
   exportSheets.push({ name: 'combined', data: combined });
 
   return {
+    location_label,
     zip,
+    city,
+    state,
     radius_miles: radiusMiles,
     years,
     center: { lat, lon },

@@ -463,6 +463,15 @@ function stripEmptyFilters<T extends Record<string, unknown> | undefined>(
   return out as T;
 }
 
+/** Unit Type Search workflow excludes Glamping Tent(s) from clarifying_question pills. */
+function filterExcludedUnitTypeClarifyingOptions(
+  question: string,
+  options: string[]
+): string[] {
+  if (!/unit\s*type/i.test(question)) return options;
+  return options.filter((o) => !/^glamping\s*tents?$/i.test(o.trim()));
+}
+
 /**
  * Stable serialization for retry counter keys. Recursively sorts object keys
  * so `{a:1,b:2}` and `{b:2,a:1}` collide, and tolerates anything JSON can hold.
@@ -2555,16 +2564,20 @@ plt.show()
           .describe('2–6 mutually distinct answer options, ordered from most to least likely.'),
       }),
       execute: async ({ question, options }) => {
-        const normalizedOptions = Array.from(
-          new Set(
-            options
-              .map((o) => o.trim().replace(/\s+/g, ' '))
-              .filter((o) => o.length >= 1 && o.length <= 120)
-          )
-        ).slice(0, 6);
+        const trimmedQuestion = question.trim();
+        const normalizedOptions = filterExcludedUnitTypeClarifyingOptions(
+          trimmedQuestion,
+          Array.from(
+            new Set(
+              options
+                .map((o) => o.trim().replace(/\s+/g, ' '))
+                .filter((o) => o.length >= 1 && o.length <= 120)
+            )
+          ).slice(0, 6)
+        );
         return {
           type: 'clarifying_question' as const,
-          question: question.trim(),
+          question: trimmedQuestion,
           options: normalizedOptions,
         };
       },

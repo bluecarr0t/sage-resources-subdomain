@@ -146,6 +146,12 @@ function compactToolOutput(output: unknown, max: number): unknown {
     });
   }
 
+  if (clone.export_fetch != null) {
+    delete clone.data;
+    delete clone.export_sheets;
+    truncateArrayField(clone, 'sample_rows', Math.min(max, 5));
+  }
+
   return clampLongStringsInToolJson(clone, 0);
 }
 

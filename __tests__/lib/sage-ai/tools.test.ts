@@ -824,6 +824,28 @@ describe('createSageAiTools', () => {
       'West Texas',
     ]);
   });
+
+  it('clarifying_question strips Glamping Tents from unit type picker options', async () => {
+    const { supabase } = makeSupabaseStub({});
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    const res = await tools.clarifying_question.execute!(
+      {
+        question: 'Which unit type(s) are you interested in?',
+        options: ['Cabins', 'Yurts', 'Treehouses', 'Safari Tents', 'Glamping Tents', 'Other'],
+      },
+      { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+    );
+    const typed = res as { type: string; options: string[] };
+    expect(typed.options).toEqual([
+      'Cabins',
+      'Yurts',
+      'Treehouses',
+      'Safari Tents',
+      'Other',
+    ]);
+  });
 });
 
 describe('scrape_webpage / crawl_website prompt-injection wrapping', () => {

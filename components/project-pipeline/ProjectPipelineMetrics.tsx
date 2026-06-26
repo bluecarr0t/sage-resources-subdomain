@@ -21,6 +21,14 @@ const METRIC_TILES: {
   { key: 'outdoorPastDue', field: 'outdoorPastDue' },
 ];
 
+/** Match parent `rounded-lg` on outer corners; avoid `overflow-hidden` so active rings are not clipped. */
+const METRIC_TILE_CORNER_RADIUS = [
+  'rounded-tl-lg sm:rounded-bl-lg',
+  'max-sm:rounded-tr-lg',
+  'max-sm:rounded-bl-lg',
+  'max-sm:rounded-br-lg sm:rounded-tr-lg sm:rounded-br-lg',
+] as const;
+
 type ProjectPipelineMetricsProps = {
   jobs: ProjectPipelineJob[];
   activeFilter: ProjectPipelineMetricFilter | null;
@@ -36,8 +44,8 @@ export function ProjectPipelineMetrics({
   const metrics = useMemo(() => computeProjectPipelineMetrics(jobs), [jobs]);
 
   return (
-    <div className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-lg border border-neutral-200/70 bg-neutral-200/60 dark:border-neutral-800 dark:bg-neutral-800/80 sm:w-auto sm:min-w-[22rem] sm:grid-cols-4">
-      {METRIC_TILES.map(({ key, field }) => {
+    <div className="grid w-full grid-cols-2 gap-px rounded-lg border border-neutral-200/70 bg-neutral-200/60 dark:border-neutral-800 dark:bg-neutral-800/80 sm:w-auto sm:min-w-[22rem] sm:grid-cols-4">
+      {METRIC_TILES.map(({ key, field }, index) => {
         const isActive = activeFilter === key;
 
         return (
@@ -47,9 +55,9 @@ export function ProjectPipelineMetrics({
             onClick={() => onFilterChange(key)}
             aria-pressed={isActive}
             aria-label={t('filterBy', { metric: t(key) })}
-            className={`flex flex-col justify-center bg-white px-3 py-2.5 text-left transition-colors sm:px-4 sm:py-3 dark:bg-neutral-950/50 ${
+            className={`flex flex-col justify-center bg-white px-3 py-2.5 text-left transition-colors sm:px-4 sm:py-3 dark:bg-neutral-950/50 ${METRIC_TILE_CORNER_RADIUS[index]} ${
               isActive
-                ? 'ring-2 ring-inset ring-sage-600/80 dark:ring-sage-500/80'
+                ? 'relative z-10 ring-2 ring-inset ring-sage-600/80 dark:ring-sage-500/80'
                 : 'hover:bg-neutral-50 dark:hover:bg-neutral-900/60'
             }`}
           >
