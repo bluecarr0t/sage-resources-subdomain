@@ -827,6 +827,14 @@ export default function SageAiClient() {
     return [];
   };
 
+  const extractExportSheets = (data: unknown): SpreadsheetExportSheet[] => {
+    if (!data || typeof data !== 'object') return [];
+    if ('export_sheets' in data && Array.isArray((data as { export_sheets: unknown }).export_sheets)) {
+      return (data as { export_sheets: SpreadsheetExportSheet[] }).export_sheets;
+    }
+    return [];
+  };
+
   const otaExportFilenameStem = (data: unknown, toolName: string): string => {
     if (toolName === 'export_ota_property_monthly_rates' && data && typeof data === 'object') {
       const o = data as {
