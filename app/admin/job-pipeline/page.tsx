@@ -60,6 +60,7 @@ import {
 } from '@/lib/project-pipeline/oauth-sync-client';
 import {
   matchesProjectPipelineJobRef,
+  removeProjectPipelineJobFromList,
   upsertProjectPipelineJobInList,
 } from '@/lib/project-pipeline/resolve-job-for-edit';
 import type { ProjectPipelineApiResponse, ProjectPipelineJob } from '@/lib/project-pipeline/types';
@@ -68,8 +69,8 @@ import type { ProjectPipelineReviewNoteType } from '@/lib/project-pipeline/revie
 const PIPELINE_OAUTH_SCOPE = googleSheetsPipelineOAuthScopeString();
 const PIPELINE_OAUTH_BACKFILL_KEY = 'project-pipeline-oauth-backfill-attempted';
 
-/** Set to true when manual sheet → Supabase refresh should be visible again. */
-const SHOW_PROJECT_PIPELINE_REFRESH = false;
+/** Manual sheet → Supabase refresh is available to admins and pipeline-wide viewers. */
+const SHOW_PROJECT_PIPELINE_REFRESH = true;
 
 export default function ProjectPipelinePage() {
   const t = useTranslations('admin.projectPipeline');
@@ -356,16 +357,35 @@ export default function ProjectPipelinePage() {
     setSyncingFromSheet(true);
     setError(null);
     try {
-      const res = await fetch('/api/admin/project-pipeline/sync', {
+      const useOAuthSync = !data?.cronSyncEnabled;
+      const accessToken = useOAuthSync
+        ? readGoogleSheetsOAuthAccessToken(PIPELINE_OAUTH_SCOPE) ?? undefined
+        : undefined;
+
+      if (useOAuthSync && !accessToken) {
+        throw new Error(t('refreshSyncOAuthRequired'));
+      }
+
+      const endpoint = useOAuthSync
+        ? '/api/admin/project-pipeline/oauth-sync'
+        : '/api/admin/project-pipeline/sync';
+      const syncPayload = useOAuthSync
+        ? {
+            accessToken,
+            ...(isProjectPipelineAllSheetsTab(sheetName)
+              ? { syncAll: true }
+              : { sheetName }),
+          }
+        : isProjectPipelineAllSheetsTab(sheetName)
+          ? { syncAll: true }
+          : { sheetName };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          isProjectPipelineAllSheetsTab(sheetName)
-            ? { syncAll: true }
-            : { sheetName }
-        ),
+        body: JSON.stringify(syncPayload),
       });
-      const body = (await res.json()) as {
+      const responseBody = (await res.json()) as {
         error?: string;
         message?: string;
         jobsFetched?: number;
@@ -373,10 +393,10 @@ export default function ProjectPipelinePage() {
         lastSyncedAt?: string;
       };
       if (!res.ok) {
-        throw new Error(body.message || body.error || t('refreshSyncError'));
+        throw new Error(responseBody.message || responseBody.error || t('refreshSyncError'));
       }
-      if (body.lastSyncedAt) {
-        setLastSyncedAt(body.lastSyncedAt);
+      if (responseBody.lastSyncedAt) {
+        setLastSyncedAt(responseBody.lastSyncedAt);
       }
       await loadJobs(undefined, sheetName, { silent: true });
       setToast({ message: t('refreshSyncSuccess'), variant: 'success' });
@@ -387,7 +407,7 @@ export default function ProjectPipelinePage() {
     } finally {
       setSyncingFromSheet(false);
     }
-  }, [loadJobs, sheetName, t]);
+  }, [data?.cronSyncEnabled, loadJobs, sheetName, t]);
 
   const connectGoogleSheets = useCallback(async () => {
     if (!data?.oauthClientId) return;
@@ -472,6 +492,25 @@ export default function ProjectPipelinePage() {
     [t]
   );
 
+  const deleteJob = useCallback(
+    async (job: ProjectPipelineJob): Promise<void> => {
+      const res = await fetch('/api/admin/project-pipeline/jobs', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job }),
+      });
+
+      const body = (await res.json()) as {
+        error?: string;
+        message?: string;
+      };
+      if (!res.ok) {
+        throw new Error(body.message || body.error || t('deleteJobError'));
+      }
+    },
+    [t]
+  );
+
   const submitReviewAction = useCallback(
     async (
       job: ProjectPipelineJob,
@@ -500,6 +539,33 @@ export default function ProjectPipelinePage() {
       };
       if (!res.ok) {
         throw new Error(body.message || body.error || t('reviewActionError'));
+      }
+      return body.job ?? job;
+    },
+    [authorPreviewActive, t]
+  );
+
+  const addJobNote = useCallback(
+    async (job: ProjectPipelineJob, note: string): Promise<ProjectPipelineJob> => {
+      const res = await fetch('/api/admin/project-pipeline/jobs/job-note', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job,
+          note,
+          ...(authorPreviewActive
+            ? { previewAsDisplayName: PROJECT_PIPELINE_DEMO_AUTHOR.displayName }
+            : {}),
+        }),
+      });
+
+      const body = (await res.json()) as {
+        error?: string;
+        message?: string;
+        job?: ProjectPipelineJob;
+      };
+      if (!res.ok) {
+        throw new Error(body.message || body.error || t('jobNoteAddError'));
       }
       return body.job ?? job;
     },
@@ -555,6 +621,22 @@ export default function ProjectPipelinePage() {
         ? {
             ...current,
             jobs: current.jobs.map((row) => (matchesJob(row) ? job : row)),
+          }
+        : current
+    );
+    window.dispatchEvent(new Event('project-pipeline-review-todos-changed'));
+  }, [sheetName]);
+
+  const handleJobDeleted = useCallback((job: ProjectPipelineJob) => {
+    const matchesJob = (row: ProjectPipelineJob) =>
+      matchesProjectPipelineJobRef(row, job, sheetName);
+
+    setJobs((current) => removeProjectPipelineJobFromList(current, job, sheetName));
+    setData((current) =>
+      current
+        ? {
+            ...current,
+            jobs: removeProjectPipelineJobFromList(current.jobs, job, sheetName),
           }
         : current
     );
@@ -706,6 +788,7 @@ export default function ProjectPipelinePage() {
             consultantWorkloadActive={consultantWorkloadActive}
             onConsultantWorkloadToggle={() => setConsultantWorkloadActive((active) => !active)}
             consultantWorkloadAuthors={data.consultantWorkloadAuthors}
+            pipelineConsultantOptions={data.pipelineConsultantOptions}
             viewerDisplayName={
               authorPreviewActive
                 ? PROJECT_PIPELINE_DEMO_AUTHOR.displayName
@@ -714,7 +797,10 @@ export default function ProjectPipelinePage() {
             viewerIsAdmin={authorPreviewActive ? false : Boolean(data.viewerIsAdmin)}
             onJobUpdated={handleJobUpdated}
             onSaveJob={saveJob}
+            onDeleteJob={authorPreviewActive ? undefined : deleteJob}
+            onJobDeleted={handleJobDeleted}
             onReviewAction={submitReviewAction}
+            onAddJobNote={authorPreviewActive ? undefined : addJobNote}
             onSaveProjectStatus={saveProjectStatus}
             onSaveResult={handleSaveResult}
             showAddJob={!authorPreviewActive && Boolean(data.viewerIsAdmin)}

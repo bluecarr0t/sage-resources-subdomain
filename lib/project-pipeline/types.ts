@@ -2,7 +2,9 @@ import type { ProjectPipelineSegment } from './segment';
 import type { ProjectPipelineProjectStatus } from './project-status';
 import type { PipelineCurrentWorkloadAuthorInput } from './current-workload';
 
+import type { ProjectPipelineJobNote } from './job-notes';
 import type { ProjectPipelineReviewNote } from './review-notes';
+import type { ProjectPipelineSheetFieldSnapshot } from './sheet-field-snapshot';
 
 export interface ProjectPipelineJob {
   jobNumber: string;
@@ -28,10 +30,12 @@ export interface ProjectPipelineJob {
   uiSourceOfTruth?: boolean;
   /** Supabase-only admin flag (not stored in Google Sheets). */
   flag?: string;
-  /** Supabase-only notes (not stored in Google Sheets). */
-  notes?: string;
+  /** Supabase-only internal notes thread (not stored in Google Sheets). */
+  jobNotes?: ProjectPipelineJobNote[];
   /** Supabase-only review workflow thread (author + admins only). */
   reviewNotes?: ProjectPipelineReviewNote[];
+  /** Last synced Google Sheets values for dual-edit fields (Supabase-only metadata). */
+  sheetFieldSnapshot?: ProjectPipelineSheetFieldSnapshot;
   /** 1-based row number in the Google Sheet (header is row 1). */
   sheetRowIndex: number;
   /** Sheet tab name when loaded from Supabase mirror (e.g. "2026 Jobs"). */
@@ -42,10 +46,10 @@ export interface ProjectPipelineJob {
 
 export type ProjectPipelineEditableField = Exclude<
   keyof ProjectPipelineJob,
-  'sheetRowIndex' | 'pipelineSheetName' | 'sheetYear' | 'projectStatus' | 'flag' | 'notes' | 'reviewNotes'
+  'sheetRowIndex' | 'pipelineSheetName' | 'sheetYear' | 'projectStatus' | 'flag' | 'jobNotes' | 'reviewNotes'
 >;
 
-export type ProjectPipelineSupabaseOnlyField = 'projectStatus' | 'flag' | 'notes' | 'reviewNotes';
+export type ProjectPipelineSupabaseOnlyField = 'projectStatus' | 'flag' | 'jobNotes' | 'reviewNotes';
 
 export type ProjectPipelineFieldColumnMap = Partial<
   Record<ProjectPipelineEditableField, number>
@@ -92,6 +96,8 @@ export interface ProjectPipelineApiResponse {
   viewerDivision?: string | null;
   canAuthorPreview?: boolean;
   consultantWorkloadAuthors?: PipelineCurrentWorkloadAuthorInput[];
+  /** Active managed users for the project modal consultant/appraiser picker. */
+  pipelineConsultantOptions?: PipelineCurrentWorkloadAuthorInput[];
   dataSource?: 'supabase' | 'sheets';
   /** True when hourly service-account cron sync can run server-side. */
   cronSyncEnabled?: boolean;

@@ -24,7 +24,7 @@ const sampleJob: ProjectPipelineJob = {
   clientEmail: 'client@example.com',
   projectStatus: 'Not Started',
   flag: 'None',
-  notes: '',
+  jobNotes: [],
   sheetRowIndex: 42,
   pipelineSheetName: '2023 Vanessa Only',
   sheetYear: 2023,
@@ -102,6 +102,24 @@ describe('projectPipelineJob db row roundtrip', () => {
     );
 
     expect(dbRow.sheet_year).toBe(2022);
+  });
+
+  it('migrates legacy text notes into jobNotes on read', () => {
+    const restored = projectPipelineJobFromDbRow({
+      ...(projectPipelineJobToDbRow(sampleJob, {
+        sheetId: 'sheet-id',
+        sheetName: '2023 Vanessa Only',
+        syncRunId: 'sync-1',
+      }) as ProjectPipelineJobDbRow),
+      job_notes: [],
+      notes: 'Kevin Gallagher is a contact in GHL but no Opportunity.',
+    });
+
+    expect(restored.jobNotes).toHaveLength(1);
+    expect(restored.jobNotes?.[0]?.note).toBe(
+      'Kevin Gallagher is a contact in GHL but no Opportunity.'
+    );
+    expect(restored.jobNotes?.[0]?.createdByDisplayName).toBe('Imported');
   });
 });
 

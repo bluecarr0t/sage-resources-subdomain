@@ -4,9 +4,10 @@ import {
 } from '@/lib/managed-users-pipeline';
 
 describe('canViewAllPipelineJobs', () => {
-  it('returns true when pipeline_view_all is set', () => {
-    expect(canViewAllPipelineJobs({ pipeline_view_all: true })).toBe(true);
-    expect(canViewAllPipelineJobs({ pipeline_view_all: false })).toBe(false);
+  it('returns true for admin role or pipeline_view_all', () => {
+    expect(canViewAllPipelineJobs({ role: 'admin', pipeline_view_all: false })).toBe(true);
+    expect(canViewAllPipelineJobs({ role: 'author', pipeline_view_all: true })).toBe(true);
+    expect(canViewAllPipelineJobs({ role: 'author', pipeline_view_all: false })).toBe(false);
     expect(canViewAllPipelineJobs(null)).toBe(false);
   });
 });

@@ -35,7 +35,7 @@ describe('mergeSheetJobsWithSupabaseOverrides', () => {
             projectStatus: 'On Hold',
             projectStatusManual: true,
             flag: 'None',
-            notes: '',
+            jobNotes: [],
             reviewNotes: [],
           },
         ],

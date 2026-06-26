@@ -64,8 +64,18 @@ describe('notifyPipelineJobChanges', () => {
 
   it('sends review status and due date emails to consultants', async () => {
     await notifyPipelineJobChanges({
-      existingJob: sampleJob({ reviewStatus: '', dueDate: '3/20/26' }),
-      savedJob: sampleJob({ reviewStatus: 'Changes Requested', dueDate: '4/1/26' }),
+      existingJob: sampleJob({
+        reviewStatus: '',
+        dueDate: '3/20/26',
+        projectStatus: 'In Progress',
+        projectStatusManual: true,
+      }),
+      savedJob: sampleJob({
+        reviewStatus: 'Changes Requested',
+        dueDate: '4/1/26',
+        projectStatus: 'In Progress',
+        projectStatusManual: true,
+      }),
       actorEmail: 'heilala@sageoutdooradvisory.com',
       actorDisplayName: 'Shari Heilala',
       managedUsers,
@@ -345,11 +355,22 @@ describe('notifyPipelineJobChanges', () => {
             dueDateChange: false,
             projectStatusChange: true,
           },
+          pipeline_slack_preferences: {
+            submitForReview: true,
+            resubmitForReview: true,
+            pmReviewStatusChange: true,
+            pmDueDateChange: true,
+            pmProjectStatusChange: true,
+            reviewStatusChange: true,
+            dueDateChange: false,
+            projectStatusChange: true,
+          },
         },
       ],
     });
 
     expect(mockNotifyPipelineEmail).not.toHaveBeenCalled();
+    expect(mockNotifyPipelineSlackDm).not.toHaveBeenCalled();
   });
 
   it('skips consultant due date email while still notifying project manager', async () => {

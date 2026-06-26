@@ -17,14 +17,13 @@ import {
 export const dynamic = 'force-dynamic';
 
 const MANAGED_USER_SELECT =
-  'id, user_id, email, display_name, first_name, last_name, slack_username, is_active, role, pipeline_view_all, division, is_project_manager, created_at, updated_at';
+  'id, user_id, email, display_name, first_name, last_name, is_active, role, pipeline_view_all, division, is_project_manager, created_at, updated_at';
 
 type ManagedUserUpdateBody = {
   id: number;
   display_name?: string | null;
   first_name?: string | null;
   last_name?: string | null;
-  slack_username?: string | null;
   role?: ManagedUser['role'];
   is_active?: boolean;
   pipeline_view_all?: boolean;
@@ -36,7 +35,6 @@ type ManagedUserCreateBody = {
   email?: string;
   firstName?: string;
   lastName?: string;
-  slackUsername?: string | null;
   role?: ManagedUser['role'];
   is_active?: boolean;
   pipeline_view_all?: boolean;
@@ -98,14 +96,14 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
 
   try {
     const supabase = createServerClient();
+    const role = resolveManagedUserRole(body.role);
     const user = await createManagedUser(supabase, {
       email,
       firstName: body.firstName?.trim() ?? '',
       lastName: body.lastName?.trim() ?? '',
-      slackUsername: body.slackUsername,
-      role: body.role,
+      role,
       division: body.division,
-      pipeline_view_all: body.pipeline_view_all,
+      pipeline_view_all: role === 'admin',
       is_active: body.is_active,
       is_project_manager: body.is_project_manager,
       createdBy: auth.session.user.id,
@@ -152,7 +150,6 @@ export const PATCH = withAdminAuth(async (request: NextRequest, auth) => {
   if ('display_name' in body) updates.display_name = body.display_name;
   if ('first_name' in body) updates.first_name = body.first_name;
   if ('last_name' in body) updates.last_name = body.last_name;
-  if ('slack_username' in body) updates.slack_username = body.slack_username;
 
   if ('first_name' in body || 'last_name' in body) {
     const firstName = 'first_name' in body ? body.first_name : existing.first_name;
@@ -161,10 +158,11 @@ export const PATCH = withAdminAuth(async (request: NextRequest, auth) => {
   }
 
   if (body.role !== undefined) {
-    updates.role = resolveManagedUserRole(body.role);
+    const role = resolveManagedUserRole(body.role);
+    updates.role = role;
+    updates.pipeline_view_all = role === 'admin';
   }
   if (body.is_active !== undefined) updates.is_active = body.is_active;
-  if (body.pipeline_view_all !== undefined) updates.pipeline_view_all = body.pipeline_view_all;
   if ('division' in body) updates.division = body.division;
   if (body.is_project_manager !== undefined) updates.is_project_manager = body.is_project_manager;
 

@@ -862,6 +862,26 @@
       "projectManagerDescription": "Emails when consultants submit or resubmit projects for your review.",
       "consultantHeading": "Consultant",
       "consultantDescription": "Emails for review updates and due date or project status changes on projects you are assigned to.",
+      "slackHeading": "Slack",
+      "slackDescriptionConsultant": "Choose which Job Pipeline Slack DMs you receive as a consultant.",
+      "slackDescriptionBoth": "Choose which Job Pipeline Slack DMs you receive as a project manager and consultant.",
+      "slackProjectManagerDescription": "Slack DMs when consultants submit or resubmit projects for your review.",
+      "slackConsultantDescription": "Slack DMs for review updates and due date or project status changes on projects you are assigned to.",
+      "enableAllLabel": "Enable all",
+      "enableAllDescription": "Turn all notifications in this section on or off.",
+      "slackEmailLabel": "Slack email",
+      "slackEmailDescription": "The email on your Slack profile in the Sage workspace. Job Pipeline DMs are sent to this address.",
+      "slackEmailVerify": "Look up",
+      "slackEmailVerifying": "Looking up…",
+      "slackEmailSave": "Save",
+      "slackEmailSaving": "Saving…",
+      "slackEmailLookupSuccess": "Slack user found for that email.",
+      "slackEmailLookupError": "Could not find a Slack user for that email.",
+      "slackEmailSaveSuccess": "Slack email saved.",
+      "slackEmailSaveError": "Could not save Slack email.",
+      "slackEmailMatched": "Matched Slack user: {name}",
+      "slackEmailSaved": "Using {email} for Slack DMs.",
+      "slackEmailFallback": "Using your login email ({email}) until you save a Slack email.",
       "preference": {
         "submitForReview": {
           "label": "Submit for review",
@@ -891,6 +911,18 @@
           "label": "Project status updates",
           "description": "When project status changes on projects you are assigned to as a consultant."
         },
+        "dueDateReminderUpcoming": {
+          "label": "Due soon reminders",
+          "description": "One business day before the due date on projects you are assigned to as a consultant."
+        },
+        "dueDateReminderDueToday": {
+          "label": "Due today reminders",
+          "description": "On the due date for projects you are assigned to as a consultant."
+        },
+        "dueDateReminderOverdue": {
+          "label": "Past due reminders",
+          "description": "After the due date until the project is complete, for projects you are assigned to as a consultant."
+        },
         "pmReviewStatusChange": {
           "label": "Review status updates",
           "description": "When review status changes on projects you manage as project manager."
@@ -902,12 +934,65 @@
         "pmProjectStatusChange": {
           "label": "Project status updates",
           "description": "When project status changes on projects you manage as project manager."
+        },
+        "pmDueDateReminderUpcoming": {
+          "label": "Due soon reminders",
+          "description": "One business day before the due date on projects you manage as project manager."
+        },
+        "pmDueDateReminderDueToday": {
+          "label": "Due today reminders",
+          "description": "On the due date for projects you manage as project manager."
+        },
+        "pmDueDateReminderOverdue": {
+          "label": "Past due reminders",
+          "description": "After the due date until the project is complete, for projects you manage as project manager."
+        }
+      },
+      "slackPreference": {
+        "submitForReview": {
+          "description": "Slack DM when a consultant submits a project for your review as project manager."
+        },
+        "resubmitForReview": {
+          "description": "Slack DM when a consultant resubmits a project after changes were requested."
+        },
+        "reviewStatusChange": {
+          "description": "Slack DM when review status changes on projects you are assigned to as a consultant."
+        },
+        "dueDateChange": {
+          "description": "Slack DM when the due date changes on projects you are assigned to as a consultant."
+        },
+        "projectStatusChange": {
+          "description": "Slack DM when project status changes on projects you are assigned to as a consultant."
+        },
+        "dueDateReminderUpcoming": {
+          "description": "Slack DM one business day before the due date on projects you are assigned to as a consultant."
+        },
+        "dueDateReminderDueToday": {
+          "description": "Slack DM on the due date for projects you are assigned to as a consultant."
+        },
+        "dueDateReminderOverdue": {
+          "description": "Slack DM after the due date until the project is complete, for projects you are assigned to as a consultant."
+        },
+        "pmDueDateChange": {
+          "description": "Slack DM when the due date changes on projects you manage as project manager."
+        },
+        "pmProjectStatusChange": {
+          "description": "Slack DM when project status changes on projects you manage as project manager."
+        },
+        "pmDueDateReminderUpcoming": {
+          "description": "Slack DM one business day before the due date on projects you manage as project manager."
+        },
+        "pmDueDateReminderDueToday": {
+          "description": "Slack DM on the due date for projects you manage as project manager."
+        },
+        "pmDueDateReminderOverdue": {
+          "description": "Slack DM after the due date until the project is complete, for projects you manage as project manager."
         }
       }
     },
     "projectPipeline": {
       "title": "Job Pipeline",
-      "subtitle": "Jobs load from the pipeline database; sheet sync is one-way (Refresh).",
+      "subtitle": "Jobs load from the pipeline database.",
       "loading": "Loading projects…",
       "loadError": "Could not load project pipeline",
       "emptyState": "No projects assigned to you yet.",
@@ -934,9 +1019,10 @@
       "filterSheetYearAll": "All Years",
       "dataSourceSupabase": "Loaded from Supabase mirror (hourly sheet sync)",
       "refreshSync": "Refresh",
-      "refreshSyncAria": "Sync the current sheet from Google Sheets to Supabase",
+      "refreshSyncAria": "Sync Google Sheets to Supabase",
       "refreshSyncWorking": "Syncing…",
       "refreshSyncError": "Could not sync from Google Sheets",
+      "refreshSyncOAuthRequired": "Connect Google Sheets to sync from the spreadsheet",
       "refreshSyncSuccess": "Sheet synced to Supabase",
       "lastSynced": "Last synced {time}",
       "lastSyncedNever": "Not synced yet",
@@ -957,7 +1043,11 @@
       "jobModalNotesSectionTitle": "Notes",
       "jobModalHeaderProjMgrLabel": "Project Manager",
       "jobModalInternalNotesLabel": "Internal notes (optional)",
-      "jobModalAddNoteLink": "Add Note",
+      "jobModalAddNoteLink": "Add note",
+      "jobModalAddingNote": "Adding note…",
+      "jobNotesEmpty": "No notes yet.",
+      "jobNoteAddedSuccess": "Note added",
+      "jobNoteAddError": "Failed to add note",
       "jobModalMoreDetails": "More job details",
       "jobModalTabReview": "Review",
       "jobModalTabDetails": "Details",
@@ -1033,6 +1123,11 @@
       "savingJobEdit": "Saving…",
       "saveJobError": "Could not save project changes",
       "saveJobSuccess": "Project saved",
+      "deleteJob": "Delete",
+      "deletingJob": "Deleting…",
+      "deleteJobConfirm": "Delete project {jobNumber} from the pipeline? This cannot be undone.",
+      "deleteJobError": "Could not delete project",
+      "deleteJobSuccess": "Project deleted",
       "addJob": "Add Job",
       "createJobTitle": "Add project",
       "createJobSubtitle": "Creates a new job in the pipeline database.",
@@ -1068,8 +1163,11 @@
       "loading": "Loading users…",
       "loadError": "Could not load managed users",
       "saveError": "Could not save user",
+      "saveSuccess": "User saved",
+      "addUserSuccess": "User added",
+      "dismissToast": "Dismiss notification",
       "columnEmail": "Email",
-      "columnDisplayName": "Display name",
+      "columnDisplayName": "Full Name",
       "columnRole": "Role",
       "columnProjectManager": "Project Manager",
       "columnDivision": "Division",
@@ -1090,10 +1188,7 @@
       "addUserError": "Could not add user",
       "fieldEmail": "Email",
       "fieldFirstName": "First name",
-      "fieldLastName": "Last name",
-      "fieldSlackUsername": "Slack username",
-      "fieldSlackUsernamePlaceholder": "e.g. greg",
-      "columnSlack": "Slack"
+      "fieldLastName": "Last name"
     },
     "jobActivity": {
       "title": "Job activity",

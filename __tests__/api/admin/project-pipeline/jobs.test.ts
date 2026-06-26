@@ -51,6 +51,7 @@ const mockFetchJobByNumber = jest.fn().mockResolvedValue(null);
 jest.mock('@/lib/project-pipeline/fetch-from-supabase', () => ({
   fetchProjectPipelineJobByJobNumber: (...args: unknown[]) => mockFetchJobByNumber(...args),
   upsertProjectPipelineJobMirror: (...args: unknown[]) => mockUpsert(...args),
+  deleteProjectPipelineJobMirror: jest.fn().mockResolvedValue(true),
 }));
 
 jest.mock('@/lib/project-pipeline/resolve-job-for-edit', () => ({
@@ -189,5 +190,22 @@ describe('PUT /api/admin/project-pipeline/jobs', () => {
         ],
       })
     );
+  });
+
+  it('DELETE removes a job for admins', async () => {
+    const job = sampleJob();
+    mockFetchJobByNumber.mockResolvedValueOnce(job);
+
+    const { DELETE } = await import('@/app/api/admin/project-pipeline/jobs/route');
+    const res = await DELETE(
+      new NextRequest('http://localhost/api/admin/project-pipeline/jobs', {
+        method: 'DELETE',
+        body: JSON.stringify({ job }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toEqual({ success: true, jobNumber: job.jobNumber });
   });
 });

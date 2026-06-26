@@ -1,4 +1,4 @@
-import { parseAppraiserConsultantValues } from '@/lib/project-pipeline/appraiser-consultant-display';
+import { parseAppraiserConsultantValues, formatAppraiserConsultantValues } from '@/lib/project-pipeline/appraiser-consultant-display';
 
 describe('parseAppraiserConsultantValues', () => {
   it('returns empty array for blank values', () => {
@@ -25,5 +25,13 @@ describe('parseAppraiserConsultantValues', () => {
   it('deduplicates repeated names case-insensitively', () => {
     expect(parseAppraiserConsultantValues('Greg / greg')).toEqual(['Greg']);
     expect(parseAppraiserConsultantValues('Luke, Luke')).toEqual(['Luke']);
+  });
+});
+
+describe('formatAppraiserConsultantValues', () => {
+  it('joins unique names with slash separators', () => {
+    expect(formatAppraiserConsultantValues(['Lars', 'Luke'])).toBe('Lars / Luke');
+    expect(formatAppraiserConsultantValues(['Greg', 'greg', 'Luke'])).toBe('Greg / Luke');
+    expect(formatAppraiserConsultantValues([])).toBe('');
   });
 });

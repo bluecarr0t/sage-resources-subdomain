@@ -6,6 +6,7 @@
 import { createServerClient } from './supabase';
 import { supabase } from './supabase';
 import type { PipelineEmailPreferences } from '@/lib/project-pipeline/notifications/email-preferences';
+import type { PipelineSlackPreferences } from '@/lib/project-pipeline/notifications/slack-preferences';
 
 /**
  * Allowed email domains for authentication
@@ -34,12 +35,13 @@ export interface ManagedUser {
   display_name: string | null;
   first_name?: string | null;
   last_name?: string | null;
-  slack_username?: string | null;
   is_active: boolean;
   role: 'admin' | 'author';
   pipeline_view_all?: boolean;
   division?: 'outdoor' | 'commercial' | 'both' | null;
   pipeline_email_preferences?: PipelineEmailPreferences;
+  pipeline_slack_preferences?: PipelineSlackPreferences;
+  slack_email?: string | null;
   is_project_manager?: boolean;
   created_at: string;
   updated_at: string;

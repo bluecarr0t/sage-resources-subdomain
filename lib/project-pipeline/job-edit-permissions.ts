@@ -26,6 +26,12 @@ export function canEditProjectPipelineFlag(
   return isManagedUserAdmin(user);
 }
 
+export function canDeleteProjectPipelineJob(
+  user: Pick<ManagedUser, 'role'> | null | undefined
+): boolean {
+  return isManagedUserAdmin(user);
+}
+
 export function isProjectPipelineJobAuthor(
   job: Pick<ProjectPipelineJob, 'appraiserConsultant'>,
   displayName: string | null | undefined

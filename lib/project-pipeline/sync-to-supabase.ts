@@ -18,6 +18,7 @@ import {
 } from './fetch-from-supabase';
 import { recordProjectPipelineSheetSyncActivitySafe } from './activity/record-sheet-sync-activity';
 import { resolveSheetSyncProjectPipelineJob } from './resolve-sheet-sync-job';
+import { pickProjectPipelineSheetFieldSnapshot } from './sheet-field-snapshot';
 import { isStickyProjectPipelineProjectStatus } from './project-status';
 import {
   PROJECT_PIPELINE_SHEET_TABS,
@@ -128,7 +129,16 @@ export async function syncProjectPipelineSheetToSupabase(
     };
     const syncedJobs = jobs
       .filter((job) => job.jobNumber.trim())
-      .map((job) => resolveSheetSyncProjectPipelineJob({ sheetJob: job, ...sheetSyncContext }));
+      .map((sheetJob) => {
+        const merged = resolveSheetSyncProjectPipelineJob({
+          sheetJob,
+          ...sheetSyncContext,
+        });
+        return {
+          ...merged,
+          sheetFieldSnapshot: pickProjectPipelineSheetFieldSnapshot(sheetJob),
+        };
+      });
     const rows = syncedJobs.map((job) => {
       const jobNumber = job.jobNumber.trim();
       const uiEdited = uiEditedByJobNumber.get(jobNumber);

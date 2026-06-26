@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Plus } from 'lucide-react';
+import { CheckCircle, Plus } from 'lucide-react';
 import { Button, Select } from '@/components/ui';
 import {
   ManagedUserAddModal,
@@ -13,6 +13,8 @@ import type { ManagedUser } from '@/lib/auth-helpers';
 import { normalizeManagedUserRole } from '@/lib/managed-user-roles';
 import {
   fromManagedUserDivisionSelectValue,
+  getManagedUserDivisionSelectTextClassName,
+  sortManagedUsersByFirstName,
   toManagedUserDivisionSelectValue,
 } from '@/lib/managed-users/division';
 
@@ -27,6 +29,9 @@ export default function ManagedUsersPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addSaving, setAddSaving] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
+    null
+  );
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -37,7 +42,7 @@ export default function ManagedUsersPage() {
       if (!res.ok) {
         throw new Error(body.error || t('loadError'));
       }
-      setUsers(body.users ?? []);
+      setUsers(sortManagedUsersByFirstName(body.users ?? []));
     } catch (err) {
       setError(err instanceof Error ? err.message : t('loadError'));
       setUsers([]);
@@ -49,6 +54,12 @@ export default function ManagedUsersPage() {
   useEffect(() => {
     void loadUsers();
   }, [loadUsers]);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   const saveUser = async (user: EditableManagedUser, patch: Partial<EditableManagedUser>) => {
     setSavingId(user.id);
@@ -64,8 +75,13 @@ export default function ManagedUsersPage() {
         throw new Error(body.error || t('saveError'));
       }
       if (body.user) {
-        setUsers((current) => current.map((row) => (row.id === body.user!.id ? body.user! : row)));
+        setUsers((current) =>
+          sortManagedUsersByFirstName(
+            current.map((row) => (row.id === body.user!.id ? body.user! : row))
+          )
+        );
       }
+      setToast({ message: t('saveSuccess'), variant: 'success' });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('saveError'));
     } finally {
@@ -84,10 +100,8 @@ export default function ManagedUsersPage() {
           email: payload.email,
           firstName: payload.firstName,
           lastName: payload.lastName,
-          slackUsername: payload.slackUsername || null,
           role: payload.role,
           division: payload.division,
-          pipeline_view_all: payload.pipeline_view_all,
           is_active: payload.is_active,
         }),
       });
@@ -96,11 +110,10 @@ export default function ManagedUsersPage() {
         throw new Error(body.error || t('addUserError'));
       }
       if (body.user) {
-        setUsers((current) =>
-          [...current, body.user!].sort((a, b) => a.email.localeCompare(b.email))
-        );
+        setUsers((current) => sortManagedUsersByFirstName([...current, body.user!]));
       }
       setAddModalOpen(false);
+      setToast({ message: t('addUserSuccess'), variant: 'success' });
     } catch (err) {
       setAddError(err instanceof Error ? err.message : t('addUserError'));
     } finally {
@@ -145,22 +158,17 @@ export default function ManagedUsersPage() {
             <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
               <thead className="admin-table-head">
                 <tr>
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnEmail')}</th>
                   <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnDisplayName')}</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnSlack')}</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnEmail')}</th>
                   <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnRole')}</th>
                   <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnProjectManager')}</th>
                   <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnDivision')}</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnViewAllPipeline')}</th>
                   <th className="px-3 py-3 text-left text-xs font-medium uppercase">{t('columnActive')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
                 {users.map((user) => (
                   <tr key={user.id} className="text-sm">
-                    <td className="whitespace-nowrap px-3 py-3 font-medium text-neutral-900 dark:text-neutral-100">
-                      {user.email}
-                    </td>
                     <td className="px-3 py-3">
                       <input
                         type="text"
@@ -175,19 +183,8 @@ export default function ManagedUsersPage() {
                         className="h-9 w-full min-w-[10rem] rounded-md border border-neutral-300 bg-white px-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
                       />
                     </td>
-                    <td className="px-3 py-3">
-                      <input
-                        type="text"
-                        defaultValue={user.slack_username ?? ''}
-                        disabled={savingId === user.id}
-                        onBlur={(e) => {
-                          const next = e.target.value.trim() || null;
-                          if (next !== (user.slack_username ?? null)) {
-                            void saveUser(user, { slack_username: next });
-                          }
-                        }}
-                        className="h-9 w-full min-w-[8rem] rounded-md border border-neutral-300 bg-white px-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
-                      />
+                    <td className="whitespace-nowrap px-3 py-3 font-medium text-neutral-900 dark:text-neutral-100">
+                      {user.email}
                     </td>
                     <td className="px-3 py-3">
                       <Select
@@ -223,24 +220,12 @@ export default function ManagedUsersPage() {
                             division: fromManagedUserDivisionSelectValue(e.target.value),
                           })
                         }
-                        className="h-9 min-w-[8rem] text-sm"
+                        className={`h-9 min-w-[8rem] text-sm ${getManagedUserDivisionSelectTextClassName(user.division)}`}
                       >
                         <option value="both">{t('divisionBoth')}</option>
                         <option value="outdoor">{t('divisionOutdoor')}</option>
                         <option value="commercial">{t('divisionCommercial')}</option>
                       </Select>
-                    </td>
-                    <td className="px-3 py-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(user.pipeline_view_all)}
-                        disabled={savingId === user.id}
-                        onChange={(e) =>
-                          void saveUser(user, { pipeline_view_all: e.target.checked })
-                        }
-                        className="rounded border-neutral-300 text-sage-600 focus:ring-sage-600"
-                        aria-label={t('columnViewAllPipeline')}
-                      />
                     </td>
                     <td className="px-3 py-3 text-center">
                       <input
@@ -269,6 +254,34 @@ export default function ManagedUsersPage() {
         }}
         onSave={createUser}
       />
+
+      {toast ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-6 left-1/2 z-50 flex max-w-md -translate-x-1/2 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-lg ${
+            toast.variant === 'success'
+              ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+              : 'bg-red-700 text-white dark:bg-red-900 dark:text-red-50'
+          }`}
+        >
+          {toast.variant === 'success' ? (
+            <CheckCircle
+              className="h-4 w-4 shrink-0 text-emerald-300 dark:text-emerald-700"
+              aria-hidden
+            />
+          ) : null}
+          <span>{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="ml-1 opacity-70 hover:opacity-100"
+            aria-label={t('dismissToast')}
+          >
+            ×
+          </button>
+        </div>
+      ) : null}
     </main>
   );
 }

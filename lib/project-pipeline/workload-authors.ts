@@ -1,5 +1,6 @@
 import { ALLOWED_EMAIL_DOMAINS } from '@/lib/auth-helpers';
 import { buildManagedUserDisplayName } from '@/lib/managed-users/display-name';
+import { parseAppraiserConsultantValues } from '@/lib/project-pipeline/appraiser-consultant-display';
 import { extractNameAliases, fieldMatchesNameAliases } from '@/lib/project-pipeline/name-aliases';
 import type { PipelineWorkloadPersonRow } from '@/lib/project-pipeline/workload';
 
@@ -223,4 +224,53 @@ export function preparePipelineWorkloadAuthors(
   return dedupeAuthorInputsByDisplayName(prepared).filter(
     (author) => !isHiddenWorkloadManagedUser(author.displayName)
   );
+}
+
+/** Active managed users for Job Pipeline consultant/appraiser picker (no hidden-person filter). */
+export function preparePipelineConsultantPickerOptions(
+  rows: readonly ManagedUserWorkloadAuthorRow[]
+): WorkloadAuthorInput[] {
+  const groupedByName = new Map<string, ManagedUserWorkloadAuthorRow[]>();
+  const withoutNameKey: ManagedUserWorkloadAuthorRow[] = [];
+
+  for (const row of rows) {
+    const key = managedUserNameKey(row.first_name, row.last_name);
+    if (!key) {
+      withoutNameKey.push(row);
+      continue;
+    }
+
+    const bucket = groupedByName.get(key) ?? [];
+    bucket.push(row);
+    groupedByName.set(key, bucket);
+  }
+
+  const prepared: WorkloadAuthorInput[] = [];
+
+  for (const group of groupedByName.values()) {
+    if (shouldMergeCrossDomainGroup(group)) {
+      prepared.push(mergeAuthorInputGroup(group));
+    } else {
+      prepared.push(...group.map(toAuthorInput));
+    }
+  }
+
+  prepared.push(...withoutNameKey.map(toAuthorInput));
+
+  return dedupeAuthorInputsByDisplayName(prepared)
+    .filter((author) => author.displayName.trim())
+    .sort((left, right) => left.displayName.localeCompare(right.displayName));
+}
+
+/** Consultant picker options, preserving a legacy sheet value not in the managed-user list. */
+export function buildPipelineConsultantSelectOptions(
+  consultants: readonly WorkloadAuthorInput[],
+  currentValue: string
+): string[] {
+  const names = consultants.map((consultant) => consultant.displayName).filter(Boolean);
+  const nameSet = new Set(names);
+  const legacyExtras = parseAppraiserConsultantValues(currentValue).filter(
+    (name) => !nameSet.has(name)
+  );
+  return [...legacyExtras, ...names];
 }

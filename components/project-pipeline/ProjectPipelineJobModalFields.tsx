@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Input, Select } from '@/components/ui';
 import { ReviewStatusSelect } from '@/components/project-pipeline/ReviewStatusSelect';
+import { PipelineConsultantMultiSelect } from '@/components/project-pipeline/PipelineConsultantMultiSelect';
 import { PROJECT_PIPELINE_SEGMENTS } from '@/lib/project-pipeline/segment';
 import { PROJECT_PIPELINE_SERVICES } from '@/lib/project-pipeline/services';
 import { DEFAULT_PROJECT_PIPELINE_SENT_TO_CLIENT, getSentToClientSelectTextClassName } from '@/lib/project-pipeline/sent-to-client';
@@ -19,14 +20,17 @@ import {
 } from '@/lib/project-pipeline/review-status';
 import { PROJECT_PIPELINE_SLACK_USERNAMES } from '@/lib/project-pipeline/slack-usernames';
 import {
+  getProjectPipelineDueDateEmphasis,
   isProjectPipelineDueDateParseable,
   projectPipelineDueDateFromInputValue,
   projectPipelineDueDateToInputValue,
 } from '@/lib/project-pipeline/due-date-emphasis';
+import type { PipelineCurrentWorkloadAuthorInput } from '@/lib/project-pipeline/current-workload';
 import {
   type ProjectPipelineEditableField,
   type ProjectPipelineJob,
 } from '@/lib/project-pipeline/types';
+import { buildPipelineConsultantSelectOptions } from '@/lib/project-pipeline/workload-authors';
 
 type ProjectPipelineJobModalField = Exclude<
   ProjectPipelineEditableField,
@@ -38,7 +42,7 @@ const FIELD_LABEL_KEYS: Record<ProjectPipelineJobModalField, string> = {
   client: 'columnClient',
   propertyLocation: 'columnPropertyLocation',
   appraiserConsultant: 'columnAppraiser',
-  projMgr: 'columnProjMgr',
+  projMgr: 'jobModalHeaderProjMgrLabel',
   contractStart: 'columnContractStart',
   dueDate: 'columnDueDate',
   dateCompleted: 'columnDateCompleted',
@@ -85,6 +89,7 @@ type ProjectPipelineJobModalFieldsProps = {
   reviewFeedbackNote: string;
   onReviewFeedbackNoteChange: (value: string) => void;
   onFieldChange: (field: ProjectPipelineEditableField, value: string) => void;
+  pipelineConsultantOptions?: PipelineCurrentWorkloadAuthorInput[];
 };
 
 export function ProjectPipelineJobModalFields({
@@ -97,6 +102,7 @@ export function ProjectPipelineJobModalFields({
   reviewFeedbackNote,
   onReviewFeedbackNoteChange,
   onFieldChange,
+  pipelineConsultantOptions = [],
 }: ProjectPipelineJobModalFieldsProps) {
   const t = useTranslations('admin.projectPipeline');
   const showWorkflowRow =
@@ -274,6 +280,13 @@ export function ProjectPipelineJobModalFields({
         if (field === 'dueDate') {
           const dueDateInvalid =
             Boolean(draft.dueDate.trim()) && !isProjectPipelineDueDateParseable(draft.dueDate);
+          const dueEmphasis = getProjectPipelineDueDateEmphasis(draft);
+          const dueDateInputClass =
+            dueEmphasis === 'past-due'
+              ? 'border-red-300 dark:border-red-600'
+              : dueEmphasis === 'due-soon'
+                ? 'border-amber-300 dark:border-amber-600'
+                : '';
 
           return (
             <div key={field} className="sm:col-span-1">
@@ -281,6 +294,7 @@ export function ProjectPipelineJobModalFields({
                 id={id}
                 type="date"
                 label={label}
+                className={dueDateInputClass}
                 value={projectPipelineDueDateToInputValue(draft.dueDate)}
                 onChange={(e) =>
                   onFieldChange(field, projectPipelineDueDateFromInputValue(e.target.value))
@@ -292,6 +306,24 @@ export function ProjectPipelineJobModalFields({
                 </p>
               ) : null}
             </div>
+          );
+        }
+
+        if (field === 'appraiserConsultant') {
+          const consultantOptions = buildPipelineConsultantSelectOptions(
+            pipelineConsultantOptions,
+            draft.appraiserConsultant
+          );
+
+          return (
+            <PipelineConsultantMultiSelect
+              key={field}
+              id={id}
+              label={label}
+              value={draft.appraiserConsultant}
+              options={consultantOptions}
+              onChange={(next) => onFieldChange(field, next)}
+            />
           );
         }
 

@@ -1,6 +1,7 @@
 export type ProjectPipelineActivityAction =
   | 'job_created'
   | 'job_updated'
+  | 'job_deleted'
   | 'review_action'
   | 'project_status_updated'
   | 'sheet_sync_created'

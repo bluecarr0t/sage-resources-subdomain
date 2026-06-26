@@ -19,3 +19,20 @@ export function parseAppraiserConsultantValues(value: string | null | undefined)
 
   return names;
 }
+
+/** Serialize consultant names for sheet / Supabase storage (slash-separated). */
+export function formatAppraiserConsultantValues(names: readonly string[]): string {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+
+  for (const name of names) {
+    const trimmed = name.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(trimmed);
+  }
+
+  return unique.join(' / ');
+}

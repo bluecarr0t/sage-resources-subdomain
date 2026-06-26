@@ -18,7 +18,7 @@ const FIELD_LABELS: Record<string, string> = {
   clientEmail: 'Client email',
   projectStatus: 'Project status',
   flag: 'Flag',
-  notes: 'Notes',
+  jobNotes: 'Notes',
 };
 
 export function getProjectPipelineActivityFieldLabel(field: string): string {
@@ -42,5 +42,5 @@ export const PROJECT_PIPELINE_ACTIVITY_TRACKED_FIELDS = [
   'clientEmail',
   'projectStatus',
   'flag',
-  'notes',
+  'jobNotes',
 ] as const satisfies readonly (keyof ProjectPipelineJob)[];

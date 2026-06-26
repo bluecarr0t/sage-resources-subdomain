@@ -134,6 +134,7 @@ interface ProjectPipelineTableProps {
   consultantWorkloadActive?: boolean;
   onConsultantWorkloadToggle?: () => void;
   consultantWorkloadAuthors?: PipelineCurrentWorkloadAuthorInput[];
+  pipelineConsultantOptions?: PipelineCurrentWorkloadAuthorInput[];
   viewerDisplayName?: string | null;
   viewerIsAdmin?: boolean;
   onJobUpdated: (job: ProjectPipelineJob) => void;
@@ -141,12 +142,15 @@ interface ProjectPipelineTableProps {
     job: ProjectPipelineJob,
     options?: { reviewFeedbackNote?: string }
   ) => Promise<ProjectPipelineJob | void>;
+  onDeleteJob?: (job: ProjectPipelineJob) => Promise<void>;
+  onJobDeleted?: (job: ProjectPipelineJob) => void;
   onReviewAction?: (
     job: ProjectPipelineJob,
     action: ProjectPipelineReviewNoteType,
     note: string,
     reviewStatus?: string
   ) => Promise<ProjectPipelineJob | void>;
+  onAddJobNote?: (job: ProjectPipelineJob, note: string) => Promise<ProjectPipelineJob | void>;
   onSaveProjectStatus: (
     job: ProjectPipelineJob,
     projectStatus: string,
@@ -186,11 +190,15 @@ export function ProjectPipelineTable({
   consultantWorkloadActive = false,
   onConsultantWorkloadToggle,
   consultantWorkloadAuthors,
+  pipelineConsultantOptions = [],
   viewerDisplayName,
   viewerIsAdmin = false,
   onJobUpdated,
   onSaveJob,
+  onDeleteJob,
+  onJobDeleted,
   onReviewAction,
+  onAddJobNote,
   onSaveProjectStatus,
   onSaveResult,
   showAddJob = false,
@@ -215,9 +223,12 @@ export function ProjectPipelineTable({
   const [selectedJob, setSelectedJob] = useState<ProjectPipelineJob | null>(null);
   const [createJobDraft, setCreateJobDraft] = useState<ProjectPipelineJob | null>(null);
   const [savingJob, setSavingJob] = useState(false);
+  const [deletingJob, setDeletingJob] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [reviewActionSaving, setReviewActionSaving] = useState(false);
   const [reviewActionError, setReviewActionError] = useState<string | null>(null);
+  const [jobNoteSaving, setJobNoteSaving] = useState(false);
+  const [jobNoteError, setJobNoteError] = useState<string | null>(null);
   const [pendingInlineReview, setPendingInlineReview] = useState<{
     job: ProjectPipelineJob;
     newStatus: string;
@@ -503,13 +514,34 @@ export function ProjectPipelineTable({
 
   const openJob = (job: ProjectPipelineJob) => {
     setSaveError(null);
+    setJobNoteError(null);
     setSelectedJob(job);
   };
 
   const closeJobModal = () => {
-    if (savingJob) return;
+    if (savingJob || deletingJob) return;
     setSelectedJob(null);
     setSaveError(null);
+    setJobNoteError(null);
+  };
+
+  const handleDeleteJob = async (job: ProjectPipelineJob) => {
+    if (!onDeleteJob) return;
+
+    setDeletingJob(true);
+    setSaveError(null);
+    try {
+      await onDeleteJob(job);
+      onJobDeleted?.(job);
+      setSelectedJob(null);
+      onSaveResult?.({ success: true, message: t('deleteJobSuccess') });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('deleteJobError');
+      setSaveError(message);
+      onSaveResult?.({ success: false, message });
+    } finally {
+      setDeletingJob(false);
+    }
   };
 
   const handleSaveJob = async (
@@ -626,6 +658,26 @@ export function ProjectPipelineTable({
     }
   };
 
+  const handleAddJobNote = async (note: string): Promise<ProjectPipelineJob | void> => {
+    if (!selectedJob || !onAddJobNote) return;
+
+    setJobNoteSaving(true);
+    setJobNoteError(null);
+    try {
+      const savedJob = (await onAddJobNote(selectedJob, note)) ?? selectedJob;
+      onJobUpdated(savedJob);
+      setSelectedJob(savedJob);
+      onSaveResult?.({ success: true, message: t('jobNoteAddedSuccess') });
+      return savedJob;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('jobNoteAddError');
+      setJobNoteError(message);
+      onSaveResult?.({ success: false, message });
+    } finally {
+      setJobNoteSaving(false);
+    }
+  };
+
   const handleInlineReviewFeedbackConfirm = async (note: string) => {
     if (!pendingInlineReview || !onReviewAction) return;
 
@@ -719,11 +771,17 @@ export function ProjectPipelineTable({
         saveError={saveError}
         viewerDisplayName={viewerDisplayName}
         viewerIsAdmin={viewerIsAdmin}
+        pipelineConsultantOptions={pipelineConsultantOptions}
         onClose={closeJobModal}
         onSave={handleSaveJob}
+        onDelete={viewerIsAdmin && onDeleteJob ? handleDeleteJob : undefined}
+        deleting={deletingJob}
         onReviewAction={onReviewAction ? handleReviewAction : undefined}
         reviewActionSaving={reviewActionSaving}
         reviewActionError={reviewActionError}
+        onAddJobNote={onAddJobNote ? handleAddJobNote : undefined}
+        jobNoteSaving={jobNoteSaving}
+        jobNoteError={jobNoteError}
       />
 
       <ProjectPipelineJobModal
@@ -735,6 +793,7 @@ export function ProjectPipelineTable({
         saveError={saveError}
         viewerDisplayName={viewerDisplayName}
         viewerIsAdmin={viewerIsAdmin}
+        pipelineConsultantOptions={pipelineConsultantOptions}
         onClose={closeCreateJobModal}
         onSave={handleCreateJob}
       />
@@ -877,20 +936,18 @@ export function ProjectPipelineTable({
                 onClick={() => void onSyncFromSheet()}
                 disabled={syncingFromSheet}
                 aria-label={t('refreshSyncAria')}
-                title={t('refreshSyncAria')}
-                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-700 dark:text-neutral-200 dark:hover:bg-gray-600"
+                title={
+                  syncingFromSheet
+                    ? t('refreshSyncWorking')
+                    : lastSyncedLabel ?? t('refreshSyncAria')
+                }
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-300 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-700 dark:text-neutral-200 dark:hover:bg-gray-600"
               >
                 <RefreshCw
                   className={`h-4 w-4 shrink-0 ${syncingFromSheet ? 'animate-spin' : ''}`}
                   aria-hidden
                 />
-                <span className="hidden sm:inline">
-                  {syncingFromSheet ? t('refreshSyncWorking') : t('refreshSync')}
-                </span>
               </button>
-              <p className="hidden text-xs text-neutral-500 dark:text-neutral-500 sm:block sm:text-right">
-                {lastSyncedLabel}
-              </p>
             </div>
           ) : null}
         </div>

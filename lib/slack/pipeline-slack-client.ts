@@ -22,6 +22,23 @@ export function isPipelineSlackEnabled(): boolean {
 
 const slackUserIdCache = new Map<string, string | null>();
 
+async function slackApiGet<T>(method: string, query: Record<string, string>): Promise<T> {
+  const token = process.env.SLACK_BOT_TOKEN!.trim();
+  const params = new URLSearchParams(query);
+  const res = await fetch(`https://slack.com/api/${method}?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const json = (await res.json()) as T & { ok?: boolean; error?: string };
+  if (!json.ok) {
+    throw new Error(json.error ?? `Slack API ${method} failed`);
+  }
+  return json;
+}
+
 async function slackApi<T>(method: string, body: Record<string, unknown>): Promise<T> {
   const token = process.env.SLACK_BOT_TOKEN!.trim();
   const res = await fetch(`https://slack.com/api/${method}`, {
@@ -40,26 +57,52 @@ async function slackApi<T>(method: string, body: Record<string, unknown>): Promi
   return json;
 }
 
-export async function lookupSlackUserIdByEmail(email: string): Promise<string | null> {
-  const normalized = email.trim().toLowerCase();
-  if (!normalized) return null;
+export type SlackUserProfile = {
+  userId: string;
+  email: string;
+  name: string;
+};
 
-  if (slackUserIdCache.has(normalized)) {
-    return slackUserIdCache.get(normalized) ?? null;
-  }
+export async function lookupSlackUserProfileByEmail(
+  email: string
+): Promise<SlackUserProfile | null> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized || !isPipelineSlackEnabled()) return null;
 
   try {
-    const result = await slackApi<{ user?: { id?: string } }>('users.lookupByEmail', {
+    const result = await slackApiGet<{
+      user?: {
+        id?: string;
+        real_name?: string;
+        profile?: { email?: string; real_name?: string };
+      };
+    }>('users.lookupByEmail', {
       email: normalized,
     });
-    const userId = result.user?.id?.trim() ?? null;
+
+    const userId = result.user?.id?.trim();
+    if (!userId) return null;
+
+    const profileEmail = result.user?.profile?.email?.trim().toLowerCase() ?? normalized;
+    const name =
+      result.user?.profile?.real_name?.trim() ||
+      result.user?.real_name?.trim() ||
+      profileEmail;
+
     slackUserIdCache.set(normalized, userId);
-    return userId;
+    slackUserIdCache.set(profileEmail, userId);
+
+    return { userId, email: profileEmail, name };
   } catch (error) {
     console.warn('[pipeline-slack] lookupByEmail failed for', normalized, error);
     slackUserIdCache.set(normalized, null);
     return null;
   }
+}
+
+export async function lookupSlackUserIdByEmail(email: string): Promise<string | null> {
+  const profile = await lookupSlackUserProfileByEmail(email);
+  return profile?.userId ?? null;
 }
 
 export async function sendPipelineSlackDm(

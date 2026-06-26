@@ -6,9 +6,11 @@ import { createServerClient } from '@/lib/supabase';
 import { resolveProjectPipelineEditUser } from '@/lib/project-pipeline/author-preview';
 import {
   assertProjectPipelineJobFieldEditsAllowed,
+  canDeleteProjectPipelineJob,
   isManagedUserAdmin,
 } from '@/lib/project-pipeline/job-edit-permissions';
 import {
+  deleteProjectPipelineJobMirror,
   fetchProjectPipelineJobByJobNumber,
   upsertProjectPipelineJobMirror,
 } from '@/lib/project-pipeline/fetch-from-supabase';
@@ -103,7 +105,7 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
     pipelineSheetName: sheetName,
     uiSourceOfTruth: true,
     flag: normalizeProjectPipelineFlag(isAdmin ? job.flag : undefined),
-    notes: job.notes ?? '',
+    jobNotes: [],
     reviewNotes: [],
     projectStatusManual: Boolean(job.projectStatusManual && isAdmin),
   });
@@ -206,8 +208,9 @@ export const PUT = withAdminAuth(async (request: NextRequest, auth) => {
     ...job,
     pipelineSheetName: sheetName,
     flag: normalizeProjectPipelineFlag(isAdmin ? job.flag : existingJob?.flag ?? job.flag),
-    notes: job.notes ?? existingJob?.notes ?? '',
+    jobNotes: existingJob?.jobNotes ?? [],
     reviewNotes: parseProjectPipelineReviewNotes(existingJob?.reviewNotes ?? []),
+    sheetFieldSnapshot: existingJob?.sheetFieldSnapshot,
   };
 
   const previousReviewStatus = normalizeProjectPipelineReviewStatus(
@@ -311,6 +314,88 @@ export const PUT = withAdminAuth(async (request: NextRequest, auth) => {
     return NextResponse.json(
       {
         error: 'Failed to save project',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+});
+
+export const DELETE = withAdminAuth(async (request: NextRequest, auth) => {
+  let body: { job?: unknown };
+
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
+  if (!isProjectPipelineJobPayload(body.job)) {
+    return NextResponse.json({ error: 'Invalid job payload' }, { status: 400 });
+  }
+
+  const job = normalizeUiCreatedProjectPipelineJobPayload(body.job);
+  const sheetName = resolveProjectPipelineSheetTab(job.pipelineSheetName);
+  const managedUser = await getManagedUser(auth.session.user.id);
+  const viewerDisplayName = managedUser?.display_name ?? null;
+
+  if (!canDeleteProjectPipelineJob(managedUser)) {
+    return NextResponse.json(
+      { error: 'Forbidden', message: 'Only admins can delete projects' },
+      { status: 403 }
+    );
+  }
+
+  const supabase = createServerClient();
+  const sheetId = getProjectPipelineSheetId();
+
+  const existingJob = await fetchProjectPipelineJobByJobNumber(supabase, {
+    sheetId,
+    sheetName,
+    jobNumber: job.jobNumber,
+  });
+
+  if (!existingJob) {
+    return NextResponse.json(
+      { error: 'Not found', message: `Job ${job.jobNumber.trim()} was not found` },
+      { status: 404 }
+    );
+  }
+
+  try {
+    const deleted = await deleteProjectPipelineJobMirror(supabase, {
+      sheetId,
+      sheetName,
+      jobNumber: job.jobNumber,
+    });
+
+    if (!deleted) {
+      return NextResponse.json(
+        { error: 'Not found', message: `Job ${job.jobNumber.trim()} was not found` },
+        { status: 404 }
+      );
+    }
+
+    const managedUsers = await loadActiveManagedUsersForPipeline(supabase);
+    recordProjectPipelineJobActivityAsync({
+      supabase,
+      sheetId,
+      sheetName,
+      job: existingJob,
+      existingJob,
+      action: 'job_deleted',
+      actorUserId: auth.session.user.id,
+      actorEmail: auth.session.user.email,
+      actorDisplayName: viewerDisplayName ?? auth.session.user.email ?? 'Unknown user',
+      managedUsers,
+    });
+
+    return NextResponse.json({ success: true, jobNumber: job.jobNumber.trim() });
+  } catch (error) {
+    console.error('[project-pipeline/jobs] delete failed', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to delete project',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

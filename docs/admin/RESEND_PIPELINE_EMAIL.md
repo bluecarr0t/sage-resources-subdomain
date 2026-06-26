@@ -26,6 +26,7 @@ Set in **Vercel → Project → Environment Variables** (server-only — no `NEX
 | `RESEND_FROM_EMAIL` | No | Defaults to `active-jobs@alerts.sageoutdooradvisory.com` |
 | `RESEND_REPLY_TO` | No | Reply-To header (recommended: real ops inbox) |
 | `PIPELINE_EMAIL_ENABLED` | Yes (prod) | Must be `true` to send; use `false` locally |
+| `PIPELINE_DUE_DATE_REMINDERS_ENABLED` | No | Must be `true` to run scheduled due-date reminders (off by default) |
 | `SITE_URL` | No | Deep link base; defaults to `https://resources.sageoutdooradvisory.com` |
 
 Local development: leave `RESEND_API_KEY` unset or set `PIPELINE_EMAIL_ENABLED=false` so saves never send email.
@@ -41,6 +42,20 @@ Emails fire **after a successful job save** when:
 **Recipients:** resolved via `managed_users` + name aliases. The actor is excluded.
 
 Email failure does **not** block the save (best-effort).
+
+## Scheduled due-date reminders (opt-in)
+
+Daily cron: `GET/POST /api/cron/pipeline-due-date-reminders` (Vercel schedule `0 13 * * *`, ~8:00 AM US Eastern).
+
+**Disabled by default.** Set `PIPELINE_DUE_DATE_REMINDERS_ENABLED=true` in Vercel when ready. Also requires `PIPELINE_EMAIL_ENABLED=true`, `RESEND_API_KEY`, and migration `scripts/migrations/add-project-pipeline-due-reminder-sent-2026-06-26.sql`.
+
+| Reminder | When |
+|----------|------|
+| Due soon | 1 business day before due date |
+| Due today | Morning of due date (ET) |
+| Past due | 1st business day after due, then +3 and +7 calendar days, then every Monday |
+
+Skipped for Completed, Cancelled, On Hold, missing/invalid due dates, and jobs with a completion date. Consultant + PM receive emails per `/admin/account` reminder toggles.
 
 ## User notification preferences
 

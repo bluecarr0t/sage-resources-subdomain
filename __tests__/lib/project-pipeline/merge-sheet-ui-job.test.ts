@@ -25,7 +25,7 @@ function sampleJob(overrides: Partial<ProjectPipelineJob> = {}): ProjectPipeline
 }
 
 describe('mergeSheetJobWithUiEditedJob', () => {
-  it('preserves UI-edited workflow fields during sheet sync', () => {
+  it('applies sheet due date changes after a UI edit', () => {
     const sheetJob = sampleJob({
       client: 'Updated Sheet Client',
       reviewStatus: 'Approved',
@@ -40,7 +40,52 @@ describe('mergeSheetJobWithUiEditedJob', () => {
       projectStatus: 'In-Progress',
       projectStatusManual: true,
       flag: 'Attention',
-      notes: 'UI note',
+      jobNotes: [
+        {
+          id: 'ui-note',
+          note: 'UI note',
+          createdAt: '2026-06-26T12:00:00.000Z',
+          createdByEmail: 'pm@example.com',
+          createdByDisplayName: 'PM',
+        },
+      ],
+      sheetFieldSnapshot: {
+        dueDate: '03/01/2026',
+        reviewStatus: 'Approved',
+        sentToClient: 'Yes',
+      },
+      uiSourceOfTruth: true,
+    });
+
+    const merged = mergeSheetJobWithUiEditedJob(sheetJob, uiJob);
+
+    expect(merged.client).toBe('Updated Sheet Client');
+    expect(merged.reviewStatus).toBe('In-Progress');
+    expect(merged.sentToClient).toBe('No');
+    expect(merged.dueDate).toBe('05/01/2026');
+    expect(merged.projectStatus).toBe('In-Progress');
+    expect(merged.projectStatusManual).toBe(true);
+    expect(merged.flag).toBe('Attention');
+    expect(merged.jobNotes?.[0]?.note).toBe('UI note');
+    expect(merged.uiSourceOfTruth).toBe(true);
+  });
+
+  it('preserves UI-edited workflow fields when the sheet is unchanged', () => {
+    const sheetJob = sampleJob({
+      client: 'Updated Sheet Client',
+      reviewStatus: 'Approved',
+      sentToClient: 'Yes',
+      dueDate: '03/01/2026',
+    });
+    const uiJob = sampleJob({
+      reviewStatus: 'In-Progress',
+      sentToClient: 'No',
+      dueDate: '04/15/2026',
+      sheetFieldSnapshot: {
+        dueDate: '03/01/2026',
+        reviewStatus: 'Approved',
+        sentToClient: 'Yes',
+      },
       uiSourceOfTruth: true,
     });
 
@@ -50,11 +95,6 @@ describe('mergeSheetJobWithUiEditedJob', () => {
     expect(merged.reviewStatus).toBe('In-Progress');
     expect(merged.sentToClient).toBe('No');
     expect(merged.dueDate).toBe('04/15/2026');
-    expect(merged.projectStatus).toBe('In-Progress');
-    expect(merged.projectStatusManual).toBe(true);
-    expect(merged.flag).toBe('Attention');
-    expect(merged.notes).toBe('UI note');
-    expect(merged.uiSourceOfTruth).toBe(true);
   });
 
   it('derives project status for non-manual UI rows', () => {
@@ -63,6 +103,11 @@ describe('mergeSheetJobWithUiEditedJob', () => {
       appraiserConsultant: 'Greg',
       sentToClient: 'Yes',
       projectStatus: 'Not Started',
+      sheetFieldSnapshot: {
+        dueDate: '03/01/2026',
+        reviewStatus: 'Not Started',
+        sentToClient: 'No',
+      },
       uiSourceOfTruth: true,
     });
 

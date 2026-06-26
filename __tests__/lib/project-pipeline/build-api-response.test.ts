@@ -6,8 +6,22 @@ jest.mock('@/lib/auth-helpers', () => ({
   getManagedUser: jest.fn(),
 }));
 
+const mockManagedUsersQuery = jest.fn();
+
 jest.mock('@/lib/supabase', () => ({
-  createServerClient: jest.fn(() => ({ from: jest.fn() })),
+  createServerClient: jest.fn(() => ({
+    from: jest.fn((table: string) => {
+      if (table === 'managed_users') {
+        return {
+          select: jest.fn(() => ({
+            order: jest.fn(() => mockManagedUsersQuery()),
+          })),
+        };
+      }
+
+      return {};
+    }),
+  })),
 }));
 
 jest.mock('@/lib/google-sheets-export', () => ({
@@ -94,6 +108,7 @@ function sampleJob(overrides: Partial<ProjectPipelineJob> = {}): ProjectPipeline
 describe('buildProjectPipelineApiResponse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockManagedUsersQuery.mockResolvedValue({ data: [], error: null });
     mockGetManagedUser.mockResolvedValue({
       id: 'user-1',
       email: 'luke@example.com',
@@ -251,6 +266,38 @@ describe('buildProjectPipelineApiResponse', () => {
     expect(mockLoadVisible).toHaveBeenCalledWith(
       expect.objectContaining({ sheetName: PROJECT_PIPELINE_ALL_SHEETS_TAB })
     );
+  });
+
+  it('includes pipeline consultant picker options from managed users', async () => {
+    mockManagedUsersQuery.mockResolvedValue({
+      data: [
+        {
+          email: 'greg@sageoutdooradvisory.com',
+          first_name: 'Greg',
+          last_name: 'Garwood',
+          display_name: 'Greg Garwood',
+          is_active: true,
+        },
+        {
+          email: 'luke@example.com',
+          first_name: 'Luke',
+          last_name: 'Marran',
+          display_name: 'Luke Marran',
+          is_active: true,
+        },
+      ],
+      error: null,
+    });
+
+    const result = await buildProjectPipelineApiResponse({
+      userId: 'user-1',
+      email: 'luke@example.com',
+    });
+
+    expect(result.pipelineConsultantOptions).toEqual([
+      { displayName: 'Greg Garwood', email: 'greg@sageoutdooradvisory.com', division: null },
+      { displayName: 'Luke Marran', email: 'luke@example.com', division: null },
+    ]);
   });
 
   it('skips the oauth gate in service-account mode', async () => {

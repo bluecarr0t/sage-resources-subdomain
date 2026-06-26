@@ -12,6 +12,10 @@ import {
   buildPipelineSlackJobContext,
   notifyPipelineSlackDm,
 } from '@/lib/slack/pipeline-slack-client';
+import {
+  resolveSlackDeliveryEmailsForAccounts,
+  type ManagedUserSlackEmailRow,
+} from '@/lib/managed-users/slack-email';
 import { detectProjectPipelineJobChanges } from '@/lib/project-pipeline/notifications/detect-job-changes';
 import type { ProjectPipelineJobChange } from '@/lib/project-pipeline/notifications/detect-job-changes';
 import {
@@ -22,6 +26,13 @@ import {
   type PipelineEmailPreferences,
 } from '@/lib/project-pipeline/notifications/email-preferences';
 import {
+  buildPipelineSlackPreferencesMap,
+  filterRecipientsBySlackPreference,
+  isPipelineSlackEnabledForUser,
+  type PipelineSlackPreferenceKey,
+  type PipelineSlackPreferences,
+} from '@/lib/project-pipeline/notifications/slack-preferences';
+import {
   resolvePipelineDueDateChangeRecipients,
   resolvePipelineProjectStatusChangeRecipients,
   resolvePipelineReviewStatusChangeRecipients,
@@ -29,8 +40,8 @@ import {
 } from '@/lib/project-pipeline/notifications/resolve-review-recipients';
 import { resolveConsultantEmailsForField } from '@/lib/project-pipeline/notifications/resolve-recipients';
 import {
-  resolvePipelineSlackRecipientsForDueDateChange,
   resolvePipelineSlackRecipientsForReviewChange,
+  type PipelineSlackRecipient,
 } from '@/lib/project-pipeline/notifications/resolve-slack-recipients';
 import { schedulePipelineReviewCalendarEventsAsync } from '@/lib/project-pipeline/notifications/schedule-review-calendar-event';
 import {
@@ -43,10 +54,11 @@ import type { ProjectPipelineReviewNoteType } from '@/lib/project-pipeline/revie
 import type { ManagedUserWorkloadAuthorRow } from '@/lib/project-pipeline/workload-authors';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 
-export type PipelineManagedUserRow = ManagedUserWorkloadAuthorRow & {
-  slack_username?: string | null;
-  pipeline_email_preferences?: unknown;
-};
+export type PipelineManagedUserRow = ManagedUserWorkloadAuthorRow &
+  ManagedUserSlackEmailRow & {
+    pipeline_email_preferences?: unknown;
+    pipeline_slack_preferences?: unknown;
+  };
 
 export type NotifyPipelineJobChangesInput = {
   existingJob: ProjectPipelineJob | null | undefined;
@@ -211,6 +223,155 @@ function filterStakeholderRecipients(
   });
 }
 
+function filterStakeholderSlackRecipients(
+  input: NotifyPipelineJobChangesInput,
+  consultantPreferenceKey: Extract<
+    PipelineSlackPreferenceKey,
+    'dueDateChange' | 'projectStatusChange'
+  >,
+  projMgrPreferenceKey: Extract<
+    PipelineSlackPreferenceKey,
+    'pmDueDateChange' | 'pmProjectStatusChange'
+  >,
+  slackPrefsMap: ReadonlyMap<string, PipelineSlackPreferences>,
+  resolveRecipients: typeof resolvePipelineDueDateChangeRecipients
+): PipelineSlackRecipient[] {
+  const consultantPool = new Set(
+    resolveConsultantEmailsForField(
+      input.savedJob.appraiserConsultant,
+      input.managedUsers
+    ).map((email) => normalizeActorEmail(email))
+  );
+  const pmPool = new Set(
+    resolveProjMgrEmailsForField(input.savedJob.projMgr, input.managedUsers).map((email) =>
+      normalizeActorEmail(email)
+    )
+  );
+
+  const emails = resolveRecipients({
+    appraiserConsultant: input.savedJob.appraiserConsultant,
+    projMgr: input.savedJob.projMgr,
+    managedUsers: input.managedUsers,
+    actorEmail: input.actorEmail,
+  }).filter((email) => {
+    const normalized = normalizeActorEmail(email);
+    const consultantChannel =
+      consultantPool.has(normalized) &&
+      isPipelineSlackEnabledForUser(email, consultantPreferenceKey, slackPrefsMap);
+    const pmChannel =
+      pmPool.has(normalized) &&
+      isPipelineSlackEnabledForUser(email, projMgrPreferenceKey, slackPrefsMap);
+    return consultantChannel || pmChannel;
+  });
+
+  return emails.map((email) => ({ email }));
+}
+
+function filterReviewStatusSlackRecipients(
+  input: NotifyPipelineJobChangesInput,
+  change: { previousValue: string; newValue: string },
+  preferenceKey: PipelineSlackPreferenceKey,
+  slackPrefsMap: ReadonlyMap<string, PipelineSlackPreferences>
+): PipelineSlackRecipient[] {
+  const resolved = resolvePipelineSlackRecipientsForReviewChange({
+    job: input.savedJob,
+    previousStatus: change.previousValue,
+    newStatus: change.newValue,
+    managedUsers: input.managedUsers,
+    actorEmail: input.actorEmail,
+  });
+
+  if (preferenceKey === 'submitForReview' || preferenceKey === 'resubmitForReview') {
+    const enabledEmails = ensureSubmitReviewPmSlackRecipients(
+      input,
+      filterRecipientsBySlackPreference(
+        resolved.map((recipient) => recipient.email),
+        preferenceKey,
+        slackPrefsMap
+      ),
+      preferenceKey,
+      slackPrefsMap
+    );
+    const enabled = new Set(enabledEmails.map((email) => normalizeActorEmail(email)));
+    return resolved.filter((recipient) =>
+      enabled.has(normalizeActorEmail(recipient.email))
+    );
+  }
+
+  if (isProjectPipelineReviewStatusChangesRequested(change.newValue)) {
+    const enabled = new Set(
+      filterRecipientsBySlackPreference(
+        resolved.map((recipient) => recipient.email),
+        'reviewStatusChange',
+        slackPrefsMap
+      ).map((email) => normalizeActorEmail(email))
+    );
+    return resolved.filter((recipient) => enabled.has(normalizeActorEmail(recipient.email)));
+  }
+
+  const consultantPool = new Set(
+    resolveConsultantEmailsForField(
+      input.savedJob.appraiserConsultant,
+      input.managedUsers
+    ).map((email) => normalizeActorEmail(email))
+  );
+  const pmPool = new Set(
+    resolveProjMgrEmailsForField(input.savedJob.projMgr, input.managedUsers).map((email) =>
+      normalizeActorEmail(email)
+    )
+  );
+
+  return resolved.filter((recipient) => {
+    const normalized = normalizeActorEmail(recipient.email);
+    const consultantChannel =
+      consultantPool.has(normalized) &&
+      isPipelineSlackEnabledForUser(recipient.email, 'reviewStatusChange', slackPrefsMap);
+    const pmChannel =
+      pmPool.has(normalized) &&
+      isPipelineSlackEnabledForUser(recipient.email, 'pmReviewStatusChange', slackPrefsMap);
+    return consultantChannel || pmChannel;
+  });
+}
+
+function sendPipelineSlackToRecipients(
+  accountEmails: readonly string[],
+  managedUsers: readonly ManagedUserSlackEmailRow[],
+  context: Parameters<typeof buildPipelineSlackJobContext>[0]
+): void {
+  const deliveryEmails = resolveSlackDeliveryEmailsForAccounts(accountEmails, managedUsers);
+  for (const deliveryEmail of deliveryEmails) {
+    notifyPipelineSlackDm(deliveryEmail, buildPipelineSlackJobContext(context));
+  }
+}
+
+function ensureSubmitReviewPmSlackRecipients(
+  input: NotifyPipelineJobChangesInput,
+  recipients: string[],
+  preferenceKey: PipelineSlackPreferenceKey,
+  slackPrefsMap: ReadonlyMap<string, PipelineSlackPreferences>
+): string[] {
+  const isSubmitPreference =
+    preferenceKey === 'submitForReview' || preferenceKey === 'resubmitForReview';
+  if (!isSubmitPreference) return recipients;
+
+  const actorEmail = input.actorEmail?.trim();
+  if (!actorEmail) return recipients;
+
+  const actorNormalized = normalizeActorEmail(actorEmail);
+  if (recipients.some((email) => normalizeActorEmail(email) === actorNormalized)) {
+    return recipients;
+  }
+
+  if (
+    !isProjectPipelineJobProjMgr(input.savedJob, input.actorDisplayName) ||
+    !isPipelineSlackEnabledForUser(actorEmail, preferenceKey, slackPrefsMap)
+  ) {
+    return recipients;
+  }
+
+  return [...recipients, actorEmail];
+}
+
 function filterDueDateRecipients(
   input: NotifyPipelineJobChangesInput,
   emailPrefsMap: ReadonlyMap<string, PipelineEmailPreferences>
@@ -340,6 +501,7 @@ export async function notifyPipelineJobChanges(
 
   const actorDisplayName = input.actorDisplayName?.trim() || 'A team member';
   const emailPrefsMap = buildPipelineEmailPreferencesMap(input.managedUsers);
+  const slackPrefsMap = buildPipelineSlackPreferencesMap(input.managedUsers);
 
   for (const change of changes) {
     if (change.type === 'reviewStatus') {
@@ -415,13 +577,12 @@ export async function notifyPipelineJobChanges(
         });
       }
 
-      const slackRecipients = resolvePipelineSlackRecipientsForReviewChange({
-        job: input.savedJob,
-        previousStatus: change.previousValue,
-        newStatus: change.newValue,
-        managedUsers: input.managedUsers,
-        actorEmail: input.actorEmail,
-      });
+      const slackRecipients = filterReviewStatusSlackRecipients(
+        input,
+        change,
+        preferenceKey,
+        slackPrefsMap
+      );
 
       const headline = resubmit
         ? 'Resubmitted for review'
@@ -432,18 +593,16 @@ export async function notifyPipelineJobChanges(
         ? [`Note: ${input.reviewActionNote.trim()}`]
         : undefined;
 
-      for (const recipient of slackRecipients) {
-        notifyPipelineSlackDm(
-          recipient.email,
-          buildPipelineSlackJobContext({
-            jobNumber: input.savedJob.jobNumber,
-            client: input.savedJob.client,
-            propertyLocation: input.savedJob.propertyLocation,
-            headline,
-            detailLines,
-          })
-        );
-      }
+      sendPipelineSlackToRecipients(
+        slackRecipients.map((recipient) => recipient.email),
+        input.managedUsers,
+        {
+        jobNumber: input.savedJob.jobNumber,
+        client: input.savedJob.client,
+        propertyLocation: input.savedJob.propertyLocation,
+        headline,
+        detailLines,
+      });
 
       if (submit || resubmit) {
         schedulePipelineReviewCalendarEventsAsync({
@@ -478,25 +637,24 @@ export async function notifyPipelineJobChanges(
         notifyPipelineEmail({ to: recipients, subject, html });
       }
 
-      const slackRecipients = resolvePipelineSlackRecipientsForDueDateChange({
-        appraiserConsultant: input.savedJob.appraiserConsultant,
-        authorSlackUsername: input.savedJob.authorSlackUsername,
-        managedUsers: input.managedUsers,
-        actorEmail: input.actorEmail,
-      });
+      const slackRecipients = filterStakeholderSlackRecipients(
+        input,
+        'dueDateChange',
+        'pmDueDateChange',
+        slackPrefsMap,
+        resolvePipelineDueDateChangeRecipients
+      );
 
-      for (const recipient of slackRecipients) {
-        notifyPipelineSlackDm(
-          recipient.email,
-          buildPipelineSlackJobContext({
-            jobNumber: input.savedJob.jobNumber,
-            client: input.savedJob.client,
-            propertyLocation: input.savedJob.propertyLocation,
-            headline: `Due date updated to ${change.newValue || '—'}`,
-            detailLines: [`Was: ${change.previousValue || '—'}`],
-          })
-        );
-      }
+      sendPipelineSlackToRecipients(
+        slackRecipients.map((recipient) => recipient.email),
+        input.managedUsers,
+        {
+        jobNumber: input.savedJob.jobNumber,
+        client: input.savedJob.client,
+        propertyLocation: input.savedJob.propertyLocation,
+        headline: `Due date updated to ${change.newValue || '—'}`,
+        detailLines: [`Was: ${change.previousValue || '—'}`],
+      });
 
       continue;
     }
@@ -535,6 +693,25 @@ export async function notifyPipelineJobChanges(
         });
         notifyPipelineEmail({ to: recipients, subject, html });
       }
+
+      const slackRecipients = filterStakeholderSlackRecipients(
+        input,
+        'projectStatusChange',
+        'pmProjectStatusChange',
+        slackPrefsMap,
+        resolvePipelineProjectStatusChangeRecipients
+      );
+
+      sendPipelineSlackToRecipients(
+        slackRecipients.map((recipient) => recipient.email),
+        input.managedUsers,
+        {
+        jobNumber: input.savedJob.jobNumber,
+        client: input.savedJob.client,
+        propertyLocation: input.savedJob.propertyLocation,
+        headline: `Project status: ${change.newValue || 'updated'}`,
+        detailLines: [`Was: ${change.previousValue || '—'}`],
+      });
     }
   }
 }

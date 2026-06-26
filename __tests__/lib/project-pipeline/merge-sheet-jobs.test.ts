@@ -81,7 +81,7 @@ describe('mergeSheetJobsWithSupabaseOverrides', () => {
       new Map([
         [
           sheetJob.jobNumber,
-          { projectStatus: 'Completed', projectStatusManual: true, flag: 'None', notes: '' },
+          { projectStatus: 'Completed', projectStatusManual: true, flag: 'None', jobNotes: [] },
         ],
       ]),
       new Map()

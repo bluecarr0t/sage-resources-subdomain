@@ -11,10 +11,19 @@ import { withDerivedProjectPipelineProjectStatus } from './derive-project-status
 import { normalizeProjectPipelineSentToClient } from './sent-to-client';
 import { normalizeProjectPipelineReviewStatus } from './review-status';
 import {
+  resolveProjectPipelineJobNotes,
+  serializeProjectPipelineJobNotes,
+  type ProjectPipelineJobNote,
+} from './job-notes';
+import {
   parseProjectPipelineReviewNotes,
   serializeProjectPipelineReviewNotes,
   type ProjectPipelineReviewNote,
 } from './review-notes';
+import {
+  parseProjectPipelineSheetFieldSnapshot,
+  pickProjectPipelineSheetFieldSnapshot,
+} from './sheet-field-snapshot';
 
 export const PROJECT_PIPELINE_JOBS_TABLE = 'project_pipeline_jobs';
 export const PROJECT_PIPELINE_SYNC_RUNS_TABLE = 'project_pipeline_sync_runs';
@@ -64,7 +73,9 @@ export type ProjectPipelineJobDbRow = {
   ui_source_of_truth: boolean;
   flag: string;
   notes: string;
+  job_notes: ProjectPipelineJobNote[] | string;
   review_notes: ProjectPipelineReviewNote[] | string;
+  sheet_field_snapshot: Record<string, string> | string;
   sheet_row_index: number;
   sheet_id: string;
   sheet_name: string;
@@ -110,8 +121,10 @@ export function projectPipelineJobToDbRow(
     project_status_manual: Boolean(job.projectStatusManual),
     ui_source_of_truth: Boolean(job.uiSourceOfTruth),
     flag: normalizeProjectPipelineFlag(job.flag),
-    notes: job.notes ?? '',
+    notes: '',
+    job_notes: serializeProjectPipelineJobNotes(job.jobNotes ?? []),
     review_notes: serializeProjectPipelineReviewNotes(job.reviewNotes ?? []),
+    sheet_field_snapshot: job.sheetFieldSnapshot ?? pickProjectPipelineSheetFieldSnapshot(job),
     sheet_row_index: job.sheetRowIndex,
     sheet_id: meta.sheetId,
     sheet_name: meta.sheetName,
@@ -174,8 +187,11 @@ export function projectPipelineJobFromDbRow(row: ProjectPipelineJobDbRow): Proje
     projectStatusManual,
     uiSourceOfTruth,
     flag: legacyOnHoldFlag ? 'None' : normalizeProjectPipelineFlag(row.flag),
-    notes: row.notes ?? '',
+    jobNotes: resolveProjectPipelineJobNotes(row.job_notes, row.notes),
     reviewNotes: parseProjectPipelineReviewNotes(row.review_notes),
+    sheetFieldSnapshot: parseProjectPipelineSheetFieldSnapshot(
+      row.sheet_field_snapshot ?? {}
+    ),
     sheetRowIndex: row.sheet_row_index,
     pipelineSheetName: row.sheet_name,
     sheetYear: row.sheet_year,

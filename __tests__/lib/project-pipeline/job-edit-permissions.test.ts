@@ -3,6 +3,7 @@ import {
   canEditProjectPipelineDueDate,
   canEditProjectPipelineReviewStatus,
   canEditProjectPipelineSentToClient,
+  canDeleteProjectPipelineJob,
   canManuallyEditProjectPipelineStatus,
   canSetProjectPipelineSentToClientYes,
   getAllowedSentToClientOptions,
@@ -139,5 +140,11 @@ describe('job edit permissions', () => {
         { isAdmin: true }
       )
     ).not.toThrow();
+  });
+
+  it('allows only admins to delete projects', () => {
+    expect(canDeleteProjectPipelineJob({ role: 'admin' })).toBe(true);
+    expect(canDeleteProjectPipelineJob({ role: 'consultant' })).toBe(false);
+    expect(canDeleteProjectPipelineJob(null)).toBe(false);
   });
 });

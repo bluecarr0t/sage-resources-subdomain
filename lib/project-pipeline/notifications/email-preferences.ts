@@ -4,10 +4,18 @@ export const ALWAYS_ENABLED_PIPELINE_EMAIL_PREFERENCE_KEYS = [
   'resubmitForReviewReceipt',
 ] as const;
 
+/** Stored and honored for notifications, but hidden from /admin/account. */
+export const HIDDEN_FROM_ACCOUNT_PIPELINE_EMAIL_PREFERENCE_KEYS = [
+  'pmReviewStatusChange',
+] as const;
+
 export const CONSULTANT_PIPELINE_EMAIL_PREFERENCE_KEYS = [
   'reviewStatusChange',
   'dueDateChange',
   'projectStatusChange',
+  'dueDateReminderUpcoming',
+  'dueDateReminderDueToday',
+  'dueDateReminderOverdue',
 ] as const;
 
 export const PROJECT_MANAGER_PIPELINE_EMAIL_PREFERENCE_KEYS = [
@@ -16,7 +24,18 @@ export const PROJECT_MANAGER_PIPELINE_EMAIL_PREFERENCE_KEYS = [
   'pmReviewStatusChange',
   'pmDueDateChange',
   'pmProjectStatusChange',
+  'pmDueDateReminderUpcoming',
+  'pmDueDateReminderDueToday',
+  'pmDueDateReminderOverdue',
 ] as const;
+
+export const VISIBLE_PROJECT_MANAGER_PIPELINE_EMAIL_PREFERENCE_KEYS =
+  PROJECT_MANAGER_PIPELINE_EMAIL_PREFERENCE_KEYS.filter(
+    (key) =>
+      !HIDDEN_FROM_ACCOUNT_PIPELINE_EMAIL_PREFERENCE_KEYS.includes(
+        key as (typeof HIDDEN_FROM_ACCOUNT_PIPELINE_EMAIL_PREFERENCE_KEYS)[number]
+      )
+  );
 
 export const PIPELINE_EMAIL_PREFERENCE_KEYS = [
   ...PROJECT_MANAGER_PIPELINE_EMAIL_PREFERENCE_KEYS,
@@ -36,9 +55,15 @@ export const DEFAULT_PIPELINE_EMAIL_PREFERENCES: PipelineEmailPreferences = {
   pmReviewStatusChange: true,
   pmDueDateChange: true,
   pmProjectStatusChange: true,
+  pmDueDateReminderUpcoming: true,
+  pmDueDateReminderDueToday: true,
+  pmDueDateReminderOverdue: true,
   reviewStatusChange: true,
   dueDateChange: true,
   projectStatusChange: true,
+  dueDateReminderUpcoming: true,
+  dueDateReminderDueToday: true,
+  dueDateReminderOverdue: true,
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -127,6 +152,14 @@ function isAlwaysEnabledPipelineEmailPreference(
   );
 }
 
+function isHiddenFromAccountPipelineEmailPreference(
+  preferenceKey: PipelineEmailPreferenceKey
+): preferenceKey is (typeof HIDDEN_FROM_ACCOUNT_PIPELINE_EMAIL_PREFERENCE_KEYS)[number] {
+  return HIDDEN_FROM_ACCOUNT_PIPELINE_EMAIL_PREFERENCE_KEYS.includes(
+    preferenceKey as (typeof HIDDEN_FROM_ACCOUNT_PIPELINE_EMAIL_PREFERENCE_KEYS)[number]
+  );
+}
+
 export function isPipelineEmailEnabledForUser(
   email: string,
   preferenceKey: PipelineEmailPreferenceKey,
@@ -184,7 +217,11 @@ export function getVisiblePipelineEmailPreferenceKeys(
     ? [...PIPELINE_EMAIL_PREFERENCE_KEYS]
     : [...CONSULTANT_PIPELINE_EMAIL_PREFERENCE_KEYS];
 
-  return keys.filter((key) => !isAlwaysEnabledPipelineEmailPreference(key));
+  return keys.filter(
+    (key) =>
+      !isAlwaysEnabledPipelineEmailPreference(key) &&
+      !isHiddenFromAccountPipelineEmailPreference(key)
+  );
 }
 
 export function isPipelineEmailPreferenceAllowedForUser(
@@ -192,6 +229,10 @@ export function isPipelineEmailPreferenceAllowedForUser(
   isProjectManager: boolean
 ): boolean {
   if (isAlwaysEnabledPipelineEmailPreference(key)) {
+    return false;
+  }
+
+  if (isHiddenFromAccountPipelineEmailPreference(key)) {
     return false;
   }
 

@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button, FieldTooltip, Input, Modal, ModalContent, Select } from '@/components/ui';
-import { AppraiserConsultantPills } from '@/components/project-pipeline/AppraiserConsultantPills';
-import { ProjMgrPill } from '@/components/project-pipeline/ProjMgrPill';
 import { ProjectFlagPill } from '@/components/project-pipeline/ProjectFlagPill';
 import { ProjectStatusPill } from '@/components/project-pipeline/ProjectStatusPill';
 import {
@@ -14,6 +12,7 @@ import {
   ProjectPipelineJobModalFields,
   WORKFLOW_DETAIL_FIELDS,
 } from '@/components/project-pipeline/ProjectPipelineJobModalFields';
+import { ProjectPipelineJobNotesThread } from '@/components/project-pipeline/ProjectPipelineJobNotesThread';
 import { ProjectPipelineReviewNotesThread } from '@/components/project-pipeline/ProjectPipelineReviewNotesThread';
 import { ReviewStatusSelect } from '@/components/project-pipeline/ReviewStatusSelect';
 import { DEFAULT_PROJECT_PIPELINE_SENT_TO_CLIENT } from '@/lib/project-pipeline/sent-to-client';
@@ -44,14 +43,11 @@ import {
   PROJECT_PIPELINE_FLAG_VALUES,
 } from '@/lib/project-pipeline/project-flag';
 import type { ProjectPipelineEditableField, ProjectPipelineJob } from '@/lib/project-pipeline/types';
+import type { PipelineCurrentWorkloadAuthorInput } from '@/lib/project-pipeline/current-workload';
 import {
   isProjectPipelineAllSheetsTab,
   PROJECT_PIPELINE_SHEET_TABS,
 } from '@/lib/project-pipeline/sheet-tabs';
-import {
-  formatProjectPipelineSheetDate,
-  getProjectPipelineDueDateEmphasis,
-} from '@/lib/project-pipeline/due-date-emphasis';
 
 type JobModalMobileTab = 'review' | 'details';
 
@@ -64,11 +60,14 @@ interface ProjectPipelineJobModalProps {
   saveError?: string | null;
   viewerDisplayName?: string | null;
   viewerIsAdmin?: boolean;
+  pipelineConsultantOptions?: PipelineCurrentWorkloadAuthorInput[];
   onClose: () => void;
   onSave: (
     job: ProjectPipelineJob,
     options?: { manualProjectStatus?: boolean; reviewFeedbackNote?: string }
   ) => void | Promise<void>;
+  onDelete?: (job: ProjectPipelineJob) => void | Promise<void>;
+  deleting?: boolean;
   onReviewAction?: (
     action: ProjectPipelineReviewNoteType,
     note: string,
@@ -76,24 +75,9 @@ interface ProjectPipelineJobModalProps {
   ) => void | Promise<void>;
   reviewActionSaving?: boolean;
   reviewActionError?: string | null;
-}
-
-function formatDueDateLabel(value: string): string {
-  const trimmed = value?.trim() ?? '';
-  if (!trimmed) return '—';
-  return formatProjectPipelineSheetDate(trimmed) || trimmed;
-}
-
-function getModalDueDateTextClasses(
-  emphasis: ReturnType<typeof getProjectPipelineDueDateEmphasis>
-): string {
-  if (emphasis === 'past-due') {
-    return 'font-medium text-red-700 dark:text-red-300';
-  }
-  if (emphasis === 'due-soon') {
-    return 'font-medium text-amber-800 dark:text-amber-200';
-  }
-  return 'text-neutral-600 dark:text-neutral-400';
+  onAddJobNote?: (note: string) => void | Promise<ProjectPipelineJob | void>;
+  jobNoteSaving?: boolean;
+  jobNoteError?: string | null;
 }
 
 export function ProjectPipelineJobModal({
@@ -105,11 +89,17 @@ export function ProjectPipelineJobModal({
   saveError = null,
   viewerDisplayName,
   viewerIsAdmin = false,
+  pipelineConsultantOptions = [],
   onClose,
   onSave,
+  onDelete,
+  deleting = false,
   onReviewAction,
   reviewActionSaving = false,
   reviewActionError = null,
+  onAddJobNote,
+  jobNoteSaving = false,
+  jobNoteError = null,
 }: ProjectPipelineJobModalProps) {
   const t = useTranslations('admin.projectPipeline');
   const [draft, setDraft] = useState<ProjectPipelineJob | null>(job);
@@ -121,7 +111,7 @@ export function ProjectPipelineJobModal({
   const [initialReviewStatus, setInitialReviewStatus] = useState('');
   const [reviewValidationError, setReviewValidationError] = useState<string | null>(null);
   const [moreDetailsOpen, setMoreDetailsOpen] = useState(false);
-  const [notesEditorOpen, setNotesEditorOpen] = useState(false);
+  const [pendingJobNote, setPendingJobNote] = useState('');
   const [mobileTab, setMobileTab] = useState<JobModalMobileTab>('details');
 
   useEffect(() => {
@@ -134,21 +124,21 @@ export function ProjectPipelineJobModal({
       setReviewerResponseNote('');
       setReviewValidationError(null);
       setMoreDetailsOpen(false);
-      setNotesEditorOpen(Boolean(job.notes?.trim()));
+      setPendingJobNote('');
       setInitialReviewStatus(normalizedReviewStatus);
       setDraft(
         job.projectStatusManual
           ? {
               ...job,
               flag: normalizeProjectPipelineFlag(job.flag),
-              notes: job.notes ?? '',
+              jobNotes: job.jobNotes ?? [],
               reviewStatus: normalizedReviewStatus,
               sentToClient: job.sentToClient.trim() || DEFAULT_PROJECT_PIPELINE_SENT_TO_CLIENT,
             }
           : withDerivedProjectPipelineProjectStatus({
               ...job,
               flag: normalizeProjectPipelineFlag(job.flag),
-              notes: job.notes ?? '',
+              jobNotes: job.jobNotes ?? [],
               reviewStatus: normalizedReviewStatus,
               sentToClient: job.sentToClient.trim() || DEFAULT_PROJECT_PIPELINE_SENT_TO_CLIENT,
             })
@@ -166,6 +156,16 @@ export function ProjectPipelineJobModal({
       setMobileTab(canSubmit || canResubmit || canRespondToReview ? 'review' : 'details');
     }
   }, [open, job, viewerDisplayName, viewerIsAdmin]);
+
+  useEffect(() => {
+    if (!open || !job) return;
+    setDraft((current) => {
+      if (!current || current.jobNumber !== job.jobNumber) return current;
+      const nextNotes = job.jobNotes ?? [];
+      if (current.jobNotes === nextNotes) return current;
+      return { ...current, jobNotes: nextNotes };
+    });
+  }, [open, job]);
 
   if (!open || !job || !draft) return null;
 
@@ -201,13 +201,8 @@ export function ProjectPipelineJobModal({
   const showReviewerComposer = canRespondToReview;
   const hasReviewNotes = (draft.reviewNotes ?? []).length > 0;
 
-  const headerSubtitle = (() => {
-    const parts = draft.jobNumber
-      ? [draft.client, draft.propertyLocation]
-      : [draft.propertyLocation];
-    return parts.map((part) => part?.trim()).filter(Boolean).join(' · ');
-  })();
-  const dueDateEmphasis = getProjectPipelineDueDateEmphasis(draft);
+  const headerReviewStatus = normalizeProjectPipelineReviewStatus(draft.reviewStatus);
+  const headerFlag = normalizeProjectPipelineFlag(draft.flag);
 
   const updateField = (field: ProjectPipelineEditableField, value: string) => {
     setDraft((current) => {
@@ -303,6 +298,13 @@ export function ProjectPipelineJobModal({
     setReviewerResponseStatus('');
   };
 
+  const handleDelete = () => {
+    if (!onDelete || isCreateMode || !viewerIsAdmin) return;
+    const jobNumber = draft.jobNumber.trim() || t('editJobTitle');
+    if (!window.confirm(t('deleteJobConfirm', { jobNumber }))) return;
+    void onDelete(draft);
+  };
+
   const fieldProps = {
     draft,
     isCreateMode,
@@ -312,6 +314,7 @@ export function ProjectPipelineJobModal({
     reviewFeedbackNote,
     onReviewFeedbackNoteChange: setReviewFeedbackNote,
     onFieldChange: updateField,
+    pipelineConsultantOptions,
   };
 
   const detailsPanel = (
@@ -424,33 +427,47 @@ export function ProjectPipelineJobModal({
 
   const reviewPanel = (
     <div className="flex flex-col">
-      <div className="shrink-0 space-y-2">
+      <div className="shrink-0 space-y-3">
         <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
           {t('jobModalNotesSectionTitle')}
         </h3>
-        {notesEditorOpen ? (
-          <>
+        <ProjectPipelineJobNotesThread notes={draft.jobNotes ?? []} />
+        {onAddJobNote ? (
+          <div className="space-y-2">
             <textarea
-              id="pipeline-job-notes"
-              value={draft.notes ?? ''}
-              onChange={(e) =>
-                setDraft((current) => (current ? { ...current, notes: e.target.value } : current))
-              }
+              id="pipeline-job-note"
+              value={pendingJobNote}
+              onChange={(e) => setPendingJobNote(e.target.value)}
               rows={3}
               placeholder={t('notesPlaceholder')}
               aria-label={t('jobModalInternalNotesLabel')}
               className="w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             />
-          </>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setNotesEditorOpen(true)}
-            className="text-sm font-medium text-sage-700 hover:text-sage-800 hover:underline dark:text-sage-400 dark:hover:text-sage-300"
-          >
-            {t('jobModalAddNoteLink')}
-          </button>
-        )}
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full sm:w-auto"
+              disabled={saving || jobNoteSaving || !pendingJobNote.trim()}
+              onClick={async () => {
+                if (!pendingJobNote.trim()) return;
+                const savedJob = await onAddJobNote(pendingJobNote.trim());
+                setPendingJobNote('');
+                if (savedJob?.jobNotes) {
+                  setDraft((current) =>
+                    current ? { ...current, jobNotes: savedJob.jobNotes } : current
+                  );
+                }
+              }}
+            >
+              {jobNoteSaving ? t('jobModalAddingNote') : t('jobModalAddNoteLink')}
+            </Button>
+            {jobNoteError ? (
+              <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                {jobNoteError}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-6 flex flex-col gap-4 border-t border-neutral-200 pt-6 dark:border-neutral-700">
@@ -591,78 +608,25 @@ export function ProjectPipelineJobModal({
                   </p>
                 </>
               ) : (
-                <>
-                  <h2
-                    id="project-pipeline-job-title"
-                    className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-base font-semibold text-neutral-900 dark:text-neutral-100"
-                  >
-                    <span className="truncate">{draft.jobNumber || draft.client || t('editJobTitle')}</span>
+                <h2
+                  id="project-pipeline-job-title"
+                  className="flex min-w-0 flex-wrap items-center gap-2 text-base font-semibold text-neutral-900 dark:text-neutral-100"
+                >
+                  <span className="truncate">
+                    {draft.jobNumber || draft.client || t('editJobTitle')}
+                  </span>
+                  {headerReviewStatus ? (
+                    <span
+                      className={`inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${getReviewStatusStyle(draft.reviewStatus)}`}
+                      title={getReviewStatusDisplayLabel(draft.reviewStatus)}
+                    >
+                      {getShortReviewStatusLabel(draft.reviewStatus)}
+                    </span>
+                  ) : (
                     <ProjectStatusPill status={draft.projectStatus} />
-                    {normalizeProjectPipelineReviewStatus(draft.reviewStatus) ? (
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${getReviewStatusStyle(draft.reviewStatus)}`}
-                        title={getReviewStatusDisplayLabel(draft.reviewStatus)}
-                      >
-                        {getShortReviewStatusLabel(draft.reviewStatus)}
-                      </span>
-                    ) : null}
-                    {normalizeProjectPipelineFlag(draft.flag) !== 'None' ? (
-                      <ProjectFlagPill flag={draft.flag} />
-                    ) : null}
-                    {headerSubtitle ? (
-                      <>
-                        <span
-                          className="text-sm font-normal text-neutral-400 dark:text-neutral-500"
-                          aria-hidden
-                        >
-                          ·
-                        </span>
-                        <span className="truncate text-sm font-normal text-neutral-600 dark:text-neutral-400">
-                          {headerSubtitle}
-                        </span>
-                      </>
-                    ) : null}
-                    {draft.dueDate?.trim() ? (
-                      <>
-                        <span
-                          className="text-sm font-normal text-neutral-400 dark:text-neutral-500"
-                          aria-hidden
-                        >
-                          ·
-                        </span>
-                        <span
-                          className={`truncate text-sm font-normal ${getModalDueDateTextClasses(dueDateEmphasis)}`}
-                        >
-                          {t('columnDueDate')}: {formatDueDateLabel(draft.dueDate)}
-                        </span>
-                      </>
-                    ) : null}
-                  </h2>
-                  <div
-                    className="mt-2 border-t border-neutral-200 dark:border-neutral-700"
-                    aria-hidden
-                  />
-                  {draft.appraiserConsultant?.trim() || draft.projMgr?.trim() ? (
-                    <div className="mt-2 flex flex-col gap-1.5">
-                      {draft.appraiserConsultant?.trim() ? (
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                            {t('columnAppraiser')}
-                          </span>
-                          <AppraiserConsultantPills value={draft.appraiserConsultant} />
-                        </div>
-                      ) : null}
-                      {draft.projMgr?.trim() ? (
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                            {t('jobModalHeaderProjMgrLabel')}
-                          </span>
-                          <ProjMgrPill value={draft.projMgr} />
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </>
+                  )}
+                  {headerFlag !== 'None' ? <ProjectFlagPill flag={draft.flag} /> : null}
+                </h2>
               )}
             </div>
             <button
@@ -756,23 +720,42 @@ export function ProjectPipelineJobModal({
             </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-neutral-700">
-            <Button type="button" variant="secondary" onClick={onClose} disabled={saving || reviewActionSaving}>
-              {t('cancelJobEdit')}
-            </Button>
-            <Button
-              type="submit"
-              variant={showReviewComposer || showReviewerComposer ? 'secondary' : 'primary'}
-              disabled={saving || reviewActionSaving}
-            >
-              {saving
-                ? isCreateMode
-                  ? t('creatingJob')
-                  : t('savingJobEdit')
-                : isCreateMode
-                  ? t('createJobSubmit')
-                  : t('saveJobEdit')}
-            </Button>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 px-6 py-4 dark:border-neutral-700">
+            <div className="flex min-w-0 flex-1 items-center">
+              {!isCreateMode && viewerIsAdmin && onDelete ? (
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={handleDelete}
+                  disabled={saving || reviewActionSaving || deleting}
+                >
+                  {deleting ? t('deletingJob') : t('deleteJob')}
+                </Button>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onClose}
+                disabled={saving || reviewActionSaving || deleting}
+              >
+                {t('cancelJobEdit')}
+              </Button>
+              <Button
+                type="submit"
+                variant={showReviewComposer || showReviewerComposer ? 'secondary' : 'primary'}
+                disabled={saving || reviewActionSaving || deleting}
+              >
+                {saving
+                  ? isCreateMode
+                    ? t('creatingJob')
+                    : t('savingJobEdit')
+                  : isCreateMode
+                    ? t('createJobSubmit')
+                    : t('saveJobEdit')}
+              </Button>
+            </div>
           </div>
         </form>
       </ModalContent>

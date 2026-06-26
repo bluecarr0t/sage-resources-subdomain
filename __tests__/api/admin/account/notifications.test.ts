@@ -46,6 +46,14 @@ describe('PATCH /api/admin/account/notifications', () => {
         reviewStatusChange: true,
         dueDateChange: true,
       },
+      pipeline_slack_preferences: {
+        submitForReview: true,
+        resubmitForReview: true,
+        pmReviewStatusChange: true,
+        pmDueDateChange: true,
+        reviewStatusChange: true,
+        dueDateChange: true,
+      },
     });
     mockEq.mockReturnValue({
       select: jest.fn().mockReturnValue({
@@ -64,16 +72,103 @@ describe('PATCH /api/admin/account/notifications', () => {
           reviewStatusChange: true,
           dueDateChange: false,
         },
+        pipeline_slack_preferences: {
+          submitForReview: true,
+          resubmitForReview: true,
+          pmReviewStatusChange: true,
+          pmDueDateChange: true,
+          reviewStatusChange: true,
+          dueDateChange: false,
+        },
       },
       error: null,
     });
   });
 
-  it('updates only the authenticated user preferences', async () => {
+  it('updates multiple preferences in one request', async () => {
+    mockSelectSingle.mockResolvedValueOnce({
+      data: {
+        pipeline_email_preferences: {
+          submitForReview: true,
+          resubmitForReview: true,
+          pmReviewStatusChange: true,
+          pmDueDateChange: false,
+          pmProjectStatusChange: false,
+          reviewStatusChange: true,
+          dueDateChange: true,
+        },
+        pipeline_slack_preferences: {
+          submitForReview: true,
+          resubmitForReview: true,
+          pmReviewStatusChange: true,
+          pmDueDateChange: true,
+          reviewStatusChange: true,
+          dueDateChange: true,
+        },
+      },
+      error: null,
+    });
+
     const { PATCH } = await import('@/app/api/admin/account/notifications/route');
     const req = new NextRequest('http://localhost/api/admin/account/notifications', {
       method: 'PATCH',
-      body: JSON.stringify({ dueDateChange: false }),
+      body: JSON.stringify({
+        channel: 'email',
+        pmDueDateChange: false,
+        pmProjectStatusChange: false,
+      }),
+    });
+
+    const res = await PATCH(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.pipeline_email_preferences.pmDueDateChange).toBe(false);
+    expect(body.pipeline_email_preferences.pmProjectStatusChange).toBe(false);
+  });
+
+  it('updates slack preferences independently', async () => {
+    mockSelectSingle.mockResolvedValueOnce({
+      data: {
+        pipeline_email_preferences: {
+          submitForReview: true,
+          resubmitForReview: true,
+          pmReviewStatusChange: true,
+          pmDueDateChange: true,
+          reviewStatusChange: true,
+          dueDateChange: true,
+        },
+        pipeline_slack_preferences: {
+          submitForReview: true,
+          resubmitForReview: true,
+          pmReviewStatusChange: true,
+          pmDueDateChange: true,
+          reviewStatusChange: true,
+          dueDateChange: false,
+        },
+      },
+      error: null,
+    });
+
+    const { PATCH } = await import('@/app/api/admin/account/notifications/route');
+    const req = new NextRequest('http://localhost/api/admin/account/notifications', {
+      method: 'PATCH',
+      body: JSON.stringify({ channel: 'slack', dueDateChange: false }),
+    });
+
+    const res = await PATCH(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.pipeline_slack_preferences.dueDateChange).toBe(false);
+    expect(body.pipeline_email_preferences.dueDateChange).toBe(true);
+  });
+
+  it('updates only the authenticated user email preferences', async () => {
+    const { PATCH } = await import('@/app/api/admin/account/notifications/route');
+    const req = new NextRequest('http://localhost/api/admin/account/notifications', {
+      method: 'PATCH',
+      body: JSON.stringify({ channel: 'email', dueDateChange: false }),
     });
 
     const res = await PATCH(req);
@@ -89,7 +184,7 @@ describe('PATCH /api/admin/account/notifications', () => {
     const { PATCH } = await import('@/app/api/admin/account/notifications/route');
     const req = new NextRequest('http://localhost/api/admin/account/notifications', {
       method: 'PATCH',
-      body: JSON.stringify({ dueDateChange: 'no' }),
+      body: JSON.stringify({ channel: 'email', dueDateChange: 'no' }),
     });
 
     const res = await PATCH(req);
@@ -112,12 +207,20 @@ describe('PATCH /api/admin/account/notifications', () => {
         reviewStatusChange: true,
         dueDateChange: true,
       },
+      pipeline_slack_preferences: {
+        submitForReview: true,
+        resubmitForReview: true,
+        pmReviewStatusChange: true,
+        pmDueDateChange: true,
+        reviewStatusChange: true,
+        dueDateChange: true,
+      },
     });
 
     const { PATCH } = await import('@/app/api/admin/account/notifications/route');
     const req = new NextRequest('http://localhost/api/admin/account/notifications', {
       method: 'PATCH',
-      body: JSON.stringify({ submitForReview: false }),
+      body: JSON.stringify({ channel: 'email', submitForReview: false }),
     });
 
     const res = await PATCH(req);
@@ -142,6 +245,14 @@ describe('GET /api/admin/account', () => {
         reviewStatusChange: true,
         dueDateChange: true,
       },
+      pipeline_slack_preferences: {
+        submitForReview: true,
+        resubmitForReview: true,
+        pmReviewStatusChange: true,
+        pmDueDateChange: true,
+        reviewStatusChange: true,
+        dueDateChange: true,
+      },
     });
   });
 
@@ -155,5 +266,6 @@ describe('GET /api/admin/account', () => {
     expect(body.role).toBe('admin');
     expect(body.is_project_manager).toBe(true);
     expect(body.pipeline_email_preferences.dueDateChange).toBe(true);
+    expect(body.pipeline_slack_preferences.dueDateChange).toBe(true);
   });
 });

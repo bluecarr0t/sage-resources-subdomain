@@ -61,7 +61,7 @@ describe('parseProjectPipelineRows', () => {
       clientEmail: 'john@example.com',
       projectStatus: 'In-Progress',
       flag: 'None',
-      notes: '',
+      jobNotes: [],
       sheetRowIndex: 2,
     });
   });

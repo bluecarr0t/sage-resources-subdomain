@@ -4,9 +4,11 @@ import {
   resolveManagedUserPipelineDisplayName,
 } from '@/lib/project-pipeline/current-workload';
 import {
+  buildPipelineConsultantSelectOptions,
   isHiddenWorkloadManagedUser,
   isHiddenWorkloadPerson,
   isHiddenWorkloadSheetConsultant,
+  preparePipelineConsultantPickerOptions,
   preparePipelineWorkloadAuthors,
 } from '@/lib/project-pipeline/workload-authors';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
@@ -255,6 +257,47 @@ describe('preparePipelineWorkloadAuthors', () => {
 
     expect(authors).toHaveLength(1);
     expect(authors[0].displayName).toBe('Greg Garwood');
+  });
+});
+
+describe('preparePipelineConsultantPickerOptions', () => {
+  it('includes hidden managed users and sorts by display name', () => {
+    const consultants = preparePipelineConsultantPickerOptions([
+      {
+        email: 'luke@example.com',
+        first_name: 'Luke',
+        last_name: 'Marran',
+        display_name: 'Luke Marran',
+      },
+      {
+        email: 'harsell@sageoutdooradvisory.com',
+        first_name: 'Nick',
+        last_name: 'Harsell',
+        display_name: 'Nick Harsell',
+      },
+      {
+        email: 'greg@sageoutdooradvisory.com',
+        first_name: 'Greg',
+        last_name: 'Garwood',
+      },
+    ]);
+
+    expect(consultants.map((consultant) => consultant.displayName)).toEqual([
+      'Greg Garwood',
+      'Luke Marran',
+      'Nick Harsell',
+    ]);
+  });
+});
+
+describe('buildPipelineConsultantSelectOptions', () => {
+  it('prepends legacy sheet values when they are not in the managed-user list', () => {
+    const options = buildPipelineConsultantSelectOptions(
+      [{ displayName: 'Greg Garwood', email: 'greg@example.com' }],
+      'Lars / Luke'
+    );
+
+    expect(options).toEqual(['Lars', 'Luke', 'Greg Garwood']);
   });
 });
 

@@ -6,6 +6,7 @@ import type {
 const ACTION_LABELS: Record<ProjectPipelineActivityAction, string> = {
   job_created: 'Created job',
   job_updated: 'Updated job',
+  job_deleted: 'Deleted job',
   review_action: 'Review action',
   project_status_updated: 'Updated project status',
   sheet_sync_created: 'Synced from Google Sheets (new job)',

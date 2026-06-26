@@ -31,6 +31,10 @@
     {
       "path": "/api/cron/sync-project-pipeline",
       "schedule": "30 * * * *"
+    },
+    {
+      "path": "/api/cron/pipeline-due-date-reminders",
+      "schedule": "0 13 * * *"
     }
   ],
   "redirects": [

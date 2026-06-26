@@ -20,7 +20,9 @@ export function resolveSheetSyncProjectPipelineJob(
   const jobNumber = input.sheetJob.jobNumber.trim();
   const uiEdited = input.uiEditedByJobNumber.get(jobNumber);
   if (uiEdited) {
-    return mergeSheetJobWithUiEditedJob(input.sheetJob, uiEdited);
+    return mergeSheetJobWithUiEditedJob(input.sheetJob, uiEdited, {
+      sheetFieldSnapshot: uiEdited.sheetFieldSnapshot,
+    });
   }
 
   const stored = input.storedStatusByJobNumber.get(jobNumber);
@@ -36,13 +38,13 @@ export function resolveSheetSyncProjectPipelineJob(
       projectStatus: stored.projectStatus,
       projectStatusManual: stored.projectStatusManual,
       flag: stored.flag,
-      notes: stored.notes,
+      jobNotes: stored.jobNotes,
       reviewNotes: stored.reviewNotes,
     });
   }
 
   const storedFlag = stored?.flag;
-  const storedNotes = stored?.notes;
+  const storedJobNotes = stored?.jobNotes;
   const storedReviewNotes = stored?.reviewNotes;
 
   return withDerivedProjectPipelineProjectStatus({
@@ -50,7 +52,7 @@ export function resolveSheetSyncProjectPipelineJob(
     pipelineSheetName: input.sheetName,
     sheetYear: input.sheetYear,
     ...(storedFlag ? { flag: storedFlag } : {}),
-    ...(storedNotes ? { notes: storedNotes } : {}),
+    ...(storedJobNotes?.length ? { jobNotes: storedJobNotes } : {}),
     ...(storedReviewNotes?.length ? { reviewNotes: storedReviewNotes } : {}),
   });
 }

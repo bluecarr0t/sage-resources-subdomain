@@ -12,10 +12,8 @@ export type ManagedUserCreatePayload = {
   email: string;
   firstName: string;
   lastName: string;
-  slackUsername: string;
   role: ManagedUser['role'];
   division: ManagedUser['division'];
-  pipeline_view_all: boolean;
   is_active: boolean;
 };
 
@@ -23,10 +21,8 @@ const EMPTY_FORM: ManagedUserCreatePayload = {
   email: '',
   firstName: '',
   lastName: '',
-  slackUsername: '',
   role: DEFAULT_MANAGED_USER_ROLE,
   division: 'both',
-  pipeline_view_all: false,
   is_active: true,
 };
 
@@ -123,14 +119,6 @@ export function ManagedUserAddModal({
                 autoComplete="off"
               />
             </div>
-            <Input
-              id="managed-user-slack"
-              label={t('fieldSlackUsername')}
-              value={form.slackUsername}
-              onChange={(e) => update('slackUsername', e.target.value)}
-              placeholder={t('fieldSlackUsernamePlaceholder')}
-              autoComplete="off"
-            />
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label
@@ -171,15 +159,6 @@ export function ManagedUserAddModal({
               </div>
             </div>
             <div className="flex flex-wrap gap-6">
-              <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
-                <input
-                  type="checkbox"
-                  checked={form.pipeline_view_all}
-                  onChange={(e) => update('pipeline_view_all', e.target.checked)}
-                  className="rounded border-neutral-300 text-sage-600 focus:ring-sage-600"
-                />
-                {t('columnViewAllPipeline')}
-              </label>
               <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
                 <input
                   type="checkbox"

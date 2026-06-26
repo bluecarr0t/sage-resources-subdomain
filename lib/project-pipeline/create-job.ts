@@ -56,7 +56,7 @@ export function createBlankProjectPipelineJob(input: {
     projectStatusManual: false,
     uiSourceOfTruth: true,
     flag: DEFAULT_PROJECT_PIPELINE_FLAG,
-    notes: '',
+    jobNotes: [],
     reviewNotes: [],
     sheetRowIndex: UI_CREATED_PROJECT_PIPELINE_SHEET_ROW_INDEX,
     pipelineSheetName,

@@ -14,6 +14,7 @@ import { withDerivedProjectPipelineProjectStatus } from './derive-project-status
 import { mergeSheetJobWithUiEditedJob } from './merge-sheet-ui-job';
 import { normalizeProjectPipelineProjectStatus, isStickyProjectPipelineProjectStatus } from './project-status';
 import { normalizeProjectPipelineFlag } from './project-flag';
+import { resolveProjectPipelineJobNotes, type ProjectPipelineJobNote } from './job-notes';
 import { parseProjectPipelineReviewNotes, type ProjectPipelineReviewNote } from './review-notes';
 import type { ProjectPipelineJob } from './types';
 
@@ -232,7 +233,7 @@ export type ProjectPipelineStoredStatus = {
   projectStatus: string;
   projectStatusManual: boolean;
   flag: string;
-  notes: string;
+  jobNotes: ProjectPipelineJobNote[];
   reviewNotes: ProjectPipelineReviewNote[];
 };
 
@@ -244,7 +245,7 @@ export async function fetchProjectPipelineStoredStatusMap(
 
   const { data, error } = await supabase
     .from(PROJECT_PIPELINE_JOBS_TABLE)
-    .select('job_number, project_status, project_status_manual, flag, notes, review_notes')
+    .select('job_number, project_status, project_status_manual, flag, notes, job_notes, review_notes')
     .eq('sheet_id', sheetId)
     .eq('sheet_name', input.sheetName);
 
@@ -264,7 +265,10 @@ export async function fetchProjectPipelineStoredStatusMap(
         flag: row.flag as string | null | undefined,
       }),
       flag: normalizeProjectPipelineFlag(row.flag as string | null | undefined),
-      notes: typeof row.notes === 'string' ? row.notes : '',
+      jobNotes: resolveProjectPipelineJobNotes(
+        row.job_notes,
+        typeof row.notes === 'string' ? row.notes : ''
+      ),
       reviewNotes: parseProjectPipelineReviewNotes(row.review_notes),
     });
   }
@@ -291,7 +295,7 @@ async function fetchProjectPipelineStoredStatusForJob(
 ): Promise<ProjectPipelineStoredStatus | null> {
   const { data, error } = await supabase
     .from(PROJECT_PIPELINE_JOBS_TABLE)
-    .select('project_status, project_status_manual, flag, notes, review_notes')
+    .select('project_status, project_status_manual, flag, notes, job_notes, review_notes')
     .eq('sheet_id', input.sheetId)
     .eq('sheet_name', input.sheetName)
     .eq('job_number', input.jobNumber)
@@ -308,7 +312,10 @@ async function fetchProjectPipelineStoredStatusForJob(
       flag: data.flag as string | null | undefined,
     }),
     flag: normalizeProjectPipelineFlag(data.flag as string | null | undefined),
-    notes: typeof data.notes === 'string' ? data.notes : '',
+    jobNotes: resolveProjectPipelineJobNotes(
+      data.job_notes,
+      typeof data.notes === 'string' ? data.notes : ''
+    ),
     reviewNotes: parseProjectPipelineReviewNotes(data.review_notes),
   };
 }
@@ -353,7 +360,9 @@ export function mergeSheetJobsWithSupabaseOverrides(
   const mergedSheetJobs = sheetJobs.map((job) => {
     const uiEdited = uiEditedByJobNumber.get(job.jobNumber.trim());
     if (uiEdited) {
-      return mergeSheetJobWithUiEditedJob(job, uiEdited);
+      return mergeSheetJobWithUiEditedJob(job, uiEdited, {
+        sheetFieldSnapshot: uiEdited.sheetFieldSnapshot,
+      });
     }
 
     const stored = storedStatusByJobNumber.get(job.jobNumber.trim());
@@ -367,7 +376,7 @@ export function mergeSheetJobsWithSupabaseOverrides(
         projectStatus: stored.projectStatus,
         projectStatusManual: stored.projectStatusManual,
         flag: stored.flag,
-        notes: stored.notes,
+        jobNotes: stored.jobNotes,
         reviewNotes: stored.reviewNotes,
       },
       stored.projectStatus
@@ -395,6 +404,11 @@ export async function upsertProjectPipelineJobMirror(
   input: { sheetId: string; sheetName: string }
 ): Promise<ProjectPipelineJob> {
   const syncedAt = new Date().toISOString();
+  const existingJob = await fetchProjectPipelineJobByJobNumber(supabase, {
+    sheetId: input.sheetId,
+    sheetName: input.sheetName,
+    jobNumber: job.jobNumber,
+  });
   const jobForMirror: ProjectPipelineJob = {
     ...(job.projectStatusManual
       ? job
@@ -402,6 +416,7 @@ export async function upsertProjectPipelineJobMirror(
           ...job,
           pipelineSheetName: input.sheetName,
         })),
+    sheetFieldSnapshot: job.sheetFieldSnapshot ?? existingJob?.sheetFieldSnapshot,
     uiSourceOfTruth: true,
     pipelineSheetName: input.sheetName,
   };
@@ -498,4 +513,28 @@ export async function updateProjectPipelineJobProjectStatus(
 
   await upsertProjectPipelineJobMirror(supabase, updatedJob, { sheetId, sheetName });
   return updatedJob;
+}
+
+export async function deleteProjectPipelineJobMirror(
+  supabase: SupabaseClient,
+  input: { sheetId: string; sheetName: string; jobNumber: string }
+): Promise<boolean> {
+  const jobNumber = input.jobNumber.trim();
+  if (!jobNumber) {
+    throw new Error('Job number is required');
+  }
+
+  const { data, error } = await supabase
+    .from(PROJECT_PIPELINE_JOBS_TABLE)
+    .delete()
+    .eq('sheet_id', input.sheetId)
+    .eq('sheet_name', input.sheetName)
+    .eq('job_number', jobNumber)
+    .select('id');
+
+  if (error) {
+    throw new Error(`Failed to delete pipeline job: ${error.message}`);
+  }
+
+  return (data?.length ?? 0) > 0;
 }

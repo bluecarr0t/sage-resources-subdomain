@@ -20,6 +20,7 @@ const MIGRATION_FILES = [
   'scripts/migrations/add-project-pipeline-notes-2026-06-24.sql',
   'scripts/migrations/add-project-pipeline-review-notes-2026-06-24.sql',
   'scripts/migrations/create-project-pipeline-job-activity-2026-06-24.sql',
+  'scripts/migrations/add-project-pipeline-job-notes-json-2026-06-26.sql',
 ] as const;
 
 async function main() {

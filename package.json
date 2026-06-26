@@ -52,6 +52,7 @@
     "sync:project-pipeline": "tsx scripts/sync-project-pipeline-to-supabase.ts",
     "test:pipeline-review-calendar": "tsx scripts/test-pipeline-review-calendar.ts",
     "test:pipeline-emails": "tsx scripts/test-pipeline-emails.ts",
+    "test:pipeline-slack": "tsx scripts/test-pipeline-slack.ts",
     "migrate:sage-table-rename": "tsx scripts/apply-sage-table-rename-migration.ts",
     "migrate:sage-data-rename": "tsx scripts/apply-sage-data-rename-migration.ts",
     "migrate:sage-data-dashboard-rpcs": "tsx scripts/apply-dashboard-sage-data-rpcs.ts",

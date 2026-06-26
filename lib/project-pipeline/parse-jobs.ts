@@ -40,7 +40,7 @@ function createEmptyJob(sheetRowIndex: number): ProjectPipelineJob {
     clientEmail: '',
     projectStatus: DEFAULT_PROJECT_PIPELINE_PROJECT_STATUS,
     flag: DEFAULT_PROJECT_PIPELINE_FLAG,
-    notes: '',
+    jobNotes: [],
     sheetRowIndex,
   };
 }

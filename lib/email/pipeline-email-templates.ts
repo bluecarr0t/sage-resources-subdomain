@@ -364,3 +364,93 @@ export function buildProjectStatusChangeEmail(input: {
     }),
   };
 }
+
+function buildDueDateReminderJobTable(job: ProjectPipelineJob): string {
+  const rows = [
+    ['Job #', job.jobNumber],
+    ['Client', job.client],
+    ['Property', job.propertyLocation],
+    ['Consultant', job.appraiserConsultant],
+    ['Project Manager', job.projMgr],
+    ['Due date', formatDueDateLabel(job.dueDate)],
+    ['Project status', job.projectStatus?.trim() || '—'],
+    ['Review status', getReviewStatusDisplayLabel(job.reviewStatus)],
+  ];
+
+  return `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:0 0 20px">${rows
+    .map(
+      ([label, value]) => `
+        <tr>
+          <td style="padding:6px 12px 6px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:${BRAND.muted};vertical-align:top;white-space:nowrap">${escapeHtml(label)}</td>
+          <td style="padding:6px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:${BRAND.text};vertical-align:top">${escapeHtml(value?.trim() || '—')}</td>
+        </tr>`
+    )
+    .join('')}</table>`;
+}
+
+function buildDueDateReminderEmail(input: {
+  job: ProjectPipelineJob;
+  headline: string;
+  lead: string;
+  activeJobsUrl?: string;
+}): { subject: string; html: string } {
+  const client = input.job.client?.trim() || 'Unknown client';
+  const dueLabel = formatDueDateLabel(input.job.dueDate);
+  const subject = `${input.headline}: Job #${input.job.jobNumber} — ${client}`;
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:${BRAND.text}">
+      ${escapeHtml(input.lead)}
+    </p>
+    <p style="margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:${BRAND.text}">
+      <strong>Due date:</strong> ${escapeHtml(dueLabel)}
+    </p>
+    ${buildDueDateReminderJobTable(input.job)}
+  `;
+
+  return {
+    subject,
+    html: buildEmailShell({
+      title: subject,
+      headline: input.headline,
+      bodyHtml,
+      ctaLabel: 'Open Job Pipeline',
+      ctaUrl: buildJobPipelineAdminUrl(input.activeJobsUrl),
+    }),
+  };
+}
+
+export function buildDueDateUpcomingReminderEmail(input: {
+  job: ProjectPipelineJob;
+  activeJobsUrl?: string;
+}): { subject: string; html: string } {
+  return buildDueDateReminderEmail({
+    job: input.job,
+    headline: 'Due soon',
+    lead: 'This project is due on the next business day. Please confirm you are on track to deliver.',
+    activeJobsUrl: input.activeJobsUrl,
+  });
+}
+
+export function buildDueDateDueTodayReminderEmail(input: {
+  job: ProjectPipelineJob;
+  activeJobsUrl?: string;
+}): { subject: string; html: string } {
+  return buildDueDateReminderEmail({
+    job: input.job,
+    headline: 'Due today',
+    lead: 'This project is due today. Please complete delivery or update the project status in Job Pipeline.',
+    activeJobsUrl: input.activeJobsUrl,
+  });
+}
+
+export function buildDueDateOverdueReminderEmail(input: {
+  job: ProjectPipelineJob;
+  activeJobsUrl?: string;
+}): { subject: string; html: string } {
+  return buildDueDateReminderEmail({
+    job: input.job,
+    headline: 'Past due — action needed',
+    lead: 'This project is past its due date and is not marked complete. Please finish the deliverable or update the due date and status.',
+    activeJobsUrl: input.activeJobsUrl,
+  });
+}

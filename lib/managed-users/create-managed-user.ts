@@ -12,7 +12,6 @@ export type CreateManagedUserInput = {
   email: string;
   firstName: string;
   lastName: string;
-  slackUsername?: string | null;
   role?: ManagedUserRole | string | null;
   division?: ManagedUser['division'];
   pipeline_view_all?: boolean;
@@ -32,7 +31,7 @@ export class CreateManagedUserError extends Error {
 }
 
 const MANAGED_USER_SELECT =
-  'id, user_id, email, display_name, first_name, last_name, slack_username, is_active, role, pipeline_view_all, division, is_project_manager, created_at, updated_at';
+  'id, user_id, email, display_name, first_name, last_name, is_active, role, pipeline_view_all, division, is_project_manager, created_at, updated_at';
 
 export async function createManagedUser(
   supabase: SupabaseClient,
@@ -50,7 +49,6 @@ export async function createManagedUser(
   }
 
   const displayName = buildManagedUserDisplayName(firstName, lastName);
-  const slackUsername = input.slackUsername?.trim() || null;
   const role = resolveManagedUserRole(input.role ?? DEFAULT_MANAGED_USER_ROLE);
 
   const { data: existingManaged } = await supabase
@@ -96,7 +94,6 @@ export async function createManagedUser(
       display_name: displayName,
       first_name: firstName || null,
       last_name: lastName || null,
-      slack_username: slackUsername,
       role,
       division: input.division ?? null,
       pipeline_view_all: input.pipeline_view_all ?? false,

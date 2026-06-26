@@ -82,6 +82,9 @@ describe('getVisiblePipelineEmailPreferenceKeys', () => {
       'reviewStatusChange',
       'dueDateChange',
       'projectStatusChange',
+      'dueDateReminderUpcoming',
+      'dueDateReminderDueToday',
+      'dueDateReminderOverdue',
     ]);
   });
 
@@ -89,12 +92,17 @@ describe('getVisiblePipelineEmailPreferenceKeys', () => {
     expect(getVisiblePipelineEmailPreferenceKeys(true)).toEqual([
       'submitForReview',
       'resubmitForReview',
-      'pmReviewStatusChange',
       'pmDueDateChange',
       'pmProjectStatusChange',
+      'pmDueDateReminderUpcoming',
+      'pmDueDateReminderDueToday',
+      'pmDueDateReminderOverdue',
       'reviewStatusChange',
       'dueDateChange',
       'projectStatusChange',
+      'dueDateReminderUpcoming',
+      'dueDateReminderDueToday',
+      'dueDateReminderOverdue',
     ]);
   });
 
@@ -114,6 +122,12 @@ describe('getVisiblePipelineEmailPreferenceKeys', () => {
   it('rejects patches for always-enabled receipt preferences', () => {
     expect(
       parsePipelineEmailPreferencesPatch({ submitForReviewReceipt: false }, { isProjectManager: false })
+    ).toBeNull();
+  });
+
+  it('rejects patches for hidden project manager preferences', () => {
+    expect(
+      parsePipelineEmailPreferencesPatch({ pmReviewStatusChange: false }, { isProjectManager: true })
     ).toBeNull();
   });
 });

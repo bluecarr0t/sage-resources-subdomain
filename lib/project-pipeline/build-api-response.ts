@@ -23,8 +23,10 @@ import { projectPipelineRequiresOAuthConnect } from '@/lib/project-pipeline/oaut
 import { canUseProjectPipelineAuthorPreview } from '@/lib/project-pipeline/author-preview';
 import { canUseProjectPipelineConsultantWorkloadView } from '@/lib/project-pipeline/consultant-workload-view';
 import { resolveDefaultProjectPipelineTableStatusFilter } from '@/lib/project-pipeline/review-todos';
-import type { PipelineCurrentWorkloadAuthorInput } from '@/lib/project-pipeline/current-workload';
-import { preparePipelineWorkloadAuthors } from '@/lib/project-pipeline/workload-authors';
+import {
+  preparePipelineConsultantPickerOptions,
+  preparePipelineWorkloadAuthors,
+} from '@/lib/project-pipeline/workload-authors';
 import {
   isProjectPipelineAllSheetsTab,
   listProjectPipelineSheetTabOptions,
@@ -99,9 +101,24 @@ export async function buildProjectPipelineApiResponse(input: {
   }
 
   const allowOAuthSheets = Boolean(input.accessToken?.trim());
+  const supabase = createServerClient();
+
+  const { data: activeManagedUsers, error: managedUsersError } = await supabase
+    .from('managed_users')
+    .select('email, display_name, first_name, last_name, division, is_active')
+    .order('email', { ascending: true });
+
+  if (managedUsersError) {
+    console.warn('[project-pipeline] managed_users read failed', managedUsersError.message);
+  }
+
+  const managedUserRows = activeManagedUsers ?? [];
+  const pipelineConsultantOptions = preparePipelineConsultantPickerOptions(managedUserRows);
+  const consultantWorkloadAuthors = canUseProjectPipelineConsultantWorkloadView(email)
+    ? preparePipelineWorkloadAuthors(managedUserRows.filter((row) => row.is_active))
+    : undefined;
 
   if (authMode === 'oauth') {
-    const supabase = createServerClient();
     const sheetId = getProjectPipelineSheetId();
     const mirroredCount = isProjectPipelineAllSheetsTab(sheetName)
       ? await countAllProjectPipelineJobsInSupabase(supabase, { sheetId })
@@ -121,12 +138,12 @@ export async function buildProjectPipelineApiResponse(input: {
         requiresOAuth: true,
         jobs: [],
         total: 0,
+        pipelineConsultantOptions,
         ...baseMeta,
       };
     }
   }
 
-  const supabase = createServerClient();
   const sheetId = getProjectPipelineSheetId();
   const mirrorStatus = await getProjectPipelineMirrorStatus(supabase, { sheetId, sheetName });
 
@@ -140,21 +157,6 @@ export async function buildProjectPipelineApiResponse(input: {
     allowOAuthSheets,
     accessToken: input.accessToken,
   });
-
-  let consultantWorkloadAuthors: PipelineCurrentWorkloadAuthorInput[] | undefined;
-  if (canUseProjectPipelineConsultantWorkloadView(email)) {
-    const { data: managedAuthors, error: authorsError } = await supabase
-      .from('managed_users')
-      .select('email, display_name, first_name, last_name, division, is_active')
-      .eq('is_active', true)
-      .order('email', { ascending: true });
-
-    if (authorsError) {
-      console.warn('[project-pipeline] managed_users read failed', authorsError.message);
-    } else {
-      consultantWorkloadAuthors = preparePipelineWorkloadAuthors(managedAuthors ?? []);
-    }
-  }
 
   return {
     configured: true,
@@ -175,6 +177,7 @@ export async function buildProjectPipelineApiResponse(input: {
     viewerDivision: managedUser?.division ?? null,
     canAuthorPreview: canUseProjectPipelineAuthorPreview(email),
     consultantWorkloadAuthors,
+    pipelineConsultantOptions,
     dataSource: pipeline.dataSource,
     mirrorIncomplete: mirrorStatus.mirrorIncomplete,
     lastSyncedAt: mirrorStatus.lastSyncedAt,

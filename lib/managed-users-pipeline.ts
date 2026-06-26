@@ -1,4 +1,5 @@
 import type { ManagedUser } from '@/lib/auth-helpers';
+import { isManagedUserAdmin } from '@/lib/project-pipeline/job-edit-permissions';
 import {
   DEFAULT_PROJECT_PIPELINE_SEGMENT_FILTER,
   type ProjectPipelineSegment,
@@ -14,13 +15,14 @@ export {
 
 export type ManagedUserPipelineFields = Pick<
   ManagedUser,
-  'pipeline_view_all' | 'division'
+  'pipeline_view_all' | 'division' | 'role'
 >;
 
 export function canViewAllPipelineJobs(
   user: ManagedUserPipelineFields | null | undefined
 ): boolean {
-  return Boolean(user?.pipeline_view_all);
+  if (!user) return false;
+  return isManagedUserAdmin(user) || Boolean(user.pipeline_view_all);
 }
 
 /** Null means show both Outdoor and Commercial segments. */

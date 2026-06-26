@@ -6,7 +6,9 @@ export async function loadActiveManagedUsersForPipeline(
 ): Promise<ManagedUserWorkloadAuthorRow[]> {
   const { data, error } = await supabase
     .from('managed_users')
-    .select('email, display_name, first_name, last_name, division, slack_username, pipeline_email_preferences')
+    .select(
+      'email, display_name, first_name, last_name, division, slack_email, pipeline_email_preferences, pipeline_slack_preferences'
+    )
     .eq('is_active', true)
     .order('email', { ascending: true });
 

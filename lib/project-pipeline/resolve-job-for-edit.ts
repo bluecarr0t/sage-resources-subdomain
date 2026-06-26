@@ -136,3 +136,11 @@ export function upsertProjectPipelineJobInList(
   next[existingIndex] = preferProjectPipelineJobRef(next[existingIndex]!, job);
   return next;
 }
+
+export function removeProjectPipelineJobFromList(
+  jobs: readonly ProjectPipelineJob[],
+  job: Pick<ProjectPipelineJob, 'jobNumber' | 'sheetRowIndex' | 'pipelineSheetName'>,
+  sheetName: string
+): ProjectPipelineJob[] {
+  return jobs.filter((row) => !matchesProjectPipelineJobRef(row, job, sheetName));
+}
