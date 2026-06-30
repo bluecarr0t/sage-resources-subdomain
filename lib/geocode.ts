@@ -259,7 +259,17 @@ export async function geocodeCityStateUsa(
   const c = city?.trim();
   const s = state?.trim();
   if (!c || !s) return null;
-  return geocodePlaceLine(`${c}, ${s}, USA`);
+  const stateAbbr = resolveUsStateAbbr(s) ?? s;
+  const line = `${c}, ${stateAbbr}, USA`;
+  const google = await geocodePlaceLine(line);
+  if (google) {
+    return enrichGeocodeState(google, { bodyState: stateAbbr });
+  }
+  const nominatim = await geocodeNominatim(`${c}, ${stateAbbr}, United States`);
+  if (nominatim) {
+    return enrichGeocodeState(nominatim, { bodyState: stateAbbr });
+  }
+  return null;
 }
 
 const NOMINATIM_UA =

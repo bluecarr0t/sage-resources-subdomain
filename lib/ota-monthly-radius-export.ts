@@ -3,9 +3,11 @@
  * `site_monthly_analytics` (DigitalOcean campings DB), filtered by zip + radius.
  */
 
-import { query } from '@/lib/legacy-camping-db';
-import { geocodeCityStateUsa } from '@/lib/geocode';
+import type { PoolClient } from 'pg';
+import { withReadOnlyCampingClient } from '@/lib/legacy-camping-db';
+import { resolveGeocodeForCompsSearch } from '@/lib/geocode';
 import { geocodeZipForSitesExport } from '@/lib/sites-export/geocode-zip';
+import { resolveUsStateAbbr } from '@/lib/us-state-centers';
 
 export const OTA_MONTHLY_EXPORT_COLUMNS = [
   'source',
@@ -83,6 +85,9 @@ const KNOWN_PLACEHOLDER_RATES = new Set(['1011.5', '1011.50', '1026.67', '705.06
 const DEFAULT_YEARS = [2025, 2026] as const;
 const DEFAULT_RADIUS_MILES = 50;
 const DEFAULT_SOURCES: OtaMonthlySource[] = ['hipcamp', 'campspot'];
+const PROPERTY_ID_BATCH_SIZE = 250;
+const US_ZIP_RE = /^\d{5}(-\d{4})?$/;
+const DB_STATEMENT_TIMEOUT_MS = 90_000;
 
 export function isOtaPlaceholderRate(val: string | undefined): boolean {
   if (!val?.trim()) return false;
@@ -111,12 +116,33 @@ type PropertyMonthlyRow = {
   distance_miles: string;
 };
 
+/** @internal Exported for unit tests. */
+export function parseCityStateInput(
+  cityRaw: string,
+  stateRaw: string,
+): { city: string; state: string } {
+  let city = cityRaw.trim();
+  let state = stateRaw.trim();
+
+  if (city && !state) {
+    const commaMatch = city.match(/^(.+?),\s*(.+)$/);
+    if (commaMatch) {
+      city = commaMatch[1]!.trim();
+      state = commaMatch[2]!.trim();
+    }
+  }
+
+  const stateAbbr = resolveUsStateAbbr(state) ?? state;
+  return { city, state: stateAbbr };
+}
+
 async function resolveExportCenter(
   options: Pick<OtaMonthlyRadiusExportOptions, 'zip' | 'city' | 'state'>,
 ): Promise<OtaMonthlyExportLocation & { lat: number; lon: number }> {
-  const zip = options.zip?.trim() ?? '';
-  const city = options.city?.trim() ?? '';
-  const state = options.state?.trim() ?? '';
+  const zipInput = options.zip?.trim() ?? '';
+  const { city, state } = parseCityStateInput(options.city?.trim() ?? '', options.state?.trim() ?? '');
+
+  const zip = zipInput || (US_ZIP_RE.test(city) ? city.slice(0, 5) : '');
 
   if (zip) {
     const center = await geocodeZipForSitesExport(zip, []);
@@ -132,7 +158,11 @@ async function resolveExportCenter(
   }
 
   if (city && state) {
-    const center = await geocodeCityStateUsa(city, state);
+    const center = await resolveGeocodeForCompsSearch({
+      city,
+      state,
+      locationLine: `${city}, ${state}, USA`,
+    });
     if (!center) throw new Error(`Could not geocode ${city}, ${state}`);
     return {
       location_label: `${city}, ${state}`,
@@ -148,13 +178,14 @@ async function resolveExportCenter(
 }
 
 async function getPropertyIdsInRadius(
+  client: PoolClient,
   source: OtaMonthlySource,
   lat: number,
   lon: number,
   radiusMiles: number,
 ): Promise<Array<{ id: string; distance_miles: number }>> {
   const radiusMeters = radiusMiles * 1609.344;
-  const { rows } = await query<{ id: string; distance_miles: string }>(
+  const { rows } = await client.query<{ id: string; distance_miles: string }>(
     `
     SELECT
       pd.id::text as id,
@@ -196,7 +227,8 @@ function propertyIdParam(
   return propertyIds;
 }
 
-async function fetchPropertyMonthlyRows(
+async function fetchPropertyMonthlyRowsBatch(
+  client: PoolClient,
   source: OtaMonthlySource,
   propertyIds: string[],
   years: number[],
@@ -210,7 +242,7 @@ async function fetchPropertyMonthlyRows(
       ? 'pd.id = sma.property_id'
       : 'pd.id::text = sma.property_id';
 
-  const { rows } = await query<PropertyMonthlyRow>(
+  const { rows } = await client.query<PropertyMonthlyRow>(
     `
     WITH property_monthly AS (
       SELECT sma.property_id, sma.year, sma.month, sma.month_name, avg(sma.avg_occupancy::float) as occ
@@ -292,6 +324,30 @@ async function fetchPropertyMonthlyRows(
   });
 }
 
+async function fetchPropertyMonthlyRows(
+  client: PoolClient,
+  source: OtaMonthlySource,
+  propertyIds: string[],
+  years: number[],
+  distanceById: Map<string, number>,
+): Promise<PropertyMonthlyRow[]> {
+  if (propertyIds.length === 0) return [];
+
+  const rows: PropertyMonthlyRow[] = [];
+  for (let i = 0; i < propertyIds.length; i += PROPERTY_ID_BATCH_SIZE) {
+    const batch = propertyIds.slice(i, i + PROPERTY_ID_BATCH_SIZE);
+    const batchRows = await fetchPropertyMonthlyRowsBatch(
+      client,
+      source,
+      batch,
+      years,
+      distanceById,
+    );
+    rows.push(...batchRows);
+  }
+  return rows;
+}
+
 export function mapOtaMonthlyRowsToExport(
   source: OtaMonthlySource,
   rows: PropertyMonthlyRow[],
@@ -337,26 +393,31 @@ export async function exportOtaPropertyMonthlyByRadius(
   const exportSheets: Array<{ name: string; data: OtaMonthlyExportRow[] }> = [];
   const combined: OtaMonthlyExportRow[] = [];
 
-  for (const source of sources) {
-    const inRadius = await getPropertyIdsInRadius(source, lat, lon, radiusMiles);
-    const distanceById = new Map(inRadius.map((p) => [p.id, p.distance_miles]));
-    const propertyIds = inRadius.map((p) => p.id);
-    const rawRows = await fetchPropertyMonthlyRows(
-      source,
-      propertyIds,
-      years,
-      distanceById,
-    );
-    const exportRows = mapOtaMonthlyRowsToExport(source, rawRows);
-    combined.push(...exportRows);
-    exportSheets.push({ name: source, data: exportRows });
-    sourceSummaries.push({
-      source,
-      properties_in_radius: inRadius.length,
-      properties_with_monthly_data: countUniqueProperties(exportRows),
-      row_count: exportRows.length,
-    });
-  }
+  await withReadOnlyCampingClient(async (client) => {
+    await client.query(`SET LOCAL statement_timeout = '${DB_STATEMENT_TIMEOUT_MS}'`);
+
+    for (const source of sources) {
+      const inRadius = await getPropertyIdsInRadius(client, source, lat, lon, radiusMiles);
+      const distanceById = new Map(inRadius.map((p) => [p.id, p.distance_miles]));
+      const propertyIds = inRadius.map((p) => p.id);
+      const rawRows = await fetchPropertyMonthlyRows(
+        client,
+        source,
+        propertyIds,
+        years,
+        distanceById,
+      );
+      const exportRows = mapOtaMonthlyRowsToExport(source, rawRows);
+      combined.push(...exportRows);
+      exportSheets.push({ name: source, data: exportRows });
+      sourceSummaries.push({
+        source,
+        properties_in_radius: inRadius.length,
+        properties_with_monthly_data: countUniqueProperties(exportRows),
+        row_count: exportRows.length,
+      });
+    }
+  });
 
   exportSheets.push({ name: 'combined', data: combined });
 

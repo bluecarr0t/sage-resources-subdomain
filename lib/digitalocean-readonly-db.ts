@@ -17,7 +17,7 @@ function getBaseConfig() {
     password: process.env.DIGITALOCEAN_DB_PASSWORD || process.env.LEGACY_CAMPING_DB_PASSWORD,
     max: 5,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 15000,
+    connectionTimeoutMillis: 30000,
   };
 }
 

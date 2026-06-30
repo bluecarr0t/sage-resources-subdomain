@@ -6,9 +6,25 @@ import {
   isOtaPlaceholderRate,
   mapOtaMonthlyRowsToExport,
   OTA_MONTHLY_EXPORT_COLUMNS,
+  parseCityStateInput,
 } from '@/lib/ota-monthly-radius-export';
 
 describe('ota-monthly-radius-export', () => {
+  it('parses combined city/state lines and normalizes full state names', () => {
+    expect(parseCityStateInput('Fredericksburg, Texas', '')).toEqual({
+      city: 'Fredericksburg',
+      state: 'TX',
+    });
+    expect(parseCityStateInput('Austin', 'Texas')).toEqual({
+      city: 'Austin',
+      state: 'TX',
+    });
+    expect(parseCityStateInput('Austin', 'TX')).toEqual({
+      city: 'Austin',
+      state: 'TX',
+    });
+  });
+
   it('flags known placeholder rates', () => {
     expect(isOtaPlaceholderRate('1011.50')).toBe(true);
     expect(isOtaPlaceholderRate('120.00')).toBe(false);

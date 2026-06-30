@@ -9,6 +9,7 @@ import {
   closeDigitalOceanPools,
   getDigitalOceanPool,
   queryDigitalOceanReadOnly,
+  withDigitalOceanReadOnlyClient,
 } from './digitalocean-readonly-db';
 
 /**
@@ -34,6 +35,16 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
  */
 export async function getClient(): Promise<PoolClient> {
   return getLegacyCampingPool().connect();
+}
+
+/**
+ * Run multiple read-only queries on one campings DB connection (single transaction).
+ * Prefer this for multi-step exports to avoid pool contention on serverless.
+ */
+export async function withReadOnlyCampingClient<T>(
+  fn: (client: PoolClient) => Promise<T>
+): Promise<T> {
+  return withDigitalOceanReadOnlyClient('campings', fn);
 }
 
 /**

@@ -21,6 +21,7 @@ export function createOtaMonthlyExportTool() {
         'occupancy %, RevPAR, min/max price, and site counts. Rates are blanked when occupancy ≤ 5% (closed season) or when ' +
         'known placeholder artifacts appear.\n\n' +
         '**Before calling:** ask the user for a **US zip code OR city + state** center point. Do not guess a location. ' +
+        'Prefer passing an explicit `zip` when the user provides one (e.g. 78624). Full state names like "Texas" are accepted. ' +
         'Default radius is 50 miles and years are 2025–2026 unless the user specifies otherwise.\n\n' +
         'The UI offers CSV/Excel download of the full export; chat context receives only a summary + sample rows.',
       inputSchema: otaMonthlyToolInputSchema,
