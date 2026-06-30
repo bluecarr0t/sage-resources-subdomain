@@ -167,8 +167,6 @@ interface ProjectPipelineTableProps {
   lastSyncedAt?: string | null;
   jobsLoading?: boolean;
   metricTableFilterVersion?: number;
-  /** Bumped after a sheet sync so the table shows all mirrored jobs (clears status filter). */
-  syncFilterResetVersion?: number;
   defaultProjectStatusFilter?: string;
 }
 
@@ -214,7 +212,6 @@ export function ProjectPipelineTable({
   lastSyncedAt = null,
   jobsLoading = false,
   metricTableFilterVersion = 0,
-  syncFilterResetVersion = 0,
   defaultProjectStatusFilter = DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER,
 }: ProjectPipelineTableProps) {
   const t = useTranslations('admin.projectPipeline');
@@ -263,14 +260,6 @@ export function ProjectPipelineTable({
     setProjectStatusFilter('');
     setPage(1);
   }, [metricTableFilterVersion]);
-
-  useEffect(() => {
-    if (!syncFilterResetVersion) return;
-    setSearch('');
-    setServiceFilter('');
-    setProjectStatusFilter('');
-    setPage(1);
-  }, [syncFilterResetVersion]);
 
   const lastSyncedLabel = useMemo(() => {
     if (!lastSyncedAt) return t('lastSyncedNever');

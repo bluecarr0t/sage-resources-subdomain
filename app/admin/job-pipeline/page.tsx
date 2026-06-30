@@ -63,7 +63,7 @@ import {
   removeProjectPipelineJobFromList,
   upsertProjectPipelineJobInList,
 } from '@/lib/project-pipeline/resolve-job-for-edit';
-import { resolveProjectPipelineSyncSuccessCounts } from '@/lib/project-pipeline/sync-success-message';
+import { resolveProjectPipelineSyncJobsAdded } from '@/lib/project-pipeline/sync-success-message';
 import type { ProjectPipelineApiResponse, ProjectPipelineJob } from '@/lib/project-pipeline/types';
 import type { ProjectPipelineReviewNoteType } from '@/lib/project-pipeline/review-notes';
 
@@ -89,11 +89,9 @@ function buildProjectPipelineSyncSuccessMessage(
   t: ReturnType<typeof useTranslations<'admin.projectPipeline'>>,
   response: ProjectPipelineSyncResponseBody
 ): string {
-  const { total, added } = resolveProjectPipelineSyncSuccessCounts(response);
-  if (added > 0) {
-    return t('refreshSyncSuccessWithAdded', { total, added });
-  }
-  return t('refreshSyncSuccess', { total });
+  return t('refreshSyncSuccessAdded', {
+    added: resolveProjectPipelineSyncJobsAdded(response),
+  });
 }
 
 export default function ProjectPipelinePage() {
@@ -120,7 +118,6 @@ export default function ProjectPipelinePage() {
   const [dueWithin30DaysOnly, setDueWithin30DaysOnly] = useState(false);
   const [outdoorPastDueOnly, setOutdoorPastDueOnly] = useState(false);
   const [metricTableFilterVersion, setMetricTableFilterVersion] = useState(0);
-  const [syncFilterResetVersion, setSyncFilterResetVersion] = useState(0);
   const [authorPreviewActive, setAuthorPreviewActive] = useState(false);
   const [consultantWorkloadActive, setConsultantWorkloadActive] = useState(false);
   const [sheetName, setSheetName] = useState(() => resolveInitialSheetFilter(searchParams));
@@ -431,7 +428,6 @@ export default function ProjectPipelinePage() {
           setLastSyncedAt(responseBody.lastSyncedAt);
         }
         await loadJobs(accessToken, sheetName, { silent: true, skipSheetReads: true });
-        setSyncFilterResetVersion((version) => version + 1);
         setToast({
           message: buildProjectPipelineSyncSuccessMessage(t, responseBody),
           variant: 'success',
@@ -885,7 +881,6 @@ export default function ProjectPipelinePage() {
             lastSyncedAt={lastSyncedAt}
             jobsLoading={jobsLoading}
             metricTableFilterVersion={metricTableFilterVersion}
-            syncFilterResetVersion={syncFilterResetVersion}
             defaultProjectStatusFilter={
               data.defaultProjectStatusFilter ?? undefined
             }

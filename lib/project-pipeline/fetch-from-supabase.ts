@@ -17,6 +17,7 @@ import { normalizeProjectPipelineFlag } from './project-flag';
 import { resolveProjectPipelineJobNotes, type ProjectPipelineJobNote } from './job-notes';
 import { parseProjectPipelineReviewNotes, type ProjectPipelineReviewNote } from './review-notes';
 import type { ProjectPipelineJob } from './types';
+import { fetchAllSupabasePages } from './supabase-pagination';
 
 export async function countProjectPipelineJobsInSupabase(
   supabase: SupabaseClient,
@@ -173,18 +174,17 @@ export async function fetchProjectPipelineJobsFromSupabase(
 ): Promise<ProjectPipelineJob[]> {
   const sheetId = input.sheetId ?? getProjectPipelineSheetId(input.env);
 
-  const { data, error } = await supabase
-    .from(PROJECT_PIPELINE_JOBS_TABLE)
-    .select('*')
-    .eq('sheet_id', sheetId)
-    .eq('sheet_name', input.sheetName)
-    .order('sheet_row_index', { ascending: true });
+  const rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(({ from, to }) =>
+    supabase
+      .from(PROJECT_PIPELINE_JOBS_TABLE)
+      .select('*')
+      .eq('sheet_id', sheetId)
+      .eq('sheet_name', input.sheetName)
+      .order('sheet_row_index', { ascending: true })
+      .range(from, to)
+  );
 
-  if (error) {
-    throw new Error(`Failed to load pipeline jobs from Supabase: ${error.message}`);
-  }
-
-  return ((data ?? []) as ProjectPipelineJobDbRow[]).map(projectPipelineJobFromDbRow);
+  return rows.map(projectPipelineJobFromDbRow);
 }
 
 export async function fetchAllProjectPipelineJobsFromSupabase(
@@ -193,18 +193,17 @@ export async function fetchAllProjectPipelineJobsFromSupabase(
 ): Promise<ProjectPipelineJob[]> {
   const sheetId = input.sheetId ?? getProjectPipelineSheetId(input.env);
 
-  const { data, error } = await supabase
-    .from(PROJECT_PIPELINE_JOBS_TABLE)
-    .select('*')
-    .eq('sheet_id', sheetId)
-    .order('sheet_name', { ascending: true })
-    .order('sheet_row_index', { ascending: true });
+  const rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(({ from, to }) =>
+    supabase
+      .from(PROJECT_PIPELINE_JOBS_TABLE)
+      .select('*')
+      .eq('sheet_id', sheetId)
+      .order('sheet_name', { ascending: true })
+      .order('sheet_row_index', { ascending: true })
+      .range(from, to)
+  );
 
-  if (error) {
-    throw new Error(`Failed to load all pipeline jobs from Supabase: ${error.message}`);
-  }
-
-  return ((data ?? []) as ProjectPipelineJobDbRow[]).map(projectPipelineJobFromDbRow);
+  return rows.map(projectPipelineJobFromDbRow);
 }
 
 export async function fetchProjectPipelineJobByJobNumber(
@@ -243,19 +242,32 @@ export async function fetchProjectPipelineStoredStatusMap(
 ): Promise<Map<string, ProjectPipelineStoredStatus>> {
   const sheetId = input.sheetId ?? getProjectPipelineSheetId(input.env);
 
-  const { data, error } = await supabase
-    .from(PROJECT_PIPELINE_JOBS_TABLE)
-    .select('job_number, project_status, project_status_manual, flag, notes, job_notes, review_notes')
-    .eq('sheet_id', sheetId)
-    .eq('sheet_name', input.sheetName);
+  let rows: {
+    job_number: string;
+    project_status: string | null;
+    project_status_manual: boolean | null;
+    flag: string | null;
+    notes: string | null;
+    job_notes: unknown;
+    review_notes: unknown;
+  }[];
 
-  if (error) {
+  try {
+    rows = await fetchAllSupabasePages(({ from, to }) =>
+      supabase
+        .from(PROJECT_PIPELINE_JOBS_TABLE)
+        .select('job_number, project_status, project_status_manual, flag, notes, job_notes, review_notes')
+        .eq('sheet_id', sheetId)
+        .eq('sheet_name', input.sheetName)
+        .range(from, to)
+    );
+  } catch (error) {
     console.warn('[project-pipeline] Failed to load stored project statuses from Supabase', error);
     return new Map();
   }
 
   const statusByJobNumber = new Map<string, ProjectPipelineStoredStatus>();
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const jobNumber = typeof row.job_number === 'string' ? row.job_number.trim() : '';
     if (!jobNumber) continue;
     statusByJobNumber.set(jobNumber, {
@@ -326,20 +338,24 @@ export async function fetchProjectPipelineUiEditedJobsMap(
 ): Promise<Map<string, ProjectPipelineJob>> {
   const sheetId = input.sheetId ?? getProjectPipelineSheetId(input.env);
 
-  const { data, error } = await supabase
-    .from(PROJECT_PIPELINE_JOBS_TABLE)
-    .select('*')
-    .eq('sheet_id', sheetId)
-    .eq('sheet_name', input.sheetName)
-    .eq('ui_source_of_truth', true);
-
-  if (error) {
+  let rows: ProjectPipelineJobDbRow[];
+  try {
+    rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(({ from, to }) =>
+      supabase
+        .from(PROJECT_PIPELINE_JOBS_TABLE)
+        .select('*')
+        .eq('sheet_id', sheetId)
+        .eq('sheet_name', input.sheetName)
+        .eq('ui_source_of_truth', true)
+        .range(from, to)
+    );
+  } catch (error) {
     console.warn('[project-pipeline] Failed to load UI-edited jobs from Supabase', error);
     return new Map();
   }
 
   const jobsByJobNumber = new Map<string, ProjectPipelineJob>();
-  for (const row of (data ?? []) as ProjectPipelineJobDbRow[]) {
+  for (const row of rows) {
     const jobNumber = row.job_number.trim();
     if (!jobNumber) continue;
     jobsByJobNumber.set(jobNumber, projectPipelineJobFromDbRow(row));

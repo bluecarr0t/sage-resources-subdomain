@@ -1,22 +1,17 @@
-import { resolveProjectPipelineSyncSuccessCounts } from '@/lib/project-pipeline/sync-success-message';
+import { resolveProjectPipelineSyncJobsAdded } from '@/lib/project-pipeline/sync-success-message';
 
-describe('resolveProjectPipelineSyncSuccessCounts', () => {
-  it('reads single-sheet sync counts', () => {
-    expect(
-      resolveProjectPipelineSyncSuccessCounts({
-        jobsUpserted: 1000,
-        jobsAdded: 12,
-      })
-    ).toEqual({ total: 1000, added: 12 });
+describe('resolveProjectPipelineSyncJobsAdded', () => {
+  it('reads single-sheet added counts', () => {
+    expect(resolveProjectPipelineSyncJobsAdded({ jobsAdded: 12 })).toBe(12);
+    expect(resolveProjectPipelineSyncJobsAdded({ jobsAdded: 0 })).toBe(0);
   });
 
-  it('reads sync-all counts', () => {
+  it('reads sync-all added counts', () => {
     expect(
-      resolveProjectPipelineSyncSuccessCounts({
+      resolveProjectPipelineSyncJobsAdded({
         syncAll: true,
-        totalJobsUpserted: 1486,
         totalJobsAdded: 7,
       })
-    ).toEqual({ total: 1486, added: 7 });
+    ).toBe(7);
   });
 });
