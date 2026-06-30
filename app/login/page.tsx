@@ -6,7 +6,7 @@ import LoginForm from "@/components/LoginForm";
 
 export const metadata: Metadata = {
   title: "Login - Sage Outdoor Advisory",
-  description: "Authorized access only. Sign in with your Google account.",
+  description: "Internal access only. Sign in with your work email via Google.",
   robots: {
     index: false,
     follow: true,
@@ -26,7 +26,8 @@ export default function LoginPage() {
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Sign In</h1>
-              <p className="text-gray-600">Authorized access only. Sign in with your @sageoutdooradvisory.com Google account.</p>
+              <p className="text-gray-600">Internal access only.</p>
+              <p className="text-gray-600">Sign in with your work email via Google.</p>
             </div>
             
             <Suspense fallback={
