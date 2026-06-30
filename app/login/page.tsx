@@ -21,7 +21,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col bg-gray-50">
       <FloatingHeader locale={locale} showFullNav={true} showSpacer={false} />
 
-      <main className="flex flex-1 flex-col justify-center px-4 py-16 pt-28 sm:px-6 sm:pt-32 lg:px-8">
+      <main className="flex flex-1 flex-col justify-center px-4 py-16 pt-28 pb-16 min-h-[calc(100dvh+4rem)] sm:px-6 sm:pt-32 lg:px-8">
         <div className="mx-auto w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
             <div className="text-center mb-8">
