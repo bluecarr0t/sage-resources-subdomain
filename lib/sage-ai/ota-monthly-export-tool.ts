@@ -17,7 +17,7 @@ export function createOtaMonthlyExportTool() {
     export_ota_property_monthly_rates: tool({
       description:
         'Export **property-level month-over-month occupancy and retail daily rates** from raw Hipcamp and Campspot ' +
-        '`site_monthly_analytics` (DigitalOcean scrape warehouse). Returns one row per property per month with median/mean ADR, ' +
+        '`site_monthly_analytics` (Hipcamp/Campspot warehouse mirrored on Supabase). Returns one row per property per month with median/mean ADR, ' +
         'occupancy %, RevPAR, min/max price, and site counts. Rates are blanked when occupancy ≤ 5% (closed season) or when ' +
         'known placeholder artifacts appear.\n\n' +
         '**Before calling:** ask the user for a **US zip code OR city + state** center point. Do not guess a location. ' +

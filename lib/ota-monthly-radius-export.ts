@@ -1,10 +1,10 @@
 /**
  * Property-level month-over-month occupancy & rates from raw Hipcamp/Campspot
- * `site_monthly_analytics` (DigitalOcean campings DB), filtered by zip + radius.
+ * `site_monthly_analytics` (DigitalOcean campings DB or Supabase mirror), filtered by zip + radius.
  */
 
 import type { PoolClient } from 'pg';
-import { withReadOnlyCampingClient } from '@/lib/legacy-camping-db';
+import { withOtaWarehouseClient } from '@/lib/ota-warehouse-db';
 import { resolveGeocodeForCompsSearch } from '@/lib/geocode';
 import { geocodeZipForSitesExport } from '@/lib/sites-export/geocode-zip';
 import { resolveUsStateAbbr } from '@/lib/us-state-centers';
@@ -393,7 +393,7 @@ export async function exportOtaPropertyMonthlyByRadius(
   const exportSheets: Array<{ name: string; data: OtaMonthlyExportRow[] }> = [];
   const combined: OtaMonthlyExportRow[] = [];
 
-  await withReadOnlyCampingClient(async (client) => {
+  await withOtaWarehouseClient(async (client) => {
     await client.query(`SET LOCAL statement_timeout = '${DB_STATEMENT_TIMEOUT_MS}'`);
 
     for (const source of sources) {

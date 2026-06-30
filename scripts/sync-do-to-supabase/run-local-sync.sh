@@ -19,7 +19,14 @@ cd "$REPO" || { echo "repo not found: $REPO" >&2; exit 1; }
 
 echo "=== DO -> Supabase sync starting $TS (args: $*) ===" | tee -a "$LOG"
 npm run sync:do -- "$@" >> "$LOG" 2>&1
-STATUS=$?
+SYNC_STATUS=$?
+if [ $SYNC_STATUS -eq 0 ]; then
+  echo "=== Matview snapshot (site_monthly_analytics, latest_sites) ===" | tee -a "$LOG"
+  npm run sync:do:matviews >> "$LOG" 2>&1
+  STATUS=$?
+else
+  STATUS=$SYNC_STATUS
+fi
 echo "=== finished status=$STATUS at $(date +%Y%m%d-%H%M%S) ===" | tee -a "$LOG"
 
 # Keep ~60 days of logs
