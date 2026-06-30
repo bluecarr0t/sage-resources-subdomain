@@ -46,7 +46,14 @@ export interface ProjectPipelineJob {
 
 export type ProjectPipelineEditableField = Exclude<
   keyof ProjectPipelineJob,
-  'sheetRowIndex' | 'pipelineSheetName' | 'sheetYear' | 'projectStatus' | 'flag' | 'jobNotes' | 'reviewNotes'
+  | 'sheetRowIndex'
+  | 'pipelineSheetName'
+  | 'sheetYear'
+  | 'projectStatus'
+  | 'flag'
+  | 'jobNotes'
+  | 'reviewNotes'
+  | 'sheetFieldSnapshot'
 >;
 
 export type ProjectPipelineSupabaseOnlyField = 'projectStatus' | 'flag' | 'jobNotes' | 'reviewNotes';
