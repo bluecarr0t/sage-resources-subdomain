@@ -48,6 +48,7 @@ import {
   DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER,
   normalizeProjectPipelineProjectStatus,
   PROJECT_PIPELINE_PROJECT_STATUSES,
+  type ProjectPipelineProjectStatus,
 } from '@/lib/project-pipeline/project-status';
 import { ProjectPipelineConsultantWorkloadTable } from '@/components/project-pipeline/ProjectPipelineConsultantWorkloadTable';
 import { ProjectPipelineTableSkeleton } from '@/components/project-pipeline/ProjectPipelineTableSkeleton';

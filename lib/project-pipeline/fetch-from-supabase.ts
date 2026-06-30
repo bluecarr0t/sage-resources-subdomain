@@ -174,7 +174,7 @@ export async function fetchProjectPipelineJobsFromSupabase(
 ): Promise<ProjectPipelineJob[]> {
   const sheetId = input.sheetId ?? getProjectPipelineSheetId(input.env);
 
-  const rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(({ from, to }) =>
+  const rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(async ({ from, to }) =>
     supabase
       .from(PROJECT_PIPELINE_JOBS_TABLE)
       .select('*')
@@ -193,7 +193,7 @@ export async function fetchAllProjectPipelineJobsFromSupabase(
 ): Promise<ProjectPipelineJob[]> {
   const sheetId = input.sheetId ?? getProjectPipelineSheetId(input.env);
 
-  const rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(({ from, to }) =>
+  const rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(async ({ from, to }) =>
     supabase
       .from(PROJECT_PIPELINE_JOBS_TABLE)
       .select('*')
@@ -253,7 +253,7 @@ export async function fetchProjectPipelineStoredStatusMap(
   }[];
 
   try {
-    rows = await fetchAllSupabasePages(({ from, to }) =>
+    rows = await fetchAllSupabasePages(async ({ from, to }) =>
       supabase
         .from(PROJECT_PIPELINE_JOBS_TABLE)
         .select('job_number, project_status, project_status_manual, flag, notes, job_notes, review_notes')
@@ -340,7 +340,7 @@ export async function fetchProjectPipelineUiEditedJobsMap(
 
   let rows: ProjectPipelineJobDbRow[];
   try {
-    rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(({ from, to }) =>
+    rows = await fetchAllSupabasePages<ProjectPipelineJobDbRow>(async ({ from, to }) =>
       supabase
         .from(PROJECT_PIPELINE_JOBS_TABLE)
         .select('*')
