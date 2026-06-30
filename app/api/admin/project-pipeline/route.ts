@@ -8,7 +8,12 @@ export const dynamic = 'force-dynamic';
 
 async function handleProjectPipelineRequest(
   auth: { session: { user: { id: string; email?: string | null } } },
-  options: { accessToken?: string; sheetName?: string } = {}
+  options: {
+    accessToken?: string;
+    sheetName?: string;
+    skipSheetReads?: boolean;
+    refreshSegmentsFromSheet?: boolean;
+  } = {}
 ) {
   if (!isProjectPipelineConfigured()) {
     return NextResponse.json(
@@ -28,6 +33,8 @@ async function handleProjectPipelineRequest(
       email: auth.session.user.email,
       accessToken: options.accessToken,
       sheetName: options.sheetName,
+      skipSheetReads: options.skipSheetReads,
+      refreshSegmentsFromSheet: options.refreshSegmentsFromSheet,
     });
 
     return NextResponse.json(payload);
@@ -45,7 +52,8 @@ async function handleProjectPipelineRequest(
 
 export const GET = withAdminAuth(async (request: NextRequest, auth) => {
   const sheetName = request.nextUrl.searchParams.get('sheetName') ?? undefined;
-  return handleProjectPipelineRequest(auth, { sheetName });
+  const skipSheetReads = request.nextUrl.searchParams.get('skipSheetReads') === '1';
+  return handleProjectPipelineRequest(auth, { sheetName, skipSheetReads });
 });
 
 export const POST = withAdminAuth(async (request: NextRequest, auth) => {

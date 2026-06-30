@@ -24,11 +24,21 @@ When a consultant **submits** or **resubmits** a project for review, the app can
 ## What gets created
 
 - **Title:** `Review: Job #… — Client` (or `Resubmit review: …`)
-- **When:** 9:00–9:30 AM on the job due date (if still in the future), otherwise the next weekday at 9:00 AM
-- **Description:** job context, author note, link to `/admin/job-pipeline`
+- **When:** 9:00–9:30 AM on the **next business day** after submission (skips weekends; not tied to the job due date)
+- **Description:** job context (including due date), author note, link to `/admin/job-pipeline`
 - **Reminders:** popup 15 min before, email 60 min before
+- **Resubmit:** updates the same calendar event (matched by stable `iCalUID`) instead of creating a duplicate
 
 Triggered from `notifyPipelineJobChanges` after a successful `submit_for_review` / `resubmit` review action (same path as email + Slack).
+
+## Production rollout checklist
+
+1. **`PIPELINE_CALENDAR_ENABLED=true`** — set on Vercel Production (required to create events).
+2. **`GOOGLE_SERVICE_ACCOUNT_JSON`** (or email + private key) — must be present on Vercel; same credentials as pipeline Sheets cron sync. Calendar creation is skipped when missing even if `PIPELINE_CALENDAR_ENABLED=true`.
+3. **Google Calendar API** enabled on the GCP project.
+4. **Domain-wide delegation** configured with scope `https://www.googleapis.com/auth/calendar.events`.
+5. **Redeploy** after env changes so serverless functions pick up new variables.
+6. **Preview/staging:** set `PIPELINE_CALENDAR_TEST_RECIPIENT` to route all review events to one mailbox while testing.
 
 ## Manual test
 

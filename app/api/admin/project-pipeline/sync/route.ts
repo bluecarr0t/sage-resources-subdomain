@@ -9,6 +9,10 @@ import {
   syncAllProjectPipelineSheetsToSupabase,
   syncProjectPipelineSheetToSupabase,
 } from '@/lib/project-pipeline/sync-to-supabase';
+import {
+  formatProjectPipelineSheetsAccessError,
+  isGoogleSheetsPermissionError,
+} from '@/lib/project-pipeline/google-sheets-errors';
 import { resolveProjectPipelineSheetTab } from '@/lib/project-pipeline/sheet-tabs';
 
 export const dynamic = 'force-dynamic';
@@ -70,14 +74,15 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
     });
   } catch (error) {
     console.error('[project-pipeline/sync] manual sync failed', error);
+    const message = formatProjectPipelineSheetsAccessError(error);
     return NextResponse.json(
       {
         ok: false,
         error: 'Sync failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message,
         elapsedMs: Date.now() - started,
       },
-      { status: 500 }
+      { status: isGoogleSheetsPermissionError(error) ? 403 : 500 }
     );
   }
 });

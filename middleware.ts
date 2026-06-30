@@ -191,6 +191,7 @@ const excludedRoutes = [
   'outdoor-hospitality-pipeline',
   'glamping-market-snapshot',
   'admin',
+  'pipeline-oauth-sync',
   'sitemap',
   'sitemap.xml',
   'sitemaps',
@@ -411,6 +412,7 @@ export async function middleware(request: NextRequest) {
           pathname === '/login' ||
           pathname.startsWith('/auth') ||
           pathname.startsWith('/admin') ||
+          pathname.startsWith('/pipeline-oauth-sync') ||
           pathname === '/privacy-policy' ||
           pathname === '/terms-of-service' ||
           pathname === '/glamping-market-snapshot'

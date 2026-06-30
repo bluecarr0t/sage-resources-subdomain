@@ -62,6 +62,8 @@ export async function buildProjectPipelineApiResponse(input: {
   email: string | null | undefined;
   accessToken?: string;
   sheetName?: string;
+  skipSheetReads?: boolean;
+  refreshSegmentsFromSheet?: boolean;
 }): Promise<ProjectPipelineApiResponse> {
   const authMode = getProjectPipelineAuthMode();
   const configured = isProjectPipelineConfigured();
@@ -156,6 +158,8 @@ export async function buildProjectPipelineApiResponse(input: {
     viewerIsAdmin,
     allowOAuthSheets,
     accessToken: input.accessToken,
+    skipSheetReads: input.skipSheetReads,
+    refreshSegmentsFromSheet: input.refreshSegmentsFromSheet,
   });
 
   return {

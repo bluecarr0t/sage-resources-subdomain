@@ -56,6 +56,18 @@ describe('parseGoogleServiceAccountFromEnv', () => {
     });
   });
 
+  it('strips JSON paste quotes from split private key env vars', () => {
+    const credentials = parseGoogleServiceAccountFromEnv({
+      GOOGLE_SERVICE_ACCOUNT_EMAIL: 'export@test.iam.gserviceaccount.com',
+      GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY:
+        '"-----BEGIN PRIVATE KEY-----\\nabc\\n-----END PRIVATE KEY-----\\n",',
+    });
+
+    expect(credentials?.private_key).toBe(
+      '-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n'
+    );
+  });
+
   it('parses a JSON service account blob', () => {
     const credentials = parseGoogleServiceAccountFromEnv({
       GOOGLE_SERVICE_ACCOUNT_JSON: JSON.stringify({

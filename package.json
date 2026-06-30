@@ -50,6 +50,7 @@
     "migrate:managed-users-profile": "tsx scripts/apply-managed-users-profile-migration.ts",
     "migrate:managed-users-is-project-manager": "tsx scripts/apply-managed-users-is-project-manager-migration.ts",
     "sync:project-pipeline": "tsx scripts/sync-project-pipeline-to-supabase.ts",
+    "sync:project-pipeline:oauth": "tsx scripts/oauth-sync-pipeline.ts",
     "test:pipeline-review-calendar": "tsx scripts/test-pipeline-review-calendar.ts",
     "test:pipeline-emails": "tsx scripts/test-pipeline-emails.ts",
     "test:pipeline-slack": "tsx scripts/test-pipeline-slack.ts",

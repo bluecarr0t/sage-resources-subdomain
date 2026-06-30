@@ -5,11 +5,11 @@ import {
   getProjectPipelineSheetId,
   fetchProjectPipelineJobs,
 } from './fetch-jobs';
+import { isGoogleSheetsReadQuotaError } from './sheets-read-cache';
 import {
   PROJECT_PIPELINE_JOBS_TABLE,
   PROJECT_PIPELINE_SYNC_RUNS_TABLE,
   projectPipelineJobToDbRow,
-  projectPipelineJobToSheetSyncDbRow,
 } from './db-row';
 import {
   fetchProjectPipelineJobsFromSupabase,
@@ -18,8 +18,8 @@ import {
 } from './fetch-from-supabase';
 import { recordProjectPipelineSheetSyncActivitySafe } from './activity/record-sheet-sync-activity';
 import { resolveSheetSyncProjectPipelineJob } from './resolve-sheet-sync-job';
+import { dedupeProjectPipelineJobs } from './resolve-job-for-edit';
 import { pickProjectPipelineSheetFieldSnapshot } from './sheet-field-snapshot';
-import { isStickyProjectPipelineProjectStatus } from './project-status';
 import {
   PROJECT_PIPELINE_SHEET_TABS,
   parseProjectPipelineSheetYear,
@@ -34,6 +34,7 @@ export type SyncProjectPipelineToSupabaseResult = {
   sheetName: string;
   jobsFetched: number;
   jobsUpserted: number;
+  jobsAdded: number;
   jobsRemoved: number;
   lastSyncedAt: string;
 };
@@ -43,6 +44,7 @@ export type SyncAllProjectPipelineSheetsResult = {
   sheets: SyncProjectPipelineToSupabaseResult[];
   totalJobsFetched: number;
   totalJobsUpserted: number;
+  totalJobsAdded: number;
   totalJobsRemoved: number;
 };
 
@@ -100,6 +102,7 @@ export async function syncProjectPipelineSheetToSupabase(
       sheetName,
       accessToken,
       bypassCache: true,
+      skipRowSegmentFetch: true,
     });
     const storedStatusByJobNumber = await fetchProjectPipelineStoredStatusMap(supabase, {
       sheetId,
@@ -127,55 +130,42 @@ export async function syncProjectPipelineSheetToSupabase(
       storedStatusByJobNumber,
       uiEditedByJobNumber,
     };
-    const syncedJobs = jobs
-      .filter((job) => job.jobNumber.trim())
-      .map((sheetJob) => {
-        const merged = resolveSheetSyncProjectPipelineJob({
-          sheetJob,
-          ...sheetSyncContext,
-        });
-        return {
-          ...merged,
-          sheetFieldSnapshot: pickProjectPipelineSheetFieldSnapshot(sheetJob),
-        };
-      });
-    const rows = syncedJobs.map((job) => {
-      const jobNumber = job.jobNumber.trim();
-      const uiEdited = uiEditedByJobNumber.get(jobNumber);
-      if (uiEdited) {
-        return projectPipelineJobToDbRow(job, {
-          sheetId,
-          sheetName,
-          syncRunId: runId,
-          syncedAt,
-          sheetYear,
-        });
-      }
+    const syncedJobs = dedupeProjectPipelineJobs(
+      jobs
+        .filter((job) => job.jobNumber.trim())
+        .map((sheetJob) => {
+          const merged = resolveSheetSyncProjectPipelineJob({
+            sheetJob,
+            ...sheetSyncContext,
+          });
+          return {
+            ...merged,
+            sheetFieldSnapshot: pickProjectPipelineSheetFieldSnapshot(sheetJob),
+          };
+        }),
+      sheetName
+    );
 
-      const stored = storedStatusByJobNumber.get(jobNumber);
-      if (
-        stored?.projectStatusManual ||
-        isStickyProjectPipelineProjectStatus(stored?.projectStatus)
-      ) {
-        return projectPipelineJobToDbRow(job, {
-          sheetId,
-          sheetName,
-          syncRunId: runId,
-          syncedAt,
-          sheetYear,
-        });
-      }
+    if (syncedJobs.length < jobs.filter((job) => job.jobNumber.trim()).length) {
+      console.warn(
+        `[project-pipeline] Deduped duplicate job numbers before upsert for ${sheetName}`
+      );
+    }
 
-      return projectPipelineJobToSheetSyncDbRow(job, {
+    const rows = syncedJobs.map((job) =>
+      projectPipelineJobToDbRow(job, {
         sheetId,
         sheetName,
         syncRunId: runId,
         syncedAt,
         sheetYear,
-      });
-    });
+      })
+    );
 
     let jobsUpserted = 0;
+    const jobsAdded = syncedJobs.filter(
+      (job) => !previousJobsByNumber.has(job.jobNumber.trim())
+    ).length;
 
     for (let offset = 0; offset < rows.length; offset += UPSERT_BATCH_SIZE) {
       const batch = rows.slice(offset, offset + UPSERT_BATCH_SIZE);
@@ -242,6 +232,7 @@ export async function syncProjectPipelineSheetToSupabase(
       sheetName,
       jobsFetched: jobs.length,
       jobsUpserted,
+      jobsAdded,
       jobsRemoved,
       lastSyncedAt,
     };
@@ -267,14 +258,29 @@ export async function syncAllProjectPipelineSheetsToSupabase(
   const env = options.env ?? process.env;
   const sheetId = getProjectPipelineSheetId(env);
   const sheets: SyncProjectPipelineToSupabaseResult[] = [];
+  const errors: string[] = [];
 
   for (const sheetName of PROJECT_PIPELINE_SHEET_TABS) {
-    sheets.push(
-      await syncProjectPipelineSheetToSupabase(supabase, sheetName, {
-        env,
-        accessToken: options.accessToken,
-      })
-    );
+    try {
+      sheets.push(
+        await syncProjectPipelineSheetToSupabase(supabase, sheetName, {
+          env,
+          accessToken: options.accessToken,
+        })
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push(`${sheetName}: ${message}`);
+      console.warn(`[project-pipeline] Sync failed for ${sheetName}`, error);
+
+      if (!isGoogleSheetsReadQuotaError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  if (!sheets.length && errors.length > 0) {
+    throw new Error(errors.join('; '));
   }
 
   return {
@@ -282,6 +288,7 @@ export async function syncAllProjectPipelineSheetsToSupabase(
     sheets,
     totalJobsFetched: sheets.reduce((sum, sheet) => sum + sheet.jobsFetched, 0),
     totalJobsUpserted: sheets.reduce((sum, sheet) => sum + sheet.jobsUpserted, 0),
+    totalJobsAdded: sheets.reduce((sum, sheet) => sum + sheet.jobsAdded, 0),
     totalJobsRemoved: sheets.reduce((sum, sheet) => sum + sheet.jobsRemoved, 0),
   };
 }

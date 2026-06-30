@@ -1,7 +1,14 @@
-import { withDerivedProjectPipelineProjectStatus } from '@/lib/project-pipeline/derive-project-status';
+import {
+  deriveProjectPipelineProjectStatus,
+  withDerivedProjectPipelineProjectStatus,
+} from '@/lib/project-pipeline/derive-project-status';
 import type { ProjectPipelineStoredStatus } from '@/lib/project-pipeline/fetch-from-supabase';
 import { mergeSheetJobWithUiEditedJob } from '@/lib/project-pipeline/merge-sheet-ui-job';
-import { isStickyProjectPipelineProjectStatus } from '@/lib/project-pipeline/project-status';
+import {
+  isStickyProjectPipelineProjectStatus,
+  normalizeProjectPipelineProjectStatus,
+  type ProjectPipelineProjectStatus,
+} from '@/lib/project-pipeline/project-status';
 import type { ProjectPipelineSheetTab } from '@/lib/project-pipeline/sheet-tabs';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 
@@ -26,33 +33,61 @@ export function resolveSheetSyncProjectPipelineJob(
   }
 
   const stored = input.storedStatusByJobNumber.get(jobNumber);
-  const preserveStoredStatus =
-    stored &&
-    (stored.projectStatusManual || isStickyProjectPipelineProjectStatus(stored.projectStatus));
-
-  if (preserveStoredStatus) {
-    return withDerivedProjectPipelineProjectStatus({
-      ...input.sheetJob,
-      pipelineSheetName: input.sheetName,
-      sheetYear: input.sheetYear,
-      projectStatus: stored.projectStatus,
-      projectStatusManual: stored.projectStatusManual,
-      flag: stored.flag,
-      jobNotes: stored.jobNotes,
-      reviewNotes: stored.reviewNotes,
-    });
-  }
-
-  const storedFlag = stored?.flag;
-  const storedJobNotes = stored?.jobNotes;
-  const storedReviewNotes = stored?.reviewNotes;
-
-  return withDerivedProjectPipelineProjectStatus({
+  const baseJob: ProjectPipelineJob = {
     ...input.sheetJob,
     pipelineSheetName: input.sheetName,
     sheetYear: input.sheetYear,
-    ...(storedFlag ? { flag: storedFlag } : {}),
-    ...(storedJobNotes?.length ? { jobNotes: storedJobNotes } : {}),
-    ...(storedReviewNotes?.length ? { reviewNotes: storedReviewNotes } : {}),
-  });
+  };
+
+  if (!stored) {
+    return withDerivedProjectPipelineProjectStatus(baseJob);
+  }
+
+  return mergeStoredProjectPipelineJobWithSheetRow(baseJob, stored);
+}
+
+/** Whether sheet signals should advance an existing non-manual stored status (never regress). */
+export function shouldAdvanceStoredProjectPipelineStatus(
+  storedStatus: string,
+  derivedStatus: ProjectPipelineProjectStatus
+): boolean {
+  const stored = normalizeProjectPipelineProjectStatus(storedStatus);
+  if (stored === derivedStatus) return false;
+  if (derivedStatus === 'Completed') return true;
+  if (
+    stored === 'Not Started' &&
+    (derivedStatus === 'In-Progress' || derivedStatus === 'In Review')
+  ) {
+    return true;
+  }
+  if (stored === 'In-Progress' && derivedStatus === 'In Review') {
+    return true;
+  }
+  return false;
+}
+
+/** Refresh sheet-backed columns for an existing mirror row without resetting workflow state. */
+export function mergeStoredProjectPipelineJobWithSheetRow(
+  sheetJob: ProjectPipelineJob,
+  stored: ProjectPipelineStoredStatus
+): ProjectPipelineJob {
+  const merged: ProjectPipelineJob = {
+    ...sheetJob,
+    projectStatus: stored.projectStatus,
+    projectStatusManual: stored.projectStatusManual,
+    flag: stored.flag,
+    jobNotes: stored.jobNotes,
+    reviewNotes: stored.reviewNotes,
+  };
+
+  if (stored.projectStatusManual || isStickyProjectPipelineProjectStatus(stored.projectStatus)) {
+    return merged;
+  }
+
+  const derived = deriveProjectPipelineProjectStatus(merged);
+  if (shouldAdvanceStoredProjectPipelineStatus(stored.projectStatus, derived)) {
+    return { ...merged, projectStatus: derived };
+  }
+
+  return merged;
 }

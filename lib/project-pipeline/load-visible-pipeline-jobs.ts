@@ -18,6 +18,8 @@ export type LoadVisibleProjectPipelineJobsInput = {
   accessToken?: string;
   allowOAuthSheets?: boolean;
   includeFieldColumnMap?: boolean;
+  skipSheetReads?: boolean;
+  refreshSegmentsFromSheet?: boolean;
 };
 
 export type LoadVisibleProjectPipelineJobsResult = {
@@ -39,6 +41,8 @@ export async function loadVisibleProjectPipelineJobs(
     allowOAuthSheets,
     accessToken: allowOAuthSheets ? input.accessToken : undefined,
     includeFieldColumnMap: input.includeFieldColumnMap,
+    skipSheetReads: input.skipSheetReads,
+    refreshSegmentsFromSheet: input.refreshSegmentsFromSheet,
   });
 
   const jobs = filterJobsForUser(

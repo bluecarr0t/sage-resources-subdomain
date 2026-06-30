@@ -22,13 +22,13 @@ export function ProjectPipelineTableSkeleton({
       aria-busy="true"
       aria-live="polite"
     >
-      <table className="w-full min-w-full table-fixed divide-y divide-neutral-200 dark:divide-neutral-800">
+      <table className="w-full min-w-[70rem] table-fixed divide-y divide-neutral-200 dark:divide-neutral-800">
         <colgroup>
           <col className="w-[8.5rem]" />
           <col className="w-[6.75rem]" />
           <col className="w-[11rem]" />
-          <col />
           <col className="w-[9rem]" />
+          <col className="w-[10.5rem]" />
           <col className="w-[6.5rem]" />
           <col className="w-[10rem]" />
           <col className="w-[7.5rem]" />

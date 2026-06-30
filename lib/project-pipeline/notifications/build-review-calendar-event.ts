@@ -1,6 +1,5 @@
 import type { calendar_v3 } from 'googleapis';
 import { buildJobPipelineAdminUrl } from '@/lib/email/pipeline-email-templates';
-import { parseProjectPipelineDueDate } from '@/lib/project-pipeline/due-date-emphasis';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 
 const REVIEW_BLOCK_MINUTES = 30;
@@ -26,59 +25,19 @@ export function getZonedWeekdayShort(date: Date, timeZone: string): string {
   return new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(date);
 }
 
-function zonedDateTimeToInstant(date: string, time: string, timeZone: string): number {
-  let instant = Date.parse(`${date}T${time}:00Z`);
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).formatToParts(new Date(instant));
-    const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-    const formattedDate = `${lookup.year}-${lookup.month}-${lookup.day}`;
-    const formattedTime = `${lookup.hour}:${lookup.minute}`;
-    const desiredMinutes = Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
-    const actualMinutes = Number(formattedTime.slice(0, 2)) * 60 + Number(formattedTime.slice(3, 5));
-    const dayOffset =
-      Date.parse(`${formattedDate}T00:00:00Z`) - Date.parse(`${date}T00:00:00Z`);
-    const deltaMinutes = dayOffset / 60_000 + (actualMinutes - desiredMinutes);
-    if (formattedDate === date && formattedTime === time) {
-      return instant;
-    }
-    instant -= deltaMinutes * 60_000;
-  }
-  return instant;
-}
-
-export function dueDateSheetValueToIsoDate(dueDate: string): string | null {
-  const dueMs = parseProjectPipelineDueDate(dueDate);
-  if (dueMs == null) return null;
-  const due = new Date(dueMs);
-  return `${due.getUTCFullYear()}-${pad(due.getUTCMonth() + 1)}-${pad(due.getUTCDate())}`;
-}
-
+/** Next business day at 9:00 AM in the given timezone (skips Sat/Sun). */
 export function resolvePipelineReviewCalendarStartParts(
-  dueDate: string,
   now: Date = new Date(),
   timeZone = 'America/New_York'
 ): { date: string; time: string } {
   const defaultTime = `${pad(DEFAULT_REVIEW_HOUR)}:00`;
-  const dueDatePart = dueDateSheetValueToIsoDate(dueDate);
-
-  if (dueDatePart) {
-    const candidateInstant = zonedDateTimeToInstant(dueDatePart, defaultTime, timeZone);
-    if (candidateInstant >= now.getTime()) {
-      return { date: dueDatePart, time: defaultTime };
-    }
-  }
 
   let cursor = new Date(now.getTime());
   cursor.setUTCDate(cursor.getUTCDate() + 1);
-  while (getZonedWeekdayShort(cursor, timeZone) === 'Sat' || getZonedWeekdayShort(cursor, timeZone) === 'Sun') {
+  while (
+    getZonedWeekdayShort(cursor, timeZone) === 'Sat' ||
+    getZonedWeekdayShort(cursor, timeZone) === 'Sun'
+  ) {
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
@@ -137,11 +96,7 @@ export function buildPipelineReviewCalendarEvent(input: {
 
   descriptionLines.push('', `Open Job Pipeline: ${jobPipelineUrl}`);
 
-  const startParts = resolvePipelineReviewCalendarStartParts(
-    input.job.dueDate,
-    input.now,
-    timeZone
-  );
+  const startParts = resolvePipelineReviewCalendarStartParts(input.now, timeZone);
   const endParts = addMinutesToLocalDateTime(
     startParts.date,
     startParts.time,

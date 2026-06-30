@@ -30,7 +30,31 @@ export function buildSheetGridValues(
 }
 
 function normalizePrivateKey(privateKey: string): string {
-  return privateKey.replace(/\\n/g, '\n');
+  let key = privateKey.trim();
+
+  if (
+    (key.startsWith("'") && key.endsWith("'")) ||
+    (key.startsWith('"') && key.endsWith('"'))
+  ) {
+    key = key.slice(1, -1);
+  }
+
+  key = key.replace(/\\n/g, '\n');
+
+  // Strip JSON/.env paste artifacts (quoted PEM blocks, trailing commas).
+  key = key
+    .replace(/^["']+/, '')
+    .replace(/["',\s]+$/, '')
+    .split('\n')
+    .map((line) => line.replace(/^["']+/, '').replace(/["',\s]+$/, ''))
+    .join('\n')
+    .trim();
+
+  if (key && !key.endsWith('\n')) {
+    key += '\n';
+  }
+
+  return key;
 }
 
 function parseServiceAccountJsonBlob(raw: string): GoogleServiceAccountCredentials | null {

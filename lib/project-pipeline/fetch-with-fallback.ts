@@ -48,7 +48,59 @@ export type FetchProjectPipelineJobsWithFallbackOptions = {
   mirrorPreferred?: boolean;
   /** Allow user OAuth for Sheets fallback when the mirror is empty (explicit opt-in). */
   allowOAuthSheets?: boolean;
+  /**
+   * When true, load jobs from Supabase only — no Google Sheets API reads
+   * (use after a successful service-account sync to avoid quota spikes).
+   */
+  skipSheetReads?: boolean;
+  /**
+   * When true, re-read row highlight colors from Google Sheets for segment labels.
+   * Defaults to false when a service account mirror is configured (segments are stored during sync).
+   */
+  refreshSegmentsFromSheet?: boolean;
 };
+
+async function refreshMirroredPipelineJobs(input: {
+  jobs: readonly ProjectPipelineJob[];
+  sheetId: string;
+  sheetName: string;
+  env?: NodeJS.ProcessEnv;
+  accessToken?: string;
+  refreshSegmentsFromSheet?: boolean;
+}): Promise<ProjectPipelineJob[]> {
+  if (!input.jobs.length) return [];
+
+  const env = input.env ?? process.env;
+  const shouldRefreshSegments =
+    input.refreshSegmentsFromSheet === true ||
+    (input.refreshSegmentsFromSheet !== false &&
+      !isGoogleSheetsServiceAccountConfigured(env));
+
+  if (!shouldRefreshSegments) {
+    return [...input.jobs];
+  }
+
+  try {
+    return await refreshProjectPipelineJobSegmentsFromSheet(input.jobs, {
+      sheetId: input.sheetId,
+      sheetName: input.sheetName,
+      accessToken: input.accessToken,
+      env,
+    });
+  } catch (error) {
+    if (isGoogleSheetsReadQuotaError(error)) {
+      console.warn(
+        `[project-pipeline] Row segment refresh skipped for ${input.sheetName} (quota exceeded)`
+      );
+    } else {
+      console.warn(
+        `[project-pipeline] Row segment refresh failed for ${input.sheetName}`,
+        error
+      );
+    }
+    return [...input.jobs];
+  }
+}
 
 async function loadProjectPipelineJobsFromSupabaseMirror(input: {
   supabase: SupabaseClient;
@@ -56,6 +108,7 @@ async function loadProjectPipelineJobsFromSupabaseMirror(input: {
   sheetName: string;
   env?: NodeJS.ProcessEnv;
   accessToken?: string;
+  refreshSegmentsFromSheet?: boolean;
 }): Promise<ProjectPipelineJob[]> {
   const jobs = await fetchProjectPipelineJobsFromSupabase(input.supabase, {
     sheetId: input.sheetId,
@@ -63,22 +116,24 @@ async function loadProjectPipelineJobsFromSupabaseMirror(input: {
     env: input.env,
   });
 
-  if (!jobs.length) return jobs;
+  return refreshMirroredPipelineJobs({
+    jobs,
+    sheetId: input.sheetId,
+    sheetName: input.sheetName,
+    env: input.env,
+    accessToken: input.accessToken,
+    refreshSegmentsFromSheet: input.refreshSegmentsFromSheet,
+  });
+}
 
-  try {
-    return await refreshProjectPipelineJobSegmentsFromSheet(jobs, {
-      sheetId: input.sheetId,
-      sheetName: input.sheetName,
-      accessToken: input.accessToken,
-      env: input.env,
-    });
-  } catch (error) {
-    console.warn(
-      `[project-pipeline] Row segment refresh failed for ${input.sheetName}`,
-      error
-    );
-    return jobs;
-  }
+function shouldRefreshSegmentsFromSheet(
+  options: FetchProjectPipelineJobsWithFallbackOptions,
+  env: NodeJS.ProcessEnv
+): boolean {
+  if (options.skipSheetReads) return false;
+  if (options.refreshSegmentsFromSheet === true) return true;
+  if (options.refreshSegmentsFromSheet === false) return false;
+  return !isGoogleSheetsServiceAccountConfigured(env);
 }
 
 export async function fetchProjectPipelineJobsWithFallback(
@@ -102,6 +157,7 @@ async function fetchSingleProjectPipelineSheetTabWithFallback(
   const useOAuthForSheets = mirrorPreferred
     ? options.allowOAuthSheets === true && Boolean(accessToken)
     : Boolean(accessToken);
+  const refreshSegmentsFromSheet = shouldRefreshSegmentsFromSheet(options, env);
 
   if (!options.forceSheets) {
     try {
@@ -117,6 +173,7 @@ async function fetchSingleProjectPipelineSheetTabWithFallback(
           sheetName,
           env,
           accessToken,
+          refreshSegmentsFromSheet,
         });
 
         return {
@@ -128,6 +185,14 @@ async function fetchSingleProjectPipelineSheetTabWithFallback(
     } catch (error) {
       console.warn('[project-pipeline] Supabase read failed, falling back to Google Sheets', error);
     }
+  }
+
+  if (options.skipSheetReads) {
+    return {
+      jobs: [],
+      fieldColumnMap: {},
+      dataSource: 'supabase',
+    };
   }
 
   if (!isProjectPipelineConfigured(env)) {
@@ -175,6 +240,7 @@ async function fetchSingleProjectPipelineSheetTabWithFallback(
         sheetName,
         env,
         accessToken,
+        refreshSegmentsFromSheet,
       });
       return { jobs, fieldColumnMap: {}, dataSource: 'supabase' };
     }
@@ -252,6 +318,7 @@ async function fetchAllProjectPipelineJobsWithFallback(
   const env = options.env ?? process.env;
   const sheetId = getProjectPipelineSheetId(env);
   const accessToken = options.accessToken?.trim();
+  const refreshSegmentsFromSheet = shouldRefreshSegmentsFromSheet(options, env);
 
   if (!options.forceSheets) {
     try {
@@ -268,29 +335,28 @@ async function fetchAllProjectPipelineJobsWithFallback(
           const mirrored = mirroredBySheet.get(sheetName) ?? [];
 
           if (mirrored.length > 0) {
-            try {
-              const jobs = await refreshProjectPipelineJobSegmentsFromSheet(mirrored, {
-                sheetId,
-                sheetName,
-                accessToken,
-                env,
-              });
-              tabResults.push({
-                jobs,
-                fieldColumnMap: {},
-                dataSource: 'supabase',
-              });
-            } catch (error) {
-              console.warn(
-                `[project-pipeline] Segment refresh failed for ${sheetName} in all-years view`,
-                error
-              );
-              tabResults.push({
-                jobs: mirrored,
-                fieldColumnMap: {},
-                dataSource: 'supabase',
-              });
-            }
+            const jobs = await refreshMirroredPipelineJobs({
+              jobs: mirrored,
+              sheetId,
+              sheetName,
+              env,
+              accessToken,
+              refreshSegmentsFromSheet,
+            });
+            tabResults.push({
+              jobs,
+              fieldColumnMap: {},
+              dataSource: 'supabase',
+            });
+            continue;
+          }
+
+          if (options.skipSheetReads) {
+            tabResults.push({
+              jobs: [],
+              fieldColumnMap: {} as ProjectPipelineFieldColumnMap,
+              dataSource: 'supabase',
+            });
             continue;
           }
 

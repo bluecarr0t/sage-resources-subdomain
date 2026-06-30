@@ -114,4 +114,78 @@ describe('resolveSheetSyncProjectPipelineJob', () => {
     expect(merged.projectStatus).toBe('On Hold');
     expect(merged.projectStatusManual).toBe(true);
   });
+
+  it('preserves In-Progress from Supabase when sheet row has no appraiser', () => {
+    const merged = resolveSheetSyncProjectPipelineJob({
+      sheetJob: sampleSheetJob({ appraiserConsultant: '', projectStatus: 'Not Started' }),
+      sheetName: '2026 Jobs',
+      sheetYear: 2026,
+      storedStatusByJobNumber: new Map([
+        [
+          '26-100A-01',
+          {
+            projectStatus: 'In-Progress',
+            projectStatusManual: false,
+            flag: 'None',
+            jobNotes: [],
+            reviewNotes: [],
+          },
+        ],
+      ]),
+      uiEditedByJobNumber: new Map(),
+    });
+
+    expect(merged.projectStatus).toBe('In-Progress');
+    expect(merged.appraiserConsultant).toBe('');
+  });
+
+  it('advances Not Started to In-Progress when sheet assigns an appraiser', () => {
+    const merged = resolveSheetSyncProjectPipelineJob({
+      sheetJob: sampleSheetJob({ appraiserConsultant: 'Greg', projectStatus: 'Not Started' }),
+      sheetName: '2026 Jobs',
+      sheetYear: 2026,
+      storedStatusByJobNumber: new Map([
+        [
+          '26-100A-01',
+          {
+            projectStatus: 'Not Started',
+            projectStatusManual: false,
+            flag: 'None',
+            jobNotes: [],
+            reviewNotes: [],
+          },
+        ],
+      ]),
+      uiEditedByJobNumber: new Map(),
+    });
+
+    expect(merged.projectStatus).toBe('In-Progress');
+  });
+
+  it('auto-completes stored In-Progress jobs when sheet shows completion', () => {
+    const merged = resolveSheetSyncProjectPipelineJob({
+      sheetJob: sampleSheetJob({
+        appraiserConsultant: 'Greg',
+        sentToClient: 'Yes',
+        dateCompleted: '03/01/2026',
+      }),
+      sheetName: '2026 Jobs',
+      sheetYear: 2026,
+      storedStatusByJobNumber: new Map([
+        [
+          '26-100A-01',
+          {
+            projectStatus: 'In-Progress',
+            projectStatusManual: false,
+            flag: 'None',
+            jobNotes: [],
+            reviewNotes: [],
+          },
+        ],
+      ]),
+      uiEditedByJobNumber: new Map(),
+    });
+
+    expect(merged.projectStatus).toBe('Completed');
+  });
 });

@@ -29,30 +29,45 @@ function sampleJob(overrides: Partial<ProjectPipelineJob> = {}): ProjectPipeline
 }
 
 describe('resolvePipelineReviewCalendarStartParts', () => {
-  it('uses the due date at 9am when it is still in the future', () => {
+  it('schedules the next business day at 9am when submitted on a weekday', () => {
     const start = resolvePipelineReviewCalendarStartParts(
-      '7/15/26',
       new Date('2026-06-24T15:00:00.000Z'),
       'America/New_York'
     );
 
-    expect(start).toEqual({ date: '2026-07-15', time: '09:00' });
+    expect(start).toEqual({ date: '2026-06-25', time: '09:00' });
   });
 
-  it('falls back to the next weekday when the due date has passed', () => {
+  it('schedules Monday at 9am when submitted on Friday', () => {
     const start = resolvePipelineReviewCalendarStartParts(
-      '3/1/26',
+      new Date('2026-06-19T15:00:00.000Z'),
+      'America/New_York'
+    );
+
+    expect(start).toEqual({ date: '2026-06-22', time: '09:00' });
+  });
+
+  it('schedules Monday at 9am when submitted on Saturday', () => {
+    const start = resolvePipelineReviewCalendarStartParts(
+      new Date('2026-06-20T15:00:00.000Z'),
+      'America/New_York'
+    );
+
+    expect(start).toEqual({ date: '2026-06-22', time: '09:00' });
+  });
+
+  it('ignores the job due date for scheduling', () => {
+    const start = resolvePipelineReviewCalendarStartParts(
       new Date('2026-06-24T15:00:00.000Z'),
       'America/New_York'
     );
 
-    expect(start.date).toBe('2026-06-25');
-    expect(start.time).toBe('09:00');
+    expect(start.date).not.toBe('2026-07-15');
   });
 });
 
 describe('buildPipelineReviewCalendarEvent', () => {
-  it('builds a 30-minute review event with job context', () => {
+  it('builds a 30-minute review event with job context on the next business day', () => {
     const event = buildPipelineReviewCalendarEvent({
       job: sampleJob(),
       actorDisplayName: 'Luke Marran',
@@ -65,15 +80,16 @@ describe('buildPipelineReviewCalendarEvent', () => {
 
     expect(event.summary).toContain('Review: Job #26-100A-01');
     expect(event.start).toEqual({
-      dateTime: '2026-07-15T09:00:00',
+      dateTime: '2026-06-25T09:00:00',
       timeZone: 'America/New_York',
     });
     expect(event.end).toEqual({
-      dateTime: '2026-07-15T09:30:00',
+      dateTime: '2026-06-25T09:30:00',
       timeZone: 'America/New_York',
     });
     expect(event.description).toContain('Ready for review.');
     expect(event.description).toContain('/admin/job-pipeline');
+    expect(event.description).toContain('Due date: 7/15/26');
     expect(event.extendedProperties?.private?.sagePipelineReviewRecipient).toBe(
       'harsell@sageoutdooradvisory.com'
     );

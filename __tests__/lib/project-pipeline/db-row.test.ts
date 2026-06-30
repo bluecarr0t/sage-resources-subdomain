@@ -121,6 +121,22 @@ describe('projectPipelineJob db row roundtrip', () => {
     );
     expect(restored.jobNotes?.[0]?.createdByDisplayName).toBe('Imported');
   });
+
+  it('preserves stored project status from Supabase without re-deriving from sheet fields', () => {
+    const dbRow = projectPipelineJobToDbRow(
+      { ...sampleJob, appraiserConsultant: '', projectStatus: 'In-Progress' },
+      {
+        sheetId: 'sheet-id',
+        sheetName: '2023 Vanessa Only',
+        syncRunId: 'sync-1',
+      }
+    );
+
+    const restored = projectPipelineJobFromDbRow(dbRow as ProjectPipelineJobDbRow);
+
+    expect(restored.projectStatus).toBe('In-Progress');
+    expect(restored.appraiserConsultant).toBe('');
+  });
 });
 
 describe('resolveProjectPipelineStoredStatusFromDbFields', () => {

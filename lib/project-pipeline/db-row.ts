@@ -197,8 +197,5 @@ export function projectPipelineJobFromDbRow(row: ProjectPipelineJobDbRow): Proje
     sheetYear: row.sheet_year,
   };
 
-  return withDerivedProjectPipelineProjectStatus(
-    base,
-    resolvedStatus
-  );
+  return base;
 }

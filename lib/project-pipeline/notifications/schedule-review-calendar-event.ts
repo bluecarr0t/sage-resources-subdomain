@@ -1,4 +1,4 @@
-import { insertGoogleCalendarEvent } from '@/lib/google-calendar/insert-event';
+import { upsertGoogleCalendarEvent } from '@/lib/google-calendar/upsert-event';
 import {
   getGoogleCalendarTimezone,
   getPipelineCalendarTestRecipient,
@@ -57,7 +57,7 @@ export async function schedulePipelineReviewCalendarEvents(
         timeZone,
       });
 
-      const eventId = await insertGoogleCalendarEvent({
+      const eventId = await upsertGoogleCalendarEvent({
         calendarUserEmail: recipientEmail,
         event,
       });

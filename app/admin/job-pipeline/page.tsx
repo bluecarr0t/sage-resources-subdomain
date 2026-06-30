@@ -63,6 +63,7 @@ import {
   removeProjectPipelineJobFromList,
   upsertProjectPipelineJobInList,
 } from '@/lib/project-pipeline/resolve-job-for-edit';
+import { resolveProjectPipelineSyncSuccessCounts } from '@/lib/project-pipeline/sync-success-message';
 import type { ProjectPipelineApiResponse, ProjectPipelineJob } from '@/lib/project-pipeline/types';
 import type { ProjectPipelineReviewNoteType } from '@/lib/project-pipeline/review-notes';
 
@@ -71,6 +72,29 @@ const PIPELINE_OAUTH_BACKFILL_KEY = 'project-pipeline-oauth-backfill-attempted';
 
 /** Manual sheet → Supabase refresh is available to admins and pipeline-wide viewers. */
 const SHOW_PROJECT_PIPELINE_REFRESH = true;
+
+type ProjectPipelineSyncResponseBody = {
+  error?: string;
+  message?: string;
+  syncAll?: boolean;
+  jobsFetched?: number;
+  jobsUpserted?: number;
+  jobsAdded?: number;
+  totalJobsUpserted?: number;
+  totalJobsAdded?: number;
+  lastSyncedAt?: string;
+};
+
+function buildProjectPipelineSyncSuccessMessage(
+  t: ReturnType<typeof useTranslations<'admin.projectPipeline'>>,
+  response: ProjectPipelineSyncResponseBody
+): string {
+  const { total, added } = resolveProjectPipelineSyncSuccessCounts(response);
+  if (added > 0) {
+    return t('refreshSyncSuccessWithAdded', { total, added });
+  }
+  return t('refreshSyncSuccess', { total });
+}
 
 export default function ProjectPipelinePage() {
   const t = useTranslations('admin.projectPipeline');
@@ -96,6 +120,7 @@ export default function ProjectPipelinePage() {
   const [dueWithin30DaysOnly, setDueWithin30DaysOnly] = useState(false);
   const [outdoorPastDueOnly, setOutdoorPastDueOnly] = useState(false);
   const [metricTableFilterVersion, setMetricTableFilterVersion] = useState(0);
+  const [syncFilterResetVersion, setSyncFilterResetVersion] = useState(0);
   const [authorPreviewActive, setAuthorPreviewActive] = useState(false);
   const [consultantWorkloadActive, setConsultantWorkloadActive] = useState(false);
   const [sheetName, setSheetName] = useState(() => resolveInitialSheetFilter(searchParams));
@@ -242,7 +267,7 @@ export default function ProjectPipelinePage() {
     async (
       accessToken?: string,
       nextSheetName: string = sheetName,
-      options?: { silent?: boolean; clearJobs?: boolean }
+      options?: { silent?: boolean; clearJobs?: boolean; skipSheetReads?: boolean }
     ) => {
       if (!options?.silent) {
         setLoading(true);
@@ -256,6 +281,9 @@ export default function ProjectPipelinePage() {
       }
       try {
         const query = new URLSearchParams({ sheetName: nextSheetName });
+        if (options?.skipSheetReads) {
+          query.set('skipSheetReads', '1');
+        }
         const res = await fetch(
           `/api/admin/project-pipeline?${query.toString()}`,
           accessToken
@@ -353,72 +381,20 @@ export default function ProjectPipelinePage() {
 
   const [syncingFromSheet, setSyncingFromSheet] = useState(false);
 
-  const syncFromSheet = useCallback(async () => {
-    setSyncingFromSheet(true);
-    setError(null);
-    try {
-      const useOAuthSync = !data?.cronSyncEnabled;
-      const accessToken = useOAuthSync
-        ? readGoogleSheetsOAuthAccessToken(PIPELINE_OAUTH_SCOPE) ?? undefined
-        : undefined;
-
-      if (useOAuthSync && !accessToken) {
-        throw new Error(t('refreshSyncOAuthRequired'));
-      }
-
-      const endpoint = useOAuthSync
-        ? '/api/admin/project-pipeline/oauth-sync'
-        : '/api/admin/project-pipeline/sync';
-      const syncPayload = useOAuthSync
-        ? {
-            accessToken,
-            ...(isProjectPipelineAllSheetsTab(sheetName)
-              ? { syncAll: true }
-              : { sheetName }),
-          }
-        : isProjectPipelineAllSheetsTab(sheetName)
-          ? { syncAll: true }
-          : { sheetName };
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(syncPayload),
-      });
-      const responseBody = (await res.json()) as {
-        error?: string;
-        message?: string;
-        jobsFetched?: number;
-        jobsUpserted?: number;
-        lastSyncedAt?: string;
-      };
-      if (!res.ok) {
-        throw new Error(responseBody.message || responseBody.error || t('refreshSyncError'));
-      }
-      if (responseBody.lastSyncedAt) {
-        setLastSyncedAt(responseBody.lastSyncedAt);
-      }
-      await loadJobs(undefined, sheetName, { silent: true });
-      setToast({ message: t('refreshSyncSuccess'), variant: 'success' });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : t('refreshSyncError');
-      setError(message);
-      setToast({ message, variant: 'error' });
-    } finally {
-      setSyncingFromSheet(false);
+  const reconnectOAuthAndSyncSheets = useCallback(async () => {
+    const oauthClientId = dataRef.current?.oauthClientId;
+    if (!oauthClientId) {
+      throw new Error(t('refreshSyncOAuthRequired'));
     }
-  }, [data?.cronSyncEnabled, loadJobs, sheetName, t]);
 
-  const connectGoogleSheets = useCallback(async () => {
-    if (!data?.oauthClientId) return;
     setConnecting(true);
-    setError(null);
     setOauthSyncActive(true);
     setOauthSyncProgress(createInitialPipelineOAuthSyncProgress());
+
     try {
       const scope = PIPELINE_OAUTH_SCOPE;
       const { accessToken, expiresIn } = await requestGoogleSheetsAccessToken(
-        data.oauthClientId,
+        oauthClientId,
         scope
       );
       writeGoogleSheetsOAuthAccessToken(accessToken, scope, expiresIn);
@@ -429,14 +405,99 @@ export default function ProjectPipelinePage() {
         onProgress: setOauthSyncProgress,
       });
 
-      await loadJobs(accessToken);
-    } catch (err) {
-      setConnecting(false);
-      setError(err instanceof Error ? err.message : t('oauthError'));
+      await loadJobs(accessToken, sheetName, { silent: true });
     } finally {
       setOauthSyncActive(false);
+      setConnecting(false);
     }
-  }, [data?.oauthClientId, loadJobs, t]);
+  }, [loadJobs, sheetName, t]);
+
+  const syncFromSheet = useCallback(async () => {
+    setSyncingFromSheet(true);
+    setError(null);
+    try {
+      const cronSyncEnabled = dataRef.current?.cronSyncEnabled ?? false;
+      const useOAuthSync = !cronSyncEnabled;
+
+      const syncPayload = isProjectPipelineAllSheetsTab(sheetName)
+        ? { syncAll: true }
+        : { sheetName };
+
+      const finishSync = async (
+        responseBody: ProjectPipelineSyncResponseBody,
+        accessToken?: string
+      ) => {
+        if (responseBody.lastSyncedAt) {
+          setLastSyncedAt(responseBody.lastSyncedAt);
+        }
+        await loadJobs(accessToken, sheetName, { silent: true, skipSheetReads: true });
+        setSyncFilterResetVersion((version) => version + 1);
+        setToast({
+          message: buildProjectPipelineSyncSuccessMessage(t, responseBody),
+          variant: 'success',
+        });
+      };
+
+      if (useOAuthSync) {
+        const accessToken =
+          readGoogleSheetsOAuthAccessToken(PIPELINE_OAUTH_SCOPE) ?? undefined;
+        if (!accessToken) {
+          throw new Error(t('refreshSyncOAuthRequired'));
+        }
+
+        const res = await fetch('/api/admin/project-pipeline/oauth-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accessToken,
+            ...syncPayload,
+          }),
+        });
+        const responseBody = (await res.json()) as ProjectPipelineSyncResponseBody;
+        if (!res.ok) {
+          throw new Error(responseBody.message || responseBody.error || t('refreshSyncError'));
+        }
+        await finishSync(responseBody, accessToken);
+        return;
+      }
+
+      const res = await fetch('/api/admin/project-pipeline/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(syncPayload),
+      });
+      const responseBody = (await res.json()) as ProjectPipelineSyncResponseBody;
+      if (!res.ok) {
+        throw new Error(responseBody.message || responseBody.error || t('refreshSyncError'));
+      }
+      await finishSync(responseBody);
+    } catch (err) {
+      const message =
+        err instanceof Error && /share the pipeline spreadsheet/i.test(err.message)
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : t('refreshSyncError');
+      if (dataRef.current && !dataRef.current.requiresOAuth) {
+        setToast({ message, variant: 'error' });
+      } else {
+        setError(message);
+        setToast({ message, variant: 'error' });
+      }
+    } finally {
+      setSyncingFromSheet(false);
+    }
+  }, [loadJobs, sheetName, t]);
+
+  const connectGoogleSheets = useCallback(async () => {
+    if (!data?.oauthClientId) return;
+    setError(null);
+    try {
+      await reconnectOAuthAndSyncSheets();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('oauthError'));
+    }
+  }, [data?.oauthClientId, reconnectOAuthAndSyncSheets, t]);
 
   const saveJob = useCallback(
     async (
@@ -761,6 +822,12 @@ export default function ProjectPipelinePage() {
           </div>
         ) : null}
 
+        {oauthSyncActive && data && !data.requiresOAuth && !data.cronSyncEnabled ? (
+          <div className="mb-6">
+            <ProjectPipelineOAuthSyncProgress progress={oauthSyncProgress} active={oauthSyncActive} />
+          </div>
+        ) : null}
+
         {data && !data.requiresOAuth ? (
           <ProjectPipelineTable
             jobs={displayJobs}
@@ -807,6 +874,7 @@ export default function ProjectPipelinePage() {
             onCreateJob={createJob}
             onJobCreated={handleJobCreated}
             syncingFromSheet={syncingFromSheet}
+            cronSyncEnabled={Boolean(data.cronSyncEnabled)}
             onSyncFromSheet={
               SHOW_PROJECT_PIPELINE_REFRESH &&
               !authorPreviewActive &&
@@ -817,6 +885,7 @@ export default function ProjectPipelinePage() {
             lastSyncedAt={lastSyncedAt}
             jobsLoading={jobsLoading}
             metricTableFilterVersion={metricTableFilterVersion}
+            syncFilterResetVersion={syncFilterResetVersion}
             defaultProjectStatusFilter={
               data.defaultProjectStatusFilter ?? undefined
             }

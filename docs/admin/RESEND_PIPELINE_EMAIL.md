@@ -35,7 +35,7 @@ Local development: leave `RESEND_API_KEY` unset or set `PIPELINE_EMAIL_ENABLED=f
 
 Emails fire **after a successful job save** when:
 
-1. **Submit for review** / **Resubmit** (`POST /api/admin/project-pipeline/jobs/review-action`) → **project manager** (`projMgr`) with the author's note in the body; optional **Google Calendar** block on the PM's primary calendar when `PIPELINE_CALENDAR_ENABLED=true`
+1. **Submit for review** / **Resubmit** (`POST /api/admin/project-pipeline/jobs/review-action`) → **project manager** (`projMgr`) with the author's note in the body; optional **Google Calendar** 30-minute block on the PM's primary calendar (next business day at 9:00 AM) when `PIPELINE_CALENDAR_ENABLED=true` — see [PIPELINE_REVIEW_CALENDAR.md](./PIPELINE_REVIEW_CALENDAR.md)
 2. **Review status** changes on save (`PUT /api/admin/project-pipeline/jobs` or review-action) → consultant or PM per routing rules
 3. **Due date** changes → assigned **Consultant** and/or **Project Manager**
 

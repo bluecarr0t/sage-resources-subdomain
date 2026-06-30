@@ -2,10 +2,10 @@
  * @jest-environment node
  */
 
-const mockInsertGoogleCalendarEvent = jest.fn().mockResolvedValue('event-123');
+const mockUpsertGoogleCalendarEvent = jest.fn().mockResolvedValue('event-123');
 
-jest.mock('@/lib/google-calendar/insert-event', () => ({
-  insertGoogleCalendarEvent: (...args: unknown[]) => mockInsertGoogleCalendarEvent(...args),
+jest.mock('@/lib/google-calendar/upsert-event', () => ({
+  upsertGoogleCalendarEvent: (...args: unknown[]) => mockUpsertGoogleCalendarEvent(...args),
 }));
 
 jest.mock('@/lib/google-calendar/config', () => ({
@@ -61,7 +61,7 @@ describe('schedulePipelineReviewCalendarEvents', () => {
       ],
     });
 
-    expect(mockInsertGoogleCalendarEvent).toHaveBeenCalledWith(
+    expect(mockUpsertGoogleCalendarEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         calendarUserEmail: 'harsell@sageoutdooradvisory.com',
         event: expect.objectContaining({

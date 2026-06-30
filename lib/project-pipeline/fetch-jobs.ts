@@ -16,6 +16,7 @@ import {
   parseProjectPipelineSheetYear,
   resolveProjectPipelineSheetTab,
 } from './sheet-tabs';
+import type { ProjectPipelineSegment } from './segment';
 import {
   getProjectPipelineSheetsCache,
   projectPipelineSheetsCacheKey,
@@ -46,12 +47,23 @@ export { isProjectPipelineConfigured } from './auth';
 async function fetchProjectPipelineJobsFromSheet(
   sheetId: string,
   sheetName: string,
-  accessToken?: string
+  accessToken?: string,
+  options: { skipRowSegmentFetch?: boolean } = {}
 ): Promise<{ jobs: ProjectPipelineJob[]; fieldColumnMap: ProjectPipelineFieldColumnMap }> {
   const sheets = accessToken
     ? createGoogleSheetsReadClientFromAccessToken(accessToken)
     : createGoogleSheetsReadClient();
   const range = `'${sheetName.replace(/'/g, "''")}'!A:O`;
+
+  const segmentPromise = options.skipRowSegmentFetch
+    ? Promise.resolve(() => undefined as ProjectPipelineSegment | undefined)
+    : fetchProjectPipelineRowSegmentGetter(sheets, sheetId, sheetName).catch((error) => {
+        console.warn(
+          `[project-pipeline] Row highlight read failed for ${sheetName}; segment column only`,
+          error
+        );
+        return () => undefined;
+      });
 
   const [response, getRowSegment] = await Promise.all([
     sheets.spreadsheets.values.get({
@@ -59,13 +71,7 @@ async function fetchProjectPipelineJobsFromSheet(
       range,
       valueRenderOption: 'FORMATTED_VALUE',
     }),
-    fetchProjectPipelineRowSegmentGetter(sheets, sheetId, sheetName).catch((error) => {
-      console.warn(
-        `[project-pipeline] Row highlight read failed for ${sheetName}; segment column only`,
-        error
-      );
-      return () => undefined;
-    }),
+    segmentPromise,
   ]);
 
   const values = response.data.values;
@@ -145,6 +151,8 @@ export type FetchProjectPipelineJobsOptions = {
   sheetName?: string;
   /** Skip Next.js unstable_cache (use for cron / write-back refresh). */
   bypassCache?: boolean;
+  /** Skip spreadsheets.get row-highlight reads (saves API quota during bulk sync). */
+  skipRowSegmentFetch?: boolean;
 };
 
 /** Fetch all jobs from the configured Google Sheet tab. Service-account reads are cached ~3 min unless bypassCache. */
@@ -170,9 +178,13 @@ export async function fetchProjectPipelineJobs(
   }
 
   const result = options.bypassCache
-    ? await fetchProjectPipelineJobsFromSheet(sheetId, sheetName, accessToken)
+    ? await fetchProjectPipelineJobsFromSheet(sheetId, sheetName, accessToken, {
+        skipRowSegmentFetch: options.skipRowSegmentFetch,
+      })
     : accessToken
-      ? await fetchProjectPipelineJobsFromSheet(sheetId, sheetName, accessToken)
+      ? await fetchProjectPipelineJobsFromSheet(sheetId, sheetName, accessToken, {
+          skipRowSegmentFetch: options.skipRowSegmentFetch,
+        })
       : await getCachedFetch(sheetId, sheetName)();
 
   if (!options.bypassCache) {

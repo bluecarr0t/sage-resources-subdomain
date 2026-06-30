@@ -72,8 +72,8 @@ function parseSortableDate(value: string): number | null {
   return parseProjectPipelineDueDate(value);
 }
 
-function effectiveProjectStatusForFilter(job: ProjectPipelineJob): string {
-  return withDerivedProjectPipelineProjectStatus(job).projectStatus;
+function effectiveProjectStatusForFilter(job: ProjectPipelineJob): ProjectPipelineProjectStatus {
+  return normalizeProjectPipelineProjectStatus(job.projectStatus);
 }
 
 function filterProjectPipelineJobs(
@@ -161,10 +161,14 @@ interface ProjectPipelineTableProps {
   onCreateJob?: (job: ProjectPipelineJob) => Promise<ProjectPipelineJob | void>;
   onJobCreated?: (job: ProjectPipelineJob) => void;
   syncingFromSheet?: boolean;
+  /** When true, refresh uses server-side service account sync (no Google OAuth popup). */
+  cronSyncEnabled?: boolean;
   onSyncFromSheet?: () => void | Promise<void>;
   lastSyncedAt?: string | null;
   jobsLoading?: boolean;
   metricTableFilterVersion?: number;
+  /** Bumped after a sheet sync so the table shows all mirrored jobs (clears status filter). */
+  syncFilterResetVersion?: number;
   defaultProjectStatusFilter?: string;
 }
 
@@ -205,10 +209,12 @@ export function ProjectPipelineTable({
   onCreateJob,
   onJobCreated,
   syncingFromSheet = false,
+  cronSyncEnabled = false,
   onSyncFromSheet,
   lastSyncedAt = null,
   jobsLoading = false,
   metricTableFilterVersion = 0,
+  syncFilterResetVersion = 0,
   defaultProjectStatusFilter = DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER,
 }: ProjectPipelineTableProps) {
   const t = useTranslations('admin.projectPipeline');
@@ -257,6 +263,14 @@ export function ProjectPipelineTable({
     setProjectStatusFilter('');
     setPage(1);
   }, [metricTableFilterVersion]);
+
+  useEffect(() => {
+    if (!syncFilterResetVersion) return;
+    setSearch('');
+    setServiceFilter('');
+    setProjectStatusFilter('');
+    setPage(1);
+  }, [syncFilterResetVersion]);
 
   const lastSyncedLabel = useMemo(() => {
     if (!lastSyncedAt) return t('lastSyncedNever');
@@ -935,11 +949,16 @@ export function ProjectPipelineTable({
                 type="button"
                 onClick={() => void onSyncFromSheet()}
                 disabled={syncingFromSheet}
-                aria-label={t('refreshSyncAria')}
+                aria-label={
+                  cronSyncEnabled ? t('refreshSyncServiceAccountAria') : t('refreshSyncAria')
+                }
                 title={
                   syncingFromSheet
                     ? t('refreshSyncWorking')
-                    : lastSyncedLabel ?? t('refreshSyncAria')
+                    : lastSyncedLabel ??
+                      (cronSyncEnabled
+                        ? t('refreshSyncServiceAccountAria')
+                        : t('refreshSyncAria'))
                 }
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-300 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-700 dark:text-neutral-200 dark:hover:bg-gray-600"
               >
@@ -1007,63 +1026,73 @@ export function ProjectPipelineTable({
       <>
       {isAllYearsView && paginationControls}
       <div className="admin-surface overflow-x-auto">
-        <table className="w-full min-w-full table-fixed divide-y divide-neutral-200 dark:divide-neutral-800">
+        <table className="w-full min-w-[70rem] table-fixed divide-y divide-neutral-200 dark:divide-neutral-800">
           <colgroup>
             <col className="w-[8.5rem]" />
             <col className="w-[6.75rem]" />
             <col className="w-[11rem]" />
-            <col />
             <col className="w-[9rem]" />
+            <col className="w-[10.5rem]" />
             <col className="w-[6.5rem]" />
             <col className="w-[10rem]" />
             <col className="w-[7.5rem]" />
           </colgroup>
           <thead className="admin-table-head">
             <tr>
-              <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
+              <th className="overflow-hidden px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
                 <button
                   type="button"
                   onClick={() => toggleSort('jobNumber')}
-                  className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"
+                  className="inline-flex max-w-full items-center gap-1 truncate hover:text-neutral-900 dark:hover:text-neutral-100"
                 >
                   {t('columnJobNumber')}
                   <SortIcon column="jobNumber" />
                 </button>
               </th>
-              <th className="w-[6.75rem] max-w-[6.75rem] px-2 py-3 text-left text-xs font-medium uppercase tracking-wide">
+              <th className="w-[6.75rem] max-w-[6.75rem] overflow-hidden px-2 py-3 text-left text-xs font-medium uppercase tracking-wide">
                 <button
                   type="button"
                   onClick={() => toggleSort('projectStatus')}
-                  className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"
+                  className="inline-flex max-w-full items-center gap-1 truncate hover:text-neutral-900 dark:hover:text-neutral-100"
                 >
                   {t('columnProjectStatus')}
                   <SortIcon column="projectStatus" />
                 </button>
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
-                {t('columnClient')}
+              <th className="overflow-hidden px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
+                <span className="block truncate" title={t('columnClient')}>
+                  {t('columnClient')}
+                </span>
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
-                {t('columnPropertyLocation')}
+              <th className="overflow-hidden px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
+                <span className="block truncate" title={t('columnPropertyLocation')}>
+                  {t('columnPropertyLocation')}
+                </span>
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
-                {t('columnAppraiser')}
+              <th className="overflow-hidden px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
+                <span className="block truncate" title={t('columnAppraiser')}>
+                  {t('columnAppraiser')}
+                </span>
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
+              <th className="overflow-hidden px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
                 <button
                   type="button"
                   onClick={() => toggleSort('dueDate')}
-                  className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"
+                  className="inline-flex max-w-full items-center gap-1 truncate hover:text-neutral-900 dark:hover:text-neutral-100"
                 >
                   {t('columnDueDate')}
                   <SortIcon column="dueDate" />
                 </button>
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
-                {t('columnService')}
+              <th className="overflow-hidden px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
+                <span className="block truncate" title={t('columnService')}>
+                  {t('columnService')}
+                </span>
               </th>
-              <th className="w-[7.5rem] max-w-[7.5rem] px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
-                {t('columnReviewStatus')}
+              <th className="w-[7.5rem] max-w-[7.5rem] overflow-hidden px-3 py-3 text-left text-xs font-medium uppercase tracking-wide">
+                <span className="block truncate" title={t('columnReviewStatus')}>
+                  {t('columnReviewStatus')}
+                </span>
               </th>
             </tr>
           </thead>

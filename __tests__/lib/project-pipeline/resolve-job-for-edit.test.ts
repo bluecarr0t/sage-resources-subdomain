@@ -125,6 +125,13 @@ describe('resolve-job-for-edit', () => {
     ).toEqual([job]);
   });
 
+  it('dedupes duplicate job numbers on a single sheet tab, keeping the later sheet row', () => {
+    const olderRow = sampleJob({ jobNumber: '25-001', sheetRowIndex: 10, client: 'Older' });
+    const newerRow = sampleJob({ jobNumber: '25-001', sheetRowIndex: 42, client: 'Newer' });
+
+    expect(dedupeProjectPipelineJobs([olderRow, newerRow], '2025 Jobs')).toEqual([newerRow]);
+  });
+
   it('upserts created jobs instead of appending duplicates', () => {
     const existing = sampleJob({ jobNumber: '26-TEST-06', client: 'Old' });
     const created = sampleJob({
