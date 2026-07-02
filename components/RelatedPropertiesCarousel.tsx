@@ -16,17 +16,6 @@ interface RelatedPropertiesCarouselProps {
   variant?: 'default' | 'editorial';
 }
 
-function getGooglePhotoUrl(
-  photo: { name: string; widthPx?: number; heightPx?: number },
-  maxWidth: number = 400,
-  maxHeight: number = 300
-): string {
-  if (!photo?.name) return '';
-  const width = photo.widthPx ? Math.min(photo.widthPx, maxWidth) : maxWidth;
-  const height = photo.heightPx ? Math.min(photo.heightPx, maxHeight) : maxHeight;
-  return `/api/google-places-photo?photoName=${encodeURIComponent(photo.name)}&maxWidthPx=${width}&maxHeightPx=${height}`;
-}
-
 function formatUsd(value: string | number | null | undefined): string {
   if (value == null || value === '') return '—';
   const n = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]/g, ''));
@@ -169,19 +158,6 @@ export default function RelatedPropertiesCarousel({
           const propertyName = property.property_name || 'Unnamed Property';
           const slug = property.slug || '';
 
-          let photos: { name: string; widthPx?: number; heightPx?: number }[] = [];
-          if (property.google_photos) {
-            if (typeof property.google_photos === 'string') {
-              try {
-                photos = JSON.parse(property.google_photos);
-              } catch {
-                // ignore
-              }
-            } else if (Array.isArray(property.google_photos)) {
-              photos = property.google_photos;
-            }
-          }
-
           const locationParts: string[] = [];
           if (property.city) locationParts.push(property.city);
           if (property.state) locationParts.push(property.state);
@@ -194,34 +170,9 @@ export default function RelatedPropertiesCarousel({
               className="group border border-gray-200 rounded-lg overflow-hidden hover:border-[#00b6a6] hover:shadow-lg transition-all"
             >
               <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
-                {photos.length > 0 ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={getGooglePhotoUrl(photos[0], 600, 400)}
-                    alt={propertyName}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                    width={600}
-                    height={400}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <p className="text-gray-400 text-sm">No photo available</p>
-                  </div>
-                )}
-
-                {property.google_rating && (
-                  <div
-                    className="absolute top-3 right-3 bg-black bg-opacity-75 text-white px-2 py-1 rounded flex items-center gap-1"
-                    role="img"
-                    aria-label={`Rating: ${property.google_rating.toFixed(1)} out of 5 stars`}
-                  >
-                    <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20" aria-hidden="true">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>
-                    <span className="text-sm font-semibold">{property.google_rating.toFixed(1)}</span>
-                  </div>
-                )}
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  <p className="text-gray-400 text-sm">View property for photos</p>
+                </div>
               </div>
 
               <div className="p-4">

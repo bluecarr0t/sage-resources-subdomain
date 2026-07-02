@@ -59,7 +59,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        // Google ToS: do not edge-cache ratings/photos shared across users
+        'Cache-Control': 'private, no-store',
       },
     });
   } catch (error) {

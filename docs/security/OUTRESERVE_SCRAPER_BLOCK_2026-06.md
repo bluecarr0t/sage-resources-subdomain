@@ -4,7 +4,7 @@
 
 - **User-Agent:** `Mozilla/5.0 (compatible; OutReserveBot/1.0)` (~5.4k requests)
 - **IP:** `212.83.77.168` (Netherlands)
-- **Targets:** `GET /api/properties`, `GET /api/google-places` (structured data + Google Places billing)
+- **Targets:** `GET /api/properties`, `GET /api/google-places`, `GET /api/google-places-photo` (structured data + Google Places billing)
 
 ### Additional blocked crawlers
 
@@ -17,7 +17,7 @@
 | Layer | Location |
 |-------|----------|
 | Blocklist (UA + IP) + origin guard | `lib/public-map-api-guard.ts` (header/env only, Edge-safe) |
-| Middleware (early 403) | `middleware.ts` runs the guard on `/api/properties`, `/api/google-places` |
+| Middleware (early 403) | `middleware.ts` runs the guard on `/api/properties`, `/api/google-places`, `/api/google-places-photo` |
 | Per-IP rate limits | `lib/public-map-api-rate-limit.ts`, called from the **route handlers** (Node runtime — Redis is not available in Edge middleware) |
 
 > Note: rate limiting must NOT run in `middleware.ts`. Middleware uses the Edge
@@ -27,13 +27,14 @@
 
 ### Per-IP rate limits (defaults)
 
-Counts are **shared** across `/api/properties` and `/api/google-places` so scrapers cannot double throughput by alternating paths.
+Counts are **shared** across `/api/properties`, `/api/google-places`, and `/api/google-places-photo` so scrapers cannot multiply throughput by alternating paths.
 
 | Bucket | Default | Env override |
 |--------|---------|----------------|
 | All public map APIs | 60 / minute / IP | `PUBLIC_MAP_API_RATELIMIT_PER_MIN` |
 | All public map APIs | 300 / hour / IP | `PUBLIC_MAP_API_RATELIMIT_PER_HOUR` |
-| Google Places only | 30 / minute / IP (additional) | `GOOGLE_PLACES_PUBLIC_ROUTE_RATELIMIT_PER_MIN` |
+| Google Places JSON | 30 / minute / IP (additional) | `GOOGLE_PLACES_PUBLIC_ROUTE_RATELIMIT_PER_MIN` |
+| Google Places photos | 40 / minute / IP (additional) | `GOOGLE_PLACES_PHOTO_ROUTE_RATELIMIT_PER_MIN` |
 
 Uses **Redis** when `REDIS_URL` (or `REDIS_HOST`) is configured so limits apply across all Vercel instances; otherwise falls back to in-memory per instance.
 
@@ -50,7 +51,9 @@ Trusted bypass headers skip rate limits (same as origin bypass).
 | `PUBLIC_MAP_API_ALLOWED_ORIGINS` | Comma-separated extra allowed origins (preview hosts) |
 | `PUBLIC_MAP_API_RATELIMIT_PER_MIN` | Combined minute cap (default `60`) |
 | `PUBLIC_MAP_API_RATELIMIT_PER_HOUR` | Combined hour cap (default `300`) |
-| `GOOGLE_PLACES_PUBLIC_ROUTE_RATELIMIT_PER_MIN` | Extra Google Places minute cap (default `30`) |
+| `GOOGLE_PLACES_PUBLIC_ROUTE_RATELIMIT_PER_MIN` | Extra Google Places JSON minute cap (default `30`) |
+| `GOOGLE_PLACES_PHOTO_ROUTE_RATELIMIT_PER_MIN` | Extra photo proxy minute cap (default `40`) |
+| `PUBLIC_MAP_API_AUTO_BAN_ENABLED` | `true` in production — enables `/api/cron/ban-abusive-ips` firewall writes |
 
 Legitimate browser traffic from the map must send an **Origin** or **Referer** from `resources.sageoutdooradvisory.com` (or `SITE_URL` / `VERCEL_URL` on previews).
 
@@ -79,7 +82,7 @@ These settings are **not** fully expressible in `vercel.json` for this project; 
 
 ### 4. Optional: rate limit rule at edge
 
-Add a firewall rate-limit rule on paths `/api/properties` and `/api/google-places` as defense in depth (app already rate-limits per IP).
+Add a firewall rate-limit rule on paths `/api/properties`, `/api/google-places`, and `/api/google-places-photo` as defense in depth (app already rate-limits per IP).
 
 ## Verification
 

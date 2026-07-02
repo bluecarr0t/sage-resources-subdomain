@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { requireAdminAuth } from '@/lib/require-admin-auth';
+import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
+import { getGooglePlacesServerApiKey } from '@/lib/google-places-server-api-key';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * API endpoint to refresh Google Places photos for a property
- * This fetches fresh photo references from Google Places API
+ * API endpoint to refresh Google Places photos for a property (admin/cron only).
+ * Fetches fresh photo references from Google Places API for batch maintenance.
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!authorizeVercelCronRequest(request)) {
+      const auth = await requireAdminAuth(request);
+      if (!auth.ok) {
+        return auth.response;
+      }
+    }
+
     const body = await request.json();
     const { propertyName } = body;
     
@@ -16,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'propertyName is required' }, { status: 400 });
     }
     
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiKey = getGooglePlacesServerApiKey();
     if (!apiKey) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }

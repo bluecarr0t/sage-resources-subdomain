@@ -17,6 +17,9 @@ interface PropertyInfoWindowProps {
   currentPhotoIndex: number;
   setCurrentPhotoIndex: React.Dispatch<React.SetStateAction<number>>;
   loadingPropertyDetails: boolean;
+  /** Fresh Google Places rating (never from DB cache) */
+  googleRating?: number | null;
+  googleReviewCount?: number | null;
   onClose: () => void;
 }
 
@@ -28,6 +31,8 @@ export default function PropertyInfoWindow({
   currentPhotoIndex,
   setCurrentPhotoIndex,
   loadingPropertyDetails,
+  googleRating = null,
+  googleReviewCount = null,
   onClose,
 }: PropertyInfoWindowProps) {
   const t = useTranslations('map');
@@ -176,22 +181,22 @@ export default function PropertyInfoWindow({
           </p>
         )}
 
-      {((propertyForDisplay as any).google_rating || (propertyForDisplay as any).google_user_rating_total) && (
+      {(googleRating || googleReviewCount) && (
         <div className="flex items-center gap-2 mb-2">
-          {(propertyForDisplay as any).google_rating && (
+          {googleRating != null && (
             <div className="flex items-center gap-1">
               <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
               </svg>
               <span className="text-sm font-semibold text-gray-900">
-                {(propertyForDisplay as any).google_rating.toFixed(1)}
+                {googleRating.toFixed(1)}
               </span>
             </div>
           )}
-          {(propertyForDisplay as any).google_user_rating_total && (
+          {googleReviewCount != null && (
             <span className="text-sm text-gray-600">
-              ({(propertyForDisplay as any).google_user_rating_total.toLocaleString()}{' '}
-              {(propertyForDisplay as any).google_user_rating_total === 1
+              ({googleReviewCount.toLocaleString()}{' '}
+              {googleReviewCount === 1
                 ? t('infoWindow.property.reviews.one')
                 : t('infoWindow.property.reviews.other')}
               )

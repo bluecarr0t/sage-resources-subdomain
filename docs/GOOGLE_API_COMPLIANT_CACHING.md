@@ -142,7 +142,9 @@ The function:
 ✅ Place IDs cached permanently (allowed)  
 ✅ All other data fetched fresh (compliant)  
 ✅ No caching of restricted data (ratings, reviews, etc.)  
-✅ Coordinates already stored in database (separate from API)
+✅ Coordinates already stored in database (separate from API)  
+✅ Public pages must not display `google_rating` / `google_photos` from Supabase without a live Places fetch in the same session  
+✅ `/api/google-places` responses use `Cache-Control: private, no-store` (no shared CDN cache of ratings/photos)
 
 ## Cost Impact
 

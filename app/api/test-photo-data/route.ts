@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { guardInternalDebugRoute } from '@/lib/protect-internal-debug-route';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Test endpoint to inspect the raw photo data from Supabase
- * and test Google's photo API directly
+ * and test Google's photo API directly (admin only in production).
  */
 export async function GET(request: NextRequest) {
   try {
+    const blocked = await guardInternalDebugRoute(request);
+    if (blocked) return blocked;
+
     const searchParams = request.nextUrl.searchParams;
     const propertyName = searchParams.get('property') || 'Wildhaven Sonoma';
     

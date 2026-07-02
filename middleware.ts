@@ -462,6 +462,7 @@ export const config = {
   matcher: [
     '/api/properties',
     '/api/google-places',
+    '/api/google-places-photo',
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)

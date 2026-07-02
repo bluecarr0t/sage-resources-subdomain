@@ -16,6 +16,7 @@ import { generateEnOnlyHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n
 import { evaluatePropertyIndexTier, propertyTierShouldIndex } from "@/lib/property-seo-index";
 import { fetchGlampingPropertyPublicImages } from "@/lib/fetch-glamping-property-public-images";
 import { shouldSkipGooglePlacesForPropertySlug } from "@/lib/property-google-places-policy";
+import { normalizePlacesApiPlaceId } from "@/lib/google-places-place-id";
 import { getBrandSummaryById } from "@/lib/brand-public-pages";
 import {
   collectDistinctUnitTypes,
@@ -378,6 +379,8 @@ export default async function PropertyPage({ params }: PageProps) {
     sage_p_amenity_waterfront: firstProperty.property_waterfront,
   });
 
+  const propertyGooglePlaceId = normalizePlacesApiPlaceId(firstProperty.google_place_id);
+
   return (
     <>
       {/* Structured Data */}
@@ -408,7 +411,7 @@ export default async function PropertyPage({ params }: PageProps) {
         propertyName={propertyName}
         nearbyProperties={nearbyProperties}
         googlePlacesData={null}
-        googlePlaceId={null}
+        googlePlaceId={propertyGooglePlaceId}
         skipGooglePlaces={skipGooglePlaces}
         propertyImages={propertyImages}
         locale={locale}

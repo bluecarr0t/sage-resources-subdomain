@@ -8,12 +8,17 @@
  */
 
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { isRedisConnected, getCacheMetrics } from '@/lib/redis';
+import { guardInternalDebugRoute } from '@/lib/protect-internal-debug-route';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const blocked = await guardInternalDebugRoute(request);
+    if (blocked) return blocked;
+
     // Check environment variables (without exposing sensitive values)
     const envCheck = {
       hasRedisUrl: !!process.env.REDIS_URL,

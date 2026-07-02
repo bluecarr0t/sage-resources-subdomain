@@ -1,3 +1,5 @@
+import { getGooglePlacesServerApiKey } from '@/lib/google-places-server-api-key';
+
 /**
  * Google Places API utility functions
  * Fetches data directly from Google Places API (New) to comply with Google's Terms of Service
@@ -194,7 +196,6 @@ async function getPlaceDetails(
 
 /**
  * Fetch Google Places data for a property
- * Optionally accepts placeId to skip Text Search call (for efficiency)
  * 
  * @param propertyName - Name of the property
  * @param city - City name (optional)
@@ -209,7 +210,7 @@ export async function fetchGooglePlacesData(
   address?: string | null,
   placeId?: string | null
 ): Promise<GooglePlacesData | null> {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = getGooglePlacesServerApiKey();
 
   if (!apiKey) {
     console.error('Google Maps API key not configured');

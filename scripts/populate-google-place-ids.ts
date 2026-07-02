@@ -7,7 +7,7 @@
  * Usage:
  *   npx tsx scripts/populate-google-place-ids.ts
  *   npx tsx scripts/populate-google-place-ids.ts --dry-run  # Preview without updating
- *   npx tsx scripts/populate-google-place-ids.ts --limit 100  # Process only first 100
+ *   npx tsx scripts/populate-google-place-ids.ts --table=all_sage_data
  */
 
 import { config } from 'dotenv';
@@ -34,7 +34,8 @@ if (!googleApiKey) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'all_glamping_properties';
+const TABLE_ARG = process.argv.find((arg) => arg.startsWith('--table='));
+const TABLE_NAME = TABLE_ARG?.split('=')[1]?.trim() || 'all_sage_data';
 const DRY_RUN = process.argv.includes('--dry-run');
 const LIMIT_ARG = process.argv.find(arg => arg.startsWith('--limit='));
 const LIMIT = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1]) : undefined;
@@ -297,7 +298,7 @@ async function updatePlaceId(
  * Main function
  */
 async function main() {
-  console.log('🔍 Populating google_place_id values in all_glamping_properties...\n');
+  console.log(`🔍 Populating google_place_id values in ${TABLE_NAME}...\n`);
   
   if (DRY_RUN) {
     console.log('⚠️  DRY RUN MODE - No changes will be saved\n');

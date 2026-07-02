@@ -2,6 +2,7 @@ import {
   getAllowedPublicMapApiOrigins,
   isAllowedPublicMapApiCaller,
   isBlockedScraperRequest,
+  isPublicMapApiPath,
 } from '@/lib/public-map-api-guard';
 
 const ORIGINAL_ENV = process.env;
@@ -95,5 +96,10 @@ describe('public-map-api-guard', () => {
   it('includes SITE_URL in allowed origins', () => {
     process.env.SITE_URL = 'https://preview.example.com';
     expect(getAllowedPublicMapApiOrigins()).toContain('https://preview.example.com');
+  });
+
+  it('treats google-places-photo as a guarded public map API path', () => {
+    expect(isPublicMapApiPath('/api/google-places-photo')).toBe(true);
+    expect(isPublicMapApiPath('/api/other')).toBe(false);
   });
 });

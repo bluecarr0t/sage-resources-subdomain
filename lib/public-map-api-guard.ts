@@ -15,6 +15,7 @@ export const DEFAULT_BLOCKED_IPS = ['212.83.77.168'];
 const PUBLIC_MAP_API_PATHS = new Set([
   '/api/properties',
   '/api/google-places',
+  '/api/google-places-photo',
 ]);
 
 export function isPublicMapApiPath(pathname: string): boolean {

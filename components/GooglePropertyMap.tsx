@@ -23,7 +23,6 @@ import { useMapMarkers } from './map/hooks/useMapMarkers';
 import { useMapLayers } from './map/hooks/useMapLayers';
 import { useFilterComputations } from './map/hooks/useFilterComputations';
 import { getGooglePhotoUrl } from './map/utils/photoUtils';
-import { parseGooglePhotos } from './map/utils/photoUtils';
 
 import FilterSidebar from './map/FilterSidebar';
 import PropertyInfoWindow from './map/PropertyInfoWindow';
@@ -220,9 +219,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
     if (freshGooglePlacesData?.photos && freshGooglePlacesData.photos.length > 0) {
       return freshGooglePlacesData.photos;
     }
-    const photosData = fullPropertyDetails?.google_photos || selectedProperty?.google_photos;
-    return parseGooglePhotos(photosData, selectedProperty?.property_name);
-  }, [freshGooglePlacesData, selectedProperty?.id, selectedProperty?.google_photos, fullPropertyDetails?.google_photos]);
+    return [];
+  }, [freshGooglePlacesData]);
 
   const currentPhotoUrl = useMemo(() => {
     if (!parsedPhotos || parsedPhotos.length === 0) return null;
@@ -816,6 +814,8 @@ export default function GooglePropertyMap({ showMap = true }: GooglePropertyMapP
                     currentPhotoIndex={currentPhotoIndex}
                     setCurrentPhotoIndex={setCurrentPhotoIndex}
                     loadingPropertyDetails={loadingPropertyDetails}
+                    googleRating={freshGooglePlacesData?.rating ?? null}
+                    googleReviewCount={freshGooglePlacesData?.userRatingCount ?? null}
                     onClose={() => {
                       setSelectedProperty(null);
                       setSelectedPark(null);

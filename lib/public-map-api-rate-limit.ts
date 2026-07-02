@@ -6,11 +6,18 @@ import {
 } from '@/lib/public-map-api-guard';
 import { recordPublicMapApiAbuse } from '@/lib/public-map-api-abuse';
 
-export type PublicMapApiRateLimitRoute = 'properties' | 'google-places';
+export type PublicMapApiRateLimitRoute =
+  | 'properties'
+  | 'google-places'
+  | 'google-places-photo';
 
 export type PublicMapApiRateLimitResult =
   | { allowed: true }
-  | { allowed: false; retryAfterSec: number; scope: 'minute' | 'hour' | 'google_places_minute' };
+  | {
+      allowed: false;
+      retryAfterSec: number;
+      scope: 'minute' | 'hour' | 'google_places_minute' | 'google_places_photo_minute';
+    };
 
 function parseLimitEnv(name: string, defaultValue: number, max: number): number {
   const raw = process.env[name];
@@ -81,6 +88,26 @@ export async function enforcePublicMapApiRateLimits(
         ipKey,
         retryAfterSeconds(googleRl.resetAt),
         'google_places_minute'
+      );
+    }
+  }
+
+  if (route === 'google-places-photo') {
+    const photoPerMin = parseLimitEnv(
+      'GOOGLE_PLACES_PHOTO_ROUTE_RATELIMIT_PER_MIN',
+      40,
+      500
+    );
+    const photoRl = await checkRateLimitAsync(
+      `public_map_api:google_places_photo:min:${ipKey}`,
+      photoPerMin,
+      60_000
+    );
+    if (!photoRl.allowed) {
+      return blocked(
+        ipKey,
+        retryAfterSeconds(photoRl.resetAt),
+        'google_places_photo_minute'
       );
     }
   }

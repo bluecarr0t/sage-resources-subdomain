@@ -13,21 +13,34 @@ export interface DeferredPlacesFetchParams {
   placeId?: string | null;
 }
 
+export interface DeferredPlacesFetchOptions {
+  /**
+   * When true, fetch only after `explicitLoadRequested` is set (click-to-load).
+   * Skips engagement listeners and idle auto-fetch.
+   */
+  requireExplicitLoad?: boolean;
+  explicitLoadRequested?: boolean;
+}
+
 const ENGAGEMENT_EVENTS = ['scroll', 'wheel', 'touchmove', 'pointerdown', 'keydown'] as const;
 
 const IDLE_TIMEOUT_MS = 4500;
 
 /**
- * Defers `/api/google-places` until the user interacts or the browser is idle (timeout),
- * reducing spend from bots that never engage and lowering Places calls on drive-by hits.
+ * Defers `/api/google-places` until the user interacts, is idle, or explicitly requests
+ * Google content — reducing spend from bots and drive-by hits.
  */
 export function useDeferredGooglePlacesFetch(
   initialData: GooglePlacesData | null | undefined,
-  params: DeferredPlacesFetchParams | null
+  params: DeferredPlacesFetchParams | null,
+  options?: DeferredPlacesFetchOptions
 ): {
   googlePlacesData: GooglePlacesData | null;
   phase: DeferredPlacesFetchPhase;
 } {
+  const requireExplicitLoad = options?.requireExplicitLoad ?? false;
+  const explicitLoadRequested = options?.explicitLoadRequested ?? false;
+
   const [googlePlacesData, setGooglePlacesData] = useState<GooglePlacesData | null>(
     initialData ?? null
   );
@@ -46,6 +59,13 @@ export function useDeferredGooglePlacesFetch(
     if (!params?.propertyName) {
       setGooglePlacesData(null);
       setPhase('complete');
+      return;
+    }
+
+    if (requireExplicitLoad && !explicitLoadRequested) {
+      fetchedRef.current = false;
+      setGooglePlacesData(null);
+      setPhase('waiting');
       return;
     }
 
@@ -101,11 +121,14 @@ export function useDeferredGooglePlacesFetch(
       void runFetch();
     }
 
-    for (const ev of ENGAGEMENT_EVENTS) {
-      window.addEventListener(ev, onEngagement, { capture: true, passive: true });
+    if (requireExplicitLoad) {
+      void runFetch();
+    } else {
+      for (const ev of ENGAGEMENT_EVENTS) {
+        window.addEventListener(ev, onEngagement, { capture: true, passive: true });
+      }
+      idleTimer = globalThis.setTimeout(() => void runFetch(), IDLE_TIMEOUT_MS);
     }
-
-    idleTimer = globalThis.setTimeout(() => void runFetch(), IDLE_TIMEOUT_MS);
 
     return () => {
       cancelled = true;
@@ -119,6 +142,8 @@ export function useDeferredGooglePlacesFetch(
     params?.state,
     params?.address,
     params?.placeId,
+    requireExplicitLoad,
+    explicitLoadRequested,
   ]);
 
   return { googlePlacesData, phase };

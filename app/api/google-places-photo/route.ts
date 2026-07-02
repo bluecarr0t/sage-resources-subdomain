@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAllowedPublicMapApiCaller } from '@/lib/public-map-api-guard';
+import {
+  enforcePublicMapApiRateLimits,
+  publicMapApiRateLimitResponse,
+} from '@/lib/public-map-api-rate-limit';
+import { getGooglePlacesServerApiKey } from '@/lib/google-places-server-api-key';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -17,6 +23,21 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
+    if (!isAllowedPublicMapApiCaller(request)) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    const rateLimit = await enforcePublicMapApiRateLimits(
+      request,
+      'google-places-photo'
+    );
+    if (!rateLimit.allowed) {
+      return publicMapApiRateLimitResponse(rateLimit, { error: 'Too many requests' });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const photoName = searchParams.get('photoName');
     const maxWidthPx = searchParams.get('maxWidthPx') || '800';
@@ -49,7 +70,7 @@ export async function GET(request: NextRequest) {
       // Don't fail here - might be a legacy format, let the API handle it
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiKey = getGooglePlacesServerApiKey();
     if (!apiKey) {
       return NextResponse.json(
         { error: 'Google Maps API key not configured' },

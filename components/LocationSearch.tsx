@@ -197,10 +197,10 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
       return;
     }
     
-    // Increased minimum character limit from 2 to 3
-    if (!isLoaded || typeof window === 'undefined' || !window.google || value.length < 3) {
+    // Increased minimum character limit — fewer autocomplete API calls
+    if (!isLoaded || typeof window === 'undefined' || !window.google || value.length < 4) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('[LocationSearch] Search aborted - Maps not loaded or value too short (minimum 3 characters)');
+        console.log('[LocationSearch] Search aborted - Maps not loaded or value too short (minimum 4 characters)');
       }
       setPredictions([]);
       return;
@@ -307,18 +307,17 @@ export default function LocationSearch({ locale, onLocationSelect, variant = 'de
       return;
     }
 
-    // Debounce the search (increased from 150ms to 300ms)
+    // Debounce the search (500ms — fewer autocomplete API calls)
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    // Increased minimum character limit from 2 to 3
-    if (value.length >= 3) {
+    if (value.length >= 4) {
       searchTimeoutRef.current = setTimeout(() => {
         performSearch(value);
-      }, 300);
+      }, 500);
     } else {
-      // Clear predictions if input is less than 3 characters
+      // Clear predictions if input is less than 4 characters
       setPredictions([]);
       setIsOpen(false);
     }

@@ -89,4 +89,17 @@ describe('enforcePublicMapApiRateLimits', () => {
       60_000
     );
   });
+
+  it('applies an extra google-places-photo minute bucket', async () => {
+    await enforcePublicMapApiRateLimits(
+      requestWith({ 'x-forwarded-for': '5.5.5.5' }),
+      'google-places-photo'
+    );
+
+    expect(checkRateLimitAsyncMock).toHaveBeenCalledWith(
+      'public_map_api:google_places_photo:min:5.5.5.5',
+      40,
+      60_000
+    );
+  });
 });
