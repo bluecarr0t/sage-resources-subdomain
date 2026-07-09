@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/require-admin-auth';
+import { isValidSageUuid } from '@/lib/sage-ai/route-schemas';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,9 @@ export async function GET(
   }
 
   const { id } = await params;
+  if (!isValidSageUuid(id)) {
+    return NextResponse.json({ error: 'Invalid session id' }, { status: 400 });
+  }
 
   const { data: session, error } = await authResult.supabase
     .from('sage_ai_sessions')
@@ -81,6 +85,9 @@ export async function PATCH(
   }
 
   const { id } = await params;
+  if (!isValidSageUuid(id)) {
+    return NextResponse.json({ error: 'Invalid session id' }, { status: 400 });
+  }
   let body: { title?: unknown };
   try {
     body = await request.json();
@@ -129,6 +136,9 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  if (!isValidSageUuid(id)) {
+    return NextResponse.json({ error: 'Invalid session id' }, { status: 400 });
+  }
 
   const { data, error } = await authResult.supabase
     .from('sage_ai_sessions')

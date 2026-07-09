@@ -6,6 +6,7 @@ import {
   SAGE_AI_USAGE_SELECT,
   summarizeSageAiSessionUsage,
 } from '@/lib/sage-ai/session-usage';
+import { isValidSageUuid } from '@/lib/sage-ai/route-schemas';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,9 @@ export async function GET(
   }
 
   const { id: sessionId } = await params;
+  if (!isValidSageUuid(sessionId)) {
+    return NextResponse.json({ error: 'Invalid session id' }, { status: 400 });
+  }
 
   const { data: session, error: sessionError } = await authResult.supabase
     .from('sage_ai_sessions')
@@ -31,11 +35,15 @@ export async function GET(
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
+  // Filter by session in the DB (via the request_meta JSON path) instead of
+  // pulling the user's last N global events and filtering in memory — the old
+  // approach under-counted threads once a user had >500 lifetime turns.
   const { data: rows, error } = await authResult.supabase
     .from('admin_ai_usage_events' as never)
     .select(SAGE_AI_USAGE_SELECT)
     .eq('feature', SAGE_AI_FEATURE)
     .eq('user_id', authResult.session.user.id)
+    .eq('request_meta->>session_id', sessionId)
     .order('created_at', { ascending: false })
     .limit(SAGE_AI_USAGE_FETCH_LIMIT);
 

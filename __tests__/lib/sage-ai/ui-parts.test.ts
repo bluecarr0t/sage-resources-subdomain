@@ -32,6 +32,15 @@ describe('visualizationToolsEnabled registration', () => {
     expect(Object.keys(tools)).toEqual(
       expect.arrayContaining(['generate_dashboard', 'visualize_on_map'])
     );
+    expect(Object.keys(tools)).not.toContain('generate_python_code');
+  });
+
+  it('keeps generate_python_code when visualization tools are off', () => {
+    const tools = createSageAiTools(fakeSupabase, {
+      userId: 'u1',
+      visualizationToolsEnabled: false,
+    });
+    expect(Object.keys(tools)).toContain('generate_python_code');
   });
 });
 

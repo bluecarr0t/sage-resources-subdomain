@@ -46,6 +46,22 @@ describe('createSageAiTools', () => {
     expect(Object.keys(tools)).not.toContain('execute_safe_sql');
   });
 
+  it('omits generate_python_code when visualizationToolsEnabled', () => {
+    const { supabase } = makeSupabaseStub({ data: [], error: null, count: 0 });
+    const withViz = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0],
+      { userId: 'u1', visualizationToolsEnabled: true }
+    );
+    expect(Object.keys(withViz)).not.toContain('generate_python_code');
+    expect(Object.keys(withViz)).toContain('generate_dashboard');
+
+    const withoutViz = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0],
+      { userId: 'u1', visualizationToolsEnabled: false }
+    );
+    expect(Object.keys(withoutViz)).toContain('generate_python_code');
+  });
+
   it('does not register Tavily/Firecrawl tools unless webResearchEnabled', () => {
     const { supabase } = makeSupabaseStub({ data: [], error: null, count: 0 });
     const without = createSageAiTools(
@@ -583,8 +599,8 @@ describe('createSageAiTools', () => {
 
     // A *different* tool's empty result should NOT be affected by the
     // counter for query_properties.
-    const otherTool = await tools.query_hipcamp.execute!(
-      { filters: { state: 'TX' }, limit: 10, offset: 0 },
+    const otherTool = await tools.query_ota.execute!(
+      { source: 'hipcamp', filters: { state: 'TX' }, limit: 10, offset: 0 },
       { messages: [], toolCallId: 't3', abortSignal: new AbortController().signal }
     );
     expect(otherTool).toMatchObject({ _emptyRetry: true, attempt: 1 });
@@ -723,13 +739,54 @@ describe('createSageAiTools', () => {
     expect(typed.error).toMatch(/filters\.country=/);
   });
 
-  it('allows dynamic columns on campspot, rejecting malformed identifiers', async () => {
+  it('does not register the removed per-source OTA query tools', () => {
+    const { supabase } = makeSupabaseStub({ data: [], error: null, count: 0 });
+    const tools = createSageAiTools(
+      supabase as unknown as Parameters<typeof createSageAiTools>[0]
+    );
+    expect(Object.keys(tools)).toContain('query_ota');
+    expect(Object.keys(tools)).not.toContain('query_hipcamp');
+    expect(Object.keys(tools)).not.toContain('query_campspot');
+    expect(Object.keys(tools)).not.toContain('query_roverpass');
+  });
+
+  it.each([
+    ['hipcamp', 'hipcamp'],
+    ['campspot', 'campspot'],
+    ['roverpass', 'all_roverpass_data_new'],
+  ] as const)(
+    'query_ota source=%s queries the %s table',
+    async (source, expectedTable) => {
+      const { supabase, fromCalls } = makeSupabaseStub({
+        data: [{ state: 'TX' }],
+        error: null,
+        count: 1,
+      });
+      const tools = createSageAiTools(
+        supabase as unknown as Parameters<typeof createSageAiTools>[0]
+      );
+      const res = await tools.query_ota.execute!(
+        { source, filters: { state: 'TX' }, limit: 10, offset: 0 },
+        { messages: [], toolCallId: 't', abortSignal: new AbortController().signal }
+      );
+      expect(fromCalls).toEqual([expectedTable]);
+      expect(res).toMatchObject({
+        source,
+        table: expectedTable,
+        total_count: 1,
+        returned_count: 1,
+      });
+    }
+  );
+
+  it('allows dynamic columns on query_ota source=campspot, rejecting malformed identifiers', async () => {
     const { supabase } = makeSupabaseStub({ data: [{ arbitrary_col: 'x' }], error: null, count: 1 });
     const tools = createSageAiTools(
       supabase as unknown as Parameters<typeof createSageAiTools>[0]
     );
-    const res = await tools.query_campspot.execute!(
+    const res = await tools.query_ota.execute!(
       {
+        source: 'campspot',
         columns: ['arbitrary_col', 'another_col', '1bad'],
         filters: { arbitrary_col: 'foo', 'foo bar': 'x' },
         limit: 10,

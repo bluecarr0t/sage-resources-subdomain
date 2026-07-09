@@ -1,0 +1,6 @@
+kind,property_id,property_name,row_id,field,existing_value,proposed_value,confidence,evidence,source_url
+unmatched_row,ef2e3cfd-80d9-4958-b901-4e0ab1231635,Zion Ponderosa,,unit_match,,"{""site_name"":null,""unit_type"":null}",low,"No specific unit type provided, and no mention of a private sauna in any unit description.",https://www.zionponderosa.com
+unmatched_row,ef2e3cfd-80d9-4958-b901-4e0ab1231635,Zion Ponderosa,,unit_match,,"{""site_name"":null,""unit_type"":null}",low,No specific unit type provided and no mention of a sauna in the general property description.,https://www.zionponderosa.com
+unmatched_row,ef2e3cfd-80d9-4958-b901-4e0ab1231635,Zion Ponderosa,,unit_match,,"{""site_name"":null,""unit_type"":null}",low,No specific unit type provided and no mention of a private sauna in the general property description.,https://www.zionponderosa.com
+unmatched_row,05d268d4-d3b1-479d-9104-d7c170e1fcb1,The Destination,,unit_match,,"{""site_name"":null,""unit_type"":null}",high,"Each Glamp has a private deck with room for lounging, dining and of course a relaxing soak in a private hot tub.",https://www.tdbsc.com/
+unmatched_row,062455a0-63d5-4c83-b047-87df70420ee6,The Griffin Ranch,,unit_match,,"{""site_name"":null,""unit_type"":null}",low,No mention of private saunas in the guest cottages or cabins.,https://www.thegriffinranch.com/

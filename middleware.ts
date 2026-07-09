@@ -396,6 +396,7 @@ export async function middleware(request: NextRequest) {
           pathname.startsWith('/outdoor-hospitality-pipeline/')
         ) {
           const response = NextResponse.next({ request });
+          response.headers.set('x-pathname', pathname);
           const supabase = createSupabaseMiddlewareClient(request, response);
           await supabase.auth.getUser();
           return response;

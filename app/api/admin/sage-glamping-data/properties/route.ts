@@ -65,6 +65,10 @@ import { isValidGlampingBrandId } from '@/lib/glamping-brands';
 import { isGlampingServiceTier } from '@/lib/glamping-service-tier';
 import { applyGlampingRatesToUsd } from '@/lib/glamping-rates-usd';
 import { sanitizePlannedOpenDatePatch } from '@/lib/glamping-planned-open';
+import {
+  CANCELLED_REASON_PROPAGATE_KEYS,
+  sanitizeCancelledReasonPatch,
+} from '@/lib/cancelled-project-reason';
 import { sanitizeGlampingSeasonRateUpdates } from '@/lib/glamping-seasonal-rate';
 import { applyIsOpenChangeWithHistory } from '@/lib/glamping-pipeline/status-history';
 
@@ -272,6 +276,14 @@ export const POST = withAdminAuth(async (request) => {
     } catch (rateErr) {
       const message = rateErr instanceof Error ? rateErr.message : 'Invalid seasonal rate';
       return NextResponse.json({ success: false, error: message }, { status: 400 });
+    }
+
+    const cancelledInsertResult = sanitizeCancelledReasonPatch(insertRow);
+    if (!cancelledInsertResult.ok) {
+      return NextResponse.json(
+        { success: false, error: cancelledInsertResult.error },
+        { status: 400 }
+      );
     }
 
     const { data, error } = await supabase
@@ -584,7 +596,16 @@ export const PATCH = withAdminAuth(async (request) => {
 
     const supabase = createServerClient();
 
-    if ('planned_open_date' in sanitized || 'is_open' in sanitized) {
+    const needsIsOpenRow =
+      'planned_open_date' in sanitized ||
+      'is_open' in sanitized ||
+      'cancelled_reason' in sanitized ||
+      'cancelled_reason_notes' in sanitized ||
+      'cancelled_year' in sanitized;
+
+    let effectiveIsOpen: string | null | undefined;
+
+    if (needsIsOpenRow) {
       const { data: currentRow, error: currentErr } = await supabase
         .from(TABLE)
         .select('slug, is_open')
@@ -596,53 +617,74 @@ export const PATCH = withAdminAuth(async (request) => {
           { status: 500 }
         );
       }
-      const plannedResult = sanitizePlannedOpenDatePatch(
-        sanitized,
-        currentRow?.is_open as string | null | undefined
-      );
-      if (!plannedResult.ok) {
-        return NextResponse.json(
-          { success: false, error: plannedResult.error },
-          { status: 400 }
-        );
-      }
 
-      if ('is_open' in sanitized && sanitized.is_open != null) {
-        const nextRaw = String(sanitized.is_open).trim();
-        if (!(GLAMPING_IS_OPEN_VALUES as readonly string[]).includes(nextRaw)) {
+      effectiveIsOpen = (currentRow?.is_open as string | null | undefined) ?? null;
+      const isOpenTouched = 'is_open' in sanitized;
+
+      if ('planned_open_date' in sanitized || isOpenTouched) {
+        const plannedResult = sanitizePlannedOpenDatePatch(sanitized, effectiveIsOpen);
+        if (!plannedResult.ok) {
           return NextResponse.json(
-            {
-              success: false,
-              error: `is_open must be one of: ${GLAMPING_IS_OPEN_VALUES.join(', ')}`,
-            },
+            { success: false, error: plannedResult.error },
             { status: 400 }
           );
         }
-        const nextIsOpen = nextRaw as GlampingIsOpenValue;
-        const currentIsOpen = (currentRow?.is_open as string | null | undefined) ?? '';
-        const slug = (currentRow?.slug as string | null | undefined) ?? '';
 
-        if (slug && currentIsOpen.trim() !== nextIsOpen) {
-          try {
-            await applyIsOpenChangeWithHistory(supabase, {
-              propertyId: Number(id),
-              slug,
-              previousIsOpen: currentIsOpen,
-              nextIsOpen,
-              changeSource: 'admin_patch',
-            });
-          } catch (historyErr) {
-            const message =
-              historyErr instanceof Error ? historyErr.message : String(historyErr);
-            console.error('[admin/sage-data/properties] is_open history:', message);
+        if (isOpenTouched && sanitized.is_open != null) {
+          const nextRaw = String(sanitized.is_open).trim();
+          if (!(GLAMPING_IS_OPEN_VALUES as readonly string[]).includes(nextRaw)) {
             return NextResponse.json(
-              { success: false, error: message },
-              { status: 500 }
+              {
+                success: false,
+                error: `is_open must be one of: ${GLAMPING_IS_OPEN_VALUES.join(', ')}`,
+              },
+              { status: 400 }
             );
           }
-        }
+          const nextIsOpen = nextRaw as GlampingIsOpenValue;
+          const currentIsOpen = (effectiveIsOpen ?? '').trim();
+          const slug = (currentRow?.slug as string | null | undefined) ?? '';
+          effectiveIsOpen = nextIsOpen;
 
+          if (slug && currentIsOpen !== nextIsOpen) {
+            try {
+              await applyIsOpenChangeWithHistory(supabase, {
+                propertyId: Number(id),
+                slug,
+                previousIsOpen: currentIsOpen,
+                nextIsOpen,
+                changeSource: 'admin_patch',
+              });
+            } catch (historyErr) {
+              const message =
+                historyErr instanceof Error ? historyErr.message : String(historyErr);
+              console.error('[admin/sage-data/properties] is_open history:', message);
+              return NextResponse.json(
+                { success: false, error: message },
+                { status: 500 }
+              );
+            }
+          }
+
+          delete sanitized.is_open;
+        }
+      }
+
+      if (
+        'cancelled_reason' in sanitized ||
+        'cancelled_reason_notes' in sanitized ||
+        'cancelled_year' in sanitized ||
+        isOpenTouched
+      ) {
+        sanitized.is_open = effectiveIsOpen ?? null;
+        const cancelledResult = sanitizeCancelledReasonPatch(sanitized);
         delete sanitized.is_open;
+        if (!cancelledResult.ok) {
+          return NextResponse.json(
+            { success: false, error: cancelledResult.error },
+            { status: 400 }
+          );
+        }
       }
     }
 
@@ -721,6 +763,17 @@ export const PATCH = withAdminAuth(async (request) => {
         )
       );
       await propagateToSiblings(otaPatch, 'ota');
+    }
+
+    const cancelledPatch = Object.fromEntries(
+      Object.entries(sanitized).filter(([k]) =>
+        (CANCELLED_REASON_PROPAGATE_KEYS as readonly string[]).includes(
+          k as (typeof CANCELLED_REASON_PROPAGATE_KEYS)[number]
+        )
+      )
+    );
+    if (Object.keys(cancelledPatch).length > 0) {
+      await propagateToSiblings(cancelledPatch, 'cancelled_reason');
     }
 
     return NextResponse.json({

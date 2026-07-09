@@ -10,7 +10,8 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { enforceDailyQuota } from '@/lib/upstash';
+import { quotaGate } from '@/lib/sage-ai/quota-gate';
+import { wrapUntrustedContent } from '@/lib/sage-ai/untrusted-content';
 import {
   REPORT_TEMPLATES,
   getReportTemplate,
@@ -18,6 +19,7 @@ import {
 } from '@/lib/sage-ai/report-templates';
 import { assertToolRole } from '@/lib/sage-ai/require-tool-role';
 import { fetchWithTimeout } from '@/lib/sage-ai/fetch-with-timeout';
+import { sageAiWriteClient } from '@/lib/sage-ai/service-writer';
 import {
   feasibilityBlockSchema,
   FEASIBILITY_DOCX_SCHEMA_VERSION,
@@ -41,41 +43,6 @@ const FEASIBILITY_SECTION_QUOTA = Number(
   process.env.SAGE_AI_QUOTA_FEASIBILITY_SECTION ?? 30
 );
 const SCRAPED_CONTENT_MAX = 4_000;
-
-async function quotaGate(
-  toolName: string,
-  userId: string | undefined,
-  quota: number
-): Promise<{ error: string; data: null } | null> {
-  // Composed tools call Google Places + Firecrawl on every invocation, so
-  // they're billed and require a user to attribute usage to.
-  if (!userId) {
-    return {
-      error: `${toolName} requires an authenticated user to enforce daily quota.`,
-      data: null,
-    };
-  }
-  const { allowed, used } = await enforceDailyQuota(toolName, userId, quota);
-  if (!allowed) {
-    return {
-      error: `Daily quota exceeded for ${toolName} (used ${used} of ${quota}).`,
-      data: null,
-    };
-  }
-  return null;
-}
-
-function escapeSource(url: string): string {
-  return url.replace(/"/g, '%22').replace(/[\r\n]/g, ' ');
-}
-
-function wrapUntrusted(source: string, content: string): string {
-  const trimmed =
-    content.length > SCRAPED_CONTENT_MAX
-      ? `${content.slice(0, SCRAPED_CONTENT_MAX)}\n...(truncated from ${content.length} characters)`
-      : content;
-  return `<UNTRUSTED_CONTENT source="${escapeSource(source)}">\n${trimmed}\n</UNTRUSTED_CONTENT>`;
-}
 
 interface CompetitorComparisonRow {
   name: string;
@@ -202,7 +169,7 @@ async function scrapeFirstUrl(
     const md = json.data?.markdown ?? '';
     if (!md) return null;
     return {
-      content: wrapUntrusted(url, md),
+      content: wrapUntrustedContent(url, md, SCRAPED_CONTENT_MAX),
       truncated: md.length > SCRAPED_CONTENT_MAX,
     };
   } catch {
@@ -480,7 +447,11 @@ The returned \`report_id\` can be linked to in the UI.`,
           }),
         };
 
-        const { data, error } = await supabase
+        // The `reports` write policy is service-role only, so the draft
+        // insert must not run on the user-scoped client (RLS rejects it and
+        // the tool reports a failure). Access is gated above by the admin
+        // role check + daily quota.
+        const { data, error } = await sageAiWriteClient(supabase)
           .from('reports')
           .insert({
             title: report_name,
@@ -492,6 +463,10 @@ The returned \`report_id\` can be linked to in the UI.`,
             status: 'draft',
             source: 'sage_ai',
             draft_content: draft,
+            // reports.user_id is NOT NULL; quotaGate above guarantees a
+            // userId. Also attributes the draft since the service-role
+            // client bypasses RLS ownership.
+            user_id: userId,
           })
           .select('id')
           .single();

@@ -13,7 +13,7 @@ export default function AdminMainContent({
   const pathname = usePathname();
   const isClientMap = pathname === '/admin/client-map';
   const isSageAi = pathname === '/admin/sage-ai';
-  const isSageData = pathname === '/admin/sage-data';
+  const isSageData = pathname.startsWith('/admin/sage-data');
   
   // Sage AI needs full viewport without padding
   if (isSageAi) {

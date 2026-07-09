@@ -1,12 +1,16 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
-import AdminGlampingPropertiesTable from '@/components/AdminGlampingPropertiesTable';
-import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
+import { ChevronRight, Table2 } from 'lucide-react';
+import AdminColumnsView from '@/components/AdminColumnsView';
+import AdminDiscoveryPipelineStats from '@/components/AdminDiscoveryPipelineStats';
+import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
+import AdminMissingFieldsBreakdown from '@/components/AdminMissingFieldsBreakdown';
+import AdminGlampingServiceTierBreakdown from '@/components/AdminGlampingServiceTierBreakdown';
+import { adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
 
 export const metadata: Metadata = {
-  title: 'Sage Data Editor - Sage Admin',
-  description: 'Inline editor for the all_sage_data table',
+  title: 'Sage Research & Data - Sage Admin',
+  description: 'View all columns from the all_sage_data table',
   robots: {
     index: false,
     follow: false,
@@ -16,26 +20,44 @@ export const metadata: Metadata = {
 export default function SageDataPage() {
   return (
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto pb-8 pt-0">
-        <Link
-          href="/admin/sage-glamping-data-breakdown"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 mb-4"
-        >
-          <ChevronLeft className="w-4 h-4" aria-hidden />
-          Back to Sage Glamping Data Breakdown
-        </Link>
-
-        <div className={adminPageHeadingMargin}>
+      <div className="max-w-7xl mx-auto">
+        <div className={`${adminPageHeadingMargin} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4`}>
           <h1 className={adminPageTitle}>
-            Sage Data Editor
+            Sage Research & Data
           </h1>
-          <p className={`${adminPageDescription} mt-2`}>
-            Browse and edit rows in <code className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">all_sage_data</code>.
-            <span className="font-medium">Click a row</span> to open the editor, or use keyboard (focus a row, then Enter or Space). Follow URL links to open the site; they do not open the editor.
-          </p>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              href="/admin/sage-data/editor"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-sage-600 hover:bg-sage-700 px-3 py-1.5 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2"
+            >
+              <Table2 className="w-4 h-4" aria-hidden />
+              Edit data table
+            </Link>
+            <Link
+              href="/admin/ai-research-pipeline"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 rounded-md"
+            >
+              View AI Research Pipeline
+              <ChevronRight className="w-4 h-4" aria-hidden />
+            </Link>
+          </div>
         </div>
 
-        <AdminGlampingPropertiesTable />
+        <AdminGlampingMetrics />
+
+        <div className="mt-8">
+          <AdminDiscoveryPipelineStats />
+        </div>
+
+        <div className="mt-8">
+          <AdminGlampingServiceTierBreakdown />
+        </div>
+
+        <div className="mt-8 mb-8">
+          <AdminMissingFieldsBreakdown />
+        </div>
+
+        <AdminColumnsView />
       </div>
     </main>
   );

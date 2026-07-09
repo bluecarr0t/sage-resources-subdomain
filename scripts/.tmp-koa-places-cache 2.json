@@ -1,0 +1,4462 @@
+{
+  "alamogordo": {
+    "name": "Alamogordo / White Sands KOA Journey",
+    "formatted_address": "412 24th St, Alamogordo, NM 88310, United States",
+    "lat": 32.9180182,
+    "lon": -105.9575102,
+    "city": "Alamogordo",
+    "state": "NM",
+    "zip_code": "88310",
+    "country": "United States"
+  },
+  "alamosa": {
+    "name": "Alamosa / Great Sand Dunes KOA Journey",
+    "formatted_address": "6900 Juniper Ln, Alamosa, CO 81101, United States",
+    "lat": 37.4746366,
+    "lon": -105.7981656,
+    "city": "Alamosa",
+    "state": "CO",
+    "zip_code": "81101",
+    "country": "United States"
+  },
+  "albany": {
+    "name": "Albany / Corvallis KOA Journey",
+    "formatted_address": "33775 Oakville Rd SW, Albany, OR 97321, United States",
+    "lat": 44.5637823,
+    "lon": -123.1529638,
+    "city": "Albany",
+    "state": "OR",
+    "zip_code": "97321",
+    "country": "United States"
+  },
+  "albert-lea": {
+    "name": "Albert Lea / Austin KOA Journey",
+    "formatted_address": "84259 County Rd 46, Hayward, MN 56043, United States",
+    "lat": 43.6613318,
+    "lon": -93.18245019999999,
+    "city": "Hayward",
+    "state": "MN",
+    "zip_code": "56043",
+    "country": "United States"
+  },
+  "albuquerque": {
+    "name": "Albuquerque KOA Journey",
+    "formatted_address": "12400 Skyline Rd NE, Albuquerque, NM 87123, United States",
+    "lat": 35.0725235,
+    "lon": -106.5087013,
+    "city": "Albuquerque",
+    "state": "NM",
+    "zip_code": "87123",
+    "country": "United States"
+  },
+  "albuquerque-north": {
+    "name": "Albuquerque North / Bernalillo KOA Journey",
+    "formatted_address": "555 South Hill, Bernalillo, NM 87004, United States",
+    "lat": 35.3065004,
+    "lon": -106.5396024,
+    "city": "Bernalillo",
+    "state": "NM",
+    "zip_code": "87004",
+    "country": "United States"
+  },
+  "allendale": {
+    "name": "Allendale / West Grand Rapids KOA Holiday",
+    "formatted_address": "8275 Warner St, Allendale, MI 49401, United States",
+    "lat": 42.996884,
+    "lon": -85.991321,
+    "city": "Allendale",
+    "state": "MI",
+    "zip_code": "49401",
+    "country": "United States"
+  },
+  "allentown": {
+    "name": "Allentown KOA Journey",
+    "formatted_address": "6750 KOA Dr, New Tripoli, PA 18066, United States",
+    "lat": 40.6586825,
+    "lon": -75.6929885,
+    "city": "New Tripoli",
+    "state": "PA",
+    "zip_code": "18066",
+    "country": "United States"
+  },
+  "amarillo": {
+    "name": "Amarillo KOA Journey",
+    "formatted_address": "1100 Folsom Rd, Amarillo, TX 79108, United States",
+    "lat": 35.2246944,
+    "lon": -101.7242484,
+    "city": "Amarillo",
+    "state": "TX",
+    "zip_code": "79108",
+    "country": "United States"
+  },
+  "americus": {
+    "name": "Americus KOA Journey",
+    "formatted_address": "1619 US-280, Americus, GA 31709, United States",
+    "lat": 32.0032199,
+    "lon": -84.1108825,
+    "city": "Americus",
+    "state": "GA",
+    "zip_code": "31709",
+    "country": "United States"
+  },
+  "anderson": {
+    "name": "Anderson / Lake Hartwell KOA Holiday",
+    "formatted_address": "200 Wham Rd, Anderson, SC 29625, United States",
+    "lat": 34.5345868,
+    "lon": -82.8015094,
+    "city": "Anderson",
+    "state": "SC",
+    "zip_code": "29625",
+    "country": "United States"
+  },
+  "andover": {
+    "name": "Andover / Pymatuning Lake KOA Holiday",
+    "formatted_address": "7652 Pymatuning Lake Rd, Williamsfield, OH 44093, United States",
+    "lat": 41.5418711,
+    "lon": -80.53287859999999,
+    "city": "Williamsfield",
+    "state": "OH",
+    "zip_code": "44093",
+    "country": "United States"
+  },
+  "angola": {
+    "name": "Angola / Hogback Lake KOA Holiday",
+    "formatted_address": "5251 US-20, Angola, IN 46703, United States",
+    "lat": 41.63332,
+    "lon": -85.08663,
+    "city": "Angola",
+    "state": "IN",
+    "zip_code": "46703",
+    "country": "United States"
+  },
+  "asheville-east": {
+    "name": "Asheville East KOA Holiday",
+    "formatted_address": "2708 US-70, Swannanoa, NC 28778, United States",
+    "lat": 35.601274,
+    "lon": -82.3743061,
+    "city": "Swannanoa",
+    "state": "NC",
+    "zip_code": "28778",
+    "country": "United States"
+  },
+  "asheville-west": {
+    "name": "Asheville West KOA Holiday",
+    "formatted_address": "309 Wiggins Rd, Candler, NC 28715, United States",
+    "lat": 35.5426556,
+    "lon": -82.7595267,
+    "city": "Candler",
+    "state": "NC",
+    "zip_code": "28715",
+    "country": "United States"
+  },
+  "astoria": {
+    "name": "Astoria / Warrenton / Seaside KOA Resort",
+    "formatted_address": "Clatsop County, 1100 NW Ridge Rd, Hammond, OR 97121, United States",
+    "lat": 46.1861513,
+    "lon": -123.9551481,
+    "city": "Hammond",
+    "state": "OR",
+    "zip_code": "97121",
+    "country": "United States"
+  },
+  "augusta": {
+    "name": "Augusta / Gardiner KOA Journey",
+    "formatted_address": "30 Mallard Dr, Richmond, ME 04357, United States",
+    "lat": 44.1517226,
+    "lon": -69.8698088,
+    "city": "Richmond",
+    "state": "ME",
+    "zip_code": "04357",
+    "country": "United States"
+  },
+  "austin-east": {
+    "name": "Austin East KOA Holiday",
+    "formatted_address": "6029 Blue Bluff Rd, Austin, TX 78724, United States",
+    "lat": 30.277483,
+    "lon": -97.61159599999999,
+    "city": "Austin",
+    "state": "TX",
+    "zip_code": "78724",
+    "country": "United States"
+  },
+  "badlands": {
+    "name": "Badlands / White River KOA Holiday",
+    "formatted_address": "20720 SD-44, Interior, SD 57750, United States",
+    "lat": 43.6919696,
+    "lon": -101.9311829,
+    "city": "Interior",
+    "state": "SD",
+    "zip_code": "57750",
+    "country": "United States"
+  },
+  "baileyton": {
+    "name": "Baileyton KOA Holiday",
+    "formatted_address": "7485 Horton Hwy, Greeneville, TN 37745, United States",
+    "lat": 36.3395113,
+    "lon": -82.82223069999999,
+    "city": "Greeneville",
+    "state": "TN",
+    "zip_code": "37745",
+    "country": "United States"
+  },
+  "bandon": {
+    "name": "Bandon / Port Orford KOA Journey",
+    "formatted_address": "46612 US-101, Langlois, OR 97450, United States",
+    "lat": 42.87775690000001,
+    "lon": -124.4686909,
+    "city": "Langlois",
+    "state": "OR",
+    "zip_code": "97450",
+    "country": "United States"
+  },
+  "bangor": {
+    "name": "Bangor / Holden KOA Holiday",
+    "formatted_address": "602 Main Rd, Holden, ME 04429, United States",
+    "lat": 44.7550554,
+    "lon": -68.6591998,
+    "city": "Holden",
+    "state": "ME",
+    "zip_code": "04429",
+    "country": "United States"
+  },
+  "banning-stagecoach": {
+    "name": "Banning Stagecoach KOA Journey",
+    "formatted_address": "1455 S San Gorgonio Ave, Banning, CA 92220, United States",
+    "lat": 33.91220029999999,
+    "lon": -116.8780927,
+    "city": "Banning",
+    "state": "CA",
+    "zip_code": "92220",
+    "country": "United States"
+  },
+  "bar-harbor-oceanside": {
+    "name": "Bar Harbor / Oceanside KOA Holiday",
+    "formatted_address": "136 County Rd, Bar Harbor, ME 04609, United States",
+    "lat": 44.4214387,
+    "lon": -68.364426,
+    "city": "Bar Harbor",
+    "state": "ME",
+    "zip_code": "04609",
+    "country": "United States"
+  },
+  "barrie": {
+    "name": "Barrie KOA Holiday",
+    "formatted_address": "3138 Penetanguishene Rd, Barrie, ON L9X 1Z7, Canada",
+    "lat": 44.5158768,
+    "lon": -79.7147933,
+    "city": "Barrie",
+    "state": "ON",
+    "zip_code": "L9X 1Z7",
+    "country": "Canada"
+  },
+  "barstow": {
+    "name": "Barstow / Calico KOA Holiday",
+    "formatted_address": "35250 Outer Hwy 15 N, Yermo, CA 92398, United States",
+    "lat": 34.90282,
+    "lon": -116.8921104,
+    "city": "Yermo",
+    "state": "CA",
+    "zip_code": "92398",
+    "country": "United States"
+  },
+  "batesville": {
+    "name": "Batesville KOA Journey",
+    "formatted_address": "7234 IN-46, Batesville, IN 47006, United States",
+    "lat": 39.2754666,
+    "lon": -85.13131779999999,
+    "city": "Batesville",
+    "state": "IN",
+    "zip_code": "47006",
+    "country": "United States"
+  },
+  "baton-rouge": {
+    "name": "Baton Rouge KOA Holiday",
+    "formatted_address": "7628 Vincent Rd, Denham Springs, LA 70726, United States",
+    "lat": 30.4483528,
+    "lon": -90.9622351,
+    "city": "Denham Springs",
+    "state": "LA",
+    "zip_code": "70726",
+    "country": "United States"
+  },
+  "bay-center": {
+    "name": "Bay Center / Willapa Bay KOA Holiday",
+    "formatted_address": "457 Bay Center Rd, South Bend, WA 98586, United States",
+    "lat": 46.6213784,
+    "lon": -123.9545241,
+    "city": "South Bend",
+    "state": "WA",
+    "zip_code": "98586",
+    "country": "United States"
+  },
+  "bear-lake": {
+    "name": "Bear Lake / Marina Side KOA Holiday",
+    "formatted_address": "485 N Bear Lake Blvd, Garden City, UT 84028, United States",
+    "lat": 41.95538519999999,
+    "lon": -111.3979039,
+    "city": "Garden City",
+    "state": "UT",
+    "zip_code": "84028",
+    "country": "United States"
+  },
+  "bear-lake-trail-side": {
+    "name": "Bear Lake / Trail Side KOA Journey",
+    "formatted_address": "145 N 300 W, Garden City, UT 84028, United States",
+    "lat": 41.94895169999999,
+    "lon": -111.4006042,
+    "city": "Garden City",
+    "state": "UT",
+    "zip_code": "84028",
+    "country": "United States"
+  },
+  "beaver": {
+    "name": "Beaver KOA Journey",
+    "formatted_address": "1428 N Manderfield Rd #357, Beaver, UT 84713, United States",
+    "lat": 38.294547,
+    "lon": -112.6381157,
+    "city": "Beaver",
+    "state": "UT",
+    "zip_code": "84713",
+    "country": "United States"
+  },
+  "bellefonte": {
+    "name": "Bellefonte / State College KOA Holiday",
+    "formatted_address": "2481 Jacksonville Rd, Bellefonte, PA 16823, United States",
+    "lat": 40.9627795,
+    "lon": -77.68731489999999,
+    "city": "Bellefonte",
+    "state": "PA",
+    "zip_code": "16823",
+    "country": "United States"
+  },
+  "belvidere": {
+    "name": "Belvidere East / Exit 170 KOA Journey",
+    "formatted_address": "24201 SD-63, Midland, SD 57552, United States",
+    "lat": 43.8910616,
+    "lon": -101.1479444,
+    "city": "Midland",
+    "state": "SD",
+    "zip_code": "57552",
+    "country": "United States"
+  },
+  "bemidji": {
+    "name": "Bemidji KOA Journey",
+    "formatted_address": "510 Brightstar Rd NW, Bemidji, MN 56601, United States",
+    "lat": 47.5095898,
+    "lon": -94.9618603,
+    "city": "Bemidji",
+    "state": "MN",
+    "zip_code": "56601",
+    "country": "United States"
+  },
+  "benbow": {
+    "name": "Benbow KOA Holiday",
+    "formatted_address": "7000 Benbow Dr, Garberville, CA 95542, United States",
+    "lat": 40.068215,
+    "lon": -123.78698,
+    "city": "Garberville",
+    "state": "CA",
+    "zip_code": "95542",
+    "country": "United States"
+  },
+  "benson": {
+    "name": "Benson KOA Journey",
+    "formatted_address": "180 W 4 Feathers Ln, Benson, AZ 85602, United States",
+    "lat": 31.9886045,
+    "lon": -110.3023868,
+    "city": "Benson",
+    "state": "AZ",
+    "zip_code": "85602",
+    "country": "United States"
+  },
+  "benton": {
+    "name": "Benton KOA Journey",
+    "formatted_address": "1500 N Du Quoin St, Benton, IL 62812, United States",
+    "lat": 38.0129178,
+    "lon": -88.928847,
+    "city": "Benton",
+    "state": "IL",
+    "zip_code": "62812",
+    "country": "United States"
+  },
+  "big-timber": {
+    "name": "Big Timber / Greycliff KOA Journey",
+    "formatted_address": "693 M10, Big Timber, MT 59011, United States",
+    "lat": 45.7740124,
+    "lon": -109.7993263,
+    "city": "Big Timber",
+    "state": "MT",
+    "zip_code": "59011",
+    "country": "United States"
+  },
+  "billings": {
+    "name": "Billings KOA Holiday",
+    "formatted_address": "547 Garden Ave, Billings, MT 59101, United States",
+    "lat": 45.75923160000001,
+    "lon": -108.4819113,
+    "city": "Billings",
+    "state": "MT",
+    "zip_code": "59101",
+    "country": "United States"
+  },
+  "bismarck": {
+    "name": "Bismarck KOA Journey",
+    "formatted_address": "3720 Centennial Rd, Bismarck, ND 58503, United States",
+    "lat": 46.8468611,
+    "lon": -100.7326412,
+    "city": "Bismarck",
+    "state": "ND",
+    "zip_code": "58503",
+    "country": "United States"
+  },
+  "bluffton": {
+    "name": "Bluffton / Fort Wayne South KOA Journey",
+    "formatted_address": "1625 W Lancaster St, Bluffton, IN 46714, United States",
+    "lat": 40.7461727,
+    "lon": -85.1934997,
+    "city": "Bluffton",
+    "state": "IN",
+    "zip_code": "46714",
+    "country": "United States"
+  },
+  "boise": {
+    "name": "Boise / Meridian KOA Journey",
+    "formatted_address": "184 W Pennwood St, Meridian, ID 83642, United States",
+    "lat": 43.6008375,
+    "lon": -116.395873,
+    "city": "Meridian",
+    "state": "ID",
+    "zip_code": "83642",
+    "country": "United States"
+  },
+  "boone": {
+    "name": "Boone KOA Holiday",
+    "formatted_address": "123 Harmony Mountain Ln, Boone, NC 28607, United States",
+    "lat": 36.2584576,
+    "lon": -81.6642463,
+    "city": "Boone",
+    "state": "NC",
+    "zip_code": "28607",
+    "country": "United States"
+  },
+  "borden": {
+    "name": "Borden / Summerside KOA Journey",
+    "formatted_address": "23714 Trans-Canada Hwy, Borden-Carleton, PE C0B 1X0, Canada",
+    "lat": 46.2553565,
+    "lon": -63.6729297,
+    "city": "Borden-Carleton",
+    "state": "PE",
+    "zip_code": "C0B 1X0",
+    "country": "Canada"
+  },
+  "boston": {
+    "name": "Boston / Cape Cod KOA Holiday",
+    "formatted_address": "438 Plymouth St, Middleborough, MA 02346, United States",
+    "lat": 41.9103436,
+    "lon": -70.9085592,
+    "city": "Middleborough",
+    "state": "MA",
+    "zip_code": "02346",
+    "country": "United States"
+  },
+  "boulevard": {
+    "name": "Boulevard / Cleveland National Forest KOA Holiday",
+    "formatted_address": "1331 Shasta Way, Boulevard, CA 91905, United States",
+    "lat": 32.6457674,
+    "lon": -116.3476617,
+    "city": "Boulevard",
+    "state": "CA",
+    "zip_code": "91905",
+    "country": "United States"
+  },
+  "bowling-green": {
+    "name": "Bowling Green KOA Holiday",
+    "formatted_address": "1960 Three Springs Rd, Bowling Green, KY 42104, United States",
+    "lat": 36.9161874,
+    "lon": -86.4353077,
+    "city": "Bowling Green",
+    "state": "KY",
+    "zip_code": "42104",
+    "country": "United States"
+  },
+  "boyer-park": {
+    "name": "Boyer Park & Marina / Snake River KOA Holiday",
+    "formatted_address": "1753 Granite Rd, Colfax, WA 99111, United States",
+    "lat": 46.68296,
+    "lon": -117.4478033,
+    "city": "Colfax",
+    "state": "WA",
+    "zip_code": "99111",
+    "country": "United States"
+  },
+  "bradenton": {
+    "name": "Bradenton / Hunsader Farms KOA Holiday",
+    "formatted_address": "5500 Co Rd 675, Bradenton, FL 34211, United States",
+    "lat": 27.445234,
+    "lon": -82.304462,
+    "city": "Bradenton",
+    "state": "FL",
+    "zip_code": "34211",
+    "country": "United States"
+  },
+  "branson": {
+    "name": "Branson KOA Holiday",
+    "formatted_address": "397 Animal Safari Rd, Branson, MO 65616, United States",
+    "lat": 36.6285076,
+    "lon": -93.28532589999999,
+    "city": "Branson",
+    "state": "MO",
+    "zip_code": "65616",
+    "country": "United States"
+  },
+  "brattleboro": {
+    "name": "Brattleboro North KOA Journey",
+    "formatted_address": "1238 US-5, East Dummerston, VT 05346, United States",
+    "lat": 42.9283402,
+    "lon": -72.5368502,
+    "city": "East Dummerston",
+    "state": "VT",
+    "zip_code": "05346",
+    "country": "United States"
+  },
+  "brigham-city": {
+    "name": "Brigham City / Perry South KOA Journey",
+    "formatted_address": "1040 W 3600 S, Perry, UT 84302, United States",
+    "lat": 41.4450376,
+    "lon": -112.0407968,
+    "city": "Perry",
+    "state": "UT",
+    "zip_code": "84302",
+    "country": "United States"
+  },
+  "brighton": {
+    "name": "Brighton / 401 KOA Holiday",
+    "formatted_address": "15051 Telephone Rd Exit 509, Brighton, ON K0K 1H0, Canada",
+    "lat": 44.0667722,
+    "lon": -77.78283909999999,
+    "city": "Brighton",
+    "state": "ON",
+    "zip_code": "K0K 1H0",
+    "country": "Canada"
+  },
+  "bristol": {
+    "name": "Bristol / Kingsport KOA Holiday",
+    "formatted_address": "425 Rocky Branch Rd, Blountville, TN 37617, United States",
+    "lat": 36.5083977,
+    "lon": -82.4450007,
+    "city": "Blountville",
+    "state": "TN",
+    "zip_code": "37617",
+    "country": "United States"
+  },
+  "brookeland": {
+    "name": "Brookeland / Lake Sam Rayburn KOA Holiday",
+    "formatted_address": "505 Co Rd 212, Brookeland, TX 75931, United States",
+    "lat": 31.1424241,
+    "lon": -93.9973507,
+    "city": "Brookeland",
+    "state": "TX",
+    "zip_code": "75931",
+    "country": "United States"
+  },
+  "brown-county": {
+    "name": "Brown County / Nashville KOA Holiday",
+    "formatted_address": "2248 IN-46, Nashville, IN 47448, United States",
+    "lat": 39.1989775,
+    "lon": -86.2047312,
+    "city": "Nashville",
+    "state": "IN",
+    "zip_code": "47448",
+    "country": "United States"
+  },
+  "buckeye-lake": {
+    "name": "Buckeye Lake / Columbus East KOA Holiday",
+    "formatted_address": "4460 Walnut Rd, Buckeye Lake, OH 43008, United States",
+    "lat": 39.92978859999999,
+    "lon": -82.4943062,
+    "city": "Buckeye Lake",
+    "state": "OH",
+    "zip_code": "43008",
+    "country": "United States"
+  },
+  "bucksport": {
+    "name": "Bucksport / Fort Knox KOA Holiday",
+    "formatted_address": "32 Leaches Point Rd, Orland, ME 04472, United States",
+    "lat": 44.5702835,
+    "lon": -68.7525075,
+    "city": "Orland",
+    "state": "ME",
+    "zip_code": "04472",
+    "country": "United States"
+  },
+  "buffalo": {
+    "name": "Buffalo KOA Journey",
+    "formatted_address": "87 US-16, Buffalo, WY 82834, United States",
+    "lat": 44.35355370000001,
+    "lon": -106.6811231,
+    "city": "Buffalo",
+    "state": "WY",
+    "zip_code": "82834",
+    "country": "United States"
+  },
+  "buffalo-wyoming": {
+    "name": "Buffalo KOA Journey",
+    "formatted_address": "87 US-16, Buffalo, WY 82834, United States",
+    "lat": 44.35355370000001,
+    "lon": -106.6811231,
+    "city": "Buffalo",
+    "state": "WY",
+    "zip_code": "82834",
+    "country": "United States"
+  },
+  "burkburnett": {
+    "name": "Burkburnett / Wichita Falls KOA Journey",
+    "formatted_address": "1202 E 3rd St, Burkburnett, TX 76354, United States",
+    "lat": 34.0991435,
+    "lon": -98.55373759999999,
+    "city": "Burkburnett",
+    "state": "TX",
+    "zip_code": "76354",
+    "country": "United States"
+  },
+  "burlington": {
+    "name": "Burlington / Anacortes KOA Holiday",
+    "formatted_address": "6397 N Green Rd, Burlington, WA 98233, United States",
+    "lat": 48.5521665,
+    "lon": -122.3339195,
+    "city": "Burlington",
+    "state": "WA",
+    "zip_code": "98233",
+    "country": "United States"
+  },
+  "butler": {
+    "name": "Butler / Mohican KOA Journey",
+    "formatted_address": "6918 Bunkerhill South Rd, Butler, OH 44822, United States",
+    "lat": 40.5687652,
+    "lon": -82.3577894,
+    "city": "Butler",
+    "state": "OH",
+    "zip_code": "44822",
+    "country": "United States"
+  },
+  "butte": {
+    "name": "Butte KOA Journey",
+    "formatted_address": "1601 Kaw Ave, Butte, MT 59701, United States",
+    "lat": 45.9947221,
+    "lon": -112.5307358,
+    "city": "Butte",
+    "state": "MT",
+    "zip_code": "59701",
+    "country": "United States"
+  },
+  "cadillac": {
+    "name": "Cadillac KOA Holiday",
+    "formatted_address": "10621 34 Rd, Cadillac, MI 49601, United States",
+    "lat": 44.2813876,
+    "lon": -85.3661837,
+    "city": "Cadillac",
+    "state": "MI",
+    "zip_code": "49601",
+    "country": "United States"
+  },
+  "canandaigua": {
+    "name": "Canandaigua / Rochester KOA Holiday",
+    "formatted_address": "5374 Canandaigua Farmington Town Line Rd, Farmington, NY 14425, United States",
+    "lat": 42.9445704,
+    "lon": -77.3094784,
+    "city": "Farmington",
+    "state": "NY",
+    "zip_code": "14425",
+    "country": "United States"
+  },
+  "cannonville": {
+    "name": "St. George / Hurricane KOA Journey",
+    "formatted_address": "5800 Old Hwy 91, Hurricane, UT 84737, United States",
+    "lat": 37.2051472,
+    "lon": -113.3929829,
+    "city": "Hurricane",
+    "state": "UT",
+    "zip_code": "84737",
+    "country": "United States"
+  },
+  "canton": {
+    "name": "Canton KOA Holiday",
+    "formatted_address": "13785 TX-19, Canton, TX 75103, United States",
+    "lat": 32.5861825,
+    "lon": -95.85242249999999,
+    "city": "Canton",
+    "state": "TX",
+    "zip_code": "75103",
+    "country": "United States"
+  },
+  "cape-hatteras": {
+    "name": "Cape Hatteras / Outer Banks KOA Resort",
+    "formatted_address": "25099 North Carolina Hwy 12, Rodanthe, NC 27968, United States",
+    "lat": 35.5751242,
+    "lon": -75.4668322,
+    "city": "Rodanthe",
+    "state": "NC",
+    "zip_code": "27968",
+    "country": "United States"
+  },
+  "carbondale": {
+    "name": "Carbondale / Crystal River KOA Holiday",
+    "formatted_address": "7202 CO-133, Carbondale, CO 81623, United States",
+    "lat": 39.3200851,
+    "lon": -107.2089672,
+    "city": "Carbondale",
+    "state": "CO",
+    "zip_code": "81623",
+    "country": "United States"
+  },
+  "cardinal": {
+    "name": "Cardinal / Ottawa South KOA Holiday",
+    "formatted_address": "609 Pittston Rd RR # 1, Cardinal, ON K0E 1E0, Canada",
+    "lat": 44.8603525,
+    "lon": -75.44213069999999,
+    "city": "Cardinal",
+    "state": "ON",
+    "zip_code": "K0E 1E0",
+    "country": "Canada"
+  },
+  "carlsbad": {
+    "name": "Carlsbad KOA Holiday",
+    "formatted_address": "2 Manthei Rd #285, Carlsbad, NM 88220, United States",
+    "lat": 32.5864632,
+    "lon": -104.414839,
+    "city": "Carlsbad",
+    "state": "NM",
+    "zip_code": "88220",
+    "country": "United States"
+  },
+  "cartersville": {
+    "name": "Cartersville / Cassville-White KOA Journey",
+    "formatted_address": "800 Cassville White Rd NW, Cartersville, GA 30121, United States",
+    "lat": 34.2714736,
+    "lon": -84.81965199999999,
+    "city": "Cartersville",
+    "state": "GA",
+    "zip_code": "30121",
+    "country": "United States"
+  },
+  "cascade-locks": {
+    "name": "Cascade Locks / Portland East KOA Holiday",
+    "formatted_address": "841 Forest Ln, Cascade Locks, OR 97014, United States",
+    "lat": 45.67869289999999,
+    "lon": -121.8684471,
+    "city": "Cascade Locks",
+    "state": "OR",
+    "zip_code": "97014",
+    "country": "United States"
+  },
+  "casey": {
+    "name": "Casey KOA Journey",
+    "formatted_address": "1248 E 1250th Rd, Casey, IL 62420, United States",
+    "lat": 39.3234245,
+    "lon": -87.9893599,
+    "city": "Casey",
+    "state": "IL",
+    "zip_code": "62420",
+    "country": "United States"
+  },
+  "casper": {
+    "name": "Casper KOA Journey",
+    "formatted_address": "1101 Prairie Ln, Bar Nunn, WY 82601, United States",
+    "lat": 42.9136691,
+    "lon": -106.3414046,
+    "city": "Bar Nunn",
+    "state": "WY",
+    "zip_code": "82601",
+    "country": "United States"
+  },
+  "charleston": {
+    "name": "Charleston KOA Holiday",
+    "formatted_address": "9494 Hwy 78, Ladson, SC 29456, United States",
+    "lat": 32.9851574,
+    "lon": -80.0918153,
+    "city": "Ladson",
+    "state": "SC",
+    "zip_code": "29456",
+    "country": "United States"
+  },
+  "charlotte": {
+    "name": "Charlotte / Fort Mill KOA Journey",
+    "formatted_address": "940 Gold Hill Rd, Fort Mill, SC 29708, United States",
+    "lat": 35.0616165,
+    "lon": -80.9648988,
+    "city": "Fort Mill",
+    "state": "SC",
+    "zip_code": "29708",
+    "country": "United States"
+  },
+  "charlottesville": {
+    "name": "Charlottesville KOA Holiday",
+    "formatted_address": "3825 Red Hill Rd, Charlottesville, VA 22903, United States",
+    "lat": 37.9320783,
+    "lon": -78.5663139,
+    "city": "Charlottesville",
+    "state": "VA",
+    "zip_code": "22903",
+    "country": "United States"
+  },
+  "chattanooga-north": {
+    "name": "Chattanooga North / Cleveland KOA Journey",
+    "formatted_address": "Exit 20, 648 Pleasant Grove Rd I75, McDonald, TN 37353, United States",
+    "lat": 35.1503865,
+    "lon": -84.96057549999999,
+    "city": "McDonald",
+    "state": "TN",
+    "zip_code": "37353",
+    "country": "United States"
+  },
+  "chautauqua-lake": {
+    "name": "Chautauqua Lake KOA Holiday",
+    "formatted_address": "5652 Thum Rd, Dewittville, NY 14728, United States",
+    "lat": 42.2310562,
+    "lon": -79.4310527,
+    "city": "Dewittville",
+    "state": "NY",
+    "zip_code": "14728",
+    "country": "United States"
+  },
+  "checotah": {
+    "name": "Checotah / Lake Eufaula West KOA Holiday",
+    "formatted_address": "409329 E 1078 Rd I-40 and, Pierce Rd Exit 255, Checotah, OK 74426, United States",
+    "lat": 35.4527227,
+    "lon": -95.7282536,
+    "city": "Checotah",
+    "state": "OK",
+    "zip_code": "74426",
+    "country": "United States"
+  },
+  "cherokee": {
+    "name": "Cherokee / Great Smokies KOA Holiday",
+    "formatted_address": "92 KOA Campground Rd, Cherokee, NC 28719, United States",
+    "lat": 35.5309149,
+    "lon": -83.28343420000002,
+    "city": "Cherokee",
+    "state": "NC",
+    "zip_code": "28719",
+    "country": "United States"
+  },
+  "chesapeake-bay": {
+    "name": "Cape Charles / Chesapeake Bay KOA Resort",
+    "formatted_address": "32246 Charles M Lankford Jr Memorial Hwy, Cape Charles, VA 23310, United States",
+    "lat": 37.1374156,
+    "lon": -75.9676478,
+    "city": "Cape Charles",
+    "state": "VA",
+    "zip_code": "23310",
+    "country": "United States"
+  },
+  "chicago": {
+    "name": "Chicago Northwest KOA Holiday",
+    "formatted_address": "8404 S Union Rd, Union, IL 60180, United States",
+    "lat": 42.206468,
+    "lon": -88.54853,
+    "city": "Union",
+    "state": "IL",
+    "zip_code": "60180",
+    "country": "United States"
+  },
+  "chocorua": {
+    "name": "Chocorua KOA Holiday",
+    "formatted_address": "893 White Mountain Hwy #484, Tamworth, NH 03886, United States",
+    "lat": 43.8562169,
+    "lon": -71.20567559999999,
+    "city": "Tamworth",
+    "state": "NH",
+    "zip_code": "03886",
+    "country": "United States"
+  },
+  "cincinnati": {
+    "name": "Lebanon / Cincinnati NE KOA Holiday",
+    "formatted_address": "760 Franklin Rd, Lebanon, OH 45036, United States",
+    "lat": 39.4423109,
+    "lon": -84.21765669999999,
+    "city": "Lebanon",
+    "state": "OH",
+    "zip_code": "45036",
+    "country": "United States"
+  },
+  "clearwater": {
+    "name": "Clearwater / Lake Tarpon KOA Holiday",
+    "formatted_address": "37061 US Hwy 19 N, Palm Harbor, FL 34684, United States",
+    "lat": 28.1089383,
+    "lon": -82.7393152,
+    "city": "Palm Harbor",
+    "state": "FL",
+    "zip_code": "34684",
+    "country": "United States"
+  },
+  "clearwater-lake": {
+    "name": "Clearwater / Lake Tarpon KOA Holiday",
+    "formatted_address": "37061 US Hwy 19 N, Palm Harbor, FL 34684, United States",
+    "lat": 28.1089383,
+    "lon": -82.7393152,
+    "city": "Palm Harbor",
+    "state": "FL",
+    "zip_code": "34684",
+    "country": "United States"
+  },
+  "cloquet": {
+    "name": "Cloquet / Duluth KOA Journey",
+    "formatted_address": "1381 Kampground Road, Cloquet, MN 55720, United States",
+    "lat": 46.6798227,
+    "lon": -92.4401075,
+    "city": "Cloquet",
+    "state": "MN",
+    "zip_code": "55720",
+    "country": "United States"
+  },
+  "cody": {
+    "name": "Cody / Yellowstone East KOA Holiday",
+    "formatted_address": "5561 Greybull Hwy, Cody, WY 82414, United States",
+    "lat": 44.5126976,
+    "lon": -109.0083522,
+    "city": "Cody",
+    "state": "WY",
+    "zip_code": "82414",
+    "country": "United States"
+  },
+  "coleville": {
+    "name": "Coleville / Walker KOA Holiday",
+    "formatted_address": "110437 US-395, Coleville, CA 96107, United States",
+    "lat": 38.5518202,
+    "lon": -119.5029784,
+    "city": "Coleville",
+    "state": "CA",
+    "zip_code": "96107",
+    "country": "United States"
+  },
+  "coloma": {
+    "name": "Coloma / St. Joseph KOA Holiday",
+    "formatted_address": "3527 Coloma Rd, Benton Harbor, MI 49022, United States",
+    "lat": 42.1869217,
+    "lon": -86.37267469999999,
+    "city": "Benton Harbor",
+    "state": "MI",
+    "zip_code": "49022",
+    "country": "United States"
+  },
+  "colorado-river": {
+    "name": "Glenwood Springs West / Colorado River KOA Holiday",
+    "formatted_address": "629 River Frontage Rd, Silt, CO 81652, United States",
+    "lat": 39.5435528,
+    "lon": -107.6581903,
+    "city": "Silt",
+    "state": "CO",
+    "zip_code": "81652",
+    "country": "United States"
+  },
+  "colorado-springs": {
+    "name": "Colorado Springs KOA Holiday",
+    "formatted_address": "8100 Bandley Dr, Fountain, CO 80817, United States",
+    "lat": 38.711873,
+    "lon": -104.724503,
+    "city": "Fountain",
+    "state": "CO",
+    "zip_code": "80817",
+    "country": "United States"
+  },
+  "concrete": {
+    "name": "Concrete / Grandy Creek KOA Holiday",
+    "formatted_address": "7370 Russell Rd, Concrete, WA 98237, United States",
+    "lat": 48.5386567,
+    "lon": -121.8772957,
+    "city": "Concrete",
+    "state": "WA",
+    "zip_code": "98237",
+    "country": "United States"
+  },
+  "cooperstown": {
+    "name": "Cooperstown KOA Journey",
+    "formatted_address": "565 Ostrander Rd, Richfield Springs, NY 13439, United States",
+    "lat": 42.8525211,
+    "lon": -74.8909443,
+    "city": "Richfield Springs",
+    "state": "NY",
+    "zip_code": "13439",
+    "country": "United States"
+  },
+  "corbin": {
+    "name": "Corbin / Laurel Lake KOA Journey",
+    "formatted_address": "171 E City Dam Rd, Corbin, KY 40701, United States",
+    "lat": 36.9725552,
+    "lon": -84.11559659999999,
+    "city": "Corbin",
+    "state": "KY",
+    "zip_code": "40701",
+    "country": "United States"
+  },
+  "cordele": {
+    "name": "Cordele KOA Journey",
+    "formatted_address": "373 Rockhouse Rd E, Cordele, GA 31015, United States",
+    "lat": 31.907415,
+    "lon": -83.742333,
+    "city": "Cordele",
+    "state": "GA",
+    "zip_code": "31015",
+    "country": "United States"
+  },
+  "coshocton": {
+    "name": "Coshocton KOA Holiday",
+    "formatted_address": "24688 Co Rd 10, Coshocton, OH 43812, United States",
+    "lat": 40.3104678,
+    "lon": -81.8234398,
+    "city": "Coshocton",
+    "state": "OH",
+    "zip_code": "43812",
+    "country": "United States"
+  },
+  "covert": {
+    "name": "Covert / South Haven KOA Holiday",
+    "formatted_address": "39397 M-140, Covert, MI 49043, United States",
+    "lat": 42.275205,
+    "lon": -86.2592391,
+    "city": "Covert",
+    "state": "MI",
+    "zip_code": "49043",
+    "country": "United States"
+  },
+  "craig": {
+    "name": "Craig KOA Journey",
+    "formatted_address": "2800 US-40, Craig, CO 81625, United States",
+    "lat": 40.510204,
+    "lon": -107.5138459,
+    "city": "Craig",
+    "state": "CO",
+    "zip_code": "81625",
+    "country": "United States"
+  },
+  "cranbrook": {
+    "name": "Cranbrook / St. Eugene KOA Journey",
+    "formatted_address": "7777 Mission Road, Cranbrook, BC V1C 7E5, Canada",
+    "lat": 49.5872618,
+    "lon": -115.7547666,
+    "city": "Cranbrook",
+    "state": "BC",
+    "zip_code": "V1C 7E5",
+    "country": "Canada"
+  },
+  "crawfordsville": {
+    "name": "Crawfordsville KOA Journey",
+    "formatted_address": "1600 Lafayette Rd, Crawfordsville, IN 47933, United States",
+    "lat": 40.0618639,
+    "lon": -86.9071628,
+    "city": "Crawfordsville",
+    "state": "IN",
+    "zip_code": "47933",
+    "country": "United States"
+  },
+  "crescent-city": {
+    "name": "Crescent City / Redwoods KOA Holiday",
+    "formatted_address": "4241 US-101, Crescent City, CA 95531, United States",
+    "lat": 41.821574,
+    "lon": -124.142729,
+    "city": "Crescent City",
+    "state": "CA",
+    "zip_code": "95531",
+    "country": "United States"
+  },
+  "cripple-creek": {
+    "name": "Cripple Creek KOA Holiday",
+    "formatted_address": "2576 Co Rd 81, Cripple Creek, CO 80813, United States",
+    "lat": 38.7747297,
+    "lon": -105.1169187,
+    "city": "Cripple Creek",
+    "state": "CO",
+    "zip_code": "80813",
+    "country": "United States"
+  },
+  "crossville": {
+    "name": "Crossville / I-40 KOA Holiday",
+    "formatted_address": "6575 US-70, Crossville, TN 38555, United States",
+    "lat": 35.9262549,
+    "lon": -84.9258645,
+    "city": "Crossville",
+    "state": "TN",
+    "zip_code": "38555",
+    "country": "United States"
+  },
+  "custer": {
+    "name": "Custer / Crazy Horse / Black Hills KOA Holiday",
+    "formatted_address": "12021 US-16, Custer, SD 57730, United States",
+    "lat": 43.7413875,
+    "lon": -103.653996,
+    "city": "Custer",
+    "state": "SD",
+    "zip_code": "57730",
+    "country": "United States"
+  },
+  "dallas-arlington": {
+    "name": "Dallas / Arlington KOA Holiday",
+    "formatted_address": "2715 S Cooper St, Arlington, TX 76015, United States",
+    "lat": 32.6997084,
+    "lon": -97.1219668,
+    "city": "Arlington",
+    "state": "TX",
+    "zip_code": "76015",
+    "country": "United States"
+  },
+  "davie": {
+    "name": "Davie / Ft. Lauderdale KOA Holiday",
+    "formatted_address": "3800 SW 142nd Ave, Davie, FL 33330, United States",
+    "lat": 26.0726997,
+    "lon": -80.3356972,
+    "city": "Davie",
+    "state": "FL",
+    "zip_code": "33330",
+    "country": "United States"
+  },
+  "dayton": {
+    "name": "Dayton KOA Holiday",
+    "formatted_address": "7796 Wellbaum Rd, Brookville, OH 45309, United States",
+    "lat": 39.858141,
+    "lon": -84.386574,
+    "city": "Brookville",
+    "state": "OH",
+    "zip_code": "45309",
+    "country": "United States"
+  },
+  "deadwood": {
+    "name": "Deadwood / Black Hills KOA Holiday",
+    "formatted_address": "11484 US-14A, Lead, SD 57754, United States",
+    "lat": 44.3708019,
+    "lon": -103.7540748,
+    "city": "Lead",
+    "state": "SD",
+    "zip_code": "57754",
+    "country": "United States"
+  },
+  "deerpark": {
+    "name": "Ventura Ranch KOA Holiday",
+    "formatted_address": "7400 Pine Grove Rd, Santa Paula, CA 93060, United States",
+    "lat": 34.40603340000001,
+    "lon": -119.0790991,
+    "city": "Santa Paula",
+    "state": "CA",
+    "zip_code": "93060",
+    "country": "United States"
+  },
+  "deland": {
+    "name": "KOA Campground",
+    "formatted_address": "DeLand, FL 32720, United States",
+    "lat": 29.0109268,
+    "lon": -81.3861189,
+    "city": "DeLand",
+    "state": "FL",
+    "zip_code": "32720",
+    "country": "United States"
+  },
+  "delaware-water-gap": {
+    "name": "Delaware Water Gap / Pocono Mountain KOA Holiday",
+    "formatted_address": "227 Hollow Rd, East Stroudsburg, PA 18302, United States",
+    "lat": 41.0500928,
+    "lon": -75.0768427,
+    "city": "East Stroudsburg",
+    "state": "PA",
+    "zip_code": "18302",
+    "country": "United States"
+  },
+  "denver-east": {
+    "name": "Denver East / Strasburg KOA Holiday",
+    "formatted_address": "1312 Monroe St, Strasburg, CO 80136, United States",
+    "lat": 39.73519,
+    "lon": -104.3202045,
+    "city": "Strasburg",
+    "state": "CO",
+    "zip_code": "80136",
+    "country": "United States"
+  },
+  "denver-west": {
+    "name": "Denver West / Central City KOA Holiday",
+    "formatted_address": "605 Lake Gulch Rd Co Rd 6, Central City, CO 80427, United States",
+    "lat": 39.7916868,
+    "lon": -105.5107527,
+    "city": "Central City",
+    "state": "CO",
+    "zip_code": "80427",
+    "country": "United States"
+  },
+  "des-moines": {
+    "name": "Des Moines West KOA Holiday",
+    "formatted_address": "34308 L Ave, Adel, IA 50003, United States",
+    "lat": 41.5419417,
+    "lon": -94.0787634,
+    "city": "Adel",
+    "state": "IA",
+    "zip_code": "50003",
+    "country": "United States"
+  },
+  "devils-tower": {
+    "name": "Devils Tower / Black Hills KOA Journey",
+    "formatted_address": "60 WY-110, Devils Tower, WY 82714, United States",
+    "lat": 44.5892308,
+    "lon": -104.6992065,
+    "city": "Devils Tower",
+    "state": "WY",
+    "zip_code": "82714",
+    "country": "United States"
+  },
+  "dodge-city": {
+    "name": "Dodge City KOA",
+    "formatted_address": "701 Park St, Dodge City, KS 67801, United States",
+    "lat": 37.7482993,
+    "lon": -100.0255302,
+    "city": "Dodge City",
+    "state": "KS",
+    "zip_code": "67801",
+    "country": "United States"
+  },
+  "door-county": {
+    "name": "Door County KOA Holiday",
+    "formatted_address": "9245 Lovers Ln, Brussels, WI 54204, United States",
+    "lat": 44.7750937,
+    "lon": -87.5930023,
+    "city": "Brussels",
+    "state": "WI",
+    "zip_code": "54204",
+    "country": "United States"
+  },
+  "douglas": {
+    "name": "Douglas KOA Journey",
+    "formatted_address": "168 WY-91 #91, Douglas, WY 82633, United States",
+    "lat": 42.7639527,
+    "lon": -105.437273,
+    "city": "Douglas",
+    "state": "WY",
+    "zip_code": "82633",
+    "country": "United States"
+  },
+  "dubois": {
+    "name": "Dubois / Wind River KOA Holiday",
+    "formatted_address": "225 W Welty St, Dubois, WY 82513, United States",
+    "lat": 43.532666,
+    "lon": -109.635721,
+    "city": "Dubois",
+    "state": "WY",
+    "zip_code": "82513",
+    "country": "United States"
+  },
+  "el-reno": {
+    "name": "El Reno West KOA Journey",
+    "formatted_address": "at exit 108 on North Side of Interstate, 301 S Walbaum Rd I40, Calumet, OK 73014, United States",
+    "lat": 35.5332658,
+    "lon": -98.2322543,
+    "city": "Calumet",
+    "state": "OK",
+    "zip_code": "73014",
+    "country": "United States"
+  },
+  "elizabethtown": {
+    "name": "Elizabethtown / Hershey KOA Holiday",
+    "formatted_address": "1980 Turnpike Rd, Elizabethtown, PA 17022, United States",
+    "lat": 40.142164,
+    "lon": -76.656707,
+    "city": "Elizabethtown",
+    "state": "PA",
+    "zip_code": "17022",
+    "country": "United States"
+  },
+  "elk-city": {
+    "name": "Elk City / Clinton KOA Journey",
+    "formatted_address": "21167 Rte 66 N, Foss, OK 73647, United States",
+    "lat": 35.4273093,
+    "lon": -99.21385199999999,
+    "city": "Foss",
+    "state": "OK",
+    "zip_code": "73647",
+    "country": "United States"
+  },
+  "elkhart-co": {
+    "name": "Elkhart Co. / Middlebury KOA Holiday",
+    "formatted_address": "52867 IN-13, Middlebury, IN 46540, United States",
+    "lat": 41.7274773,
+    "lon": -85.6840895,
+    "city": "Middlebury",
+    "state": "IN",
+    "zip_code": "46540",
+    "country": "United States"
+  },
+  "ellensburg": {
+    "name": "Ellensburg KOA Journey",
+    "formatted_address": "32 Thorp Hwy S, Ellensburg, WA 98926, United States",
+    "lat": 47.00581,
+    "lon": -120.5948141,
+    "city": "Ellensburg",
+    "state": "WA",
+    "zip_code": "98926",
+    "country": "United States"
+  },
+  "ely": {
+    "name": "Ely KOA Journey",
+    "formatted_address": "1596 US-93, Ely, NV 89301, United States",
+    "lat": 39.213831,
+    "lon": -114.855861,
+    "city": "Ely",
+    "state": "NV",
+    "zip_code": "89301",
+    "country": "United States"
+  },
+  "emmett": {
+    "name": "Emmett KOA Holiday",
+    "formatted_address": "3864 Breen Rd, Emmett, MI 48022, United States",
+    "lat": 43.0088618,
+    "lon": -82.8472342,
+    "city": "Emmett",
+    "state": "MI",
+    "zip_code": "48022",
+    "country": "United States"
+  },
+  "enfield": {
+    "name": "Enfield / Rocky Mount KOA Journey",
+    "formatted_address": "18562 NC-481, Enfield, NC 27823, United States",
+    "lat": 36.1761797,
+    "lon": -77.7823643,
+    "city": "Enfield",
+    "state": "NC",
+    "zip_code": "27823",
+    "country": "United States"
+  },
+  "erie": {
+    "name": "Erie KOA Holiday",
+    "formatted_address": "6645 W Rd, McKean, PA 16426, United States",
+    "lat": 42.0026652,
+    "lon": -80.1920164,
+    "city": "McKean",
+    "state": "PA",
+    "zip_code": "16426",
+    "country": "United States"
+  },
+  "estes-park": {
+    "name": "Estes Park / Rocky Mountain National Park KOA Holiday",
+    "formatted_address": "2051 Big Thompson Ave, Estes Park, CO 80517, United States",
+    "lat": 40.3781728,
+    "lon": -105.4872422,
+    "city": "Estes Park",
+    "state": "CO",
+    "zip_code": "80517",
+    "country": "United States"
+  },
+  "eureka-springs": {
+    "name": "Eureka Springs KOA Journey",
+    "formatted_address": "15020 Hwy 187, Eureka Springs, AR 72631, United States",
+    "lat": 36.421185,
+    "lon": -93.793196,
+    "city": "Eureka Springs",
+    "state": "AR",
+    "zip_code": "72631",
+    "country": "United States"
+  },
+  "fancy-gap": {
+    "name": "Fancy Gap / Blue Ridge Parkway KOA Journey",
+    "formatted_address": "47 Fox Trl Lp, Fancy Gap, VA 24328, United States",
+    "lat": 36.6660763,
+    "lon": -80.6972609,
+    "city": "Fancy Gap",
+    "state": "VA",
+    "zip_code": "24328",
+    "country": "United States"
+  },
+  "fillmore": {
+    "name": "Fillmore KOA Journey",
+    "formatted_address": "410 W 900 S St, Fillmore, UT 84631, United States",
+    "lat": 38.948852,
+    "lon": -112.335254,
+    "city": "Fillmore",
+    "state": "UT",
+    "zip_code": "84631",
+    "country": "United States"
+  },
+  "flagstaff": {
+    "name": "Flagstaff KOA Holiday",
+    "formatted_address": "5803 US-89, Flagstaff, AZ 86004, United States",
+    "lat": 35.233954,
+    "lon": -111.5776047,
+    "city": "Flagstaff",
+    "state": "AZ",
+    "zip_code": "86004",
+    "country": "United States"
+  },
+  "flaming-gorge": {
+    "name": "Flaming Gorge / Manila KOA Journey",
+    "formatted_address": "320 UT-43, Manila, UT 84046, United States",
+    "lat": 40.9884069,
+    "lon": -109.7302183,
+    "city": "Manila",
+    "state": "UT",
+    "zip_code": "84046",
+    "country": "United States"
+  },
+  "flatwoods": {
+    "name": "Flatwoods KOA Journey",
+    "formatted_address": "350 Days Dr, Sutton, WV 26601, United States",
+    "lat": 38.6968937,
+    "lon": -80.6622685,
+    "city": "Sutton",
+    "state": "WV",
+    "zip_code": "26601",
+    "country": "United States"
+  },
+  "forsyth": {
+    "name": "Forsyth KOA Journey",
+    "formatted_address": "414 Frontage Rd, Forsyth, GA 31029, United States",
+    "lat": 33.0376203,
+    "lon": -83.9260975,
+    "city": "Forsyth",
+    "state": "GA",
+    "zip_code": "31029",
+    "country": "United States"
+  },
+  "fort-collins-lakeside": {
+    "name": "Fort Collins / Lakeside KOA Holiday",
+    "formatted_address": "1910 Lakeside Resort Ln, Fort Collins, CO 80524, United States",
+    "lat": 40.6148069,
+    "lon": -105.108869,
+    "city": "Fort Collins",
+    "state": "CO",
+    "zip_code": "80524",
+    "country": "United States"
+  },
+  "fort-collins-north": {
+    "name": "Fort Collins North / Wellington KOA Journey",
+    "formatted_address": "4821 E Co Rd 70, Wellington, CO 80549, United States",
+    "lat": 40.753081,
+    "lon": -104.985231,
+    "city": "Wellington",
+    "state": "CO",
+    "zip_code": "80549",
+    "country": "United States"
+  },
+  "fort-myers": {
+    "name": "Fort Myers / Pine Island KOA Holiday",
+    "formatted_address": "5120 Stringfellow Rd, St James City, FL 33956, United States",
+    "lat": 26.5346999,
+    "lon": -82.0865674,
+    "city": "St James City",
+    "state": "FL",
+    "zip_code": "33956",
+    "country": "United States"
+  },
+  "fort-pierce": {
+    "name": "Fort Pierce West KOA Holiday",
+    "formatted_address": "3180 S Jenkins Rd, Fort Pierce, FL 34981, United States",
+    "lat": 27.4093491,
+    "lon": -80.38258040000001,
+    "city": "Fort Pierce",
+    "state": "FL",
+    "zip_code": "34981",
+    "country": "United States"
+  },
+  "fort-pierce-west": {
+    "name": "Fort Pierce West KOA Holiday",
+    "formatted_address": "3180 S Jenkins Rd, Fort Pierce, FL 34981, United States",
+    "lat": 27.4093491,
+    "lon": -80.38258040000001,
+    "city": "Fort Pierce",
+    "state": "FL",
+    "zip_code": "34981",
+    "country": "United States"
+  },
+  "fredericksburg": {
+    "name": "Fredericksburg / Washington DC South KOA Holiday",
+    "formatted_address": "7400 Brookside Ln, Fredericksburg, VA 22408, United States",
+    "lat": 38.1654473,
+    "lon": -77.47688169999999,
+    "city": "Fredericksburg",
+    "state": "VA",
+    "zip_code": "22408",
+    "country": "United States"
+  },
+  "fredericksburg-washington-dc": {
+    "name": "Fredericksburg / Washington DC South KOA Holiday",
+    "formatted_address": "7400 Brookside Ln, Fredericksburg, VA 22408, United States",
+    "lat": 38.1654473,
+    "lon": -77.47688169999999,
+    "city": "Fredericksburg",
+    "state": "VA",
+    "zip_code": "22408",
+    "country": "United States"
+  },
+  "freeport": {
+    "name": "Freeport / Durham KOA Holiday",
+    "formatted_address": "82 Big Skye Ln, Durham, ME 04222, United States",
+    "lat": 43.929656,
+    "lon": -70.15080999999999,
+    "city": "Durham",
+    "state": "ME",
+    "zip_code": "04222",
+    "country": "United States"
+  },
+  "gatlinburg": {
+    "name": "Pigeon Forge / Gatlinburg KOA Holiday",
+    "formatted_address": "3122 Veterans Blvd, Pigeon Forge, TN 37863, United States",
+    "lat": 35.78669,
+    "lon": -83.54891429999999,
+    "city": "Pigeon Forge",
+    "state": "TN",
+    "zip_code": "37863",
+    "country": "United States"
+  },
+  "gaylord": {
+    "name": "Gaylord KOA Holiday",
+    "formatted_address": "5101 Campfires Parkway, Gaylord, MI 49735, United States",
+    "lat": 44.9559716,
+    "lon": -84.6607005,
+    "city": "Gaylord",
+    "state": "MI",
+    "zip_code": "49735",
+    "country": "United States"
+  },
+  "gettysburg": {
+    "name": "Gettysburg / Battlefield KOA Holiday",
+    "formatted_address": "20 Knox Rd, Gettysburg, PA 17325, United States",
+    "lat": 39.82859870000001,
+    "lon": -77.3281689,
+    "city": "Gettysburg",
+    "state": "PA",
+    "zip_code": "17325",
+    "country": "United States"
+  },
+  "goodland": {
+    "name": "Goodland KOA Journey",
+    "formatted_address": "1114 US-24, Goodland, KS 67735, United States",
+    "lat": 39.3378822,
+    "lon": -101.6975655,
+    "city": "Goodland",
+    "state": "KS",
+    "zip_code": "67735",
+    "country": "United States"
+  },
+  "grand-canyon": {
+    "name": "Grand Canyon South Rim KOA Journey",
+    "formatted_address": "5333 AZ-64, Williams, AZ 86046, United States",
+    "lat": 35.3281642,
+    "lon": -112.1575524,
+    "city": "Williams",
+    "state": "AZ",
+    "zip_code": "86046",
+    "country": "United States"
+  },
+  "grand-island": {
+    "name": "Niagara Falls / Grand Island KOA Holiday",
+    "formatted_address": "2570 Grand Island Blvd, Grand Island, NY 14072, United States",
+    "lat": 43.0312828,
+    "lon": -78.9729077,
+    "city": "Grand Island",
+    "state": "NY",
+    "zip_code": "14072",
+    "country": "United States"
+  },
+  "grand-junction": {
+    "name": "Grand Junction KOA Holiday",
+    "formatted_address": "2819 US-50, Grand Junction, CO 81503, United States",
+    "lat": 39.0353682,
+    "lon": -108.5297735,
+    "city": "Grand Junction",
+    "state": "CO",
+    "zip_code": "81503",
+    "country": "United States"
+  },
+  "grants": {
+    "name": "Grants KOA Journey",
+    "formatted_address": "26 Cibola Sands Loop, Grants, NM 87020, United States",
+    "lat": 35.14514380000001,
+    "lon": -107.8738508,
+    "city": "Grants",
+    "state": "NM",
+    "zip_code": "87020",
+    "country": "United States"
+  },
+  "grayville": {
+    "name": "Grayville / I-64 KOA Holiday",
+    "formatted_address": "200 Koehler St, Grayville, IL 62844, United States",
+    "lat": 38.2434738,
+    "lon": -88.0025629,
+    "city": "Grayville",
+    "state": "IL",
+    "zip_code": "62844",
+    "country": "United States"
+  },
+  "great-falls": {
+    "name": "Great Falls KOA Holiday",
+    "formatted_address": "1500 51st St S, Great Falls, MT 59405, United States",
+    "lat": 47.4875491,
+    "lon": -111.2216082,
+    "city": "Great Falls",
+    "state": "MT",
+    "zip_code": "59405",
+    "country": "United States"
+  },
+  "green-river": {
+    "name": "Green River KOA Journey",
+    "formatted_address": "235 S 1780 E, Green River, UT 84525, United States",
+    "lat": 38.9913347,
+    "lon": -110.1408387,
+    "city": "Green River",
+    "state": "UT",
+    "zip_code": "84525",
+    "country": "United States"
+  },
+  "greensboro": {
+    "name": "Greensboro KOA Journey",
+    "formatted_address": "1896 Trox Rd, Greensboro, NC 27406, United States",
+    "lat": 36.0463921,
+    "lon": -79.7482103,
+    "city": "Greensboro",
+    "state": "NC",
+    "zip_code": "27406",
+    "country": "United States"
+  },
+  "greenville": {
+    "name": "Travelers Rest / N Greenville KOA Holiday",
+    "formatted_address": "2400 US-25, Travelers Rest, SC 29690, United States",
+    "lat": 35.0616664,
+    "lon": -82.4271045,
+    "city": "Travelers Rest",
+    "state": "SC",
+    "zip_code": "29690",
+    "country": "United States"
+  },
+  "greybull": {
+    "name": "Greybull KOA Holiday",
+    "formatted_address": "399 N 2nd St, Greybull, WY 82426, United States",
+    "lat": 44.4930515,
+    "lon": -108.0495847,
+    "city": "Greybull",
+    "state": "WY",
+    "zip_code": "82426",
+    "country": "United States"
+  },
+  "gros-morne": {
+    "name": "Gros Morne / Norris Point KOA Holiday",
+    "formatted_address": "5 Shearakin Lane, Rocky Harbour, NL A0K 4N0, Canada",
+    "lat": 49.5564519,
+    "lon": -57.87375119999999,
+    "city": "Rocky Harbour",
+    "state": "NL",
+    "zip_code": "A0K 4N0",
+    "country": "Canada"
+  },
+  "gulf-shores": {
+    "name": "Gulf Shores / Pensacola West KOA Holiday",
+    "formatted_address": "11650 Co Rd 99, Lillian, AL 36549, United States",
+    "lat": 30.3959797,
+    "lon": -87.4543932,
+    "city": "Lillian",
+    "state": "AL",
+    "zip_code": "36549",
+    "country": "United States"
+  },
+  "gunnison": {
+    "name": "Gunnison KOA Journey",
+    "formatted_address": "105 Co Rd 50, Gunnison, CO 81230, United States",
+    "lat": 38.52958599999999,
+    "lon": -106.945774,
+    "city": "Gunnison",
+    "state": "CO",
+    "zip_code": "81230",
+    "country": "United States"
+  },
+  "hagerstown": {
+    "name": "Hagerstown / Antietam Battlefield KOA Holiday",
+    "formatted_address": "11759 Snug Hbr Ln, Williamsport, MD 21795, United States",
+    "lat": 39.6323583,
+    "lon": -77.8360897,
+    "city": "Williamsport",
+    "state": "MD",
+    "zip_code": "21795",
+    "country": "United States"
+  },
+  "halifax": {
+    "name": "Halifax West KOA",
+    "formatted_address": "3070 Nova Scotia Trunk 1, Upper Sackville, NS B4E 3C9, Canada",
+    "lat": 44.8317902,
+    "lon": -63.78414979999999,
+    "city": "Upper Sackville",
+    "state": "NS",
+    "zip_code": "B4E 3C9",
+    "country": "Canada"
+  },
+  "hardin": {
+    "name": "Hardin KOA Journey",
+    "formatted_address": "2205 MT-47, Hardin, MT 59034, United States",
+    "lat": 45.7635094,
+    "lon": -107.613195,
+    "city": "Hardin",
+    "state": "MT",
+    "zip_code": "59034",
+    "country": "United States"
+  },
+  "harpers-ferry": {
+    "name": "Harpers Ferry / Civil War Battlefields KOA Holiday",
+    "formatted_address": "343 Campground Rd, Harpers Ferry, WV 25425, United States",
+    "lat": 39.31374599999999,
+    "lon": -77.7637644,
+    "city": "Harpers Ferry",
+    "state": "WV",
+    "zip_code": "25425",
+    "country": "United States"
+  },
+  "harrison": {
+    "name": "Harrison KOA Holiday",
+    "formatted_address": "3629 Highway 65N, Harrison, AR 72601, United States",
+    "lat": 36.2828244,
+    "lon": -93.167132,
+    "city": "Harrison",
+    "state": "AR",
+    "zip_code": "72601",
+    "country": "United States"
+  },
+  "harrisonburg": {
+    "name": "Harrisonburg / Shenandoah Valley KOA Holiday",
+    "formatted_address": "12480 Mountain Valley Rd, Broadway, VA 22815, United States",
+    "lat": 38.5355592,
+    "lon": -78.7060681,
+    "city": "Broadway",
+    "state": "VA",
+    "zip_code": "22815",
+    "country": "United States"
+  },
+  "hayward": {
+    "name": "Hayward KOA Holiday",
+    "formatted_address": "11544 US-63, Hayward, WI 54843, United States",
+    "lat": 46.0493627,
+    "lon": -91.4410245,
+    "city": "Hayward",
+    "state": "WI",
+    "zip_code": "54843",
+    "country": "United States"
+  },
+  "helena-north": {
+    "name": "Helena North KOA Journey",
+    "formatted_address": "850 Lincoln Rd W, Helena, MT 59602, United States",
+    "lat": 46.705579,
+    "lon": -112.029194,
+    "city": "Helena",
+    "state": "MT",
+    "zip_code": "59602",
+    "country": "United States"
+  },
+  "herkimer": {
+    "name": "Herkimer Diamond KOA Resort",
+    "formatted_address": "4626 NY-28, Herkimer, NY 13350, United States",
+    "lat": 43.1275761,
+    "lon": -74.9753105,
+    "city": "Herkimer",
+    "state": "NY",
+    "zip_code": "13350",
+    "country": "United States"
+  },
+  "hinton": {
+    "name": "Hinton / Jasper KOA Holiday",
+    "formatted_address": "B, 50409, AB-16, Hinton, AB T7V 1X3, Canada",
+    "lat": 53.3399339,
+    "lon": -117.6656861,
+    "city": "Hinton",
+    "state": "AB",
+    "zip_code": "T7V 1X3",
+    "country": "Canada"
+  },
+  "hixton": {
+    "name": "Hixton / Alma Center KOA Holiday",
+    "formatted_address": "9657 WI-95, Alma Center, WI 54611, United States",
+    "lat": 44.4226738,
+    "lon": -90.95009220000001,
+    "city": "Alma Center",
+    "state": "WI",
+    "zip_code": "54611",
+    "country": "United States"
+  },
+  "holbrook": {
+    "name": "Holbrook / Petrified Forest KOA Journey",
+    "formatted_address": "102 Hermosa Dr, Holbrook, AZ 86025, United States",
+    "lat": 34.9227915,
+    "lon": -110.1425789,
+    "city": "Holbrook",
+    "state": "AZ",
+    "zip_code": "86025",
+    "country": "United States"
+  },
+  "hollywood": {
+    "name": "Hollywood KOA",
+    "formatted_address": "5931 Polk St, Hollywood, FL 33021, United States",
+    "lat": 26.0123006,
+    "lon": -80.2066629,
+    "city": "Hollywood",
+    "state": "FL",
+    "zip_code": "33021",
+    "country": "United States"
+  },
+  "homer": {
+    "name": "Homer / Baycrest KOA Holiday",
+    "formatted_address": "3425 Sterling Hwy Mile 169, Homer, AK 99603, United States",
+    "lat": 59.6581223,
+    "lon": -151.6392211,
+    "city": "Homer",
+    "state": "AK",
+    "zip_code": "99603",
+    "country": "United States"
+  },
+  "honesdale-pocono": {
+    "name": "Honesdale / Pocono KOA Holiday",
+    "formatted_address": "50 Countryside Ln, Honesdale, PA 18431, United States",
+    "lat": 41.6588473,
+    "lon": -75.3191174,
+    "city": "Honesdale",
+    "state": "PA",
+    "zip_code": "18431",
+    "country": "United States"
+  },
+  "horse-cave": {
+    "name": "Horse Cave KOA Holiday",
+    "formatted_address": "KOA AVE, 489 Flint Ridge Rd, Horse Cave, KY 42749, United States",
+    "lat": 37.199842,
+    "lon": -85.941476,
+    "city": "Horse Cave",
+    "state": "KY",
+    "zip_code": "42749",
+    "country": "United States"
+  },
+  "hot-springs": {
+    "name": "Hot Springs National Park KOA Holiday",
+    "formatted_address": "838 McClendon Rd, Hot Springs, AR 71901, United States",
+    "lat": 34.5071836,
+    "lon": -93.00646840000002,
+    "city": "Hot Springs",
+    "state": "AR",
+    "zip_code": "71901",
+    "country": "United States"
+  },
+  "hot-springs-national-park": {
+    "name": "Hot Springs National Park KOA Holiday",
+    "formatted_address": "838 McClendon Rd, Hot Springs, AR 71901, United States",
+    "lat": 34.5071836,
+    "lon": -93.00646840000002,
+    "city": "Hot Springs",
+    "state": "AR",
+    "zip_code": "71901",
+    "country": "United States"
+  },
+  "houghton-letchworth": {
+    "name": "Houghton / Letchworth KOA",
+    "formatted_address": "7632 Centerville Rd, Houghton, NY 14744, United States",
+    "lat": 42.4405094,
+    "lon": -78.1679528,
+    "city": "Houghton",
+    "state": "NY",
+    "zip_code": "14744",
+    "country": "United States"
+  },
+  "houlton": {
+    "name": "Houlton / Canadian Border KOA Journey",
+    "formatted_address": "659 North St, Houlton, ME 04730, United States",
+    "lat": 46.1716954,
+    "lon": -67.8382378,
+    "city": "Houlton",
+    "state": "ME",
+    "zip_code": "04730",
+    "country": "United States"
+  },
+  "huntington": {
+    "name": "Huntington / Fox Fire KOA Holiday",
+    "formatted_address": "290 Fox Fire Rd, Milton, WV 25541, United States",
+    "lat": 38.4328916,
+    "lon": -82.1684385,
+    "city": "Milton",
+    "state": "WV",
+    "zip_code": "25541",
+    "country": "United States"
+  },
+  "indiana-beach": {
+    "name": "Indiana Beach / Monticello KOA Holiday",
+    "formatted_address": "2882 NW Shafer Dr, Monticello, IN 47960, United States",
+    "lat": 40.7943563,
+    "lon": -86.78106919999999,
+    "city": "Monticello",
+    "state": "IN",
+    "zip_code": "47960",
+    "country": "United States"
+  },
+  "indianapolis": {
+    "name": "Indianapolis KOA Holiday",
+    "formatted_address": "5896 W 200 N, Greenfield, IN 46140, United States",
+    "lat": 39.81269899999999,
+    "lon": -85.9130131,
+    "city": "Greenfield",
+    "state": "IN",
+    "zip_code": "46140",
+    "country": "United States"
+  },
+  "ivy-lea": {
+    "name": "1000 Islands / Ivy Lea KOA Holiday",
+    "formatted_address": "85 Edgewater Ln, Lansdowne, ON K0E 1L0, Canada",
+    "lat": 44.3651522,
+    "lon": -76.0228846,
+    "city": "Lansdowne",
+    "state": "ON",
+    "zip_code": "K0E 1L0",
+    "country": "Canada"
+  },
+  "jackson": {
+    "name": "Jackson, MN KOA Journey",
+    "formatted_address": "2035 US-71, Jackson, MN 56143, United States",
+    "lat": 43.6443842,
+    "lon": -94.99787300000001,
+    "city": "Jackson",
+    "state": "MN",
+    "zip_code": "56143",
+    "country": "United States"
+  },
+  "jacksonville": {
+    "name": "Jacksonville North / St. Marys KOA Holiday",
+    "formatted_address": "2970 Scrubby Bluff Rd, Kingsland, GA 31548, United States",
+    "lat": 30.7553456,
+    "lon": -81.6525743,
+    "city": "Kingsland",
+    "state": "GA",
+    "zip_code": "31548",
+    "country": "United States"
+  },
+  "jonestown": {
+    "name": "Jonestown / Hershey NE KOA Journey",
+    "formatted_address": "11 Lickdale Rd, Jonestown, PA 17038, United States",
+    "lat": 40.4519904,
+    "lon": -76.51142329999999,
+    "city": "Jonestown",
+    "state": "PA",
+    "zip_code": "17038",
+    "country": "United States"
+  },
+  "joplin": {
+    "name": "Joplin KOA Journey",
+    "formatted_address": "4359 Dakota Ln, Joplin, MO 64804, United States",
+    "lat": 37.0076326,
+    "lon": -94.5481234,
+    "city": "Joplin",
+    "state": "MO",
+    "zip_code": "64804",
+    "country": "United States"
+  },
+  "kamiah": {
+    "name": "Kamiah / Clearwater River KOA Journey",
+    "formatted_address": "4243 US-12, Kamiah, ID 83536, United States",
+    "lat": 46.2126586,
+    "lon": -116.0043058,
+    "city": "Kamiah",
+    "state": "ID",
+    "zip_code": "83536",
+    "country": "United States"
+  },
+  "kankakee": {
+    "name": "Kankakee South KOA Holiday",
+    "formatted_address": "425 E 6000S Rd, Chebanse, IL 60922, United States",
+    "lat": 41.0335297,
+    "lon": -87.8595007,
+    "city": "Chebanse",
+    "state": "IL",
+    "zip_code": "60922",
+    "country": "United States"
+  },
+  "kansas-city-west": {
+    "name": "Kansas City West / Lawrence KOA Holiday",
+    "formatted_address": "1473 US-40, Lawrence, KS 66044, United States",
+    "lat": 38.9982123,
+    "lon": -95.2288106,
+    "city": "Lawrence",
+    "state": "KS",
+    "zip_code": "66044",
+    "country": "United States"
+  },
+  "kennebec": {
+    "name": "Kennebec KOA Journey",
+    "formatted_address": "I-90 Exit 235 307, SD-273, Kennebec, SD 57544, United States",
+    "lat": 43.9015613,
+    "lon": -99.8669884,
+    "city": "Kennebec",
+    "state": "SD",
+    "zip_code": "57544",
+    "country": "United States"
+  },
+  "kentucky-lake": {
+    "name": "Paducah / I-24 / Kentucky Lake KOA Journey",
+    "formatted_address": "4793 US-62, Calvert City, KY 42029, United States",
+    "lat": 37.0029706,
+    "lon": -88.3516604,
+    "city": "Calvert City",
+    "state": "KY",
+    "zip_code": "42029",
+    "country": "United States"
+  },
+  "kentucky-lakes": {
+    "name": "Kentucky Lakes / Prizer Point KOA",
+    "formatted_address": "1777 Prizer Point Rd Mile Marker 55 on Lake Barkley, Cadiz, KY 42211, United States",
+    "lat": 36.9118388,
+    "lon": -87.98917019999999,
+    "city": "Cadiz",
+    "state": "KY",
+    "zip_code": "42211",
+    "country": "United States"
+  },
+  "kerrville": {
+    "name": "Kerrville KOA Journey",
+    "formatted_address": "2400 Goat Creek Rd, Kerrville, TX 78028, United States",
+    "lat": 30.0917635,
+    "lon": -99.19960530000002,
+    "city": "Kerrville",
+    "state": "TX",
+    "zip_code": "78028",
+    "country": "United States"
+  },
+  "kingman": {
+    "name": "Kingman KOA Journey",
+    "formatted_address": "3820 N Roosevelt St, Kingman, AZ 86409, United States",
+    "lat": 35.2340495,
+    "lon": -114.017938,
+    "city": "Kingman",
+    "state": "AZ",
+    "zip_code": "86409",
+    "country": "United States"
+  },
+  "kingston": {
+    "name": "1000 Islands / Kingston KOA Holiday",
+    "formatted_address": "2039 Cordukes Rd, Kingston, ON K7L 4V4, Canada",
+    "lat": 44.3014234,
+    "lon": -76.57555479999999,
+    "city": "Kingston",
+    "state": "ON",
+    "zip_code": "K7L 4V4",
+    "country": "Canada"
+  },
+  "kissimmee": {
+    "name": "Orlando / Kissimmee KOA Holiday",
+    "formatted_address": "2644 Happy Camper Pl, Kissimmee, FL 34746, United States",
+    "lat": 28.3244157,
+    "lon": -81.4685832,
+    "city": "Kissimmee",
+    "state": "FL",
+    "zip_code": "34746",
+    "country": "United States"
+  },
+  "klamath": {
+    "name": "Klamath Falls KOA Journey",
+    "formatted_address": "3435 Shasta Way, Klamath Falls, OR 97603, United States",
+    "lat": 42.2141295,
+    "lon": -121.7465671,
+    "city": "Klamath Falls",
+    "state": "OR",
+    "zip_code": "97603",
+    "country": "United States"
+  },
+  "lafayette": {
+    "name": "Lafayette KOA Holiday",
+    "formatted_address": "1825 St Mary St, Scott, LA 70583, United States",
+    "lat": 30.2467108,
+    "lon": -92.11147989999999,
+    "city": "Scott",
+    "state": "LA",
+    "zip_code": "70583",
+    "country": "United States"
+  },
+  "lake-bomoseen": {
+    "name": "Lake Bomoseen KOA Holiday",
+    "formatted_address": "18 Campground Dr, Bomoseen, VT 05732, United States",
+    "lat": 43.683514,
+    "lon": -73.1890342,
+    "city": "Bomoseen",
+    "state": "VT",
+    "zip_code": "05732",
+    "country": "United States"
+  },
+  "lake-conroe": {
+    "name": "Lake Conroe / Houston North KOA Holiday",
+    "formatted_address": "19785 Hwy 105 W, Montgomery, TX 77356, United States",
+    "lat": 30.385223,
+    "lon": -95.669822,
+    "city": "Montgomery",
+    "state": "TX",
+    "zip_code": "77356",
+    "country": "United States"
+  },
+  "lake-george": {
+    "name": "Lake George / Saratoga KOA Journey",
+    "formatted_address": "564 Lake Ave, Lake Luzerne, NY 12846, United States",
+    "lat": 43.3416069,
+    "lon": -73.8369325,
+    "city": "Lake Luzerne",
+    "state": "NY",
+    "zip_code": "12846",
+    "country": "United States"
+  },
+  "lake-isabella": {
+    "name": "Lake Isabella / Kern River KOA Journey",
+    "formatted_address": "Kern River KOA, 15627 Highway 178 Lake Isabella, Weldon, CA 93283, United States",
+    "lat": 35.6552419,
+    "lon": -118.342702,
+    "city": "Weldon",
+    "state": "CA",
+    "zip_code": "93283",
+    "country": "United States"
+  },
+  "lake-milton": {
+    "name": "Lake Milton / Berlin Lake KOA Holiday",
+    "formatted_address": "15487 Creed Rd, Lake Milton, OH 44429, United States",
+    "lat": 41.1084427,
+    "lon": -80.94321649999999,
+    "city": "Lake Milton",
+    "state": "OH",
+    "zip_code": "44429",
+    "country": "United States"
+  },
+  "lake-oconee": {
+    "name": "Lake Oconee / Greensboro KOA Holiday",
+    "formatted_address": "2541 Carey Station Rd, Greensboro, GA 30642, United States",
+    "lat": 33.5452074,
+    "lon": -83.2686488,
+    "city": "Greensboro",
+    "state": "GA",
+    "zip_code": "30642",
+    "country": "United States"
+  },
+  "lake-placid": {
+    "name": "Lake Placid / Whiteface Mtn. KOA Holiday",
+    "formatted_address": "5591 NY-86, Wilmington, NY 12997, United States",
+    "lat": 44.3847493,
+    "lon": -73.82809820000001,
+    "city": "Wilmington",
+    "state": "NY",
+    "zip_code": "12997",
+    "country": "United States"
+  },
+  "lancaster": {
+    "name": "Lancaster / New Holland KOA Journey",
+    "formatted_address": "354 Springville Rd, New Holland, PA 17557, United States",
+    "lat": 40.0579473,
+    "lon": -76.0202935,
+    "city": "New Holland",
+    "state": "PA",
+    "zip_code": "17557",
+    "country": "United States"
+  },
+  "las-cruces": {
+    "name": "Las Cruces KOA Holiday",
+    "formatted_address": "814 Weinrich Rd, Las Cruces, NM 88007, United States",
+    "lat": 32.2924755,
+    "lon": -106.8591689,
+    "city": "Las Cruces",
+    "state": "NM",
+    "zip_code": "88007",
+    "country": "United States"
+  },
+  "las-vegas": {
+    "name": "Las Vegas KOA Journey at Sam's Town Journey",
+    "formatted_address": "5225 Boulder Hwy, Las Vegas, NV 89122, United States",
+    "lat": 36.1107162,
+    "lon": -115.060084,
+    "city": "Las Vegas",
+    "state": "NV",
+    "zip_code": "89122",
+    "country": "United States"
+  },
+  "las-vegas-new-mexico": {
+    "name": "Las Vegas, New Mexico KOA Journey",
+    "formatted_address": "76 County Rd A25A, Las Vegas, NM 87701, United States",
+    "lat": 35.5115755,
+    "lon": -105.2535878,
+    "city": "Las Vegas",
+    "state": "NM",
+    "zip_code": "87701",
+    "country": "United States"
+  },
+  "lasalle": {
+    "name": "LaSalle / Peru KOA Journey",
+    "formatted_address": "756 N 3150th Rd, North Utica, IL 61373, United States",
+    "lat": 41.389883,
+    "lon": -89.01826700000001,
+    "city": "North Utica",
+    "state": "IL",
+    "zip_code": "61373",
+    "country": "United States"
+  },
+  "laughlin": {
+    "name": "Laughlin / Avi Casino KOA Journey",
+    "formatted_address": "10000 Aha Macav Pkwy, Laughlin, NV 89029, United States",
+    "lat": 35.0171666,
+    "lon": -114.6444157,
+    "city": "Laughlin",
+    "state": "NV",
+    "zip_code": "89029",
+    "country": "United States"
+  },
+  "lava-hot-springs": {
+    "name": "Lava Hot Springs East KOA Holiday",
+    "formatted_address": "100 Bristol Park Ln, Lava Hot Springs, ID 83246, United States",
+    "lat": 42.62036639999999,
+    "lon": -112.0004086,
+    "city": "Lava Hot Springs",
+    "state": "ID",
+    "zip_code": "83246",
+    "country": "United States"
+  },
+  "leander": {
+    "name": "Leander / NW Austin KOA Holiday",
+    "formatted_address": "2689 Hero Way, Leander, TX 78641, United States",
+    "lat": 30.5885784,
+    "lon": -97.8338751,
+    "city": "Leander",
+    "state": "TX",
+    "zip_code": "78641",
+    "country": "United States"
+  },
+  "leavenworth": {
+    "name": "Leavenworth / Pine Village KOA Holiday",
+    "formatted_address": "308 Zelt Strasse, Leavenworth, WA 98826, United States",
+    "lat": 47.5984008,
+    "lon": -120.6402114,
+    "city": "Leavenworth",
+    "state": "WA",
+    "zip_code": "98826",
+    "country": "United States"
+  },
+  "lebanon": {
+    "name": "Lebanon KOA Holiday on Salmon Falls River Holiday",
+    "formatted_address": "21 Flat Rock Bridge Rd, Lebanon, ME 04027, United States",
+    "lat": 43.346181,
+    "lon": -70.96463,
+    "city": "Lebanon",
+    "state": "ME",
+    "zip_code": "04027",
+    "country": "United States"
+  },
+  "lemolo-lake": {
+    "name": "Lemolo Lake / Crater Lake North KOA Holiday",
+    "formatted_address": "2610 Birds Point Rd, Idleyld Park, OR 97447, United States",
+    "lat": 43.3183183,
+    "lon": -122.1945724,
+    "city": "Idleyld Park",
+    "state": "OR",
+    "zip_code": "97447",
+    "country": "United States"
+  },
+  "lena": {
+    "name": "Lena KOA Holiday",
+    "formatted_address": "10982 US-20, Lena, IL 61048, United States",
+    "lat": 42.3576255,
+    "lon": -89.82228289999999,
+    "city": "Lena",
+    "state": "IL",
+    "zip_code": "61048",
+    "country": "United States"
+  },
+  "lincoln-city": {
+    "name": "Lincoln City KOA Holiday",
+    "formatted_address": "5298 NE Park Ln, Otis, OR 97368, United States",
+    "lat": 44.9920132,
+    "lon": -123.9786199,
+    "city": "Otis",
+    "state": "OR",
+    "zip_code": "97368",
+    "country": "United States"
+  },
+  "linn-creek": {
+    "name": "Lake of the Ozarks / Linn Creek KOA Holiday",
+    "formatted_address": "4171 US-54, Linn Creek, MO 65052, United States",
+    "lat": 38.054418,
+    "lon": -92.701072,
+    "city": "Linn Creek",
+    "state": "MO",
+    "zip_code": "65052",
+    "country": "United States"
+  },
+  "little-rock": {
+    "name": "Little Rock North / Jct. I-40 KOA Journey",
+    "formatted_address": "7820 Kampground Way, North Little Rock, AR 72118, United States",
+    "lat": 34.8146023,
+    "lon": -92.34896189999999,
+    "city": "North Little Rock",
+    "state": "AR",
+    "zip_code": "72118",
+    "country": "United States"
+  },
+  "littleton": {
+    "name": "Littleton / Franconia Notch KOA Holiday",
+    "formatted_address": "2154 US-302, Lisbon, NH 03585, United States",
+    "lat": 44.2501402,
+    "lon": -71.8520466,
+    "city": "Lisbon",
+    "state": "NH",
+    "zip_code": "03585",
+    "country": "United States"
+  },
+  "livingston": {
+    "name": "Livingston / Paradise Valley KOA Holiday",
+    "formatted_address": "163 Pine Creek Rd, Livingston, MT 59047, United States",
+    "lat": 45.51184569999999,
+    "lon": -110.5797075,
+    "city": "Livingston",
+    "state": "MT",
+    "zip_code": "59047",
+    "country": "United States"
+  },
+  "logan": {
+    "name": "Hocking Hills KOA Holiday",
+    "formatted_address": "29150 Pattor Rd, Logan, OH 43138, United States",
+    "lat": 39.466924,
+    "lon": -82.4870869,
+    "city": "Logan",
+    "state": "OH",
+    "zip_code": "43138",
+    "country": "United States"
+  },
+  "lookout-mtn-west": {
+    "name": "Lookout Mountain / Chattanooga West KOA Holiday",
+    "formatted_address": "930 Mountain Shadows Dr, Trenton, GA 30752, United States",
+    "lat": 34.91870910000001,
+    "lon": -85.4906761,
+    "city": "Trenton",
+    "state": "GA",
+    "zip_code": "30752",
+    "country": "United States"
+  },
+  "lordsburg": {
+    "name": "Lordsburg KOA Journey",
+    "formatted_address": "1501 Lead St, Lordsburg, NM 88045, United States",
+    "lat": 32.3410903,
+    "lon": -108.7174288,
+    "city": "Lordsburg",
+    "state": "NM",
+    "zip_code": "88045",
+    "country": "United States"
+  },
+  "louisville-south": {
+    "name": "Louisville South KOA Holiday",
+    "formatted_address": "2433 Hwy 44 E, Shepherdsville, KY 40165, United States",
+    "lat": 38.0049742,
+    "lon": -85.6790149,
+    "city": "Shepherdsville",
+    "state": "KY",
+    "zip_code": "40165",
+    "country": "United States"
+  },
+  "lubbock": {
+    "name": "Lubbock KOA Journey",
+    "formatted_address": "5502 County Rd 6300, Lubbock, TX 79416, United States",
+    "lat": 33.636494,
+    "lon": -101.931396,
+    "city": "Lubbock",
+    "state": "TX",
+    "zip_code": "79416",
+    "country": "United States"
+  },
+  "lufkin": {
+    "name": "Lufkin KOA Journey",
+    "formatted_address": "250 FM2021, Lufkin, TX 75901, United States",
+    "lat": 31.3690233,
+    "lon": -94.7036014,
+    "city": "Lufkin",
+    "state": "TX",
+    "zip_code": "75901",
+    "country": "United States"
+  },
+  "lumberton": {
+    "name": "Lumberton / I-95 KOA Journey",
+    "formatted_address": "465 Kenric Rd, Lumberton, NC 28360, United States",
+    "lat": 34.6052586,
+    "lon": -79.0987317,
+    "city": "Lumberton",
+    "state": "NC",
+    "zip_code": "28360",
+    "country": "United States"
+  },
+  "lyman": {
+    "name": "Lyman KOA Journey",
+    "formatted_address": "1545 WY-413, Lyman, WY 82937, United States",
+    "lat": 41.3500383,
+    "lon": -110.2990413,
+    "city": "Lyman",
+    "state": "WY",
+    "zip_code": "82937",
+    "country": "United States"
+  },
+  "lynchburg": {
+    "name": "Lynchburg / Blue Ridge Parkway KOA Holiday",
+    "formatted_address": "6252 Elon Rd, Monroe, VA 24574, United States",
+    "lat": 37.5732744,
+    "lon": -79.3260004,
+    "city": "Monroe",
+    "state": "VA",
+    "zip_code": "24574",
+    "country": "United States"
+  },
+  "lynden": {
+    "name": "Lynden / Bellingham KOA Journey",
+    "formatted_address": "8717 Line Rd, Lynden, WA 98264, United States",
+    "lat": 48.9566715,
+    "lon": -122.4189913,
+    "city": "Lynden",
+    "state": "WA",
+    "zip_code": "98264",
+    "country": "United States"
+  },
+  "mackinaw-city": {
+    "name": "Mackinaw City / Mackinac Island KOA Journey",
+    "formatted_address": "566 Trails End Rd, Mackinaw City, MI 49701, United States",
+    "lat": 45.7676579,
+    "lon": -84.74078899999999,
+    "city": "Mackinaw City",
+    "state": "MI",
+    "zip_code": "49701",
+    "country": "United States"
+  },
+  "madison": {
+    "name": "Madison / Pittsburgh S.E. KOA Journey",
+    "formatted_address": "764 Waltz Ml Rd, Ruffs Dale, PA 15679, United States",
+    "lat": 40.2232801,
+    "lon": -79.6630526,
+    "city": "Ruffs Dale",
+    "state": "PA",
+    "zip_code": "15679",
+    "country": "United States"
+  },
+  "madison-pittsburgh": {
+    "name": "Madison / Pittsburgh S.E. KOA Journey",
+    "formatted_address": "764 Waltz Ml Rd, Ruffs Dale, PA 15679, United States",
+    "lat": 40.2232801,
+    "lon": -79.6630526,
+    "city": "Ruffs Dale",
+    "state": "PA",
+    "zip_code": "15679",
+    "country": "United States"
+  },
+  "mallorytown": {
+    "name": "1000 Islands / Mallorytown KOA Holiday",
+    "formatted_address": "1477 County Rd 2, Mallorytown, ON K0E 1R0, Canada",
+    "lat": 44.4694229,
+    "lon": -75.8796595,
+    "city": "Mallorytown",
+    "state": "ON",
+    "zip_code": "K0E 1R0",
+    "country": "Canada"
+  },
+  "manchester-beach": {
+    "name": "Manchester Beach / Mendocino Coast KOA Journey",
+    "formatted_address": "44300 Kinney Rd, Manchester, CA 95459, United States",
+    "lat": 38.9812565,
+    "lon": -123.6935311,
+    "city": "Manchester",
+    "state": "CA",
+    "zip_code": "95459",
+    "country": "United States"
+  },
+  "medford": {
+    "name": "Medford / Grants Pass KOA Journey",
+    "formatted_address": "12297 Blackwell Rd, Central Point, OR 97502, United States",
+    "lat": 42.42785960000001,
+    "lon": -123.0370303,
+    "city": "Central Point",
+    "state": "OR",
+    "zip_code": "97502",
+    "country": "United States"
+  },
+  "medina": {
+    "name": "Medina / Wildwood Lake KOA Holiday",
+    "formatted_address": "2711 County Line Rd, Medina, NY 14103, United States",
+    "lat": 43.28079899999999,
+    "lon": -78.463019,
+    "city": "Medina",
+    "state": "NY",
+    "zip_code": "14103",
+    "country": "United States"
+  },
+  "memphis": {
+    "name": "Memphis KOA Journey",
+    "formatted_address": "7037 I-55, Marion, AR 72364, United States",
+    "lat": 35.2616051,
+    "lon": -90.2288442,
+    "city": "Marion",
+    "state": "AR",
+    "zip_code": "72364",
+    "country": "United States"
+  },
+  "mercer": {
+    "name": "Mercer / Grove City KOA Holiday",
+    "formatted_address": "1337 Butler Pike, Mercer, PA 16137, United States",
+    "lat": 41.17964,
+    "lon": -80.18509,
+    "city": "Mercer",
+    "state": "PA",
+    "zip_code": "16137",
+    "country": "United States"
+  },
+  "meridian-east": {
+    "name": "Meridian East / Toomsuba KOA Journey",
+    "formatted_address": "3953 KOA Campground Rd, Toomsuba, MS 39364, United States",
+    "lat": 32.392859,
+    "lon": -88.504592,
+    "city": "Toomsuba",
+    "state": "MS",
+    "zip_code": "39364",
+    "country": "United States"
+  },
+  "miles-city": {
+    "name": "Miles City KOA Journey",
+    "formatted_address": "1 Palmer St, Miles City, MT 59301, United States",
+    "lat": 46.406312,
+    "lon": -105.859304,
+    "city": "Miles City",
+    "state": "MT",
+    "zip_code": "59301",
+    "country": "United States"
+  },
+  "milton-wi": {
+    "name": "Milton KOA Holiday",
+    "formatted_address": "872 E E State Rd 59, Milton, WI 53563, United States",
+    "lat": 42.8246041,
+    "lon": -89.0157023,
+    "city": "Milton",
+    "state": "WI",
+    "zip_code": "53563",
+    "country": "United States"
+  },
+  "minneapolis-northwest": {
+    "name": "Minneapolis Northwest KOA Journey",
+    "formatted_address": "10410 Brockton Ln N, Maple Grove, MN 55311, United States",
+    "lat": 45.1441215,
+    "lon": -93.52036350000002,
+    "city": "Maple Grove",
+    "state": "MN",
+    "zip_code": "55311",
+    "country": "United States"
+  },
+  "minneapolis-southwest": {
+    "name": "Minneapolis Southwest KOA Holiday",
+    "formatted_address": "3315 W 166th St, Jordan, MN 55352, United States",
+    "lat": 44.708023,
+    "lon": -93.587868,
+    "city": "Jordan",
+    "state": "MN",
+    "zip_code": "55352",
+    "country": "United States"
+  },
+  "minot": {
+    "name": "Minot / Swenson RV KOA Journey",
+    "formatted_address": "1945 20th Ave SE, Minot, ND 58701, United States",
+    "lat": 48.21327549999999,
+    "lon": -101.2617014,
+    "city": "Minot",
+    "state": "ND",
+    "zip_code": "58701",
+    "country": "United States"
+  },
+  "missoula": {
+    "name": "Missoula KOA Holiday",
+    "formatted_address": "3450 Tina Ave, Missoula, MT 59808, United States",
+    "lat": 46.8966295,
+    "lon": -114.0423517,
+    "city": "Missoula",
+    "state": "MT",
+    "zip_code": "59808",
+    "country": "United States"
+  },
+  "mitchell": {
+    "name": "Mitchell KOA Journey",
+    "formatted_address": "41255 SD-38, Mitchell, SD 57301, United States",
+    "lat": 43.7016879,
+    "lon": -97.9567003,
+    "city": "Mitchell",
+    "state": "SD",
+    "zip_code": "57301",
+    "country": "United States"
+  },
+  "moab": {
+    "name": "Moab KOA Holiday",
+    "formatted_address": "3225 S Hwy 191, Moab, UT 84532, United States",
+    "lat": 38.5238477,
+    "lon": -109.4963935,
+    "city": "Moab",
+    "state": "UT",
+    "zip_code": "84532",
+    "country": "United States"
+  },
+  "monroe-co": {
+    "name": "Monroe Co. / Toledo North KOA Holiday",
+    "formatted_address": "15600 Tunnicliffe Rd, Petersburg, MI 49270, United States",
+    "lat": 41.8439781,
+    "lon": -83.6625,
+    "city": "Petersburg",
+    "state": "MI",
+    "zip_code": "49270",
+    "country": "United States"
+  },
+  "montpelier-creek": {
+    "name": "Montpelier Creek KOA Journey",
+    "formatted_address": "28501 US-89, Montpelier, ID 83254, United States",
+    "lat": 42.320039,
+    "lon": -111.255301,
+    "city": "Montpelier",
+    "state": "ID",
+    "zip_code": "83254",
+    "country": "United States"
+  },
+  "montreal-south": {
+    "name": "Montreal South KOA Journey",
+    "formatted_address": "130 Mnt Monette, Saint-Philippe, QC J0L 2K0, Canada",
+    "lat": 45.345979,
+    "lon": -73.48906199999999,
+    "city": "Saint-Philippe",
+    "state": "QC",
+    "zip_code": "J0L 2K0",
+    "country": "Canada"
+  },
+  "montrose-black-canyon-natl-park": {
+    "name": "Montrose / Black Canyon Nat'l Park KOA Journey",
+    "formatted_address": "200 N Cedar St, Montrose, CO 81401, United States",
+    "lat": 38.4885737,
+    "lon": -107.8680012,
+    "city": "Montrose",
+    "state": "CO",
+    "zip_code": "81401",
+    "country": "United States"
+  },
+  "monument-valley": {
+    "name": "Monument Valley KOA Journey",
+    "formatted_address": "Milepost, 2 Hwy 163, Oljato-Monument Valley, UT 84536, United States",
+    "lat": 37.017012,
+    "lon": -110.1534726,
+    "city": "Oljato-Monument Valley",
+    "state": "UT",
+    "zip_code": "84536",
+    "country": "United States"
+  },
+  "moore-haven": {
+    "name": "Moore Haven KOA Holiday",
+    "formatted_address": "17192 US-27, Moore Haven, FL 33471, United States",
+    "lat": 26.8614311,
+    "lon": -81.2150841,
+    "city": "Moore Haven",
+    "state": "FL",
+    "zip_code": "33471",
+    "country": "United States"
+  },
+  "moss-landing": {
+    "name": "Moss Landing KOA Express",
+    "formatted_address": "7905 Sandholdt Rd, Moss Landing, CA 95039, United States",
+    "lat": 36.7995024,
+    "lon": -121.78622,
+    "city": "Moss Landing",
+    "state": "CA",
+    "zip_code": "95039",
+    "country": "United States"
+  },
+  "mount-gilead": {
+    "name": "Mt. Gilead KOA Holiday",
+    "formatted_address": "901 E High St, Mt Gilead, OH 43338, United States",
+    "lat": 40.5457098,
+    "lon": -82.8097875,
+    "city": "Mt Gilead",
+    "state": "OH",
+    "zip_code": "43338",
+    "country": "United States"
+  },
+  "mount-pleasant": {
+    "name": "Mount Pleasant / Charleston KOA Holiday",
+    "formatted_address": "3157 N Hwy 17, Mt Pleasant, SC 29466, United States",
+    "lat": 32.8651054,
+    "lon": -79.7760869,
+    "city": "Mt Pleasant",
+    "state": "SC",
+    "zip_code": "29466",
+    "country": "United States"
+  },
+  "mount-pleasant-charleston": {
+    "name": "Mount Pleasant / Charleston KOA Holiday",
+    "formatted_address": "3157 N Hwy 17, Mt Pleasant, SC 29466, United States",
+    "lat": 32.8651054,
+    "lon": -79.7760869,
+    "city": "Mt Pleasant",
+    "state": "SC",
+    "zip_code": "29466",
+    "country": "United States"
+  },
+  "mount-shasta": {
+    "name": "Mount Shasta City KOA Holiday",
+    "formatted_address": "900 N Mt Shasta Blvd, Mt Shasta, CA 96067, United States",
+    "lat": 41.3217887,
+    "lon": -122.3175652,
+    "city": "Mt Shasta",
+    "state": "CA",
+    "zip_code": "96067",
+    "country": "United States"
+  },
+  "mountainside": {
+    "name": "Yellowstone Park / Mountainside KOA Journey",
+    "formatted_address": "1545 Targhee Pass Hwy, West Yellowstone, MT 59758, United States",
+    "lat": 44.6873988,
+    "lon": -111.2523465,
+    "city": "West Yellowstone",
+    "state": "MT",
+    "zip_code": "59758",
+    "country": "United States"
+  },
+  "mt-lassen": {
+    "name": "Mt. Lassen / Shingletown KOA Holiday",
+    "formatted_address": "7749 KOA Rd, Shingletown, CA 96088, United States",
+    "lat": 40.51217949999999,
+    "lon": -121.811877,
+    "city": "Shingletown",
+    "state": "CA",
+    "zip_code": "96088",
+    "country": "United States"
+  },
+  "muncie": {
+    "name": "Indianapolis KOA Holiday",
+    "formatted_address": "5896 W 200 N, Greenfield, IN 46140, United States",
+    "lat": 39.81269899999999,
+    "lon": -85.9130131,
+    "city": "Greenfield",
+    "state": "IN",
+    "zip_code": "46140",
+    "country": "United States"
+  },
+  "murphy": {
+    "name": "Murphy / Peace Valley KOA Holiday",
+    "formatted_address": "117 Happy Valley Rd, Marble, NC 28905, United States",
+    "lat": 35.1266494,
+    "lon": -83.9889986,
+    "city": "Marble",
+    "state": "NC",
+    "zip_code": "28905",
+    "country": "United States"
+  },
+  "myrtle-beach": {
+    "name": "Myrtle Beach KOA Resort",
+    "formatted_address": "613 5th Ave S, Myrtle Beach, SC 29577, United States",
+    "lat": 33.6840968,
+    "lon": -78.89694380000002,
+    "city": "Myrtle Beach",
+    "state": "SC",
+    "zip_code": "29577",
+    "country": "United States"
+  },
+  "mystic": {
+    "name": "Mystic KOA Holiday",
+    "formatted_address": "118 Pendleton Hill Rd, North Stonington, CT 06359, United States",
+    "lat": 41.4238952,
+    "lon": -71.8405633,
+    "city": "North Stonington",
+    "state": "CT",
+    "zip_code": "06359",
+    "country": "United States"
+  },
+  "naples": {
+    "name": "Naples / Marco Island KOA Holiday",
+    "formatted_address": "1700 Barefoot Williams Rd, Naples, FL 34113, United States",
+    "lat": 26.0501032,
+    "lon": -81.7087785,
+    "city": "Naples",
+    "state": "FL",
+    "zip_code": "34113",
+    "country": "United States"
+  },
+  "naples-maine": {
+    "name": "Naples KOA Holiday",
+    "formatted_address": "295 Sebago Rd, Naples, ME 04055, United States",
+    "lat": 43.94691359999999,
+    "lon": -70.6031671,
+    "city": "Naples",
+    "state": "ME",
+    "zip_code": "04055",
+    "country": "United States"
+  },
+  "nashville-east": {
+    "name": "Nashville East / Lebanon KOA Journey",
+    "formatted_address": "2100 Safari Camp Rd, Lebanon, TN 37090, United States",
+    "lat": 36.1831042,
+    "lon": -86.3690792,
+    "city": "Lebanon",
+    "state": "TN",
+    "zip_code": "37090",
+    "country": "United States"
+  },
+  "natural-bridge": {
+    "name": "Natural Bridge / Lexington KOA Holiday",
+    "formatted_address": "214 Killdeer Ln, Natural Bridge, VA 24578, United States",
+    "lat": 37.6795953,
+    "lon": -79.50881129999999,
+    "city": "Natural Bridge",
+    "state": "VA",
+    "zip_code": "24578",
+    "country": "United States"
+  },
+  "needles": {
+    "name": "Needles KOA Journey",
+    "formatted_address": "5400 Route 66, 5400 National Old Trails Rd, Needles, CA 92363, United States",
+    "lat": 34.8687915,
+    "lon": -114.6426715,
+    "city": "Needles",
+    "state": "CA",
+    "zip_code": "92363",
+    "country": "United States"
+  },
+  "new-bern": {
+    "name": "New Bern KOA Holiday",
+    "formatted_address": "1565 B St, New Bern, NC 28560, United States",
+    "lat": 35.136279,
+    "lon": -77.028142,
+    "city": "New Bern",
+    "state": "NC",
+    "zip_code": "28560",
+    "country": "United States"
+  },
+  "new-orleans": {
+    "name": "New Orleans KOA Holiday",
+    "formatted_address": "11129 Jefferson Hwy, River Ridge, LA 70123, United States",
+    "lat": 29.9709418,
+    "lon": -90.2340622,
+    "city": "River Ridge",
+    "state": "LA",
+    "zip_code": "70123",
+    "country": "United States"
+  },
+  "newberry-sc": {
+    "name": "Newberry / I-26 / Sumter NF KOA Journey",
+    "formatted_address": "567 Fairview Church Rd, Kinards, SC 29355, United States",
+    "lat": 34.4324358,
+    "lon": -81.7559897,
+    "city": "Kinards",
+    "state": "SC",
+    "zip_code": "29355",
+    "country": "United States"
+  },
+  "newburgh": {
+    "name": "New York City North / Newburgh KOA Holiday",
+    "formatted_address": "119 Freetown Hwy, Wallkill, NY 12589, United States",
+    "lat": 41.6376967,
+    "lon": -74.1021315,
+    "city": "Wallkill",
+    "state": "NY",
+    "zip_code": "12589",
+    "country": "United States"
+  },
+  "newport-little-diamond": {
+    "name": "Newport / Little Diamond Lake KOA Holiday",
+    "formatted_address": "1002 McGowen Rd, Newport, WA 99156, United States",
+    "lat": 48.142795,
+    "lon": -117.2220769,
+    "city": "Newport",
+    "state": "WA",
+    "zip_code": "99156",
+    "country": "United States"
+  },
+  "newport-smoky-mountains": {
+    "name": "Newport / I-40 / Smoky Mountains KOA Journey",
+    "formatted_address": "240 KOA Ln, Newport, TN 37821, United States",
+    "lat": 35.9702663,
+    "lon": -83.227577,
+    "city": "Newport",
+    "state": "TN",
+    "zip_code": "37821",
+    "country": "United States"
+  },
+  "niagara-falls-new-york": {
+    "name": "Niagara Falls / Grand Island KOA Holiday",
+    "formatted_address": "2570 Grand Island Blvd, Grand Island, NY 14072, United States",
+    "lat": 43.0312828,
+    "lon": -78.9729077,
+    "city": "Grand Island",
+    "state": "NY",
+    "zip_code": "14072",
+    "country": "United States"
+  },
+  "niagara-falls-north": {
+    "name": "Niagara Falls North / Lewiston KOA Journey",
+    "formatted_address": "1250 Pletcher Rd, Youngstown, NY 14174, United States",
+    "lat": 43.207031,
+    "lon": -78.98988299999999,
+    "city": "Youngstown",
+    "state": "NY",
+    "zip_code": "14174",
+    "country": "United States"
+  },
+  "niagara-falls-ontario": {
+    "name": "Niagara Falls KOA Holiday",
+    "formatted_address": "8625 Lundy's Ln, Niagara Falls, ON L2H 1H5, Canada",
+    "lat": 43.0891087,
+    "lon": -79.1423422,
+    "city": "Niagara Falls",
+    "state": "ON",
+    "zip_code": "L2H 1H5",
+    "country": "Canada"
+  },
+  "niantic": {
+    "name": "Niantic / I-95 Exit 72 KOA Holiday",
+    "formatted_address": "271 W Main St, Niantic, CT 06357, United States",
+    "lat": 41.3154024,
+    "lon": -72.2495823,
+    "city": "Niantic",
+    "state": "CT",
+    "zip_code": "06357",
+    "country": "United States"
+  },
+  "north-sydney": {
+    "name": "North Sydney / Cabot Trail KOA",
+    "formatted_address": "3779 New Harris Rd, New Harris, NS B1X 1T1, Canada",
+    "lat": 46.24040129999999,
+    "lon": -60.4990207,
+    "city": "New Harris",
+    "state": "NS",
+    "zip_code": "B1X 1T1",
+    "country": "Canada"
+  },
+  "northampton": {
+    "name": "Northampton / Springfield KOA Holiday",
+    "formatted_address": "139 S Rd, Westhampton, MA 01027, United States",
+    "lat": 42.28637,
+    "lon": -72.7753283,
+    "city": "Westhampton",
+    "state": "MA",
+    "zip_code": "01027",
+    "country": "United States"
+  },
+  "oakdale": {
+    "name": "Oakdale KOA Journey",
+    "formatted_address": "200 Jay St, Oakdale, WI 54649, United States",
+    "lat": 43.9617374,
+    "lon": -90.37204679999999,
+    "city": "Oakdale",
+    "state": "WI",
+    "zip_code": "54649",
+    "country": "United States"
+  },
+  "ogallala": {
+    "name": "Ogallala / I-80 KOA Journey",
+    "formatted_address": "221 E County Rd 85, Ogallala, NE 69153, United States",
+    "lat": 41.113,
+    "lon": -101.7086111,
+    "city": "Ogallala",
+    "state": "NE",
+    "zip_code": "69153",
+    "country": "United States"
+  },
+  "okeechobee": {
+    "name": "Okeechobee KOA Resort",
+    "formatted_address": "4276 US-441, Okeechobee, FL 34974, United States",
+    "lat": 27.2048979,
+    "lon": -80.8279895,
+    "city": "Okeechobee",
+    "state": "FL",
+    "zip_code": "34974",
+    "country": "United States"
+  },
+  "oklahoma-city": {
+    "name": "Oklahoma City East KOA Holiday",
+    "formatted_address": "6200 S Choctaw Rd, Choctaw, OK 73020, United States",
+    "lat": 35.4036904,
+    "lon": -97.2638006,
+    "city": "Choctaw",
+    "state": "OK",
+    "zip_code": "73020",
+    "country": "United States"
+  },
+  "onalaska": {
+    "name": "Ventura Ranch KOA Holiday",
+    "formatted_address": "7400 Pine Grove Rd, Santa Paula, CA 93060, United States",
+    "lat": 34.40603340000001,
+    "lon": -119.0790991,
+    "city": "Santa Paula",
+    "state": "CA",
+    "zip_code": "93060",
+    "country": "United States"
+  },
+  "onawa": {
+    "name": "Onawa / Blue Lake KOA Holiday",
+    "formatted_address": "21788 Dogwood Ave, Onawa, IA 51040, United States",
+    "lat": 42.0433941,
+    "lon": -96.1565693,
+    "city": "Onawa",
+    "state": "IA",
+    "zip_code": "51040",
+    "country": "United States"
+  },
+  "oregon-dunes": {
+    "name": "Oregon Dunes KOA Holiday",
+    "formatted_address": "68632 US-101, North Bend, OR 97459, United States",
+    "lat": 43.5014851,
+    "lon": -124.219815,
+    "city": "North Bend",
+    "state": "OR",
+    "zip_code": "97459",
+    "country": "United States"
+  },
+  "orlando-nw-orange-blossom": {
+    "name": "Orlando NW / Orange Blossom KOA Journey",
+    "formatted_address": "3800 W Orange Blossom Trail, Apopka, FL 32712, United States",
+    "lat": 28.6988007,
+    "lon": -81.5737187,
+    "city": "Apopka",
+    "state": "FL",
+    "zip_code": "32712",
+    "country": "United States"
+  },
+  "orlando-sw": {
+    "name": "Orlando Southwest KOA Holiday",
+    "formatted_address": "2525 Frontage Rd, Davenport, FL 33837, United States",
+    "lat": 28.2293653,
+    "lon": -81.6525668,
+    "city": "Davenport",
+    "state": "FL",
+    "zip_code": "33837",
+    "country": "United States"
+  },
+  "oroville": {
+    "name": "Oroville / Feather Falls Casino KOA Journey",
+    "formatted_address": "3 Alverda Dr, 1 Feather Falls Blvd, Oroville, CA 95966, United States",
+    "lat": 39.4651676,
+    "lon": -121.5174514,
+    "city": "Oroville",
+    "state": "CA",
+    "zip_code": "95966",
+    "country": "United States"
+  },
+  "oscoda": {
+    "name": "Oscoda / Tawas KOA Holiday",
+    "formatted_address": "3591 Forest Rd, Oscoda Township, MI 48750, United States",
+    "lat": 44.3852475,
+    "lon": -83.3477087,
+    "city": "Oscoda Township",
+    "state": "MI",
+    "zip_code": "48750",
+    "country": "United States"
+  },
+  "ouray": {
+    "name": "Ouray KOA Holiday",
+    "formatted_address": "225 Co Rd 23, Ridgway, CO 81432, United States",
+    "lat": 38.081318,
+    "lon": -107.7057708,
+    "city": "Ridgway",
+    "state": "CO",
+    "zip_code": "81432",
+    "country": "United States"
+  },
+  "outer-banks-west": {
+    "name": "Outer Banks West / Currituck Sound KOA Holiday",
+    "formatted_address": "1631 Waterlily Rd, Coinjock, NC 27923, United States",
+    "lat": 36.4258538,
+    "lon": -75.9254287,
+    "city": "Coinjock",
+    "state": "NC",
+    "zip_code": "27923",
+    "country": "United States"
+  },
+  "owen-sound": {
+    "name": "Owen Sound KOA Journey",
+    "formatted_address": "398235 28th Ave E, Owen Sound, ON N4K 5N8, Canada",
+    "lat": 44.565424,
+    "lon": -80.8840809,
+    "city": "Owen Sound",
+    "state": "ON",
+    "zip_code": "N4K 5N8",
+    "country": "Canada"
+  },
+  "ozark": {
+    "name": "Ozark / Fort Rucker KOA Journey",
+    "formatted_address": "2414 N US Hwy 231, Ozark, AL 36360, United States",
+    "lat": 31.4881295,
+    "lon": -85.6870045,
+    "city": "Ozark",
+    "state": "AL",
+    "zip_code": "36360",
+    "country": "United States"
+  },
+  "palm-springs": {
+    "name": "Palm Springs / Joshua Tree KOA Holiday",
+    "formatted_address": "70405 Dillon Rd, Desert Hot Springs, CA 92241, United States",
+    "lat": 33.9249725,
+    "lon": -116.4329697,
+    "city": "Desert Hot Springs",
+    "state": "CA",
+    "zip_code": "92241",
+    "country": "United States"
+  },
+  "paris-landing": {
+    "name": "Paris Landing / Kentucky Lake KOA Holiday",
+    "formatted_address": "6290 E Antioch Rd, Buchanan, TN 38222, United States",
+    "lat": 36.4139207,
+    "lon": -88.1318496,
+    "city": "Buchanan",
+    "state": "TN",
+    "zip_code": "38222",
+    "country": "United States"
+  },
+  "parry-sound": {
+    "name": "Parry Sound KOA Holiday",
+    "formatted_address": "276 Rankin Lake Rd, Seguin, ON P2A 0B2, Canada",
+    "lat": 45.2986172,
+    "lon": -79.9052291,
+    "city": "Seguin",
+    "state": "ON",
+    "zip_code": "P2A 0B2",
+    "country": "Canada"
+  },
+  "pasco": {
+    "name": "Pasco / Tri-Cities KOA Journey",
+    "formatted_address": "8801 St Thomas Dr, Pasco, WA 99301, United States",
+    "lat": 46.2715291,
+    "lon": -119.2055254,
+    "city": "Pasco",
+    "state": "WA",
+    "zip_code": "99301",
+    "country": "United States"
+  },
+  "pendleton": {
+    "name": "Pendleton KOA Journey",
+    "formatted_address": "1375 SE 3rd St, Pendleton, OR 97801, United States",
+    "lat": 45.6598261,
+    "lon": -118.7802393,
+    "city": "Pendleton",
+    "state": "OR",
+    "zip_code": "97801",
+    "country": "United States"
+  },
+  "pere-marquette": {
+    "name": "Ludington East / Pere Marquette River KOA Holiday",
+    "formatted_address": "11713 W 40th St, Branch Township, MI 49402, United States",
+    "lat": 43.9157525,
+    "lon": -86.0331108,
+    "city": "Branch Township",
+    "state": "MI",
+    "zip_code": "49402",
+    "country": "United States"
+  },
+  "perry": {
+    "name": "Perry KOA Holiday",
+    "formatted_address": "3641 South Byron Butler Pkwy, US-19, Perry, FL 32348, United States",
+    "lat": 30.0721652,
+    "lon": -83.5620175,
+    "city": "Perry",
+    "state": "FL",
+    "zip_code": "32348",
+    "country": "United States"
+  },
+  "philadelphia": {
+    "name": "Philadelphia South / Clarksboro KOA Holiday",
+    "formatted_address": "117 Timberlane Rd, Clarksboro, NJ 08020, United States",
+    "lat": 39.8076895,
+    "lon": -75.2372067,
+    "city": "Clarksboro",
+    "state": "NJ",
+    "zip_code": "08020",
+    "country": "United States"
+  },
+  "philadelphia-south": {
+    "name": "Philadelphia South / Clarksboro KOA Holiday",
+    "formatted_address": "117 Timberlane Rd, Clarksboro, NJ 08020, United States",
+    "lat": 39.8076895,
+    "lon": -75.2372067,
+    "city": "Clarksboro",
+    "state": "NJ",
+    "zip_code": "08020",
+    "country": "United States"
+  },
+  "picacho-tucson-nw": {
+    "name": "Picacho / Tucson NW KOA Journey",
+    "formatted_address": "18428 S Picacho Hwy, Picacho, AZ 85141, United States",
+    "lat": 32.7121558,
+    "lon": -111.4993896,
+    "city": "Picacho",
+    "state": "AZ",
+    "zip_code": "85141",
+    "country": "United States"
+  },
+  "pictured-rocks": {
+    "name": "Munising / Pictured Rocks KOA Journey",
+    "formatted_address": "E10102 M-28, Wetmore, MI 49895, United States",
+    "lat": 46.3778873,
+    "lon": -86.5937163,
+    "city": "Wetmore",
+    "state": "MI",
+    "zip_code": "49895",
+    "country": "United States"
+  },
+  "pigeon-forge": {
+    "name": "Pigeon Forge / Gatlinburg KOA Holiday",
+    "formatted_address": "3122 Veterans Blvd, Pigeon Forge, TN 37863, United States",
+    "lat": 35.78669,
+    "lon": -83.54891429999999,
+    "city": "Pigeon Forge",
+    "state": "TN",
+    "zip_code": "37863",
+    "country": "United States"
+  },
+  "pocatello": {
+    "name": "Pocatello KOA Journey",
+    "formatted_address": "9815 W Pocatello Creek Rd, Pocatello, ID 83201, United States",
+    "lat": 42.8941534,
+    "lon": -112.4138992,
+    "city": "Pocatello",
+    "state": "ID",
+    "zip_code": "83201",
+    "country": "United States"
+  },
+  "pointsouth": {
+    "name": "Point South / I-95 / Yemassee KOA Holiday",
+    "formatted_address": "14 Campground Rd (I-95 @ Exit 33) &, US-17, Yemassee, SC 29945, United States",
+    "lat": 32.6248473,
+    "lon": -80.881751,
+    "city": "Yemassee",
+    "state": "SC",
+    "zip_code": "29945",
+    "country": "United States"
+  },
+  "polson": {
+    "name": "Polson / Flathead Lake KOA Holiday",
+    "formatted_address": "200 Irvine Flats Rd, Polson, MT 59860, United States",
+    "lat": 47.6993947,
+    "lon": -114.1867449,
+    "city": "Polson",
+    "state": "MT",
+    "zip_code": "59860",
+    "country": "United States"
+  },
+  "port-huron": {
+    "name": "Port Huron KOA Resort",
+    "formatted_address": "5111 Lapeer Rd, Kimball, MI 48074, United States",
+    "lat": 42.9838966,
+    "lon": -82.5286612,
+    "city": "Kimball",
+    "state": "MI",
+    "zip_code": "48074",
+    "country": "United States"
+  },
+  "port-lavaca": {
+    "name": "Port Lavaca / Matagorda Bay KOA Holiday",
+    "formatted_address": "1348 Co Rd 302, Port Lavaca, TX 77979, United States",
+    "lat": 28.7045854,
+    "lon": -96.4306249,
+    "city": "Port Lavaca",
+    "state": "TX",
+    "zip_code": "77979",
+    "country": "United States"
+  },
+  "pueblo": {
+    "name": "Pueblo KOA Journey",
+    "formatted_address": "4131 I-25 Exit 108, Pueblo, CO 81008, United States",
+    "lat": 38.4097768,
+    "lon": -104.6161546,
+    "city": "Pueblo",
+    "state": "CO",
+    "zip_code": "81008",
+    "country": "United States"
+  },
+  "pueblo-south": {
+    "name": "Pueblo South / Colorado City KOA Holiday",
+    "formatted_address": "9040 Interstate 25 South @ Exit, 74, Pueblo, CO 81004, United States",
+    "lat": 37.9587669,
+    "lon": -104.7968616,
+    "city": "Pueblo",
+    "state": "CO",
+    "zip_code": "81004",
+    "country": "United States"
+  },
+  "quebec-city": {
+    "name": "Quebec City KOA Holiday",
+    "formatted_address": "684 Chem. Olivier, Saint-Nicolas, QC G7A 2N6, Canada",
+    "lat": 46.6993565,
+    "lon": -71.30151029999999,
+    "city": "Saint-Nicolas",
+    "state": "QC",
+    "zip_code": "G7A 2N6",
+    "country": "Canada"
+  },
+  "rapid-city": {
+    "name": "Rapid City / Black Hills KOA Holiday",
+    "formatted_address": "3010 SD-44, Rapid City, SD 57703, United States",
+    "lat": 44.0696599,
+    "lon": -103.1657859,
+    "city": "Rapid City",
+    "state": "SD",
+    "zip_code": "57703",
+    "country": "United States"
+  },
+  "raton": {
+    "name": "Raton KOA Journey",
+    "formatted_address": "1330 S 2nd St, Raton, NM 87740, United States",
+    "lat": 36.8784426,
+    "lon": -104.4408585,
+    "city": "Raton",
+    "state": "NM",
+    "zip_code": "87740",
+    "country": "United States"
+  },
+  "rawlins": {
+    "name": "Rawlins KOA Journey",
+    "formatted_address": "205 WY-71, Rawlins, WY 82301, United States",
+    "lat": 41.77983510000001,
+    "lon": -107.2297989,
+    "city": "Rawlins",
+    "state": "WY",
+    "zip_code": "82301",
+    "country": "United States"
+  },
+  "red-lodge": {
+    "name": "Red Lodge KOA Journey",
+    "formatted_address": "7464 US-212, Red Lodge, MT 59068, United States",
+    "lat": 45.25676379999999,
+    "lon": -109.2282446,
+    "city": "Red Lodge",
+    "state": "MT",
+    "zip_code": "59068",
+    "country": "United States"
+  },
+  "redmond": {
+    "name": "Redmond / Central Oregon KOA Holiday",
+    "formatted_address": "2435 SW Jericho Ln, Culver, OR 97734, United States",
+    "lat": 44.50126820000001,
+    "lon": -121.1787497,
+    "city": "Culver",
+    "state": "OR",
+    "zip_code": "97734",
+    "country": "United States"
+  },
+  "renfrew": {
+    "name": "Renfrew / Ottawa West KOA Journey",
+    "formatted_address": "2826 Johnston Rd, Renfrew, ON K7V 3Z8, Canada",
+    "lat": 45.5316354,
+    "lon": -76.6814375,
+    "city": "Renfrew",
+    "state": "ON",
+    "zip_code": "K7V 3Z8",
+    "country": "Canada"
+  },
+  "renfro": {
+    "name": "Renfro Valley KOA Holiday",
+    "formatted_address": "184 KOA Campground Rd, Mt Vernon, KY 40456, United States",
+    "lat": 37.3962631,
+    "lon": -84.33023829999999,
+    "city": "Mt Vernon",
+    "state": "KY",
+    "zip_code": "40456",
+    "country": "United States"
+  },
+  "reno": {
+    "name": "Reno KOA Journey at Boomtown Journey",
+    "formatted_address": "2100 Garson Rd, Verdi, NV 89439, United States",
+    "lat": 39.515368,
+    "lon": -119.96436,
+    "city": "Verdi",
+    "state": "NV",
+    "zip_code": "89439",
+    "country": "United States"
+  },
+  "richfield": {
+    "name": "Richfield KOA Holiday",
+    "formatted_address": "590 W 600 S, Richfield, UT 84701, United States",
+    "lat": 38.7600637,
+    "lon": -112.0952013,
+    "city": "Richfield",
+    "state": "UT",
+    "zip_code": "84701",
+    "country": "United States"
+  },
+  "richmond": {
+    "name": "Richmond KOA Holiday",
+    "formatted_address": "3101 Cart Rd, Richmond, IN 47374, United States",
+    "lat": 39.870102,
+    "lon": -84.8639546,
+    "city": "Richmond",
+    "state": "IN",
+    "zip_code": "47374",
+    "country": "United States"
+  },
+  "richmond-north": {
+    "name": "Richmond North / Kings Dominion KOA Holiday",
+    "formatted_address": "10061 Kings Dominion Blvd, Doswell, VA 23047, United States",
+    "lat": 37.8476893,
+    "lon": -77.4390325,
+    "city": "Doswell",
+    "state": "VA",
+    "zip_code": "23047",
+    "country": "United States"
+  },
+  "rochester": {
+    "name": "Rochester / Marion KOA Journey",
+    "formatted_address": "5232 65th Ave SE, Rochester, MN 55904, United States",
+    "lat": 43.9445634,
+    "lon": -92.3480956,
+    "city": "Rochester",
+    "state": "MN",
+    "zip_code": "55904",
+    "country": "United States"
+  },
+  "rock-springs": {
+    "name": "Rock Springs / Green River KOA Journey",
+    "formatted_address": "86 Foothill Blvd, Rock Springs, WY 82901, United States",
+    "lat": 41.5683359,
+    "lon": -109.2932917,
+    "city": "Rock Springs",
+    "state": "WY",
+    "zip_code": "82901",
+    "country": "United States"
+  },
+  "royal-gorge": {
+    "name": "Royal Gorge / Canon City KOA Holiday",
+    "formatted_address": "559 Co Rd 3A, Cañon City, CO 81215, United States",
+    "lat": 38.4893787,
+    "lon": -105.3311684,
+    "city": "Cañon City",
+    "state": "CO",
+    "zip_code": "81215",
+    "country": "United States"
+  },
+  "rusk": {
+    "name": "Rusk KOA Holiday",
+    "formatted_address": "745 FM 343 East, Rusk, TX 75785, United States",
+    "lat": 31.7946827,
+    "lon": -95.11893990000002,
+    "city": "Rusk",
+    "state": "TX",
+    "zip_code": "75785",
+    "country": "United States"
+  },
+  "russell-springs": {
+    "name": "Russell Springs / Lake Cumberland KOA Journey",
+    "formatted_address": "1440 Highway 1383, Russell Springs, KY 42642, United States",
+    "lat": 36.9978441,
+    "lon": -84.9337249,
+    "city": "Russell Springs",
+    "state": "KY",
+    "zip_code": "42642",
+    "country": "United States"
+  },
+  "salem-lisbon": {
+    "name": "Salem / Lisbon KOA Holiday",
+    "formatted_address": "33807 Winona Rd, Salem, OH 44460, United States",
+    "lat": 40.826041,
+    "lon": -80.861035,
+    "city": "Salem",
+    "state": "OH",
+    "zip_code": "44460",
+    "country": "United States"
+  },
+  "sallisaw": {
+    "name": "Sallisaw / Fort Smith West KOA Holiday",
+    "formatted_address": "1900 KOA- Power Dr, Sallisaw, OK 74955, United States",
+    "lat": 35.4387642,
+    "lon": -94.8103811,
+    "city": "Sallisaw",
+    "state": "OK",
+    "zip_code": "74955",
+    "country": "United States"
+  },
+  "salmon-falls": {
+    "name": "Lebanon KOA Holiday on Salmon Falls River Holiday",
+    "formatted_address": "21 Flat Rock Bridge Rd, Lebanon, ME 04027, United States",
+    "lat": 43.346181,
+    "lon": -70.96463,
+    "city": "Lebanon",
+    "state": "ME",
+    "zip_code": "04027",
+    "country": "United States"
+  },
+  "salome": {
+    "name": "Salome KOA Journey",
+    "formatted_address": "64812 Harcuvar Dr, Salome, AZ 85348, United States",
+    "lat": 33.760834,
+    "lon": -113.6491667,
+    "city": "Salome",
+    "state": "AZ",
+    "zip_code": "85348",
+    "country": "United States"
+  },
+  "salt-lake-city": {
+    "name": "Salt Lake City KOA Holiday",
+    "formatted_address": "1400 W North Temple St, Salt Lake City, UT 84116, United States",
+    "lat": 40.7721575,
+    "lon": -111.9322819,
+    "city": "Salt Lake City",
+    "state": "UT",
+    "zip_code": "84116",
+    "country": "United States"
+  },
+  "san-angelo": {
+    "name": "San Angelo KOA Holiday",
+    "formatted_address": "6699 Knickerbocker Rd, San Angelo, TX 76904, United States",
+    "lat": 31.3894039,
+    "lon": -100.4936167,
+    "city": "San Angelo",
+    "state": "TX",
+    "zip_code": "76904",
+    "country": "United States"
+  },
+  "san-antonio": {
+    "name": "San Antonio / Alamo KOA Holiday",
+    "formatted_address": "602 Gembler Rd, San Antonio, TX 78219, United States",
+    "lat": 29.4340752,
+    "lon": -98.42252040000001,
+    "city": "San Antonio",
+    "state": "TX",
+    "zip_code": "78219",
+    "country": "United States"
+  },
+  "san-diego": {
+    "name": "San Diego Metro KOA Resort",
+    "formatted_address": "111 N 2nd Ave, Chula Vista, CA 91910, United States",
+    "lat": 32.6566687,
+    "lon": -117.0807169,
+    "city": "Chula Vista",
+    "state": "CA",
+    "zip_code": "91910",
+    "country": "United States"
+  },
+  "san-francisco": {
+    "name": "San Francisco North / Petaluma KOA RV Camping Resort",
+    "formatted_address": "20 Rainsville Rd, Petaluma, CA 94952, United States",
+    "lat": 38.2737111,
+    "lon": -122.6793212,
+    "city": "Petaluma",
+    "state": "CA",
+    "zip_code": "94952",
+    "country": "United States"
+  },
+  "sandusky": {
+    "name": "Sandusky KOA Holiday Campground",
+    "formatted_address": "E Shoreway Dr KOA, Sandusky, OH 44870, United States",
+    "lat": 41.43745,
+    "lon": -82.6654834,
+    "city": "Sandusky",
+    "state": "OH",
+    "zip_code": "44870",
+    "country": "United States"
+  },
+  "sanger": {
+    "name": "Sanger / Denton North KOA Journey",
+    "formatted_address": "13037 I-35, Sanger, TX 76266, United States",
+    "lat": 33.4023322,
+    "lon": -97.1820886,
+    "city": "Sanger",
+    "state": "TX",
+    "zip_code": "76266",
+    "country": "United States"
+  },
+  "santa-cruz": {
+    "name": "Santa Cruz / Monterey Bay KOA Holiday",
+    "formatted_address": "1186 San Andreas Rd, Watsonville, CA 95076, United States",
+    "lat": 36.9263352,
+    "lon": -121.8450506,
+    "city": "Watsonville",
+    "state": "CA",
+    "zip_code": "95076",
+    "country": "United States"
+  },
+  "santa-fe": {
+    "name": "Santa Fe KOA Holiday",
+    "formatted_address": "934 Old Las Vegas Hwy, Santa Fe, NM 87505, United States",
+    "lat": 35.5466213,
+    "lon": -105.8366668,
+    "city": "Santa Fe",
+    "state": "NM",
+    "zip_code": "87505",
+    "country": "United States"
+  },
+  "santa-margarita": {
+    "name": "Santa Margarita KOA Holiday",
+    "formatted_address": "4765 Santa Margarita Lake Rd, Santa Margarita, CA 93453, United States",
+    "lat": 35.3197117,
+    "lon": -120.4997048,
+    "city": "Santa Margarita",
+    "state": "CA",
+    "zip_code": "93453",
+    "country": "United States"
+  },
+  "santee": {
+    "name": "Santee / Santee Lakes KOA Journey",
+    "formatted_address": "1268 Gordon Rd, Summerton, SC 29148, United States",
+    "lat": 33.5172523,
+    "lon": -80.4292883,
+    "city": "Summerton",
+    "state": "SC",
+    "zip_code": "29148",
+    "country": "United States"
+  },
+  "sault-ste-marie": {
+    "name": "Sault Ste. Marie KOA Holiday",
+    "formatted_address": "501 Fifth Line E, Sault Ste. Marie, ON P6A 6J8, Canada",
+    "lat": 46.5793924,
+    "lon": -84.32858039999999,
+    "city": "Sault Ste. Marie",
+    "state": "ON",
+    "zip_code": "P6A 6J8",
+    "country": "Canada"
+  },
+  "savannah": {
+    "name": "Savannah South KOA Holiday",
+    "formatted_address": "4915 US-17, Richmond Hill, GA 31324, United States",
+    "lat": 31.9206695,
+    "lon": -81.3393967,
+    "city": "Richmond Hill",
+    "state": "GA",
+    "zip_code": "31324",
+    "country": "United States"
+  },
+  "seattle": {
+    "name": "Burlington / Anacortes KOA Holiday",
+    "formatted_address": "6397 N Green Rd, Burlington, WA 98233, United States",
+    "lat": 48.5521665,
+    "lon": -122.3339195,
+    "city": "Burlington",
+    "state": "WA",
+    "zip_code": "98233",
+    "country": "United States"
+  },
+  "seligman": {
+    "name": "Seligman / Route 66 KOA Journey",
+    "formatted_address": "21305 I-40BL, Seligman, AZ 86337, United States",
+    "lat": 35.3227191,
+    "lon": -112.8551506,
+    "city": "Seligman",
+    "state": "AZ",
+    "zip_code": "86337",
+    "country": "United States"
+  },
+  "seward": {
+    "name": "Seward KOA Holiday",
+    "formatted_address": "31702 Herman Leirer Rd, Seward, AK 99664, United States",
+    "lat": 60.1578911,
+    "lon": -149.4407582,
+    "city": "Seward",
+    "state": "AK",
+    "zip_code": "99664",
+    "country": "United States"
+  },
+  "shelby": {
+    "name": "Shelby / Mansfield KOA Resort",
+    "formatted_address": "6787 Baker Rd #47, Shelby, OH 44875, United States",
+    "lat": 40.9486446,
+    "lon": -82.7431953,
+    "city": "Shelby",
+    "state": "OH",
+    "zip_code": "44875",
+    "country": "United States"
+  },
+  "sheridan": {
+    "name": "Sheridan / Big Horn Mountains KOA Journey",
+    "formatted_address": "63 Decker Rd, Sheridan, WY 82801, United States",
+    "lat": 44.8359017,
+    "lon": -106.9637019,
+    "city": "Sheridan",
+    "state": "WY",
+    "zip_code": "82801",
+    "country": "United States"
+  },
+  "shreveport": {
+    "name": "Shreveport / Bossier City KOA Journey",
+    "formatted_address": "6510 W 70th St, Shreveport, LA 71129, United States",
+    "lat": 32.4434842,
+    "lon": -93.87793940000002,
+    "city": "Shreveport",
+    "state": "LA",
+    "zip_code": "71129",
+    "country": "United States"
+  },
+  "silver-city": {
+    "name": "Silver City KOA Holiday",
+    "formatted_address": "11824 US-180, Silver City, NM 88022, United States",
+    "lat": 32.7782169,
+    "lon": -108.1909831,
+    "city": "Silver City",
+    "state": "NM",
+    "zip_code": "88022",
+    "country": "United States"
+  },
+  "sioux-city": {
+    "name": "Sioux City North KOA Holiday",
+    "formatted_address": "675 Streeter Dr, North Sioux City, SD 57049, United States",
+    "lat": 42.536009,
+    "lon": -96.501295,
+    "city": "North Sioux City",
+    "state": "SD",
+    "zip_code": "57049",
+    "country": "United States"
+  },
+  "sioux-falls": {
+    "name": "Sioux Falls KOA Journey",
+    "formatted_address": "1401 E Robur Dr, Sioux Falls, SD 57104, United States",
+    "lat": 43.606936,
+    "lon": -96.705479,
+    "city": "Sioux Falls",
+    "state": "SD",
+    "zip_code": "57104",
+    "country": "United States"
+  },
+  "skowhegan": {
+    "name": "Skowhegan / Kennebec Valley KOA Journey",
+    "formatted_address": "18 Cabin Rd, Canaan, ME 04924, United States",
+    "lat": 44.7687641,
+    "lon": -69.5430701,
+    "city": "Canaan",
+    "state": "ME",
+    "zip_code": "04924",
+    "country": "United States"
+  },
+  "south-bend": {
+    "name": "Bay Center / Willapa Bay KOA Holiday",
+    "formatted_address": "457 Bay Center Rd, South Bend, WA 98586, United States",
+    "lat": 46.6213784,
+    "lon": -123.9545241,
+    "city": "South Bend",
+    "state": "WA",
+    "zip_code": "98586",
+    "country": "United States"
+  },
+  "south-padre": {
+    "name": "South Padre Island KOA Holiday",
+    "formatted_address": "1 Padre Blvd, South Padre Island, TX 78597, United States",
+    "lat": 26.0792272,
+    "lon": -97.16693459999999,
+    "city": "South Padre Island",
+    "state": "TX",
+    "zip_code": "78597",
+    "country": "United States"
+  },
+  "spartanburg": {
+    "name": "Travelers Rest / N Greenville KOA Holiday",
+    "formatted_address": "2400 US-25, Travelers Rest, SC 29690, United States",
+    "lat": 35.0616664,
+    "lon": -82.4271045,
+    "city": "Travelers Rest",
+    "state": "SC",
+    "zip_code": "29690",
+    "country": "United States"
+  },
+  "spearfish": {
+    "name": "Spearfish / Black Hills KOA Holiday",
+    "formatted_address": "41 US-14, Spearfish, SD 57783, United States",
+    "lat": 44.517112,
+    "lon": -103.8674913,
+    "city": "Spearfish",
+    "state": "SD",
+    "zip_code": "57783",
+    "country": "United States"
+  },
+  "springfield": {
+    "name": "Springfield / Route 66 KOA Holiday",
+    "formatted_address": "5775 W Farm Rd 140, Springfield, MO 65802, United States",
+    "lat": 37.1983348,
+    "lon": -93.40253899999999,
+    "city": "Springfield",
+    "state": "MO",
+    "zip_code": "65802",
+    "country": "United States"
+  },
+  "springfield-route-66": {
+    "name": "Springfield / Route 66 KOA Holiday",
+    "formatted_address": "5775 W Farm Rd 140, Springfield, MO 65802, United States",
+    "lat": 37.1983348,
+    "lon": -93.40253899999999,
+    "city": "Springfield",
+    "state": "MO",
+    "zip_code": "65802",
+    "country": "United States"
+  },
+  "st-augustine-beach": {
+    "name": "St. Augustine Beach KOA Holiday",
+    "formatted_address": "525 W Pope Rd, St. Augustine, FL 32080, United States",
+    "lat": 29.8589026,
+    "lon": -81.2822716,
+    "city": "St. Augustine",
+    "state": "FL",
+    "zip_code": "32080",
+    "country": "United States"
+  },
+  "st-george": {
+    "name": "St. George / Hurricane KOA Journey",
+    "formatted_address": "5800 Old Hwy 91, Hurricane, UT 84737, United States",
+    "lat": 37.2051472,
+    "lon": -113.3929829,
+    "city": "Hurricane",
+    "state": "UT",
+    "zip_code": "84737",
+    "country": "United States"
+  },
+  "st-ignace": {
+    "name": "St. Ignace / Mackinac Island KOA Holiday",
+    "formatted_address": "W1118 US-2, St Ignace, MI 49781, United States",
+    "lat": 45.8544675,
+    "lon": -84.7740161,
+    "city": "St Ignace",
+    "state": "MI",
+    "zip_code": "49781",
+    "country": "United States"
+  },
+  "st-louis-ne": {
+    "name": "St. Louis N.E. / I-270 / Granite City KOA Journey",
+    "formatted_address": "3157 W Chain of Rocks Rd, Granite City, IL 62040, United States",
+    "lat": 38.760288,
+    "lon": -90.1160788,
+    "city": "Granite City",
+    "state": "IL",
+    "zip_code": "62040",
+    "country": "United States"
+  },
+  "st-louis-west": {
+    "name": "St. Louis West / Historic Route 66 KOA Holiday",
+    "formatted_address": "18475 Old US Hwy 66, Eureka, MO 63025, United States",
+    "lat": 38.5008854,
+    "lon": -90.6890105,
+    "city": "Eureka",
+    "state": "MO",
+    "zip_code": "63025",
+    "country": "United States"
+  },
+  "st-mary": {
+    "name": "St. Mary / East Glacier KOA Holiday",
+    "formatted_address": "106 W Shore Rd, St Mary, MT 59417, United States",
+    "lat": 48.7580143,
+    "lon": -113.4369871,
+    "city": "St Mary",
+    "state": "MT",
+    "zip_code": "59417",
+    "country": "United States"
+  },
+  "st-petersburg": {
+    "name": "St. Petersburg / Madeira Beach KOA Holiday",
+    "formatted_address": "5400 95th St N, St. Petersburg, FL 33708, United States",
+    "lat": 27.8214799,
+    "lon": -82.77102190000001,
+    "city": "St. Petersburg",
+    "state": "FL",
+    "zip_code": "33708",
+    "country": "United States"
+  },
+  "stanton": {
+    "name": "KOA EDI",
+    "formatted_address": "7020 Topanga Canyon Blvd, Canoga Park, CA 91303, United States",
+    "lat": 34.1979473,
+    "lon": -118.6055939,
+    "city": "Canoga Park",
+    "state": "CA",
+    "zip_code": "91303",
+    "country": "United States"
+  },
+  "starbuck": {
+    "name": "Lyons Ferry Marina KOA",
+    "formatted_address": "102 Lyons Ferry Rd, LaCrosse, WA 99143, United States",
+    "lat": 46.5857442,
+    "lon": -118.2194313,
+    "city": "LaCrosse",
+    "state": "WA",
+    "zip_code": "99143",
+    "country": "United States"
+  },
+  "starke": {
+    "name": "Starke / Gainesville N.E. KOA Holiday",
+    "formatted_address": "1475 S Walnut St, Starke, FL 32091, United States",
+    "lat": 29.932171,
+    "lon": -82.119732,
+    "city": "Starke",
+    "state": "FL",
+    "zip_code": "32091",
+    "country": "United States"
+  },
+  "starkville": {
+    "name": "Starkville KOA Holiday",
+    "formatted_address": "2661 County Lake Rd, Starkville, MS 39759, United States",
+    "lat": 33.5128755,
+    "lon": -88.93401449999999,
+    "city": "Starkville",
+    "state": "MS",
+    "zip_code": "39759",
+    "country": "United States"
+  },
+  "steamboat-springs": {
+    "name": "Steamboat Springs KOA Holiday",
+    "formatted_address": "3603 Lincoln Ave, Steamboat Springs, CO 80487, United States",
+    "lat": 40.5047435,
+    "lon": -106.8780077,
+    "city": "Steamboat Springs",
+    "state": "CO",
+    "zip_code": "80487",
+    "country": "United States"
+  },
+  "strafford": {
+    "name": "Strafford / Lake Winnipesaukee South KOA Holiday",
+    "formatted_address": "79 First Crown Point Rd, Strafford, NH 03884, United States",
+    "lat": 43.2855762,
+    "lon": -71.0680146,
+    "city": "Strafford",
+    "state": "NH",
+    "zip_code": "03884",
+    "country": "United States"
+  },
+  "streetsboro": {
+    "name": "Streetsboro / Cleveland SE KOA Holiday",
+    "formatted_address": "187 OH-303, Streetsboro, OH 44241, United States",
+    "lat": 41.2425077,
+    "lon": -81.3880377,
+    "city": "Streetsboro",
+    "state": "OH",
+    "zip_code": "44241",
+    "country": "United States"
+  },
+  "sturgeon-falls": {
+    "name": "Sturgeon Falls KOA",
+    "formatted_address": "818 Lalande Rd, Sturgeon Falls, ON P2B 2V4, Canada",
+    "lat": 46.3488372,
+    "lon": -79.9695471,
+    "city": "Sturgeon Falls",
+    "state": "ON",
+    "zip_code": "P2B 2V4",
+    "country": "Canada"
+  },
+  "sugarloaf-key": {
+    "name": "Sugarloaf Key / Key West KOA Resort",
+    "formatted_address": "251 Co Rd 939, Summerland Key, FL 33042, United States",
+    "lat": 24.6590812,
+    "lon": -81.5177581,
+    "city": "Summerland Key",
+    "state": "FL",
+    "zip_code": "33042",
+    "country": "United States"
+  },
+  "sunbury": {
+    "name": "Sunbury / Columbus North KOA Holiday",
+    "formatted_address": "8644 Porter Central Rd, Sunbury, OH 43074, United States",
+    "lat": 40.3370114,
+    "lon": -82.7937652,
+    "city": "Sunbury",
+    "state": "OH",
+    "zip_code": "43074",
+    "country": "United States"
+  },
+  "sussex": {
+    "name": "Sussex KOA Journey",
+    "formatted_address": "133 Aiton Rd, Sussex Parish, NB E4G 2V5, Canada",
+    "lat": 45.7361156,
+    "lon": -65.4855584,
+    "city": "Sussex Parish",
+    "state": "NB",
+    "zip_code": "E4G 2V5",
+    "country": "Canada"
+  },
+  "sweetwater": {
+    "name": "Sweetwater KOA Holiday",
+    "formatted_address": "269 Murrays Chapel Rd, Sweetwater, TN 37874, United States",
+    "lat": 35.6218011,
+    "lon": -84.5062968,
+    "city": "Sweetwater",
+    "state": "TN",
+    "zip_code": "37874",
+    "country": "United States"
+  },
+  "temecula": {
+    "name": "Temecula KOA at Vail Lake",
+    "formatted_address": "38000 CA-79, Temecula, CA 92592, United States",
+    "lat": 33.4710529,
+    "lon": -116.9905769,
+    "city": "Temecula",
+    "state": "CA",
+    "zip_code": "92592",
+    "country": "United States"
+  },
+  "texarkana": {
+    "name": "Texarkana KOA Journey",
+    "formatted_address": "500 St Michael Dr, Texarkana, TX 75503, United States",
+    "lat": 33.4715808,
+    "lon": -94.0468755,
+    "city": "Texarkana",
+    "state": "TX",
+    "zip_code": "75503",
+    "country": "United States"
+  },
+  "thompson": {
+    "name": "Thompson / Grand River Valley KOA Holiday",
+    "formatted_address": "6445 Ledge Rd, Thompson, OH 44086, United States",
+    "lat": 41.697345,
+    "lon": -81.0373917,
+    "city": "Thompson",
+    "state": "OH",
+    "zip_code": "44086",
+    "country": "United States"
+  },
+  "thunder-bay": {
+    "name": "Thunder Bay KOA Holiday",
+    "formatted_address": "162 Spruce River Rd, Shuniah, ON P7A 0N6, Canada",
+    "lat": 48.4990596,
+    "lon": -89.1289882,
+    "city": "Shuniah",
+    "state": "ON",
+    "zip_code": "P7A 0N6",
+    "country": "Canada"
+  },
+  "toccoa-river": {
+    "name": "Blue Ridge / Toccoa River KOA Holiday",
+    "formatted_address": "67 Blackhawk Dr, Blue Ridge, GA 30513, United States",
+    "lat": 34.889611,
+    "lon": -84.28966899999999,
+    "city": "Blue Ridge",
+    "state": "GA",
+    "zip_code": "30513",
+    "country": "United States"
+  },
+  "toledo": {
+    "name": "Toledo East / Stony Ridge KOA Journey",
+    "formatted_address": "24787 Luckey Rd, Perrysburg, OH 43551, United States",
+    "lat": 41.5110871,
+    "lon": -83.493478,
+    "city": "Perrysburg",
+    "state": "OH",
+    "zip_code": "43551",
+    "country": "United States"
+  },
+  "topeka": {
+    "name": "Topeka / Capital City KOA Journey",
+    "formatted_address": "1949 SW 49th St, Topeka, KS 66609, United States",
+    "lat": 38.9766369,
+    "lon": -95.704731,
+    "city": "Topeka",
+    "state": "KS",
+    "zip_code": "66609",
+    "country": "United States"
+  },
+  "toronto-north": {
+    "name": "Toronto North / Cookstown KOA Holiday",
+    "formatted_address": "139 Reive Blvd, Cookstown, ON L0L 1L0, Canada",
+    "lat": 44.2051223,
+    "lon": -79.653076,
+    "city": "Cookstown",
+    "state": "ON",
+    "zip_code": "L0L 1L0",
+    "country": "Canada"
+  },
+  "townsend-canyon": {
+    "name": "Townsend / Canyon Ferry Lake KOA Journey",
+    "formatted_address": "81 Silos Rd, Townsend, MT 59644, United States",
+    "lat": 46.4139516,
+    "lon": -111.5805173,
+    "city": "Townsend",
+    "state": "MT",
+    "zip_code": "59644",
+    "country": "United States"
+  },
+  "townsend-great-smokies": {
+    "name": "Townsend / Great Smokies KOA Holiday",
+    "formatted_address": "8533 TN-73, Townsend, TN 37882, United States",
+    "lat": 35.6737312,
+    "lon": -83.7179651,
+    "city": "Townsend",
+    "state": "TN",
+    "zip_code": "37882",
+    "country": "United States"
+  },
+  "traverse-city": {
+    "name": "Traverse City KOA Holiday",
+    "formatted_address": "9700 M-37, Buckley, MI 49620, United States",
+    "lat": 44.5456783,
+    "lon": -85.67735859999999,
+    "city": "Buckley",
+    "state": "MI",
+    "zip_code": "49620",
+    "country": "United States"
+  },
+  "treasure-lake": {
+    "name": "DuBois / Treasure Lake KOA Holiday",
+    "formatted_address": "95 Coral Reef Rd, DuBois, PA 15801, United States",
+    "lat": 41.1367254,
+    "lon": -78.6977222,
+    "city": "DuBois",
+    "state": "PA",
+    "zip_code": "15801",
+    "country": "United States"
+  },
+  "trinity-lake": {
+    "name": "Trinity Lake KOA Holiday",
+    "formatted_address": "60260 CA-3, Trinity Center, CA 96091, United States",
+    "lat": 40.991343,
+    "lon": -122.701031,
+    "city": "Trinity Center",
+    "state": "CA",
+    "zip_code": "96091",
+    "country": "United States"
+  },
+  "tucson-lazydays": {
+    "name": "Tucson KOA Resort",
+    "formatted_address": "5151 S Country Club Rd, Tucson, AZ 85706, United States",
+    "lat": 32.1578583,
+    "lon": -110.9235149,
+    "city": "Tucson",
+    "state": "AZ",
+    "zip_code": "85706",
+    "country": "United States"
+  },
+  "tucumcari": {
+    "name": "Tucumcari / Route 66 KOA Journey",
+    "formatted_address": "6299 Quay Rd A L, Tucumcari, NM 88401, United States",
+    "lat": 35.1714619,
+    "lon": -103.6668844,
+    "city": "Tucumcari",
+    "state": "NM",
+    "zip_code": "88401",
+    "country": "United States"
+  },
+  "tulsa": {
+    "name": "Tulsa NE / Will Rogers Downs KOA Journey",
+    "formatted_address": "20900 S 4200 Rd, Claremore, OK 74019, United States",
+    "lat": 36.3135777,
+    "lon": -95.5292666,
+    "city": "Claremore",
+    "state": "OK",
+    "zip_code": "74019",
+    "country": "United States"
+  },
+  "twin-falls": {
+    "name": "Twin Falls / Jerome KOA Holiday",
+    "formatted_address": "441 S Liberty Ln, Jerome, ID 83338, United States",
+    "lat": 42.6599616,
+    "lon": -114.4436322,
+    "city": "Jerome",
+    "state": "ID",
+    "zip_code": "83338",
+    "country": "United States"
+  },
+  "twin-mountain": {
+    "name": "Twin Mountain / Mt. Washington KOA Holiday",
+    "formatted_address": "372 Route, 115, Twin Mountain, NH 03595, United States",
+    "lat": 44.305121,
+    "lon": -71.5323472,
+    "city": "Twin Mountain",
+    "state": "NH",
+    "zip_code": "03595",
+    "country": "United States"
+  },
+  "unadilla": {
+    "name": "Unadilla / I-88 / Oneonta KOA Journey",
+    "formatted_address": "242 Union Church Rd, Franklin, NY 13775, United States",
+    "lat": 42.3411316,
+    "lon": -75.2475037,
+    "city": "Franklin",
+    "state": "NY",
+    "zip_code": "13775",
+    "country": "United States"
+  },
+  "valdez": {
+    "name": "Valdez KOA Journey",
+    "formatted_address": "3181 Richardson Hwy, Valdez, AK 99686, United States",
+    "lat": 61.10071559999999,
+    "lon": -146.2157135,
+    "city": "Valdez",
+    "state": "AK",
+    "zip_code": "99686",
+    "country": "United States"
+  },
+  "ventura-ranch": {
+    "name": "Ventura Ranch KOA Holiday",
+    "formatted_address": "7400 Pine Grove Rd, Santa Paula, CA 93060, United States",
+    "lat": 34.40603340000001,
+    "lon": -119.0790991,
+    "city": "Santa Paula",
+    "state": "CA",
+    "zip_code": "93060",
+    "country": "United States"
+  },
+  "vernal": {
+    "name": "Vernal / Dinosaurland KOA Holiday",
+    "formatted_address": "930 N Vernal Ave, Vernal, UT 84078, United States",
+    "lat": 40.4694307,
+    "lon": -109.5285888,
+    "city": "Vernal",
+    "state": "UT",
+    "zip_code": "84078",
+    "country": "United States"
+  },
+  "virginia-beach": {
+    "name": "Virginia Beach KOA Holiday",
+    "formatted_address": "1240 General Booth Blvd, Virginia Beach, VA 23451, United States",
+    "lat": 36.7955234,
+    "lon": -75.99224079999999,
+    "city": "Virginia Beach",
+    "state": "VA",
+    "zip_code": "23451",
+    "country": "United States"
+  },
+  "visalia": {
+    "name": "Visalia / Sequoia National Park KOA Journey",
+    "formatted_address": "7480 Avenue 308, Visalia, CA 93291, United States",
+    "lat": 36.34938440000001,
+    "lon": -119.4061501,
+    "city": "Visalia",
+    "state": "CA",
+    "zip_code": "93291",
+    "country": "United States"
+  },
+  "wakeeney": {
+    "name": "WaKeeney KOA Journey",
+    "formatted_address": "25027 S Interstate, WaKeeney, KS 67672, United States",
+    "lat": 39.0130321,
+    "lon": -99.8861319,
+    "city": "WaKeeney",
+    "state": "KS",
+    "zip_code": "67672",
+    "country": "United States"
+  },
+  "waldport": {
+    "name": "Waldport / Newport KOA Journey",
+    "formatted_address": "1330 NW Pacific Coast Hwy, Waldport, OR 97394, United States",
+    "lat": 44.435486,
+    "lon": -124.0762961,
+    "city": "Waldport",
+    "state": "OR",
+    "zip_code": "97394",
+    "country": "United States"
+  },
+  "wapakoneta": {
+    "name": "Wapakoneta KOA Journey",
+    "formatted_address": "14719 Cemetery Rd, Wapakoneta, OH 45895, United States",
+    "lat": 40.56598899999999,
+    "lon": -84.1669299,
+    "city": "Wapakoneta",
+    "state": "OH",
+    "zip_code": "45895",
+    "country": "United States"
+  },
+  "washington-dc": {
+    "name": "Washington DC / Capitol KOA Holiday",
+    "formatted_address": "768 Cecil Ave N, Millersville, MD 21108, United States",
+    "lat": 39.0691632,
+    "lon": -76.6477087,
+    "city": "Millersville",
+    "state": "MD",
+    "zip_code": "21108",
+    "country": "United States"
+  },
+  "washington-pittsburgh": {
+    "name": "Washington / Pittsburgh SW KOA Journey",
+    "formatted_address": "7 KOA Rd, Washington, PA 15301, United States",
+    "lat": 40.1611302,
+    "lon": -80.1972444,
+    "city": "Washington",
+    "state": "PA",
+    "zip_code": "15301",
+    "country": "United States"
+  },
+  "waterloo": {
+    "name": "Waterloo / Lost Island KOA Resort",
+    "formatted_address": "4550 La Porte Rd, Hess Rd, Waterloo, IA 50701, United States",
+    "lat": 42.4483887,
+    "lon": -92.3227785,
+    "city": "Waterloo",
+    "state": "IA",
+    "zip_code": "50701",
+    "country": "United States"
+  },
+  "watertown": {
+    "name": "Natural Bridge / Watertown, NY KOA Journey",
+    "formatted_address": "6081 State Rte 3, Natural Bridge, NY 13665, United States",
+    "lat": 44.0753784,
+    "lon": -75.4746686,
+    "city": "Natural Bridge",
+    "state": "NY",
+    "zip_code": "13665",
+    "country": "United States"
+  },
+  "watkins-glen": {
+    "name": "Watkins Glen / Corning KOA Resort",
+    "formatted_address": "1710 State Route 414 (GPS address, 1710 KOA Dr, Watkins Glen, NY 14891, United States",
+    "lat": 42.3162728,
+    "lon": -76.9071392,
+    "city": "Watkins Glen",
+    "state": "NY",
+    "zip_code": "14891",
+    "country": "United States"
+  },
+  "weatherford": {
+    "name": "Weatherford / Fort Worth West KOA Journey",
+    "formatted_address": "2205 Tin Top Rd, Weatherford, TX 76087, United States",
+    "lat": 32.724917,
+    "lon": -97.796388,
+    "city": "Weatherford",
+    "state": "TX",
+    "zip_code": "76087",
+    "country": "United States"
+  },
+  "weidman": {
+    "name": "Weidman KOA Holiday",
+    "formatted_address": "1855 Coldwater Rd, Weidman, MI 48893, United States",
+    "lat": 43.6647438,
+    "lon": -84.9840334,
+    "city": "Weidman",
+    "state": "MI",
+    "zip_code": "48893",
+    "country": "United States"
+  },
+  "wendover": {
+    "name": "Wendover KOA Journey",
+    "formatted_address": "651 Camper Dr, West Wendover, NV 89883, United States",
+    "lat": 40.7359134,
+    "lon": -114.0667447,
+    "city": "West Wendover",
+    "state": "NV",
+    "zip_code": "89883",
+    "country": "United States"
+  },
+  "west-glacier": {
+    "name": "West Glacier KOA Resort",
+    "formatted_address": "355 Halfmoon Flts Rd, West Glacier, MT 59936, United States",
+    "lat": 48.463985,
+    "lon": -113.9817653,
+    "city": "West Glacier",
+    "state": "MT",
+    "zip_code": "59936",
+    "country": "United States"
+  },
+  "west-omaha": {
+    "name": "West Omaha / NE Lincoln KOA Holiday",
+    "formatted_address": "14601 US-6, Gretna, NE 68028, United States",
+    "lat": 41.09477100000001,
+    "lon": -96.26405899999999,
+    "city": "Gretna",
+    "state": "NE",
+    "zip_code": "68028",
+    "country": "United States"
+  },
+  "west-palm-beach": {
+    "name": "West Palm Beach / Lion Country Safari KOA Journey",
+    "formatted_address": "2000 Lion Country Safari Rd, Loxahatchee, FL 33470, United States",
+    "lat": 26.7140525,
+    "lon": -80.31804199999999,
+    "city": "Loxahatchee",
+    "state": "FL",
+    "zip_code": "33470",
+    "country": "United States"
+  },
+  "westfield": {
+    "name": "Westfield / Lake Erie KOA Journey",
+    "formatted_address": "8001 East Lake Road, NY-5, Westfield, NY 14787, United States",
+    "lat": 42.3437853,
+    "lon": -79.57973940000001,
+    "city": "Westfield",
+    "state": "NY",
+    "zip_code": "14787",
+    "country": "United States"
+  },
+  "whitefish": {
+    "name": "Whitefish / Kalispell North KOA Holiday",
+    "formatted_address": "5121 US-93, Whitefish, MT 59937, United States",
+    "lat": 48.3465298,
+    "lon": -114.3316325,
+    "city": "Whitefish",
+    "state": "MT",
+    "zip_code": "59937",
+    "country": "United States"
+  },
+  "willcox": {
+    "name": "Willcox Wine Country KOA Holiday",
+    "formatted_address": "700 Virginia Ave, Willcox, AZ 85643, United States",
+    "lat": 32.26405,
+    "lon": -109.84714,
+    "city": "Willcox",
+    "state": "AZ",
+    "zip_code": "85643",
+    "country": "United States"
+  },
+  "williams": {
+    "name": "Williams / Exit 167 / Circle Pines KOA Holiday",
+    "formatted_address": "1000 Circle Pines Rd, Williams, AZ 86046, United States",
+    "lat": 35.260263,
+    "lon": -112.116581,
+    "city": "Williams",
+    "state": "AZ",
+    "zip_code": "86046",
+    "country": "United States"
+  },
+  "williamsport": {
+    "name": "Williamsport South / Nittany Mtn. KOA Holiday",
+    "formatted_address": "2751 Millers Bottom Rd, New Columbia, PA 17856, United States",
+    "lat": 41.0473921,
+    "lon": -76.9544672,
+    "city": "New Columbia",
+    "state": "PA",
+    "zip_code": "17856",
+    "country": "United States"
+  },
+  "wilmington": {
+    "name": "Wilmington KOA Holiday",
+    "formatted_address": "7415 Market St, Wilmington, NC 28411, United States",
+    "lat": 34.278214,
+    "lon": -77.81598129999999,
+    "city": "Wilmington",
+    "state": "NC",
+    "zip_code": "28411",
+    "country": "United States"
+  },
+  "winnipeg-west": {
+    "name": "Winnipeg West KOA Journey",
+    "formatted_address": "588 Hwy 1, Jones Dr S, Saint François Xavier, MB R4L 1A1, Canada",
+    "lat": 49.8869222,
+    "lon": -97.5087928,
+    "city": "Saint François Xavier",
+    "state": "MB",
+    "zip_code": "R4L 1A1",
+    "country": "Canada"
+  },
+  "winthrop": {
+    "name": "Winthrop / N. Cascades National Park KOA Holiday",
+    "formatted_address": "1114 State Rte 20, Winthrop, WA 98862, United States",
+    "lat": 48.462863,
+    "lon": -120.170593,
+    "city": "Winthrop",
+    "state": "WA",
+    "zip_code": "98862",
+    "country": "United States"
+  },
+  "wisconsin-dells": {
+    "name": "Wisconsin Dells KOA Holiday",
+    "formatted_address": "S235A, Stand Rock Rd, Wisconsin Dells, WI 53965, United States",
+    "lat": 43.636844,
+    "lon": -89.786841,
+    "city": "Wisconsin Dells",
+    "state": "WI",
+    "zip_code": "53965",
+    "country": "United States"
+  },
+  "woodstock": {
+    "name": "Lincoln / Woodstock KOA Holiday",
+    "formatted_address": "1000 Eastside Rd RT 175, Woodstock, NH 03293, United States",
+    "lat": 43.9623722,
+    "lon": -71.6750156,
+    "city": "Woodstock",
+    "state": "NH",
+    "zip_code": "03293",
+    "country": "United States"
+  },
+  "wytheville": {
+    "name": "Wytheville KOA Holiday",
+    "formatted_address": "231 KOA Rd, Wytheville, VA 24382, United States",
+    "lat": 36.9322349,
+    "lon": -81.0051172,
+    "city": "Wytheville",
+    "state": "VA",
+    "zip_code": "24382",
+    "country": "United States"
+  },
+  "yankton": {
+    "name": "Yankton / Missouri River KOA Journey",
+    "formatted_address": "807 Bill Baggs Rd, Yankton, SD 57078, United States",
+    "lat": 42.8767907,
+    "lon": -97.35990699999999,
+    "city": "Yankton",
+    "state": "SD",
+    "zip_code": "57078",
+    "country": "United States"
+  },
+  "yellowstone-park": {
+    "name": "Yellowstone Park / West Gate KOA Holiday",
+    "formatted_address": "3305 Targhee Pass Highway 6 miles West on, US-20, West Yellowstone, MT 59758, United States",
+    "lat": 44.6891513,
+    "lon": -111.2167873,
+    "city": "West Yellowstone",
+    "state": "MT",
+    "zip_code": "59758",
+    "country": "United States"
+  }
+}

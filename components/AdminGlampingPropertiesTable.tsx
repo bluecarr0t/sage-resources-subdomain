@@ -11,6 +11,11 @@ import {
   normalizePropertyTypeForForm,
 } from '@/lib/glamping-property-types';
 import {
+  CANCELLED_PROJECT_REASONS,
+  CANCELLED_PROJECT_REASON_MSG_KEYS,
+  cancelledYearOptions,
+} from '@/lib/cancelled-project-reason';
+import {
   GLAMPING_SERVICE_TIERS,
   tierDisplayLabel,
 } from '@/lib/glamping-service-tier';
@@ -180,6 +185,9 @@ interface FieldGroup {
     brandSelect?: boolean;
     /** Four-tier glamping service classification. */
     serviceTierSelect?: boolean;
+    /** Canonical cancellation reasons when is_open = Cancelled. */
+    cancelledReasonSelect?: boolean;
+    cancelledYearSelect?: boolean;
   }[];
 }
 
@@ -222,6 +230,14 @@ const SHARED_EDIT_FIELD_GROUPS: FieldGroup[] = [
       { key: 'source' },
       { key: 'discovery_source' },
       { key: 'brand_id', type: 'select', brandSelect: true },
+    ],
+  },
+  {
+    title: 'Cancellation',
+    fields: [
+      { key: 'cancelled_year', type: 'select', cancelledYearSelect: true },
+      { key: 'cancelled_reason', type: 'select', cancelledReasonSelect: true },
+      { key: 'cancelled_reason_notes', type: 'textarea' },
     ],
   },
   {
@@ -1029,6 +1045,10 @@ function EditModal({
   const renderSharedField = (field: FieldGroup['fields'][number], groupTitle: string) => {
     const id = `edit-shared-${field.key}`;
     const value = sharedDraft[field.key] ?? '';
+    const isCancelledProject = sharedDraft.is_open === 'Cancelled';
+    if (groupTitle === 'Cancellation' && !isCancelledProject) {
+      return null;
+    }
     const colSpan = field.type === 'textarea' ? 'md:col-span-2' : '';
     const labelText =
       field.key === 'url'
@@ -1049,12 +1069,21 @@ function EditModal({
               ? t('fieldServiceTier')
               : field.key === 'glamping_service_tier_notes'
                 ? t('fieldServiceTierNotes')
-                : humanizeKey(field.key);
+                : field.key === 'cancelled_reason'
+                  ? t('fieldCancelledReason')
+                  : field.key === 'cancelled_reason_notes'
+                    ? t('fieldCancelledReasonNotes')
+                    : field.key === 'cancelled_year'
+                      ? t('fieldCancelledYear')
+                      : humanizeKey(field.key);
     const showRequired =
       mode === 'create' &&
       (REQUIRED_FIELDS_CREATE.has(field.key) ||
         (field.key === 'url' && !hasWebsiteOrThirdPartyListing(sharedDraft)));
-    const disabled = busy || editBlocked;
+    const disabled =
+      busy ||
+      editBlocked ||
+      (groupTitle === 'Cancellation' && !isCancelledProject);
 
     return (
       <div key={`${groupTitle}-${field.key}`} className={colSpan}>
@@ -1078,9 +1107,18 @@ function EditModal({
             value={value}
             disabled={disabled}
             aria-required={showRequired}
-            onChange={(e) =>
-              setSharedDraft((prev) => ({ ...prev, [field.key]: e.target.value }))
-            }
+            onChange={(e) => {
+              const next = e.target.value;
+              setSharedDraft((prev) => {
+                const updated = { ...prev, [field.key]: next };
+                if (field.key === 'is_open' && next !== 'Cancelled') {
+                  updated.cancelled_reason = '';
+                  updated.cancelled_reason_notes = '';
+                  updated.cancelled_year = '';
+                }
+                return updated;
+              });
+            }}
             rows={4}
             className={inputClasses}
           />
@@ -1090,9 +1128,18 @@ function EditModal({
             value={value}
             disabled={disabled}
             aria-required={showRequired}
-            onChange={(e) =>
-              setSharedDraft((prev) => ({ ...prev, [field.key]: e.target.value }))
-            }
+            onChange={(e) => {
+              const next = e.target.value;
+              setSharedDraft((prev) => {
+                const updated = { ...prev, [field.key]: next };
+                if (field.key === 'is_open' && next !== 'Cancelled') {
+                  updated.cancelled_reason = '';
+                  updated.cancelled_reason_notes = '';
+                  updated.cancelled_year = '';
+                }
+                return updated;
+              });
+            }}
             className={inputClasses}
           >
             {field.propertyTypeSelect ? (
@@ -1118,6 +1165,26 @@ function EditModal({
                 {GLAMPING_SERVICE_TIERS.map((tier) => (
                   <option key={tier} value={tier}>
                     {tierDisplayLabel(tier, 'short')}
+                  </option>
+                ))}
+              </>
+            ) : field.cancelledReasonSelect ? (
+              <>
+                <option value="">{t('cancelledReasonUnset')}</option>
+                {CANCELLED_PROJECT_REASONS.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {t(
+                      `cancelledReason.${CANCELLED_PROJECT_REASON_MSG_KEYS[reason]}` as never
+                    )}
+                  </option>
+                ))}
+              </>
+            ) : field.cancelledYearSelect ? (
+              <>
+                <option value="">{t('cancelledYearUnset')}</option>
+                {cancelledYearOptions().map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}
                   </option>
                 ))}
               </>
@@ -1168,6 +1235,14 @@ function EditModal({
                 {sharedDraft.is_open === 'Under Construction'
                   ? 'Auto-flips to Open on this date (daily cron).'
                   : 'Only used when Open? is Under Construction.'}
+              </p>
+            ) : field.key === 'cancelled_reason_notes' ? (
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                {t('cancelledReasonNotesHint')}
+              </p>
+            ) : field.key === 'cancelled_year' ? (
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                {t('cancelledYearHint')}
               </p>
             ) : null}
           </>
@@ -1274,16 +1349,21 @@ function EditModal({
             <p className="text-sm text-red-600 dark:text-red-400">{t('siblingsLoadError')}</p>
           ) : null}
 
-          {SHARED_EDIT_FIELD_GROUPS.map((group) => (
+          {SHARED_EDIT_FIELD_GROUPS.map((group) => {
+            if (group.title === 'Cancellation' && sharedDraft.is_open !== 'Cancelled') {
+              return null;
+            }
+            return (
             <section key={group.title}>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
-                {group.title}
+                {group.title === 'Cancellation' ? t('cancellationSectionTitle') : group.title}
               </h3>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {group.fields.map((field) => renderSharedField(field, group.title))}
               </div>
             </section>
-          ))}
+            );
+          })}
 
           {mode === 'edit' && property && siblingsLoad === 'ready' ? (
             <GlampingPropertyImagesPanel propertyId={String(property.id)} disabled={busy} />

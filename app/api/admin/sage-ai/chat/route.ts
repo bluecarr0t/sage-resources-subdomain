@@ -18,14 +18,20 @@ import {
   buildSageAiGatewayHeaders,
   buildSageAiGatewayTags,
 } from '@/lib/sage-ai/vercel-ai-gateway';
-import { parseSageAiChatModelId } from '@/lib/sage-ai/sage-ai-chat-models';
-import { limit as redisLimit, getRedis } from '@/lib/upstash';
+import { resolveChatModelForTurn } from '@/lib/sage-ai/resolve-chat-model';
+import { limit as redisLimit, getRedis, enforceDailyQuota } from '@/lib/upstash';
 import { compactMessages } from '@/lib/sage-ai/compact-messages';
+import { sanitizeUiMessagesForModel, sanitizeModelMessagesForProvider } from '@/lib/sage-ai/sanitize-ui-messages-for-model';
+import {
+  injectThreadSummary,
+  loadThreadSummaryForSession,
+} from '@/lib/sage-ai/thread-summary';
 import { buildSageAiSystemPrompt } from '@/lib/sage-ai/system-prompt';
 import {
   getSageAiChatMaxDuration,
   getSageAiChatMaxSteps,
 } from '@/lib/sage-ai/chat-limits';
+import { isValidSageUuid, sageMessageSchema } from '@/lib/sage-ai/route-schemas';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = getSageAiChatMaxDuration();
@@ -53,6 +59,19 @@ const MAX_INCOMING_BODY_BYTES = (() => {
 /** Per-user chat request cap (default 30 req / 5 min, env-overridable). */
 const CHAT_RATE_LIMIT = Number(process.env.SAGE_AI_CHAT_RATE_LIMIT ?? 30);
 const CHAT_RATE_WINDOW = (process.env.SAGE_AI_CHAT_RATE_WINDOW ?? '5 m') as `${number} ${'s' | 'm' | 'h' | 'd'}`;
+
+/**
+ * Per-user daily turn budget. The sliding window above bounds burst rate; this
+ * bounds sustained daily spend (the sliding window resets every 5 min, so a
+ * determined user could otherwise run thousands of paid turns/day). Default
+ * 500 turns/day; set SAGE_AI_CHAT_DAILY_TURNS=0 to disable.
+ */
+const CHAT_DAILY_TURN_BUDGET = (() => {
+  const raw = process.env.SAGE_AI_CHAT_DAILY_TURNS;
+  if (raw == null || raw === '') return 500;
+  const n = Number(raw.replace(/_/g, ''));
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 500;
+})();
 
 export async function POST(request: Request) {
   const startTime = Date.now();
@@ -118,6 +137,29 @@ export async function POST(request: Request) {
       { status: 413, headers: { 'Content-Type': 'application/json' } }
     );
   }
+  // Structurally validate each message envelope (role + optional id/content/
+  // parts) WITHOUT reserializing — `body.messages` stays the original UIMessage
+  // objects so convertToModelMessages/compactMessages keep every SDK field.
+  for (const m of body.messages) {
+    if (!sageMessageSchema.safeParse(m).success) {
+      return new Response(
+        JSON.stringify({ error: 'Each message must have a valid role and shape.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }
+  // sessionId (when present) is a UUID used for usage attribution; reject a
+  // malformed non-empty value rather than silently polluting per-session usage.
+  if (
+    body.sessionId != null &&
+    body.sessionId !== '' &&
+    !isValidSageUuid(body.sessionId)
+  ) {
+    return new Response(
+      JSON.stringify({ error: 'Invalid sessionId' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 
   const rl = await redisLimit(
     'chat',
@@ -150,8 +192,42 @@ export async function POST(request: Request) {
     );
   }
 
+  if (CHAT_DAILY_TURN_BUDGET > 0) {
+    const daily = await enforceDailyQuota(
+      'chat_daily_turns',
+      authResult.session.user.id,
+      CHAT_DAILY_TURN_BUDGET
+    );
+    if (!daily.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: `Daily chat limit reached (${daily.used} of ${daily.quota}). Resets at 00:00 UTC. Ask an admin to raise SAGE_AI_CHAT_DAILY_TURNS if you need more.`,
+          used: daily.used,
+          quota: daily.quota,
+        }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }
+
   const messages = body.messages;
-  const modelId = parseSageAiChatModelId(body.model);
+  /** Server env + explicit client opt-in — ignores forged requests when env is off. */
+  const webResearchEnabled =
+    process.env.SAGE_AI_WEB_RESEARCH_ENABLED === 'true' && body.webResearch === true;
+
+  const modelResolved = resolveChatModelForTurn({
+    requestedModel: body.model,
+    messages,
+    webResearchEnabled,
+  });
+  if (!modelResolved.ok) {
+    return new Response(JSON.stringify({ error: modelResolved.error }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const modelId = modelResolved.modelId;
+
   const correlationId = crypto.randomUUID();
   const chatId = typeof body.id === 'string' && body.id ? body.id : correlationId;
   const sessionId =
@@ -169,9 +245,6 @@ export async function POST(request: Request) {
     maxRowsPerToolResultRecent: parseEnvPositiveInt('SAGE_AI_COMPACT_RECENT_ROWS', 16),
     charBudget: parseEnvPositiveInt('SAGE_AI_COMPACT_CHAR_BUDGET', 100_000),
   };
-  /** Server env + explicit client opt-in — ignores forged requests when env is off. */
-  const webResearchEnabled =
-    process.env.SAGE_AI_WEB_RESEARCH_ENABLED === 'true' && body.webResearch === true;
   const geoToolsEnabled = process.env.SAGE_AI_GEO_TOOLS === 'true';
   const semanticSearchEnabled =
     process.env.SAGE_AI_SEMANTIC_SEARCH === 'true';
@@ -188,6 +261,7 @@ export async function POST(request: Request) {
     userId: authResult.session.user.id,
     userRole: managed ? normalizeManagedUserRole(managed.role) : null,
     correlationId,
+    sessionId,
     webResearchEnabled,
     geoToolsEnabled,
     semanticSearchEnabled,
@@ -202,13 +276,58 @@ export async function POST(request: Request) {
     visualizationToolsEnabled,
   });
 
+  let messagesForModel = messages;
+  if (sessionId) {
+    const threadSummary = await loadThreadSummaryForSession(
+      authResult.supabase,
+      sessionId,
+      authResult.session.user.id
+    );
+    if (threadSummary) {
+      messagesForModel = injectThreadSummary(messages, threadSummary);
+    }
+  }
+
+  // Convert (and compact) up front so a malformed client payload becomes a
+  // clean 400 instead of an unhandled throw inside streamText (which would
+  // surface as a 500 with a stack trace and leave the stream marker dangling).
+  let modelMessages;
+  try {
+    modelMessages = sanitizeModelMessagesForProvider(
+      await convertToModelMessages(
+        compactMessages(
+          sanitizeUiMessagesForModel(messagesForModel),
+          sageAiCompactOpts
+        )
+      )
+    );
+  } catch (err) {
+    console.error('[sage-ai/chat] Failed to convert messages', {
+      correlationId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return new Response(
+      JSON.stringify({ error: 'Invalid message format' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   // Record an "active stream" marker so the resume endpoint can decide whether
   // to attempt reconnection. Best-effort; Redis outages are non-fatal.
   const redis = getRedis();
+  const streamMarkerKey = `sage_ai:stream:${chatId}`;
+  const clearStreamMarker = async () => {
+    if (!redis) return;
+    try {
+      await redis.del(streamMarkerKey);
+    } catch (err) {
+      console.warn('[sage-ai/chat] Failed to clear active stream marker', err);
+    }
+  };
   if (redis) {
     try {
       await redis.set(
-        `sage_ai:stream:${chatId}`,
+        streamMarkerKey,
         JSON.stringify({
           userId: authResult.session.user.id,
           correlationId,
@@ -237,7 +356,7 @@ export async function POST(request: Request) {
       },
     },
     system: systemPrompt,
-    messages: await convertToModelMessages(compactMessages(messages, sageAiCompactOpts)),
+    messages: modelMessages,
     tools,
     stopWhen: stepCountIs(getSageAiChatMaxSteps()),
     onError(error) {
@@ -246,6 +365,9 @@ export async function POST(request: Request) {
         userId: authResult.session.user.id,
         error: error instanceof Error ? error.message : String(error),
       });
+      // Errored/aborted streams must release the marker too, otherwise the
+      // resume endpoint reports a stale "active" stream for up to 15 min.
+      void clearStreamMarker();
       void logSageAiUsage({
         userId: authResult.session.user.id,
         userEmail: authResult.session.user.email ?? null,
@@ -268,13 +390,7 @@ export async function POST(request: Request) {
         0
       ) ?? 0;
 
-      if (redis) {
-        try {
-          await redis.del(`sage_ai:stream:${chatId}`);
-        } catch (err) {
-          console.warn('[sage-ai/chat] Failed to clear active stream marker', err);
-        }
-      }
+      await clearStreamMarker();
 
       await logSageAiUsage({
         userId: authResult.session.user.id,

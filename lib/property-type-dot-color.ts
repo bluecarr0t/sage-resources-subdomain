@@ -8,6 +8,7 @@ import {
 export const PROPERTY_TYPE_DOT_COLORS: Record<GlampingPropertyTypeFormValue, string> = {
   Glamping: '#5c7a5c',
   'Outdoor Boutique Hotel': '#8b7355',
+  'Outdoor Resort': '#6d8570',
   'RV Resort': '#6b7d8a',
   'RV Park': '#5a6d78',
   Campground: '#a67c52',
@@ -32,6 +33,9 @@ export function getPropertyTypeDotColor(propertyType: string | null | undefined)
   if (lower.includes('glamping')) return PROPERTY_TYPE_DOT_COLORS.Glamping;
   if (lower.includes('boutique') && lower.includes('hotel')) {
     return PROPERTY_TYPE_DOT_COLORS['Outdoor Boutique Hotel'];
+  }
+  if (lower.includes('outdoor') && lower.includes('resort')) {
+    return PROPERTY_TYPE_DOT_COLORS['Outdoor Resort'];
   }
   if (lower.includes('landscape') && lower.includes('hotel')) {
     return PROPERTY_TYPE_DOT_COLORS['Landscape Hotel'];

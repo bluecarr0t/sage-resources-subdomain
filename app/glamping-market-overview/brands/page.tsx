@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   EDITORIAL_LINK_CLASS,
@@ -15,13 +14,6 @@ const BRANDS_TABLE_GRID_CLASS =
 const BRANDS_TABLE_NUMERIC_CLASS = 'text-right tabular-nums';
 
 export const dynamic = 'force-dynamic';
-
-export const metadata: Metadata = {
-  title: 'Top Glamping Brands',
-  description:
-    'Rankings of the largest United States glamping brands by published property count (property type Glamping only), units, and average nightly rates.',
-  robots: { index: false, follow: false },
-};
 
 function formatInt(n: number): string {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);

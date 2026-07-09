@@ -13,8 +13,9 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { enforceDailyQuota } from '@/lib/upstash';
+import { quotaGate } from '@/lib/sage-ai/quota-gate';
 import { fetchWithTimeout } from '@/lib/sage-ai/fetch-with-timeout';
+import { sageAiWriteClient } from '@/lib/sage-ai/service-writer';
 
 /** Cap any single Google call (find-place / geocode) at 8s. */
 const GOOGLE_TIMEOUT_MS = 8_000;
@@ -37,29 +38,6 @@ interface GeocodeRow {
   formatted_address: string | null;
   fetched_at: string;
   stale_after: string;
-}
-
-async function quotaGate(
-  toolName: string,
-  userId: string | undefined,
-  quota: number
-): Promise<{ error: string; data: null } | null> {
-  // geocode_property hits Google Places/Geocoding when there is no DB or
-  // cached lat/lon hit. Require an attributable user.
-  if (!userId) {
-    return {
-      error: `${toolName} requires an authenticated user to enforce daily quota.`,
-      data: null,
-    };
-  }
-  const { allowed, used } = await enforceDailyQuota(toolName, userId, quota);
-  if (!allowed) {
-    return {
-      error: `Daily quota exceeded for ${toolName} (used ${used} of ${quota}). Try again tomorrow or ask an admin to raise the limit.`,
-      data: null,
-    };
-  }
-  return null;
 }
 
 async function readCachedGeocode(
@@ -92,7 +70,9 @@ async function writeCachedGeocode(
   const stale = new Date(
     Date.now() + GEOCODE_CACHE_TTL_DAYS * 24 * 60 * 60 * 1000
   ).toISOString();
-  const { error } = await supabase.from('property_geocode').upsert({
+  // property_geocode only grants SELECT to authenticated users; writes need
+  // the service-role client or they are silently rejected by RLS.
+  const { error } = await sageAiWriteClient(supabase).from('property_geocode').upsert({
     property_id: row.property_id,
     latitude: row.latitude,
     longitude: row.longitude,
@@ -104,7 +84,7 @@ async function writeCachedGeocode(
     stale_after: stale,
   });
   if (error) {
-    console.warn('[sage-ai/geocode] upsert failed', error.message);
+    console.error('[sage-ai/geocode] cache upsert rejected', error.message);
   }
 }
 

@@ -715,6 +715,53 @@ describe('aggregateTopGlampingBrands', () => {
     expect(result.brands[0]?.slug).toBe('worldhotels-backdrop');
     expect(result.brands.some((r) => r.slug === 'the-glamping-collective')).toBe(false);
   });
+
+  it('excludes Cancelled properties from brand rollups', () => {
+    const rows = [
+      {
+        id: 1,
+        property_id: 'open',
+        slug: null,
+        property_name: 'AutoCamp Yosemite',
+        property_type: 'Glamping',
+        city: 'Midpines',
+        state: 'CA',
+        country: 'United States',
+        brand_id: autocampId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 300,
+        land_operator_category: 'private_commercial',
+        is_open: 'Yes',
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 2,
+        property_id: 'cancelled',
+        slug: null,
+        property_name: 'AutoCamp Napa',
+        property_type: 'Glamping',
+        city: 'Napa',
+        state: 'CA',
+        country: 'United States',
+        brand_id: autocampId,
+        quantity_of_units: 100,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 250,
+        land_operator_category: 'private_commercial',
+        is_open: 'Cancelled',
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
+
+    expect(result.brands).toHaveLength(1);
+    expect(result.brands[0]?.propertyCount).toBe(1);
+    expect(result.brands[0]?.unitCount).toBe(10);
+  });
 });
 
 describe('formatRetailDailyRate', () => {

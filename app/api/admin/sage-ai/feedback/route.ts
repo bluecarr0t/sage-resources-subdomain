@@ -124,11 +124,33 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Invalid sessionId' }, { status: 400 });
   }
 
+  const userId = authResult.session.user.id;
+
+  // Mirror the POST handler: verify the session belongs to the caller before
+  // returning anything. The feedback query below is already scoped by user_id
+  // (so no cross-user rows leak), but without this check a foreign/unknown
+  // sessionId returns an empty 200 instead of a 404 — inconsistent with POST
+  // and it masks ownership from the client.
+  const { data: ownedSession, error: ownerErr } = await authResult.supabase
+    .from('sage_ai_sessions')
+    .select('id')
+    .eq('id', sessionId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (ownerErr) {
+    console.error('[sage-ai/feedback] session lookup error:', ownerErr);
+    return NextResponse.json({ error: 'Failed to verify session ownership' }, { status: 500 });
+  }
+  if (!ownedSession) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   const { data, error } = await authResult.supabase
     .from('sage_ai_feedback')
     .select('message_id, rating, comment, updated_at')
     .eq('session_id', sessionId)
-    .eq('user_id', authResult.session.user.id);
+    .eq('user_id', userId);
 
   if (error) {
     console.error('[sage-ai/feedback] list error:', error);

@@ -20,21 +20,21 @@ const FUNNEL_STAGES = [
     key: 'new' as const,
     label: 'New',
     sublabel: null,
-    href: '/admin/sage-glamping-data-breakdown',
+    href: '/admin/sage-data',
     accentClass: 'bg-neutral-400 dark:bg-neutral-500',
   },
   {
     key: 'inProgress' as const,
     label: 'In progress',
     sublabel: 'Queue',
-    href: '/admin/sage-glamping-data-breakdown',
+    href: '/admin/sage-data',
     accentClass: 'bg-amber-500/90 dark:bg-amber-500/70',
   },
   {
     key: 'published' as const,
     label: 'Published',
     sublabel: null,
-    href: '/admin/sage-glamping-data-breakdown',
+    href: '/admin/sage-data',
     accentClass: 'bg-emerald-600/85 dark:bg-emerald-500/65',
   },
 ] as const;
@@ -159,7 +159,7 @@ export default function AdminGlampingMetrics() {
             </span>
           )}
           <Link
-            href="/admin/sage-glamping-data-breakdown"
+            href="/admin/sage-data"
             className="inline-flex items-center gap-0.5 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 rounded-sm"
           >
             Breakdown

@@ -1,0 +1,812 @@
+[
+  {
+    "url": "https://www.glamping.com/destination/north-america/alaska/glacier-view/alpenglow-luxury-camping/",
+    "slug": "alpenglow-luxury-camping",
+    "city": "glacier view",
+    "region": "alaska"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/alaska/tok/log-cabin-wilderness-lodge/",
+    "slug": "log-cabin-wilderness-lodge",
+    "city": "tok",
+    "region": "alaska"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/arizona/camp-verde/verde-ranch-rv-resort/",
+    "slug": "verde-ranch-rv-resort",
+    "city": "camp verde",
+    "region": "arizona"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/arizona/goodyear/arizona-luxury-expeditions-llc/",
+    "slug": "arizona-luxury-expeditions-llc",
+    "city": "goodyear",
+    "region": "arizona"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/arizona/north-rim/american-safari-camp/",
+    "slug": "american-safari-camp",
+    "city": "north rim",
+    "region": "arizona"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/arizona/page/shash-dine-ecoretreat/",
+    "slug": "shash-dine-ecoretreat",
+    "city": "page",
+    "region": "arizona"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/baja-california/la-paz/baja-camp/",
+    "slug": "baja-camp",
+    "city": "la paz",
+    "region": "baja california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/british-columbia/boston-bar/reo-rafting-glamping-yoga-resort/",
+    "slug": "reo-rafting-glamping-yoga-resort",
+    "city": "boston bar",
+    "region": "british columbia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/british-columbia/port-mcneill/nimmo-bay-wilderness-resort/",
+    "slug": "nimmo-bay-wilderness-resort",
+    "city": "port mcneill",
+    "region": "british columbia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/british-columbia/powell-river/cabana-desolation-eco-resort/",
+    "slug": "cabana-desolation-eco-resort",
+    "city": "powell river",
+    "region": "british columbia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/british-columbia/quathiaski-cove/wildcoast-adventures/",
+    "slug": "wildcoast-adventures",
+    "city": "quathiaski cove",
+    "region": "british columbia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/british-columbia/surge-narrows/the-flow-wilderness-retreat/",
+    "slug": "the-flow-wilderness-retreat",
+    "city": "surge narrows",
+    "region": "british columbia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/british-columbia/swanson-island/spirit-of-the-west-adventures/",
+    "slug": "spirit-of-the-west-adventures",
+    "city": "swanson island",
+    "region": "british columbia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/british-columbia/tofino/clayoquot-wilderness-resort/",
+    "slug": "clayoquot-wilderness-resort",
+    "city": "tofino",
+    "region": "british columbia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/ahwahnee/sierra-mountain-lodge/",
+    "slug": "sierra-mountain-lodge",
+    "city": "ahwahnee",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/big-sur/glen-oaks-big-sur/",
+    "slug": "glen-oaks-big-sur",
+    "city": "big sur",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/big-sur/ventana-big-sur-an-alila-resort/",
+    "slug": "ventana-big-sur-an-alila-resort",
+    "city": "big sur",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/buellton/flying-flags-rv-resort-and-campground/",
+    "slug": "flying-flags-rv-resort-and-campground",
+    "city": "buellton",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/chatsworth/luxe-rv/",
+    "slug": "luxe-rv",
+    "city": "chatsworth",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/hope-valley/sorensens-resort/",
+    "slug": "sorensens-resort",
+    "city": "hope valley",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/kings-canyon-national-park/sequoia-high-sierra-camp/",
+    "slug": "sequoia-high-sierra-camp",
+    "city": "kings canyon national park",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/lake-arrowhead/pine-mountain-camp/",
+    "slug": "pine-mountain-camp",
+    "city": "lake arrowhead",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/murphys/murphys-glamping/",
+    "slug": "murphys-glamping",
+    "city": "murphys",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/nevada-city/inn-town-campground/",
+    "slug": "inn-town-campground",
+    "city": "nevada city",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/paso-robles/the-trailer-pond/",
+    "slug": "the-trailer-pond",
+    "city": "paso robles",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/pescadero/costanoa-lodge-and-resort/",
+    "slug": "costanoa-lodge-and-resort",
+    "city": "pescadero",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/santa-rosa/safari-west/",
+    "slug": "safari-west",
+    "city": "santa rosa",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/somes-bar/marble-mountain-ranch/",
+    "slug": "marble-mountain-ranch",
+    "city": "somes bar",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/studio-city/chill-rv/",
+    "slug": "chill-rv",
+    "city": "studio city",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/topanga/beach-canyon-authentic-tipi-in-topanga-california/",
+    "slug": "beach-canyon-authentic-tipi-in-topanga-california",
+    "city": "topanga",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/california/vista/safari-sunset-eco-ranch/",
+    "slug": "safari-sunset-eco-ranch",
+    "city": "vista",
+    "region": "california"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/colorado/basalt/galt-valley-artsy-tucked-away-retreat/",
+    "slug": "galt-valley-artsy-tucked-away-retreat",
+    "city": "basalt",
+    "region": "colorado"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/colorado/canon-city/colorado-rafting-tours-royal-gorge-adventure-beach/",
+    "slug": "colorado-rafting-tours-royal-gorge-adventure-beach",
+    "city": "canon city",
+    "region": "colorado"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/colorado/canon-city/royal-gorge-cabins/",
+    "slug": "royal-gorge-cabins",
+    "city": "canon city",
+    "region": "colorado"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/colorado/clark/vista-verde-guest-ranch/",
+    "slug": "vista-verde-guest-ranch",
+    "city": "clark",
+    "region": "colorado"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/colorado/dolores/dunton-hot-springs/",
+    "slug": "dunton-hot-springs",
+    "city": "dolores",
+    "region": "colorado"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/colorado/gateway/gateway-canyons-resort-spa/",
+    "slug": "gateway-canyons-resort-spa",
+    "city": "gateway",
+    "region": "colorado"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/colorado/wolcott/vail-collective-retreat-at-4-eagle-ranch/",
+    "slug": "vail-collective-retreat-at-4-eagle-ranch",
+    "city": "wolcott",
+    "region": "colorado"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/florida/defuniak-springs/twin-lakes-camp-resort/",
+    "slug": "twin-lakes-camp-resort",
+    "city": "defuniak springs",
+    "region": "florida"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/florida/fort-mccoy/the-griffin-ranch/",
+    "slug": "the-griffin-ranch",
+    "city": "fort mccoy",
+    "region": "florida"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/florida/jupiter/headwaters-jupiter/",
+    "slug": "headwaters-jupiter",
+    "city": "jupiter",
+    "region": "florida"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/florida/key-west/blue-ocean-yacht-charters/",
+    "slug": "blue-ocean-yacht-charters",
+    "city": "key west",
+    "region": "florida"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/florida/navarre/aluminum-cabana/",
+    "slug": "aluminum-cabana",
+    "city": "navarre",
+    "region": "florida"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/florida/river-ranch/westgate-river-ranch/",
+    "slug": "westgate-river-ranch",
+    "city": "river ranch",
+    "region": "florida"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/georgia/ellijay/heavens-gate-mountain-getaway/",
+    "slug": "heavens-gate-mountain-getaway",
+    "city": "ellijay",
+    "region": "georgia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/georgia/jekyll-island/little-raccoon-key/",
+    "slug": "little-raccoon-key",
+    "city": "jekyll island",
+    "region": "georgia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/georgia/saint-simons-island/the-lodge-on-little-st-simons-island/",
+    "slug": "the-lodge-on-little-st-simons-island",
+    "city": "saint simons island",
+    "region": "georgia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/hawaii/haiku/maui-eco-retreat/",
+    "slug": "maui-eco-retreat",
+    "city": "haiku",
+    "region": "hawaii"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/idaho/ketchum/treehouse-ketchum/",
+    "slug": "treehouse-ketchum",
+    "city": "ketchum",
+    "region": "idaho"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/idaho/kooskia/river-dance-lodge/",
+    "slug": "river-dance-lodge",
+    "city": "kooskia",
+    "region": "idaho"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/idaho/sandpoint/elysium-woods/",
+    "slug": "elysium-woods",
+    "city": "sandpoint",
+    "region": "idaho"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/illinois/karbers-ridge/timber-ridge-outpost/",
+    "slug": "timber-ridge-outpost",
+    "city": "karbers ridge",
+    "region": "illinois"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/louisiana/braithwaite/paloma-lake/",
+    "slug": "paloma-lake",
+    "city": "braithwaite",
+    "region": "louisiana"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maine/bar-harbor/the-woods-of-eden/",
+    "slug": "the-woods-of-eden",
+    "city": "bar harbor",
+    "region": "maine"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maine/beaver-cove/spencer-pond-camps/",
+    "slug": "spencer-pond-camps",
+    "city": "beaver cove",
+    "region": "maine"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maine/durham/maine-forest-yurts/",
+    "slug": "maine-forest-yurts",
+    "city": "durham",
+    "region": "maine"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maine/eagle-lake/eagle-lake-sporting-camps/",
+    "slug": "eagle-lake-sporting-camps",
+    "city": "eagle lake",
+    "region": "maine"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maine/georgetown/seguin/",
+    "slug": "seguin",
+    "city": "georgetown",
+    "region": "maine"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maine/sanford/huttopia-southern-maine/",
+    "slug": "huttopia-southern-maine",
+    "city": "sanford",
+    "region": "maine"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maine/stoneham/timberstone-adventures/",
+    "slug": "timberstone-adventures",
+    "city": "stoneham",
+    "region": "maine"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maryland/frostburg/savage-river-lodge/",
+    "slug": "savage-river-lodge",
+    "city": "frostburg",
+    "region": "maryland"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/maryland/oakland/wild-yough-glamping-huts/",
+    "slug": "wild-yough-glamping-huts",
+    "city": "oakland",
+    "region": "maryland"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/michigan/south-haven/the-fields/",
+    "slug": "the-fields",
+    "city": "south haven",
+    "region": "michigan"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/montana/big-sky/the-yellowstone-collective-retreat/",
+    "slug": "the-yellowstone-collective-retreat",
+    "city": "big sky",
+    "region": "montana"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/montana/darby/triple-creek-ranch/",
+    "slug": "triple-creek-ranch",
+    "city": "darby",
+    "region": "montana"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/montana/greenough/the-green-o/",
+    "slug": "the-green-o",
+    "city": "greenough",
+    "region": "montana"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/montana/greenough/the-resort-at-paws-up/",
+    "slug": "the-resort-at-paws-up",
+    "city": "greenough",
+    "region": "montana"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/montana/helena/norwegian-wood-ranch-glamping/",
+    "slug": "norwegian-wood-ranch-glamping",
+    "city": "helena",
+    "region": "montana"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/montana/philipsburg/the-ranch-at-rock-creek/",
+    "slug": "the-ranch-at-rock-creek",
+    "city": "philipsburg",
+    "region": "montana"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/nayarit/sayulita/campamonte/",
+    "slug": "campamonte",
+    "city": "sayulita",
+    "region": "nayarit"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/nevada/jarbidge/the-eagles-nest/",
+    "slug": "the-eagles-nest",
+    "city": "jarbidge",
+    "region": "nevada"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/nevada/wells/mustang-monument/",
+    "slug": "mustang-monument",
+    "city": "wells",
+    "region": "nevada"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-hampshire/albany/huttopia-white-mountains/",
+    "slug": "huttopia-white-mountains",
+    "city": "albany",
+    "region": "new hampshire"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-mexico/la-madera/cliff-river-springs/",
+    "slug": "cliff-river-springs",
+    "city": "la madera",
+    "region": "new mexico"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-mexico/santa-fe/rancho-gallina/",
+    "slug": "rancho-gallina",
+    "city": "santa fe",
+    "region": "new mexico"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-york/ghent/collective-hudson-valley/",
+    "slug": "collective-hudson-valley",
+    "city": "ghent",
+    "region": "new york"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-york/ithaca/ithaca-by-firelight-camps/",
+    "slug": "ithaca-by-firelight-camps",
+    "city": "ithaca",
+    "region": "new york"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-york/lake-luzerne/huttopia-adirondacks/",
+    "slug": "huttopia-adirondacks",
+    "city": "lake luzerne",
+    "region": "new york"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-york/marlboro/the-glass-house/",
+    "slug": "the-glass-house",
+    "city": "marlboro",
+    "region": "new york"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-york/naples/mountain-horse-farm-bb-and-wellness-retreat/",
+    "slug": "mountain-horse-farm-bb-and-wellness-retreat",
+    "city": "naples",
+    "region": "new york"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-york/new-york/camp-rockaway/",
+    "slug": "camp-rockaway",
+    "city": "new york",
+    "region": "new york"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-york/windham/eastwind/",
+    "slug": "eastwind",
+    "city": "windham",
+    "region": "new york"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/new-york/woodstock/glamping-at-woodstock-meadows/",
+    "slug": "glamping-at-woodstock-meadows",
+    "city": "woodstock",
+    "region": "new york"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/newfoundland/joe-batts-arm/fogo-island-inn/",
+    "slug": "fogo-island-inn",
+    "city": "joe batts arm",
+    "region": "newfoundland"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/north-carolina/alexander/americana-island-cabin-at-riverside-escapes/",
+    "slug": "americana-island-cabin-at-riverside-escapes",
+    "city": "alexander",
+    "region": "north carolina"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/north-carolina/boone/blue-bear-mountain-camp/",
+    "slug": "blue-bear-mountain-camp",
+    "city": "boone",
+    "region": "north carolina"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/north-carolina/bryson-city/nantahala-cabins-inc/",
+    "slug": "nantahala-cabins-inc",
+    "city": "bryson city",
+    "region": "north carolina"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/north-carolina/horse-shoe/moonbeam-bungalows/",
+    "slug": "moonbeam-bungalows",
+    "city": "horse shoe",
+    "region": "north carolina"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/north-carolina/hot-springs/paint-rock-farm/",
+    "slug": "paint-rock-farm",
+    "city": "hot springs",
+    "region": "north carolina"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/nova-scotia/east-kemptville/trout-point-lodge/",
+    "slug": "trout-point-lodge",
+    "city": "east kemptville",
+    "region": "nova scotia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/nova-scotia/hammonds-plains/east-coast-glamping-inc/",
+    "slug": "east-coast-glamping-inc",
+    "city": "hammonds plains",
+    "region": "nova scotia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/oaxaca/brisas-de-zicatela/selina-puerto-escondido/",
+    "slug": "selina-puerto-escondido",
+    "city": "brisas de zicatela",
+    "region": "oaxaca"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/oaxaca/puerto-escondido/finca-las-nieves/",
+    "slug": "finca-las-nieves",
+    "city": "puerto escondido",
+    "region": "oaxaca"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/ohio/chillicothe/wren-eagle-retreat/",
+    "slug": "wren-eagle-retreat",
+    "city": "chillicothe",
+    "region": "ohio"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/ohio/glenmont/the-mohicans-treehouse/",
+    "slug": "the-mohicans-treehouse",
+    "city": "glenmont",
+    "region": "ohio"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/ontario/caledon-village/alabaster-acres/",
+    "slug": "alabaster-acres",
+    "city": "caledon village",
+    "region": "ontario"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/ontario/grafton/whispering-springs-wilderness-retreat/",
+    "slug": "whispering-springs-wilderness-retreat",
+    "city": "grafton",
+    "region": "ontario"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/ontario/temagami/outpostco/",
+    "slug": "outpostco",
+    "city": "temagami",
+    "region": "ontario"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/oregon/coos-bay/oceanside-beachfront-rv-resort/",
+    "slug": "oceanside-beachfront-rv-resort",
+    "city": "coos bay",
+    "region": "oregon"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/oregon/crescent/shelter-cove-resort-marina/",
+    "slug": "shelter-cove-resort-marina",
+    "city": "crescent",
+    "region": "oregon"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/oregon/dayton/the-vintages-trailer-resort/",
+    "slug": "the-vintages-trailer-resort",
+    "city": "dayton",
+    "region": "oregon"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/oregon/marcola/tipi-village-retreat/",
+    "slug": "tipi-village-retreat",
+    "city": "marcola",
+    "region": "oregon"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/pennsylvania/shawnee-on-delaware/the-shawnee-inn-and-golf-resort/",
+    "slug": "the-shawnee-inn-and-golf-resort",
+    "city": "shawnee on delaware",
+    "region": "pennsylvania"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/quebec/la-conception/hintercabin/",
+    "slug": "hintercabin",
+    "city": "la conception",
+    "region": "quebec"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/quebec/mont-tremblant/bel-air-resort-mont-tremblant/",
+    "slug": "bel-air-resort-mont-tremblant",
+    "city": "mont tremblant",
+    "region": "quebec"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/quebec/sutton/huttopia-sutton/",
+    "slug": "huttopia-sutton",
+    "city": "sutton",
+    "region": "quebec"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/quintana-roo/akumal/akumal-natura/",
+    "slug": "akumal-natura",
+    "city": "akumal",
+    "region": "quintana roo"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/quintana-roo/playa-del-carmen/eco-itaka-glamping/",
+    "slug": "eco-itaka-glamping",
+    "city": "playa del carmen",
+    "region": "quintana roo"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/quintana-roo/tulum/joy-tulum/",
+    "slug": "joy-tulum",
+    "city": "tulum",
+    "region": "quintana roo"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/quintana-roo/tulum/papaya-playa-project/",
+    "slug": "papaya-playa-project",
+    "city": "tulum",
+    "region": "quintana roo"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/quintana-roo/xpu-ha/serenity-luxury-tented-camp-by-xperience-hotels/",
+    "slug": "serenity-luxury-tented-camp-by-xperience-hotels",
+    "city": "xpu ha",
+    "region": "quintana roo"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/st-croix/frederiksted/cane-bay-campground/",
+    "slug": "cane-bay-campground",
+    "city": "frederiksted",
+    "region": "st croix"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/tennessee/townsend/little-arrow-outdoor-resort/",
+    "slug": "little-arrow-outdoor-resort",
+    "city": "townsend",
+    "region": "tennessee"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/texas/austin/lone-star-court/",
+    "slug": "lone-star-court",
+    "city": "austin",
+    "region": "texas"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/texas/bluffdale/the-hideaway-ranch/",
+    "slug": "the-hideaway-ranch",
+    "city": "bluffdale",
+    "region": "texas"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/texas/dripping-springs/camp-lucy-cottages/",
+    "slug": "camp-lucy-cottages",
+    "city": "dripping springs",
+    "region": "texas"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/texas/glen-rose/country-woods-inn/",
+    "slug": "country-woods-inn",
+    "city": "glen rose",
+    "region": "texas"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/texas/johnson-city/walden-retreats-hill-country/",
+    "slug": "walden-retreats-hill-country",
+    "city": "johnson city",
+    "region": "texas"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/texas/kingsbury/wahwahtaysee-resort/",
+    "slug": "wahwahtaysee-resort",
+    "city": "kingsbury",
+    "region": "texas"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/texas/wimberley/collective-hill-country-a-retreat-at-montesino-ranch/",
+    "slug": "collective-hill-country-a-retreat-at-montesino-ranch",
+    "city": "wimberley",
+    "region": "texas"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/texas/wimberley/sinya-on-lone-man-creek/",
+    "slug": "sinya-on-lone-man-creek",
+    "city": "wimberley",
+    "region": "texas"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/utah/boulder/boulder-mountain-guest-ranch/",
+    "slug": "boulder-mountain-guest-ranch",
+    "city": "boulder",
+    "region": "utah"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/utah/garden-city/conestoga-ranch/",
+    "slug": "conestoga-ranch",
+    "city": "garden city",
+    "region": "utah"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/utah/mt-carmel/zion-ponderosa-ranch-resort/",
+    "slug": "zion-ponderosa-ranch-resort",
+    "city": "mt carmel",
+    "region": "utah"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/utah/torrey/capitol-reef-resort/",
+    "slug": "capitol-reef-resort",
+    "city": "torrey",
+    "region": "utah"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/veracruz/santa-fe/pico-rodavento/",
+    "slug": "pico-rodavento",
+    "city": "santa fe",
+    "region": "veracruz"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/vermont/jeffersonville/sterling-ridge-resort/",
+    "slug": "sterling-ridge-resort",
+    "city": "jeffersonville",
+    "region": "vermont"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/virginia/luray/1-rock-tavern-river-kamp/",
+    "slug": "1-rock-tavern-river-kamp",
+    "city": "luray",
+    "region": "virginia"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/washington/carson/carson-ridge-luxury-cabins/",
+    "slug": "carson-ridge-luxury-cabins",
+    "city": "carson",
+    "region": "washington"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/washington/langley/langley-lodging/",
+    "slug": "langley-lodging",
+    "city": "langley",
+    "region": "washington"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/washington/silver-lake/silver-cove-rv-resort/",
+    "slug": "silver-cove-rv-resort",
+    "city": "silver lake",
+    "region": "washington"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/wisconsin/gillett/apple-creek-whitetails/",
+    "slug": "apple-creek-whitetails",
+    "city": "gillett",
+    "region": "wisconsin"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/wisconsin/new-london/mulroys-irish-acres-farm/",
+    "slug": "mulroys-irish-acres-farm",
+    "city": "new london",
+    "region": "wisconsin"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/wyoming/saratoga/the-lodge-and-spa-at-brush-creek-ranch/",
+    "slug": "the-lodge-and-spa-at-brush-creek-ranch",
+    "city": "saratoga",
+    "region": "wyoming"
+  },
+  {
+    "url": "https://www.glamping.com/destination/north-america/wyoming/shell/the-hideout-lodge-guest-ranch/",
+    "slug": "the-hideout-lodge-guest-ranch",
+    "city": "shell",
+    "region": "wyoming"
+  }
+]

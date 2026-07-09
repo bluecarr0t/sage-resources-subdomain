@@ -14,6 +14,7 @@ import {
 } from '@/lib/glamping-market-snapshot-property-type-filter';
 import { applyBrandsPageLandOperatorFilter } from '@/lib/public-map-cohort-filters';
 import { isExcludedLandOperatorForPublicMap } from '@/lib/glamping-land-operator-category';
+import { excludeClosedGlampingRows } from '@/lib/glamping-is-open';
 import { isUnitedStatesCountryFilterValue } from '@/lib/admin/glamping-sage-data-list';
 import {
   countryValuesForGlampingMarketSnapshot,
@@ -151,6 +152,7 @@ type PropertyRow = Pick<
   | 'property_total_sites'
   | 'rate_avg_retail_daily_rate'
   | 'land_operator_category'
+  | 'is_open'
   | 'updated_at'
   | 'created_at'
 >;
@@ -297,7 +299,7 @@ async function fetchPublishedBrandedRows(
         supabase
           .from(PROPERTIES_TABLE)
           .select(
-            'id, property_id, slug, property_name, property_type, city, state, country, brand_id, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, land_operator_category, updated_at, created_at'
+            'id, property_id, slug, property_name, property_type, city, state, country, brand_id, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, land_operator_category, is_open, updated_at, created_at'
           )
           .eq('research_status', PUBLISHED_RESEARCH_STATUS)
           .not('brand_id', 'is', null)
@@ -325,7 +327,7 @@ export function aggregateTopGlampingBrands(
   market: GlampingMarketSnapshotMarket = 'us',
   minPropertyCount = TOP_BRANDS_MIN_PROPERTY_COUNT
 ): TopGlampingBrandsOverview {
-  const glampingRows = rows.filter(
+  const glampingRows = excludeClosedGlampingRows(rows).filter(
     (row) =>
       isGlampingMarketSnapshotPropertyType(row.property_type) &&
       propertyMatchesBrandsMarket(row.country, market) &&

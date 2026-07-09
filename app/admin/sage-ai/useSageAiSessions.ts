@@ -72,6 +72,13 @@ export function useSageAiSessions({
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  /**
+   * Monotonic token guarding session loads: rapid clicks on different history
+   * entries fire overlapping fetches, and without this the SLOWEST response
+   * would win and overwrite the conversation the user actually selected.
+   */
+  const loadSessionGenRef = useRef(0);
+
   useEffect(() => {
     currentSessionIdRef.current = currentSessionId;
   }, [currentSessionId]);
@@ -230,10 +237,14 @@ export function useSageAiSessions({
 
   const handleLoadSession = useCallback(
     async (sessionId: string) => {
+      const gen = ++loadSessionGenRef.current;
       try {
         const res = await fetch(`/api/admin/sage-ai/sessions/${sessionId}`);
+        // A newer load started while this one was in flight — discard.
+        if (gen !== loadSessionGenRef.current) return;
         if (res.ok) {
           const data = await res.json();
+          if (gen !== loadSessionGenRef.current) return;
           const rawMessages = Array.isArray(data?.session?.messages)
             ? (data.session.messages as Array<Partial<UIMessage>>)
             : [];
@@ -247,6 +258,9 @@ export function useSageAiSessions({
           }));
           stopActiveStream();
           onSessionLoaded(sessionId, hydratedMessages);
+          // Set the ref synchronously too: the debounced auto-save reads the
+          // ref, and the effect that syncs it runs a tick after state commits.
+          currentSessionIdRef.current = sessionId;
           setCurrentSessionId(sessionId);
           setSidebarOpen(false);
         } else {
@@ -254,10 +268,12 @@ export function useSageAiSessions({
           showToast(t('loadSessionError'));
         }
       } catch (e) {
+        if (gen !== loadSessionGenRef.current) return;
         console.error('Failed to load session:', e);
         showToast(t('loadSessionError'));
       }
 
+      if (gen !== loadSessionGenRef.current) return;
       void loadSessionFeedback(sessionId);
     },
     [

@@ -1,0 +1,1373 @@
+{
+  "trulyMissing": [
+    {
+      "url": "https://www.glamping.com/destination/north-america/british-columbia/swanson-island/spirit-of-the-west-adventures/",
+      "slug": "spirit-of-the-west-adventures",
+      "city": "swanson island",
+      "region": "british columbia",
+      "guess": "Spirit Of The West Adventures"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/chatsworth/luxe-rv/",
+      "slug": "luxe-rv",
+      "city": "chatsworth",
+      "region": "california",
+      "guess": "Luxe Rv"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/studio-city/chill-rv/",
+      "slug": "chill-rv",
+      "city": "studio city",
+      "region": "california",
+      "guess": "Chill Rv"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/topanga/beach-canyon-authentic-tipi-in-topanga-california/",
+      "slug": "beach-canyon-authentic-tipi-in-topanga-california",
+      "city": "topanga",
+      "region": "california",
+      "guess": "Beach Canyon Authentic Tipi In Topanga California"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/colorado/basalt/galt-valley-artsy-tucked-away-retreat/",
+      "slug": "galt-valley-artsy-tucked-away-retreat",
+      "city": "basalt",
+      "region": "colorado",
+      "guess": "Galt Valley Artsy Tucked Away Retreat"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/colorado/canon-city/colorado-rafting-tours-royal-gorge-adventure-beach/",
+      "slug": "colorado-rafting-tours-royal-gorge-adventure-beach",
+      "city": "canon city",
+      "region": "colorado",
+      "guess": "Colorado Rafting Tours Royal Gorge Adventure Beach"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/florida/key-west/blue-ocean-yacht-charters/",
+      "slug": "blue-ocean-yacht-charters",
+      "city": "key west",
+      "region": "florida",
+      "guess": "Blue Ocean Yacht Charters"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/florida/navarre/aluminum-cabana/",
+      "slug": "aluminum-cabana",
+      "city": "navarre",
+      "region": "florida",
+      "guess": "Aluminum Cabana"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/georgia/ellijay/heavens-gate-mountain-getaway/",
+      "slug": "heavens-gate-mountain-getaway",
+      "city": "ellijay",
+      "region": "georgia",
+      "guess": "Heavens Gate Mountain Getaway"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maine/beaver-cove/spencer-pond-camps/",
+      "slug": "spencer-pond-camps",
+      "city": "beaver cove",
+      "region": "maine",
+      "guess": "Spencer Pond Camps"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maine/eagle-lake/eagle-lake-sporting-camps/",
+      "slug": "eagle-lake-sporting-camps",
+      "city": "eagle lake",
+      "region": "maine",
+      "guess": "Eagle Lake Sporting Camps"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maine/georgetown/seguin/",
+      "slug": "seguin",
+      "city": "georgetown",
+      "region": "maine",
+      "guess": "Seguin"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/north-carolina/alexander/americana-island-cabin-at-riverside-escapes/",
+      "slug": "americana-island-cabin-at-riverside-escapes",
+      "city": "alexander",
+      "region": "north carolina",
+      "guess": "Americana Island Cabin At Riverside Escapes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/north-carolina/bryson-city/nantahala-cabins-inc/",
+      "slug": "nantahala-cabins-inc",
+      "city": "bryson city",
+      "region": "north carolina",
+      "guess": "Nantahala Cabins Inc"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/ontario/temagami/outpostco/",
+      "slug": "outpostco",
+      "city": "temagami",
+      "region": "ontario",
+      "guess": "Outpostco"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/quebec/la-conception/hintercabin/",
+      "slug": "hintercabin",
+      "city": "la conception",
+      "region": "quebec",
+      "guess": "Hintercabin"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/st-croix/frederiksted/cane-bay-campground/",
+      "slug": "cane-bay-campground",
+      "city": "frederiksted",
+      "region": "st croix",
+      "guess": "Cane Bay Campground"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/texas/austin/lone-star-court/",
+      "slug": "lone-star-court",
+      "city": "austin",
+      "region": "texas",
+      "guess": "Lone Star Court"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/texas/dripping-springs/camp-lucy-cottages/",
+      "slug": "camp-lucy-cottages",
+      "city": "dripping springs",
+      "region": "texas",
+      "guess": "Camp Lucy Cottages"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/texas/glen-rose/country-woods-inn/",
+      "slug": "country-woods-inn",
+      "city": "glen rose",
+      "region": "texas",
+      "guess": "Country Woods Inn"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/veracruz/santa-fe/pico-rodavento/",
+      "slug": "pico-rodavento",
+      "city": "santa fe",
+      "region": "veracruz",
+      "guess": "Pico Rodavento"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/washington/langley/langley-lodging/",
+      "slug": "langley-lodging",
+      "city": "langley",
+      "region": "washington",
+      "guess": "Langley Lodging"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/wisconsin/gillett/apple-creek-whitetails/",
+      "slug": "apple-creek-whitetails",
+      "city": "gillett",
+      "region": "wisconsin",
+      "guess": "Apple Creek Whitetails"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/wisconsin/new-london/mulroys-irish-acres-farm/",
+      "slug": "mulroys-irish-acres-farm",
+      "city": "new london",
+      "region": "wisconsin",
+      "guess": "Mulroys Irish Acres Farm"
+    }
+  ],
+  "weakMatches": [
+    {
+      "url": "https://www.glamping.com/destination/north-america/alaska/glacier-view/alpenglow-luxury-camping/",
+      "slug": "alpenglow-luxury-camping",
+      "city": "glacier view",
+      "region": "alaska",
+      "guess": "Alpenglow Luxury Camping",
+      "match": "Alpenglow Luxury Camping",
+      "score": 1,
+      "property_id": "27de84c0-fdc6-4d3c-8486-d9b9e650c296",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/alaska/tok/log-cabin-wilderness-lodge/",
+      "slug": "log-cabin-wilderness-lodge",
+      "city": "tok",
+      "region": "alaska",
+      "guess": "Log Cabin Wilderness Lodge",
+      "match": "Log Cabin Wilderness Lodge",
+      "score": 1.35,
+      "property_id": "925c1c4e-82c9-49d6-805e-18db3df21492",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/arizona/camp-verde/verde-ranch-rv-resort/",
+      "slug": "verde-ranch-rv-resort",
+      "city": "camp verde",
+      "region": "arizona",
+      "guess": "Verde Ranch RV Resort",
+      "match": "Verde Ranch Resort",
+      "score": 1.35,
+      "property_id": "68655985-36f5-414b-be20-8a148f07913a",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/arizona/goodyear/arizona-luxury-expeditions-llc/",
+      "slug": "arizona-luxury-expeditions-llc",
+      "city": "goodyear",
+      "region": "arizona",
+      "guess": "Arizona Luxury Expeditions LLC",
+      "match": "Arizonea Luxury Expeditions",
+      "score": 0.85,
+      "property_id": "8ff21da9-84ee-4198-a39c-7b3517015b53",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/arizona/north-rim/american-safari-camp/",
+      "slug": "american-safari-camp",
+      "city": "north rim",
+      "region": "arizona",
+      "guess": "American Safari Camp",
+      "match": "American Safari Camp",
+      "score": 1,
+      "property_id": "9a6fd48f-4527-4e83-a0de-155720d9f183",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/arizona/page/shash-dine-ecoretreat/",
+      "slug": "shash-dine-ecoretreat",
+      "city": "page",
+      "region": "arizona",
+      "guess": "Shash Dine Ecoretreat",
+      "match": "Shash Dine' EcoRetreat",
+      "score": 1.35,
+      "property_id": "3f8fb0d0-a949-401e-8b08-096e6f1a1a17",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/baja-california/la-paz/baja-camp/",
+      "slug": "baja-camp",
+      "city": "la paz",
+      "region": "baja california",
+      "guess": "Baja Camp",
+      "match": "Baja Airstream Experience",
+      "score": 0.8333333333333334,
+      "property_id": "c0773f01-c7d2-420b-a868-4f97cd6c3e12",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/british-columbia/boston-bar/reo-rafting-glamping-yoga-resort/",
+      "slug": "reo-rafting-glamping-yoga-resort",
+      "city": "boston bar",
+      "region": "british columbia",
+      "guess": "Reo Rafting Glamping Yoga Resort",
+      "match": "REO Rafting, Glamping & Yoga Resort",
+      "score": 1.35,
+      "property_id": "96410333-485d-49d8-a1e0-e5bd13d1af77",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/british-columbia/port-mcneill/nimmo-bay-wilderness-resort/",
+      "slug": "nimmo-bay-wilderness-resort",
+      "city": "port mcneill",
+      "region": "british columbia",
+      "guess": "Nimmo Bay Wilderness Resort",
+      "match": "Nimmo Bay Wilderness Resort",
+      "score": 1.35,
+      "property_id": "8d70366f-9943-4b96-a156-116cc29c51c5",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/british-columbia/powell-river/cabana-desolation-eco-resort/",
+      "slug": "cabana-desolation-eco-resort",
+      "city": "powell river",
+      "region": "british columbia",
+      "guess": "Cabana Desolation Eco Resort",
+      "match": "Cabana Desolation Eco Resort",
+      "score": 1,
+      "property_id": "974b062d-e108-46d9-9bfa-0fc23f83e8c9",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/british-columbia/quathiaski-cove/wildcoast-adventures/",
+      "slug": "wildcoast-adventures",
+      "city": "quathiaski cove",
+      "region": "british columbia",
+      "guess": "Wildcoast Adventures",
+      "match": "Mohican Adventures",
+      "score": 0.5,
+      "property_id": "1ad57662-6be6-49cc-be47-2ae1b9431c37",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/british-columbia/surge-narrows/the-flow-wilderness-retreat/",
+      "slug": "the-flow-wilderness-retreat",
+      "city": "surge narrows",
+      "region": "british columbia",
+      "guess": "The Flow Wilderness Retreat",
+      "match": "Whispering Springs Wilderness Retreat",
+      "score": 0.5,
+      "property_id": "74cd8cb9-6719-421d-a987-dc658b3fa1e8",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/british-columbia/tofino/clayoquot-wilderness-resort/",
+      "slug": "clayoquot-wilderness-resort",
+      "city": "tofino",
+      "region": "british columbia",
+      "guess": "Clayoquot Wilderness Resort",
+      "match": "Clayoquot Wilderness Resort",
+      "score": 1.35,
+      "property_id": "20750f0c-d100-4b18-8cb7-e29564c98e4b",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/ahwahnee/sierra-mountain-lodge/",
+      "slug": "sierra-mountain-lodge",
+      "city": "ahwahnee",
+      "region": "california",
+      "guess": "Sierra Mountain Lodge",
+      "match": "Treehouse Lodge",
+      "score": 0.6833333333333333,
+      "property_id": "3dbc6294-6583-4045-aebc-acc888f28253",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/big-sur/glen-oaks-big-sur/",
+      "slug": "glen-oaks-big-sur",
+      "city": "big sur",
+      "region": "california",
+      "guess": "Glen Oaks Big Sur",
+      "match": "Glen Oaks Big Sur",
+      "score": 1.35,
+      "property_id": "81dbb7c8-5ffc-4a64-9f34-ebccaf53901b",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/big-sur/ventana-big-sur-an-alila-resort/",
+      "slug": "ventana-big-sur-an-alila-resort",
+      "city": "big sur",
+      "region": "california",
+      "guess": "Ventana Big Sur An Alila Resort",
+      "match": "Ventana Big Sur",
+      "score": 0.95,
+      "property_id": "14ff0f99-335e-40f3-85ca-7216d1e2d31b",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/buellton/flying-flags-rv-resort-and-campground/",
+      "slug": "flying-flags-rv-resort-and-campground",
+      "city": "buellton",
+      "region": "california",
+      "guess": "Flying Flags RV Resort And Campground",
+      "match": "Flying Flags RV Resort & Campground",
+      "score": 1.15,
+      "property_id": "acf5c24d-bf8b-4722-8e9a-fc83557a9f59",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/hope-valley/sorensens-resort/",
+      "slug": "sorensens-resort",
+      "city": "hope valley",
+      "region": "california",
+      "guess": "Sorensens Resort",
+      "match": "Somerset Resort",
+      "score": 0.5,
+      "property_id": "ff26f12f-f2fb-4486-a925-c2f9e3b00d43",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/kings-canyon-national-park/sequoia-high-sierra-camp/",
+      "slug": "sequoia-high-sierra-camp",
+      "city": "kings canyon national park",
+      "region": "california",
+      "guess": "Sequoia High Sierra Camp",
+      "match": "Sequoia High Sierra Camp",
+      "score": 1,
+      "property_id": "04a1d272-282b-48fa-b176-c2311d88ac46",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/lake-arrowhead/pine-mountain-camp/",
+      "slug": "pine-mountain-camp",
+      "city": "lake arrowhead",
+      "region": "california",
+      "guess": "Pine Mountain Camp",
+      "match": "Rocky Mountain Safari Camp",
+      "score": 0.5,
+      "property_id": "1d2cc233-a2ac-4fa5-940b-12705ab5fe49",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/murphys/murphys-glamping/",
+      "slug": "murphys-glamping",
+      "city": "murphys",
+      "region": "california",
+      "guess": "Murphys Glamping",
+      "match": "Monument Glamping",
+      "score": 0.85,
+      "property_id": "85c5b687-4623-48de-bd91-3e08a3cb44b7",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/nevada-city/inn-town-campground/",
+      "slug": "inn-town-campground",
+      "city": "nevada city",
+      "region": "california",
+      "guess": "Inn Town Campground",
+      "match": "Inn Town Campground",
+      "score": 1.35,
+      "property_id": "68a4462d-38fb-4c84-865b-2a8a4e6cf6ae",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/paso-robles/the-trailer-pond/",
+      "slug": "the-trailer-pond",
+      "city": "paso robles",
+      "region": "california",
+      "guess": "The Trailer Pond",
+      "match": "The Trailer Pond at Alta Colina",
+      "score": 0.95,
+      "property_id": "bcd1535d-08b5-49f0-adff-4c464746548e",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/pescadero/costanoa-lodge-and-resort/",
+      "slug": "costanoa-lodge-and-resort",
+      "city": "pescadero",
+      "region": "california",
+      "guess": "Costanoa Lodge And Resort",
+      "match": "Costanoa Lodge",
+      "score": 0.85,
+      "property_id": "bcea8373-58c6-473a-b595-96899a7fe17e",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/santa-rosa/safari-west/",
+      "slug": "safari-west",
+      "city": "santa rosa",
+      "region": "california",
+      "guess": "Safari West",
+      "match": "Safari West",
+      "score": 1.35,
+      "property_id": "5f3c2cd9-5c4f-41f2-afdd-27f96172de9a",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/somes-bar/marble-mountain-ranch/",
+      "slug": "marble-mountain-ranch",
+      "city": "somes bar",
+      "region": "california",
+      "guess": "Marble Mountain Ranch",
+      "match": "Lone Mountain Ranch",
+      "score": 0.6666666666666666,
+      "property_id": "88e6fdfd-3aed-4c1e-8726-509900bea596",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/california/vista/safari-sunset-eco-ranch/",
+      "slug": "safari-sunset-eco-ranch",
+      "city": "vista",
+      "region": "california",
+      "guess": "Safari Sunset Eco Ranch",
+      "match": "Udoscape Eco-Glamping Resort",
+      "score": 0.6,
+      "property_id": "a9597586-99a0-487b-8213-d1200b5e5eca",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/colorado/canon-city/royal-gorge-cabins/",
+      "slug": "royal-gorge-cabins",
+      "city": "canon city",
+      "region": "colorado",
+      "guess": "Royal Gorge Cabins",
+      "match": "Royal Gorge Cabins",
+      "score": 1,
+      "property_id": "304685ba-bc17-45bf-bdce-90daac4ab8b8",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/colorado/clark/vista-verde-guest-ranch/",
+      "slug": "vista-verde-guest-ranch",
+      "city": "clark",
+      "region": "colorado",
+      "guess": "Vista Verde Guest Ranch",
+      "match": "Verde Ranch Resort",
+      "score": 0.5,
+      "property_id": "68655985-36f5-414b-be20-8a148f07913a",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/colorado/dolores/dunton-hot-springs/",
+      "slug": "dunton-hot-springs",
+      "city": "dolores",
+      "region": "colorado",
+      "guess": "Dunton Hot Springs",
+      "match": "Dunton Hot Springs",
+      "score": 1.35,
+      "property_id": "838cd515-c12c-4111-9d41-1e0d28fafa95",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/colorado/gateway/gateway-canyons-resort-spa/",
+      "slug": "gateway-canyons-resort-spa",
+      "city": "gateway",
+      "region": "colorado",
+      "guess": "Gateway Canyons Resort Spa",
+      "match": "Gateway Canyons Resort & Spa",
+      "score": 1.35,
+      "property_id": "9f6059a7-a516-4716-b4c5-a9c779bcd75e",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/colorado/wolcott/vail-collective-retreat-at-4-eagle-ranch/",
+      "slug": "vail-collective-retreat-at-4-eagle-ranch",
+      "city": "wolcott",
+      "region": "colorado",
+      "guess": "Vail Collective Retreat At 4 Eagle Ranch",
+      "match": "Collective Retreats Vail",
+      "score": 0.75,
+      "property_id": "64029283-bd01-4fe0-abba-1e5c04e60e21",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/florida/defuniak-springs/twin-lakes-camp-resort/",
+      "slug": "twin-lakes-camp-resort",
+      "city": "defuniak springs",
+      "region": "florida",
+      "guess": "Twin Lakes Camp Resort",
+      "match": "Twin Lakes Camp Resort",
+      "score": 1.35,
+      "property_id": "db89ebba-eb1a-4904-9a4d-b049c6f9958e",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/florida/fort-mccoy/the-griffin-ranch/",
+      "slug": "the-griffin-ranch",
+      "city": "fort mccoy",
+      "region": "florida",
+      "guess": "The Griffin Ranch",
+      "match": "The Griffin Ranch",
+      "score": 1.35,
+      "property_id": "062455a0-63d5-4c83-b047-87df70420ee6",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/florida/jupiter/headwaters-jupiter/",
+      "slug": "headwaters-jupiter",
+      "city": "jupiter",
+      "region": "florida",
+      "guess": "Headwaters Jupiter",
+      "match": "Headwaters Jupiter",
+      "score": 1.35,
+      "property_id": "881d84b0-d724-439f-ba76-8acfc46ddcb6",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/florida/river-ranch/westgate-river-ranch/",
+      "slug": "westgate-river-ranch",
+      "city": "river ranch",
+      "region": "florida",
+      "guess": "Westgate River Ranch",
+      "match": "Westgate River Ranch Resort & Rodeo",
+      "score": 0.95,
+      "property_id": "a849b900-1177-4540-9580-5bb5d1f0b86f",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/georgia/jekyll-island/little-raccoon-key/",
+      "slug": "little-raccoon-key",
+      "city": "jekyll island",
+      "region": "georgia",
+      "guess": "Little Raccoon Key",
+      "match": "Little Raccoon Key",
+      "score": 1.35,
+      "property_id": "43508342-83ce-44b8-8ec3-e65047f9d578",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/georgia/saint-simons-island/the-lodge-on-little-st-simons-island/",
+      "slug": "the-lodge-on-little-st-simons-island",
+      "city": "saint simons island",
+      "region": "georgia",
+      "guess": "The Lodge On Little St Simons Island",
+      "match": "Treehouse Lodge",
+      "score": 0.55,
+      "property_id": "3dbc6294-6583-4045-aebc-acc888f28253",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/hawaii/haiku/maui-eco-retreat/",
+      "slug": "maui-eco-retreat",
+      "city": "haiku",
+      "region": "hawaii",
+      "guess": "Maui Eco Retreat",
+      "match": "Eco Retreat Konark",
+      "score": 0.6666666666666666,
+      "property_id": "13ba29c1-223d-475d-b0e3-98c657b9b1df",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/idaho/ketchum/treehouse-ketchum/",
+      "slug": "treehouse-ketchum",
+      "city": "ketchum",
+      "region": "idaho",
+      "guess": "Treehouse Ketchum",
+      "match": "Treehouse Lodge",
+      "score": 0.85,
+      "property_id": "3dbc6294-6583-4045-aebc-acc888f28253",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/idaho/kooskia/river-dance-lodge/",
+      "slug": "river-dance-lodge",
+      "city": "kooskia",
+      "region": "idaho",
+      "guess": "River Dance Lodge",
+      "match": "River Dance Lodge",
+      "score": 1.35,
+      "property_id": "fa8f3c43-056f-49b1-88c6-e599719024b5",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/idaho/sandpoint/elysium-woods/",
+      "slug": "elysium-woods",
+      "city": "sandpoint",
+      "region": "idaho",
+      "guess": "Elysium Woods",
+      "match": "WOODS on Pender",
+      "score": 0.5,
+      "property_id": "8ea494d9-c655-4c8c-b4de-ba6d3a1c7d43",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/illinois/karbers-ridge/timber-ridge-outpost/",
+      "slug": "timber-ridge-outpost",
+      "city": "karbers ridge",
+      "region": "illinois",
+      "guess": "Timber Ridge Outpost",
+      "match": "Timber Ridge Outpost & Cabins",
+      "score": 1.1,
+      "property_id": "cb6f4800-814f-457c-93d0-ce9b64e5c984",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/louisiana/braithwaite/paloma-lake/",
+      "slug": "paloma-lake",
+      "city": "braithwaite",
+      "region": "louisiana",
+      "guess": "Paloma Lake",
+      "match": "Paloma Lake",
+      "score": 1.35,
+      "property_id": "ff73d4f4-f34a-42c9-8803-5a27fc047e0f",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maine/bar-harbor/the-woods-of-eden/",
+      "slug": "the-woods-of-eden",
+      "city": "bar harbor",
+      "region": "maine",
+      "guess": "The Woods Of Eden",
+      "match": "Woods of Eden Glampground",
+      "score": 1.0166666666666666,
+      "property_id": "d6bd8129-878a-4a36-9bfb-1fd3c281a139",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maine/durham/maine-forest-yurts/",
+      "slug": "maine-forest-yurts",
+      "city": "durham",
+      "region": "maine",
+      "guess": "Maine Forest Yurts",
+      "match": "Maine Forest Yurts",
+      "score": 1.35,
+      "property_id": "5632f805-aafd-4962-9bc7-d38cbdd6a5c5",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maine/sanford/huttopia-southern-maine/",
+      "slug": "huttopia-southern-maine",
+      "city": "sanford",
+      "region": "maine",
+      "guess": "Huttopia Southern Maine",
+      "match": "Huttopia Southern Maine",
+      "score": 1.35,
+      "property_id": "fdf10858-db1a-4676-a9c6-d98e6b32317a",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maine/stoneham/timberstone-adventures/",
+      "slug": "timberstone-adventures",
+      "city": "stoneham",
+      "region": "maine",
+      "guess": "Timberstone Adventures",
+      "match": "TimberStone Adventures",
+      "score": 1,
+      "property_id": "fb77589c-e072-48da-90c2-586e31f318a1",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maryland/frostburg/savage-river-lodge/",
+      "slug": "savage-river-lodge",
+      "city": "frostburg",
+      "region": "maryland",
+      "guess": "Savage River Lodge",
+      "match": "Savage River Lodge",
+      "score": 1.35,
+      "property_id": "01733900-af68-4857-a404-5c38803657a9",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/maryland/oakland/wild-yough-glamping-huts/",
+      "slug": "wild-yough-glamping-huts",
+      "city": "oakland",
+      "region": "maryland",
+      "guess": "Wild Yough Glamping Huts",
+      "match": "Wild Yough Glamping Huts",
+      "score": 1.35,
+      "property_id": "4b2e5aa9-ad6f-4272-a8de-db20e3102974",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/michigan/south-haven/the-fields/",
+      "slug": "the-fields",
+      "city": "south haven",
+      "region": "michigan",
+      "guess": "The Fields",
+      "match": "The Fields of Michigan",
+      "score": 1.0166666666666666,
+      "property_id": "09eb4831-15c0-484a-ace9-f9a642ce6c8a",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/montana/big-sky/the-yellowstone-collective-retreat/",
+      "slug": "the-yellowstone-collective-retreat",
+      "city": "big sky",
+      "region": "montana",
+      "guess": "The Yellowstone Collective Retreat",
+      "match": "Collective Yellowstone",
+      "score": 0.85,
+      "property_id": "4b51946f-b1a5-4b2c-87a1-8ea01d4ee856",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/montana/darby/triple-creek-ranch/",
+      "slug": "triple-creek-ranch",
+      "city": "darby",
+      "region": "montana",
+      "guess": "Triple Creek Ranch",
+      "match": "Spring Creek Ranch",
+      "score": 0.6666666666666666,
+      "property_id": "e9d6dce9-8eca-4c48-a22b-2c688e8a7939",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/montana/greenough/the-green-o/",
+      "slug": "the-green-o",
+      "city": "greenough",
+      "region": "montana",
+      "guess": "The Green O",
+      "match": "The Green O",
+      "score": 1.35,
+      "property_id": "7c6d48ab-f90d-4aca-9c4c-6301e65ea381",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/montana/greenough/the-resort-at-paws-up/",
+      "slug": "the-resort-at-paws-up",
+      "city": "greenough",
+      "region": "montana",
+      "guess": "The Resort At Paws Up",
+      "match": "The Resort at Paws Up",
+      "score": 1.35,
+      "property_id": "a6bf3611-ae72-420f-a1ca-fe010defd1a2",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/montana/helena/norwegian-wood-ranch-glamping/",
+      "slug": "norwegian-wood-ranch-glamping",
+      "city": "helena",
+      "region": "montana",
+      "guess": "Norwegian Wood Ranch Glamping",
+      "match": "Norwegian Wood Ranch",
+      "score": 1.1,
+      "property_id": "c66d290b-e984-49a3-8f09-1d3ef5c55aaa",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/montana/philipsburg/the-ranch-at-rock-creek/",
+      "slug": "the-ranch-at-rock-creek",
+      "city": "philipsburg",
+      "region": "montana",
+      "guess": "The Ranch At Rock Creek",
+      "match": "The Ranch at Rock Creek",
+      "score": 1.35,
+      "property_id": "f0ef65ab-6e01-4952-b8e1-e4d7642d8510",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/nayarit/sayulita/campamonte/",
+      "slug": "campamonte",
+      "city": "sayulita",
+      "region": "nayarit",
+      "guess": "Campamonte",
+      "match": "Nayarit Treehouse Resort",
+      "score": 0.5,
+      "property_id": "f6998d0d-d2d9-4a4a-8cb4-c2215a341bfc",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/nevada/wells/mustang-monument/",
+      "slug": "mustang-monument",
+      "city": "wells",
+      "region": "nevada",
+      "guess": "Mustang Monument",
+      "match": "Mustang Monument",
+      "score": 1.35,
+      "property_id": "a0c2f25d-570c-4a14-95c0-7884e5eb29dd",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-hampshire/albany/huttopia-white-mountains/",
+      "slug": "huttopia-white-mountains",
+      "city": "albany",
+      "region": "new hampshire",
+      "guess": "Huttopia White Mountains",
+      "match": "Huttopia White Mountains",
+      "score": 1.35,
+      "property_id": "0e7a4d64-eb2e-45c9-aa22-fa4d6f3741cb",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-mexico/la-madera/cliff-river-springs/",
+      "slug": "cliff-river-springs",
+      "city": "la madera",
+      "region": "new mexico",
+      "guess": "Cliff River Springs",
+      "match": "Cliff River Springs",
+      "score": 1,
+      "property_id": "a8d0a032-2984-4d2e-82f8-6072214c6901",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-mexico/santa-fe/rancho-gallina/",
+      "slug": "rancho-gallina",
+      "city": "santa fe",
+      "region": "new mexico",
+      "guess": "Rancho Gallina",
+      "match": "Rancho La Puerta",
+      "score": 0.5,
+      "property_id": "a582b522-da3a-4ce6-b823-c52d9415bca7",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-york/ghent/collective-hudson-valley/",
+      "slug": "collective-hudson-valley",
+      "city": "ghent",
+      "region": "new york",
+      "guess": "Collective Hudson Valley",
+      "match": "Collective Retreats Hudson Valley",
+      "score": 1.1,
+      "property_id": "7595422f-257b-4506-b22a-eef9bee4e9ea",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-york/ithaca/ithaca-by-firelight-camps/",
+      "slug": "ithaca-by-firelight-camps",
+      "city": "ithaca",
+      "region": "new york",
+      "guess": "Ithaca By Firelight Camps",
+      "match": "Ithaca by Firelight Camp",
+      "score": 1.0166666666666666,
+      "property_id": "d732c43a-e231-4dfb-b535-65816db127e6",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-york/lake-luzerne/huttopia-adirondacks/",
+      "slug": "huttopia-adirondacks",
+      "city": "lake luzerne",
+      "region": "new york",
+      "guess": "Huttopia Adirondacks",
+      "match": "Huttopia Adirondacks",
+      "score": 1.35,
+      "property_id": "10e97c2d-9eaa-44e0-9942-8da3eafd8ae2",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-york/marlboro/the-glass-house/",
+      "slug": "the-glass-house",
+      "city": "marlboro",
+      "region": "new york",
+      "guess": "The Glass House",
+      "match": "Palmaïa - The House of AïA",
+      "score": 0.6666666666666666,
+      "property_id": "3fd0c119-c0b4-4ed7-a956-8979a5b2b5da",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-york/naples/mountain-horse-farm-bb-and-wellness-retreat/",
+      "slug": "mountain-horse-farm-bb-and-wellness-retreat",
+      "city": "naples",
+      "region": "new york",
+      "guess": "Mountain Horse Farm B&B And Wellness Retreat",
+      "match": "Milk & Honey Glamping and Wellness Retreat",
+      "score": 0.5,
+      "property_id": "e114dba1-6ed3-4c8e-9a95-759fb4e95238",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-york/new-york/camp-rockaway/",
+      "slug": "camp-rockaway",
+      "city": "new york",
+      "region": "new york",
+      "guess": "Camp Rockaway",
+      "match": "Camp Rockaway",
+      "score": 1,
+      "property_id": "6cd6d952-de9b-4177-989d-93580ed1368b",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/new-york/windham/eastwind/",
+      "slug": "eastwind",
+      "city": "windham",
+      "region": "new york",
+      "guess": "Eastwind",
+      "match": "Eastwind Hotels Windham",
+      "score": 0.6833333333333333,
+      "property_id": "4ae296fb-022e-48f3-a7b1-723f5e0544e2",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/newfoundland/joe-batts-arm/fogo-island-inn/",
+      "slug": "fogo-island-inn",
+      "city": "joe batts arm",
+      "region": "newfoundland",
+      "guess": "Fogo Island Inn",
+      "match": "Fogo Island Inn",
+      "score": 1,
+      "property_id": "4681be70-0d54-4b84-85b6-3df8221cf96a",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/north-carolina/boone/blue-bear-mountain-camp/",
+      "slug": "blue-bear-mountain-camp",
+      "city": "boone",
+      "region": "north carolina",
+      "guess": "Blue Bear Mountain Camp",
+      "match": "Blue Bear Mountain Camp",
+      "score": 1,
+      "property_id": "f8a24d87-aebc-4a05-83b4-5d7124519036",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/north-carolina/horse-shoe/moonbeam-bungalows/",
+      "slug": "moonbeam-bungalows",
+      "city": "horse shoe",
+      "region": "north carolina",
+      "guess": "Moonbeam Bungalows",
+      "match": "Moonbeam Bungalows",
+      "score": 1,
+      "property_id": "fe0f4c91-93f3-436d-800c-fceeb72da7dd",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/north-carolina/hot-springs/paint-rock-farm/",
+      "slug": "paint-rock-farm",
+      "city": "hot springs",
+      "region": "north carolina",
+      "guess": "Paint Rock Farm",
+      "match": "Paint Rock Farm",
+      "score": 1.35,
+      "property_id": "ddef014e-95c5-4184-95d8-46e41de1210e",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/nova-scotia/east-kemptville/trout-point-lodge/",
+      "slug": "trout-point-lodge",
+      "city": "east kemptville",
+      "region": "nova scotia",
+      "guess": "Trout Point Lodge",
+      "match": "Trout Point Lodge",
+      "score": 1.35,
+      "property_id": "004f20f9-2bfd-45eb-a380-f149c4dd8915",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/nova-scotia/hammonds-plains/east-coast-glamping-inc/",
+      "slug": "east-coast-glamping-inc",
+      "city": "hammonds plains",
+      "region": "nova scotia",
+      "guess": "East Coast Glamping Inc",
+      "match": "Rocky Mountains Glamping",
+      "score": 0.6,
+      "property_id": "fbaf3835-b8c7-4324-b361-85f09a31a849",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/oaxaca/brisas-de-zicatela/selina-puerto-escondido/",
+      "slug": "selina-puerto-escondido",
+      "city": "brisas de zicatela",
+      "region": "oaxaca",
+      "guess": "Selina Puerto Escondido",
+      "match": "Hotel Escondido",
+      "score": 0.4833333333333333,
+      "property_id": "13949eae-0db2-4783-af1a-d45fac4329a9",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/oaxaca/puerto-escondido/finca-las-nieves/",
+      "slug": "finca-las-nieves",
+      "city": "puerto escondido",
+      "region": "oaxaca",
+      "guess": "Finca Las Nieves",
+      "match": "Hotel Escondido",
+      "score": 0.5,
+      "property_id": "13949eae-0db2-4783-af1a-d45fac4329a9",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/ohio/chillicothe/wren-eagle-retreat/",
+      "slug": "wren-eagle-retreat",
+      "city": "chillicothe",
+      "region": "ohio",
+      "guess": "Wren Eagle Retreat",
+      "match": "Eagle's Nest Retreat",
+      "score": 0.6666666666666666,
+      "property_id": "380dfd79-5a59-4994-aa17-ded971f1f51a",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/ohio/glenmont/the-mohicans-treehouse/",
+      "slug": "the-mohicans-treehouse",
+      "city": "glenmont",
+      "region": "ohio",
+      "guess": "The Mohicans Treehouse",
+      "match": "The Mohicans Treehouse Resort and Wedding Venue",
+      "score": 0.7785714285714285,
+      "property_id": "2566465a-7934-4f99-8057-f1cc314d30d2",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/ontario/caledon-village/alabaster-acres/",
+      "slug": "alabaster-acres",
+      "city": "caledon village",
+      "region": "ontario",
+      "guess": "Alabaster Acres",
+      "match": "Alabaster Acres",
+      "score": 1.35,
+      "property_id": "7520ecda-90f9-4440-b99b-edbe5c8264b6",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/ontario/grafton/whispering-springs-wilderness-retreat/",
+      "slug": "whispering-springs-wilderness-retreat",
+      "city": "grafton",
+      "region": "ontario",
+      "guess": "Whispering Springs Wilderness Retreat",
+      "match": "Whispering Springs Wilderness Retreat",
+      "score": 1.35,
+      "property_id": "74cd8cb9-6719-421d-a987-dc658b3fa1e8",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/oregon/coos-bay/oceanside-beachfront-rv-resort/",
+      "slug": "oceanside-beachfront-rv-resort",
+      "city": "coos bay",
+      "region": "oregon",
+      "guess": "Oceanside Beachfront RV Resort",
+      "match": "Pictou Lodge Beachfront Resort",
+      "score": 0.5,
+      "property_id": "f73bacb7-df88-4d46-bb6d-bfda16739e1f",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/oregon/crescent/shelter-cove-resort-marina/",
+      "slug": "shelter-cove-resort-marina",
+      "city": "crescent",
+      "region": "oregon",
+      "guess": "Shelter Cove Resort Marina",
+      "match": "Dockside Marina & Resort",
+      "score": 0.5,
+      "property_id": "7b106bd5-69b4-4d7e-a318-66d754471149",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/oregon/dayton/the-vintages-trailer-resort/",
+      "slug": "the-vintages-trailer-resort",
+      "city": "dayton",
+      "region": "oregon",
+      "guess": "The Vintages Trailer Resort",
+      "match": "The Vintages Trailer Resort",
+      "score": 1.35,
+      "property_id": "036e226c-040d-457b-9a17-0a5c1736cb96",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/oregon/marcola/tipi-village-retreat/",
+      "slug": "tipi-village-retreat",
+      "city": "marcola",
+      "region": "oregon",
+      "guess": "Tipi Village Retreat",
+      "match": "Tipi Village Retreat",
+      "score": 1.35,
+      "property_id": "4338de66-62c4-401c-b917-b3be49563272",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/pennsylvania/shawnee-on-delaware/the-shawnee-inn-and-golf-resort/",
+      "slug": "the-shawnee-inn-and-golf-resort",
+      "city": "shawnee on delaware",
+      "region": "pennsylvania",
+      "guess": "The Shawnee Inn And Golf Resort",
+      "match": "Shawnee Inn & Golf Resort",
+      "score": 1.0166666666666666,
+      "property_id": "5467e778-a16a-4e2f-8560-2e57d8aca62c",
+      "is_glamping_property": "No"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/quebec/mont-tremblant/bel-air-resort-mont-tremblant/",
+      "slug": "bel-air-resort-mont-tremblant",
+      "city": "mont tremblant",
+      "region": "quebec",
+      "guess": "Bel Air Resort Mont Tremblant",
+      "match": "Bel Air Resort Mont-Tremblant",
+      "score": 1.35,
+      "property_id": "e75790e8-9aa9-40a7-8377-cbfbe307700e",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/quebec/sutton/huttopia-sutton/",
+      "slug": "huttopia-sutton",
+      "city": "sutton",
+      "region": "quebec",
+      "guess": "Huttopia Sutton",
+      "match": "Huttopia Sutton",
+      "score": 1.35,
+      "property_id": "db251b36-110d-4eb2-9650-f29eabba490a",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/quintana-roo/akumal/akumal-natura/",
+      "slug": "akumal-natura",
+      "city": "akumal",
+      "region": "quintana roo",
+      "guess": "Akumal Natura",
+      "match": "Akumal Natura Glamping",
+      "score": 1.1666666666666665,
+      "property_id": "96377bd9-1b06-4dc7-b9f6-4725eab8c1a9",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/quintana-roo/playa-del-carmen/eco-itaka-glamping/",
+      "slug": "eco-itaka-glamping",
+      "city": "playa del carmen",
+      "region": "quintana roo",
+      "guess": "Eco Itaka Glamping",
+      "match": "Riviera Maya Glamping",
+      "score": 0.8333333333333334,
+      "property_id": "940b564a-a848-4087-b783-0e6945fb3707",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/quintana-roo/tulum/joy-tulum/",
+      "slug": "joy-tulum",
+      "city": "tulum",
+      "region": "quintana roo",
+      "guess": "Joy Tulum",
+      "match": "Nomade Tulum",
+      "score": 1,
+      "property_id": "1ff99196-3086-455a-9c0c-6ac7f8ca1e10",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/quintana-roo/tulum/papaya-playa-project/",
+      "slug": "papaya-playa-project",
+      "city": "tulum",
+      "region": "quintana roo",
+      "guess": "Papaya Playa Project",
+      "match": "Papaya Playa Project",
+      "score": 1.5,
+      "property_id": "eca66e7b-7e7a-4c92-912d-90801e945512",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/quintana-roo/xpu-ha/serenity-luxury-tented-camp-by-xperience-hotels/",
+      "slug": "serenity-luxury-tented-camp-by-xperience-hotels",
+      "city": "xpu ha",
+      "region": "quintana roo",
+      "guess": "Serenity Luxury Tented Camp By Xperience Hotels",
+      "match": "Serenity Eco Luxury Tented Camp",
+      "score": 1.1666666666666665,
+      "property_id": "d53d0ff7-fc34-4a5f-a9e9-0d148af5f7e1",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/tennessee/townsend/little-arrow-outdoor-resort/",
+      "slug": "little-arrow-outdoor-resort",
+      "city": "townsend",
+      "region": "tennessee",
+      "guess": "Little Arrow Outdoor Resort",
+      "match": "Little Arrow Outdoor Resort",
+      "score": 1.35,
+      "property_id": "61dfc695-f6d6-4e47-921b-ed63f3e8427c",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/texas/bluffdale/the-hideaway-ranch/",
+      "slug": "the-hideaway-ranch",
+      "city": "bluffdale",
+      "region": "texas",
+      "guess": "The Hideaway Ranch",
+      "match": "The Griffin Ranch",
+      "score": 0.6666666666666666,
+      "property_id": "062455a0-63d5-4c83-b047-87df70420ee6",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/texas/johnson-city/walden-retreats-hill-country/",
+      "slug": "walden-retreats-hill-country",
+      "city": "johnson city",
+      "region": "texas",
+      "guess": "Walden Retreats Hill Country",
+      "match": "Walden Retreats Hill Country",
+      "score": 1.35,
+      "property_id": "680d47ad-5058-4231-965f-dc13472eba70",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/texas/kingsbury/wahwahtaysee-resort/",
+      "slug": "wahwahtaysee-resort",
+      "city": "kingsbury",
+      "region": "texas",
+      "guess": "Wahwahtaysee Resort",
+      "match": "Wahwahtaysee Resort",
+      "score": 1.35,
+      "property_id": "03f71ff5-8024-490c-b591-568be27c3e1d",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/texas/wimberley/collective-hill-country-a-retreat-at-montesino-ranch/",
+      "slug": "collective-hill-country-a-retreat-at-montesino-ranch",
+      "city": "wimberley",
+      "region": "texas",
+      "guess": "Collective Hill Country A Retreat At Montesino Ranch",
+      "match": "Collective Retreats Hill Country",
+      "score": 0.85,
+      "property_id": "abc84ce3-bf95-4fe2-be0e-a6480f0ad551",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/texas/wimberley/sinya-on-lone-man-creek/",
+      "slug": "sinya-on-lone-man-creek",
+      "city": "wimberley",
+      "region": "texas",
+      "guess": "Sinya On Lone Man Creek",
+      "match": "Sinya on Lone Man Creek",
+      "score": 1.35,
+      "property_id": "7824773f-426e-4eb0-b4a1-ee646595fb65",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/utah/boulder/boulder-mountain-guest-ranch/",
+      "slug": "boulder-mountain-guest-ranch",
+      "city": "boulder",
+      "region": "utah",
+      "guess": "Boulder Mountain Guest Ranch",
+      "match": "Boulder Mountain Guest Ranch",
+      "score": 1.35,
+      "property_id": "57202682-9390-450e-a6f8-4f0c013e83d5",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/utah/garden-city/conestoga-ranch/",
+      "slug": "conestoga-ranch",
+      "city": "garden city",
+      "region": "utah",
+      "guess": "Conestoga Ranch",
+      "match": "Conestoga Ranch",
+      "score": 1.35,
+      "property_id": "d45060d8-960a-4f27-adb4-ae36292e5186",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/utah/mt-carmel/zion-ponderosa-ranch-resort/",
+      "slug": "zion-ponderosa-ranch-resort",
+      "city": "mt carmel",
+      "region": "utah",
+      "guess": "Zion Ponderosa Ranch Resort",
+      "match": "Zion Ponderosa Ranch Resort",
+      "score": 1,
+      "property_id": "c9482aca-7023-4d29-a4c3-4a40faa9a4e1",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/utah/torrey/capitol-reef-resort/",
+      "slug": "capitol-reef-resort",
+      "city": "torrey",
+      "region": "utah",
+      "guess": "Capitol Reef Resort",
+      "match": "Capitol Reef Resort",
+      "score": 1.35,
+      "property_id": "1945066e-4470-4f26-a650-8d561cf5c371",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/vermont/jeffersonville/sterling-ridge-resort/",
+      "slug": "sterling-ridge-resort",
+      "city": "jeffersonville",
+      "region": "vermont",
+      "guess": "Sterling Ridge Resort",
+      "match": "Elk Ridge Resort",
+      "score": 0.6666666666666666,
+      "property_id": "641be990-887c-44c4-9e69-d8adc2e5ca34",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/virginia/luray/1-rock-tavern-river-kamp/",
+      "slug": "1-rock-tavern-river-kamp",
+      "city": "luray",
+      "region": "virginia",
+      "guess": "1 Rock Tavern River Kamp",
+      "match": "Pagosa River Domes",
+      "score": 0.6,
+      "property_id": "43b7c289-4abc-41d8-bde9-e51abd34f1d0",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/washington/carson/carson-ridge-luxury-cabins/",
+      "slug": "carson-ridge-luxury-cabins",
+      "city": "carson",
+      "region": "washington",
+      "guess": "Carson Ridge Luxury Cabins",
+      "match": "Carson Ridge Luxury Cabins",
+      "score": 1.35,
+      "property_id": "4c0f6b20-58d9-468e-a2a0-e137787ba686",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/washington/silver-lake/silver-cove-rv-resort/",
+      "slug": "silver-cove-rv-resort",
+      "city": "silver lake",
+      "region": "washington",
+      "guess": "Silver Cove RV Resort",
+      "match": "Long Cove Resort",
+      "score": 0.6666666666666666,
+      "property_id": "aa8d3879-a7dd-45ee-83f4-9d4cd5d92ef9",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/wyoming/saratoga/the-lodge-and-spa-at-brush-creek-ranch/",
+      "slug": "the-lodge-and-spa-at-brush-creek-ranch",
+      "city": "saratoga",
+      "region": "wyoming",
+      "guess": "The Lodge And Spa At Brush Creek Ranch",
+      "match": "The Lodge and Spa at Brush Creek Ranch",
+      "score": 1.35,
+      "property_id": "95e82c7d-aae5-4a90-bede-b58b5fcde73c",
+      "is_glamping_property": "Yes"
+    },
+    {
+      "url": "https://www.glamping.com/destination/north-america/wyoming/shell/the-hideout-lodge-guest-ranch/",
+      "slug": "the-hideout-lodge-guest-ranch",
+      "city": "shell",
+      "region": "wyoming",
+      "guess": "The Hideout Lodge Guest Ranch",
+      "match": "The Hideout Lodge & Guest Ranch",
+      "score": 1.35,
+      "property_id": "b98bd165-b50f-436c-af15-a7e4828c75bb",
+      "is_glamping_property": "Yes"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import OpenAI from 'openai';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { enforceDailyQuota } from '@/lib/upstash';
+import { quotaGate } from '@/lib/sage-ai/quota-gate';
 import {
   embedText,
   EMBEDDING_DIM,
@@ -20,32 +20,6 @@ import {
 const QUOTA_PER_DAY = Number(
   process.env.SAGE_AI_QUOTA_SEMANTIC_SEARCH ?? 100
 );
-
-async function quotaGate(
-  toolName: string,
-  userId: string | undefined
-): Promise<{ error: string; data: null } | null> {
-  // semantic_search calls OpenAI embeddings (paid) when given a free-text
-  // query. Require a user so we can rate-limit per identity.
-  if (!userId) {
-    return {
-      error: `${toolName} requires an authenticated user to enforce daily quota.`,
-      data: null,
-    };
-  }
-  const { allowed, used } = await enforceDailyQuota(
-    toolName,
-    userId,
-    QUOTA_PER_DAY
-  );
-  if (!allowed) {
-    return {
-      error: `Daily quota exceeded for ${toolName} (used ${used} of ${QUOTA_PER_DAY}). Try again tomorrow or ask an admin to raise the limit.`,
-      data: null,
-    };
-  }
-  return null;
-}
 
 async function fetchPropertyEmbedding(
   supabase: SupabaseClient,
@@ -148,7 +122,11 @@ Provide EITHER \`query\` (text) OR \`similar_to_property_id\` (use that property
           if (!apiKey) {
             return { error: 'OPENAI_API_KEY is not configured', data: null };
           }
-          const gate = await quotaGate('semantic_search_properties', userId);
+          const gate = await quotaGate(
+            'semantic_search_properties',
+            userId,
+            QUOTA_PER_DAY
+          );
           if (gate) return gate;
           try {
             // Cap embedding latency at 15s. The OpenAI SDK retries 2x by

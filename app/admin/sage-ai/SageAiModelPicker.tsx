@@ -2,14 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Brain, Check, ChevronDown, Globe } from 'lucide-react';
+import { Brain, Check, ChevronDown, Globe, Sparkles } from 'lucide-react';
 import {
-  SAGE_AI_CHAT_DEFAULT_MODEL,
   SAGE_AI_CHAT_MODELS,
+  SAGE_AI_DEFAULT_MODEL_SELECTION,
   type SageAiChatGatewayModelId,
   type SageAiModelSelection,
   isAllowedSageAiChatModel,
   migrateLegacySageAiChatModelId,
+  sageAiModelForChatRequest,
 } from '@/lib/sage-ai/sage-ai-chat-models';
 
 export const SAGE_AI_MODEL_STORAGE_KEY = 'sage-ai-model-selection-v1';
@@ -19,39 +20,54 @@ import { SAGE_AI_WEB_RESEARCH_UI_ENABLED } from '@/lib/sage-ai/server-capabiliti
 /** When true, the Web Research toggle is interactive; server also requires `SAGE_AI_WEB_RESEARCH_ENABLED=true`. */
 export { SAGE_AI_WEB_RESEARCH_UI_ENABLED };
 
-/** Legacy `{ k: 'auto' | 'premium' | 'm', id? }` or current `{ modelId }`. */
+/** Legacy `{ k: 'auto' | 'premium' | 'm', id? }`, `{ modelId }`, or current `{ mode }`. */
 type StoredSelection =
   | { k: 'auto' }
   | { k: 'premium' }
   | { k: 'm'; id: string }
-  | { modelId: string };
+  | { modelId: string }
+  | { mode: 'auto' }
+  | { mode: 'fixed'; modelId: string };
 
-export function sageAiSelectionToStorage(s: SageAiModelSelection): Pick<SageAiModelSelection, 'modelId'> {
-  return { modelId: s.modelId };
+export function sageAiSelectionToStorage(s: SageAiModelSelection): StoredSelection {
+  if (s.mode === 'auto') return { mode: 'auto' };
+  return { mode: 'fixed', modelId: s.modelId };
 }
 
 export function sageAiSelectionFromStorage(raw: unknown): SageAiModelSelection | null {
   if (!raw || typeof raw !== 'object') return null;
-  if ('modelId' in raw && typeof (raw as { modelId: unknown }).modelId === 'string') {
-    const id = migrateLegacySageAiChatModelId((raw as { modelId: string }).modelId);
-    if (isAllowedSageAiChatModel(id)) return { modelId: id };
+
+  if ('mode' in raw) {
+    const mode = (raw as { mode: unknown }).mode;
+    if (mode === 'auto') return { mode: 'auto' };
+    if (mode === 'fixed' && typeof (raw as { modelId?: unknown }).modelId === 'string') {
+      const modelId = (raw as unknown as { modelId: string }).modelId;
+      const id = migrateLegacySageAiChatModelId(modelId);
+      if (isAllowedSageAiChatModel(id)) return { mode: 'fixed', modelId: id };
+    }
     return null;
   }
+
+  if ('modelId' in raw && typeof (raw as { modelId: unknown }).modelId === 'string') {
+    const id = migrateLegacySageAiChatModelId((raw as { modelId: string }).modelId);
+    if (isAllowedSageAiChatModel(id)) return { mode: 'fixed', modelId: id };
+    return null;
+  }
+
   const o = raw as StoredSelection;
-  if ('k' in o && o.k === 'auto') return { modelId: SAGE_AI_CHAT_DEFAULT_MODEL };
-  if ('k' in o && o.k === 'premium') return { modelId: SAGE_AI_CHAT_DEFAULT_MODEL };
+  if ('k' in o && o.k === 'auto') return { mode: 'auto' };
+  if ('k' in o && o.k === 'premium') return { mode: 'fixed', modelId: 'anthropic/claude-sonnet-5' };
   if ('k' in o && o.k === 'm' && typeof o.id === 'string') {
     const id = migrateLegacySageAiChatModelId(o.id);
-    if (isAllowedSageAiChatModel(id)) return { modelId: id };
+    if (isAllowedSageAiChatModel(id)) return { mode: 'fixed', modelId: id };
   }
   return null;
 }
 
 const MODEL_LABEL_KEYS: Record<SageAiChatGatewayModelId, string> = {
   'anthropic/claude-haiku-4.5': 'modelAnthropicHaiku45',
+  'anthropic/claude-sonnet-5': 'modelAnthropicSonnet5',
 };
-
-const SINGLE_MODEL = SAGE_AI_CHAT_MODELS.length === 1;
 
 const TIER_LABEL_KEYS = {
   fast: 'modelTierFast',
@@ -63,8 +79,12 @@ export function sageAiTriggerLabel(
   selection: SageAiModelSelection,
   t: (key: string) => string
 ): string {
+  if (selection.mode === 'auto') return t('modelAuto');
   return t(MODEL_LABEL_KEYS[selection.modelId]);
 }
+
+/** Re-export for transport body wiring. */
+export { sageAiModelForChatRequest };
 
 type SageAiModelPickerProps = {
   selection: SageAiModelSelection;
@@ -100,15 +120,15 @@ export function SageAiModelPicker({
   }, [open]);
 
   const rowSelected = useCallback(
-    (id: SageAiChatGatewayModelId) => selection.modelId === id,
-    [selection.modelId]
+    (next: SageAiModelSelection) => {
+      if (selection.mode === 'auto' && next.mode === 'auto') return true;
+      if (selection.mode === 'fixed' && next.mode === 'fixed') {
+        return selection.modelId === next.modelId;
+      }
+      return false;
+    },
+    [selection]
   );
-
-  if (SINGLE_MODEL && !webResearchServerEnabled) {
-    return null;
-  }
-
-  const showModelList = !SINGLE_MODEL;
 
   return (
     <div className="flex min-w-0 items-center gap-1" ref={rootRef}>
@@ -117,7 +137,7 @@ export function SageAiModelPicker({
           type="button"
           disabled={disabled}
           onClick={() => setOpen((o) => !o)}
-          className="flex h-8 max-w-[200px] items-center gap-1 rounded-lg px-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100 disabled:opacity-40 dark:text-gray-100 dark:hover:bg-gray-800 min-w-0"
+          className="flex h-8 max-w-[220px] items-center gap-1 rounded-lg px-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100 disabled:opacity-40 dark:text-gray-100 dark:hover:bg-gray-800 min-w-0"
           aria-expanded={open}
           aria-haspopup="listbox"
           aria-label={t('modelTriggerAria')}
@@ -167,10 +187,33 @@ export function SageAiModelPicker({
                 </div>
               </div>
             ) : null}
-            {showModelList ? (
             <div className="max-h-[min(50vh,360px)] overflow-y-auto px-1 py-1" role="listbox">
+              <button
+                type="button"
+                role="option"
+                aria-selected={selection.mode === 'auto'}
+                onClick={() => {
+                  onSelectionChange(SAGE_AI_DEFAULT_MODEL_SELECTION);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <span className="truncate font-medium text-gray-900 dark:text-gray-100">
+                    {t('modelAuto')}
+                  </span>
+                  <Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-sage-600 dark:text-sage-400" aria-hidden />
+                  <span className="flex-shrink-0 text-xs text-gray-400 dark:text-gray-500">
+                    {t('modelAutoHint')}
+                  </span>
+                </div>
+                {selection.mode === 'auto' ? (
+                  <Check className="h-4 w-4 flex-shrink-0 text-gray-700 dark:text-gray-200" />
+                ) : null}
+              </button>
               {SAGE_AI_CHAT_MODELS.map((m) => {
-                const check = rowSelected(m.id);
+                const option: SageAiModelSelection = { mode: 'fixed', modelId: m.id };
+                const check = rowSelected(option);
 
                 return (
                   <button
@@ -179,7 +222,7 @@ export function SageAiModelPicker({
                     role="option"
                     aria-selected={check}
                     onClick={() => {
-                      onSelectionChange({ modelId: m.id });
+                      onSelectionChange(option);
                       setOpen(false);
                     }}
                     className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-neutral-50/90 dark:hover:bg-neutral-900/40"
@@ -198,7 +241,6 @@ export function SageAiModelPicker({
                 );
               })}
             </div>
-            ) : null}
           </div>
         )}
       </div>

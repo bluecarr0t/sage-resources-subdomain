@@ -6,6 +6,7 @@ import {
 describe('getPropertyTypeDotColor', () => {
   it('returns canonical colors for form values', () => {
     expect(getPropertyTypeDotColor('Glamping')).toBe(PROPERTY_TYPE_DOT_COLORS.Glamping);
+    expect(getPropertyTypeDotColor('Outdoor Resort')).toBe(PROPERTY_TYPE_DOT_COLORS['Outdoor Resort']);
     expect(getPropertyTypeDotColor('RV Resort')).toBe(PROPERTY_TYPE_DOT_COLORS['RV Resort']);
     expect(getPropertyTypeDotColor('RV Park')).toBe(PROPERTY_TYPE_DOT_COLORS['RV Park']);
     expect(getPropertyTypeDotColor('Marina')).toBe(PROPERTY_TYPE_DOT_COLORS.Marina);

@@ -11,6 +11,8 @@
 import { NextResponse } from 'next/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { requireAdminAuth } from '@/lib/require-admin-auth';
+import { sageMessagesArraySchema } from '@/lib/sage-ai/route-schemas';
+import { maybeUpdateThreadSummary } from '@/lib/sage-ai/thread-summary';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,9 +62,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  if (!body.messages || !Array.isArray(body.messages)) {
-    return NextResponse.json({ error: 'messages must be an array' }, { status: 400 });
+  const messagesResult = sageMessagesArraySchema.safeParse(body.messages);
+  if (!messagesResult.success) {
+    return NextResponse.json(
+      { error: 'messages must be an array of { role, parts | content }' },
+      { status: 400 }
+    );
   }
+  body.messages = messagesResult.data;
   if (body.messages.length > MAX_MESSAGES_PER_SESSION) {
     return NextResponse.json(
       {
@@ -79,40 +86,59 @@ export async function POST(request: Request) {
   const title = (body.title || generateSessionTitle(body.messages)).slice(0, MAX_TITLE_LENGTH);
 
   if (body.id) {
-    const { data: existing } = await authResult.supabase
+    const { data: existing, error: lookupError } = await authResult.supabase
       .from('sage_ai_sessions')
       .select('id')
       .eq('id', body.id)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (existing) {
-      const { error } = await authResult.supabase
-        .from('sage_ai_sessions')
-        .update({
-          title,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', body.id)
-        .eq('user_id', userId);
-
-      if (error) {
-        console.error('[sage-ai/sessions] Update error:', error);
-        return NextResponse.json({ error: 'Failed to update session' }, { status: 500 });
-      }
-
-      try {
-        await syncMessages(authResult.supabase, body.id, userId, body.messages);
-      } catch (err) {
-        console.error('[sage-ai/sessions] sync error during update:', err);
-        return NextResponse.json(
-          { error: 'Failed to persist messages' },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({ id: body.id, title });
+    if (lookupError) {
+      console.error('[sage-ai/sessions] Lookup error:', lookupError);
+      return NextResponse.json({ error: 'Failed to load session' }, { status: 500 });
     }
+
+    // An explicit id that the caller does not own (or that no longer exists)
+    // must NOT silently create a new session — that orphans the client's
+    // conversation and could mask attempts to write to another user's id.
+    if (!existing) {
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    }
+
+    const { error } = await authResult.supabase
+      .from('sage_ai_sessions')
+      .update({
+        title,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', body.id)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('[sage-ai/sessions] Update error:', error);
+      return NextResponse.json({ error: 'Failed to update session' }, { status: 500 });
+    }
+
+    try {
+      await syncMessages(authResult.supabase, body.id, userId, body.messages);
+    } catch (err) {
+      console.error('[sage-ai/sessions] sync error during update:', err);
+      return NextResponse.json(
+        { error: 'Failed to persist messages' },
+        { status: 500 }
+      );
+    }
+
+    void maybeUpdateThreadSummary({
+      supabase: authResult.supabase,
+      sessionId: body.id,
+      userId,
+      messages: body.messages,
+    }).catch((err) => {
+      console.error('[sage-ai/sessions] thread summary failed', err);
+    });
+
+    return NextResponse.json({ id: body.id, title });
   }
 
   const { data, error } = await authResult.supabase
@@ -138,6 +164,15 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+
+  void maybeUpdateThreadSummary({
+    supabase: authResult.supabase,
+    sessionId: data.id,
+    userId,
+    messages: body.messages,
+  }).catch((err) => {
+    console.error('[sage-ai/sessions] thread summary failed', err);
+  });
 
   return NextResponse.json({ id: data.id, title });
 }

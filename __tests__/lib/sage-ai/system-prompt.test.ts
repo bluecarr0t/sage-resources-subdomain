@@ -29,4 +29,29 @@ describe('buildSageAiSystemPrompt', () => {
     expect(built).toContain('Semantic search (unavailable)');
     expect(built).toContain('Web research (disabled)');
   });
+
+  it('routes RV questions to the merged query_ota tool (no stale tool names)', () => {
+    expect(SYSTEM_PROMPT_FULL).toContain('query_ota');
+    expect(SYSTEM_PROMPT_FULL).not.toContain('query_hipcamp');
+    expect(SYSTEM_PROMPT_FULL).not.toContain('query_campspot');
+    expect(SYSTEM_PROMPT_FULL).not.toContain('query_roverpass');
+  });
+
+  it('keeps the core behavioral contracts in the always-on prompt', () => {
+    const minimal = buildSageAiSystemPrompt({
+      webResearchEnabled: false,
+      geoToolsEnabled: false,
+      semanticSearchEnabled: false,
+      composedToolsEnabled: false,
+      visualizationToolsEnabled: false,
+    });
+    // Data-integrity + unit-math hard rules.
+    expect(minimal).toContain('Data Integrity');
+    expect(minimal).toContain('quantity_of_units');
+    expect(minimal).toContain('count_unique_properties');
+    // UI behavioral contracts.
+    expect(minimal).toContain('UNTRUSTED_CONTENT');
+    expect(minimal).toContain('suggest_followups');
+    expect(minimal).toContain('clarifying_question');
+  });
 });

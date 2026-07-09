@@ -39,6 +39,9 @@ const requestSchema = z.object({
   market_type: z.string().min(2).max(40).optional().nullable(),
 });
 
+// requireRole mirrors the `generate_feasibility_section` tool's admin-only
+// gate (assertToolRole in composed-tools): without it, any active managed
+// user (author role) could bypass the tool restriction via direct POST.
 export const POST = withAdminAuth(async (request: NextRequest, auth) => {
   const contentLength = Number(request.headers.get('content-length') ?? '0');
   if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
@@ -114,4 +117,4 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
       'Cache-Control': 'no-store',
     },
   });
-});
+}, { requireRole: 'admin' });

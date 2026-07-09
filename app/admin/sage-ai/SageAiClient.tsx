@@ -3,74 +3,44 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useChat, type UIMessage } from '@ai-sdk/react';
-import { DefaultChatTransport, isReasoningUIPart, isToolUIPart } from 'ai';
-import {
-  isDashboardPayload,
-  isMapPayload,
-} from '@/lib/sage-ai/ui-parts';
-import { CanvasDashboard } from './CanvasDashboard';
-import { SageAiMap } from './SageAiMap';
-import {
-  FeasibilitySectionPreview,
-  type FeasibilitySectionPreviewPayload,
-} from './FeasibilitySectionPreview';
-import { isFeasibilityDocxPayload } from '@/lib/sage-ai/feasibility-docx-payload';
+import { DefaultChatTransport, isToolUIPart } from 'ai';
 import { useTranslations } from 'next-intl';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import {
   Send,
-  Download,
-  FileSpreadsheet,
-  Loader2,
-  Database,
   AlertCircle,
-  Trash2,
-  History,
   Plus,
   X,
-  Bookmark,
-  BookmarkPlus,
-  Play,
-  PanelLeftClose,
   PanelLeft,
   Tent,
-  Copy,
-  Check,
   Square,
   ArrowDown,
-  Pencil,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { Modal, ModalContent } from '@/components/ui/Modal';
-import { CollapsibleMarkdownPre } from '@/lib/sage-ai/CollapsibleMarkdownPre';
-import { FeedbackControls } from './FeedbackControls';
-import { linkifyPastReportRefsInMarkdown } from '@/lib/sage-ai/linkify-past-report-refs';
-import {
-  downloadCsvFromData,
-  downloadXlsxFromData,
-  downloadXlsxFromSheets,
-  generateExportFilename,
-  type SpreadsheetExportSheet,
-} from '@/lib/sage-ai/csv-download';
-import { PythonCodeBlock } from '@/lib/sage-ai/pyodide/PythonCodeBlock';
 import { isPyodideEnvironmentError } from '@/lib/sage-ai/pyodide/is-pyodide-environment-error';
 import {
   useAnyPythonBlockRunActive,
   abortAllPythonBlockRuns,
 } from '@/lib/sage-ai/pyodide/python-execution-bridge';
 import {
-  SAGE_AI_CHAT_DEFAULT_MODEL,
+  SAGE_AI_DEFAULT_MODEL_SELECTION,
   resolveSageAiGatewayModelId,
   type SageAiModelSelection,
 } from '@/lib/sage-ai/sage-ai-chat-models';
 import { generateUniqueId } from '@/lib/random-id';
 import {
+  SageAiModelPicker,
+  sageAiModelForChatRequest,
   sageAiSelectionFromStorage,
   sageAiSelectionToStorage,
+  sageAiTriggerLabel,
   SAGE_AI_MODEL_STORAGE_KEY,
 } from './SageAiModelPicker';
+import { SageAiMessageRow } from './SageAiMessageRow';
+import {
+  SageAiSidebar,
+  type SageAiPendingConfirm,
+  type SidebarTab,
+} from './SageAiSidebar';
 import { useSageAiServerCapabilities } from './useSageAiServerCapabilities';
 import { isSageAiTimeoutError } from '@/lib/sage-ai/chat-limits';
 import { SageAiFieldGuidePanel } from './SageAiFieldGuidePanel';
@@ -88,43 +58,6 @@ import {
   SAGE_AI_FROM_MARKET_REPORT_SEARCH_VALUE,
 } from '@/lib/sage-ai/market-report-bootstrap';
 import { SAGE_AI_CLIENT_STREAM_RESUME_ENABLED } from '@/lib/sage-ai/server-capabilities';
-
-type SageAiPendingConfirm =
-  | { kind: 'deleteSession'; sessionId: string; title: string }
-  | { kind: 'clearHistory' }
-  | { kind: 'deleteSavedQuery'; queryId: string; name: string };
-
-/**
- * Whitelist of HTML tags / attributes the assistant is allowed to render via
- * `<ReactMarkdown>`. We start from `defaultSchema` (which already strips
- * scripts/iframes/event handlers) and add the few attributes our markdown
- * relies on — `className` for prose styling, `target/rel` so our custom `a`
- * component can produce an external-link affordance.
- *
- * Why this matters: assistant output is partly model-generated and partly
- * scraped (UNTRUSTED_CONTENT) — without sanitization, a model that decides
- * to emit raw `<img onerror>` or `<script>` would execute in the admin UI.
- */
-const SAGE_AI_MARKDOWN_SANITIZE_SCHEMA = {
-  ...defaultSchema,
-  attributes: {
-    ...defaultSchema.attributes,
-    a: [
-      ...(defaultSchema.attributes?.a ?? []),
-      'target',
-      'rel',
-    ],
-    code: [...(defaultSchema.attributes?.code ?? []), 'className'],
-    span: [...(defaultSchema.attributes?.span ?? []), 'className'],
-    div: [...(defaultSchema.attributes?.div ?? []), 'className'],
-    pre: [...(defaultSchema.attributes?.pre ?? []), 'className'],
-    table: [...(defaultSchema.attributes?.table ?? []), 'className'],
-    th: [...(defaultSchema.attributes?.th ?? []), 'className'],
-    td: [...(defaultSchema.attributes?.td ?? []), 'className'],
-  },
-};
-
-type SidebarTab = 'history' | 'saved';
 
 function userMessagePlainText(message: UIMessage): string {
   const textParts = message.parts.filter((p) => p.type === 'text') as Array<{ type: 'text'; text: string }>;
@@ -166,9 +99,9 @@ export default function SageAiClient() {
   const [pythonRetryCount, setPythonRetryCount] = useState(0);
   /** At most one LLM auto-fix message per session; incremented synchronously to avoid duplicate sends when multiple Python blocks fail in one render. */
   const pythonAutoFixSentRef = useRef(0);
-  const [modelSelection, setModelSelection] = useState<SageAiModelSelection>({
-    modelId: SAGE_AI_CHAT_DEFAULT_MODEL,
-  });
+  const [modelSelection, setModelSelection] = useState<SageAiModelSelection>(
+    SAGE_AI_DEFAULT_MODEL_SELECTION
+  );
   /** Tavily/Firecrawl; only sent to API when UI flag allows and server env permits. */
   const [webResearchEnabled, setWebResearchEnabled] = useState(false);
   const serverCapabilities = useSageAiServerCapabilities();
@@ -308,7 +241,7 @@ export default function SageAiClient() {
             messages,
             trigger,
             messageId,
-            model: resolveSageAiGatewayModelId(modelSelectionRef.current),
+            model: sageAiModelForChatRequest(modelSelectionRef.current),
             webResearch: webResearchRef.current,
             sessionId: sessionIdForChatRef.current,
           },
@@ -421,31 +354,44 @@ export default function SageAiClient() {
     return () => clearTimeout(timer);
   }, [toastMessage]);
 
-  /** Stable ref for `PythonCodeBlock` so `handleRun` is not re-created on every parent render. */
+  /** Mirror of `lastQueryData`; lets the getter below stay referentially stable. */
+  const lastQueryDataValueRef = useRef<Record<string, unknown>[] | null>(null);
+  lastQueryDataValueRef.current = lastQueryData;
+  /**
+   * Stable getter for `PythonCodeBlock` (via memoized message rows): never
+   * re-created, reads the latest dataset from the ref at run time.
+   */
   const getInjectedQueryData = useCallback((): Record<string, unknown>[] | null => {
-    return lastQueryData;
-  }, [lastQueryData]);
+    return lastQueryDataValueRef.current;
+  }, []);
 
+  /** Stable: reads everything through refs so memoized rows never re-render because of it. */
   const handlePythonError = useCallback(
     (error: string, code: string) => {
       if (isPyodideEnvironmentError(error)) {
-        showToast(t('pyodideEnvironmentToast'));
+        showToastRef.current(tRef.current('pyodideEnvironmentToast'));
         return;
       }
       if (pythonAutoFixSentRef.current >= 1) return;
       pythonAutoFixSentRef.current += 1;
       setPythonRetryCount(pythonAutoFixSentRef.current);
-      sendMessage({
+      sendMessageRef.current({
         text: `The Python code failed with this error:\n\n\`\`\`\n${error}\n\`\`\`\n\nOriginal code:\n\`\`\`python\n${code}\n\`\`\`\n\nPlease analyze the error and generate fixed Python code that will work correctly.`,
       });
     },
-    [sendMessage, showToast, t]
+    []
   );
 
+  /** Mirror editing state into refs so `submitEditMessage` stays stable across edit keystrokes. */
+  const editingMessageIdRef = useRef<string | null>(null);
+  editingMessageIdRef.current = editingMessageId;
+  const editingDraftRef = useRef('');
+  editingDraftRef.current = editingDraft;
+
   const submitEditMessage = useCallback(() => {
-    const messageId = editingMessageId;
+    const messageId = editingMessageIdRef.current;
     if (!messageId) return;
-    const draft = editingDraft.trim();
+    const draft = editingDraftRef.current.trim();
     if (!draft) return;
     const idx = messagesRef.current.findIndex((m) => m.id === messageId);
     if (idx === -1) {
@@ -459,8 +405,36 @@ export default function SageAiClient() {
     setMessages(messagesRef.current.slice(0, idx));
     setEditingMessageId(null);
     setEditingDraft('');
-    sendMessage({ text: draft });
-  }, [editingDraft, editingMessageId, sendMessage, setMessages]);
+    sendMessageRef.current({ text: draft });
+  }, [setMessages]);
+
+  /** Stable send wrapper for memoized rows (clarifying-question / follow-up chips). */
+  const handleSendMessageText = useCallback((text: string) => {
+    sendMessageRef.current({ text });
+  }, []);
+
+  /** Stable per-message feedback updater for memoized rows. */
+  const handleFeedbackChange = useCallback(
+    (messageId: string, next: { rating: 1 | -1 } | null) => {
+      setFeedbackBySessionMessage((prev) => {
+        if (next === null) {
+          const { [messageId]: _removed, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [messageId]: next };
+      });
+    },
+    []
+  );
+
+  /** Stable ref registrar for user message rows (sticky-prompt scroll tracking). */
+  const registerUserMessageEl = useCallback(
+    (id: string, el: HTMLDivElement | null) => {
+      if (el) userMessageRowRefs.current.set(id, el);
+      else userMessageRowRefs.current.delete(id);
+    },
+    []
+  );
 
   useEffect(() => {
     if (!webResearchServerEnabled && webResearchEnabled) {
@@ -468,26 +442,36 @@ export default function SageAiClient() {
     }
   }, [webResearchServerEnabled, webResearchEnabled]);
 
+  // Debounced auto-save. Keyed on the `status` transition to 'ready' plus the
+  // message count — NOT the full `messages` array, which gets a new identity on
+  // every streaming token and used to re-run this effect (clear + re-arm the
+  // debounce) hundreds of times per response. The saved payload is read from
+  // `messagesRef` inside the timeout so it is always the latest snapshot.
   useEffect(() => {
-    if (messages.length > 0 && status === 'ready') {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-      saveTimeoutRef.current = setTimeout(() => {
-        saveSession(messages, currentSessionIdRef.current);
-      }, 2000);
-    }
+    if (status !== 'ready' || messages.length === 0) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      saveSession(messagesRef.current, currentSessionIdRef.current);
+    }, 2000);
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
-  }, [messages, status, saveSession]);
+  }, [messages.length, status, saveSession, saveTimeoutRef, currentSessionIdRef]);
 
-  /** Persist session on first user turn so feedback works on the first assistant reply. */
+  /**
+   * Persist session on first user turn so feedback works on the first assistant
+   * reply. Keyed on `messages.length` + `status` (not the full array) so it
+   * doesn't re-run per streaming token; `earlySessionSaveRef` already makes it
+   * once-per-session.
+   */
   useEffect(() => {
     if (currentSessionIdRef.current || earlySessionSaveRef.current) return;
     if (status !== 'submitted' && status !== 'streaming') return;
-    if (!messages.some((m) => m.role === 'user')) return;
+    const msgs = messagesRef.current;
+    if (!msgs.some((m) => m.role === 'user')) return;
     earlySessionSaveRef.current = true;
-    void saveSession(messages, null);
-  }, [messages, status, saveSession]);
+    void saveSession(msgs, null);
+  }, [messages.length, status, saveSession, currentSessionIdRef]);
 
   useEffect(() => {
     try {
@@ -579,6 +563,26 @@ export default function SageAiClient() {
     return 0;
   }, [messages]);
 
+  /**
+   * Fingerprint of the last assistant message's tool parts: message id, part
+   * count, and how many tool parts have reached `output-available`. Changes
+   * when a tool result lands (including in-place `state` transitions that
+   * don't change the part count) but NOT on every streamed text token — used
+   * to gate the `lastQueryData` scan below.
+   */
+  const lastAssistantToolOutputKey = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i]!;
+      if (m.role !== 'assistant') continue;
+      let outputCount = 0;
+      for (const p of m.parts) {
+        if (isToolUIPart(p) && p.state === 'output-available') outputCount += 1;
+      }
+      return `${m.id}:${m.parts.length}:${outputCount}`;
+    }
+    return '';
+  }, [messages]);
+
   useEffect(() => {
     scheduleStickyUserPromptUpdate();
   }, [
@@ -653,13 +657,19 @@ export default function SageAiClient() {
   // `part.output` object identity: the AI SDK can replace that object on every
   // `messages` update, which re-fired this effect and called `setLastQueryData` every
   // render (Maximum update depth exceeded). We use a stable fingerprint instead.
+  //
+  // Re-keyed on `lastAssistantToolOutputKey` + `status` (instead of the full
+  // `messages` array) so the full history scan runs only when a tool output
+  // lands or streaming finishes — not on every streamed token. Message data is
+  // read from `messagesRef` to keep the deps minimal.
   useEffect(() => {
     let latestSource: unknown = null;
     let latestData: Record<string, unknown>[] | null = null;
     let fingerprint: string | null = null;
 
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const message = messages[i];
+    const scanMessages = messagesRef.current;
+    for (let i = scanMessages.length - 1; i >= 0; i--) {
+      const message = scanMessages[i];
       if (message.role !== 'assistant') continue;
       for (let j = message.parts.length - 1; j >= 0; j--) {
         const part = message.parts[j];
@@ -710,7 +720,7 @@ export default function SageAiClient() {
     lastQueryDataFingerprintRef.current = fingerprint;
     if (latestSource != null) lastQueryDataSourceRef.current = latestSource;
     if (latestData != null) setLastQueryData(latestData);
-  }, [messages]);
+  }, [lastAssistantToolOutputKey, status, messages.length]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -810,319 +820,42 @@ export default function SageAiClient() {
     e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
   };
 
-  const extractExportData = (data: unknown): Record<string, unknown>[] => {
-    if (!data || typeof data !== 'object') return [];
-
-    if ('data' in data && Array.isArray((data as { data: unknown }).data)) {
-      return (data as { data: Record<string, unknown>[] }).data;
-    }
-    if ('aggregates' in data && Array.isArray((data as { aggregates: unknown }).aggregates)) {
-      return (data as { aggregates: Record<string, unknown>[] }).aggregates;
-    }
-    if ('values' in data && Array.isArray((data as { values: unknown }).values)) {
-      const values = (data as { values: unknown[]; column?: string }).values;
-      const column = (data as { column?: string }).column ?? 'value';
-      return values.map((v) => ({ [column]: v }));
-    }
-    return [];
-  };
-
-  const extractExportSheets = (data: unknown): SpreadsheetExportSheet[] => {
-    if (!data || typeof data !== 'object') return [];
-    if ('export_sheets' in data && Array.isArray((data as { export_sheets: unknown }).export_sheets)) {
-      return (data as { export_sheets: SpreadsheetExportSheet[] }).export_sheets;
-    }
-    return [];
-  };
-
-  const otaExportFilenameStem = (data: unknown, toolName: string): string => {
-    if (toolName === 'export_ota_property_monthly_rates' && data && typeof data === 'object') {
-      const o = data as {
-        location_label?: string;
-        zip?: string | null;
-        radius_miles?: number;
-      };
-      const location = o.location_label || o.zip || 'export';
-      const radius = o.radius_miles ?? 50;
-      const slug = String(location)
-        .replace(/[^\w]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-      return `ota-monthly-${slug}-${radius}mi`;
-    }
-    return generateExportFilename(`sage-ai-${toolName}`);
-  };
-
-  const resolveDownloadPayload = async (
-    data: unknown,
-  ): Promise<{ rows: Record<string, unknown>[]; sheets: SpreadsheetExportSheet[] }> => {
-    if (data && typeof data === 'object' && 'export_fetch' in data) {
-      const fetchParams = (data as { export_fetch: unknown }).export_fetch;
-      if (fetchParams && typeof fetchParams === 'object') {
-        const res = await fetch('/api/admin/sage-ai/ota-monthly-export', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(fetchParams),
-        });
-        if (!res.ok) {
-          const err = (await res.json().catch(() => null)) as { error?: string } | null;
-          throw new Error(err?.error ?? 'Failed to load export data');
-        }
-        const full = (await res.json()) as {
-          data?: Record<string, unknown>[];
-          export_sheets?: SpreadsheetExportSheet[];
-        };
-        return {
-          rows: full.data ?? [],
-          sheets: full.export_sheets ?? [],
-        };
-      }
-    }
-
-    return {
-      rows: extractExportData(data),
-      sheets: extractExportSheets(data),
-    };
-  };
-
-  const handleDownloadCsv = async (data: unknown, toolName: string) => {
-    try {
-      const { rows } = await resolveDownloadPayload(data);
-      if (rows.length > 0) {
-        downloadCsvFromData(rows, `${otaExportFilenameStem(data, toolName)}.csv`);
-      }
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : t('toastFailedExportXlsx'));
-    }
-  };
-
-  const handleDownloadXlsx = async (data: unknown, toolName: string) => {
-    try {
-      const { rows, sheets } = await resolveDownloadPayload(data);
-      if (sheets.length === 0 && rows.length === 0) return;
-
-      const stem = otaExportFilenameStem(data, toolName);
-      if (sheets.length > 0) {
-        await downloadXlsxFromSheets(sheets, `${stem}.xlsx`);
-      } else {
-        await downloadXlsxFromData(rows, `${stem}.xlsx`);
-      }
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : t('toastFailedExportXlsx'));
-    }
-  };
-
-  const hasExportableData = (output: unknown): boolean => {
-    if (!output || typeof output !== 'object') return false;
-    if ('export_fetch' in output && (output as { export_fetch?: unknown }).export_fetch) return true;
-    if (
-      'total_row_count' in output &&
-      typeof (output as { total_row_count: unknown }).total_row_count === 'number' &&
-      (output as { total_row_count: number }).total_row_count > 0
-    ) {
-      return true;
-    }
-    if ('data' in output && Array.isArray((output as { data: unknown }).data) && (output as { data: unknown[] }).data.length > 0) return true;
-    if ('aggregates' in output && Array.isArray((output as { aggregates: unknown }).aggregates) && (output as { aggregates: unknown[] }).aggregates.length > 0) return true;
-    if ('values' in output && Array.isArray((output as { values: unknown }).values) && (output as { values: unknown[] }).values.length > 0) return true;
-    return false;
-  };
+  /** Resolved gateway model id sent with feedback; stable string so memoized rows don't re-render. */
+  const feedbackModel = resolveSageAiGatewayModelId(modelSelection);
 
   return (
     <div className="flex h-full overflow-hidden">
       {/* Sidebar */}
       {showSidebar && (
-        <div className="w-64 flex-shrink-0 border-r border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 flex flex-col">
-          <div className="p-3 border-b border-neutral-200/75 dark:border-neutral-800 flex items-center justify-between">
-            <div className="flex gap-1">
-              <button
-                onClick={() => setSidebarTab('history')}
-                className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  sidebarTab === 'history'
-                    ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
-              >
-                <History className="w-3.5 h-3.5 inline mr-1" />
-                {t('history')}
-              </button>
-              <button
-                onClick={() => setSidebarTab('saved')}
-                className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  sidebarTab === 'saved'
-                    ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
-              >
-                <Bookmark className="w-3.5 h-3.5 inline mr-1" />
-                {t('saved')}
-              </button>
-            </div>
-            <button
-              onClick={() => setShowSidebar(false)}
-              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
-            >
-              <PanelLeftClose className="w-4 h-4 text-gray-500" />
-            </button>
-          </div>
-
-          {sidebarTab === 'history' && (
-            <>
-              <div className="p-2">
-                {currentSessionId && currentSessionTitle ? (
-                  <div className="mb-2 rounded-lg border border-neutral-200/75 bg-neutral-50/80 px-1 py-1 dark:border-neutral-800 dark:bg-neutral-900/50">
-                    <SageAiSessionTitleEditor
-                      sessionId={currentSessionId}
-                      title={currentSessionTitle}
-                      onRenamed={(title) => updateSessionTitle(currentSessionId, title)}
-                      showToast={showToast}
-                    />
-                  </div>
-                ) : null}
-                <button
-                  onClick={handleNewChat}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200/75 dark:border-neutral-800 hover:bg-neutral-50/90 dark:hover:bg-neutral-800/50 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  {t('newChat')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPendingConfirm({ kind: 'clearHistory' })}
-                  disabled={sessionsLoading || sessions.length === 0}
-                  aria-label={t('clearAllHistoryAria')}
-                  className="mt-2 w-full px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                >
-                  {t('clearAllHistory')}
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto px-2 pb-2">
-                {sessionsLoading ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                  </div>
-                ) : sessionsError ? (
-                  <div className="text-center py-8 px-2">
-                    <AlertCircle className="w-5 h-5 text-red-400 mx-auto mb-2" />
-                    <p className="text-xs text-red-500 mb-2">{sessionsError}</p>
-                    <button onClick={loadSessions} className="text-xs text-sage-600 hover:underline">
-                      {t('retry')}
-                    </button>
-                  </div>
-                ) : sessions.length === 0 ? (
-                  <p className="text-xs text-gray-500 text-center py-8">{t('noHistory')}</p>
-                ) : (
-                  Object.entries(groupedSessions).map(([group, groupSessions]) => (
-                    <div key={group} className="mb-3">
-                      <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2 mb-1">
-                        {group}
-                      </p>
-                      {groupSessions.map((session) => {
-                        const isActive = currentSessionId === session.id;
-                        return (
-                          <div
-                            key={session.id}
-                            className={`group flex items-center rounded-md transition-colors ${
-                              isActive
-                                ? 'bg-white dark:bg-neutral-900 shadow-sm'
-                                : 'hover:bg-white dark:hover:bg-gray-800'
-                            }`}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => handleLoadSession(session.id)}
-                              aria-current={isActive ? 'true' : undefined}
-                              className={`flex-1 min-w-0 text-left px-2 py-1.5 text-[13px] rounded-md focus:outline-none focus:ring-2 focus:ring-sage-500 ${
-                                isActive
-                                  ? 'text-gray-900 dark:text-gray-100'
-                                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                              }`}
-                            >
-                              <span className="block truncate">{session.title}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setPendingConfirm({
-                                  kind: 'deleteSession',
-                                  sessionId: session.id,
-                                  title: session.title,
-                                });
-                              }}
-                              aria-label={t('deleteSessionAria', { title: session.title })}
-                              className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 mr-1 hover:text-red-500 transition-opacity rounded focus:outline-none focus:ring-2 focus:ring-sage-500"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))
-                )}
-              </div>
-            </>
-          )}
-
-          {sidebarTab === 'saved' && (
-            <div className="flex-1 overflow-y-auto p-2">
-              {savedQueriesLoading ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                </div>
-              ) : savedQueriesError ? (
-                <div className="text-center py-8 px-2">
-                  <AlertCircle className="w-5 h-5 text-red-400 mx-auto mb-2" />
-                  <p className="text-xs text-red-500 mb-2">{savedQueriesError}</p>
-                  <button onClick={loadSavedQueries} className="text-xs text-sage-600 hover:underline">
-                    {t('retry')}
-                  </button>
-                </div>
-              ) : savedQueries.length === 0 ? (
-                <p className="text-xs text-gray-500 text-center py-8">{t('noSavedQueries')}</p>
-              ) : (
-                savedQueries.map((query) => (
-                  <div
-                    key={query.id}
-                    className="group flex items-start rounded-md hover:bg-white dark:hover:bg-gray-800 transition-colors mb-1"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => handleUseSavedQuery(query, setInput)}
-                      className="flex-1 min-w-0 text-left px-2 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sage-500"
-                    >
-                      <span className="flex items-center gap-1">
-                        <span className="font-medium text-gray-700 dark:text-gray-300 truncate text-[13px] flex-1 min-w-0">
-                          {query.name}
-                        </span>
-                        <Play className="w-3 h-3 text-sage-600 opacity-0 group-hover:opacity-100 shrink-0" aria-hidden="true" />
-                      </span>
-                      <span className="block text-xs text-gray-500 truncate mt-0.5">
-                        {query.query}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPendingConfirm({
-                          kind: 'deleteSavedQuery',
-                          queryId: query.id,
-                          name: query.name,
-                        });
-                      }}
-                      aria-label={t('deleteSavedQueryAria', { name: query.name })}
-                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 mr-1 mt-2 hover:text-red-500 rounded focus:outline-none focus:ring-2 focus:ring-sage-500"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          aria-hidden="true"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+      {showSidebar && (
+        <SageAiSidebar
+          sidebarTab={sidebarTab}
+          onTabChange={setSidebarTab}
+          onClose={() => setShowSidebar(false)}
+          currentSessionId={currentSessionId}
+          currentSessionTitle={currentSessionTitle}
+          onRenameSession={updateSessionTitle}
+          showToast={showToast}
+          onNewChat={handleNewChat}
+          onRequestConfirm={setPendingConfirm}
+          sessions={sessions}
+          sessionsLoading={sessionsLoading}
+          sessionsError={sessionsError}
+          onRetrySessions={loadSessions}
+          groupedSessions={groupedSessions}
+          onLoadSession={handleLoadSession}
+          savedQueries={savedQueries}
+          savedQueriesLoading={savedQueriesLoading}
+          savedQueriesError={savedQueriesError}
+          onRetrySavedQueries={loadSavedQueries}
+          onUseSavedQuery={(query) => handleUseSavedQuery(query, setInput)}
+        />
       )}
 
       <Modal
@@ -1292,770 +1025,59 @@ export default function SageAiClient() {
                 </p>
                 
                 {/* Quick Start Buttons */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-5xl mx-auto text-left items-stretch">
+                <div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
                   <button
                     type="button"
                     onClick={() => sendMessage({ text: t('quickStartMarketReportPrompt') })}
-                    className="flex h-full flex-col items-start gap-2 rounded-xl border border-neutral-200/75 p-4 transition-all hover:border-sage-300 hover:bg-sage-50 group dark:border-neutral-800 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
+                    className="rounded-lg border border-gray-200/80 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-sage-300 hover:bg-sage-50 dark:border-gray-700 dark:text-gray-200 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
                   >
-                    <span className="text-lg">📋</span>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartMarketReportTitle')}
-                      </div>
-                      <div className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                        {t('quickStartMarketReportDesc')}
-                      </div>
-                    </div>
+                    {t('quickStartMarketReportTitle')}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => sendMessage({ text: t('quickStartMonthlyRatesPrompt') })}
-                    className="flex h-full flex-col items-start gap-2 rounded-xl border border-neutral-200/75 p-4 transition-all hover:border-sage-300 hover:bg-sage-50 group dark:border-neutral-800 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
+                    className="rounded-lg border border-gray-200/80 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-sage-300 hover:bg-sage-50 dark:border-gray-700 dark:text-gray-200 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
                   >
-                    <span className="text-lg">📊</span>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartMonthlyRatesTitle')}
-                      </div>
-                      <div className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                        {t('quickStartMonthlyRatesDesc')}
-                      </div>
-                    </div>
+                    {t('quickStartMonthlyRatesTitle')}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => sendMessage({ text: t('quickStartUnitTypePrompt') })}
-                    className="flex h-full flex-col items-start gap-2 rounded-xl border border-neutral-200/75 p-4 transition-all hover:border-sage-300 hover:bg-sage-50 group dark:border-neutral-800 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
+                    className="rounded-lg border border-gray-200/80 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-sage-300 hover:bg-sage-50 dark:border-gray-700 dark:text-gray-200 dark:hover:border-sage-700 dark:hover:bg-sage-900/20"
                   >
-                    <span className="text-lg">🏕️</span>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-sage-700 dark:group-hover:text-sage-400">
-                        {t('quickStartUnitTypeTitle')}
-                      </div>
-                      <div className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                        {t('quickStartUnitTypeDesc')}
-                      </div>
-                    </div>
+                    {t('quickStartUnitTypeTitle')}
                   </button>
                 </div>
               </div>
             )}
 
             {messages.map((message) => (
-              <div key={message.id} className="mb-6">
-                {message.role === 'user' ? (
-                  <div
-                    ref={(el) => {
-                      if (el) userMessageRowRefs.current.set(message.id, el);
-                      else userMessageRowRefs.current.delete(message.id);
-                    }}
-                    className="group relative"
-                  >
-                    <div className="rounded-lg border border-gray-200/90 bg-gray-100 px-4 py-3 shadow-sm dark:border-neutral-800/90 dark:bg-gray-800/95">
-                      {editingMessageId === message.id ? (
-                        <div className="flex flex-col gap-2">
-                          <textarea
-                            value={editingDraft}
-                            onChange={(e) => setEditingDraft(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                                e.preventDefault();
-                                submitEditMessage();
-                              } else if (e.key === 'Escape') {
-                                e.preventDefault();
-                                cancelEditMessage();
-                              }
-                            }}
-                            autoFocus
-                            rows={Math.min(8, Math.max(2, editingDraft.split('\n').length))}
-                            className="w-full resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-[15px] text-gray-900 focus:border-sage-500 focus:outline-none focus:ring-1 focus:ring-sage-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-gray-100"
-                            disabled={isLoading}
-                          />
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={cancelEditMessage}
-                              className="px-3 py-1.5 text-sm rounded-md text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
-                              disabled={isLoading}
-                            >
-                              {t('cancel')}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={submitEditMessage}
-                              disabled={!editingDraft.trim() || isLoading}
-                              className="px-3 py-1.5 text-sm rounded-md bg-sage-600 text-white hover:bg-sage-700 disabled:opacity-40"
-                            >
-                              {t('editResend')}
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-[15px] leading-relaxed text-gray-900 dark:text-gray-100">
-                          {message.parts.map((part, partIndex) => {
-                            if (part.type === 'text') {
-                              return (
-                                <div key={partIndex} className="whitespace-pre-wrap">
-                                  {part.text}
-                                  <span className="ml-2 inline-flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                                    <button
-                                      type="button"
-                                      onClick={() => beginEditMessage(message.id)}
-                                      title={t('editMessage')}
-                                      disabled={isLoading}
-                                      className="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40"
-                                    >
-                                      <Pencil className="h-4 w-4 text-gray-500 hover:text-sage-600 dark:text-gray-400" />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => openSaveQueryDialog(part.text)}
-                                      title={t('saveQuery')}
-                                      className="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-                                    >
-                                      <BookmarkPlus className="h-4 w-4 text-gray-500 hover:text-sage-600 dark:text-gray-400" />
-                                    </button>
-                                  </span>
-                                </div>
-                              );
-                            }
-                            return null;
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed group/response">
-                    {(() => {
-                      // Tools that have their own custom renderer (CanvasDashboard,
-                      // SageAiMap, clarifying-question card, etc.) render inline as
-                      // before. Every other tool falls through to the generic
-                      // "data tile" — and a single research turn often emits 3-5
-                      // of those in a row (count + a few aggregations). To keep
-                      // the chat scannable we collapse runs of ≥ 2 consecutive
-                      // generic data tiles into one `<details>` group.
-                      const CUSTOM_RENDERED_TOOL_NAMES = new Set([
-                        'clarifying_question',
-                        'suggest_followups',
-                        'generate_dashboard',
-                        'visualize_on_map',
-                        'competitor_comparison',
-                        'build_feasibility_brief',
-                        'generate_python_code',
-                      ]);
-                      const isEmptyRetryOutput = (output: unknown): boolean =>
-                        typeof output === 'object' &&
-                        output !== null &&
-                        '_emptyRetry' in output &&
-                        (output as { _emptyRetry: unknown })._emptyRetry === true;
-                      const isBundleableDataTool = (
-                        part: typeof message.parts[number]
-                      ): boolean => {
-                        if (!isToolUIPart(part)) return false;
-                        const name =
-                          'toolName' in part
-                            ? (part as { toolName: string }).toolName
-                            : part.type.replace(/^tool-/, '');
-                        if (CUSTOM_RENDERED_TOOL_NAMES.has(name)) return false;
-                        if (
-                          part.state === 'output-available' &&
-                          isEmptyRetryOutput(part.output)
-                        ) {
-                          return false;
-                        }
-                        return true;
-                      };
-                      /** Whitespace-only assistant `text` parts sit between tool results in some streams; they should not split Supabase query groups. */
-                      const doesNotBreakDataToolBundle = (
-                        p: typeof message.parts[number]
-                      ): boolean =>
-                        p.type === 'text' &&
-                        !(p as { type: 'text'; text: string }).text.trim();
-                      const skipIndexes = new Set<number>();
-                      const bundleStarts = new Map<number, number[]>();
-                      let activeBundle: number[] | null = null;
-                      for (let i = 0; i < message.parts.length; i++) {
-                        const p = message.parts[i];
-                        if (isBundleableDataTool(p)) {
-                          if (!activeBundle) {
-                            activeBundle = [i];
-                            bundleStarts.set(i, activeBundle);
-                          } else {
-                            activeBundle.push(i);
-                            skipIndexes.add(i);
-                          }
-                        } else if (doesNotBreakDataToolBundle(p)) {
-                          // keep activeBundle
-                        } else {
-                          activeBundle = null;
-                        }
-                      }
-                      const renderDefaultDataTile = (
-                        innerPart: typeof message.parts[number],
-                        innerIndex: number
-                      ) => {
-                        if (!isToolUIPart(innerPart)) return null;
-                        const innerToolName =
-                          'toolName' in innerPart
-                            ? (innerPart as { toolName: string }).toolName
-                            : innerPart.type.replace(/^tool-/, '');
-                        const innerOutput =
-                          innerPart.state === 'output-available'
-                            ? innerPart.output
-                            : undefined;
-                        return (
-                          <div
-                            key={innerIndex}
-                            className="rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden"
-                          >
-                            <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950">
-                              <Database className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {innerToolName.replace(/_/g, ' ')}
-                              </span>
-                              {innerPart.state === 'input-streaming' && (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />
-                              )}
-                              {innerPart.state === 'input-available' && (
-                                <span className="text-xs text-amber-600 dark:text-amber-400">{t('toolRunning')}</span>
-                              )}
-                              {innerPart.state === 'output-available' && (
-                                <span className="text-xs text-emerald-600 dark:text-emerald-400">{t('toolDone')}</span>
-                              )}
-                            </div>
-                            {innerPart.state === 'output-available' && innerOutput != null && (
-                              <div className="px-3 py-2">
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                  {typeof innerOutput === 'object' && innerOutput !== null && 'error' in innerOutput ? (
-                                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                                      <AlertCircle className="w-4 h-4" />
-                                      <span>{String((innerOutput as { error: string }).error)}</span>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center justify-between">
-                                      <div>
-                                        {typeof innerOutput === 'object' && 'total_count' in (innerOutput as object) && (
-                                          <span>
-                                            {t('toolFoundResults', { total: (innerOutput as { total_count: number }).total_count })}
-                                            {typeof innerOutput === 'object' && 'returned_count' in (innerOutput as object) &&
-                                              ` · ${t('toolShowingResults', { count: (innerOutput as { returned_count: number }).returned_count })}`}
-                                          </span>
-                                        )}
-                                        {typeof innerOutput === 'object' && 'count' in (innerOutput as object) && !('total_count' in (innerOutput as object)) && (() => {
-                                          const co = innerOutput as {
-                                            count: number;
-                                            scope?: 'whole_table' | 'filtered';
-                                            filters?: Record<string, string>;
-                                            table?: string;
-                                          };
-                                          const filterEntries = co.filters
-                                            ? Object.entries(co.filters)
-                                            : [];
-                                          const scopeText =
-                                            co.scope === 'whole_table'
-                                              ? t('toolCountUnfiltered')
-                                              : filterEntries.length > 0
-                                                ? t('toolCountFiltered', {
-                                                    filters: filterEntries
-                                                      .map(([k, v]) => `${k}=${v}`)
-                                                      .join(', '),
-                                                  })
-                                                : null;
-                                          return (
-                                            <span>
-                                              {t('toolCount', { count: co.count })}
-                                              {scopeText && (
-                                                <span className="ml-2 text-xs text-amber-600 dark:text-amber-400">
-                                                  {scopeText}
-                                                </span>
-                                              )}
-                                            </span>
-                                          );
-                                        })()}
-                                        {typeof innerOutput === 'object' && 'total_groups' in (innerOutput as object) && (
-                                          <span>{t('toolGroups', { count: (innerOutput as { total_groups: number }).total_groups })}</span>
-                                        )}
-                                      </div>
-                                      {hasExportableData(innerOutput) && (
-                                        <div className="flex items-center gap-1">
-                                          <button
-                                            onClick={() => void handleDownloadCsv(innerOutput, innerToolName)}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                                          >
-                                            <Download className="w-3 h-3" />
-                                            CSV
-                                          </button>
-                                          <button
-                                            onClick={() => void handleDownloadXlsx(innerOutput, innerToolName)}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                                          >
-                                            <FileSpreadsheet className="w-3 h-3" />
-                                            Excel
-                                          </button>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      };
-                      return message.parts.map((part, partIndex) => {
-                      if (skipIndexes.has(partIndex)) return null;
-                      if (isReasoningUIPart(part)) {
-                        return (
-                          <details
-                            key={partIndex}
-                            open={part.state !== 'done'}
-                            className="my-3 rounded-lg border border-gray-200 bg-gray-50/80 dark:border-neutral-800 dark:bg-neutral-900/50"
-                          >
-                            <summary className="cursor-pointer select-none px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                              {t('thinking')}
-                            </summary>
-                            <div className="border-t border-gray-200 px-3 py-2 text-xs leading-relaxed text-gray-700 dark:border-neutral-800 dark:text-gray-300 whitespace-pre-wrap font-mono">
-                              {part.text}
-                            </div>
-                          </details>
-                        );
-                      }
-
-                      if (part.type === 'text') {
-                        if (!part.text.trim()) {
-                          return null;
-                        }
-                        const copyId = `${message.id}-${partIndex}`;
-                        return (
-                          <div key={partIndex} className="relative">
-                            <button
-                              onClick={() => handleCopyText(part.text, copyId)}
-                              className="absolute -right-2 top-0 p-1.5 rounded-md opacity-0 group-hover/response:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                              title="Copy to clipboard"
-                            >
-                              {copiedId === copyId ? (
-                                <Check className="w-4 h-4 text-emerald-500" />
-                              ) : (
-                                <Copy className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
-                              )}
-                            </button>
-                            <div
-                              className="prose prose-sm prose-gray dark:prose-invert max-w-none
-                                prose-p:my-1.5 prose-p:leading-normal
-                                prose-ul:my-2 prose-ul:pl-0 prose-ul:list-none
-                                prose-ol:my-2 prose-ol:pl-5
-                                prose-li:my-0.5 prose-li:leading-normal
-                                prose-headings:my-3 prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100
-                                prose-h2:text-base prose-h2:mt-5 prose-h2:mb-2 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200 dark:prose-h2:border-gray-700
-                                prose-h3:text-sm prose-h3:mt-4 prose-h3:mb-1.5
-                                prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-strong:font-semibold
-                                prose-code:text-xs prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:before:content-none prose-code:after:content-none
-                                prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:p-3 prose-pre:rounded-lg prose-pre:overflow-x-auto
-                                prose-a:text-sage-600 prose-a:no-underline hover:prose-a:underline
-                                prose-table:w-full prose-table:border-collapse prose-table:text-sm prose-table:my-3
-                                prose-th:border prose-th:border-gray-200 prose-th:bg-gray-50 prose-th:px-3 prose-th:py-2 prose-th:text-left prose-th:font-semibold
-                                prose-td:border prose-td:border-gray-200 prose-td:px-3 prose-td:py-2
-                                dark:prose-th:border-gray-700 dark:prose-th:bg-gray-800 dark:prose-td:border-gray-700
-                                prose-hr:my-5 prose-hr:border-gray-200 dark:prose-hr:border-gray-700
-                                prose-blockquote:border-l-4 prose-blockquote:border-sage-500 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400"
-                            >
-                              <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                rehypePlugins={[[rehypeSanitize, SAGE_AI_MARKDOWN_SANITIZE_SCHEMA]]}
-                                components={{
-                                  pre: CollapsibleMarkdownPre,
-                                  a: ({ href, children, ...props }) => {
-                                    const openNew =
-                                      typeof href === 'string' &&
-                                      (href.startsWith('/admin') ||
-                                        href.startsWith('/api/') ||
-                                        href.startsWith('http'));
-                                    return (
-                                      <a
-                                        href={href}
-                                        {...props}
-                                        target={openNew ? '_blank' : undefined}
-                                        rel={openNew ? 'noopener noreferrer' : undefined}
-                                      >
-                                        {children}
-                                      </a>
-                                    );
-                                  },
-                                  ul: ({ children }) => (
-                                    <ul className="m-0 list-none space-y-0.5 p-0">{children}</ul>
-                                  ),
-                                  li: ({ children }) => (
-                                    <li className="m-0 flex list-none items-baseline gap-2 pl-0">
-                                      <span
-                                        className="shrink-0 select-none text-[0.7em] leading-none text-sage-500"
-                                        aria-hidden
-                                      >
-                                        ●
-                                      </span>
-                                      <span className="min-w-0 flex-1 [&>p]:mb-0 [&>p]:mt-0 [&>p+p]:mt-1.5">
-                                        {children}
-                                      </span>
-                                    </li>
-                                  ),
-                                }}
-                              >
-                                {linkifyPastReportRefsInMarkdown(part.text)}
-                              </ReactMarkdown>
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      if (isToolUIPart(part)) {
-                        const toolName = 'toolName' in part 
-                          ? (part as { toolName: string }).toolName 
-                          : part.type.replace(/^tool-/, '');
-                        const toolOutput = part.state === 'output-available' ? part.output : undefined;
-
-                        // Hide intermediate empty-result tiles. The tool layer
-                        // returns `{ _emptyRetry: true }` when a query yielded
-                        // 0 rows but we want the model to retry with different
-                        // params — rendering that tile is just noise. The
-                        // model will produce a follow-up tool call (or, after
-                        // burning the retry budget, a `_emptyRetryExhausted`
-                        // payload that flows through the existing error path).
-                        if (
-                          part.state === 'output-available' &&
-                          typeof toolOutput === 'object' &&
-                          toolOutput !== null &&
-                          '_emptyRetry' in toolOutput &&
-                          (toolOutput as { _emptyRetry: unknown })._emptyRetry === true
-                        ) {
-                          return null;
-                        }
-
-                        // Render `clarifying_question` as a question card with
-                        // clickable answer pills. Clicking an option sends that
-                        // exact text back as the next user message — saves the
-                        // user from typing the answer.
-                        if (toolName === 'clarifying_question') {
-                          if (part.state !== 'output-available') return null;
-                          const cqOutput = toolOutput as
-                            | { type?: string; question?: unknown; options?: unknown }
-                            | undefined;
-                          const question =
-                            typeof cqOutput?.question === 'string'
-                              ? cqOutput.question.trim()
-                              : '';
-                          const options = Array.isArray(cqOutput?.options)
-                            ? (cqOutput.options as unknown[]).filter(
-                                (o): o is string => typeof o === 'string' && o.trim().length > 0
-                              )
-                            : [];
-                          if (!question || options.length === 0) return null;
-                          return (
-                            <div
-                              key={partIndex}
-                              className="my-3 rounded-lg border border-sage-200 bg-sage-50/60 px-4 py-3 dark:border-sage-800 dark:bg-sage-900/20"
-                              role="group"
-                              aria-label={t('clarifyingQuestionAria')}
-                            >
-                              <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                                {question}
-                              </p>
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                {options.map((option, i) => (
-                                  <button
-                                    key={`${partIndex}-${i}`}
-                                    type="button"
-                                    onClick={() => sendMessage({ text: option })}
-                                    className="rounded-full border border-sage-400 bg-white px-3 py-1.5 text-sm font-medium text-sage-800 hover:bg-sage-100 hover:border-sage-500 dark:border-sage-600 dark:bg-sage-900/60 dark:text-sage-100 dark:hover:bg-sage-900/80 transition-colors"
-                                  >
-                                    {option}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        }
-
-                        // Render `suggest_followups` as a chip row, not a tool card.
-                        if (toolName === 'suggest_followups') {
-                          if (part.state !== 'output-available') return null;
-                          const followupOutput = toolOutput as
-                            | { type?: string; suggestions?: unknown }
-                            | undefined;
-                          const suggestions = Array.isArray(followupOutput?.suggestions)
-                            ? (followupOutput.suggestions as unknown[]).filter(
-                                (s): s is string => typeof s === 'string' && s.trim().length > 0
-                              )
-                            : [];
-                          if (suggestions.length === 0) return null;
-                          return (
-                            <div
-                              key={partIndex}
-                              className="my-3 flex flex-wrap gap-2"
-                              aria-label="Follow-up suggestions"
-                            >
-                              {suggestions.map((suggestion, i) => (
-                                <button
-                                  key={`${partIndex}-${i}`}
-                                  type="button"
-                                  onClick={() => sendMessage({ text: suggestion })}
-                                  className="rounded-full border border-sage-300 bg-sage-50 px-3 py-1.5 text-sm text-sage-700 hover:bg-sage-100 hover:border-sage-400 dark:border-sage-700 dark:bg-sage-900/40 dark:text-sage-200 dark:hover:bg-sage-900/60 transition-colors"
-                                >
-                                  {suggestion}
-                                </button>
-                              ))}
-                            </div>
-                          );
-                        }
-
-                        // Custom success renderer for generate_dashboard:
-                        // pass the payload to the Recharts canvas.
-                        if (
-                          toolName === 'generate_dashboard' &&
-                          part.state === 'output-available' &&
-                          isDashboardPayload(toolOutput)
-                        ) {
-                          return (
-                            <CanvasDashboard
-                              key={partIndex}
-                              payload={toolOutput}
-                            />
-                          );
-                        }
-
-                        // Custom success renderer for visualize_on_map:
-                        // hand off GeoJSON to the Leaflet map.
-                        if (
-                          toolName === 'visualize_on_map' &&
-                          part.state === 'output-available' &&
-                          isMapPayload(toolOutput)
-                        ) {
-                          return (
-                            <SageAiMap key={partIndex} payload={toolOutput} />
-                          );
-                        }
-
-                        // Custom success renderer for generate_feasibility_section:
-                        // styled inline preview + "Download .docx" button that
-                        // POSTs the same payload to the section builder route.
-                        if (
-                          toolName === 'generate_feasibility_section' &&
-                          part.state === 'output-available' &&
-                          isFeasibilityDocxPayload(toolOutput)
-                        ) {
-                          const previewPayload = toolOutput as FeasibilitySectionPreviewPayload;
-                          return (
-                            <FeasibilitySectionPreview
-                              key={partIndex}
-                              payload={previewPayload}
-                            />
-                          );
-                        }
-
-                        // Custom success renderer for competitor_comparison:
-                        // show a compact summary; the model synthesizes the
-                        // narrative from the tool payload in its follow-up text.
-                        if (
-                          toolName === 'competitor_comparison' &&
-                          part.state === 'output-available' &&
-                          typeof toolOutput === 'object' &&
-                          toolOutput !== null &&
-                          'type' in toolOutput &&
-                          (toolOutput as { type: string }).type ===
-                            'competitor_comparison'
-                        ) {
-                          const cmpOut = toolOutput as unknown as {
-                            competitors: Array<{
-                              name: string;
-                              place?: { website: string | null } | null;
-                              scrape?: { url: string } | null;
-                              errors: string[];
-                            }>;
-                          };
-                          const withPlace = cmpOut.competitors.filter(
-                            (c) => c.place
-                          ).length;
-                          const withScrape = cmpOut.competitors.filter(
-                            (c) => c.scrape
-                          ).length;
-                          return (
-                            <div
-                              key={partIndex}
-                              className="my-4 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-4 py-3"
-                            >
-                              <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                Competitor comparison
-                              </div>
-                              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                {cmpOut.competitors.length} competitors ·{' '}
-                                {withPlace} with Google Places data ·{' '}
-                                {withScrape} with scraped homepage
-                              </div>
-                            </div>
-                          );
-                        }
-
-                        // Custom success renderer for build_feasibility_brief:
-                        // show a link to the newly created draft report.
-                        if (
-                          toolName === 'build_feasibility_brief' &&
-                          part.state === 'output-available' &&
-                          typeof toolOutput === 'object' &&
-                          toolOutput !== null &&
-                          'type' in toolOutput &&
-                          (toolOutput as { type: string }).type ===
-                            'feasibility_brief_draft'
-                        ) {
-                          const briefOut = toolOutput as unknown as {
-                            report_id: string;
-                            template: string;
-                            sections_written: number;
-                            view_url: string;
-                          };
-                          return (
-                            <div
-                              key={partIndex}
-                              className="my-4 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/20 px-4 py-3"
-                            >
-                              <div className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
-                                Draft feasibility brief created
-                              </div>
-                              <div className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
-                                Template: {briefOut.template} ·{' '}
-                                {briefOut.sections_written} section
-                                {briefOut.sections_written === 1 ? '' : 's'} written
-                              </div>
-                              <a
-                                href={briefOut.view_url}
-                                className="mt-2 inline-flex items-center text-sm font-medium text-emerald-700 dark:text-emerald-200 hover:underline"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                Open draft in reports →
-                              </a>
-                            </div>
-                          );
-                        }
-
-                        // Inline `generate_python_code` tiles (chunky python
-                        // editor + chart output) keep their own card so the user
-                        // can run / inspect them without expanding a group.
-                        if (
-                          toolName === 'generate_python_code' &&
-                          part.state === 'output-available' &&
-                          typeof toolOutput === 'object' &&
-                          toolOutput !== null &&
-                          'type' in toolOutput &&
-                          (toolOutput as { type: string }).type === 'python_code'
-                        ) {
-                          const pyOutput = toolOutput as unknown as {
-                            code: string;
-                            description: string;
-                            uses_query_data?: boolean;
-                          };
-                          return (
-                            <div
-                              key={partIndex}
-                              className="my-4 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden"
-                            >
-                              <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950">
-                                <Database className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                  {toolName.replace(/_/g, ' ')}
-                                </span>
-                                <span className="text-xs text-emerald-600 dark:text-emerald-400">{t('toolDone')}</span>
-                              </div>
-                              <div className="px-3 py-2">
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                  {pyOutput.description}
-                                </p>
-                                <PythonCodeBlock
-                                  code={pyOutput.code}
-                                  onDataInject={
-                                    pyOutput.uses_query_data
-                                      ? getInjectedQueryData
-                                      : undefined
-                                  }
-                                  onError={handlePythonError}
-                                  retryCount={pythonRetryCount}
-                                />
-                              </div>
-                            </div>
-                          );
-                        }
-
-                        // Generic data tile. If this index is the start of a
-                        // ≥ 2 tile bundle, collapse the whole run behind a
-                        // single `<details>` toggle; otherwise render solo.
-                        const bundle = bundleStarts.get(partIndex);
-                        if (bundle && bundle.length > 1) {
-                          const allDone = bundle.every((i) => {
-                            const bp = message.parts[i];
-                            return (
-                              isToolUIPart(bp) && bp.state === 'output-available'
-                            );
-                          });
-                          return (
-                            <details
-                              key={partIndex}
-                              className="my-4 rounded-lg border border-neutral-200/75 dark:border-neutral-800 bg-white dark:bg-neutral-950 overflow-hidden group/bundle"
-                            >
-                              <summary className="cursor-pointer select-none flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 list-none [&::-webkit-details-marker]:hidden">
-                                <Database className="w-4 h-4 shrink-0 text-gray-400" />
-                                <span>{t('toolBundle', { count: bundle.length })}</span>
-                                <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                                  {t('toolBundleExpand')}
-                                </span>
-                                {allDone ? (
-                                  <span className="text-xs text-emerald-600 dark:text-emerald-400">{t('toolDone')}</span>
-                                ) : (
-                                  <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin text-gray-400" />
-                                )}
-                              </summary>
-                              <div className="border-t border-neutral-200/75 dark:border-neutral-800 px-3 py-2 space-y-2">
-                                {bundle.map((i) =>
-                                  renderDefaultDataTile(message.parts[i], i)
-                                )}
-                              </div>
-                            </details>
-                          );
-                        }
-
-                        return (
-                          <div key={partIndex} className="my-4">
-                            {renderDefaultDataTile(part, partIndex)}
-                          </div>
-                        );
-                      }
-
-                      return null;
-                      });
-                    })()}
-                    {message.role === 'assistant' &&
-                      !isLoading &&
-                      currentSessionId && (
-                        <FeedbackControls
-                          sessionId={currentSessionId}
-                          messageId={message.id}
-                          model={resolveSageAiGatewayModelId(modelSelection)}
-                          initial={feedbackBySessionMessage[message.id]}
-                          onChange={(next) => {
-                            setFeedbackBySessionMessage((prev) => {
-                              if (next === null) {
-                                const { [message.id]: _removed, ...rest } = prev;
-                                return rest;
-                              }
-                              return { ...prev, [message.id]: next };
-                            });
-                          }}
-                          onError={showToast}
-                        />
-                      )}
-                  </div>
-                )}
-              </div>
+              <SageAiMessageRow
+                key={message.id}
+                message={message}
+                isLoading={isLoading}
+                currentSessionId={currentSessionId}
+                feedbackModel={feedbackModel}
+                feedback={feedbackBySessionMessage[message.id]}
+                onFeedbackChange={handleFeedbackChange}
+                copiedId={copiedId}
+                onCopyText={handleCopyText}
+                onSendMessage={handleSendMessageText}
+                onToast={showToast}
+                onOpenSaveQueryDialog={openSaveQueryDialog}
+                onUserMessageElement={registerUserMessageEl}
+                isEditing={editingMessageId === message.id}
+                editingDraft={editingMessageId === message.id ? editingDraft : ''}
+                onEditingDraftChange={setEditingDraft}
+                onBeginEdit={beginEditMessage}
+                onCancelEdit={cancelEditMessage}
+                onSubmitEdit={submitEditMessage}
+                getInjectedQueryData={getInjectedQueryData}
+                onPythonError={handlePythonError}
+                pythonRetryCount={pythonRetryCount}
+              />
             ))}
 
             {isLoading && (
@@ -2081,6 +1103,16 @@ export default function SageAiClient() {
             <form onSubmit={handleSubmit}>
               <SageAiThreadUsageBar sessionId={currentSessionId} refreshKey={usageRefreshKey} />
               <div className="flex items-end gap-1 rounded-xl border border-neutral-200/70 bg-white px-2 py-2 shadow-sm dark:border-gray-800 dark:bg-neutral-950">
+                <div className="mb-1 flex-shrink-0">
+                  <SageAiModelPicker
+                    selection={modelSelection}
+                    onSelectionChange={setModelSelection}
+                    webResearchServerEnabled={webResearchServerEnabled}
+                    webResearchEnabled={webResearchEnabled}
+                    onWebResearchChange={setWebResearchEnabled}
+                    disabled={isLoading}
+                  />
+                </div>
                 <textarea
                   ref={inputRef}
                   value={input}
@@ -2120,16 +1152,32 @@ export default function SageAiClient() {
         </div>
       </div>
 
-      {/* Toast notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          {toastMessage}
-          <button onClick={() => setToastMessage(null)} className="ml-2 hover:opacity-70">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
+      {/* Toast notification. The outer wrapper is ALWAYS mounted and carries
+          the aria-live region so screen readers announce each new toast — a
+          live region added to the DOM at the same time as its content is not
+          reliably announced. The visible card renders inside it. */}
+      <div
+        aria-live="assertive"
+        aria-atomic="true"
+        className="pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2"
+      >
+        {toastMessage && (
+          <div
+            role="status"
+            className="pointer-events-auto flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm text-white shadow-lg animate-in fade-in slide-in-from-bottom-4 dark:bg-gray-100 dark:text-gray-900"
+          >
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            {toastMessage}
+            <button
+              onClick={() => setToastMessage(null)}
+              aria-label={t('dismiss')}
+              className="ml-2 hover:opacity-70"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

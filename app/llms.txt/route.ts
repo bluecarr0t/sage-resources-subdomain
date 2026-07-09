@@ -54,6 +54,11 @@ export async function GET() {
       return `- [${title}](${enBase}/guides/${slug}): ${guide?.metaDescription?.slice(0, 60) || ''}...`;
     }),
     '',
+    '## Market intelligence (email sign-in)',
+    `- [Glamping Market Overview](${baseUrl}/glamping-market-overview): US & Canada glamping supply, ADR benchmarks, unit-type mix, and state rankings — Sage research (free magic-link access)`,
+    `- [Top Glamping Brands](${baseUrl}/glamping-market-overview/brands): Largest US glamping operators ranked by property count, units, and average nightly rates`,
+    `- [Glamping Unit Type Classification](${baseUrl}/glamping-unit-type-classification): Canonical taxonomy of glamping unit types used in Sage market data`,
+    '',
     '## Map and Properties',
     `- [Interactive Glamping Map](${enBase}/map): Explore 1,266+ glamping properties across US, Canada, and Europe with filters by location, unit type, and price`,
     `- [Glamping Near National Parks](${enBase}/glamping/near-national-parks): Find glamping properties within 75 miles of Yellowstone, Yosemite, Great Smoky Mountains, and 60+ national parks`,

@@ -185,10 +185,11 @@ async function fetchPublishedRowsForBrandIds(brandIds: string[]): Promise<SagePr
         supabase
           .from(PROPERTIES_TABLE)
           .select('*')
-          .eq('research_status', PUBLISHED_RESEARCH_STATUS)
-          .neq('is_open', 'Closed')
-          .neq('is_open', 'No')
-          .in('brand_id', chunk)
+        .eq('research_status', PUBLISHED_RESEARCH_STATUS)
+        .neq('is_open', 'Closed')
+        .neq('is_open', 'No')
+        .neq('is_open', 'Cancelled')
+        .in('brand_id', chunk)
       ).range(from, from + PAGE_SIZE - 1);
 
       if (error) {
@@ -365,6 +366,7 @@ export async function getAllPublicBrandSlugs(): Promise<Array<{ slug: string }>>
         .eq('research_status', PUBLISHED_RESEARCH_STATUS)
         .neq('is_open', 'Closed')
         .neq('is_open', 'No')
+        .neq('is_open', 'Cancelled')
         .in('brand_id', brandIds.slice(0, 100))
     );
 

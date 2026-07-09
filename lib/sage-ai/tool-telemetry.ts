@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { sageAiWriteClient } from '@/lib/sage-ai/service-writer';
 
 export interface ToolTelemetryContext {
   supabase: SupabaseClient;
@@ -35,15 +36,22 @@ async function recordEvent(
   errorCode: string | null
 ): Promise<void> {
   try {
-    await ctx.supabase.from('sage_ai_tool_events').insert({
-      user_id: ctx.userId ?? null,
-      tool_name: toolName,
-      latency_ms: latencyMs,
-      error_code: errorCode,
-      correlation_id: ctx.correlationId ?? null,
-    });
+    // sage_ai_tool_events only has a service-role write policy; the chat
+    // route hands us the user-scoped client, whose inserts RLS rejects.
+    const { error } = await sageAiWriteClient(ctx.supabase)
+      .from('sage_ai_tool_events')
+      .insert({
+        user_id: ctx.userId ?? null,
+        tool_name: toolName,
+        latency_ms: latencyMs,
+        error_code: errorCode,
+        correlation_id: ctx.correlationId ?? null,
+      });
+    if (error) {
+      console.error('[sage-ai/tool-telemetry] insert rejected', toolName, error.message);
+    }
   } catch (err) {
-    console.warn('[sage-ai/tool-telemetry] insert failed', toolName, err);
+    console.error('[sage-ai/tool-telemetry] insert failed', toolName, err);
   }
 }
 

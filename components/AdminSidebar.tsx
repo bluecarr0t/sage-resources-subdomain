@@ -68,7 +68,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/audit-log')) return 'audit-log';
   if (pathname.startsWith('/admin/cost-explorer')) return 'cost-explorer';
   if (pathname.startsWith('/admin/sites-export')) return 'sites-export';
-  if (pathname.startsWith('/admin/sage-glamping-data-breakdown')) return 'sage-glamping-data-breakdown';
+  if (pathname.startsWith('/admin/sage-data')) return 'sage-data';
   if (pathname.startsWith('/admin/users')) return 'managed-users';
   if (pathname.startsWith('/admin/account')) return 'account';
   if (pathname.startsWith('/admin/workload')) return 'pipeline-workload';
@@ -89,7 +89,7 @@ const TOOLS_PAGE_IDS = new Set([
   'site-design',
   'site-builder',
   'sage-ai',
-  'sage-glamping-data-breakdown',
+  'sage-data',
 ]);
 
 const ADMIN_PAGE_IDS = new Set(['managed-users', 'pipeline-workload', 'job-activity']);
@@ -764,11 +764,11 @@ export default function AdminSidebar() {
                           isCollapsed={false}
                         />
                         <NavLink
-                          href="/admin/sage-glamping-data-breakdown"
+                          href="/admin/sage-data"
                           label={tSidebar('sageDataResearch')}
                           icon={Table2}
-                          pageId="sage-glamping-data-breakdown"
-                          isActive={activePageId === 'sage-glamping-data-breakdown'}
+                          pageId="sage-data"
+                          isActive={activePageId === 'sage-data'}
                           isCollapsed={false}
                         />
                       </div>
@@ -874,11 +874,11 @@ export default function AdminSidebar() {
                           {tSidebar('siteBuilder')}
                         </Link>
                         <Link
-                          href="/admin/sage-glamping-data-breakdown"
+                          href="/admin/sage-data"
                           role="menuitem"
                           onClick={() => setToolsFlyoutOpen(false)}
                           className={`flex items-center gap-2 px-3 py-2 text-sm ${
-                            activePageId === 'sage-glamping-data-breakdown'
+                            activePageId === 'sage-data'
                               ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
                               : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
                           }`}

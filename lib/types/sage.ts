@@ -21,6 +21,12 @@ export interface SageProperty {
   is_open: string | null;
   /** When is_open = Under Construction, cron flips to Yes on this date (YYYY-MM-DD). */
   planned_open_date: string | null;
+  /** Canonical slug when is_open = Cancelled (see lib/cancelled-project-reason.ts). */
+  cancelled_reason: string | null;
+  /** Free-text context for why a pipeline project was cancelled. */
+  cancelled_reason_notes: string | null;
+  /** Calendar year the pipeline project was cancelled (when is_open = Cancelled). */
+  cancelled_year: number | null;
 
   // SOURCE & TRACKING
   source: string | null;

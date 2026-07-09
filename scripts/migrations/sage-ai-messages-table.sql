@@ -33,15 +33,32 @@ CREATE POLICY "Users can view their own messages"
   ON sage_ai_messages FOR SELECT
   USING (auth.uid() = user_id);
 
+-- INSERT/UPDATE also require the target session to belong to the caller (not
+-- just a matching user_id) — see sage-ai-messages-session-ownership-rls.sql.
 DROP POLICY IF EXISTS "Users can insert their own messages" ON sage_ai_messages;
 CREATE POLICY "Users can insert their own messages"
   ON sage_ai_messages FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (
+    auth.uid() = user_id
+    AND EXISTS (
+      SELECT 1 FROM sage_ai_sessions s
+      WHERE s.id = sage_ai_messages.session_id
+        AND s.user_id = auth.uid()
+    )
+  );
 
 DROP POLICY IF EXISTS "Users can update their own messages" ON sage_ai_messages;
 CREATE POLICY "Users can update their own messages"
   ON sage_ai_messages FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id)
+  WITH CHECK (
+    auth.uid() = user_id
+    AND EXISTS (
+      SELECT 1 FROM sage_ai_sessions s
+      WHERE s.id = sage_ai_messages.session_id
+        AND s.user_id = auth.uid()
+    )
+  );
 
 DROP POLICY IF EXISTS "Users can delete their own messages" ON sage_ai_messages;
 CREATE POLICY "Users can delete their own messages"

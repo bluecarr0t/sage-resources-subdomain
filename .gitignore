@@ -54,3 +54,6 @@ next-env.d.ts
 /docs/seo/baselines/instrumentation-baseline.json
 /docs/seo/baselines/gsc/
 
+
+# firecrawl scrape cache (may contain third-party tokens)
+.firecrawl/

@@ -1,0 +1,69 @@
+[dotenv@17.2.3] injecting env (39) from .env.local -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+Processing 495 properties (LIVE)...
+[1/495] Trout Creek Wilderness Lodge (1 rows)
+  Applied 0 row updates, 0 conflicts, 17276 chars scraped
+[2/495] Boonies Farm (1 rows)
+  Applied 0 row updates, 0 conflicts, 615 chars scraped
+[3/495] Westgate River Ranch Resort & Rodeo (5 rows)
+  Applied 0 row updates, 0 conflicts, 48000 chars scraped
+[4/495] Heritage Ranch MT (1 rows)
+  Applied 1 row updates, 0 conflicts, 24059 chars scraped
+[5/495] Savage River Lodge (2 rows)
+  Skipped: fetch_error
+[6/495] Outdoorsy Hill Country (2 rows)
+  Applied 0 row updates, 0 conflicts, 4934 chars scraped
+[7/495] Timberglow Getaway (2 rows)
+  Applied 0 row updates, 0 conflicts, 2076 chars scraped
+[8/495] The Vintages Trailer Resort (1 rows)
+  Applied 0 row updates, 0 conflicts, 13484 chars scraped
+[9/495] Star Gazer Glamping Village (1 rows)
+  Applied 0 row updates, 0 conflicts, 48000 chars scraped
+[10/495] Camp V (2 rows)
+  Applied 0 row updates, 0 conflicts, 8703 chars scraped
+[11/495] Wahwahtaysee Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 3071 chars scraped
+[12/495] Glamping at Lake Grapevine (1 rows)
+  Applied 0 row updates, 0 conflicts, 8131 chars scraped
+[13/495] StarStruck Glamping (2 rows)
+  Applied 0 row updates, 0 conflicts, 5126 chars scraped
+[14/495] Sequoia High Sierra Camp (1 rows)
+  Applied 0 row updates, 0 conflicts, 16915 chars scraped
+[15/495] Escalante Yurts (hotel near Bryce Canyon) (2 rows)
+  Applied 0 row updates, 0 conflicts, 9713 chars scraped
+[16/495] Appalachian Pond Campground (1 rows)
+  Applied 1 row updates, 0 conflicts, 4959 chars scraped
+[17/495] The Destination (1 rows)
+  Applied 0 row updates, 1 conflicts, 5279 chars scraped
+[18/495] Fireside Resort - Jackson Hole (1 rows)
+  Applied 0 row updates, 0 conflicts, 5040 chars scraped
+[19/495] The Griffin Ranch (1 rows)
+  Applied 0 row updates, 1 conflicts, 3301 chars scraped
+[20/495] Happydale Retreat (2 rows)
+  Applied 0 row updates, 0 conflicts, 2657 chars scraped
+[21/495] Costanoa (4 rows)
+  Applied 0 row updates, 0 conflicts, 13375 chars scraped
+[22/495] The Glamping Collective (1 rows)
+  Applied 0 row updates, 0 conflicts, 16868 chars scraped
+[23/495] Alter Experiences (Glamping in Mt Laguna & Lake Cuyamaca) (1 rows)
+  Applied 0 row updates, 0 conflicts, 11654 chars scraped
+[24/495] Tiger Safari Zoological Park (1 rows)
+  Skipped: fetch_error
+[25/495] Ouachita Wilde (3 rows)
+  Applied 0 row updates, 0 conflicts, 15805 chars scraped
+[26/495] The Sequoia High Sierra Camp (1 rows)
+  Applied 0 row updates, 0 conflicts, 16915 chars scraped
+[27/495] Cedar Bloom Farm (1 rows)
+  Applied 1 row updates, 0 conflicts, 10081 chars scraped
+[28/495] The Whippoorwill's Nest Glamping Tent (1 rows)
+  Applied 0 row updates, 0 conflicts, 5195 chars scraped
+[29/495] The Fields of Michigan (6 rows)
+  Applied 0 row updates, 0 conflicts, 608 chars scraped
+[30/495] Airydale Retreat (3 rows)
+  Applied 0 row updates, 0 conflicts, 8337 chars scraped
+[31/495] Sky Ridge Yurts (1 rows)
+  Applied 0 row updates, 0 conflicts, 933 chars scraped
+[32/495] Good Natured Glamping (2 rows)
+  Skipped: fetch_error
+[33/495] Huttopia White Mountains (4 rows)
+  Applied 0 row updates, 0 conflicts, 6711 chars scraped
+[34/495] Cameron Ranch Glamping - Bastrop (1 rows)

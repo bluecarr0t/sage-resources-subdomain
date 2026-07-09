@@ -81,11 +81,13 @@ async function main() {
   let offset = 0;
   while (stats.fetched < hardLimit) {
     const pageSize = Math.min(FETCH_BATCH, hardLimit - stats.fetched);
+    // Select all columns so the embedding text can include the per-feature
+    // flag columns (unit_*/property_*/activities_*/setting_*) and raw text —
+    // there is no single `amenities` column. This is an offline batch, so the
+    // wide select is fine and auto-captures new flag columns.
     const { data, error } = await supabase
       .from('all_glamping_properties')
-      .select(
-        'id, property_name, description, amenities, unit_type, property_type, city, state'
-      )
+      .select('*')
       .range(offset, offset + pageSize - 1);
 
     if (error) {

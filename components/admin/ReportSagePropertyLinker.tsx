@@ -261,8 +261,8 @@ export default function ReportSagePropertyLinker({
     const location = formatLocation(sageProperty);
     const openLabel = formatGlampingIsOpenPublicLabel(sageProperty.is_open);
     const sageDataUrl = sageProperty.property_name
-      ? `/admin/sage-data?q=${encodeURIComponent(sageProperty.property_name)}`
-      : '/admin/sage-data';
+      ? `/admin/sage-data/editor?q=${encodeURIComponent(sageProperty.property_name)}`
+      : '/admin/sage-data/editor';
 
     return (
       <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">

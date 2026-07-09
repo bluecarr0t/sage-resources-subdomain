@@ -1,0 +1,53 @@
+name: Weekly RIDB sync
+
+on:
+  schedule:
+    # Sundays 07:00 UTC — federal campsite metadata refresh
+    - cron: '0 7 * * 0'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Sync mode (incremental recommended for scheduled runs)'
+        required: false
+        default: 'incremental'
+        type: choice
+        options:
+          - incremental
+          - full
+      reset_progress:
+        description: 'Reset progress and start from offset 0 (full re-walk)'
+        type: boolean
+        default: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verify RIDB setup
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          RIDB_API_KEY: ${{ secrets.RIDB_API_KEY }}
+        run: npx tsx scripts/verify-ridb-setup.ts
+
+      - name: Collect RIDB campsites
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          RIDB_API_KEY: ${{ secrets.RIDB_API_KEY }}
+        run: |
+          ARGS="--mode=${{ github.event.inputs.mode || 'incremental' }}"
+          if [ "${{ github.event.inputs.reset_progress }}" = "true" ]; then
+            ARGS="$ARGS --reset-progress"
+          fi
+          npx tsx scripts/collect-ridb-campsites.ts $ARGS

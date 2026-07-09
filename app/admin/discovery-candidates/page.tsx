@@ -125,11 +125,11 @@ export default function DiscoveryCandidatesPage() {
     <main className="pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto py-8">
         <Link
-          href="/admin/sage-glamping-data-breakdown"
+          href="/admin/sage-data"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 mb-6"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to Sage Glamping Data
+          Back to Sage Research & Data
         </Link>
 
         <h1 className={`${adminPageTitle} mb-1`}>

@@ -94,7 +94,7 @@ export default function AdminGlampingServiceTierBreakdown() {
           quality tiers. Stored on{' '}
           <span className="font-mono text-[11px]">all_sage_data</span>; editable in{' '}
           <Link
-            href="/admin/sage-data"
+            href="/admin/sage-data/editor"
             className="text-sage-600 dark:text-sage-400 hover:underline"
           >
             Sage Data

@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/require-admin-auth';
+import { isValidSageUuid } from '@/lib/sage-ai/route-schemas';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,9 @@ export async function POST(
   }
 
   const { id } = await params;
+  if (!isValidSageUuid(id)) {
+    return NextResponse.json({ error: 'Invalid saved query id' }, { status: 400 });
+  }
 
   const { error } = await authResult.supabase.rpc('increment_saved_query_use_count', {
     query_id: id,
@@ -46,6 +50,9 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  if (!isValidSageUuid(id)) {
+    return NextResponse.json({ error: 'Invalid saved query id' }, { status: 400 });
+  }
 
   const { data, error } = await authResult.supabase
     .from('sage_ai_saved_queries')

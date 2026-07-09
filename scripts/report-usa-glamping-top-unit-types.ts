@@ -11,7 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '../lib/glamping-land-operator-category';
 import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '../lib/glamping-market-snapshot-region';
 import { isExcludedGlampingMarketSnapshotUnitType } from '../lib/glamping-market-snapshot-unit-filter';
-import { normalizeGlampingUnitTypeForStorage } from '../lib/glamping-unit-type-normalize';
+import { isGlampingOperatingForAnalytics } from '../lib/glamping-is-open';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 config();
@@ -34,6 +34,7 @@ type Row = {
   unit_type: string | null;
   quantity_of_units: string | number | null;
   property_total_sites: string | number | null;
+  is_open: string | null;
 };
 
 function parsePositiveNumber(value: unknown): number | null {
@@ -60,7 +61,7 @@ async function main() {
   for (;;) {
     const { data, error } = await supabase
       .from('all_glamping_properties')
-      .select('unit_type, quantity_of_units, property_total_sites')
+      .select('unit_type, quantity_of_units, property_total_sites, is_open')
       .eq('is_glamping_property', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
@@ -77,6 +78,7 @@ async function main() {
     if (batch.length === 0) break;
 
     for (const row of batch) {
+      if (!isGlampingOperatingForAnalytics(row.is_open)) continue;
       if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
 
       const rowUnits = sitesForRow(row);

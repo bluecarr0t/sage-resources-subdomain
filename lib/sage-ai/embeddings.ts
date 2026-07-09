@@ -21,26 +21,96 @@ export interface PropertyEmbeddingInput {
   id: number;
   property_name?: string | null;
   description?: string | null;
-  amenities?: string | null;
+  unit_description?: string | null;
+  glamping_service_tier?: string | null;
   unit_type?: string | null;
   property_type?: string | null;
   city?: string | null;
   state?: string | null;
+  /** Unstructured Roverpass text blobs, when present. */
+  amenities_raw?: string | null;
+  activities_raw?: string | null;
+  lifestyle_raw?: string | null;
+  /**
+   * The `all_sage_data` schema has NO single `amenities` column — features are
+   * hundreds of per-flag columns (`unit_*`, `property_*`, `activities_*`,
+   * `setting_*`, `river_stream_or_creek`) whose value is usually "Yes"/"No".
+   * The batch script passes the whole row, so accept arbitrary flag columns.
+   */
+  [key: string]: unknown;
+}
+
+/** Prefixes whose "Yes" columns represent a present amenity/activity/setting. */
+const FLAG_PREFIXES = ['unit_', 'property_', 'activities_', 'setting_', 'rv_'] as const;
+
+/**
+ * Columns matching a flag prefix that are NOT boolean flags (descriptive /
+ * numeric / identifier), so they must not be treated as present amenities.
+ */
+const NON_FLAG_COLUMNS = new Set<string>([
+  'unit_type',
+  'unit_capacity',
+  'unit_sq_ft',
+  'unit_description',
+  'unit_bed',
+  'property_type',
+  'property_name',
+  'property_id',
+  'property_total_sites',
+  'rv_vehicle_length',
+  'rv_surface_type',
+  'rv_surface_level',
+]);
+
+function isPresentFlag(column: string, value: unknown): boolean {
+  if (NON_FLAG_COLUMNS.has(column)) return false;
+  const matchesPrefix =
+    column === 'river_stream_or_creek' ||
+    FLAG_PREFIXES.some((p) => column.startsWith(p));
+  if (!matchesPrefix) return false;
+  return typeof value === 'string' && value.trim().toLowerCase() === 'yes';
+}
+
+/** "unit_private_bathroom" -> "private bathroom"; "setting_forest" -> "forest". */
+function humanizeFlag(column: string): string {
+  const withoutPrefix = column.replace(
+    /^(unit_|property_|activities_|setting_|rv_)/,
+    ''
+  );
+  return withoutPrefix.replace(/_/g, ' ').trim();
 }
 
 /**
  * Canonical "document" text for a property. Keep the label order stable —
  * the content_hash uses this exact serialization to short-circuit repeat
- * embeddings.
+ * embeddings. Amenities/activities/settings come from the real per-flag
+ * columns (the "Yes" ones) plus any unstructured raw text, since there is no
+ * single `amenities` column in the schema.
  */
 export function buildPropertyEmbeddingText(p: PropertyEmbeddingInput): string {
+  const presentFlags: string[] = [];
+  for (const [column, value] of Object.entries(p)) {
+    if (isPresentFlag(column, value)) {
+      presentFlags.push(humanizeFlag(column));
+    }
+  }
+  presentFlags.sort();
+
+  const rawText = [p.amenities_raw, p.activities_raw, p.lifestyle_raw]
+    .filter((v) => typeof v === 'string' && v.trim().length > 0)
+    .map((v) => (v as string).trim())
+    .join(' | ');
+
   const fields: Array<[string, string | null | undefined]> = [
     ['Name', p.property_name],
     ['Location', [p.city, p.state].filter(Boolean).join(', ') || null],
     ['Unit type', p.unit_type],
     ['Property type', p.property_type],
+    ['Service tier', p.glamping_service_tier],
     ['Description', p.description],
-    ['Amenities', p.amenities],
+    ['Unit description', p.unit_description],
+    ['Amenities', presentFlags.length > 0 ? presentFlags.join(', ') : null],
+    ['Other features', rawText || null],
   ];
   return fields
     .filter(([, v]) => typeof v === 'string' && v.trim().length > 0)

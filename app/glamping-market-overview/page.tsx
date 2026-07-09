@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import nextDynamic from 'next/dynamic';
 import { EDITORIAL_LINK_CLASS, EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
@@ -40,14 +39,6 @@ const GlampingIndustryCanadaProvinces = nextDynamic(
 );
 
 export const dynamic = 'force-dynamic';
-
-export const metadata: Metadata = {
-  title: 'Glamping Market Overview',
-  description:
-    'US and Canada glamping metrics for private commercial operators with property type Glamping only. Excludes other product types, booking marketplaces, and public-land stays.',
-  // Gated behind a Supabase magic-link sign-in; don't index the access wall.
-  robots: { index: false, follow: false },
-};
 
 function formatInt(n: number): string {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);

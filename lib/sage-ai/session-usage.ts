@@ -36,6 +36,8 @@ export function summarizeSageAiSessionUsage(
   rows: UsageRow[],
   sessionId: string
 ): SageAiSessionUsageSummary {
+  // Rows are already filtered to this session in the DB query; this defensive
+  // filter keeps the function correct if ever passed a mixed set.
   const sessionRows = rows.filter(
     (r) => sessionIdFromMeta(r.request_meta) === sessionId
   );

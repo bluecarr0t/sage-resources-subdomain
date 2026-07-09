@@ -1,0 +1,407 @@
+[dotenv@17.2.3] injecting env (39) from .env.local -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+Processing 200 properties (LIVE)...
+[1/200] AutoCamp Asheville (2 rows)
+  Applied 2 row updates, 0 conflicts, 14844 chars scraped
+[2/200] Huttopia Adirondacks (1 rows)
+  Applied 0 row updates, 0 conflicts, 6711 chars scraped
+[3/200] SKYE Texas Hill Country Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 2789 chars scraped
+[4/200] Collective Retreats Governors Island (2 rows)
+  Applied 0 row updates, 0 conflicts, 7707 chars scraped
+[5/200] Two Capes Lookout (7 rows)
+  Applied 0 row updates, 0 conflicts, 8910 chars scraped
+[6/200] Huttopia Southern Maine (4 rows)
+  Applied 0 row updates, 0 conflicts, 35760 chars scraped
+[7/200] The Vintages Trailer Resort (1 rows)
+  Applied 0 row updates, 0 conflicts, 13484 chars scraped
+[8/200] Roamstead (10 rows)
+  Applied 0 row updates, 0 conflicts, 48000 chars scraped
+[9/200] Lost Lake Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 2983 chars scraped
+[10/200] WeeCasa Tiny House Resort (1 rows)
+  Applied 0 row updates, 0 conflicts, 3509 chars scraped
+[11/200] Valley Overlook (2 rows)
+  Applied 0 row updates, 0 conflicts, 4893 chars scraped
+[12/200] Huttopia White Mountains (1 rows)
+  Applied 0 row updates, 0 conflicts, 6711 chars scraped
+[13/200] Happydale Retreat (1 rows)
+  Applied 0 row updates, 0 conflicts, 2657 chars scraped
+[14/200] The Woods Luxury Camping (2 rows)
+  Applied 0 row updates, 0 conflicts, 9629 chars scraped
+[15/200] Naturluxe & Stars (2 rows)
+  Applied 0 row updates, 0 conflicts, 3453 chars scraped
+[16/200] Wander Camp Smoky Mountains (1 rows)
+  Applied 1 row updates, 0 conflicts, 27439 chars scraped
+[17/200] Wander Camp Bear Lake (1 rows)
+  Applied 0 row updates, 0 conflicts, 10945 chars scraped
+[18/200] Snow Peak Campfield (2 rows)
+  Applied 2 row updates, 0 conflicts, 27444 chars scraped
+[19/200] Wander Camp Smoky Mountains (1 rows)
+  Applied 1 row updates, 0 conflicts, 27439 chars scraped
+[20/200] Wander Camp Bear Lake (1 rows)
+  Applied 0 row updates, 0 conflicts, 10945 chars scraped
+[21/200] Zion Glamping Adventures (2 rows)
+  Applied 2 row updates, 0 conflicts, 22109 chars scraped
+[22/200] Crater Lake Resort (1 rows)
+  Applied 1 row updates, 0 conflicts, 20199 chars scraped
+[23/200] Under Canvas Yosemite (3 rows)
+  Applied 3 row updates, 0 conflicts, 26957 chars scraped
+[24/200] Paulina Lake Lodge (2 rows)
+  Applied 2 row updates, 0 conflicts, 41503 chars scraped
+[25/200] Pisgah Glamping at Lake Powhatan (1 rows)
+  Applied 1 row updates, 0 conflicts, 6548 chars scraped
+[26/200] Son's Guadalupe (1 rows)
+  Applied 0 row updates, 0 conflicts, 16275 chars scraped
+[27/200] Yellowstone Dreamin Camp (1 rows)
+  Applied 0 row updates, 0 conflicts, 4485 chars scraped
+[28/200] Postcard Cabins Gilchrist Springs (1 rows)
+  Skipped: fetch_error
+[29/200] Hope Acres Glampground (1 rows)
+  Applied 0 row updates, 0 conflicts, 514 chars scraped
+[30/200] Camp Ferncrest - Chambers Creek (2 rows)
+  Applied 2 row updates, 0 conflicts, 23534 chars scraped
+[31/200] UDOSCAPE (1 rows)
+  Applied 1 row updates, 0 conflicts, 9101 chars scraped
+[32/200] Paint Rock Farm (1 rows)
+  Applied 0 row updates, 0 conflicts, 1565 chars scraped
+[33/200] Tarantula Ranch (10 rows)
+  Applied 0 row updates, 0 conflicts, 48000 chars scraped
+[34/200] GLAT Austin (5 rows)
+  Applied 0 row updates, 0 conflicts, 606 chars scraped
+[35/200] Stay Nantahala (4 rows)
+  Applied 2 row updates, 0 conflicts, 7897 chars scraped
+[36/200] Safari West (1 rows)
+  Applied 0 row updates, 0 conflicts, 9499 chars scraped
+[37/200] Silver Spur Homestead (2 rows)
+  Applied 0 row updates, 0 conflicts, 6077 chars scraped
+[38/200] Wander Camp Smoky Mountains (1 rows)
+  Applied 1 row updates, 0 conflicts, 27439 chars scraped
+[39/200] Luxury Yurt at Loyd Park on Joe Pool Lake (1 rows)
+  Applied 0 row updates, 0 conflicts, 8307 chars scraped
+[40/200] Wander Camp Bear Lake (1 rows)
+  Applied 0 row updates, 0 conflicts, 10945 chars scraped
+[41/200] The Outlier Inn (5 rows)
+  Applied 0 row updates, 0 conflicts, 5269 chars scraped
+[42/200] Freedom Yurt Resorts (3 rows)
+  Applied 3 row updates, 0 conflicts, 5534 chars scraped
+[43/200] Wander Camp Smoky Mountains (1 rows)
+  Applied 1 row updates, 0 conflicts, 27439 chars scraped
+[44/200] Wander Camp Bear Lake (1 rows)
+  Applied 0 row updates, 0 conflicts, 10945 chars scraped
+[45/200] Johnny Yurts (1 rows)
+  Applied 1 row updates, 0 conflicts, 6748 chars scraped
+[46/200] Vegas Glamping (7 rows)
+  Applied 1 row updates, 0 conflicts, 6699 chars scraped
+[47/200] Escalante Yurts (hotel near Bryce Canyon) (2 rows)
+  Applied 0 row updates, 0 conflicts, 9713 chars scraped
+[48/200] Green Rock Retreat (1 rows)
+  Applied 0 row updates, 0 conflicts, 7908 chars scraped
+[49/200] Shearwater Cove (1 rows)
+  Applied 1 row updates, 0 conflicts, 22884 chars scraped
+[50/200] Cliff River Springs (1 rows)
+  Applied 1 row updates, 0 conflicts, 20098 chars scraped
+[51/200] The Fields of Michigan (6 rows)
+  Applied 0 row updates, 0 conflicts, 608 chars scraped
+[52/200] Lost Woods Farm & Forest (6 rows)
+  Applied 6 row updates, 0 conflicts, 21232 chars scraped
+[53/200] Tuxedo Falls (2 rows)
+  Applied 0 row updates, 0 conflicts, 9182 chars scraped
+[54/200] All Is Well Resort (2 rows)
+  Applied 2 row updates, 0 conflicts, 20105 chars scraped
+[55/200] Serana (2 rows)
+  Applied 2 row updates, 0 conflicts, 993 chars scraped
+[56/200] Palo 32° (1 rows)
+  Applied 1 row updates, 0 conflicts, 9313 chars scraped
+[57/200] River Road Treehouses (1 rows)
+  Applied 1 row updates, 0 conflicts, 19338 chars scraped
+[58/200] Rolling Huts (1 rows)
+  Applied 1 row updates, 0 conflicts, 10352 chars scraped
+[59/200] Dunya Camp (1 rows)
+  Applied 1 row updates, 0 conflicts, 4093 chars scraped
+[60/200] Sonoma Zipline Adventure (1 rows)
+  Applied 0 row updates, 0 conflicts, 7055 chars scraped
+[61/200] Untamed Honey (1 rows)
+  Applied 0 row updates, 0 conflicts, 6826 chars scraped
+[62/200] Spring Ranch Campground (5 rows)
+  Applied 5 row updates, 0 conflicts, 16335 chars scraped
+[63/200] Five Meadows Farms by Your Glamping Adventure (4 rows)
+  Applied 0 row updates, 0 conflicts, 3543 chars scraped
+[64/200] Bear Den Cabins & Camp (3 rows)
+  Applied 0 row updates, 0 conflicts, 2393 chars scraped
+[65/200] Twin Falls Ranch (3 rows)
+  Applied 3 row updates, 0 conflicts, 7673 chars scraped
+[66/200] Skamania Lodge (2 rows)
+  Applied 2 row updates, 0 conflicts, 48000 chars scraped
+[67/200] Cozy Heron Glamping (1 rows)
+  Applied 1 row updates, 0 conflicts, 13555 chars scraped
+[68/200] Wander Camp Bryce Canyon (1 rows)
+  Applied 1 row updates, 0 conflicts, 26927 chars scraped
+[69/200] Blue Skies Retro Resort (1 rows)
+  Applied 1 row updates, 0 conflicts, 14993 chars scraped
+[70/200] Roaring River Hills Campground and Cabins (1 rows)
+  Applied 0 row updates, 0 conflicts, 27556 chars scraped
+[71/200] The Hohnstead Glamping Cabins (1 rows)
+  Applied 1 row updates, 0 conflicts, 17698 chars scraped
+[72/200] Off Map Glamping (1 rows)
+  Applied 0 row updates, 0 conflicts, 8951 chars scraped
+[73/200] The Trailer Pond at Alta Colina (1 rows)
+  Applied 0 row updates, 0 conflicts, 3134 chars scraped
+[74/200] Roadhouse Ranch & Camp (1 rows)
+  Applied 0 row updates, 0 conflicts, 3181 chars scraped
+[75/200] Paloma Lake (1 rows)
+  Applied 1 row updates, 0 conflicts, 10177 chars scraped
+[76/200] Mossquatch Resort (4 rows)
+  Applied 0 row updates, 0 conflicts, 44396 chars scraped
+[77/200] Haven Yurts (4 rows)
+  Applied 4 row updates, 0 conflicts, 7597 chars scraped
+[78/200] Huttopia Paradise Springs (4 rows)
+  Applied 0 row updates, 0 conflicts, 6711 chars scraped
+[79/200] Cathys Dream Glamping (4 rows)
+  Applied 0 row updates, 0 conflicts, 1021 chars scraped
+[80/200] Paddler's Village (4 rows)
+  Applied 0 row updates, 0 conflicts, 24446 chars scraped
+[81/200] Domance Glamping (3 rows)
+  Applied 1 row updates, 0 conflicts, 5443 chars scraped
+[82/200] StarStruck Glamping (2 rows)
+  Applied 0 row updates, 0 conflicts, 5126 chars scraped
+[83/200] Glacier Rock Wellness Rock Ranch (2 rows)
+  Applied 0 row updates, 0 conflicts, 391 chars scraped
+[84/200] Under Canvas Acadia (2 rows)
+  Applied 0 row updates, 0 conflicts, 32929 chars scraped
+[85/200] The Destination (1 rows)
+  Applied 1 row updates, 1 conflicts, 5279 chars scraped
+[86/200] The Mohicans Treehouse Resort and Wedding Venue (1 rows)
+  Applied 1 row updates, 0 conflicts, 27547 chars scraped
+[87/200] Tipi Village Retreat (1 rows)
+  Applied 0 row updates, 0 conflicts, 2057 chars scraped
+[88/200] Goosewing Ranch (1 rows)
+  Applied 0 row updates, 0 conflicts, 4283 chars scraped
+[89/200] Maine Forest Yurts (1 rows)
+  Applied 0 row updates, 0 conflicts, 4867 chars scraped
+[90/200] Whispering Springs Wilderness Retreat (1 rows)
+  Applied 1 row updates, 0 conflicts, 47184 chars scraped
+[91/200] Sunny Valley Resort (1 rows)
+  Applied 0 row updates, 0 conflicts, 4012 chars scraped
+[92/200] Container Cabins in the Catskills (1 rows)
+  Applied 1 row updates, 0 conflicts, 7703 chars scraped
+[93/200] Norwegian Wood Ranch (1 rows)
+  Skipped: no_url
+[94/200] Safari for the Soul Luxury Glamping (1 rows)
+  Applied 1 row updates, 0 conflicts, 20794 chars scraped
+[95/200] Palo Duro Glamping (1 rows)
+  Applied 0 row updates, 0 conflicts, 3668 chars scraped
+[96/200] Ouachita Wilde (3 rows)
+  Applied 0 row updates, 0 conflicts, 15805 chars scraped
+[97/200] El Mistico Ranch (3 rows)
+  Applied 0 row updates, 0 conflicts, 48000 chars scraped
+[98/200] HomeGrown HideAways (3 rows)
+  Applied 0 row updates, 0 conflicts, 21478 chars scraped
+[99/200] Shash Dine' EcoRetreat (3 rows)
+  Applied 0 row updates, 0 conflicts, 1298 chars scraped
+[100/200] Elk & Embers Resort (3 rows)
+  Applied 3 row updates, 0 conflicts, 8416 chars scraped
+[101/200] Starlight Haven at Weiss Lake (3 rows)
+  Applied 3 row updates, 0 conflicts, 3888 chars scraped
+[102/200] El Capitan Canyon (3 rows)
+  Applied 0 row updates, 0 conflicts, 17090 chars scraped
+[103/200] ReTreet Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 8408 chars scraped
+[104/200] Huttopia Wine Country (3 rows)
+  Applied 0 row updates, 0 conflicts, 6711 chars scraped
+[105/200] Tammah (2 rows)
+  Applied 2 row updates, 0 conflicts, 38609 chars scraped
+[106/200] Umpqua's Last Resort (2 rows)
+  Applied 2 row updates, 0 conflicts, 12659 chars scraped
+[107/200] Khushatta Hills Ranch (2 rows)
+  Applied 0 row updates, 0 conflicts, 6589 chars scraped
+[108/200] Boonies Farm (1 rows)
+  Applied 0 row updates, 0 conflicts, 615 chars scraped
+[109/200] Tennessee Glamping (1 rows)
+  Applied 1 row updates, 0 conflicts, 20191 chars scraped
+[110/200] Idaho Wilderness Yurts (1 rows)
+  Applied 1 row updates, 0 conflicts, 5296 chars scraped
+[111/200] Spoon Mountain Glamping (1 rows)
+  Applied 1 row updates, 0 conflicts, 12390 chars scraped
+[112/200] Menizei (1 rows)
+  Applied 1 row updates, 0 conflicts, 9147 chars scraped
+[113/200] Yak Eco Camp (1 rows)
+  Skipped: fetch_error
+[114/200] Timberglow Getaway (2 rows)
+  Skipped: fetch_error
+[115/200] Treebones Resort (2 rows)
+  Skipped: fetch_error
+[116/200] Nomad Landing (2 rows)
+  Skipped: fetch_error
+[117/200] Alpenglow Luxury Camping (2 rows)
+  Skipped: fetch_error
+[118/200] New Mexico Glamping Tipis (2 rows)
+  Skipped: fetch_error
+[119/200] Borealis Basecamp (2 rows)
+  Skipped: fetch_error
+[120/200] Cave Lakes Canyon (2 rows)
+  Skipped: fetch_error
+[121/200] Battenkill Glamping Resort (2 rows)
+  Skipped: fetch_error
+[122/200] Broad River Campground (2 rows)
+  Skipped: fetch_error
+[123/200] Point Sebago Resort (2 rows)
+  Skipped: fetch_error
+[124/200] Glampful (2 rows)
+  Skipped: fetch_error
+[125/200] Tops'l Farm (2 rows)
+  Skipped: fetch_error
+[126/200] Glamp Michigan (2 rows)
+  Skipped: fetch_error
+[127/200] The Retreat on the Hill (2 rows)
+  Skipped: fetch_error
+[128/200] Streeter Mountain Farm (2 rows)
+  Skipped: fetch_error
+[129/200] Lynnhurst Family Resort (2 rows)
+  Skipped: fetch_error
+[130/200] Pacific Dunes Resort (2 rows)
+  Skipped: fetch_error
+[131/200] Basecamp Terlingua (2 rows)
+  Skipped: fetch_error
+[132/200] Glamping Downeast (2 rows)
+  Skipped: fetch_error
+[133/200] Eden Reserve (2 rows)
+  Skipped: fetch_error
+[134/200] Wildhaven Yosemite (2 rows)
+  Skipped: fetch_error
+[135/200] Zion Backcountry Glamping (2 rows)
+  Skipped: fetch_error
+[136/200] The Canopy Crew (2 rows)
+  Skipped: fetch_error
+[137/200] Alpine Garden Camping Village & Winery (2 rows)
+  Skipped: fetch_error
+[138/200] Timber Ridge Outpost & Cabins (2 rows)
+  Skipped: fetch_error
+[139/200] Bar N Ranch (2 rows)
+  Skipped: fetch_error
+[140/200] Woods of Eden Glampground (2 rows)
+  Skipped: fetch_error
+[141/200] Field Trip (2 rows)
+  Skipped: fetch_error
+[142/200] Chattooga River Lodge and Campground (2 rows)
+  Skipped: fetch_error
+[143/200] Highwood Retreat (2 rows)
+  Skipped: fetch_error
+[144/200] The Cedars Ranch (2 rows)
+  Skipped: fetch_error
+[145/200] Alter Experiences (Glamping in Mt Laguna & Lake Cuyamaca) (1 rows)
+  Skipped: fetch_error
+[146/200] Timberline Glamping at Williamsburg (1 rows)
+  Skipped: fetch_error
+[147/200] Timberline Glamping at Kingston Downs (1 rows)
+  Skipped: fetch_error
+[148/200] Out N About Treehouse (1 rows)
+  Skipped: fetch_error
+[149/200] Timberline Glamping at Lula (1 rows)
+  Skipped: fetch_error
+[150/200] Ray of Sunshine (1 rows)
+  Skipped: fetch_error
+[151/200] Treetop Hideaways (1 rows)
+  Skipped: fetch_error
+[152/200] Glen Oaks Big Sur (1 rows)
+  Skipped: fetch_error
+[153/200] Timberline Glamping at Lake Lanier River Forks (1 rows)
+  Skipped: fetch_error
+[154/200] Camp Ledgerock Retreat - Luxury Glamping on Canyon Lake (1 rows)
+  Skipped: fetch_error
+[155/200] Camposanto ATX Glamping (1 rows)
+  Skipped: fetch_error
+[156/200] Highland Meadows Resort (1 rows)
+  Skipped: fetch_error
+[157/200] River Rock Point (1 rows)
+  Skipped: fetch_error
+[158/200] Rimrock Ranch (1 rows)
+  Skipped: fetch_error
+[159/200] Alexander's Lodge Yurts (1 rows)
+  Skipped: fetch_error
+[160/200] Wyldstay Smoky Mountains (1 rows)
+  Skipped: fetch_error
+[161/200] Sticks and Stones Farm (1 rows)
+  Skipped: fetch_error
+[162/200] Heritage Ranch MT (1 rows)
+  Skipped: fetch_error
+[163/200] Outdoorsy Hill Country (1 rows)
+  Skipped: fetch_error
+[164/200] Wahwahtaysee Resort (1 rows)
+  Skipped: fetch_error
+[165/200] Sequoia High Sierra Camp (1 rows)
+  Skipped: fetch_error
+[166/200] The Griffin Ranch (1 rows)
+  Skipped: fetch_error
+[167/200] Tiger Safari Zoological Park (1 rows)
+  Skipped: fetch_error
+[168/200] Cedar Bloom Farm (1 rows)
+  Skipped: fetch_error
+[169/200] The Whippoorwill's Nest Glamping Tent (1 rows)
+  Skipped: fetch_error
+[170/200] Good Natured Glamping (1 rows)
+  Skipped: fetch_error
+[171/200] Cameron Ranch Glamping - Bastrop (1 rows)
+  Skipped: fetch_error
+[172/200] Nature Nook Retreats (1 rows)
+  Skipped: fetch_error
+[173/200] Nordic House Glamping (1 rows)
+  Skipped: fetch_error
+[174/200] Timberline Glamping at Kingston Downs (1 rows)
+  Skipped: fetch_error
+[175/200] Outdoors Elevated (1 rows)
+  Skipped: fetch_error
+[176/200] Evergreen Lodge (1 rows)
+  Skipped: fetch_error
+[177/200] Washington Glamping (1 rows)
+  Skipped: fetch_error
+[178/200] Gunnison Glamping Wagons (1 rows)
+  Skipped: fetch_error
+[179/200] The Destination Glamping Resort (1 rows)
+  Skipped: fetch_error
+[180/200] Timberline Glamping at Williamsburg (1 rows)
+  Skipped: fetch_error
+[181/200] Postcard Cabins Big Bear (1 rows)
+  Skipped: fetch_error
+[182/200] Scruffy Buffalo (1 rows)
+  Skipped: fetch_error
+[183/200] Summit Big Bend (1 rows)
+  Skipped: fetch_error
+[184/200] Flamingo Everglades Glamping Tents (1 rows)
+  Skipped: fetch_error
+[185/200] Colorado Cabin Adventures at Grand Lake (1 rows)
+  Skipped: fetch_error
+[186/200] Terramor Outdoor Resort (1 rows)
+  Skipped: fetch_error
+[187/200] Glamping Wild (1 rows)
+  Skipped: fetch_error
+[188/200] Sou'wester Lodge (1 rows)
+  Skipped: fetch_error
+[189/200] Timberline Glamping at Williamsburg (1 rows)
+  Skipped: fetch_error
+[190/200] Clear Sky Resorts - Grand Canyon (1 rows)
+  Skipped: fetch_error
+[191/200] Sundance Ranch KC (1 rows)
+  Skipped: fetch_error
+[192/200] Mariaville Goat Farm (1 rows)
+  Skipped: fetch_error
+[193/200] Loloma Lodge (1 rows)
+  Skipped: fetch_error
+[194/200] Timberline Glamping at Kingston Downs (1 rows)
+  Skipped: fetch_error
+[195/200] Space Cowboys (1 rows)
+  Skipped: fetch_error
+[196/200] Wildhaven Yosemite (1 rows)
+  Skipped: fetch_error
+[197/200] Wylder Hope Valley (1 rows)
+  Skipped: fetch_error
+[198/200] Smoky Mountain Glamping (1 rows)
+  Skipped: fetch_error
+[199/200] Turner Falls Park (1 rows)
+  Skipped: fetch_error
+[200/200] Quaint Glamping (1 rows)
+  Skipped: fetch_error
+
+Wrote SQL: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-hot-tub-review/backfill-hot-tub-2026-05-27.sql
+
+Done. Row updates: 82, conflicts logged: 1, skipped properties: 90
+Artifacts: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-hot-tub-review

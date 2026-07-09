@@ -80,7 +80,7 @@ const STEPS = [
     title: 'Approval & publish',
     subtitle: 'Review and make live on the map',
     description:
-      'Newly inserted properties start in "In progress" for review. The team works them in the Sage Glamping Data Breakdown and can run enrichment scripts to fill in more detail. When a property is approved, research_status is set to "Published". Only published properties appear on the public map. This step ensures quality control before new discoveries go live.',
+      'Newly inserted properties start in "In progress" for review. The team works them in Sage Research & Data and can run enrichment scripts to fill in more detail. When a property is approved, research_status is set to "Published". Only published properties appear on the public map. This step ensures quality control before new discoveries go live.',
     icon: CheckCircle2,
     color: 'bg-sage-100 dark:bg-sage-900/40 text-sage-800 dark:text-sage-200',
   },
@@ -123,10 +123,10 @@ export default function DiscoveryPipelineAutomationPage() {
       <div className="max-w-4xl mx-auto">
         <div className={adminPageHeadingMargin}>
           <Link
-            href="/admin/sage-glamping-data-breakdown"
+            href="/admin/sage-data"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 mb-4"
           >
-            ← Back to Sage Glamping Data Breakdown
+            ← Back to Sage Research & Data
           </Link>
           <h1 className={adminPageTitle}>
             Discovery Pipeline Automation

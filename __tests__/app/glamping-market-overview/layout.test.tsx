@@ -3,10 +3,16 @@
  * @jest-environment node
  */
 
-import { isValidElement, type ReactElement } from 'react';
+import { Fragment, isValidElement, type ReactElement } from 'react';
 
 const mockGetUser = jest.fn();
 const mockCheckGatedPageAccess = jest.fn();
+
+jest.mock('next/headers', () => ({
+  headers: jest.fn(async () => ({
+    get: (key: string) => (key === 'x-pathname' ? '/glamping-market-overview' : null),
+  })),
+}));
 
 jest.mock('@/lib/supabase-server', () => ({
   createServerClientWithCookies: jest.fn(async () => ({
@@ -32,6 +38,12 @@ import GlampingMarketOverviewLayout from '@/app/glamping-market-overview/layout'
 import { GlampingMarketOverviewGatedShell } from '@/components/glamping-industry/GlampingMarketOverviewGatedShell';
 import { GATED_PAGE_GLAMPING_MARKET_OVERVIEW } from '@/lib/gated-access';
 
+function fragmentChildren(result: ReactElement): ReactElement[] {
+  expect(result.type).toBe(Fragment);
+  const raw = result.props.children;
+  return Array.isArray(raw) ? raw : [raw];
+}
+
 describe('GlampingMarketOverviewLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,11 +57,11 @@ describe('GlampingMarketOverviewLayout', () => {
     const result = await GlampingMarketOverviewLayout({ children: child });
 
     expect(isValidElement(result)).toBe(true);
-    expect((result as ReactElement).type).toBe(GlampingMarketOverviewGatedShell);
-    expect((result as ReactElement).props.children).toEqual(child);
-    expect((result as ReactElement).props.pageSlug).toBe(
-      GATED_PAGE_GLAMPING_MARKET_OVERVIEW
-    );
+    const [, shell] = fragmentChildren(result as ReactElement);
+    expect(shell.type).toBe(GlampingMarketOverviewGatedShell);
+    expect(shell.props.children).toEqual(child);
+    expect(shell.props.pageSlug).toBe(GATED_PAGE_GLAMPING_MARKET_OVERVIEW);
+    expect(shell.props.seoVariant).toBe('overview');
     expect(mockCheckGatedPageAccess).toHaveBeenCalledWith(
       expect.anything(),
       null,
@@ -72,7 +84,8 @@ describe('GlampingMarketOverviewLayout', () => {
     const result = await GlampingMarketOverviewLayout({ children: child });
 
     expect(isValidElement(result)).toBe(true);
-    expect((result as ReactElement).props.children).toEqual(child);
+    const [, content] = fragmentChildren(result as ReactElement);
+    expect(content).toEqual(child);
   });
 
   it('renders children when checkGatedPageAccess grants admin bypass', async () => {
@@ -90,6 +103,7 @@ describe('GlampingMarketOverviewLayout', () => {
     const child = <span>metrics</span>;
     const result = await GlampingMarketOverviewLayout({ children: child });
 
-    expect((result as ReactElement).props.children).toEqual(child);
+    const [, content] = fragmentChildren(result as ReactElement);
+    expect(content).toEqual(child);
   });
 });

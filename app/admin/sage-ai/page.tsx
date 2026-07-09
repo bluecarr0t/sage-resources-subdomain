@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 // When the React canvas dashboard + map tools are enabled, the model will
 // prefer them over Python/matplotlib and most sessions will never load
 // Pyodide. Skip the ~50 KB loader preload in that case; it'll still
-// lazy-load on demand if the model falls back to generate_python_code.
+// lazy-load on demand only when visualization tools are off (Python is not
+// registered when SAGE_AI_VISUALIZATION_TOOLS=true).
 const SHOULD_PRELOAD_PYODIDE =
   process.env.SAGE_AI_VISUALIZATION_TOOLS !== 'true';
 

@@ -94,10 +94,10 @@ export default function AIResearchPipelinePage() {
       <div className="max-w-4xl mx-auto">
         <div className={adminPageHeadingMargin}>
           <Link
-            href="/admin/sage-glamping-data-breakdown"
+            href="/admin/sage-data"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-sage-600 dark:text-sage-400 hover:text-sage-700 dark:hover:text-sage-300 mb-4"
           >
-            ← Back to Sage Glamping Data Breakdown
+            ← Back to Sage Research & Data
           </Link>
           <h1 className={adminPageTitle}>
             AI Research Pipeline

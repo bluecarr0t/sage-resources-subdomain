@@ -28,6 +28,7 @@
     "verify:api-key": "tsx scripts/verify-api-key-restrictions.ts",
     "populate:google-place-ids": "tsx scripts/populate-google-place-ids.ts --table=all_sage_data",
     "populate:google-place-ids:dry-run": "tsx scripts/populate-google-place-ids.ts --table=all_sage_data --dry-run",
+    "test:public-map-api-guard:prod": "tsx scripts/test-public-map-api-guard-production.ts",
     "test:legacy-db": "tsx scripts/test-legacy-camping-db.ts",
     "test:report-draft": "tsx scripts/test-report-draft-pipeline.ts",
     "export:campspot-rates": "tsx scripts/export-campspot-property-rates.ts",

@@ -67,6 +67,16 @@ const nextConfig = {
       { source: '/admin/comps/:path+', destination: '/admin/glamping-properties/:path+', permanent: true },
       { source: '/map', destination: '/en/map', permanent: true },
       { source: '/map/:path*', destination: '/en/map/:path*', permanent: true },
+      {
+        source: '/admin/sage-glamping-data-breakdown',
+        destination: '/admin/sage-data',
+        permanent: true,
+      },
+      {
+        source: '/admin/sage-glamping-data-breakdown/:path*',
+        destination: '/admin/sage-data',
+        permanent: true,
+      },
     ];
   },
 

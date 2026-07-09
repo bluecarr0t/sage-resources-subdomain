@@ -1,0 +1,57 @@
+[dotenv@17.2.3] injecting env (39) from .env.local -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+Processing 25 properties (LIVE)...
+[1/25] Firefall Ranch (7 rows)
+  Applied 0 row updates, 0 conflicts, 48000 chars scraped
+[2/25] North Texas Jellystone Park (2 rows)
+  Applied 0 row updates, 0 conflicts, 26413 chars scraped
+[3/25] Huttopia Southern Maine (8 rows)
+  Applied 0 row updates, 0 conflicts, 35760 chars scraped
+[4/25] Huttopia Adirondacks (6 rows)
+  Applied 0 row updates, 0 conflicts, 35859 chars scraped
+[5/25] AutoCamp Yosemite (5 rows)
+  Applied 0 row updates, 0 conflicts, 18047 chars scraped
+[6/25] Under Canvas West Yellowstone (5 rows)
+  Applied 0 row updates, 0 conflicts, 41436 chars scraped
+[7/25] Huttopia White Mountains (4 rows)
+  Applied 0 row updates, 0 conflicts, 6711 chars scraped
+[8/25] Under Canvas Grand Canyon (4 rows)
+  Applied 4 row updates, 0 conflicts, 40872 chars scraped
+[9/25] Postcard Cabins Dale Hollow (3 rows)
+  Applied 0 row updates, 0 conflicts, 4008 chars scraped
+[10/25] Collective Retreats Governors Island (5 rows)
+  Applied 0 row updates, 0 conflicts, 7707 chars scraped
+[11/25] AutoCamp Catskills (3 rows)
+  Applied 0 row updates, 0 conflicts, 17290 chars scraped
+[12/25] AutoCamp Cape Cod (3 rows)
+  Applied 0 row updates, 0 conflicts, 16935 chars scraped
+[13/25] Postcard Cabins Big Bear (5 rows)
+  Applied 0 row updates, 0 conflicts, 28893 chars scraped
+[14/25] Zion Wildflower Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 27732 chars scraped
+[15/25] Under Canvas Mount Rushmore (4 rows)
+  Applied 4 row updates, 0 conflicts, 37718 chars scraped
+[16/25] Mendocino Grove (7 rows)
+  Applied 7 row updates, 0 conflicts, 12201 chars scraped
+[17/25] AutoCamp Asheville (2 rows)
+  Applied 0 row updates, 0 conflicts, 14844 chars scraped
+[18/25] Under Canvas Zion (4 rows)
+  Applied 0 row updates, 0 conflicts, 31546 chars scraped
+[19/25] Costanoa (4 rows)
+  Applied 0 row updates, 0 conflicts, 13375 chars scraped
+[20/25] Terramor Outdoor Resort (6 rows)
+  Applied 0 row updates, 0 conflicts, 20266 chars scraped
+[21/25] Paws Up Montana (2 rows)
+  Applied 0 row updates, 0 conflicts, 23184 chars scraped
+[22/25] Under Canvas Acadia (7 rows)
+  Applied 0 row updates, 0 conflicts, 32929 chars scraped
+[23/25] Under Canvas Glacier (4 rows)
+  Applied 4 row updates, 0 conflicts, 30648 chars scraped
+[24/25] SKYE Texas Hill Country Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 2789 chars scraped
+[25/25] Postcard Cabins Starved Rock (2 rows)
+  Applied 0 row updates, 0 conflicts, 34127 chars scraped
+
+Wrote SQL: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-sauna-review/backfill-sauna-2026-05-27.sql
+
+Done. Row updates: 19, conflicts logged: 0, skipped properties: 0
+Artifacts: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-sauna-review
