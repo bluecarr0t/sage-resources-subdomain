@@ -41,9 +41,9 @@ export function glampingMarketOverviewRateFootnote(
   market: GlampingMarketSnapshotMarket
 ): string {
   if (market === 'ca') {
-    return 'ARDR (avg. retail daily rate) in CAD when published. Mean and median use operating properties with a recorded nightly rate.';
+    return 'ARDR (avg. retail daily rate) in CAD when published. Mean and median use operating properties with a recorded nightly rate; all-inclusive / package rates are excluded.';
   }
-  return 'ARDR (avg. retail daily rate) in USD when published. Mean and median use operating properties with a recorded nightly rate.';
+  return 'ARDR (avg. retail daily rate) in USD when published. Mean and median use operating properties with a recorded nightly rate; all-inclusive / package rates are excluded.';
 }
 
 /** Compact currency hint for sidebar / regional panels. */

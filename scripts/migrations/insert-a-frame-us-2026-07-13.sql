@@ -1,0 +1,21 @@
+-- USA A-Frame curated inserts (2026-07-13)
+-- discovery_source: web_research_a_frame_us_2026_07_13
+-- Rows applied via TypeScript insert script (UUID property_ids generated at runtime).
+-- Net-new properties: 17
+-- Sibling inserts: 1
+-- See scripts/.tmp-a-frame-review/insert-a-frame-us-2026-07-13.sql for run log.
+
+-- USA A-Frame curated inserts (2026-07-13)
+-- discovery_source: web_research_a_frame_us_2026_07_13
+-- Applied via scripts/insert-a-frame-us-2026-07-13.ts
+
+-- INSERT Fall Creek Retreats (Purlear, NC) property_id=87acd71c-d907-4dfe-b2a9-f6ba31a9b142
+-- INSERT Piney Hills Campground (Mauk, GA) property_id=8ee7ece8-5139-4bd3-b8b0-5fe4cbd9e78a
+-- INSERT Solstice Farms (Loomis, CA) property_id=d9895069-0a5f-4c7a-9c8d-a5ce7247cb51
+-- INSERT Crystal Ranch (Golden, CO) property_id=743070c8-ad77-40f7-a78b-6488bd11f06f
+-- INSERT The Ridge at Stanley Gap (Blue Ridge, GA) property_id=8da63336-b539-4e48-bc13-663b32cfa8e3
+-- INSERT Happy Hollow Homestead (Marengo, IN) property_id=2417c2f9-5f10-41da-ac59-f575565ee25f
+-- INSERT Noble Pine Campground (Mammoth Cave, KY) property_id=fbe6a571-ecb2-4010-bf25-4f41445f1f7d
+-- INSERT Good Creek Meadows (Olney, MT) property_id=0c2d0d45-ac3c-47cf-91e8-fdfd90a664df
+-- INSERT Maine Guide Company (Carmel, ME) property_id=3628303d-e305-4692-b832-105f3ae4d171
+-- INSERT Willenborg Woods (Charleston, IL) property_id=070638cf-99a5-4281-b6e7-f046dac7f970

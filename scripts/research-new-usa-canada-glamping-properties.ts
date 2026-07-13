@@ -261,7 +261,7 @@ For each unique glamping property you find that is NOT in the list above, provid
 - country (required): "USA" or "Canada"
 - url (optional): Official website URL if you can find it
 - description (optional): Brief description of what makes it special
-- unit_type (optional): Types of accommodations (e.g., "Safari Tent", "Yurt", "Dome", "Treehouse", "Cabin")
+- unit_type (optional): Single singular Title Case product when known (e.g. "Yurt", "Bell Tent", "Dome", "Cabin", "Safari Tent", "Cabin Tent"). Ambiguous "tents"/"glamping tents" → omit; use Safari Tent only when explicitly named.
 - property_type (optional): Type of property (e.g., "Glamping Resort", "Luxury Campground")
 - address (optional): Full street address if available
 - zip_code (optional): ZIP/postal code if available
@@ -281,7 +281,7 @@ Return ONLY valid JSON in this format:
       "country": "USA",
       "url": "https://example.com",
       "description": "Brief description...",
-      "unit_type": "Safari Tent",
+      "unit_type": "Bell Tent",
       "property_type": "Glamping Resort",
       "address": "Street Address",
       "zip_code": "12345",
@@ -376,7 +376,7 @@ Provide a JSON object with as much detail as possible:
 - zip_code: ZIP/postal code if available
 - url: Official website URL
 - description: 3-5 sentence description of the property, amenities, and what makes it special
-- unit_type: Types of accommodations (comma-separated, e.g., "Safari Tent, Yurt, Cabin")
+- unit_type: Single singular Title Case product when known (e.g. "Yurt", "Bell Tent", "Dome", "Cabin", "Safari Tent", "Cabin Tent"). Ambiguous "tents"/"glamping tents" → omit; Safari Tent only when explicitly named.
 - property_type: Type of property (e.g., "Glamping Resort", "Luxury Campground")
 - phone_number: Phone number if available
 - latitude: Approximate latitude if known (number)

@@ -66,6 +66,8 @@ export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'unit_wood_burning_stove',
   'rate_unit_rates_by_year',
   'rate_avg_retail_daily_rate',
+  'rate_basis',
+  'rate_basis_notes',
   'rate_winter_weekday',
   'rate_winter_weekend',
   'rate_spring_weekday',

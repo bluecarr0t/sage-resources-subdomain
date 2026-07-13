@@ -63,7 +63,7 @@ const LOWERCASE_TO_CANONICAL: Record<string, string> = {
   'yurts, bell tents': 'Yurt, Bell Tent',
   'yurts, eco-cottages': 'Yurt, Eco Cottage',
   'yurts, tipis': 'Yurt, Tipi',
-  bothies: 'Bothy',
+  bothies: 'Cabin',
   'bubble tents': 'Bubble Tent',
   'bungalows, safari tents': 'Bungalow, Safari Tent',
   'cabins, safari tents': 'Cabin, Safari Tent',

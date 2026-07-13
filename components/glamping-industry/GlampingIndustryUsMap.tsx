@@ -237,6 +237,8 @@ type Props = {
   initialSelectedAbbr?: string | null;
   stageFilter?: PipelineMapStageFilter;
   onStageFilterChange?: (filter: PipelineMapStageFilter) => void;
+  /** When true, omit default top margin (page owns spacing for scroll targets). */
+  flushTop?: boolean;
 };
 
 const PIPELINE_MAP_FILTER_ACTIVE_CLASS: Record<PipelineMapStageFilter, string> = {
@@ -306,6 +308,7 @@ export default function GlampingIndustryUsMap({
   initialSelectedAbbr,
   stageFilter = 'all-pre-opening',
   onStageFilterChange,
+  flushTop = false,
 }: Props) {
   const defaultSelected =
     initialSelectedAbbr !== undefined
@@ -336,10 +339,14 @@ export default function GlampingIndustryUsMap({
   }, [variant]);
 
   return (
-    <div className="relative mt-16 space-y-12 overflow-x-hidden sm:mt-20 sm:space-y-0 lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start lg:gap-x-12">
+    <div
+      className={`relative space-y-12 overflow-x-hidden sm:space-y-0 lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start lg:gap-x-12${
+        flushTop ? '' : ' mt-16 sm:mt-20'
+      }`}
+    >
       <div className="relative min-w-0 overflow-x-hidden overflow-y-visible">
         {variant === 'market-overview' ? (
-          <div className="mb-4 space-y-1 text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+          <div className="mb-4 space-y-1 text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base">
             <p>United States map · click a state</p>
             <p className="text-[9px] font-light normal-case tracking-normal text-neutral-500">
               Alaska lower left · Hawaii lower left

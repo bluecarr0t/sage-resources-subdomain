@@ -263,7 +263,7 @@ Return a JSON object with a "properties" array containing one object for each gl
 - address (optional): Full street address if mentioned
 - url (optional): Website URL if mentioned
 - description (optional): Brief description of the property from the article
-- unit_type (optional): Types of accommodations (e.g., "yurts", "tents", "cabins", "treehouses", "Airstreams", "safari tents")
+- unit_type (optional): Types of accommodations (e.g., "yurts", "Bell Tent", "cabins", "treehouses", "Airstreams"; "safari tents" only when named; omit ambiguous tents)
 - property_type (optional): Type of property (e.g., "Glamping Resort", "Campground", "Luxury Camping")
 
 Be thorough and extract ALL properties mentioned. Focus on properties in California, USA.

@@ -2,6 +2,8 @@
 /**
  * Import all KOA campgrounds from koa.com sitemap into all_glamping_properties
  * as property_type = 'Campground', is_glamping_property = 'No'.
+ * unit_type is left null (parks are multi-SKU: RV pads / cabins / tent sites) —
+ * do not write "Mixed"; split into sibling unit rows later from KOA unit pages if needed.
  *
  * Enrichment: Google Places Find Place (name, address, lat/lon).
  * Source: https://koa.com/sitemaps/campground-pages-sitemap.xml (May 2026).
@@ -348,7 +350,8 @@ async function main() {
       site_name: property_name,
       slug: rowSlug,
       property_type: 'Campground',
-      unit_type: 'Mixed',
+      /** Multi-product parks — leave null until sibling unit rows exist. */
+      unit_type: null,
       source: 'Sage',
       discovery_source: DISCOVERY_SOURCE,
       country: place.country ?? 'United States',

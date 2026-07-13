@@ -89,9 +89,16 @@ function styleForProvince(code: string, selected: string | null) {
   };
 }
 
-type Props = { byProvince: GlampingCaProvinceMetricsMap };
+type Props = {
+  byProvince: GlampingCaProvinceMetricsMap;
+  /** When true, omit default top margin (page owns spacing for scroll targets). */
+  flushTop?: boolean;
+};
 
-export default function GlampingIndustryCanadaProvinces({ byProvince }: Props) {
+export default function GlampingIndustryCanadaProvinces({
+  byProvince,
+  flushTop = false,
+}: Props) {
   const [selected, setSelected] = useState<string | null>(
     byProvince[DEFAULT_SELECTED_PROVINCE] ? DEFAULT_SELECTED_PROVINCE : null
   );
@@ -111,15 +118,19 @@ export default function GlampingIndustryCanadaProvinces({ byProvince }: Props) {
   }, []);
 
   return (
-    <div className="relative mt-16 space-y-12 sm:mt-20 sm:space-y-0 lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start lg:gap-x-12">
+    <div
+      className={`relative space-y-12 sm:space-y-0 lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start lg:gap-x-12${
+        flushTop ? '' : ' mt-16 sm:mt-20'
+      }`}
+    >
       <div className="relative min-w-0">
-        <div className="mb-4 space-y-1 text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+        <div className="mb-4 space-y-1 text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base">
           <p>Canada map · click a province or territory</p>
           <p className="text-[9px] font-light normal-case tracking-normal text-neutral-500">
             Rates shown in CAD as published by operators
           </p>
         </div>
-        <div className="relative w-full">
+        <div className="relative mx-auto w-full max-w-[88%]">
           <ComposableMap
             projection="geoAlbers"
             projectionConfig={CANADA_PROJECTION}

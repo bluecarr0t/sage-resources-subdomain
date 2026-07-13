@@ -11,10 +11,11 @@ export const GLAMPING_UNIT_TYPE_DISPLAY_LABELS: readonly string[] = [
   'Beach House',
   'Beach Lodge',
   'Bell Tent',
-  'Bothy',
   'Bubble Tent',
   'Bungalow',
   'Cabin',
+  'Cabin Tent',
+  'Canvas Cabin',
   'Canvas Cottage',
   'Canvas Tent',
   'Cave House',
@@ -58,6 +59,9 @@ export const GLAMPING_UNIT_TYPE_DISPLAY_LABELS: readonly string[] = [
   'Wall Tent',
   'Yurt',
 ] as const;
+
+// Canvas Cabin / Wall Tent / Canvas Tent remain listed so legacy property_type
+// mislabels still detect; Wall Tent → Safari Tent; Canvas Tent → null on storage.
 
 /** DB variants where unit taxonomy was stored in property_type. */
 export const EXTRA_UNIT_TYPE_AS_PROPERTY_TYPE_LABELS: readonly string[] = [

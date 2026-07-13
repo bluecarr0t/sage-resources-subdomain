@@ -310,6 +310,8 @@ const SITE_FIELD_GROUPS: FieldGroup[] = [
     title: 'Rates',
     fields: [
       { key: 'rate_avg_retail_daily_rate' },
+      { key: 'rate_basis' },
+      { key: 'rate_basis_notes', type: 'textarea' },
       { key: 'rate_winter_weekday' },
       { key: 'rate_winter_weekend' },
       { key: 'rate_spring_weekday' },

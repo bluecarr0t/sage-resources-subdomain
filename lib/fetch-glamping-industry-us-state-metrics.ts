@@ -27,6 +27,7 @@ import {
   glampingMarketSnapshotUnitsForRow,
   parseGlampingMarketSnapshotPositiveNumber,
 } from '@/lib/glamping-market-snapshot/site-units-for-row';
+import { isComparableMarketArdrRateBasis } from '@/lib/glamping-rate-basis';
 
 const PAGE_SIZE = 1000;
 
@@ -40,6 +41,7 @@ type Row = {
   quantity_of_units: string | number | null;
   property_total_sites: string | number | null;
   rate_avg_retail_daily_rate: string | number | null;
+  rate_basis: string | null;
 };
 
 function isUsRow(country: string | null | undefined): boolean {
@@ -136,7 +138,9 @@ async function loadGlampingIndustryUsStateMetrics(
 
       if (status === 'yes' && name) {
         const adr = parseGlampingMarketSnapshotPositiveNumber(row.rate_avg_retail_daily_rate);
-        if (adr != null) recordPropertyAdrSample(agg.adrByProperty, name, adr);
+        if (adr != null && isComparableMarketArdrRateBasis(row.rate_basis)) {
+          recordPropertyAdrSample(agg.adrByProperty, name, adr);
+        }
       }
     }
 
@@ -168,7 +172,7 @@ export async function fetchGlampingIndustryUsStateMetrics(
 ): Promise<{ ok: true; data: GlampingUsStateMetricsMap } | { ok: false; error: string }> {
   return unstable_cache(
     () => loadGlampingIndustryUsStateMetrics(tier),
-    ['glamping-industry-us-state-metrics', tier],
+    ['glamping-industry-us-state-metrics', tier, 'rate-basis-v1'],
     {
       revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
       tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],

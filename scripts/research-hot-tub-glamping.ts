@@ -5,11 +5,13 @@
  * Usage:
  *   npx tsx scripts/research-hot-tub-glamping.ts --dry-run --limit 25
  *   npx tsx scripts/research-hot-tub-glamping.ts --limit 50 --only-null
+ *   npx tsx scripts/research-hot-tub-glamping.ts --dry-run --limit 25 --unit-types "Safari Tent,Cabin" --only-unit-hot-tub-null
  *   npx tsx scripts/research-hot-tub-glamping.ts --property-id <uuid>
  *   npx tsx scripts/research-hot-tub-glamping.ts --export-sql --limit 100
  *   npx tsx scripts/research-hot-tub-glamping.ts --report
  *
  * Env: FIRECRAWL_API_KEY, OPENAI_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ *      (or SUPABASE_SECRET_KEY)
  */
 
 import { config } from 'dotenv';
@@ -20,6 +22,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { FirecrawlThrottleState } from '@/lib/comps-v2/scrape-url';
 import {
   fetchCohortByProperty,
+  parseUnitTypesArg,
   pickScrapeUrl,
   HOT_TUB_TABLE,
 } from '@/lib/glamping-hot-tub-research/cohort';
@@ -66,9 +69,14 @@ function parseArgs() {
     limitIdx >= 0 ? parseInt(args[limitIdx + 1] ?? '', 10) : undefined;
   const propIdx = args.indexOf('--property-id');
   const propertyId = propIdx >= 0 ? args[propIdx + 1] : undefined;
+  const unitTypesIdx = args.indexOf('--unit-types');
+  const unitTypesRaw =
+    unitTypesIdx >= 0 ? args[unitTypesIdx + 1] : undefined;
   return {
     dryRun: args.includes('--dry-run'),
     onlyNull: args.includes('--only-null'),
+    onlyUnitHotTubNull: args.includes('--only-unit-hot-tub-null'),
+    unitTypes: parseUnitTypesArg(unitTypesRaw),
     skipResearched: !args.includes('--include-researched'),
     exportSql: args.includes('--export-sql'),
     report: args.includes('--report'),
@@ -227,14 +235,17 @@ async function main() {
 
   const byProperty = await fetchCohortByProperty(supabase, {
     onlyNull: opts.onlyNull,
+    onlyUnitHotTubNull: opts.onlyUnitHotTubNull,
+    unitTypes: opts.unitTypes,
     propertyId: opts.propertyId,
     limitProperties: opts.limit,
     skipAlreadyResearched: opts.skipResearched,
   });
 
   const propertyIds = [...byProperty.keys()];
+  const unitTypesLabel = opts.unitTypes?.join(', ') ?? 'all';
   console.log(
-    `Processing ${propertyIds.length} properties (${opts.dryRun ? 'DRY RUN' : 'LIVE'})...`
+    `Processing ${propertyIds.length} properties (${opts.dryRun ? 'DRY RUN' : 'LIVE'}; unitTypes=${unitTypesLabel}; onlyUnitHotTubNull=${opts.onlyUnitHotTubNull}; onlyNull=${opts.onlyNull})...`
   );
 
   const throttle: FirecrawlThrottleState = { lastCall: 0 };

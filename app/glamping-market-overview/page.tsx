@@ -1,15 +1,17 @@
 import Link from 'next/link';
 import nextDynamic from 'next/dynamic';
 import { EDITORIAL_LINK_CLASS, EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
-import { GlampingMarketClassificationFilter } from '@/components/glamping-industry/GlampingMarketClassificationFilter';
 import { GlampingMarketOverviewLoadError } from '@/components/glamping-industry/GlampingMarketOverviewLoadError';
 import { GlampingMarketOverviewMapLoading } from '@/components/glamping-industry/GlampingMarketOverviewMapLoading';
+import { GlampingAmenityImpactSection } from '@/components/glamping-industry/GlampingAmenityImpactSection';
+import { GlampingMarketOverviewSectionNav } from '@/components/glamping-industry/GlampingMarketOverviewSectionNav';
+import { GlampingMarketOverviewStickyNav } from '@/components/glamping-industry/GlampingMarketOverviewStickyNav';
+import { GlampingProximitySection } from '@/components/glamping-industry/GlampingProximitySection';
 import {
   GlampingMarketMethodologyProvider,
   GlampingMarketOverviewResearchFooter,
   GlampingMarketScopeDisclosure,
 } from '@/components/glamping-industry/GlampingMarketOverviewResearchFooter';
-import { GlampingMarketSnapshotToggle } from '@/components/glamping-industry/GlampingMarketSnapshotToggle';
 import { isGlampingMarketOverviewUnlocked } from '@/lib/glamping-market-overview-access';
 import {
   formatGlampingMarketOverviewRate,
@@ -17,8 +19,16 @@ import {
   glampingMarketOverviewRateFootnote,
 } from '@/lib/glamping-market-overview-currency';
 import { parseGlampingMarketSnapshotTierFilter } from '@/lib/glamping-market-snapshot-classification';
+import { fetchGlampingAmenityImpact } from '@/lib/fetch-glamping-amenity-impact';
 import { fetchGlampingIndustryCaProvinceMetrics } from '@/lib/fetch-glamping-industry-ca-province-metrics';
 import { fetchGlampingIndustryMetrics } from '@/lib/fetch-glamping-industry-metrics';
+import {
+  AIRPORTS_PROXIMITY_THRESHOLD_MILES,
+  fetchGlampingMarketProximityBundle,
+  NATIONAL_PARKS_PROXIMITY_THRESHOLD_MILES,
+} from '@/lib/fetch-glamping-proximity-analysis';
+import { filterUnitTypesForRateChart, unitTypeLabelsForRateChart } from '@/lib/glamping-unit-type-by-rate-chart';
+import { GlampingUnitTypeByRateDefinitionsButton } from '@/components/glamping-industry/GlampingUnitTypeByRateDefinitionsButton';
 import { fetchGlampingIndustryUsStateMetrics } from '@/lib/fetch-glamping-industry-us-state-metrics';
 import { parseGlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapshot-region';
 import { CA_PROVINCE_DISPLAY_NAME } from '@/lib/normalize-ca-province-key';
@@ -50,6 +60,45 @@ const GlampingIndustryCanadaProvinces = nextDynamic(
   { ssr: false, loading: () => <GlampingMarketOverviewMapLoading /> }
 );
 
+const GlampingUnitTypeByRateChart = nextDynamic(
+  () => import('@/components/glamping-industry/GlampingUnitTypeByRateChart'),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="h-[22rem] w-full animate-pulse rounded-sm bg-sage-100/60 sm:h-[26rem]"
+        aria-hidden
+      />
+    ),
+  }
+);
+
+const GlampingProximityBandChart = nextDynamic(
+  () => import('@/components/glamping-industry/GlampingProximityBandChart'),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="h-[22rem] w-full animate-pulse rounded-sm bg-sage-100/60 sm:h-[26rem]"
+        aria-hidden
+      />
+    ),
+  }
+);
+
+const GlampingAmenityImpactChart = nextDynamic(
+  () => import('@/components/glamping-industry/GlampingAmenityImpactChart'),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="h-[22rem] w-full animate-pulse rounded-sm bg-sage-100/60 sm:h-[24rem]"
+        aria-hidden
+      />
+    ),
+  }
+);
+
 export const dynamic = 'force-dynamic';
 
 function formatInt(n: number): string {
@@ -79,15 +128,20 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
   const market = parseGlampingMarketSnapshotMarket(searchParams.market);
   const tier = parseGlampingMarketSnapshotTierFilter(searchParams.tier);
 
-  const [result, usStates, caProvinces] = await Promise.all([
-    fetchGlampingIndustryMetrics(market, tier),
-    market === 'us'
-      ? fetchGlampingIndustryUsStateMetrics(tier)
-      : Promise.resolve({ ok: true as const, data: {} }),
-    market === 'ca'
-      ? fetchGlampingIndustryCaProvinceMetrics(tier)
-      : Promise.resolve({ ok: true as const, data: {} }),
-  ]);
+  const [result, usStates, caProvinces, proximity, amenityImpact] =
+    await Promise.all([
+      fetchGlampingIndustryMetrics(market, tier),
+      market === 'us'
+        ? fetchGlampingIndustryUsStateMetrics(tier)
+        : Promise.resolve({ ok: true as const, data: {} }),
+      market === 'ca'
+        ? fetchGlampingIndustryCaProvinceMetrics(tier)
+        : Promise.resolve({ ok: true as const, data: {} }),
+      fetchGlampingMarketProximityBundle(market, tier),
+      market === 'us'
+        ? fetchGlampingAmenityImpact(market, 'all')
+        : Promise.resolve({ ok: true as const, data: [] }),
+    ]);
 
   const topUsStates: {
     key: string;
@@ -135,26 +189,30 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
             style={{ backgroundImage: `url(${EDITORIAL_TOPO_BG_URL})` }}
             aria-hidden
           />
-          <main className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-x-hidden px-6 pt-16 pb-24 sm:pt-24 sm:pb-32">
-            <h1 className="font-[Georgia] text-sm font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg">
-              Glamping Market Overview
-            </h1>
-
-          {result.ok ? (
-            <p className="mt-3 text-[11px] font-light tabular-nums leading-snug text-neutral-500 sm:text-xs">
-              Last Updated: {formatLastUpdatedDate(result.data.asOf)}
-            </p>
-          ) : null}
-
-          <div className="mt-6 flex w-full flex-wrap items-start justify-between gap-4">
-            <GlampingMarketSnapshotToggle market={market} tier={tier} />
-            <GlampingMarketClassificationFilter market={market} tier={tier} />
-          </div>
+          <GlampingMarketOverviewSectionNav
+            showNationalParks={market === 'us'}
+            showAmenityImpact={market === 'us'}
+          />
+          <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-x-hidden px-6 pt-16 pb-24 sm:pt-24 sm:pb-32">
+            <GlampingMarketOverviewStickyNav
+              market={market}
+              tier={tier}
+              lastUpdated={
+                result.ok ? (
+                  <p className="mt-3 text-[11px] font-light tabular-nums leading-snug text-neutral-500 sm:text-xs">
+                    Last Updated: {formatLastUpdatedDate(result.data.asOf)}
+                  </p>
+                ) : null
+              }
+            />
 
           <GlampingMarketScopeDisclosure />
 
           {result.ok ? (
-            <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-x-16">
+            <div
+              id="overview"
+              className="mt-10 scroll-mt-40 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-x-16"
+            >
               <dl className="space-y-12">
                 <div>
                   <dt className="text-[11px] uppercase tracking-widest text-neutral-500">
@@ -219,7 +277,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                   </p>
                   {market === 'us' ? (
                     <div className="mt-8">
-                      <h2 className="text-[11px] uppercase tracking-widest text-neutral-500">
+                      <h2 className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base">
                         Top brands
                       </h2>
                       <p className="mt-3 max-w-xs text-[11px] leading-relaxed text-neutral-500">
@@ -237,12 +295,12 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
               </dl>
 
               <aside className="lg:border-l lg:border-sage-200 lg:pl-10">
-                <h2 className="text-[11px] uppercase tracking-widest text-neutral-500">
+                <h2 className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base">
                   Top unit types
                 </h2>
                 <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
                   Open-unit mix{tier !== 'all' ? ' in this tier' : ''}; unit-weighted ARDR
-                  {market === 'ca' ? ' (CAD)' : ''} when published
+                  {market === 'ca' ? ' (CAD)' : ''} when published (excludes all-inclusive)
                   {tier !== 'all' ? '. ~ = small sample; under 5 hidden' : ''}.
                 </p>
                 {result.data.topUnitTypesByUnits.length > 0 ? (
@@ -291,7 +349,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
 
                 {market === 'us' && result.ok && usStates.ok ? (
                   <>
-                    <h2 className="mt-10 text-[11px] uppercase tracking-widest text-neutral-500">
+                    <h2 className="mt-10 text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base">
                       Top states
                     </h2>
                     <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
@@ -341,7 +399,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
 
                 {market === 'ca' && result.ok && caProvinces.ok ? (
                   <>
-                    <h2 className="mt-10 text-[11px] uppercase tracking-widest text-neutral-500">
+                    <h2 className="mt-10 text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base">
                       Top provinces & territories
                     </h2>
                     <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
@@ -397,28 +455,136 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
             <GlampingMarketOverviewLoadError detail={result.error} />
           )}
 
-          {market === 'us' && result.ok && usStates.ok ? (
-            <GlampingIndustryUsMap byState={usStates.data} />
-          ) : market === 'us' && result.ok && !usStates.ok ? (
-            <GlampingMarketOverviewLoadError
-              className="mt-16"
-              title="Unable to load US map"
-              message="National metrics loaded, but the state map could not be refreshed. Try again or contact support if this continues."
-              detail={usStates.error}
+          <div className="mt-16 sm:mt-20">
+            <div id="map" className="scroll-mt-28">
+              {market === 'us' && result.ok && usStates.ok ? (
+                <GlampingIndustryUsMap byState={usStates.data} flushTop />
+              ) : market === 'us' && result.ok && !usStates.ok ? (
+                <GlampingMarketOverviewLoadError
+                  title="Unable to load US map"
+                  message="National metrics loaded, but the state map could not be refreshed. Try again or contact support if this continues."
+                  detail={usStates.error}
+                />
+              ) : null}
+
+              {market === 'ca' && result.ok && caProvinces.ok ? (
+                <GlampingIndustryCanadaProvinces byProvince={caProvinces.data} flushTop />
+              ) : market === 'ca' && result.ok && !caProvinces.ok ? (
+                <GlampingMarketOverviewLoadError
+                  title="Unable to load Canada map"
+                  message="National metrics loaded, but the province breakdown could not be refreshed. Try again or contact support if this continues."
+                  detail={caProvinces.error}
+                />
+              ) : null}
+            </div>
+          </div>
+
+          {result.ok ? (
+            <section
+              id="unit-type-by-rate"
+              className="mt-16 scroll-mt-28 sm:mt-20"
+              aria-labelledby="unit-type-by-rate-heading"
+            >
+              <h2
+                id="unit-type-by-rate-heading"
+                className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base"
+              >
+                Unit Type by Rate
+              </h2>
+              <p className="mt-2 whitespace-nowrap text-[10px] leading-relaxed text-neutral-500">
+                Before taxes and booking fees. Open-unit mix
+                {tier !== 'all' ? ' in this tier' : ''}; unit-weighted average retail daily
+                rate{market === 'ca' ? ' (CAD)' : ''} when published (excludes all-inclusive)
+                {tier !== 'all' ? '. ~ = small sample; under 5 hidden' : ''}.
+                <GlampingUnitTypeByRateDefinitionsButton
+                  labels={unitTypeLabelsForRateChart(result.data.unitTypesByUnits)}
+                />
+              </p>
+              <div className="mt-6">
+                <GlampingUnitTypeByRateChart
+                  rows={filterUnitTypesForRateChart(result.data.unitTypesByUnits)}
+                  market={market}
+                />
+              </div>
+            </section>
+          ) : null}
+
+          {market === 'us' ? (
+            amenityImpact.ok ? (
+              <GlampingAmenityImpactSection
+                rows={amenityImpact.data}
+                market={market}
+                chart={
+                  <GlampingAmenityImpactChart
+                    rows={amenityImpact.data}
+                    market={market}
+                  />
+                }
+              />
+            ) : (
+              <GlampingMarketOverviewLoadError
+                className="mt-16"
+                title="Unable to load amenity impact"
+                message="National metrics loaded, but amenity rate impact could not be refreshed. Try again or contact support if this continues."
+                detail={amenityImpact.error}
+              />
+            )
+          ) : null}
+
+          {proximity.ok && proximity.data.nationalParks ? (
+            <GlampingProximitySection
+              headingId="national-parks-analysis-heading"
+              title="National Parks Analysis"
+              subtitle="Unit-weighted average rate and open inventory by distance band to the nearest national park."
+              unitsWithinLabel="Properties within 100 Miles"
+              unitsWithinSubLabel="From National Parks"
+              withinMetric="propertiesPct"
+              rateImpactSubLabel={`Less than ${NATIONAL_PARKS_PROXIMITY_THRESHOLD_MILES} miles vs. greater than ${NATIONAL_PARKS_PROXIMITY_THRESHOLD_MILES} miles`}
+              analysis={proximity.data.nationalParks}
+              market={market}
+              chart={
+                <GlampingProximityBandChart
+                  analysis={proximity.data.nationalParks}
+                  market={market}
+                  xAxisLabel="Distance to National Park (miles)"
+                  ariaLabel="Band average retail daily rate and open units by distance to nearest national park"
+                  showRateImpactFootnote={false}
+                />
+              }
             />
           ) : null}
 
-          {market === 'ca' && result.ok && caProvinces.ok ? (
-            <GlampingIndustryCanadaProvinces byProvince={caProvinces.data} />
-          ) : market === 'ca' && result.ok && !caProvinces.ok ? (
+          {proximity.ok ? (
+            <GlampingProximitySection
+              headingId="transportation-analysis-heading"
+              title="Transportation Analysis"
+              subtitle="Unit-weighted average rate and open inventory by distance band to the nearest major or large airport."
+              unitsWithinLabel="Properties within 100 Miles"
+              unitsWithinSubLabel="From Major and Large Airports"
+              withinMetric="propertiesPct"
+              rateImpactSubLabel={`Greater than ${AIRPORTS_PROXIMITY_THRESHOLD_MILES} miles vs. less than ${AIRPORTS_PROXIMITY_THRESHOLD_MILES} miles`}
+              analysis={proximity.data.airports}
+              market={market}
+              chart={
+                <GlampingProximityBandChart
+                  analysis={proximity.data.airports}
+                  market={market}
+                  xAxisLabel="Distance to Airport (miles)"
+                  ariaLabel="Band average retail daily rate and open units by distance to nearest major airport"
+                  showRateImpactFootnote={false}
+                  emphasizeBeyondRates
+                />
+              }
+            />
+          ) : proximity.ok === false ? (
             <GlampingMarketOverviewLoadError
               className="mt-16"
-              title="Unable to load Canada map"
-              message="National metrics loaded, but the province breakdown could not be refreshed. Try again or contact support if this continues."
-              detail={caProvinces.error}
+              title="Unable to load proximity analysis"
+              message="National metrics loaded, but park and airport proximity could not be refreshed. Try again or contact support if this continues."
+              detail={proximity.error}
             />
           ) : null}
-        </main>
+          </main>
 
         <GlampingMarketOverviewResearchFooter market={market} />
       </div>

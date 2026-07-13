@@ -186,10 +186,12 @@ Sage Outdoor Advisory includes Airstream and other vintage trailer accommodation
     "bell-tent": {
     slug: "bell-tent",
     term: "Bell Tent",
-    definition: "A circular canvas tent supported by a single central pole, with a design resembling a bell, providing a spacious interior and popular for its simplicity and charm in glamping.",
+    definition: "Circular base with a single tall central pole and typically an A-frame door — strong wind resistance and quick setup; sloped walls reduce perimeter headroom. One of Sage’s four structural tent types.",
     extendedDefinition: `A bell tent is a circular canvas tent supported by a single central pole, with a design that dates back to the 19th century. The structure gets its name from its bell-like shape, with vertical walls that slope outward from a central point, creating a spacious interior with a high ceiling.
 
-Bell tents are characterized by their simple yet effective design. The central pole supports the entire structure, while guy ropes attached around the top of the walls provide stability and are secured to the ground with pegs. This design creates a large, open interior space with no internal poles or supports, making it ideal for comfortable furnishings and movement.
+Bell tents are characterized by their simple yet effective design. The central pole supports the entire structure, while guy ropes attached around the top of the walls provide stability and are secured to the ground with pegs. This design creates a large, open interior space ideal for comfortable furnishings — though the center pole occupies mid-floor and sloping walls reduce headroom at the perimeter.
+
+In Sage taxonomy, Bell Tent is one of four structural furnished-canvas types alongside <a href="/glossary/safari-tent">Safari Tent</a>, Cabin Tent, and <a href="/glossary/tipi">Tipi</a>.
 
 In glamping settings, bell tents are favored for their aesthetic appeal, ease of setup, and the cozy atmosphere they create. They typically feature a single spacious room that can accommodate beds, furniture, rugs, and other amenities. Many glamping bell tents include features such as windows, mesh panels for ventilation, and sometimes even wood-burning stoves.
 
@@ -201,7 +203,7 @@ Bell tents appeal to glamping guests seeking a traditional tent experience with 
 
 Sage Outdoor Advisory includes bell tents and other canvas tent structures in our glamping feasibility studies, analyzing their costs, market appeal, and operational considerations for outdoor hospitality properties.`,
     category: "Glamping",
-    relatedTerms: ["glamping", "canvas-tent", "safari-tent", "tipi"],
+    relatedTerms: ["glamping", "safari-tent", "tipi"],
     examples: [
       "A 16-foot bell tent on a wooden platform with king bed, area rug, vintage furniture, and string lights, positioned in a meadow glamping resort",
       "A family-sized bell tent with two beds, wood-burning stove, and outdoor deck area for a mountain glamping experience",
@@ -215,12 +217,12 @@ Sage Outdoor Advisory includes bell tents and other canvas tent structures in ou
     seoKeywords: ["bell tent", "bell tent glamping", "circular tent", "canvas bell tent", "glamping bell tent"],
     internalLinks: [
       { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
-      { text: "Canvas Tent", url: "/glossary/canvas-tent" }
+      { text: "Safari Tent", url: "/glossary/safari-tent" }
     ],
     faqs: [
       {
         question: "What's the difference between a bell tent and other canvas tents?",
-        answer: "Bell tents are circular with a single central pole and sloping walls, creating a distinctive bell shape. They differ from safari tents (rectangular with straight walls) and tipis (conical with multiple poles). Bell tents offer a spacious, open interior with no internal supports."
+        answer: "Bell tents are circular with a single central pole and sloping walls, creating a distinctive bell shape. They differ from safari/wall tents (rectangular with straight walls and a rigid frame), cabin tents (straight walls on a lighter portable frame), and tipis (conical with poles meeting at the top)."
       },
       {
         question: "Are bell tents suitable for year-round glamping?",
@@ -287,12 +289,14 @@ Sage Outdoor Advisory includes cabin accommodations in our glamping property ana
     slug: "canvas-tent",
     term: "Canvas Tent",
     image: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/canvas-tent.jpg",
-    definition: "A tent made from heavy-duty canvas material, known for durability and breathability, used in glamping to provide traditional camping experiences with modern comfort.",
-    extendedDefinition: `A canvas tent is a shelter made from heavy-duty canvas fabric, a material known for its durability, breathability, and traditional camping aesthetic. Canvas tents are a fundamental type of glamping accommodation, offering the authentic feel of tent camping while providing the comfort and amenities associated with glamping.
+    definition: "A broad historical category of durable canvas shelters. In Sage taxonomy, Canvas Tent is retired as a catch-all — classify furnished canvas into Bell Tent, Safari Tent (wall/safari frame), Cabin Tent, or Tipi.",
+    extendedDefinition: `A canvas tent is a shelter made from heavy-duty canvas fabric, a material known for its durability, breathability, and traditional camping aesthetic.
+
+<strong>Sage taxonomy (updated):</strong> <strong>Canvas Tent</strong> is no longer used as a storage catch-all. Furnished canvas inventory should be one of four structural types: <a href="/glossary/bell-tent">Bell Tent</a>, <a href="/glossary/safari-tent">Safari Tent</a> (also called wall tent), <strong>Cabin Tent</strong> (portable straight-wall / tent-cabin / tentalow hybrids), or <a href="/glossary/tipi">Tipi</a>. Ambiguous “tent” / “glamping tent” / “luxury tent” labels without structural cues should not invent a type.
 
 Canvas, typically made from cotton or cotton-blend materials, offers several advantages over synthetic tent fabrics. It's highly breathable, allowing moisture to escape and preventing condensation buildup. Canvas is also durable and can withstand years of use when properly maintained. The material provides good insulation, keeping tents warmer in cold weather and cooler in hot weather compared to synthetic alternatives.
 
-In glamping settings, canvas tents come in various forms including bell tents, safari tents, wall tents, and traditional pyramid tents. They can be simple single-room structures or elaborate multi-room accommodations with separate sleeping, living, and bathroom areas.
+In glamping settings, canvas structures come in those four structural forms — plus hybrids such as tent-cabins — and can be simple single-room structures or elaborate multi-room accommodations with separate sleeping, living, and bathroom areas.
 
 Glamping canvas tents are often placed on raised wooden platforms or decks to provide a level surface, protect the canvas from ground moisture, and create a more permanent feeling. They may include features such as windows with screens, mesh panels for ventilation, zippered doors, and sometimes even wood-burning stoves or heating systems.
 
@@ -322,6 +326,10 @@ Sage Outdoor Advisory includes canvas tent accommodations in our glamping feasib
       { text: "Safari Tent", url: "/glossary/safari-tent" }
     ],
     faqs: [
+      {
+        question: "What's the difference between a canvas tent and a safari tent?",
+        answer: "Canvas Tent is a retired catch-all in Sage data. Furnished canvas should be Bell Tent, Safari Tent (straight walls + rigid frame / wall tent), Cabin Tent (portable straight-wall / tent-cabin), or Tipi. A Safari Tent is the rigid-frame, often semi-permanent wall/safari product used for high-end glamping."
+      },
       {
         question: "What are the advantages of canvas tents over synthetic tents?",
         answer: "Canvas tents offer better breathability, reducing condensation. They provide superior insulation, keeping interiors warmer in cold weather and cooler in hot weather. Canvas is also more durable and provides a traditional, authentic camping aesthetic that many glamping guests prefer."
@@ -456,10 +464,12 @@ Sage Outdoor Advisory includes dome accommodations in our glamping feasibility s
     "safari-tent": {
     slug: "safari-tent",
     term: "Safari Tent",
-    definition: "A large, rectangular canvas tent with straight vertical walls and a peaked roof, often built on a raised platform, originally used in African safaris and now popular for spacious, luxurious glamping accommodations.",
-    extendedDefinition: `A safari tent is a large, rectangular canvas tent structure with straight vertical walls and a peaked or gabled roof. Originally designed for use on African safaris, these tents have become one of the most popular and recognizable types of glamping accommodations, offering spacious interiors and the ability to house luxurious amenities.
+    definition: "Four straight vertical walls with a peaked roof on a rigid internal frame (also called a wall tent) — room-like floor space, often semi-permanent on a raised deck. Sage stores Wall Tent as Safari Tent.",
+    extendedDefinition: `A safari tent is a large, rectangular canvas tent on a rigid heavy-duty metal or wood frame, with straight vertical walls and a peaked or gabled roof. Originally designed for use on African safaris, these tents have become one of the most popular and recognizable types of high-end glamping accommodations. In Sage taxonomy, <strong>Wall Tent</strong> aliases to <strong>Safari Tent</strong>.
 
-Safari tents differ from traditional camping tents in several key ways. They feature straight, vertical walls rather than sloping sides, which maximizes usable interior space. The peaked roof provides additional headroom and creates a more room-like feeling. Many safari tents are built on raised wooden platforms, which provide a level surface, protect the canvas from ground moisture, and create a more permanent, luxurious feeling.
+<strong>Structural tent types:</strong> Furnished canvas inventory is classified as <a href="/glossary/bell-tent">Bell Tent</a>, Safari Tent (wall/safari frame), Cabin Tent (portable straight-wall / tent-cabin / tentalow), or <a href="/glossary/tipi">Tipi</a> — not a Canvas Tent catch-all.
+
+Safari tents maximize usable interior space wall-to-wall — more like a hotel room than a pole tent with obstructed floor area. Many safari tents are built on raised wooden platforms, which provide a level surface, protect the canvas from ground moisture, and create a more permanent, luxurious feeling.
 
 The rectangular design of safari tents allows for efficient space planning and can accommodate multiple rooms. Luxury safari tents may include separate sleeping areas, living spaces, and even en-suite bathrooms. They can be outfitted with full-size beds, furniture, rugs, lighting, electricity, and climate control systems.
 
@@ -467,13 +477,13 @@ Safari tents are typically constructed with heavy-duty canvas material that prov
 
 The spaciousness and room-like quality of safari tents make them particularly appealing for glamping guests who want the authentic tent experience but with the comfort and amenities of a hotel room. They're popular for couples, families, and groups who need more space than traditional tent accommodations provide.
 
-Safari tents can range from basic structures with simple amenities to ultra-luxury accommodations with premium furnishings, private bathrooms, kitchenettes, and high-end finishes. The level of luxury and amenities depends on the property's positioning and target market.
+Safari tents can range from solid mid-luxury structures to ultra-luxury accommodations with premium furnishings, private bathrooms, kitchenettes, and high-end finishes. The level of luxury and amenities depends on the property's positioning and target market.
 
 In glamping feasibility studies and appraisals, safari tents are valued for their market appeal, ability to command premium rates, and relatively efficient use of space. They're considered a staple of the glamping industry and are widely recognized by potential guests.
 
 Sage Outdoor Advisory includes safari tent accommodations in our glamping property analyses, understanding their construction costs, market positioning, maintenance requirements, and revenue potential for outdoor hospitality properties.`,
     category: "Glamping",
-    relatedTerms: ["glamping", "glamping-resort", "canvas-tent", "bell-tent"],
+    relatedTerms: ["glamping", "glamping-resort", "bell-tent", "tipi"],
     examples: [
       "A 400-square-foot safari tent on a raised platform with king bed, sitting area, en-suite bathroom, and private deck overlooking a savanna in an African-themed glamping resort",
       "A family safari tent with separate bedrooms, living area, full bathroom, and kitchenette, positioned in a forest glamping destination",
@@ -484,24 +494,24 @@ Sage Outdoor Advisory includes safari tent accommodations in our glamping proper
       "Offering family-friendly glamping options with multiple rooms",
       "Providing premium glamping experiences with full amenities"
     ],
-    seoKeywords: ["safari tent", "safari tent glamping", "luxury safari tent", "canvas safari tent", "glamping safari tent"],
+    seoKeywords: ["safari tent", "safari tent glamping", "luxury safari tent", "canvas safari tent", "glamping safari tent", "wall tent"],
     internalLinks: [
       { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
       { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
-      { text: "Canvas Tent", url: "/glossary/canvas-tent" }
+      { text: "Bell Tent", url: "/glossary/bell-tent" }
     ],
     faqs: [
       {
-        question: "What's the difference between a safari tent and other canvas tents?",
-        answer: "Safari tents have straight vertical walls and a peaked roof, creating a more room-like interior with maximum usable space. They differ from bell tents (circular with sloping walls) and tipis (conical). Safari tents are typically larger and can accommodate multiple rooms and full amenities."
+        question: "What's the difference between a safari tent and a cabin tent?",
+        answer: "Safari tents (wall tents) use a heavy rigid frame and are often semi-permanent on a raised deck with hotel-room-like space. Cabin tents have straight walls too but on a lighter portable frame (often with dividers/mesh windows) and include tent-cabin / tentalow hybrids. Ambiguous “canvas tent” labels should not invent either type."
       },
       {
         question: "What amenities can safari tents include?",
-        answer: "Safari tents can range from basic with simple beds to ultra-luxury with separate bedrooms, full bathrooms, kitchenettes, heating/cooling, premium furnishings, and outdoor deck areas. The level of amenities depends on the property's positioning and target market."
+        answer: "Safari tents can range from solid mid-luxury with beds and furnishings to ultra-luxury with separate bedrooms, full bathrooms, kitchenettes, heating/cooling, premium finishes, and outdoor deck areas. The level of amenities depends on the property's positioning and target market."
       },
       {
         question: "Are safari tents suitable for year-round glamping?",
-        answer: "Safari tents can be used year-round with proper insulation, heating systems, and weatherproofing. Many luxury safari tents include climate control systems, wood stoves, or other heating options that make them comfortable in various weather conditions."
+        answer: "Safari tents can be used year-round with proper insulation, heating systems, and weatherproofing. Many luxury safari tents include climate control systems, wood stoves, or other heating options that make them comfortable in various weather conditions — though many cold-climate resorts still operate safari inventory seasonally."
       }
     ]
   },
@@ -965,26 +975,16 @@ Sage Outdoor Advisory includes inflatable tent accommodations in our glamping pr
     "wall-tent": {
     slug: "wall-tent",
     term: "Wall Tent",
-    definition: "A rectangular canvas tent with vertical walls and a peaked roof, similar to safari tents but typically smaller and more traditional, often used for hunting camps and rustic glamping experiences.",
-    extendedDefinition: `A wall tent is a rectangular canvas tent structure with straight vertical walls and a peaked or gabled roof, creating a room-like interior with maximum usable space. While similar in design to safari tents, wall tents are typically smaller, more traditional in construction, and often associated with hunting camps, backcountry expeditions, and rustic outdoor experiences.
+    definition: "Straight-wall peaked-roof canvas tent on a rigid frame — in Sage data, Wall Tent aliases to Safari Tent.",
+    extendedDefinition: `A wall tent is a rectangular canvas tent structure with straight vertical walls and a peaked or gabled roof, creating a room-like interior with maximum usable space. In Sage taxonomy, <strong>Wall Tent</strong> is stored as <a href="/glossary/safari-tent">Safari Tent</a> (the same structural class: four straight walls, peaked roof, rigid internal frame).
 
-The design of wall tents emphasizes functionality and durability. The vertical walls maximize interior space, allowing for comfortable furnishings, beds, and movement. The peaked roof provides additional headroom in the center and helps shed rain and snow effectively. This design creates a more spacious and comfortable interior compared to traditional sloping-wall tents.
+The design emphasizes functionality and durability. The vertical walls maximize interior space for furnishings and movement; the peaked roof sheds rain and snow. Construction typically uses heavy-duty canvas on wood or metal poles.
 
-Wall tents are constructed with heavy-duty canvas material, typically cotton or cotton-blend fabric that provides breathability, durability, and weather resistance. The structure is supported by a framework of poles, typically wood or metal, that create the vertical walls and peaked roof. The construction is designed to be sturdy and weather-resistant while remaining relatively portable.
+In glamping settings, wall/safari tents appear in hunting camps, backcountry lodges, and high-end semi-permanent resorts (e.g. deck-mounted lodge canvas). They differ from <strong>Cabin Tent</strong> products, which share straight walls but use a lighter portable frame (tent-cabin / tentalow hybrids).
 
-In glamping settings, wall tents offer a more traditional, rustic aesthetic compared to modern safari tents. They appeal to guests seeking authentic outdoor experiences with a connection to traditional camping and hunting culture. Many glamping properties use wall tents to create a backcountry or wilderness atmosphere while providing modern amenities.
-
-Wall tents can be placed on platforms or directly on the ground, depending on the property's design and location. When used for glamping, they're often outfitted with comfortable beds, furniture, lighting, electricity, and sometimes heating systems like wood-burning stoves. The spacious interior allows for multiple rooms or separate sleeping and living areas.
-
-The traditional aesthetic of wall tents makes them particularly appealing for themed glamping experiences, such as western-themed resorts, hunting lodges, or backcountry adventures. They provide a sense of authenticity and connection to outdoor traditions while offering the comfort and amenities associated with glamping.
-
-Wall tents differ from safari tents primarily in size, construction methods, and aesthetic. While safari tents are typically larger and may have more modern construction techniques, wall tents maintain a more traditional appearance and are often associated with rustic or backcountry experiences.
-
-In glamping feasibility studies and appraisals, wall tents are valued for their traditional appeal, ability to create distinctive themed experiences, and relatively cost-effective construction. They can command competitive rates, particularly in markets where guests value authentic outdoor experiences.
-
-Sage Outdoor Advisory includes wall tent accommodations in our glamping property analyses, understanding their construction costs, market appeal, maintenance requirements, and revenue potential for outdoor hospitality properties.`,
+Sage Outdoor Advisory analyzes wall/safari tent construction costs, market appeal, and revenue potential within the four structural tent types (Bell, Safari/Wall, Cabin Tent, Tipi).`,
     category: "Glamping",
-    relatedTerms: ["glamping", "canvas-tent", "safari-tent", "bell-tent"],
+    relatedTerms: ["glamping", "safari-tent", "bell-tent", "tipi"],
     examples: [
       "A traditional wall tent on a wooden platform with queen bed, wood-burning stove, rustic furnishings, and outdoor fire pit in a western-themed glamping resort",
       "A spacious wall tent with separate sleeping and living areas, comfortable furnishings, electricity, and large windows in a backcountry glamping destination",
@@ -998,13 +998,12 @@ Sage Outdoor Advisory includes wall tent accommodations in our glamping property
     seoKeywords: ["wall tent", "canvas wall tent", "traditional wall tent", "wall tent glamping", "hunting tent glamping", "rustic tent glamping"],
     internalLinks: [
       { text: "Glamping Feasibility Study", url: "/landing/glamping-feasibility-study" },
-      { text: "Canvas Tent", url: "/glossary/canvas-tent" },
       { text: "Safari Tent", url: "/glossary/safari-tent" }
     ],
     faqs: [
       {
         question: "What's the difference between a wall tent and a safari tent?",
-        answer: "Wall tents and safari tents are similar in design (both have vertical walls and peaked roofs), but wall tents are typically smaller, more traditional in construction, and associated with rustic or backcountry experiences. Safari tents are usually larger, may have more modern construction techniques, and are associated with luxury glamping. Wall tents maintain a more traditional, authentic aesthetic."
+        answer: "In Sage data they are the same structural class: Wall Tent aliases to Safari Tent (straight walls, peaked roof, rigid frame). Marketing may still say “wall tent” for rustic/hunting aesthetics and “safari tent” for luxury lodge canvas."
       },
       {
         question: "What amenities can wall tent glamping units include?",

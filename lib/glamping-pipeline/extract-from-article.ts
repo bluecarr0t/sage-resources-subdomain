@@ -14,6 +14,10 @@ import type {
   PipelineExtractedProperty,
   PipelineStatusUpdate,
 } from './types';
+import {
+  GLAMPING_UNIT_TYPE_LLM_EXAMPLES,
+  GLAMPING_UNIT_TYPE_LLM_RULES,
+} from '@/lib/glamping-unit-type-llm-guidance';
 
 const GLAMPING_EXTRACTION_PROMPT = `Extract USA glamping pipeline intelligence from the article below.
 
@@ -36,6 +40,8 @@ For status_updates:
 - confidence: "high" only when explicit (e.g. "now open", "broke ground", "planning denied", "project cancelled", "developer pulled out").
 - Use "medium" or "low" when ambiguous — prefer low over guessing.
 
+${GLAMPING_UNIT_TYPE_LLM_RULES}
+
 Return ONLY valid JSON:
 {
   "new_properties": [
@@ -47,7 +53,7 @@ Return ONLY valid JSON:
       "address": "optional",
       "url": "optional official site",
       "description": "brief",
-      "unit_type": "singular Title Case e.g. Dome",
+      "unit_type": "singular Title Case e.g. ${GLAMPING_UNIT_TYPE_LLM_EXAMPLES}",
       "number_of_units": 10,
       "is_open": "Proposed Development" | "Under Construction"
     }

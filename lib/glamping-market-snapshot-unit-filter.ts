@@ -10,22 +10,27 @@ import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-no
  * (tent pads, RV pads, hotel rooms, suites, property buyouts, generic trailers).
  * Glamping trailers such as Vintage Trailer / Airstream stay included.
  * Eco-suite stays included (not bare Suite).
+ * "Property buyout" is not a canonical type — legacy strings still match PROPERTY_BUYOUT_RAW.
  */
 const MARKET_SNAPSHOT_EXCLUDED_CANONICAL = new Set(
   [
     'Tent Site',
-    'Tent',
     'Campsite',
     'Camping',
     'RV',
     'Hotel Room',
     'Trailer',
     'Suite',
-    'Property buyout',
+    /** Retired catch-all — exclude until remapped to Bell / Safari / Cabin Tent / Tipi. */
+    'Canvas Tent',
   ].map((s) => s.toLowerCase())
 );
 
 const TENT_SITE_RAW = /\btent\s*site(s)?\b/i;
+/** Legacy bare "Tent"/"Tents" rows — exclude from overview. */
+const BARE_TENT_RAW = /^\s*tents?\s*$/i;
+/** Retired catch-all label (also excluded when normalize returns null). */
+const CANVAS_TENT_RAW = /^\s*canvas\s*tents?\s*$/i;
 const CAMPSITE_RAW = /\bcamp\s*sites?\b|\bcamping\s*sites?\b/i;
 const HOTEL_ROOM_RAW = /\bhotel\s*rooms?\b/i;
 /** Bare "Suite" / "Suites" — not Eco-suite / Eco Suite. */
@@ -47,6 +52,8 @@ export function isExcludedGlampingMarketSnapshotUnitType(
   if (unitTypeRaw != null) {
     const raw = String(unitTypeRaw);
     if (TENT_SITE_RAW.test(raw)) return true;
+    if (BARE_TENT_RAW.test(raw)) return true;
+    if (CANVAS_TENT_RAW.test(raw)) return true;
     if (CAMPSITE_RAW.test(raw)) return true;
     if (HOTEL_ROOM_RAW.test(raw)) return true;
     if (BARE_SUITE_RAW.test(raw)) return true;

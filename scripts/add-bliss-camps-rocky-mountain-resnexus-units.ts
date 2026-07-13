@@ -48,7 +48,7 @@ const DISCOVERY = `ResNexus booking engine (${STAY_NIGHTS} nights May 16–18, 2
 
 const UNITS: {
   site_name: string;
-  unit_type: string;
+  unit_type: string | null;
   unit_capacity: string;
   /** Nightly Standard Rate (USD) from ResNexus for the quoted stay. */
   nightlyStandardUsd: number | null;
@@ -97,7 +97,8 @@ const UNITS: {
   },
   {
     site_name: "Bliss Camp Event Venue in Paradise",
-    unit_type: "Property buyout",
+    /** Venue exclusive rental — not a lodging structure; leave unit_type unset. */
+    unit_type: null,
     unit_capacity: "Group",
     nightlyStandardUsd: 795.0,
     unit_ada_accessibility: null,

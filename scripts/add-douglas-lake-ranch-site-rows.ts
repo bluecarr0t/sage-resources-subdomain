@@ -181,7 +181,7 @@ const UNITS: UnitSpec[] = [
   },
   {
     site_name: "Quilchena Hotel — entire facility rental (EFR)",
-    unit_type: "Property buyout",
+    unit_type: "Hotel Room",
     unit_capacity: "30",
     nightlyUsd: 3300,
     notesLine: "15 rooms; private non-staffed rental; 2-night minimum. https://www.douglaslake.com/quilchena-resort",

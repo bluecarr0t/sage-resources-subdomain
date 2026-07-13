@@ -3,6 +3,15 @@
  * classification diagram. Canonical strings align with `normalizeGlampingUnitTypeForStorage`.
  */
 
+import {
+  BELL_TENT_CLASSIFICATION_DESCRIPTION,
+  CABIN_TENT_CLASSIFICATION_DESCRIPTION,
+  CANVAS_CABIN_CLASSIFICATION_DESCRIPTION,
+  SAFARI_TENT_CLASSIFICATION_DESCRIPTION,
+  STRUCTURAL_TENT_TYPES_SUMMARY,
+  TIPI_CLASSIFICATION_DESCRIPTION,
+} from '@/lib/glamping-structural-tent-types';
+
 /** Property-type cohort lens for the public diagram (orthogonal to structural family). */
 export type UnitPropertyTypeFilter = 'glamping' | 'rvResort' | 'campground' | 'marina';
 
@@ -43,46 +52,85 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
   {
     id: 'canvas-tented',
     label: 'Canvas & tented',
-    summary: 'Fabric-forward structures where the tent envelope is the primary guest experience.',
+    summary: STRUCTURAL_TENT_TYPES_SUMMARY,
     accent: '#b8864b',
     subtypes: [
       {
         canonical: 'Safari Tent',
         propertyTypes: ['glamping'],
-        description: 'Large rectangular canvas tent with straight walls and lodge-style headroom.',
-        aliases: ['safari tents', 'canvas lodge tent'],
+        description: SAFARI_TENT_CLASSIFICATION_DESCRIPTION,
+        aliases: [
+          'safari tents',
+          'canvas lodge tent',
+          'wall tent',
+          'wall tents',
+          'luxury safari tent',
+          'luxury safari tents',
+          'safari suite',
+          'safari suites',
+        ],
         glossarySlug: 'safari-tent',
+        inReportPicklist: true,
+      },
+      {
+        canonical: 'Cabin Tent',
+        propertyTypes: ['glamping'],
+        description: CABIN_TENT_CLASSIFICATION_DESCRIPTION,
+        aliases: [
+          'cabin tents',
+          'tent cabin',
+          'tent cabins',
+          'tent-cabin',
+          'tent-cabins',
+          'tentalow',
+          'tentalows',
+          'deluxe tent cabin',
+        ],
+        inReportPicklist: true,
+      },
+      {
+        canonical: 'Canvas Cabin',
+        propertyTypes: ['glamping'],
+        description: CANVAS_CABIN_CLASSIFICATION_DESCRIPTION,
+        aliases: [
+          'canvas cabin',
+          'canvas cabins',
+          'classic canvas cabin',
+          'family canvas cabin',
+        ],
         inReportPicklist: true,
       },
       {
         canonical: 'Bell Tent',
         propertyTypes: ['glamping'],
-        description: 'Circular canvas tent with a single center pole and airy interior volume.',
-        aliases: ['bell tents', 'lotus belle'],
+        description: BELL_TENT_CLASSIFICATION_DESCRIPTION,
+        aliases: ['bell tents', 'lotus belle', 'lotus tent'],
         glossarySlug: 'bell-tent',
-        inReportPicklist: true,
-      },
-      {
-        canonical: 'Canvas Tent',
-        propertyTypes: ['glamping'],
-        description: 'General canvas tent structure — used when the specific tent style is not distinguished.',
-        aliases: ['canvas tents'],
-        glossarySlug: 'canvas-tent',
         inReportPicklist: true,
       },
       {
         canonical: 'Tipi',
         propertyTypes: ['glamping'],
-        description:
-          'Conical pole tent — often marketed for cultural or prairie settings. Also spelled teepee; Sage normalizes that spelling to Tipi in new data (some legacy rows may still show Teepee).',
+        description: TIPI_CLASSIFICATION_DESCRIPTION,
         aliases: ['tipis', 'teepee', 'teepees'],
         glossarySlug: 'tipi',
         inReportPicklist: true,
       },
       {
+        canonical: 'Canvas Tent',
+        propertyTypes: ['glamping'],
+        description:
+          'Retired catch-all label. Prefer Bell Tent, Safari Tent, Cabin Tent, Canvas Cabin, or Tipi for new inventory.',
+        aliases: ['canvas tents'],
+        glossarySlug: 'canvas-tent',
+        inReportPicklist: false,
+        excludedFromMarketSnapshot: true,
+      },
+      {
         canonical: 'Yurt',
         propertyTypes: ['glamping'],
-        description: 'Circular lattice-frame tent with compression ring — permanent or seasonal platforms.',
+        description:
+          'Circular lattice-frame tent with a compression ring, usually on a platform. Permanent or seasonal glamping with more even headroom than a tipi.',
         aliases: ['yurts', 'ger'],
         glossarySlug: 'yurt',
         inReportPicklist: true,
@@ -90,13 +138,15 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Tree Tent',
         propertyTypes: ['glamping'],
-        description: 'Elevated or suspended tent platform anchored to trees.',
+        description:
+          'Elevated or suspended tent platform anchored to trees. Immersive canopy stay distinct from a solid treehouse.',
         aliases: ['tree tents'],
       },
       {
         canonical: 'Bubble Tent',
         propertyTypes: ['glamping'],
-        description: 'Transparent or inflatable PVC dome tent for stargazing and immersive views.',
+        description:
+          'Transparent or inflatable PVC dome tent for stargazing and immersive views. Soft-shell novelty product, not a geodesic Dome.',
         aliases: ['bubble tents', 'inflatable tent'],
         glossarySlug: 'bubble-tent',
       },
@@ -104,8 +154,8 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
         canonical: 'Tent Site',
         propertyTypes: ['campground'],
         description:
-          'BYO tent pad — campground inventory, not a furnished glamping unit. Generic “tent” labels in imports usually mean this inventory class rather than a glamping structure.',
-        aliases: ['tent sites', 'tent', 'tents'],
+          'BYO tent pad — campground inventory, not a furnished glamping unit. Ambiguous “tent” / “glamping tent” labels without structural cues should not invent a furnished type (normalize to null for storage).',
+        aliases: ['tent sites'],
         excludedFromMarketSnapshot: true,
       },
       {
@@ -127,7 +177,8 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Dome',
         propertyTypes: ['glamping'],
-        description: 'Geodesic or geodesic-style dome — includes “geodome” aliases.',
+        description:
+          'Geodesic or geodesic-style rigid dome shell, including geodome aliases. Distinctive form often used for year-round climate-controlled stays.',
         aliases: ['domes', 'geodome', 'geodesic dome', 'stargazing dome'],
         glossarySlug: 'dome',
         inReportPicklist: true,
@@ -135,20 +186,22 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Pod',
         propertyTypes: ['glamping'],
-        description: 'Compact standalone pod without the “glamping” modifier.',
+        description:
+          'Compact standalone pod without an eco branding modifier. Small rigid or semi-rigid overnight shell.',
         aliases: ['pods'],
       },
       {
         canonical: 'Eco-pod',
         propertyTypes: ['glamping'],
-        description: 'Sustainability-forward pod branding (eco-pod / eco pod).',
+        description:
+          'Sustainability-forward pod product (eco-pod / eco pod). Compact shell positioned with green or low-impact branding.',
         aliases: ['eco pod', 'eco-pods'],
       },
       {
         canonical: 'Jupe',
         propertyTypes: ['glamping'],
         description:
-          'Branded modular glamping shelter (Jupe) — engineered tent/pod hybrid with a rigid frame and fabric envelope; often solar-powered with hotel-style bedding.',
+          'Branded modular shelter (Jupe) with a rigid frame and fabric envelope. Engineered tent/pod hybrid, often with hotel-style bedding.',
         aliases: ['jupes', 'jupe tent', 'jupe tents'],
         inReportPicklist: true,
       },
@@ -163,47 +216,54 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Cabin',
         propertyTypes: ['glamping'],
-        description: 'Small fixed structure in a natural setting — default wooden glamping cabin.',
-        aliases: ['cabins'],
+        description:
+          'Small fixed wooden or similar structure in a natural setting. Default solid-wall glamping cabin in comps.',
+        aliases: ['cabins', 'bothy', 'bothies'],
         glossarySlug: 'cabin',
         inReportPicklist: true,
       },
       {
         canonical: 'A-Frame',
         propertyTypes: ['glamping'],
-        description: 'Triangular A-frame cabin with steep roof planes.',
-        aliases: ['a-frames', 'a frame'],
+        description:
+          'Triangular cabin with steep roof planes meeting at a ridge. Compact solid-wall form with a distinctive silhouette.',
+        aliases: ['a-frames', 'a frame', 'lushna', 'lushna cabin', 'lushna cabins'],
         glossarySlug: 'a-frame',
         inReportPicklist: true,
       },
       {
         canonical: 'Cottage',
         propertyTypes: ['glamping'],
-        description: 'Detached cottage — often whole-unit vacation rental positioning.',
+        description:
+          'Detached cottage-style unit, often positioned as a whole-home vacation rental. Softer residential massing than a cabin.',
         aliases: ['cottages'],
       },
       {
         canonical: 'Chalet',
         propertyTypes: ['glamping'],
-        description: 'Mountain or alpine cottage styling.',
+        description:
+          'Mountain or alpine cottage styling with residential finishes. Solid-wall lodging common in ski and highland markets.',
         aliases: ['chalets'],
       },
       {
         canonical: 'Bungalow',
         propertyTypes: ['glamping'],
-        description: 'Single-story detached unit — common in resort and coastal markets.',
+        description:
+          'Single-story detached unit common in resort and coastal markets. Solid-wall lodging with a low, residential profile.',
         aliases: ['bungalows'],
       },
       {
         canonical: 'Lodge',
         propertyTypes: ['glamping', 'rvResort'],
-        description: 'Larger fixed lodge building — room-forward or multi-room.',
+        description:
+          'Larger fixed lodge building, often room-forward or multi-room. Heavier structure than a single cabin unit.',
         aliases: ['lodges'],
       },
       {
         canonical: "Shepherd's Hut",
         propertyTypes: ['glamping'],
-        description: 'Curved-roof British wagon hut on wheels or skids.',
+        description:
+          'Curved-roof British wagon hut on wheels or skids. Compact shepherd-style overnight unit.',
         aliases: ["shepherd's huts", 'shepherd hut'],
         glossarySlug: 'shepherds-hut',
         inReportPicklist: true,
@@ -211,19 +271,22 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Canvas Cottage',
         propertyTypes: ['glamping'],
-        description: 'Canvas-walled cottage hybrid — tent envelope with cabin proportions.',
+        description:
+          'Canvas-walled cottage hybrid with tent envelope and cabin proportions. Soft walls with a more residential layout than a safari tent.',
         aliases: ['canvas cottages'],
       },
       {
         canonical: 'Eco Cabin',
         propertyTypes: ['glamping'],
-        description: 'Sustainability-branded cabin product line.',
+        description:
+          'Sustainability-branded cabin product line. Solid-wall cabin marketed with eco or low-impact positioning.',
         aliases: ['eco cabins'],
       },
       {
         canonical: 'Cube Cabin',
         propertyTypes: ['glamping'],
-        description: 'Modern cubic modular cabin footprint.',
+        description:
+          'Modern cubic modular cabin footprint. Boxy prefab form distinct from traditional log or A-frame cabins.',
         aliases: ['cube cabins'],
       },
     ],
@@ -238,7 +301,7 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
         canonical: 'Tiny Home',
         propertyTypes: ['glamping'],
         description:
-          'Compact dwelling under ~400 sq ft on a foundation or trailer. Also labeled tiny house in imports; Sage prefers Tiny Home for new data (some legacy rows may still show Tiny House).',
+          'Compact dwelling under about 400 sq ft on a foundation or trailer. Imports may say tiny house; Sage prefers Tiny Home for new data.',
         aliases: ['tiny homes', 'tiny house', 'tiny houses'],
         glossarySlug: 'tiny-home',
         inReportPicklist: true,
@@ -246,7 +309,8 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Container Home',
         propertyTypes: ['glamping'],
-        description: 'Shipping-container conversion — industrial modern glamping segment.',
+        description:
+          'Shipping-container conversion used as overnight inventory. Industrial modern form in the compact glamping segment.',
         aliases: ['shipping container', 'converted container'],
         glossarySlug: 'converted-container',
         inReportPicklist: true,
@@ -254,19 +318,22 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Mobile Home',
         propertyTypes: ['campground', 'rvResort'],
-        description: 'Manufactured home or park model used as overnight inventory.',
+        description:
+          'Manufactured home or park model used as overnight inventory. Distinct from Tiny Home and cabin product lines.',
         aliases: ['mobile homes'],
       },
       {
         canonical: 'Roulotte',
         propertyTypes: ['glamping'],
-        description: 'European caravan / gypsy wagon aesthetic on wheels.',
+        description:
+          'European caravan or gypsy-wagon aesthetic on wheels. Compact rolling stock converted for overnight stays.',
         aliases: ['roulottes'],
       },
       {
         canonical: 'Wagonette',
         propertyTypes: ['glamping'],
-        description: 'Smaller wagon-style unit distinct from full covered wagon.',
+        description:
+          'Smaller wagon-style unit distinct from a full Covered Wagon. Compact rolling or skid-mounted overnight product.',
         aliases: ['wagonettes'],
       },
     ],
@@ -280,7 +347,8 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Airstream',
         propertyTypes: ['glamping', 'rvResort'],
-        description: 'Aluminum travel-trailer icon — often stationary “silver bullet” glamping.',
+        description:
+          'Iconic aluminum travel trailer, often parked as a stationary silver-bullet stay. Furnished glamping product distinct from bare RV pads.',
         aliases: ['airstreams'],
         glossarySlug: 'airstream',
         inReportPicklist: true,
@@ -288,7 +356,8 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Vintage Trailer',
         propertyTypes: ['glamping', 'rvResort'],
-        description: 'Restored mid-century travel trailer used as a fixed glamping unit.',
+        description:
+          'Restored mid-century travel trailer used as a fixed overnight unit. Furnished vintage product, not a guest-owned RV pad.',
         aliases: ['vintage trailers', 'retro trailer'],
         glossarySlug: 'vintage-trailer',
         inReportPicklist: true,
@@ -356,15 +425,24 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Treehouse',
         propertyTypes: ['glamping'],
-        description: 'Elevated structure supported by trees or stilts.',
-        aliases: ['tree house', 'treehouses'],
+        description:
+          'Elevated structure supported by trees or stilts. Architectural canopy lodging distinct from a soft tree tent.',
+        aliases: [
+          'tree house',
+          'treehouses',
+          'luxury treehouse',
+          'luxury treehouses',
+          'luxury tree house',
+          'luxury tree houses',
+        ],
         glossarySlug: 'treehouse',
         inReportPicklist: true,
       },
       {
         canonical: 'Covered Wagon',
         propertyTypes: ['glamping'],
-        description: 'Conestoga or prairie wagon replica — stationary glamping wagons.',
+        description:
+          'Conestoga or prairie-style wagon replica used as stationary overnight inventory. Western-themed glamping wagon on a fixed site.',
         aliases: ['wagon', 'wagons', 'conestoga wagon', 'conestoga'],
         glossarySlug: 'covered-wagon',
         inReportPicklist: true,
@@ -372,33 +450,38 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Igloo',
         propertyTypes: ['glamping'],
-        description: 'Igloo or ice-lodge inspired shell — often seasonal or Nordic markets.',
+        description:
+          'Igloo or ice-lodge inspired shell, often seasonal or Nordic. Specialty climate or novelty lodging form.',
         aliases: ['igloos'],
       },
       {
         canonical: 'Hobbit House',
         propertyTypes: ['glamping'],
-        description: 'Earth-sheltered curved architecture — fantasy / landscape integration.',
+        description:
+          'Earth-sheltered curved architecture with landscape integration. Fantasy or hobbit-style specialty lodging.',
         glossarySlug: 'hobbit-house',
         inReportPicklist: true,
       },
       {
         canonical: 'Silo',
         propertyTypes: ['glamping'],
-        description: 'Converted agricultural silo — vertical cylinder adaptive reuse.',
+        description:
+          'Converted agricultural silo reused as overnight lodging. Vertical cylinder adaptive-reuse specialty unit.',
         inReportPicklist: true,
       },
       {
         canonical: 'Mirror Cabin',
         propertyTypes: ['glamping'],
-        description: 'Reflective-clad cabin — high visual differentiation for social marketing.',
+        description:
+          'Cabin clad in reflective glass or mirrored panels for landscape camouflage. High visual differentiation used in destination marketing.',
         glossarySlug: 'mirror-cabin',
         inReportPicklist: true,
       },
       {
         canonical: 'Cave House',
         propertyTypes: ['glamping'],
-        description: 'Whole cave dwelling or grotto suite.',
+        description:
+          'Whole cave dwelling or grotto suite carved into or built against rock. Specialty earth-integrated lodging.',
         aliases: ['cave houses'],
       },
     ],
@@ -412,59 +495,59 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Hotel Room',
         propertyTypes: ['rvResort'],
-        description: 'Conventional hotel room inventory co-listed with outdoor hospitality — not glamping.',
-        aliases: ['hotel rooms'],
+        description:
+          'Conventional hotel room inventory co-listed with outdoor hospitality. Not a furnished glamping structure.',
+        aliases: ['hotel rooms', 'cliffside room', 'cliffside rooms'],
         excludedFromMarketSnapshot: true,
       },
       {
         canonical: 'Suite',
         propertyTypes: ['rvResort'],
         description:
-          'Hotel-style suite inventory — not a glamping structure. Distinct from Eco-suite glamping product labels.',
+          'Hotel-style suite inventory, not a glamping structure. Distinct from Eco-suite product labels.',
         aliases: ['suites'],
-        excludedFromMarketSnapshot: true,
-      },
-      {
-        canonical: 'Property buyout',
-        propertyTypes: ['glamping', 'rvResort'],
-        description: 'Whole-property buyout / exclusive rental SKU — not a countable glamping unit type.',
-        aliases: ['property buyouts', 'buyout', 'buyouts'],
         excludedFromMarketSnapshot: true,
       },
       {
         canonical: 'Villa',
         propertyTypes: ['rvResort'],
-        description: 'Detached premium unit — whole-villa vacation rental positioning.',
+        description:
+          'Detached premium villa unit with whole-home vacation rental positioning. Heavier residential product than a cabin.',
         aliases: ['villas'],
       },
       {
         canonical: 'Luxury Room',
         propertyTypes: ['rvResort'],
-        description: 'Single luxury room within a larger outdoor resort.',
+        description:
+          'Single luxury room within a larger outdoor resort. Hotel-adjacent inventory at unit grain.',
         aliases: ['luxury rooms'],
       },
       {
         canonical: 'Eco-suite',
         propertyTypes: ['rvResort'],
-        description: 'Eco-branded suite product.',
+        description:
+          'Eco-branded suite product within an outdoor hospitality property. Soft-green positioning on room inventory.',
         aliases: ['eco suite', 'eco-suites'],
       },
       {
         canonical: 'Eco-house',
         propertyTypes: ['rvResort'],
-        description: 'Standalone eco-branded house unit.',
+        description:
+          'Standalone eco-branded house unit. Whole-house lodging with sustainability marketing.',
         aliases: ['eco house', 'eco-houses'],
       },
       {
         canonical: 'Open-air Room',
         propertyTypes: ['rvResort'],
-        description: 'Partially open room or pavilion sleeping space.',
+        description:
+          'Partially open room or pavilion sleeping space. Semi-enclosed lodging without a full solid envelope.',
         aliases: ['open air room'],
       },
       {
         canonical: 'Beach House',
         propertyTypes: ['rvResort', 'marina'],
-        description: 'Coastal whole-house inventory at unit grain.',
+        description:
+          'Coastal whole-house inventory tagged at unit grain. Beach or waterfront residential lodging.',
         aliases: ['beach houses'],
       },
     ],
@@ -478,7 +561,8 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
       {
         canonical: 'Other Glamping',
         propertyTypes: ['glamping', 'rvResort'],
-        description: 'Property-level merge when multiple unit types share one matview row.',
+        description:
+          'Property-level merge when multiple unit types share one row. Catch-all when a single structure type does not apply.',
         aliases: ['mixed glamping', 'Mixed Glamping', 'mixed glamping units'],
       },
     ],
@@ -495,7 +579,11 @@ export function findGlampingUnitSubtype(canonical: string): {
 } | null {
   const key = canonical.trim().toLowerCase();
   for (const family of GLAMPING_UNIT_CLASSIFICATION_FAMILIES) {
-    const subtype = family.subtypes.find((s) => s.canonical.toLowerCase() === key);
+    const subtype = family.subtypes.find(
+      (s) =>
+        s.canonical.toLowerCase() === key ||
+        s.aliases?.some((a) => a.toLowerCase() === key)
+    );
     if (subtype) return { family, subtype };
   }
   return null;

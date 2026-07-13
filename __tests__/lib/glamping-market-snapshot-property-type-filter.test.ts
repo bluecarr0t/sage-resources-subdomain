@@ -13,6 +13,7 @@ describe('glamping-market-snapshot-property-type-filter', () => {
     expect(isGlampingMarketSnapshotPropertyType('Unknown')).toBe(false);
     expect(isGlampingMarketSnapshotPropertyType('Landscape Hotel')).toBe(false);
     expect(isGlampingMarketSnapshotPropertyType('Campground')).toBe(false);
+    expect(isGlampingMarketSnapshotPropertyType('Vacation Rental')).toBe(false);
     expect(isGlampingMarketSnapshotPropertyType(null)).toBe(false);
     expect(isGlampingMarketSnapshotPropertyType('')).toBe(false);
   });

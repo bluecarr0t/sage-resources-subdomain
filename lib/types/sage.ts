@@ -80,6 +80,14 @@ export interface SageProperty {
 
   // PRICING
   rate_avg_retail_daily_rate: string | number | null;
+  /**
+   * How the published ARDR is packaged:
+   * room_only | breakfast | half_board | full_board | all_inclusive | unknown.
+   * Keep the quoted rate; exclude all_inclusive from default market ARDR.
+   */
+  rate_basis: string | null;
+  /** Short audit note for rate_basis (e.g. meals + activities). */
+  rate_basis_notes: string | null;
   rate_winter_weekday: string | number | null;
   rate_winter_weekend: string | number | null;
   rate_spring_weekday: string | number | null;

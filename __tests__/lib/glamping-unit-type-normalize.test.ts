@@ -31,7 +31,7 @@ describe('normalizeGlampingUnitTypeForStorage', () => {
   });
 
   it('keeps only the first segment then normalizes', () => {
-    expect(normalizeGlampingUnitTypeForStorage('Luxury Tent, Cabin')).toBe('Luxury Tent');
+    expect(normalizeGlampingUnitTypeForStorage('Luxury Tent, Cabin')).toBeNull();
     expect(normalizeGlampingUnitTypeForStorage('Safari Tents, Yurts')).toBe('Safari Tent');
   });
 
@@ -41,6 +41,8 @@ describe('normalizeGlampingUnitTypeForStorage', () => {
 
   it('formats A-Frame and RV Site', () => {
     expect(normalizeGlampingUnitTypeForStorage('a-frames')).toBe('A-Frame');
+    expect(normalizeGlampingUnitTypeForStorage('aframe')).toBe('A-Frame');
+    expect(normalizeGlampingUnitTypeForStorage('Aframes')).toBe('A-Frame');
     expect(normalizeGlampingUnitTypeForStorage('rv sites')).toBe('RV Site');
   });
 
@@ -70,14 +72,73 @@ describe('normalizeGlampingUnitTypeForStorage', () => {
     expect(normalizeGlampingUnitTypeForStorage('jupe tents')).toBe('Jupe');
   });
 
-  it('maps hobbit home, cave, and glamping tent to canonical labels', () => {
+  it('maps Bothy / Cliffside Room / Lushna to structural types', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Bothy')).toBe('Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('bothies')).toBe('Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('Cliffside Room')).toBe('Hotel Room');
+    expect(normalizeGlampingUnitTypeForStorage('Lushna Cabin')).toBe('A-Frame');
+    expect(normalizeGlampingUnitTypeForStorage('lushna')).toBe('A-Frame');
+  });
+
+  it('maps Luxury Treehouse variants to Treehouse', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Luxury Treehouse')).toBe('Treehouse');
+    expect(normalizeGlampingUnitTypeForStorage('Luxury Tree House')).toBe('Treehouse');
+    expect(normalizeGlampingUnitTypeForStorage('luxury treehouses')).toBe('Treehouse');
+  });
+
+  it('does not store retired Property buyout or Mixed as a unit type', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Property buyout')).toBeNull();
+    expect(normalizeGlampingUnitTypeForStorage('property buy-outs')).toBeNull();
+    expect(normalizeGlampingUnitTypeForStorage('Mixed')).toBeNull();
+    expect(normalizeGlampingUnitTypeForStorage('mixed glamping')).toBeNull();
+  });
+
+  it('maps canvas cabin aliases to Canvas Cabin; tent-cabin / tentalow to Cabin Tent', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Canvas Cabin')).toBe('Canvas Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('canvas cabins')).toBe('Canvas Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('Family Canvas Cabin')).toBe('Canvas Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('Classic Canvas Cabin')).toBe('Canvas Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('Tent-Cabin')).toBe('Cabin Tent');
+    expect(normalizeGlampingUnitTypeForStorage('cabin tent')).toBe('Cabin Tent');
+    expect(normalizeGlampingUnitTypeForStorage('Tentalow')).toBe('Cabin Tent');
+    expect(normalizeGlampingUnitTypeForStorage('Deluxe Tent Cabin')).toBe('Cabin Tent');
+  });
+
+  it('maps wall tent to Safari Tent and teepee to Tipi', () => {
+    expect(normalizeGlampingUnitTypeForStorage('wall tent')).toBe('Safari Tent');
+    expect(normalizeGlampingUnitTypeForStorage('Wall Tents')).toBe('Safari Tent');
+    expect(normalizeGlampingUnitTypeForStorage('teepee')).toBe('Tipi');
+    expect(normalizeGlampingUnitTypeForStorage('teepees')).toBe('Tipi');
+  });
+
+  it('maps mirror / ÖÖD / glass cabin aliases to Mirror Cabin', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Mirror Cabin')).toBe('Mirror Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('mirror cabins')).toBe('Mirror Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('Mirrored Cabin')).toBe('Mirror Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('Mirror House')).toBe('Mirror Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('glass cabin')).toBe('Mirror Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('Glass Cabins')).toBe('Mirror Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('ÖÖD House')).toBe('Mirror Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('ood house')).toBe('Mirror Cabin');
+    expect(normalizeGlampingUnitTypeForStorage('ood mirror cabin')).toBe('Mirror Cabin');
+  });
+
+  it('maps hobbit home and cave labels; ambiguous glamping tent → null', () => {
     expect(normalizeGlampingUnitTypeForStorage('Hobbit Home')).toBe('Hobbit House');
     expect(normalizeGlampingUnitTypeForStorage('cave')).toBe('Cave House');
     expect(normalizeGlampingUnitTypeForStorage('Cave Room')).toBe('Cave Room');
-    expect(normalizeGlampingUnitTypeForStorage('glamping tent')).toBe('Canvas Tent');
+    expect(normalizeGlampingUnitTypeForStorage('glamping tent')).toBeNull();
+  });
+
+  it('returns null for ambiguous tent labels (not Safari Tent or Canvas Tent)', () => {
+    expect(normalizeGlampingUnitTypeForStorage('tent')).toBeNull();
+    expect(normalizeGlampingUnitTypeForStorage('tents')).toBeNull();
+    expect(normalizeGlampingUnitTypeForStorage('Luxury Tent')).toBeNull();
+    expect(normalizeGlampingUnitTypeForStorage('deluxe tents')).toBeNull();
+    expect(normalizeGlampingUnitTypeForStorage('canvas tent')).toBeNull();
+    expect(normalizeGlampingUnitTypeForStorage('Safari Tent')).toBe('Safari Tent');
   });
 });
-
 describe('normalizeGlampingUnitTypeForDisplay', () => {
   it('canonicalizes merged Sage matview unit text', () => {
     expect(normalizeGlampingUnitTypeForDisplay('Geodesic Dome Glamping Resort')).toBe('Dome');

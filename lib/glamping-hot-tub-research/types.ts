@@ -22,6 +22,8 @@ export type HotTubCohortRow = {
   discovery_source: string | null;
   notes: string | null;
   quantity_of_units: number | null;
+  rate_avg_retail_daily_rate?: number | string | null;
+  state?: string | null;
 };
 
 export type HotTubUnitMatch = {

@@ -52,10 +52,10 @@ describe('glamping-unit-type-classification', () => {
       'Trailer',
       'Hotel Room',
       'Suite',
-      'Property buyout',
     ]) {
       expect(findGlampingUnitSubtype(label)?.subtype.excludedFromMarketSnapshot).toBe(true);
     }
+    expect(findGlampingUnitSubtype('Property buyout')).toBeNull();
     expect(findGlampingUnitSubtype('Eco-suite')?.subtype.excludedFromMarketSnapshot).toBeFalsy();
     expect(findGlampingUnitSubtype('Safari Tent')?.subtype.excludedFromMarketSnapshot).toBeFalsy();
   });
@@ -76,6 +76,20 @@ describe('glamping-unit-type-classification', () => {
     expect(findGlampingUnitSubtype('Jupe')?.family.id).toBe('domes-pods');
     expect(findGlampingUnitSubtype('Jupe')?.subtype.propertyTypes).toEqual(['glamping']);
     expect(findGlampingUnitSubtype('Jupe')?.subtype.inReportPicklist).toBe(true);
+  });
+
+  it('maps Cabin Tent and Canvas Cabin as distinct canvas-tented types', () => {
+    expect(findGlampingUnitSubtype('Cabin Tent')?.family.id).toBe('canvas-tented');
+    expect(findGlampingUnitSubtype('Cabin Tent')?.subtype.inReportPicklist).toBe(true);
+    expect(findGlampingUnitSubtype('tentalow')?.subtype.canonical).toBe('Cabin Tent');
+    expect(findGlampingUnitSubtype('Canvas Cabin')?.family.id).toBe('canvas-tented');
+    expect(findGlampingUnitSubtype('Canvas Cabin')?.subtype.inReportPicklist).toBe(true);
+    expect(findGlampingUnitSubtype('canvas cabin')?.subtype.canonical).toBe('Canvas Cabin');
+  });
+
+  it('excludes retired Canvas Tent from market snapshot picklist', () => {
+    expect(findGlampingUnitSubtype('Canvas Tent')?.subtype.excludedFromMarketSnapshot).toBe(true);
+    expect(findGlampingUnitSubtype('Canvas Tent')?.subtype.inReportPicklist).toBe(false);
   });
 
   it('has a subtype count matching flattened list', () => {

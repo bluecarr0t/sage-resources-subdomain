@@ -26,7 +26,7 @@ WITH lines AS (
         'Mossquatch Resort', 'ULUM Moab', 'Dunton River Camp', 'Backland', 'Firelight Camps'
       )
       AND (
-        unit_type IN ('Canvas Cottage', 'Eco Cabin', 'Cube Cabin')
+        unit_type IN ('Canvas Cabin', 'Canvas Cottage', 'Eco Cabin', 'Cube Cabin')
         OR site_name ~* '(canvas cabin|canvas cottage|tent.?cabin|cabin tent|tentalow|deluxe tent cabin|glamping cabin|canvas glamping)'
         OR site_name ~* '(suite tent|stargazer|deluxe tent|summit tent|journey\+|outlook shelter)'
         OR (

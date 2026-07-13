@@ -5,13 +5,26 @@
  * Used by discovery inserts, admin approval flows, and batch cleanup scripts.
  */
 
+import { AMBIGUOUS_FURNISHED_TENT_PHRASES } from '@/lib/glamping-structural-tent-types';
+
+/** Non-structure booking SKUs — do not store as unit_type. */
+const RETIRED_NON_STRUCTURE_PHRASES = new Set(
+  [
+    'property buyout',
+    'property buyouts',
+    'property buy-out',
+    'property buy-outs',
+    'mixed',
+    'mixed glamping',
+    'mixed glamping units',
+  ].map((s) => s.toLowerCase())
+);
+
 /** Lowercased full string (after taking the primary segment) -> canonical display form. */
 const PHRASE_CANONICAL: Record<string, string> = {
   // Common singles / aliases
   yurt: 'Yurt',
   yurts: 'Yurt',
-  tent: 'Tent',
-  tents: 'Tent',
   dome: 'Dome',
   domes: 'Dome',
   geodome: 'Dome',
@@ -40,10 +53,18 @@ const PHRASE_CANONICAL: Record<string, string> = {
   igloos: 'Igloo',
   tipi: 'Tipi',
   tipis: 'Tipi',
-  teepee: 'Teepee',
-  teepees: 'Teepee',
-  bothy: 'Bothy',
-  bothies: 'Bothy',
+  teepee: 'Tipi',
+  teepees: 'Tipi',
+  /** Scottish bothy marketing — store as Cabin. */
+  bothy: 'Cabin',
+  bothies: 'Cabin',
+  'cliffside room': 'Hotel Room',
+  'cliffside rooms': 'Hotel Room',
+  'lushna cabin': 'A-Frame',
+  'lushna cabins': 'A-Frame',
+  lushna: 'A-Frame',
+  'hotel room': 'Hotel Room',
+  'hotel rooms': 'Hotel Room',
   roulotte: 'Roulotte',
   roulottes: 'Roulotte',
   hut: 'Hut',
@@ -54,12 +75,10 @@ const PHRASE_CANONICAL: Record<string, string> = {
   "shepherd's huts": "Shepherd's Hut",
   'glamping pod': 'Glamping Pod',
   'glamping pods': 'Glamping Pod',
-  'glamping tent': 'Canvas Tent',
-  'glamping tents': 'Canvas Tent',
   'bell tent': 'Bell Tent',
   'bell tents': 'Bell Tent',
-  'wall tent': 'Wall Tent',
-  'wall tents': 'Wall Tent',
+  'wall tent': 'Safari Tent',
+  'wall tents': 'Safari Tent',
   /** DB often uses plain "Wagon" for stationary covered / Conestoga glamping units. */
   wagon: 'Covered Wagon',
   wagons: 'Covered Wagon',
@@ -74,13 +93,24 @@ const PHRASE_CANONICAL: Record<string, string> = {
   'bubble tents': 'Bubble Tent',
   'bubble dome': 'Bubble Tent',
   'bubble domes': 'Bubble Tent',
-  'luxury tent': 'Luxury Tent',
-  'luxury tents': 'Luxury Tent',
   'luxury room': 'Luxury Room',
   'luxury rooms': 'Luxury Room',
   'safari tent': 'Safari Tent',
   'safari tents': 'Safari Tent',
-  'canvas tent': 'Canvas Tent',
+  'cabin tent': 'Cabin Tent',
+  'cabin tents': 'Cabin Tent',
+  'canvas cabin': 'Canvas Cabin',
+  'canvas cabins': 'Canvas Cabin',
+  'family canvas cabin': 'Canvas Cabin',
+  'classic canvas cabin': 'Canvas Cabin',
+  'tent cabin': 'Cabin Tent',
+  'tent cabins': 'Cabin Tent',
+  'tent-cabin': 'Cabin Tent',
+  'tent-cabins': 'Cabin Tent',
+  tentalow: 'Cabin Tent',
+  tentalows: 'Cabin Tent',
+  'deluxe tent cabin': 'Cabin Tent',
+  'deluxe tent cabins': 'Cabin Tent',
   'canvas cottage': 'Canvas Cottage',
   'canvas cottages': 'Canvas Cottage',
   'eco pod': 'Eco-pod',
@@ -99,11 +129,17 @@ const PHRASE_CANONICAL: Record<string, string> = {
   treehouses: 'Treehouse',
   'tree house': 'Treehouse',
   'tree houses': 'Treehouse',
+  'luxury treehouse': 'Treehouse',
+  'luxury treehouses': 'Treehouse',
+  'luxury tree house': 'Treehouse',
+  'luxury tree houses': 'Treehouse',
   'tree tent': 'Tree Tent',
   'tree tents': 'Tree Tent',
   'a-frame': 'A-Frame',
   'a-frames': 'A-Frame',
   'a frame': 'A-Frame',
+  aframe: 'A-Frame',
+  aframes: 'A-Frame',
   'beach cabin': 'Beach Cabin',
   'beach cabins': 'Beach Cabin',
   'beach house': 'Beach House',
@@ -128,6 +164,30 @@ const PHRASE_CANONICAL: Record<string, string> = {
   'tent sites': 'Tent Site',
   'cube cabin': 'Cube Cabin',
   'cube cabins': 'Cube Cabin',
+  /**
+   * Prefab mirrored / ÖÖD-style houses — keep marketing names in site_name when needed.
+   * Note: some "Glass Cabin" marketing (e.g. view-glass wall cabins) is not mirrored cladding;
+   * do not auto-retype inventory solely from site_name without verification.
+   */
+  'mirror cabin': 'Mirror Cabin',
+  'mirror cabins': 'Mirror Cabin',
+  'mirrored cabin': 'Mirror Cabin',
+  'mirrored cabins': 'Mirror Cabin',
+  'mirror house': 'Mirror Cabin',
+  'mirror houses': 'Mirror Cabin',
+  'mirrored house': 'Mirror Cabin',
+  'mirrored houses': 'Mirror Cabin',
+  'glass cabin': 'Mirror Cabin',
+  'glass cabins': 'Mirror Cabin',
+  'glass house': 'Mirror Cabin',
+  'glass houses': 'Mirror Cabin',
+  'ood house': 'Mirror Cabin',
+  'ood houses': 'Mirror Cabin',
+  'ööd': 'Mirror Cabin',
+  'ööd house': 'Mirror Cabin',
+  'ööd houses': 'Mirror Cabin',
+  'ood mirror house': 'Mirror Cabin',
+  'ood mirror cabin': 'Mirror Cabin',
   'eco cabin': 'Eco Cabin',
   'eco cottage': 'Eco Cottage',
   'eco-house': 'Eco-house',
@@ -136,7 +196,6 @@ const PHRASE_CANONICAL: Record<string, string> = {
   'open-air room': 'Open-air Room',
   'open air room': 'Open-air Room',
   wagonette: 'Wagonette',
-  'mixed glamping': 'Mixed Glamping',
 };
 
 /** Lowercased single token (may include hyphens) -> singular lower form. */
@@ -163,6 +222,7 @@ const TOKEN_PLURAL_TO_SINGULAR: Record<string, string> = {
   tipis: 'tipi',
   airstreams: 'airstream',
   bothies: 'bothy',
+  lushnas: 'lushna',
   roulottes: 'roulotte',
   wagons: 'wagon',
   'a-frames': 'a-frame',
@@ -235,7 +295,7 @@ function singularizeTokenLower(token: string): string {
 function titleCaseToken(rawLower: string): string {
   const l = rawLower.toLowerCase();
   if (l === 'rv') return 'RV';
-  if (l === 'a-frame') return 'A-Frame';
+  if (l === 'a-frame' || l === 'aframe') return 'A-Frame';
 
   const possessive = l.match(/^([a-z]+)('s)$/);
   if (possessive && possessive[1]) {
@@ -273,6 +333,12 @@ export function normalizeGlampingUnitTypeForStorage(
 
   const collapsed = collapseSpaces(primary);
   const key = collapsed.toLowerCase();
+  if (AMBIGUOUS_FURNISHED_TENT_PHRASES.has(key)) {
+    return null;
+  }
+  if (RETIRED_NON_STRUCTURE_PHRASES.has(key)) {
+    return null;
+  }
   if (Object.prototype.hasOwnProperty.call(PHRASE_CANONICAL, key)) {
     return PHRASE_CANONICAL[key]!;
   }
@@ -385,5 +451,9 @@ export function normalizeGlampingUnitTypeForDisplay(
     return labels.join(', ');
   }
 
-  return normalizeGlampingUnitTypeForStorage(trimmed);
+  const stored = normalizeGlampingUnitTypeForStorage(trimmed);
+  if (stored) return stored;
+  // Preserve retired catch-all for legacy rows (storage normalize returns null).
+  if (/^canvas\s*tents?$/i.test(trimmed)) return 'Canvas Tent';
+  return null;
 }

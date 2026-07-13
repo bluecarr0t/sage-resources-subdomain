@@ -46,6 +46,57 @@ npx tsx scripts/research-hot-tub-glamping.ts --property-id <uuid>
 npx tsx scripts/research-hot-tub-glamping.ts --limit 50 --only-null --include-researched
 ```
 
+## P0 Amenity Impact backfill (unit_hot_tub Yes/No)
+
+Goal: explicit `Yes`/`No` on **`unit_hot_tub`** for published open US commercial glamping so Amenity Impact stops treating blanks as “without.” Prioritize **Safari Tent + Cabin**.
+
+### Field rules
+
+| Situation | Tags |
+|-----------|------|
+| Private in-unit / on-deck tub for that unit | `unit_hot_tub = Yes` |
+| Shared property spa only | `property_hot_tub = Yes`, **`unit_hot_tub = No`** |
+| Values | Exactly `Yes` or `No` (never leave null once researched) |
+
+Derive `unit_hot_tub_or_sauna` on apply (pipeline does this automatically).
+
+### CLI flags (P0)
+
+| Flag | Meaning |
+|------|---------|
+| `--only-unit-hot-tub-null` | Research when **`unit_hot_tub` is blank** (even if `property_hot_tub` is already set). Prefer this over `--only-null` for Amenity Impact. |
+| `--unit-types "Safari Tent,Cabin"` | Limit qualifying properties to those unit types |
+| `--only-null` | Legacy: both `unit_hot_tub` and `property_hot_tub` empty |
+
+### Cadence (slow / accurate)
+
+1. **Audit** — [`queries/hot_tub_tagging_audit.sql`](../../queries/hot_tub_tagging_audit.sql)
+2. **Export queue** — `npx tsx scripts/export-unit-hot-tub-queue.ts` (or [`queries/unit_hot_tub_p0_queue.sql`](../../queries/unit_hot_tub_p0_queue.sql))
+3. **Dry-run 25** — Safari/Cabin first:
+
+```bash
+npx tsx scripts/research-hot-tub-glamping.ts \
+  --dry-run --limit 25 \
+  --unit-types "Safari Tent,Cabin" \
+  --only-unit-hot-tub-null \
+  --export-sql
+```
+
+4. **Human review** — `scripts/.tmp-hot-tub-review/results.jsonl` + `conflicts.csv`; spot-check private vs shared spa
+5. **Live apply** — same command without `--dry-run` (auto-applies high / medium+evidence only; never overwrites existing Yes/No)
+6. **Check in SQL** — copy reviewed export to `scripts/migrations/backfill-hot-tub-unit-p0-YYYY-MM-DD-batch-N.sql`
+7. **Re-measure** — audit SQL + Amenity Impact (within-type Safari/Cabin)
+8. **Next batch** — 25–50 properties/week until Safari/Cabin rated rows are ≥ **95%** explicit, then expand unit types
+
+See also: [`HOT_TUB_P0_REMEASURE-2026-07-13.md`](./HOT_TUB_P0_REMEASURE-2026-07-13.md), [`HOT_TUB_P0_EXPAND_REMAINING.md`](./HOT_TUB_P0_EXPAND_REMAINING.md).
+
+### Success gates (P0)
+
+1. Safari Tent + Cabin rated rows: ≥ **95%** explicit `unit_hot_tub`
+2. Full US open published rated cohort: ≥ **85%** explicit
+3. No unresolved `unit_hot_tub` vs `unit_hot_tub_or_sauna` contradictions in Safari/Cabin
+4. Do **not** invent a positive national Unit Hot Tub premium by changing comparison math; use within-type deltas if national remains noisy
+
 ## Apply policy
 
 - **Auto-apply:** null/empty fields when confidence is `high`, or `medium` with substantive evidence text

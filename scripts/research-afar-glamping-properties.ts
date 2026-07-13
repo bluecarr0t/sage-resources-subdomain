@@ -219,7 +219,7 @@ For each glamping property/resort mentioned in the article that is in North Amer
 - address (optional): Full street address if known
 - url (optional): Official website URL if you can find it
 - description (optional): Brief description of what makes this property special (from the article)
-- unit_type (optional): Types of accommodations offered (e.g., "yurts", "tents", "cabins", "treehouses", "Airstreams", "safari tents")
+- unit_type (optional): Types of accommodations (e.g., "yurts", "Bell Tent", "cabins", "treehouses", "Airstreams", "safari tents" only when named). Omit when the source only says tents/glamping tents with no structural cue.
 - property_type (optional): Type of property (e.g., "Glamping Resort", "Luxury Campground", "Boutique Camping")
 
 Be VERY thorough - this article likely mentions 10-15 properties total, and I need ALL of the North American ones. Common glamping properties in AFAR articles include places like Under Canvas, Collective Retreats, AutoCamp, El Cosmico, and many others.
@@ -234,7 +234,7 @@ Return ONLY valid JSON in this format:
       "country": "USA",
       "url": "https://example.com",
       "description": "Brief description from article...",
-      "unit_type": "tents, yurts",
+      "unit_type": "Bell Tent, Yurt",
       "property_type": "Glamping Resort"
     }
   ]

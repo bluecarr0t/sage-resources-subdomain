@@ -1,7 +1,7 @@
 -- Properties with "canvas cabin" / "canvas cottage" signals in Sage
--- (no unit_type = 'Canvas Cabin' exists today; closest types: Canvas Tent, Canvas Cottage, Cabin, Safari Tent)
+-- Canonical types: Canvas Cabin (2026-07-13), Canvas Cottage; related: Canvas Tent, Cabin, Safari Tent
 
--- A) Explicit site_name OR unit_type Canvas Cottage
+-- A) Explicit site_name OR unit_type Canvas Cabin / Canvas Cottage
 SELECT
   id,
   property_name,
@@ -13,8 +13,8 @@ SELECT
   quantity_of_units,
   rate_avg_retail_daily_rate
 FROM all_sage_data
-WHERE site_name ~* 'canvas\s*cabin|canvas\s*cottage|classic\s+canvas\s+cabin|family\s+canvas\s+cabin'
-   OR unit_type = 'Canvas Cottage'
+WHERE site_name ~* 'canvas\s*cabin|canvas\s*cottage|classic\s+canvas\s+cabin|family\s+canvas\s+cabin|tent.?cabin|cabin\s+tent|tentalow'
+   OR unit_type IN ('Canvas Cabin', 'Canvas Cottage')
 ORDER BY country, state, property_name, site_name;
 
 -- B) Description mentions canvas cabin(s) but site_name does not (property-level copy on wrong row)

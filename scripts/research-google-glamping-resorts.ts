@@ -306,7 +306,7 @@ Provide a JSON object with as much detail as possible:
 - zip_code: ZIP/postal code if available
 - url: Official website URL
 - description: 3-5 sentence description of the property, amenities, and what makes it special
-- unit_type: Types of accommodations (comma-separated, e.g., "tents, yurts, cabins")
+- unit_type: Types of accommodations (prefer singular Title Case; ambiguous tents → omit unit_type; e.g. "Bell Tent, Yurt, Cabin" when known)
 - property_type: Type of property (e.g., "Glamping Resort", "Luxury Campground")
 - phone_number: Phone number if available
 - latitude: Approximate latitude if known (number)

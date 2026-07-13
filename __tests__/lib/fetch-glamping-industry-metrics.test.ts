@@ -1,5 +1,6 @@
 import {
   buildTopUnitTypesByOpenUnits,
+  buildUnitTypesByOpenUnits,
   meanAndMedianAdr,
   medianSorted,
   propertyLevelAdrValues,
@@ -110,11 +111,13 @@ describe('fetch-glamping-industry-metrics helpers', () => {
       ]);
       expect(rows[0]).toMatchObject({
         label: 'Bell Tent',
+        openUnits: 102,
         avgRetailDailyRateMean: 74,
         avgRetailDailyRateProvisional: false,
       });
       expect(rows[1]).toMatchObject({
         label: 'Cabin',
+        openUnits: 40,
         pctOfUnits: 21,
         avgRetailDailyRateMean: 85,
         ratedUnitWeight: 8,
@@ -122,6 +125,7 @@ describe('fetch-glamping-industry-metrics helpers', () => {
       });
       expect(rows[4]).toMatchObject({
         label: 'Dome',
+        openUnits: 3,
         avgRetailDailyRateMean: null,
         avgRetailDailyRateProvisional: false,
       });
@@ -129,6 +133,30 @@ describe('fetch-glamping-industry-metrics helpers', () => {
 
     it('returns empty when there are no open units', () => {
       expect(buildTopUnitTypesByOpenUnits(new Map(), new Map(), true)).toEqual([]);
+    });
+  });
+
+  describe('buildUnitTypesByOpenUnits', () => {
+    it('returns the full open-unit mix when limit is omitted', () => {
+      const openUnits = new Map<string, number>([
+        ['Cabin', 40],
+        ['Safari Tent', 25],
+        ['Bell Tent', 102],
+        ['Dome', 3],
+        ['Yurt', 17],
+        ['Treehouse', 8],
+      ]);
+      const rows = buildUnitTypesByOpenUnits(openUnits, new Map(), false);
+      expect(rows).toHaveLength(6);
+      expect(rows.map((r) => r.label)).toEqual([
+        'Bell Tent',
+        'Cabin',
+        'Safari Tent',
+        'Yurt',
+        'Treehouse',
+        'Dome',
+      ]);
+      expect(rows[5].openUnits).toBe(3);
     });
   });
 });

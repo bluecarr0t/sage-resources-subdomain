@@ -29,6 +29,7 @@ describe('glamping-market-overview-currency', () => {
   it('returns market-specific footnotes and hints', () => {
     expect(glampingMarketOverviewRateFootnote('ca')).toMatch(/CAD/);
     expect(glampingMarketOverviewRateFootnote('us')).toMatch(/USD/);
+    expect(glampingMarketOverviewRateFootnote('us')).toMatch(/all-inclusive/);
     expect(glampingMarketOverviewRateCurrencyHint('ca')).toMatch(/CAD/);
     expect(glampingMarketOverviewRateCurrencyHint('us')).not.toMatch(/CAD/);
   });

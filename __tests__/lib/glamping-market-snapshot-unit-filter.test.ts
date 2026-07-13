@@ -7,11 +7,13 @@ describe('isExcludedGlampingMarketSnapshotUnitType', () => {
     expect(isExcludedGlampingMarketSnapshotUnitType('Vehicles')).toBe(true);
   });
 
-  it('excludes tent sites and plain tent inventory', () => {
+  it('excludes tent sites, plain tent inventory, and retired Canvas Tent', () => {
     expect(isExcludedGlampingMarketSnapshotUnitType('Tent Site')).toBe(true);
     expect(isExcludedGlampingMarketSnapshotUnitType('tent sites')).toBe(true);
+    // Legacy bare Tent/Tents rows stay excluded; ambiguous labels normalize to null.
     expect(isExcludedGlampingMarketSnapshotUnitType('Tent')).toBe(true);
     expect(isExcludedGlampingMarketSnapshotUnitType('tents')).toBe(true);
+    expect(isExcludedGlampingMarketSnapshotUnitType('Canvas Tent')).toBe(true);
   });
 
   it('excludes campsite, bare RV, hotel room, and bare trailer inventory', () => {
@@ -36,9 +38,9 @@ describe('isExcludedGlampingMarketSnapshotUnitType', () => {
   it('keeps structure and glamping tent product types', () => {
     expect(isExcludedGlampingMarketSnapshotUnitType('Safari Tent')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Bell Tent')).toBe(false);
+    expect(isExcludedGlampingMarketSnapshotUnitType('Cabin Tent')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Yurt')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Cabin')).toBe(false);
-    expect(isExcludedGlampingMarketSnapshotUnitType('Canvas Tent')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Vintage Trailer')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Airstream')).toBe(false);
     expect(isExcludedGlampingMarketSnapshotUnitType('Teardrop trailer')).toBe(false);

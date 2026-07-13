@@ -22,6 +22,7 @@ import {
 } from '@/lib/glamping-market-snapshot-property-type-filter';
 import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 import { normalizeCaProvinceToCode } from '@/lib/normalize-ca-province-key';
+import { isComparableMarketArdrRateBasis } from '@/lib/glamping-rate-basis';
 
 const PAGE_SIZE = 1000;
 
@@ -35,6 +36,7 @@ type Row = {
   quantity_of_units: string | number | null;
   property_total_sites: string | number | null;
   rate_avg_retail_daily_rate: string | number | null;
+  rate_basis: string | null;
 };
 
 function parsePositiveNumber(value: unknown): number | null {
@@ -132,7 +134,9 @@ async function loadGlampingIndustryCaProvinceMetrics(
 
       if (normalizeIsOpen(row.is_open) === 'yes' && name) {
         const adr = parsePositiveNumber(row.rate_avg_retail_daily_rate);
-        if (adr != null) recordPropertyAdrSample(agg.adrByProperty, name, adr);
+        if (adr != null && isComparableMarketArdrRateBasis(row.rate_basis)) {
+          recordPropertyAdrSample(agg.adrByProperty, name, adr);
+        }
       }
     }
 
@@ -161,7 +165,7 @@ export async function fetchGlampingIndustryCaProvinceMetrics(
 ): Promise<{ ok: true; data: GlampingCaProvinceMetricsMap } | { ok: false; error: string }> {
   return unstable_cache(
     () => loadGlampingIndustryCaProvinceMetrics(tier),
-    ['glamping-industry-ca-province-metrics', tier],
+    ['glamping-industry-ca-province-metrics', tier, 'rate-basis-v1'],
     {
       revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
       tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],

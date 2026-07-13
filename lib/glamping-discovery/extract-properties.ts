@@ -4,6 +4,10 @@
  */
 
 import { OpenAI } from 'openai';
+import {
+  GLAMPING_UNIT_TYPE_LLM_EXAMPLES,
+  GLAMPING_UNIT_TYPE_LLM_RULES,
+} from '@/lib/glamping-unit-type-llm-guidance';
 
 export interface ExtractedProperty {
   property_name: string;
@@ -42,10 +46,12 @@ Return a JSON object with a "properties" array containing one object for each qu
 - address (optional): Full street address if mentioned
 - url (optional): Website URL if mentioned
 - description (optional): Brief description of the property from the article
-- unit_type (optional): Types of accommodations (e.g., "tents", "yurts", "cabins", "pavilions")
+- unit_type (optional): Single singular Title Case label when known (e.g. ${GLAMPING_UNIT_TYPE_LLM_EXAMPLES}). Omit when the article only says "tents" / "glamping tents" with no structural cue (do not invent Safari Tent or use Canvas Tent).
 - property_type (optional): Type of property (e.g., "Glamping Resort", "Luxury Campground")
 - year_opened (optional): Year the property opened if mentioned
 - number_of_units (optional): Number of accommodations if mentioned
+
+${GLAMPING_UNIT_TYPE_LLM_RULES}
 
 Be VERY thorough - extract ALL North American properties mentioned.
 
@@ -59,7 +65,7 @@ Return ONLY valid JSON in this format:
       "country": "USA",
       "url": "https://example.com",
       "description": "Brief description from article...",
-      "unit_type": "tents",
+      "unit_type": "Bell Tent",
       "property_type": "Glamping Resort",
       "year_opened": 2020,
       "number_of_units": 10

@@ -2,6 +2,8 @@
 
 Curated list of properties with explicit site naming or clear hybrid SKUs (canvas-on-platform / hard-sided luxury tent product). Sourced from `all_glamping_properties` (Sage Database).
 
+**Canonical `unit_type`:** Prefer **`Canvas Cabin`** for hardwall+canvas hybrids (bath/porch modules + canvas envelope). Prefer **`Cabin Tent`** for portable soft-wall tent-cabin / tentalow products. Use **`Canvas Cottage`** when the operator labels the SKU as such. Do not park Canvas Cabin hybrids under Safari Tent or Cabin Tent.
+
 **ADR:** Unit-weighted retail ADR (`rate_avg_retail_daily_rate` × `quantity_of_units`) across hybrid-classified rows only. Rows missing `quantity_of_units` count as 1 for weighting. Does not apply seasonal `rate_*` fields or IQR screening.
 
 **Winter (cold climate):** Can the **hybrid canvas/cabin SKU** be operated in a **cold, freezing environment** (snow, sub-freezing nights)? Based on property websites and FAQs (researched 2026-06-01). “Cold-capable” means the product is heated/insulated and the property accepts winter bookings for that unit type—not merely that the brand has winter rates in Sage.

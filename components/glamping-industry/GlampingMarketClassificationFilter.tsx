@@ -26,12 +26,15 @@ type Props = {
     market: GlampingMarketSnapshotMarket,
     tier: GlampingMarketSnapshotTierFilter
   ) => string;
+  /** Hide the “What do these mean?” link (e.g. sticky header). */
+  compact?: boolean;
 };
 
 export function GlampingMarketClassificationFilter({
   market,
   tier,
   pathForMarketTier = glampingMarketOverviewPath,
+  compact = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
@@ -43,9 +46,15 @@ export function GlampingMarketClassificationFilter({
     'rounded-sm px-3 py-2 text-[11px] font-medium tracking-wide text-neutral-600 transition-colors hover:text-neutral-900';
 
   return (
-    <div className="flex max-w-full flex-col items-stretch gap-2 sm:items-end">
+    <div
+      className={
+        compact
+          ? 'flex max-w-full flex-col items-start sm:items-end'
+          : 'flex max-w-full flex-col items-start gap-2 sm:items-end'
+      }
+    >
       <div
-        className="inline-flex shrink-0 self-end rounded border border-sage-200 p-0.5"
+        className="inline-flex max-w-full shrink-0 flex-wrap self-start rounded border border-sage-200 p-0.5 sm:self-end"
         role="group"
         aria-label="Classification"
       >
@@ -61,15 +70,18 @@ export function GlampingMarketClassificationFilter({
           </Link>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={`self-end text-[11px] font-light ${METHOD_LINK_CLASS}`}
-        aria-haspopup="dialog"
-      >
-        What do these mean?
-      </button>
+      {!compact ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={`self-start text-[11px] font-light sm:self-end ${METHOD_LINK_CLASS}`}
+          aria-haspopup="dialog"
+        >
+          What do these mean?
+        </button>
+      ) : null}
 
+      {!compact ? (
       <Modal open={open} onClose={close} className="max-w-lg" ariaLabelledBy={titleId}>
         <ModalContent className="border-neutral-200 bg-[#faf9f3] text-neutral-900 shadow-xl">
           <div className="flex max-h-[min(85vh,36rem)] flex-col">
@@ -121,6 +133,7 @@ export function GlampingMarketClassificationFilter({
           </div>
         </ModalContent>
       </Modal>
+      ) : null}
     </div>
   );
 }

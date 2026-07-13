@@ -26,6 +26,7 @@ import {
   parseGlampingMarketSnapshotPositiveNumber,
 } from '@/lib/glamping-market-snapshot/site-units-for-row';
 import { fetchAllSageDataLastUpdatedAt } from '@/lib/fetch-all-sage-data-last-updated';
+import { isComparableMarketArdrRateBasis } from '@/lib/glamping-rate-basis';
 
 const PAGE_SIZE = 1000;
 
@@ -47,6 +48,8 @@ export const TOP_UNIT_TYPE_ADR_PROVISIONAL_MIN_RATED_UNITS = 5;
 
 export type GlampingTopUnitTypeRow = {
   label: string;
+  /** Open operating unit weight for this primary `unit_type` label. */
+  openUnits: number;
   /**
    * Integer percent of **open** units (primary `unit_type` label per row).
    * Pipeline / cancelled inventory is excluded from the mix.
@@ -55,8 +58,8 @@ export type GlampingTopUnitTypeRow = {
   /**
    * Unit-weighted mean retail ADR for open rows with this primary unit label and a recorded
    * rate (`quantity_of_units`, else `property_total_sites`, else weight 1).
-   * Null when no rates, or when a tier filter is active and rated unit weight
-   * is below {@link TOP_UNIT_TYPE_ADR_PROVISIONAL_MIN_RATED_UNITS}.
+   * Excludes `rate_basis=all_inclusive`. Null when no rates, or when a tier filter is active
+   * and rated unit weight is below {@link TOP_UNIT_TYPE_ADR_PROVISIONAL_MIN_RATED_UNITS}.
    */
   avgRetailDailyRateMean: number | null;
   /** Rated open unit weight used for the ADR mean (0 when no rated open rows). */
@@ -76,7 +79,10 @@ export type GlampingIndustryMetrics = {
   totalUnits: number;
   avgRetailDailyRateMean: number | null;
   avgRetailDailyRateMedian: number | null;
+  /** Top {@link TOP_UNIT_TYPES_COUNT} unit types by open unit weight (sidebar). */
   topUnitTypesByUnits: GlampingTopUnitTypeRow[];
+  /** All open unit types with counts + ADR (Unit Type by Rate chart). */
+  unitTypesByUnits: GlampingTopUnitTypeRow[];
   asOf: string;
 };
 
@@ -88,6 +94,7 @@ type Row = {
   quantity_of_units: string | number | null;
   property_total_sites: string | number | null;
   rate_avg_retail_daily_rate: string | number | null;
+  rate_basis: string | null;
 };
 
 /** Median of a non-empty sorted array (ascending). */
@@ -161,30 +168,51 @@ export function resolveTopUnitTypeAdrDisplay(
 }
 
 /**
- * Rank top unit types by **open** unit weight and attach ADR (with optional tier floor).
+ * Rank unit types by **open** unit weight and attach ADR (with optional tier floor).
+ * Pass `limit` to cap the list (e.g. sidebar top N); omit for the full mix.
  */
-export function buildTopUnitTypesByOpenUnits(
+export function buildUnitTypesByOpenUnits(
   openUnitsByPrimaryUnitLabel: Map<string, number>,
   adrWeightByPrimaryUnitLabel: Map<string, { rateTimesUnits: number; units: number }>,
-  applyAdrSampleFloor: boolean
+  applyAdrSampleFloor: boolean,
+  limit?: number
 ): GlampingTopUnitTypeRow[] {
   const openUnitsTotal = [...openUnitsByPrimaryUnitLabel.values()].reduce((s, n) => s + n, 0);
   if (openUnitsTotal <= 0) return [];
 
   const ranked = [...openUnitsByPrimaryUnitLabel.entries()].sort((a, b) => b[1] - a[1]);
-  return ranked.slice(0, TOP_UNIT_TYPES_COUNT).map(([label, n]) => {
+  const sliced = limit != null ? ranked.slice(0, limit) : ranked;
+  return sliced.map(([label, n]) => {
     const agg = adrWeightByPrimaryUnitLabel.get(label);
     const ratedUnitWeight = agg?.units ?? 0;
     const unitMean = agg && agg.units > 0 ? agg.rateTimesUnits / agg.units : null;
     const adr = resolveTopUnitTypeAdrDisplay(unitMean, ratedUnitWeight, applyAdrSampleFloor);
     return {
       label,
+      openUnits: n,
       pctOfUnits: Math.round((100 * n) / openUnitsTotal),
       avgRetailDailyRateMean: adr.avgRetailDailyRateMean,
       ratedUnitWeight,
       avgRetailDailyRateProvisional: adr.avgRetailDailyRateProvisional,
     };
   });
+}
+
+/**
+ * Rank top unit types by **open** unit weight and attach ADR (with optional tier floor).
+ * Capped at {@link TOP_UNIT_TYPES_COUNT} for the overview sidebar.
+ */
+export function buildTopUnitTypesByOpenUnits(
+  openUnitsByPrimaryUnitLabel: Map<string, number>,
+  adrWeightByPrimaryUnitLabel: Map<string, { rateTimesUnits: number; units: number }>,
+  applyAdrSampleFloor: boolean
+): GlampingTopUnitTypeRow[] {
+  return buildUnitTypesByOpenUnits(
+    openUnitsByPrimaryUnitLabel,
+    adrWeightByPrimaryUnitLabel,
+    applyAdrSampleFloor,
+    TOP_UNIT_TYPES_COUNT
+  );
 }
 
 /**
@@ -222,7 +250,7 @@ async function loadGlampingIndustryMetrics(
       supabase
         .from('all_sage_data')
         .select(
-          'property_name, property_type, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate'
+          'property_name, property_type, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis'
         )
         .eq('is_glamping_property', 'Yes')
         .eq('research_status', 'published')
@@ -270,7 +298,7 @@ async function loadGlampingIndustryMetrics(
           );
         }
         const adr = parseGlampingMarketSnapshotPositiveNumber(row.rate_avg_retail_daily_rate);
-        if (adr != null) {
+        if (adr != null && isComparableMarketArdrRateBasis(row.rate_basis)) {
           if (name) recordPropertyAdrSample(adrByProperty, name, adr);
           if (primaryLabel) {
             const unitWeight = rowUnits > 0 ? rowUnits : 1;
@@ -295,11 +323,12 @@ async function loadGlampingIndustryMetrics(
   const { mean, median } = meanAndMedianAdr(propertyAdrs);
 
   const applyAdrSampleFloor = tier !== 'all';
-  const topUnitTypesByUnits = buildTopUnitTypesByOpenUnits(
+  const unitTypesByUnits = buildUnitTypesByOpenUnits(
     openUnitsByPrimaryUnitLabel,
     adrWeightByPrimaryUnitLabel,
     applyAdrSampleFloor
   );
+  const topUnitTypesByUnits = unitTypesByUnits.slice(0, TOP_UNIT_TYPES_COUNT);
 
   const asOf = await fetchAllSageDataLastUpdatedAt();
 
@@ -314,6 +343,7 @@ async function loadGlampingIndustryMetrics(
       avgRetailDailyRateMean: mean != null ? Math.round(mean) : null,
       avgRetailDailyRateMedian: median != null ? Math.round(median) : null,
       topUnitTypesByUnits,
+      unitTypesByUnits,
       asOf,
     },
   };
@@ -330,7 +360,7 @@ export async function fetchGlampingIndustryMetrics(
 ): Promise<{ ok: true; data: GlampingIndustryMetrics } | { ok: false; error: string }> {
   return unstable_cache(
     () => loadGlampingIndustryMetrics(market, tier),
-    ['glamping-industry-metrics', market, tier, 'open-unit-mix-v2'],
+    ['glamping-industry-metrics', market, tier, 'open-unit-mix-v4-rate-basis'],
     {
       revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
       tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
