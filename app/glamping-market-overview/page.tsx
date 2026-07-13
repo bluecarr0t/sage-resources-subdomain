@@ -244,7 +244,6 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                   Open-unit mix{tier !== 'all' ? ' in this tier' : ''}; unit-weighted ARDR
                   {market === 'ca' ? ' (CAD)' : ''} when published
                   {tier !== 'all' ? '. ~ = small sample; under 5 hidden' : ''}.
-                  Excludes pipeline, cancelled, basic tent, and RV.
                 </p>
                 {result.data.topUnitTypesByUnits.length > 0 ? (
                   <ul className="mt-6 space-y-3 text-sm">

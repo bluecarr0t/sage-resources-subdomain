@@ -13,7 +13,7 @@ import {
 } from '@/lib/fetch-top-glamping-brands';
 /** Fixed columns: rank · brand name · props · units · avg. retail daily rate */
 const BRANDS_TABLE_GRID_CLASS =
-  'grid grid-cols-[1.25rem_minmax(0,1fr)_3.25rem_3.25rem_minmax(5.5rem,auto)] items-baseline gap-x-2';
+  'grid grid-cols-[1.25rem_minmax(0,1fr)_2.75rem_3rem_3.5rem] items-baseline gap-x-3';
 const BRANDS_TABLE_NUMERIC_CLASS = 'text-right tabular-nums';
 
 export const dynamic = 'force-dynamic';
@@ -110,9 +110,9 @@ export default async function BrandOverviewPage() {
               <h2 className="text-[11px] uppercase tracking-widest text-neutral-500">
                 Top brands
               </h2>
-              <p className="mt-2 max-w-md text-[10px] leading-relaxed text-neutral-500">
-                Properties per brand; rollups include sub-brands. ARDR (avg. retail daily rate) is
-                USD where nightly rates are published—not PMS ADR.
+              <p className="mt-2 text-[10px] leading-relaxed text-neutral-500 whitespace-nowrap">
+                Properties per brand; rollups include sub-brands. ARDR (avg. retail daily rate) in USD
+                when published.
               </p>
               {result.data.brands.length > 0 ? (
                 <ul className="mt-6 w-full min-w-0 space-y-4 text-sm">
@@ -124,12 +124,8 @@ export default async function BrandOverviewPage() {
                     <span />
                     <span className={`${BRANDS_TABLE_NUMERIC_CLASS} whitespace-nowrap`}>Props</span>
                     <span className={`${BRANDS_TABLE_NUMERIC_CLASS} whitespace-nowrap`}>Units</span>
-                    <span
-                      className={`${BRANDS_TABLE_NUMERIC_CLASS} whitespace-nowrap text-[9px] leading-tight`}
-                    >
-                      Avg. retail
-                      <br />
-                      daily rate (ARDR)
+                    <span className={`${BRANDS_TABLE_NUMERIC_CLASS} whitespace-nowrap`}>
+                      ARDR
                     </span>
                   </li>
                   {result.data.brands.map((row) => (
