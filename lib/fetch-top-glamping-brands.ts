@@ -1,7 +1,11 @@
 /**
  * Top glamping brands by published property count (portfolio rollup to root brand).
  * Powers `/glamping-market-overview/brands` overview page.
+ *
+ * Cohort: published US/CA Glamping, live/open (`is_open` operating), private/unset land
+ * only — state parks and pipeline (UC / proposed / closed) are excluded.
  */
+import { unstable_cache } from 'next/cache';
 import { createServerClient } from '@/lib/supabase';
 import {
   dedupeRowsToOutpostAnchors,
@@ -12,9 +16,14 @@ import {
   applyGlampingOnlyPropertyTypeFilter,
   isGlampingMarketSnapshotPropertyType,
 } from '@/lib/glamping-market-snapshot-property-type-filter';
+import {
+  GLAMPING_MARKET_OVERVIEW_CACHE_TAGS,
+  GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+} from '@/lib/glamping-market-overview-cache';
+import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 import { applyBrandsPageLandOperatorFilter } from '@/lib/public-map-cohort-filters';
 import { isExcludedLandOperatorForPublicMap } from '@/lib/glamping-land-operator-category';
-import { excludeClosedGlampingRows } from '@/lib/glamping-is-open';
+import { isGlampingOperatingForAnalytics } from '@/lib/glamping-is-open';
 import { isUnitedStatesCountryFilterValue } from '@/lib/admin/glamping-sage-data-list';
 import {
   countryValuesForGlampingMarketSnapshot,
@@ -22,6 +31,7 @@ import {
 } from '@/lib/glamping-market-snapshot-region';
 import { PUBLISHED_RESEARCH_STATUS } from '@/lib/published-property-pages';
 import type { SageProperty } from '@/lib/types/sage';
+import { fetchAllSageDataLastUpdatedAt } from '@/lib/fetch-all-sage-data-last-updated';
 
 const BRANDS_TABLE = 'glamping_brands';
 const PROPERTIES_TABLE = 'all_sage_data';
@@ -144,6 +154,7 @@ type PropertyRow = Pick<
   | 'slug'
   | 'property_name'
   | 'property_type'
+  | 'unit_type'
   | 'city'
   | 'state'
   | 'country'
@@ -299,7 +310,7 @@ async function fetchPublishedBrandedRows(
         supabase
           .from(PROPERTIES_TABLE)
           .select(
-            'id, property_id, slug, property_name, property_type, city, state, country, brand_id, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, land_operator_category, is_open, updated_at, created_at'
+            'id, property_id, slug, property_name, property_type, unit_type, city, state, country, brand_id, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, land_operator_category, is_open, updated_at, created_at'
           )
           .eq('research_status', PUBLISHED_RESEARCH_STATUS)
           .not('brand_id', 'is', null)
@@ -325,13 +336,21 @@ export function aggregateTopGlampingBrands(
   rows: PropertyRow[],
   limit = TOP_GLAMPING_BRANDS_COUNT,
   market: GlampingMarketSnapshotMarket = 'us',
-  minPropertyCount = TOP_BRANDS_MIN_PROPERTY_COUNT
+  minPropertyCount = TOP_BRANDS_MIN_PROPERTY_COUNT,
+  /** Table-wide Last Updated; defaults to max timestamp among ranked rows (tests). */
+  asOfOverride?: string
 ): TopGlampingBrandsOverview {
-  const glampingRows = excludeClosedGlampingRows(rows).filter(
+  // Live/open properties only — exclude pipeline (UC/proposed), temporarily closed, and closed.
+  // State/federal/other public land stays excluded via land_operator_category.
+  // Non-glamping unit SKUs (RV pads, campsites, hotel rooms, suites, etc.) stay
+  // categorized in research data but do not contribute to Brands rankings.
+  const glampingRows = rows.filter(
     (row) =>
+      isGlampingOperatingForAnalytics(row.is_open) &&
       isGlampingMarketSnapshotPropertyType(row.property_type) &&
       propertyMatchesBrandsMarket(row.country, market) &&
-      !isExcludedLandOperatorForPublicMap(row.land_operator_category)
+      !isExcludedLandOperatorForPublicMap(row.land_operator_category) &&
+      !isExcludedGlampingMarketSnapshotUnitType(row.unit_type)
   );
   const byId = new Map(brands.map((b) => [b.id, b]));
   const anchors = dedupeRowsToOutpostAnchors(
@@ -450,7 +469,7 @@ export function aggregateTopGlampingBrands(
     totalBrandedProperties,
     totalBrandedUnits,
     brandsWithPublishedProperties: byBrand.size,
-    asOf: latestTimestamp(glampingRows),
+    asOf: asOfOverride ?? latestTimestamp(glampingRows),
   };
 }
 
@@ -462,17 +481,30 @@ export async function fetchTopGlampingBrands(
   limit = TOP_GLAMPING_BRANDS_COUNT,
   market: GlampingMarketSnapshotMarket = 'us'
 ): Promise<FetchTopGlampingBrandsResult> {
-  try {
-    const [brands, rows] = await Promise.all([
-      fetchAllBrands(),
-      fetchPublishedBrandedRows(market),
-    ]);
-    if (brands.length === 0) {
-      return { ok: false, error: 'Brand registry is unavailable.' };
+  return unstable_cache(
+    async (): Promise<FetchTopGlampingBrandsResult> => {
+      try {
+        const [brands, rows, asOf] = await Promise.all([
+          fetchAllBrands(),
+          fetchPublishedBrandedRows(market),
+          fetchAllSageDataLastUpdatedAt(),
+        ]);
+        if (brands.length === 0) {
+          return { ok: false, error: 'Brand registry is unavailable.' };
+        }
+        return {
+          ok: true,
+          data: aggregateTopGlampingBrands(brands, rows, limit, market, TOP_BRANDS_MIN_PROPERTY_COUNT, asOf),
+        };
+      } catch (err) {
+        console.error('[fetchTopGlampingBrands]', err);
+        return { ok: false, error: 'Unable to load brand rankings.' };
+      }
+    },
+    ['top-glamping-brands', String(limit), market],
+    {
+      revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+      tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
     }
-    return { ok: true, data: aggregateTopGlampingBrands(brands, rows, limit, market) };
-  } catch (err) {
-    console.error('[fetchTopGlampingBrands]', err);
-    return { ok: false, error: 'Unable to load brand rankings.' };
-  }
+  )();
 }

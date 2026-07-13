@@ -39,6 +39,25 @@ describe('glamping-unit-type-classification', () => {
   it('maps hotel-style inventory to RV Resort', () => {
     expect(findGlampingUnitSubtype('Luxury Room')?.subtype.propertyTypes).toEqual(['rvResort']);
     expect(findGlampingUnitSubtype('Villa')?.subtype.propertyTypes).toEqual(['rvResort']);
+    expect(findGlampingUnitSubtype('Hotel Room')?.subtype.propertyTypes).toEqual(['rvResort']);
+    expect(findGlampingUnitSubtype('Suite')?.subtype.propertyTypes).toEqual(['rvResort']);
+  });
+
+  it('marks non-glamping inventory as excluded from the market snapshot', () => {
+    for (const label of [
+      'Tent Site',
+      'Campsite',
+      'RV Site - General',
+      'RV',
+      'Trailer',
+      'Hotel Room',
+      'Suite',
+      'Property buyout',
+    ]) {
+      expect(findGlampingUnitSubtype(label)?.subtype.excludedFromMarketSnapshot).toBe(true);
+    }
+    expect(findGlampingUnitSubtype('Eco-suite')?.subtype.excludedFromMarketSnapshot).toBeFalsy();
+    expect(findGlampingUnitSubtype('Safari Tent')?.subtype.excludedFromMarketSnapshot).toBeFalsy();
   });
 
   it('maps beach house to RV Resort and marina', () => {
@@ -51,6 +70,12 @@ describe('glamping-unit-type-classification', () => {
   it('groups RV pad variants under the RV Site family', () => {
     expect(findGlampingUnitSubtype('RV Site - General')?.family.label).toBe('RV Site');
     expect(findGlampingUnitSubtype('RV Site - Pull thru')?.family.id).toBe('rv-site');
+  });
+
+  it('maps Jupe to Domes & pods family', () => {
+    expect(findGlampingUnitSubtype('Jupe')?.family.id).toBe('domes-pods');
+    expect(findGlampingUnitSubtype('Jupe')?.subtype.propertyTypes).toEqual(['glamping']);
+    expect(findGlampingUnitSubtype('Jupe')?.subtype.inReportPicklist).toBe(true);
   });
 
   it('has a subtype count matching flattened list', () => {

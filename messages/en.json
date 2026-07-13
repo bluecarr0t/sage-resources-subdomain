@@ -1623,6 +1623,7 @@
       "propertyType": {
         "unknown": "Unknown",
         "glamping": "Glamping",
+        "vacationRental": "Vacation Rental",
         "outdoorBoutiqueHotel": "Outdoor Boutique Hotel",
         "outdoorResort": "Outdoor Resort",
         "rvResort": "RV Resort",

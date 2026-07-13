@@ -50,7 +50,7 @@ export function classifySeoPageSection(pathname: string): SeoPageSection {
   return 'other';
 }
 
-/** Secondary slug for landing/guides/glossary/property/brand (undefined when N/A). */
+/** Secondary slug for landing/guides/glossary/property/brand/market overview (undefined when N/A). */
 export function extractSeoContentSlug(pathname: string): string | undefined {
   const path = stripLocaleFromPathname(pathname);
   const patterns: Array<[RegExp, number]> = [
@@ -61,6 +61,7 @@ export function extractSeoContentSlug(pathname: string): string | undefined {
     [/^\/brand\/([^/]+)/, 1],
     [/^\/glamping\/([^/]+)/, 1],
     [/^\/map\/([^/]+)/, 1],
+    [/^\/glamping-market-overview\/([^/]+)/, 1],
   ];
 
   for (const [re, group] of patterns) {

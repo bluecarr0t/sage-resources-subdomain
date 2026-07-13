@@ -7,6 +7,10 @@ import {
   CHAIN_KEY_TO_BRAND_SLUG,
 } from '@/lib/brand-chain-label';
 import {
+  brandSlugFromPropertyUrl,
+  websiteHostFromUrl,
+} from '@/lib/brand-website-host';
+import {
   dedupeRowsToPropertyAnchors,
 } from '@/lib/admin/glamping-list-anchor-key';
 import type { GlampingBrand } from '@/lib/glamping-brands';
@@ -14,6 +18,8 @@ import type { GlampingBrand } from '@/lib/glamping-brands';
 const PROPERTIES_TABLE = 'all_sage_data';
 const BRANDS_TABLE = 'glamping_brands';
 const PAGE_SIZE = 1000;
+
+export type BrandMatchSource = 'name' | 'domain' | 'sibling';
 
 export type BrandAuditPropertyRow = {
   id: number;
@@ -23,6 +29,7 @@ export type BrandAuditPropertyRow = {
   city: string | null;
   state: string | null;
   country: string | null;
+  url: string | null;
   brand_id: string | null;
   research_status: string | null;
   is_open: string | null;
@@ -34,8 +41,16 @@ export type BrandBackfillCandidate = {
   brandSlug: string;
   brandDisplayName: string;
   brandId: string;
+  matchSource: BrandMatchSource;
   unassignedRowCount: number;
   totalAnchorCount: number;
+  samplePropertyNames: string[];
+};
+
+export type UnbrandedMultiUnitChain = {
+  chainKey: string;
+  anchorCount: number;
+  totalUnitRows: number;
   samplePropertyNames: string[];
 };
 
@@ -64,7 +79,12 @@ export type BrandAssignmentAuditReport = {
 
 type BrandRow = Pick<
   GlampingBrand,
-  'id' | 'slug' | 'display_name' | 'legacy_chain_key' | 'parent_brand_id'
+  | 'id'
+  | 'slug'
+  | 'display_name'
+  | 'legacy_chain_key'
+  | 'parent_brand_id'
+  | 'website_url'
 >;
 
 /** Service-role client for audits/CLI (avoids placeholder fallback in createServerClient). */
@@ -86,7 +106,7 @@ async function fetchAllBrands(): Promise<BrandRow[]> {
   const supabase = createBrandAuditSupabaseClient();
   const { data, error } = await supabase
     .from(BRANDS_TABLE)
-    .select('id, slug, display_name, legacy_chain_key, parent_brand_id');
+    .select('id, slug, display_name, legacy_chain_key, parent_brand_id, website_url');
   if (error) throw error;
   return (data ?? []) as BrandRow[];
 }
@@ -102,7 +122,7 @@ export async function fetchPropertiesForBrandAudit(
     let q = supabase
       .from(PROPERTIES_TABLE)
       .select(
-        'id,property_id,slug,property_name,city,state,country,brand_id,research_status,is_open,is_glamping_property'
+        'id,property_id,slug,property_name,city,state,country,url,brand_id,research_status,is_open,is_glamping_property'
       )
       .range(from, from + PAGE_SIZE - 1);
 
@@ -119,6 +139,35 @@ export async function fetchPropertiesForBrandAudit(
   }
 
   return all;
+}
+
+function buildBrandHostIndex(brands: BrandRow[]): Map<string, BrandRow> {
+  const byHost = new Map<string, BrandRow>();
+  for (const b of brands) {
+    const host = websiteHostFromUrl(b.website_url);
+    if (host && !byHost.has(host)) byHost.set(host, b);
+  }
+  return byHost;
+}
+
+export function matchBrandForPropertyUrl(
+  url: string | null | undefined,
+  brandList: BrandRow[],
+  byHost: Map<string, BrandRow>
+): BrandRow | null {
+  const slugGuess = brandSlugFromPropertyUrl(url);
+  if (slugGuess) {
+    const fromSlug = brandList.find((b) => b.slug === slugGuess);
+    if (fromSlug) return fromSlug;
+  }
+  const host = websiteHostFromUrl(url);
+  if (!host) return null;
+  const direct = byHost.get(host);
+  if (direct) return direct;
+  for (const [brandHost, brand] of byHost) {
+    if (host === brandHost || host.endsWith(`.${brandHost}`)) return brand;
+  }
+  return null;
 }
 
 export function matchBrandForChainKey(
@@ -147,6 +196,7 @@ export function buildBrandAssignmentAudit(
   for (const b of brands) {
     if (b.legacy_chain_key) byLegacy.set(b.legacy_chain_key.toLowerCase(), b);
   }
+  const byHost = buildBrandHostIndex(brands);
 
   const anchors = dedupeRowsToPropertyAnchors(
     rows as Array<BrandAuditPropertyRow & Record<string, unknown>>
@@ -176,6 +226,7 @@ export function buildBrandAssignmentAudit(
         brandSlug: matched.slug,
         brandDisplayName: matched.display_name,
         brandId: matched.id,
+        matchSource: 'name',
         unassignedRowCount: withoutBrand,
         totalAnchorCount: properties.length,
         samplePropertyNames: properties
@@ -201,6 +252,34 @@ export function buildBrandAssignmentAudit(
         samplePropertyNames: properties.slice(0, 5).map((p) => p.property_name ?? '(unnamed)'),
       });
     }
+  }
+
+  const byDomain = new Map<string, BrandAuditPropertyRow[]>();
+  for (const r of anchors.filter((p) => !p.brand_id)) {
+    const host = websiteHostFromUrl(r.url);
+    if (!host) continue;
+    const list = byDomain.get(host) ?? [];
+    list.push(r);
+    byDomain.set(host, list);
+  }
+  for (const [host, properties] of byDomain) {
+    const matched = matchBrandForPropertyUrl(`https://${host}`, brands, byHost);
+    if (!matched) continue;
+    if (backfillCandidates.some((c) => c.brandId === matched.id && c.matchSource === 'domain')) {
+      continue;
+    }
+    backfillCandidates.push({
+      chainKey: host,
+      brandSlug: matched.slug,
+      brandDisplayName: matched.display_name,
+      brandId: matched.id,
+      matchSource: 'domain',
+      unassignedRowCount: properties.length,
+      totalAnchorCount: properties.length,
+      samplePropertyNames: properties
+        .slice(0, 5)
+        .map((p) => p.property_name ?? '(unnamed)'),
+    });
   }
 
   backfillCandidates.sort((a, b) => b.unassignedRowCount - a.unassignedRowCount);
@@ -232,60 +311,162 @@ export async function runBrandAssignmentAudit(): Promise<BrandAssignmentAuditRep
 export type ApplyBrandBackfillResult = {
   dryRun: boolean;
   updatedRowCount: number;
-  byBrand: Array<{ brandSlug: string; rowCount: number }>;
+  byBrand: Array<{ brandSlug: string; matchSource: BrandMatchSource; rowCount: number }>;
 };
 
-/** Assign brand_id on published rows inferred from property name. */
+export function resolveBrandForRow(
+  row: BrandAuditPropertyRow,
+  brands: BrandRow[],
+  byLegacy: Map<string, BrandRow>,
+  byHost: Map<string, BrandRow>
+): { brand: BrandRow; matchSource: BrandMatchSource } | null {
+  const ck = chainLabelFromPropertyName(row.property_name);
+  const fromName = ck ? matchBrandForChainKey(ck, brands, byLegacy) : null;
+  if (fromName) return { brand: fromName, matchSource: 'name' };
+
+  const fromDomain = matchBrandForPropertyUrl(row.url, brands, byHost);
+  if (fromDomain) return { brand: fromDomain, matchSource: 'domain' };
+
+  return null;
+}
+
+/** Build sibling brand_id map from property_id groups. */
+export function siblingBrandByPropertyId(
+  rows: BrandAuditPropertyRow[]
+): Map<string, string> {
+  const byPid = new Map<string, BrandAuditPropertyRow[]>();
+  for (const r of rows) {
+    const pid = r.property_id?.trim();
+    if (!pid) continue;
+    const list = byPid.get(pid) ?? [];
+    list.push(r);
+    byPid.set(pid, list);
+  }
+  const result = new Map<string, string>();
+  for (const [, group] of byPid) {
+    const withBrand = group.find((r) => r.brand_id)?.brand_id;
+    if (withBrand) {
+      for (const r of group) {
+        if (!r.brand_id) result.set(String(r.id), withBrand);
+      }
+    }
+  }
+  return result;
+}
+
+export function buildUnbrandedMultiUnitChains(
+  rows: BrandAuditPropertyRow[]
+): UnbrandedMultiUnitChain[] {
+  const unbranded = rows.filter((r) => !r.brand_id);
+  const byChain = new Map<string, BrandAuditPropertyRow[]>();
+  for (const r of unbranded) {
+    const ck =
+      chainLabelFromPropertyName(r.property_name) ||
+      websiteHostFromUrl(r.url) ||
+      'unknown';
+    const list = byChain.get(ck) ?? [];
+    list.push(r);
+    byChain.set(ck, list);
+  }
+
+  const anchors = dedupeRowsToPropertyAnchors(
+    unbranded as Array<BrandAuditPropertyRow & Record<string, unknown>>
+  ) as BrandAuditPropertyRow[];
+
+  const anchorCountByChain = new Map<string, number>();
+  for (const a of anchors) {
+    const ck =
+      chainLabelFromPropertyName(a.property_name) ||
+      websiteHostFromUrl(a.url) ||
+      'unknown';
+    anchorCountByChain.set(ck, (anchorCountByChain.get(ck) ?? 0) + 1);
+  }
+
+  const chains: UnbrandedMultiUnitChain[] = [];
+  for (const [chainKey, group] of byChain) {
+    const anchorCount = anchorCountByChain.get(chainKey) ?? 0;
+    if (group.length < 3 && anchorCount < 2) continue;
+    chains.push({
+      chainKey,
+      anchorCount,
+      totalUnitRows: group.length,
+      samplePropertyNames: group
+        .slice(0, 5)
+        .map((p) => p.property_name ?? '(unnamed)'),
+    });
+  }
+  chains.sort((a, b) => b.totalUnitRows - a.totalUnitRows);
+  return chains;
+}
+
+/** Assign brand_id on published rows via name, domain, and sibling propagation. */
 export async function applyBrandBackfill(options: {
   dryRun?: boolean;
   brandSlugs?: string[];
 }): Promise<ApplyBrandBackfillResult> {
   const dryRun = options.dryRun ?? true;
-  const [brands, rows, audit] = await Promise.all([
+  const [brands, publishedRows, allRowsForSiblings] = await Promise.all([
     fetchAllBrands(),
     fetchPropertiesForBrandAudit('published'),
-    runBrandAssignmentAudit(),
+    fetchPropertiesForBrandAudit('all'),
   ]);
 
   const byLegacy = new Map<string, BrandRow>();
   for (const b of brands) {
     if (b.legacy_chain_key) byLegacy.set(b.legacy_chain_key.toLowerCase(), b);
   }
-
-  const candidates = options.brandSlugs?.length
-    ? audit.backfillCandidates.filter((c) => options.brandSlugs!.includes(c.brandSlug))
-    : audit.backfillCandidates;
+  const byHost = buildBrandHostIndex(brands);
+  const siblingMap = siblingBrandByPropertyId(allRowsForSiblings);
 
   const supabase = createBrandAuditSupabaseClient();
   let updatedRowCount = 0;
   const byBrand: ApplyBrandBackfillResult['byBrand'] = [];
+  const brandCounts = new Map<string, { matchSource: BrandMatchSource; count: number }>();
 
-  for (const candidate of candidates) {
-    const idsToUpdate: number[] = [];
-    for (const r of rows) {
-      if (r.brand_id) continue;
-      const ck = chainLabelFromPropertyName(r.property_name);
-      const matched = matchBrandForChainKey(ck, brands, byLegacy);
-      if (matched?.id !== candidate.brandId) continue;
-      idsToUpdate.push(r.id);
-    }
+  const pending = publishedRows.filter((r) => !r.brand_id);
+  for (const row of pending) {
+    let brandId: string | null = null;
+    let matchSource: BrandMatchSource = 'name';
 
-    if (idsToUpdate.length === 0) continue;
-
-    if (!dryRun) {
-      for (let i = 0; i < idsToUpdate.length; i += 100) {
-        const chunk = idsToUpdate.slice(i, i + 100);
-        const { error } = await supabase
-          .from(PROPERTIES_TABLE)
-          .update({ brand_id: candidate.brandId })
-          .in('id', chunk);
-        if (error) throw error;
+    const resolved = resolveBrandForRow(row, brands, byLegacy, byHost);
+    if (resolved) {
+      brandId = resolved.brand.id;
+      matchSource = resolved.matchSource;
+    } else {
+      const sib = siblingMap.get(String(row.id));
+      if (sib) {
+        brandId = sib;
+        matchSource = 'sibling';
       }
     }
 
-    updatedRowCount += idsToUpdate.length;
-    byBrand.push({ brandSlug: candidate.brandSlug, rowCount: idsToUpdate.length });
+    if (!brandId) continue;
+
+    const brand = brands.find((b) => b.id === brandId);
+    if (!brand) continue;
+    if (options.brandSlugs?.length && !options.brandSlugs.includes(brand.slug)) {
+      continue;
+    }
+
+    if (!dryRun) {
+      const { error } = await supabase
+        .from(PROPERTIES_TABLE)
+        .update({ brand_id: brandId })
+        .eq('id', row.id);
+      if (error) throw error;
+    }
+
+    updatedRowCount += 1;
+    const key = `${brand.slug}:${matchSource}`;
+    const prev = brandCounts.get(key) ?? { matchSource, count: 0 };
+    brandCounts.set(key, { matchSource, count: prev.count + 1 });
   }
+
+  for (const [key, { matchSource, count }] of brandCounts) {
+    const brandSlug = key.split(':')[0]!;
+    byBrand.push({ brandSlug, matchSource, rowCount: count });
+  }
+  byBrand.sort((a, b) => b.rowCount - a.rowCount);
 
   return { dryRun, updatedRowCount, byBrand };
 }

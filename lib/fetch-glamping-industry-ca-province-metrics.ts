@@ -1,6 +1,11 @@
+import { unstable_cache } from 'next/cache';
 import { createServerClient } from '@/lib/supabase';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 import { GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN } from '@/lib/glamping-market-snapshot-region';
+import {
+  GLAMPING_MARKET_OVERVIEW_CACHE_TAGS,
+  GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+} from '@/lib/glamping-market-overview-cache';
 import {
   meanAndMedianAdr,
   propertyLevelAdrValues,
@@ -79,8 +84,8 @@ type Agg = {
 /**
  * Per-province/territory aggregates for published commercial glamping in Canada only.
  */
-export async function fetchGlampingIndustryCaProvinceMetrics(
-  tier: GlampingMarketSnapshotTierFilter = 'all'
+async function loadGlampingIndustryCaProvinceMetrics(
+  tier: GlampingMarketSnapshotTierFilter
 ): Promise<{ ok: true; data: GlampingCaProvinceMetricsMap } | { ok: false; error: string }> {
   const supabase = createServerClient();
   const aggs = new Map<string, Agg>();
@@ -148,4 +153,18 @@ export async function fetchGlampingIndustryCaProvinceMetrics(
   }
 
   return { ok: true, data: out };
+}
+
+/** Cached Canada province aggregates for `/glamping-market-overview`. */
+export async function fetchGlampingIndustryCaProvinceMetrics(
+  tier: GlampingMarketSnapshotTierFilter = 'all'
+): Promise<{ ok: true; data: GlampingCaProvinceMetricsMap } | { ok: false; error: string }> {
+  return unstable_cache(
+    () => loadGlampingIndustryCaProvinceMetrics(tier),
+    ['glamping-industry-ca-province-metrics', tier],
+    {
+      revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+      tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
+    }
+  )();
 }

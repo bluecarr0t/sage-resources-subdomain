@@ -13,7 +13,7 @@ export const GLAMPING_MARKET_OVERVIEW_OG_IMAGE = {
   url: 'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg',
   width: 1200,
   height: 630,
-  alt: 'Glamping market overview — US and Canada private commercial glamping metrics by Sage Outdoor Advisory',
+  alt: 'Glamping market overview: US and Canada private commercial glamping metrics by Sage Outdoor Advisory',
 } as const;
 
 export type GlampingMarketOverviewSeoVariant = 'overview' | 'brands';
@@ -31,8 +31,8 @@ export const GLAMPING_MARKET_OVERVIEW_KEYWORDS = [
   'glamping market overview',
   'glamping market data',
   'glamping industry statistics',
-  'glamping ADR',
-  'average daily rate glamping',
+  'glamping ARDR',
+  'average retail daily rate glamping',
   'glamping supply data',
   'US glamping market',
   'Canada glamping market',
@@ -46,12 +46,12 @@ export const GLAMPING_MARKET_OVERVIEW_FAQS: FAQItem[] = [
   {
     question: 'What is the Sage Glamping Market Overview?',
     answer:
-      'The Glamping Market Overview is Sage Outdoor Advisory’s research dashboard for private commercial glamping in the United States and Canada. It summarizes property counts, unit inventory, average retail daily rates (ADR), top unit types, state and province breakdowns, and an interactive US map. Access is free after a quick email sign-in.',
+      'The Glamping Market Overview is Sage Outdoor Advisory’s research dashboard for private commercial glamping in the United States and Canada. It summarizes property counts, unit inventory, average retail daily rates (ARDR), top unit types, state and province breakdowns, and interactive US and Canada maps. Access is free after a quick email sign-in.',
   },
   {
     question: 'Which properties are included in the glamping market snapshot?',
     answer:
-      'The snapshot includes private commercial operators whose primary product is glamping — safari tents, cabins, tiny homes, domes, yurts, and similar unit types with at least three glamping units. It excludes RV parks, traditional campgrounds, hotels, OTA-only listings, and state or national park campgrounds.',
+      'The snapshot includes private commercial operators whose primary product is glamping: safari tents, cabins, tiny homes, domes, yurts, and similar unit types, as classified in Sage research. It excludes RV parks, traditional campgrounds, hotels, OTA-only listings, and state or national park campgrounds. Newer discovery prefers multi-unit operators when inventory is known; this overview does not enforce a hard unit-count floor.',
   },
   {
     question: 'What glamping metrics can I see after signing in?',
@@ -66,12 +66,12 @@ export const GLAMPING_MARKET_OVERVIEW_FAQS: FAQItem[] = [
   {
     question: 'Who uses Sage glamping market data?',
     answer:
-      'Developers, investors, lenders, brands, and consultants use Sage glamping market intelligence for feasibility studies, appraisals, competitive benchmarking, and site selection. The data supports underwriting assumptions on supply, ADR, and unit mix.',
+      'Developers, investors, lenders, brands, and consultants use Sage glamping market intelligence for feasibility studies, appraisals, competitive benchmarking, and site selection. The data supports underwriting assumptions on supply, avg. retail daily rate (ARDR), and unit mix.',
   },
   {
     question: 'Is the Glamping Market Overview the same as the interactive map?',
     answer:
-      'The public interactive map shows individual glamping properties with filters. The Market Overview aggregates that research into market-level totals, rate benchmarks, and geographic rankings — designed for market sizing rather than property-by-property discovery.',
+      'The public interactive map shows individual glamping properties with filters. The Market Overview aggregates that research into market-level totals, rate benchmarks, and geographic rankings with US state and Canada province maps, designed for market sizing rather than property-by-property discovery.',
   },
 ];
 
@@ -89,7 +89,7 @@ export const GLAMPING_MARKET_BRANDS_FAQS: FAQItem[] = [
   {
     question: 'How do I access the Top Glamping Brands list?',
     answer:
-      'Request access on the Glamping Market Overview with your name and work email. Sage sends a secure magic-link sign-in — no password required. The same login unlocks market totals and the brand rankings.',
+      'Request access on the Glamping Market Overview with your name and work email. Sage sends a secure magic-link sign-in; no password required. The same login unlocks market totals and the brand rankings.',
   },
 ];
 
@@ -108,9 +108,9 @@ export function buildGlampingMarketOverviewMetadata(
   const canonicalUrl = `${GLAMPING_MARKET_OVERVIEW_BASE_URL}${path}`;
 
   if (variant === 'brands') {
-    const title = 'Top Glamping Brands in the US | Rankings & ADR | Sage';
+    const title = 'Top Glamping Brands in the US | Rankings & ARDR | Sage';
     const description =
-      'Rank the largest US glamping brands by property count, glamping units, and average nightly rates. Sage research for developers, investors, and lenders — free access with email sign-in.';
+      'Rank the largest US glamping brands by property count, glamping units, and average retail nightly rates. Sage research for developers, investors, and lenders. Free access with email sign-in.';
     return {
       title,
       description,
@@ -127,7 +127,7 @@ export function buildGlampingMarketOverviewMetadata(
         card: 'summary_large_image',
         title: 'Top Glamping Brands in the US',
         description:
-          'US glamping brand rankings by property count, units, and ADR — Sage Outdoor Advisory market research.',
+          'US glamping brand rankings by property count, units, and avg. retail daily rate (ARDR). Sage Outdoor Advisory market research.',
         images: [GLAMPING_MARKET_OVERVIEW_OG_IMAGE.url],
       },
       alternates: {
@@ -147,9 +147,9 @@ export function buildGlampingMarketOverviewMetadata(
     };
   }
 
-  const title = 'Glamping Market Overview | US & Canada Supply, ADR & Unit Data | Sage';
+  const title = 'Glamping Market Overview | US & Canada Supply, ARDR & Unit Data | Sage';
   const description =
-    'Research-grade glamping market snapshot for the US and Canada: property counts, unit inventory, mean and median ADR, top unit types, and state maps. Private commercial glamping only — free access with email sign-in.';
+    'Research-grade glamping market snapshot for the US and Canada: property counts, unit inventory, mean and median avg. retail daily rate (ARDR), top unit types, and state maps. Private commercial glamping only. Free access with email sign-in.';
   return {
     title,
     description,
@@ -164,9 +164,9 @@ export function buildGlampingMarketOverviewMetadata(
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Glamping Market Overview — US & Canada',
+      title: 'Glamping Market Overview: US & Canada',
       description:
-        'Glamping supply, ADR benchmarks, and geographic rankings from Sage Outdoor Advisory. Sign in free to unlock full metrics.',
+        'Glamping supply, ARDR benchmarks, and geographic rankings from Sage Outdoor Advisory. Sign in free to unlock full metrics.',
       images: [GLAMPING_MARKET_OVERVIEW_OG_IMAGE.url],
     },
     alternates: {
@@ -193,11 +193,11 @@ export function generateGlampingMarketOverviewWebPageSchema(
   const url = `${GLAMPING_MARKET_OVERVIEW_BASE_URL}${path}`;
   const isBrands = variant === 'brands';
   const name = isBrands
-    ? 'Top Glamping Brands — United States Rankings'
-    : 'Glamping Market Overview — US & Canada';
+    ? 'Top Glamping Brands: United States Rankings'
+    : 'Glamping Market Overview: US & Canada';
   const description = isBrands
     ? 'Rankings of the largest United States glamping brands by published property count, glamping units, and average retail nightly rates from Sage Outdoor Advisory research.'
-    : 'Aggregated glamping market metrics for private commercial operators in the United States and Canada, including property counts, unit inventory, ADR benchmarks, and geographic breakdowns.';
+    : 'Aggregated glamping market metrics for private commercial operators in the United States and Canada, including property counts, unit inventory, avg. retail daily rate (ARDR) benchmarks, and geographic breakdowns.';
 
   return {
     '@context': 'https://schema.org',
@@ -254,7 +254,7 @@ export function generateGlampingMarketOverviewDatasetSchema(
       : 'North America Glamping Market Snapshot',
     description: isBrands
       ? 'Ranked list of the largest US glamping operators by published Glamping property count, with unit totals and average retail nightly rates from Sage Outdoor Advisory.'
-      : 'Aggregated counts of private commercial glamping properties and units, retail ADR benchmarks, unit-type mix, and US state / Canadian province breakdowns maintained by Sage Outdoor Advisory.',
+      : 'Aggregated counts of private commercial glamping properties and units, retail ARDR benchmarks, unit-type mix, and US state / Canadian province breakdowns maintained by Sage Outdoor Advisory.',
     keywords: GLAMPING_MARKET_OVERVIEW_KEYWORDS,
     creator: {
       '@type': 'Organization',
@@ -280,7 +280,7 @@ export function generateGlampingMarketOverviewDatasetSchema(
     },
     license: {
       '@type': 'CreativeWork',
-      name: 'All Rights Reserved — Sage Outdoor Advisory',
+      name: 'All Rights Reserved, Sage Outdoor Advisory',
       url: GLAMPING_MARKET_OVERVIEW_BASE_URL,
     },
   };

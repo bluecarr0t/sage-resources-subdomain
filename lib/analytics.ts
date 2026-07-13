@@ -147,7 +147,7 @@ export function trackPageEngagement(timeOnPage: number): void {
  * Track map interactions
  */
 export function trackMapInteraction(
-  action: 'marker_click' | 'filter_change' | 'zoom' | 'pan',
+  action: 'marker_click' | 'filter_change' | 'zoom' | 'pan' | 'region_select',
   details?: Record<string, any>
 ): void {
   trackEvent('map_interaction', {

@@ -1,0 +1,238 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[APPLY] Writing rates to all_sage_data
+
+Phase=intl tier=all allowEstimates=false
+APIs: Firecrawl=yes Tavily=yes OpenAI=yes
+
+Processing 111 missing-ADR rows
+
+[1/111] Treehouse Lodge (null, null) id=68
+   firecrawl → $30 (https://www.treehouselodge.com)
+[2/111] Bukubaki Eco Surf Resort (Peniche, null) id=11136
+   tavily → $151 (https://www.expedia.com/Peniche-Hotels-Bukubaki-Eco-Surf-Resort.h18257338.Hotel-Information)
+[3/111] Douglas Lake Ranch (Douglas Lake, BC) id=11602
+   tavily → $750 (https://www.douglaslake.com/twiggs-rates)
+[4/111] Fronterra Farm (Hillier, ON) id=11614
+   skipped_no_evidence
+[5/111] Oceans Edge Eagle Retreat (Delta, BC) id=11618
+   tavily → $431 (https://www.hipcamp.com/en-CA/land/british-columbia-oceans-edge-eagle-retreat-qeohy0xo)
+[6/111] REO Rafting, Glamping & Yoga Resort (Boston Bar, BC) id=11619
+   tavily → $320 (https://www.instagram.com/reel/C8A_tWxymQ1)
+[7/111] Cultus Lake Glamping (Cultus Lake, BC) id=11620
+   firecrawl → $25 (https://cultuslakeglamping.ca/)
+[8/111] Douglas Lake Ranch (Douglas Lake, BC) id=11777
+   tavily → $280 (https://sun-ski.com/property/the-adaha-cabin-rustic-cozy-at-douglas-lake/HA-3212712259)
+[9/111] Douglas Lake Ranch (Douglas Lake, BC) id=11778
+   tavily → $280 (https://sun-ski.com/property/the-adaha-cabin-rustic-cozy-at-douglas-lake/HA-3212712259)
+[10/111] Douglas Lake Ranch (Douglas Lake, BC) id=11779
+   tavily → $45 (https://www.douglaslake.com/reservations)
+[11/111] Douglas Lake Ranch (Douglas Lake, BC) id=11780
+   tavily → $45 (https://www.douglaslake.com/reservations)
+[12/111] Douglas Lake Ranch (Douglas Lake, BC) id=11781
+   tavily → $25 (https://www.facebook.com/DouglasLakeRanch/posts/planning-a-summer-camping-fishing-trip-and-tired-of-fighting-the-crowds-we-are-e/865300400214285)
+[13/111] Douglas Lake Ranch (Douglas Lake, BC) id=11782
+   tavily → $700 (https://www.douglaslake.com/minnie-rates)
+[14/111] Douglas Lake Ranch (Douglas Lake, BC) id=11783
+   tavily → $700 (https://www.douglaslake.com/minnie-rates)
+[15/111] Douglas Lake Ranch (Douglas Lake, BC) id=11784
+   tavily → $700 (https://www.douglaslake.com/minnie-rates)
+[16/111] Douglas Lake Ranch (Douglas Lake, BC) id=11785
+   tavily → $700 (https://www.douglaslake.com/minnie-rates)
+[17/111] Douglas Lake Ranch (Douglas Lake, BC) id=11786
+   tavily → $700 (https://www.douglaslake.com/minnie-rates)
+[18/111] Douglas Lake Ranch (Douglas Lake, BC) id=11787
+   tavily → $1500 (https://www.douglaslake.com/stoney-rates)
+[19/111] Douglas Lake Ranch (Douglas Lake, BC) id=11788
+   tavily → $1500 (https://www.douglaslake.com/stoney-rates)
+[20/111] Douglas Lake Ranch (Douglas Lake, BC) id=11789
+   tavily → $25 (https://www.facebook.com/DouglasLakeRanch/posts/planning-a-summer-camping-fishing-trip-and-tired-of-fighting-the-crowds-we-are-e/865300400214285)
+[21/111] Douglas Lake Ranch (Douglas Lake, BC) id=11790
+   tavily → $25 (https://www.facebook.com/DouglasLakeRanch/posts/planning-a-summer-camping-fishing-trip-and-tired-of-fighting-the-crowds-we-are-e/865300400214285)
+[22/111] Douglas Lake Ranch (Douglas Lake, BC) id=11791
+   tavily → $25 (https://www.facebook.com/DouglasLakeRanch/posts/planning-a-summer-camping-fishing-trip-and-tired-of-fighting-the-crowds-we-are-e/865300400214285)
+[23/111] Douglas Lake Ranch (Douglas Lake, BC) id=11792
+   tavily → $25 (https://www.facebook.com/DouglasLakeRanch/posts/planning-a-summer-camping-fishing-trip-and-tired-of-fighting-the-crowds-we-are-e/865300400214285)
+[24/111] Douglas Lake Ranch (Douglas Lake, BC) id=11793
+   tavily → $25 (https://www.facebook.com/DouglasLakeRanch/posts/planning-a-summer-camping-fishing-trip-and-tired-of-fighting-the-crowds-we-are-e/865300400214285)
+[25/111] Douglas Lake Ranch (Douglas Lake, BC) id=11794
+   tavily → $2000 (https://www.douglaslake.com/stoney-rates)
+[26/111] Natura Wilderness Resort (Ellershouse, NS) id=11845
+   tavily → $25 (https://naturawilderness.ca/our-tents.html)
+[27/111] Natura Wilderness Resort (Ellershouse, NS) id=11906
+   tavily → $25 (https://naturawilderness.ca/our-tents.html)
+[28/111] Natura Wilderness Resort (Ellershouse, NS) id=11907
+   tavily → $25 (https://naturawilderness.ca/our-tents.html)
+[29/111] Natura Wilderness Resort (Ellershouse, NS) id=11908
+   tavily → $25 (https://naturawilderness.ca/our-tents.html)
+[30/111] Longitude 131° (Yulara, NT) id=12196
+   sibling_copy → $3161
+[31/111] Longitude 131° (Yulara, NT) id=12197
+   tavily → $800 (https://resources.sageoutdooradvisory.com/es/property/longitude-131-uluru-nt-au)
+[32/111] Nayara Tented Camp (La Fortuna, Alajuela) id=12199
+   tavily → $1622 (https://www.travelocity.com/La-Fortuna-Hotels-Nayara-Tented-Camp.h40057347.Hotel-Information)
+[33/111] Nayara Tented Camp (La Fortuna, Alajuela) id=12200
+   tavily → $1622 (https://www.travelocity.com/La-Fortuna-Hotels-Nayara-Tented-Camp.h40057347.Hotel-Information)
+[34/111] Nayara Tented Camp (La Fortuna, Alajuela) id=12201
+   tavily → $1622 (https://www.travelocity.com/La-Fortuna-Hotels-Nayara-Tented-Camp.h40057347.Hotel-Information)
+[35/111] Suján Jawai (Jawai, RJ) id=12202
+   sibling_copy → $1074
+[36/111] Suján Jawai (Jawai, RJ) id=12204
+   firecrawl → $25 (https://thesujanlife.com/sujan-camps/sujan-jawai)
+[37/111] Suján Sher Bagh (Ranthambhore, RJ) id=12206
+   sibling_copy → $734
+[38/111] Suján Sher Bagh (Ranthambhore, RJ) id=12208
+   firecrawl → $20 (https://thesujanlife.com/sujan-camps/sujan-sher-bagh)
+[39/111] The Lodge at Pico Bonito (La Ceiba, null) id=12213
+   tavily → $182 (https://www.expedia.com/La-Ceiba-Hotels-The-Lodge-At-Pico-Bonito.h4596741.Hotel-Information)
+[40/111] Naviva (Punta de Mita, Nayarit) id=12217
+   sibling_copy → $3861
+[41/111] Al Maha (Dubai Desert Conservation Reserve, null) id=12220
+   sibling_copy → $1417
+[42/111] Al Maha (Dubai Desert Conservation Reserve, null) id=12221
+   sibling_copy → $1417
+[43/111] JW Marriott Masai Mara Lodge (Masai Mara, null) id=12227
+   skipped_no_evidence
+[44/111] The Ritz-Carlton, Masai Mara Safari Camp (Masai Mara, null) id=12228
+   skipped_no_evidence
+[45/111] Sal Salis (Exmouth, WA) id=12230
+   sibling_copy → $1755
+[46/111] Sal Salis (Exmouth, WA) id=12231
+   sibling_copy → $1755
+[47/111] Capella Ubud (Ubud, Bali) id=12232
+   sibling_copy → $650
+[48/111] Capella Ubud (Ubud, Bali) id=12233
+   sibling_copy → $650
+[49/111] Capella Ubud (Ubud, Bali) id=12234
+   sibling_copy → $650
+[50/111] Capella Ubud (Ubud, Bali) id=12235
+   sibling_copy → $650
+[51/111] Shinta Mani Wild (Kampong Seila, Koh Kong) id=12245
+   sibling_copy → $1900
+[52/111] Shinta Mani Wild (Kampong Seila, Koh Kong) id=12246
+   sibling_copy → $1900
+[53/111] andBeyond Ngala Tented Camp (Kruger National Park, Mpumalanga) id=12263
+   tavily → $2200 (https://www.internationaltraveller.com/africa/south-africa/ngala-tented-camp)
+[54/111] andBeyond Chobe Under Canvas (Chobe National Park, Chobe) id=12266
+   tavily → $1090 (https://www.chaloafrica.com/accommodation/andbeyond-chobe-canvas-chobe-national-park-botswana)
+[55/111] andBeyond Nxabega Okavango Tented Camp (Okavango Delta, Okavango Delta) id=12267
+   tavily → $1270 (https://www.okavango.com/andbeyond-nxabega-okavango-tented-camp.php)
+[56/111] andBeyond Xaranna Okavango Delta Camp (Okavango Delta, Okavango Delta) id=12268
+   skipped_no_evidence
+[57/111] andBeyond Kichwa Tembo Tented Camp (Masai Mara National Reserve, Masai Mara) id=12269
+   skipped_no_evidence
+[58/111] andBeyond Suyian Lodge (Suyian Conservancy, Laikipia) id=12275
+   tavily → $525 (https://www.travelandleisure.com/andbeyond-suyian-lodge-in-kenya-first-in-hotel-review-11811656)
+[59/111] andBeyond Vira Vira (Pucon, Los Ríos) id=12276
+   tavily → $80 (https://www.hotels.com/ho441501/andbeyond-vira-vira-pucon-chile)
+[60/111] andBeyond Mnemba Island Lodge (Mnemba Island, Zanzibar) id=12278
+   tavily → $744 (https://zanzibar-retreats.com/property/mnemba-island)
+[61/111] Mapito Safari Camp, Serengeti (Serengeti, null) id=12280
+   sibling_copy → $1651
+[62/111] Mapito Safari Camp, Serengeti (Serengeti, null) id=12281
+   tavily → $891 (https://upgradedpoints.com/news/marriott-autograph-collection-mapito-safari-camp)
+[63/111] Bukubaki Eco Surf Resort (Peniche, null) id=12282
+   firecrawl → $99 (https://www.bukubaki.com/alojamentos)
+[64/111] Bukubaki Eco Surf Resort (Peniche, null) id=12283
+   firecrawl → $99 (https://www.bukubaki.com/alojamentos)
+[65/111] Bukubaki Eco Surf Resort (Peniche, null) id=12284
+   firecrawl → $197 (https://www.bukubaki.com/alojamentos)
+[66/111] Bukubaki Eco Surf Resort (Peniche, null) id=12285
+   firecrawl → $161 (https://www.bukubaki.com/alojamentos)
+[67/111] Bukubaki Eco Surf Resort (Peniche, null) id=12286
+   firecrawl → $263 (https://www.bukubaki.com/alojamentos)
+[68/111] Bukubaki Eco Surf Resort (Peniche, null) id=12287
+   firecrawl → $45 (https://www.bukubaki.com/alojamentos)
+[69/111] Bukubaki Eco Surf Resort (Peniche, null) id=12288
+   firecrawl → $145 (https://www.bukubaki.com/alojamentos)
+[70/111] Nightfall Camp (Lamington, QLD) id=12294
+   tavily → $709 (https://www.glamping.com/destination/australia/queensland/lamington-national-park/nightfall-wilderness-camp)
+[71/111] Paperbark Camp (Woollamia, NSW) id=12295
+   tavily → $218 (https://paperbarkcamp.com.au/our-rates)
+[72/111] Tanja Lagoon Camp (Tanja, NSW) id=12296
+   tavily → $330 (https://tanjalagooncamp.com.au/our-tents)
+[73/111] Tathaastu Glamping Resort Mussoorie (Mussoorie, Uttarakhand) id=12299
+   tavily → $262 (https://www.goibibo.com/hotels/tathaastu-glamping-resort-hotel-in-mussoorie-5862990907771086988)
+[74/111] The Bubble Retreat (Monteleone di Spoleto, Umbria) id=12300
+    Firecrawl failed: All scraping engines failed to retrieve content from this URL. Engines tried: [index, fire-engine;chrome-cdp, fire-engine(retry);chrome-cdp, fire-engine;tlsclient, fetch]. This usually happens when: (1) The URL is invalid or the page doesn't exist (404), (2) The website is blocking automated access, (3) The website is down or unreachable, (4) The page requires authentication. Double check the URL is correct and accessible in a browser. If the issue persists, contact us at help@firecrawl.com with your request ID for investigation.
+   tavily → $55 (https://www.expedia.com/Monteleone-Di-Spoleto.dx3000027349)
+[75/111] Wildcoast Adventures (Quathiaski Cove, BC) id=12303
+   tavily → $144 (https://www.expedia.com/Quathiaski-Cove.dx6046691)
+[76/111] The Flow Wilderness Retreat (Surge Narrows, BC) id=12304
+   tavily → $300 (https://www.glamping.com/destination/north-america/british-columbia/surge-narrows/the-flow-wilderness-retreat)
+[77/111] Spirit of the West Adventures (Swanson Island, BC) id=12305
+   firecrawl → $525 (https://www.glamping.com/destination/north-america/british-columbia/swanson-island/spirit-of-the-west-adventures/)
+[78/111] Campamonte (Sayulita, Nayarit) id=12329
+    Firecrawl failed: DNS resolution failed for hostname "www.campamonte.com". This means the domain name could not be translated to an IP address. Possible causes: (1) The domain name is misspelled (check for typos), (2) The domain does not exist or has expired, (3) The DNS servers are temporarily unavailable, or (4) The domain was recently registered and DNS has not propagated yet. Please verify the URL is correct and the website exists.
+   tavily → $304.5 (https://www.hotelscombined.com/Place/Sayulita.htm)
+[79/111] East Coast Glamping (Hammonds Plains, NS) id=12335
+   firecrawl → $180 (https://www.glamping.com/destination/north-america/nova-scotia/hammonds-plains/east-coast-glamping-inc/)
+[80/111] Selina Puerto Escondido (Brisas De Zicatela, Oaxaca) id=12336
+   firecrawl → $50 (https://www.glamping.com/destination/north-america/oaxaca/brisas-de-zicatela/selina-puerto-escondido/)
+[81/111] Finca Las Nieves (Puerto Escondido, Oaxaca) id=12337
+   firecrawl → $250 (https://www.glamping.com/destination/north-america/oaxaca/puerto-escondido/finca-las-nieves/)
+[82/111] Outpost Co. (Temagami, ON) id=12339
+   tavily → $700 (https://www.glamping.com/destination/north-america/ontario/temagami/outpostco)
+[83/111] Hintercabin (La Conception, QC) id=12342
+   firecrawl → $500 (https://www.hintercabin.com/)
+[84/111] Cane Bay Campground (Frederiksted, St. Croix) id=12343
+   firecrawl → $137.5 (https://www.glamping.com/destination/north-america/st-croix/frederiksted/cane-bay-campground/)
+[85/111] Pico Rodavento (Santa Fe, Veracruz) id=12348
+   firecrawl → $150 (https://www.glamping.com/destination/north-america/veracruz/santa-fe/pico-rodavento/)
+[86/111] Eco Itaka Glamping (Playa del Carmen, Quintana Roo) id=12355
+   firecrawl → $65 (https://www.glamping.com/destination/north-america/quintana-roo/playa-del-carmen/eco-itaka-glamping/)
+[87/111] Joy Tulum (Tulum, Quintana Roo) id=12356
+   firecrawl → $60 (https://www.glamping.com/destination/north-america/quintana-roo/tulum/joy-tulum/)
+[88/111] Baja Camp (La Paz, Baja California Sur) id=12357
+   firecrawl → $550 (https://www.glamping.com/destination/north-america/baja-california/la-paz/baja-camp/)
+[89/111] Huttopia Sutton (Sutton, QC) id=12358
+   sibling_copy → $140
+[90/111] Huttopia Sutton (Sutton, QC) id=12359
+   sibling_copy → $140
+[91/111] Huttopia Sutton (Sutton, QC) id=12360
+   sibling_copy → $140
+[92/111] Huttopia Sutton (Sutton, QC) id=12361
+   sibling_copy → $140
+[93/111] Huttopia Les Deux Lacs – Laurentides (Lac-Supérieur, QC) id=12362
+   tavily → $87 (https://www.bonjourquebec.com/en-us/listing/accommodation/huttopia-les-deux-lacs-laurentides/02jl)
+[94/111] Huttopia Les Deux Lacs – Laurentides (Lac-Supérieur, QC) id=12363
+   tavily → $87 (https://www.travelandleisure.com/huttopia-les-deux-lacs-in-quebec-canada-hotel-review-11949617)
+[95/111] Huttopia Les Deux Lacs – Laurentides (Lac-Supérieur, QC) id=12364
+   tavily → $87 (https://www.bonjourquebec.com/en-us/listing/accommodation/huttopia-les-deux-lacs-laurentides/02jl)
+[96/111] Sundance by Basecamp (Kananaskis, AB) id=12365
+   tavily → $182.5 (https://www.hotels.com/ho2944890368/sundance-by-basecamp-dixcove-ghana)
+[97/111] Sundance by Basecamp (Kananaskis, AB) id=12366
+   sibling_copy → $230
+[98/111] Sundance by Basecamp (Kananaskis, AB) id=12367
+   tavily → $182.5 (https://www.hotels.com/ho2944890368/sundance-by-basecamp-dixcove-ghana)
+[99/111] Sundance by Basecamp (Kananaskis, AB) id=12368
+   sibling_copy → $230
+[100/111] Sundance by Basecamp (Kananaskis, AB) id=12369
+   tavily → $140 (https://www.expedia.com/Kananaskis-Hotels-Sundance-By-Basecamp.h91996574.Hotel-Information)
+[101/111] Sundance by Basecamp (Kananaskis, AB) id=12370
+   tavily → $123 (https://www.expedia.com/Kananaskis-Hotels-Sundance-By-Basecamp.h91996574.Hotel-Information)
+[102/111] Charmed Resorts — Crowsnest Pass (Blairmore, AB) id=12371
+   skipped_no_evidence
+[103/111] Charmed Resorts — Crowsnest Pass (Blairmore, AB) id=12372
+   skipped_no_evidence
+[104/111] Charmed Resorts — Crowsnest Pass (Blairmore, AB) id=12373
+   skipped_no_evidence
+[105/111] Charmed Resorts — Crowsnest Pass (Blairmore, AB) id=12374
+   skipped_no_evidence
+[106/111] Charmed Resorts — Crowsnest Pass (Blairmore, AB) id=12375
+   skipped_no_evidence
+[107/111] Charmed Resorts — Crowsnest Pass (Blairmore, AB) id=11444
+   tavily → $100 (https://www.tripadvisor.com/Hotel_Review-g1087598-d24874409-Reviews-Charmed_Resorts-Blairmore_Crowsnest_Pass_Alberta.html)
+[108/111] Charmed Resorts — Mulhurst Bay (Mulhurst Bay, AB) id=11445
+   tavily → $250 (https://www.facebook.com/groups/albertacampingwithkids/posts/780418280914956)
+[109/111] Cathedral Lakes Lodge (Slocan Park, BC) id=11621
+   tavily → $320 (https://www.cathedrallakes.ca/accommodation)
+[110/111] Eco Retreat Konark (Konark, Odisha) id=12297
+   skipped_no_evidence
+[111/111] Eco Retreat Daringbadi (Daringbadi, Odisha) id=12298
+   skipped_no_evidence
+
+=== SUMMARY ===
+Updated: 99
+Skipped (manual queue): 12
+Wrote /Users/nickharsell/Documents/sage-resources-subdomain/scripts/output/missing-published-adr-results.csv
+Wrote /Users/nickharsell/Documents/sage-resources-subdomain/scripts/output/missing-published-adr-manual-queue.csv

@@ -1,0 +1,29 @@
+id,property_name,site_name,unit_type,city,state,country,url,brand_id,land_operator_category,has_url,sibling_has_rate,is_us
+33,River's Edge Treehouse Resort,,Treehouse,Robbinsville,NC,United States,https://www.riversedgetreehouses.com,,private_commercial,true,false,true
+11517,Timberline Glamping at Sebastian Inlet,Deluxe Safari Tent,Safari Tent,Melbourne Beach,FL,United States,https://sebastian.tlglamping.com/,bd816ced-2d68-4070-9b96-3864e0cf1cef,state_park,true,true,true
+11518,Timberline Glamping at Sebastian Inlet,Double Safari Tent,Safari Tent,Melbourne Beach,FL,United States,https://sebastian.tlglamping.com/,bd816ced-2d68-4070-9b96-3864e0cf1cef,state_park,true,true,true
+11526,Timberline Glamping at Jupiter,Deluxe Safari Tent,Safari Tent,Jupiter,FL,United States,https://jupiter.tlglamping.com/,bd816ced-2d68-4070-9b96-3864e0cf1cef,state_park,true,false,true
+11527,Timberline Glamping at Jupiter,Double Safari Tent,Safari Tent,Jupiter,FL,United States,https://jupiter.tlglamping.com/,bd816ced-2d68-4070-9b96-3864e0cf1cef,state_park,true,false,true
+11528,Timberline Glamping at Jupiter,Standard Safari Tent,Safari Tent,Jupiter,FL,United States,https://jupiter.tlglamping.com/,bd816ced-2d68-4070-9b96-3864e0cf1cef,state_park,true,false,true
+11532,Timberline Glamping at Williamsburg,Deluxe Safari Tent,Safari Tent,Williamsburg,VA,United States,https://williamsburg.tlglamping.com/,bd816ced-2d68-4070-9b96-3864e0cf1cef,,true,false,true
+11533,Timberline Glamping at Williamsburg,Double Safari Tent,Safari Tent,Williamsburg,VA,United States,https://williamsburg.tlglamping.com/,bd816ced-2d68-4070-9b96-3864e0cf1cef,,true,false,true
+11534,Timberline Glamping at Williamsburg,Standard Safari Tent,Safari Tent,Williamsburg,VA,United States,https://williamsburg.tlglamping.com/,bd816ced-2d68-4070-9b96-3864e0cf1cef,,true,false,true
+11591,Boonies Farm,,Dome,Worden,IL,United States,https://www.booniesfarm.com/,,private_commercial,true,false,true
+11614,Fronterra Farm,,,Hillier,ON,Canada,https://fronterra.ca/,,private_commercial,true,false,false
+11622,Sou'wester Lodge,Sou'wester Lodge,,Seaview,WA,United States,https://souwesterlodge.com/,,private_commercial,true,false,true
+11728,Tawas Point State Park,Tawas Point State Park,,East Tawas,MI,United States,https://www2.dnr.state.mi.us/parksandtrails/details.aspx?id=509&type=SFPG,,state_park,true,false,true
+11744,Bliss Camps Glamping (Rocky Mountain Glamping),Sapphira Vardo Glamping,Vardo,Lyons,CO,United States,https://blisscamps.com/,1eace407-b9a5-4940-947d-1022947a47c6,,true,false,true
+11745,Bliss Camps Glamping (Rocky Mountain Glamping),Shimza Vardo Glamping,Vardo,Lyons,CO,United States,https://blisscamps.com/,1eace407-b9a5-4940-947d-1022947a47c6,,true,false,true
+11747,Bliss Camps Glamping (Rocky Mountain Glamping),Bliss Camp Event Venue in Paradise,Property buyout,Lyons,CO,United States,https://blisscamps.com/,1eace407-b9a5-4940-947d-1022947a47c6,,true,false,true
+12227,JW Marriott Masai Mara Lodge,,Safari Tent,Masai Mara,,Kenya,https://www.marriott.com/en-us/hotels/nbomj-jw-marriott-masai-mara-lodge/overview/,7a2fc1e3-8272-4cd0-8427-1c90a038dab3,private_commercial,true,false,false
+12228,"The Ritz-Carlton, Masai Mara Safari Camp",,Safari Tent,Masai Mara,,Kenya,https://www.ritzcarlton.com/hotels/nbomr-the-ritz-carlton-masai-mara-safari-camp/overview/,7a2fc1e3-8272-4cd0-8427-1c90a038dab3,private_commercial,true,false,false
+12268,andBeyond Xaranna Okavango Delta Camp,,Safari Tent,Okavango Delta,Okavango Delta,Botswana,https://www.andbeyond.com/our-lodges/africa/botswana/okavango-delta/andbeyond-xaranna-okavango-delta-camp/,554ed463-5cae-4389-b5a8-a9b1a718d9da,private_commercial,true,false,false
+12269,andBeyond Kichwa Tembo Tented Camp,,Safari Tent,Masai Mara National Reserve,Masai Mara,Kenya,https://www.andbeyond.com/our-lodges/africa/kenya/masai-mara-national-park/andbeyond-kichwa-tembo-tented-camp/,554ed463-5cae-4389-b5a8-a9b1a718d9da,private_commercial,true,false,false
+12289,Dunya Camp,,Yurt,Summerville,GA,United States,https://dunyacamp.com/,,private_commercial,true,false,true
+12297,Eco Retreat Konark,,Safari Tent,Konark,Odisha,India,https://ecoretreat.odishatourism.gov.in/,11b71b26-7e8e-4be7-bdae-0cb7c423be24,other_public,true,false,false
+12298,Eco Retreat Daringbadi,,Safari Tent,Daringbadi,Odisha,India,https://ecoretreat.odishatourism.gov.in/,11b71b26-7e8e-4be7-bdae-0cb7c423be24,other_public,true,false,false
+12371,Charmed Resorts — Crowsnest Pass,Snow White's Cottage,Cottage,Blairmore,AB,Canada,https://charmedresorts.ca/locations/crowsnest-pass,99cbb5e2-80f2-4a23-8b35-3d516b039c30,private_commercial,true,false,false
+12372,Charmed Resorts — Crowsnest Pass,Cinderella's Cottage,Cottage,Blairmore,AB,Canada,https://charmedresorts.ca/locations/crowsnest-pass,99cbb5e2-80f2-4a23-8b35-3d516b039c30,private_commercial,true,false,false
+12373,Charmed Resorts — Crowsnest Pass,Rapunzel's Cottage,Cottage,Blairmore,AB,Canada,https://charmedresorts.ca/locations/crowsnest-pass,99cbb5e2-80f2-4a23-8b35-3d516b039c30,private_commercial,true,false,false
+12374,Charmed Resorts — Crowsnest Pass,Gingerbread Cottage,Cottage,Blairmore,AB,Canada,https://charmedresorts.ca/locations/crowsnest-pass,99cbb5e2-80f2-4a23-8b35-3d516b039c30,private_commercial,true,false,false
+12375,Charmed Resorts — Crowsnest Pass,Hobbit Hole,Cottage,Blairmore,AB,Canada,https://charmedresorts.ca/locations/crowsnest-pass,99cbb5e2-80f2-4a23-8b35-3d516b039c30,private_commercial,true,false,false

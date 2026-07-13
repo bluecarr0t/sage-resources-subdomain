@@ -33,14 +33,14 @@ export function GlampingMarketOverviewPublicSeo({ variant = 'overview' }: Props)
           id="glamping-market-public-seo-heading"
           className="mt-3 font-[Georgia] text-2xl font-medium tracking-tight text-neutral-900 sm:text-3xl"
         >
-          {isBrands ? 'Top glamping brands in the United States' : 'Glamping market overview — US & Canada'}
+          {isBrands ? 'Top glamping brands in the United States' : 'Glamping market overview: US & Canada'}
         </h1>
         <p className="speakable-answer mt-4 max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base">
           {isBrands ? (
             <>
               Compare the largest multi-property glamping operators in the United States by published
               location count, glamping units, and average retail nightly rates. Rankings use Sage
-              research on private commercial glamping — the same database that powers our{' '}
+              research on private commercial glamping, the same database that powers our{' '}
               <Link href="/en/map" className={EDITORIAL_LINK_CLASS}>
                 interactive property map
               </Link>
@@ -49,14 +49,14 @@ export function GlampingMarketOverviewPublicSeo({ variant = 'overview' }: Props)
           ) : (
             <>
               Benchmark private commercial glamping supply, unit inventory, and average retail daily
-              rates (ADR) across the United States and Canada. Sage aggregates published research into
-              property totals, unit-type mix, state and province rankings, and an interactive US map —
-              scoped to {GLAMPING_MARKET_SCOPE_SHORT_LABEL.toLowerCase()} operators only.
+              rates (ARDR) across the United States and Canada. Sage aggregates published research into
+              property totals, unit-type mix, state and province rankings, and interactive US and
+              Canada maps, scoped to {GLAMPING_MARKET_SCOPE_SHORT_LABEL.toLowerCase()} operators only.
             </>
           )}
         </p>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-600">
-          Full metrics unlock after a free email sign-in. No password — we send a secure magic link to
+          Full metrics unlock after a free email sign-in. No password; we send a secure magic link to
           your inbox.
         </p>
 

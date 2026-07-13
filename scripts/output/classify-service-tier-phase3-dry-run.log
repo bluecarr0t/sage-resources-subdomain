@@ -1,0 +1,74 @@
+[dotenv@17.2.3] injecting env (0) from .env.local -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+Glamping service tier classifier (dry-run)
+
+Loaded 2610 site rows (published + in_progress, is_glamping_property = Yes)
+
+  The Yurt Village at Frost Mountain: midscale → rustic [ADR $148.5 < $150 with shared bath (score -2)] (1 rows)
+  Silver Bullet Retreats: midscale → rustic [ADR $132.63 < $150 with shared bath (score -2)] (1 rows)
+  Echo Canyon Campground: midscale → rustic [ADR $141.25 < $150 with shared bath (score -2)] (1 rows)
+  Gunnison Glamping Wagons: midscale → rustic [ADR $140 < $150 with shared bath (score -2)] (1 rows)
+  Glacier View Adventures: midscale → rustic [ADR $141.25 < $150 with shared bath (score -2)] (1 rows)
+  Doe Bay Resort & Retreat: midscale → rustic [ADR $147.5 < $150 with shared bath (score 0)] (1 rows)
+  River Dance Lodge: midscale → rustic [ADR $135 < $150 with shared bath (score -2)] (1 rows)
+  Huckleberry Tent & Breakfast: midscale → rustic [ADR $141.25 < $150 with shared bath (score -2)] (1 rows)
+  Downata Hot Springs: midscale → rustic [ADR $147.5 < $150 with shared bath (score 0)] (1 rows)
+  Norwegian Wood Ranch: midscale → rustic [ADR $140 < $150 with shared bath (score -2)] (1 rows)
+  Paddler's Village: midscale → rustic [ADR $142.5 < $150 with shared bath (score -2)] (3 rows)
+  Arcady Ridge Ranch: midscale → rustic [ADR $135 < $150 with shared bath (score 0)] (1 rows)
+  Arizona Nordic Village: midscale → rustic [ADR $126.25 < $150 with shared bath (score -2)] (1 rows)
+  Lake Cumberland Glamping: midscale → rustic [ADR $141.25 < $150 with shared bath (score -2)] (1 rows)
+  Wolfe's Neck Oceanfront Camping & Glamping: midscale → rustic [ADR $135 < $150 with shared bath (score -2)] (1 rows)
+  Hub North: midscale → rustic [ADR $130 < $150 with shared bath (score -2)] (2 rows)
+  Mariaville Goat Farm: midscale → rustic [ADR $147.67 < $150 with shared bath (score 0)] (2 rows)
+  Gorgeous Stays: midscale → rustic [ADR $133.33 < $150 with shared bath (score 0)] (3 rows)
+  Tobacco River Ranch Glamping: midscale → rustic [ADR $139 < $150 with shared bath (score -2)] (3 rows)
+  Cozy Heron Glamping: midscale → rustic [ADR $139 < $150 with shared bath (score -2)] (1 rows)
+  Son's Guadalupe: midscale → rustic [ADR $141.25 < $150 with shared bath (score -2)] (1 rows)
+  Wander Camp Bryce Canyon: midscale → rustic [ADR $142.83 < $150 with shared bath (score 0)] (4 rows)
+  Adventure Domes: midscale → rustic [ADR $126 < $150 with shared bath (score -2)] (1 rows)
+  Wolf Den Nature Retreat Hostel & Cabins: midscale → rustic [ADR $125 < $150 with shared bath (score -2)] (1 rows)
+  Camp Rockaway: midscale → rustic [ADR $142.5 < $150 with shared bath (score -2)] (1 rows)
+  Huttopia Les Deux Lacs – Laurentides: midscale → rustic [ADR $147.5 < $150 with shared bath (score -2)] (4 rows)
+  Glamping at Camping Siësta: midscale → rustic [ADR $128.75 < $150 with shared bath (score 0)] (1 rows)
+  Camping Les Murets: midscale → rustic [ADR $126.25 < $150 with shared bath (score -2)] (1 rows)
+  Camping am Bauernhof: midscale → rustic [ADR $147.5 < $150 with shared bath (score 0)] (1 rows)
+  Agricampeggio Terra di Fuoco: midscale → rustic [ADR $126.25 < $150 with shared bath (score 0)] (1 rows)
+  Vlotkamp: midscale → rustic [ADR $147.5 < $150 with shared bath (score 0)] (1 rows)
+  Camping Arolla: midscale → rustic [ADR $137.5 < $150 with shared bath (score 0)] (1 rows)
+  The Treehouse Camp at Maple Tree Campground: midscale → rustic [ADR $126.25 < $150 with shared bath (score -2)] (1 rows)
+  Somerset Resort: midscale → rustic [ADR $127.38 < $150 with shared bath (score -2)] (1 rows)
+  Sou'wester Lodge: midscale → rustic [ADR $127.38 < $150 with shared bath (score 0)] (1 rows)
+  Cross Ranch State Park (Yurts): midscale → rustic [ADR $143 < $150 with shared bath (score -2)] (1 rows)
+  Table Rock State Park: midscale → rustic [ADR $132.63 < $150 with shared bath (score -2)] (1 rows)
+  White Pines Forest State Park: midscale → rustic [ADR $148.5 < $150 with shared bath (score -2)] (1 rows)
+  Ouachita Wilde: midscale → rustic [ADR $145 < $150 with shared bath (score -1)] (3 rows)
+  Sorensen's Resort: midscale → rustic [ADR $132.63 < $150 with shared bath (score -2)] (1 rows)
+  Nantahala Cabins Inc: midscale → rustic [ADR $127.38 < $150 with shared bath (score -2)] (1 rows)
+  Oceanside Beachfront RV Resort: midscale → rustic [ADR $126.38 < $150 with shared bath (score -2)] (1 rows)
+  Shelter Cove Resort & Marina: midscale → rustic [ADR $132.63 < $150 with shared bath (score -2)] (1 rows)
+  Cane Bay Campground: midscale → rustic [ADR $146.25 < $150 with shared bath (score -2)] (1 rows)
+  Country Woods Inn: midscale → rustic [ADR $132.63 < $150 with shared bath (score -2)] (1 rows)
+  Ponderosa Pines Resort: (null) → rustic [default rustic (amenity score -2)] (3 rows)
+  Camp Yellow Cardinal: (null) → rustic [default rustic (amenity score -2)] (1 rows)
+  Hidden Beach RV Resort: (null) → rustic [default rustic (amenity score -2)] (2 rows)
+  Bent Ridge Winery Glamping: (null) → rustic [default rustic (amenity score -2)] (1 rows)
+  Garden Bay Hideaway: (null) → rustic [default rustic (amenity score -2)] (2 rows)
+  Domaine des Constellations: (null) → rustic [default rustic (amenity score -2)] (2 rows)
+  Les Dômes du Parc: (null) → rustic [default rustic (amenity score -2)] (1 rows)
+  Ofland Hotel: (null) → rustic [default rustic (amenity score -2)] (1 rows)
+  Historic Two Guns Resort: (null) → rustic [default rustic (amenity score -2)] (1 rows)
+  Yosemite Under Canvas: (null) → rustic [default rustic (amenity score -2)] (1 rows)
+  Terra Vi Lodge: (null) → rustic [default rustic (amenity score -2)] (1 rows)
+
+--- Summary ---
+Properties (groups): 1514
+Skipped (manual override): 140
+Unchanged: 1318
+Would change / changed groups: 56
+
+Tier distribution (auto-classified groups):
+  luxury: 54
+  upscale: 130
+  midscale: 818
+  rustic: 372

@@ -1,30 +1,33 @@
-import type { ReactNode } from 'react';
 import { GlampingMarketAccessGate } from '@/components/glamping-industry/GlampingMarketAccessGate';
+import { GlampingMarketOverviewLockedPreview } from '@/components/glamping-industry/GlampingMarketOverviewLockedPreview';
 import { GlampingMarketOverviewPublicSeo } from '@/components/glamping-industry/GlampingMarketOverviewPublicSeo';
 import { GATED_PAGE_GLAMPING_MARKET_OVERVIEW } from '@/lib/gated-access';
 import type { GlampingMarketOverviewSeoVariant } from '@/lib/glamping-market-overview-seo';
 
 /**
- * Renders crawlable public SEO copy, the real page underneath a moderate blur, and the access modal.
- * Metrics in the blurred layer are preview-only; interaction stays blocked until unlock.
+ * Locked experience: crawlable SEO (visually hidden; single document H1),
+ * a decorative blurred stand-in (no live metrics / no second H1), and the
+ * access modal. Real page content renders only after unlock in the layout.
  */
 export function GlampingMarketOverviewGatedShell({
-  children,
   pageSlug = GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   seoVariant = 'overview',
 }: {
-  children: ReactNode;
   pageSlug?: string;
   seoVariant?: GlampingMarketOverviewSeoVariant;
 }) {
   return (
-    <div className="relative min-h-screen">
-      <GlampingMarketOverviewPublicSeo variant={seoVariant} />
+    <div className="relative min-h-screen overflow-hidden bg-[#faf9f3]">
+      <div className="sr-only">
+        <GlampingMarketOverviewPublicSeo variant={seoVariant} />
+      </div>
       <div
-        className="pointer-events-none select-none blur-[8px] brightness-[0.97] contrast-[0.96]"
+        className="pointer-events-none fixed inset-0 select-none overflow-hidden"
         aria-hidden
       >
-        {children}
+        <div className="h-full min-h-screen w-full origin-top scale-105 blur-[8px] brightness-[0.98] contrast-[0.9] saturate-[0.8]">
+          <GlampingMarketOverviewLockedPreview variant={seoVariant} />
+        </div>
       </div>
       <GlampingMarketAccessGate pageSlug={pageSlug} />
     </div>

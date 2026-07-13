@@ -1,86 +1,175 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
+import { trackMapInteraction } from '@/lib/analytics';
 import type { GlampingCaProvinceMetricsMap } from '@/lib/fetch-glamping-industry-ca-province-metrics';
-import { CA_PROVINCE_DISPLAY_NAME } from '@/lib/normalize-ca-province-key';
+import { formatGlampingMarketOverviewRate } from '@/lib/glamping-market-overview-currency';
+import {
+  CA_PROVINCE_DISPLAY_NAME,
+  normalizeCaProvinceToCode,
+} from '@/lib/normalize-ca-province-key';
+
+/** Provinces & territories GeoJSON (Click That Hood / Code for America). */
+const CANADA_PROVINCES_GEO_URL =
+  'https://cdn.jsdelivr.net/gh/codeforamerica/click_that_hood@master/public/data/canada.geojson';
+
+/** Matches US map palette in GlampingIndustryUsMap. */
+const SAGE_MAP = {
+  fill: '#f6f7f6',
+  fillHover: '#e3e7e3',
+  fillSelected: '#c7d2c7',
+  stroke: '#334033',
+} as const;
+
+const MAP_W = 900;
+/** Taller than 16:9 so Albers Canada can grow until width and height both fill. */
+const MAP_H = 771;
+
+/**
+ * Albers params from d3 `fitExtent` for canada.geojson at MAP_W×MAP_H with an
+ * 8px inset (aspect matched to the geography so scale is maximized). 
+ * react-simple-maps always translates to [width/2, height/2], so we apply
+ * FIT_TRANSLATE_NUDGE inside the SVG to match the fitExtent translate.
+ */
+const CANADA_PROJECTION = {
+  rotate: [96, 0, 0] as [number, number, number],
+  center: [-0.6, 38.7] as [number, number],
+  parallels: [49, 77] as [number, number],
+  scale: 1049.307,
+};
+
+/** fitExtent translate [376.89, 838.99] − RSM default [MAP_W/2, MAP_H/2] */
+const FIT_TRANSLATE_NUDGE = {
+  x: 376.89 - MAP_W / 2,
+  y: 838.99 - MAP_H / 2,
+} as const;
+
+/** Default highlight: British Columbia (largest published cohort in recent snapshots). */
+const DEFAULT_SELECTED_PROVINCE = 'BC';
 
 function formatInt(n: number): string {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);
 }
 
-function formatUsd(n: number | null): string {
-  if (n == null) return '—';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(n);
+function provinceLabel(code: string): string {
+  return CA_PROVINCE_DISPLAY_NAME[code] ?? code;
+}
+
+function provinceCodeFromGeo(geo: { properties?: { name?: string } }): string | null {
+  return normalizeCaProvinceToCode(geo.properties?.name);
+}
+
+function styleForProvince(code: string, selected: string | null) {
+  const isSel = selected === code;
+  const fill = isSel ? SAGE_MAP.fillSelected : SAGE_MAP.fill;
+  const fillHover = isSel ? SAGE_MAP.fillSelected : SAGE_MAP.fillHover;
+  return {
+    default: {
+      fill,
+      stroke: SAGE_MAP.stroke,
+      strokeWidth: 0.4,
+      outline: 'none' as const,
+      cursor: 'pointer' as const,
+    },
+    hover: {
+      fill: fillHover,
+      stroke: SAGE_MAP.stroke,
+      strokeWidth: 0.75,
+      outline: 'none' as const,
+      cursor: 'pointer' as const,
+    },
+    pressed: {
+      fill: SAGE_MAP.fillSelected,
+      stroke: SAGE_MAP.stroke,
+      strokeWidth: 0.75,
+      outline: 'none' as const,
+      cursor: 'pointer' as const,
+    },
+  };
 }
 
 type Props = { byProvince: GlampingCaProvinceMetricsMap };
 
 export default function GlampingIndustryCanadaProvinces({ byProvince }: Props) {
-  const [selected, setSelected] = useState<string | null>(null);
-
-  const sorted = useMemo(() => {
-    return Object.entries(byProvince)
-      .map(([code, m]) => ({
-        code,
-        name: CA_PROVINCE_DISPLAY_NAME[code] ?? code,
-        ...m,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [byProvince]);
+  const [selected, setSelected] = useState<string | null>(
+    byProvince[DEFAULT_SELECTED_PROVINCE] ? DEFAULT_SELECTED_PROVINCE : null
+  );
 
   const row = selected ? byProvince[selected] : undefined;
 
   const onSelect = useCallback((code: string) => {
-    setSelected((prev) => (prev === code ? null : code));
+    setSelected((prev) => {
+      const next = prev === code ? null : code;
+      trackMapInteraction('region_select', {
+        map: 'glamping_market_overview_ca',
+        region: code,
+        selected: next != null,
+      });
+      return next;
+    });
   }, []);
 
   return (
-    <div className="relative mt-10 space-y-12 lg:space-y-0 lg:pr-[calc(220px+3rem)]">
-      <div className="min-w-0">
+    <div className="relative mt-16 space-y-12 sm:mt-20 sm:space-y-0 lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start lg:gap-x-12">
+      <div className="relative min-w-0">
         <div className="mb-4 space-y-1 text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-          <p>Canada · provinces & territories</p>
-          <p className="font-light normal-case tracking-normal text-neutral-500">
-            Select a region for property count, unit count, and average retail daily rate.
+          <p>Canada map · click a province or territory</p>
+          <p className="text-[9px] font-light normal-case tracking-normal text-neutral-500">
+            Rates shown in CAD as published by operators
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {sorted.map(({ code, name }) => {
-            const isSel = selected === code;
-            return (
-              <button
-                key={code}
-                type="button"
-                onClick={() => onSelect(code)}
-                className={`border px-2 py-2.5 text-left text-xs font-light transition-colors ${
-                  isSel
-                    ? 'border-sage-teal-text bg-sage-100 text-neutral-900'
-                    : 'border-sage-200 bg-white text-neutral-700 hover:border-sage-400'
-                }`}
-              >
-                <span className="block leading-snug">{name}</span>
-                <span className="mt-1 block tabular-nums text-[11px] text-neutral-500">
-                  {formatInt(byProvince[code]?.propertyCount ?? 0)} properties
-                </span>
-              </button>
-            );
-          })}
+        <div className="relative w-full">
+          <ComposableMap
+            projection="geoAlbers"
+            projectionConfig={CANADA_PROJECTION}
+            width={MAP_W}
+            height={MAP_H}
+            className="h-auto w-full max-w-full [&_.rsm-geography]:outline-none"
+          >
+            <g transform={`translate(${FIT_TRANSLATE_NUDGE.x} ${FIT_TRANSLATE_NUDGE.y})`}>
+              <Geographies geography={CANADA_PROVINCES_GEO_URL}>
+                {({ geographies }) => (
+                  <>
+                    {geographies.map((geo) => {
+                      const code = provinceCodeFromGeo(geo);
+                      if (!code) return null;
+                      return (
+                        <Geography
+                          key={geo.rsmKey}
+                          geography={geo}
+                          style={styleForProvince(code, selected)}
+                          onClick={() => onSelect(code)}
+                          tabIndex={0}
+                          aria-label={provinceLabel(code)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onSelect(code);
+                            }
+                          }}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+              </Geographies>
+            </g>
+          </ComposableMap>
         </div>
       </div>
 
-      <aside className="border-t border-sage-200 pt-6 lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:flex lg:min-h-0 lg:w-[220px] lg:flex-col lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
-        <div className="min-h-0 flex-1 overflow-y-auto lg:min-h-0">
+      <aside className="border-t border-sage-200 pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+        <div>
           {!selected ? (
-            <p className="text-xs font-light leading-relaxed text-neutral-600">
-              Choose a province or territory from the grid for detailed metrics.
+            <p className="text-sm font-light leading-relaxed text-neutral-600">
+              Select a province or territory on the map for property count, unit count, and average
+              retail daily rate.
             </p>
           ) : (
             <div className="space-y-6">
               <h2 className="text-[11px] font-medium uppercase tracking-widest text-neutral-500">
-                {CA_PROVINCE_DISPLAY_NAME[selected] ?? selected}
+                {provinceLabel(selected)}
               </h2>
               <dl className="space-y-5 text-sm">
                 <div>
@@ -101,21 +190,24 @@ export default function GlampingIndustryCanadaProvinces({ byProvince }: Props) {
                 </div>
                 <div>
                   <dt className="text-[10px] uppercase tracking-wider text-neutral-500">
-                    Avg. retail daily rate
+                    Avg. retail daily rate (ARDR, CAD)
                   </dt>
                   <dd className="mt-1 space-y-0.5 font-light tabular-nums text-lg tracking-tight text-neutral-900">
                     <div>
                       <span className="text-neutral-500">Mean</span>{' '}
-                      {formatUsd(row?.avgRetailDailyRateMean ?? null)}
+                      {formatGlampingMarketOverviewRate(
+                        row?.avgRetailDailyRateMean ?? null,
+                        'ca'
+                      )}
                     </div>
                     <div>
                       <span className="text-neutral-500">Median</span>{' '}
-                      {formatUsd(row?.avgRetailDailyRateMedian ?? null)}
+                      {formatGlampingMarketOverviewRate(
+                        row?.avgRetailDailyRateMedian ?? null,
+                        'ca'
+                      )}
                     </div>
                   </dd>
-                  <p className="mt-2 text-[10px] leading-relaxed text-neutral-500">
-                    From operating properties with a rate.
-                  </p>
                 </div>
               </dl>
             </div>

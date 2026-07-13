@@ -63,6 +63,13 @@ describe('normalizeGlampingUnitTypeForStorage', () => {
     expect(normalizeGlampingUnitTypeForStorage('bubble domes')).toBe('Bubble Tent');
   });
 
+  it('maps Jupe branded shelter aliases to Jupe', () => {
+    expect(normalizeGlampingUnitTypeForStorage('Jupe')).toBe('Jupe');
+    expect(normalizeGlampingUnitTypeForStorage('jupes')).toBe('Jupe');
+    expect(normalizeGlampingUnitTypeForStorage('Jupe Tent')).toBe('Jupe');
+    expect(normalizeGlampingUnitTypeForStorage('jupe tents')).toBe('Jupe');
+  });
+
   it('maps hobbit home, cave, and glamping tent to canonical labels', () => {
     expect(normalizeGlampingUnitTypeForStorage('Hobbit Home')).toBe('Hobbit House');
     expect(normalizeGlampingUnitTypeForStorage('cave')).toBe('Cave House');

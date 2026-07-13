@@ -1,0 +1,64 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[DRY RUN] No DB writes
+
+Phase=us-url tier=1 allowEstimates=false
+APIs: Firecrawl=yes Tavily=yes OpenAI=yes
+
+Processing 25 missing-ADR rows
+
+[1/25] Treehouse Point (Fall City, WA) id=31
+   sibling_copy → $483.5
+[2/25] River's Edge Treehouse Resort (Robbinsville, NC) id=33
+   skipped_no_evidence
+[3/25] In The Trees  (Amherst, VA) id=36
+   firecrawl → $309 (https://www.inthetreesmaine.com/)
+[4/25] Branson Treehouse Adventures (Branson, MO) id=39
+   firecrawl → $269 (https://www.bransontreehouseadventures.com)
+[5/25] Treehouse Resort at River Road (New Braunfels, TX) id=40
+   skipped_no_evidence
+[6/25] Sinya on Lone Man Creek (Wimberley, TX) id=88
+   sibling_copy → $410
+[7/25] Falling Waters Adventure Resort (Bryson City, NC) id=108
+   skipped_no_evidence
+[8/25] The Yurt Village at Frost Mountain (Brownfield, ME) id=110
+   skipped_no_evidence
+[9/25] The Shady Dell (Bisbee, AZ) id=164
+   skipped_no_evidence
+[10/25] Silver Bullet Retreats (Orlando, FL) id=165
+   skipped_no_evidence
+[11/25] Roamstead (Cosby, TN) id=11433
+   sibling_copy → $159
+[12/25] Roadhouse Ranch & Camp (Terrebonne, OR) id=11566
+   skipped_no_evidence
+[13/25] Rimrock Ranch (Pioneertown, CA) id=11577
+   skipped_no_evidence
+[14/25] Mossquatch Resort (Forks, WA) id=11578
+   sibling_copy → $355
+[15/25] Container Cabins in the Catskills (Saugerties, NY) id=11587
+   skipped_no_evidence
+[16/25] Boonies Farm (Worden, IL) id=11591
+   skipped_no_evidence
+[17/25] Yurts of the World (Lava Hot Springs, ID) id=11605
+   skipped_no_evidence
+[18/25] Sou'wester Lodge (Seaview, WA) id=11622
+   skipped_no_evidence
+[19/25] Loloma Lodge (McKenzie Bridge, OR) id=11627
+   skipped_no_evidence
+[20/25] The Highlands Resort (Guerneville, CA) id=11630
+   skipped_no_evidence
+[21/25] Gateway Canyons Resort & Spa (Gateway, CO) id=11649
+   skipped_no_evidence
+[22/25] Vegas Glamping (Nelson, NV) id=11650
+   skipped_no_evidence
+[23/25] Lost Creek Ranch & Spa (Moose, WY) id=11663
+   skipped_no_evidence
+[24/25] RESET Hotel Joshua Tree (Twentynine Palms, CA) id=11803
+   skipped_no_evidence
+[25/25] Camp Ferncrest - Chambers Creek (Grandview, TX) id=11815
+   skipped_no_evidence
+
+=== SUMMARY ===
+Updated: 6
+Skipped (manual queue): 19
+Wrote /Users/nickharsell/Documents/sage-resources-subdomain/scripts/output/missing-published-adr-results.csv
+Wrote /Users/nickharsell/Documents/sage-resources-subdomain/scripts/output/missing-published-adr-manual-queue.csv

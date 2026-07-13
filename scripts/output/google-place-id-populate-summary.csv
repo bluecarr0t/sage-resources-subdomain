@@ -1,0 +1,1904 @@
+id,property_name,matched_place_id,similarity,status
+1,Yosemite Pines RV Resort & Family Lodging,ChIJBYPdV27VkIARldVvaj4_0rE,1.000,matched
+2,Camp Wandawega,,0,not_found
+3,Post Ranch Inn,ChIJyRIOxGO8koARh25pZ7mikWE,1.000,matched
+4,Treehouse Utopia,ChIJcS5EhSS5XoYRfpG-v47_KeE,1.000,matched
+9,The Point,ChIJ04Kq05ATy0wRonPza5T1BJE,1.000,matched
+31,Treehouse Point,,0,not_found
+32,Eureka Springs Treehouses,,0,not_found
+33,River's Edge Treehouse Resort,ChIJnwSVZo_GXogRwsoGc9u9ImU,1.000,matched
+36,In The Trees ,,0,not_found
+39,Branson Treehouse Adventures,,0,not_found
+40,Treehouse Resort at River Road,,0,not_found
+64,Eureka Springs Treehouses,,0,not_found
+88,Sinya on Lone Man Creek,,0,not_found
+108,Falling Waters Adventure Resort,,0,not_found
+109,Yosemite Lakes RV Resort,,0,not_found
+110,The Yurt Village at Frost Mountain,,0,not_found
+138,Holistika Tulum,,0,not_found
+140,Monte Uzulu,,0,not_found
+162,Kate's Lazy Desert Airstream Motel,,0,not_found
+163,Flying Flags RV Resort & Campground,ChIJuTUsqRyr7oAR3J8mJgyej1s,1.000,matched
+164,The Shady Dell,ChIJgWq4uka00IYRrP19j3S9kC8,1.000,matched
+165,Silver Bullet Retreats,,0,not_found
+180,The Resort at Massey’s Landing,,0,not_found
+181,The Resort at Port Ludlow,ChIJmYaRVtvgj1QR2ZOk8nPwZNE,1.000,matched
+200,Zoa Hotel,,0,not_found
+9505,Firefall Ranch,,0,not_found
+9506,Jellystone Park Zion,ChIJ32noVTpZyoARKvvmEMrK3uE,0.952,matched
+9507,Wyldstay Smoky Mountains,,0,not_found
+9510,Ray of Sunshine,,0,not_found
+9511,Timberline Glamping at Amelia Island,,0,not_found
+9512,Timberline Glamping at Amelia Island,,0,not_found
+9513,Timberline Glamping at Pymatuning,,0,not_found
+9514,AutoCamp Hill Country,,0,not_found
+9517,The Fields of Michigan,ChIJiWvzVShVF4gRAWYYidWRWyU,1.000,matched
+9521,Tuxedo Falls,ChIJWxg_ZFXFWYgRU1EFDYoR4V0,1.000,matched
+9522,Glamping Wild,,0,not_found
+9523,Elk & Embers Resort,ChIJ5SGMbWB7WYgR8IMx7qOIf5o,0.632,matched
+9525,Elk & Embers Resort,ChIJ5SGMbWB7WYgR8IMx7qOIf5o,0.632,matched
+9526,Broad River Campground,,0,not_found
+9527,Broad River Campground,,0,not_found
+9528,The Hemlocks by NOC,,0,not_found
+9529,Elk Hollow Resort,ChIJ0WWLc75JWYgRI-xDXy8s_yA,1.000,matched
+9531,SKYE Texas Hill Country Resort,ChIJJWEgUHLPW4YRHPDC8a-VI2s,1.000,matched
+9532,SKYE Texas Hill Country Resort,ChIJJWEgUHLPW4YRHPDC8a-VI2s,1.000,matched
+9534,Basecamp Terlingua,ChIJR-uIXQ757YYRLqxVbfqxZrY,1.000,matched
+9536,The Cedars Ranch,,0,not_found
+9537,The Cedars Ranch,,0,not_found
+9538,Blue Skies Retro Resort,ChIJq6rOKga6W4YRfpGs4SmA2Dk,1.000,matched
+9540,Camp Ferncrest - Chambers Creek,ChIJ3W_nippRToYRIFwmvPJHRDM,0.774,matched
+9542,Royal View Campground,,0,not_found
+9545,Gunnison Glamping Wagons,,0,not_found
+9546,Wildhaven Yosemite,ChIJd1QkHyy7loARNfz2e8DvrOI,0.667,matched
+9547,Wildhaven Yosemite,ChIJd1QkHyy7loARNfz2e8DvrOI,0.667,matched
+9548,Evergreen Lodge,,0,not_found
+9552,Costanoa Lodge,,0,not_found
+9554,Treebones Resort,ChIJEQTXma-ikoARCNwLZLNVDKA,1.000,matched
+9555,Treebones Resort,ChIJEQTXma-ikoARCNwLZLNVDKA,1.000,matched
+9557,The Trailer Pond at Alta Colina,,0,not_found
+9558,Wildhaven Sonoma,ChIJr8RBtmERhIAR1SkvI-PJIao,0.640,matched
+9559,El Capitan Canyon,ChIJWxoXo9VO6YARypm7wEx_e1M,1.000,matched
+9560,El Capitan Canyon,ChIJWxoXo9VO6YARypm7wEx_e1M,1.000,matched
+9561,El Capitan Canyon,ChIJWxoXo9VO6YARypm7wEx_e1M,1.000,matched
+9562,Flying Flags Avila Beach,ChIJDV3VFZD57IARTrGVW41QgXY,1.000,matched
+9563,Sequoia High Sierra Camp,,0,not_found
+9565,Two Capes Lookout,ChIJy7s5bObd6lQRRxbZUF6XjP4,0.607,matched
+9566,The Vintages Trailer Resort,ChIJNcWHHilElVQRAZf-nYDQ2IE,1.000,matched
+9567,Umpqua's Last Resort,,0,not_found
+9568,Lost Lake Resort,,0,not_found
+9572,Alpenglow Luxury Camping,ChIJce8PZHKayVYRp0fxo6Xbb7o,1.000,matched
+9573,Alpenglow Luxury Camping,ChIJce8PZHKayVYRp0fxo6Xbb7o,1.000,matched
+9574,Borealis Basecamp,ChIJBXPUsNsUMlERdn-QOoNCQiY,1.000,matched
+9575,Borealis Basecamp,ChIJBXPUsNsUMlERdn-QOoNCQiY,1.000,matched
+9576,Camp McCarthy,ChIJF8gGTU6Fs1YRB0eh7xzdl-g,1.000,matched
+9578,Orca Island Cabins,ChIJLRnXxap4x1YRb0s9yuAjHD4,1.000,matched
+9582,Snow Peak Campfield,ChIJ9fFRdn1zk1QR3KCQDSb0SpI,0.613,matched
+9584,Doe Bay Resort & Retreat,ChIJoeiFNbeEhVQRcv4Lnbkxjc0,1.000,matched
+9586,Pacific Dunes Resort,ChIJ7R7kq8VtklQRyqAekLFBgZg,1.000,matched
+9588,Iliana's Glamping Village at Mike's Beach Resort,,0,not_found
+9589,Washington Glamping,,0,not_found
+9590,Skamania Lodge,ChIJObecNGDnlVQRHegFOy_pcpM,1.000,matched
+9592,River Dance Lodge,,0,not_found
+9593,Linn Canyon Ranch,ChIJv8eZ14qgU1MRG2BMg3pXD6o,1.000,matched
+9595,Willow Glamping Yurt,,0,not_found
+9597,Downata Hot Springs,ChIJ23Prj10QVYcRv4yPn_HALYE,1.000,matched
+9598,Smokejumper Cabin Rentals,,0,not_found
+9603,Eastward In Eden,ChIJoc12OcsFVIcRnfLTkDhOJ10,1.000,matched
+9604,Cave Lakes Canyon,ChIJ7SwXJ_IqNYcRZGiNQlVnylU,1.000,matched
+9611,Yellowstone Dreamin Camp,ChIJA1TNsmLvT1MR1nQJ7HEJ4Xk,0.741,matched
+9614,Summer Star Ranch,ChIJyT7NKidDQ1MRQrLIsYPlnrw,1.000,matched
+9620,Lost Woods Farm & Forest,ChIJ8zAVeXpfNU0RKpGFB101eLg,1.000,matched
+9621,Lost Woods Farm & Forest,ChIJ8zAVeXpfNU0RKpGFB101eLg,1.000,matched
+9622,Lost Woods Farm & Forest,ChIJ8zAVeXpfNU0RKpGFB101eLg,1.000,matched
+9623,The Fields of Michigan,ChIJiWvzVShVF4gRAWYYidWRWyU,1.000,matched
+9628,Glamp Michigan,ChIJl6d6WapvHogRth5vLS8Czcc,1.000,matched
+9629,Butter & Grahams - Bell Tent Glamping,ChIJOQ408DopNE0RqbvHYrdBkO8,1.000,matched
+9630,Paddler's Village,ChIJ29X75fqKTk0RG6cSCluIoVw,1.000,matched
+9632,Timberglow Getaway,ChIJr-fKf8E7IYgR_e9o45X633o,1.000,matched
+9633,Arcady Ridge Ranch,,0,not_found
+9634,Glamping on the Greys,ChIJ04mlcBEbU1MRQpurHDK5p7E,1.000,matched
+9635,The Hideout Lodge & Guest Ranch,ChIJ1VdkY7q_S1MRQ5ZwFMg2pHQ,1.000,matched
+9639,Blue River Bells,,0,not_found
+9640,Mana Farm Davis,,0,not_found
+9643,Tiger Safari Zoological Park,,0,not_found
+9645,Shash Dine' EcoRetreat,ChIJwS9bZTZyNIcRaSut7Z2nJ_U,1.000,matched
+9646,Shash Dine' EcoRetreat,ChIJwS9bZTZyNIcRaSut7Z2nJ_U,1.000,matched
+9647,Shash Dine' EcoRetreat,ChIJwS9bZTZyNIcRaSut7Z2nJ_U,1.000,matched
+9650,American Safari Camp,ChIJzzY3mNMO3IARwVZ3xKL9hss,0.800,matched
+9652,Wander Camp Grand Canyon,ChIJPQd3TgjlMocRJe5uc8tKvQo,1.000,matched
+9658,New Mexico Glamping Tipis,ChIJ-Wjvdt65F4cRczzdM79nkLg,1.000,matched
+9661,Field Trip,ChIJKQ5hm52tGYcR_V_poFziTFk,1.000,matched
+9665,Cliff River Springs,ChIJSdPKBYCRF4cRLTihwRsIixs,1.000,matched
+9666,ReTreet Resort,,0,not_found
+9667,ReTreet Resort,,0,not_found
+9668,ReTreet Resort,,0,not_found
+9670,Starlight Haven at Weiss Lake,ChIJIWsr_hKPiogRPUFvQPiNd0M,1.000,matched
+9672,Starlight Haven at Weiss Lake,ChIJIWsr_hKPiogRPUFvQPiNd0M,1.000,matched
+9678,The Overlook Red River Gorge,,0,not_found
+9679,Eden Reserve,,0,not_found
+9680,Eden Reserve,,0,not_found
+9681,Nine Pines Retreat,ChIJ7-3hTZ3neogRo-54K57BSIo,0.947,matched
+9682,The Whippoorwill's Nest Glamping Tent,,0,not_found
+9683,Red River Gorge Cabin Rentals,,0,not_found
+9686,LockRidge Park,ChIJywW6WKOTQogRWSnJzozfvgs,1.000,matched
+9691,The Canopy Crew,,0,not_found
+9692,The Canopy Crew,,0,not_found
+9694,The Wildflower Boutique Retreat,,0,not_found
+9695,Sankoty Lakes,,0,not_found
+9696,Timber Ridge Outpost & Cabins,,0,not_found
+9700,Jaybird Treehouse,,0,not_found
+9701,Willowbrook Cabins,,0,not_found
+9702,Keola Retreat,,0,not_found
+9703,The Haven at Hawi Nani Ranch,,0,not_found
+9704,The Point at Haleiwa,,0,not_found
+9705,Kalōpā State Recreation Area,ChIJZdB3IXqgU3kRYeDr9Gb4DN4,1.000,matched
+9706,Kalōpā State Recreation Area,ChIJZdB3IXqgU3kRYeDr9Gb4DN4,1.000,matched
+9707,The Sunset Yurt,,0,not_found
+9708,Hilo Glamping Yurt,,0,not_found
+9714,Lost Woods Farm & Forest,ChIJ8zAVeXpfNU0RKpGFB101eLg,1.000,matched
+9719,The Woods Luxury Camping,ChIJCVweRxn_GYgR3HzfzmT9PvA,1.000,matched
+9725,Battenkill Glamping Resort,ChIJKZs8yGmF4IkRRU0MxIG-plE,1.000,matched
+9726,Battenkill Glamping Resort,ChIJKZs8yGmF4IkRRU0MxIG-plE,1.000,matched
+9727,Camptown,,0,not_found
+9728,Glampful,ChIJqQDakxlZ3okRMmiknwfP6uI,1.000,matched
+9732,The Outlier Inn,ChIJXca5rYTH3IkRIBxCQjWbIG4,1.000,matched
+9733,The Outlier Inn,ChIJXca5rYTH3IkRIBxCQjWbIG4,1.000,matched
+9734,Boheme Retreats,,0,not_found
+9735,Terra Glamping,,0,not_found
+9738,Woods of Eden Glampground,ChIJMwR8xT_rrkwRT3v5-Ui64pU,1.000,matched
+9739,Tops'l Farm,ChIJrT8KoIrBrUwRXucp9ZmekRA,1.000,matched
+9740,Tops'l Farm,ChIJrT8KoIrBrUwRXucp9ZmekRA,1.000,matched
+9741,Glamping Downeast,,0,not_found
+9742,Glamping Downeast,,0,not_found
+9743,Nordic House Glamping,ChIJiWmf98HPs0wRPQio4DzxRC0,1.000,matched
+9744,Brigid Spring,,0,not_found
+9747,Blue Heron Farm and Retreat,,0,not_found
+9750,Alpine Garden Camping Village & Winery,ChIJ94iy4WCFs0wR0zQbK4o76ZQ,1.000,matched
+9751,Under Canvas White Mountains,ChIJN-NKS5tttEwR7Sk1JkH_-uw,1.000,matched
+9752,Streeter Mountain Farm,,0,not_found
+9753,Streeter Mountain Farm,,0,not_found
+9755,Toad Hill,ChIJgTsexV69s0wRH4M6JmtNq_4,1.000,matched
+9756,Skoolie Retreat,,0,not_found
+9757,Milk & Honey Glamping and Wellness Retreat,,0,not_found
+9758,Low Country Oasis,,0,not_found
+9759,Nature Nook Retreats,,0,not_found
+9760,Starlight Glamping,,0,not_found
+9761,WYLDSTAY Greenville,,0,not_found
+9762,Flowertown Glampground,ChIJmY0M8Kb1_ogRyGWM1ZjHxpc,1.000,matched
+9763,Chattooga River Lodge and Campground,ChIJMaTrpyTCWIgRbgHUKSneIWQ,1.000,matched
+9765,Orca Island Cabins,ChIJLRnXxap4x1YRb0s9yuAjHD4,1.000,matched
+9766,Shearwater Cove,ChIJOT5L6Uh_x1YR1kkxYgEaqcE,1.000,matched
+9767,Desolation Hotel Hope Valley,ChIJQfa5Gginm4AR_gJJNtdSgMA,1.000,matched
+9768,Desolation Hotel Hope Valley,ChIJQfa5Gginm4AR_gJJNtdSgMA,1.000,matched
+9769,El Capitan Canyon,ChIJWxoXo9VO6YARypm7wEx_e1M,1.000,matched
+9770,Inn Town Campground,ChIJAz13nZtwm4ARm9JniSSHQp0,1.000,matched
+9771,Reverie retreat,ChIJ8w9EM31UmoARg41c2Y5SLMY,1.000,matched
+9773,Treebones Resort,ChIJEQTXma-ikoARCNwLZLNVDKA,1.000,matched
+9774,Treebones Resort,ChIJEQTXma-ikoARCNwLZLNVDKA,1.000,matched
+9775,Whispering Springs Wilderness Retreat,,0,not_found
+9776,Cedar Ridge Ranch,ChIJ89a03cGuQYcR39Kc3Li_sq0,1.000,matched
+9777,Cedar Ridge Ranch,ChIJ89a03cGuQYcR39Kc3Li_sq0,1.000,matched
+9778,Joyful Journey Hot Springs,ChIJZaqDKuKoFYcRgc49HGYmiLY,0.867,matched
+9779,Lawson Adventure Park,,0,not_found
+9780,Royal Gorge Yurts,ChIJm8bO_tSTFIcRZt-ORcEqbgY,1.000,matched
+9782,White Pines Campsites,ChIJBVqnwVkK54kR7xRYstkf3Vw,1.000,matched
+9783,Savage River Lodge,ChIJUS-61mK9yokR_G4ILl86_F4,1.000,matched
+9785,Acadia Yurts & Wellness Center,ChIJDR8tA1y9rkwRXawyKRdOnVY,1.000,matched
+9786,Frost Mountain Yurts,ChIJIQvi-LYAs0wR44uQ1CFHrzU,1.000,matched
+9789,Hawley Farm Glamping,ChIJhxvLjKbuwYcRPkJEeby5piA,1.000,matched
+9790,Dupont Yurts,ChIJd5mLEp25WYgR9QnpJGjJGcg,1.000,matched
+9791,Dupont Yurts,ChIJd5mLEp25WYgR9QnpJGjJGcg,1.000,matched
+9792,Dupont Yurts,ChIJd5mLEp25WYgR9QnpJGjJGcg,1.000,matched
+9793,Dupont Yurts,ChIJd5mLEp25WYgR9QnpJGjJGcg,1.000,matched
+9794,Emberglow Outdoor Resort,ChIJ-WOoLBxfV4gRzgXTQC_6M1g,1.000,matched
+9795,Hidden Flower Tiny Farm,,0,not_found
+9799,Sky Ridge Yurts,ChIJ1Wj3-8Y0WYgRih9u5Ri6FEI,1.000,matched
+9800,Stay Nantahala,,0,not_found
+9801,Stay Nantahala,,0,not_found
+9802,Hub North,ChIJMctwc8zzs0wRxLZ_nkPlJ5w,1.000,matched
+9803,Andelyn Farm,ChIJuX8z5Fl34IkRXtu9OAN7YFo,1.000,matched
+9804,Andelyn Farm,ChIJuX8z5Fl34IkRXtu9OAN7YFo,1.000,matched
+9805,Andelyn Farm,ChIJuX8z5Fl34IkRXtu9OAN7YFo,1.000,matched
+9806,Andelyn Farm,ChIJuX8z5Fl34IkRXtu9OAN7YFo,1.000,matched
+9807,Andelyn Farm,ChIJuX8z5Fl34IkRXtu9OAN7YFo,1.000,matched
+9808,Loomis Lair,,0,not_found
+9812,Camp Dakota,,0,not_found
+9813,Camp Dakota,,0,not_found
+9816,All Is Well Resort,ChIJOxcM0kdtTYYRKqc085uL2Jk,1.000,matched
+9819,Freedom Yurt Resorts,ChIJ5aOZn82dXIYRWxYsdSRBMys,1.000,matched
+9820,Freedom Yurt Resorts,ChIJ5aOZn82dXIYRWxYsdSRBMys,1.000,matched
+9821,Freedom Yurt Resorts,ChIJ5aOZn82dXIYRWxYsdSRBMys,1.000,matched
+9823,Green Acres,,0,not_found
+9824,Green Acres,,0,not_found
+9825,Green Acres,,0,not_found
+9826,Green Acres,,0,not_found
+9827,Johnny Yurts,ChIJX7Ek8ptzW4YRGwrkfxAmMJ0,1.000,matched
+9828,Lucky Arrow Retreat,ChIJGwRmki9AW4YRN742xE6NRJo,1.000,matched
+9831,The Yurtopian,,0,not_found
+9832,Boulder Mountain Guest Ranch,ChIJxQcmYLx3SocRYjCr0yA3vuk,1.000,matched
+9833,Boulder Mountain Guest Ranch,ChIJxQcmYLx3SocRYjCr0yA3vuk,1.000,matched
+9834,Escalante Yurts (hotel near Bryce Canyon),,0,not_found
+9835,Escalante Yurts (hotel near Bryce Canyon),,0,not_found
+9836,Massanutten Springs,,0,not_found
+9837,Massanutten Springs,,0,not_found
+9838,Lakedale,,0,not_found
+9839,Lakedale Resort,,0,not_found
+9840,Lothlorien Woods Adobes of Middle Earth,ChIJNwgg4S4VllQR_s9KsxPvrtU,0.621,matched
+9841,French Creek at Bush Creek Ranch,,0,not_found
+9843,North Haven Campground,ChIJf0Q4_7mPY1MRua-OUpLey3o,1.000,matched
+9845,AutoCamp Russian River,,0,not_found
+9846,Costanoa,,0,not_found
+9847,Desolation Hotel Hope Valley,ChIJQfa5Gginm4AR_gJJNtdSgMA,1.000,matched
+9848,The Trailer Pond at Alta Colina,,0,not_found
+9849,Mountain Goat Lodge,ChIJr3pkl2s-FYcREeno9M4GOd0,0.826,matched
+9850,Mountain Goat Lodge,ChIJr3pkl2s-FYcREeno9M4GOd0,0.826,matched
+9851,White Pines Campsites,ChIJBVqnwVkK54kR7xRYstkf3Vw,1.000,matched
+9852,Kentucky Lake Glamping,ChIJdyeyrD0Be4gRYSI9d5niiI4,1.000,matched
+9854,ROAM Beyond,,0,not_found
+9855,Appalachian Pond Campground,ChIJpciu5Vx7WYgRD2xuqbOTV_o,1.000,matched
+9856,Emberglow Outdoor Resort,ChIJ-WOoLBxfV4gRzgXTQC_6M1g,1.000,matched
+9857,Gorgeous Stays,,0,not_found
+9859,Copperhead Retreat,ChIJ7-BwQnYXM4gR-IZF2zYB2Nc,1.000,matched
+9860,Laurel Oaks Estate,ChIJF1UQidsTAIkRYPOwrFMk0Vk,1.000,matched
+9862,Evanscliff,ChIJc5AoKqvSfIcR5aWieL1kKtE,0.909,matched
+9863,Evanscliff,ChIJc5AoKqvSfIcR5aWieL1kKtE,0.909,matched
+9864,Cloudberry Cabin,ChIJIQ4bb7uJSlERXzDChj2jW2Y,1.000,matched
+9866,Treebones Resort,ChIJEQTXma-ikoARCNwLZLNVDKA,1.000,matched
+9867,Coldwater Gardens,,0,not_found
+9868,Treetop Hideaways,ChIJSdUMRZRcYIgRu-i1d2lue-c,1.000,matched
+9870,Timber Ridge Outpost & Cabins,,0,not_found
+9871,Pickwick Adventures,,0,not_found
+9872,Asheville Glamping,,0,not_found
+9873,Cherry Treesort,ChIJMyF4BO33U4gRKTFNX83nJEE,1.000,matched
+9874,Cherry Treesort,ChIJMyF4BO33U4gRKTFNX83nJEE,1.000,matched
+9875,Cherry Treesort,ChIJMyF4BO33U4gRKTFNX83nJEE,1.000,matched
+9877,New Mexico Tipis and Treehouse,,0,not_found
+9878,Mariaville Goat Farm,ChIJWWK04Cd93okRsrC50erZyFw,1.000,matched
+9879,Treetopia Campground,,0,not_found
+9880,The Mohicans Treehouse Resort and Wedding Venue,ChIJUTrxtZhiN4gR0oJavhVeFPw,1.000,matched
+9882,Out N About Treehouse,ChIJtbWLv8z5z1QRjUiyKbYxg4s,0.633,matched
+9883,Out N About Treehouse,ChIJtbWLv8z5z1QRjUiyKbYxg4s,0.633,matched
+9884,Out N About Treehouse,ChIJtbWLv8z5z1QRjUiyKbYxg4s,0.633,matched
+9885,Airydale Retreat,ChIJNb2cDrFXyYkRaaOrSUbwlzM,1.000,matched
+9886,Bolt Farm Treehouse,ChIJnXkZ1D7_YIgRCYTFc-SKGqw,0.655,matched
+9887,Bolt Farm Treehouse,ChIJnXkZ1D7_YIgRCYTFc-SKGqw,0.655,matched
+9888,Geronimo Creek Retreat,ChIJ8Y9z7Ea3XIYRhWKdUf19qFo,1.000,matched
+9889,River Road Treehouses,ChIJD68U4TqfXIYRGn3yy5v2xMU,1.000,matched
+9890,Lothlorien Woods Adobes of Middle Earth,ChIJNwgg4S4VllQR_s9KsxPvrtU,0.621,matched
+9891,Skamania Lodge,ChIJObecNGDnlVQRHegFOy_pcpM,1.000,matched
+9892,Skamania Lodge,ChIJObecNGDnlVQRHegFOy_pcpM,1.000,matched
+9893,TreeHouse Point,ChIJjxUKf_B6kFQRdWAghYhsS6M,1.000,matched
+9894,TreeHouse Point,ChIJjxUKf_B6kFQRdWAghYhsS6M,1.000,matched
+9895,TreeHouse Point,ChIJjxUKf_B6kFQRdWAghYhsS6M,1.000,matched
+9897,Arapaho Valley Ranch,ChIJz80AOqHUa4cRbBhMCqQikqw,1.000,matched
+9898,Joyful Journey Hot Springs,ChIJZaqDKuKoFYcRgc49HGYmiLY,0.867,matched
+9900,Lake Compounce,,0,not_found
+9901,"Glamping Florida, by River Ranch",,0,not_found
+9902,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+9903,Fredrock,,0,not_found
+9904,Bodhi Farms,,0,not_found
+9905,Dreamcatcher Tipi Hotel,ChIJif5tcIjZT1MR1eAA_Z1jHaM,1.000,matched
+9906,New Mexico Tipis and Treehouse,,0,not_found
+9907,Mustang Monument,,0,not_found
+9908,Bellfire Farm,,0,not_found
+9909,At Boulders Edge,,0,not_found
+9910,Orr Family Farm,,0,not_found
+9911,Camp Dakota,,0,not_found
+9912,Sunny Valley Resort,,0,not_found
+9915,Tipi Village Retreat,ChIJ211r8JzuwFQR80x9J-0wEBI,1.000,matched
+9916,Copperhead Retreat,ChIJ7-BwQnYXM4gR-IZF2zYB2Nc,1.000,matched
+9917,Copperhead Retreat,ChIJ7-BwQnYXM4gR-IZF2zYB2Nc,1.000,matched
+9919,Buffalo Ridge Camp Resort,ChIJjZe3r7jNYocRLydWxDnlCI0,1.000,matched
+9920,Buffalo Ridge Camp Resort,ChIJjZe3r7jNYocRLydWxDnlCI0,1.000,matched
+9921,Highland Meadows Resort,,0,not_found
+9923,North Texas Jellystone Park,,0,not_found
+9924,The Arrowhead Tipi Resort,,0,not_found
+9925,The Retreat on the Hill,ChIJh5GbtCcDW4YRHfUNBLiQJQ8,1.000,matched
+9927,Zion White Bison Resort,ChIJyTVCNqbxyoARrfcrvoKRRCA,0.622,matched
+9928,Borealis Basecamp,ChIJBXPUsNsUMlERdn-QOoNCQiY,1.000,matched
+9929,Postcard Cabins Talladega Valley,,0,not_found
+9930,Postcard Cabins Talladega Valley,,0,not_found
+9931,Ambiente,,0,not_found
+9932,Backland,,0,not_found
+9933,Backland,,0,not_found
+9934,Backland,,0,not_found
+9935,Backland,,0,not_found
+9937,AutoCamp Joshua Tree,ChIJt4EN-Prb2oARTsse6GAxPKw,1.000,matched
+9938,AutoCamp Joshua Tree,ChIJt4EN-Prb2oARTsse6GAxPKw,1.000,matched
+9940,AutoCamp Russian River,,0,not_found
+9941,Postcard Cabins Big Bear,,0,not_found
+9942,Postcard Cabins Big Bear,,0,not_found
+9943,Postcard Cabins Big Bear,,0,not_found
+9944,Postcard Cabins Big Bear,,0,not_found
+9946,The Castle House Estate,ChIJ6WYeDEzb2oAReAqBLx9Zses,0.920,matched
+9948,Royal Gorge Cabins,ChIJBeC8dCOSFIcRMvF_3Zo37co,1.000,matched
+9949,Postcard Cabins Machimoodus,,0,not_found
+9950,Postcard Cabins Machimoodus,,0,not_found
+9951,Lake Compounce,,0,not_found
+9952,Coldwater Gardens,,0,not_found
+9953,Coldwater Gardens,,0,not_found
+9954,Home Field Advantage Farmstead,ChIJjVnVhs2_7ogRs9Z3u0SFdxU,1.000,matched
+9956,Postcard Cabins Chattahoochee,,0,not_found
+9957,Postcard Cabins Chattahoochee,,0,not_found
+9958,Miracle and Banbury Hot Springs,ChIJq2KLSheNrFQRjZqU-8NAiks,0.613,matched
+9959,Postcard Cabins Starved Rock,,0,not_found
+9960,Postcard Cabins Starved Rock,,0,not_found
+9961,Kentucky Lake Glamping,ChIJdyeyrD0Be4gRYSI9d5niiI4,1.000,matched
+9962,Kentucky Lake Glamping,ChIJdyeyrD0Be4gRYSI9d5niiI4,1.000,matched
+9963,Postcard Cabins Homochitto,,0,not_found
+9964,Postcard Cabins Homochitto,,0,not_found
+9965,Paloma Lake,,0,not_found
+9966,AutoCamp Cape Cod,ChIJnWgCytPZ5IkR_CkLfcmdRlY,1.000,matched
+9967,Acadia Yurts & Wellness Center,ChIJDR8tA1y9rkwRXawyKRdOnVY,1.000,matched
+9969,Huttopia Southern Maine,ChIJOSQGn4S1skwRV5hbwA5pFhI,1.000,matched
+9970,Sandy Pines Campground,ChIJUyvtQRmpskwRfwRU450MoP8,1.000,matched
+9971,Tops'l Farm,ChIJrT8KoIrBrUwRXucp9ZmekRA,1.000,matched
+9972,Postcard Cabins Barber Creek,,0,not_found
+9973,Postcard Cabins Barber Creek,,0,not_found
+9974,Cuyuna Cove,ChIJR4XfjFfLtlIRKnFC8p7_3S8,1.000,matched
+9975,Postcard Cabins Kettle River,,0,not_found
+9976,Postcard Cabins Kettle River,,0,not_found
+9977,Postcard Cabins Ozark Highlands,,0,not_found
+9978,Postcard Cabins Ozark Highlands,,0,not_found
+9979,Postcard Cabins St. Francois,,0,not_found
+9980,Postcard Cabins St. Francois,,0,not_found
+9981,Hawley Farm Glamping,ChIJhxvLjKbuwYcRPkJEeby5piA,1.000,matched
+9982,Longleaf Piney Resort,ChIJ92Olax8hnYgRruhJIBX6fYk,1.000,matched
+9984,Tobacco River Ranch Glamping,ChIJFTE05W-1ZVMRvnB_xnnfF-A,1.000,matched
+9985,Ashevile River Cabins,ChIJ-2XC67eSWYgRDasiy_xXV9g,0.955,matched
+9986,Ashevile River Cabins,ChIJ-2XC67eSWYgRDasiy_xXV9g,0.955,matched
+9988,Cherry Treesort,ChIJMyF4BO33U4gRKTFNX83nJEE,1.000,matched
+9989,Emberglow Outdoor Resort,ChIJ-WOoLBxfV4gRzgXTQC_6M1g,1.000,matched
+9990,Postcard Cabins Asheboro,,0,not_found
+9991,Postcard Cabins Asheboro,,0,not_found
+9992,Gorgeous Stays,,0,not_found
+9993,Hidden Flower Tiny Farm,,0,not_found
+9994,Hidden Flower Tiny Farm,,0,not_found
+9995,Hidden Flower Tiny Farm,,0,not_found
+9996,Moonbeam Bungalows,,0,not_found
+9997,Moonbeam Bungalows,,0,not_found
+9999,Pilot Cove,ChIJjVQr4pS8WYgRy2OJmLKaNnY,1.000,matched
+10000,Pilot Cove,ChIJjVQr4pS8WYgRy2OJmLKaNnY,1.000,matched
+10002,Kimberly Creek Retreat,ChIJfUNPkmcFlIcRCGolfPA5dm8,1.000,matched
+10003,Kimberly Creek Retreat,ChIJfUNPkmcFlIcRCGolfPA5dm8,1.000,matched
+10004,Kimberly Creek Retreat,ChIJfUNPkmcFlIcRCGolfPA5dm8,1.000,matched
+10005,Postcard Cabins Blake Brook,,0,not_found
+10006,Postcard Cabins Blake Brook,,0,not_found
+10007,Lumen Nature Retreat,ChIJlZtcWVh9s0wR28Q1X9BuHcw,1.000,matched
+10008,Lumen Nature Retreat,ChIJlZtcWVh9s0wR28Q1X9BuHcw,1.000,matched
+10010,A Tiny Home Resort,ChIJZT6uqW-53YkR3EMth-AnV3w,0.895,matched
+10011,A Tiny Home Resort,ChIJZT6uqW-53YkR3EMth-AnV3w,0.895,matched
+10012,A Tiny Home Resort,ChIJZT6uqW-53YkR3EMth-AnV3w,0.895,matched
+10013,A Tiny Home Resort,ChIJZT6uqW-53YkR3EMth-AnV3w,0.895,matched
+10014,A Tiny Home Resort,ChIJZT6uqW-53YkR3EMth-AnV3w,0.895,matched
+10016,Bellfire Farm,,0,not_found
+10018,Eastwind Hotels Windham,ChIJEW3b0KdM3IkR1OWyEQf9s70,0.917,matched
+10019,Gather Greene,ChIJ7QnfU5m_3YkRBPDKWDdO57M,1.000,matched
+10020,Postcard Cabins Eastern Catskills,,0,not_found
+10021,Postcard Cabins Eastern Catskills,,0,not_found
+10022,Postcard Cabins Western Catskills,,0,not_found
+10023,Postcard Cabins Western Catskills,,0,not_found
+10025,Seneca Sol,,0,not_found
+10026,The Outlier Inn,ChIJXca5rYTH3IkRIBxCQjWbIG4,1.000,matched
+10027,Treetopia Campground,,0,not_found
+10028,Treetopia Campground,,0,not_found
+10029,Postcard Cabins Beaver Creek,,0,not_found
+10030,Postcard Cabins Beaver Creek,,0,not_found
+10031,Happydale Retreat,,0,not_found
+10032,Happydale Retreat,,0,not_found
+10033,Umpqua's Last Resort,,0,not_found
+10034,Camptel Poconos,ChIJybkZOhlVxIkRsRMgla3NWuo,1.000,matched
+10035,Camptel Poconos,ChIJybkZOhlVxIkRsRMgla3NWuo,1.000,matched
+10036,River Mountain,ChIJQ1RKbIxbyokRTuax9-fiaJg,1.000,matched
+10037,Postcard Cabins Lake Hartwell,,0,not_found
+10038,Postcard Cabins Lake Hartwell,,0,not_found
+10040,Saluda Outdoor Center,ChIJ7fr4Dy43WIgRc7XM3OX8Gkc,1.000,matched
+10041,Saluda Outdoor Center,ChIJ7fr4Dy43WIgRc7XM3OX8Gkc,1.000,matched
+10042,Saluda Outdoor Center,ChIJ7fr4Dy43WIgRc7XM3OX8Gkc,1.000,matched
+10043,Buffalo Ridge Camp Resort,ChIJjZe3r7jNYocRLydWxDnlCI0,1.000,matched
+10044,Outpost Adventures,,0,not_found
+10045,Bolt Farm Treehouse,ChIJnXkZ1D7_YIgRCYTFc-SKGqw,0.655,matched
+10046,Postcard Cabins Dale Hollow,,0,not_found
+10047,Postcard Cabins Dale Hollow,,0,not_found
+10049,Camp Fimfo,,0,not_found
+10050,Camp Fimfo,,0,not_found
+10051,Camp Fimfo,,0,not_found
+10052,Camp Fimfo,,0,not_found
+10053,Camp Fimfo,,0,not_found
+10054,Camp Fimfo,,0,not_found
+10055,Camp Fimfo,,0,not_found
+10056,Postcard Cabins Brazos Valley,,0,not_found
+10057,Postcard Cabins Brazos Valley,,0,not_found
+10058,Postcard Cabins Hill Country,,0,not_found
+10059,Postcard Cabins Hill Country,,0,not_found
+10060,Postcard Cabins Piney Woods,,0,not_found
+10061,Postcard Cabins Piney Woods,,0,not_found
+10062,Green Acres,,0,not_found
+10063,Khushatta Hills Ranch,ChIJSUo6nKRjR4YRs3cpyTGFskQ,0.808,matched
+10064,Lucky Arrow Retreat,ChIJGwRmki9AW4YRN742xE6NRJo,1.000,matched
+10065,Lucky Arrow Retreat,ChIJGwRmki9AW4YRN742xE6NRJo,1.000,matched
+10066,Lucky Arrow Retreat,ChIJGwRmki9AW4YRN742xE6NRJo,1.000,matched
+10068,Onera Fredericksburg,ChIJ18ahsHDBW4YRjNHDHOpY1I8,1.000,matched
+10069,Onera Fredericksburg,ChIJ18ahsHDBW4YRjNHDHOpY1I8,1.000,matched
+10070,Wahwahtaysee Resort,ChIJqwsUZqxSQ4YR2MLwl3MQK-Q,1.000,matched
+10071,Zion Ponderosa,,0,not_found
+10074,Yonder Escalante,ChIJFRmpWNWPNYcRlVRKNpGrTW0,0.625,matched
+10075,Zion Ponderosa Ranch Resort,ChIJacxYqTvEyoARKwxBP47TfaY,1.000,matched
+10076,Postcard Cabins Shenandoah,,0,not_found
+10077,Postcard Cabins Shenandoah,,0,not_found
+10078,Postcard Cabins Mount Adams,,0,not_found
+10079,Postcard Cabins Mount Adams,,0,not_found
+10080,Postcard Cabins Skagit Valley,,0,not_found
+10081,Postcard Cabins Skagit Valley,,0,not_found
+10082,Postcard Cabins Wild Rose,,0,not_found
+10083,Postcard Cabins Wild Rose,,0,not_found
+10088,Grand Canyon Glamping Resort,ChIJte9zYVgRzIARQMybHXEGw1c,1.000,matched
+10089,Under Canvas Grand Canyon,,0,not_found
+10090,Under Canvas Grand Canyon,,0,not_found
+10091,Under Canvas Grand Canyon,,0,not_found
+10092,Under Canvas Grand Canyon,,0,not_found
+10093,AutoCamp Russian River,,0,not_found
+10094,AutoCamp Yosemite,ChIJ-75iwh-5loARJv17sJP16-w,1.000,matched
+10095,Costanoa,,0,not_found
+10096,Huttopia Wine Country,,0,not_found
+10097,Huttopia Wine Country,,0,not_found
+10098,Huttopia Wine Country,,0,not_found
+10099,Huttopia Paradise Springs,ChIJ_____w8aw4ARXgTbgtBNa-o,1.000,matched
+10100,Huttopia Paradise Springs,ChIJ_____w8aw4ARXgTbgtBNa-o,1.000,matched
+10103,Inn Town Campground,ChIJAz13nZtwm4ARm9JniSSHQp0,1.000,matched
+10104,Mendocino Grove,,0,not_found
+10105,Mendocino Grove,,0,not_found
+10106,Mendocino Grove,,0,not_found
+10107,Mendocino Grove,,0,not_found
+10108,Mendocino Grove,,0,not_found
+10109,Mendocino Grove,,0,not_found
+10110,The Sequoia High Sierra Camp,,0,not_found
+10111,Ventana Big Sur,ChIJ4TZJu1aEjYARA-2yJUhD4as,0.714,matched
+10113,Black Tree Resort,ChIJjU-VEiE1a4cR46e_Gp-ELII,1.000,matched
+10114,Cedar Ridge Ranch,ChIJ89a03cGuQYcR39Kc3Li_sq0,1.000,matched
+10116,Dunton River Camp,ChIJNQj77MMtOYcRO37_sVWueig,1.000,matched
+10117,Royal Gorge Cabins,ChIJBeC8dCOSFIcRMvF_3Zo37co,1.000,matched
+10118,Rustic Rook Resort,ChIJNbY4ANzVFYcRYsnzLKcyAcE,1.000,matched
+10119,Rustic Rook Resort,ChIJNbY4ANzVFYcRYsnzLKcyAcE,1.000,matched
+10121,Coldwater Gardens,,0,not_found
+10122,Home Field Advantage Farmstead,,0,not_found
+10123,Timberline Glamping Co. Hillsborough River,ChIJNSWBGBK1wogR-dhPcfH0a14,0.929,matched
+10128,Timberline Glamping Co. Clarks Hill Lake,ChIJu8nbKxOH94gRAC4oinxbNok,0.925,matched
+10131,Timberline Glamping Co. Lake Lanier,ChIJOWCZ7VOP9YgRrvGweQsKAyc,0.610,matched
+10132,Timberline Glamping Co. Lake Lanier,ChIJOWCZ7VOP9YgRrvGweQsKAyc,0.610,matched
+10134,Camp Olowalu,ChIJLeTA8rsrVXkRdw56V5Sdcys,1.000,matched
+10135,Camp Olowalu,ChIJLeTA8rsrVXkRdw56V5Sdcys,1.000,matched
+10136,Aspen Grove Inn,,0,not_found
+10137,Aspen Grove Inn,,0,not_found
+10139,Moose Creek Ranch,ChIJ8_XRfEcLU1MRtrUCVxGi3CY,1.000,matched
+10140,Camp Aramoni,ChIJCaE6UA_jC4gRLPaKhHKVRjw,1.000,matched
+10141,AutoCamp Cape Cod,ChIJnWgCytPZ5IkR_CkLfcmdRlY,1.000,matched
+10142,Huttopia Southern Maine,ChIJOSQGn4S1skwRV5hbwA5pFhI,1.000,matched
+10143,Huttopia Southern Maine,ChIJOSQGn4S1skwRV5hbwA5pFhI,1.000,matched
+10144,Huttopia Southern Maine,ChIJOSQGn4S1skwRV5hbwA5pFhI,1.000,matched
+10148,Sandy Pines Campground,ChIJUyvtQRmpskwRfwRU450MoP8,1.000,matched
+10149,Sandy Pines Campground,ChIJUyvtQRmpskwRfwRU450MoP8,1.000,matched
+10150,Terramor Outdoor Resort,ChIJpdG-pkiVrkwRlOYYwVw57GE,1.000,matched
+10151,Terramor Outdoor Resort,ChIJpdG-pkiVrkwRlOYYwVw57GE,1.000,matched
+10152,Terramor Outdoor Resort,ChIJpdG-pkiVrkwRlOYYwVw57GE,1.000,matched
+10156,Under Canvas Acadia,ChIJC-ZwHSXzrkwREO92LF-4sW4,1.000,matched
+10161,Woods of Eden Glampground,ChIJMwR8xT_rrkwRT3v5-Ui64pU,1.000,matched
+10162,Woods of Eden Glampground,ChIJMwR8xT_rrkwRT3v5-Ui64pU,1.000,matched
+10163,Beaver Island Retreat,ChIJH1_evxCzS00RBku7lRUjdsU,1.000,matched
+10164,Off Map Glamping,,0,not_found
+10165,Off Map Glamping,,0,not_found
+10167,Cuyuna Cove,ChIJR4XfjFfLtlIRKnFC8p7_3S8,1.000,matched
+10168,Hawley Farm Glamping,ChIJhxvLjKbuwYcRPkJEeby5piA,1.000,matched
+10169,Roaring River Hills Campground and Cabins,ChIJjx6g2TzXyIcRAZCghKillxw,1.000,matched
+10171,The Ranch at Rock Creek,ChIJOz3a-R11XFMRDrc9hNViboE,1.000,matched
+10172,The Ranch at Rock Creek,ChIJOz3a-R11XFMRDrc9hNViboE,1.000,matched
+10173,The Resort at Paws Up,,0,not_found
+10174,Tiny Town Campground,ChIJk6ZEteztT1MRFjteVLfLLUQ,1.000,matched
+10175,Under Canvas Glacier,ChIJq7xC-DMjZlMR66-CBV5yUvs,1.000,matched
+10176,Under Canvas Glacier,ChIJq7xC-DMjZlMR66-CBV5yUvs,1.000,matched
+10177,Under Canvas Glacier,ChIJq7xC-DMjZlMR66-CBV5yUvs,1.000,matched
+10178,Under Canvas Glacier,ChIJq7xC-DMjZlMR66-CBV5yUvs,1.000,matched
+10180,Under Canvas West Yellowstone,ChIJy3ZqNUWwUVMRsrYBgFds3OQ,1.000,matched
+10182,Under Canvas West Yellowstone,ChIJy3ZqNUWwUVMRsrYBgFds3OQ,1.000,matched
+10183,Under Canvas West Yellowstone,ChIJy3ZqNUWwUVMRsrYBgFds3OQ,1.000,matched
+10185,Asheville Glamping,,0,not_found
+10186,Gorgeous Stays,,0,not_found
+10188,Rusty's Roost Rentals,ChIJuSc6VKcLWogRE4DfrNxVzWQ,0.708,matched
+10189,Smoky Mountain Glamping,,0,not_found
+10190,Slattery Vintage Estates,,0,not_found
+10194,Huttopia White Mountains,ChIJo7Ogk38Ls0wRXEBU20LGOUY,1.000,matched
+10196,Lumen Nature Retreat,ChIJlZtcWVh9s0wR28Q1X9BuHcw,1.000,matched
+10203,Firelight Camps,ChIJXTbK9liA0IkR2SF9bOVUnMo,1.000,matched
+10204,Firelight Camps,ChIJXTbK9liA0IkR2SF9bOVUnMo,1.000,matched
+10205,Firelight Camps,ChIJXTbK9liA0IkR2SF9bOVUnMo,1.000,matched
+10210,Glamping at Woodstock Meadows,,0,not_found
+10215,Huttopia Adirondacks,,0,not_found
+10216,Huttopia Adirondacks,,0,not_found
+10217,Huttopia Adirondacks,,0,not_found
+10218,Huttopia Adirondacks,,0,not_found
+10221,Seneca Sol,,0,not_found
+10222,Treetopia Campground,,0,not_found
+10223,Hilltop Resorts and Campground,ChIJh--VXFHvR4gRm-YPnOWapwk,0.968,matched
+10225,Camp Dakota,,0,not_found
+10226,Camp Dakota,,0,not_found
+10227,Umpqua's Last Resort,,0,not_found
+10228,Umpqua's Last Resort,,0,not_found
+10229,Umpqua's Last Resort,,0,not_found
+10232,BigMount Glamping,ChIJWfZ3k3X3yIkRF29T5zM_14U,1.000,matched
+10235,Allen Ranch Campground,ChIJ38p-r4_OfIcR5M5mdiOe3ks,1.000,matched
+10237,Buffalo Ridge Camp Resort,ChIJjZe3r7jNYocRLydWxDnlCI0,1.000,matched
+10238,Outpost Adventures,,0,not_found
+10239,Under Canvas Mount Rushmore,ChIJT5v8wJk3fYcRXPCk5iNTH3A,1.000,matched
+10240,Under Canvas Mount Rushmore,ChIJT5v8wJk3fYcRXPCk5iNTH3A,1.000,matched
+10241,Under Canvas Mount Rushmore,ChIJT5v8wJk3fYcRXPCk5iNTH3A,1.000,matched
+10244,Little Arrow Outdoor Resort,ChIJKWnNWCmpXogRlCbW39P1bNY,1.000,matched
+10245,Little Arrow Outdoor Resort,ChIJKWnNWCmpXogRlCbW39P1bNY,1.000,matched
+10247,Star Gazer Glamping Village,ChIJs4KkQA6rXogR0wsUuhSz60w,1.000,matched
+10248,Under Canvas Great Smoky Mountains,ChIJoeGd1cFVWYgRlnHrFyybXPc,1.000,matched
+10249,Under Canvas Great Smoky Mountains,ChIJoeGd1cFVWYgRlnHrFyybXPc,1.000,matched
+10250,Under Canvas Great Smoky Mountains,ChIJoeGd1cFVWYgRlnHrFyybXPc,1.000,matched
+10251,Under Canvas Great Smoky Mountains,ChIJoeGd1cFVWYgRlnHrFyybXPc,1.000,matched
+10252,Collective Retreats Hill Country,,0,not_found
+10253,Collective Retreats Hill Country,,0,not_found
+10254,Collective Retreats Hill Country,,0,not_found
+10260,Loving Heart Retreat,ChIJp9vug5LnWoYRthdG-8MfQ7Q,0.952,matched
+10261,Loving Heart Retreat,ChIJp9vug5LnWoYRthdG-8MfQ7Q,0.952,matched
+10266,Safari for the Soul Luxury Glamping,ChIJ7f7_xIMfW4YRp1DKtBVy7qY,0.800,matched
+10267,Serana,ChIJq3sGMzFjRIYRwBbVkLkRC6w,1.000,matched
+10269,Sinya on Lone Man Creek,,0,not_found
+10271,Twin Falls Ranch,ChIJW4LD3t-PW4YRuHkl1CZAe18,1.000,matched
+10272,Wahwahtaysee Resort,ChIJqwsUZqxSQ4YR2MLwl3MQK-Q,1.000,matched
+10273,Wahwahtaysee Resort,ChIJqwsUZqxSQ4YR2MLwl3MQK-Q,1.000,matched
+10274,Walden Retreats Hill Country,ChIJEaythKMLW4YRLoGEWHpbII8,1.000,matched
+10276,Basecamp 37,ChIJl9dX4e_aNIcRjs3Pf3QWpzk,1.000,matched
+10277,Conestoga Ranch,ChIJt4rubscTVIcRdx3AkrRVk58,1.000,matched
+10278,Conestoga Ranch,ChIJt4rubscTVIcRdx3AkrRVk58,1.000,matched
+10279,Conestoga Ranch,ChIJt4rubscTVIcRdx3AkrRVk58,1.000,matched
+10281,Open Sky,ChIJe_pR2FTvyoARtGCJM4RDGrA,0.615,matched
+10282,Open Sky,ChIJe_pR2FTvyoARtGCJM4RDGrA,0.615,matched
+10283,Open Sky,ChIJe_pR2FTvyoARtGCJM4RDGrA,0.615,matched
+10285,Open Sky,ChIJe_pR2FTvyoARtGCJM4RDGrA,0.615,matched
+10286,ULUM Moab,,0,not_found
+10290,Under Canvas Lake Powell – Grand Staircase,ChIJK9afHSxFNIcRTSpwa_3bTV0,0.976,matched
+10291,Under Canvas Lake Powell – Grand Staircase,ChIJK9afHSxFNIcRTSpwa_3bTV0,0.976,matched
+10292,Under Canvas Lake Powell – Grand Staircase,ChIJK9afHSxFNIcRTSpwa_3bTV0,0.976,matched
+10293,Under Canvas Moab,ChIJZ04okFfjR4cRFgT_gcB_-kk,1.000,matched
+10294,Under Canvas Moab,ChIJZ04okFfjR4cRFgT_gcB_-kk,1.000,matched
+10295,Under Canvas Moab,ChIJZ04okFfjR4cRFgT_gcB_-kk,1.000,matched
+10296,Under Canvas Moab,ChIJZ04okFfjR4cRFgT_gcB_-kk,1.000,matched
+10297,Under Canvas Zion,ChIJkQ8wembsyoARBErVPw0Jgok,1.000,matched
+10301,Zion Ponderosa Ranch Resort,ChIJacxYqTvEyoARKwxBP47TfaY,1.000,matched
+10302,Lakedale,,0,not_found
+10303,Lakedale,,0,not_found
+10304,Pampered Wilderness,ChIJuQb0rbRxkVQRkgImzJpb6ok,1.000,matched
+10306,Glamping of Jackson Hole,,0,not_found
+10308,Shash Dine' EcoRetreat,ChIJwS9bZTZyNIcRaSut7Z2nJ_U,1.000,matched
+10309,Shash Dine' EcoRetreat,ChIJwS9bZTZyNIcRaSut7Z2nJ_U,1.000,matched
+10310,Jupe Redwoods,,0,not_found
+10311,Treebones Resort,ChIJEQTXma-ikoARCNwLZLNVDKA,1.000,matched
+10312,Treebones Resort,ChIJEQTXma-ikoARCNwLZLNVDKA,1.000,matched
+10313,CampV,,0,not_found
+10314,"Glamping Florida, by River Ranch",,0,not_found
+10315,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+10316,North Haven Campground,ChIJf0Q4_7mPY1MRua-OUpLey3o,1.000,matched
+10317,The Inn & Spa at Cedar Falls,ChIJ1eIV4I7qR4gRZiVHOMvR0kY,0.857,matched
+10319,Trout Creek Wilderness Lodge,ChIJDbiJb8Pbv1QRoqsu69VpbuI,1.000,matched
+10325,North Texas Jellystone Park,,0,not_found
+10333,Glamp Blue Ridge,ChIJgdrmJMKhX4gRxPvI8URyFAA,1.000,matched
+10334,The Glamp Inn,ChIJCdiYeWe_94gRhPGCqKS2aSg,1.000,matched
+10336,Miracle and Banbury Hot Springs,ChIJq2KLSheNrFQRjZqU-8NAiks,0.613,matched
+10338,Beehive Domes,ChIJVxANGgCtyokROqv80cH63q4,1.000,matched
+10339,"Klarhet, Lusten, Minnesota",,0,not_found
+10340,River Rock Point,ChIJj_wjAhk_z4cRPw4yrpK6Xlg,1.000,matched
+10342,Asheville Glamping,,0,not_found
+10343,Asheville Glamping,,0,not_found
+10344,Asheville Glamping,,0,not_found
+10345,Emberglow Outdoor Resort,ChIJ-WOoLBxfV4gRzgXTQC_6M1g,1.000,matched
+10346,The Glamping Collective,ChIJsb2KSjqDWYgRDPdioqYhuYE,0.697,matched
+10348,Kimberly Creek Retreat,ChIJfUNPkmcFlIcRCGolfPA5dm8,1.000,matched
+10349,Kimberly Creek Retreat,ChIJfUNPkmcFlIcRCGolfPA5dm8,1.000,matched
+10350,The Outlier Inn,ChIJXca5rYTH3IkRIBxCQjWbIG4,1.000,matched
+10353,The Inn & Spa at Cedar Falls,ChIJ1eIV4I7qR4gRZiVHOMvR0kY,0.857,matched
+10358,Airydale Retreat,ChIJNb2cDrFXyYkRaaOrSUbwlzM,1.000,matched
+10359,Bolt Farm Treehouse,ChIJnXkZ1D7_YIgRCYTFc-SKGqw,0.655,matched
+10360,Bolt Farm Treehouse,ChIJnXkZ1D7_YIgRCYTFc-SKGqw,0.655,matched
+10363,Tennessee Glamping,ChIJNXCFRnAXYYgRq517Jo-U3jY,1.000,matched
+10365,Domance Glamping,ChIJj3BmFcJnSYYRiYcPrmZunAQ,1.000,matched
+10369,Onera Fredericksburg,ChIJ18ahsHDBW4YRjNHDHOpY1I8,1.000,matched
+10373,WV Glamping Domes,ChIJGeIu6qoxTIgRY0YjSayF-UA,1.000,matched
+10374,Tammah,,0,not_found
+10375,Tammah,,0,not_found
+10379,Shash Dine' EcoRetreat,ChIJwS9bZTZyNIcRaSut7Z2nJ_U,1.000,matched
+10381,Cutty's Hayden Creek Resort,,0,not_found
+10382,"Glamping Florida, by River Ranch",,0,not_found
+10383,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+10384,Sandy Pines Campground,ChIJUyvtQRmpskwRfwRU450MoP8,1.000,matched
+10385,Fredrock,,0,not_found
+10386,Chico Hot Springs Resort,ChIJD2dSDE7sT1MRFRMJ3fyZoSY,0.706,matched
+10387,Cozy Heron Glamping,,0,not_found
+10388,Catskill Conestoga Wagon Outpost,,0,not_found
+10389,Hilltop Resorts and Campground,ChIJh--VXFHvR4gRm-YPnOWapwk,0.968,matched
+10390,Orr Family Farm,,0,not_found
+10391,North Texas Jellystone Park,,0,not_found
+10393,Conestoga Ranch,ChIJt4rubscTVIcRdx3AkrRVk58,1.000,matched
+10395,Zion White Bison Resort,ChIJyTVCNqbxyoARrfcrvoKRRCA,0.622,matched
+10396,Zion Wildflower Resort,,0,not_found
+10398,Goosewing Ranch,ChIJg9iGUxDsUlMRh4kyDxXA8ew,1.000,matched
+10399,Alpenglow Luxury Camping,,0,not_found
+10400,Alpenglow Luxury Camping,,0,not_found
+10401,Alpenglow Luxury Camping,,0,not_found
+10402,The River Electric,ChIJYVPT3U0hhIARcnhXwYW5Sqc,1.000,matched
+10404,Little Raccoon Key,,0,not_found
+10407,Zion Wildflower Resort,,0,not_found
+10408,Lakedale Resort,,0,not_found
+10410,Cloudberry Cabin,ChIJIQ4bb7uJSlERXzDChj2jW2Y,1.000,matched
+10411,Cloudberry Cabin,ChIJIQ4bb7uJSlERXzDChj2jW2Y,1.000,matched
+10412,Log Cabin Wilderness Lodge,ChIJEaC-uDeVSlERQFp9Gu7nbNc,1.000,matched
+10413,Log Cabin Wilderness Lodge,ChIJEaC-uDeVSlERQFp9Gu7nbNc,1.000,matched
+10418,Costanoa,,0,not_found
+10419,Costanoa,,0,not_found
+10421,El Capitan Canyon,ChIJWxoXo9VO6YARypm7wEx_e1M,1.000,matched
+10422,El Capitan Canyon,ChIJWxoXo9VO6YARypm7wEx_e1M,1.000,matched
+10423,Glen Oaks Big Sur,ChIJI-IxvvmPjYARRG88R_Ocs6A,1.000,matched
+10425,Huttopia Paradise Springs,ChIJ_____w8aw4ARXgTbgtBNa-o,1.000,matched
+10426,Postcard Cabins Big Bear,,0,not_found
+10427,Reverie retreat,ChIJ8w9EM31UmoARg41c2Y5SLMY,1.000,matched
+10429,Arapaho Valley Ranch,ChIJz80AOqHUa4cRbBhMCqQikqw,1.000,matched
+10430,Avalanche Ranch,ChIJs2x6YuJWQIcRUV7GV2u3lUY,1.000,matched
+10431,Camp V,,0,not_found
+10432,Camp V,,0,not_found
+10433,Cutty's Hayden Creek Resort,,0,not_found
+10434,Cutty's Hayden Creek Resort,,0,not_found
+10435,Lake Compounce,,0,not_found
+10436,Lake Compounce,,0,not_found
+10437,Sticks and Stones Farm,ChIJU4wj4Eb954kRjdBvChNeO3k,1.000,matched
+10438,Sticks and Stones Farm,ChIJU4wj4Eb954kRjdBvChNeO3k,1.000,matched
+10439,White Pines Campsites,ChIJBVqnwVkK54kR7xRYstkf3Vw,1.000,matched
+10440,White Pines Campsites,ChIJBVqnwVkK54kR7xRYstkf3Vw,1.000,matched
+10441,Coldwater Gardens,,0,not_found
+10442,"Glamping Florida, by River Ranch",,0,not_found
+10443,Postcard Cabins Gilchrist Springs,,0,not_found
+10444,Trail Lakes Campground,ChIJtSwjZ2lE2ogR8a54DXDaFzk,1.000,matched
+10445,Trail Lakes Campground,ChIJtSwjZ2lE2ogR8a54DXDaFzk,1.000,matched
+10446,Twin Lakes Camp Resort,ChIJqz1kRXHUk4gRMKbE8uOOiGI,1.000,matched
+10448,Hidden Hollow Resort,,0,not_found
+10450,Aspen Grove Inn,,0,not_found
+10451,Aspen Grove Inn,,0,not_found
+10452,Bristol Cabins,ChIJQ0SCgYJxVYcRvctlwivF5K0,1.000,matched
+10453,Miracle and Banbury Hot Springs,ChIJq2KLSheNrFQRjZqU-8NAiks,0.613,matched
+10454,Moose Creek Ranch,ChIJ8_XRfEcLU1MRtrUCVxGi3CY,1.000,matched
+10455,Moose Creek Ranch,ChIJ8_XRfEcLU1MRtrUCVxGi3CY,1.000,matched
+10456,North Haven Campground,ChIJf0Q4_7mPY1MRua-OUpLey3o,1.000,matched
+10457,North Haven Campground,ChIJf0Q4_7mPY1MRua-OUpLey3o,1.000,matched
+10458,Coy and Wilma's Campsites and Cabins,,0,not_found
+10459,Coy and Wilma's Campsites and Cabins,,0,not_found
+10460,Coy and Wilma's Campsites and Cabins,,0,not_found
+10461,Shale Lake,,0,not_found
+10462,Shale Lake,,0,not_found
+10463,Timber Ridge Outpost & Cabins,,0,not_found
+10464,Timber Ridge Outpost & Cabins,,0,not_found
+10465,Timber Ridge Outpost & Cabins,,0,not_found
+10466,Timber Ridge Outpost & Cabins,,0,not_found
+10467,Postcard Cabins Brown County,,0,not_found
+10468,Lago Linda Hideaway,ChIJwbtk8o9vQ4gR4QE0K89I2LI,1.000,matched
+10469,Lago Linda Hideaway,ChIJwbtk8o9vQ4gR4QE0K89I2LI,1.000,matched
+10470,Lago Linda Hideaway,ChIJwbtk8o9vQ4gR4QE0K89I2LI,1.000,matched
+10471,Lake Compounce,,0,not_found
+10472,Little River Bluffs,,0,not_found
+10473,Savage River Lodge,ChIJUS-61mK9yokR_G4ILl86_F4,1.000,matched
+10474,Postcard Cabins The Thumb,,0,not_found
+10476,Fredrock,,0,not_found
+10478,Longleaf Piney Resort,ChIJ92Olax8hnYgRruhJIBX6fYk,1.000,matched
+10479,Bison Creek Ranch,,0,not_found
+10480,Bison Creek Ranch,,0,not_found
+10483,Long Cove Resort,,0,not_found
+10484,Moravian Falls Family Campground & Cabins,ChIJSyMtgpUSUYgR1Ev9iM37KfY,0.854,matched
+10485,Moravian Falls Family Campground & Cabins,ChIJSyMtgpUSUYgR1Ev9iM37KfY,0.854,matched
+10486,Rusty's Roost Rentals,ChIJuSc6VKcLWogRE4DfrNxVzWQ,0.708,matched
+10488,Stay Nantahala,,0,not_found
+10489,Stay Nantahala,,0,not_found
+10490,The Glamping Collective,ChIJsb2KSjqDWYgRDPdioqYhuYE,0.697,matched
+10491,The Glamping Collective,ChIJsb2KSjqDWYgRDPdioqYhuYE,0.697,matched
+10492,Kimberly Creek Retreat,ChIJfUNPkmcFlIcRCGolfPA5dm8,1.000,matched
+10494,Huttopia White Mountains,ChIJo7Ogk38Ls0wRXEBU20LGOUY,1.000,matched
+10495,Mustang Monument,,0,not_found
+10496,Camp Catskills,ChIJsUd_cra_3YkRV3ozGqxW9sM,0.636,matched
+10498,Eastwind Hotels Windham,ChIJEW3b0KdM3IkR1OWyEQf9s70,0.917,matched
+10499,At Boulders Edge,,0,not_found
+10500,At Boulders Edge,,0,not_found
+10501,At Boulders Edge,,0,not_found
+10502,Hilltop Resorts and Campground,ChIJh--VXFHvR4gRm-YPnOWapwk,0.968,matched
+10503,Mohican Adventures,,0,not_found
+10504,Mohican Adventures,,0,not_found
+10505,Mohican Adventures,,0,not_found
+10506,Mohican Adventures,,0,not_found
+10509,The Mohicans Treehouse Resort and Wedding Venue,ChIJUTrxtZhiN4gR0oJavhVeFPw,1.000,matched
+10511,Elk Lake Resort,ChIJEwxxs9rHuFQRNppdgdbCBxo,1.000,matched
+10512,Elk Lake Resort,ChIJEwxxs9rHuFQRNppdgdbCBxo,1.000,matched
+10514,Elk Lake Resort,ChIJEwxxs9rHuFQRNppdgdbCBxo,1.000,matched
+10516,Paulina Lake Lodge,ChIJlyQXUP2OuFQRisgGyz3es5A,1.000,matched
+10517,Paulina Lake Lodge,ChIJlyQXUP2OuFQRisgGyz3es5A,1.000,matched
+10518,Tipi Village Retreat,ChIJ211r8JzuwFQR80x9J-0wEBI,1.000,matched
+10519,Deerpath Cabins,,0,not_found
+10520,Deerpath Cabins,,0,not_found
+10521,Deerpath Cabins,,0,not_found
+10522,Laurel Oaks Estate,ChIJF1UQidsTAIkRYPOwrFMk0Vk,1.000,matched
+10523,Saluda Outdoor Center,ChIJ7fr4Dy43WIgRc7XM3OX8Gkc,1.000,matched
+10524,Bear Den Cabins & Camp,ChIJDclrLeU7fYcR5BRDL1aBxGg,1.000,matched
+10526,Buffalo Ridge Camp Resort,ChIJjZe3r7jNYocRLydWxDnlCI0,1.000,matched
+10527,Buffalo Ridge Camp Resort,ChIJjZe3r7jNYocRLydWxDnlCI0,1.000,matched
+10528,Highland Meadows Resort,,0,not_found
+10530,Postcard Cabins Dale Hollow,,0,not_found
+10531,Camp Fimfo,,0,not_found
+10535,Geronimo Creek Retreat,ChIJ8Y9z7Ea3XIYRhWKdUf19qFo,1.000,matched
+10539,North Texas Jellystone Park,,0,not_found
+10541,Serana,ChIJq3sGMzFjRIYRwBbVkLkRC6w,1.000,matched
+10542,Boulder Mountain Guest Ranch,ChIJxQcmYLx3SocRYjCr0yA3vuk,1.000,matched
+10544,Zion Ponderosa Ranch Resort,ChIJacxYqTvEyoARKwxBP47TfaY,1.000,matched
+10546,Massanutten Springs,,0,not_found
+10549,Carson Ridge Luxury Cabins,ChIJZX5irMbflVQRheLsz_fS5cA,1.000,matched
+10550,Lakedale Resort,,0,not_found
+10551,French Creek at Bush Creek Ranch,,0,not_found
+10553,Goosewing Ranch,ChIJg9iGUxDsUlMRh4kyDxXA8ew,1.000,matched
+10554,Zion Wildflower Resort,,0,not_found
+10555,Arizonea Luxury Expeditions,,0,not_found
+10556,Arizonea Luxury Expeditions,,0,not_found
+10557,Shash Dine' EcoRetreat,ChIJwS9bZTZyNIcRaSut7Z2nJ_U,1.000,matched
+10561,Wander Camp Olympic,ChIJsdD1fjFTjlQRgbbaFDxdiQc,1.000,matched
+10563,Wander Camp Grand Canyon,ChIJPQd3TgjlMocRJe5uc8tKvQo,1.000,matched
+10564,Wander Camp Grand Canyon,ChIJPQd3TgjlMocRJe5uc8tKvQo,1.000,matched
+10565,Wander Camp Grand Canyon,ChIJPQd3TgjlMocRJe5uc8tKvQo,1.000,matched
+10566,Alter Experiences (Glamping in Mt Laguna & Lake Cuyamaca),ChIJC4kLTUTX24ARXh_gS3MpsLg,0.947,matched
+10567,Under Canvas Yosemite,ChIJGaQi9dXZloARiz7nOaWOI3A,1.000,matched
+10568,Under Canvas Yosemite,ChIJGaQi9dXZloARiz7nOaWOI3A,1.000,matched
+10569,Under Canvas Yosemite,ChIJGaQi9dXZloARiz7nOaWOI3A,1.000,matched
+10570,Under Canvas Yosemite,ChIJGaQi9dXZloARiz7nOaWOI3A,1.000,matched
+10572,Timberline Glamping Co. Hillsborough River,ChIJNSWBGBK1wogR-dhPcfH0a14,0.929,matched
+10574,Timberline Glamping Co. Lake Lanier,ChIJOWCZ7VOP9YgRrvGweQsKAyc,0.610,matched
+10575,Untamed Honey,,0,not_found
+10576,Wander Camp Yellowstone,ChIJqzTPGdigUVMRZMsgzT-FC_Y,1.000,matched
+10577,Wander Camp Yellowstone,ChIJqzTPGdigUVMRZMsgzT-FC_Y,1.000,matched
+10578,Wander Camp Yellowstone,ChIJqzTPGdigUVMRZMsgzT-FC_Y,1.000,matched
+10579,Wander Camp Yellowstone,ChIJqzTPGdigUVMRZMsgzT-FC_Y,1.000,matched
+10581,The Grove Glamping,ChIJB0VgqTXryVIR_xHvSiUD-HQ,1.000,matched
+10583,The Embers,,0,not_found
+10584,Pickwick Adventures,,0,not_found
+10585,Pickwick Adventures,,0,not_found
+10586,Sleepy Teepee,ChIJywdf42VXQ1MRxqnKCIQx8iQ,1.000,matched
+10587,Under Canvas North Yellowstone,,0,not_found
+10588,Under Canvas North Yellowstone,ChIJESiIYxyJT1MRYSZgWMK1mfk,0.625,matched
+10589,Under Canvas North Yellowstone,ChIJESiIYxyJT1MRYSZgWMK1mfk,0.625,matched
+10590,Under Canvas North Yellowstone,ChIJESiIYxyJT1MRYSZgWMK1mfk,0.625,matched
+10591,Under Canvas North Yellowstone,ChIJESiIYxyJT1MRYSZgWMK1mfk,0.625,matched
+10593,Under Canvas North Yellowstone,ChIJESiIYxyJT1MRYSZgWMK1mfk,0.625,matched
+10594,Wander Camp Glacier,,0,not_found
+10595,Wander Camp Glacier,,0,not_found
+10596,Wander Camp Glacier,,0,not_found
+10597,Wander Camp Glacier,,0,not_found
+10598,Asheville Glamping,,0,not_found
+10599,Hub North,ChIJMctwc8zzs0wRxLZ_nkPlJ5w,1.000,matched
+10602,Adirondack Safari,ChIJKYiYg6rD34kR-EcBYB0Imlg,1.000,matched
+10603,Adirondack Safari,ChIJKYiYg6rD34kR-EcBYB0Imlg,1.000,matched
+10604,Good Natured Glamping,ChIJlzOnxmVd0okRQSAHAG12dr4,1.000,matched
+10606,The Eco Camp,,0,not_found
+10607,City Lights Glamping,,0,not_found
+10608,Elk Lake Resort,ChIJEwxxs9rHuFQRNppdgdbCBxo,1.000,matched
+10609,River Mountain,ChIJQ1RKbIxbyokRTuax9-fiaJg,1.000,matched
+10610,Evanscliff,ChIJc5AoKqvSfIcR5aWieL1kKtE,0.909,matched
+10616,Wander Camp Bryce Canyon,ChIJxyUGnBJtNYcRFPuOkyrhtl4,0.667,matched
+10618,Wander Camp Bryce Canyon,ChIJxyUGnBJtNYcRFPuOkyrhtl4,0.667,matched
+10619,Wander Camp Bryce Canyon,ChIJxyUGnBJtNYcRFPuOkyrhtl4,0.667,matched
+10625,Zion Glamping Adventures,ChIJ5SQMw38gy4ARjw4IO6oENKg,1.000,matched
+10628,Under Canvas Columbia River Gorge,ChIJwUeJD4trllQRWKcDRM60m00,1.000,matched
+10629,Under Canvas Columbia River Gorge,ChIJwUeJD4trllQRWKcDRM60m00,1.000,matched
+10630,Under Canvas Columbia River Gorge,ChIJwUeJD4trllQRWKcDRM60m00,1.000,matched
+10631,Under Canvas Columbia River Gorge,ChIJwUeJD4trllQRWKcDRM60m00,1.000,matched
+10632,Under Canvas Columbia River Gorge,ChIJwUeJD4trllQRWKcDRM60m00,1.000,matched
+10633,Under Canvas Columbia River Gorge,ChIJwUeJD4trllQRWKcDRM60m00,1.000,matched
+10634,Under Canvas Columbia River Gorge,ChIJwUeJD4trllQRWKcDRM60m00,1.000,matched
+10636,AutoCamp Joshua Tree,ChIJt4EN-Prb2oARTsse6GAxPKw,1.000,matched
+10637,AutoCamp Russian River,,0,not_found
+10638,AutoCamp Russian River,,0,not_found
+10642,Whispering Springs Wilderness Retreat,,0,not_found
+10643,Royal Gorge Yurts,ChIJm8bO_tSTFIcRZt-ORcEqbgY,1.000,matched
+10645,Kentucky Lake Glamping,ChIJdyeyrD0Be4gRYSI9d5niiI4,1.000,matched
+10646,Progress Park Airstream Resort & Event Venue,ChIJ6csFwX4LaYgRUDzS3pKRlM4,1.000,matched
+10647,AutoCamp Cape Cod,ChIJnWgCytPZ5IkR_CkLfcmdRlY,1.000,matched
+10648,Fredrock,,0,not_found
+10649,Tobacco River Ranch Glamping,ChIJFTE05W-1ZVMRvnB_xnnfF-A,1.000,matched
+10650,AutoCamp Asheville,ChIJ0a-SD5eLWYgRbSs3tJ2HXI8,1.000,matched
+10652,Camp Catskills,ChIJsUd_cra_3YkRV3ozGqxW9sM,0.636,matched
+10653,Treetopia Campground,,0,not_found
+10654,Natural Gathering Grounds,ChIJmWGGla2V_ogRswKRKFV7f1E,1.000,matched
+10656,Little Arrow Outdoor Resort,ChIJKWnNWCmpXogRlCbW39P1bNY,1.000,matched
+10658,Green Acres,,0,not_found
+10659,The Juniper Ranch & Retreat,ChIJGWPWBc-dXIYRbUl8VSF5MTM,1.000,matched
+10660,Twin Falls Ranch,ChIJW4LD3t-PW4YRuHkl1CZAe18,1.000,matched
+10661,AutoCamp Zion,ChIJiy_LNkbuyoARS880CP-Azu4,1.000,matched
+10662,Yonder Escalante,ChIJFRmpWNWPNYcRlVRKNpGrTW0,0.625,matched
+10664,Safari for the Soul Luxury Glamping,,0,not_found
+10665,Zion Ponderosa,ChIJcVyK5VTFyoAR84F87dh-7AI,1.000,matched
+10666,Zion Ponderosa Ranch Resort,ChIJacxYqTvEyoARKwxBP47TfaY,1.000,matched
+10670,Glamping Tent,,0,not_found
+10671,Quaint Glamping,,0,not_found
+10672,Postcard Cabins Hocking Hills,,0,not_found
+10674,Zion White Bison Resort,ChIJyTVCNqbxyoARrfcrvoKRRCA,0.622,matched
+10675,Postcard Cabins Shenandoah North,,0,not_found
+10676,Udoscape Eco-Glamping Resort,ChIJQf25m9k7W4YRZ6WYypFbW4c,1.000,matched
+10677,Elk Island Retreat,ChIJGWCMhTFDoFMRaHIJItaI2AM,1.000,matched
+10678,Mount Engadine Lodge,ChIJrbLquIvbcFMRt4Pjau4UHfM,1.000,matched
+10679,Cape Carraholly Retreat,ChIJ14pZWQN5hlQRGNMVy9WcI28,1.000,matched
+10681,Cheekye Ranch,ChIJi0h5PSD8hlQRMmo0KfHx_WU,1.000,matched
+10683,Radius Retreat,ChIJyeaqSeluelMRJCtRtupkOo8,1.000,matched
+10685,Imago Village,ChIJgx-aoXmP6kwRy1rx3h0-FfQ,1.000,matched
+10687,Imago Village,ChIJgx-aoXmP6kwRy1rx3h0-FfQ,1.000,matched
+10688,Yourtes Glamping du Poisson Blanc,ChIJUUS51H4l0EwRf7eKNk42Stc,1.000,matched
+10690,Boulder Mountain Resort,ChIJcbvlFpE2eVMR4uKCRMJ0a1g,1.000,matched
+10691,Boulder Mountain Resort,ChIJcbvlFpE2eVMR4uKCRMJ0a1g,1.000,matched
+10692,Four Corners Algonquin,,0,not_found
+10694,Bel Air Resort Mont-Tremblant,,0,not_found
+10695,Sundance by Basecamp,ChIJl4nJuO3ncFMRPN_6O04bLTk,1.000,matched
+10696,Boulder Mountain Resort,ChIJcbvlFpE2eVMR4uKCRMJ0a1g,1.000,matched
+10697,Camp Moose Trail,ChIJy2ATo7TJeVMRTYt6ilRD9x4,1.000,matched
+10698,Clayoquot Wilderness Lodge,ChIJy-YzMZrHiVQRzPDs4pvgFyk,0.743,matched
+10699,Haida Gwaii Glamping Co.,ChIJJ9WrtlkvbVQRLnAc0sA36VA,1.000,matched
+10700,So Damn Lucky Glamping,ChIJH3l-NNByiVQRO_hliadMRsI,1.000,matched
+10701,Four Corners Algonquin,,0,not_found
+10702,Four Corners Algonquin,,0,not_found
+10703,Whispering Springs Wilderness Retreat,,0,not_found
+10705,Brown's Bay Resort,ChIJS_haVMe2YlQRUrPI1TZVw6U,1.000,matched
+10706,Glamping Aboiteau,ChIJzzBCJw6doEwR4-H58jR3imc,1.000,matched
+10707,Joli Voyageur Resort & Campground,ChIJ1Y60IIorKU0Rrj5lACEtYkc,1.000,matched
+10709,Arcana,,0,not_found
+10710,Bridgeviews Retreat & Glamping,ChIJF0emDr4Rc1MRUWQGId_VvBk,1.000,matched
+10711,Elevated Escapes Glamping,,0,not_found
+10712,Elk Island Retreat,ChIJGWCMhTFDoFMRaHIJItaI2AM,1.000,matched
+10713,Glamping Resorts - Castle Provincial Park,,0,not_found
+10714,Half Moon Lake Resort,ChIJTfRTJKUUoFMRGBZKwStKans,1.000,matched
+10715,Ravines Edge Geo Glamping,ChIJyySBrMD1n1MR01aI8950vRg,1.000,matched
+10716,Refuge Bay,,0,not_found
+10717,Simply Glamping,ChIJ_TlXnXRFn1MRUEdHwis8AFM,1.000,matched
+10718,Adventure Domes,ChIJ_bFQmgOCfFMRQEvdo9bYHXM,1.000,matched
+10719,Backeddy Resort,ChIJVVVVVdzIh1QRNzKKQ6Noz2k,0.625,matched
+10720,Boulder Mountain Resort,ChIJcbvlFpE2eVMR4uKCRMJ0a1g,1.000,matched
+10721,Moonlite Canopy,ChIJ19YU30Y_3VIRndAwIqfx8as,0.933,matched
+10722,Stay Wilder,,0,not_found
+10723,Wildpod,,0,not_found
+10724,Winderdome Resort Inc.,ChIJcxqM0xJjelMR-Yl19EUKOmc,1.000,matched
+10726,Oak Haven Oasis,ChIJ6VVROyaH51IRH4cZU4KxnrY,1.000,matched
+10727,Ravens Hollow Eco Dome Resort,ChIJNVl3nfht-FIRlIGAJj5yNFE,1.000,matched
+10728,IronTree Glamping,ChIJma9bRXrpoEwRy_gsa2bDCVY,1.000,matched
+10729,Lake View Glamping,,0,not_found
+10730,Archers Edge,,0,not_found
+10731,True North Destinations,ChIJqUKKniIfZ0sRrbv1cPwLOTo,1.000,matched
+10732,Back Forty Glamping,ChIJT-tIex0HKogRvNNoT6rY7ZM,1.000,matched
+10733,Glen Oro Farm,,0,not_found
+10734,Grotto Getaway,,0,not_found
+10735,Otter Pointe Resort,ChIJ96BwPtbNKU0R4zFb_bKBqcg,1.000,matched
+10736,Rustic Retreat Glamping Dome,ChIJgWX7llE304kRVs8IQOCdJJk,1.000,matched
+10737,Tiny Village Parry Sound,ChIJi_CwzvfcK00RbxsVHXX5ssw,1.000,matched
+10738,Nellie's Landing,,0,not_found
+10741,Bel Air Resort Mont-Tremblant,,0,not_found
+10742,Dômes Charlevoix,,0,not_found
+10744,Glamping Resorts Ltd - Buffalo Pound Lake,ChIJ2y6we5GVG1MR99x9FLd1mmg,1.000,matched
+10745,Elevated Escapes Glamping,,0,not_found
+10747,Brown's Bay Resort,ChIJS_haVMe2YlQRUrPI1TZVw6U,1.000,matched
+10748,Siwash Lake Wilderness Resort & Ranch,,0,not_found
+10749,Glen Oro Farm,,0,not_found
+10750,The Northridge Inn & Resort,ChIJyzRX3GiJKU0Rwyj8tkI6JyU,1.000,matched
+10752,Elk Island Retreat,ChIJGWCMhTFDoFMRaHIJItaI2AM,1.000,matched
+10754,Half Moon Lake Resort,ChIJTfRTJKUUoFMRGBZKwStKans,1.000,matched
+10755,Mount Engadine Lodge,ChIJrbLquIvbcFMRt4Pjau4UHfM,1.000,matched
+10756,Refuge Bay,,0,not_found
+10758,Skyridge Glamping,ChIJWZvg3-zbcFMRHim-PS6xRQg,1.000,matched
+10759,Backeddy Resort,ChIJVVVVVdzIh1QRNzKKQ6Noz2k,0.625,matched
+10760,Backeddy Resort,ChIJVVVVVdzIh1QRNzKKQ6Noz2k,0.625,matched
+10762,Brown's Bay Resort,ChIJS_haVMe2YlQRUrPI1TZVw6U,1.000,matched
+10763,Cabana Desolation Eco Resort,,0,not_found
+10765,Ecoscape Cabins,ChIJNdo6qHl-ZFQRre-BBi-U0aM,1.000,matched
+10766,Nimmo Bay Wilderness Resort,,0,not_found
+10767,Siwash Lake,,0,not_found
+10768,Siwash Lake Wilderness Resort & Ranch,,0,not_found
+10769,Footprints Resort,,0,not_found
+10770,Ipfun,,0,not_found
+10773,Tiny Village Parry Sound,ChIJi_CwzvfcK00RbxsVHXX5ssw,1.000,matched
+10774,Wolf Den Nature Retreat Hostel & Cabins,,0,not_found
+10777,Station Chêne Rouge : Glamping et Mariages en Nature à North Hatley | Mini-Chalets & Tentes Safari,,0,not_found
+10779,Glamping Resorts - Castle Provincial Park,,0,not_found
+10781,Glamping Resorts - Castle Provincial Park,,0,not_found
+10782,Bridgeviews Retreat & Glamping,ChIJF0emDr4Rc1MRUWQGId_VvBk,1.000,matched
+10783,Utopia Feels,,0,not_found
+10784,Grotto Getaway,,0,not_found
+10785,Stoco Lake Lodge,ChIJd1-3PSAl00wRviG-JCe_BtY,1.000,matched
+10786,Village Viking Hop,ChIJ7-4Cx11NvkwRZQciC2ca684,0.944,matched
+10787,Camp Woof Willow,ChIJSWiJgo8xBVMRuRaG9eY2Egs,0.938,matched
+10789,Camp Woof Willow,ChIJSWiJgo8xBVMRuRaG9eY2Egs,0.938,matched
+10790,Long Point Eco-Adventures Resort & Retreat Centre,,0,not_found
+10791,Ray's Cottages,,0,not_found
+10840,The Green O,ChIJ8Ta7KFRVXFMRAjzcBhbwyv4,1.000,matched
+10842,Dunton Hot Springs,,0,not_found
+10843,Ithaca by Firelight Camp,,0,not_found
+10846,Headwaters Jupiter,ChIJpz_GF-jV3ogRP3F07YjZ2_I,1.000,matched
+10847,Blue Bear Mountain Camp,ChIJX7yyumX4UIgR8ijFCuOsdD4,0.783,matched
+10849,Waldhaus Retreat,,0,not_found
+10850,Pinecone Treehouse,,0,not_found
+10851,Treehouse in Vineyard,,0,not_found
+10852,Spartan Trailer,,0,not_found
+10853,Bohemian Bus,,0,not_found
+10854,Pool Ranch,,0,not_found
+10855,Blue Sky Center,ChIJFZNLF1fb64ARfhcEeGGVbVk,1.000,matched
+10856,Bad Moon,,0,not_found
+10857,Wylder Hope Valley,,0,not_found
+10859,Huttopia Berkshires,ChIJzR66Mdis4IkRlRPG2zTLp2I,1.000,matched
+10860,Huttopia Les Deux Lacs – Laurentides,,0,not_found
+10861,Catalina Island Camp,,0,not_found
+10863,Aman Camp Sarika,,0,not_found
+10867,KitFox,,0,not_found
+10869,Moose Meadow Lodge,,0,not_found
+10872,Treetop Villas at Mirror Lake,,0,not_found
+10875,Muskoka Dome,ChIJaciWyRSDKk0RVSQwAKE7u9A,1.000,matched
+10876,Birchwood Luxury Camping,,0,not_found
+10878,Triple G's Resort,,0,not_found
+10879,Cedar Bloom Farm,ChIJX5tlsMT5z1QRofeguRXSF5E,1.000,matched
+10881,Outpost X,ChIJbYtlOwCXtYARHbMdielyBao,1.000,matched
+10882,North Shore Camping Company,ChIJT1_cMZZNr1IRk1tRUBm5_Qg,0.815,matched
+10883,Outdoors Elevated,,0,not_found
+10884,Zen Zion Glamping Domes,ChIJVak2OKI0NYcRg96SeuYO0vI,0.609,matched
+10886,Onera Wimberley,ChIJ--WRCgBfW4YRmLFzxePM_nE,1.000,matched
+10888,Camp Elena,ChIJRXe3Ro757YYR6G8v4qG_Tbw,1.000,matched
+10889,Talula Mesa Glamping Resort,ChIJtfVnqt4jW4YRefF5IvbE39Y,1.000,matched
+10891,Space Cowboys,ChIJdzsbhn8B8oYRMKxXWhonM8A,1.000,matched
+10893,Sheltered Nook on Tillamook Bay,ChIJCyInmh0t61QRxlvCR9JcP5E,1.000,matched
+10894,Crater Lake Resort,,0,not_found
+10895,Mt. Hood Tiny House Village,,0,not_found
+10896,Green Rock Retreat,ChIJ28veFIjXvlQRd4cCwGcd8y4,1.000,matched
+10897,Alpine Airstream Glamping,,0,not_found
+10898,Stargazer Dome,,0,not_found
+10900,The Hill - Olympic Peninsula Glamping,,0,not_found
+10901,Iron & Vine Luxury Treehouse,ChIJpSWsk9wpkVQRoi1rYd53teE,0.750,matched
+10902,Alexander's Lodge Yurts,ChIJRd0EekUqkVQRQA-x1NwGoX0,0.613,matched
+10903,Darla the Glamping Trailer,,0,not_found
+10906,SKYE Texas Hill Country Resort,ChIJJWEgUHLPW4YRHPDC8a-VI2s,1.000,matched
+10908,Cypress Valley,ChIJPQlyPhI9W4YRfhCR1ChC8YA,1.000,matched
+10911,Spoon Mountain Glamping,ChIJ87thXZpfW4YR4X1qtHpF22g,1.000,matched
+10915,AutoCamp Asheville,ChIJ0a-SD5eLWYgRbSs3tJ2HXI8,1.000,matched
+10921,Pisgah Glamping at Lake Powhatan,,0,not_found
+10928,Keystone Heights RV Resort,ChIJAcvCE38F5ogRcXHV2yASx9M,1.000,matched
+10930,Flamingo Everglades Glamping Tents,,0,not_found
+10931,Timberline Glamping at Collier-Seminole State Park,,0,not_found
+10933,Shell Camp Florida,,0,not_found
+10935,Rockwater Secret Cove Resort,ChIJwzy3U4UthlQRkPW0yhlpUf0,1.000,matched
+10937,Riverside - A Parkbridge Camping & RV Resort,ChIJnbAPhF87h1QR-x7KceQ8zUk,0.977,matched
+10939,Wild Havens Pop Up Glamping,ChIJ6z0N4wQ1h1QRzbKRMop8tD4,1.000,matched
+10941,WOODS on Pender,ChIJyTn7ypBfj1QRHl296al8QME,1.000,matched
+10944,Akasha Farm Retreat Spa,,0,not_found
+10945,Ruby Lake Resort,ChIJK4U-GwzNh1QRFc4G0gQGFeI,1.000,matched
+10946,Lagom Retreat,ChIJFdTpsElrW4YRrRp3xKkmAl8,1.000,matched
+10947,Lost Lake Resort,,0,not_found
+10948,Lost Lake Resort,,0,not_found
+10949,Glacier Rock Wellness Rock Ranch,,0,not_found
+10951,Ancient Lore Village,ChIJpV7mDbYbXIgRjrdTh78sD98,1.000,matched
+10954,Firefall Ranch,,0,not_found
+10955,Firefall Ranch,,0,not_found
+10956,Firefall Ranch,,0,not_found
+10957,Firefall Ranch,,0,not_found
+10958,Firefall Ranch,,0,not_found
+10959,Firefall Ranch,,0,not_found
+10960,Ecochique,,0,not_found
+10961,Nutchel Cosy Cabins,,0,not_found
+10964,Warredal,,0,not_found
+10971,Ecochique Glamping,,0,not_found
+10997,Camping Houtum,,0,not_found
+11128,Eco Retreat Basecamp IJmuiden,,0,not_found
+11136,Bukubaki Eco Surf Resort,,0,not_found
+11171,Cabañas en los Árboles,,0,not_found
+11208,Whitepod Eco-Luxury Hotel,,0,not_found
+11240,Hinton Hideaways,,0,not_found
+11245,Eco Retreats,,0,not_found
+11246,Loch Tay Highland Lodges,,0,not_found
+11250,Kudhva,,0,not_found
+11254,"Another Place, The Lake",,0,not_found
+11268,Wild Wellingtons Glamping,,0,not_found
+11272,Camp Kátur,,0,not_found
+11273,Little Seed Field,,0,not_found
+11283,Happy Valley Norfolk,,0,not_found
+11289,Forest Garden Shovelstrode,,0,not_found
+11291,Safari Cornwall,,0,not_found
+11293,Glamping at Long Valley Yurts,,0,not_found
+11302,Blue Moon Rising,,0,not_found
+11303,The Treehouse Camp at Maple Tree Campground,,0,not_found
+11304,Cherry Hill Park,ChIJXzMyP8K0t4kRmcZCBOa_7DI,1.000,matched
+11305,Camp Misty Mount,ChIJH2fQl5W4yYkRtDrtIQAAkRY,1.000,matched
+11307,The Cozy Peach at Schnepf Farms,ChIJJVXuuylNKocR0jXCyqgrxsU,1.000,matched
+11313,Redfish Lake Lodge,ChIJaXcBe7b5qFQRcoR-Ti8vxCg,1.000,matched
+11323,Amangiri,ChIJq-qcNtwhNYcRazgIZDEKTIc,1.000,matched
+11325,The Boulders Resort & Spa,,0,not_found
+11327,L'Auberge de Sedona,ChIJ0e0M2-KjLYcR7H-hcql-mlg,1.000,matched
+11329,Teton Springs Lodge & Spa,,0,not_found
+11330,Shore Lodge,ChIJyyJICc9mplQRWxiivV2VIxA,1.000,matched
+11332,Blackberry Mountain,ChIJD5s5n7qnXogRGdve0FdRyhM,1.000,matched
+11333,Treehouse Grove at Norton Creek,,0,not_found
+11335,Eagle's Nest Retreat,ChIJoUXxTQDvW4gR6GkrTwuofDM,0.600,matched
+11342,Blackberry Mountain,ChIJD5s5n7qnXogRGdve0FdRyhM,1.000,matched
+11343,Blackberry Mountain,ChIJD5s5n7qnXogRGdve0FdRyhM,1.000,matched
+11344,Castle Hot Springs,ChIJXytkaZelLIcRtj1nfYzy1Rc,1.000,matched
+11345,Castle Hot Springs,ChIJXytkaZelLIcRtj1nfYzy1Rc,1.000,matched
+11346,Idaho Wilderness Yurts,,0,not_found
+11349,Auberge Primland Resort,,0,not_found
+11354,Rose River Farm,,0,not_found
+11356,The Joshua Tree House,ChIJf_eb9IrZ2oAR4v08pQNWcmc,0.810,matched
+11432,Camp LeConte Luxury Outdoor Resort,ChIJo9nl2ttXWYgRHYz6bodGlHQ,1.000,matched
+11433,Roamstead,,0,not_found
+11434,Sweet Springs Glamping,ChIJDcBgOJKtSogR_PJWISE-tWc,1.000,matched
+11435,River Yurt Village,ChIJr4USQJQFXIYRVqN_RkYSp0U,0.643,matched
+11436,Basecamp Resort,ChIJ2x4CfxZbWYYRmS4MxquXTSM,1.000,matched
+11438,Rio Bella Resort,ChIJqTHYB8DRXoYRpQgwN2zLUCs,1.000,matched
+11439,The Yurtopian Wimberley,,0,not_found
+11441,Somerset Resort,,0,not_found
+11445,Charmed Resorts — Mulhurst Bay,,0,not_found
+11446,Collinswood Retreat,,0,not_found
+11457,The Lodge and Spa at Brush Creek Ranch,,0,not_found
+11458,Eastwind Oliverea Valley,ChIJHaAKjUj33IkRtkGPIajw-64,0.750,matched
+11462,Haven Hills Campground & Resort,ChIJg4xfCwB74YcR8T1VCua3KlM,1.000,matched
+11464,The Destination,,0,not_found
+11470,Wander Camp Bear Lake,,0,not_found
+11471,Wander Camp Bear Lake,,0,not_found
+11472,Wander Camp Bear Lake,,0,not_found
+11473,Wander Camp Bear Lake,,0,not_found
+11474,Wander Camp Smoky Mountains,,0,not_found
+11475,Wander Camp Smoky Mountains,,0,not_found
+11476,Wander Camp Smoky Mountains,,0,not_found
+11477,Wander Camp Smoky Mountains,,0,not_found
+11479,Timberline Glamping at Unicoi State Park,ChIJ3_HYbNs3X4gR9QwjtTIHHhM,1.000,matched
+11480,Timberline Glamping at Unicoi State Park,ChIJ3_HYbNs3X4gR9QwjtTIHHhM,1.000,matched
+11481,Timberline Glamping at Orange Beach,ChIJ14koP5YFmogRlphtaelvtB8,0.810,matched
+11482,Timberline Glamping at Orange Beach,ChIJ14koP5YFmogRlphtaelvtB8,0.810,matched
+11483,Timberline Glamping at Orange Beach,ChIJ14koP5YFmogRlphtaelvtB8,0.810,matched
+11484,Timberline Glamping at Auburn,ChIJs7vPoOnzjIgRwQDWr3p-vqw,1.000,matched
+11485,Timberline Glamping at Auburn,ChIJs7vPoOnzjIgRwQDWr3p-vqw,1.000,matched
+11486,Timberline Glamping at Auburn,ChIJs7vPoOnzjIgRwQDWr3p-vqw,1.000,matched
+11487,Timberline Glamping at Lake Martin,,0,not_found
+11488,Timberline Glamping at Lake Martin,,0,not_found
+11489,Timberline Glamping at Lake Martin,,0,not_found
+11490,Timberline Glamping at Lake Guntersville,ChIJMR_1n6kBiogRgESKeVav6is,1.000,matched
+11491,Timberline Glamping at Lake Guntersville,ChIJMR_1n6kBiogRgESKeVav6is,1.000,matched
+11492,Timberline Glamping at Lake Guntersville,ChIJMR_1n6kBiogRgESKeVav6is,1.000,matched
+11493,Timberline Glamping at Cheaha,,0,not_found
+11494,Timberline Glamping at Cheaha,,0,not_found
+11495,Timberline Glamping at Cheaha,,0,not_found
+11496,Timberline Glamping at Huntsville,ChIJAwVdEUMVYogRwU5PDgB6hOE,1.000,matched
+11497,Timberline Glamping at Huntsville,ChIJAwVdEUMVYogRwU5PDgB6hOE,1.000,matched
+11498,Timberline Glamping at Huntsville,ChIJAwVdEUMVYogRwU5PDgB6hOE,1.000,matched
+11499,Timberline Glamping at Birmingham,,0,not_found
+11500,Timberline Glamping at Birmingham,,0,not_found
+11501,Timberline Glamping at Birmingham,,0,not_found
+11502,Timberline Glamping at Tuscaloosa,,0,not_found
+11503,Timberline Glamping at Tuscaloosa,,0,not_found
+11504,Timberline Glamping at Tuscaloosa,,0,not_found
+11506,Timberline Glamping at Lake Blackshear,ChIJc3KD7Fo58ogRj6SznN5OM4g,1.000,matched
+11507,Timberline Glamping at Lake Blackshear,ChIJc3KD7Fo58ogRj6SznN5OM4g,1.000,matched
+11508,Timberline Glamping at Kingston Downs,,0,not_found
+11509,Timberline Glamping at Kingston Downs,,0,not_found
+11510,Timberline Glamping at Kingston Downs,,0,not_found
+11511,Timberline Glamping at Lake Lanier River Forks,,0,not_found
+11512,Timberline Glamping at Lake Lanier River Forks,,0,not_found
+11513,Timberline Glamping at Lake Lanier River Forks,,0,not_found
+11514,Timberline Glamping at Lula,,0,not_found
+11515,Timberline Glamping at Lula,,0,not_found
+11516,Timberline Glamping at Lula,,0,not_found
+11517,Timberline Glamping at Sebastian Inlet,,0,not_found
+11518,Timberline Glamping at Sebastian Inlet,,0,not_found
+11519,Timberline Glamping at Sebastian Inlet,,0,not_found
+11520,Timberline Glamping at Lake Manatee,ChIJ2z4b4x0xw4gREYwJ9gXZxVk,0.914,matched
+11521,Timberline Glamping at Lake Manatee,ChIJ2z4b4x0xw4gREYwJ9gXZxVk,0.914,matched
+11522,Timberline Glamping at Lake Manatee,ChIJ2z4b4x0xw4gREYwJ9gXZxVk,0.914,matched
+11523,Timberline Glamping at Sarasota,ChIJL2sVhVNFw4gRhMVABTB-nPs,0.903,matched
+11524,Timberline Glamping at Sarasota,ChIJL2sVhVNFw4gRhMVABTB-nPs,0.903,matched
+11525,Timberline Glamping at Sarasota,ChIJL2sVhVNFw4gRhMVABTB-nPs,0.903,matched
+11526,Timberline Glamping at Jupiter,,0,not_found
+11527,Timberline Glamping at Jupiter,,0,not_found
+11528,Timberline Glamping at Jupiter,,0,not_found
+11530,Timberline Glamping at Fort Myers,ChIJhXbvqo0X24gRzk22jpAONiI,0.636,matched
+11531,Timberline Glamping at Fort Myers,ChIJhXbvqo0X24gRzk22jpAONiI,0.636,matched
+11532,Timberline Glamping at Williamsburg,ChIJ0YyZaQD1sIkRQ7uICnseBLY,0.810,matched
+11533,Timberline Glamping at Williamsburg,ChIJ0YyZaQD1sIkRQ7uICnseBLY,0.810,matched
+11534,Timberline Glamping at Williamsburg,ChIJ0YyZaQD1sIkRQ7uICnseBLY,0.810,matched
+11535,Timberline Glamping at Promised Land,ChIJK_wZ5GS9xIkRw7uvqaQvRg4,0.917,matched
+11536,Timberline Glamping at Promised Land,ChIJK_wZ5GS9xIkRw7uvqaQvRg4,0.917,matched
+11537,Timberline Glamping at Promised Land,ChIJK_wZ5GS9xIkRw7uvqaQvRg4,0.917,matched
+11538,Timberline Glamping at Laurel Hill,,0,not_found
+11539,Timberline Glamping at Laurel Hill,,0,not_found
+11540,Timberline Glamping at Laurel Hill,,0,not_found
+11541,Timberline Glamping at Hills Creek,,0,not_found
+11542,Timberline Glamping at Hills Creek,,0,not_found
+11543,Timberline Glamping at Hills Creek,,0,not_found
+11544,Timberline Glamping at Hickory Run,ChIJbyalbUj_xIkRxsDiTZYi0Fs,0.912,matched
+11545,Timberline Glamping at Hickory Run,ChIJbyalbUj_xIkRxsDiTZYi0Fs,0.912,matched
+11546,Timberline Glamping at Hickory Run,ChIJbyalbUj_xIkRxsDiTZYi0Fs,0.912,matched
+11547,Timberline Glamping at Codorus,,0,not_found
+11548,Timberline Glamping at Codorus,,0,not_found
+11549,Timberline Glamping at Codorus,,0,not_found
+11550,Timberline Glamping at French Creek,,0,not_found
+11551,Timberline Glamping at French Creek,,0,not_found
+11552,Timberline Glamping at French Creek,,0,not_found
+11557,UDOSCAPE,,0,not_found
+11564,Nashville KOA Resort,ChIJSWT6DIxCZIgR4lKXMSOU2ME,1.000,matched
+11566,Roadhouse Ranch & Camp,,0,not_found
+11567,Edge-O-Dells Resort,,0,not_found
+11569,BeanTown Glamping RV Park,,0,not_found
+11570,Haven Yurts,ChIJ3fJA7KGXW4YRYSTJd2PsDfw,1.000,matched
+11572,Palo 32°,,0,not_found
+11573,Bespoke Outdoor Bubbles,,0,not_found
+11576,Quail Wash Retreat,,0,not_found
+11579,Menizei,,0,not_found
+11581,Madrone Straits,,0,not_found
+11582,Serenity Ridge,,0,not_found
+11590,Wildman Adventure Resort,,0,not_found
+11592,Indigo Zen Garden,,0,not_found
+11594,Snow Mountain Ranch (YMCA yurts),,0,not_found
+11595,Bliss Camps Glamping (Rocky Mountain Glamping),,0,not_found
+11598,The Glamping Collective,ChIJsb2KSjqDWYgRDPdioqYhuYE,0.697,matched
+11599,The Glamping Collective,ChIJsb2KSjqDWYgRDPdioqYhuYE,0.697,matched
+11600,The Glamping Collective,ChIJsb2KSjqDWYgRDPdioqYhuYE,0.697,matched
+11602,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11605,Yurts of the World,,0,not_found
+11606,Earth Harmony Wellness Institute (Glamping Domes),,0,not_found
+11610,Hardscrabble Ranch,ChIJkW_2yyMTRVMR9IMu4uIgszM,1.000,matched
+11611,Pitch Yellowstone,ChIJCzjtFpyNT1MR5NHsFIsV72I,1.000,matched
+11614,Fronterra Farm,,0,not_found
+11618,Oceans Edge Eagle Retreat,,0,not_found
+11620,Cultus Lake Glamping,,0,not_found
+11621,Cathedral Lakes Lodge,,0,not_found
+11622,Sou'wester Lodge,,0,not_found
+11625,Roam Spokane,,0,not_found
+11626,Summer Lake Hot Springs,,0,not_found
+11627,Loloma Lodge,ChIJKy9CihqnwFQRh3ltZW7wuKM,1.000,matched
+11642,River's Edge RV Resort,,0,not_found
+11650,Vegas Glamping,,0,not_found
+11652,Lake Mead RV Village at Boulder Beach,,0,not_found
+11657,Paradise on Lake Texoma,,0,not_found
+11658,Garden of the Gods RV Resort,,0,not_found
+11661,Sylvan Dale Guest Ranch,,0,not_found
+11670,Fort Ransom State Park (Pederson Yurt),,0,not_found
+11674,Mount Rushmore KOA Resort at Palmer Gulch,ChIJvQp0Xa5KfYcRjBRhbc5_ZAQ,0.854,matched
+11677,Cedar Pass Lodge,,0,not_found
+11680,Hochatown RV Park,,0,not_found
+11690,Lake Fausse Pointe State Park,,0,not_found
+11700,Stephen Foster Folk Culture Center State Park,ChIJw1ypoA4EYYgR2yXKvtJupWM,1.000,matched
+11702,Hunting Island State Park,,0,not_found
+11714,Salt Fork State Park Lodge,,0,not_found
+11715,Maumee Bay State Park Lodge,,0,not_found
+11716,Geneva State Park Lodge,,0,not_found
+11721,Hugh White State Park,ChIJkaXBOwA1gIgRcuKTMkKRIYQ,1.000,matched
+11723,Rock Cut State Park,,0,not_found
+11724,White Pines Forest State Park,,0,not_found
+11725,Kankakee River State Park,,0,not_found
+11727,Platte River Campground (Sleeping Bear Dunes NL),,0,not_found
+11728,Tawas Point State Park,ChIJW8IpMPEoJ4gRbuFULwf5Qic,1.000,matched
+11729,Silver Lake State Park,ChIJaf2-yiH0G4gR4w8BKmnepfw,1.000,matched
+11734,Brown County State Park (Abe Martin Lodge),,0,not_found
+11735,Turkey Run State Park Inn,,0,not_found
+11736,Clifty Falls State Park Inn,,0,not_found
+11742,Bliss Camps Glamping (Rocky Mountain Glamping),,0,not_found
+11743,Bliss Camps Glamping (Rocky Mountain Glamping),,0,not_found
+11744,Bliss Camps Glamping (Rocky Mountain Glamping),,0,not_found
+11745,Bliss Camps Glamping (Rocky Mountain Glamping),,0,not_found
+11746,Bliss Camps Glamping (Rocky Mountain Glamping),,0,not_found
+11747,Bliss Camps Glamping (Rocky Mountain Glamping),,0,not_found
+11748,Bliss Camps Glamping (Rocky Mountain Glamping),,0,not_found
+11750,Bear Mountain State Park,,0,not_found
+11751,Watkins Glen State Park,ChIJS_CTFgBf0IkR3hZneHJBI38,1.000,matched
+11752,Letchworth State Park,,0,not_found
+11753,Nickerson State Park,ChIJR5wPwFxq-4kR-zXO2Qbj72A,1.000,matched
+11755,Mount Greylock State Reservation,ChIJSebKhQi04IkRYYAHdx0cCzA,1.000,matched
+11758,Camden Hills State Park,ChIJiychGCB4rkwR27-Kl6FTiYA,1.000,matched
+11759,Bradbury Mountain State Park,ChIJhaROUul8skwRLBc0gtCK7KE,1.000,matched
+11760,Sebago Lake State Park,ChIJEd57dyL3skwRY3NCAcIp3k8,1.000,matched
+11762,Island Beach State Park,ChIJW6J68g2ZwYkRRDkYBRZgNe4,1.000,matched
+11763,Worthington State Forest,ChIJabANTd-GxIkRu3Wte49VXt4,1.000,matched
+11764,Allaire State Park,ChIJpQrNRbeAwYkRpvpeSrSKGwo,1.000,matched
+11766,Trap Pond State Park,ChIJxawvSUXkuIkR96W_tM_pXHU,1.000,matched
+11767,Killens Pond State Park,ChIJAWLQc7CEuIkRFx2jPJk_MP4,1.000,matched
+11768,Lums Pond State Park,ChIJW9RvZomnx4kRPYy2EaXc1JQ,1.000,matched
+11769,Franconia Notch State Park,,0,not_found
+11772,Crawford Notch State Park,,0,not_found
+11773,Hammonasset Beach State Park,ChIJnf75gt0o5okRxNdw7AdivbA,1.000,matched
+11774,Black Rock State Park,ChIJJTxx3pmV54kR4p5-TwcB1rA,1.000,matched
+11778,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11779,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11780,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11781,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11782,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11783,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11784,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11785,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11786,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11787,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11788,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11789,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11791,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11792,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11793,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11794,Douglas Lake Ranch,ChIJVVVVVVX5gVQR2puvoTWqLP4,1.000,matched
+11797,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+11801,Pilot Mountain Glamping Resort,,0,not_found
+11803,RESET Hotel Joshua Tree,,0,not_found
+11809,Lighthouse Cove RV Park (Lake Ray Roberts Marina),,0,not_found
+11814,The Inn at Herrington Harbour,,0,not_found
+11815,Camp Ferncrest - Chambers Creek,ChIJ3W_nippRToYRIFwmvPJHRDM,0.774,matched
+11823,Trailborn Jackson Hole,ChIJdz7iUEAaU1MRKVwJJAozpgw,1.000,matched
+11839,Jolly Roger RV Resort,ChIJOWoFRwDR0IgRUa8Hk6Lr1nk,1.000,matched
+11840,TK Glamping and Wellness,,0,not_found
+11845,Natura Wilderness Resort,ChIJT9sOrv6hWUsR8aTRUeQ4Gxg,1.000,matched
+11848,Terranova Nirvana,,0,not_found
+11849,Camp Ferncrest - Elkhorn River,,0,not_found
+11852,Dwell RV Resort & Casita Cabins,,0,not_found
+11854,Terranova Nirvana,,0,not_found
+11855,Terranova Nirvana,,0,not_found
+11856,Camp Ferncrest - Elkhorn River,,0,not_found
+11857,Camp Ferncrest - Elkhorn River,,0,not_found
+11868,Lovewell State Park (Lookout Yurt),,0,not_found
+11869,Glamping the Flint Hills (Equine Estates Rustic Ranch),,0,not_found
+11870,Sunset Ridge Campground (Milford State Park),,0,not_found
+11871,Spring Ranch Campground,ChIJk9f9G_qzmYcRMfvspp3Fxk8,1.000,matched
+11872,Platte River State Park (Glamping Cabins),,0,not_found
+11876,Walker River Resort,,0,not_found
+11877,Ouachita Wilde,,0,not_found
+11880,Mount Snow Yurt,,0,not_found
+11881,Lilla Rustica Treehouse,,0,not_found
+11886,Camp Ferncrest - Ocoee,,0,not_found
+11908,Natura Wilderness Resort,ChIJT9sOrv6hWUsR8aTRUeQ4Gxg,1.000,matched
+11909,TK Glamping and Wellness,,0,not_found
+11910,TK Glamping and Wellness,,0,not_found
+11911,TK Glamping and Wellness,,0,not_found
+11912,TK Glamping and Wellness,,0,not_found
+11913,Roamstead,,0,not_found
+11914,Roamstead,,0,not_found
+11915,Roamstead,,0,not_found
+11916,Roamstead,,0,not_found
+11917,Roamstead,,0,not_found
+11918,Roamstead,,0,not_found
+11919,Roamstead,,0,not_found
+11920,Roamstead,,0,not_found
+11921,Roamstead,,0,not_found
+11922,Roamstead,,0,not_found
+11923,Roamstead,,0,not_found
+11924,Roamstead,,0,not_found
+11925,Roamstead,,0,not_found
+11926,Roamstead,,0,not_found
+11935,Ashland Glamping,ChIJzScPydIFlIcRczhGIvcUH7w,1.000,matched
+11936,Ouachita Wilde,,0,not_found
+11937,Ouachita Wilde,,0,not_found
+11938,Spring Ranch Campground,ChIJk9f9G_qzmYcRMfvspp3Fxk8,1.000,matched
+11939,Spring Ranch Campground,ChIJk9f9G_qzmYcRMfvspp3Fxk8,1.000,matched
+11940,Spring Ranch Campground,ChIJk9f9G_qzmYcRMfvspp3Fxk8,1.000,matched
+11959,Blue Bell Lodge,ChIJuRWqr_TKYocRwS_8ojZbya0,1.000,matched
+11960,Blue Bell Lodge,ChIJuRWqr_TKYocRwS_8ojZbya0,1.000,matched
+12007,Serenity Ridge,,0,not_found
+12008,Serenity Ridge,,0,not_found
+12009,Serenity Ridge,,0,not_found
+12010,Serenity Ridge,,0,not_found
+12011,Serenity Ridge,,0,not_found
+12012,Serenity Ridge,,0,not_found
+12013,Serenity Ridge,,0,not_found
+12019,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12020,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12021,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12023,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12025,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12026,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12027,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12028,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12030,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12031,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12032,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12034,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12035,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12036,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12037,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12038,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12039,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12040,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12043,Lone Mountain Ranch,ChIJrU7eJ80PUFMR7BQUQeUc4cw,1.000,matched
+12044,Cedar Pass Lodge,,0,not_found
+12045,Cedar Pass Lodge,,0,not_found
+12046,Cedar Pass Lodge,,0,not_found
+12047,Cedar Pass Lodge,,0,not_found
+12048,Cedar Pass Lodge,,0,not_found
+12049,Cedar Pass Lodge,,0,not_found
+12055,Strawberry Park Hot Springs,ChIJFwU1UvFmQocR6_UF09MX6wQ,0.771,matched
+12056,Bespoke Outdoor Bubbles,,0,not_found
+12057,Bespoke Outdoor Bubbles,,0,not_found
+12058,Bespoke Outdoor Bubbles,,0,not_found
+12060,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12061,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12062,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12064,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12066,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12067,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12068,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12070,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12071,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12072,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12073,Westgate River Ranch Resort & Rodeo,ChIJje07ybC33YgRH9isSDfK6JM,1.000,matched
+12075,The Yurtopian Wimberley,,0,not_found
+12076,The Yurtopian Wimberley,,0,not_found
+12077,The Yurtopian Wimberley,,0,not_found
+12078,The Yurtopian Wimberley,,0,not_found
+12079,The Yurtopian Wimberley,,0,not_found
+12080,Treebox,,0,not_found
+12081,Treebox,,0,not_found
+12082,Treebox,,0,not_found
+12083,Treebox,,0,not_found
+12084,Treebox,,0,not_found
+12085,Treebox,,0,not_found
+12086,Treebox,,0,not_found
+12087,Treebox,,0,not_found
+12088,Treebox,,0,not_found
+12089,Tarantula Ranch,,0,not_found
+12090,The Eagle's Nest,,0,not_found
+12094,Lahontan Shores High Desert Retreat,,0,not_found
+12097,Vegas Glamping,,0,not_found
+12098,Vegas Glamping,,0,not_found
+12099,Vegas Glamping,,0,not_found
+12100,Vegas Glamping,,0,not_found
+12101,Vegas Glamping,,0,not_found
+12102,Vegas Glamping,,0,not_found
+12103,Tarantula Ranch,,0,not_found
+12104,Tarantula Ranch,,0,not_found
+12105,Tarantula Ranch,,0,not_found
+12106,Tarantula Ranch,,0,not_found
+12107,Tarantula Ranch,,0,not_found
+12108,Tarantula Ranch,,0,not_found
+12109,Tarantula Ranch,,0,not_found
+12110,Tarantula Ranch,,0,not_found
+12111,Tarantula Ranch,,0,not_found
+12112,Tarantula Ranch,,0,not_found
+12113,Tarantula Ranch,,0,not_found
+12114,Tarantula Ranch,,0,not_found
+12115,Tarantula Ranch,,0,not_found
+12116,Tarantula Ranch,,0,not_found
+12117,Tarantula Ranch,,0,not_found
+12118,Highwood Retreat,ChIJ87a7dnu54YkR94jjzwKEAwM,1.000,matched
+12119,Highwood Retreat,ChIJ87a7dnu54YkR94jjzwKEAwM,1.000,matched
+12149,Eureka Springs Treehouses,,0,not_found
+12150,Eureka Springs Treehouses,,0,not_found
+12151,Eureka Springs Treehouses,,0,not_found
+12152,Eureka Springs Treehouses,,0,not_found
+12153,Eureka Springs Treehouses,,0,not_found
+12154,Eureka Springs Treehouses,,0,not_found
+12155,Eureka Springs Treehouses,,0,not_found
+12156,Eureka Springs Treehouses,,0,not_found
+12157,Eureka Springs Treehouses,,0,not_found
+12158,Eureka Springs Treehouses,,0,not_found
+12159,Eureka Springs Treehouses,,0,not_found
+12160,Eureka Springs Treehouses,,0,not_found
+12161,Eureka Springs Treehouses,,0,not_found
+12162,Eureka Springs Treehouses,,0,not_found
+12163,Eureka Springs Treehouses,,0,not_found
+12164,Eureka Springs Treehouses,,0,not_found
+12165,Eureka Springs Treehouses,,0,not_found
+12166,Eureka Springs Treehouses,,0,not_found
+12167,Eureka Springs Treehouses,,0,not_found
+12168,Eureka Springs Treehouses,,0,not_found
+12169,Eureka Springs Treehouses,,0,not_found
+12170,Eureka Springs Treehouses,,0,not_found
+12179,Haven Yurts,ChIJ3fJA7KGXW4YRYSTJd2PsDfw,1.000,matched
+12182,East Zion Resort,ChIJIT3uL2vNyoAR3nqaFlhfHSw,1.000,matched
+12183,East Zion Resort,ChIJIT3uL2vNyoAR3nqaFlhfHSw,1.000,matched
+12184,Savannah Sunset Resort and Spa,,0,not_found
+12185,Al Maha,,0,not_found
+12186,andBeyond Punakha River Lodge,,0,not_found
+12187,Capella Ubud,,0,not_found
+12188,Four Seasons Tented Camp Golden Triangle,,0,not_found
+12189,Longitude 131°,,0,not_found
+12190,Naviva,,0,not_found
+12191,Nayara Tented Camp,,0,not_found
+12192,Sal Salis,,0,not_found
+12193,Shinta Mani Wild,,0,not_found
+12194,Suján Jawai,,0,not_found
+12195,Three Camel Lodge,,0,not_found
+12196,Longitude 131°,,0,not_found
+12197,Longitude 131°,,0,not_found
+12198,Nayara Tented Camp,,0,not_found
+12199,Nayara Tented Camp,,0,not_found
+12200,Nayara Tented Camp,,0,not_found
+12201,Nayara Tented Camp,,0,not_found
+12202,Suján Jawai,,0,not_found
+12203,Suján Jawai,,0,not_found
+12204,Suján Jawai,,0,not_found
+12205,Suján Sher Bagh,,0,not_found
+12206,Suján Sher Bagh,,0,not_found
+12207,Suján Sher Bagh,,0,not_found
+12208,Suján Sher Bagh,,0,not_found
+12209,Suján The Serai,,0,not_found
+12210,Suján The Serai,,0,not_found
+12211,Suján The Serai,,0,not_found
+12213,The Lodge at Pico Bonito,,0,not_found
+12217,Naviva,,0,not_found
+12218,Al Maha,,0,not_found
+12219,Al Maha,,0,not_found
+12220,Al Maha,,0,not_found
+12221,Al Maha,,0,not_found
+12222,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12223,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12224,Trailborn Grand Canyon,ChIJd3cZ7jufMocRVF0OnuDh4JU,1.000,matched
+12225,Trailborn Mendocino Hillside,,0,not_found
+12226,"Mapito Safari Camp, Serengeti",,0,not_found
+12227,JW Marriott Masai Mara Lodge,,0,not_found
+12228,"The Ritz-Carlton, Masai Mara Safari Camp",,0,not_found
+12230,Sal Salis,,0,not_found
+12231,Sal Salis,,0,not_found
+12232,Capella Ubud,,0,not_found
+12233,Capella Ubud,,0,not_found
+12234,Capella Ubud,,0,not_found
+12235,Capella Ubud,,0,not_found
+12236,East Zion Resort,ChIJIT3uL2vNyoAR3nqaFlhfHSw,1.000,matched
+12237,East Zion Resort,ChIJIT3uL2vNyoAR3nqaFlhfHSw,1.000,matched
+12240,East Zion Resort,ChIJIT3uL2vNyoAR3nqaFlhfHSw,1.000,matched
+12241,East Zion Resort,ChIJIT3uL2vNyoAR3nqaFlhfHSw,1.000,matched
+12245,Shinta Mani Wild,,0,not_found
+12246,Shinta Mani Wild,,0,not_found
+12247,"Slackline Moab, Outset Collection by Hilton",ChIJuUiPTlvhR4cR_LlnouD6r1Q,1.000,matched
+12248,Savannah Sunset Resort and Spa,,0,not_found
+12249,Savannah Sunset Resort and Spa,,0,not_found
+12250,Savannah Sunset Resort and Spa,,0,not_found
+12251,Savannah Sunset Resort and Spa,,0,not_found
+12252,Savannah Sunset Resort and Spa,,0,not_found
+12253,Savannah Sunset Resort and Spa,,0,not_found
+12254,Savannah Sunset Resort and Spa,,0,not_found
+12255,Savannah Sunset Resort and Spa,,0,not_found
+12256,Four Seasons Tented Camp Golden Triangle,,0,not_found
+12257,Four Seasons Tented Camp Golden Triangle,,0,not_found
+12258,Four Seasons Tented Camp Golden Triangle,,0,not_found
+12259,Three Camel Lodge,,0,not_found
+12260,Three Camel Lodge,,0,not_found
+12261,andBeyond Punakha River Lodge,,0,not_found
+12262,andBeyond Punakha River Lodge,,0,not_found
+12263,andBeyond Ngala Tented Camp,,0,not_found
+12264,andBeyond Serengeti Under Canvas,,0,not_found
+12266,andBeyond Chobe Under Canvas,,0,not_found
+12267,andBeyond Nxabega Okavango Tented Camp,,0,not_found
+12268,andBeyond Xaranna Okavango Delta Camp,,0,not_found
+12269,andBeyond Kichwa Tembo Tented Camp,,0,not_found
+12276,andBeyond Vira Vira,,0,not_found
+12278,andBeyond Mnemba Island Lodge,,0,not_found
+12279,"Mapito Safari Camp, Serengeti",,0,not_found
+12280,"Mapito Safari Camp, Serengeti",,0,not_found
+12281,"Mapito Safari Camp, Serengeti",,0,not_found
+12282,Bukubaki Eco Surf Resort,,0,not_found
+12283,Bukubaki Eco Surf Resort,,0,not_found
+12284,Bukubaki Eco Surf Resort,,0,not_found
+12285,Bukubaki Eco Surf Resort,,0,not_found
+12286,Bukubaki Eco Surf Resort,,0,not_found
+12287,Bukubaki Eco Surf Resort,,0,not_found
+12288,Bukubaki Eco Surf Resort,,0,not_found
+12294,Nightfall Camp,,0,not_found
+12295,Paperbark Camp,,0,not_found
+12296,Tanja Lagoon Camp,,0,not_found
+12297,Eco Retreat Konark,,0,not_found
+12298,Eco Retreat Daringbadi,,0,not_found
+12299,Tathaastu Glamping Resort Mussoorie,,0,not_found
+12300,The Bubble Retreat,,0,not_found
+12304,The Flow Wilderness Retreat,,0,not_found
+12305,Spirit of the West Adventures,,0,not_found
+12307,Luxe RV,,0,not_found
+12308,Sorensen's Resort,,0,not_found
+12310,Murphys Glamping,,0,not_found
+12312,Chill RV,,0,not_found
+12313,Beach Canyon Authentic Tipi,,0,not_found
+12314,Safari Sunset Eco Ranch,,0,not_found
+12315,Galt Valley Artsy Tucked Away Retreat,,0,not_found
+12316,Colorado Rafting Tours Royal Gorge Adventure Beach,,0,not_found
+12319,Aluminum Cabana,,0,not_found
+12320,Heaven's Gate Mountain Getaway,,0,not_found
+12321,The Lodge on Little St. Simons Island,,0,not_found
+12323,Treehouse Ketchum,,0,not_found
+12325,Spencer Pond Camps,,0,not_found
+12327,Seguin,,0,not_found
+12328,Triple Creek Ranch,,0,not_found
+12329,Campamonte,,0,not_found
+12330,Rancho Gallina,,0,not_found
+12331,The Glass House,,0,not_found
+12332,Mountain Horse Farm B&B and Wellness Retreat,,0,not_found
+12333,Americana Island Cabin at Riverside Escapes,,0,not_found
+12335,East Coast Glamping,,0,not_found
+12336,Selina Puerto Escondido,,0,not_found
+12337,Finca Las Nieves,,0,not_found
+12339,Outpost Co.,,0,not_found
+12340,Oceanside Beachfront RV Resort,,0,not_found
+12341,Shelter Cove Resort & Marina,,0,not_found
+12343,Cane Bay Campground,,0,not_found
+12344,Lone Star Court,,0,not_found
+12345,The Hideaway Ranch,,0,not_found
+12346,Camp Lucy Cottages,,0,not_found
+12348,Pico Rodavento,,0,not_found
+12353,Apple Creek Whitetails,,0,not_found
+12354,Mulroy's Irish Acres Farm,,0,not_found
+12355,Eco Itaka Glamping,,0,not_found
+12356,Joy Tulum,,0,not_found
+12357,Baja Camp,,0,not_found
+12358,Huttopia Sutton,ChIJR4HIkZcetkwRt6o8x7wYxTA,1.000,matched
+12359,Huttopia Sutton,ChIJR4HIkZcetkwRt6o8x7wYxTA,1.000,matched
+12360,Huttopia Sutton,ChIJR4HIkZcetkwRt6o8x7wYxTA,1.000,matched
+12361,Huttopia Sutton,ChIJR4HIkZcetkwRt6o8x7wYxTA,1.000,matched
+12362,Huttopia Les Deux Lacs – Laurentides,,0,not_found
+12363,Huttopia Les Deux Lacs – Laurentides,,0,not_found
+12364,Huttopia Les Deux Lacs – Laurentides,,0,not_found
+12365,Sundance by Basecamp,ChIJl4nJuO3ncFMRPN_6O04bLTk,1.000,matched
+12366,Sundance by Basecamp,ChIJl4nJuO3ncFMRPN_6O04bLTk,1.000,matched
+12367,Sundance by Basecamp,ChIJl4nJuO3ncFMRPN_6O04bLTk,1.000,matched
+12368,Sundance by Basecamp,ChIJl4nJuO3ncFMRPN_6O04bLTk,1.000,matched
+12369,Sundance by Basecamp,ChIJl4nJuO3ncFMRPN_6O04bLTk,1.000,matched
+12370,Sundance by Basecamp,ChIJl4nJuO3ncFMRPN_6O04bLTk,1.000,matched
+12371,Charmed Resorts — Crowsnest Pass,ChIJQ-srHNiPb1MR_bYRSJXxFbU,0.938,matched
+12372,Charmed Resorts — Crowsnest Pass,ChIJQ-srHNiPb1MR_bYRSJXxFbU,0.938,matched
+12373,Charmed Resorts — Crowsnest Pass,ChIJQ-srHNiPb1MR_bYRSJXxFbU,0.938,matched
+12374,Charmed Resorts — Crowsnest Pass,ChIJQ-srHNiPb1MR_bYRSJXxFbU,0.938,matched
+12375,Charmed Resorts — Crowsnest Pass,ChIJQ-srHNiPb1MR_bYRSJXxFbU,0.938,matched
+12376,Wildhaven Sonoma,ChIJr8RBtmERhIAR1SkvI-PJIao,0.640,matched
+12377,Wildhaven Sonoma,ChIJr8RBtmERhIAR1SkvI-PJIao,0.640,matched
+12378,Wildhaven Sonoma,ChIJr8RBtmERhIAR1SkvI-PJIao,0.640,matched
+12379,Wildhaven Yosemite,ChIJd1QkHyy7loARNfz2e8DvrOI,0.667,matched
+12380,Wildhaven Yosemite,ChIJd1QkHyy7loARNfz2e8DvrOI,0.667,matched
+12381,Wildhaven Yosemite,ChIJd1QkHyy7loARNfz2e8DvrOI,0.667,matched
+12383,Wildhaven Yosemite,ChIJd1QkHyy7loARNfz2e8DvrOI,0.667,matched
+12430,Boise / Meridian KOA Journey,,0,not_found
+12441,Brighton / 401 KOA Holiday,,0,not_found
+12448,Buffalo KOA Journey,ChIJrzdSIhd4NVMRShfanoxP0_g,1.000,matched
+12456,St. George / Hurricane KOA Journey,ChIJxdhSWm9fyoARlST4sdv0LvA,1.000,matched
+12507,Ventura Ranch KOA Holiday,ChIJZzFnI2i26YARk9B4GFg1GTo,1.000,matched
+12536,Fort Collins / Lakeside KOA Holiday,,0,not_found
+12544,Pigeon Forge / Gatlinburg KOA Holiday,ChIJCebjlP_-W4gR4828onk7hNE,1.000,matched
+12545,Gaylord KOA Holiday,ChIJq0E_UlpJNU0RthPyiuMyt4w,1.000,matched
+12546,Gettysburg / Battlefield KOA Holiday,ChIJVwHzAeOuyYkRE8pBxK8cJLU,1.000,matched
+12547,Goodland KOA Journey,ChIJzRf7rY81C4cRX62GZ2iCDhU,1.000,matched
+12548,Grand Canyon South Rim KOA Journey,ChIJ_e6sQJ2ZMocRhujlJbUz_jQ,0.853,matched
+12549,Niagara Falls / Grand Island KOA Holiday,ChIJfVDUd39p04kRf4pNNWAlw7M,1.000,matched
+12550,Grand Junction KOA Holiday,ChIJHQsHP-cbR4cREPwgALl0KGU,1.000,matched
+12551,Grants KOA Journey,ChIJgeJbvn2DI4cRrLu3N90DGI8,1.000,matched
+12553,Grayville / I-64 KOA Holiday,,0,not_found
+12554,Great Falls KOA Holiday,ChIJQ30owOA2QlMRXvMp5PtKHRs,1.000,matched
+12555,Green River KOA Journey,ChIJg1KE29z6SIcRzKI6OFC-X4I,1.000,matched
+12556,Greensboro KOA Journey,ChIJszJjNIQYU4gR0Ez6ewvk9-I,1.000,matched
+12557,Travelers Rest / N Greenville KOA Holiday,ChIJFwYFjdPNWYgRvFzH_NZvDxY,1.000,matched
+12558,Greybull KOA Holiday,ChIJ6d08k7XHS1MRsbvUv7N57tA,1.000,matched
+12559,Gros Morne / Norris Point KOA Holiday,ChIJdQ8JmNRbeUsR3QgxBEdotV4,1.000,matched
+12560,Gulf Shores / Pensacola West KOA Holiday,ChIJdXpCCxukkIgRDUEcgcCn9lg,1.000,matched
+12561,Gunnison KOA Journey,ChIJXTlEcz13QIcRv7NCIzHCBRA,1.000,matched
+12562,Hagerstown / Antietam Battlefield KOA Holiday,ChIJk2qXm33zyYkR7eZ-khy4WXk,1.000,matched
+12563,Halifax West KOA,ChIJ9fuBfuSIWUsRoNXC-p9Dla8,1.000,matched
+12564,Hardin KOA Journey,ChIJvWflDWDnN1MRnsdGcBRfDTw,1.000,matched
+12565,Harpers Ferry / Civil War Battlefields KOA Holiday,ChIJZZPcZ78CtokR5ZRzLVR55_A,1.000,matched
+12566,Harrison KOA Holiday,,0,not_found
+12567,Harrisonburg / Shenandoah Valley KOA Holiday,ChIJQ8ns64j2tIkRTylw3aSiUPA,1.000,matched
+12568,Hayward KOA Holiday,ChIJGa_qxZ4arFIRkLJEGG3SK_U,1.000,matched
+12569,Helena North KOA Journey,ChIJ70ofWA1RQ1MRFgfTToINN-g,1.000,matched
+12570,Herkimer Diamond KOA Resort,ChIJG__exDE12YkRyFgCHYvVgwA,1.000,matched
+12571,Hinton / Jasper KOA Holiday,,0,not_found
+12572,Hixton / Alma Center KOA Holiday,ChIJwSozNdIh_4cRzKUECUghn0k,1.000,matched
+12573,Holbrook / Petrified Forest KOA Journey,ChIJsaanKXeoL4cRDtWBMvbdb3Y,1.000,matched
+12574,Hollywood KOA,ChIJ2TIlPEKp2YgRdQEGFj8odPU,1.000,matched
+12575,Homer / Baycrest KOA Holiday,ChIJM6z4wM4zwVYRYWr09YLuebI,1.000,matched
+12577,Honesdale / Pocono KOA Holiday,ChIJIQPjD2pK24kRr1X1jOEpz48,1.000,matched
+12578,Horse Cave KOA Holiday,ChIJ6cKfBpIfZogRj5WtC4tatgE,1.000,matched
+12579,Hot Springs National Park KOA Holiday,ChIJpYVWn48szYcRY_xzZoSaTqs,1.000,matched
+12581,Houghton / Letchworth KOA,ChIJCWOWVOMw0okRuclCdtXAZcE,1.000,matched
+12582,Houlton / Canadian Border KOA Journey,ChIJEWfLNBfBpEwRQnJHKyVd-vQ,1.000,matched
+12583,Huntington / Fox Fire KOA Holiday,ChIJBZvVgACrSIgRMLBk7fU1fVc,1.000,matched
+12584,Indiana Beach / Monticello KOA Holiday,ChIJSynfnUmxE4gRbZ9Wv0fwrJM,1.000,matched
+12585,Indianapolis KOA Holiday,ChIJz3sXhRM2a4gRF_wxQFS1myU,1.000,matched
+12586,1000 Islands / Ivy Lea KOA Holiday,,0,not_found
+12587,"Jackson, MN KOA Journey",ChIJFyXIWbVV84cRmYrmGzGo25Q,1.000,matched
+12588,Jacksonville North / St. Marys KOA Holiday,ChIJl5Bk1q0F5YgRj_lUavpfRyA,1.000,matched
+12589,Jonestown / Hershey NE KOA Journey,ChIJt7fEYAaryIkR7Ja_eHd_4Yw,1.000,matched
+12590,Joplin KOA Journey,ChIJ20msOG5lyIcR1ouAV7RVZ5E,1.000,matched
+12591,Kamiah / Clearwater River KOA Journey,ChIJgfQQ85CFoFQRwJ3Ft3xThdM,1.000,matched
+12592,Kankakee South KOA Holiday,ChIJ0TZ29A7CDYgRpf31_ZrNh1s,1.000,matched
+12593,Kansas City West / Lawrence KOA Holiday,ChIJ92Ve3IBvv4cRnOcPy962C_0,1.000,matched
+12594,Kennebec KOA Journey,,0,not_found
+12595,Paducah / I-24 / Kentucky Lake KOA Journey,ChIJCe38cOloeogRL1x2euBX5tk,1.000,matched
+12596,Kentucky Lakes / Prizer Point KOA,ChIJcdjZghHteogRvZ4D1_uQX3g,1.000,matched
+12597,Kerrville KOA Journey,ChIJa5xqwqJYWYYRYFs5t04hUM4,1.000,matched
+12598,Kingman KOA Journey,ChIJXUwpxHHczYARsZjEw_oebLc,1.000,matched
+12599,1000 Islands / Kingston KOA Holiday,,0,not_found
+12600,Orlando / Kissimmee KOA Holiday,ChIJ96WqKniB3YgRVVsUtlDsTL0,1.000,matched
+12601,Klamath Falls KOA Journey,ChIJ6YA4fqfVyFQRtEkL5ehJEn0,1.000,matched
+12602,Lafayette KOA Holiday,ChIJmQcYvdeYJIYRZligGvbnn7Y,1.000,matched
+12603,Lake Bomoseen KOA Holiday,ChIJq6qqqs4b4IkR6QqCFzvskuk,1.000,matched
+12605,Lake Conroe / Houston North KOA Holiday,ChIJRxAEEcEhR4YRNAEA3WOZKHs,1.000,matched
+12606,Lake George / Saratoga KOA Journey,ChIJdz9Xtt3J34kRH2Vt_P8QRlY,1.000,matched
+12607,Lake Isabella / Kern River KOA Journey,ChIJu-wnrlnIwYARSPebAA9UhT0,1.000,matched
+12608,Lake Milton / Berlin Lake KOA Holiday,ChIJY5xYYfVaMYgRUM64s5TmCGE,1.000,matched
+12609,Lake Oconee / Greensboro KOA Holiday,ChIJ8QKTWkCL9ogRc3uWp8Mwcj0,1.000,matched
+12610,Lake Placid / Whiteface Mtn. KOA Holiday,ChIJP_0En_z7ykwRoVgsJPTMer0,1.000,matched
+12611,Lancaster / New Holland KOA Journey,ChIJk3fhZxJBxokR2oXtPysWP7A,1.000,matched
+12613,Las Cruces KOA Holiday,ChIJX4pPiik-3oYRKEckl9VODTU,1.000,matched
+12614,Las Vegas KOA Journey at Sam's Town Journey,ChIJE2R_KQ3EyIAR5rrh6AdLu7w,1.000,matched
+12615,"Las Vegas, New Mexico KOA Journey",ChIJfU_hGPpwGYcRZ-TExE72mRE,1.000,matched
+12616,LaSalle / Peru KOA Journey,ChIJr27RA4dbCYgRgpnHi_Jf-Vc,1.000,matched
+12617,Laughlin / Avi Casino KOA Journey,ChIJi2-R65c4zoARG_9eUkomY-k,1.000,matched
+12618,Lava Hot Springs East KOA Holiday,ChIJexo3fYJxVYcRMlhsYaGCZqg,1.000,matched
+12619,Leander / NW Austin KOA Holiday,ChIJZ0830p4rW4YR8dUfrtA9tZU,1.000,matched
+12620,Leavenworth / Pine Village KOA Holiday,ChIJf7mom4NNmlQR8RMwFtQlF8g,1.000,matched
+12621,Lebanon KOA Holiday on Salmon Falls River Holiday,ChIJj7Tbzfqc4okRBYsFcAh-h6I,1.000,matched
+12622,Lemolo Lake / Crater Lake North KOA Holiday,ChIJmSOpjHb_xlQR9waQPuNz7i8,1.000,matched
+12623,Lena KOA Holiday,ChIJAetTy1kQCIgRXzxfRSTObKQ,1.000,matched
+12624,Lincoln City KOA Holiday,ChIJ3f4fieqS6lQR1TVQH30vPw4,1.000,matched
+12625,Lake of the Ozarks / Linn Creek KOA Holiday,ChIJxxTfxyTdxIcRYAb17IsJIo4,1.000,matched
+12626,Little Rock North / Jct. I-40 KOA Journey,ChIJL14VVFyi0ocR5HLcGDFSu1M,1.000,matched
+12627,Littleton / Franconia Notch KOA Holiday,ChIJJeGbAfpmtEwRKvzFccqhq0w,1.000,matched
+12628,Livingston / Paradise Valley KOA Holiday,ChIJubTy3hyJT1MRLdwSqhvLOjw,1.000,matched
+12629,Hocking Hills KOA Holiday,ChIJf5IBPsPrR4gRbHjjAlXZTl0,1.000,matched
+12630,Lookout Mountain / Chattanooga West KOA Holiday,ChIJazC0N1pOYIgR1gnjguJbME4,1.000,matched
+12631,Lordsburg KOA Journey,ChIJ7-Ky7ogB2YYRGyVExiMt2Yo,1.000,matched
+12632,Louisville South KOA Holiday,ChIJ54M0tqEGaYgRF6oFi2Y-IVQ,1.000,matched
+12633,Lubbock KOA Journey,ChIJw0bebrQN_oYRKTDGdMfPhRc,1.000,matched
+12634,Lufkin KOA Journey,ChIJc19h78giOIYRxKyNTV1XGYI,1.000,matched
+12635,Lumberton / I-95 KOA Journey,ChIJBa2QEnDcqokR7jv2gjgNJ2g,1.000,matched
+12637,Lyman KOA Journey,ChIJ50EoGYn_UIcRqGBvbPbcSps,1.000,matched
+12638,Lynchburg / Blue Ridge Parkway KOA Holiday,ChIJ5ZXEM5Urs4kRQOO6i1TA1oA,1.000,matched
+12639,Lynden / Bellingham KOA Journey,ChIJARKwjIy2hVQR7fjdYqskpag,1.000,matched
+12640,Mackinaw City / Mackinac Island KOA Journey,ChIJxTgQ7CCLNU0RRgGpJvs2NXI,1.000,matched
+12641,Madison / Pittsburgh S.E. KOA Journey,ChIJC6BXztreNIgRR2kzpW2eTfs,1.000,matched
+12643,1000 Islands / Mallorytown KOA Holiday,,0,not_found
+12644,Manchester Beach / Mendocino Coast KOA Journey,ChIJR04Ee5sbgYARoO8QYtdPO_U,1.000,matched
+12645,Medford / Grants Pass KOA Journey,ChIJKSFgDM-AxVQRAoYrvYv3Ke0,1.000,matched
+12646,Medina / Wildwood Lake KOA Holiday,ChIJT1GOtK9w1IkR9wVdPcGF2ms,1.000,matched
+12647,Memphis KOA Journey,,0,not_found
+12648,Mercer / Grove City KOA Holiday,ChIJ09Wk6FSfM4gR8RZlNFKjgn0,1.000,matched
+12649,Meridian East / Toomsuba KOA Journey,,0,not_found
+12650,Miles City KOA Journey,ChIJmZ_XyBN0OlMRrW6TEQVfRws,1.000,matched
+12651,Milton KOA Holiday,ChIJXVjKY34TBogR61SMapymo1s,1.000,matched
+12652,Minneapolis Northwest KOA Journey,ChIJt7-C_5xGs1IRQucR_4uf8Yk,1.000,matched
+12653,Minneapolis Southwest KOA Holiday,ChIJ8YY1aPAN9ocRL95YGUXp2lI,1.000,matched
+12654,Minot / Swenson RV KOA Journey,ChIJJ04CG4fV3lIRS9qBGKVsXvQ,1.000,matched
+12655,Missoula KOA Holiday,ChIJC1_LIU_OXVMRp42yuQUYvdI,1.000,matched
+12656,Mitchell KOA Journey,ChIJ11Ehq4EahocRsCA2T5Y27aM,1.000,matched
+12657,Moab KOA Holiday,ChIJgWVpFwvjR4cRXeNvxn8tgcU,1.000,matched
+12658,Monroe Co. / Toledo North KOA Holiday,ChIJ0STISuuDPIgRpjDp9KWKJJ4,1.000,matched
+12659,Montpelier Creek KOA Journey,ChIJ8QSHhcQtVIcR2FMJX_pdnPI,1.000,matched
+12660,Montreal South KOA Journey,ChIJqXDMcoEMyUwRxzEWzRiDkeU,1.000,matched
+12661,Montrose / Black Canyon Nat'l Park KOA Journey,ChIJUXIxrplQP4cR19Rp1XvaR_s,1.000,matched
+12662,Monument Valley KOA Journey,ChIJYwrexzEuN4cRMmG1Gv3GLuQ,1.000,matched
+12663,Moore Haven KOA Holiday,ChIJURgqS5GL24gR0ylKgtlm-NU,1.000,matched
+12664,Moss Landing KOA Express,ChIJj-GFa20GjoARjIjiKkxbcOM,1.000,matched
+12665,Mt. Gilead KOA Holiday,ChIJ8VvGKTuvOYgR4aE9kmGl0MQ,1.000,matched
+12666,Mount Pleasant / Charleston KOA Holiday,ChIJPzDPyQ1t_ogR9RFQ_L01_NU,1.000,matched
+12668,Mount Shasta City KOA Holiday,ChIJ9WGwWtPgzVQRHJ62XTTKOg8,1.000,matched
+12669,Yellowstone Park / Mountainside KOA Journey,ChIJPZx8nzGwUVMRrPrgeqFfAC8,1.000,matched
+12670,Mt. Lassen / Shingletown KOA Holiday,ChIJJZHqItOn0lQRhaY01TwuKgg,1.000,matched
+12672,Murphy / Peace Valley KOA Holiday,ChIJX8H-1BPhXogRbwsOnd0Tw5s,1.000,matched
+12673,Myrtle Beach KOA Resort,ChIJd8yRFLtpAIkRg_Sllv1C4Y8,1.000,matched
+12674,Mystic KOA Holiday,ChIJcf1zhOjd5YkR-6K1CgZ2_Ng,1.000,matched
+12675,Naples / Marco Island KOA Holiday,ChIJc6Tlk9zk2ogRbo4O7-d5RP4,1.000,matched
+12676,Naples KOA Holiday,ChIJhYAggzxYskwRdm3yHPbMfMg,1.000,matched
+12677,Nashville East / Lebanon KOA Journey,ChIJ08o3HfIYZIgRta2EKVe_CZw,1.000,matched
+12678,Natural Bridge / Lexington KOA Holiday,ChIJ01sFqtfRTIgR6O5zbhJ_Lhs,1.000,matched
+12679,Needles KOA Journey,ChIJk5cI50k7zoARlew69Diu5qI,1.000,matched
+12680,New Bern KOA Holiday,ChIJU2aQgxnSqIkRUCP5ApN_4Mw,1.000,matched
+12681,New Orleans KOA Holiday,ChIJs82GPOO5IIYRy2hqd9JunE4,1.000,matched
+12682,Newberry / I-26 / Sumter NF KOA Journey,ChIJYV1pl1nFV4gRy8jmiYOmoIU,1.000,matched
+12683,New York City North / Newburgh KOA Holiday,ChIJCz7ddkok3YkRsOmZbyo1k5E,1.000,matched
+12684,Newport / Little Diamond Lake KOA Holiday,ChIJzaPTs98YYlMRmDv-ayXemOU,1.000,matched
+12685,Newport / I-40 / Smoky Mountains KOA Journey,ChIJm-gf8z3CW4gRQI2xTXtIuJk,1.000,matched
+12687,Niagara Falls North / Lewiston KOA Journey,ChIJ_9rLRelg04kRAYrUZDFin_A,1.000,matched
+12688,Niagara Falls KOA Holiday,ChIJZc60UfBE04kRvo2wFLF6KMU,1.000,matched
+12689,Niantic / I-95 Exit 72 KOA Holiday,ChIJ21PDLf0Z5okRyezyE8v4RQc,1.000,matched
+12690,North Sydney / Cabot Trail KOA,ChIJ44rusISSZ0sR-lRaaZyKZQg,1.000,matched
+12691,Northampton / Springfield KOA Holiday,ChIJy0RpVV8m54kRup3D9j1QzSw,1.000,matched
+12692,Oakdale KOA Journey,ChIJv4Z_T-dt_ocRzA33reKE0vg,1.000,matched
+12693,Ogallala / I-80 KOA Journey,ChIJY95j_XfCdocR6zUCDIp0zLA,1.000,matched
+12694,Okeechobee KOA Resort,ChIJT-qgW8wf3IgRlVY4dqXQLVU,1.000,matched
+12695,Oklahoma City East KOA Holiday,ChIJv8ZG_WI3socR5rlUJe_4o7s,1.000,matched
+12697,Onawa / Blue Lake KOA Holiday,ChIJz8PFc9c9kocRgtAcSXIFNtg,1.000,matched
+12698,Oregon Dunes KOA Holiday,,0,not_found
+12699,Orlando NW / Orange Blossom KOA Journey,ChIJs01T35qe54gRFAp9tqK4XqQ,1.000,matched
+12700,Orlando Southwest KOA Holiday,ChIJFZAJNX9w3YgRIzQiLj5r8RE,1.000,matched
+12701,Oroville / Feather Falls Casino KOA Journey,ChIJwyesm0GxnIAReHCr7heLzIM,1.000,matched
+12702,Oscoda / Tawas KOA Holiday,ChIJ7fDrG3A7J4gRNWRrlgGwkKU,1.000,matched
+12703,Ouray KOA Holiday,ChIJq8FmSdghP4cRoJe36twkr3Q,1.000,matched
+12704,Outer Banks West / Currituck Sound KOA Holiday,ChIJb9DB1oIzpYkR6CVOBR7fxmw,1.000,matched
+12705,Owen Sound KOA Journey,ChIJ__8PhX_8KYgRrsKu1ZJ5KFs,1.000,matched
+12706,Ozark / Fort Rucker KOA Journey,ChIJn4hVhTV5kogRPW1WQbLC4DI,1.000,matched
+12707,Palm Springs / Joshua Tree KOA Holiday,ChIJOXA83zIe24AR0ZxOrg958ZQ,1.000,matched
+12709,Paris Landing / Kentucky Lake KOA Holiday,ChIJP23Bi3wIe4gR1NNThJf008Q,1.000,matched
+12710,Parry Sound KOA Holiday,ChIJHTESuY6tK00RRN0-zx5Kb4g,1.000,matched
+12711,Pasco / Tri-Cities KOA Journey,ChIJ10lqHp97mFQRJPK4pZHB-Ys,1.000,matched
+12712,Pendleton KOA Journey,ChIJ5RgMi2TholQR24zleBNlJwk,1.000,matched
+12713,Ludington East / Pere Marquette River KOA Holiday,ChIJS0RKg7W7HogRN0V0GQfv4y8,1.000,matched
+12714,Perry KOA Holiday,ChIJJwIHiCKq7ogR3OSkBSFKN8o,1.000,matched
+12716,Philadelphia South / Clarksboro KOA Holiday,ChIJ8e9tCXjbxokRH-orQrVVotM,1.000,matched
+12718,Picacho / Tucson NW KOA Journey,ChIJh9xBoWpzKocRPjb345Lrahk,1.000,matched
+12719,Munising / Pictured Rocks KOA Journey,ChIJkYn-ExKOTk0R01JxIrIS6dM,1.000,matched
+12721,Pocatello KOA Journey,ChIJfQzMpqNIVVMRvitwWqXgt68,1.000,matched
+12722,Point South / I-95 / Yemassee KOA Holiday,ChIJy7fu3W35-4gRfQ8vNhlG8n8,1.000,matched
+12723,Polson / Flathead Lake KOA Holiday,ChIJSwpNdp5zZ1MRQrUb8HVzQxA,1.000,matched
+12724,Port Huron KOA Resort,ChIJj3ty-RmfJYgReaGCrv3OYAg,1.000,matched
+12725,Port Lavaca / Matagorda Bay KOA Holiday,ChIJqyMHzsoCQoYRIaW9OI8adOc,1.000,matched
+12726,Pueblo KOA Journey,ChIJN9wIF4YKE4cREX0JguLTCUg,1.000,matched
+12727,Pueblo South / Colorado City KOA Holiday,ChIJoxLksoDuE4cRBdpvQzS5IYw,1.000,matched
+12728,Quebec City KOA Holiday,ChIJYy2RzPuRuEwRRoXsPVpN_uw,1.000,matched
+12729,Rapid City / Black Hills KOA Holiday,ChIJnSuMnhhofYcRlqx_XLZNK5U,1.000,matched
+12730,Raton KOA Journey,ChIJmy0PL03wEIcRcpxSOzoqAXY,1.000,matched
+12731,Rawlins KOA Journey,ChIJ5Y9FdNADXYcRSvUfNy2vxRU,1.000,matched
+12732,Red Lodge KOA Journey,ChIJmeQQvKEsT1MR48X3xXZmnK8,1.000,matched
+12733,Redmond / Central Oregon KOA Holiday,ChIJodNVQX7bvlQR8lM-mTyKHSI,1.000,matched
+12734,Renfrew / Ottawa West KOA Journey,ChIJs_XiaWt50UwR51oaR2SnR_8,1.000,matched
+12735,Renfro Valley KOA Holiday,ChIJZ5d5AkDZQogRdFJDmUh_vjI,1.000,matched
+12736,Reno KOA Journey at Boomtown Journey,ChIJI2uhUzNbmYARghIn60swerk,1.000,matched
+12737,Richfield KOA Holiday,ChIJZ1mxulISS4cRBuvIGmbsWEM,1.000,matched
+12738,Richmond KOA Holiday,ChIJeUF8C1n_P4gRkrIj0wpP4r8,1.000,matched
+12739,Richmond North / Kings Dominion KOA Holiday,ChIJI2KEmOMwsYkRxW9NeL7cnEw,1.000,matched
+12740,Rochester / Marion KOA Journey,ChIJq1c-a-Tk-YcRwjaXd5Bd-30,1.000,matched
+12741,Rock Springs / Green River KOA Journey,ChIJ18DWItJjWocRtntemHghbSM,1.000,matched
+12742,Royal Gorge / Canon City KOA Holiday,ChIJo4lG7ZaSFIcRvHvCPlNaNAA,1.000,matched
+12743,Rusk KOA Holiday,ChIJ217CcSEcSIYRE8348SOb36c,1.000,matched
+12744,Russell Springs / Lake Cumberland KOA Journey,ChIJx7-vFgtYXYgR5RN3n-v0Wqc,1.000,matched
+12746,Salem / Lisbon KOA Holiday,ChIJ1UJwq3CpNogRPFi14hOEOUE,1.000,matched
+12747,Sallisaw / Fort Smith West KOA Holiday,ChIJ0TXeX51syocRWxco8JKUvwI,1.000,matched
+12749,Salome KOA Journey,ChIJcVUdU_-Q04ARoTbcBkXlT78,1.000,matched
+12750,Salt Lake City KOA Holiday,ChIJWdfmWWb0UocRLPVN1x_GrLo,1.000,matched
+12751,San Angelo KOA Holiday,ChIJK2tp-dDkV4YRZx3U3X_Tfsg,1.000,matched
+12752,San Antonio / Alamo KOA Holiday,ChIJRZ-DQCH0XIYRXzKhlDmu5j8,1.000,matched
+12753,San Diego Metro KOA Resort,ChIJSYXgaQJS2YARvefsjGqpzRQ,1.000,matched
+12754,San Francisco North / Petaluma KOA RV Camping Resort,ChIJpT3Z8Ry1hYARJgF-PhjFwSw,1.000,matched
+12755,Sandusky KOA Holiday Campground,ChIJcwNV6bxGOogRODElWrj6i_0,1.000,matched
+12756,Sanger / Denton North KOA Journey,ChIJk8N-WfixTYYRNL0mqb7rPMU,1.000,matched
+12757,Santa Cruz / Monterey Bay KOA Holiday,ChIJ_TidkugQjoARVoBdDY4qbDc,1.000,matched
+12758,Santa Fe KOA Holiday,ChIJU9a9SXr_GIcRTbD903K5QZg,1.000,matched
+12759,Santa Margarita KOA Holiday,ChIJS5_7uOiM7IAROU9hx1P2Q7A,1.000,matched
+12760,Santee / Santee Lakes KOA Journey,ChIJO9hnMzwZ_4gRgXALraYLXZA,1.000,matched
+12761,Sault Ste. Marie KOA Holiday,ChIJTxIpLu42Nk0Rggk4-sX0bCs,1.000,matched
+12762,Savannah South KOA Holiday,ChIJQ_quzngP-4gRm9_6Pg40vZc,1.000,matched
+12764,Seligman / Route 66 KOA Journey,ChIJFS8YEX9GzYARtXJ-ltjQEmM,1.000,matched
+12765,Seward KOA Holiday,ChIJ7ROk3x6bx1YRKCrFHfUp1Jg,1.000,matched
+12766,Shelby / Mansfield KOA Resort,ChIJAS-Uto2FOYgRsp5Jw9ksmgQ,1.000,matched
+12767,Sheridan / Big Horn Mountains KOA Journey,ChIJ1wLz6Tb7NVMRnaK3seBPGAQ,1.000,matched
+12768,Shreveport / Bossier City KOA Journey,ChIJFyqAylrQNoYRmvabM9b6DLE,1.000,matched
+12770,Silver City KOA Holiday,ChIJE8PiyErI2IYRvxcQtK2RWpo,1.000,matched
+12771,Sioux City North KOA Holiday,ChIJjdh-Ak8PjocRd09_esJxVUU,1.000,matched
+12772,Sioux Falls KOA Journey,ChIJz6jpu9hKiYcRz3YRYlwjFT0,1.000,matched
+12773,Skowhegan / Kennebec Valley KOA Journey,ChIJT25HB-PasUwRoErrPvFsctM,1.000,matched
+12775,South Padre Island KOA Holiday,ChIJ72INHcOtb4YRDBJNBilibwg,1.000,matched
+12777,Spearfish / Black Hills KOA Holiday,ChIJqxfgooyZMlMRiB3b64IjyHo,1.000,matched
+12778,Springfield / Route 66 KOA Holiday,ChIJl6bQiIxgz4cRrERVAt3SbdQ,1.000,matched
+12780,St. Augustine Beach KOA Holiday,ChIJ-ZuiKo6d5ogRIoG7Dj9tV9c,1.000,matched
+12782,St. Ignace / Mackinac Island KOA Holiday,ChIJQTjiWQQKSk0R7sBA-6PwY5c,1.000,matched
+12783,St. Louis N.E. / I-270 / Granite City KOA Journey,ChIJfUveCaFR34cRHxi6vwfJbgE,1.000,matched
+12784,St. Louis West / Historic Route 66 KOA Holiday,ChIJrWmriEYv2YcRunKdg1Aea2s,1.000,matched
+12785,St. Mary / East Glacier KOA Holiday,ChIJVZ-BvYW3aFMRSR1gy8Othdc,1.000,matched
+12786,St. Petersburg / Madeira Beach KOA Holiday,ChIJB2-xyoX8wogRm5lIwL7xAR4,1.000,matched
+12787,KOA EDI,,0,not_found
+12788,Lyons Ferry Marina KOA,ChIJq0yjpbComFQR3fJmGFNDs-Q,1.000,matched
+12789,Starke / Gainesville N.E. KOA Holiday,ChIJU6pQTvr95YgRnXZkKfGNERY,1.000,matched
+12790,Starkville KOA Holiday,ChIJCXebHFA3gYgRi7DCP7XL3mI,1.000,matched
+12791,Steamboat Springs KOA Holiday,ChIJP5_ivXBoQocRD8k7VeFa30Q,1.000,matched
+12792,Strafford / Lake Winnipesaukee South KOA Holiday,ChIJM0Qr7reF4okRA2YD1CuJXo8,1.000,matched
+12793,Streetsboro / Cleveland SE KOA Holiday,ChIJidu4xFQiMYgRkePjUAyQGhk,1.000,matched
+12794,Sturgeon Falls KOA,,0,not_found
+12795,Sugarloaf Key / Key West KOA Resort,ChIJ1ftFJaqq0YgRRdqi7ZYG8kA,1.000,matched
+12796,Sunbury / Columbus North KOA Holiday,ChIJv_2IYNtTOIgRF-kbcOnA4WE,1.000,matched
+12797,Sussex KOA Journey,ChIJc_1yVeEip0wR8MeOOg9SE3A,1.000,matched
+12798,Sweetwater KOA Holiday,ChIJWTykguZxXogRvdlm1M5pXuA,1.000,matched
+12799,Temecula KOA at Vail Lake,ChIJewPs9wqD24ARpyO2m7NSoYQ,1.000,matched
+12800,Texarkana KOA Journey,ChIJq__tA41pNIYR9Nzba38TmqM,1.000,matched
+12801,Thompson / Grand River Valley KOA Holiday,ChIJuXHZt1CaMYgRrxT8SayW0L8,1.000,matched
+12802,Thunder Bay KOA Holiday,ChIJ7X9nizg7WU0RvxzlR9p0nUA,1.000,matched
+12803,Blue Ridge / Toccoa River KOA Holiday,ChIJIXEqFtqnX4gRg4MRsdXFYRA,1.000,matched
+12804,Toledo East / Stony Ridge KOA Journey,ChIJ4XT0LLqOO4gRpTR_7KeICvw,1.000,matched
+12805,Topeka / Capital City KOA Journey,ChIJ5Zl7QAodv4cR8lWmP-3saKQ,1.000,matched
+12806,Toronto North / Cookstown KOA Holiday,ChIJmdVeSszAKogRruqxq1jHIlY,1.000,matched
+12808,Townsend / Canyon Ferry Lake KOA Journey,ChIJkVwTVeW7RFMRzsQpMkA81vA,1.000,matched
+12809,Townsend / Great Smokies KOA Holiday,ChIJp-6IRCipXogR5bE1uGez23I,1.000,matched
+12810,Traverse City KOA Holiday,ChIJRZ5nTvhLHogRbtBXw8sCz44,1.000,matched
+12811,DuBois / Treasure Lake KOA Holiday,ChIJ4_XylYL3zIkRIWCVBP9-Nfc,1.000,matched
+12812,Trinity Lake KOA Holiday,ChIJR2eKaj0T0lQRuWPMHQ629GM,1.000,matched
+12813,Tucson KOA Resort,ChIJcR_gAMN61oYRwWkpm2uY83w,1.000,matched
+12814,Tucumcari / Route 66 KOA Journey,ChIJEbDGc1tWG4cRrnFkH8TDX6o,1.000,matched
+12815,Tulsa NE / Will Rogers Downs KOA Journey,ChIJLWe2ZIZPtocR-zi6S6VygbM,1.000,matched
+12816,Twin Falls / Jerome KOA Holiday,ChIJI6O3WlWerFQRe8s_kbE27TU,1.000,matched
+12817,Twin Mountain / Mt. Washington KOA Holiday,ChIJ84VKypl2tEwRPoj8LTNcJn4,1.000,matched
+12818,Unadilla / I-88 / Oneonta KOA Journey,ChIJAfwxiIeZ24kRv_qJmXM7Ba4,1.000,matched
+12819,Valdez KOA Journey,ChIJh-P52V9EtlYRGkNW73TT020,1.000,matched
+12821,Vernal / Dinosaurland KOA Holiday,ChIJt68Uty5iRYcR3HSEX4OaeR4,1.000,matched
+12822,Virginia Beach KOA Holiday,ChIJTSmmPPjBuokRynvXoMFe-sQ,1.000,matched
+12823,Visalia / Sequoia National Park KOA Journey,ChIJG-U7gHcnlYARFicrdyqftxw,1.000,matched
+12824,WaKeeney KOA Journey,ChIJ_zF16sSsoYcR4GI80HA_lXM,1.000,matched
+12825,Waldport / Newport KOA Journey,,0,not_found
+12826,Wapakoneta KOA Journey,ChIJDyOqBgv8PogRrKvR8N85g9I,1.000,matched
+12827,Washington DC / Capitol KOA Holiday,ChIJ8-d9ijblt4kR_r1ZCq-eeG0,1.000,matched
+12828,Washington / Pittsburgh SW KOA Journey,ChIJf8TQx3KsNYgRdbwipqCjx3c,1.000,matched
+12829,Waterloo / Lost Island KOA Resort,ChIJUUJlCx5S5YcR2hN927bIG0A,1.000,matched
+12830,"Natural Bridge / Watertown, NY KOA Journey",ChIJl5E7-tbMzEwR7X_ehle5QBY,1.000,matched
+12831,Watkins Glen / Corning KOA Resort,ChIJ-WNkBHBc0IkRryGrStc5hfg,1.000,matched
+12832,Weatherford / Fort Worth West KOA Journey,ChIJR23GX-39UYYR5LJjHpi1-P8,1.000,matched
+12833,Weidman KOA Holiday,ChIJb4zq2VWrGIgRsjTd3fj2AyA,1.000,matched
+12834,Wendover KOA Journey,ChIJ0YNJSqEorIARnNIYfoaorMc,1.000,matched
+12835,West Glacier KOA Resort,ChIJByqu9tcXZlMRLrd6yxSwjKI,1.000,matched
+12836,West Omaha / NE Lincoln KOA Holiday,ChIJHWNXHpQHlIcRRcyMXKgPtUo,1.000,matched
+12837,West Palm Beach / Lion Country Safari KOA Journey,ChIJJYiDRgcx2YgR53v41d-pOcI,1.000,matched
+12838,Westfield / Lake Erie KOA Journey,,0,not_found
+12839,Whitefish / Kalispell North KOA Holiday,ChIJD_GIy9BCZlMRARkm0XS00CA,1.000,matched
+12840,Willcox Wine Country KOA Holiday,ChIJI34pQhmc14YRZhd5SF1pxFM,1.000,matched
+12841,Williams / Exit 167 / Circle Pines KOA Holiday,ChIJA_3BF0mcMocR6BQsA_3rjP4,1.000,matched
+12842,Williamsport South / Nittany Mtn. KOA Holiday,ChIJF3nYOlAOz4kRYtIDgrHGs3I,1.000,matched
+12844,Wilmington KOA Holiday,ChIJqSNA7pSMqYkRXEf3nUjxpLk,1.000,matched
+12845,Winnipeg West KOA Journey,ChIJI5ZdB00E6lIRuztO1gek66M,1.000,matched
+12846,Winthrop / N. Cascades National Park KOA Holiday,ChIJu7SgB6CvnFQRUucnw10-FEM,1.000,matched
+12847,Wisconsin Dells KOA Holiday,,0,not_found
+12848,Lincoln / Woodstock KOA Holiday,ChIJ6aJ_sqCCtEwRyTsqkmD5I30,1.000,matched
+12849,Wytheville KOA Holiday,ChIJlaIzyMDiUYgRwhLcsOjK-ZU,1.000,matched
+12850,Yankton / Missouri River KOA Journey,ChIJLx03rE6hj4cRavYILiW3DC8,1.000,matched
+12851,Yellowstone Park / West Gate KOA Holiday,ChIJOx3WTFiwUVMRG5nNStBKM7A,1.000,matched
+12852,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12853,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12854,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12855,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12856,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12857,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12858,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12859,Trailborn Highlands,ChIJe5SjQkweWYgRg2T4jzlSAbY,1.000,matched
+12860,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12861,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12862,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12863,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12864,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12865,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12866,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12867,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12868,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12869,Trailborn Surf & Sound,ChIJ25LxBqnzqYkRH3jw40kU4As,1.000,matched
+12870,Trailborn Grand Canyon,ChIJd3cZ7jufMocRVF0OnuDh4JU,1.000,matched
+12871,Trailborn Jackson Hole,ChIJdz7iUEAaU1MRKVwJJAozpgw,1.000,matched
+12872,Trailborn Jackson Hole,ChIJdz7iUEAaU1MRKVwJJAozpgw,1.000,matched
+12873,Trailborn Jackson Hole,ChIJdz7iUEAaU1MRKVwJJAozpgw,1.000,matched
+12874,Trailborn Jackson Hole,ChIJdz7iUEAaU1MRKVwJJAozpgw,1.000,matched
+12875,Trailborn Jackson Hole,ChIJdz7iUEAaU1MRKVwJJAozpgw,1.000,matched
+12876,Trailborn Jackson Hole,ChIJdz7iUEAaU1MRKVwJJAozpgw,1.000,matched
+12877,Trailborn Jackson Hole,ChIJdz7iUEAaU1MRKVwJJAozpgw,1.000,matched
+12878,Trailborn Mendocino Hillside,,0,not_found
+12879,Trailborn Mendocino Hillside,,0,not_found
+12880,Trailborn Mendocino Hillside,,0,not_found
+12881,Trailborn Mendocino Hillside,,0,not_found
+12882,Trailborn Mendocino Hillside,,0,not_found
+12883,Trailborn Mendocino Hillside,,0,not_found
+12884,Trailborn Mendocino Hillside,,0,not_found
+12885,Trailborn Mendocino Hillside,,0,not_found
+12893,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12894,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12895,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12896,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12897,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12898,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12899,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12900,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12901,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12902,The Outpost Grand Canyon,ChIJdSjiXQDvMocRkkr3FndkiMk,1.000,matched
+12903,Rice Ranch RV Park,ChIJJzhlhPVZ0YAR11xWTBb_kV8,0.611,matched
+12904,Rice Ranch RV Park,ChIJJzhlhPVZ0YAR11xWTBb_kV8,0.611,matched
+12905,Rice Ranch RV Park,,0,not_found
+12906,Rice Ranch RV Park,ChIJJzhlhPVZ0YAR11xWTBb_kV8,0.611,matched
+12907,Rice Ranch RV Park,,0,not_found
+12909,Camp Wandawega,,0,not_found
+12910,Camp Wandawega,,0,not_found
+12911,Camp Wandawega,,0,not_found
+12912,Camp Wandawega,,0,not_found
+12913,Camp Wandawega,,0,not_found
+12914,Camp Wandawega,,0,not_found
+12915,Camp Wandawega,,0,not_found
+12916,Camp Wandawega,,0,not_found
+12917,Camp Wandawega,,0,not_found
+12920,Glamping Loft Lake Geneva,,0,not_found
+12924,Sundara Inn & Spa,,0,not_found
+12925,Sundara Inn & Spa,,0,not_found
+12926,Sundara Inn & Spa,,0,not_found
+12927,Pepin Forest Treehouse,,0,not_found
+12929,Pepin Forest Treehouse,,0,not_found
+12930,Lakewood Farms,ChIJB__VLDeXBYgRG70uZT0th7Y,0.700,matched
+12931,Lakewood Farms,ChIJB__VLDeXBYgRG70uZT0th7Y,0.700,matched
+12932,Lakewood Farms,ChIJB__VLDeXBYgRG70uZT0th7Y,0.700,matched
+13008,Collective Retreats Governors Island,ChIJCermg6JbwokRTZIcXC6F8Cc,1.000,matched
+13009,Collective Retreats Governors Island,ChIJCermg6JbwokRTZIcXC6F8Cc,1.000,matched
+13010,Collective Retreats Governors Island,ChIJCermg6JbwokRTZIcXC6F8Cc,1.000,matched

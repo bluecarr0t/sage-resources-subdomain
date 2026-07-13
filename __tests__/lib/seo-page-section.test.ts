@@ -44,5 +44,7 @@ describe('extractSeoContentSlug', () => {
       'glamping-feasibility-study-texas'
     );
     expect(extractSeoContentSlug('/en/property/eureka-springs')).toBe('eureka-springs');
+    expect(extractSeoContentSlug('/glamping-market-overview/brands')).toBe('brands');
+    expect(extractSeoContentSlug('/glamping-market-overview')).toBeUndefined();
   });
 });

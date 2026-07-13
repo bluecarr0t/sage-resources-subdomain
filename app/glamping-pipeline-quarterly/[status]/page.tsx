@@ -89,7 +89,7 @@ export default async function PipelineQuarterlyStatusPage({
         </Link>
       </p>
 
-      <div className="mt-6 flex w-full flex-wrap items-center justify-between gap-4">
+      <div className="mt-6 flex w-full flex-wrap items-start justify-between gap-4">
         <GlampingMarketSnapshotToggle
           market={market}
           tier={tier}

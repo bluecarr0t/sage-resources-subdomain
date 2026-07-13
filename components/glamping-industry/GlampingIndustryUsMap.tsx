@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
+import { trackMapInteraction } from '@/lib/analytics';
 import type { GlampingUsStateMetricsMap } from '@/lib/fetch-glamping-industry-us-state-metrics';
 import {
   pipelineMapStateDetailPath,
@@ -73,9 +74,14 @@ const PIPELINE_MAP_COLORS: Record<
     fillSelected: PIPELINE_BOTH_STAGES_COLORS.mapFillSelected,
   },
 };
-/** Mercator inset for HI only — placed above Alaska (Albers lower-left) so it does not cover AK. */
-const HAWAII_INSET_W = 64;
-const HAWAII_INSET_H = 38;
+/** Mercator inset for HI only — placed left of Alaska (Albers lower-left) so it does not cover AK. */
+const HAWAII_INSET_W = 80;
+const HAWAII_INSET_H = 46;
+/** Centroid + scale fit the full island chain inside HAWAII_INSET_* (scale 1400 clipped Kauai). */
+const HAWAII_INSET_PROJECTION = {
+  center: [-156.34, 20.25] as [number, number],
+  scale: 520,
+};
 
 function parseHawaiiStateGeo(geos: GeoJSON.Feature[]) {
   return geos.filter((g) => {
@@ -317,12 +323,21 @@ export default function GlampingIndustryUsMap({
   const row = selected ? byState[selected] : undefined;
 
   const onSelect = useCallback((abbr: string) => {
-    setSelected((prev) => (prev === abbr ? null : abbr));
-  }, []);
+    setSelected((prev) => {
+      const next = prev === abbr ? null : abbr;
+      trackMapInteraction('region_select', {
+        map: 'glamping_market_overview_us',
+        region: abbr,
+        selected: next != null,
+        variant,
+      });
+      return next;
+    });
+  }, [variant]);
 
   return (
-    <div className="relative mt-16 space-y-12 overflow-x-visible sm:mt-20 sm:space-y-0 lg:pr-[calc(240px+3rem)]">
-      <div className="relative min-w-0 overflow-x-visible overflow-y-visible">
+    <div className="relative mt-16 space-y-12 overflow-x-hidden sm:mt-20 sm:space-y-0 lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start lg:gap-x-12">
+      <div className="relative min-w-0 overflow-x-hidden overflow-y-visible">
         {variant === 'market-overview' ? (
           <div className="mb-4 space-y-1 text-[10px] uppercase tracking-[0.25em] text-neutral-500">
             <p>United States map · click a state</p>
@@ -371,7 +386,7 @@ export default function GlampingIndustryUsMap({
             <PipelineMapLegend stageFilter={stageFilter} />
           </div>
         )}
-        <div className="relative w-[108%] max-w-none">
+        <div className="relative w-full max-w-full">
         <ComposableMap
           projection="geoAlbersUsa"
           width={MAP_W}
@@ -442,16 +457,13 @@ export default function GlampingIndustryUsMap({
         </ComposableMap>
 
         <div
-          className="pointer-events-none absolute bottom-[10%] left-2 z-10 -translate-x-4 sm:bottom-[12%] sm:left-3 sm:-translate-x-5 md:bottom-[14%] md:left-4 md:-translate-x-6 lg:left-4 lg:-translate-x-7"
+          className="pointer-events-none absolute bottom-[10%] left-1 z-10 sm:bottom-[12%] sm:left-2 md:bottom-[14%] md:left-2"
           style={{ width: HAWAII_INSET_W, height: HAWAII_INSET_H }}
         >
-          <div className="h-full w-full overflow-hidden [&_svg]:pointer-events-none [&_svg]:overflow-hidden [&_path.rsm-geography]:pointer-events-auto">
+          <div className="h-full w-full overflow-visible [&_svg]:pointer-events-none [&_path.rsm-geography]:pointer-events-auto">
             <ComposableMap
               projection="geoMercator"
-              projectionConfig={{
-                center: [-157.35, 20.42] as [number, number],
-                scale: 1400,
-              }}
+              projectionConfig={HAWAII_INSET_PROJECTION}
               width={HAWAII_INSET_W}
               height={HAWAII_INSET_H}
               className="block h-full w-full max-w-none [&_.rsm-geography]:outline-none"
@@ -487,8 +499,8 @@ export default function GlampingIndustryUsMap({
         </div>
       </div>
 
-      <aside className="border-t border-sage-200 pt-6 lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:flex lg:min-h-0 lg:w-[240px] lg:flex-col lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
-        <div className="min-h-0 flex-1 overflow-y-auto lg:min-h-0">
+      <aside className="border-t border-sage-200 pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+        <div>
           {!selected ? (
             <p className="text-sm font-light leading-relaxed text-neutral-600">
               {variant === 'pipeline-quarterly'
@@ -578,7 +590,7 @@ export default function GlampingIndustryUsMap({
                 </div>
                 <div>
                   <dt className="text-[10px] uppercase tracking-wider text-neutral-500">
-                    Avg. retail daily rate
+                    Avg. retail daily rate (ARDR)
                   </dt>
                   <dd className="mt-1 space-y-0.5 font-light tabular-nums text-lg tracking-tight text-neutral-900">
                     <div>
@@ -590,9 +602,6 @@ export default function GlampingIndustryUsMap({
                       {formatUsd(row?.avgRetailDailyRateMedian ?? null)}
                     </div>
                   </dd>
-                  <p className="mt-2 text-[10px] leading-relaxed text-neutral-500">
-                    From operating properties with a rate.
-                  </p>
                 </div>
               </dl>
             </div>

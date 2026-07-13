@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { Mail } from 'lucide-react';
 import {
   EDITORIAL_BUTTON_PRIMARY_CLASS,
   EDITORIAL_H1_CLASS,
   EDITORIAL_INPUT_CLASS,
 } from '@/components/editorial/EditorialPageShell';
+import { trackFormSubmission } from '@/lib/analytics';
 import { fireGateAccessConfetti } from '@/lib/gate-access-confetti';
 import {
   GATED_ACCESS_EXISTING_LEAD_CODE,
@@ -16,6 +18,21 @@ import { supabase } from '@/lib/supabase';
 
 type GateStep = 'form' | 'sent';
 type FormMode = 'lead' | 'email-only';
+
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+function listFocusable(root: HTMLElement): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true'
+  );
+}
 
 export type GlampingMarketAccessGateCopy = {
   title?: string;
@@ -40,6 +57,8 @@ export function GlampingMarketAccessGate({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const descriptionId = useId();
 
   const emailOnly = formMode === 'email-only';
 
@@ -50,6 +69,56 @@ export function GlampingMarketAccessGate({
       document.body.style.overflow = prev;
     };
   }, []);
+
+  // Focus trap: keep Tab cycling inside the gate. Escape does not dismiss
+  // (hard gate) but returns focus to the first field so keys are handled.
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const focusFirst = () => {
+      const items = listFocusable(panel);
+      items[0]?.focus();
+    };
+
+    // Defer so autoFocus / step content has mounted.
+    const t = window.setTimeout(focusFirst, 0);
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        focusFirst();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const items = listFocusable(panel);
+      if (items.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      const active = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey) {
+        if (active === first || !panel.contains(active)) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !panel.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      window.clearTimeout(t);
+      document.removeEventListener('keydown', onKeyDown, true);
+    };
+  }, [step, formMode]);
 
   // The auth callback returns here with `?access=link-expired` when a magic
   // link could not be verified (expired, already used, or opened on a
@@ -72,6 +141,9 @@ export function GlampingMarketAccessGate({
     event.preventDefault();
     setError(null);
     setSubmitting(true);
+    const formName = emailOnly
+      ? 'glamping_market_overview_gate_email'
+      : 'glamping_market_overview_gate_lead';
     try {
       // Drop any stale browser session so the server can issue a fresh magic link
       // (returning-user email-only sign-in often fails to send when a session exists).
@@ -92,6 +164,7 @@ export function GlampingMarketAccessGate({
         | { ok?: boolean; error?: string; code?: string; name?: string | null }
         | null;
       if (!res.ok || !data?.ok) {
+        trackFormSubmission(formName, pageSlug, false);
         if (data?.code === GATED_ACCESS_REQUIRE_LEAD_FORM_CODE) {
           setFormMode('lead');
           setNotice(data.error ?? null);
@@ -110,10 +183,12 @@ export function GlampingMarketAccessGate({
         setError(data?.error ?? 'Something went wrong. Please try again.');
         return;
       }
+      trackFormSubmission(formName, pageSlug, true);
       void fireGateAccessConfetti();
       setNotice(null);
       setStep('sent');
     } catch {
+      trackFormSubmission(formName, pageSlug, false);
       setError('Network error. Please try again.');
     } finally {
       setSubmitting(false);
@@ -135,10 +210,14 @@ export function GlampingMarketAccessGate({
       role="dialog"
       aria-modal="true"
       aria-labelledby="gate-dialog-title"
+      aria-describedby={descriptionId}
     >
-      <div className="absolute inset-0 bg-[#faf9f3]/40" aria-hidden />
+      <div className="absolute inset-0 bg-[#faf9f3]/55" aria-hidden />
 
-      <div className="relative z-10 w-full max-w-md border border-sage-200/90 bg-white/95 p-6 shadow-lg sm:max-w-lg sm:p-8">
+      <div
+        ref={panelRef}
+        className="relative z-10 w-full max-w-md border border-sage-200/90 bg-white/95 p-6 shadow-lg sm:max-w-lg sm:p-8"
+      >
         <h1
           id="gate-dialog-title"
           className={`${EDITORIAL_H1_CLASS} sm:whitespace-nowrap sm:tracking-[0.22em]`}
@@ -153,7 +232,10 @@ export function GlampingMarketAccessGate({
                 {notice}
               </p>
             ) : null}
-            <p className="mt-4 text-sm font-light leading-relaxed text-neutral-600">
+            <p
+              id={descriptionId}
+              className="mt-4 text-sm font-light leading-relaxed text-neutral-600"
+            >
               {emailOnly ? emailOnlyDescription : leadDescription}
             </p>
 
@@ -273,10 +355,19 @@ export function GlampingMarketAccessGate({
           </>
         ) : (
           <>
-            <h2 className="mt-4 text-base font-medium text-neutral-900">Check your email</h2>
-            <p className="mt-3 text-sm font-light leading-relaxed text-neutral-600">
+            <h2 className="mt-4 flex items-center gap-2 text-base font-medium text-neutral-900">
+              <Mail className="h-4 w-4 shrink-0 text-neutral-700" aria-hidden />
+              Check your email
+            </h2>
+            <p
+              id={descriptionId}
+              className="mt-3 text-sm font-light leading-relaxed text-neutral-600"
+            >
               We&apos;ve sent a secure sign-in link to{' '}
-              <span className="font-medium text-neutral-900">{email}</span>. {successDescription}
+              <span className="font-medium text-neutral-900">{email}</span>.
+            </p>
+            <p className="mt-2 mb-4 text-sm font-light leading-relaxed text-neutral-600">
+              {successDescription}
             </p>
             <p className="mt-4 text-[11px] leading-relaxed text-neutral-500">
               Open the link on <span className="font-medium text-neutral-700">this device</span>{' '}

@@ -34,7 +34,7 @@ const supabase = createClient(supabaseUrl, secretKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-const TABLE = 'all_glamping_properties';
+const TABLE = 'all_sage_data';
 const PAGE_SIZE = 1000;
 
 const SELECT_COLS = [

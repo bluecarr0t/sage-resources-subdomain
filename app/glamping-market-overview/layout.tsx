@@ -2,14 +2,13 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { headers } from 'next/headers';
 import { GlampingMarketOverviewGatedShell } from '@/components/glamping-industry/GlampingMarketOverviewGatedShell';
-import { checkGatedPageAccess } from '@/lib/check-gated-page-access';
+import { isGlampingMarketOverviewUnlocked } from '@/lib/glamping-market-overview-access';
 import { GATED_PAGE_GLAMPING_MARKET_OVERVIEW } from '@/lib/gated-access';
 import {
   buildGlampingMarketOverviewMetadata,
   generateGlampingMarketOverviewJsonLd,
   resolveGlampingMarketOverviewSeoVariant,
 } from '@/lib/glamping-market-overview-seo';
-import { createServerClientWithCookies } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,8 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * Server gate for `/glamping-market-overview` (and nested routes like `/brands`).
- * Locked visitors see public SEO copy, the real page slightly blurred, and an access modal;
- * unlocked visitors (magic link or active admin) see the page normally.
+ * Locked visitors see crawlable SEO copy (one H1), a decorative blurred stand-in
+ * (no live metrics), and an access modal. Unlocked visitors see the real page.
  */
 export default async function GlampingMarketOverviewLayout({
   children,
@@ -32,17 +31,7 @@ export default async function GlampingMarketOverviewLayout({
   const pathname = (await headers()).get('x-pathname');
   const seoVariant = resolveGlampingMarketOverviewSeoVariant(pathname);
   const jsonLd = generateGlampingMarketOverviewJsonLd(seoVariant);
-
-  const supabase = await createServerClientWithCookies();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const unlocked = await checkGatedPageAccess(
-    supabase,
-    user,
-    GATED_PAGE_GLAMPING_MARKET_OVERVIEW
-  );
+  const unlocked = await isGlampingMarketOverviewUnlocked();
 
   if (!unlocked) {
     return (
@@ -51,9 +40,10 @@ export default async function GlampingMarketOverviewLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <GlampingMarketOverviewGatedShell pageSlug={GATED_PAGE_GLAMPING_MARKET_OVERVIEW} seoVariant={seoVariant}>
-          {children}
-        </GlampingMarketOverviewGatedShell>
+        <GlampingMarketOverviewGatedShell
+          pageSlug={GATED_PAGE_GLAMPING_MARKET_OVERVIEW}
+          seoVariant={seoVariant}
+        />
       </>
     );
   }

@@ -7,6 +7,7 @@
  * await revalidatePropertiesCache();
  */
 import { revalidateTag } from 'next/cache';
+import { GLAMPING_MARKET_OVERVIEW_CACHE_TAG } from '@/lib/glamping-market-overview-cache';
 import { deleteCache, deleteCachePattern } from '@/lib/redis';
 
 /**
@@ -26,6 +27,7 @@ export async function revalidatePropertiesCache() {
     
     // Also revalidate Next.js cache tag for any remaining Next.js cache
     revalidateTag('properties');
+    revalidateTag(GLAMPING_MARKET_OVERVIEW_CACHE_TAG);
     
     console.log(`Properties cache revalidated successfully. Cleared ${deletedCount} Redis cache entries.`);
     return { success: true, redisKeysDeleted: deletedCount };

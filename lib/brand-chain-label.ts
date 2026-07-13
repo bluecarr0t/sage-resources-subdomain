@@ -31,6 +31,10 @@ export const SAGE_CHAIN_LABEL_PREFIXES = [
   'ulum',
   'under canvas',
   'wander camp',
+  'trailborn',
+  'ofland',
+  'luxeden',
+  'huttopia usa',
   'timberline glamping co.',
   'timberline glamping',
   'getaway house',
@@ -60,6 +64,9 @@ export const CHAIN_KEY_TO_BRAND_SLUG: ReadonlyArray<{ pattern: string; slug: str
   { pattern: 'treebox', slug: 'treebox' },
   { pattern: 'bliss camps', slug: 'bliss-camps' },
   { pattern: 'westgate river ranch', slug: 'westgate-river-ranch' },
+  { pattern: 'trailborn', slug: 'trailborn' },
+  { pattern: 'huttopia', slug: 'huttopia' },
+  { pattern: 'wander camp', slug: 'wander' },
 ];
 
 export function chainLabelFromPropertyName(name: string | null | undefined): string {

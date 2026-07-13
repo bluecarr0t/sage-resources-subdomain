@@ -73,9 +73,9 @@ export const GLAMPING_SERVICE_TIER_FAST_PATHS: ReadonlyArray<{
   condition: string;
   tier: GlampingServiceTier;
 }> = [
-  { condition: 'Max site ADR ≥ $800', tier: 'luxury' },
+  { condition: 'Max site ARDR ≥ $800', tier: 'luxury' },
   {
-    condition: 'Max site ADR < $125 and shared bath on all rows',
+    condition: 'Max site ARDR < $150, shared bath, and amenity score < 1',
     tier: 'rustic',
   },
 ];
@@ -84,12 +84,16 @@ export const GLAMPING_SERVICE_TIER_BASE_RULES: ReadonlyArray<{
   tier: GlampingServiceTier;
   rule: string;
 }> = [
-  { tier: 'luxury', rule: 'Amenity score ≥ 6 AND max ADR ≥ $500 (if not already luxury)' },
-  { tier: 'upscale', rule: 'Amenity score ≥ 4 AND max ADR ≥ $250' },
-  { tier: 'midscale', rule: 'Amenity score ≥ 1 OR max ADR ≥ $125' },
+  { tier: 'luxury', rule: 'Amenity score ≥ 6 AND max ARDR ≥ $500 (if not already luxury)' },
+  { tier: 'upscale', rule: 'Amenity score ≥ 4 AND max ARDR ≥ $250' },
+  {
+    tier: 'midscale',
+    rule: 'Amenity score ≥ 1 OR max ARDR ≥ $150 (price floor for low-amenity inventory)',
+  },
   {
     tier: 'rustic',
-    rule: 'Default; or max ADR < $150 with low amenity score',
+    rule:
+      'Shared bath + amenity score < 1 + max ARDR < $150; or amenity score < 1 with max ARDR null/<$150',
   },
 ];
 
@@ -97,11 +101,11 @@ export const GLAMPING_SERVICE_TIER_BASE_RULES: ReadonlyArray<{
 export const GLAMPING_SERVICE_TIER_AGGREGATION_STEPS = [
   'Group site rows by property_id (fallback: property_name + city + state).',
   'Amenities: BOOL_OR across rows (Yes on any row counts for the property).',
-  'ADR: MAX(rate_avg_retail_daily_rate) across site rows.',
+  'ARDR (avg. retail daily rate): MAX(rate_avg_retail_daily_rate) across site rows.',
   'Manual rows (glamping_service_tier_source = manual) are skipped by the batch classifier.',
 ] as const;
 
-/** Suggested max-site ADR bands (USD) from Sage cohort study — guidance only. */
+/** Suggested max-site ARDR bands (USD) from Sage cohort study — guidance only. */
 export const TIER_ADR_GUIDANCE: Record<
   GlampingServiceTier,
   { min: number | null; max: number | null; note: string }
@@ -227,11 +231,13 @@ export function computeGlampingServiceTier(
     };
   }
 
-  if (adr != null && adr < 125 && !agg.hasPrivateBathroom) {
+  // Shared-bath, low-amenity inventory in the rustic ADR guidance band stays rustic
+  // even when price clears the old $125 midscale floor.
+  if (adr != null && adr < 150 && !agg.hasPrivateBathroom && points < 1) {
     return {
       tier: 'rustic',
       points,
-      rationale: `ADR $${adr} < $125 with shared bath (score ${points})`,
+      rationale: `ADR $${adr} < $150 with shared bath (score ${points})`,
     };
   }
 
@@ -251,7 +257,7 @@ export function computeGlampingServiceTier(
     };
   }
 
-  if (points >= 1 || (adr != null && adr >= 125)) {
+  if (points >= 1 || (adr != null && adr >= 150)) {
     return {
       tier: 'midscale',
       points,
@@ -262,11 +268,21 @@ export function computeGlampingServiceTier(
     };
   }
 
+  // Low-amenity properties with ADR still in the rustic band stay rustic.
   if (adr != null && adr < 150) {
     return {
       tier: 'rustic',
       points,
       rationale: `ADR $${adr} < $150, amenity score ${points}`,
+    };
+  }
+
+  // Price above the rustic band with weak amenity signals still lands midscale.
+  if (adr != null && adr >= 150) {
+    return {
+      tier: 'midscale',
+      points,
+      rationale: `ADR $${adr} ≥ $150 midscale floor (amenity score ${points})`,
     };
   }
 
@@ -293,6 +309,11 @@ export function tierDisplayLabel(
   const labels =
     style === 'short' ? GLAMPING_SERVICE_TIER_SHORT_LABELS : GLAMPING_SERVICE_TIER_LABELS;
   return labels[key] ?? tier;
+}
+
+/** Public one-line blurb for market-overview classification filter (active tier). */
+export function glampingServiceTierPublicSummary(tier: GlampingServiceTier): string {
+  return GLAMPING_SERVICE_TIER_DEFINITIONS[tier].summary;
 }
 
 export function isGlampingServiceTier(value: string): value is GlampingServiceTier {

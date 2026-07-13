@@ -89,7 +89,8 @@ export default function AdminGlampingServiceTierBreakdown() {
           Glamping service tier
         </h2>
         <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400 max-w-3xl">
-          Property-level experience classification from amenities and max site ADR. Distinct from{' '}
+          Property-level experience classification from amenities and max site avg. retail daily rate
+          (ARDR). Distinct from{' '}
           <span className="font-mono text-[11px]">rate_category</span> (price buckets) and comps-v2
           quality tiers. Stored on{' '}
           <span className="font-mono text-[11px]">all_sage_data</span>; editable in{' '}
@@ -174,7 +175,7 @@ export default function AdminGlampingServiceTierBreakdown() {
                     Label
                   </th>
                   <th className="px-3 py-2 font-medium text-neutral-600 dark:text-neutral-400">
-                    Max ADR band
+                    Max ARDR band
                   </th>
                   <th className="px-3 py-2 font-medium text-neutral-600 dark:text-neutral-400">
                     Definition

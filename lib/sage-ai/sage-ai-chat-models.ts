@@ -52,7 +52,10 @@ export type SageAiModelSelection =
   | { mode: 'auto' }
   | { mode: 'fixed'; modelId: SageAiChatGatewayModelId };
 
-export const SAGE_AI_DEFAULT_MODEL_SELECTION: SageAiModelSelection = { mode: 'auto' };
+export const SAGE_AI_DEFAULT_MODEL_SELECTION: SageAiModelSelection = {
+  mode: 'fixed',
+  modelId: SAGE_AI_CHAT_FAST_MODEL,
+};
 
 /** Value sent in POST /api/admin/sage-ai/chat `body.model`. */
 export function sageAiModelForChatRequest(selection: SageAiModelSelection): string {

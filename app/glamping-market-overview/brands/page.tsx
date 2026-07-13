@@ -3,6 +3,9 @@ import {
   EDITORIAL_LINK_CLASS,
   EDITORIAL_TOPO_BG_URL,
 } from '@/components/editorial/EditorialPageShell';
+import { GlampingMarketOverviewLoadError } from '@/components/glamping-industry/GlampingMarketOverviewLoadError';
+import { GlampingMarketOverviewResearchFooter } from '@/components/glamping-industry/GlampingMarketOverviewResearchFooter';
+import { isGlampingMarketOverviewUnlocked } from '@/lib/glamping-market-overview-access';
 import {
   fetchTopGlampingBrands,
   formatRetailDailyRate,
@@ -30,6 +33,11 @@ function formatLastUpdatedDate(iso: string): string {
 }
 
 export default async function BrandOverviewPage() {
+  // Layout already shows the lock UI; skip brand fetches so rankings never leave the server.
+  if (!(await isGlampingMarketOverviewUnlocked())) {
+    return null;
+  }
+
   const result = await fetchTopGlampingBrands(TOP_GLAMPING_BRANDS_COUNT, 'us');
 
   return (
@@ -57,8 +65,8 @@ export default async function BrandOverviewPage() {
         ) : null}
 
         <p className="mt-6 max-w-xl text-sm font-light leading-relaxed text-neutral-600">
-          Largest multi-property glamping operators in the United States in Sage research. Portfolio
-          brands include sub-brand locations in their totals.
+          Largest multi-property US glamping operators in Sage research. Open, privately operated
+          locations only; portfolio totals include sub-brands.
         </p>
 
         {result.ok ? (
@@ -103,8 +111,8 @@ export default async function BrandOverviewPage() {
                 Top brands
               </h2>
               <p className="mt-2 max-w-md text-[10px] leading-relaxed text-neutral-500">
-                Properties per brand; rollups include sub-brands. Avg. retail rate is the mean where
-                nightly rates are published.
+                Properties per brand; rollups include sub-brands. ARDR (avg. retail daily rate) is
+                USD where nightly rates are published—not PMS ADR.
               </p>
               {result.data.brands.length > 0 ? (
                 <ul className="mt-6 w-full min-w-0 space-y-4 text-sm">
@@ -121,7 +129,7 @@ export default async function BrandOverviewPage() {
                     >
                       Avg. retail
                       <br />
-                      daily rate
+                      daily rate (ARDR)
                     </span>
                   </li>
                   {result.data.brands.map((row) => (
@@ -163,24 +171,15 @@ export default async function BrandOverviewPage() {
             </aside>
           </div>
         ) : (
-          <p className="mt-12 text-sm text-neutral-600">{result.error}</p>
+          <GlampingMarketOverviewLoadError
+            title="Unable to load brand rankings"
+            message="Something went wrong while loading top glamping brands. Please try again in a moment."
+            detail={result.error}
+          />
         )}
       </main>
 
-      <footer className="relative z-10 mt-auto w-full py-6 text-center">
-        <div className="mx-auto max-w-4xl px-6">
-          <p className="text-xs font-light text-neutral-500">
-            Powered by{' '}
-            <a
-              href="https://sageoutdooradvisory.com/"
-              className="text-neutral-500 underline-offset-2 transition-colors hover:text-neutral-900 hover:underline"
-              rel="noopener noreferrer"
-            >
-              Sage Outdoor Advisory
-            </a>
-          </p>
-        </div>
-      </footer>
+      <GlampingMarketOverviewResearchFooter market="us" />
     </div>
   );
 }

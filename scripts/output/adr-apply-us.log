@@ -1,0 +1,620 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[APPLY] Writing rates to all_sage_data
+
+Phase=us tier=all allowEstimates=false
+APIs: Firecrawl=yes Tavily=yes OpenAI=yes
+
+Processing 302 missing-ADR rows
+
+[1/302] Treehouse Point (Fall City, WA) id=31
+   sibling_copy → $483.5
+[2/302] River's Edge Treehouse Resort (Robbinsville, NC) id=33
+   skipped_no_evidence
+[3/302] In The Trees  (Amherst, VA) id=36
+   firecrawl → $309 (https://www.inthetreesmaine.com/)
+[4/302] Branson Treehouse Adventures (Branson, MO) id=39
+   firecrawl → $269 (https://www.bransontreehouseadventures.com)
+[5/302] Treehouse Resort at River Road (New Braunfels, TX) id=40
+   tavily → $114 (https://rusticvacations.com/property/river-road-treehouses)
+[6/302] Sinya on Lone Man Creek (Wimberley, TX) id=88
+   sibling_copy → $410
+[7/302] Falling Waters Adventure Resort (Bryson City, NC) id=108
+   tavily → $70 (https://wildwaterrafting.com/adventures/nantahala-nc-lodging)
+[8/302] The Yurt Village at Frost Mountain (Brownfield, ME) id=110
+   tavily → $140 (https://www.yelp.com/biz/frost-mountain-yurts-brownfield-2)
+[9/302] The Shady Dell (Bisbee, AZ) id=164
+   tavily → $92 (https://www.hotel-scoop.com/arizonas-shady-dell-trailer-park-offers-instagram-worthy-stays)
+[10/302] Silver Bullet Retreats (Orlando, FL) id=165
+   tavily → $125 (https://www.silverbulletretreats.com/rates_rules.php)
+[11/302] Roamstead (Cosby, TN) id=11433
+   sibling_copy → $159
+[12/302] Roadhouse Ranch & Camp (Terrebonne, OR) id=11566
+   tavily → $52 (https://www.campspot.com/park/roadhouse-ranch-and-camp-bend-or)
+[13/302] Rimrock Ranch (Pioneertown, CA) id=11577
+   tavily → $1500 (https://rusticvacations.com/property/rimrock-ranch-california)
+[14/302] Mossquatch Resort (Forks, WA) id=11578
+   sibling_copy → $355
+[15/302] Container Cabins in the Catskills (Saugerties, NY) id=11587
+   tavily → $534 (https://www.expedia.com/Saugerties-Hotels-40-Foot-Container-Cabin-In-The-Catskills.h101987328.Hotel-Information)
+[16/302] Boonies Farm (Worden, IL) id=11591
+   skipped_no_evidence
+[17/302] Yurts of the World (Lava Hot Springs, ID) id=11605
+   tavily → $254 (https://www.vrbo.com/4170097)
+[18/302] Sou'wester Lodge (Seaview, WA) id=11622
+   skipped_no_evidence
+[19/302] Loloma Lodge (McKenzie Bridge, OR) id=11627
+   tavily → $225 (https://www.lolomalodge.com/riverside-cabins)
+[20/302] The Highlands Resort (Guerneville, CA) id=11630
+   tavily → $40 (https://www.instagram.com/highlandsresort?hl=en)
+[21/302] Gateway Canyons Resort & Spa (Gateway, CO) id=11649
+   tavily → $927 (https://www.expedia.com/Gateway-Hotels-Gateway-Canyons-Resort.h4071707.Hotel-Information)
+[22/302] Vegas Glamping (Nelson, NV) id=11650
+   tavily → $199 (https://www.pitchup.com/en-us/campsites/usa/west/nevada/henderson/vegas-glamping)
+[23/302] Lost Creek Ranch & Spa (Moose, WY) id=11663
+   tavily → $650 (https://rusticvacations.com/property/lost-creek-ranch-spa)
+[24/302] RESET Hotel Joshua Tree (Twentynine Palms, CA) id=11803
+   tavily → $258 (https://www.expedia.com/Twentynine-Palms-Hotels-RESET.h109932822.Hotel-Information)
+[25/302] Camp Ferncrest - Chambers Creek (Grandview, TX) id=11815
+   tavily → $396 (https://www.hipcamp.com/en-US/land/texas-ferncrest-chamber-s-creek-lz9h0ry1)
+[26/302] Terranova Nirvana (Page, AZ) id=11848
+   tavily → $600 (https://terranovanirvana.com)
+[27/302] Terranova Nirvana (Page, AZ) id=11854
+   tavily → $600 (https://terranovanirvana.com)
+[28/302] Terranova Nirvana (Page, AZ) id=11855
+   tavily → $600 (https://terranovanirvana.com)
+[29/302] Starlight Haven at Hot Springs (Hot Springs, AR) id=11878
+   tavily → $242 (https://www.expedia.com/Hot-Springs-Hotels-Starlight-Haven-Hot-Springs.h87126289.Hotel-Information)
+[30/302] Mount Snow Yurt (Dover, VT) id=11880
+   firecrawl → $400 (https://mountsnowyurt.com/)
+[31/302] Lilla Rustica Treehouse (Moretown, VT) id=11881
+   firecrawl → $343 (https://www.treehouserentals.com/property/cozy-warm-treehouse-with-amazing-views-winter-paradise-hike-from-cabin/HA-3212044380)
+[32/302] Roamstead (Cosby, TN) id=11913
+   sibling_copy → $159
+[33/302] Roamstead (Cosby, TN) id=11917
+   firecrawl → $84 (https://resnexus.com/resnexus/reservations/book/FBF415F2-C33B-4F06-BDCC-DD190FDF60BB)
+[34/302] Lone Mountain Ranch (Big Sky, MT) id=12040
+   tavily → $416.5 (https://www.businesstravelnews.com/Hotels/Big-Sky-MT/Lone-Mountain-Ranch-p3275917)
+[35/302] Lone Mountain Ranch (Big Sky, MT) id=12041
+   tavily → $416.5 (https://www.businesstravelnews.com/Hotels/Big-Sky-MT/Lone-Mountain-Ranch-p3275917)
+[36/302] Lone Mountain Ranch (Big Sky, MT) id=12042
+   tavily → $416.5 (https://www.businesstravelnews.com/Hotels/Big-Sky-MT/Lone-Mountain-Ranch-p3275917)
+[37/302] Lone Mountain Ranch (Big Sky, MT) id=12043
+   tavily → $416.5 (https://www.businesstravelnews.com/Hotels/Big-Sky-MT/Lone-Mountain-Ranch-p3275917)
+[38/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12059
+   sibling_copy → $250
+[39/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12062
+   tavily → $156 (https://www.travelocity.com/River-Ranch-Hotels-Westgate-River-Ranch-Resort-Rodeo.h899141.Hotel-Information)
+[40/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12063
+   tavily → $85 (https://www.expedia-aarp.com/River-Ranch-Hotels-Westgate-River-Ranch-Resort-Rodeo.h899141.Hotel-Information)
+[41/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12064
+   tavily → $156 (https://www.travelocity.com/River-Ranch-Hotels-Westgate-River-Ranch-Resort-Rodeo.h899141.Hotel-Information)
+[42/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12065
+   tavily → $156 (https://www.travelocity.com/River-Ranch-Hotels-Westgate-River-Ranch-Resort-Rodeo.h899141.Hotel-Information)
+[43/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12067
+   sibling_copy → $344.5
+[44/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12072
+   tavily → $55 (https://www.travelocity.com/River-Ranch-Hotels-Westgate-River-Ranch-Resort-Rodeo.h899141.Hotel-Information)
+[45/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12073
+   tavily → $25 (https://www.expedia.com/River-Ranch-Hotels-Westgate-River-Ranch-Resort-Rodeo.h899141.Hotel-Information)
+[46/302] Westgate River Ranch Resort & Rodeo (River Ranch, FL) id=12074
+   tavily → $55 (https://www.expedia-aarp.com/River-Ranch-Hotels-Westgate-River-Ranch-Resort-Rodeo.h899141.Hotel-Information)
+[47/302] Tarantula Ranch (Amargosa Valley, NV) id=12089
+   firecrawl → $107 (https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/)
+[48/302] The Eagle's Nest (Jarbidge, NV) id=12090
+   firecrawl → $25 (https://www.glamping.com/destination/north-america/nevada/jarbidge/the-eagles-nest/)
+[49/302] Vegas Glamping (Nelson, NV) id=12097
+   tavily → $199 (https://www.pitchup.com/en-us/campsites/usa/west/nevada/henderson/vegas-glamping)
+[50/302] Vegas Glamping (Nelson, NV) id=12098
+   tavily → $199 (https://www.pitchup.com/en-us/campsites/usa/west/nevada/henderson/vegas-glamping)
+[51/302] Vegas Glamping (Nelson, NV) id=12099
+   tavily → $199 (https://www.pitchup.com/en-us/campsites/usa/west/nevada/henderson/vegas-glamping)
+[52/302] Vegas Glamping (Nelson, NV) id=12100
+   tavily → $149 (https://www.pitchup.com/en-us/campsites/usa/west/nevada/henderson/vegas-glamping)
+[53/302] Vegas Glamping (Nelson, NV) id=12101
+   tavily → $199 (https://www.pitchup.com/en-us/campsites/usa/west/nevada/henderson/vegas-glamping)
+[54/302] Vegas Glamping (Nelson, NV) id=12102
+   tavily → $199 (https://www.pitchup.com/en-us/campsites/usa/west/nevada/henderson/vegas-glamping)
+[55/302] Tarantula Ranch (Amargosa Valley, NV) id=12103
+   sibling_copy → $96.3
+[56/302] Stone City Treehouse (Hardwick, VT) id=12121
+   firecrawl → $294 (https://www.stonecitytreehouse.com/treehouse-and-glamping-experiences-at-stone-city)
+[57/302] Eureka Springs Treehouses (Eureka Springs, AR) id=12168
+   sibling_copy → $149
+[58/302] East Zion Resort (Orderville, UT) id=12182
+   tavily → $320 (https://www.expedia.com/Orderville-Hotels-Glamping-Tent-9.h48417125.Hotel-Information)
+[59/302] East Zion Resort (Orderville, UT) id=12183
+   tavily → $352 (https://www.expedia.com/Orderville-Hotels-Yurt-Overlook-At-East-Zion-Resort-10.h38259884.Hotel-Information)
+[60/302] Asheville River Cabins (Arden, NC) id=12212
+   tavily → $318 (https://www.expedia.com/Asheville-Hotels-Asheville-River-Cabins-All-With-River-Views.h11296208.Hotel-Information)
+[61/302] East Zion Resort (Orderville, UT) id=12236
+   tavily → $338 (https://www.expedia.com/Orderville-Hotels-Treetop-10-At-East-Zion-Resort.h48225169.Hotel-Information)
+[62/302] East Zion Resort (Orderville, UT) id=12237
+   tavily → $448 (https://www.travelocity.com/Orderville-Hotels-Treetop-8-At-East-Zion-Resort.h39173553.Hotel-Information)
+[63/302] East Zion Resort (Orderville, UT) id=12238
+   tavily → $338 (https://www.expedia.com/Orderville-Hotels-Treetop-10-At-East-Zion-Resort.h48225169.Hotel-Information)
+[64/302] East Zion Resort (Orderville, UT) id=12239
+   tavily → $40 (https://www.travelocity.com/Orderville-RV-Parks.d6235868-aaRVParks.Travel-Guide-Accommodation)
+[65/302] East Zion Resort (Orderville, UT) id=12240
+   tavily → $338 (https://www.expedia.com/Orderville-Hotels-Treetop-10-At-East-Zion-Resort.h48225169.Hotel-Information)
+[66/302] East Zion Resort (Orderville, UT) id=12241
+   tavily → $448 (https://www.travelocity.com/Orderville-Hotels-Treetop-8-At-East-Zion-Resort.h39173553.Hotel-Information)
+[67/302] East Zion Resort (Orderville, UT) id=12242
+   tavily → $326 (https://www.expedia.com/Orderville-Hotels-Treetop-8-At-East-Zion-Resort.h39173553.Hotel-Information)
+[68/302] East Zion Resort (Orderville, UT) id=12243
+   tavily → $338 (https://www.expedia.com/Orderville-Hotels-Treetop-10-At-East-Zion-Resort.h48225169.Hotel-Information)
+[69/302] East Zion Resort (Orderville, UT) id=12244
+   tavily → $102 (https://www.expedia.com/Orderville-Hotels-East-Zion-Resort.h133120368.Hotel-Information)
+[70/302] Dunya Camp (Summerville, GA) id=12289
+   skipped_no_evidence
+[71/302] Timberline Glamping at Pine Acres (Acworth, GA) id=12301
+   tavily → $150 (https://resources.sageoutdooradvisory.com/de/property/timberline-glamping-at-pine-acres-acworth-ga)
+[72/302] Sierra Mountain Lodge (Ahwahnee, CA) id=12306
+   tavily → $176 (https://www.vrbo.com/1422863)
+[73/302] Luxe RV (Chatsworth, CA) id=12307
+   firecrawl → $375 (https://www.glamping.com/destination/north-america/california/chatsworth/luxe-rv/)
+[74/302] Sorensen's Resort (Hope Valley, CA) id=12308
+   tavily → $125 (https://www.glamping.com/destination/north-america/california/hope-valley/sorensens-resort)
+[75/302] Pine Mountain Camp (Lake Arrowhead, CA) id=12309
+   firecrawl → $1800 (https://www.glamping.com/destination/north-america/california/lake-arrowhead/pine-mountain-camp/)
+[76/302] Murphys Glamping (Murphys, CA) id=12310
+   firecrawl → $150 (https://www.glamping.com/destination/north-america/california/murphys/murphys-glamping/)
+[77/302] Marble Mountain Ranch (Somes Bar, CA) id=12311
+   firecrawl → $165 (https://www.marblemountainranch.com/)
+[78/302] Chill RV (Studio City, CA) id=12312
+   firecrawl → $37 (https://www.glamping.com/destination/north-america/california/studio-city/chill-rv/)
+[79/302] Beach Canyon Authentic Tipi (Topanga, CA) id=12313
+   firecrawl → $35 (https://www.glamping.com/destination/north-america/california/topanga/beach-canyon-authentic-tipi-in-topanga-california/)
+[80/302] Safari Sunset Eco Ranch (Vista, CA) id=12314
+   firecrawl → $175 (https://www.glamping.com/destination/north-america/california/vista/safari-sunset-eco-ranch/)
+[81/302] Galt Valley Artsy Tucked Away Retreat (Basalt, CO) id=12315
+   firecrawl → $200 (https://www.glamping.com/destination/north-america/colorado/basalt/galt-valley-artsy-tucked-away-retreat/)
+[82/302] Colorado Rafting Tours Royal Gorge Adventure Beach (Canon City, CO) id=12316
+   firecrawl → $50 (https://www.glamping.com/destination/north-america/colorado/canon-city/colorado-rafting-tours-royal-gorge-adventure-beach/)
+[83/302] Vista Verde Guest Ranch (Clark, CO) id=12317
+   tavily → $385 (https://www.vistaverde.com/rates/all-inclusive-rates)
+[84/302] Blue Ocean Yacht Charters (Key West, FL) id=12318
+   firecrawl → $25 (https://www.glamping.com/destination/north-america/florida/key-west/blue-ocean-yacht-charters/)
+[85/302] Aluminum Cabana (Navarre, FL) id=12319
+   firecrawl → $179 (https://www.glamping.com/destination/north-america/florida/navarre/aluminum-cabana/)
+[86/302] Heaven's Gate Mountain Getaway (Ellijay, GA) id=12320
+   firecrawl → $215 (https://www.glamping.com/destination/north-america/georgia/ellijay/heavens-gate-mountain-getaway/)
+[87/302] The Lodge on Little St. Simons Island (Saint Simons Island, GA) id=12321
+   tavily → $460 (https://www.littlestsimonsisland.com/lodging/georgia-beach-cabin-rentals/1000)
+[88/302] Maui Eco Retreat (Haiku, HI) id=12322
+   tavily → $378.5 (https://www.tripadvisor.com/Hotel_Review-g60629-d1019110-Reviews-Maui_Eco_Retreat-Haiku_Maui_Hawaii.html)
+[89/302] Treehouse Ketchum (Ketchum, ID) id=12323
+   tavily → $226 (https://www.expedia.com/Ketchum.d6093.Destination-Travel-Guides)
+[90/302] Elysium Woods (Sandpoint, ID) id=12324
+   tavily → $115 (https://www.airdna.co/vacation-rental-data/app/us/idaho/sandpoint/overview)
+[91/302] Spencer Pond Camps (Beaver Cove, ME) id=12325
+    Firecrawl failed: DNS resolution failed for hostname "www.spencerpondcamps.com". This means the domain name could not be translated to an IP address. Possible causes: (1) The domain name is misspelled (check for typos), (2) The domain does not exist or has expired, (3) The DNS servers are temporarily unavailable, or (4) The domain was recently registered and DNS has not propagated yet. Please verify the URL is correct and the website exists.
+   tavily → $175 (https://www.glamping.com/destination/north-america/maine/beaver-cove/spencer-pond-camps)
+[92/302] Eagle Lake Sporting Camps (Eagle Lake, ME) id=12326
+   tavily → $212.5 (https://www.hipcamp.com/en-US/d/united-states/maine/eagle-lake/camping/cabins)
+[93/302] Seguin (Georgetown, ME) id=12327
+   firecrawl → $149 (https://www.glamping.com/destination/north-america/maine/georgetown/seguin/)
+[94/302] Triple Creek Ranch (Darby, MT) id=12328
+   tavily → $2450 (https://www.triplecreekranch.com/accommodations/one-bedroom-luxury-cabins)
+[95/302] Rancho Gallina (Santa Fe, NM) id=12330
+   firecrawl → $160 (https://www.glamping.com/destination/north-america/new-mexico/santa-fe/rancho-gallina/)
+[96/302] The Glass House (Marlboro, NY) id=12331
+   tavily → $200 (https://www.glamping.com/destination/north-america/new-york/marlboro/the-glass-house)
+[97/302] Mountain Horse Farm B&B and Wellness Retreat (Naples, NY) id=12332
+    Firecrawl failed: The URL failed to load in the browser with error code "ERR_TUNNEL_CONNECTION_FAILED". Firecrawl encountered an internal proxy error while establishing the tunnel. This is an internal Firecrawl proxy error. Please retry or contact support.
+   tavily → $160 (https://www.kayak.com/Naples-Hotels-Mountain-Horse-Farm.625601.ksp)
+[98/302] Americana Island Cabin at Riverside Escapes (Alexander, NC) id=12333
+   firecrawl → $150 (https://www.glamping.com/destination/north-america/north-carolina/alexander/americana-island-cabin-at-riverside-escapes/)
+[99/302] Nantahala Cabins Inc (Bryson City, NC) id=12334
+   firecrawl → $120 (https://www.glamping.com/destination/north-america/north-carolina/bryson-city/nantahala-cabins-inc/)
+[100/302] Wren Eagle Retreat (Chillicothe, OH) id=12338
+   tavily → $143 (https://www.glamping.com/destination/north-america/ohio/chillicothe/wren-eagle-retreat)
+[101/302] Oceanside Beachfront RV Resort (Coos Bay, OR) id=12340
+   firecrawl → $119 (https://www.glamping.com/destination/north-america/oregon/coos-bay/oceanside-beachfront-rv-resort/)
+[102/302] Shelter Cove Resort & Marina (Crescent, OR) id=12341
+   firecrawl → $125 (https://www.glamping.com/destination/north-america/oregon/crescent/shelter-cove-resort-marina/)
+[103/302] Lone Star Court (Austin, TX) id=12344
+   tavily → $107 (https://www.expedia.com/Austin-Hotels-Lone-Star-Court.h7042909.Hotel-Information)
+[104/302] The Hideaway Ranch (Bluffdale, TX) id=12345
+   tavily → $255.5 (https://www.vrbo.com/1361343)
+[105/302] Camp Lucy Cottages (Dripping Springs, TX) id=12346
+   tavily → $509.5 (https://www.expedia.com/Dripping-Springs-Hotels-Camp-Lucy.h8768587.Hotel-Information)
+[106/302] Country Woods Inn (Glen Rose, TX) id=12347
+   firecrawl → $125 (https://www.glamping.com/destination/north-america/texas/glen-rose/country-woods-inn/)
+[107/302] Sterling Ridge Resort (Jeffersonville, VT) id=12349
+   tavily → $224 (https://www.facebook.com/sterlingridgeresortvt?locale=ru_RU)
+[108/302] #1 Rock Tavern River Kamp (Luray, VA) id=12350
+   firecrawl → $45 (https://www.glamping.com/destination/north-america/virginia/luray/1-rock-tavern-river-kamp/)
+[109/302] Langley Lodging (Langley, WA) id=12351
+   firecrawl → $35 (https://www.glamping.com/destination/north-america/washington/langley/langley-lodging/)
+[110/302] Silver Cove RV Resort (Silver Lake, WA) id=12352
+   firecrawl → $89 (https://www.glamping.com/destination/north-america/washington/silver-lake/silver-cove-rv-resort/)
+[111/302] Apple Creek Whitetails (Gillett, WI) id=12353
+   firecrawl → $100 (https://www.glamping.com/destination/north-america/wisconsin/gillett/apple-creek-whitetails/)
+[112/302] Mulroy's Irish Acres Farm (New London, WI) id=12354
+   firecrawl → $79 (https://www.glamping.com/destination/north-america/wisconsin/new-london/mulroys-irish-acres-farm/)
+[113/302] Wildhaven Sonoma (Healdsburg, CA) id=12376
+   sibling_copy → $178.13
+[114/302] Wildhaven Sonoma (Healdsburg, CA) id=12377
+   sibling_copy → $178.13
+[115/302] Wildhaven Sonoma (Healdsburg, CA) id=12378
+   tavily → $99 (https://www.expedia.com/Healdsburg-Hotels-Wildhaven-Sonoma-Glamping.h90211799.Hotel-Information)
+[116/302] Wildhaven Yosemite (Mariposa, CA) id=12379
+   sibling_copy → $176.25
+[117/302] Wildhaven Yosemite (Mariposa, CA) id=12380
+   sibling_copy → $176.25
+[118/302] Wildhaven Yosemite (Mariposa, CA) id=12381
+   sibling_copy → $251.25
+[119/302] Wildhaven Yosemite (Mariposa, CA) id=12382
+   sibling_copy → $251.25
+[120/302] Wildhaven Yosemite (Mariposa, CA) id=12383
+   sibling_copy → $251.25
+[121/302] The Outpost Grand Canyon (Williams, AZ) id=12893
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[122/302] The Outpost Grand Canyon (Williams, AZ) id=12894
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[123/302] The Outpost Grand Canyon (Williams, AZ) id=12895
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[124/302] The Outpost Grand Canyon (Williams, AZ) id=12896
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[125/302] The Outpost Grand Canyon (Williams, AZ) id=12897
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[126/302] The Outpost Grand Canyon (Williams, AZ) id=12898
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[127/302] The Outpost Grand Canyon (Williams, AZ) id=12899
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[128/302] The Outpost Grand Canyon (Williams, AZ) id=12900
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[129/302] The Outpost Grand Canyon (Williams, AZ) id=12901
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[130/302] The Outpost Grand Canyon (Williams, AZ) id=12902
+   tavily → $201 (https://www.expedia.com/Williams-Hotels-The-Outpost-Grand-Canyon.h119935363.Hotel-Information)
+[131/302] Collective Retreats Governors Island (New York, NY) id=13008
+   tavily → $554.5 (https://www.tripadvisor.com/Hotel_Review-g60763-d14031408-Reviews-Collective_Retreats_Governors_Island-New_York_City_New_York.html)
+[132/302] Collective Retreats Governors Island (New York, NY) id=13009
+   tavily → $554.5 (https://www.tripadvisor.com/Hotel_Review-g60763-d14031408-Reviews-Collective_Retreats_Governors_Island-New_York_City_New_York.html)
+[133/302] Collective Retreats Governors Island (New York, NY) id=13010
+   tavily → $172 (https://www.timeout.com/newyork/news/governors-islands-swanky-glamping-is-back-for-the-summer-051723)
+[134/302] Glamping the Flint Hills (Equine Estates Rustic Ranch) (Junction City, KS) id=11869
+   tavily → $32 (https://www.hipcamp.com/en-US/d/united-states/kansas/junction-city/camping/glamping-and-pets)
+[135/302] Somerset Resort (Somerset, PA) id=11441
+   tavily → $120 (https://www.facebook.com/p/Somerset-Resort-61555575817973)
+[136/302] The Lodge and Spa at Brush Creek Ranch (Saratoga, WY) id=11457
+   tavily → $1400 (https://www.glamping.com/destination/north-america/wyoming/saratoga/the-lodge-and-spa-at-brush-creek-ranch)
+[137/302] Eastwind Oliverea Valley (Big Indian, NY) id=11458
+   tavily → $298 (https://www.expedia.com/Big-Indian-Hotels-Eastwind-Oliverea-Valley.h91907163.Hotel-Information)
+[138/302] Haven Hills Campground & Resort (Aledo, IL) id=11462
+   tavily → $155.5 (https://www.campspot.com/park/haven-hills-campground-resort-aledo-il)
+[139/302] The Destination (Dadeville, AL) id=11464
+   tavily → $300 (https://www.tripadvisor.com/Hotel_Review-g30468-d26230448-Reviews-The_Destination_Glamping_Resort-Dadeville_Alabama.html)
+[140/302] Wander Camp Bear Lake (Garden City, UT) id=11470
+   tavily → $109 (https://www.hipcamp.com/en-US/d/united-states/utah/garden-city/camping/lake)
+[141/302] Wander Camp Bear Lake (Garden City, UT) id=11471
+   tavily → $109 (https://www.hipcamp.com/en-US/d/united-states/utah/garden-city/camping/lake)
+[142/302] Wander Camp Bear Lake (Garden City, UT) id=11472
+   tavily → $109 (https://www.hipcamp.com/en-US/d/united-states/utah/garden-city/camping/lake)
+[143/302] Wander Camp Bear Lake (Garden City, UT) id=11473
+   tavily → $109 (https://www.hipcamp.com/en-US/d/united-states/utah/garden-city/camping/lake)
+[144/302] Wander Camp Smoky Mountains (Gatlinburg, TN) id=11474
+   tavily → $25 (https://www.hipcamp.com/en-US/national-park/united-states/tennessee/great-smoky-mountains/all)
+[145/302] Wander Camp Smoky Mountains (Gatlinburg, TN) id=11475
+   tavily → $25 (https://www.hipcamp.com/en-US/national-park/united-states/tennessee/great-smoky-mountains/all)
+[146/302] Wander Camp Smoky Mountains (Gatlinburg, TN) id=11476
+   tavily → $25 (https://www.hipcamp.com/en-US/national-park/united-states/tennessee/great-smoky-mountains/all)
+[147/302] Wander Camp Smoky Mountains (Gatlinburg, TN) id=11477
+   tavily → $25 (https://www.hipcamp.com/en-US/national-park/united-states/tennessee/great-smoky-mountains/all)
+[148/302] Timberline Glamping at Unicoi State Park (Helen, GA) id=11478
+   firecrawl → $159 (https://unicoi.tlglamping.com/)
+[149/302] Timberline Glamping at Unicoi State Park (Helen, GA) id=11479
+   firecrawl → $159 (https://unicoi.tlglamping.com/)
+[150/302] Timberline Glamping at Unicoi State Park (Helen, GA) id=11480
+   firecrawl → $159 (https://unicoi.tlglamping.com/)
+[151/302] Timberline Glamping at Orange Beach (Orange Beach, AL) id=11481
+   tavily → $109 (https://www.kayak.com/Gulf-Shores-Hotels-Timberline-Glamping-Orange-Beach.1071835877.ksp)
+[152/302] Timberline Glamping at Orange Beach (Orange Beach, AL) id=11482
+   tavily → $109 (https://www.kayak.com/Gulf-Shores-Hotels-Timberline-Glamping-Orange-Beach.1071835877.ksp)
+[153/302] Timberline Glamping at Orange Beach (Orange Beach, AL) id=11483
+   tavily → $109 (https://www.kayak.com/Gulf-Shores-Hotels-Timberline-Glamping-Orange-Beach.1071835877.ksp)
+[154/302] Timberline Glamping at Auburn (Auburn, AL) id=11484
+   firecrawl → $169 (https://auburn.tlglamping.com/)
+[155/302] Timberline Glamping at Auburn (Auburn, AL) id=11485
+   firecrawl → $169 (https://auburn.tlglamping.com/)
+[156/302] Timberline Glamping at Auburn (Auburn, AL) id=11486
+   firecrawl → $169 (https://auburn.tlglamping.com/)
+[157/302] Timberline Glamping at Lake Martin (Alexander City, AL) id=11487
+   tavily → $150 (https://www.goodsam.com/campgrounds-rv-parks/alabama/alexander-city/timberline-glamping-at-lake-martin/cgid-202524812)
+[158/302] Timberline Glamping at Lake Martin (Alexander City, AL) id=11488
+   tavily → $150 (https://www.goodsam.com/campgrounds-rv-parks/alabama/alexander-city/timberline-glamping-at-lake-martin/cgid-202524812)
+[159/302] Timberline Glamping at Lake Martin (Alexander City, AL) id=11489
+   tavily → $150 (https://www.goodsam.com/campgrounds-rv-parks/alabama/alexander-city/timberline-glamping-at-lake-martin/cgid-202524812)
+[160/302] Timberline Glamping at Lake Guntersville (Guntersville, AL) id=11490
+   firecrawl → $135 (https://lakeguntersville.tlglamping.com/)
+[161/302] Timberline Glamping at Lake Guntersville (Guntersville, AL) id=11491
+   firecrawl → $135 (https://lakeguntersville.tlglamping.com/)
+[162/302] Timberline Glamping at Lake Guntersville (Guntersville, AL) id=11492
+   firecrawl → $135 (https://lakeguntersville.tlglamping.com/)
+[163/302] Timberline Glamping at Cheaha (Lineville, AL) id=11493
+   firecrawl → $169 (https://cheaha.tlglamping.com/)
+[164/302] Timberline Glamping at Cheaha (Lineville, AL) id=11494
+   firecrawl → $169 (https://cheaha.tlglamping.com/)
+[165/302] Timberline Glamping at Cheaha (Lineville, AL) id=11495
+   firecrawl → $169 (https://cheaha.tlglamping.com/)
+[166/302] Timberline Glamping at Huntsville (Huntsville, AL) id=11496
+   firecrawl → $159 (https://huntsville.tlglamping.com/)
+[167/302] Timberline Glamping at Huntsville (Huntsville, AL) id=11497
+   firecrawl → $159 (https://huntsville.tlglamping.com/)
+[168/302] Timberline Glamping at Huntsville (Huntsville, AL) id=11498
+   firecrawl → $159 (https://huntsville.tlglamping.com/)
+[169/302] Timberline Glamping at Birmingham (Birmingham, AL) id=11499
+   firecrawl → $169 (https://birmingham.tlglamping.com/)
+[170/302] Timberline Glamping at Birmingham (Birmingham, AL) id=11500
+   firecrawl → $169 (https://birmingham.tlglamping.com/)
+[171/302] Timberline Glamping at Birmingham (Birmingham, AL) id=11501
+   firecrawl → $169 (https://birmingham.tlglamping.com/)
+[172/302] Timberline Glamping at Tuscaloosa (Tuscaloosa, AL) id=11502
+   firecrawl → $169 (https://tuscaloosa.tlglamping.com/)
+[173/302] Timberline Glamping at Tuscaloosa (Tuscaloosa, AL) id=11503
+   firecrawl → $169 (https://tuscaloosa.tlglamping.com/)
+[174/302] Timberline Glamping at Tuscaloosa (Tuscaloosa, AL) id=11504
+   firecrawl → $169 (https://tuscaloosa.tlglamping.com/)
+[175/302] Timberline Glamping at Lake Blackshear (Cordele, GA) id=11505
+   firecrawl → $149 (https://lakeblackshear.tlglamping.com/)
+[176/302] Timberline Glamping at Lake Blackshear (Cordele, GA) id=11506
+   firecrawl → $149 (https://lakeblackshear.tlglamping.com/)
+[177/302] Timberline Glamping at Lake Blackshear (Cordele, GA) id=11507
+   firecrawl → $149 (https://lakeblackshear.tlglamping.com/)
+[178/302] Timberline Glamping at Kingston Downs (Rome, GA) id=11508
+   firecrawl → $159 (https://kingstondowns.tlglamping.com/)
+[179/302] Timberline Glamping at Kingston Downs (Rome, GA) id=11509
+   firecrawl → $159 (https://kingstondowns.tlglamping.com/)
+[180/302] Timberline Glamping at Kingston Downs (Rome, GA) id=11510
+   firecrawl → $159 (https://kingstondowns.tlglamping.com/)
+[181/302] Timberline Glamping at Lake Lanier River Forks (Gainesville, GA) id=11511
+   tavily → $200 (https://thedyrt.com/camping/georgia/glamping-at-river-forks-lake-lanier)
+[182/302] Timberline Glamping at Lake Lanier River Forks (Gainesville, GA) id=11512
+   tavily → $200 (https://thedyrt.com/camping/georgia/glamping-at-river-forks-lake-lanier)
+[183/302] Timberline Glamping at Lake Lanier River Forks (Gainesville, GA) id=11513
+   tavily → $200 (https://thedyrt.com/camping/georgia/glamping-at-river-forks-lake-lanier)
+[184/302] Timberline Glamping at Lula (Lula, GA) id=11514
+   tavily → $250 (https://www.goodsam.com/campgrounds-rv-parks/georgia/lula/timberline-glamping-at-lula/cgid-202524747)
+[185/302] Timberline Glamping at Lula (Lula, GA) id=11515
+   tavily → $250 (https://www.goodsam.com/campgrounds-rv-parks/georgia/lula/timberline-glamping-at-lula/cgid-202524747)
+[186/302] Timberline Glamping at Lula (Lula, GA) id=11516
+   tavily → $250 (https://www.goodsam.com/campgrounds-rv-parks/georgia/lula/timberline-glamping-at-lula/cgid-202524747)
+[187/302] Timberline Glamping at Sebastian Inlet (Melbourne Beach, FL) id=11517
+   skipped_no_evidence
+[188/302] Timberline Glamping at Sebastian Inlet (Melbourne Beach, FL) id=11518
+   skipped_no_evidence
+[189/302] Timberline Glamping at Sebastian Inlet (Melbourne Beach, FL) id=11519
+   tavily → $50 (https://www.hipcamp.com/en-US/d/united-states/florida/sebastian/camping/glamping)
+[190/302] Timberline Glamping at Lake Manatee (Bradenton, FL) id=11520
+   firecrawl → $169 (https://lakemanatee.tlglamping.com/)
+[191/302] Timberline Glamping at Lake Manatee (Bradenton, FL) id=11521
+   firecrawl → $169 (https://lakemanatee.tlglamping.com/)
+[192/302] Timberline Glamping at Lake Manatee (Bradenton, FL) id=11522
+   firecrawl → $169 (https://lakemanatee.tlglamping.com/)
+[193/302] Timberline Glamping at Sarasota (Osprey, FL) id=11523
+   firecrawl → $169 (https://sarasota.tlglamping.com/)
+[194/302] Timberline Glamping at Sarasota (Osprey, FL) id=11524
+   firecrawl → $169 (https://sarasota.tlglamping.com/)
+[195/302] Timberline Glamping at Sarasota (Osprey, FL) id=11525
+   firecrawl → $169 (https://sarasota.tlglamping.com/)
+[196/302] Timberline Glamping at Jupiter (Jupiter, FL) id=11526
+   skipped_no_evidence
+[197/302] Timberline Glamping at Jupiter (Jupiter, FL) id=11527
+   skipped_no_evidence
+[198/302] Timberline Glamping at Jupiter (Jupiter, FL) id=11528
+   skipped_no_evidence
+[199/302] Timberline Glamping at Fort Myers (Estero, FL) id=11529
+   tavily → $180 (https://www.floridastateparks.org/parks-and-trails/koreshan-state-park/experiences-amenities)
+[200/302] Timberline Glamping at Fort Myers (Estero, FL) id=11530
+   tavily → $180 (https://www.floridastateparks.org/parks-and-trails/koreshan-state-park/experiences-amenities)
+[201/302] Timberline Glamping at Fort Myers (Estero, FL) id=11531
+   tavily → $180 (https://www.floridastateparks.org/parks-and-trails/koreshan-state-park/experiences-amenities)
+[202/302] Timberline Glamping at Williamsburg (Williamsburg, VA) id=11532
+   skipped_no_evidence
+[203/302] Timberline Glamping at Williamsburg (Williamsburg, VA) id=11533
+   skipped_no_evidence
+[204/302] Timberline Glamping at Williamsburg (Williamsburg, VA) id=11534
+   skipped_no_evidence
+[205/302] UDOSCAPE (Lago Vista, TX) id=11557
+   tavily → $250 (https://www.kxan.com/things-to-do/pod-resort-offers-hill-country-eco-glamping-getaway)
+[206/302] Palo 32° (Strawn, TX) id=11572
+   tavily → $400 (https://www.instagram.com/reel/DPXENdpiZpi)
+[207/302] Menizei (Joyce, WA) id=11579
+   tavily → $750 (https://fabulouswashington.com/washingtons-best/travel-adventure/menizei-new-adults-only-forest-retreat-on-olympic-peninsula)
+[208/302] Bliss Camps Glamping (Rocky Mountain Glamping) (Lyons, CO) id=11595
+   tavily → $110 (https://www.hipcamp.com/en-US/d/united-states/colorado/lyons/camping/glamping)
+[209/302] The Glamping Collective (Clyde, NC) id=11601
+   sibling_copy → $805.33
+[210/302] Oso Blu Yurts (Garden City, UT) id=11603
+   tavily → $396 (https://thedyrt.com/camping/utah/osoblu-bear-lake-yurts)
+[211/302] Hardscrabble Ranch (Bozeman, MT) id=11610
+   tavily → $250 (https://en.wikipedia.org/wiki/Hardscrabble)
+[212/302] Pitch Yellowstone (Livingston, MT) id=11611
+   tavily → $55 (https://rvparksnear.me/mt/livingston/livingston-rv-park-campground)
+[213/302] East Canyon State Park (Yurts) (Morgan, UT) id=11644
+   tavily → $150 (https://www.reserveamerica.com/explore/east-canyon-state-park/UT/342191/15267/campsite-booking)
+[214/302] Fort Ransom State Park (Pederson Yurt) (Fort Ransom, ND) id=11670
+   firecrawl → $45 (https://www.parkrec.nd.gov/fort-ransom-state-park)
+[215/302] Cross Ranch State Park (Yurts) (Center, ND) id=11671
+   firecrawl → $135 (https://www.parkrec.nd.gov/cross-ranch-state-park)
+[216/302] Turtle River State Park (Cabins) (Arvilla, ND) id=11672
+   firecrawl → $80 (https://www.parkrec.nd.gov/turtle-river-state-park)
+[217/302] Lake Metigoshe State Park (Yurts) (Bottineau, ND) id=11673
+   firecrawl → $70 (https://www.parkrec.nd.gov/lake-metigoshe-state-park)
+[218/302] Roman Nose State Park Lodge (Watonga, OK) id=11678
+   tavily → $200 (https://www.orbitz.com/Roman-Nose-State-Park-Hotels.0-l553248621532647389-0.Travel-Guide-Filter-Hotels)
+[219/302] The Lodge at Sequoyah State Park (Hulbert, OK) id=11679
+   tavily → $250 (https://www.greencountryok.com/listing/the-lodge-at-sequoyah-state-park/401)
+[220/302] Lake Fausse Pointe State Park (St. Martinville, LA) id=11690
+   firecrawl → $175 (https://www.lastateparks.com/parks-preserves/lake-fausse-pointe-state-park)
+[221/302] Fontainebleau State Park (Mandeville, LA) id=11691
+   firecrawl → $175 (https://www.lastateparks.com/parks-preserves/fontainebleau-state-park)
+[222/302] Tickfaw State Park (Springfield, LA) id=11693
+   tavily → $218.5 (https://www.hipcamp.com/en-US/state-park/united-states/louisiana/tickfaw/all)
+[223/302] The Lodge at Gulf State Park (Gulf Shores, AL) id=11694
+   tavily → $256 (https://www.expedia.com/Gulf-Shores-Hotels-Hilton-The-Lodge-At-Gulf-State-Park.h23512629.Hotel-Information)
+[224/302] Joe Wheeler State Park Resort (Rogersville, AL) id=11695
+   tavily → $20 (https://www.yelp.com/biz/joe-wheeler-state-park-resort-rogersville-4)
+[225/302] DeSoto State Park (Lodge & Chalets) (Fort Payne, AL) id=11696
+   tavily → $100 (https://www.cozycozy.com/us/landmark-desoto-state-park-fort-payne)
+[226/302] Lakepoint Resort State Park (Eufaula, AL) id=11697
+   tavily → $56 (https://www.travelocity.com/Lakepoint-Resort-State-Park-Hotels.0-l553248621532653634-0.Travel-Guide-Filter-Hotels)
+[227/302] Hontoon Island State Park (DeLand, FL) id=11699
+   tavily → $114 (https://outdoorithm.com/campgrounds/fl/hontoon-island-state-park/hontoon-island-state-park-campground)
+[228/302] Stephen Foster Folk Culture Center State Park (White Springs, FL) id=11700
+   tavily → $60 (https://thedyrt.com/camping/florida/stephen-foster-state-park)
+[229/302] John Pennekamp Coral Reef State Park (Key Largo, FL) id=11701
+   tavily → $36 (https://thedyrt.com/camping/florida/florida-john-pennekamp-coral-reef-state-park)
+[230/302] Hunting Island State Park (Hunting Island, SC) id=11702
+   tavily → $37.5 (https://thedyrt.com/camping/south-carolina/south-carolina-hunting-island-state-park)
+[231/302] Edisto Beach State Park (Edisto Island, SC) id=11703
+   tavily → $37.5 (https://scpg.itinio.com/edisto-beach/campsites)
+[232/302] Myrtle Beach State Park (Myrtle Beach, SC) id=11704
+   tavily → $45 (https://www.hipcamp.com/en-US/question/how-much-does-it-cost-to-camp-at-nyp2s547)
+[233/302] Table Rock State Park (Pickens, SC) id=11705
+   tavily → $125 (https://www.vrbo.com/vacation-rentals/usa/south-carolina/pickens/table-rock-state-park)
+[234/302] Merchants Millpond State Park (Gatesville, NC) id=11706
+   tavily → $47.5 (https://outdoorithm.com/campgrounds/nc/gatesville/merchants-millpond-family-campground)
+[235/302] Goose Creek State Park (Washington, NC) id=11707
+   tavily → $62 (https://maps.campendium.com/us/washington-nc/camping-rv/goose-creek-state-park-washington)
+[236/302] Cliffs of the Neuse State Park (Seven Springs, NC) id=11708
+   tavily → $30 (https://maps.campendium.com/us/seven-springs-nc/nature/cliffs-of-the-neuse-state-park)
+[237/302] Raven Rock State Park (Lillington, NC) id=11709
+   tavily → $150 (https://www.rvezy.com/rv-rentals/campground/raven-rock-state-park-campground)
+[238/302] Gooseberry Falls State Park (Two Harbors, MN) id=11710
+   tavily → $25 (https://www.orbitz.com/Gooseberry-Falls-State-Park-Hotels.0-l553248621532652226-0.Travel-Guide-Filter-Hotels)
+[239/302] Jay Cooke State Park (Carlton, MN) id=11711
+   tavily → $25 (https://maps.campendium.com/us/carlton-mn/nature/jay-cooke-state-park)
+[240/302] Itasca State Park (Park Rapids, MN) id=11712
+   tavily → $176 (https://www.hipcamp.com/en-US/d/united-states/minnesota/park-rapids/camping/glamping)
+[241/302] Tettegouche State Park (Silver Bay, MN) id=11713
+   tavily → $110 (https://www.hipcamp.com/en-US/d/united-states/minnesota/silver-bay/camping/glamping)
+[242/302] Salt Fork State Park Lodge (Lore City, OH) id=11714
+   tavily → $219 (https://maps.campendium.com/us/lore-city-oh/nature/salt-fork-state-park-campground)
+[243/302] Maumee Bay State Park Lodge (Oregon, OH) id=11715
+   tavily → $48.5 (https://www.campendium.com/maumee-bay-state-park)
+[244/302] Geneva State Park Lodge (Geneva, OH) id=11716
+   tavily → $312 (https://www.travelocity.com/Austinburg-Hotels-The-Lodge-At-Geneva.h1372060.Hotel-Information)
+[245/302] Hocking Hills State Park Lodge (Logan, OH) id=11717
+   tavily → $249 (https://www.hipcamp.com/en-US/question/how-much-does-it-cost-to-camp-at-8327spon)
+[246/302] Tishomingo State Park (Tishomingo, MS) id=11718
+   tavily → $60 (https://www.hipcamp.com/en-US/state-park/united-states/mississippi/tishomingo/all)
+[247/302] Buccaneer State Park (Waveland, MS) id=11719
+   tavily → $85 (https://www.sunherald.com/news/local/article258621748.html)
+[248/302] Percy Quin State Park (McComb, MS) id=11720
+   tavily → $150 (https://www.facebook.com/msstateparks/posts/cabins-20-28-at-percy-quin-state-park-in-mccomb-have-been-completely-renovated-a/837168585792987)
+[249/302] Hugh White State Park (Grenada, MS) id=11721
+   tavily → $177 (https://thedyrt.com/camping/mississippi/mississippi-hugh-white-state-park)
+[250/302] Chain O'Lakes State Park (Spring Grove, IL) id=11722
+   tavily → $25 (https://maps.campendium.com/us/spring-grove-il/camping-rv/chain-o-lakes-state-park-spring-grove-il--1)
+[251/302] Rock Cut State Park (Loves Park, IL) id=11723
+   tavily → $90 (https://www.hometogo.com/f/rock-cut-state-park)
+[252/302] White Pines Forest State Park (Mount Morris, IL) id=11724
+   tavily → $140 (https://www.expedia.com/Mount-Morris-Hotels-White-Pines-Lodge.h106330749.Hotel-Information)
+[253/302] Kankakee River State Park (Kankakee, IL) id=11725
+   tavily → $97 (https://www.facebook.com/KankakeeRiverSP)
+[254/302] Ludington State Park (Ludington, MI) id=11726
+   tavily → $60 (https://www.ludington.mi.us/374/Cartier-Park-Campground)
+[255/302] Tawas Point State Park (East Tawas, MI) id=11728
+   skipped_no_evidence
+[256/302] Silver Lake State Park (Mears, MI) id=11729
+   tavily → $78 (https://silverlakerc.com/stay-with-us/rates)
+[257/302] Ponderosa State Park (McCall, ID) id=11730
+   tavily → $95 (https://www.facebook.com/idahostateparksandrecreation/posts/the-idaho-department-of-parks-and-recreation-is-thrilled-to-announce-group-reser/1409315217904105)
+[258/302] Bruneau Dunes State Park (Bruneau, ID) id=11731
+   tavily → $34 (https://outdoorithm.com/campgrounds/id/bruneau-dunes-state-park/bruneau-dunes-state-park)
+[259/302] Lake Cascade State Park (Cascade, ID) id=11732
+   firecrawl → $100 (https://parksandrecreation.idaho.gov/parks/lake-cascade)
+[260/302] Three Island Crossing State Park (Glenns Ferry, ID) id=11733
+   firecrawl → $1841 (https://parksandrecreation.idaho.gov/parks/three-island-crossing)
+[261/302] Brown County State Park (Abe Martin Lodge) (Nashville, IN) id=11734
+   tavily → $88 (https://www.in.gov/dnr/state-parks/inns/abe-martin-lodge-at-brown-county-state-park)
+[262/302] Turkey Run State Park Inn (Marshall, IN) id=11735
+   tavily → $160 (https://www.in.gov/dnr/state-parks/inns/turkey-run-inn-at-turkey-run-state-park)
+[263/302] Clifty Falls State Park Inn (Madison, IN) id=11736
+   tavily → $172.5 (https://www.in.gov/dnr/state-parks/inns/clifty-inn-at-clifty-falls-state-park)
+[264/302] Potato Creek State Park (North Liberty, IN) id=11737
+   tavily → $49 (https://www.travelocity.com/Potato-Creek-State-Park-Hotels.0-l553248621561881306-0.Travel-Guide-Filter-Hotels)
+[265/302] Fall Creek Falls State Park (Spencer, TN) id=11738
+   firecrawl → $650 (https://tnstateparks.com/parks/fall-creek-falls)
+[266/302] Montgomery Bell State Park (Burns, TN) id=11739
+   firecrawl → $179.5 (https://tnstateparks.com/parks/montgomery-bell)
+[267/302] Pickwick Landing State Park (Counce, TN) id=11740
+   tavily → $200 (https://www.expedia.com/Pickwick-Dam-Hotels.d55901.Travel-Guide-Hotels)
+[268/302] Big Ridge State Park (Maynardville, TN) id=11741
+   tavily → $222 (https://www.travelocity.com/Big-Ridge-State-Park-Hotels.0-l553248621532656998-0.Travel-Guide-Filter-Hotels)
+[269/302] Bliss Camps Glamping (Rocky Mountain Glamping) (Lyons, CO) id=11742
+   tavily → $200 (https://www.hipcamp.com/en-US/d/united-states/colorado/lyons/camping/glamping)
+[270/302] Bliss Camps Glamping (Rocky Mountain Glamping) (Lyons, CO) id=11743
+   tavily → $200 (https://www.hipcamp.com/en-US/d/united-states/colorado/lyons/camping/glamping)
+[271/302] Bliss Camps Glamping (Rocky Mountain Glamping) (Lyons, CO) id=11744
+   skipped_no_evidence
+[272/302] Bliss Camps Glamping (Rocky Mountain Glamping) (Lyons, CO) id=11745
+   skipped_no_evidence
+[273/302] Bliss Camps Glamping (Rocky Mountain Glamping) (Lyons, CO) id=11746
+   tavily → $150 (https://www.hipcamp.com/en-US/d/united-states/colorado/lyons/camping/glamping)
+[274/302] Bliss Camps Glamping (Rocky Mountain Glamping) (Lyons, CO) id=11747
+   skipped_no_evidence
+[275/302] Bliss Camps Glamping (Rocky Mountain Glamping) (Lyons, CO) id=11748
+   tavily → $146 (https://www.hipcamp.com/en-US/d/united-states/colorado/lyons/camping/glamping)
+[276/302] Minnewaska State Park Preserve (Kerhonkson, NY) id=11749
+   tavily → $152 (https://www.expedia.com/Kerhonkson-Hotels-Glamping-Tent-Campsite-By-Minnewaska-State-Park.h79873967.Hotel-Information)
+[277/302] Bear Mountain State Park (Bear Mountain, NY) id=11750
+   tavily → $60 (https://www.expedia.com/Bear-Mountain-Hotels.d183639.Travel-Guide-Hotels)
+[278/302] Watkins Glen State Park (Watkins Glen, NY) id=11751
+   firecrawl → $24 (https://parks.ny.gov/parks/watkinsglen/)
+[279/302] Letchworth State Park (Castile, NY) id=11752
+   firecrawl → $31 (https://parks.ny.gov/parks/letchworth/)
+[280/302] Nickerson State Park (Brewster, MA) id=11753
+   firecrawl → $22 (https://www.mass.gov/locations/nickerson-state-park)
+[281/302] Mount Greylock State Reservation (Lanesborough, MA) id=11755
+   firecrawl → $20 (https://www.mass.gov/locations/mount-greylock-state-reservation)
+[282/302] Camden Hills State Park (Camden, ME) id=11758
+   tavily → $35 (https://maps.campendium.com/us/camden-me/camping-rv/camden-hills-state-park-campground-camden)
+[283/302] Bradbury Mountain State Park (Pownal, ME) id=11759
+   tavily → $27 (https://maps.campendium.com/us/me/camping-rv/bradbury-mountain-state-park-me--1)
+[284/302] Sebago Lake State Park (Casco, ME) id=11760
+   tavily → $25 (https://sebagolakecamping.com/facilities-rates)
+[285/302] High Point State Park (Sussex, NJ) id=11761
+   firecrawl → $20 (https://www.nj.gov/dep/parksandforests/parks/highpoint.html)
+[286/302] Island Beach State Park (Seaside Park, NJ) id=11762
+   tavily → $95 (https://www.yelp.com/biz/island-beach-state-park-seaside-park)
+[287/302] Worthington State Forest (Columbia, NJ) id=11763
+   tavily → $20 (https://scenicwilddelawareriver.com/entries/worthington-state-forest-columbia-nj/a5308bba-ba00-4617-8c17-8c429bbee5d2)
+[288/302] Allaire State Park (Wall Township, NJ) id=11764
+   firecrawl → $100 (https://www.nj.gov/dep/parksandforests/parks/allaire.html)
+[289/302] Cape Henlopen State Park (Lewes, DE) id=11765
+   tavily → $33.5 (https://thedyrt.com/camping/delaware/delaware-cape-henlopen-state-park)
+[290/302] Trap Pond State Park (Laurel, DE) id=11766
+   tavily → $40 (https://campgrounds.rvlife.com/regions/delaware/laurel/trap-pond-state-park-622)
+[291/302] Killens Pond State Park (Felton, DE) id=11767
+   tavily → $32 (https://outdoorithm.com/campgrounds/de/killens-pond-campground/killens-pond-campground)
+[292/302] Lums Pond State Park (Bear, DE) id=11768
+   tavily → $46 (https://outdoorithm.com/campgrounds/de/lums-pond-state-park-campground-entrance-campground/lums-pond-state-park-campground-entrance-campground)
+[293/302] Franconia Notch State Park (Franconia, NH) id=11769
+   tavily → $300 (https://www.travelocity.com/Franconia-Notch-State-Park-Hotels.0-l6079721-0.Travel-Guide-Filter-Hotels)
+[294/302] Ellacoya State Park (Gilford, NH) id=11770
+   tavily → $60 (https://thedyrt.com/camping/new-hampshire/new-hampshire-ellacoya-state-park)
+[295/302] Pawtuckaway State Park (Nottingham, NH) id=11771
+   tavily → $65 (https://outdoorithm.com/campgrounds/nh/nottingham-nh/pawtuckaway-campground)
+[296/302] Crawford Notch State Park (Harts Location, NH) id=11772
+   tavily → $145 (https://www.campspot.com/park/crawford-notch-campground)
+[297/302] Hammonasset Beach State Park (Madison, CT) id=11773
+   tavily → $35 (https://maps.campendium.com/us/ct/camping-rv/hammonasset-beach-state-park-ct)
+[298/302] Black Rock State Park (Watertown, CT) id=11774
+   firecrawl → $30 (https://portal.ct.gov/DEEP/State-Parks/Parks/Black-Rock-State-Park)
+[299/302] Rocky Neck State Park (Niantic, CT) id=11775
+   firecrawl → $70 (https://portal.ct.gov/DEEP/State-Parks/Parks/Rocky-Neck-State-Park)
+[300/302] Silver Sands State Park (Milford, CT) id=11776
+   tavily → $78.5 (https://www.expedia.com/Silver-Sands-State-Park-Hotels.0-l6163923-0.Travel-Guide-Filter-Hotels)
+[301/302] Cedar Pass Lodge (Interior, SD) id=12046
+   sibling_copy → $269
+[302/302] Cedar Pass Lodge (Interior, SD) id=12047
+   tavily → $165 (https://www.yelp.com/biz/cedar-pass-lodge-interior-5)
+
+=== SUMMARY ===
+Updated: 286
+Skipped (manual queue): 16
+Wrote /Users/nickharsell/Documents/sage-resources-subdomain/scripts/output/missing-published-adr-results.csv
+Wrote /Users/nickharsell/Documents/sage-resources-subdomain/scripts/output/missing-published-adr-manual-queue.csv

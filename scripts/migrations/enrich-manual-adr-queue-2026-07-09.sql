@@ -1,0 +1,21 @@
+-- Manual ADR queue leftovers after automated Firecrawl/Tavily backfill (2026-07-09).
+-- These rows had no extractable public nightly rack rate. Fill when confirmed.
+-- Source list: scripts/output/missing-published-adr-manual-queue.csv
+--
+-- Pattern (cite URL in notes; fill all 8 seasonal cells so trigger maintains avg):
+--
+-- UPDATE all_sage_data SET
+--   rate_winter_weekday = X, rate_winter_weekend = X,
+--   rate_spring_weekday = X, rate_spring_weekend = X,
+--   rate_summer_weekday = X, rate_summer_weekend = X,
+--   rate_fall_weekday = X, rate_fall_weekend = X,
+--   notes = COALESCE(notes,'') || E'\n\n[2026-07-09] ADR curated from <URL>',
+--   date_updated = to_char(current_date, 'YYYY-MM-DD')
+-- WHERE id IN (...);
+--
+-- Priority candidates:
+--   Charmed Resorts — Crowsnest Pass (ids 12371–12375) — sibling Mulhurst Bay may have rates
+--   JW Marriott / Ritz-Carlton Masai Mara (12227, 12228) — package pricing
+--   andBeyond Xaranna / Kichwa Tembo (12268, 12269) — package pricing
+--   Eco Retreat Konark / Daringbadi (12297, 12298) — government eco-retreat, seasonal packages
+--   Fronterra Farm (11614)

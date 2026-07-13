@@ -7,6 +7,7 @@ import {
 /** Earthy dot colors aligned with Sage greens and neutral outdoor palette. */
 export const PROPERTY_TYPE_DOT_COLORS: Record<GlampingPropertyTypeFormValue, string> = {
   Glamping: '#5c7a5c',
+  'Vacation Rental': '#7a6b5c',
   'Outdoor Boutique Hotel': '#8b7355',
   'Outdoor Resort': '#6d8570',
   'RV Resort': '#6b7d8a',
@@ -31,6 +32,9 @@ export function getPropertyTypeDotColor(propertyType: string | null | undefined)
 
   const lower = raw.toLowerCase();
   if (lower.includes('glamping')) return PROPERTY_TYPE_DOT_COLORS.Glamping;
+  if (lower.includes('vacation rental') || lower.includes('vacation-rental')) {
+    return PROPERTY_TYPE_DOT_COLORS['Vacation Rental'];
+  }
   if (lower.includes('boutique') && lower.includes('hotel')) {
     return PROPERTY_TYPE_DOT_COLORS['Outdoor Boutique Hotel'];
   }

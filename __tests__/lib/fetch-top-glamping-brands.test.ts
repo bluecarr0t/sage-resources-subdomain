@@ -128,6 +128,86 @@ describe('aggregateTopGlampingBrands', () => {
     expect(result.brandsWithPublishedProperties).toBe(2);
   });
 
+  it('excludes non-glamping unit types from brand unit counts and rates', () => {
+    const rows = [
+      {
+        id: 1,
+        property_id: 'p1',
+        slug: null,
+        property_name: 'Under Canvas Zion',
+        property_type: 'Glamping',
+        unit_type: 'Safari Tent',
+        city: 'Springdale',
+        state: 'UT',
+        brand_id: underCanvasId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 400,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 2,
+        property_id: 'p1',
+        slug: null,
+        property_name: 'Under Canvas Zion',
+        property_type: 'Glamping',
+        unit_type: 'RV Site',
+        city: 'Springdale',
+        state: 'UT',
+        brand_id: underCanvasId,
+        quantity_of_units: 40,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 80,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 3,
+        property_id: 'p2',
+        slug: null,
+        property_name: 'Under Canvas Suite-Only',
+        property_type: 'Glamping',
+        unit_type: 'Suite',
+        city: 'Moab',
+        state: 'UT',
+        brand_id: underCanvasId,
+        quantity_of_units: 12,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 900,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 4,
+        property_id: 'p3',
+        slug: null,
+        property_name: 'AutoCamp Zion',
+        property_type: 'Glamping',
+        unit_type: 'Airstream',
+        city: 'Springdale',
+        state: 'UT',
+        brand_id: autocampId,
+        quantity_of_units: 8,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 350,
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
+
+    expect(result.brands).toHaveLength(2);
+    const underCanvas = result.brands.find((b) => b.slug === 'under-canvas');
+    expect(underCanvas?.propertyCount).toBe(1);
+    expect(underCanvas?.unitCount).toBe(10);
+    expect(underCanvas?.avgRetailDailyRate).toBe(400);
+    const autocamp = result.brands.find((b) => b.slug === 'autocamp');
+    expect(autocamp?.propertyCount).toBe(1);
+    expect(autocamp?.unitCount).toBe(8);
+  });
+
   it('counts only properties in the selected market', () => {
     const rows = [
       {
@@ -761,6 +841,133 @@ describe('aggregateTopGlampingBrands', () => {
     expect(result.brands).toHaveLength(1);
     expect(result.brands[0]?.propertyCount).toBe(1);
     expect(result.brands[0]?.unitCount).toBe(10);
+  });
+
+  it('counts only live/open properties — excludes Under Construction and Proposed Development', () => {
+    const rows = [
+      {
+        id: 1,
+        property_id: 'open',
+        slug: null,
+        property_name: 'AutoCamp Yosemite',
+        property_type: 'Glamping',
+        city: 'Midpines',
+        state: 'CA',
+        country: 'United States',
+        brand_id: autocampId,
+        quantity_of_units: 10,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 300,
+        land_operator_category: 'private_commercial',
+        is_open: 'Yes',
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 2,
+        property_id: 'uc',
+        slug: null,
+        property_name: 'AutoCamp Bryson City',
+        property_type: 'Glamping',
+        city: 'Bryson City',
+        state: 'NC',
+        country: 'United States',
+        brand_id: autocampId,
+        quantity_of_units: 20,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 250,
+        land_operator_category: 'private_commercial',
+        is_open: 'Under Construction',
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 3,
+        property_id: 'proposed',
+        slug: null,
+        property_name: 'AutoCamp Lanesborough',
+        property_type: 'Glamping',
+        city: 'Lanesborough',
+        state: 'MA',
+        country: 'United States',
+        brand_id: autocampId,
+        quantity_of_units: 30,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 275,
+        land_operator_category: null,
+        is_open: 'Proposed Development',
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(brands, rows, TOP_GLAMPING_BRANDS_COUNT, 'us', 1);
+
+    expect(result.brands).toHaveLength(1);
+    expect(result.brands[0]?.propertyCount).toBe(1);
+    expect(result.brands[0]?.unitCount).toBe(10);
+  });
+
+  it('excludes state_park land operators from brand rollups', () => {
+    const timberlineId = '44444444-4444-4444-8444-444444444444';
+    const timberlineBrands: GlampingBrand[] = [
+      brand({
+        id: timberlineId,
+        slug: 'timberline-glamping-co',
+        display_name: 'Timberline Glamping Co.',
+        brand_tier: 'standalone',
+      }),
+    ];
+    const rows = [
+      {
+        id: 1,
+        property_id: 'private',
+        slug: null,
+        property_name: 'Timberline Glamping at Pine Acres',
+        property_type: 'Glamping',
+        city: 'Acworth',
+        state: 'GA',
+        country: 'United States',
+        brand_id: timberlineId,
+        quantity_of_units: 4,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 170,
+        land_operator_category: 'private_commercial',
+        is_open: 'Yes',
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+      {
+        id: 2,
+        property_id: 'park',
+        slug: null,
+        property_name: 'Timberline Glamping at Amicalola Falls',
+        property_type: 'Glamping',
+        city: 'Dawsonville',
+        state: 'GA',
+        country: 'United States',
+        brand_id: timberlineId,
+        quantity_of_units: 50,
+        property_total_sites: null,
+        rate_avg_retail_daily_rate: 160,
+        land_operator_category: 'state_park',
+        is_open: 'Yes',
+        updated_at: '2026-05-01T00:00:00Z',
+        created_at: '2026-05-01T00:00:00Z',
+      },
+    ];
+
+    const result = aggregateTopGlampingBrands(
+      timberlineBrands,
+      rows,
+      TOP_GLAMPING_BRANDS_COUNT,
+      'us',
+      1
+    );
+
+    expect(result.brands).toHaveLength(1);
+    expect(result.brands[0]?.propertyCount).toBe(1);
+    expect(result.brands[0]?.unitCount).toBe(4);
   });
 });
 

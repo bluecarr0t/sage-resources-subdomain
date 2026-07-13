@@ -108,6 +108,14 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
         aliases: ['tent sites', 'tent', 'tents'],
         excludedFromMarketSnapshot: true,
       },
+      {
+        canonical: 'Campsite',
+        propertyTypes: ['campground'],
+        description:
+          'Generic campground pitch / campsite inventory — not a furnished glamping structure.',
+        aliases: ['campsites', 'camping', 'camp site', 'camp sites'],
+        excludedFromMarketSnapshot: true,
+      },
     ],
   },
   {
@@ -135,6 +143,14 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
         propertyTypes: ['glamping'],
         description: 'Sustainability-forward pod branding (eco-pod / eco pod).',
         aliases: ['eco pod', 'eco-pods'],
+      },
+      {
+        canonical: 'Jupe',
+        propertyTypes: ['glamping'],
+        description:
+          'Branded modular glamping shelter (Jupe) — engineered tent/pod hybrid with a rigid frame and fabric envelope; often solar-powered with hotel-style bedding.',
+        aliases: ['jupes', 'jupe tent', 'jupe tents'],
+        inReportPicklist: true,
       },
     ],
   },
@@ -314,6 +330,21 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
         excludedFromMarketSnapshot: true,
         inReportPicklist: true,
       },
+      {
+        canonical: 'RV',
+        propertyTypes: ['campground', 'rvResort'],
+        description: 'Bare RV / guest-owned vehicle inventory — not a furnished glamping unit.',
+        aliases: ['rvs'],
+        excludedFromMarketSnapshot: true,
+      },
+      {
+        canonical: 'Trailer',
+        propertyTypes: ['campground', 'rvResort'],
+        description:
+          'Generic trailer pad or unfurnished trailer inventory — distinct from Vintage Trailer / Airstream glamping product.',
+        aliases: ['trailers'],
+        excludedFromMarketSnapshot: true,
+      },
     ],
   },
   {
@@ -378,6 +409,28 @@ export const GLAMPING_UNIT_CLASSIFICATION_FAMILIES: GlampingUnitFamily[] = [
     summary: 'Hotel-adjacent inventory still tagged at unit level in outdoor hospitality datasets.',
     accent: '#8a8078',
     subtypes: [
+      {
+        canonical: 'Hotel Room',
+        propertyTypes: ['rvResort'],
+        description: 'Conventional hotel room inventory co-listed with outdoor hospitality — not glamping.',
+        aliases: ['hotel rooms'],
+        excludedFromMarketSnapshot: true,
+      },
+      {
+        canonical: 'Suite',
+        propertyTypes: ['rvResort'],
+        description:
+          'Hotel-style suite inventory — not a glamping structure. Distinct from Eco-suite glamping product labels.',
+        aliases: ['suites'],
+        excludedFromMarketSnapshot: true,
+      },
+      {
+        canonical: 'Property buyout',
+        propertyTypes: ['glamping', 'rvResort'],
+        description: 'Whole-property buyout / exclusive rental SKU — not a countable glamping unit type.',
+        aliases: ['property buyouts', 'buyout', 'buyouts'],
+        excludedFromMarketSnapshot: true,
+      },
       {
         canonical: 'Villa',
         propertyTypes: ['rvResort'],

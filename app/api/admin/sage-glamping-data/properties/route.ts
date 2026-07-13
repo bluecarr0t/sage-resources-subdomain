@@ -271,6 +271,40 @@ export const POST = withAdminAuth(async (request) => {
       }
     }
 
+    if (
+      !insertRow.property_id &&
+      typeof insertRow.property_name === 'string' &&
+      insertRow.property_name.trim() !== ''
+    ) {
+      const propertyName = insertRow.property_name.trim();
+      let nameCityStateQuery = supabase
+        .from(TABLE)
+        .select('property_id')
+        .eq('property_name', propertyName)
+        .not('property_id', 'is', null)
+        .order('id', { ascending: true })
+        .limit(1);
+
+      const cityRaw = insertRow.city;
+      if (cityRaw == null || String(cityRaw).trim() === '') {
+        nameCityStateQuery = nameCityStateQuery.or('city.is.null,city.eq.');
+      } else {
+        nameCityStateQuery = nameCityStateQuery.eq('city', String(cityRaw).trim());
+      }
+
+      const stateRaw = insertRow.state;
+      if (stateRaw == null || String(stateRaw).trim() === '') {
+        nameCityStateQuery = nameCityStateQuery.or('state.is.null,state.eq.');
+      } else {
+        nameCityStateQuery = nameCityStateQuery.eq('state', String(stateRaw).trim());
+      }
+
+      const { data: locationSibling } = await nameCityStateQuery.maybeSingle();
+      if (locationSibling?.property_id) {
+        insertRow.property_id = locationSibling.property_id;
+      }
+    }
+
     try {
       Object.assign(insertRow, sanitizeGlampingSeasonRateUpdates(insertRow));
     } catch (rateErr) {
@@ -774,6 +808,13 @@ export const PATCH = withAdminAuth(async (request) => {
     );
     if (Object.keys(cancelledPatch).length > 0) {
       await propagateToSiblings(cancelledPatch, 'cancelled_reason');
+    }
+
+    if ('property_total_sites' in sanitized) {
+      await propagateToSiblings(
+        { property_total_sites: sanitized.property_total_sites },
+        'property_total_sites'
+      );
     }
 
     return NextResponse.json({

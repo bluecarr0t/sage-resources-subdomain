@@ -1,0 +1,13 @@
+-- P1: Exact duplicate row cleanup (5-tuple: property_name, city, state, unit_type, site_name).
+-- Prefer scripts/apply-exact-duplicate-rows-2026-07-09.ts --apply (FK-safe merge + delete).
+-- This file documents the policy; id-targeted DELETEs are generated in scripts/output/exact-duplicate-deletes.csv
+-- after manual review of scripts/output/exact-duplicate-groups.csv.
+--
+-- Example (replace ids after audit):
+-- BEGIN;
+-- UPDATE reports.reports SET sage_data_anchor_id = 1234 WHERE sage_data_anchor_id = 5678;
+-- UPDATE glamping_property_images SET property_id = 1234 WHERE property_id = 5678;
+-- UPDATE property_geocode SET property_id = 1234 WHERE property_id = 5678 AND NOT EXISTS (SELECT 1 FROM property_geocode WHERE property_id = 1234);
+-- UPDATE property_embeddings SET property_id = 1234 WHERE property_id = 5678 AND NOT EXISTS (SELECT 1 FROM property_embeddings WHERE property_id = 1234);
+-- DELETE FROM all_sage_data WHERE id = 5678;
+-- COMMIT;

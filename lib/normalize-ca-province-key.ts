@@ -34,6 +34,7 @@ const CA_FULL_TO_CODE: Record<string, string> = {
   newfoundland: 'NL',
   labrador: 'NL',
   yukon: 'YT',
+  'yukon territory': 'YT',
   'northwest territories': 'NT',
   nunavut: 'NU',
 };

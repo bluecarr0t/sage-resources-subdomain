@@ -1,20 +1,21 @@
 #!/usr/bin/env tsx
 /**
- * Batch-embed all_glamping_properties rows into property_embeddings.
+ * Batch-embed all_sage_data rows into property_embeddings.
  *
  * Run:
- *   npx tsx scripts/embed-glamping-properties.ts [--limit N] [--force]
+ *   npx tsx scripts/embed-glamping-properties.ts --anchors-only
+ *   npx tsx scripts/embed-glamping-properties.ts --anchors-only --limit 50
+ *   npx tsx scripts/embed-glamping-properties.ts --all-rows
  *
  * Requires:
  *   - NEXT_PUBLIC_SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY)
  *   - OPENAI_API_KEY
  *
- * --force   re-embed even if content_hash matches (useful after model change)
- * --limit N only process the first N properties (for dry-runs)
- *
- * The helper in lib/sage-ai/embeddings.ts skips unchanged content by default
- * so this is safe to re-run on a schedule.
+ * --anchors-only  embed list anchors only (default)
+ * --all-rows      embed every unit row in all_sage_data
+ * --force         re-embed even if content_hash matches
+ * --limit N       only process the first N properties
  */
 
 import { config } from 'dotenv';
@@ -22,6 +23,10 @@ import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import pLimit from 'p-limit';
+import {
+  ALL_SAGE_DATA_LIST_ANCHORS_VIEW,
+  ALL_SAGE_DATA_TABLE,
+} from '@/lib/all-sage-data-table';
 import {
   upsertPropertyEmbedding,
   type PropertyEmbeddingInput,
@@ -35,19 +40,25 @@ const CONCURRENCY = 5;
 function parseArgs() {
   let limit = Infinity;
   let force = false;
+  let anchorsOnly = true;
   for (let i = 2; i < process.argv.length; i++) {
     const a = process.argv[i];
     if (a === '--force') force = true;
+    else if (a === '--anchors-only') anchorsOnly = true;
+    else if (a === '--all-rows') anchorsOnly = false;
     else if (a === '--limit' && process.argv[i + 1]) {
       limit = Number(process.argv[i + 1]);
       i++;
     }
   }
-  return { limit, force };
+  return { limit, force, anchorsOnly };
 }
 
 async function main() {
-  const { limit: hardLimit, force } = parseArgs();
+  const { limit: hardLimit, force, anchorsOnly } = parseArgs();
+  const sourceTable = anchorsOnly
+    ? ALL_SAGE_DATA_LIST_ANCHORS_VIEW
+    : ALL_SAGE_DATA_TABLE;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
@@ -69,6 +80,10 @@ async function main() {
   const openai = new OpenAI({ apiKey: openaiKey });
   const limiter = pLimit(CONCURRENCY);
 
+  console.log(
+    `Embedding from ${sourceTable} (anchorsOnly=${anchorsOnly}, limit=${Number.isFinite(hardLimit) ? hardLimit : 'all'})`
+  );
+
   const stats = {
     fetched: 0,
     inserted: 0,
@@ -81,13 +96,10 @@ async function main() {
   let offset = 0;
   while (stats.fetched < hardLimit) {
     const pageSize = Math.min(FETCH_BATCH, hardLimit - stats.fetched);
-    // Select all columns so the embedding text can include the per-feature
-    // flag columns (unit_*/property_*/activities_*/setting_*) and raw text —
-    // there is no single `amenities` column. This is an offline batch, so the
-    // wide select is fine and auto-captures new flag columns.
     const { data, error } = await supabase
-      .from('all_glamping_properties')
+      .from(sourceTable)
       .select('*')
+      .order('id', { ascending: true })
       .range(offset, offset + pageSize - 1);
 
     if (error) {

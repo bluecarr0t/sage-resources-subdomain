@@ -1,0 +1,20 @@
+
+> sage-subdomain-marketing@0.1.0 embed:glamping-anchors
+> tsx scripts/embed-glamping-properties.ts --anchors-only
+
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: ⚙️  override existing env vars with { override: true }
+Embedding from all_sage_data_list_anchors (anchorsOnly=true, limit=all)
+[offset=500] fetched=500 inserted=500 updated=0 skipped_unchanged=0 skipped_too_short=0 errors=0
+[offset=1000] fetched=1000 inserted=1000 updated=0 skipped_unchanged=0 skipped_too_short=0 errors=0
+[offset=1500] fetched=1500 inserted=1500 updated=0 skipped_unchanged=0 skipped_too_short=0 errors=0
+[offset=2000] fetched=2000 inserted=2000 updated=0 skipped_unchanged=0 skipped_too_short=0 errors=0
+[offset=2186] fetched=2186 inserted=2186 updated=0 skipped_unchanged=0 skipped_too_short=0 errors=0
+
+Done. {
+  fetched: 2186,
+  inserted: 2186,
+  updated: 0,
+  skipped_unchanged: 0,
+  skipped_too_short: 0,
+  errors: 0
+}

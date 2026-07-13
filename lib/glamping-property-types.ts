@@ -6,6 +6,7 @@
 export const GLAMPING_PROPERTY_TYPE_FORM_OPTIONS = [
   { value: 'Unknown', msgKey: 'unknown' as const },
   { value: 'Glamping', msgKey: 'glamping' as const },
+  { value: 'Vacation Rental', msgKey: 'vacationRental' as const },
   { value: 'Outdoor Boutique Hotel', msgKey: 'outdoorBoutiqueHotel' as const },
   { value: 'Outdoor Resort', msgKey: 'outdoorResort' as const },
   { value: 'RV Resort', msgKey: 'rvResort' as const },

@@ -12,7 +12,9 @@
 
 import { config } from 'dotenv';
 import { resolve } from 'path';
+import { mkdirSync, writeFileSync } from 'fs';
 import { createClient } from '@supabase/supabase-js';
+import { csvEscape } from '@/lib/sage-data-p1-audit';
 
 // Load environment variables from .env.local
 config({ path: resolve(process.cwd(), '.env.local') });
@@ -39,6 +41,8 @@ const TABLE_NAME = TABLE_ARG?.split('=')[1]?.trim() || 'all_sage_data';
 const DRY_RUN = process.argv.includes('--dry-run');
 const LIMIT_ARG = process.argv.find(arg => arg.startsWith('--limit='));
 const LIMIT = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1]) : undefined;
+const COHORT_ARG = process.argv.find((arg) => arg.startsWith('--cohort='));
+const COHORT = COHORT_ARG?.split('=')[1]?.trim() || 'all';
 
 // Create Supabase client
 const supabase = createClient(supabaseUrl, secretKey);
@@ -165,6 +169,7 @@ async function searchPlace(
   displayName: string;
   formattedAddress: string;
   city: string;
+  similarity: number;
 } | null> {
   // Build search query
   const queryParts: string[] = [propertyName];
@@ -262,6 +267,7 @@ async function searchPlace(
       displayName,
       formattedAddress,
       city: googleCity,
+      similarity: bestMatch.similarity,
     };
   } catch (error) {
     console.error(`  ⚠ Search error:`, error);
@@ -303,27 +309,56 @@ async function main() {
   if (DRY_RUN) {
     console.log('⚠️  DRY RUN MODE - No changes will be saved\n');
   }
+  if (COHORT === 'published') {
+    console.log('📌 Cohort filter: published rows only\n');
+  }
 
-  // Fetch properties without google_place_id
+  // Fetch properties without google_place_id (paginated; Supabase caps at 1000/request)
   console.log('📥 Fetching properties without google_place_id...');
-  
-  let query = supabase
-    .from(TABLE_NAME)
-    .select('id, property_name, city, state, address, zip_code, google_place_id')
-    .is('google_place_id', null);
-  
-  if (LIMIT) {
-    query = query.limit(LIMIT);
+
+  type PropertyRow = {
+    id: number;
+    property_name: string | null;
+    city: string | null;
+    state: string | null;
+    address: string | null;
+    zip_code: string | null;
+    google_place_id: string | null;
+    research_status: string | null;
+  };
+
+  const properties: PropertyRow[] = [];
+  const pageSize = LIMIT ? Math.min(LIMIT, 1000) : 1000;
+  let offset = 0;
+
+  while (true) {
+    let query = supabase
+      .from(TABLE_NAME)
+      .select('id, property_name, city, state, address, zip_code, google_place_id, research_status')
+      .is('google_place_id', null)
+      .order('id', { ascending: true })
+      .range(offset, offset + pageSize - 1);
+
+    if (COHORT === 'published') {
+      query = query.eq('research_status', 'published');
+    }
+
+    const { data, error: fetchError } = await query;
+    if (fetchError) {
+      console.error('❌ Error fetching properties:', fetchError.message);
+      process.exit(1);
+    }
+    if (!data?.length) break;
+    properties.push(...(data as PropertyRow[]));
+    if (LIMIT && properties.length >= LIMIT) {
+      properties.splice(LIMIT);
+      break;
+    }
+    if (data.length < pageSize) break;
+    offset += pageSize;
   }
 
-  const { data: properties, error: fetchError } = await query;
-
-  if (fetchError) {
-    console.error('❌ Error fetching properties:', fetchError.message);
-    process.exit(1);
-  }
-
-  if (!properties || properties.length === 0) {
+  if (properties.length === 0) {
     console.log('✅ No properties found without google_place_id');
     return;
   }
@@ -333,6 +368,7 @@ async function main() {
   let successCount = 0;
   let failCount = 0;
   let skipCount = 0;
+  const summaryCsv: string[] = [];
 
   // Process each property
   for (let i = 0; i < properties.length; i++) {
@@ -367,6 +403,15 @@ async function main() {
     if (!placeResult) {
       console.log('   ❌ No matching place found');
       failCount++;
+      summaryCsv.push(
+        [
+          String(property.id),
+          csvEscape(property.property_name ?? ''),
+          '',
+          '0',
+          'not_found',
+        ].join(',')
+      );
       
       // Rate limiting: wait 100ms between requests
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -376,6 +421,7 @@ async function main() {
     // Display match details
     console.log(`   ✅ Found match: "${placeResult.displayName}"`);
     console.log(`      Place ID: ${placeResult.placeId}`);
+    console.log(`      Similarity: ${(placeResult.similarity * 100).toFixed(0)}%`);
     console.log(`      Address: ${placeResult.formattedAddress}`);
     if (placeResult.city) {
       console.log(`      City: ${placeResult.city} ${normalizeCity(property.city) === normalizeCity(placeResult.city) ? '✅' : '⚠️'}`);
@@ -387,6 +433,15 @@ async function main() {
     if (updated) {
       successCount++;
       console.log('   ✅ Updated successfully');
+      summaryCsv.push(
+        [
+          String(property.id),
+          csvEscape(property.property_name ?? ''),
+          csvEscape(placeResult.placeId),
+          String(placeResult.similarity.toFixed(3)),
+          'matched',
+        ].join(',')
+      );
     } else {
       failCount++;
       console.log('   ❌ Update failed');
@@ -409,6 +464,15 @@ async function main() {
     console.log('\n⚠️  This was a DRY RUN - no changes were saved');
     console.log('Run without --dry-run to apply changes');
   }
+
+  const outDir = resolve(process.cwd(), 'scripts/output');
+  mkdirSync(outDir, { recursive: true });
+  const summaryPath = resolve(outDir, 'google-place-id-populate-summary.csv');
+  writeFileSync(
+    summaryPath,
+    ['id,property_name,matched_place_id,similarity,status', ...summaryCsv].join('\n') + '\n'
+  );
+  console.log(`\nWrote summary CSV: ${summaryPath}`);
 }
 
 // Run the script

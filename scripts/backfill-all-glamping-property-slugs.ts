@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Find `all_glamping_properties` rows with missing `slug` (NULL or blank) and set
+ * Find `all_sage_data` rows with missing `slug` (NULL or blank) and set
  * `slug` from `property_name` using the same rules as `slugifyPropertyName` in
  * `lib/properties.ts` (aligned with DB trigger `generate_slug_from_property_name`).
  *
@@ -35,7 +35,7 @@ const supabase = createClient(supabaseUrl, secretKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-const TABLE = "all_glamping_properties";
+const TABLE = "all_sage_data";
 const PAGE = 1000;
 const DRY_RUN = process.argv.includes("--dry-run");
 const TODAY = new Date().toISOString().split("T")[0];

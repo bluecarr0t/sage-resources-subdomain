@@ -1,7 +1,15 @@
 #!/usr/bin/env npx tsx
 /**
- * Research and populate rate_avg_retail_daily_rate and rate_unit_rates_by_year
- * for ALL properties with missing rate_avg_retail_daily_rate using OpenAI.
+ * ESTIMATE-ONLY rate backfill via OpenAI parametric knowledge (no live web scrape).
+ *
+ * Prefer the high-accuracy published pipeline instead:
+ *   npm run audit:missing-published-adr
+ *   npm run apply:missing-published-adr:dry-run
+ *   npm run apply:missing-published-adr
+ *
+ * This script is appropriate for in_progress / triage rows where a rough estimate
+ * is better than null. Do NOT use it as the primary path for published open
+ * glamping ADR — those should use Firecrawl/Tavily evidence first.
  *
  * Estimates average nightly rate even when multiple unit types have different rates.
  * Populates rate_unit_rates_by_year with 2026 structure; uses season-specific rates
@@ -38,7 +46,7 @@ const supabase = createClient(supabaseUrl, secretKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-const TABLE = 'all_glamping_properties';
+const TABLE = 'all_sage_data';
 const DELAY_MS = 2000;
 
 interface PropertyRow {

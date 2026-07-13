@@ -1,0 +1,227 @@
+group_key,row_count,distinct_totals,sum_qty,total_conflict,qty_mismatch,property_name,city,state,ids
+pid:5e1775be-1a1a-48e0-9aa6-38ad97aeb1ad,5,16,15,false,true,A Tiny Home Resort,South Cairo,NY,10010|10011|10012|10013|10014
+pid:ad64ad4c-4b01-4156-92d2-08f52a309ae6,5,42,5,false,true,Al Maha,Dubai Desert Conservation Reserve,,12185|12218|12219|12220|12221
+pid:ab65f633-6220-465f-a692-8f439872afd4,2,15,3,false,true,Allen Ranch Campground,Hot Springs,SD,9918|10235
+pid:27de84c0-fdc6-4d3c-8486-d9b9e650c296,5,8,10,false,true,Alpenglow Luxury Camping,Sutton-Alpine,AK,9572|9573|10399|10400|10401
+pid:438f4830-dedf-4b35-a708-dfb24b3d8a25,7,40,6,false,true,Amangani,Jackson,WY,11945|11991|11992|11993|11994|11995|11996
+pid:dc56af74-f2b0-43af-a5b4-d2c577a16ac9,1,14,1,false,true,Ancient Lore Village,Knoxville,TN,10951
+pid:84d62611-8819-45a0-a8d2-bce1b3db15f2,5,19,5,false,true,Andelyn Farm,Granville,NY,9803|9804|9805|9806|9807
+pid:05726e00-7d76-4589-bc0b-87945dfc698d,1,12,1,false,true,Appalachian Pond Campground,Waynesville,NC,9855
+pid:a00f8f1b-2ccf-43f2-8cef-0d5844435cf7,3,61,13,false,true,Arapaho Valley Ranch,Granby,CO,9897|10112|10429
+pid:8ff21da9-84ee-4198-a39c-7b3517015b53,2,10,8,false,true,Arizonea Luxury Expeditions,Goodyear,AZ,10555|10556
+pid:ff68af84-b6a1-459d-813a-ec6713c7599c,2,13,25,false,true,Arowhon Pines,Algonquin Park,ON,194|217
+pid:33c39bef-19cf-43b9-b79a-6eaedfea9ff7,3,11,3,false,true,Ashevile River Cabins,Arden,NC,9985|9986|9987
+pid:1e60c7eb-9c65-45d8-9003-4cfb2e7c74b2,4,45,13,false,true,Aspen Grove Inn,Rigby,ID,10136|10137|10450|10451
+pid:527a6ccc-49aa-4038-9e4d-31f7b2f95408,2,67,72,false,true,AutoCamp Asheville,Asheville,NC,10650|10915
+pid:52d97ce8-23f6-4b99-aa27-3e66b4250ddd,3,100,85,false,true,AutoCamp Cape Cod,Falmouth,MA,9966|10141|10647
+pid:44d15235-71b4-4df0-82d6-ac196006455f,4,55,14,false,true,AutoCamp Joshua Tree,Joshua Tree,CA,9937|9938|9939|10636
+pid:519865e7-df19-4356-a854-b4ca89b90e3b,2,20,15,false,true,Avalanche Ranch,Redstone Historic District,CO,10380|10430
+pid:b3069c0a-c040-43d8-acad-efffdeb0bf2e,4,6,4,false,true,AWOL Kennebunkport,Kennebunkport,ME,11946|11963|11964|11965
+pid:cd884e96-cab3-49d8-b8ff-2c5f0a840397,3,20,12,false,true,Backeddy Resort,Egmont,BC,10719|10759|10760
+pid:5c3ce162-334d-4a56-8007-b4072035badc,1,37,5,false,true,Basecamp 37,Kanab,UT,10276
+pid:40279bf4-a620-4ec1-acbb-a19b0aa05b67,1,9,5,false,true,Baumhaushotel Oberbayern,Jetzendorf,Bavaria,11003
+pid:329da681-9864-43aa-b1e0-29ed53c45464,1,7,5,false,true,Baumhaushotel Seemühle,Gräfendorf,Bavaria,11000
+pid:e75790e8-9aa9-40a7-8377-cbfbe307700e,2,40,17,false,true,Bel Air Resort Mont-Tremblant,Mont-Tremblant,QC,10694|10741
+pid:66951380-6c2b-41a4-9c62-b8e2db331608,8,30,10,false,true,Blue Bell Lodge,Custer,SD,11675|11956|11957|11958|11959|11960|11961|11962
+pid:2575ea71-fa21-43f5-9a93-2eb0928bd70e,1,2,6,false,true,Blue Ridge Treehouse Rentals,Blue Ridge,GA,37
+pid:57202682-9390-450e-a6f8-4f0c013e83d5,3,9,7,false,true,Boulder Mountain Guest Ranch,Boulder,UT,9832|9833|10542
+pid:cb02b12e-1d93-43e3-9071-db86753455ed,5,46,18,false,true,Boulder Mountain Resort,Revelstoke,BC,10690|10691|10696|10720|10761
+pid:014c6750-6123-4fcd-9ebe-cef01111852b,2,7,14,false,true,Branson Treehouse Adventures,Branson,MO,39|65
+pid:7fd7679a-ffe8-4445-b1ae-c17d4d64be43,2,26,13,false,true,Bridgeviews Retreat & Glamping,Rosedale,AB,10710|10782
+pid:210f1347-9c43-4080-bca2-02497c49ac73,3,17,15,false,true,Brown's Bay Resort,Campbell River,BC,10705|10747|10762
+pid:974b062d-e108-46d9-9bfa-0fc23f83e8c9,1,2,1,false,true,Cabana Desolation Eco Resort,British Columbia,BC,10763
+pid:a0fec64e-acc0-4f7c-aa0a-b10bf01475a3,1,6,5,false,true,Cabañas de Lires,Cee,Galicia,11202
+pid:06817cae-a6f4-4880-8cc5-4ad9a7582368,1,8,10,false,true,Cabañas en los Árboles,Zeanuri,Basque Country,11171
+pid:51a8f391-1dc7-4d7e-9e60-d4c80cafbd41,5,50,20,false,true,Camp Dakota,Scotts Mills,OR,9812|9813|9911|10225|10226
+pid:4bb9fd64-26b2-4a3e-b39a-378a4d7ed542,3,12,3,false,true,Camp Ferncrest - Elkhorn River,Neligh,NE,11849|11856|11857
+pid:5da96886-5efd-4fd8-a857-ce237e5de966,1,12,9,false,true,Camp Ferncrest - Ocoee,Ocoee,TN,11886
+pid:ad312471-3062-41d1-af0a-60ece08ce1da,8,196,45,false,true,Camp Fimfo,NEW BRAUNFELS,TX,10049|10050|10051|10052|10053|10054|10055|10531
+pid:03973add-9b42-4a1d-a814-bd2d97b3f908,2,8,2,false,true,Camp V,Vancorum,CO,10431|10432
+pid:a6d510d3-f33a-4889-9903-c52c60409e21,10,14,12,false,true,Camp Wandawega,Elkhorn,WI,2|12909|12910|12911|12912|12913|12914|12915|12916|12917
+pid:dfe22da4-e3ff-487d-bfa8-a0a0fd4b03c3,1,10,20,false,true,Camping Houtum,Kasterlee,Antwerp,10997
+pid:32949540-66bd-4f0f-a0d8-0e0b3411719a,1,5,10,false,true,Camping Molignon,Les Haudères,Valais,11230
+pid:05ebfeeb-e497-481f-994f-8ea40b361dbd,1,100,20,false,true,Camping Scarabeo,Punta Braccetto,Sicily,11070
+pid:02e8bb4f-8ad6-41a2-8599-dbcf52706f89,1,8,7,false,true,Canonici di San Marco,Mirano,Veneto,11041
+pid:8511c2cf-fb12-40dd-9282-6b8476ce69c1,1,9,5,false,true,Cape Carraholly Retreat,Port Moody,BC,10679
+pid:5df9503b-6850-4c93-aa07-1f56ad0eb18a,5,23,5,false,true,Capella Ubud,Ubud,Bali,12187|12232|12233|12234|12235
+pid:99b83ca2-077b-4bc5-91e4-a6b6f952717c,3,31,30,false,true,Castle Hot Springs,Morristown,AZ,11324|11344|11345
+pid:8a56a8e9-fdc0-42f3-84da-a4214cbc3110,7,23,13,false,true,Cedar Pass Lodge,Interior,SD,11677|12044|12045|12046|12047|12048|12049
+pid:93c9289c-5b76-4e63-a43c-5e0b744dcb14,3,11,8,false,true,Cheekye Ranch,Brackendale,BC,10680|10681|10764
+pid:663c6298-83e0-4148-9cc0-ea88fa9d4f85,8,80,8,false,true,Civana Carefree Resort & Spa,Carefree,AZ,11942|11966|11967|11968|11969|11970|11971|11972
+pid:8f833666-eec4-4cee-af22-05e8cb1f2bd8,5,16,14,false,true,Coldwater Gardens,Milton,FL,9867|9952|9953|10121|10441
+pid:64029283-bd01-4fe0-abba-1e5c04e60e21,3,18,26,false,true,Collective Retreats Vail,Wolcott,CO,87|10115|10571
+pid:6de72182-4fe8-4678-a9f4-601e678f084d,3,4,3,false,true,Copperhead Retreat,Kennerdell,PA,9859|9916|9917
+pid:06544c3e-1326-487f-9bec-1f8ee6c5e9a3,4,98,65,false,true,Costanoa,Pescadero,CA,9846|10095|10418|10419
+pid:70c7c5a9-0412-4032-b873-e7cb778bc0f7,3,151,20,false,true,Cutty's Hayden Creek Resort,Coaldale,CO,10381|10433|10434
+pid:52177aed-da03-41a3-91a2-5f7746db2488,4,28,14,false,true,Desolation Hotel Hope Valley,Hope Valley,CA,9767|9768|9847|10420
+pid:3e27838b-f2d5-4431-943f-07286f65144c,11,57,56,false,true,East Zion Resort,Orderville,UT,12182|12183|12236|12237|12238|12239|12240|12241|12242|12243|12244
+pid:00db292b-820c-4965-88cd-3872e6c263ef,1,5,10,false,true,Ecochique,Poperinge,West Flanders,10960
+pid:a0fcd461-0eab-471c-aa25-ed3252eee29f,4,43,11,false,true,Elk Island Retreat,Fort Saskatchewan,AB,10677|10712|10752|10753
+pid:641be990-887c-44c4-9e69-d8adc2e5ca34,2,15,30,false,true,Elk Ridge Resort,Waskesiu Lake,SK,187|208
+pid:51425191-f9f6-4b78-bc49-658a7f34baeb,4,50,22,false,true,Emberglow Outdoor Resort,Mill Spring,NC,9794|9856|9989|10345
+pid:95862b9e-fcc7-461d-a870-c48f1dcc0e9d,2,24,48,false,true,Emerald Lake Lodge,Field,BC,192|210
+pid:972e66a3-6019-458b-b716-e6280c0396a3,2,8,16,false,true,Enchanted Earth Retreat,Tofino,BC,150|154
+pid:db3e3d1a-12c3-4380-999e-5ec50e256757,7,55,385,false,true,Firefall Ranch,Groveland,CA,9505|10954|10955|10956|10957|10958|10959
+pid:454bc60b-b4fd-40a5-878b-8778908678e1,4,6,5,false,true,Five Meadows Farms by Your Glamping Adventure,Smithville,TN,10320|10321|10322|10361
+pid:5f898f1a-2ac1-4aad-a036-6df6a418f0cc,1,7,4,false,true,Footprints Resort,Harcourt,ON,10769
+pid:0137d9b1-ad12-4c7a-b72e-98b019684d48,4,16,4,false,true,Four Seasons Tented Camp Golden Triangle,Chiang Rai,Chiang Rai,12188|12256|12257|12258
+pid:770bacb1-eed4-42dd-aa45-533ae03fe6a9,1,17,12,false,true,Fox Hollow Campground,Deer Isle,ME,12990
+pid:144e34c5-ba80-4c27-aaea-dbbd191b4494,4,14,7,false,true,Fredrock,Fredericktown,MO,9903|10385|10476|10648
+pid:8c2b11ac-efa0-4879-a203-b6403e1798fb,1,18,17,false,true,Gather Greene,Coxsackie,NY,10019
+pid:24e4fb67-5d63-4837-915e-a3766aac2483,2,5,4,false,true,Glacier Rock Wellness Rock Ranch,Randle,WA,10949|10950
+pid:e969305b-47ea-4c0c-84f1-ad57ba254995,1,41,1,false,true,Glamp Camp,Waterborough,NB,10689
+pid:69245ad2-6271-417f-80ff-f063f16b2740,5,6,4,false,true,Glampful,Broadalbin,NY,9728|10206|10207|10208|10209
+pid:b405eafe-5240-47a2-b7f4-c293034c6f17,1,10,5,false,true,Glamping Airstream Andalucía,Vejer de la Frontera,Andalusia,11174
+pid:fb5e9b90-1dd0-4697-bf42-475fec4d434b,2,8,5,false,true,Glamping Canonici di San Marco,Mirano,Veneto,11049|11172
+pid:5d6b43df-2c98-495d-a545-ba84acf1cf47,1,3,2,false,true,Glamping InStead,Stead,MB,10725
+pid:ab890bce-e56e-4dbd-bd9c-e6690b98f853,1,5,20,false,true,Glamping Jungfrau,Lauterbrunnen,Bern,11223
+pid:d17b62c4-5a8f-4e2b-9c1d-7f3a6e8b0d42,1,1,12,false,true,Glamping Loft Lake Geneva,Lake Geneva,WI,12920
+pid:d2812c06-7175-4bdf-be5e-43e6b5f8bd3f,3,7,3,false,true,Glamping Resorts - Castle Provincial Park,Provincial Park,AB,10713|10779|10781
+pid:95ca25ee-52bf-4358-a104-736e1a65b3f5,1,7,6,false,true,Glamping Resorts Ltd - Buffalo Pound Lake,Findlater,SK,10744
+pid:4c54a6fe-6c00-4796-af86-64161b5e8cc9,4,15,18,false,true,Goosewing Ranch,Kelly,WY,10397|10398|10552|10553
+pid:d3a3ab4b-c36d-4025-9489-3e6617851273,3,13,10,false,true,Gorgeous Stays,Bryson City,NC,9857|9992|10186
+pid:67f5bf25-56b5-49b3-9142-ff42085397f4,8,27,24,false,true,Grand Canyon Glamping Resort,Meadview,AZ,9896|10087|10088|10328|10329|10330|10376|10377
+pid:e29c73d5-6b9a-4f3c-ad2e-8c4b1f7e9a63,3,36,38,false,true,Grand Geneva Resort Glamping,Lake Geneva,WI,12921|12922|12923
+pid:1aea2b99-7699-4ce9-be21-9730aa65dfc1,1,162,15,false,true,Grass Valley RV Resort,Grass Valley,CA,12960
+pid:409ec309-ae2d-4d36-bb03-750c75103cde,6,8,6,false,true,Green Acres,Elgin,TX,9823|9824|9825|9826|10062|10658
+pid:0aaec528-a63d-45e1-bbdc-466723f314b7,2,28,18,false,true,Grotto Getaway,"Miller Lake,",ON,10734|10784
+pid:79586682-6be1-4aaf-a021-379b069c9cfb,2,9,6,false,true,Half Moon Lake Resort,Sherwood Park,AB,10714|10754
+pid:064662a3-a05f-4250-b260-50e4e7ca120a,2,40,30,false,true,Happydale Retreat,Cambridge,OH,10031|10032
+pid:91d8006a-c6e9-4c74-8ec4-ca7b7929a8ac,1,14,20,false,true,Harvest Moon Holidays,Dunbar,East Lothian,11263
+pid:4f4e99a5-3a8c-495e-8682-0a061bd25bdb,1,12,10,false,true,Het Kleine Paradijs,Easterein,Friesland,11114
+pid:af21e0a7-bc9e-4011-a373-663f760bd5c9,2,8,6,false,true,Highland Meadows Resort,Hot Spring,SD,9921|10528
+pid:ea257743-1b29-48da-bf41-5cfede9bdc73,3,3,5,false,true,Highwood Retreat,Springfield,VT,12118|12119|12120
+pid:1f2ece7a-e082-42bb-8fd8-986a8149f39a,3,75,19,false,true,Hilltop Resorts and Campground,Logan,OH,10223|10389|10502
+pid:8b21771f-425b-4957-a521-40c73d3d357e,1,6,4,false,true,Hinton Hideaways,Crewkerne,Somerset,11240
+pid:bdf0b4c5-b450-4923-869d-d72a323657a5,2,10,15,false,true,Hobbiton Hideaway,Mont-Tremblant,QC,152|153
+pid:b0affc2b-2220-4aee-9825-55cd1427a274,2,8,3,false,true,Home Field Advantage Farmstead,Lee,FL,9954|10122
+pid:13949eae-0db2-4783-af1a-d45fac4329a9,2,16,32,false,true,Hotel Escondido,Puerto Escondido,Oaxaca,201|221
+pid:11d402a4-6ca1-4cc8-a855-e95e05eefc56,2,6,5,false,true,Hub North,Gorham,NH,9802|10599
+pid:4b802f57-c33a-4f21-8b3e-0ed4679a2b21,5,12,6,false,true,Huttopia Paradise Springs,Valyermo,CA,10099|10100|10101|10424|10425
+pid:db251b36-110d-4eb2-9650-f29eabba490a,6,148,58,false,true,Huttopia Sutton,Sutton,QC,10704|10776|12358|12359|12360|12361
+pid:5500fc39-898e-4f45-a568-6097026fe113,3,17,3,false,true,Imago Village,Saint-David-de-Falardeau,QC,10685|10686|10687
+pid:68a4462d-38fb-4c84-865b-2a8a4e6cf6ae,3,70,3,false,true,Inn Town Campground,Nevada City,CA,9770|10102|10103
+pid:05188993-1a82-43ff-9fd4-40369f947629,1,7,1,false,true,Ipfun,Williams,ON,10770
+pid:63e27ed8-b809-4b06-9865-06ae557a1ff7,2,12,6,false,true,Joli Voyageur Resort & Campground,Lavigne,ON,10707|10780
+pid:5339c7a5-5550-4c92-a5da-8de6209070b0,1,15,22,false,true,Jollydays Glamping,York,North Yorkshire,11271
+pid:b1df8259-b22f-4c15-9d29-8985f415f4d9,2,31,10,false,true,Joyful Journey Hot Springs,Moffat,CO,9778|9898
+pid:cfa7617a-b0eb-4ee4-9981-9ec8b9a15d27,4,11,6,false,true,Kentucky Lake Glamping,New Concord,KY,9852|9961|9962|10645
+pid:84b78916-3946-48b5-9578-970d8b4066e5,2,18,36,false,true,Killarney Mountain Lodge,Killarney,ON,188|211
+pid:a9dddbb8-43d9-4f87-90bb-7a197c2c2bf2,1,6,5,false,true,L'Évasion Glamping Dome,Lac-Supérieur,QC,10743
+pid:8f95ef51-7136-4729-9a96-04e22bb62165,3,45,4,false,true,Lago Linda Hideaway,Beattyville,KY,10468|10469|10470
+pid:c10e389b-51b2-4f0d-96d8-446fcc0d762a,5,131,33,false,true,Lake Compounce,Bristol,CT,9900|9951|10435|10436|10471
+pid:34e99c8b-17ed-4e47-936a-21ad44e73ac1,3,66,36,false,true,Lakedale,Friday Harbor,WA,9838|10302|10303
+pid:24e5fe17-8948-4bfa-a74d-1e71ec267c91,3,47,37,false,true,Lakedale Resort,"Friday Harbor,",WA,9839|10408|10550
+pid:fd0942c1-508d-4694-9423-3a1439ff9f3c,1,16,17,false,true,Lanzarote Retreats,Arrieta,Canary Islands,11201
+pid:824b3210-64b7-4fd5-b79d-da477477b950,1,12,4,false,true,Lawson Adventure Park,Dumont,CO,9779
+pid:9d809848-b48d-47db-bc72-80fed55a1c83,2,12,20,false,true,Les Refuges Perchés,Nominingue,QC,42|70
+pid:61dfc695-f6d6-4e47-921b-ed63f3e8427c,5,17,16,false,true,Little Arrow Outdoor Resort,Townsend,TN,10048|10244|10245|10246|10656
+pid:925c1c4e-82c9-49d6-805e-18db3df21492,4,16,6,false,true,Log Cabin Wilderness Lodge,Tok,AK,9577|10085|10412|10413
+pid:aa8d3879-a7dd-45ee-83f4-9d4cd5d92ef9,1,33,39,false,true,Long Cove Resort,Charlotte,NC,10483
+pid:a8c4e2b1-6f3d-4a9e-b2c1-7d8e4f5a6b0c,3,16,3,false,true,Longitude 131°,Yulara,NT,12189|12196|12197
+pid:9070750d-df56-4023-a218-dd08c41e87f3,6,1,2,false,true,Lost Woods Farm & Forest,Boyne Falls,MI,9620|9621|9622|9713|9714|9715
+pid:fe746e82-ce2a-42cf-82c0-d3b57ff6c6a7,4,8,4,false,true,Loving Heart Retreat,Burnet,TX,10260|10261|10367|10368
+pid:5f944e55-6616-4bd5-992c-b0843c89d334,4,35,5,false,true,Lumen Nature Retreat,Woodstock,NH,10007|10008|10009|10196
+pid:92a63e97-13c5-4957-9d6e-586de9a0d592,2,240,11,false,true,Luxury Yurt at Loyd Park on Joe Pool Lake,Grand Prairie,TX,9829|10538
+pid:1c3cf7b1-f2f4-4154-93a3-b0b641b21d14,4,16,4,false,true,"Mapito Safari Camp, Serengeti",Serengeti,,12226|12279|12280|12281
+pid:84eacdec-091c-420d-b8e9-3ba71efbbb0f,3,15,8,false,true,Massanutten Springs,Luray,VA,9836|9837|10546
+pid:ee26ab22-fc70-47ef-b2d2-5bc741dd1e82,3,21,6,false,true,Miracle and Banbury Hot Springs,Buhl,ID,9958|10336|10453
+pid:942e7820-12d2-4bf8-b313-d38a469fb53c,13,400,12,false,true,Miraval Arizona Resort & Spa,Tucson,AZ,11943|11973|11974|11975|11976|11977|11978|11979|11980|11981|11982|11983|11984
+pid:1ad57662-6be6-49cc-be47-2ae1b9431c37,4,228,45,false,true,Mohican Adventures,Loudonville,OH,10503|10504|10505|10506
+pid:4d6867f5-da5a-4533-b7cf-a6d243307066,1,10,9,false,true,Monte da Vilarinha,Bordeira,Algarve,11145
+pid:bb8cc55d-e650-46e9-8927-02f6c41ea09f,4,31,16,false,true,Moose Creek Ranch,Victor,ID,10139|10454|10455|10644
+pid:4ccbe46a-49e6-4430-b86a-293e03af4abb,2,42,2,false,true,Moravian Falls Family Campground & Cabins,Moravian Falls,NC,10484|10485
+pid:33387855-ffc9-4b5c-a51c-52c18c93b495,4,15,9,false,true,Mount Engadine Lodge,Kananaskis,AB,12|10678|10746|10755
+pid:a0c2f25d-570c-4a14-95c0-7884e5eb29dd,2,2,20,false,true,Mustang Monument,Wells,NV,9907|10495
+pid:5059bce2-7a7d-4ffa-9869-35ce93ab64dd,1,10,2,false,true,Natural Gathering Grounds,Ridgeville,SC,10654
+pid:8dc6fb82-3351-4a68-a708-235d05e11a2b,2,15,2,false,true,Naviva,Punta de Mita,Nayarit,12190|12217
+pid:e339ee56-db9c-4f71-aaa2-3c5b9934a62f,5,37,5,false,true,Nayara Tented Camp,La Fortuna,Alajuela,12191|12198|12199|12200|12201
+pid:bb889ca0-09e2-4562-b105-fa88a1dae908,1,7,1,false,true,Nellie's Landing,Murray Harbour,PE,10738
+pid:80e41d7c-e63c-4d9d-991c-8a5856f0dae1,1,52,40,false,true,Nicholas Beaver Lake Glamping Resort,Rogers,AR,12995
+pid:8d70366f-9943-4b96-a156-116cc29c51c5,2,9,15,false,true,Nimmo Bay Wilderness Resort,Port McNeill,BC,209|10766
+pid:25cb8606-60f7-46ec-b9ea-28f57b490959,4,33,11,false,true,North Haven Campground,Bonners Ferry,ID,9843|10316|10456|10457
+pid:3a8e7766-9d10-42ad-8df0-85b143209337,4,434,173,false,true,North Texas Jellystone Park,"Blvd, Burleson",TX,9923|10325|10391|10539
+pid:0cceab43-b620-4409-9250-7dd781234ded,2,8,15,false,true,Northern Edge Algonquin,South River,ON,189|216
+pid:ea25e5c2-777a-4127-b235-d496c752b7d8,5,11,5,false,true,Onera Fredericksburg,Fredericksburg,TX,10067|10068|10069|10262|10369
+pid:112f9d63-fb9f-48a4-b9d2-ad73c4f606c3,1,3,1,false,true,Otter Pointe Resort,Calvin,ON,10735
+pid:9e88ec9d-7d23-47b4-a807-95f92cbdb9d1,2,12,24,false,true,Playa Viva,Petatlán,Guerrero,198|218
+pid:1f5383a3-36ea-4832-a5d3-a371288e2dd3,5,40,82,false,true,Postcard Cabins Big Bear,Running Springs,CA,9941|9942|9943|9944|10426
+pid:8b81b3d6-f779-43d9-8010-1a51ddd3f2bd,3,50,90,false,true,Postcard Cabins Dale Hollow,Celina,TN,10046|10047|10530
+pid:b707f986-b945-4a50-a1bc-998e5a550e8f,1,11,8,false,true,Progress Park Airstream Resort & Event Venue,Louisville,KY,10646
+pid:66ea8d3d-95ae-4d1b-817e-9fe2727353e4,2,8,2,false,true,Reverie retreat,Garden Valley,CA,9771|10427
+pid:70c5f7dc-f68b-4a14-80b7-3384cb9468bd,4,17,4,false,true,River Mountain,Everett,PA,9814|9815|10036|10609
+pid:11aa2819-c3a3-4286-b799-337431e9b00b,2,6,13,false,true,River's Edge Treehouse Resort,Robbinsville,NC,33|63
+pid:9a4164f2-f223-444e-a9d8-df9b8ecef0fb,2,10,18,false,true,Riviera Maya Treehouse Resort,Akumal,Quintana Roo,52|80
+pid:f2b14797-003c-4e06-b6ce-a07baaa4f220,1,15,5,false,true,Roadhouse Ranch & Camp,Terrebonne,OR,11566
+pid:d2150e8e-a018-40f3-8c58-ddd4a0ab81bf,15,84,191,false,true,Roamstead,Cosby,TN,11433|11913|11914|11915|11916|11917|11918|11919|11920|11921|11922|11923|11924|11925|11926
+pid:c978fb71-5949-48f3-8499-0c440cbb3af2,2,4,5,false,true,Safari for the Soul Luxury Glamping,Marble Falls,TX,10266|10664
+pid:5f3c2cd9-5c4f-41f2-afdd-27f96172de9a,1,31,10,false,true,Safari West,Santa Rosa,CA,10428
+pid:535f346b-0116-48d3-bb38-c1de022fb858,3,15,3,false,true,Sal Salis,Exmouth,WA,12192|12230|12231
+pid:8a892d66-34a5-40af-9487-c40ede65502a,6,9,10,false,true,Saluda Outdoor Center,Easley,SC,9861|10039|10040|10041|10042|10523
+pid:88e06654-0367-42e7-b99b-1f961fb403be,7,109,6,false,true,"Sanctuary Camelback Mountain, A Gurney's Resort",Paradise Valley,AZ,11944|11985|11986|11987|11988|11989|11990
+pid:2fea5bba-9b34-43d4-8f6a-2743f50cf24f,4,280,22,false,true,Sandy Pines Campground,Kennebunkport,ME,9970|10148|10149|10384
+pid:316e61ca-884c-4271-bbc0-bb85dbc1debb,1,6,10,false,true,Schwimmende Zelte,Gletterens,Fribourg,11212
+pid:42a8941c-9302-495e-bf67-9ed67e29b925,1,30,34,false,true,Scube Park Berlin,Berlin,Berlin,11035
+pid:3f8fb0d0-a949-401e-8b08-096e6f1a1a17,11,9,17,false,true,Shash Dine' EcoRetreat,Page,AZ,9645|9646|9647|9936|10308|10309|10378|10379|10415|10557|10558
+pid:592a2546-a332-4041-9e59-df0a2776d941,2,7,11,false,true,Shearwater Cove,Seward,AK,9579|9766
+pid:13237df5-8c3f-4f42-bff1-8d03cda1472a,2,41,9,false,true,Silver Spur Homestead,Tombstone,AZ,10559|10560
+pid:7824773f-426e-4eb0-b4a1-ee646595fb65,2,5,6,false,true,Sinya on Lone Man Creek,Wimberley,TX,88|10269
+pid:ecaf854b-90a5-4506-b9eb-a84781ffdae7,1,4,1,false,true,Siwash Lake,Thompson-Nicola E,BC,10767
+pid:d7884a59-6994-4448-a063-03f9891f00f3,2,4,2,false,true,Siwash Lake Wilderness Resort & Ranch,Thompson-Nicola,BC,10748|10768
+pid:95799e27-51c0-4863-b001-67bb75cf4022,3,99,60,false,true,SKYE Texas Hill Country Resort,Fredericksburg,TX,9531|9532|10906
+pid:97995a3c-74ec-4f38-9a1f-fc5c4e1016dd,1,8,5,false,true,So Damn Lucky Glamping,Ucluelet,BC,10700
+pid:5395fe4e-9b98-4421-9fec-5836aa43094b,1,34,12,false,true,Son's Guadalupe,New Braunfels,TX,10612
+pid:037eda0d-4f3a-47ef-81ed-d336c944ff04,1,15,13,false,true,Star Gazer Glamping Village,Sevierville,TN,10247
+pid:b816ec87-c49e-4bd0-9ead-3afba5a22d39,1,22,16,false,true,Station Chêne Rouge : Glamping et Mariages en Nature à North Hatley | Mini-Chalets & Tentes Safari,Hatley,QC,10777
+pid:21174342-ecf0-4b2d-8114-9fb5e314d62c,2,11,10,false,true,Stoco Lake Lodge,Tweed,ON,10771|10785
+pid:e58a1d5b-1f57-48df-aed6-86216f1ee5eb,1,3,1,false,true,Stone City Treehouse,Hardwick,VT,12121
+pid:05de5919-3265-49fe-99e6-4c54be45a9d0,4,10,4,false,true,Suján Jawai,Jawai,RJ,12194|12202|12203|12204
+pid:a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789,4,12,4,false,true,Suján Sher Bagh,Ranthambhore,RJ,12205|12206|12207|12208
+pid:f8a1b2c3-d4e5-4f6a-9b0c-1d2e3f4a5b6c,3,21,3,false,true,Suján The Serai,Jaisalmer,RJ,12209|12210|12211
+pid:4cb0f95e-a4ba-4c7c-9c25-a90ac46d765f,7,7,1,false,true,Sundance by Basecamp,Kananaskis,AB,10695|12365|12366|12367|12368|12369|12370
+pid:f8a2c1d4-6e7b-4a9f-b3c2-1d8e5f6a7b90,3,42,40,false,true,Sundara Inn & Spa,Wisconsin Dells,WI,12924|12925|12926
+pid:25d75561-c409-4802-9582-3f8f0a6fd142,5,64,63,false,true,Terramor Outdoor Resort,Bar Harbor,ME,10150|10151|10152|10153|10154
+pid:2e4d1813-cbfd-4f79-a257-a1af6ca5a0db,2,11,8,false,true,The Castle House Estate,Joshua Tree,CA,9772|9946
+pid:c4b9e669-a094-4de5-8c17-b8041d18948a,8,23,14,false,true,The Glamping Collective,Clyde,NC,10346|10347|10490|10491|11598|11599|11600|11601
+pid:60398957-6aab-476e-9253-8531d1c81f4b,8,44,48,false,true,The Inn & Spa at Cedar Falls,Logan,OH,9810|9811|10317|10318|10352|10353|10507|10508
+pid:804e39aa-d654-43bf-b8cb-111cd98bb6b6,3,29,9,false,true,The Northridge Inn & Resort,Sundridge,ON,10750|10772|10788
+pid:b7334799-a250-4250-82a0-a2985f37192d,6,13,7,false,true,The Outlier Inn,Woodridge,NY,9732|9733|9858|10026|10350|10351
+pid:2284cb70-3899-4dd7-8f49-7b721ca41ded,10,12,11,false,true,The Outpost Grand Canyon,Williams,AZ,12893|12894|12895|12896|12897|12898|12899|12900|12901|12902
+pid:f0ef65ab-6e01-4952-b8e1-e4d7642d8510,2,29,8,false,true,The Ranch at Rock Creek,Philipsburg,MT,10171|10172
+pid:7d7f1123-c4dd-41a3-bf9c-4b4768a004a0,2,10,15,false,true,The Resort at Eagle Point,Eagle Point,OR,178|204
+pid:a6bf3611-ae72-420f-a1ca-fe010defd1a2,1,36,10,false,true,The Resort at Paws Up,Greenough,MT,10173
+pid:84dfdbce-be28-4861-bf02-8723ea981d28,3,11,4,false,true,The Retreat on the Hill,Cottonwood Shores,TX,9925|10327|10372
+pid:bcd1535d-08b5-49f0-adff-4c464746548e,2,5,10,false,true,The Trailer Pond at Alta Colina,Paso Robles,CA,9557|9848
+pid:eb5d289c-437a-4276-97bd-aa07bc1168a9,1,6,1,false,true,The Tree Howf,Dunblane,Stirling,11264
+pid:72ba9ebe-554b-4950-96cf-3db77e3cdc22,3,40,3,false,true,Three Camel Lodge,Dalanzadgad,Ömnögovi,12195|12259|12260
+pid:83eddfb9-fd32-4dfc-9c2e-8fb3a7be3f48,2,20,40,false,true,Tigh-Na-Mara Seaside Spa Resort,Parksville,BC,193|212
+pid:cb6f4800-814f-457c-93d0-ce9b64e5c984,8,6,7,false,true,Timber Ridge Outpost & Cabins,Karbers Ridge,IL,9696|9697|9869|9870|10463|10464|10465|10466
+pid:8ad55a16-d31a-48b4-9504-ffd6b1d54f5d,2,112,7,false,true,Trail Lakes Campground,Ochopee,FL,10444|10445
+pid:ac466005-2cee-4c01-be5c-66ef3f91ea6c,9,10,9,false,true,Trailborn Highlands,Highlands,NC,12222|12852|12853|12854|12855|12856|12857|12858|12859
+pid:c2155e6a-bcf9-4bc4-9f4a-95ff51900a2d,11,13,11,false,true,Trailborn Surf & Sound,Wrightsville Beach,NC,12223|12860|12861|12862|12863|12864|12865|12866|12867|12868|12869
+pid:17f8dcfc-873f-44f8-9288-9ffeee764ae5,7,26,21,false,true,Treebones Resort,Big Sur,CA,9554|9555|9773|9774|9866|10311|10312
+pid:8522e822-7b5e-4467-9202-488c5fd26cfd,1,3,1,false,true,Treehouse Lodge Peru,Peru,VT,12128
+pid:a3178651-a97d-4c5d-8de3-fc0c05e3ce26,4,7,13,false,true,Treehouse Point,Fall City,WA,31|9893|9894|9895
+pid:711bad29-434b-4539-83a1-26f72e05ba7b,1,2,4,false,true,Treehouses at Starved Rock,Ottawa,IL,11593
+pid:9fb020a7-8dfa-4208-b8fa-26180e44c114,4,9,7,false,true,Treetop Haven,Mount Tryon,PE,18|10739|10740|10775
+pid:353ef70b-105b-4f09-a899-704f6513c892,5,93,21,false,true,Treetopia Campground,Catskill,NY,9879|10027|10028|10222|10653
+pid:4772acec-7be7-4a19-881e-a1bf99055d17,2,5,10,false,true,Tropical Treehouse Haven,Cozumel,Quintana Roo,54|85
+pid:6886ea0d-605b-47a8-8b66-b8a173734838,1,5,1,false,true,True North Destinations,Pleasant Bay,NS,10731
+pid:db89ebba-eb1a-4904-9a4d-b049c6f9958e,3,78,17,false,true,Twin Lakes Camp Resort,DeFuniak Springs,FL,9955|10124|10446
+pid:d4a351a9-0cca-414a-8b06-1d017de5836c,7,21,42,false,true,Two Capes Lookout,Cloverdale,OR,9564|9565|10326|10354|10355|10356|10357
+pid:c20c7585-bc3b-4974-ae9b-707c7625d560,6,63,62,false,true,Under Canvas Acadia,Surry,ME,10155|10156|10157|10158|10159|10160
+pid:3f85ea8b-63ee-4029-8fa2-718489b092c6,3,51,48,false,true,Under Canvas Bryce Canyon,Widtsoe,UT,10287|10288|10289
+pid:58b5f9ab-b90b-4b6d-9e7d-bbbf0cd53e64,2,30,21,false,true,Valley Overlook,Peninsula,OH,10224|10510
+pid:14ff0f99-335e-40f3-85ca-7216d1e2d31b,1,78,15,false,true,Ventana Big Sur,Big Sur,CA,10111
+pid:68655985-36f5-414b-be20-8a148f07913a,1,418,16,false,true,Verde Ranch Resort,Camp Verde,AZ,10416
+pid:a2a30e64-125b-494e-b128-e445816e1939,1,2,1,false,true,Vermont Tree Cabin,Coventry,VT,12124
+pid:a771421d-81fe-4554-be18-d91219ccb9f9,1,2,1,false,true,Village Viking Hop,Saint-Siméon,QC,10786
+pid:ee6d3a55-46bb-421f-ac12-8557540c48b0,1,15,30,false,true,Warredal,Neeroeteren,Flanders,10964
+pid:6bb2069d-9001-4c73-a963-4acfea5ed39e,1,21,20,false,true,West Lexham,King's Lynn,Norfolk,11282
+pid:015cbbf3-927b-4d98-b6bb-51b3e94f14bf,23,17,67,false,true,Westgate River Ranch Resort & Rodeo,River Ranch,FL,9902|10315|10383|10403|10447|11797|12059|12060|12061|12062|12063|12064|12065|12066|12067|12068|12069|12070|12071|12072|12073|12074|12934
+pid:7ebebb0d-3645-4d0e-8416-baf137a754eb,1,18,5,false,true,Wolf Den Nature Retreat Hostel & Cabins,Algonquin Highlands,ON,10774
+pid:476b1c8c-3dcc-4b6d-a247-71a16e03df4a,2,23,46,false,true,Xinalani Retreat,Puerto Vallarta,Jalisco,202|220
+pid:014a00ad-6b38-46f3-994b-ccea499b743b,2,99,32,false,true,Yonder Escalante,Escalante,UT,10074|10662
+pid:c33d44d5-22e9-4cb8-ad2e-22c89b20849f,2,21,13,false,true,Zion Glamping Adventures,Hildale,UT,10624|10625
+pid:ef2e3cfd-80d9-4958-b901-4e0ab1231635,2,70,11,false,true,Zion Ponderosa,Orderville,UT,10071|10665
+pid:c9482aca-7023-4d29-a4c3-4a40faa9a4e1,9,70,42,false,true,Zion Ponderosa Ranch Resort,Orderville,UT,9844|10075|10301|10544|10545|10626|10666|10667|10668

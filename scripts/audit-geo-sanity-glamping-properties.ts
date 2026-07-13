@@ -1,5 +1,5 @@
 /**
- * Geo-sanity audit for all_glamping_properties.
+ * Geo-sanity audit for all_sage_data.
  *
  * Flags rows where lat/lon doesn't agree with the row's state / country.
  * Uses approximate state bounding boxes for US states + Canadian provinces.
@@ -21,6 +21,7 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { createClient } from '@supabase/supabase-js';
+import { ALL_SAGE_DATA_TABLE } from '@/lib/all-sage-data-table';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
@@ -179,7 +180,7 @@ async function fetchAll(): Promise<Row[]> {
 
   while (true) {
     const { data, error, count } = await supabase
-      .from('all_glamping_properties')
+      .from(ALL_SAGE_DATA_TABLE)
       .select('id,property_name,city,state,country,lat,lon', { count: 'exact' })
       .range(offset, offset + batch - 1);
 
@@ -215,7 +216,7 @@ type FlaggedRow = {
 };
 
 async function main() {
-  console.log('Fetching all_glamping_properties...');
+  console.log(`Fetching ${ALL_SAGE_DATA_TABLE}...`);
   const rows = await fetchAll();
   console.log(`Total rows: ${rows.length}\n`);
 

@@ -1,6 +1,11 @@
+import { unstable_cache } from 'next/cache';
 import { createServerClient } from '@/lib/supabase';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
 import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '@/lib/glamping-market-snapshot-region';
+import {
+  GLAMPING_MARKET_OVERVIEW_CACHE_TAGS,
+  GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+} from '@/lib/glamping-market-overview-cache';
 import { normalizeDbStateToUspsAbbr } from '@/lib/normalize-us-state-abbr';
 import {
   meanAndMedianAdr,
@@ -72,8 +77,8 @@ type Agg = {
  * Per-USPS-state aggregates for published commercial glamping in the United States only
  * (Canada is included in national snapshot metrics but has no US-state breakdown here).
  */
-export async function fetchGlampingIndustryUsStateMetrics(
-  tier: GlampingMarketSnapshotTierFilter = 'all'
+async function loadGlampingIndustryUsStateMetrics(
+  tier: GlampingMarketSnapshotTierFilter
 ): Promise<{ ok: true; data: GlampingUsStateMetricsMap } | { ok: false; error: string }> {
   const supabase = createServerClient();
   const aggs = new Map<string, Agg>();
@@ -155,4 +160,18 @@ export async function fetchGlampingIndustryUsStateMetrics(
   }
 
   return { ok: true, data: out };
+}
+
+/** Cached US state aggregates for `/glamping-market-overview`. */
+export async function fetchGlampingIndustryUsStateMetrics(
+  tier: GlampingMarketSnapshotTierFilter = 'all'
+): Promise<{ ok: true; data: GlampingUsStateMetricsMap } | { ok: false; error: string }> {
+  return unstable_cache(
+    () => loadGlampingIndustryUsStateMetrics(tier),
+    ['glamping-industry-us-state-metrics', tier],
+    {
+      revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+      tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
+    }
+  )();
 }
