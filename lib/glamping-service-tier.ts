@@ -51,7 +51,7 @@ export const GLAMPING_SERVICE_TIER_DEFINITIONS: Record<
   },
   rustic: {
     summary:
-      'Budget-first; often shared bath; minimal infrastructure; bring-your-own or limited on-site services.',
+      'Budget-first; often shared bath; minimal infrastructure; limited on-site services.',
     alternates: 'Economy glamping, back-to-nature',
   },
 };
