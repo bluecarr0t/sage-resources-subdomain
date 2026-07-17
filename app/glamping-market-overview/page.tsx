@@ -514,6 +514,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
               <GlampingAmenityImpactSection
                 rows={amenityImpact.data}
                 market={market}
+                showAllClassificationsScope={tier !== 'all'}
                 chart={
                   <GlampingAmenityImpactChart
                     rows={amenityImpact.data}

@@ -3,14 +3,20 @@ import type { GlampingAmenityImpactRow } from '@/lib/glamping-amenity-impact';
 import { formatGlampingMarketOverviewRate } from '@/lib/glamping-market-overview-currency';
 import type { GlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapshot-region';
 
-/** Shown for every market-overview tier filter (All / Luxury / …); not tier-conditional. */
+/** Always national (all classifications); not recomputed when the page tier filter changes. */
 export const AMENITY_IMPACT_SECTION_BLURB =
   'Unit-weighted avg. rate with vs. without each amenity (with − without). Thin “with” samples show as provisional (~); non-positive deltas as Inconclusive.';
+
+/** Appended when a classification tier is selected so users know this section stays national. */
+export const AMENITY_IMPACT_NATIONAL_SCOPE_BLURB =
+  'National · all classifications (not filtered by tier).';
 
 export type GlampingAmenityImpactSectionProps = {
   rows: GlampingAmenityImpactRow[];
   market: GlampingMarketSnapshotMarket;
   chart: ReactNode;
+  /** When true (page tier ≠ All), show the All classifications chip + national scope note. */
+  showAllClassificationsScope?: boolean;
 };
 
 function formatSignedImpact(
@@ -65,6 +71,7 @@ export function GlampingAmenityImpactSection({
   rows,
   market,
   chart,
+  showAllClassificationsScope = false,
 }: GlampingAmenityImpactSectionProps) {
   return (
     <section
@@ -72,14 +79,30 @@ export function GlampingAmenityImpactSection({
       className="mt-16 scroll-mt-28 sm:mt-20"
       aria-labelledby="amenity-impact-heading"
     >
-      <h2
-        id="amenity-impact-heading"
-        className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base"
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+        <h2
+          id="amenity-impact-heading"
+          className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base"
+        >
+          Amenity Impact
+        </h2>
+        {showAllClassificationsScope ? (
+          <span className="inline-flex items-center rounded-sm bg-sage-700 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-yellow-300">
+            All classifications
+          </span>
+        ) : null}
+      </div>
+      <p
+        className={
+          showAllClassificationsScope
+            ? 'mt-2 max-w-3xl text-[10px] leading-relaxed text-neutral-500'
+            : 'mt-2 whitespace-nowrap text-[10px] leading-relaxed text-neutral-500'
+        }
       >
-        Amenity Impact
-      </h2>
-      <p className="mt-2 whitespace-nowrap text-[10px] leading-relaxed text-neutral-500">
         {AMENITY_IMPACT_SECTION_BLURB}
+        {showAllClassificationsScope
+          ? ` ${AMENITY_IMPACT_NATIONAL_SCOPE_BLURB}`
+          : null}
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
