@@ -11,6 +11,8 @@ export type GatedContentEventType = 'form_submit' | 'auth_verified';
 export type GatedContentEventMetadata = {
   email_only?: boolean;
   name?: string;
+  first_name?: string | null;
+  last_name?: string | null;
 };
 
 export type LogGatedContentEventParams = {
