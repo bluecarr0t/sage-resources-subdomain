@@ -488,6 +488,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                   byState={usStates.data}
                   flushTop
                   filterStates={statesFilter}
+                  lockedRegionId={matchedRegion}
                   selectionMetrics={
                     statesFilter != null
                       ? {

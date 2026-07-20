@@ -13,6 +13,7 @@ import {
 import {
   GLAMPING_MARKET_US_REGION_LABELS,
   regionMatchingStates,
+  type GlampingMarketUsRegionId,
 } from '@/lib/glamping-market-snapshot-us-regions';
 import {
   glampingMarketOverviewPathToggleState,
@@ -179,7 +180,8 @@ function styleForState(
   byState: GlampingUsStateMetricsMap,
   stageFilter: PipelineMapStageFilter,
   gradientRanges: PipelineMapGradientRanges | null,
-  filterStates: Set<string> | null
+  filterStates: Set<string> | null,
+  interactive: boolean
 ) {
   const { fill, fillHover, fillSelected } = stateFillColors(
     abbr,
@@ -197,30 +199,33 @@ function styleForState(
         ? filterStates.has(abbr)
         : selected === abbr
       : selected === abbr;
+  const cursor = interactive ? ('pointer' as const) : ('default' as const);
+  const dimmed =
+    hasFilter && variant === 'market-overview' && !filterStates.has(abbr);
   return {
     default: {
       fill,
       stroke: SAGE_MAP.stroke,
       strokeWidth: isEmphasized ? 0.75 : 0.4,
       outline: 'none' as const,
-      cursor: 'pointer' as const,
-      opacity: hasFilter && variant === 'market-overview' && !filterStates.has(abbr) ? 0.55 : 1,
+      cursor,
+      opacity: dimmed ? 0.55 : 1,
     },
     hover: {
-      fill: isEmphasized ? fillSelected : fillHover,
+      fill: interactive ? (isEmphasized ? fillSelected : fillHover) : fill,
       stroke: SAGE_MAP.stroke,
-      strokeWidth: 0.75,
+      strokeWidth: interactive || isEmphasized ? 0.75 : 0.4,
       outline: 'none' as const,
-      cursor: 'pointer' as const,
-      opacity: 1,
+      cursor,
+      opacity: dimmed ? 0.55 : 1,
     },
     pressed: {
-      fill: fillSelected,
+      fill: interactive ? fillSelected : fill,
       stroke: SAGE_MAP.stroke,
-      strokeWidth: 0.75,
+      strokeWidth: interactive || isEmphasized ? 0.75 : 0.4,
       outline: 'none' as const,
-      cursor: 'pointer' as const,
-      opacity: 1,
+      cursor,
+      opacity: dimmed ? 0.55 : 1,
     },
   };
 }
@@ -232,7 +237,8 @@ function styleForHawaiiInset(
   byState: GlampingUsStateMetricsMap,
   stageFilter: PipelineMapStageFilter,
   gradientRanges: PipelineMapGradientRanges | null,
-  filterStates: Set<string> | null
+  filterStates: Set<string> | null,
+  interactive: boolean
 ) {
   return styleForState(
     'HI',
@@ -241,7 +247,8 @@ function styleForHawaiiInset(
     byState,
     stageFilter,
     gradientRanges,
-    filterStates
+    filterStates,
+    interactive
   );
 }
 
@@ -260,6 +267,11 @@ type Props = {
    * `filterStates`, the detail panel uses these instead of a single focused state.
    */
   selectionMetrics?: GlampingUsStateMetricRow | null;
+  /**
+   * When set, the map is locked to that region preset — states are not clickable
+   * to add/remove; change scope via the region filter control.
+   */
+  lockedRegionId?: GlampingMarketUsRegionId | null;
   market?: GlampingMarketSnapshotMarket;
   tier?: GlampingMarketSnapshotTierFilter;
 };
@@ -334,6 +346,7 @@ export default function GlampingIndustryUsMap({
   flushTop = false,
   filterStates = null,
   selectionMetrics = null,
+  lockedRegionId = null,
   market = 'us',
   tier = 'all',
 }: Props) {
@@ -346,12 +359,21 @@ export default function GlampingIndustryUsMap({
     [filterStates]
   );
 
+  const selectionLocked =
+    variant === 'market-overview' && lockedRegionId != null;
+  /** All US: focus one state in the panel only (no URL multi-select). */
+  const nationalSingleSelect =
+    variant === 'market-overview' && !selectionLocked && filterSet == null;
+  const mapInteractive = variant !== 'market-overview' || !selectionLocked;
+
   const defaultSelected =
     initialSelectedAbbr !== undefined
       ? initialSelectedAbbr
       : variant === 'pipeline-quarterly'
         ? null
-        : filterSet?.values().next().value ?? DEFAULT_MARKET_OVERVIEW_SELECTED_STATE_ABBR;
+        : filterSet?.size === 1
+          ? [...filterSet][0]!
+          : DEFAULT_MARKET_OVERVIEW_SELECTED_STATE_ABBR;
   const [selected, setSelected] = useState<string | null>(defaultSelected);
 
   const pipelineGradientRanges = useMemo(() => {
@@ -360,7 +382,10 @@ export default function GlampingIndustryUsMap({
   }, [byState, stageFilter, variant]);
 
   const showSelectionAggregate =
-    variant === 'market-overview' && filterSet != null && filterSet.size > 0;
+    variant === 'market-overview' &&
+    filterSet != null &&
+    filterSet.size > 0 &&
+    !nationalSingleSelect;
 
   const panelRow: GlampingUsStateMetricRow | undefined = useMemo(() => {
     if (showSelectionAggregate) {
@@ -374,18 +399,23 @@ export default function GlampingIndustryUsMap({
     if (!showSelectionAggregate) {
       return selected ? stateLabel(selected) : null;
     }
+    if (lockedRegionId) {
+      return GLAMPING_MARKET_US_REGION_LABELS[lockedRegionId];
+    }
     if (filterSet.size === 1) {
       return stateLabel([...filterSet][0]!);
     }
     const matched = regionMatchingStates([...filterSet]);
     if (matched) return GLAMPING_MARKET_US_REGION_LABELS[matched];
     return `${filterSet.size} selected states`;
-  }, [showSelectionAggregate, selected, filterSet]);
+  }, [showSelectionAggregate, selected, filterSet, lockedRegionId]);
 
   const row = panelRow;
 
   const onSelect = useCallback(
     (abbr: string) => {
+      if (selectionLocked) return;
+
       setSelected(abbr);
       trackMapInteraction('region_select', {
         map: 'glamping_market_overview_us',
@@ -394,12 +424,25 @@ export default function GlampingIndustryUsMap({
         variant,
       });
 
+      // All US: single-state focus for the detail panel only — never multi-select via URL.
+      if (variant === 'market-overview' && nationalSingleSelect) {
+        return;
+      }
+
       if (variant === 'market-overview') {
         const href = glampingMarketOverviewPathToggleState(market, tier, filterStates, abbr);
         router.push(href, { scroll: false });
       }
     },
-    [variant, market, tier, filterStates, router]
+    [
+      variant,
+      market,
+      tier,
+      filterStates,
+      router,
+      selectionLocked,
+      nationalSingleSelect,
+    ]
   );
 
   return (
@@ -412,14 +455,18 @@ export default function GlampingIndustryUsMap({
         {variant === 'market-overview' ? (
           <div className="mb-4 space-y-1 text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base">
             <p>
-              United States map ·{' '}
-              {filterSet
-                ? 'click states to refine selection'
-                : 'click states to filter (multi-select)'}
+              United States map
+              {selectionLocked && lockedRegionId
+                ? ` · ${GLAMPING_MARKET_US_REGION_LABELS[lockedRegionId]}`
+                : nationalSingleSelect
+                  ? ' · select by individual state'
+                  : filterSet
+                    ? ' · region selection'
+                    : ''}
             </p>
             <p className="text-[9px] font-light normal-case tracking-normal text-neutral-500">
               Alaska lower left · Hawaii lower left
-              {filterSet ? ` · ${filterSet.size} selected` : ''}
+              {selectionLocked ? ' · change region above to update selection' : ''}
             </p>
           </div>
         ) : (
@@ -497,16 +544,30 @@ export default function GlampingIndustryUsMap({
                       >
                         <Geography
                           geography={geo}
-                          style={styleForState(abbr, selected, variant, byState, stageFilter, pipelineGradientRanges, filterSet)}
-                          onClick={() => onSelect(abbr)}
-                          tabIndex={0}
+                          style={styleForState(
+                            abbr,
+                            selected,
+                            variant,
+                            byState,
+                            stageFilter,
+                            pipelineGradientRanges,
+                            filterSet,
+                            mapInteractive
+                          )}
+                          onClick={mapInteractive ? () => onSelect(abbr) : undefined}
+                          tabIndex={mapInteractive ? 0 : -1}
                           aria-label={stateLabel(abbr)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              onSelect(abbr);
-                            }
-                          }}
+                          aria-disabled={selectionLocked || undefined}
+                          onKeyDown={
+                            mapInteractive
+                              ? (e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    onSelect(abbr);
+                                  }
+                                }
+                              : undefined
+                          }
                         />
                       </g>
                     );
@@ -515,16 +576,30 @@ export default function GlampingIndustryUsMap({
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      style={styleForState(abbr, selected, variant, byState, stageFilter, pipelineGradientRanges, filterSet)}
-                      onClick={() => onSelect(abbr)}
-                      tabIndex={0}
+                      style={styleForState(
+                        abbr,
+                        selected,
+                        variant,
+                        byState,
+                        stageFilter,
+                        pipelineGradientRanges,
+                        filterSet,
+                        mapInteractive
+                      )}
+                      onClick={mapInteractive ? () => onSelect(abbr) : undefined}
+                      tabIndex={mapInteractive ? 0 : -1}
                       aria-label={stateLabel(abbr)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onSelect(abbr);
-                        }
-                      }}
+                      aria-disabled={selectionLocked || undefined}
+                      onKeyDown={
+                        mapInteractive
+                          ? (e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                onSelect(abbr);
+                              }
+                            }
+                          : undefined
+                      }
                     />
                   );
                 })}
@@ -537,7 +612,11 @@ export default function GlampingIndustryUsMap({
           className="pointer-events-none absolute bottom-[10%] left-1 z-10 sm:bottom-[12%] sm:left-2 md:bottom-[14%] md:left-2"
           style={{ width: HAWAII_INSET_W, height: HAWAII_INSET_H }}
         >
-          <div className="h-full w-full overflow-visible [&_svg]:pointer-events-none [&_path.rsm-geography]:pointer-events-auto">
+          <div
+            className={`h-full w-full overflow-visible [&_svg]:pointer-events-none ${
+              mapInteractive ? '[&_path.rsm-geography]:pointer-events-auto' : ''
+            }`}
+          >
             <ComposableMap
               projection="geoMercator"
               projectionConfig={HAWAII_INSET_PROJECTION}
@@ -555,16 +634,29 @@ export default function GlampingIndustryUsMap({
                       <Geography
                         key={`hi-${geo.rsmKey}`}
                         geography={geo}
-                        style={styleForHawaiiInset(selected, variant, byState, stageFilter, pipelineGradientRanges, filterSet)}
-                        onClick={() => onSelect('HI')}
-                        tabIndex={0}
+                        style={styleForHawaiiInset(
+                          selected,
+                          variant,
+                          byState,
+                          stageFilter,
+                          pipelineGradientRanges,
+                          filterSet,
+                          mapInteractive
+                        )}
+                        onClick={mapInteractive ? () => onSelect('HI') : undefined}
+                        tabIndex={mapInteractive ? 0 : -1}
                         aria-label={stateLabel('HI')}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            onSelect('HI');
-                          }
-                        }}
+                        aria-disabled={selectionLocked || undefined}
+                        onKeyDown={
+                          mapInteractive
+                            ? (e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  onSelect('HI');
+                                }
+                              }
+                            : undefined
+                        }
                       />
                     ))}
                   </>
@@ -582,7 +674,7 @@ export default function GlampingIndustryUsMap({
             <p className="text-sm font-light leading-relaxed text-neutral-600">
               {variant === 'pipeline-quarterly'
                 ? 'Select a state for proposed development and under construction counts, or use the stage filter above.'
-                : 'Click states on the map to filter metrics (multi-select). Select a state for property count, unit count, and average retail daily rate.'}
+                : 'Select a state for property count, unit count, and average retail daily rate.'}
             </p>
           ) : variant === 'pipeline-quarterly' ? (
             <div className="space-y-6">
