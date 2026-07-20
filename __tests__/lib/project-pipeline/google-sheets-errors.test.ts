@@ -1,5 +1,6 @@
 import {
   formatProjectPipelineSheetsAccessError,
+  isGoogleSheetsOAuthAuthError,
   isGoogleSheetsPermissionError,
 } from '@/lib/project-pipeline/google-sheets-errors';
 
@@ -9,6 +10,17 @@ describe('google-sheets-errors', () => {
       true
     );
     expect(isGoogleSheetsPermissionError(new Error('Quota exceeded'))).toBe(false);
+  });
+
+  it('detects OAuth authentication errors', () => {
+    expect(
+      isGoogleSheetsOAuthAuthError(
+        new Error('Request had invalid authentication credentials. Expected OAuth 2 access token.')
+      )
+    ).toBe(true);
+    expect(isGoogleSheetsOAuthAuthError(new Error('Login Required'))).toBe(true);
+    expect(isGoogleSheetsOAuthAuthError(new Error('Invalid Credentials'))).toBe(true);
+    expect(isGoogleSheetsOAuthAuthError(new Error('Quota exceeded'))).toBe(false);
   });
 
   it('formats a share-sheet message with the service account email', () => {

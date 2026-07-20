@@ -22,6 +22,7 @@ import {
   filterAssignedAuthorActiveJobs,
   PROJECT_PIPELINE_DEMO_AUTHOR,
 } from '@/lib/project-pipeline/author-preview';
+import { isGoogleSheetsOAuthAuthError } from '@/lib/project-pipeline/google-sheets-errors';
 import {
   DEFAULT_PROJECT_PIPELINE_VIEW_SHEET_FILTER,
   isProjectPipelineAllSheetsTab,
@@ -434,11 +435,22 @@ export default function ProjectPipelinePage() {
         });
       };
 
+      const reauthorizeAndSync = async () => {
+        clearGoogleSheetsOAuthAccessToken();
+        await reconnectOAuthAndSyncSheets();
+        setOauthExpiryPrompt(false);
+        setToast({
+          message: t('refreshSyncReconnected'),
+          variant: 'success',
+        });
+      };
+
       if (useOAuthSync) {
         const accessToken =
           readGoogleSheetsOAuthAccessToken(PIPELINE_OAUTH_SCOPE) ?? undefined;
         if (!accessToken) {
-          throw new Error(t('refreshSyncOAuthRequired'));
+          await reauthorizeAndSync();
+          return;
         }
 
         const res = await fetch('/api/admin/project-pipeline/oauth-sync', {
@@ -451,7 +463,13 @@ export default function ProjectPipelinePage() {
         });
         const responseBody = (await res.json()) as ProjectPipelineSyncResponseBody;
         if (!res.ok) {
-          throw new Error(responseBody.message || responseBody.error || t('refreshSyncError'));
+          const syncError =
+            responseBody.message || responseBody.error || t('refreshSyncError');
+          if (isGoogleSheetsOAuthAuthError(syncError)) {
+            await reauthorizeAndSync();
+            return;
+          }
+          throw new Error(syncError);
         }
         await finishSync(responseBody, accessToken);
         return;
@@ -483,7 +501,7 @@ export default function ProjectPipelinePage() {
     } finally {
       setSyncingFromSheet(false);
     }
-  }, [loadJobs, sheetName, t]);
+  }, [loadJobs, reconnectOAuthAndSyncSheets, sheetName, t]);
 
   const connectGoogleSheets = useCallback(async () => {
     if (!data?.oauthClientId) return;
