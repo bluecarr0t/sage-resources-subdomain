@@ -7,7 +7,6 @@ import {
   recordPropertyAdrSample,
   resolveTopUnitTypeAdrDisplay,
   TOP_UNIT_TYPE_ADR_MIN_RATED_UNITS,
-  TOP_UNIT_TYPE_ADR_PROVISIONAL_MIN_RATED_UNITS,
 } from '@/lib/fetch-glamping-industry-metrics';
 import {
   bucketGlampingIsOpenForMetrics,
@@ -58,16 +57,18 @@ describe('fetch-glamping-industry-metrics helpers', () => {
       });
     });
 
-    it('hides means below the provisional floor when the sample floor is on', () => {
-      expect(
-        resolveTopUnitTypeAdrDisplay(90, TOP_UNIT_TYPE_ADR_PROVISIONAL_MIN_RATED_UNITS - 1, true)
-      ).toEqual({
+    it('hides means with no rated weight when the sample floor is on', () => {
+      expect(resolveTopUnitTypeAdrDisplay(90, 0, true)).toEqual({
         avgRetailDailyRateMean: null,
         avgRetailDailyRateProvisional: false,
       });
     });
 
     it('marks means provisional between provisional and full floors', () => {
+      expect(resolveTopUnitTypeAdrDisplay(85.2, 1, true)).toEqual({
+        avgRetailDailyRateMean: 85,
+        avgRetailDailyRateProvisional: true,
+      });
       expect(resolveTopUnitTypeAdrDisplay(85.2, 8, true)).toEqual({
         avgRetailDailyRateMean: 85,
         avgRetailDailyRateProvisional: true,
@@ -126,8 +127,32 @@ describe('fetch-glamping-industry-metrics helpers', () => {
       expect(rows[4]).toMatchObject({
         label: 'Dome',
         openUnits: 3,
-        avgRetailDailyRateMean: null,
-        avgRetailDailyRateProvisional: false,
+        avgRetailDailyRateMean: 76,
+        avgRetailDailyRateProvisional: true,
+      });
+    });
+
+    it('uses package-rate ADR as a provisional fallback when comparable ADR is missing', () => {
+      const openUnits = new Map<string, number>([['Tipi', 21]]);
+      const comparable = new Map<string, { rateTimesUnits: number; units: number }>();
+      const packageRates = new Map([
+        ['Tipi', { rateTimesUnits: 2400 * 10 + 719 * 1 + 718.5 * 10, units: 21 }],
+      ]);
+
+      const rows = buildUnitTypesByOpenUnits(
+        openUnits,
+        comparable,
+        true,
+        undefined,
+        packageRates
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({
+        label: 'Tipi',
+        openUnits: 21,
+        avgRetailDailyRateMean: 1519,
+        ratedUnitWeight: 21,
+        avgRetailDailyRateProvisional: true,
       });
     });
 

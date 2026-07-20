@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useId, useMemo, type CSSProperties } from 'react';
 import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   LabelList,
   Legend,
   ResponsiveContainer,
@@ -27,6 +28,33 @@ const COLOR_RATE = '#5c7a5c';
 /** sage-teal — unit count bars */
 const COLOR_COUNT = '#00b6a6';
 const COLOR_GRID = '#e0dbd2';
+
+function ProvisionalStripePattern({ id, color }: { id: string; color: string }) {
+  return (
+    <pattern
+      id={id}
+      width="7"
+      height="7"
+      patternUnits="userSpaceOnUse"
+      patternTransform="rotate(45)"
+    >
+      <rect width="7" height="7" fill="#faf9f3" />
+      <rect width="3.5" height="7" fill={color} />
+    </pattern>
+  );
+}
+
+function provisionalStripeSwatchStyle(color: string): CSSProperties {
+  return {
+    backgroundImage: `repeating-linear-gradient(
+      -45deg,
+      ${color},
+      ${color} 2px,
+      #faf9f3 2px,
+      #faf9f3 4px
+    )`,
+  };
+}
 
 export type GlampingUnitTypeByRateChartProps = {
   rows: GlampingTopUnitTypeRow[];
@@ -83,9 +111,15 @@ function ChartTooltip({
             <span
               aria-hidden
               className="inline-block h-2.5 w-2.5 rounded-sm"
-              style={{ backgroundColor: entry.color }}
+              style={
+                isRate && row?.provisional
+                  ? provisionalStripeSwatchStyle(COLOR_RATE)
+                  : { backgroundColor: entry.color }
+              }
             />
-            <span className="text-neutral-500">{entry.name}:</span>
+            <span className="text-neutral-500">
+              {isRate && row?.provisional ? 'Provisional rate' : entry.name}:
+            </span>
             <span className="font-medium text-neutral-800">{formatted}</span>
           </p>
         );
@@ -115,6 +149,8 @@ function niceAxisMax(rawMax: number): number {
 }
 
 export function GlampingUnitTypeByRateChart({ rows, market }: GlampingUnitTypeByRateChartProps) {
+  const patternId = `unit-type-rate-provisional-${useId().replace(/:/g, '')}`;
+
   const data: ChartDatum[] = useMemo(
     () =>
       sortUnitTypesForRateChart(filterUnitTypesForRateChart(rows)).map((r) => ({
@@ -132,6 +168,8 @@ export function GlampingUnitTypeByRateChart({ rows, market }: GlampingUnitTypeBy
       })),
     [rows, market]
   );
+
+  const hasProvisional = data.some((d) => d.provisional && d.rate != null);
 
   const rateAxisMax = useMemo(() => {
     const maxRate = Math.max(0, ...data.map((d) => d.rate ?? 0));
@@ -164,6 +202,9 @@ export function GlampingUnitTypeByRateChart({ rows, market }: GlampingUnitTypeBy
           margin={{ top: 36, right: 8, left: 4, bottom: longTickMode ? 60 : 12 }}
           barCategoryGap="18%"
         >
+          <defs>
+            <ProvisionalStripePattern id={patternId} color={COLOR_RATE} />
+          </defs>
           <CartesianGrid strokeDasharray="3 3" stroke={COLOR_GRID} vertical={false} />
           <XAxis
             dataKey="label"
@@ -228,6 +269,36 @@ export function GlampingUnitTypeByRateChart({ rows, market }: GlampingUnitTypeBy
             wrapperStyle={{ fontSize: 11, paddingTop: 8, color: '#525252' }}
             iconType="square"
             iconSize={10}
+            content={({ payload }) => {
+              const items = payload ?? [];
+              return (
+                <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-2">
+                  {items.map((entry) => (
+                    <li
+                      key={String(entry.value)}
+                      className="inline-flex items-center gap-1.5 text-[11px] text-neutral-600"
+                    >
+                      <span
+                        aria-hidden
+                        className="inline-block h-2.5 w-2.5 rounded-sm"
+                        style={{ backgroundColor: entry.color }}
+                      />
+                      {entry.value}
+                    </li>
+                  ))}
+                  {hasProvisional ? (
+                    <li className="inline-flex items-center gap-1.5 text-[11px] text-neutral-600">
+                      <span
+                        aria-hidden
+                        className="inline-block h-2.5 w-2.5 rounded-sm"
+                        style={provisionalStripeSwatchStyle(COLOR_RATE)}
+                      />
+                      Provisional rate (~)
+                    </li>
+                  ) : null}
+                </ul>
+              );
+            }}
           />
           <Bar
             yAxisId="rate"
@@ -238,6 +309,12 @@ export function GlampingUnitTypeByRateChart({ rows, market }: GlampingUnitTypeBy
             maxBarSize={36}
             isAnimationActive={false}
           >
+            {data.map((row) => (
+              <Cell
+                key={row.label}
+                fill={row.provisional ? `url(#${patternId})` : COLOR_RATE}
+              />
+            ))}
             <LabelList
               dataKey="rateLabel"
               position="top"

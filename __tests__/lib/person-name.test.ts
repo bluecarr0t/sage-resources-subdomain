@@ -1,4 +1,4 @@
-import { joinFullName, splitFullName } from '@/lib/person-name';
+import { joinFullName, parsePersonNameFields, splitFullName } from '@/lib/person-name';
 
 describe('splitFullName', () => {
   it('splits first token and remainder', () => {
@@ -23,5 +23,19 @@ describe('splitFullName', () => {
 describe('joinFullName', () => {
   it('joins first and last name', () => {
     expect(joinFullName('Jane', 'Doe')).toBe('Jane Doe');
+  });
+});
+
+describe('parsePersonNameFields', () => {
+  it('parses valid first and last name', () => {
+    expect(parsePersonNameFields({ firstName: ' Jane ', lastName: ' Doe ' })).toEqual({
+      firstName: 'Jane',
+      lastName: 'Doe',
+    });
+  });
+
+  it('returns null when either part is missing', () => {
+    expect(parsePersonNameFields({ firstName: 'Jane', lastName: '' })).toBeNull();
+    expect(parsePersonNameFields({ firstName: '', lastName: 'Doe' })).toBeNull();
   });
 });

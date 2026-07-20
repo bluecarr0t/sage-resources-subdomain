@@ -33,6 +33,7 @@ import {
   isValidEmail,
   normalizeAuthSiteOrigin,
 } from '@/lib/gated-access';
+import { joinFullName, parsePersonNameFields, splitFullName } from '@/lib/person-name';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,14 +52,43 @@ function getRequestOrigin(request: NextRequest): string {
   return normalizeAuthSiteOrigin(new URL(request.url).origin);
 }
 
-async function lookupLeadName(email: string, pageSlug: string): Promise<string | null> {
+type LeadNameParts = {
+  fullName: string;
+  firstName: string;
+  lastName: string;
+};
+
+async function lookupLeadNameParts(
+  email: string,
+  pageSlug: string
+): Promise<LeadNameParts | null> {
   const lead = await lookupGatedLead(email, pageSlug);
+  if (lead.firstName && lead.lastName) {
+    return {
+      firstName: lead.firstName,
+      lastName: lead.lastName,
+      fullName: joinFullName(lead.firstName, lead.lastName),
+    };
+  }
   const name = lead.name?.trim() ?? '';
-  return name.length >= GATED_ACCESS_NAME_MIN_LENGTH ? name : null;
+  if (name.length < GATED_ACCESS_NAME_MIN_LENGTH) return null;
+  const split = splitFullName(name);
+  return {
+    fullName: name,
+    firstName: split.first_name,
+    lastName: split.last_name,
+  };
 }
 
 export async function POST(request: NextRequest) {
-  let body: { name?: unknown; email?: unknown; pageSlug?: unknown; emailOnly?: unknown };
+  let body: {
+    name?: unknown;
+    firstName?: unknown;
+    lastName?: unknown;
+    email?: unknown;
+    pageSlug?: unknown;
+    emailOnly?: unknown;
+  };
   try {
     body = await request.json();
   } catch {
@@ -66,15 +96,27 @@ export async function POST(request: NextRequest) {
   }
 
   const emailOnly = isEmailOnlyGatedRequest(body.emailOnly);
-  const name = typeof body.name === 'string' ? body.name.trim() : '';
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   const pageSlug = isGatedPageSlug(body.pageSlug)
     ? body.pageSlug
     : GATED_PAGE_GLAMPING_MARKET_OVERVIEW;
 
-  if (!emailOnly && name.length < GATED_ACCESS_NAME_MIN_LENGTH) {
-    return NextResponse.json({ ok: false, error: 'Please enter your name.' }, { status: 400 });
+  let leadNames: LeadNameParts | null = null;
+  if (!emailOnly) {
+    const parsed = parsePersonNameFields(body);
+    if (!parsed) {
+      return NextResponse.json(
+        { ok: false, error: 'Please enter your first and last name.' },
+        { status: 400 }
+      );
+    }
+    leadNames = {
+      firstName: parsed.firstName,
+      lastName: parsed.lastName,
+      fullName: joinFullName(parsed.firstName, parsed.lastName),
+    };
   }
+
   if (!isValidEmail(email)) {
     return NextResponse.json(
       { ok: false, error: 'Please enter a valid email address.' },
@@ -103,6 +145,8 @@ export async function POST(request: NextRequest) {
           code: GATED_ACCESS_EXISTING_LEAD_CODE,
           error: GATED_ACCESS_EXISTING_LEAD_MESSAGE,
           name: lead.name,
+          firstName: lead.firstName,
+          lastName: lead.lastName,
         },
         { status: 400 }
       );
@@ -138,7 +182,8 @@ export async function POST(request: NextRequest) {
     // (returning-user sign-in can noop when a partial session is present).
     await supabase.auth.signOut();
 
-    const leadName = name || (emailOnly ? await lookupLeadName(email, pageSlug) : null);
+    const names =
+      leadNames ?? (emailOnly ? await lookupLeadNameParts(email, pageSlug) : null);
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -146,7 +191,13 @@ export async function POST(request: NextRequest) {
         // same request (Supabase enforces a short cooldown between sends).
         shouldCreateUser: true,
         data: {
-          ...(leadName ? { full_name: leadName } : {}),
+          ...(names
+            ? {
+                full_name: names.fullName,
+                first_name: names.firstName,
+                last_name: names.lastName,
+              }
+            : {}),
           gated_page: pageSlug,
         },
         emailRedirectTo: buildMagicLinkRedirectUrl(getRequestOrigin(request), pageSlug),

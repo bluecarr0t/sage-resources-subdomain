@@ -16,8 +16,10 @@ import { bucketGlampingIsOpenForMetrics } from '@/lib/glamping-is-open';
 import { GLAMPING_MARKET_SNAPSHOT_US_STATE_SELECT } from '@/lib/glamping-market-snapshot-row-select';
 import {
   applyGlampingMarketSnapshotTierToQuery,
+  glampingMarketOverviewStatesKey,
   type GlampingMarketSnapshotTierFilter,
 } from '@/lib/glamping-market-snapshot-classification';
+import { rowPassesGlampingMarketUsStatesFilter } from '@/lib/glamping-market-snapshot-us-regions';
 import {
   applyGlampingOnlyPropertyTypeFilter,
   isGlampingMarketSnapshotPropertyType,
@@ -66,6 +68,56 @@ export type GlampingUsStateMetricRow = {
 
 export type GlampingUsStateMetricsMap = Record<string, GlampingUsStateMetricRow>;
 
+/**
+ * Sum counts across USPS abbreviations and property-weight ARDR mean/median
+ * (approximation when only per-state rolled rates are available).
+ */
+export function aggregateGlampingUsStateMetrics(
+  byState: GlampingUsStateMetricsMap,
+  abbrs: Iterable<string>
+): GlampingUsStateMetricRow {
+  let propertyCount = 0;
+  let openProperties = 0;
+  let underConstructionProperties = 0;
+  let proposedDevelopmentProperties = 0;
+  let unitCount = 0;
+  let meanWeightedSum = 0;
+  let meanWeight = 0;
+  let medianWeightedSum = 0;
+  let medianWeight = 0;
+
+  for (const raw of abbrs) {
+    const abbr = raw.toUpperCase();
+    const row = byState[abbr];
+    if (!row) continue;
+    propertyCount += row.propertyCount;
+    openProperties += row.openProperties;
+    underConstructionProperties += row.underConstructionProperties;
+    proposedDevelopmentProperties += row.proposedDevelopmentProperties;
+    unitCount += row.unitCount;
+    if (row.avgRetailDailyRateMean != null && row.propertyCount > 0) {
+      meanWeightedSum += row.avgRetailDailyRateMean * row.propertyCount;
+      meanWeight += row.propertyCount;
+    }
+    if (row.avgRetailDailyRateMedian != null && row.propertyCount > 0) {
+      medianWeightedSum += row.avgRetailDailyRateMedian * row.propertyCount;
+      medianWeight += row.propertyCount;
+    }
+  }
+
+  return {
+    propertyCount,
+    openProperties,
+    underConstructionProperties,
+    proposedDevelopmentProperties,
+    unitCount,
+    avgRetailDailyRateMean:
+      meanWeight > 0 ? Math.round(meanWeightedSum / meanWeight) : null,
+    avgRetailDailyRateMedian:
+      medianWeight > 0 ? Math.round(medianWeightedSum / medianWeight) : null,
+  };
+}
+
 type Agg = {
   names: Set<string>;
   openNames: Set<string>;
@@ -80,7 +132,8 @@ type Agg = {
  * (Canada is included in national snapshot metrics but has no US-state breakdown here).
  */
 async function loadGlampingIndustryUsStateMetrics(
-  tier: GlampingMarketSnapshotTierFilter
+  tier: GlampingMarketSnapshotTierFilter,
+  states: string[] | null
 ): Promise<{ ok: true; data: GlampingUsStateMetricsMap } | { ok: false; error: string }> {
   const supabase = createServerClient();
   const aggs = new Map<string, Agg>();
@@ -114,6 +167,7 @@ async function loadGlampingIndustryUsStateMetrics(
       if (!isUsRow(row.country)) continue;
       const abbr = normalizeDbStateToUspsAbbr(row.state);
       if (!abbr) continue;
+      if (!rowPassesGlampingMarketUsStatesFilter(abbr, states)) continue;
 
       const name = (row.property_name ?? '').trim();
       let agg = aggs.get(abbr);
@@ -168,11 +222,13 @@ async function loadGlampingIndustryUsStateMetrics(
 
 /** Cached US state aggregates for `/glamping-market-overview`. */
 export async function fetchGlampingIndustryUsStateMetrics(
-  tier: GlampingMarketSnapshotTierFilter = 'all'
+  tier: GlampingMarketSnapshotTierFilter = 'all',
+  states: string[] | null = null
 ): Promise<{ ok: true; data: GlampingUsStateMetricsMap } | { ok: false; error: string }> {
+  const statesKey = glampingMarketOverviewStatesKey(states);
   return unstable_cache(
-    () => loadGlampingIndustryUsStateMetrics(tier),
-    ['glamping-industry-us-state-metrics', tier, 'rate-basis-v1'],
+    () => loadGlampingIndustryUsStateMetrics(tier, states),
+    ['glamping-industry-us-state-metrics', tier, statesKey, 'rate-basis-v2-us-states'],
     {
       revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
       tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],

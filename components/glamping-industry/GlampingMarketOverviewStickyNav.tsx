@@ -3,21 +3,32 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { GlampingMarketClassificationFilter } from '@/components/glamping-industry/GlampingMarketClassificationFilter';
 import { GlampingMarketSnapshotToggle } from '@/components/glamping-industry/GlampingMarketSnapshotToggle';
-import type { GlampingMarketSnapshotTierFilter } from '@/lib/glamping-market-snapshot-classification';
+import { GlampingMarketUsRegionFilter } from '@/components/glamping-industry/GlampingMarketUsRegionFilter';
+import {
+  glampingMarketOverviewPath,
+  type GlampingMarketSnapshotTierFilter,
+} from '@/lib/glamping-market-snapshot-classification';
 import type { GlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapshot-region';
 
 type Props = {
   market: GlampingMarketSnapshotMarket;
   tier: GlampingMarketSnapshotTierFilter;
+  /** Active USPS selection; null = national. Cleared when switching to Canada. */
+  states?: string[] | null;
   /** Rendered under the in-flow title only (not in the sticky bar). */
   lastUpdated?: ReactNode;
 };
 
 /**
  * In-flow title + filters; once the page title leaves the viewport, a compact
- * sticky bar keeps the title and market/tier toggles available while scrolling.
+ * sticky bar keeps the title and market/tier/region toggles available while scrolling.
  */
-export function GlampingMarketOverviewStickyNav({ market, tier, lastUpdated }: Props) {
+export function GlampingMarketOverviewStickyNav({
+  market,
+  tier,
+  states = null,
+  lastUpdated,
+}: Props) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [stuck, setStuck] = useState(false);
 
@@ -35,6 +46,14 @@ export function GlampingMarketOverviewStickyNav({ market, tier, lastUpdated }: P
     return () => observer.disconnect();
   }, []);
 
+  const pathForMarketTier = (
+    nextMarket: GlampingMarketSnapshotMarket,
+    nextTier: GlampingMarketSnapshotTierFilter
+  ) =>
+    glampingMarketOverviewPath(nextMarket, nextTier, {
+      states: nextMarket === 'us' ? states : null,
+    });
+
   return (
     <>
       <h1
@@ -47,8 +66,19 @@ export function GlampingMarketOverviewStickyNav({ market, tier, lastUpdated }: P
       {lastUpdated}
 
       <div className="mt-6 flex w-full flex-wrap items-start justify-start gap-4 sm:justify-between">
-        <GlampingMarketSnapshotToggle market={market} tier={tier} />
-        <GlampingMarketClassificationFilter market={market} tier={tier} />
+        <div className="flex flex-wrap items-start gap-3">
+          <GlampingMarketSnapshotToggle
+            market={market}
+            tier={tier}
+            pathForMarketTier={pathForMarketTier}
+          />
+          <GlampingMarketUsRegionFilter market={market} tier={tier} states={states} />
+        </div>
+        <GlampingMarketClassificationFilter
+          market={market}
+          tier={tier}
+          pathForMarketTier={pathForMarketTier}
+        />
       </div>
 
       <div
@@ -62,8 +92,23 @@ export function GlampingMarketOverviewStickyNav({ market, tier, lastUpdated }: P
             Glamping Market Overview
           </p>
           <div className="flex min-w-0 flex-wrap items-center justify-start gap-2 sm:justify-end sm:gap-3">
-            <GlampingMarketSnapshotToggle market={market} tier={tier} />
-            <GlampingMarketClassificationFilter market={market} tier={tier} compact />
+            <GlampingMarketSnapshotToggle
+              market={market}
+              tier={tier}
+              pathForMarketTier={pathForMarketTier}
+            />
+            <GlampingMarketUsRegionFilter
+              market={market}
+              tier={tier}
+              states={states}
+              compact
+            />
+            <GlampingMarketClassificationFilter
+              market={market}
+              tier={tier}
+              pathForMarketTier={pathForMarketTier}
+              compact
+            />
           </div>
         </div>
       </div>

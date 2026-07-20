@@ -40,7 +40,11 @@ function callbackUrl(params: Record<string, string>): NextRequest {
 const mockUser = {
   id: 'user-uuid-1',
   email: 'jane@example.com',
-  user_metadata: { full_name: 'Jane Doe' },
+  user_metadata: {
+    full_name: 'Jane Doe',
+    first_name: 'Jane',
+    last_name: 'Doe',
+  },
 };
 
 describe('GET /auth/callback — gated magic link', () => {
@@ -72,6 +76,8 @@ describe('GET /auth/callback — gated magic link', () => {
         user_id: 'user-uuid-1',
         email: 'jane@example.com',
         name: 'Jane Doe',
+        first_name: 'Jane',
+        last_name: 'Doe',
         page_slug: 'glamping-market-overview',
         verified_at: expect.any(String),
       }),
@@ -82,7 +88,7 @@ describe('GET /auth/callback — gated magic link', () => {
       email: 'jane@example.com',
       pageSlug: 'glamping-market-overview',
       userId: 'user-uuid-1',
-      metadata: { name: 'Jane Doe' },
+      metadata: { name: 'Jane Doe', first_name: 'Jane', last_name: 'Doe' },
     });
   });
 

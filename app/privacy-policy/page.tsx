@@ -48,7 +48,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
                 <li><strong>Sign in via Google OAuth:</strong> If you sign in with Google, we receive your email, name, and profile photo from Google.</li>
-                <li><strong>Request access to gated market reports:</strong> When you request access to gated content (such as our Glamping Market Overview), we collect your name and email and send a magic sign-in link via Supabase. We retain this information to verify access and to follow up with you about relevant Sage Outdoor Advisory services.</li>
+                <li><strong>Request access to gated market reports:</strong> When you request access to gated content (such as our Glamping Market Overview), we collect your first name, last name, and email and send a magic sign-in link via Supabase. We retain this information to verify access and to follow up with you about relevant Sage Outdoor Advisory services.</li>
                 <li><strong>Create an account:</strong> We store your account information in our database, including your user ID, email address, and account status</li>
                 <li><strong>Contact us:</strong> If you contact us through our website, we collect the information you provide, such as your name and email address</li>
                 <li><strong>Use our services:</strong> We collect information about how you interact with our website and services</li>

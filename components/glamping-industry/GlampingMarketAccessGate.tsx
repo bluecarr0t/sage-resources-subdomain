@@ -44,7 +44,7 @@ export type GlampingMarketAccessGateCopy = {
 export function GlampingMarketAccessGate({
   pageSlug = GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   title = 'Glamping Market Overview',
-  leadDescription = 'Enter your name and work email to unlock US & Canada glamping metrics. We\u2019ll send a secure sign-in link to your inbox. No password required.',
+  leadDescription = 'Enter your name and work email to unlock US & Canada glamping metrics. We\u2019ll send a secure sign-in link\u2014no password required.',
   emailOnlyDescription = 'Enter your work email and we\u2019ll send a secure sign-in link. No password required.',
   successDescription = 'Open it on this device to unlock the Glamping Market Overview.',
 }: {
@@ -52,7 +52,8 @@ export function GlampingMarketAccessGate({
 } & GlampingMarketAccessGateCopy) {
   const [step, setStep] = useState<GateStep>('form');
   const [formMode, setFormMode] = useState<FormMode>('lead');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,11 +158,18 @@ export function GlampingMarketAccessGate({
           email,
           pageSlug,
           emailOnly,
-          ...(emailOnly ? {} : { name }),
+          ...(emailOnly ? {} : { firstName, lastName }),
         }),
       });
       const data = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; code?: string; name?: string | null }
+        | {
+            ok?: boolean;
+            error?: string;
+            code?: string;
+            name?: string | null;
+            firstName?: string | null;
+            lastName?: string | null;
+          }
         | null;
       if (!res.ok || !data?.ok) {
         trackFormSubmission(formName, pageSlug, false);
@@ -175,8 +183,19 @@ export function GlampingMarketAccessGate({
           setFormMode('lead');
           setNotice(data.error ?? null);
           setError(null);
-          if (typeof data.name === 'string' && data.name.trim().length > 0) {
-            setName(data.name.trim());
+          if (typeof data.firstName === 'string' && data.firstName.trim()) {
+            setFirstName(data.firstName.trim());
+          }
+          if (typeof data.lastName === 'string' && data.lastName.trim()) {
+            setLastName(data.lastName.trim());
+          } else if (
+            typeof data.name === 'string' &&
+            data.name.trim().length > 0 &&
+            !(typeof data.firstName === 'string' && data.firstName.trim())
+          ) {
+            const parts = data.name.trim().split(/\s+/);
+            setFirstName(parts[0] ?? '');
+            setLastName(parts.slice(1).join(' '));
           }
           return;
         }
@@ -200,7 +219,8 @@ export function GlampingMarketAccessGate({
     setError(null);
     setNotice(null);
     if (mode === 'email-only') {
-      setName('');
+      setFirstName('');
+      setLastName('');
     }
   }
 
@@ -241,24 +261,44 @@ export function GlampingMarketAccessGate({
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               {!emailOnly ? (
-                <div>
-                  <label
-                    htmlFor="gate-name"
-                    className="mb-1.5 block text-[11px] uppercase tracking-widest text-neutral-500"
-                  >
-                    Full Name
-                  </label>
-                  <input
-                    id="gate-name"
-                    type="text"
-                    autoComplete="name"
-                    required
-                    autoFocus
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className={EDITORIAL_INPUT_CLASS}
-                    placeholder="Jane Doe"
-                  />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="gate-first-name"
+                      className="mb-1.5 block text-[11px] uppercase tracking-widest text-neutral-500"
+                    >
+                      First Name
+                    </label>
+                    <input
+                      id="gate-first-name"
+                      type="text"
+                      autoComplete="given-name"
+                      required
+                      autoFocus
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className={EDITORIAL_INPUT_CLASS}
+                      placeholder="Morgan"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="gate-last-name"
+                      className="mb-1.5 block text-[11px] uppercase tracking-widest text-neutral-500"
+                    >
+                      Last Name
+                    </label>
+                    <input
+                      id="gate-last-name"
+                      type="text"
+                      autoComplete="family-name"
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className={EDITORIAL_INPUT_CLASS}
+                      placeholder="Vale"
+                    />
+                  </div>
                 </div>
               ) : null}
               <div>
@@ -277,7 +317,7 @@ export function GlampingMarketAccessGate({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={EDITORIAL_INPUT_CLASS}
-                  placeholder="jane@company.com"
+                  placeholder="morgan@willowcreekglamping.com"
                 />
               </div>
 
@@ -300,16 +340,16 @@ export function GlampingMarketAccessGate({
               </button>
             </form>
 
-            <p className="mt-4 text-center text-[11px] text-neutral-500">
+            <p className="mt-4 mb-4 pb-3 text-center text-xs font-medium text-neutral-700">
               {emailOnly ? (
                 <>
                   First time here?{' '}
                   <button
                     type="button"
                     onClick={() => switchMode('lead')}
-                    className="underline decoration-neutral-300 underline-offset-2 transition-colors hover:text-neutral-900 hover:decoration-neutral-500"
+                    className="underline decoration-neutral-400 underline-offset-2 transition-colors hover:text-neutral-900 hover:decoration-neutral-600"
                   >
-                    Enter your name to get access
+                    Enter your details to get access
                   </button>
                 </>
               ) : (
@@ -318,7 +358,7 @@ export function GlampingMarketAccessGate({
                   <button
                     type="button"
                     onClick={() => switchMode('email-only')}
-                    className="underline decoration-neutral-300 underline-offset-2 transition-colors hover:text-neutral-900 hover:decoration-neutral-500"
+                    className="underline decoration-neutral-400 underline-offset-2 transition-colors hover:text-neutral-900 hover:decoration-neutral-600"
                   >
                     Sign in with email only
                   </button>
@@ -326,32 +366,19 @@ export function GlampingMarketAccessGate({
               )}
             </p>
 
-            <p className="mt-5 text-[11px] leading-relaxed text-neutral-500">
-              {emailOnly ? (
-                <>
-                  By continuing you agree to our{' '}
-                  <a
-                    href="/privacy-policy"
-                    className="underline decoration-neutral-300 underline-offset-2 transition-colors hover:text-neutral-900 hover:decoration-neutral-500"
-                  >
-                    Privacy Policy
-                  </a>
-                  .
-                </>
-              ) : (
-                <>
-                  By continuing you agree we may contact you about Sage Outdoor Advisory
-                  services. See our{' '}
-                  <a
-                    href="/privacy-policy"
-                    className="underline decoration-neutral-300 underline-offset-2 transition-colors hover:text-neutral-900 hover:decoration-neutral-500"
-                  >
-                    Privacy Policy
-                  </a>
-                  .
-                </>
-              )}
-            </p>
+            {!emailOnly ? (
+              <p className="mt-5 text-center text-[10px] leading-snug tracking-tight text-neutral-500 sm:-mx-2 sm:whitespace-nowrap">
+                By continuing you agree we may contact you about Sage Outdoor Advisory
+                services. See our{' '}
+                <a
+                  href="/privacy-policy"
+                  className="underline decoration-neutral-300 underline-offset-2 transition-colors hover:text-neutral-900 hover:decoration-neutral-500"
+                >
+                  Privacy Policy
+                </a>
+                .
+              </p>
+            ) : null}
           </>
         ) : (
           <>

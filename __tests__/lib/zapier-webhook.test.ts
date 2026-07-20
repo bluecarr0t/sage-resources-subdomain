@@ -78,4 +78,35 @@ describe('zapier-webhook', () => {
       })
     );
   });
+
+  it('prefers explicit first_name and last_name for gated content leads', async () => {
+    process.env.ZAPIER_GATED_LEAD_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/gated/';
+
+    const { notifyZapierGatedLead } = await import('@/lib/zapier-webhook');
+    notifyZapierGatedLead({
+      email: 'jane@example.com',
+      name: 'Jane Doe',
+      first_name: 'Jane',
+      last_name: 'Doe',
+      page_slug: 'glamping-market-overview',
+      verified_at: '2026-06-05T20:00:00.000Z',
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://hooks.zapier.com/hooks/catch/gated/',
+      expect.objectContaining({
+        body: JSON.stringify({
+          lead_type: 'gated_content',
+          email: 'jane@example.com',
+          first_name: 'Jane',
+          last_name: 'Doe',
+          name: 'Jane Doe',
+          page_slug: 'glamping-market-overview',
+          verified_at: '2026-06-05T20:00:00.000Z',
+        }),
+      })
+    );
+  });
 });

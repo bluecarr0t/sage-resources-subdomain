@@ -3,7 +3,7 @@
  */
 
 import { isValidEmail } from '@/lib/gated-access';
-import { isValidNamePart, normalizeNamePart } from '@/lib/person-name';
+import { parsePersonNameFields } from '@/lib/person-name';
 
 export { isValidEmail };
 
@@ -11,15 +11,7 @@ export function parseNewsletterNameFields(body: {
   firstName?: unknown;
   lastName?: unknown;
 }): { firstName: string; lastName: string } | null {
-  const firstName =
-    typeof body.firstName === 'string' ? normalizeNamePart(body.firstName) : '';
-  const lastName = typeof body.lastName === 'string' ? normalizeNamePart(body.lastName) : '';
-
-  if (!isValidNamePart(firstName) || !isValidNamePart(lastName)) {
-    return null;
-  }
-
-  return { firstName, lastName };
+  return parsePersonNameFields(body);
 }
 
 export const DEFAULT_NEWSLETTER_SOURCE = 'footer';

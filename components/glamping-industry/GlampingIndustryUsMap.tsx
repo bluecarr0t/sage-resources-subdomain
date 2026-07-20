@@ -2,9 +2,23 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { trackMapInteraction } from '@/lib/analytics';
-import type { GlampingUsStateMetricsMap } from '@/lib/fetch-glamping-industry-us-state-metrics';
+import {
+  aggregateGlampingUsStateMetrics,
+  type GlampingUsStateMetricRow,
+  type GlampingUsStateMetricsMap,
+} from '@/lib/fetch-glamping-industry-us-state-metrics';
+import {
+  GLAMPING_MARKET_US_REGION_LABELS,
+  regionMatchingStates,
+} from '@/lib/glamping-market-snapshot-us-regions';
+import {
+  glampingMarketOverviewPathToggleState,
+  type GlampingMarketSnapshotTierFilter,
+} from '@/lib/glamping-market-snapshot-classification';
+import type { GlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapshot-region';
 import {
   pipelineMapStateDetailPath,
   pipelineUsStateHighlightForFilter,
@@ -113,13 +127,25 @@ function stateFillColors(
   variant: GlampingIndustryUsMapVariant,
   byState: GlampingUsStateMetricsMap,
   stageFilter: PipelineMapStageFilter,
-  gradientRanges: PipelineMapGradientRanges | null
+  gradientRanges: PipelineMapGradientRanges | null,
+  filterStates: Set<string> | null
 ) {
-  const isSel = selected === abbr;
+  const isFocused = selected === abbr;
+  const hasFilter = filterStates != null && filterStates.size > 0;
+  const inFilter = !hasFilter || filterStates.has(abbr);
+
   if (variant === 'market-overview') {
+    if (hasFilter && !inFilter) {
+      return {
+        fill: '#eceae4',
+        fillHover: '#e0dbd2',
+        fillSelected: SAGE_MAP.fillSelected,
+      };
+    }
+    const emphasized = hasFilter ? inFilter : isFocused;
     return {
-      fill: isSel ? SAGE_MAP.fillSelected : SAGE_MAP.fill,
-      fillHover: isSel ? SAGE_MAP.fillSelected : SAGE_MAP.fillHover,
+      fill: emphasized ? SAGE_MAP.fillSelected : SAGE_MAP.fill,
+      fillHover: emphasized ? SAGE_MAP.fillSelected : SAGE_MAP.fillHover,
       fillSelected: SAGE_MAP.fillSelected,
     };
   }
@@ -127,8 +153,8 @@ function stateFillColors(
   const highlight = pipelineUsStateHighlightForFilter(row, stageFilter);
   if (highlight === 'none') {
     return {
-      fill: isSel ? '#e5e7eb' : SAGE_MAP.fill,
-      fillHover: isSel ? '#e5e7eb' : SAGE_MAP.fillHover,
+      fill: isFocused ? '#e5e7eb' : SAGE_MAP.fill,
+      fillHover: isFocused ? '#e5e7eb' : SAGE_MAP.fillHover,
       fillSelected: '#d1d5db',
     };
   }
@@ -140,8 +166,8 @@ function stateFillColors(
       : PIPELINE_MAP_COLORS[highlight];
 
   return {
-    fill: isSel ? palette.fillSelected : palette.fill,
-    fillHover: isSel ? palette.fillSelected : palette.fillHover,
+    fill: isFocused ? palette.fillSelected : palette.fill,
+    fillHover: isFocused ? palette.fillSelected : palette.fillHover,
     fillSelected: palette.fillSelected,
   };
 }
@@ -152,7 +178,8 @@ function styleForState(
   variant: GlampingIndustryUsMapVariant,
   byState: GlampingUsStateMetricsMap,
   stageFilter: PipelineMapStageFilter,
-  gradientRanges: PipelineMapGradientRanges | null
+  gradientRanges: PipelineMapGradientRanges | null,
+  filterStates: Set<string> | null
 ) {
   const { fill, fillHover, fillSelected } = stateFillColors(
     abbr,
@@ -160,23 +187,32 @@ function styleForState(
     variant,
     byState,
     stageFilter,
-    gradientRanges
+    gradientRanges,
+    filterStates
   );
-  const isSel = selected === abbr;
+  const hasFilter = filterStates != null && filterStates.size > 0;
+  const isEmphasized =
+    variant === 'market-overview'
+      ? hasFilter
+        ? filterStates.has(abbr)
+        : selected === abbr
+      : selected === abbr;
   return {
     default: {
       fill,
       stroke: SAGE_MAP.stroke,
-      strokeWidth: 0.4,
+      strokeWidth: isEmphasized ? 0.75 : 0.4,
       outline: 'none' as const,
       cursor: 'pointer' as const,
+      opacity: hasFilter && variant === 'market-overview' && !filterStates.has(abbr) ? 0.55 : 1,
     },
     hover: {
-      fill: isSel ? fillSelected : fillHover,
+      fill: isEmphasized ? fillSelected : fillHover,
       stroke: SAGE_MAP.stroke,
       strokeWidth: 0.75,
       outline: 'none' as const,
       cursor: 'pointer' as const,
+      opacity: 1,
     },
     pressed: {
       fill: fillSelected,
@@ -184,6 +220,7 @@ function styleForState(
       strokeWidth: 0.75,
       outline: 'none' as const,
       cursor: 'pointer' as const,
+      opacity: 1,
     },
   };
 }
@@ -194,41 +231,18 @@ function styleForHawaiiInset(
   variant: GlampingIndustryUsMapVariant,
   byState: GlampingUsStateMetricsMap,
   stageFilter: PipelineMapStageFilter,
-  gradientRanges: PipelineMapGradientRanges | null
+  gradientRanges: PipelineMapGradientRanges | null,
+  filterStates: Set<string> | null
 ) {
-  const { fill, fillHover, fillSelected } = stateFillColors(
+  return styleForState(
     'HI',
     selected,
     variant,
     byState,
     stageFilter,
-    gradientRanges
+    gradientRanges,
+    filterStates
   );
-  const isSel = selected === 'HI';
-  const sw = { default: 0.55, hover: 0.75, pressed: 0.75 } as const;
-  return {
-    default: {
-      fill,
-      stroke: SAGE_MAP.stroke,
-      strokeWidth: sw.default,
-      outline: 'none' as const,
-      cursor: 'pointer' as const,
-    },
-    hover: {
-      fill: isSel ? fillSelected : fillHover,
-      stroke: SAGE_MAP.stroke,
-      strokeWidth: sw.hover,
-      outline: 'none' as const,
-      cursor: 'pointer' as const,
-    },
-    pressed: {
-      fill: fillSelected,
-      stroke: SAGE_MAP.stroke,
-      strokeWidth: sw.pressed,
-      outline: 'none' as const,
-      cursor: 'pointer' as const,
-    },
-  };
 }
 
 type Props = {
@@ -239,6 +253,15 @@ type Props = {
   onStageFilterChange?: (filter: PipelineMapStageFilter) => void;
   /** When true, omit default top margin (page owns spacing for scroll targets). */
   flushTop?: boolean;
+  /** Market overview multi-select: active USPS set (null = national). */
+  filterStates?: string[] | null;
+  /**
+   * Exact selection-scoped metrics (from national overview fetch). When set with
+   * `filterStates`, the detail panel uses these instead of a single focused state.
+   */
+  selectionMetrics?: GlampingUsStateMetricRow | null;
+  market?: GlampingMarketSnapshotMarket;
+  tier?: GlampingMarketSnapshotTierFilter;
 };
 
 const PIPELINE_MAP_FILTER_ACTIVE_CLASS: Record<PipelineMapStageFilter, string> = {
@@ -309,13 +332,26 @@ export default function GlampingIndustryUsMap({
   stageFilter = 'all-pre-opening',
   onStageFilterChange,
   flushTop = false,
+  filterStates = null,
+  selectionMetrics = null,
+  market = 'us',
+  tier = 'all',
 }: Props) {
+  const router = useRouter();
+  const filterSet = useMemo(
+    () =>
+      filterStates != null && filterStates.length > 0
+        ? new Set(filterStates.map((s) => s.toUpperCase()))
+        : null,
+    [filterStates]
+  );
+
   const defaultSelected =
     initialSelectedAbbr !== undefined
       ? initialSelectedAbbr
       : variant === 'pipeline-quarterly'
         ? null
-        : DEFAULT_MARKET_OVERVIEW_SELECTED_STATE_ABBR;
+        : filterSet?.values().next().value ?? DEFAULT_MARKET_OVERVIEW_SELECTED_STATE_ABBR;
   const [selected, setSelected] = useState<string | null>(defaultSelected);
 
   const pipelineGradientRanges = useMemo(() => {
@@ -323,20 +359,48 @@ export default function GlampingIndustryUsMap({
     return buildPipelineMapGradientRanges(byState, stageFilter);
   }, [byState, stageFilter, variant]);
 
-  const row = selected ? byState[selected] : undefined;
+  const showSelectionAggregate =
+    variant === 'market-overview' && filterSet != null && filterSet.size > 0;
 
-  const onSelect = useCallback((abbr: string) => {
-    setSelected((prev) => {
-      const next = prev === abbr ? null : abbr;
+  const panelRow: GlampingUsStateMetricRow | undefined = useMemo(() => {
+    if (showSelectionAggregate) {
+      if (selectionMetrics) return selectionMetrics;
+      return aggregateGlampingUsStateMetrics(byState, filterSet);
+    }
+    return selected ? byState[selected] : undefined;
+  }, [showSelectionAggregate, selectionMetrics, byState, filterSet, selected]);
+
+  const panelTitle = useMemo(() => {
+    if (!showSelectionAggregate) {
+      return selected ? stateLabel(selected) : null;
+    }
+    if (filterSet.size === 1) {
+      return stateLabel([...filterSet][0]!);
+    }
+    const matched = regionMatchingStates([...filterSet]);
+    if (matched) return GLAMPING_MARKET_US_REGION_LABELS[matched];
+    return `${filterSet.size} selected states`;
+  }, [showSelectionAggregate, selected, filterSet]);
+
+  const row = panelRow;
+
+  const onSelect = useCallback(
+    (abbr: string) => {
+      setSelected(abbr);
       trackMapInteraction('region_select', {
         map: 'glamping_market_overview_us',
         region: abbr,
-        selected: next != null,
+        selected: true,
         variant,
       });
-      return next;
-    });
-  }, [variant]);
+
+      if (variant === 'market-overview') {
+        const href = glampingMarketOverviewPathToggleState(market, tier, filterStates, abbr);
+        router.push(href, { scroll: false });
+      }
+    },
+    [variant, market, tier, filterStates, router]
+  );
 
   return (
     <div
@@ -347,9 +411,15 @@ export default function GlampingIndustryUsMap({
       <div className="relative min-w-0 overflow-x-hidden overflow-y-visible">
         {variant === 'market-overview' ? (
           <div className="mb-4 space-y-1 text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base">
-            <p>United States map · click a state</p>
+            <p>
+              United States map ·{' '}
+              {filterSet
+                ? 'click states to refine selection'
+                : 'click states to filter (multi-select)'}
+            </p>
             <p className="text-[9px] font-light normal-case tracking-normal text-neutral-500">
               Alaska lower left · Hawaii lower left
+              {filterSet ? ` · ${filterSet.size} selected` : ''}
             </p>
           </div>
         ) : (
@@ -427,7 +497,7 @@ export default function GlampingIndustryUsMap({
                       >
                         <Geography
                           geography={geo}
-                          style={styleForState(abbr, selected, variant, byState, stageFilter, pipelineGradientRanges)}
+                          style={styleForState(abbr, selected, variant, byState, stageFilter, pipelineGradientRanges, filterSet)}
                           onClick={() => onSelect(abbr)}
                           tabIndex={0}
                           aria-label={stateLabel(abbr)}
@@ -445,7 +515,7 @@ export default function GlampingIndustryUsMap({
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      style={styleForState(abbr, selected, variant, byState, stageFilter, pipelineGradientRanges)}
+                      style={styleForState(abbr, selected, variant, byState, stageFilter, pipelineGradientRanges, filterSet)}
                       onClick={() => onSelect(abbr)}
                       tabIndex={0}
                       aria-label={stateLabel(abbr)}
@@ -485,7 +555,7 @@ export default function GlampingIndustryUsMap({
                       <Geography
                         key={`hi-${geo.rsmKey}`}
                         geography={geo}
-                        style={styleForHawaiiInset(selected, variant, byState, stageFilter, pipelineGradientRanges)}
+                        style={styleForHawaiiInset(selected, variant, byState, stageFilter, pipelineGradientRanges, filterSet)}
                         onClick={() => onSelect('HI')}
                         tabIndex={0}
                         aria-label={stateLabel('HI')}
@@ -508,15 +578,15 @@ export default function GlampingIndustryUsMap({
 
       <aside className="border-t border-sage-200 pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
         <div>
-          {!selected ? (
+          {!panelTitle ? (
             <p className="text-sm font-light leading-relaxed text-neutral-600">
               {variant === 'pipeline-quarterly'
                 ? 'Select a state for proposed development and under construction counts, or use the stage filter above.'
-                : 'Select a state on the map for property count, unit count, and average retail daily rate.'}
+                : 'Click states on the map to filter metrics (multi-select). Select a state for property count, unit count, and average retail daily rate.'}
             </p>
           ) : variant === 'pipeline-quarterly' ? (
             <div className="space-y-6">
-              <h2 className="text-sm font-medium text-neutral-800">{stateLabel(selected)}</h2>
+              <h2 className="text-sm font-medium text-neutral-800">{panelTitle}</h2>
               <dl className="space-y-5 text-sm">
                 <div>
                   <dt className="text-xs text-neutral-500">Proposed development</dt>
@@ -534,6 +604,7 @@ export default function GlampingIndustryUsMap({
                 </div>
               </dl>
               {(() => {
+                if (!selected) return null;
                 const detailPath = pipelineMapStateDetailPath(
                   selected,
                   stageFilter,
@@ -554,7 +625,7 @@ export default function GlampingIndustryUsMap({
           ) : (
             <div className="space-y-6">
               <h2 className="text-[11px] font-medium uppercase tracking-widest text-neutral-500">
-                {stateLabel(selected)}
+                {panelTitle}
               </h2>
               <dl className="space-y-5 text-sm">
                 <div>

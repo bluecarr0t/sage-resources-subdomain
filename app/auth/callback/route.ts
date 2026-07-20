@@ -18,6 +18,7 @@ import {
   isGatedPageSlug,
 } from '@/lib/gated-access';
 import { logGatedContentEvent } from '@/lib/gated-content-events';
+import { joinFullName, splitFullName } from '@/lib/person-name';
 import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
 import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
@@ -53,10 +54,18 @@ function gatedSlugForRedirect(redirect: string): string | null {
  * here must never block the user from reaching the page.
  */
 async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
+  const meta = user.user_metadata ?? {};
+  const metaFirst =
+    typeof meta.first_name === 'string' ? meta.first_name.trim() : '';
+  const metaLast = typeof meta.last_name === 'string' ? meta.last_name.trim() : '';
+  const metaFull =
+    typeof meta.full_name === 'string' ? meta.full_name.trim() : '';
+
+  const split = splitFullName(metaFull);
+  const firstName = metaFirst || split.first_name || null;
+  const lastName = metaLast || split.last_name || null;
   const name =
-    (typeof user.user_metadata?.full_name === 'string'
-      ? user.user_metadata.full_name
-      : null) ?? null;
+    metaFull || joinFullName(firstName ?? '', lastName ?? '') || null;
 
   const verifiedAt = new Date().toISOString();
   const email = user.email ?? '';
@@ -66,6 +75,8 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       user_id: user.id,
       email,
       name,
+      first_name: firstName,
+      last_name: lastName,
       page_slug: pageSlug,
       verified_at: verifiedAt,
     },
@@ -80,11 +91,15 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       email,
       pageSlug,
       userId: user.id,
-      metadata: name ? { name } : undefined,
+      metadata: name
+        ? { name, first_name: firstName, last_name: lastName }
+        : undefined,
     });
     notifyZapierGatedLead({
       email,
       name,
+      first_name: firstName,
+      last_name: lastName,
       page_slug: pageSlug,
       verified_at: verifiedAt,
     });

@@ -13,8 +13,11 @@ import {
 import { bucketGlampingIsOpenForMetrics } from '@/lib/glamping-is-open';
 import {
   applyGlampingMarketSnapshotTierToQuery,
+  glampingMarketOverviewStatesKey,
   type GlampingMarketSnapshotTierFilter,
 } from '@/lib/glamping-market-snapshot-classification';
+import { rowPassesGlampingMarketUsStatesFilter } from '@/lib/glamping-market-snapshot-us-regions';
+import { normalizeDbStateToUspsAbbr } from '@/lib/normalize-us-state-abbr';
 import {
   applyGlampingOnlyPropertyTypeFilter,
   isGlampingMarketSnapshotPropertyType,
@@ -40,6 +43,7 @@ type SageRow = {
   property_name: string | null;
   property_type: string | null;
   unit_type: string | null;
+  state: string | null;
   is_open: string | null;
   quantity_of_units: string | number | null;
   property_total_sites: string | number | null;
@@ -53,7 +57,8 @@ type SageRow = {
 
 async function loadAmenityImpact(
   market: GlampingMarketSnapshotMarket,
-  tier: GlampingMarketSnapshotTierFilter
+  tier: GlampingMarketSnapshotTierFilter,
+  states: string[] | null
 ): Promise<GlampingAmenityImpactRow[]> {
   const supabase = createServerClient();
   const countryIn =
@@ -69,7 +74,7 @@ async function loadAmenityImpact(
       supabase
         .from('all_sage_data')
         .select(
-          'property_name, property_type, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis, unit_private_bathroom, property_hot_tub, property_food_on_site, property_restaurant'
+          'property_name, property_type, unit_type, state, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis, unit_private_bathroom, property_hot_tub, property_food_on_site, property_restaurant'
         )
         .eq('is_glamping_property', 'Yes')
         .eq('research_status', 'published')
@@ -90,6 +95,11 @@ async function loadAmenityImpact(
       if (!isGlampingMarketSnapshotPropertyType(row.property_type)) continue;
       if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
       if (bucketGlampingIsOpenForMetrics(row.is_open) !== 'yes') continue;
+
+      if (market === 'us') {
+        const usps = normalizeDbStateToUspsAbbr(row.state);
+        if (!rowPassesGlampingMarketUsStatesFilter(usps, states)) continue;
+      }
 
       const adr = parseGlampingMarketSnapshotPositiveNumber(
         row.rate_avg_retail_daily_rate
@@ -116,14 +126,16 @@ async function loadAmenityImpact(
  */
 export async function fetchGlampingAmenityImpact(
   market: GlampingMarketSnapshotMarket = 'us',
-  tier: GlampingMarketSnapshotTierFilter = 'all'
+  tier: GlampingMarketSnapshotTierFilter = 'all',
+  states: string[] | null = null
 ): Promise<
   { ok: true; data: GlampingAmenityImpactRow[] } | { ok: false; error: string }
 > {
+  const statesKey = glampingMarketOverviewStatesKey(market === 'us' ? states : null);
   try {
     const data = await unstable_cache(
-      () => loadAmenityImpact(market, tier),
-      ['glamping-amenity-impact', market, tier, 'v8-properties-with'],
+      () => loadAmenityImpact(market, tier, market === 'us' ? states : null),
+      ['glamping-amenity-impact', market, tier, statesKey, 'v9-us-states'],
       {
         revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
         tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],

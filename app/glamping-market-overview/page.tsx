@@ -19,6 +19,11 @@ import {
   glampingMarketOverviewRateFootnote,
 } from '@/lib/glamping-market-overview-currency';
 import { parseGlampingMarketSnapshotTierFilter } from '@/lib/glamping-market-snapshot-classification';
+import {
+  GLAMPING_MARKET_US_REGION_LABELS,
+  regionMatchingStates,
+  resolveGlampingMarketUsStatesFilter,
+} from '@/lib/glamping-market-snapshot-us-regions';
 import { fetchGlampingAmenityImpact } from '@/lib/fetch-glamping-amenity-impact';
 import { fetchGlampingIndustryCaProvinceMetrics } from '@/lib/fetch-glamping-industry-ca-province-metrics';
 import { fetchGlampingIndustryMetrics } from '@/lib/fetch-glamping-industry-metrics';
@@ -116,7 +121,7 @@ function formatLastUpdatedDate(iso: string): string {
 }
 
 type PageProps = {
-  searchParams: { market?: string; tier?: string };
+  searchParams: { market?: string; tier?: string; region?: string; states?: string };
 };
 
 export default async function GlampingMarketOverviewPage({ searchParams }: PageProps) {
@@ -127,19 +132,33 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
 
   const market = parseGlampingMarketSnapshotMarket(searchParams.market);
   const tier = parseGlampingMarketSnapshotTierFilter(searchParams.tier);
+  const statesFilter =
+    market === 'us'
+      ? resolveGlampingMarketUsStatesFilter({
+          statesRaw: searchParams.states,
+          regionRaw: searchParams.region,
+        })
+      : null;
+  const matchedRegion = regionMatchingStates(statesFilter);
+  const geoScopeLabel =
+    market !== 'us' || statesFilter == null
+      ? null
+      : matchedRegion
+        ? GLAMPING_MARKET_US_REGION_LABELS[matchedRegion]
+        : `${statesFilter.length} states selected`;
 
   const [result, usStates, caProvinces, proximity, amenityImpact] =
     await Promise.all([
-      fetchGlampingIndustryMetrics(market, tier),
+      fetchGlampingIndustryMetrics(market, tier, statesFilter),
       market === 'us'
-        ? fetchGlampingIndustryUsStateMetrics(tier)
+        ? fetchGlampingIndustryUsStateMetrics(tier, statesFilter)
         : Promise.resolve({ ok: true as const, data: {} }),
       market === 'ca'
         ? fetchGlampingIndustryCaProvinceMetrics(tier)
         : Promise.resolve({ ok: true as const, data: {} }),
-      fetchGlampingMarketProximityBundle(market, tier),
+      fetchGlampingMarketProximityBundle(market, tier, statesFilter),
       market === 'us'
-        ? fetchGlampingAmenityImpact(market, 'all')
+        ? fetchGlampingAmenityImpact(market, 'all', statesFilter)
         : Promise.resolve({ ok: true as const, data: [] }),
     ]);
 
@@ -197,10 +216,17 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
             <GlampingMarketOverviewStickyNav
               market={market}
               tier={tier}
+              states={statesFilter}
               lastUpdated={
                 result.ok ? (
                   <p className="mt-3 text-[11px] font-light tabular-nums leading-snug text-neutral-500 sm:text-xs">
                     Last Updated: {formatLastUpdatedDate(result.data.asOf)}
+                    {geoScopeLabel ? (
+                      <>
+                        {' '}
+                        · <span className="text-neutral-700">{geoScopeLabel}</span>
+                      </>
+                    ) : null}
                   </p>
                 ) : null
               }
@@ -301,7 +327,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                 <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
                   Open-unit mix{tier !== 'all' ? ' in this tier' : ''}; unit-weighted ARDR
                   {market === 'ca' ? ' (CAD)' : ''} when published (excludes all-inclusive)
-                  {tier !== 'all' ? '. ~ = small sample; under 5 hidden' : ''}.
+                  {tier !== 'all' ? '. ~ = provisional (thin or package-rate sample)' : ''}.
                 </p>
                 {result.data.topUnitTypesByUnits.length > 0 ? (
                   <ul className="mt-6 space-y-3 text-sm">
@@ -458,7 +484,28 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
           <div className="mt-16 sm:mt-20">
             <div id="map" className="scroll-mt-28">
               {market === 'us' && result.ok && usStates.ok ? (
-                <GlampingIndustryUsMap byState={usStates.data} flushTop />
+                <GlampingIndustryUsMap
+                  byState={usStates.data}
+                  flushTop
+                  filterStates={statesFilter}
+                  selectionMetrics={
+                    statesFilter != null
+                      ? {
+                          propertyCount: result.data.totalProperties,
+                          openProperties: result.data.openProperties,
+                          underConstructionProperties:
+                            result.data.underConstructionProperties,
+                          proposedDevelopmentProperties:
+                            result.data.proposedDevelopmentProperties,
+                          unitCount: result.data.totalUnits,
+                          avgRetailDailyRateMean: result.data.avgRetailDailyRateMean,
+                          avgRetailDailyRateMedian: result.data.avgRetailDailyRateMedian,
+                        }
+                      : null
+                  }
+                  market={market}
+                  tier={tier}
+                />
               ) : market === 'us' && result.ok && !usStates.ok ? (
                 <GlampingMarketOverviewLoadError
                   title="Unable to load US map"
@@ -495,7 +542,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                 Before taxes and booking fees. Open-unit mix
                 {tier !== 'all' ? ' in this tier' : ''}; unit-weighted average retail daily
                 rate{market === 'ca' ? ' (CAD)' : ''} when published (excludes all-inclusive)
-                {tier !== 'all' ? '. ~ = small sample; under 5 hidden' : ''}.
+                {tier !== 'all' ? '. ~ = provisional (thin or package-rate sample)' : ''}.
                 <GlampingUnitTypeByRateDefinitionsButton
                   labels={unitTypeLabelsForRateChart(result.data.unitTypesByUnits)}
                 />
@@ -560,9 +607,9 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
               headingId="transportation-analysis-heading"
               title="Transportation Analysis"
               subtitle="Unit-weighted average rate and open inventory by distance band to the nearest major or large airport."
-              unitsWithinLabel="Properties within 100 Miles"
+              unitsWithinLabel="Properties greater than 100 Miles"
               unitsWithinSubLabel="From Major and Large Airports"
-              withinMetric="propertiesPct"
+              withinMetric="propertiesBeyondPct"
               rateImpactSubLabel={`Greater than ${AIRPORTS_PROXIMITY_THRESHOLD_MILES} miles vs. less than ${AIRPORTS_PROXIMITY_THRESHOLD_MILES} miles`}
               analysis={proximity.data.airports}
               market={market}

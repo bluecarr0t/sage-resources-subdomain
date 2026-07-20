@@ -3,10 +3,13 @@
  */
 
 import { createServerClient } from '@/lib/supabase';
+import { joinFullName } from '@/lib/person-name';
 
 export type GatedLeadLookup = {
   exists: boolean;
   name: string | null;
+  firstName: string | null;
+  lastName: string | null;
 };
 
 /**
@@ -20,18 +23,35 @@ export async function lookupGatedLead(
     const admin = createServerClient();
     const { data } = await admin
       .from('gated_content_leads')
-      .select('name')
+      .select('name, first_name, last_name')
       .eq('email', email.trim().toLowerCase())
       .eq('page_slug', pageSlug)
       .maybeSingle();
 
     if (!data) {
-      return { exists: false, name: null };
+      return { exists: false, name: null, firstName: null, lastName: null };
     }
 
-    const name = typeof data.name === 'string' ? data.name.trim() : '';
-    return { exists: true, name: name.length > 0 ? name : null };
+    const firstName =
+      typeof data.first_name === 'string' && data.first_name.trim().length > 0
+        ? data.first_name.trim()
+        : null;
+    const lastName =
+      typeof data.last_name === 'string' && data.last_name.trim().length > 0
+        ? data.last_name.trim()
+        : null;
+    const combined =
+      typeof data.name === 'string' && data.name.trim().length > 0
+        ? data.name.trim()
+        : joinFullName(firstName ?? '', lastName ?? '') || null;
+
+    return {
+      exists: true,
+      name: combined,
+      firstName,
+      lastName,
+    };
   } catch {
-    return { exists: false, name: null };
+    return { exists: false, name: null, firstName: null, lastName: null };
   }
 }

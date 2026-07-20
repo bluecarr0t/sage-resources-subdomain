@@ -13,8 +13,11 @@ import {
 import { bucketGlampingIsOpenForMetrics } from '@/lib/glamping-is-open';
 import {
   applyGlampingMarketSnapshotTierToQuery,
+  glampingMarketOverviewStatesKey,
   type GlampingMarketSnapshotTierFilter,
 } from '@/lib/glamping-market-snapshot-classification';
+import { rowPassesGlampingMarketUsStatesFilter } from '@/lib/glamping-market-snapshot-us-regions';
+import { normalizeDbStateToUspsAbbr } from '@/lib/normalize-us-state-abbr';
 import {
   applyGlampingOnlyPropertyTypeFilter,
   isGlampingMarketSnapshotPropertyType,
@@ -48,6 +51,7 @@ type SageRow = {
   property_name: string | null;
   property_type: string | null;
   unit_type: string | null;
+  state: string | null;
   is_open: string | null;
   quantity_of_units: string | number | null;
   property_total_sites: string | number | null;
@@ -77,7 +81,8 @@ function parseCoord(v: string | number | null | undefined): number | null {
  */
 async function loadOpenProximityProperties(
   market: GlampingMarketSnapshotMarket,
-  tier: GlampingMarketSnapshotTierFilter
+  tier: GlampingMarketSnapshotTierFilter,
+  states: string[] | null
 ): Promise<ProximityPropertyRow[]> {
   const supabase = createServerClient();
   const countryIn =
@@ -93,7 +98,7 @@ async function loadOpenProximityProperties(
       supabase
         .from('all_sage_data')
         .select(
-          'property_name, property_type, unit_type, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis, lat, lon'
+          'property_name, property_type, unit_type, state, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis, lat, lon'
         )
         .eq('is_glamping_property', 'Yes')
         .eq('research_status', 'published')
@@ -114,6 +119,11 @@ async function loadOpenProximityProperties(
       if (!isGlampingMarketSnapshotPropertyType(row.property_type)) continue;
       if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
       if (bucketGlampingIsOpenForMetrics(row.is_open) !== 'yes') continue;
+
+      if (market === 'us') {
+        const usps = normalizeDbStateToUspsAbbr(row.state);
+        if (!rowPassesGlampingMarketUsStatesFilter(usps, states)) continue;
+      }
 
       const name = (row.property_name ?? '').trim();
       if (!name) continue;
@@ -199,9 +209,11 @@ async function loadAirportAnchors(
 
 async function loadProximityBundle(
   market: GlampingMarketSnapshotMarket,
-  tier: GlampingMarketSnapshotTierFilter
+  tier: GlampingMarketSnapshotTierFilter,
+  states: string[] | null
 ): Promise<GlampingMarketProximityBundle> {
-  const propertiesPromise = loadOpenProximityProperties(market, tier);
+  const geoStates = market === 'us' ? states : null;
+  const propertiesPromise = loadOpenProximityProperties(market, tier, geoStates);
   const airportsPromise = loadAirportAnchors(market);
   const parksPromise =
     market === 'us' ? loadNationalParkAnchors() : Promise.resolve([] as ProximityAnchor[]);
@@ -235,18 +247,21 @@ async function loadProximityBundle(
  */
 export async function fetchGlampingMarketProximityBundle(
   market: GlampingMarketSnapshotMarket = 'us',
-  tier: GlampingMarketSnapshotTierFilter = 'all'
+  tier: GlampingMarketSnapshotTierFilter = 'all',
+  states: string[] | null = null
 ): Promise<
   { ok: true; data: GlampingMarketProximityBundle } | { ok: false; error: string }
 > {
+  const statesKey = glampingMarketOverviewStatesKey(market === 'us' ? states : null);
   try {
     const data = await unstable_cache(
-      () => loadProximityBundle(market, tier),
+      () => loadProximityBundle(market, tier, market === 'us' ? states : null),
       [
         'glamping-market-proximity-bundle',
         market,
         tier,
-        'v13-band-provisional-rates',
+        statesKey,
+        'v14-us-states-filter',
       ],
       {
         revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,

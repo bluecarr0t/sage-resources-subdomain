@@ -64,19 +64,24 @@ export function notifyZapierNewsletterSignup(payload: NewsletterZapierPayload): 
 export type GatedLeadZapierPayload = {
   email: string;
   name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
   page_slug: string;
   verified_at: string;
 };
 
 export function notifyZapierGatedLead(payload: GatedLeadZapierPayload): void {
-  const { first_name, last_name } = splitFullName(payload.name ?? '');
+  const split = splitFullName(payload.name ?? '');
+  const first_name = payload.first_name?.trim() || split.first_name;
+  const last_name = payload.last_name?.trim() || split.last_name;
 
   void postZapierWebhook('ZAPIER_GATED_LEAD_WEBHOOK_URL', {
     lead_type: 'gated_content',
     email: payload.email,
     first_name,
     last_name,
-    name: payload.name?.trim() || joinFullName(first_name, last_name) || undefined,
+    name:
+      payload.name?.trim() || joinFullName(first_name, last_name) || undefined,
     page_slug: payload.page_slug,
     verified_at: payload.verified_at,
   });

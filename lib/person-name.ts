@@ -41,3 +41,19 @@ export function isValidNamePart(value: string): boolean {
     normalized.length <= PERSON_NAME_MAX_LENGTH
   );
 }
+
+/** Parse camelCase firstName/lastName from a JSON body. */
+export function parsePersonNameFields(body: {
+  firstName?: unknown;
+  lastName?: unknown;
+}): { firstName: string; lastName: string } | null {
+  const firstName =
+    typeof body.firstName === 'string' ? normalizeNamePart(body.firstName) : '';
+  const lastName = typeof body.lastName === 'string' ? normalizeNamePart(body.lastName) : '';
+
+  if (!isValidNamePart(firstName) || !isValidNamePart(lastName)) {
+    return null;
+  }
+
+  return { firstName, lastName };
+}

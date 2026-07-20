@@ -9,8 +9,8 @@ export type GlampingProximitySectionProps = {
   subtitle: string;
   unitsWithinLabel: string;
   unitsWithinSubLabel: string;
-  /** KPI card: share of geocoded properties within threshold (default), or open-unit count. */
-  withinMetric?: 'units' | 'propertiesPct';
+  /** KPI card: share of geocoded properties within threshold (default), beyond threshold, or open-unit count. */
+  withinMetric?: 'units' | 'propertiesPct' | 'propertiesBeyondPct';
   rateImpactSubLabel: string;
   analysis: GlampingProximityAnalysis;
   market: GlampingMarketSnapshotMarket;
@@ -65,11 +65,13 @@ export function GlampingProximitySection({
   const sectionId = headingId.replace(/-heading$/, '');
 
   const withinValue =
-    withinMetric === 'propertiesPct'
-      ? analysis.propertiesWithinPct != null
-        ? `${analysis.propertiesWithinPct}%`
-        : '—'
-      : new Intl.NumberFormat('en-US').format(analysis.unitsWithin);
+    withinMetric === 'units'
+      ? new Intl.NumberFormat('en-US').format(analysis.unitsWithin)
+      : analysis.propertiesWithinPct == null
+        ? '—'
+        : withinMetric === 'propertiesBeyondPct'
+          ? `${Math.max(0, 100 - analysis.propertiesWithinPct)}%`
+          : `${analysis.propertiesWithinPct}%`;
 
   return (
     <section
