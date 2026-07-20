@@ -22,7 +22,7 @@ import {
   filterAssignedAuthorActiveJobs,
   PROJECT_PIPELINE_DEMO_AUTHOR,
 } from '@/lib/project-pipeline/author-preview';
-import { isGoogleSheetsOAuthAuthError } from '@/lib/project-pipeline/google-sheets-errors';
+import { isGoogleSheetsOAuthAuthError } from '@/lib/project-pipeline/google-sheets-client-errors';
 import {
   DEFAULT_PROJECT_PIPELINE_VIEW_SHEET_FILTER,
   isProjectPipelineAllSheetsTab,

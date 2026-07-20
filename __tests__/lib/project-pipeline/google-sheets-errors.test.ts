@@ -1,8 +1,8 @@
 import {
-  formatProjectPipelineSheetsAccessError,
   isGoogleSheetsOAuthAuthError,
   isGoogleSheetsPermissionError,
-} from '@/lib/project-pipeline/google-sheets-errors';
+} from '@/lib/project-pipeline/google-sheets-client-errors';
+import { formatProjectPipelineSheetsAccessError } from '@/lib/project-pipeline/google-sheets-errors';
 
 describe('google-sheets-errors', () => {
   it('detects permission errors', () => {
