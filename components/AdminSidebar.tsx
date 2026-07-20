@@ -9,6 +9,7 @@ import {
   Map,
   FileText,
   User,
+  Receipt,
   LogOut,
   X,
   Menu,
@@ -73,6 +74,7 @@ function getActivePageId(pathname: string): string {
   if (pathname.startsWith('/admin/account')) return 'account';
   if (pathname.startsWith('/admin/workload')) return 'pipeline-workload';
   if (pathname.startsWith('/admin/job-activity')) return 'job-activity';
+  if (pathname.startsWith('/admin/quickbooks')) return 'quickbooks';
   return '';
 }
 
@@ -92,7 +94,12 @@ const TOOLS_PAGE_IDS = new Set([
   'sage-data',
 ]);
 
-const ADMIN_PAGE_IDS = new Set(['managed-users', 'pipeline-workload', 'job-activity']);
+const ADMIN_PAGE_IDS = new Set([
+  'managed-users',
+  'pipeline-workload',
+  'job-activity',
+  'quickbooks',
+]);
 
 function NavLink({
   href,
@@ -204,6 +211,7 @@ export default function AdminSidebar() {
 
   const showCollapsed = isDesktop && isCollapsed;
   const showManagedUsersAdminNav = isManagedUsersAdminEmail(userEmail);
+  const showQuickbooksAdminNav = userRole === 'admin';
   const isLoggedInManagedUser =
     userEmail !== 'Loading...' &&
     userEmail !== 'Not logged in' &&
@@ -957,6 +965,16 @@ export default function AdminSidebar() {
                               isCollapsed={false}
                             />
                           ) : null}
+                          {showQuickbooksAdminNav ? (
+                            <NavLink
+                              href="/admin/quickbooks"
+                              label={tSidebar('quickbooks')}
+                              icon={Receipt}
+                              pageId="quickbooks"
+                              isActive={activePageId === 'quickbooks'}
+                              isCollapsed={false}
+                            />
+                          ) : null}
                         </div>
                       ) : null}
                     </div>
@@ -1030,6 +1048,21 @@ export default function AdminSidebar() {
                             >
                               <Briefcase className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                               {tSidebar('pipelineWorkload')}
+                            </Link>
+                          ) : null}
+                          {showQuickbooksAdminNav ? (
+                            <Link
+                              href="/admin/quickbooks"
+                              role="menuitem"
+                              onClick={() => setAdminFlyoutOpen(false)}
+                              className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                                activePageId === 'quickbooks'
+                                  ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                                  : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                              }`}
+                            >
+                              <Receipt className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                              {tSidebar('quickbooks')}
                             </Link>
                           ) : null}
                         </div>
