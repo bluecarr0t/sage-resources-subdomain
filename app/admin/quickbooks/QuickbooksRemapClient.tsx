@@ -8,11 +8,13 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
   Link2,
   Loader2,
   RefreshCw,
+  X,
 } from 'lucide-react';
-import { Button, Card, Select } from '@/components/ui';
+import { Button, Card, Modal, ModalContent, Select } from '@/components/ui';
 import {
   adminBodyMuted,
   adminPageDescription,
@@ -20,6 +22,7 @@ import {
   adminPageTitle,
   adminSurface,
 } from '@/lib/admin-ui';
+import { quickbooksInvoiceUiUrl } from '@/lib/quickbooks/constants';
 import type { RemapInvoicesSummary } from '@/lib/quickbooks/qbo-types';
 import type {
   QuickbooksRemapHistoryAction,
@@ -93,6 +96,8 @@ export default function QuickbooksRemapClient() {
   const [historySource, setHistorySource] = useState<
     QuickbooksRemapHistorySource | 'all'
   >('all');
+  const [selectedHistory, setSelectedHistory] =
+    useState<QuickbooksRemapHistoryRow | null>(null);
 
   const loadStatus = useCallback(async () => {
     setStatusLoading(true);
@@ -540,10 +545,22 @@ export default function QuickbooksRemapClient() {
                     </tr>
                   </thead>
                   <tbody>
-                    {history.map((row) => (
+                    {history.map((row) => {
+                      const docLabel = row.doc_number || row.invoice_id;
+                      return (
                       <tr
                         key={row.id}
-                        className="border-t border-neutral-200/70 dark:border-neutral-800"
+                        className="cursor-pointer border-t border-neutral-200/70 transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900/40"
+                        tabIndex={0}
+                        role="button"
+                        aria-label={t('historyRowOpen', { docNumber: docLabel })}
+                        onClick={() => setSelectedHistory(row)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setSelectedHistory(row);
+                          }
+                        }}
                       >
                         <td className="whitespace-nowrap px-3 py-2 text-xs">
                           {formatWhen(row.created_at)}
@@ -551,7 +568,7 @@ export default function QuickbooksRemapClient() {
                         <td className="px-3 py-2">{sourceLabel(row.source)}</td>
                         <td className="px-3 py-2">
                           <span
-                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            className={`inline-flex whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${
                               row.action === 'updated'
                                 ? 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200'
                                 : row.action === 'error'
@@ -562,8 +579,8 @@ export default function QuickbooksRemapClient() {
                             {actionLabel(row.action)}
                           </span>
                         </td>
-                        <td className="px-3 py-2 font-mono text-xs">
-                          {row.doc_number || row.invoice_id}
+                        <td className="px-3 py-2 font-mono text-xs text-[#006b5f]">
+                          {docLabel}
                         </td>
                         <td className="px-3 py-2 text-xs">
                           {row.source_item_name} → {row.target_item_name || '—'}
@@ -580,7 +597,8 @@ export default function QuickbooksRemapClient() {
                               : '—')}
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -624,6 +642,157 @@ export default function QuickbooksRemapClient() {
             </div>
           )}
         </Card>
+
+        <Modal
+          open={selectedHistory != null}
+          onClose={() => setSelectedHistory(null)}
+          className="max-w-lg"
+          ariaLabelledBy="qbo-history-detail-title"
+        >
+          {selectedHistory ? (
+            <ModalContent className="p-5">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <h2
+                    id="qbo-history-detail-title"
+                    className="text-base font-medium text-neutral-900 dark:text-neutral-100"
+                  >
+                    {t('historyDetailTitle')}
+                  </h2>
+                  <p className={`${adminBodyMuted} mt-1 font-mono text-xs`}>
+                    {selectedHistory.doc_number || selectedHistory.invoice_id}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedHistory(null)}
+                  className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+                  aria-label={t('historyDetailClose')}
+                >
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+
+              <dl className="space-y-2 text-sm text-neutral-700 dark:text-neutral-300">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailDocNumber')}
+                  </dt>
+                  <dd className="font-mono text-xs">
+                    {selectedHistory.doc_number || '—'}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailInvoiceId')}
+                  </dt>
+                  <dd className="font-mono text-xs">{selectedHistory.invoice_id}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailTxnDate')}
+                  </dt>
+                  <dd>{selectedHistory.txn_date || '—'}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailWhen')}
+                  </dt>
+                  <dd>{formatWhen(selectedHistory.created_at)}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailAction')}
+                  </dt>
+                  <dd>{actionLabel(selectedHistory.action)}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailSource')}
+                  </dt>
+                  <dd>{sourceLabel(selectedHistory.source)}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailChange')}
+                  </dt>
+                  <dd className="text-right text-xs">
+                    {selectedHistory.source_item_name} →{' '}
+                    {selectedHistory.target_item_name || '—'}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailActor')}
+                  </dt>
+                  <dd className="text-right text-xs">
+                    {selectedHistory.actor_email || '—'}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-neutral-500 dark:text-neutral-400">
+                    {t('historyDetailStatus')}
+                  </dt>
+                  <dd className="text-right text-xs">
+                    {selectedHistory.error_message ||
+                      (selectedHistory.matched_line_ids.length
+                        ? t('historyLinesChanged', {
+                            count: selectedHistory.matched_line_ids.length,
+                          })
+                        : '—')}
+                  </dd>
+                </div>
+                {selectedHistory.matched_line_ids.length > 0 ? (
+                  <div>
+                    <dt className="text-neutral-500 dark:text-neutral-400">
+                      {t('historyDetailLines')}
+                    </dt>
+                    <dd className="mt-1 font-mono text-xs">
+                      {selectedHistory.matched_line_ids.join(', ')}
+                    </dd>
+                  </div>
+                ) : null}
+                {selectedHistory.matched_descriptions.length > 0 ? (
+                  <div>
+                    <dt className="text-neutral-500 dark:text-neutral-400">
+                      {t('historyDetailDescriptions')}
+                    </dt>
+                    <dd className="mt-1 text-xs">
+                      {selectedHistory.matched_descriptions.join(' · ')}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+
+              <div className="mt-5 flex flex-wrap justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setSelectedHistory(null)}
+                >
+                  {t('historyDetailClose')}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => {
+                    const environment = status?.environment ?? 'sandbox';
+                    window.open(
+                      quickbooksInvoiceUiUrl(environment, selectedHistory.invoice_id),
+                      '_blank',
+                      'noopener,noreferrer'
+                    );
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4" aria-hidden />
+                  {t('historyDetailOpenQbo')}
+                </Button>
+              </div>
+            </ModalContent>
+          ) : null}
+        </Modal>
       </div>
     </main>
   );

@@ -14,3 +14,15 @@ export const QBO_OAUTH_TOKEN_URL = 'https://oauth.platform.intuit.com/oauth2/v1/
 
 export const QBO_API_BASE_PRODUCTION = 'https://quickbooks.api.intuit.com';
 export const QBO_API_BASE_SANDBOX = 'https://sandbox-quickbooks.api.intuit.com';
+
+/** Customer-facing QBO UI host for opening an invoice by txn id. */
+export function quickbooksInvoiceUiUrl(
+  environment: 'production' | 'sandbox',
+  invoiceId: string
+): string {
+  const host =
+    environment === 'sandbox'
+      ? 'https://app.sandbox.qbo.intuit.com'
+      : 'https://app.qbo.intuit.com';
+  return `${host}/app/invoice?txnId=${encodeURIComponent(invoiceId)}`;
+}

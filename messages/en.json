@@ -1278,7 +1278,22 @@
       "historyLinesChanged": "{count, plural, one {# line} other {# lines}}",
       "historyPagination": "Page {page} of {pages}",
       "historyPrevious": "Previous",
-      "historyNext": "Next"
+      "historyNext": "Next",
+      "historyRowOpen": "View invoice {docNumber}",
+      "historyDetailTitle": "Invoice details",
+      "historyDetailClose": "Close",
+      "historyDetailOpenQbo": "Open in QuickBooks",
+      "historyDetailInvoiceId": "Invoice ID",
+      "historyDetailDocNumber": "Invoice #",
+      "historyDetailTxnDate": "Txn date",
+      "historyDetailAction": "Action",
+      "historyDetailSource": "Source",
+      "historyDetailChange": "Change",
+      "historyDetailActor": "Actor",
+      "historyDetailWhen": "When",
+      "historyDetailStatus": "Status",
+      "historyDetailLines": "Matched lines",
+      "historyDetailDescriptions": "Descriptions"
     },
     "pipelineWorkload": {
       "title": "Pipeline workload",
