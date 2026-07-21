@@ -1,15 +1,16 @@
 import type { ReactNode } from 'react';
+import { GlampingAllClassificationsPill } from '@/components/glamping-industry/GlampingAllClassificationsPill';
 import type { GlampingAmenityImpactRow } from '@/lib/glamping-amenity-impact';
 import { formatGlampingMarketOverviewRate } from '@/lib/glamping-market-overview-currency';
 import type { GlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapshot-region';
 
-/** Always national (all classifications); not recomputed when the page tier filter changes. */
+/** Always all classifications; not recomputed when the page tier filter changes. */
 export const AMENITY_IMPACT_SECTION_BLURB =
   'Unit-weighted avg. rate with vs. without each amenity (with − without). Thin “with” samples show as provisional (~); non-positive deltas as Inconclusive.';
 
-/** Appended when a classification tier is selected so users know this section stays national. */
-export const AMENITY_IMPACT_NATIONAL_SCOPE_BLURB =
-  'National · all classifications (not filtered by tier).';
+/** Appended when a classification tier is selected so users know this section ignores tier. */
+export const AMENITY_IMPACT_ALL_CLASSIFICATIONS_SCOPE_BLURB =
+  'All classifications (not filtered by tier).';
 
 export type GlampingAmenityImpactSectionProps = {
   rows: GlampingAmenityImpactRow[];
@@ -86,11 +87,7 @@ export function GlampingAmenityImpactSection({
         >
           Amenity Impact
         </h2>
-        {showAllClassificationsScope ? (
-          <span className="inline-flex items-center rounded-sm bg-sage-700 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-yellow-300">
-            All classifications
-          </span>
-        ) : null}
+        {showAllClassificationsScope ? <GlampingAllClassificationsPill /> : null}
       </div>
       <p
         className={
@@ -101,7 +98,7 @@ export function GlampingAmenityImpactSection({
       >
         {AMENITY_IMPACT_SECTION_BLURB}
         {showAllClassificationsScope
-          ? ` ${AMENITY_IMPACT_NATIONAL_SCOPE_BLURB}`
+          ? ` ${AMENITY_IMPACT_ALL_CLASSIFICATIONS_SCOPE_BLURB}`
           : null}
       </p>
 

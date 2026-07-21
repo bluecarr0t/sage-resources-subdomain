@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import nextDynamic from 'next/dynamic';
 import { EDITORIAL_LINK_CLASS, EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
+import { GlampingAllClassificationsPill } from '@/components/glamping-industry/GlampingAllClassificationsPill';
 import { GlampingMarketOverviewLoadError } from '@/components/glamping-industry/GlampingMarketOverviewLoadError';
 import { GlampingMarketOverviewMapLoading } from '@/components/glamping-industry/GlampingMarketOverviewMapLoading';
 import { GlampingAmenityImpactSection } from '@/components/glamping-industry/GlampingAmenityImpactSection';
@@ -146,17 +147,30 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
       : matchedRegion
         ? GLAMPING_MARKET_US_REGION_LABELS[matchedRegion]
         : `${statesFilter.length} states selected`;
+  /**
+   * Keep charts & aggregates on all classifications when:
+   * - Canada (thin tier samples), or
+   * - a US region / state selection is active.
+   * UI tier stays in the URL. Amenity Impact always ignores tier.
+   */
+  const ignoreClassification = market === 'ca' || statesFilter != null;
+  const dataTier = ignoreClassification ? 'all' : tier;
+  const showAllClassificationsOnCharts = tier !== 'all' && ignoreClassification;
+  /** Amenity Impact is always all-classifications, including national US. */
+  const showAllClassificationsOnAmenity = tier !== 'all';
+  /** Copy: only claim “in this tier” when data is actually tier-filtered. */
+  const tierScopedCopy = dataTier !== 'all';
 
   const [result, usStates, caProvinces, proximity, amenityImpact] =
     await Promise.all([
-      fetchGlampingIndustryMetrics(market, tier, statesFilter),
+      fetchGlampingIndustryMetrics(market, dataTier, statesFilter),
       market === 'us'
-        ? fetchGlampingIndustryUsStateMetrics(tier, statesFilter)
+        ? fetchGlampingIndustryUsStateMetrics(dataTier, statesFilter)
         : Promise.resolve({ ok: true as const, data: {} }),
       market === 'ca'
-        ? fetchGlampingIndustryCaProvinceMetrics(tier)
+        ? fetchGlampingIndustryCaProvinceMetrics(dataTier)
         : Promise.resolve({ ok: true as const, data: {} }),
-      fetchGlampingMarketProximityBundle(market, tier, statesFilter),
+      fetchGlampingMarketProximityBundle(market, dataTier, statesFilter),
       market === 'us'
         ? fetchGlampingAmenityImpact(market, 'all', statesFilter)
         : Promise.resolve({ ok: true as const, data: [] }),
@@ -325,9 +339,9 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
                   Top unit types
                 </h2>
                 <p className="mt-2 max-w-xs text-[10px] leading-relaxed text-neutral-500">
-                  Open-unit mix{tier !== 'all' ? ' in this tier' : ''}; unit-weighted ARDR
+                  Open-unit mix{tierScopedCopy ? ' in this tier' : ''}; unit-weighted ARDR
                   {market === 'ca' ? ' (CAD)' : ''} when published (excludes all-inclusive)
-                  {tier !== 'all' ? '. ~ = provisional (thin or package-rate sample)' : ''}.
+                  {tierScopedCopy ? '. ~ = provisional (thin or package-rate sample)' : ''}.
                 </p>
                 {result.data.topUnitTypesByUnits.length > 0 ? (
                   <ul className="mt-6 space-y-3 text-sm">
@@ -533,17 +547,22 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
               className="mt-16 scroll-mt-28 sm:mt-20"
               aria-labelledby="unit-type-by-rate-heading"
             >
-              <h2
-                id="unit-type-by-rate-heading"
-                className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base"
-              >
-                Unit Type by Rate
-              </h2>
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                <h2
+                  id="unit-type-by-rate-heading"
+                  className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base"
+                >
+                  Unit Type by Rate
+                </h2>
+                {showAllClassificationsOnCharts ? (
+                  <GlampingAllClassificationsPill />
+                ) : null}
+              </div>
               <p className="mt-2 whitespace-nowrap text-[10px] leading-relaxed text-neutral-500">
                 Before taxes and booking fees. Open-unit mix
-                {tier !== 'all' ? ' in this tier' : ''}; unit-weighted average retail daily
+                {tierScopedCopy ? ' in this tier' : ''}; unit-weighted average retail daily
                 rate{market === 'ca' ? ' (CAD)' : ''} when published (excludes all-inclusive)
-                {tier !== 'all' ? '. ~ = provisional (thin or package-rate sample)' : ''}.
+                {tierScopedCopy ? '. ~ = provisional (thin or package-rate sample)' : ''}.
                 <GlampingUnitTypeByRateDefinitionsButton
                   labels={unitTypeLabelsForRateChart(result.data.unitTypesByUnits)}
                 />
@@ -562,7 +581,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
               <GlampingAmenityImpactSection
                 rows={amenityImpact.data}
                 market={market}
-                showAllClassificationsScope={tier !== 'all'}
+                showAllClassificationsScope={showAllClassificationsOnAmenity}
                 chart={
                   <GlampingAmenityImpactChart
                     rows={amenityImpact.data}
@@ -591,6 +610,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
               rateImpactSubLabel={`Less than ${NATIONAL_PARKS_PROXIMITY_THRESHOLD_MILES} miles vs. greater than ${NATIONAL_PARKS_PROXIMITY_THRESHOLD_MILES} miles`}
               analysis={proximity.data.nationalParks}
               market={market}
+              showAllClassificationsScope={showAllClassificationsOnCharts}
               chart={
                 <GlampingProximityBandChart
                   analysis={proximity.data.nationalParks}
@@ -614,6 +634,7 @@ export default async function GlampingMarketOverviewPage({ searchParams }: PageP
               rateImpactSubLabel={`Greater than ${AIRPORTS_PROXIMITY_THRESHOLD_MILES} miles vs. less than ${AIRPORTS_PROXIMITY_THRESHOLD_MILES} miles`}
               analysis={proximity.data.airports}
               market={market}
+              showAllClassificationsScope={showAllClassificationsOnCharts}
               chart={
                 <GlampingProximityBandChart
                   analysis={proximity.data.airports}

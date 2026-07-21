@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { GlampingAllClassificationsPill } from '@/components/glamping-industry/GlampingAllClassificationsPill';
 import type { GlampingProximityAnalysis } from '@/lib/glamping-proximity-analysis';
 import { formatGlampingMarketOverviewRate } from '@/lib/glamping-market-overview-currency';
 import type { GlampingMarketSnapshotMarket } from '@/lib/glamping-market-snapshot-region';
@@ -15,6 +16,8 @@ export type GlampingProximitySectionProps = {
   analysis: GlampingProximityAnalysis;
   market: GlampingMarketSnapshotMarket;
   chart: ReactNode;
+  /** When true (page tier ≠ All under a geo scope), show the All classifications chip. */
+  showAllClassificationsScope?: boolean;
 };
 
 function MetricCard({
@@ -61,6 +64,7 @@ export function GlampingProximitySection({
   analysis,
   market,
   chart,
+  showAllClassificationsScope = false,
 }: GlampingProximitySectionProps) {
   const sectionId = headingId.replace(/-heading$/, '');
 
@@ -79,12 +83,15 @@ export function GlampingProximitySection({
       className="mt-16 scroll-mt-28 sm:mt-20"
       aria-labelledby={headingId}
     >
-      <h2
-        id={headingId}
-        className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base"
-      >
-        {title}
-      </h2>
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+        <h2
+          id={headingId}
+          className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-600 sm:text-base"
+        >
+          {title}
+        </h2>
+        {showAllClassificationsScope ? <GlampingAllClassificationsPill /> : null}
+      </div>
       <p className="mt-2 max-w-xl text-[10px] leading-relaxed text-neutral-500">
         {subtitle}
       </p>
