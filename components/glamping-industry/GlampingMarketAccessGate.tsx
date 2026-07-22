@@ -122,14 +122,13 @@ export function GlampingMarketAccessGate({
   }, [step, formMode]);
 
   // The auth callback returns here with `?access=link-expired` when a magic
-  // link could not be verified (expired, already used, or opened on a
-  // different device than it was requested). Prompt for a fresh link and
-  // default to the email-only mode since they already submitted their details.
+  // link could not be verified (expired or already used). Prompt for a fresh
+  // link and default to email-only mode since they already submitted details.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('access') === 'link-expired') {
       setNotice(
-        'That sign-in link has expired or was already used. Request a new one below, and open it on this device.'
+        'That sign-in link has expired or was already used. Request a new one below.'
       );
       setFormMode('email-only');
       const url = new URL(window.location.href);
@@ -397,9 +396,8 @@ export function GlampingMarketAccessGate({
               {successDescription}
             </p>
             <p className="mt-4 text-[11px] leading-relaxed text-neutral-500">
-              Open the link on <span className="font-medium text-neutral-700">this device</span>{' '}
-              (the same browser you used here). The link expires shortly. Don&apos;t see it? Check
-              spam, or{' '}
+              Open the link from any device — it signs you in on the browser you use. The
+              link expires shortly. Don&apos;t see it? Check spam, or{' '}
               <button
                 type="button"
                 onClick={() => {

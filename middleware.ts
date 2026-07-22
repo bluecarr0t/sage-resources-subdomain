@@ -215,7 +215,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Supabase may send PKCE `code` to Site URL (e.g. /en) instead of /auth/callback.
+    // Supabase may send auth params to Site URL (e.g. /en) instead of /auth/callback.
     const authCallbackUrl = relocateAuthCodeToCallbackUrl(request.nextUrl);
     if (authCallbackUrl) {
       return NextResponse.redirect(authCallbackUrl);

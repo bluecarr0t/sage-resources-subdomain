@@ -6,6 +6,7 @@
 import { NextRequest } from 'next/server';
 
 const mockExchangeCodeForSession = jest.fn();
+const mockVerifyOtp = jest.fn();
 const mockUpsert = jest.fn();
 const mockLogGatedContentEvent = jest.fn();
 
@@ -17,6 +18,7 @@ jest.mock('@/lib/supabase-server', () => ({
   createSupabaseRouteHandlerClient: jest.fn(() => ({
     auth: {
       exchangeCodeForSession: (...args: unknown[]) => mockExchangeCodeForSession(...args),
+      verifyOtp: (...args: unknown[]) => mockVerifyOtp(...args),
     },
   })),
 }));
@@ -54,14 +56,19 @@ describe('GET /auth/callback — gated magic link', () => {
       error: null,
       data: { session: { user: mockUser } },
     });
+    mockVerifyOtp.mockResolvedValue({
+      error: null,
+      data: { session: { user: mockUser } },
+    });
     mockUpsert.mockResolvedValue({ error: null });
     mockLogGatedContentEvent.mockResolvedValue(undefined);
   });
 
-  it('exchanges code, upserts lead, and redirects to glamping market overview', async () => {
+  it('verifies token_hash, upserts lead, and redirects to glamping market overview', async () => {
     const res = await GET(
       callbackUrl({
-        code: 'pkce-auth-code',
+        token_hash: 'otp-token-hash',
+        type: 'signup',
         redirect: '/glamping-market-overview',
       })
     );
@@ -70,7 +77,11 @@ describe('GET /auth/callback — gated magic link', () => {
     const location = res.headers.get('location') ?? '';
     expect(location).toMatch(/\/glamping-market-overview$/);
 
-    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('pkce-auth-code');
+    expect(mockVerifyOtp).toHaveBeenCalledWith({
+      type: 'signup',
+      token_hash: 'otp-token-hash',
+    });
+    expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
     expect(mockUpsert).toHaveBeenCalledWith(
       expect.objectContaining({
         user_id: 'user-uuid-1',
@@ -92,12 +103,55 @@ describe('GET /auth/callback — gated magic link', () => {
     });
   });
 
+  it('prefers token_hash over PKCE code when both are present', async () => {
+    const res = await GET(
+      callbackUrl({
+        token_hash: 'otp-token-hash',
+        type: 'magiclink',
+        code: 'pkce-auth-code',
+        redirect: '/glamping-market-overview',
+      })
+    );
+
+    expect(res.status).toBe(307);
+    expect(mockVerifyOtp).toHaveBeenCalledWith({
+      type: 'magiclink',
+      token_hash: 'otp-token-hash',
+    });
+    expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
+  });
+
+  it('exchanges PKCE code when token_hash is absent (admin OAuth / legacy links)', async () => {
+    const res = await GET(
+      callbackUrl({
+        code: 'pkce-auth-code',
+        redirect: '/glamping-market-overview',
+      })
+    );
+
+    expect(res.status).toBe(307);
+    const location = res.headers.get('location') ?? '';
+    expect(location).toMatch(/\/glamping-market-overview$/);
+
+    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('pkce-auth-code');
+    expect(mockVerifyOtp).not.toHaveBeenCalled();
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: 'user-uuid-1',
+        email: 'jane@example.com',
+        page_slug: 'glamping-market-overview',
+      }),
+      { onConflict: 'email,page_slug' }
+    );
+  });
+
   it('still redirects to overview when lead upsert fails', async () => {
     mockUpsert.mockResolvedValueOnce({ error: { message: 'db error' } });
 
     const res = await GET(
       callbackUrl({
-        code: 'pkce-auth-code',
+        token_hash: 'otp-token-hash',
+        type: 'signup',
         redirect: '/glamping-market-overview',
       })
     );
@@ -107,7 +161,30 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
   });
 
-  it('returns gated users to the gated page (not /login) when code exchange fails', async () => {
+  it('returns gated users to the gated page (not /login) when OTP verify fails', async () => {
+    mockVerifyOtp.mockResolvedValueOnce({
+      error: { message: 'invalid token' },
+      data: { session: null },
+    });
+
+    const res = await GET(
+      callbackUrl({
+        token_hash: 'bad-hash',
+        type: 'signup',
+        redirect: '/glamping-market-overview',
+      })
+    );
+
+    expect(res.status).toBe(307);
+    const location = res.headers.get('location') ?? '';
+    expect(location).toContain('/glamping-market-overview');
+    expect(location).toContain('access=link-expired');
+    expect(location).not.toContain('/login');
+    expect(mockUpsert).not.toHaveBeenCalled();
+    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
+  });
+
+  it('returns gated users to the gated page when code exchange fails', async () => {
     mockExchangeCodeForSession.mockResolvedValueOnce({
       error: { message: 'invalid code' },
       data: { session: null },
@@ -125,8 +202,6 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(location).toContain('/glamping-market-overview');
     expect(location).toContain('access=link-expired');
     expect(location).not.toContain('/login');
-    expect(mockUpsert).not.toHaveBeenCalled();
-    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
   });
 
   it('redirects admin flows to /login when code exchange fails', async () => {
@@ -153,6 +228,7 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toMatch(/\/admin\/job-pipeline$/);
     expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
+    expect(mockVerifyOtp).not.toHaveBeenCalled();
   });
 
   it('admin OAuth flow without redirect param still goes to active jobs', async () => {
@@ -163,7 +239,7 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(mockUpsert).not.toHaveBeenCalled();
   });
 
-  it('returns gated users with link-expired when callback has no code', async () => {
+  it('returns gated users with link-expired when callback has no token or code', async () => {
     const res = await GET(
       callbackUrl({
         redirect: '/glamping-market-overview',
@@ -175,5 +251,21 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(location).toContain('/glamping-market-overview');
     expect(location).toContain('access=link-expired');
     expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
+    expect(mockVerifyOtp).not.toHaveBeenCalled();
+  });
+
+  it('returns link-expired when token_hash is present without a valid type', async () => {
+    const res = await GET(
+      callbackUrl({
+        token_hash: 'otp-token-hash',
+        type: 'not-a-real-type',
+        redirect: '/glamping-market-overview',
+      })
+    );
+
+    expect(res.status).toBe(307);
+    const location = res.headers.get('location') ?? '';
+    expect(location).toContain('access=link-expired');
+    expect(mockVerifyOtp).not.toHaveBeenCalled();
   });
 });

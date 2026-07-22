@@ -9,8 +9,8 @@
  * - Responses are always a generic `{ ok: true }` to avoid email enumeration.
  * - Rate limited per-email and per-IP via Upstash (fails open when Upstash is
  *   not configured locally).
- * - Uses the cookie-backed SSR client so the PKCE code_verifier is stored for
- *   the `/auth/callback` exchange.
+ * - Uses the cookie-backed SSR client so session cookies are available when
+ *   the user completes `/auth/callback` (token_hash verify or PKCE exchange).
  */
 
 import { NextRequest, NextResponse } from 'next/server';

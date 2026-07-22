@@ -7,6 +7,23 @@ Branded HTML templates for gated-access sign-in live in the repo:
 | Magic link (OTP / sign-in) | [`docs/email-templates/supabase-magic-link.html`](../email-templates/supabase-magic-link.html) | **Authentication → Email Templates → Magic Link** |
 | Confirm signup (if users see “Confirm your signup”) | [`docs/email-templates/supabase-confirm-signup.html`](../email-templates/supabase-confirm-signup.html) | **Authentication → Email Templates → Confirm signup** |
 
+## Cross-device sign-in (token_hash)
+
+Gated emails **must not** use `{{ .ConfirmationURL }}` (PKCE). That link only works in
+the browser that requested the email. Templates instead append `token_hash` onto
+`{{ .RedirectTo }}` (the app’s `emailRedirectTo`):
+
+```text
+{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email       # Magic Link template
+{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=signup      # Confirm signup template
+```
+
+`/auth/callback` calls `verifyOtp({ token_hash, type })`, so the session is created
+on **whatever device opens the link**.
+
+After changing templates in the repo, **re-paste them into the Supabase dashboard**
+(or the old PKCE links keep shipping).
+
 ## Recommended setup (one email)
 
 The gated form calls `signInWithOtp` (passwordless), so the **Magic Link** template
@@ -52,7 +69,7 @@ Under **Authentication → URL Configuration**:
 - **Site URL:** `https://resources.sageoutdooradvisory.com` (root only — **not** `/en` or any locale path; a locale Site URL sends users to `/en?code=…` instead of `/auth/callback`)
 - **Redirect URLs:** include  
   `https://resources.sageoutdooradvisory.com/auth/callback` and  
-  `https://resources.sageoutdooradvisory.com/auth/callback?redirect=**` (wildcard so the `redirect` query param is allowed) and  
+  `https://resources.sageoutdooradvisory.com/auth/callback?redirect=**` (wildcard so the `redirect` / `token_hash` query params are allowed) and  
   `http://localhost:3003/auth/callback`
 
 Under **Authentication → Providers → Email**:
@@ -119,16 +136,21 @@ Default sender is `Supabase Auth <noreply@mail.app.supabase.io>`. For a `@sageou
 
 ## Test
 
-1. Request access on `/glamping-market-overview` with a test inbox.
-2. Confirm subject, logo, button, and link land on `/auth/callback?redirect=/glamping-market-overview`.
-3. Click the link in the **same browser** used to submit the form (PKCE).
-4. If no email arrives, check Supabase → Logs → Auth for `mail.send` vs `over_email_send_rate_limit`.
+1. Deploy the app (so `/auth/callback` supports `token_hash`).
+2. Paste updated templates into Supabase (see **Apply in Supabase**).
+3. Request access on `/glamping-market-overview` with a test inbox.
+4. Confirm the email link is `…/auth/callback?redirect=…&token_hash=…&type=…` (not `….supabase.co/auth/v1/verify?token=pkce_…`).
+5. Open the link in a **different** browser or device than the one used to submit the form — access should unlock.
+6. If no email arrives, check Supabase → Logs → Auth for `mail.send` vs `over_email_send_rate_limit`.
 
 ## Template variables
 
 Supabase replaces these automatically—do not remove:
 
-- `{{ .ConfirmationURL }}` — sign-in / confirm link (required)
+- `{{ .RedirectTo }}` — app `emailRedirectTo` (`/auth/callback?redirect=…`)
+- `{{ .TokenHash }}` — OTP token hash for `verifyOtp` (required for cross-device)
 - `{{ .Email }}` — recipient (used in footer)
+
+Do **not** use `{{ .ConfirmationURL }}` for gated access — it is PKCE-bound to the request browser.
 
 See [Supabase email templates](https://supabase.com/docs/guides/auth/auth-email-templates).

@@ -1,11 +1,12 @@
 /**
- * OAuth callback route - handles PKCE code exchange on the server
- * The code_verifier is stored in cookies when OAuth is initiated; the server
- * receives those cookies with this request and can complete the exchange.
+ * Auth callback — establishes a session from either:
+ * - Email OTP `token_hash` + `type` (gated magic links; works on any device)
+ * - PKCE `code` (admin Google OAuth / legacy PKCE email links)
  *
  * Add this URL to Supabase Dashboard → Authentication → URL Configuration → Redirect URLs:
  * - http://localhost:3003/auth/callback (development)
  * - https://yourdomain.com/auth/callback (production)
+ * - https://yourdomain.com/auth/callback?redirect=**
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,6 +16,7 @@ import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import {
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   getGatedPageRedirectPath,
+  isEmailOtpType,
   isGatedPageSlug,
 } from '@/lib/gated-access';
 import { logGatedContentEvent } from '@/lib/gated-content-events';
@@ -127,18 +129,60 @@ function buildFailureRedirect(
   );
 }
 
+async function completeGatedSession(
+  response: NextResponse,
+  gatedSlug: string | null,
+  user: User | null | undefined
+): Promise<NextResponse> {
+  if (gatedSlug && user) {
+    await upsertGatedLead(user, gatedSlug);
+  }
+  return response;
+}
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
+  const tokenHash = requestUrl.searchParams.get('token_hash');
+  const otpTypeParam = requestUrl.searchParams.get('type');
   const redirectParam = requestUrl.searchParams.get('redirect');
 
   const destination = getSafeRedirect(redirectParam);
   const gatedSlug = gatedSlugForRedirect(destination);
+  const redirectTarget = gatedSlug
+    ? getGatedPageRedirectPath(gatedSlug)
+    : destination;
+
+  // Prefer token_hash (cross-device email links) over PKCE code exchange.
+  if (tokenHash && isEmailOtpType(otpTypeParam)) {
+    const response = NextResponse.redirect(new URL(redirectTarget, request.url));
+
+    try {
+      const supabase = createSupabaseRouteHandlerClient(request, response);
+      const { data, error } = await supabase.auth.verifyOtp({
+        type: otpTypeParam,
+        token_hash: tokenHash,
+      });
+
+      if (error) {
+        console.error('[auth/callback] OTP verify failed:', error);
+        return buildFailureRedirect(request, gatedSlug, error.message);
+      }
+
+      const user = data.session?.user ?? data.user;
+      return completeGatedSession(response, gatedSlug, user);
+    } catch (err) {
+      console.error('[auth/callback] OTP verify error:', err);
+      return buildFailureRedirect(request, gatedSlug, 'Authentication failed');
+    }
+  }
+
+  if (tokenHash && !isEmailOtpType(otpTypeParam)) {
+    console.error('[auth/callback] Missing or invalid OTP type for token_hash');
+    return buildFailureRedirect(request, gatedSlug, 'Sign-in link is missing or invalid');
+  }
 
   if (code) {
-    const redirectTarget = gatedSlug
-      ? getGatedPageRedirectPath(gatedSlug)
-      : destination;
     const response = NextResponse.redirect(new URL(redirectTarget, request.url));
 
     try {
@@ -151,11 +195,7 @@ export async function GET(request: NextRequest) {
       }
 
       const user = data.session?.user ?? data.user;
-      if (gatedSlug && user) {
-        await upsertGatedLead(user, gatedSlug);
-      }
-
-      return response;
+      return completeGatedSession(response, gatedSlug, user);
     } catch (err) {
       console.error('[auth/callback] Error:', err);
       return buildFailureRedirect(request, gatedSlug, 'Authentication failed');

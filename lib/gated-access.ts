@@ -47,9 +47,11 @@ export function normalizeAuthSiteOrigin(origin: string): string {
 }
 
 /**
- * Build the `emailRedirectTo` URL for `signInWithOtp`. Supabase sends the user
- * to `/auth/callback` with a `code`; we tack on `redirect` so the callback
- * knows which gated page to unlock after exchanging the code.
+ * Build the `emailRedirectTo` URL for `signInWithOtp`.
+ *
+ * Gated emails use `{{ .TokenHash }}` (not PKCE `{{ .ConfirmationURL }}`) and
+ * append `token_hash` onto this URL so `/auth/callback` can `verifyOtp` on any
+ * device. The `redirect` query param names the gated page to unlock.
  */
 export function buildMagicLinkRedirectUrl(origin: string, pageSlug: string): string {
   const normalizedOrigin = normalizeAuthSiteOrigin(origin);
@@ -58,13 +60,36 @@ export function buildMagicLinkRedirectUrl(origin: string, pageSlug: string): str
   return `${normalizedOrigin}/auth/callback?${params.toString()}`;
 }
 
+/** Supabase email OTP `type` values accepted by `auth.verifyOtp`. */
+const EMAIL_OTP_TYPES = [
+  'signup',
+  'invite',
+  'magiclink',
+  'recovery',
+  'email_change',
+  'email',
+] as const;
+
+export type EmailOtpType = (typeof EMAIL_OTP_TYPES)[number];
+
+/** True when `value` is a known Supabase email OTP type. */
+export function isEmailOtpType(value: unknown): value is EmailOtpType {
+  return typeof value === 'string' && (EMAIL_OTP_TYPES as readonly string[]).includes(value);
+}
+
 /**
  * When Supabase Site URL is set to `/{locale}` (or `emailRedirectTo` is not
- * allowlisted), magic links land as `/{locale}?code=…`. Rewrite to our callback.
+ * allowlisted), auth params land as `/{locale}?code=…` or `?token_hash=…`.
+ * Rewrite to our callback so the session can be established.
  */
 export function relocateAuthCodeToCallbackUrl(url: URL): URL | null {
   const code = url.searchParams.get('code');
-  if (!code || url.pathname === '/auth/callback' || url.pathname.startsWith('/auth/callback/')) {
+  const tokenHash = url.searchParams.get('token_hash');
+  if (
+    (!code && !tokenHash) ||
+    url.pathname === '/auth/callback' ||
+    url.pathname.startsWith('/auth/callback/')
+  ) {
     return null;
   }
   const next = new URL(url);

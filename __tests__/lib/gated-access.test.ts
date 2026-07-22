@@ -13,6 +13,7 @@ import {
   isValidEmail,
   normalizeAuthSiteOrigin,
   relocateAuthCodeToCallbackUrl,
+  isEmailOtpType,
 } from '@/lib/gated-access';
 
 describe('gated-access helpers', () => {
@@ -96,6 +97,17 @@ describe('gated-access helpers', () => {
       expect(out?.searchParams.get('redirect')).toBe('/glamping-market-overview');
     });
 
+    it('rewrites /en?token_hash=… to /auth/callback with redirect', () => {
+      const input = new URL(
+        'https://resources.sageoutdooradvisory.com/en?token_hash=abc&type=signup'
+      );
+      const out = relocateAuthCodeToCallbackUrl(input);
+      expect(out?.pathname).toBe('/auth/callback');
+      expect(out?.searchParams.get('token_hash')).toBe('abc');
+      expect(out?.searchParams.get('type')).toBe('signup');
+      expect(out?.searchParams.get('redirect')).toBe('/glamping-market-overview');
+    });
+
     it('returns null when already on /auth/callback', () => {
       const input = new URL(
         'https://resources.sageoutdooradvisory.com/auth/callback?code=abc&redirect=%2Fglamping-market-overview'
@@ -167,6 +179,20 @@ describe('gated-access helpers', () => {
         formatGatedAccessOtpErrorMessage('429: email rate limit exceeded')
       ).toMatch(/about an hour/i);
       expect(formatGatedAccessOtpErrorMessage('unexpected')).toBeNull();
+    });
+  });
+
+  describe('isEmailOtpType', () => {
+    it('accepts known Supabase email OTP types', () => {
+      expect(isEmailOtpType('signup')).toBe(true);
+      expect(isEmailOtpType('magiclink')).toBe(true);
+      expect(isEmailOtpType('email')).toBe(true);
+    });
+
+    it('rejects unknown values', () => {
+      expect(isEmailOtpType('not-a-real-type')).toBe(false);
+      expect(isEmailOtpType(null)).toBe(false);
+      expect(isEmailOtpType(undefined)).toBe(false);
     });
   });
 
