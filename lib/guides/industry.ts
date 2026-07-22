@@ -12,7 +12,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Glamping Industry Complete Guide",
       subheadline: "Everything you need to know about the glamping industry, from market trends to starting your own glamping business",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -394,7 +394,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Ready to Start Your Glamping Business?",
       description: "Schedule a free consultation with our glamping experts to discuss your project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -407,7 +407,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "RV Resort Industry Complete Guide",
       subheadline: "Everything you need to know about the RV resort industry, from market trends to starting your own RV resort",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -904,7 +904,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Ready to Start Your RV Resort?",
       description: "Schedule a free consultation with our RV resort experts to discuss your project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -916,7 +916,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Glamping Accommodation Types",
       subheadline: "A comprehensive guide to different glamping accommodation options",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -1044,7 +1044,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Choosing Accommodation Types?",
       description: "Schedule a consultation to discuss your glamping project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1056,7 +1056,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Glamping Market Trends 2025",
       subheadline: "Current trends and insights shaping the glamping industry",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -1151,7 +1151,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Want to Understand Market Trends for Your Project?",
       description: "Schedule a consultation to discuss market analysis",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1164,7 +1164,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "How to Start a Glamping Business",
       subheadline: "A step-by-step guide to launching your glamping venture",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -1847,7 +1847,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Ready to Start Your Glamping Business?",
       description: "Schedule a consultation to discuss your glamping project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1859,7 +1859,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Glamping vs. RV Resort",
       subheadline: "Comparing glamping and RV resort business models",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -1975,7 +1975,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Choosing Between Glamping and RV Resort?",
       description: "Schedule a consultation to discuss your options",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1987,7 +1987,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "RV Resort vs. RV Park",
       subheadline: "Understanding the differences between RV resorts and RV parks",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -2095,7 +2095,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Choosing Between RV Resort and RV Park?",
       description: "Schedule a consultation to discuss your options",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -2107,7 +2107,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "RV Resort Amenities Guide",
       subheadline: "Comprehensive guide to amenities and design for RV resorts",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -2223,7 +2223,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Planning RV Resort Amenities?",
       description: "Schedule a consultation to discuss your RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -2235,7 +2235,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "RV Resort Market Trends",
       subheadline: "Current trends and insights shaping the RV resort industry",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -2377,7 +2377,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Want to Understand Market Trends for Your Project?",
       description: "Schedule a consultation to discuss market analysis",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -2389,7 +2389,7 @@ export const industryGuides: Record<string, GuideContent> = {
     hero: {
       headline: "RV Resort Investment Guide",
       subheadline: "Comprehensive guide to RV resort investment analysis and strategy",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -2512,7 +2512,7 @@ export const industryGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Analyzing an RV Resort Investment?",
       description: "Schedule a consultation to discuss your investment goals",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   }

@@ -73,7 +73,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study",
       subheadline: "In the rapidly growing glamping market, understanding nuances and market demands is key to success. Our feasibility studies provide a thorough examination of potential for upscale and unique outdoor accommodations.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -187,7 +187,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Ready to Validate Your Glamping Project?",
       description: "Schedule a complimentary consultation with our glamping specialists",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     faqs: [
@@ -277,7 +277,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study",
       subheadline: "Make informed investment decisions with comprehensive RV resort market analysis",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -311,7 +311,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your RV Resort Investment",
       description: "Get started with a free consultation from our RV resort specialists",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     faqs: [
@@ -374,7 +374,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Feasibility Study",
       subheadline: "Expert market analysis and financial projections for your campground project",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -408,7 +408,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Campground Feasibility Study",
       description: "Schedule a complimentary consultation with our campground specialists",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     faqs: [
@@ -471,7 +471,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal",
       subheadline: "Bank-approved glamping appraisals built for lenders—not generic hotel templates. Income, sales, and cost approaches grounded in 350+ outdoor hospitality valuations across North America.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -599,7 +599,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Glamping Property Appraised",
       description: "Schedule a consultation to discuss your appraisal needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     faqs: [
@@ -677,7 +677,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Appraisal & Valuation",
       subheadline: "Expert RV resort appraisals trusted by banks and investors",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -707,7 +707,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Request Your RV Resort Appraisal",
       description: "Get started with a free consultation",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     faqs: [
@@ -771,7 +771,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in Texas",
       subheadline: "Expert glamping market analysis and feasibility studies for Texas properties. Understand your Texas glamping resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -800,7 +800,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Texas Glamping Feasibility Study",
       description: "Get expert analysis for your Texas glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Texas", "Texas glamping feasibility", "glamping resort Texas", "Texas outdoor hospitality"],
@@ -852,7 +852,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Help Financing Your Glamping Resort",
       description: "Schedule a consultation to discuss your financing needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     faqs: [
@@ -930,7 +930,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Appraisal in California",
       subheadline: "Expert RV resort and RV park appraisals for California properties. Bank-approved valuations trusted by California lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -959,7 +959,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your California RV Resort Appraised",
       description: "Schedule a consultation for your California RV resort appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort California", "California RV park appraisal", "RV resort appraisal CA", "California outdoor hospitality"],
@@ -973,7 +973,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in Florida",
       subheadline: "Expert glamping market analysis and feasibility studies for Florida properties. Understand your Florida glamping resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1002,7 +1002,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Florida Glamping Feasibility Study",
       description: "Get expert analysis for your Florida glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Florida", "Florida glamping feasibility", "glamping resort Florida", "Florida outdoor hospitality"],
@@ -1016,7 +1016,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in Florida",
       subheadline: "Expert RV resort market analysis and feasibility studies for Florida properties. Make informed investment decisions.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1045,7 +1045,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your Florida RV Resort Investment",
       description: "Get expert analysis for your Florida RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Florida", "Florida RV park feasibility", "RV resort Florida", "Florida RV market"],
@@ -1059,7 +1059,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal in Colorado",
       subheadline: "Expert glamping appraisals for Colorado properties. Bank-approved valuations trusted by Colorado lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1088,7 +1088,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Colorado Glamping Property Appraised",
       description: "Schedule a consultation for your Colorado glamping appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Colorado", "Colorado glamping appraisal", "glamping resort Colorado", "Colorado outdoor hospitality"],
@@ -1101,7 +1101,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in Arizona",
       subheadline: "Expert RV resort market analysis and feasibility studies for Arizona properties. Understand your Arizona RV resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1130,7 +1130,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Arizona RV Resort Feasibility Study",
       description: "Get expert analysis for your Arizona RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Arizona", "Arizona RV park feasibility", "RV resort Arizona", "Arizona RV market"],
@@ -1143,7 +1143,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Feasibility Study in North Carolina",
       subheadline: "Expert campground market analysis and feasibility studies for North Carolina properties. Validate your NC campground project.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1172,7 +1172,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your North Carolina Campground Feasibility Study",
       description: "Get expert analysis for your North Carolina campground project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground North Carolina", "NC campground feasibility", "campground North Carolina", "North Carolina outdoor hospitality"],
@@ -1185,7 +1185,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in Utah",
       subheadline: "Expert glamping market analysis and feasibility studies for Utah properties. Understand your Utah glamping resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1214,7 +1214,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Utah Glamping Feasibility Study",
       description: "Get expert analysis for your Utah glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Utah", "Utah glamping feasibility", "glamping resort Utah", "Utah outdoor hospitality"],
@@ -1227,7 +1227,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Appraisal in Texas",
       subheadline: "Expert RV resort and RV park appraisals for Texas properties. Bank-approved valuations trusted by Texas lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1256,7 +1256,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Texas RV Resort Appraised",
       description: "Schedule a consultation for your Texas RV resort appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Texas", "Texas RV park appraisal", "RV resort appraisal TX", "Texas outdoor hospitality"],
@@ -1269,7 +1269,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Appraisal in Florida",
       subheadline: "Expert campground appraisals for Florida properties. Bank-approved valuations trusted by Florida lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1298,7 +1298,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Florida Campground Appraised",
       description: "Schedule a consultation for your Florida campground appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground Florida", "Florida campground appraisal", "campground appraisal FL", "Florida outdoor hospitality"],
@@ -1311,7 +1311,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in Oregon",
       subheadline: "Expert glamping market analysis and feasibility studies for Oregon properties. Understand your Oregon glamping resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1340,7 +1340,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Oregon Glamping Feasibility Study",
       description: "Get expert analysis for your Oregon glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Oregon", "Oregon glamping feasibility", "glamping resort Oregon", "Oregon outdoor hospitality"],
@@ -1353,7 +1353,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in Tennessee",
       subheadline: "Expert RV resort market analysis and feasibility studies for Tennessee properties. Make informed investment decisions.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1382,7 +1382,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your Tennessee RV Resort Investment",
       description: "Get expert analysis for your Tennessee RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Tennessee", "Tennessee RV park feasibility", "RV resort TN", "Tennessee RV market"],
@@ -1394,7 +1394,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Property Appraisal",
       subheadline: "Get bank-approved appraisals for your campground property",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1424,7 +1424,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Campground Property Appraised",
       description: "Schedule a consultation to discuss your appraisal needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     faqs: [
@@ -1472,7 +1472,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Feasibility Study FAQ",
       subheadline: "Answers to common questions about feasibility studies for outdoor hospitality projects",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1549,7 +1549,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Have More Questions?",
       description: "Schedule a free consultation to discuss your feasibility study needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1560,7 +1560,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Property Appraisal FAQ",
       subheadline: "Answers to common questions about property appraisals for outdoor hospitality",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1637,7 +1637,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Need an Appraisal?",
       description: "Schedule a free consultation to discuss your appraisal needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1654,7 +1654,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in California",
       subheadline: "Expert glamping market analysis and feasibility studies for California properties. Understand your California glamping resort potential across wine country, coastal, and mountain markets.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1719,7 +1719,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your California Glamping Feasibility Study",
       description: "Get expert analysis for your California glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping California", "California glamping feasibility", "glamping resort California", "California outdoor hospitality"],
@@ -1760,7 +1760,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in Colorado",
       subheadline: "Expert glamping market analysis and feasibility studies for Colorado properties. Understand your Colorado glamping resort potential in mountain resort markets.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1790,7 +1790,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Colorado Glamping Feasibility Study",
       description: "Get expert analysis for your Colorado glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Colorado", "Colorado glamping feasibility", "glamping resort Colorado", "Colorado outdoor hospitality"],
@@ -1805,7 +1805,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in Arizona",
       subheadline: "Expert glamping market analysis and feasibility studies for Arizona properties. Understand your Arizona glamping resort potential in desert markets.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1835,7 +1835,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Arizona Glamping Feasibility Study",
       description: "Get expert analysis for your Arizona glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Arizona", "Arizona glamping feasibility", "glamping resort Arizona", "Arizona outdoor hospitality"],
@@ -1850,7 +1850,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in North Carolina",
       subheadline: "Expert glamping market analysis and feasibility studies for North Carolina properties. Understand your North Carolina glamping resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1880,7 +1880,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your North Carolina Glamping Feasibility Study",
       description: "Get expert analysis for your North Carolina glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping North Carolina", "NC glamping feasibility", "glamping resort North Carolina", "North Carolina outdoor hospitality"],
@@ -1895,7 +1895,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in Georgia",
       subheadline: "Expert glamping market analysis and feasibility studies for Georgia properties. Understand your Georgia glamping resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1925,7 +1925,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Georgia Glamping Feasibility Study",
       description: "Get expert analysis for your Georgia glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Georgia", "Georgia glamping feasibility", "glamping resort Georgia", "Georgia outdoor hospitality"],
@@ -1940,7 +1940,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Feasibility Study in Tennessee",
       subheadline: "Expert glamping market analysis and feasibility studies for Tennessee properties. Understand your Tennessee glamping resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -1970,7 +1970,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Tennessee Glamping Feasibility Study",
       description: "Get expert analysis for your Tennessee glamping resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping Tennessee", "Tennessee glamping feasibility", "glamping resort Tennessee", "Tennessee outdoor hospitality"],
@@ -1987,7 +1987,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal in California",
       subheadline: "Expert glamping appraisals for California properties. Bank-approved valuations trusted by California lenders for wine country, coastal, and mountain markets.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2017,7 +2017,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your California Glamping Property Appraised",
       description: "Schedule a consultation for your California glamping appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping appraisal California", "California glamping appraisal", "glamping property valuation California", "California outdoor hospitality"],
@@ -2031,7 +2031,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal in Texas",
       subheadline: "Expert glamping appraisals for Texas properties. Bank-approved valuations trusted by Texas lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2061,7 +2061,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Texas Glamping Property Appraised",
       description: "Schedule a consultation for your Texas glamping appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping appraisal Texas", "Texas glamping appraisal", "glamping property valuation Texas", "Texas outdoor hospitality"],
@@ -2075,7 +2075,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal in Florida",
       subheadline: "Expert glamping appraisals for Florida properties. Bank-approved valuations trusted by Florida lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2105,7 +2105,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Florida Glamping Property Appraised",
       description: "Schedule a consultation for your Florida glamping appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping appraisal Florida", "Florida glamping appraisal", "glamping property valuation Florida", "Florida outdoor hospitality"],
@@ -2119,7 +2119,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal in Utah",
       subheadline: "Expert glamping appraisals for Utah properties. Bank-approved valuations trusted by Utah lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2149,7 +2149,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Utah Glamping Property Appraised",
       description: "Schedule a consultation for your Utah glamping appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping appraisal Utah", "Utah glamping appraisal", "glamping property valuation Utah", "Utah outdoor hospitality"],
@@ -2163,7 +2163,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal in Oregon",
       subheadline: "Expert glamping appraisals for Oregon properties. Bank-approved valuations trusted by Oregon lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2193,7 +2193,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Oregon Glamping Property Appraised",
       description: "Schedule a consultation for your Oregon glamping appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping appraisal Oregon", "Oregon glamping appraisal", "glamping property valuation Oregon", "Oregon outdoor hospitality"],
@@ -2207,7 +2207,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal in Arizona",
       subheadline: "Expert glamping appraisals for Arizona properties. Bank-approved valuations trusted by Arizona lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2237,7 +2237,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Arizona Glamping Property Appraised",
       description: "Schedule a consultation for your Arizona glamping appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping appraisal Arizona", "Arizona glamping appraisal", "glamping property valuation Arizona", "Arizona outdoor hospitality"],
@@ -2251,7 +2251,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Property Appraisal in North Carolina",
       subheadline: "Expert glamping appraisals for North Carolina properties. Bank-approved valuations trusted by North Carolina lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2281,7 +2281,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your North Carolina Glamping Property Appraised",
       description: "Schedule a consultation for your North Carolina glamping appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["glamping appraisal North Carolina", "NC glamping appraisal", "glamping property valuation North Carolina", "North Carolina outdoor hospitality"],
@@ -2297,7 +2297,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in California",
       subheadline: "Expert RV resort market analysis and feasibility studies for California properties. Make informed investment decisions.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2327,7 +2327,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your California RV Resort Investment",
       description: "Get expert analysis for your California RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort California", "California RV park feasibility", "RV resort California", "California RV market"],
@@ -2342,7 +2342,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in Texas",
       subheadline: "Expert RV resort market analysis and feasibility studies for Texas properties. Understand your Texas RV resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2372,7 +2372,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your Texas RV Resort Investment",
       description: "Get expert analysis for your Texas RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Texas", "Texas RV park feasibility", "RV resort Texas", "Texas RV market"],
@@ -2387,7 +2387,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in Colorado",
       subheadline: "Expert RV resort market analysis and feasibility studies for Colorado properties. Make informed investment decisions.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2417,7 +2417,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your Colorado RV Resort Investment",
       description: "Get expert analysis for your Colorado RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Colorado", "Colorado RV park feasibility", "RV resort Colorado", "Colorado RV market"],
@@ -2432,7 +2432,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in North Carolina",
       subheadline: "Expert RV resort market analysis and feasibility studies for North Carolina properties. Make informed investment decisions.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2462,7 +2462,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your North Carolina RV Resort Investment",
       description: "Get expert analysis for your North Carolina RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort North Carolina", "NC RV park feasibility", "RV resort North Carolina", "North Carolina RV market"],
@@ -2477,7 +2477,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in Georgia",
       subheadline: "Expert RV resort market analysis and feasibility studies for Georgia properties. Make informed investment decisions.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2507,7 +2507,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your Georgia RV Resort Investment",
       description: "Get expert analysis for your Georgia RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Georgia", "Georgia RV park feasibility", "RV resort Georgia", "Georgia RV market"],
@@ -2522,7 +2522,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in Utah",
       subheadline: "Expert RV resort market analysis and feasibility studies for Utah properties. Make informed investment decisions.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2552,7 +2552,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your Utah RV Resort Investment",
       description: "Get expert analysis for your Utah RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Utah", "Utah RV park feasibility", "RV resort Utah", "Utah RV market"],
@@ -2567,7 +2567,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Feasibility Study in Oregon",
       subheadline: "Expert RV resort market analysis and feasibility studies for Oregon properties. Make informed investment decisions.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2597,7 +2597,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Validate Your Oregon RV Resort Investment",
       description: "Get expert analysis for your Oregon RV resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Oregon", "Oregon RV park feasibility", "RV resort Oregon", "Oregon RV market"],
@@ -2614,7 +2614,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Appraisal in Florida",
       subheadline: "Expert RV resort and RV park appraisals for Florida properties. Bank-approved valuations trusted by Florida lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2644,7 +2644,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Florida RV Resort Appraised",
       description: "Schedule a consultation for your Florida RV resort appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Florida", "Florida RV park appraisal", "RV resort appraisal FL", "Florida outdoor hospitality"],
@@ -2658,7 +2658,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Appraisal in Arizona",
       subheadline: "Expert RV resort and RV park appraisals for Arizona properties. Bank-approved valuations trusted by Arizona lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2688,7 +2688,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Arizona RV Resort Appraised",
       description: "Schedule a consultation for your Arizona RV resort appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Arizona", "Arizona RV park appraisal", "RV resort appraisal AZ", "Arizona outdoor hospitality"],
@@ -2702,7 +2702,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "RV Resort Appraisal in Colorado",
       subheadline: "Expert RV resort and RV park appraisals for Colorado properties. Bank-approved valuations trusted by Colorado lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2732,7 +2732,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Colorado RV Resort Appraised",
       description: "Schedule a consultation for your Colorado RV resort appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["RV resort Colorado", "Colorado RV park appraisal", "RV resort appraisal CO", "Colorado outdoor hospitality"],
@@ -2748,7 +2748,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Feasibility Study in California",
       subheadline: "Expert campground market analysis and feasibility studies for California properties. Validate your California campground project.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2778,7 +2778,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your California Campground Feasibility Study",
       description: "Get expert analysis for your California campground project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground California", "California campground feasibility", "campground California", "California outdoor hospitality"],
@@ -2793,7 +2793,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Feasibility Study in Texas",
       subheadline: "Expert campground market analysis and feasibility studies for Texas properties. Validate your Texas campground project.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2823,7 +2823,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Texas Campground Feasibility Study",
       description: "Get expert analysis for your Texas campground project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground Texas", "Texas campground feasibility", "campground Texas", "Texas outdoor hospitality"],
@@ -2838,7 +2838,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Feasibility Study in Florida",
       subheadline: "Expert campground market analysis and feasibility studies for Florida properties. Validate your Florida campground project.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2868,7 +2868,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Florida Campground Feasibility Study",
       description: "Get expert analysis for your Florida campground project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground Florida", "Florida campground feasibility", "campground Florida", "Florida outdoor hospitality"],
@@ -2883,7 +2883,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Feasibility Study in Colorado",
       subheadline: "Expert campground market analysis and feasibility studies for Colorado properties. Validate your Colorado campground project.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2913,7 +2913,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Colorado Campground Feasibility Study",
       description: "Get expert analysis for your Colorado campground project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground Colorado", "Colorado campground feasibility", "campground Colorado", "Colorado outdoor hospitality"],
@@ -2928,7 +2928,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Feasibility Study in Arizona",
       subheadline: "Expert campground market analysis and feasibility studies for Arizona properties. Validate your Arizona campground project.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -2958,7 +2958,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Arizona Campground Feasibility Study",
       description: "Get expert analysis for your Arizona campground project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground Arizona", "Arizona campground feasibility", "campground Arizona", "Arizona outdoor hospitality"],
@@ -2973,7 +2973,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Feasibility Study in Utah",
       subheadline: "Expert campground market analysis and feasibility studies for Utah properties. Validate your Utah campground project.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3003,7 +3003,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Utah Campground Feasibility Study",
       description: "Get expert analysis for your Utah campground project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground Utah", "Utah campground feasibility", "campground Utah", "Utah outdoor hospitality"],
@@ -3020,7 +3020,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Appraisal in California",
       subheadline: "Expert campground appraisals for California properties. Bank-approved valuations trusted by California lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3050,7 +3050,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your California Campground Appraised",
       description: "Schedule a consultation for your California campground appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground California", "California campground appraisal", "campground appraisal CA", "California outdoor hospitality"],
@@ -3064,7 +3064,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Campground Appraisal in Texas",
       subheadline: "Expert campground appraisals for Texas properties. Bank-approved valuations trusted by Texas lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3094,7 +3094,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your Texas Campground Appraised",
       description: "Schedule a consultation for your Texas campground appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["campground Texas", "Texas campground appraisal", "campground appraisal TX", "Texas outdoor hospitality"],
@@ -3110,7 +3110,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Outdoor Resort Feasibility Study in California",
       subheadline: "Expert outdoor resort market analysis and feasibility studies for California properties. Understand your California outdoor resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3140,7 +3140,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your California Outdoor Resort Feasibility Study",
       description: "Get expert analysis for your California outdoor resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["outdoor resort California", "California outdoor resort feasibility", "outdoor resort California", "California outdoor hospitality"],
@@ -3154,7 +3154,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Outdoor Resort Feasibility Study in Florida",
       subheadline: "Expert outdoor resort market analysis and feasibility studies for Florida properties. Understand your Florida outdoor resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3184,7 +3184,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Florida Outdoor Resort Feasibility Study",
       description: "Get expert analysis for your Florida outdoor resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["outdoor resort Florida", "Florida outdoor resort feasibility", "outdoor resort Florida", "Florida outdoor hospitality"],
@@ -3198,7 +3198,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Outdoor Resort Feasibility Study in Texas",
       subheadline: "Expert outdoor resort market analysis and feasibility studies for Texas properties. Understand your Texas outdoor resort potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3228,7 +3228,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Texas Outdoor Resort Feasibility Study",
       description: "Get expert analysis for your Texas outdoor resort project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["outdoor resort Texas", "Texas outdoor resort feasibility", "outdoor resort Texas", "Texas outdoor hospitality"],
@@ -3244,7 +3244,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Outdoor Resort Appraisal in California",
       subheadline: "Expert outdoor resort appraisals for California properties. Bank-approved valuations trusted by California lenders.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3274,7 +3274,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Get Your California Outdoor Resort Appraised",
       description: "Schedule a consultation for your California outdoor resort appraisal",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["outdoor resort California", "California outdoor resort appraisal", "outdoor resort appraisal CA", "California outdoor hospitality"],
@@ -3290,7 +3290,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Marina Feasibility Study in Florida",
       subheadline: "Expert marina market analysis and feasibility studies for Florida properties. Understand your Florida marina potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3320,7 +3320,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your Florida Marina Feasibility Study",
       description: "Get expert analysis for your Florida marina project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["marina Florida", "Florida marina feasibility", "marina Florida", "Florida marina"],
@@ -3358,7 +3358,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Marina Feasibility Study in California",
       subheadline: "Expert marina market analysis and feasibility studies for California properties. Understand your California marina potential.",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3388,7 +3388,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Start Your California Marina Feasibility Study",
       description: "Get expert analysis for your California marina project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["marina California", "California marina feasibility", "marina California", "California marina"],
@@ -3426,7 +3426,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping in Deutschland",
       subheadline: "Entdecken Sie die wachsenden Möglichkeiten für Luxus-Camping und Glamping-Resorts in Deutschland. Marktübersicht, Trends und regionale Einblicke.",
-      ctaText: "Kostenlose Beratung Vereinbaren",
+      ctaText: "Kontakt aufnehmen",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3481,7 +3481,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Starten Sie Ihr Deutsches Glamping-Projekt",
       description: "Erhalten Sie Expertenanalyse für Ihr Glamping-Resort in Deutschland",
-      buttonText: "Kostenlose Beratung Vereinbaren",
+      buttonText: "Kontakt aufnehmen",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["Glamping Deutschland", "Luxus Camping Deutschland", "Glamping Resort Deutschland", "Glamping Bayern", "Glamping Schwarzwald"],
@@ -3520,7 +3520,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Machbarkeitsstudie in Deutschland",
       subheadline: "Experten-Glamping-Marktanalyse und Machbarkeitsstudien für deutsche Immobilien. Verstehen Sie das Potenzial Ihres deutschen Glamping-Resorts.",
-      ctaText: "Kostenlose Beratung Vereinbaren",
+      ctaText: "Kontakt aufnehmen",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3573,7 +3573,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Starten Sie Ihre Deutsche Glamping-Machbarkeitsstudie",
       description: "Erhalten Sie Expertenanalyse für Ihr deutsches Glamping-Resort-Projekt",
-      buttonText: "Kostenlose Beratung Vereinbaren",
+      buttonText: "Kontakt aufnehmen",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["Glamping Machbarkeitsstudie Deutschland", "Glamping Geschäft Deutschland", "Glamping Deutschland Machbarkeitsstudie", "Deutsche Glamping Marktanalyse"],
@@ -3612,7 +3612,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping Bewertung in Deutschland",
       subheadline: "Experten-Glamping-Bewertungen für deutsche Immobilien. Professionelle Bewertungen für Finanzierung und Transaktionen.",
-      ctaText: "Kostenlose Beratung Vereinbaren",
+      ctaText: "Kontakt aufnehmen",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3661,7 +3661,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Erhalten Sie Ihre Deutsche Glamping-Bewertung",
       description: "Planen Sie eine Beratung, um Ihre Bewertungsanforderungen zu besprechen",
-      buttonText: "Kostenlose Beratung Vereinbaren",
+      buttonText: "Kontakt aufnehmen",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["Glamping Bewertung Deutschland", "Glamping Investition Deutschland", "Deutsche Glamping Bewertung", "Glamping Immobilienbewertung Deutschland"],
@@ -3700,7 +3700,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Glamping en México",
       subheadline: "Descubra las crecientes oportunidades para campamentos de lujo y resorts de glamping en México. Resumen del mercado, tendencias e información regional.",
-      ctaText: "Programar Consulta Gratuita",
+      ctaText: "Ponerse en contacto",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3755,7 +3755,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Comience Su Proyecto de Glamping en México",
       description: "Obtenga análisis experto para su resort de glamping en México",
-      buttonText: "Programar Consulta Gratuita",
+      buttonText: "Ponerse en contacto",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["Glamping México", "Campamento de lujo México", "Resort Glamping México", "Glamping Riviera Maya", "Glamping Baja California"],
@@ -3794,7 +3794,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Estudio de Viabilidad de Glamping en México",
       subheadline: "Análisis de mercado de glamping experto y estudios de viabilidad para propiedades en México. Comprenda el potencial de su resort de glamping en México.",
-      ctaText: "Programar Consulta Gratuita",
+      ctaText: "Ponerse en contacto",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3847,7 +3847,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Comience Su Estudio de Viabilidad de Glamping en México",
       description: "Obtenga análisis experto para su proyecto de resort de glamping en México",
-      buttonText: "Programar Consulta Gratuita",
+      buttonText: "Ponerse en contacto",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["Estudio de Viabilidad Glamping México", "Negocio glamping México", "Estudio de Viabilidad Glamping México", "Análisis de Mercado Glamping México"],
@@ -3886,7 +3886,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     hero: {
       headline: "Avalúo de Glamping en México",
       subheadline: "Avalúos de glamping expertos para propiedades en México. Valuaciones profesionales para financiamiento y transacciones.",
-      ctaText: "Programar Consulta Gratuita",
+      ctaText: "Ponerse en contacto",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
     },
     sections: [
@@ -3935,7 +3935,7 @@ export const landingPages: Record<string, LandingPageContent> = {
     cta: {
       title: "Obtenga Su Avalúo de Glamping en México",
       description: "Programe una consulta para discutir sus necesidades de avalúo",
-      buttonText: "Programar Consulta Gratuita",
+      buttonText: "Ponerse en contacto",
       buttonLink: "https://sageoutdooradvisory.com/contact-us",
     },
     keywords: ["Avalúo Glamping México", "Inversión glamping México", "Avalúo Glamping México", "Valuación de Propiedades Glamping México"],

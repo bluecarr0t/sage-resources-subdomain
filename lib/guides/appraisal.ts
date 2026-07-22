@@ -12,7 +12,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Appraisals Complete Guide",
       subheadline: "Everything you need to know about appraisals for outdoor hospitality properties",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
       backgroundImage:
         "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/guides/property-appraisals-complete-guide-hero.webp"
@@ -410,7 +410,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need a Property Appraisal?",
       description: "Schedule a free consultation with our appraisal experts to discuss your property",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -422,7 +422,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Income Approach Appraisal Guide",
       subheadline: "Understanding income-based property valuation methods",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -553,7 +553,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need an Income Approach Appraisal?",
       description: "Schedule a consultation to discuss your appraisal needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -565,7 +565,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Appraisal vs. Feasibility Study",
       subheadline: "Understanding the key differences and when you need each",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -669,7 +669,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Understanding Which You Need?",
       description: "Schedule a consultation to discuss your project needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -681,7 +681,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Bank Appraisal Requirements",
       subheadline: "Understanding lender requirements for property appraisals",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -807,7 +807,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need a Bank-Approved Appraisal?",
       description: "Schedule a consultation to discuss your financing needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   }

@@ -199,7 +199,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
           rel="noopener noreferrer"
           className={`fixed bottom-6 right-6 z-40 hidden sm:inline-block ${EDITORIAL_BUTTON_PRIMARY_CLASS}`}
         >
-          Schedule free call
+          Get In Touch
         </a>
 
         <main className={EDITORIAL_MAIN_WITH_HEADER_CLASS}>

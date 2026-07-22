@@ -19,7 +19,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Feasibility Studies Complete Guide",
       subheadline: "Everything you need to know about feasibility studies for outdoor hospitality projects",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -715,7 +715,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     cta: {
       title: "Ready to Start Your Feasibility Study?",
       description: "Schedule a free consultation with our feasibility study experts to discuss your project",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -728,7 +728,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     hero: {
       headline: "How to Read a Feasibility Study",
       subheadline: "A comprehensive guide to understanding and interpreting feasibility study reports",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -987,7 +987,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Understanding Your Feasibility Study?",
       description: "Schedule a consultation to discuss your feasibility study findings",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1000,7 +1000,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Feasibility Study vs. Appraisal",
       subheadline: "Understanding the key differences and when you need each",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -1188,7 +1188,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need Help Understanding Which You Need?",
       description: "Schedule a consultation to discuss your project needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1201,7 +1201,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     hero: {
       headline: "Feasibility Study Process & Timeline",
       subheadline: "Understanding the feasibility study process from start to finish",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -1365,7 +1365,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     cta: {
       title: "Ready to Start Your Feasibility Study?",
       description: "Schedule a consultation to discuss your project timeline",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
@@ -1377,7 +1377,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     hero: {
       headline: "What Banks Look for in Feasibility Studies",
       subheadline: "Understanding lender requirements for feasibility studies",
-      ctaText: "Schedule Free Consultation",
+      ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
     tableOfContents: [
@@ -1526,7 +1526,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     cta: {
       title: "Need a Bank-Approved Feasibility Study?",
       description: "Schedule a consultation to discuss your financing needs",
-      buttonText: "Schedule Free Consultation",
+      buttonText: "Get In Touch",
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   }
