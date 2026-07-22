@@ -2,6 +2,7 @@ import Link from 'next/link';
 import {
   EDITORIAL_BODY_CLASS,
   EDITORIAL_BUTTON_OUTLINE_CLASS,
+  EDITORIAL_BUTTON_PRIMARY_CLASS,
   EDITORIAL_H2_CLASS,
 } from '@/components/editorial/EditorialPageShell';
 
@@ -11,6 +12,8 @@ type EditorialCtaBandProps = {
   buttonLabel: string;
   buttonHref: string;
   external?: boolean;
+  /** Filled sage button for primary promos; outline is the default. */
+  buttonVariant?: 'outline' | 'primary';
 };
 
 export function EditorialCtaBand({
@@ -19,8 +22,13 @@ export function EditorialCtaBand({
   buttonLabel,
   buttonHref,
   external = false,
+  buttonVariant = 'outline',
 }: EditorialCtaBandProps) {
-  const linkClass = `${EDITORIAL_BUTTON_OUTLINE_CLASS} mt-6`;
+  const linkClass = `${
+    buttonVariant === 'primary'
+      ? EDITORIAL_BUTTON_PRIMARY_CLASS
+      : EDITORIAL_BUTTON_OUTLINE_CLASS
+  } mt-6`;
   return (
     <section className="mt-16 border border-sage-200/90 bg-white/40 px-6 py-10 sm:px-8">
       <h2 className={EDITORIAL_H2_CLASS}>{title}</h2>

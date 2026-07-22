@@ -2049,6 +2049,23 @@
       ]
     }
   },
+  "property": {
+    "resources": {
+      "title": "¿Planifica un proyecto de glamping u hospitalidad al aire libre?",
+      "description": "Sage publica este mapa para comparar mercados. Si está desarrollando, adquiriendo o financiando un resort, comience con un estudio de viabilidad listo para bancos y definiciones específicas del sector.",
+      "feasibilityGuide": "Guía completa de estudios de viabilidad",
+      "timelineGuide": "¿Cuánto tarda un estudio de viabilidad?",
+      "feasibilityGlossary": "¿Qué es un estudio de viabilidad?",
+      "feasibilityService": "Servicios de estudio de viabilidad de glamping",
+      "glampingGlossary": "Glosario de la industria del glamping",
+      "footnote": "Las guías se abren en inglés. Sage Outdoor Advisory ofrece estudios de viabilidad y valoraciones para glamping, resorts para autocaravanas y campings en todo el país."
+    },
+    "marketOverview": {
+      "title": "Panorama del mercado de glamping",
+      "description": "Compare la oferta, tarifas y tipos de unidad en EE. UU. y Canadá a partir de la investigación de Sage, y use esta propiedad como referencia para su proyecto.",
+      "button": "Panorama gratuito del mercado de glamping"
+    }
+  },
   "notFound": {
     "eyebrow": "404 — Fuera del mapa",
     "title": "Este sendero no existe",

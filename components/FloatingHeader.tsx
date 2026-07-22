@@ -229,6 +229,9 @@ export default function FloatingHeader({
 
   const resourcesActive = isActive(navLinks.guides) || isActive(navLinks.glossary);
 
+  const marketOverviewHref = '/glamping-market-overview';
+  const marketOverviewActive = isActive(marketOverviewHref);
+
   const navTriggerClass = (active: boolean) =>
     active
       ? `${NAV_LINK_ACTIVE_CLASS} flex items-center gap-1`
@@ -324,6 +327,15 @@ export default function FloatingHeader({
                     </div>
                   ) : null}
                 </div>
+
+                <Link
+                  href={marketOverviewHref}
+                  className={
+                    marketOverviewActive ? NAV_LINK_ACTIVE_CLASS : NAV_LINK_IDLE_CLASS
+                  }
+                >
+                  Market Overview
+                </Link>
 
                 <div className="relative">
                   <button
@@ -483,6 +495,18 @@ export default function FloatingHeader({
                   </div>
                 ) : null}
               </div>
+
+              <Link
+                href={marketOverviewHref}
+                className={
+                  marketOverviewActive
+                    ? `${NAV_LINK_ACTIVE_CLASS} w-full`
+                    : `${NAV_LINK_IDLE_CLASS} w-full`
+                }
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Market Overview
+              </Link>
 
               <div>
                 <button

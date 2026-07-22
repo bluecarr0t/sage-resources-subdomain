@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
+import dynamic from 'next/dynamic';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 import ChunkLoadErrorHandler from '@/components/ChunkLoadErrorHandler';
 import { defaultLocale, locales, type Locale } from '@/i18n';
+
+const GlampingMarketOverviewPromo = dynamic(
+  () => import('@/components/GlampingMarketOverviewPromo'),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://resources.sageoutdooradvisory.com'),
@@ -47,7 +53,10 @@ export default async function RootLayout({
     <html lang={lang} suppressHydrationWarning>
       <body>
         <ChunkLoadErrorHandler />
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <GlampingMarketOverviewPromo />
+        </ThemeProvider>
       </body>
     </html>
   );

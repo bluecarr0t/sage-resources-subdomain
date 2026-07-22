@@ -22,14 +22,14 @@ function SummaryMetricDotValue({
   dotColor: string;
 }) {
   return (
-    <dd className="mt-1 flex items-center gap-2 text-neutral-800">
+    <div className="flex items-center gap-2 text-neutral-800">
       <span
         className="h-2 w-2 shrink-0 rounded-full"
         style={{ backgroundColor: dotColor }}
         aria-hidden
       />
       <span>{children}</span>
-    </dd>
+    </div>
   );
 }
 
@@ -120,9 +120,11 @@ export default function PropertyDetailServerSummary({
         {propertyType && propertyTypeDotColor ? (
           <div>
             <dt className={EDITORIAL_SECTION_LABEL_CLASS}>Property type</dt>
-            <SummaryMetricDotValue dotColor={propertyTypeDotColor}>
-              {propertyType}
-            </SummaryMetricDotValue>
+            <dd className="mt-1">
+              <SummaryMetricDotValue dotColor={propertyTypeDotColor}>
+                {propertyType}
+              </SummaryMetricDotValue>
+            </dd>
           </div>
         ) : null}
         {showGoogleRating && (googleRating != null || googleReviewCount != null) ? (

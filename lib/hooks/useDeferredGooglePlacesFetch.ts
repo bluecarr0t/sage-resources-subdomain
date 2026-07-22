@@ -20,6 +20,11 @@ export interface DeferredPlacesFetchOptions {
    */
   requireExplicitLoad?: boolean;
   explicitLoadRequested?: boolean;
+  /**
+   * When true (and not waiting on explicit load), fetch on mount instead of
+   * waiting for engagement or the idle timer.
+   */
+  immediate?: boolean;
 }
 
 const ENGAGEMENT_EVENTS = ['scroll', 'wheel', 'touchmove', 'pointerdown', 'keydown'] as const;
@@ -27,8 +32,8 @@ const ENGAGEMENT_EVENTS = ['scroll', 'wheel', 'touchmove', 'pointerdown', 'keydo
 const IDLE_TIMEOUT_MS = 4500;
 
 /**
- * Defers `/api/google-places` until the user interacts, is idle, or explicitly requests
- * Google content — reducing spend from bots and drive-by hits.
+ * Defers `/api/google-places` until the user interacts, is idle, explicitly requests
+ * Google content, or `immediate` is set — reducing spend from bots and drive-by hits.
  */
 export function useDeferredGooglePlacesFetch(
   initialData: GooglePlacesData | null | undefined,
@@ -40,6 +45,7 @@ export function useDeferredGooglePlacesFetch(
 } {
   const requireExplicitLoad = options?.requireExplicitLoad ?? false;
   const explicitLoadRequested = options?.explicitLoadRequested ?? false;
+  const immediate = options?.immediate ?? false;
 
   const [googlePlacesData, setGooglePlacesData] = useState<GooglePlacesData | null>(
     initialData ?? null
@@ -121,7 +127,7 @@ export function useDeferredGooglePlacesFetch(
       void runFetch();
     }
 
-    if (requireExplicitLoad) {
+    if (requireExplicitLoad || immediate) {
       void runFetch();
     } else {
       for (const ev of ENGAGEMENT_EVENTS) {
@@ -144,6 +150,7 @@ export function useDeferredGooglePlacesFetch(
     params?.placeId,
     requireExplicitLoad,
     explicitLoadRequested,
+    immediate,
   ]);
 
   return { googlePlacesData, phase };

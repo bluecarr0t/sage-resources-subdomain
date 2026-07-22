@@ -2305,6 +2305,23 @@
       ]
     }
   },
+  "property": {
+    "resources": {
+      "title": "Vous planifiez un projet de glamping ou d'hospitalité de plein air ?",
+      "description": "Sage publie cette carte pour le benchmarking de marché. Si vous développez, acquérez ou financez un resort, commencez par une étude de faisabilité prête pour les banques et des définitions propres au secteur.",
+      "feasibilityGuide": "Guide complet des études de faisabilité",
+      "timelineGuide": "Combien de temps dure une étude de faisabilité ?",
+      "feasibilityGlossary": "Qu'est-ce qu'une étude de faisabilité ?",
+      "feasibilityService": "Services d'étude de faisabilité glamping",
+      "glampingGlossary": "Glossaire de l'industrie du glamping",
+      "footnote": "Les guides s'ouvrent en anglais. Sage Outdoor Advisory propose des études de faisabilité et des évaluations pour le glamping, les resorts pour camping-cars et les campings à l'échelle nationale."
+    },
+    "marketOverview": {
+      "title": "Aperçu du marché du glamping",
+      "description": "Comparez l'offre, les tarifs et les types d'unités aux États-Unis et au Canada grâce à la recherche Sage—puis utilisez cette propriété comme point de référence pour votre projet.",
+      "button": "Aperçu gratuit du marché du glamping"
+    }
+  },
   "notFound": {
     "eyebrow": "404 — Hors réseau",
     "title": "Ce sentier n'existe pas",

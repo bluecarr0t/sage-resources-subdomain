@@ -2045,6 +2045,23 @@
       ]
     }
   },
+  "property": {
+    "resources": {
+      "title": "Planen Sie ein Glamping- oder Outdoor-Hospitality-Projekt?",
+      "description": "Sage veröffentlicht diese Karte für Marktvergleiche. Wenn Sie ein Resort entwickeln, erwerben oder finanzieren, beginnen Sie mit einer bankfähigen Machbarkeitsstudie und branchenspezifischen Definitionen.",
+      "feasibilityGuide": "Leitfaden zu Machbarkeitsstudien",
+      "timelineGuide": "Wie lange dauert eine Machbarkeitsstudie?",
+      "feasibilityGlossary": "Was ist eine Machbarkeitsstudie?",
+      "feasibilityService": "Glamping-Machbarkeitsstudien",
+      "glampingGlossary": "Glamping-Branchenglossar",
+      "footnote": "Leitfäden öffnen auf Englisch. Sage Outdoor Advisory bietet Machbarkeitsstudien und Bewertungen für Glamping, Wohnmobil-Resorts und Campingplätze in ganz Nordamerika."
+    },
+    "marketOverview": {
+      "title": "Glamping-Marktüberblick",
+      "description": "Vergleichen Sie Angebot, Preise und Einheitstypen in den USA und Kanada aus der Sage-Forschung—und nutzen Sie diese Immobilie als Referenzpunkt für Ihr Projekt.",
+      "button": "Kostenloser Glamping-Marktüberblick"
+    }
+  },
   "notFound": {
     "eyebrow": "404 — Abseits der Route",
     "title": "Dieser Pfad existiert nicht",

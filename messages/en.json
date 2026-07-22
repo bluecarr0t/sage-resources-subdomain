@@ -463,6 +463,11 @@
       "feasibilityService": "Glamping feasibility study services",
       "glampingGlossary": "Glamping industry glossary",
       "footnote": "Guides open in English. Sage Outdoor Advisory provides feasibility studies and appraisals for glamping, RV resorts, and campgrounds nationwide."
+    },
+    "marketOverview": {
+      "title": "Glamping market overview",
+      "description": "Compare US and Canada supply, rates, and unit-type benchmarks from Sage research—then use this property as a reference point for your project.",
+      "button": "Free glamping market overview"
     }
   },
   "notFound": {

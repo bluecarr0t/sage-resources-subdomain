@@ -30,6 +30,8 @@ import PropertyDetailServerSummary from '@/components/PropertyDetailServerSummar
 import { formatPropertyMailingLine, splitPropertyMailingAddress } from '@/lib/format-property-mailing-line';
 import PropertyMailingAddress from '@/components/property/PropertyMailingAddress';
 import { collectDistinctUnitTypes } from '@/lib/property-unit-types';
+import { EditorialCtaBand } from '@/components/editorial/EditorialCtaBand';
+import { useTranslations } from 'next-intl';
 
 interface PropertyDetailTemplateProps {
   properties: SageProperty[];
@@ -129,6 +131,7 @@ export default function PropertyDetailTemplate({
   serverFaqs = null,
   serverAddress = null,
 }: PropertyDetailTemplateProps) {
+  const tMarketOverview = useTranslations('property.marketOverview');
   const firstProperty = properties[0];
   const links = useMemo(() => createLocaleLinks(locale), [locale]);
   const otaListings = useMemo(() => getPropertyOtaListings(properties), [properties]);
@@ -147,13 +150,6 @@ export default function PropertyDetailTemplate({
   }, [propertyImages]);
 
   const useSagePhotos = sagePhotoUrls.length > 0;
-
-  const needsGooglePlacesContent = !skipGooglePlaces && !useSagePhotos;
-  const [googlePlacesLoadRequested, setGooglePlacesLoadRequested] = useState(false);
-
-  useEffect(() => {
-    setGooglePlacesLoadRequested(false);
-  }, [propertyName, googlePlaceId, skipGooglePlaces, useSagePhotos]);
 
   const deferredPlacesParams = useMemo(
     () =>
@@ -181,15 +177,10 @@ export default function PropertyDetailTemplate({
     skipGooglePlaces ? null : (initialGooglePlacesData ?? undefined),
     deferredPlacesParams,
     {
-      requireExplicitLoad: needsGooglePlacesContent,
-      explicitLoadRequested: googlePlacesLoadRequested,
+      // Property pages auto-fetch Google reviews/photos; spend monitored separately.
+      immediate: !skipGooglePlaces && !useSagePhotos,
     }
   );
-
-  const awaitingGooglePlacesClick =
-    needsGooglePlacesContent &&
-    !googlePlacesLoadRequested &&
-    placesFetchPhase === 'waiting';
 
   const googlePhotoUrls =
     !skipGooglePlaces && placesFetchPhase === 'complete' && googlePlacesData?.photos?.length
@@ -200,7 +191,7 @@ export default function PropertyDetailTemplate({
 
   const galleryUrls = useSagePhotos ? sagePhotoUrls : googlePhotoUrls;
   const showPhotoSkeleton =
-    !useSagePhotos && !skipGooglePlaces && placesFetchPhase === 'loading';
+    !useSagePhotos && !skipGooglePlaces && placesFetchPhase !== 'complete';
   const showPhotos = galleryUrls.length > 0;
   const showGoogleReviews =
     !skipGooglePlaces && !!(googlePlacesData?.rating || googlePlacesData?.userRatingCount);
@@ -362,23 +353,6 @@ export default function PropertyDetailTemplate({
                   </div>
                 </>
               )}
-            </div>
-          ) : awaitingGooglePlacesClick ? (
-            <div
-              className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-4 border border-dashed border-neutral-300 bg-neutral-100/40 px-6 text-center"
-              role="region"
-              aria-label={`Google reviews and photos for ${propertyName}`}
-            >
-              <p className="text-sm font-light text-neutral-600">
-                Load Google reviews and photos for this property
-              </p>
-              <button
-                type="button"
-                onClick={() => setGooglePlacesLoadRequested(true)}
-                className="border border-neutral-800 bg-neutral-900 px-4 py-2 text-xs font-medium uppercase tracking-wider text-white transition-colors hover:bg-neutral-800 focus:outline-none focus:ring-1 focus:ring-neutral-500"
-              >
-                Show Google reviews &amp; photos
-              </button>
             </div>
           ) : showPhotoSkeleton ? (
             <div
@@ -638,6 +612,14 @@ export default function PropertyDetailTemplate({
             variant="editorial"
           />
         ) : null}
+
+        <EditorialCtaBand
+          title={tMarketOverview('title')}
+          description={tMarketOverview('description')}
+          buttonLabel={tMarketOverview('button')}
+          buttonHref="/glamping-market-overview"
+          buttonVariant="primary"
+        />
       </main>
     </EditorialPageShell>
   );
