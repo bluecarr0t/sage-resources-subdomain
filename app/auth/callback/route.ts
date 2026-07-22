@@ -22,6 +22,7 @@ import {
 import { logGatedContentEvent } from '@/lib/gated-content-events';
 import { joinFullName, splitFullName } from '@/lib/person-name';
 import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
+import { notifyMarketOverviewSignupSlackAsync } from '@/lib/slack/website-slack-client';
 import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
@@ -71,8 +72,18 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
 
   const verifiedAt = new Date().toISOString();
   const email = user.email ?? '';
+  const supabase = createServerClient();
 
-  const { error } = await createServerClient().from('gated_content_leads').upsert(
+  const { data: existing } = await supabase
+    .from('gated_content_leads')
+    .select('verified_at')
+    .eq('email', email)
+    .eq('page_slug', pageSlug)
+    .maybeSingle();
+
+  const isNewSignup = Boolean(email) && !existing?.verified_at;
+
+  const { error } = await supabase.from('gated_content_leads').upsert(
     {
       user_id: user.id,
       email,
@@ -105,6 +116,27 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       page_slug: pageSlug,
       verified_at: verifiedAt,
     });
+
+    if (isNewSignup && pageSlug === GATED_PAGE_GLAMPING_MARKET_OVERVIEW) {
+      const { count, error: countError } = await supabase
+        .from('gated_content_leads')
+        .select('*', { count: 'exact', head: true })
+        .eq('page_slug', pageSlug)
+        .not('verified_at', 'is', null);
+
+      if (countError) {
+        console.error(
+          '[auth/callback] market overview signup count failed:',
+          countError.message
+        );
+      } else if (typeof count === 'number' && count > 0) {
+        notifyMarketOverviewSignupSlackAsync({
+          signupNumber: count,
+          email,
+          name,
+        });
+      }
+    }
   }
 }
 
