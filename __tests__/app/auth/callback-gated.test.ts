@@ -11,15 +11,15 @@ const mockUpsert = jest.fn();
 const mockMaybeSingle = jest.fn();
 const mockCountSelect = jest.fn();
 const mockLogGatedContentEvent = jest.fn();
-const mockNotifyMarketOverviewSignupSlackAsync = jest.fn();
+const mockNotifyMarketOverviewSignupSlack = jest.fn();
 
 jest.mock('@/lib/gated-content-events', () => ({
   logGatedContentEvent: (...args: unknown[]) => mockLogGatedContentEvent(...args),
 }));
 
 jest.mock('@/lib/slack/website-slack-client', () => ({
-  notifyMarketOverviewSignupSlackAsync: (...args: unknown[]) =>
-    mockNotifyMarketOverviewSignupSlackAsync(...args),
+  notifyMarketOverviewSignupSlack: (...args: unknown[]) =>
+    mockNotifyMarketOverviewSignupSlack(...args),
 }));
 
 jest.mock('@/lib/supabase-server', () => ({
@@ -127,7 +127,7 @@ describe('GET /auth/callback — gated magic link', () => {
       userId: 'user-uuid-1',
       metadata: { name: 'Jane Doe', first_name: 'Jane', last_name: 'Doe' },
     });
-    expect(mockNotifyMarketOverviewSignupSlackAsync).toHaveBeenCalledWith({
+    expect(mockNotifyMarketOverviewSignupSlack).toHaveBeenCalledWith({
       signupNumber: 43,
       email: 'jane@example.com',
       name: 'Jane Doe',
@@ -150,7 +150,7 @@ describe('GET /auth/callback — gated magic link', () => {
 
     expect(res.status).toBe(307);
     expect(mockUpsert).toHaveBeenCalled();
-    expect(mockNotifyMarketOverviewSignupSlackAsync).not.toHaveBeenCalled();
+    expect(mockNotifyMarketOverviewSignupSlack).not.toHaveBeenCalled();
   });
 
   it('prefers token_hash over PKCE code when both are present', async () => {
@@ -209,7 +209,7 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toMatch(/\/glamping-market-overview$/);
     expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
-    expect(mockNotifyMarketOverviewSignupSlackAsync).not.toHaveBeenCalled();
+    expect(mockNotifyMarketOverviewSignupSlack).not.toHaveBeenCalled();
   });
 
   it('returns gated users to the gated page (not /login) when OTP verify fails', async () => {

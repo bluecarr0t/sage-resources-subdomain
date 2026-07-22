@@ -138,7 +138,12 @@ export async function sendWebsiteSlackMessage(message: WebsiteSlackMessage): Pro
 export async function notifyMarketOverviewSignupSlack(
   payload: MarketOverviewSignupSlackPayload
 ): Promise<void> {
-  if (!isWebsiteSlackEnabled()) return;
+  if (!isWebsiteSlackEnabled()) {
+    console.warn(
+      '[website-slack] skipped market overview signup notify (not enabled or missing env)'
+    );
+    return;
+  }
 
   try {
     await sendWebsiteSlackMessage(buildMarketOverviewSignupSlackMessage(payload));
@@ -147,7 +152,7 @@ export async function notifyMarketOverviewSignupSlack(
   }
 }
 
-/** Fire-and-forget wrapper for request handlers. */
+/** Fire-and-forget wrapper for non-critical paths. Prefer await in auth callbacks. */
 export function notifyMarketOverviewSignupSlackAsync(
   payload: MarketOverviewSignupSlackPayload
 ): void {

@@ -22,7 +22,7 @@ import {
 import { logGatedContentEvent } from '@/lib/gated-content-events';
 import { joinFullName, splitFullName } from '@/lib/person-name';
 import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
-import { notifyMarketOverviewSignupSlackAsync } from '@/lib/slack/website-slack-client';
+import { notifyMarketOverviewSignupSlack } from '@/lib/slack/website-slack-client';
 import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
@@ -130,7 +130,8 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
           countError.message
         );
       } else if (typeof count === 'number' && count > 0) {
-        notifyMarketOverviewSignupSlackAsync({
+        // Await so Vercel does not freeze the function before Slack posts.
+        await notifyMarketOverviewSignupSlack({
           signupNumber: count,
           email,
           name,
