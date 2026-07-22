@@ -390,7 +390,7 @@ export default function FloatingHeader({
               href="https://sageoutdooradvisory.com/contact-us/"
               className={`${EDITORIAL_BUTTON_PRIMARY_CLASS} shrink-0 px-4 py-2 text-[10px] sm:px-5 sm:text-[11px]`}
             >
-              Get Free Consultation
+              Get In Touch
             </Link>
 
             {showFullNav ? (

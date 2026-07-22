@@ -286,7 +286,7 @@
     "cta": {
       "title": "Need Help with Your Outdoor Hospitality Project?",
       "description": "Our experts have completed over 350 feasibility studies and appraisals. Get personalized guidance for your project.",
-      "button": "Schedule Free Consultation"
+      "button": "Get In Touch"
     },
     "englishNotice": {
       "message": "Guide articles are available in English. Links below open the English versions.",
@@ -342,7 +342,7 @@
     "cta": {
       "title": "Need Help Understanding These Terms?",
       "description": "Our experts can help you understand how these industry terms apply to your outdoor hospitality project.",
-      "button": "Schedule Free Consultation"
+      "button": "Get In Touch"
     },
     "termMeta": {
       "title": "What is {article} {term}? | Definition & Guide | Sage Outdoor Advisory",
@@ -364,11 +364,11 @@
       "expertGuides": "Expert guides",
       "ourServices": "Our services",
       "marketReports": "Market reports",
-      "scheduleConsultation": "Schedule consultation",
+      "scheduleConsultation": "Get In Touch",
       "cta": {
         "title": "Need help with your outdoor hospitality project?",
         "description": "Our experts can help you understand how {term} applies to your project.",
-        "button": "Schedule Free Consultation"
+        "button": "Get In Touch"
       }
     },
     "terms": {}
@@ -419,7 +419,7 @@
       "cta": {
         "title": "Need Expert Guidance?",
         "description": "Our team of outdoor hospitality experts can help with feasibility studies, appraisals, and market analysis for your project.",
-        "button": "Schedule Free Consultation"
+        "button": "Get In Touch"
       }
     },
     "faq": {

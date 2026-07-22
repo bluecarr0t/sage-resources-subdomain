@@ -494,7 +494,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
               <EditorialCtaBand
                 title="Have more questions?"
                 description="Let's discuss your outdoor hospitality project."
-                buttonLabel="Schedule your free consultation"
+                buttonLabel="Get In Touch"
                 buttonHref="https://sageoutdooradvisory.com/contact-us/"
                 external
               />

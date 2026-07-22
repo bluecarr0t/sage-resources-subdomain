@@ -62,7 +62,7 @@ export default function Footer({ locale = defaultLocale }: FooterProps) {
             <ul className="space-y-2 text-gray-400">
               <li>
                 <Link href="https://sageoutdooradvisory.com/contact-us/" className="hover:text-white font-semibold">
-                  Schedule Consultation →
+                  Get In Touch →
                 </Link>
               </li>
               <li>

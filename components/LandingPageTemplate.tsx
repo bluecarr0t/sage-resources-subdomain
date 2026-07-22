@@ -112,7 +112,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
           href="https://sageoutdooradvisory.com/contact-us/"
           className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-full shadow-2xl hover:bg-[#005a4f] transition-all transform hover:scale-105"
         >
-          Schedule Free Call
+          Get In Touch
         </Link>
       </div>
 
@@ -235,7 +235,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
                     href="https://sageoutdooradvisory.com/contact-us/"
                     className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
                   >
-                    Schedule Free Consultation
+                    Get In Touch
                   </Link>
                 </div>
               )}
@@ -268,7 +268,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
                 href="https://sageoutdooradvisory.com/contact-us/"
                 className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
-                Schedule Your Free Consultation
+                Get In Touch
               </Link>
             </div>
           </div>
@@ -331,7 +331,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
                 href="https://sageoutdooradvisory.com/contact-us/"
                 className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
-                Schedule Your Free Consultation
+                Get In Touch
               </Link>
             </div>
           </div>
@@ -379,7 +379,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
                 href="https://sageoutdooradvisory.com/contact-us/"
                 className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
               >
-                Schedule Free Consultation
+                Get In Touch
               </Link>
             </div>
           </div>
@@ -643,7 +643,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
                 href="https://sageoutdooradvisory.com/contact-us/"
                 className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
-                Schedule Your Free Consultation
+                Get In Touch
               </Link>
             </div>
           </div>
@@ -690,7 +690,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
               href="https://sageoutdooradvisory.com/contact-us/"
               className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
             >
-              Schedule Free Consultation
+              Get In Touch
             </Link>
             <Link
               href="https://sageoutdooradvisory.com/services-overview/"

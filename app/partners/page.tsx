@@ -309,7 +309,7 @@ export default function PartnersPage() {
             href="https://sageoutdooradvisory.com/contact-us/"
             className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
           >
-            Schedule Free Consultation
+            Get In Touch
           </Link>
         </div>
       </section>
