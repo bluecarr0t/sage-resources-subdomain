@@ -64,3 +64,30 @@ describe('countVerifiedGatedLeads', () => {
     expect(result).toEqual({ count: 3, error: null });
   });
 });
+
+describe('rankVerifiedGatedLead', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetModules();
+  });
+
+  it('prefers the SECURITY DEFINER rank RPC', async () => {
+    mockRpc.mockResolvedValue({ data: 16, error: null });
+    const { createServerClient } = await import('@/lib/supabase');
+    const { rankVerifiedGatedLead } = await import(
+      '@/lib/gated-content-signup-count'
+    );
+
+    const result = await rankVerifiedGatedLead(
+      createServerClient(),
+      'glamping-market-overview',
+      'terrawhitellc@gmail.com'
+    );
+
+    expect(mockRpc).toHaveBeenCalledWith('rank_verified_gated_lead', {
+      p_page_slug: 'glamping-market-overview',
+      p_email: 'terrawhitellc@gmail.com',
+    });
+    expect(result).toEqual({ rank: 16, error: null });
+  });
+});

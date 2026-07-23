@@ -29,6 +29,7 @@ import {
 import {
   countAuthVerifiedForEmail,
   countVerifiedGatedLeads,
+  rankVerifiedGatedLead,
 } from '@/lib/gated-content-signup-count';
 import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
@@ -130,8 +131,13 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
     });
 
     if (pageSlug === GATED_PAGE_GLAMPING_MARKET_OVERVIEW) {
-      const { count: totalVerified, error: countError } =
-        await countVerifiedGatedLeads(supabase, pageSlug);
+      const [{ count: totalVerified, error: countError }, rankResult] =
+        await Promise.all([
+          countVerifiedGatedLeads(supabase, pageSlug),
+          isNewSignup
+            ? rankVerifiedGatedLead(supabase, pageSlug, email)
+            : Promise.resolve({ rank: 0, error: null as string | null }),
+        ]);
 
       if (countError) {
         console.error(
@@ -139,16 +145,36 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
           countError
         );
       }
+      if (rankResult.error) {
+        console.error(
+          '[auth/callback] market overview signup rank failed:',
+          rankResult.error
+        );
+      }
 
-      if (isNewSignup && typeof totalVerified === 'number' && totalVerified > 0) {
+      // Prefer this lead's rank for "#N". Fall back to total, and never let a
+      // lagging total under-count a brand-new signup below its rank.
+      const signupNumber =
+        rankResult.rank > 0
+          ? rankResult.rank
+          : typeof totalVerified === 'number' && totalVerified > 0
+            ? totalVerified
+            : 0;
+      const totalForSlack = Math.max(
+        typeof totalVerified === 'number' ? totalVerified : 0,
+        signupNumber
+      );
+
+      if (isNewSignup && signupNumber > 0) {
         console.info(
-          `[auth/callback] market overview signup #${totalVerified} (${email})`
+          `[auth/callback] market overview signup #${signupNumber} (${email}); total=${totalForSlack}`
         );
         // Await so Vercel does not freeze the function before Slack posts.
         await notifyMarketOverviewSignupSlack({
-          signupNumber: totalVerified,
+          signupNumber,
           email,
           name,
+          totalVerifiedEmails: totalForSlack,
         });
       } else if (!isNewSignup) {
         const signInCount = Math.max(
@@ -163,10 +189,7 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
           name,
           signInCount,
           firstVerifiedAt,
-          totalVerifiedEmails:
-            typeof totalVerified === 'number' && totalVerified > 0
-              ? totalVerified
-              : 0,
+          totalVerifiedEmails: totalForSlack,
         });
       }
     }

@@ -14,6 +14,7 @@ const mockNotifyMarketOverviewSignupSlack = jest.fn();
 const mockNotifyMarketOverviewReturnSigninSlack = jest.fn();
 const mockCountVerifiedGatedLeads = jest.fn();
 const mockCountAuthVerifiedForEmail = jest.fn();
+const mockRankVerifiedGatedLead = jest.fn();
 
 jest.mock('@/lib/gated-content-events', () => ({
   logGatedContentEvent: (...args: unknown[]) => mockLogGatedContentEvent(...args),
@@ -30,6 +31,7 @@ jest.mock('@/lib/gated-content-signup-count', () => ({
   countVerifiedGatedLeads: (...args: unknown[]) => mockCountVerifiedGatedLeads(...args),
   countAuthVerifiedForEmail: (...args: unknown[]) =>
     mockCountAuthVerifiedForEmail(...args),
+  rankVerifiedGatedLead: (...args: unknown[]) => mockRankVerifiedGatedLead(...args),
 }));
 
 jest.mock('@/lib/supabase-server', () => ({
@@ -89,6 +91,7 @@ describe('GET /auth/callback — gated magic link', () => {
     mockUpsert.mockResolvedValue({ error: null });
     mockCountVerifiedGatedLeads.mockResolvedValue({ count: 43, error: null });
     mockCountAuthVerifiedForEmail.mockResolvedValue(3);
+    mockRankVerifiedGatedLead.mockResolvedValue({ rank: 43, error: null });
     mockLogGatedContentEvent.mockResolvedValue(undefined);
   });
 
@@ -139,8 +142,30 @@ describe('GET /auth/callback — gated magic link', () => {
       signupNumber: 43,
       email: 'jane@example.com',
       name: 'Jane Doe',
+      totalVerifiedEmails: 43,
     });
     expect(mockNotifyMarketOverviewReturnSigninSlack).not.toHaveBeenCalled();
+  });
+
+  it('uses lead rank for Slack # even when total count lags behind', async () => {
+    mockRankVerifiedGatedLead.mockResolvedValueOnce({ rank: 16, error: null });
+    mockCountVerifiedGatedLeads.mockResolvedValueOnce({ count: 15, error: null });
+
+    const res = await GET(
+      callbackUrl({
+        token_hash: 'otp-token-hash',
+        type: 'signup',
+        redirect: '/glamping-market-overview',
+      })
+    );
+
+    expect(res.status).toBe(307);
+    expect(mockNotifyMarketOverviewSignupSlack).toHaveBeenCalledWith({
+      signupNumber: 16,
+      email: 'jane@example.com',
+      name: 'Jane Doe',
+      totalVerifiedEmails: 16,
+    });
   });
 
   it('posts a return sign-in Slack notice when lead was already verified', async () => {

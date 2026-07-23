@@ -16,9 +16,12 @@ export type WebsiteSlackMessage = {
 };
 
 export type MarketOverviewSignupSlackPayload = {
+  /** 1-based ordinal for this signup (this lead's rank). */
   signupNumber: number;
   email: string;
   name?: string | null;
+  /** Current verified total; defaults to signupNumber when omitted. */
+  totalVerifiedEmails?: number;
 };
 
 export type MarketOverviewReturnSigninSlackPayload = {
@@ -57,11 +60,12 @@ export function buildMarketOverviewSignupSlackMessage(
 ): WebsiteSlackMessage {
   const who = payload.name?.trim() || payload.email;
   const n = payload.signupNumber;
+  const total = payload.totalVerifiedEmails ?? n;
   const text = [
     `🎉 New Glamping Market Overview signup — *#${n}*!`,
     `${who} just unlocked the free market overview.`,
     `Email: ${payload.email}`,
-    `Total verified emails: ${n}`,
+    `Total verified emails: ${total}`,
   ].join('\n');
 
   const blocks: Record<string, unknown>[] = [
@@ -90,7 +94,7 @@ export function buildMarketOverviewSignupSlackMessage(
       elements: [
         {
           type: 'mrkdwn',
-          text: `<${marketOverviewUrl()}|Open Market Overview> · Total verified emails: *${n}*`,
+          text: `<${marketOverviewUrl()}|Open Market Overview> · Total verified emails: *${total}*`,
         },
       ],
     },
