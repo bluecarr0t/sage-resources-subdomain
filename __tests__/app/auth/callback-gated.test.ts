@@ -9,9 +9,11 @@ const mockExchangeCodeForSession = jest.fn();
 const mockVerifyOtp = jest.fn();
 const mockUpsert = jest.fn();
 const mockMaybeSingle = jest.fn();
-const mockCountSelect = jest.fn();
 const mockLogGatedContentEvent = jest.fn();
 const mockNotifyMarketOverviewSignupSlack = jest.fn();
+const mockNotifyMarketOverviewReturnSigninSlack = jest.fn();
+const mockCountVerifiedGatedLeads = jest.fn();
+const mockCountAuthVerifiedForEmail = jest.fn();
 
 jest.mock('@/lib/gated-content-events', () => ({
   logGatedContentEvent: (...args: unknown[]) => mockLogGatedContentEvent(...args),
@@ -20,6 +22,14 @@ jest.mock('@/lib/gated-content-events', () => ({
 jest.mock('@/lib/slack/website-slack-client', () => ({
   notifyMarketOverviewSignupSlack: (...args: unknown[]) =>
     mockNotifyMarketOverviewSignupSlack(...args),
+  notifyMarketOverviewReturnSigninSlack: (...args: unknown[]) =>
+    mockNotifyMarketOverviewReturnSigninSlack(...args),
+}));
+
+jest.mock('@/lib/gated-content-signup-count', () => ({
+  countVerifiedGatedLeads: (...args: unknown[]) => mockCountVerifiedGatedLeads(...args),
+  countAuthVerifiedForEmail: (...args: unknown[]) =>
+    mockCountAuthVerifiedForEmail(...args),
 }));
 
 jest.mock('@/lib/supabase-server', () => ({
@@ -34,22 +44,13 @@ jest.mock('@/lib/supabase-server', () => ({
 jest.mock('@/lib/supabase', () => ({
   createServerClient: jest.fn(() => ({
     from: () => ({
-      select: (columns?: string, options?: { count?: string; head?: boolean }) => {
-        if (options?.count === 'exact' && options?.head) {
-          return {
-            eq: () => ({
-              not: () => mockCountSelect(),
-            }),
-          };
-        }
-        return {
+      select: () => ({
+        eq: () => ({
           eq: () => ({
-            eq: () => ({
-              maybeSingle: (...args: unknown[]) => mockMaybeSingle(...args),
-            }),
+            maybeSingle: (...args: unknown[]) => mockMaybeSingle(...args),
           }),
-        };
-      },
+        }),
+      }),
       upsert: (...args: unknown[]) => mockUpsert(...args),
     }),
   })),
@@ -86,7 +87,8 @@ describe('GET /auth/callback — gated magic link', () => {
     });
     mockMaybeSingle.mockResolvedValue({ data: null, error: null });
     mockUpsert.mockResolvedValue({ error: null });
-    mockCountSelect.mockResolvedValue({ count: 43, error: null });
+    mockCountVerifiedGatedLeads.mockResolvedValue({ count: 43, error: null });
+    mockCountAuthVerifiedForEmail.mockResolvedValue(3);
     mockLogGatedContentEvent.mockResolvedValue(undefined);
   });
 
@@ -125,16 +127,23 @@ describe('GET /auth/callback — gated magic link', () => {
       email: 'jane@example.com',
       pageSlug: 'glamping-market-overview',
       userId: 'user-uuid-1',
-      metadata: { name: 'Jane Doe', first_name: 'Jane', last_name: 'Doe' },
+      metadata: {
+        name: 'Jane Doe',
+        first_name: 'Jane',
+        last_name: 'Doe',
+        is_new_signup: true,
+        is_return: false,
+      },
     });
     expect(mockNotifyMarketOverviewSignupSlack).toHaveBeenCalledWith({
       signupNumber: 43,
       email: 'jane@example.com',
       name: 'Jane Doe',
     });
+    expect(mockNotifyMarketOverviewReturnSigninSlack).not.toHaveBeenCalled();
   });
 
-  it('does not post to Slack when lead was already verified', async () => {
+  it('posts a return sign-in Slack notice when lead was already verified', async () => {
     mockMaybeSingle.mockResolvedValueOnce({
       data: { verified_at: '2026-01-01T00:00:00.000Z' },
       error: null,
@@ -149,8 +158,28 @@ describe('GET /auth/callback — gated magic link', () => {
     );
 
     expect(res.status).toBe(307);
-    expect(mockUpsert).toHaveBeenCalled();
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        verified_at: '2026-01-01T00:00:00.000Z',
+      }),
+      { onConflict: 'email,page_slug' }
+    );
+    expect(mockLogGatedContentEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          is_new_signup: false,
+          is_return: true,
+        }),
+      })
+    );
     expect(mockNotifyMarketOverviewSignupSlack).not.toHaveBeenCalled();
+    expect(mockNotifyMarketOverviewReturnSigninSlack).toHaveBeenCalledWith({
+      email: 'jane@example.com',
+      name: 'Jane Doe',
+      signInCount: 3,
+      firstVerifiedAt: '2026-01-01T00:00:00.000Z',
+      totalVerifiedEmails: 43,
+    });
   });
 
   it('prefers token_hash over PKCE code when both are present', async () => {

@@ -22,7 +22,14 @@ import {
 import { logGatedContentEvent } from '@/lib/gated-content-events';
 import { joinFullName, splitFullName } from '@/lib/person-name';
 import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
-import { notifyMarketOverviewSignupSlack } from '@/lib/slack/website-slack-client';
+import {
+  notifyMarketOverviewReturnSigninSlack,
+  notifyMarketOverviewSignupSlack,
+} from '@/lib/slack/website-slack-client';
+import {
+  countAuthVerifiedForEmail,
+  countVerifiedGatedLeads,
+} from '@/lib/gated-content-signup-count';
 import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
@@ -82,6 +89,7 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
     .maybeSingle();
 
   const isNewSignup = Boolean(email) && !existing?.verified_at;
+  const firstVerifiedAt = existing?.verified_at ?? verifiedAt;
 
   const { error } = await supabase.from('gated_content_leads').upsert(
     {
@@ -91,7 +99,8 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       first_name: firstName,
       last_name: lastName,
       page_slug: pageSlug,
-      verified_at: verifiedAt,
+      // Keep the original first-verify timestamp on return sign-ins.
+      verified_at: firstVerifiedAt,
     },
     { onConflict: 'email,page_slug' }
   );
@@ -99,14 +108,17 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
   if (error) {
     console.error('[auth/callback] gated lead upsert failed:', error.message);
   } else if (email) {
-    void logGatedContentEvent({
+    // Await so return-signin counts include this verify before Slack posts.
+    await logGatedContentEvent({
       eventType: 'auth_verified',
       email,
       pageSlug,
       userId: user.id,
-      metadata: name
-        ? { name, first_name: firstName, last_name: lastName }
-        : undefined,
+      metadata: {
+        ...(name ? { name, first_name: firstName, last_name: lastName } : {}),
+        is_new_signup: isNewSignup,
+        is_return: !isNewSignup,
+      },
     });
     notifyZapierGatedLead({
       email,
@@ -117,24 +129,44 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       verified_at: verifiedAt,
     });
 
-    if (isNewSignup && pageSlug === GATED_PAGE_GLAMPING_MARKET_OVERVIEW) {
-      const { count, error: countError } = await supabase
-        .from('gated_content_leads')
-        .select('*', { count: 'exact', head: true })
-        .eq('page_slug', pageSlug)
-        .not('verified_at', 'is', null);
+    if (pageSlug === GATED_PAGE_GLAMPING_MARKET_OVERVIEW) {
+      const { count: totalVerified, error: countError } =
+        await countVerifiedGatedLeads(supabase, pageSlug);
 
       if (countError) {
         console.error(
           '[auth/callback] market overview signup count failed:',
-          countError.message
+          countError
         );
-      } else if (typeof count === 'number' && count > 0) {
+      }
+
+      if (isNewSignup && typeof totalVerified === 'number' && totalVerified > 0) {
+        console.info(
+          `[auth/callback] market overview signup #${totalVerified} (${email})`
+        );
         // Await so Vercel does not freeze the function before Slack posts.
         await notifyMarketOverviewSignupSlack({
-          signupNumber: count,
+          signupNumber: totalVerified,
           email,
           name,
+        });
+      } else if (!isNewSignup) {
+        const signInCount = Math.max(
+          await countAuthVerifiedForEmail(supabase, email, pageSlug),
+          2
+        );
+        console.info(
+          `[auth/callback] market overview return sign-in #${signInCount} (${email})`
+        );
+        await notifyMarketOverviewReturnSigninSlack({
+          email,
+          name,
+          signInCount,
+          firstVerifiedAt,
+          totalVerifiedEmails:
+            typeof totalVerified === 'number' && totalVerified > 0
+              ? totalVerified
+              : 0,
         });
       }
     }

@@ -53,4 +53,25 @@ describe('website-slack-client', () => {
     expect(JSON.stringify(message.blocks)).toContain('Market Overview signup #43');
     expect(JSON.stringify(message.blocks)).toContain('Total verified emails: *43*');
   });
+
+  it('builds a return sign-in message with visit count', async () => {
+    process.env.SITE_URL = 'https://resources.sageoutdooradvisory.com';
+    const { buildMarketOverviewReturnSigninSlackMessage } = await import(
+      '@/lib/slack/website-slack-client'
+    );
+
+    const message = buildMarketOverviewReturnSigninSlackMessage({
+      email: 'jane@example.com',
+      name: 'Jane Doe',
+      signInCount: 4,
+      firstVerifiedAt: '2026-01-15T12:00:00.000Z',
+      totalVerifiedEmails: 43,
+    });
+
+    expect(message.text).toContain('Return sign-in');
+    expect(message.text).toContain('visit #4');
+    expect(JSON.stringify(message.blocks)).toContain('return sign-in');
+    expect(JSON.stringify(message.blocks)).toContain('sign-in *#4*');
+    expect(JSON.stringify(message.blocks)).toContain('Total verified emails: *43*');
+  });
 });

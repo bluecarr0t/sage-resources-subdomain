@@ -13,6 +13,10 @@ export type GatedContentEventMetadata = {
   name?: string;
   first_name?: string | null;
   last_name?: string | null;
+  /** True when this auth_verified is the lead's first magic-link verify. */
+  is_new_signup?: boolean;
+  /** True when this auth_verified is a later return sign-in. */
+  is_return?: boolean;
 };
 
 export type LogGatedContentEventParams = {

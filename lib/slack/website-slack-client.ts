@@ -21,6 +21,17 @@ export type MarketOverviewSignupSlackPayload = {
   name?: string | null;
 };
 
+export type MarketOverviewReturnSigninSlackPayload = {
+  email: string;
+  name?: string | null;
+  /** Total magic-link verifies for this email+page (including this one). */
+  signInCount: number;
+  /** ISO timestamp of the lead's first verification, if known. */
+  firstVerifiedAt?: string | null;
+  /** Current total verified Market Overview emails. */
+  totalVerifiedEmails: number;
+};
+
 export function isWebsiteSlackEnabled(): boolean {
   if (process.env.WEBSITE_SLACK_ENABLED?.trim().toLowerCase() !== 'true') {
     return false;
@@ -45,10 +56,12 @@ export function buildMarketOverviewSignupSlackMessage(
   payload: MarketOverviewSignupSlackPayload
 ): WebsiteSlackMessage {
   const who = payload.name?.trim() || payload.email;
+  const n = payload.signupNumber;
   const text = [
-    `🎉 New Glamping Market Overview signup — *#${payload.signupNumber}*!`,
+    `🎉 New Glamping Market Overview signup — *#${n}*!`,
     `${who} just unlocked the free market overview.`,
     `Email: ${payload.email}`,
+    `Total verified emails: ${n}`,
   ].join('\n');
 
   const blocks: Record<string, unknown>[] = [
@@ -56,7 +69,7 @@ export function buildMarketOverviewSignupSlackMessage(
       type: 'header',
       text: {
         type: 'plain_text',
-        text: `🎉 Market Overview signup #${payload.signupNumber}`,
+        text: `🎉 Market Overview signup #${n}`,
         emoji: true,
       },
     },
@@ -65,7 +78,7 @@ export function buildMarketOverviewSignupSlackMessage(
       text: {
         type: 'mrkdwn',
         text: [
-          `*#${payload.signupNumber}* just signed up for the *Glamping Market Overview*!`,
+          `Signup *#${n}* just joined the *Glamping Market Overview*!`,
           '',
           `*Name:* ${payload.name?.trim() || '_Not provided_'}`,
           `*Email:* ${payload.email}`,
@@ -77,7 +90,62 @@ export function buildMarketOverviewSignupSlackMessage(
       elements: [
         {
           type: 'mrkdwn',
-          text: `<${marketOverviewUrl()}|Open Market Overview> · Total verified emails: *${payload.signupNumber}*`,
+          text: `<${marketOverviewUrl()}|Open Market Overview> · Total verified emails: *${n}*`,
+        },
+      ],
+    },
+  ];
+
+  return { text, blocks };
+}
+
+function formatSlackDate(iso: string | null | undefined): string {
+  if (!iso) return '_Unknown_';
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return '_Unknown_';
+  return `<!date^${Math.floor(ms / 1000)}^{date_short_pretty}|${iso.slice(0, 10)}>`;
+}
+
+export function buildMarketOverviewReturnSigninSlackMessage(
+  payload: MarketOverviewReturnSigninSlackPayload
+): WebsiteSlackMessage {
+  const who = payload.name?.trim() || payload.email;
+  const visits = payload.signInCount;
+  const text = [
+    `🔁 Return sign-in — Glamping Market Overview`,
+    `${who} signed in again (visit #${visits}).`,
+    `Email: ${payload.email}`,
+    `Total verified emails: ${payload.totalVerifiedEmails}`,
+  ].join('\n');
+
+  const blocks: Record<string, unknown>[] = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: `🔁 Market Overview return sign-in`,
+        emoji: true,
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: [
+          `*${who}* signed back in to the *Glamping Market Overview* (sign-in *#${visits}* for this email).`,
+          '',
+          `*Name:* ${payload.name?.trim() || '_Not provided_'}`,
+          `*Email:* ${payload.email}`,
+          `*First verified:* ${formatSlackDate(payload.firstVerifiedAt)}`,
+        ].join('\n'),
+      },
+    },
+    {
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: `<${marketOverviewUrl()}|Open Market Overview> · Total verified emails: *${payload.totalVerifiedEmails}*`,
         },
       ],
     },
@@ -149,6 +217,23 @@ export async function notifyMarketOverviewSignupSlack(
     await sendWebsiteSlackMessage(buildMarketOverviewSignupSlackMessage(payload));
   } catch (error) {
     console.error('[website-slack] market overview signup notify failed:', error);
+  }
+}
+
+export async function notifyMarketOverviewReturnSigninSlack(
+  payload: MarketOverviewReturnSigninSlackPayload
+): Promise<void> {
+  if (!isWebsiteSlackEnabled()) {
+    console.warn(
+      '[website-slack] skipped market overview return sign-in notify (not enabled or missing env)'
+    );
+    return;
+  }
+
+  try {
+    await sendWebsiteSlackMessage(buildMarketOverviewReturnSigninSlackMessage(payload));
+  } catch (error) {
+    console.error('[website-slack] market overview return sign-in notify failed:', error);
   }
 }
 
