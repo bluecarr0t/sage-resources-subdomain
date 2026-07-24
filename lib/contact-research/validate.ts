@@ -24,8 +24,20 @@ export function parseConfidence(value: unknown): ContactConfidence {
   return 'low';
 }
 
+/** Loose input before email/category/confidence gates (LLM or scraper output). */
+export type RawContactExtractionInput = {
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  business_name?: string | null;
+  category?: string | null;
+  confidence?: ContactConfidence | string | null;
+  evidence_snippet?: string | null;
+};
+
 export function gateExtraction(
-  raw: Partial<ContactExtraction> & { email?: string | null; category?: string | null },
+  raw: RawContactExtractionInput,
   options?: { requirePersonEmail?: boolean }
 ): GateResult {
   const emailRaw = (raw.email ?? '').trim();
