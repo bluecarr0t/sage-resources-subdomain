@@ -1,0 +1,1 @@
+Baseline 2026-07-13: rated_rows=1388 rated_units=7877 unit_tub_explicit_pct=52% safari_cabin_rated=584 safari_cabin_explicit=48% safari_cabin_blank=305. Queue: 668 all / 305 Safari+Cabin (171 props).

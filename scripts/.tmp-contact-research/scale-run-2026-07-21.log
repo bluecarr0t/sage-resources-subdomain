@@ -1,0 +1,105 @@
+[dotenv@17.2.3] injecting env (57) from .env.local -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+Contact research: seed=all limit=40 dryRun=false tavily=true
+Seed queue: 40 candidates
+Existing contact emails: 1867
+
+[1/40] Camp Wandawega (inventory → glamping_property_owner)
+
+[2/40] Post Ranch Inn (inventory → glamping_property_owner)
+  skipped: duplicate_email (reservations@postranchinn.com)
+
+[3/40] Treehouse Utopia (inventory → glamping_property_owner)
+  skipped: duplicate_email (info@treehouseutopia.com)
+
+[4/40] Treehouse Point (inventory → glamping_property_owner)
+  inserted: info@treehousepoint.com [glamping_property_owner]
+
+[5/40] Eureka Springs Treehouses (inventory → glamping_property_owner)
+  no scrapable pages
+
+[6/40] River's Edge Treehouse Resort (inventory → glamping_property_owner)
+  inserted: info@riversedgetreehouses.com [glamping_property_owner]
+
+[7/40] In The Trees (inventory → glamping_property_owner)
+  inserted: info@inthetreesmaine.com [glamping_property_owner]
+
+[8/40] Cedar Creek Treehouse (inventory → glamping_property_owner)
+
+[9/40] Branson Treehouse Adventures (inventory → glamping_property_owner)
+
+[10/40] Treehouse Resort at River Road (inventory → glamping_property_owner)
+
+[11/40] Treehouse Villas (inventory → glamping_property_owner)
+
+[12/40] Collective Retreats Vail (inventory → glamping_property_owner)
+
+[13/40] Sinya on Lone Man Creek (inventory → glamping_property_owner)
+
+[14/40] Falling Waters Adventure Resort (inventory → glamping_property_owner)
+
+[15/40] The Yurt Village at Frost Mountain (inventory → glamping_property_owner)
+  inserted: info@frostmountainyurts.com [glamping_property_owner]
+
+[16/40] Timberline Glamping at Lake Lanier (inventory → glamping_property_owner)
+  inserted: info@tlglamping.com [glamping_property_owner]
+
+[17/40] Flying Flags RV Resort & Campground (inventory → glamping_property_owner)
+  inserted: groups@highwaywest.com [glamping_property_owner]
+
+[18/40] The Shady Dell (inventory → glamping_property_owner)
+
+[19/40] Silver Bullet Retreats (inventory → glamping_property_owner)
+
+[20/40] Firefall Ranch (inventory → glamping_property_owner)
+  inserted: terim@firefallranch.com [glamping_property_owner]
+
+[21/40] Wyldstay Smoky Mountains (inventory → glamping_property_owner)
+
+[22/40] Ray of Sunshine (inventory → glamping_property_owner)
+  inserted: hjeffersontowns@neo.rr.com [glamping_property_owner]
+
+[23/40] Timberline Glamping at Amelia Island (inventory → glamping_property_owner)
+  inserted: ameliaisland@tlglamping.com [glamping_property_owner]
+
+[24/40] Timberline Glamping at Pymatuning (inventory → glamping_property_owner)
+
+[25/40] Jennifer Messer (pipeline → outdoor_hospitality_developer)
+
+[26/40] Busey Bank (pipeline → outdoor_hospitality_developer)
+  inserted: tmsupport@busey.com [outdoor_hospitality_lender]
+
+[27/40] Looking Glass (pipeline → outdoor_hospitality_developer)
+  inserted: gina@lookingglasscounselingpdx.com [outdoor_hospitality_developer]
+
+[28/40] JPMorgan Chase Bank (pipeline → outdoor_hospitality_developer)
+
+[29/40] Fifth Third Bank (pipeline → outdoor_hospitality_developer)
+  inserted: james.costa@53.com [outdoor_hospitality_lender]
+
+[30/40] Allstate (pipeline → outdoor_hospitality_developer)
+
+[31/40] Tom Hunton (pipeline → outdoor_hospitality_developer)
+  inserted: tomh@camascountrymill.com [outdoor_hospitality_developer]
+
+[32/40] Citizens Community Federal (pipeline → outdoor_hospitality_developer)
+
+[33/40] The U.S. Glamping Industry Enters Its Institutional Era (web → outdoor_hospitality_investor)
+
+[34/40] About - NAI Outdoor Hospitality Brokers (web → outdoor_hospitality_investor)
+  skipped: duplicate_email (jessepine@naiohb.com)
+
+[35/40] Glamping (web → outdoor_hospitality_investor)
+
+[36/40] Outdoor hospitality market evolves beyond glamping | Paul Stanton posted on the topic | LinkedIn (web → outdoor_hospitality_investor)
+
+[37/40] Who We Are — Outside Capital (web → outdoor_hospitality_investor)
+  skipped: duplicate_email (info@outside.capital)
+
+[38/40] Invest in AutoCamp | Where Premium Hospitality & Nature Meet (web → outdoor_hospitality_investor)
+
+[39/40] 25 Outdoor Hospitality Players to Watch in 2025 - Part 1 (1-8) (web → outdoor_hospitality_investor)
+
+[40/40] Outdoor Hospitality Group - Outdoor Hospitality Group (web → outdoor_hospitality_investor)
+  inserted: kwalsh@outdoorhospitalitygroup.biz [outdoor_hospitality_investor]
+
+Done. inserted=14 skipped=5 failed=0 artifacts=/Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-contact-research

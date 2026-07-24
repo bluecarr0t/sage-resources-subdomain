@@ -1,0 +1,35 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+Processing 15 properties (DRY RUN; unitTypes=Safari Tent, Cabin; onlyUnitHotTubNull=true; onlyNull=false)...
+[1/15] ULUM Moab (1 rows)
+  Applied 0 row updates, 0 conflicts, 3028 chars scraped
+[2/15] Mohican Adventures (4 rows)
+  Applied 0 row updates, 0 conflicts, 4810 chars scraped
+[3/15] Under Canvas White Mountains (1 rows)
+  Applied 0 row updates, 0 conflicts, 36844 chars scraped
+[4/15] SKYE Texas Hill Country Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 2799 chars scraped
+[5/15] Under Canvas Columbia River Gorge (3 rows)
+  Applied 0 row updates, 0 conflicts, 39845 chars scraped
+[6/15] The Woods Luxury Camping (2 rows)
+  Applied 0 row updates, 0 conflicts, 9618 chars scraped
+[7/15] Cutty's Hayden Creek Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 5896 chars scraped
+[8/15] Naturluxe & Stars (3 rows)
+  Applied 0 row updates, 0 conflicts, 3094 chars scraped
+[9/15] Savage River Lodge (2 rows)
+  Skipped: fetch_error
+[10/15] Off Map Glamping (2 rows)
+  Applied 0 row updates, 0 conflicts, 8904 chars scraped
+[11/15] El Capitan Canyon (6 rows)
+  Applied 0 row updates, 0 conflicts, 19905 chars scraped
+[12/15] Hilltop Resorts and Campground (3 rows)
+  Applied 0 row updates, 0 conflicts, 8097 chars scraped
+[13/15] Goosewing Ranch (4 rows)
+  Applied 0 row updates, 0 conflicts, 4351 chars scraped
+[14/15] Rusty's Roost Rentals (2 rows)
+  Skipped: fetch_error
+[15/15] Paint Rock Farm (1 rows)
+  Applied 0 row updates, 0 conflicts, 1573 chars scraped
+
+Done. Row updates: 0, conflicts logged: 0, skipped properties: 2
+Artifacts: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-hot-tub-review

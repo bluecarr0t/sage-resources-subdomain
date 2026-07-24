@@ -1,0 +1,87 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: ⚙️  write to custom object with { processEnv: myObject }
+Processing 40 properties (DRY RUN; unitTypes=Safari Tent, Cabin; onlyUnitHotTubNull=true; onlyNull=false)...
+[1/40] North Texas Jellystone Park (2 rows)
+  Applied 0 row updates, 0 conflicts, 25950 chars scraped
+[2/40] Huttopia White Mountains (4 rows)
+  Applied 0 row updates, 0 conflicts, 4998 chars scraped
+[3/40] Under Canvas North Yellowstone (7 rows)
+  Applied 7 row updates, 0 conflicts, 42804 chars scraped
+[4/40] Costanoa (4 rows)
+  Applied 0 row updates, 0 conflicts, 14962 chars scraped
+[5/40] Mohican Adventures (4 rows)
+  Applied 0 row updates, 0 conflicts, 4810 chars scraped
+[6/40] Under Canvas White Mountains (1 rows)
+  Applied 0 row updates, 0 conflicts, 36844 chars scraped
+[7/40] SKYE Texas Hill Country Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 2799 chars scraped
+[8/40] Collective Retreats Governors Island (3 rows)
+  Applied 0 row updates, 0 conflicts, 7716 chars scraped
+[9/40] Paws Up Montana (1 rows)
+  Applied 0 row updates, 0 conflicts, 23180 chars scraped
+[10/40] Camp Olowalu (3 rows)
+  Applied 0 row updates, 0 conflicts, 724 chars scraped
+[11/40] Under Canvas Columbia River Gorge (3 rows)
+  Applied 0 row updates, 0 conflicts, 39845 chars scraped
+[12/40] Valley Overlook (2 rows)
+  Applied 0 row updates, 0 conflicts, 5527 chars scraped
+[13/40] Off Map Glamping (2 rows)
+  Applied 0 row updates, 0 conflicts, 8904 chars scraped
+[14/40] The Woods Luxury Camping (2 rows)
+  Applied 0 row updates, 0 conflicts, 9618 chars scraped
+[15/40] Hilltop Resorts and Campground (3 rows)
+  Applied 0 row updates, 0 conflicts, 8097 chars scraped
+[16/40] Cutty's Hayden Creek Resort (3 rows)
+  Applied 0 row updates, 0 conflicts, 5896 chars scraped
+[17/40] Naturluxe & Stars (3 rows)
+  Applied 0 row updates, 0 conflicts, 3094 chars scraped
+[18/40] Savage River Lodge (2 rows)
+  Skipped: fetch_error
+[19/40] Westgate River Ranch Resort & Rodeo (21 rows)
+  Applied 5 row updates, 0 conflicts, 44216 chars scraped
+[20/40] Moose Creek Ranch (4 rows)
+  Applied 0 row updates, 0 conflicts, 4661 chars scraped
+[21/40] El Capitan Canyon (6 rows)
+  Applied 0 row updates, 0 conflicts, 19905 chars scraped
+[22/40] Royal Gorge Cabins (2 rows)
+  Applied 0 row updates, 0 conflicts, 6988 chars scraped
+[23/40] Black Tree Resort (1 rows)
+  Applied 0 row updates, 0 conflicts, 4482 chars scraped
+[24/40] Collective Retreats Hill Country (3 rows)
+  Applied 0 row updates, 0 conflicts, 5398 chars scraped
+[25/40] Yellowstone Dreamin Camp (1 rows)
+  Applied 0 row updates, 0 conflicts, 4496 chars scraped
+[26/40] Postcard Cabins Gilchrist Springs (1 rows)
+  Applied 1 row updates, 0 conflicts, 48000 chars scraped
+[27/40] Coldwater Gardens (5 rows)
+  Applied 0 row updates, 0 conflicts, 765 chars scraped
+[28/40] Goosewing Ranch (4 rows)
+  Applied 0 row updates, 0 conflicts, 4351 chars scraped
+[29/40] Rusty's Roost Rentals (2 rows)
+  Skipped: fetch_error
+[30/40] Camp Aramoni (1 rows)
+  Applied 0 row updates, 0 conflicts, 21524 chars scraped
+[31/40] Paint Rock Farm (1 rows)
+  Applied 0 row updates, 0 conflicts, 1573 chars scraped
+[32/40] AutoCamp Russian River (5 rows)
+  Applied 0 row updates, 0 conflicts, 8777 chars scraped
+[33/40] GLAT Austin (5 rows)
+  Applied 0 row updates, 0 conflicts, 606 chars scraped
+[34/40] AutoCamp Catskills (3 rows)
+  Applied 0 row updates, 0 conflicts, 18144 chars scraped
+[35/40] Shale Lake (2 rows)
+  Skipped: fetch_error
+[36/40] Roaring River Hills Campground and Cabins (2 rows)
+  Applied 0 row updates, 0 conflicts, 28057 chars scraped
+[37/40] Mustang Monument (2 rows)
+  Applied 0 row updates, 0 conflicts, 5020 chars scraped
+[38/40] Safari West (1 rows)
+  Applied 0 row updates, 0 conflicts, 9573 chars scraped
+[39/40] Beaver Island Retreat (1 rows)
+  Applied 0 row updates, 0 conflicts, 10718 chars scraped
+[40/40] Luxury Yurt at Loyd Park on Joe Pool Lake (1 rows)
+  Applied 0 row updates, 0 conflicts, 8307 chars scraped
+
+Wrote SQL: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-hot-tub-review/backfill-hot-tub-2026-07-13.sql
+
+Done. Row updates: 13, conflicts logged: 0, skipped properties: 3
+Artifacts: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-hot-tub-review

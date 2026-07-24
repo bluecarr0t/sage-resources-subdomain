@@ -1,0 +1,129 @@
+[dotenv@17.2.3] injecting env (57) from .env.local -- tip: ⚙️  enable debug logging with { debug: true }
+Contact research: seed=all limit=50 offset=0 dryRun=false tavily=true
+Seed queue: 50 candidates
+Existing contact emails: 1885
+
+[1/50] Camp Wandawega (inventory → glamping_property_owner)
+
+[2/50] Eureka Springs Treehouses (inventory → glamping_property_owner)
+  no scrapable pages
+
+[3/50] Cedar Creek Treehouse (inventory → glamping_property_owner)
+
+[4/50] Branson Treehouse Adventures (inventory → glamping_property_owner)
+
+[5/50] Treehouse Resort at River Road (inventory → glamping_property_owner)
+
+[6/50] Treehouse Villas (inventory → glamping_property_owner)
+
+[7/50] Collective Retreats Vail (inventory → glamping_property_owner)
+
+[8/50] Sinya on Lone Man Creek (inventory → glamping_property_owner)
+
+[9/50] Falling Waters Adventure Resort (inventory → glamping_property_owner)
+
+[10/50] The Shady Dell (inventory → glamping_property_owner)
+
+[11/50] Silver Bullet Retreats (inventory → glamping_property_owner)
+
+[12/50] Wyldstay Smoky Mountains (inventory → glamping_property_owner)
+
+[13/50] Timberline Glamping at Pymatuning (inventory → glamping_property_owner)
+
+[14/50] AutoCamp Hill Country (inventory → glamping_property_owner)
+
+[15/50] Tuxedo Falls (inventory → glamping_property_owner)
+
+[16/50] Glamping Wild (inventory → glamping_property_owner)
+  no scrapable pages
+
+[17/50] Elk & Embers Resort (inventory → glamping_property_owner)
+
+[18/50] Broad River Campground (inventory → glamping_property_owner)
+
+[19/50] The Hemlocks by NOC (inventory → glamping_property_owner)
+
+[20/50] Elk Hollow Resort (inventory → glamping_property_owner)
+  inserted: info@elkhollowresort.com [glamping_property_owner]
+
+[21/50] SKYE Texas Hill Country Resort (inventory → glamping_property_owner)
+  inserted: info@skyetexashillcountry.com [glamping_property_owner]
+
+[22/50] Firesong Ranch (inventory → glamping_property_owner)
+  inserted: dawn@firesongranch.com [glamping_property_owner]
+
+[23/50] Basecamp Terlingua (inventory → glamping_property_owner)
+  inserted: info@basecampterlingua.com [glamping_property_owner]
+
+[24/50] The Cedars Ranch (inventory → glamping_property_owner)
+  inserted: staywithreverie@gmail.com [glamping_property_owner]
+
+[25/50] Blue Skies Retro Resort (inventory → glamping_property_owner)
+  inserted: info@blueskiesresort.com [glamping_property_owner]
+
+[26/50] Lost Horizon (inventory → glamping_property_owner)
+  inserted: howdy@luckybuffalo.co [glamping_property_owner]
+
+[27/50] Camp Ferncrest - Chambers Creek (inventory → glamping_property_owner)
+  inserted: info@lintonhospitality.com [glamping_property_owner]
+
+[28/50] Royal View Campground (inventory → glamping_property_owner)
+  inserted: royalviewcg@aol.com [glamping_property_owner]
+
+[29/50] TEST (pipeline → glamping_property_owner)
+
+[30/50] Tom Hunton (pipeline → outdoor_hospitality_developer)
+  skipped: duplicate_email (tomh@camascountrymill.com)
+
+[31/50] Eric Rubenstein (pipeline → outdoor_hospitality_developer)
+  skipped: duplicate_email (erubenstein@uga.edu)
+
+[32/50] Mike Sullivan (pipeline → outdoor_hospitality_developer)
+  skipped: duplicate_email (michael.sullivan@dnr.iowa.gov)
+
+[33/50] Don Vick-Site Visit (pipeline → glamping_property_owner)
+
+[34/50] Leonard Grado (pipeline → outdoor_hospitality_developer)
+  skipped: duplicate_email (lgrado@gradoconstruction.com)
+
+[35/50] Jack Tucker (pipeline → outdoor_hospitality_developer)
+
+[36/50] Scott Bradshaw / Arbor House (pipeline → outdoor_hospitality_developer)
+
+[37/50] Robert Neill (pipeline → glamping_property_owner)
+
+[38/50] Sonya Falcone - CANCELLED (pipeline → outdoor_hospitality_developer)
+  inserted: sonyafalcone@gmail.com [outdoor_hospitality_developer]
+
+[39/50] Glamping (web → outdoor_hospitality_investor)
+
+[40/50] RV & Cabin Resort Investing - (web → outdoor_hospitality_investor)
+  inserted: danny@usacampingcompany.com [outdoor_hospitality_investor]
+
+[41/50] Stomp Capital | Next Gen Hospitality Private Equity (web → outdoor_hospitality_investor)
+  inserted: hello@stompcapital.com [outdoor_hospitality_investor]
+
+[42/50] Outdoor Hospitality: The Rise of Glamping | Covercy (web → outdoor_hospitality_investor)
+
+[43/50] Luxury outdoor hospitality • Outstanding (web → outdoor_hospitality_investor)
+  inserted: robert@outstandingtent.com [unit_manufacturer]
+
+[44/50] Glamping Capital - Expert Strategies for Success (web → outdoor_hospitality_investor)
+
+[45/50] Contact Us — Luxury Glamping Resort Near Lake Guntersville ... (web → outdoor_hospitality_developer)
+  inserted: info@retreet.fun [outdoor_hospitality_developer]
+
+[46/50] blue water development Archives - Blue Water Development (web → outdoor_hospitality_developer)
+
+[47/50] Let’s Go Glamping: Luxury Camping Gets Its Own Association | Associations Now (web → outdoor_hospitality_developer)
+
+[48/50] Andrew Revkin - So the tiny company Clear Sky Resorts has... (web → outdoor_hospitality_developer)
+  inserted: dev7561@gmail.com [outdoor_hospitality_developer]
+
+[49/50] Travel Resorts of America (web → outdoor_hospitality_developer)
+  inserted: membersupport@travelresorts.com [outdoor_hospitality_developer]
+
+[50/50] The Columbian - BELLINGHAM — The future of a proposed... (web → outdoor_hospitality_developer)
+  skipped: duplicate_email (dev7561@gmail.com)
+
+Done. inserted=16 skipped=7 failed=0 artifacts=/Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-contact-research

@@ -1,0 +1,8 @@
+id,property_id,property_name,site_name,unit_type,city,state,research_status,is_open,quantity_of_units,rate_avg_retail_daily_rate,url
+13115,dc230036-0899-40c5-82f1-4716d15e2413,Highland Ranch,Jupe Tent,Jupe,Kalispell,MT,in_progress,Yes,10,,https://www.highlandranch.com/accommodations/jupe-tent
+13117,39349470-8b4e-4ea7-a41b-622ca29fdf59,Grand Lake Lodge,Jupe,Jupe,Grand Lake,CO,in_progress,Yes,4,,https://www.grandlakelodge.com/
+9562,e9624294-46e6-49bd-9c30-b77759e5b316,Flying Flags Avila Beach,Jupe Tent,Jupe,Avila Beach,CA,published,Yes,8,251.25,https://www.flyingflags.com/avila-beach/
+10319,00616bd2-e669-4ada-94cd-32efb6d695ca,Trout Creek Wilderness Lodge,Jupes,Jupe,Molalla,OR,published,Yes,4,289.33,https://www.troutcreekwildernesslodge.com/
+10310,d3bc7200-e81e-49c8-92f5-cf95eadd57a4,Jupe Redwoods,Jupes,Jupe,Davenport,CA,published,Yes,6,190,https://www.jupe.com/destinations/redwoods
+10313,e4f4ed9a-cfa5-4955-9b6c-503cf93d0a92,CampV,Jupes,Jupe,Vancorum,CO,published,Yes,10,150,https://www.campv.com/
+13116,ddfbb2f3-7dc0-4345-85d5-2ac081fc8309,Indian Flat Campground,Jupe Tent,Jupe,El Portal,CA,in_progress,Yes,6,,https://yosemiteresorts.com/indian-flat/

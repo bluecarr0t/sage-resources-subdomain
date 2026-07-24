@@ -1,0 +1,43 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+Mode: DRY RUN
+
+Wave A — Manual No
+------------------------------------------------------------
+UPDATE id=10193 Huttopia White Mountains / Trappeur: unit_hot_tub null → No
+UPDATE id=10195 Huttopia White Mountains / Canadienne: unit_hot_tub null → No
+UPDATE id=10194 Huttopia White Mountains / Trappeur Duo: unit_hot_tub null → No
+UPDATE id=10424 Huttopia Paradise Springs / Trappeur Duo Pacific Red Rock: unit_hot_tub null → No
+UPDATE id=10099 Huttopia Paradise Springs / Canadienne Pacific: unit_hot_tub null → No
+UPDATE id=10100 Huttopia Paradise Springs / Trappeur Pacific: unit_hot_tub null → No
+UPDATE id=10101 Huttopia Paradise Springs / Trappeur Duo Pacific: unit_hot_tub null → No
+UPDATE id=10096 Huttopia Wine Country / Canadienne Pacific: unit_hot_tub null → No
+UPDATE id=10097 Huttopia Wine Country / Trappeur Pacific: unit_hot_tub null → No
+UPDATE id=10098 Huttopia Wine Country / Trappeur Duo Pacific: unit_hot_tub null → No
+UPDATE id=10095 Costanoa / Tent Bungalo: unit_hot_tub null → No
+UPDATE id=10419 Costanoa / Douglas Fir Cabins: unit_hot_tub null → No
+UPDATE id=10418 Costanoa / Campground Cabin: unit_hot_tub null → No
+UPDATE id=10093 AutoCamp Russian River / Luxury Tent: unit_hot_tub null → No
+UPDATE id=10198 AutoCamp Catskills / Luxury Tent: unit_hot_tub null → No
+UPDATE id=13008 Collective Retreats Governors Island / Journey Tent: unit_hot_tub null → No
+UPDATE id=13009 Collective Retreats Governors Island / Voyager Tent: unit_hot_tub null → No
+UPDATE id=13010 Collective Retreats Governors Island / Basecamp Cabin: unit_hot_tub null → No
+UPDATE id=10254 Collective Retreats Hill Country / Summit Tent: unit_hot_tub null → No
+UPDATE id=10252 Collective Retreats Hill Country / Honeymoon Tent: unit_hot_tub null → No
+UPDATE id=10253 Collective Retreats Hill Country / Family Suite: unit_hot_tub null → No
+UPDATE id=10326 Two Capes Lookout / South Cape Mirror Cabin: unit_hot_tub null → No
+UPDATE id=10672 Postcard Cabins Hocking Hills / null: unit_hot_tub null → No
+UPDATE id=10675 Postcard Cabins Shenandoah North / null: unit_hot_tub null → No
+
+Wave B — Manual Yes
+------------------------------------------------------------
+UPDATE id=10539 North Texas Jellystone Park / Cabins: unit_hot_tub null → Yes
+UPDATE id=10481 Paws Up Montana / luxury cabins: unit_hot_tub null → Yes
+UPDATE id=10425 Huttopia Paradise Springs / Chaplain Cabin: unit_hot_tub null → Yes
+UPDATE id=10045 Bolt Farm Treehouse / Mirror Cabins: unit_hot_tub No → Yes
+UPDATE id=13095 Tu Tu' Tun Lodge / ÖÖD Glass Cabin: unit_hot_tub null → Yes
+UPDATE id=13093 Oakey Mountain Mirror Häus / ÖÖD Mirror House: unit_hot_tub null → Yes
+
+Summary: Manual No updates=24, Manual Yes updates=6, skipped=0
+Migrations: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/migrations/backfill-hot-tub-unit-p0-2026-07-13-batch-4.sql
+            /Users/nickharsell/Documents/sage-resources-subdomain/scripts/migrations/backfill-hot-tub-unit-p0-2026-07-13-batch-5.sql
+Audit CSV: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-hot-tub-review/manual-hot-tub-pass-2026-07-13.csv

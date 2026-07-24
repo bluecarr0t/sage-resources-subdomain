@@ -1,0 +1,32 @@
+id,property_id,property_name,site_name,unit_type,city,state,research_status,is_open,quantity_of_units,rate_avg_retail_daily_rate,url
+10948,caae79d5-aaed-4d9a-add8-0638a6c88f69,Lost Lake Resort,A-frame,A-Frame,Hood River,OR,published,Yes,1,208.75,https://lostlakeresort.org/
+9759,0f073e76-9139-45e4-bf0b-0713c0a89187,Nature Nook Retreats,A-Frame Cabin,A-Frame,Greenville,SC,published,Yes,,178.75,https://www.wyldstaygreenvillesc.com/
+9965,ff73d4f4-f34a-42c9-8803-5a27fc047e0f,Paloma Lake,A-Frame Cabins,A-Frame,Braithwaite,LA,published,Yes,5,276.67,https://www.palomalakela.com/
+9670,5e0cd2d3-d1fe-480b-a294-1b932d7dd154,Starlight Haven at Weiss Lake,A-Frame Cabin,A-Frame,Cedar Bluff,AL,published,Yes,,175,https://visitstarlight.com/weiss-lake/
+9714,9070750d-df56-4023-a218-dd08c41e87f3,Lost Woods Farm & Forest,A-Frame Cabin,A-Frame,Boyne Falls,MI,published,Yes,,176.25,http://www.lostwoodsmi.com/
+12916,a6d510d3-f33a-4889-9903-c52c60409e21,Camp Wandawega,A-Frame,A-Frame,Elkhorn,WI,published,Yes,1,400,https://www.wandawega.com/bookyourstay
+9739,74949d28-3c5e-4c78-80f4-c70b4b5689ff,Tops'l Farm,A-Frame Cabin,A-Frame,Waldoboro,ME,published,Yes,,211.25,http://www.topslfarm.com/
+9983,c3125bfd-0352-4132-a223-5b7be2891639,Tiny Town Campground,A-Frames,A-Frame,Emigrant,MT,published,Yes,5,128.67,https://www.emigrantcabins.com/
+10879,09d7f420-ca5a-4641-bf72-58b38f8e3c88,Cedar Bloom Farm,A-Frame Cabin,A-Frame,Cave Junction,OR,published,Yes,,176.25,https://www.cedarbloomfarm.com/
+13097,b11f6f6b-f6f1-435c-bfe1-83d1c39efede,Callicoon Hills,A-Frame Cabins,A-Frame,Callicoon Center,NY,in_progress,Yes,6,,https://callicoonhills.com/stay/a-frames/
+10259,6b27b3a7-2b52-4d30-a91c-a6eba46eff00,Khushatta Hills Ranch,A-Frame,A-Frame,Coldspring,TX,published,Yes,1,150,https://khushattahillsranch.com/
+9984,e52ed16f-1bfb-4290-a311-c41b5fceffdb,Tobacco River Ranch Glamping,A-Frame,A-Frame,Eureka,MT,published,Yes,1,106.83,https://tobaccoriverranch.com/
+10480,73b983a9-3b09-47f7-9799-23da76458749,Bison Creek Ranch,A-Frames,A-Frame,East Glacier,MT,published,Yes,3,200,https://bisoncreekranch.com
+10028,353ef70b-105b-4f09-a899-704f6513c892,Treetopia Campground,A-Frame Cabin,A-Frame,Catskill,NY,published,Yes,1,270,https://www.treetopiacampground.com/
+13098,0536a92c-c4d1-4878-8377-5a7c91df407f,The Charmadillo,A-Frame Cabins,A-Frame,Center Point,TX,in_progress,Yes,7,,https://www.thecharmadillo.com/lodging
+13103,2b4b9efd-e1b1-4c32-bc9c-04a02358a2fb,22 West Cabins & Recreation,Moose Haven A-Frame,A-Frame,Walden,CO,in_progress,Yes,1,,https://www.22west.net/
+13107,d9895069-0a5f-4c7a-9c8d-a5ce7247cb51,Solstice Farms,A-Frame Microcabin,A-Frame,Loomis,CA,in_progress,Yes,1,,https://www.farmstayca.com/book-a-room
+13112,0c2d0d45-ac3c-47cf-91e8-fdfd90a664df,Good Creek Meadows,A-Frame,A-Frame,Olney,MT,in_progress,Yes,1,,https://www.hipcamp.com/en-GB/land/montana-good-creek-meadows-2ejhzmq1
+13099,2c59ee1d-715e-4ca0-8938-f1923bc6536d,Punkin Hollow Resort,A-Frame Cabins,A-Frame,Stanton,KY,in_progress,Yes,5,,https://www.hipcamp.com/en-US/land/kentucky-punkin-hollow-resort-ex9h5q6d
+13104,a74485dd-ce65-4c0d-82e7-e8e0a46404d6,The Hohnstead Glamping Cabins,Transforming A-Frame,A-Frame,Bonner,MT,in_progress,Yes,1,,https://www.thehohnstead.com/transforming-aframe-cabin-missoula
+13109,8da63336-b539-4e48-bc13-663b32cfa8e3,The Ridge at Stanley Gap,A-Frame,A-Frame,Blue Ridge,GA,in_progress,Yes,1,,https://www.hipcamp.com/en-GB/land/georgia-the-ridge-at-stanley-gap-9mxhzddj
+13114,070638cf-99a5-4281-b6e7-f046dac7f970,Willenborg Woods,A-Frame,A-Frame,Charleston,IL,in_progress,Yes,1,,https://www.hipcamp.com/en-GB/land/illinois-willenborg-woods-y0zhqem8
+13100,53260890-3e81-40e0-9666-48e2a3f695bf,Nolla A-Frames Near Yosemite,Nolla A-Frame,A-Frame,Colfax Springs,CA,in_progress,Yes,3,,https://nollacabins.com/destinations/yosemite
+13106,8ee7ece8-5139-4bd3-b8b0-5fe4cbd9e78a,Piney Hills Campground,A-Frame Cabins,A-Frame,Mauk,GA,in_progress,Yes,2,,https://pineyhillscampground.com/
+13111,fbe6a571-ecb2-4010-bf25-4f41445f1f7d,Noble Pine Campground,A-Frame,A-Frame,Mammoth Cave,KY,in_progress,Yes,1,,https://www.hipcamp.com/en-GB/land/kentucky-noble-pine-campground-2ejhzln8
+13101,822b300d-553b-4169-a6a1-f460b5858c9d,Bentonville Bike Camp,Mini A-Frames,A-Frame,Bentonville,AR,in_progress,Yes,3,,https://bentonvillebikecamp.com
+13105,87acd71c-d907-4dfe-b2a9-f6ba31a9b142,Fall Creek Retreats,Transforming A-Frame,A-Frame,Purlear,NC,in_progress,Yes,1,,https://fallcreekretreats.com/transforming-a-frame/
+13110,2417c2f9-5f10-41da-ac59-f575565ee25f,Happy Hollow Homestead,A-Frame,A-Frame,Marengo,IN,in_progress,Yes,1,,https://www.hipcamp.com/en-GB/land/indiana-happy-hollow-homestead-3pw1hmxd
+13102,0a070e3f-7887-4590-920c-35401efed1ee,Bear Woods Resort and Campground,A-Frame Cabins,A-Frame,Bear Lake,MI,in_progress,Yes,4,,https://www.hipcamp.com/en-US/land/michigan-bear-woods-resort-and-campground-6p0hq505
+13108,743070c8-ad77-40f7-a78b-6488bd11f06f,Crystal Ranch,A-Frame Cabins,A-Frame,Golden,CO,in_progress,Yes,2,,https://www.hipcamp.com/en-US/land/colorado-crystal-ranch-v1qh97yx
+13113,3628303d-e305-4692-b832-105f3ae4d171,Maine Guide Company,A-Frame,A-Frame,Carmel,ME,in_progress,Yes,1,,https://www.hipcamp.com/en-GB/land/maine-maine-guide-company-2ejh6own

@@ -1,0 +1,32 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+Phase 3 Mirror Cabin discovery (limit=45, firecrawl=true)
+Alias check: Mirror Cabin
+Loading all_sage_data for dedupe...
+  3476 rows
+Tavily search...
+  45 unique docs (incl. seeds)
+Firecrawl deep scrape (16 URLs)...
+  ok https://www.glamptuary.com/blog/spotlight-on-glamping-structures-mirror-cabins
+  ok https://oodhouse.com/en-us
+  ok https://glampmichigan.co/mirrorhouses
+  ok https://www.pdxmonthly.com/travel-and-outdoors/2026/03/mirror-cabins-vacation-lu
+  ok https://thepointsguy.com/hotel/best-glamping-spots
+  ok https://cameronranchglamping.com
+  ok https://www.boltfarmtreehouse.com/stay
+  ok https://www.realfoodtraveler.com/where-to-go-to-glamping-in-the-u-s-and-canada
+  ok https://www.modernescapes.com
+  ok https://www.glamping.com/destinations/north-america
+  ok https://oodhouse.com/en-us/references/learn-how-katie-and-zach-built-one-of-the-
+  ok https://oodhouse.com/en-us/news/the-first-ever-mobile-mirror-house-by-ood-is-now
+  ok https://oodhouse.com/en-us/news/ood-mirror-houses-in-paradise-ranch-fastest-grow
+  ok https://oodhouse.com/en-us/news/ood-expands-to-its-fourth-site-in-texas-at-st-jo
+  ok https://www.dwell.com/article/ood-house-prefab-tiny-home-mirrored-walls-417de3db
+  ok https://www.businessinsider.com/mirrored-tiny-home-on-wheels-ood-2023-4
+GPT extract...
+  6 candidates
+
+Summary
+  new_candidate: 0
+  already_in_sage: 5
+  rejected: 1
+Artifacts under /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-mirror-cabin-review

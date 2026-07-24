@@ -1,0 +1,82 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+Mode: DRY RUN
+Discovery source: ood_mirror_cabin_web_expand_2026_07_13
+
+A) Glamp Michigan sibling
+------------------------------------------------------------
+INSERT sibling Glamp Michigan / ÖÖD Mirror House qty=2
+  evidence: glampmichigan.co/mirrorhouses — Michigan’s first two ÖÖD units (Lumi + Sol) with mirrored glass on three sides; private hot tub/sauna/plunge.
+{
+  "property_name": "Glamp Michigan",
+  "site_name": "ÖÖD Mirror House",
+  "slug": "glamp-michigan",
+  "property_id": "79707212-25c5-4dfe-8d31-56e72be7b0aa",
+  "property_type": "Glamping",
+  "research_status": "in_progress",
+  "is_glamping_property": "Yes",
+  "is_open": "Yes",
+  "source": "Sage",
+  "discovery_source": "ood_mirror_cabin_web_expand_2026_07_13",
+  "date_added": "2026-07-13",
+  "date_updated": "2026-07-13",
+  "country": "United States",
+  "land_operator_category": "private_commercial",
+  "address": "7537 Wallaker Rd",
+  "city": "Benzonia",
+  "state": "MI",
+  "zip_code": "49616",
+  "lat": 44.521758,
+  "lon": -86.077545,
+  "url": "https://glampmichigan.co/mirrorhouses",
+  "phone_number": null,
+  "description": "Glamp Michigan (The Domes) in Benzonia, MI now offers two ÖÖD Mirror Houses (Lumi and Sol) alongside geodesic domes — Michigan’s first mirrored ÖÖD stays.",
+  "unit_type": "Mirror Cabin",
+  "quantity_of_units": "2",
+  "property_total_sites": null,
+  "glamping_service_tier": "midscale",
+  "notes": "[2026-07-13] Phase 3 sibling. glampmichigan.co/mirrorhouses — Michigan’s first two ÖÖD units (Lumi + Sol) with mirrored glass on three sides; private hot tub/sauna/plunge."
+}
+
+B) Oak Ranch Resort net-new
+------------------------------------------------------------
+INSERT net-new Oak Ranch Resort / Mirror House qty=2
+  evidence: oakranchresort.com/mirror-houses — Reflections + Whispering Oaks Mirror Houses now booking; Scandinavian mirrored design.
+{
+  "property_name": "Oak Ranch Resort",
+  "site_name": "Mirror House",
+  "slug": "oak-ranch-resort",
+  "property_id": "88461704-8bd4-42f2-abea-907a228c1885",
+  "property_type": "Glamping",
+  "research_status": "in_progress",
+  "is_glamping_property": "Yes",
+  "is_open": "Yes",
+  "source": "Sage",
+  "discovery_source": "ood_mirror_cabin_web_expand_2026_07_13",
+  "date_added": "2026-07-13",
+  "date_updated": "2026-07-13",
+  "country": "United States",
+  "land_operator_category": "private_commercial",
+  "address": "303 Young Ln",
+  "city": "Graham",
+  "state": "TX",
+  "zip_code": "76450",
+  "lat": null,
+  "lon": null,
+  "url": "https://oakranchresort.com/mirror-houses/",
+  "phone_number": null,
+  "description": "Oak Ranch Resort is a 57-acre ranch retreat near Graham, TX (north of Possum Kingdom Lake) offering two mirrored cabins (Reflections and Whispering Oaks Mirror Houses, ~238 sq ft) with private hot tubs and fire pits, plus casitas and La Casa Tierra.",
+  "unit_type": "Mirror Cabin",
+  "quantity_of_units": "2",
+  "property_total_sites": null,
+  "notes": "[2026-07-13] Phase 3 web-expand net-new. Confirm ÖÖD vs other mirror manufacturer and lat/lon before publishing."
+}
+
+C) Rejected / not retyped
+------------------------------------------------------------
+  The Glamping Collective Glass Cabin / Luxe Glass Cabin (ids 10490, 10491, 11600): View-glass wall cabins (8×16 / 16-ft glass wall), not mirrored cladding / ÖÖD. Keep unit_type Cabin.
+  Space Cowboys Mirrored Space Pod: Mirrored dome/pod product — leave unit_type Dome.
+  Terranova Nirvana Mirror glamping dome: Mirrored dome SKUs — leave unit_type Dome.
+
+Summary: inserted=2, skipped=0 (would be applied)
+SQL export: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-mirror-cabin-review/phase3-mirror-cabin-2026-07-13.sql
+Report: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-mirror-cabin-review/PHASE3_REPORT-2026-07-13.md

@@ -1,0 +1,23 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+Mode: LIVE
+Discovery source: ood_mirror_cabin_web_expand_2026_07_13
+
+A) Glamp Michigan sibling
+------------------------------------------------------------
+INSERT sibling Glamp Michigan / ÖÖD Mirror House qty=2
+  evidence: glampmichigan.co/mirrorhouses — Michigan’s first two ÖÖD units (Lumi + Sol) with mirrored glass on three sides; private hot tub/sauna/plunge.
+
+B) Oak Ranch Resort net-new
+------------------------------------------------------------
+INSERT net-new Oak Ranch Resort / Mirror House qty=2
+  evidence: oakranchresort.com/mirror-houses — Reflections + Whispering Oaks Mirror Houses now booking; Scandinavian mirrored design.
+
+C) Rejected / not retyped
+------------------------------------------------------------
+  The Glamping Collective Glass Cabin / Luxe Glass Cabin (ids 10490, 10491, 11600): View-glass wall cabins (8×16 / 16-ft glass wall), not mirrored cladding / ÖÖD. Keep unit_type Cabin.
+  Space Cowboys Mirrored Space Pod: Mirrored dome/pod product — leave unit_type Dome.
+  Terranova Nirvana Mirror glamping dome: Mirrored dome SKUs — leave unit_type Dome.
+
+Summary: inserted=2, skipped=0 (were applied)
+SQL export: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-mirror-cabin-review/phase3-mirror-cabin-2026-07-13.sql
+Report: /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-mirror-cabin-review/PHASE3_REPORT-2026-07-13.md

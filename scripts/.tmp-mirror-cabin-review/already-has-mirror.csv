@@ -1,0 +1,2 @@
+matched_row_id,property_id,property_name,city,state,mirror_row_ids,mirror_unit_types,mirror_site_names,match_type,ood_deal_count,ood_locations,audit_date
+10356,d4a351a9-0cca-414a-8b06-1d017de5836c,Two Capes Lookout,Cloverdale,OR,10326;9565,Mirror Cabin;Cabin,South Cape Mirror Cabin;Mirror Cabin,city_state_zip,1,"6080 Floyd Avenue, Cloverdale, OR 97112, USA",2026-07-13

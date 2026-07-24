@@ -1,0 +1,74 @@
+[dotenv@17.2.3] injecting env (57) from .env.local -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+Contact research: seed=all limit=50 offset=0 dryRun=false tavily=true
+Seed queue: 50 candidates
+Existing contact emails: 1901
+[1/50] Camp Wandawega (inventory → glamping_property_owner)
+[2/50] Eureka Springs Treehouses (inventory → glamping_property_owner)
+  no scrapable pages
+[3/50] Cedar Creek Treehouse (inventory → glamping_property_owner)
+[4/50] Branson Treehouse Adventures (inventory → glamping_property_owner)
+[5/50] Treehouse Resort at River Road (inventory → glamping_property_owner)
+[6/50] Treehouse Villas (inventory → glamping_property_owner)
+[7/50] Collective Retreats Vail (inventory → glamping_property_owner)
+[8/50] Sinya on Lone Man Creek (inventory → glamping_property_owner)
+[9/50] Falling Waters Adventure Resort (inventory → glamping_property_owner)
+[10/50] The Shady Dell (inventory → glamping_property_owner)
+[11/50] Silver Bullet Retreats (inventory → glamping_property_owner)
+[12/50] Wyldstay Smoky Mountains (inventory → glamping_property_owner)
+[13/50] Timberline Glamping at Pymatuning (inventory → glamping_property_owner)
+[14/50] AutoCamp Hill Country (inventory → glamping_property_owner)
+[15/50] Tuxedo Falls (inventory → glamping_property_owner)
+[16/50] Glamping Wild (inventory → glamping_property_owner)
+  no scrapable pages
+[17/50] Elk & Embers Resort (inventory → glamping_property_owner)
+[18/50] Broad River Campground (inventory → glamping_property_owner)
+[19/50] The Hemlocks by NOC (inventory → glamping_property_owner)
+[20/50] WeeCasa Tiny House Resort (inventory → glamping_property_owner)
+[21/50] Colorado Cabin Adventures at Grand Lake (inventory → glamping_property_owner)
+[22/50] Gunnison Glamping Wagons (inventory → glamping_property_owner)
+  inserted: info@gunnisonrvpark.com [glamping_property_owner]
+[23/50] Wildhaven Yosemite (inventory → glamping_property_owner)
+  inserted: info@wildhavenyosemite.com [glamping_property_owner]
+[24/50] Evergreen Lodge (inventory → glamping_property_owner)
+  inserted: terim@evergreenlodge.com [glamping_property_owner]
+[25/50] Del Rio Ranch (inventory → outdoor_hospitality_developer)
+[26/50] Costanoa Lodge (inventory → glamping_property_owner)
+  inserted: costanoa@highwaywest.com [glamping_property_owner]
+[27/50] Treebones Resort (inventory → glamping_property_owner)
+[28/50] The Trailer Pond at Alta Colina (inventory → glamping_property_owner)
+  inserted: booking@thetrailerpond.com [glamping_property_owner]
+[29/50] TEST (pipeline → glamping_property_owner)
+[30/50] Tom Hunton (pipeline → outdoor_hospitality_developer)
+[31/50] Eric Rubenstein (pipeline → outdoor_hospitality_developer)
+  skipped: duplicate_email (erubenstein@uga.edu)
+[32/50] Mike Sullivan (pipeline → outdoor_hospitality_developer)
+  inserted: mike@sullivanlandsales.com [outdoor_hospitality_developer]
+[33/50] Don Vick-Site Visit (pipeline → glamping_property_owner)
+[34/50] Leonard Grado (pipeline → outdoor_hospitality_developer)
+  skipped: duplicate_email (lgrado@gradoconstruction.com)
+[35/50] Jack Tucker (pipeline → outdoor_hospitality_developer)
+[36/50] Scott Bradshaw / Arbor House (pipeline → outdoor_hospitality_developer)
+[37/50] Robert Neill (pipeline → glamping_property_owner)
+[38/50] Sonya Falcone - CANCELLED (pipeline → outdoor_hospitality_developer)
+  inserted: sonya@daylight.la [outdoor_hospitality_developer]
+[39/50] RV Park Brokers, Campground Brokers (web → outdoor_hospitality_investor)
+  skipped: duplicate_email (bobkaplan@naiohb.com)
+[40/50] Glamping Capital - Expert Strategies for Success (web → outdoor_hospitality_investor)
+[41/50] AGA Glamping Experts — American Glamping Association (web → outdoor_hospitality_developer)
+  inserted: info@americanglampingassociation.net [outdoor_hospitality_developer]
+[42/50] Resort Operators - Luna Glamping (web → outdoor_hospitality_developer)
+  inserted: hello@lunaglamping.com [outdoor_hospitality_developer]
+[43/50] blue water development Archives (web → outdoor_hospitality_developer)
+[44/50] Modular & Temporary Structures For Events, Glamping & Hospitality | EJH Distribution (web → outdoor_hospitality_developer)
+  inserted: sales@ejhdistribution.com [outdoor_hospitality_developer]
+[45/50] RESORT PLANNING | Outdoor Design Group (web → outdoor_hospitality_developer)
+[46/50] Top 5 RV Park Development Companies | RoverPass Blog (web → outdoor_hospitality_developer)
+[47/50] Geodesic Dome Manufacturer | Custom Dome Tents for Glamping (web → unit_manufacturer)
+  inserted: info@foerstine.net [unit_manufacturer]
+[48/50] Buy Luxury Glamping Tents & Domes Online | Luna Glamping (web → unit_manufacturer)
+  skipped: duplicate_email (hello@lunaglamping.com)
+[49/50] TruDomes | Geodesic Glamping Dome Supplier in the United States (web → unit_manufacturer)
+  inserted: hello@trudomes.com [unit_manufacturer]
+[50/50] Buy Glamping Geodesic Domes Tent Online | Geodesic Dome Tent for Sale – Glamping Dome Store (web → unit_manufacturer)
+
+Done. inserted=12 skipped=6 failed=0 queue=50

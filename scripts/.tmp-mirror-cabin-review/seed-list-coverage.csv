@@ -1,0 +1,10 @@
+seed_name,status,matched_row_id,property_id,property_name,city,state,audit_date
+Borealis Basecamp,needs_sibling,9928,4419eb3e-2657-4c18-a94c-5bd5aa3286e4,Borealis Basecamp,Fairbanks,AK,2026-07-13
+Heritage Ranch MT,needs_sibling,9612,016308a4-a3a4-404f-8e3c-2e9500961cb3,Heritage Ranch MT,Bozeman,MT,2026-07-13
+Inn Town Campground,needs_sibling,10103,68a4462d-38fb-4c84-865b-2a8a4e6cf6ae,Inn Town Campground,Nevada City,CA,2026-07-13
+Hidden Flower Tiny Farm,needs_sibling,9795,bf108d78-9b83-4235-9ad7-d7e99dc68caa,Hidden Flower Tiny Farm,Asheville,NC,2026-07-13
+Two Capes Lookout,already_has_mirror,10356,d4a351a9-0cca-414a-8b06-1d017de5836c,Two Capes Lookout,Cloverdale,OR,2026-07-13
+Dupont Yurts,needs_sibling,9792,342085ae-9f64-4b56-9edb-b1b52d780ffa,Dupont Yurts,Hendersonville,NC,2026-07-13
+The Yurtopian,needs_sibling,12075,3566f6a0-9a83-4a90-bb50-4c99b480dc5f,The Yurtopian Wimberley,Wimberley,TX,2026-07-13
+The Yurtopian,needs_sibling,9831,6c776703-cdd3-47fb-8158-6be66184684b,The Yurtopian,Dripping Springs,TX,2026-07-13
+Collective Governors Island,needs_sibling,13010,54752c1b-e4ae-4f5e-9f4c-65234d4b95cd,Collective Retreats Governors Island,New York,NY,2026-07-13

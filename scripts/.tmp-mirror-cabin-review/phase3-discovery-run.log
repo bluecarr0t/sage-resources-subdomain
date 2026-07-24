@@ -1,0 +1,28 @@
+[dotenv@17.2.3] injecting env (54) from .env.local -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+Phase 3 Mirror Cabin discovery (limit=35, firecrawl=true)
+Alias check: Mirror Cabin
+Loading all_sage_data for dedupe...
+  3476 rows
+Tavily search...
+  35 unique docs
+Firecrawl deep scrape (12 URLs)...
+  ok https://www.pdxmonthly.com/travel-and-outdoors/2026/03/mirror-cabins-vacation-lu
+  ok https://thepointsguy.com/hotel/best-glamping-spots
+  ok https://www.glamptuary.com/blog/spotlight-on-glamping-structures-mirror-cabins
+  ok https://cameronranchglamping.com
+  ok https://www.boltfarmtreehouse.com/stay
+  ok https://www.realfoodtraveler.com/where-to-go-to-glamping-in-the-u-s-and-canada
+  ok https://www.modernescapes.com
+  ok https://www.glamping.com/destinations/north-america
+  ok https://oodhouse.com/en-us/references/learn-how-katie-and-zach-built-one-of-the-
+  ok https://oodhouse.com/en-us
+  ok https://oodhouse.com/en-us/news/the-first-ever-mobile-mirror-house-by-ood-is-now
+  ok https://oodhouse.com/en-us/news/ood-mirror-houses-in-paradise-ranch-fastest-grow
+GPT extract...
+  5 candidates
+
+Summary
+  new_candidate: 0
+  already_in_sage: 4
+  rejected: 1
+Artifacts under /Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-mirror-cabin-review

@@ -1,0 +1,22 @@
+id,property_id,property_name,site_name,unit_type,city,state,research_status,is_open,quantity_of_units,rate_avg_retail_daily_rate,url,signal_field,recommended_action
+9971,74949d28-3c5e-4c78-80f4-c70b4b5689ff,Tops'l Farm,A-Frame Cabins,Tiny Home,Waldoboro,ME,published,Yes,10,210,https://www.topslfarm.com/,site_name,skip_already_has_aframe
+10008,5f944e55-6616-4bd5-992c-b0843c89d334,Lumen Nature Retreat,Hygge Nordic Cabins,Tiny Home,Woodstock,NH,published,Yes,1,397.17,https://www.stayatlumen.com/,description,description_only
+10063,6b27b3a7-2b52-4d30-a91c-a6eba46eff00,Khushatta Hills Ranch,Aunt B,Tiny Home,Coldspring,TX,published,Yes,1,150,https://khushattahillsranch.com/,description,description_only
+11875,ba1103d6-a1d2-43f1-a096-5230e9a15a01,Schellraiser,Bell Tent,Bell Tent,McGill,NV,rejected,Yes,,,https://www.schellraiser.com/,description,description_only
+10196,5f944e55-6616-4bd5-992c-b0843c89d334,Lumen Nature Retreat,Luxury Safari Tents,Safari Tent,Woodstock,NH,published,Yes,2,338,https://www.stayatlumen.com/,description,description_only
+10009,5f944e55-6616-4bd5-992c-b0843c89d334,Lumen Nature Retreat,Luxury A-Frame Tents,Tiny Home,Woodstock,NH,published,Yes,1,304,https://www.stayatlumen.com/,site_name,ambiguous
+9671,5e0cd2d3-d1fe-480b-a294-1b932d7dd154,Starlight Haven at Weiss Lake,Geodesic Dome,Dome,Cedar Bluff,AL,published,Yes,,157.5,https://visitstarlight.com/weiss-lake/,description,description_only
+9839,24e5fe17-8948-4bfa-a74d-1e71ec267c91,Lakedale Resort,yurts,Yurt,"Friday Harbor,",WA,published,Yes,7,449,https://www.lakedale.com/,description,description_only
+9620,9070750d-df56-4023-a218-dd08c41e87f3,Lost Woods Farm & Forest,Bell Tent,Bell Tent,Boyne Falls,MI,published,Yes,,140,http://www.lostwoodsmi.com/,description,description_only
+9622,9070750d-df56-4023-a218-dd08c41e87f3,Lost Woods Farm & Forest,A-Frame Cabin,Cabin,Boyne Falls,MI,published,Yes,1,232.5,http://www.lostwoodsmi.com/,site_name,skip_already_has_aframe
+9672,5e0cd2d3-d1fe-480b-a294-1b932d7dd154,Starlight Haven at Weiss Lake,Glamping Tent,Canvas Tent,Cedar Bluff,AL,published,Yes,,151.25,https://visitstarlight.com/weiss-lake/,description,description_only
+10479,73b983a9-3b09-47f7-9799-23da76458749,Bison Creek Ranch,Beaver Lodge,Cabin,East Glacier,MT,published,Yes,1,275,https://bisoncreekranch.com,description,description_only
+10504,1ad57662-6be6-49cc-be47-2ae1b9431c37,Mohican Adventures,"A-Frame, Frye",Cabin,Loudonville,OH,published,Yes,17,290.25,https://www.mohicanadventures.com/,site_name,retype
+10408,24e5fe17-8948-4bfa-a74d-1e71ec267c91,Lakedale Resort,Glamping,Canvas Tent,"Friday Harbor,",WA,published,Yes,23,304,https://www.lakedale.com/,description,description_only
+10032,064662a3-a05f-4250-b260-50e4e7ca120a,Happydale Retreat,A-Frame/Cabin,Tiny Home,Cambridge,OH,published,Yes,10,155,https://glamplyfe.com,site_name,ambiguous
+10302,34e99c8b-17ed-4e47-936a-21ad44e73ac1,Lakedale,Canvas Cottage,Canvas Cottage,Friday Harbor,WA,published,Yes,7,513.25,https://www.lakedale.com/,description,description_only
+9838,34e99c8b-17ed-4e47-936a-21ad44e73ac1,Lakedale,Yurt,Yurt,Friday Harbor,WA,published,Yes,7,425.67,https://www.lakedale.com/,description,description_only
+10303,34e99c8b-17ed-4e47-936a-21ad44e73ac1,Lakedale,Canvas Cabin,Cabin Tent,Friday Harbor,WA,published,Yes,22,194,https://www.lakedale.com/,description,description_only
+9621,9070750d-df56-4023-a218-dd08c41e87f3,Lost Woods Farm & Forest,Geodesic Dome,Dome,Boyne Falls,MI,published,Yes,1,227.5,http://www.lostwoodsmi.com/,description,description_only
+10550,24e5fe17-8948-4bfa-a74d-1e71ec267c91,Lakedale Resort,Log Cabins,Cabin,"Friday Harbor,",WA,published,Yes,7,774,https://www.lakedale.com/,description,description_only
+11458,e7ddf68b-0093-40ef-a3b2-4587e2bf696f,Eastwind Oliverea Valley,,Cabin,Big Indian,NY,published,Yes,26,316,https://eastwindhotels.com/oliverea-valley/,description,description_only

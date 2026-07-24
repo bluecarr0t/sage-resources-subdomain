@@ -17,6 +17,10 @@
       "schedule": "0 16 * * 1"
     },
     {
+      "path": "/api/cron/research-contacts",
+      "schedule": "0 17 * * 2"
+    },
+    {
       "path": "/api/cron/refresh-unified-comps",
       "schedule": "0 9 * * *"
     },

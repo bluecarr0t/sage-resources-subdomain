@@ -1,0 +1,27 @@
+kind,property_id,property_name,row_id,field,existing_value,proposed_value,confidence,evidence,source_url
+value_mismatch,5cb35373-581a-4767-a667-32dcd400d090,Zion Wildflower Resort,10396,unit_hot_tub_or_sauna,Yes,No,medium,No mention of private hot tub for Covered Wagons.,https://zionwildflower.com/
+value_mismatch,5cb35373-581a-4767-a667-32dcd400d090,Zion Wildflower Resort,10407,unit_hot_tub_or_sauna,Yes,No,medium,No mention of private hot tub for Canvas Tents.,https://zionwildflower.com/
+value_mismatch,5cb35373-581a-4767-a667-32dcd400d090,Zion Wildflower Resort,10554,unit_hot_tub_or_sauna,Yes,No,medium,No mention of private hot tub for Bungalows.,https://zionwildflower.com/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12019,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12020,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12021,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12022,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12023,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12024,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12025,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12026,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12027,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12028,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12029,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12030,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12031,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12032,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12033,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12034,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12035,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12036,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12037,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12038,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12039,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12042,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/
+value_mismatch,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,12043,property_hot_tub,No,Yes,high,Shared property hot tub available.,https://lonemountainranch.com/cabins/ouzel/

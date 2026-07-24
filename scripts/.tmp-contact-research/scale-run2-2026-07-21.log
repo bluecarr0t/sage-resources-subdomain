@@ -1,0 +1,75 @@
+[dotenv@17.2.3] injecting env (57) from .env.local -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+Contact research: seed=all limit=30 offset=0 dryRun=false tavily=true
+Seed queue: 30 candidates
+Existing contact emails: 1881
+
+[1/30] Camp Wandawega (inventory → glamping_property_owner)
+
+[2/30] Eureka Springs Treehouses (inventory → glamping_property_owner)
+  no scrapable pages
+
+[3/30] Cedar Creek Treehouse (inventory → glamping_property_owner)
+
+[4/30] Branson Treehouse Adventures (inventory → glamping_property_owner)
+
+[5/30] Treehouse Resort at River Road (inventory → glamping_property_owner)
+
+[6/30] Treehouse Villas (inventory → glamping_property_owner)
+
+[7/30] Collective Retreats Vail (inventory → glamping_property_owner)
+
+[8/30] Sinya on Lone Man Creek (inventory → glamping_property_owner)
+
+[9/30] Falling Waters Adventure Resort (inventory → glamping_property_owner)
+
+[10/30] The Shady Dell (inventory → glamping_property_owner)
+
+[11/30] Silver Bullet Retreats (inventory → glamping_property_owner)
+
+[12/30] Wyldstay Smoky Mountains (inventory → glamping_property_owner)
+
+[13/30] Timberline Glamping at Pymatuning (inventory → glamping_property_owner)
+
+[14/30] AutoCamp Hill Country (inventory → glamping_property_owner)
+
+[15/30] The Fields of Michigan (inventory → glamping_property_owner)
+  inserted: info@undercanvas.com [glamping_property_owner]
+
+[16/30] Bar N Ranch (inventory → glamping_property_owner)
+  skipped: duplicate_email (info@undercanvas.com)
+
+[17/30] Tuxedo Falls (inventory → glamping_property_owner)
+
+[18/30] Tom Hunton (pipeline → outdoor_hospitality_developer)
+  skipped: duplicate_email (tomh@camascountrymill.com)
+
+[19/30] Eric Rubenstein (pipeline → outdoor_hospitality_developer)
+  inserted: erubenstein@uga.edu [outdoor_hospitality_developer]
+
+[20/30] Mike Sullivan (pipeline → outdoor_hospitality_developer)
+  inserted: michael.sullivan@dnr.iowa.gov [outdoor_hospitality_developer]
+
+[21/30] Don Vick-Site Visit (pipeline → glamping_property_owner)
+
+[22/30] Leonard Grado (pipeline → outdoor_hospitality_developer)
+  inserted: lgrado@gradoconstruction.com [outdoor_hospitality_developer]
+
+[23/30] Jack Tucker (pipeline → outdoor_hospitality_developer)
+
+[24/30] The U.S. Glamping Industry Enters Its Institutional Era (web → outdoor_hospitality_investor)
+
+[25/30] About - NAI Outdoor Hospitality Brokers (web → outdoor_hospitality_investor)
+  skipped: duplicate_email (jessepine@naiohb.com)
+
+[26/30] Glamping (web → outdoor_hospitality_investor)
+
+[27/30] Outdoor hospitality market evolves beyond glamping | Paul Stanton posted on the topic | LinkedIn (web → outdoor_hospitality_investor)
+
+[28/30] Who We Are — Outside Capital (web → outdoor_hospitality_investor)
+  skipped: duplicate_email (info@outside.capital)
+
+[29/30] Invest in AutoCamp | Where Premium Hospitality & Nature Meet (web → outdoor_hospitality_investor)
+
+[30/30] 25 Outdoor Hospitality Players to Watch in 2025 - Part 1 (1-8) (web → outdoor_hospitality_investor)
+
+Done. inserted=4 skipped=5 failed=0 artifacts=/Users/nickharsell/Documents/sage-resources-subdomain/scripts/.tmp-contact-research

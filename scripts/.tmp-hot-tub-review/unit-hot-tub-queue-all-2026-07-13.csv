@@ -1,0 +1,669 @@
+priority_stratum,id,property_id,property_name,site_name,unit_type,state,unit_weight,rate_avg_retail_daily_rate,unit_hot_tub_current,property_hot_tub_current,unit_hot_tub_or_sauna_current,url,ota_url_hipcamp,ota_url_airbnb,discovery_source
+P0-Safari/Cabin-blank,10539,3a8e7766-9d10-42ad-8df0-85b143209337,North Texas Jellystone Park,Cabins,Cabin,TX,122,238.13,,,Yes,https://www.northtexasjellystone.com/,,,Sage
+P0-Safari/Cabin-blank,10193,0e7a4d64-eb2e-45c9-aa22-fa4d6f3741cb,Huttopia White Mountains,Trappeur,Safari Tent,NH,61,287.25,,,No,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,9751,5109dc2f-7b6a-4186-aa3a-e8196e55b236,Under Canvas White Mountains,Safari Tent,Safari Tent,NH,45,293.75,,,,https://www.undercanvas.com/camps/white-mountains/,,,Sage
+P0-Safari/Cabin-blank,10467,fde3d59a-165a-4541-929e-535e711cd323,Postcard Cabins Brown County,Cabin,Cabin,IN,45,171.5,,,No,https://www.marriott.com/en-us/hotels/indbc-postcard-cabins-brown-county-outdoor-collection-bonvoy/overview/,,,Sage
+P0-Safari/Cabin-blank,10426,1f5383a3-36ea-4832-a5d3-a371288e2dd3,Postcard Cabins Big Bear,Tiny Cabins,Cabin,CA,40,236,,,No,https://postcardcabins.com/los-angeles/,,,Sage
+P0-Safari/Cabin-blank,10530,8b81b3d6-f779-43d9-8010-1a51ddd3f2bd,Postcard Cabins Dale Hollow,Tiny Cabins,Cabin,TN,40,141,,,No,https://www.marriott.com/en-us/hotels/bnadl-postcard-cabins-dale-hollow-outdoor-collection-bonvoy/overview/,,,Sage
+P0-Safari/Cabin-blank,9532,95799e27-51c0-4863-b001-67bb75cf4022,SKYE Texas Hill Country Resort,Cabin,Cabin,TX,36,253.75,,,,https://www.skyetexashillcountry.com/,,,Sage
+P0-Safari/Cabin-blank,12947,6baca801-1434-4563-b0ad-7a5e59bafe76,Hinata Mountainside Resort,,Cabin,MA,32,424,,,,https://www.hinataretreat.com/,,,pipeline_research_2026_06_15
+P0-Safari/Cabin-blank,10095,06544c3e-1326-487f-9bec-1f8ee6c5e9a3,Costanoa,Tent Bungalo,Safari Tent,CA,30,406.83,,,No,https://costanoa.com,,,Sage
+P0-Safari/Cabin-blank,10481,d816bff9-37fc-479d-b041-d24b40ef674b,Paws Up Montana,luxury cabins,Cabin,MT,28,1500,,No,Yes,https://www.pawsup.com/,,,Sage; web_research_sauna_2026_05_27; web_research_hot_tub_2026_05_27
+P0-Safari/Cabin-blank,10554,5cb35373-581a-4767-a667-32dcd400d090,Zion Wildflower Resort,Bungalows,Cabin,UT,25,245,,,Yes,https://zionwildflower.com/,,,Sage
+P0-Safari/Cabin-blank,10195,0e7a4d64-eb2e-45c9-aa22-fa4d6f3741cb,Huttopia White Mountains,Canadienne,Safari Tent,NH,21,187.75,,,,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10419,06544c3e-1326-487f-9bec-1f8ee6c5e9a3,Costanoa,Douglas Fir Cabins,Cabin,CA,19,379.83,,,No,https://costanoa.com,,,Sage
+P0-Safari/Cabin-blank,9627,aff52948-14b4-4d01-bc12-906fd9444754,The Woods Luxury Camping,Glamping Cabin,Cabin,MI,18,227.5,,,,http://bookthewoods.com/,,,Sage
+P0-Safari/Cabin-blank,10135,97d26b8d-8f17-42be-87df-60ce4f0d130c,Camp Olowalu,Standard Tentalow,Safari Tent,HI,18,160,,,No,https://campolowalu.com,,,Sage
+P0-Safari/Cabin-blank,10473,01733900-af68-4857-a404-5c38803657a9,Savage River Lodge,Cabins,Cabin,MD,18,265,,,No,https://www.savageriverlodge.com/,,,Sage
+P0-Safari/Cabin-blank,10504,1ad57662-6be6-49cc-be47-2ae1b9431c37,Mohican Adventures,"A-Frame, Frye",Cabin,OH,17,290.25,,,No,https://www.mohicanadventures.com/,,,Sage
+P0-Safari/Cabin-blank,10224,58b5f9ab-b90b-4b6d-9e7d-bbbf0cd53e64,Valley Overlook,Canvas Cabin,Safari Tent,OH,16,116.5,,,,https://www.valleyoverlook.com/,,,Sage
+P0-Safari/Cabin-blank,10165,ae850e9d-38db-4cea-93b4-711f855b4c44,Off Map Glamping,Safari Tents,Safari Tent,MI,15,187.5,,,No,https://www.stayoffmap.com/,,,Sage
+P0-Safari/Cabin-blank,13008,54752c1b-e4ae-4f5e-9f4c-65234d4b95cd,Collective Retreats Governors Island,Journey Tent,Safari Tent,NY,15,588.25,,,,https://www.collectiveretreats.com/retreat/collective-governors-island/,,,safari_tent_unit_mix_corrections_round2_2026_07_08
+P0-Safari/Cabin-blank,10502,1f2ece7a-e082-42bb-8fd8-986a8149f39a,Hilltop Resorts and Campground,Cabins,Cabin,OH,14,145.67,,,No,https://www.hilltopresorts.com,,,Sage
+P0-Safari/Cabin-blank,10113,ea1b3a6c-16aa-484c-961f-f9ddd8055058,Black Tree Resort,Tents,Safari Tent,CO,13,655,,,No,https://blacktreeresort.com,,,Sage
+P0-Safari/Cabin-blank,10117,304685ba-bc17-45bf-bdce-90daac4ab8b8,Royal Gorge Cabins,Tent,Safari Tent,CO,13,286.5,,,No,https://www.royalgorgecabins.com,,,Sage
+P0-Safari/Cabin-blank,9611,58ce6494-77a1-4aa5-952d-3c2b881f8696,Yellowstone Dreamin Camp,Glamping Tent,Safari Tent,MT,12,206.25,,,,https://www.yellowstonedreamincamp.com/,,,Sage
+P0-Safari/Cabin-blank,10434,70c7c5a9-0412-4032-b873-e7cb778bc0f7,Cutty's Hayden Creek Resort,Cozy Cabins,Cabin,CO,12,131.5,,,No,https://cuttysresort.net,,,Sage
+P0-Safari/Cabin-blank,10443,76008fc0-58c8-4999-9020-b84a8f4d5bcb,Postcard Cabins Gilchrist Springs,Cabin,Cabin,FL,12,184.5,,,,https://www.marriott.com/en-us/hotels/gnvgs-postcard-cabins-gilchrist-springs-outdoor-collection-bonvoy/overview/,,,Sage
+P0-Safari/Cabin-blank,10140,a241541f-01e6-4eb7-a7b7-59b5295ca97b,Camp Aramoni,Tent,Safari Tent,IL,11,450,,,No,https://camparamoni.com,,,Sage
+P0-Safari/Cabin-blank,10924,ddef014e-95c5-4184-95d8-46e41de1210e,Paint Rock Farm,Cabin,Cabin,NC,11,225,,,,https://www.paintrockfarm.com/,,,Web Research 2025
+P0-Safari/Cabin-blank,10093,89838adb-89bd-4d5b-b62d-ec7ff0391861,AutoCamp Russian River,Luxury Tent,Safari Tent,CA,10,274.5,,,No,https://autocamp.com/russian-river/,,,Sage
+P0-Safari/Cabin-blank,10163,7365e1ad-baeb-4e5f-a302-3543e835aa7f,Beaver Island Retreat,Safari Tents,Safari Tent,MI,10,249,,,No,https://beaverislandretreat.com,,,Sage
+P0-Safari/Cabin-blank,10188,45e418ea-1669-4eb1-b6ce-45f9eb7a2087,Rusty's Roost Rentals,River Tent,Safari Tent,NC,10,128.8,,,No,https://rustysroostnc.com,,,Sage
+P0-Safari/Cabin-blank,10194,0e7a4d64-eb2e-45c9-aa22-fa4d6f3741cb,Huttopia White Mountains,Trappeur Duo,Safari Tent,NH,10,260,,,No,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10198,47cdea9e-d3af-4cdb-9e71-4ffff8722e65,AutoCamp Catskills,Luxury Tent,Safari Tent,NY,10,264,,,No,https://autocamp.com/catskills/,,,Sage
+P0-Safari/Cabin-blank,10220,850fc643-d467-459f-ab65-db87cc88fbce,Naturluxe & Stars,Platform Tent,Safari Tent,NY,10,514,,,No,http://www.naturluxeandstars.com/,,,Sage
+P0-Safari/Cabin-blank,10254,946432a4-c5f2-402b-9aa6-c48eccde7050,Collective Retreats Hill Country,Summit Tent,Safari Tent,TX,10,264,,,No,https://www.collectiveretreats.com/retreat/collective-hill-country/,,,Sage
+P0-Safari/Cabin-blank,10422,80a8b343-3d15-4b85-9b99-df2626de19d4,El Capitan Canyon,Cabins,Cabin,CA,10,414,,,No,https://elcapitancanyon.com/,,,Sage
+P0-Safari/Cabin-blank,10428,5f3c2cd9-5c4f-41f2-afdd-27f96172de9a,Safari West,Hillside King,Cabin,CA,10,395.33,,,,https://www.safariwest.com/,,,Sage
+P0-Safari/Cabin-blank,10447,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Saddle Club Cabins,Cabin,FL,10,344.5,,,No,https://resort.to/wrrrr?y_source=1_OTc1MjIxNy03MTUtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D,,,Sage
+P0-Safari/Cabin-blank,10495,a0c2f25d-570c-4a14-95c0-7884e5eb29dd,Mustang Monument,Safari Cottages,Cabin,NV,10,2600,,,No,https://www.mustangmonument.com/,,,web_research_mustangmonument_2026_05
+P0-Safari/Cabin-blank,10503,1ad57662-6be6-49cc-be47-2ae1b9431c37,Mohican Adventures,"Al's, Chuck, Hillside, Super Log",Cabin,OH,10,349,,,No,https://www.mohicanadventures.com/,,,Sage
+P0-Safari/Cabin-blank,10587,2fe92e91-deb8-42e4-8885-7a6a1d6e7f03,Under Canvas North Yellowstone,Yellowstone River Suite,Safari Tent,MT,10,1317,,,No,https://www.undercanvas.com/camps/north-yellowstone/,,,Sage
+P0-Safari/Cabin-blank,13009,54752c1b-e4ae-4f5e-9f4c-65234d4b95cd,Collective Retreats Governors Island,Voyager Tent,Safari Tent,NY,10,588.25,,,,https://www.collectiveretreats.com/retreat/collective-governors-island/,,,safari_tent_unit_mix_corrections_round2_2026_07_08
+P0-Safari/Cabin-blank,10124,db89ebba-eb1a-4904-9a4d-b049c6f9958e,Twin Lakes Camp Resort,Glamping Tents,Safari Tent,FL,9,266.33,,,No,https://twinlakescampresort.com/,,,Sage
+P0-Safari/Cabin-blank,10462,8347b480-e3cd-4895-b200-1f750a65a2c7,Shale Lake,Land Cabins,Cabin,IL,9,153,,,No,https://shalewine.com/home-page,,,Sage
+P0-Safari/Cabin-blank,10505,1ad57662-6be6-49cc-be47-2ae1b9431c37,Mohican Adventures,Cozy Cabin,Cabin,OH,9,189.75,,,No,https://www.mohicanadventures.com/,,,Sage
+P0-Safari/Cabin-blank,10506,1ad57662-6be6-49cc-be47-2ae1b9431c37,Mohican Adventures,Camper Cabins,Cabin,OH,9,154.17,,,No,https://www.mohicanadventures.com/,,,Sage
+P0-Safari/Cabin-blank,10538,92a63e97-13c5-4957-9d6e-586de9a0d592,Luxury Yurt at Loyd Park on Joe Pool Lake,Piney Woods / Panhandle / Praries and Lakes / South Texas Plains / Rolling Plains / Big Bend / Gulf Coast / Hill Country / Lloyd Home,Cabin,TX,9,157.5,,,,https://loydpark.com/services/yurts/,,,Sage
+P0-Safari/Cabin-blank,10590,2fe92e91-deb8-42e4-8885-7a6a1d6e7f03,Under Canvas North Yellowstone,Suite tent,Safari Tent,MT,9,598,,,No,https://www.undercanvas.com/camps/north-yellowstone/,,,Sage
+P0-Safari/Cabin-blank,10592,2fe92e91-deb8-42e4-8885-7a6a1d6e7f03,Under Canvas North Yellowstone,Stargazer tent,Safari Tent,MT,9,478.17,,,No,https://www.undercanvas.com/camps/north-yellowstone/,,,Sage
+P0-Safari/Cabin-blank,10219,850fc643-d467-459f-ab65-db87cc88fbce,Naturluxe & Stars,Safari Tent,Safari Tent,NY,8,694.5,,,,http://www.naturluxeandstars.com/,,,Sage
+P0-Safari/Cabin-blank,10454,bb8cc55d-e650-46e9-8927-02f6c41ea09f,Moose Creek Ranch,Twin Cabins,Cabin,ID,8,563.33,,,No,https://www.moosecreekranch.com/,,,Sage
+P0-Safari/Cabin-blank,10553,4c54a6fe-6c00-4796-af86-64161b5e8cc9,Goosewing Ranch,1 Bedroom Cabins,Cabin,WY,8,578.67,,,No,https://goosewingranch.com/,,,Sage
+P0-Safari/Cabin-blank,10588,2fe92e91-deb8-42e4-8885-7a6a1d6e7f03,Under Canvas North Yellowstone,Suite with kids tent,Safari Tent,MT,8,693.83,,,No,https://www.undercanvas.com/camps/north-yellowstone//,,,Sage
+P0-Safari/Cabin-blank,10589,2fe92e91-deb8-42e4-8885-7a6a1d6e7f03,Under Canvas North Yellowstone,Stargazer with kids tent,Safari Tent,MT,8,574,,,No,https://www.undercanvas.com/camps/north-yellowstone/,,,Sage
+P0-Safari/Cabin-blank,10591,2fe92e91-deb8-42e4-8885-7a6a1d6e7f03,Under Canvas North Yellowstone,DELUXE with kids tent,Safari Tent,MT,8,514.17,,,No,https://www.undercanvas.com/camps/north-yellowstone/,,,Sage
+P0-Safari/Cabin-blank,10593,2fe92e91-deb8-42e4-8885-7a6a1d6e7f03,Under Canvas North Yellowstone,Deluxe suite,Safari Tent,MT,8,418.33,,,No,https://www.undercanvas.com/camps/north-yellowstone/,,,Sage
+P0-Safari/Cabin-blank,10947,caae79d5-aaed-4d9a-add8-0638a6c88f69,Lost Lake Resort,Cabin,Cabin,OR,8,162.5,,,,https://lostlakeresort.org/,,,Sage
+P0-Safari/Cabin-blank,10222,353ef70b-105b-4f09-a899-704f6513c892,Treetopia Campground,Glamping Tents,Safari Tent,NY,7,170,,,No,https://www.treetopiacampground.com/,,,Sage
+P0-Safari/Cabin-blank,10628,8facf96d-97eb-463c-b2b0-06e9168ed8ff,Under Canvas Columbia River Gorge,Mount Hood Suite,Safari Tent,WA,7,993.5,,,No,https://www.undercanvas.com/camps/columbia-river-gorge/,,,Sage
+P0-Safari/Cabin-blank,10629,8facf96d-97eb-463c-b2b0-06e9168ed8ff,Under Canvas Columbia River Gorge,Suite with kids tent,Safari Tent,WA,7,502,,,No,https://www.undercanvas.com/camps/columbia-river-gorge/,,,Sage
+P0-Safari/Cabin-blank,10633,8facf96d-97eb-463c-b2b0-06e9168ed8ff,Under Canvas Columbia River Gorge,Stargazer tent,Safari Tent,WA,7,383.33,,,No,https://www.undercanvas.com/camps/columbia-river-gorge/,,,Sage
+P0-Safari/Cabin-blank,10896,1f6c251b-64c6-4847-bb08-c88ebee79f07,Green Rock Retreat,Safari Tent,Safari Tent,OR,7,206.25,,,,https://www.greenrockretreat.com/,,,Web Research 2025
+P0-Safari/Cabin-blank,10121,8f833666-eec4-4cee-af22-05e8cb1f2bd8,Coldwater Gardens,Glamping Tents,Safari Tent,FL,6,130,,,No,https://coldwatergardens.com/,,,Sage
+P0-Safari/Cabin-blank,10243,759d1ef3-a43b-48ee-8579-a507e07ff71e,Glamping Retro,Safari Tent,Safari Tent,TN,6,118,,,No,https://glampingretro.com/,,,Sage
+P0-Safari/Cabin-blank,10304,c0535d2c-39a4-4ae6-9c79-72cff41ea9dd,Pampered Wilderness,Timber Framed Safari Tent,Safari Tent,WA,6,245,,,No,http://pamperedwilderness.com/,,,Sage
+P0-Safari/Cabin-blank,10418,06544c3e-1326-487f-9bec-1f8ee6c5e9a3,Costanoa,Campground Cabin,Cabin,CA,6,390.33,,,No,https://costanoa.com,,,Sage
+P0-Safari/Cabin-blank,10433,70c7c5a9-0412-4032-b873-e7cb778bc0f7,Cutty's Hayden Creek Resort,Creekside Cabins,Cabin,CO,6,168.5,,,No,https://cuttysresort.net,,,Sage
+P0-Safari/Cabin-blank,10449,97d26b8d-8f17-42be-87df-60ce4f0d130c,Camp Olowalu,Cabins,Cabin,HI,6,1800,,,No,https://campolowalu.com,,,Sage
+P0-Safari/Cabin-blank,10548,f681a445-3519-4d98-be68-5c0a48f83656,Alpine Lakes Lodge,Cabin,Cabin,WA,6,140,,,No,https://alpinelakeslodge.com/,,,Sage
+P0-Safari/Cabin-blank,88,7824773f-426e-4eb0-b4a1-ee646595fb65,Sinya on Lone Man Creek,,Safari Tent,TX,5,419.13,,Yes,,https://www.hillcountrysinya.com/,,,OpenAI Research - Safari Tents
+P0-Safari/Cabin-blank,10139,bb8cc55d-e650-46e9-8927-02f6c41ea09f,Moose Creek Ranch,Glamping Cabins,Safari Tent,ID,5,182.33,,,No,https://www.moosecreekranch.com/,,,Sage
+P0-Safari/Cabin-blank,10164,ae850e9d-38db-4cea-93b4-711f855b4c44,Off Map Glamping,Deluxe Tent,Safari Tent,MI,5,287.5,,,,https://www.stayoffmap.com/,,,Sage
+P0-Safari/Cabin-blank,10169,8c930a04-f40c-4364-a46c-177ba6ac7749,Roaring River Hills Campground and Cabins,Big #3 / Big #4 / Big #5 / Small #1 / Small #2,Safari Tent,MO,5,101.75,,,,https://roaringriverhillscampgroundandcabins.com/,,,Sage
+P0-Safari/Cabin-blank,10170,8c930a04-f40c-4364-a46c-177ba6ac7749,Roaring River Hills Campground and Cabins,Adventure Tent #12 / Adventure Tent #13 / Adventure Tent #14 / Adventure Tent #15 / Adventure Tent #16,Safari Tent,MO,5,101.75,,,No,https://roaringriverhillscampgroundandcabins.com/,,,Sage
+P0-Safari/Cabin-blank,10429,a00f8f1b-2ccf-43f2-8cef-0d5844435cf7,Arapaho Valley Ranch,Cabins,Cabin,CO,5,309.83,,,No,https://arapahovalleyranch.com/,,,Sage
+P0-Safari/Cabin-blank,10441,8f833666-eec4-4cee-af22-05e8cb1f2bd8,Coldwater Gardens,Canopy Cottages,Cabin,FL,5,238.33,,,No,https://coldwatergardens.com/,,,Sage
+P0-Safari/Cabin-blank,10446,db89ebba-eb1a-4904-9a4d-b049c6f9958e,Twin Lakes Camp Resort,Cabin Suites,Cabin,FL,5,303,,,No,https://twinlakescampresort.com/,,,Sage
+P0-Safari/Cabin-blank,10452,6748d0d0-0c7e-4fdb-987e-53d0f877b796,Bristol Cabins,Cabins,Cabin,ID,5,95,,,No,https://bristolcabins.org,,,Sage
+P0-Safari/Cabin-blank,10510,58b5f9ab-b90b-4b6d-9e7d-bbbf0cd53e64,Valley Overlook,Loft Cabin,Cabin,OH,5,296.5,,,,https://www.valleyoverlook.com/,,,Sage
+P0-Safari/Cabin-blank,9521,260f5a81-f77f-4e2c-8c9b-4e24e35c68af,Tuxedo Falls,Safari Tent,Safari Tent,NC,4,250,,,,https://woodallscm.com/n-c-glamping-retreat-opens-with-2-treehouses-4-tents/,,,Sage
+P0-Safari/Cabin-blank,9565,d4a351a9-0cca-414a-8b06-1d017de5836c,Two Capes Lookout,Mirror Cabin,Cabin,OR,4,231.25,,,,https://twocapeslookout.com/,,,Sage
+P0-Safari/Cabin-blank,10174,c3125bfd-0352-4132-a223-5b7be2891639,Tiny Town Campground,Safari Tents,Safari Tent,MT,4,223.67,,,No,https://www.emigrantcabins.com/,,,Sage
+P0-Safari/Cabin-blank,10212,9e4b8ed3-58cc-48aa-aa82-be9260749b3a,Hemlock Falls,Tents,Safari Tent,NY,4,325,,,No,https://www.hemlockfallscamping.com,,,Sage
+P0-Safari/Cabin-blank,10223,1f2ece7a-e082-42bb-8fd8-986a8149f39a,Hilltop Resorts and Campground,Glamping Tent,Safari Tent,OH,4,99.5,,,No,https://www.hilltopresorts.com,,,Sage
+P0-Safari/Cabin-blank,10229,65b0bdf6-39c6-4148-ab1e-b4534efa2248,Umpqua's Last Resort,Glamping Tent,Safari Tent,OR,4,150,,No,No,http://www.umpquaslastresort.com/,,,Sage; web_research_hot_tub_2026_05_27
+P0-Safari/Cabin-blank,10265,dc27f086-09d9-4089-81e2-8678a4558387,Palo Duro Glamping,Glampsite A / Glampsite B / Glampsite C / Glampsite D,Safari Tent,TX,4,176.25,,,,https://www.paloduroglamping.com/,,,Sage
+P0-Safari/Cabin-blank,10273,03f71ff5-8024-490c-b591-568be27c3e1d,Wahwahtaysee Resort,Safari Tent (One Bedroom),Safari Tent,TX,4,366.67,,,No,http://www.wahwahtayseeresort.com/,,,Sage
+P0-Safari/Cabin-blank,10445,8ad55a16-d31a-48b4-9504-ffd6b1d54f5d,Trail Lakes Campground,Cabins,Cabin,FL,4,225,,,No,https://www.evergladescamping.net/,,,Sage
+P0-Safari/Cabin-blank,10448,4de6e19b-6199-4fc6-818c-c3349b6ae3e5,Hidden Hollow Resort,Cabins,Cabin,GA,4,152.5,,,No,http://hiddenhollowresort.com/index.html,,,Sage
+P0-Safari/Cabin-blank,10477,3228cc0f-e0e4-407d-bc87-44b5ba357511,Sundance Ranch KC,Cabins,Cabin,MO,4,498.33,,,No,https://www.sundancekc.com,,,Sage
+P0-Safari/Cabin-blank,10551,e469b772-121b-462a-9e97-ac02171816a8,French Creek at Bush Creek Ranch,Sportsman's Club Cabins,Cabin,WY,4,1500,,,No,https://www.brushcreekranch.com/frenchcreek,,,Sage
+P0-Safari/Cabin-blank,11464,05d268d4-d3b1-479d-9104-d7c170e1fcb1,The Destination,,Safari Tent,AL,4,318,,No,,https://www.tdbsc.com/,,,Google News RSS; web_research_hot_tub_2026_05_27
+P0-Safari/Cabin-blank,13010,54752c1b-e4ae-4f5e-9f4c-65234d4b95cd,Collective Retreats Governors Island,Basecamp Cabin,Cabin,NY,4,182.38,,,,https://www.collectiveretreats.com/retreat/collective-governors-island/,,,safari_tent_unit_mix_corrections_round2_2026_07_08
+P0-Safari/Cabin-blank,10112,a00f8f1b-2ccf-43f2-8cef-0d5844435cf7,Arapaho Valley Ranch,Glamping Tent,Safari Tent,CO,3,236.25,,,No,https://arapahovalleyranch.com/,,,Sage
+P0-Safari/Cabin-blank,10134,97d26b8d-8f17-42be-87df-60ce4f0d130c,Camp Olowalu,Family Tentalow,Safari Tent,HI,3,210,,,No,https://campolowalu.com,,,Sage
+P0-Safari/Cabin-blank,10186,d3a3ab4b-c36d-4025-9489-3e6617851273,Gorgeous Stays,Tents,Safari Tent,NC,3,95,,,No,https://www.gorgeousstays.com,,,Sage
+P0-Safari/Cabin-blank,10236,cc0df0a7-9a9e-453c-8b8a-81313fbfafe9,Bear Den Cabins & Camp,Glamping Tent,Safari Tent,SD,3,80,,,,https://beardencabinsandcamp.com/?utm_source=GMB&utm_medium=GMB&utm_campaign=GMB,,,Sage
+P0-Safari/Cabin-blank,10255,f4a66596-a81c-4f9c-bb64-3bf24d0ce22d,GLAT Austin,French #2 / Colorado #2 / Montana #8,Safari Tent,TX,3,173.75,,,,https://glataustin.com/,,,Sage
+P0-Safari/Cabin-blank,10256,f4a66596-a81c-4f9c-bb64-3bf24d0ce22d,GLAT Austin,Bitmo / Amalfi #5 / Careyes #6,Safari Tent,TX,3,175,,,,https://glataustin.com/,,,Sage
+P0-Safari/Cabin-blank,10272,03f71ff5-8024-490c-b591-568be27c3e1d,Wahwahtaysee Resort,Safari Tent (Two Bedroom),Safari Tent,TX,3,466.67,,,No,http://www.wahwahtayseeresort.com/,,,Sage
+P0-Safari/Cabin-blank,10413,925c1c4e-82c9-49d6-805e-18db3df21492,Log Cabin Wilderness Lodge,Small Cabins,Cabin,AK,3,289,,,No,https://www.logcabinwildernesslodge.com,,,Sage; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,10444,8ad55a16-d31a-48b4-9504-ffd6b1d54f5d,Trail Lakes Campground,Chickees,Cabin,FL,3,243.33,,,No,https://www.evergladescamping.net/,,,Sage
+P0-Safari/Cabin-blank,10480,73b983a9-3b09-47f7-9799-23da76458749,Bison Creek Ranch,A-Frames,Cabin,MT,3,200,,,No,https://bisoncreekranch.com,,,Sage
+P0-Safari/Cabin-blank,10482,e52ed16f-1bfb-4290-a311-c41b5fceffdb,Tobacco River Ranch Glamping,Cabins,Cabin,MT,3,115,,,No,https://tobaccoriverranch.com/,,,Sage
+P0-Safari/Cabin-blank,10542,57202682-9390-450e-a6f8-4f0c013e83d5,Boulder Mountain Guest Ranch,Cabins,Cabin,UT,3,333.75,,,No,https://bouldermountainguestranch.com,,,Sage
+P0-Safari/Cabin-blank,10552,4c54a6fe-6c00-4796-af86-64161b5e8cc9,Goosewing Ranch,2 Bedroom Cabins,Cabin,WY,3,1882,,,No,https://goosewingranch.com/,,,Sage
+P0-Safari/Cabin-blank,9507,d29e6fad-901a-4280-b52e-7017cde3a942,Wyldstay Smoky Mountains,Glamping Site,Safari Tent,TN,2,175,,,,https://moderncampground.com/usa/tennessee/wyldstay-smoky-mountains-opens-1-5m-glamping-retreat-in-jefferson-county/,,,Sage
+P0-Safari/Cabin-blank,9510,68204578-568d-4060-a9c0-451598f6af09,Ray of Sunshine,Off-Grid Cabin,Cabin,PA,2,152.5,,,,http://jeffersontwppa.com/,,,Sage
+P0-Safari/Cabin-blank,10130,8be728cd-a2a5-43e3-b167-e4d7cd0a114e,Timberline Glamping Co. Clarks Hill Lake,Standard Safari Tent,Safari Tent,GA,2,154,,,No,https://www.timberlineglamping.com/clarks-hill,,,Sage
+P0-Safari/Cabin-blank,10138,6748d0d0-0c7e-4fdb-987e-53d0f877b796,Bristol Cabins,Tent-Cabins,Safari Tent,ID,2,90,,,No,https://bristolcabins.org,,,Sage
+P0-Safari/Cabin-blank,10197,529d4cbc-5dd0-48df-8eee-84eb29921bd5,Moon Valley Campground,Safari Tents,Safari Tent,NJ,2,300,,,No,https://moonvalleycampground.com/,,,Sage
+P0-Safari/Cabin-blank,10211,0d143092-7a34-4df4-8d9d-2d97527ce670,Good Natured Glamping,Safari Tent,Safari Tent,NY,2,115,,,No,https://www.goodnaturedglamping.com/,,,Sage
+P0-Safari/Cabin-blank,10231,0b197347-1fb9-4534-b975-35a6c59c521f,Airydale Retreat,Towhee,Safari Tent,PA,2,160,,,No,https://www.airydaleretreat.com/,,,Sage
+P0-Safari/Cabin-blank,10232,842d8c9a-cc2e-4459-bc26-5d29e90efd44,BigMount Glamping,Safari Tents,Safari Tent,PA,2,300,,,No,https://www.bmglamping.com,,,Sage
+P0-Safari/Cabin-blank,10258,6b27b3a7-2b52-4d30-a91c-a6eba46eff00,Khushatta Hills Ranch,Alzeda / Mom Mollie,Safari Tent,TX,2,150,,,,https://khushattahillsranch.com/,,,Sage
+P0-Safari/Cabin-blank,10311,17f8dcfc-873f-44f8-9288-9ffeee764ae5,Treebones Resort,Autonomous Tent,Safari Tent,CA,2,948.33,,,No,https://www.treebonesresort.com/,,,Sage
+P0-Safari/Cabin-blank,10412,925c1c4e-82c9-49d6-805e-18db3df21492,Log Cabin Wilderness Lodge,Cabins,Cabin,AK,2,319,,,No,https://www.logcabinwildernesslodge.com,,,Sage; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,10421,80a8b343-3d15-4b85-9b99-df2626de19d4,El Capitan Canyon,Luxury Cabins,Cabin,CA,2,909.33,,,No,https://elcapitancanyon.com/,,,Sage
+P0-Safari/Cabin-blank,10424,4b802f57-c33a-4f21-8b3e-0ed4679a2b21,Huttopia Paradise Springs,Trappeur Duo Pacific Red Rock,Cabin,CA,2,430.75,,,No,https://canada-usa.huttopia.com/en/site/paradise-springs/,,,Sage
+P0-Safari/Cabin-blank,10437,db02f3e9-ace4-46eb-a4bf-40fe02d05719,Sticks and Stones Farm,Rustic Cabins,Cabin,CT,2,110,,,No,https://www.sticksandstonesfarm.com,,,Sage
+P0-Safari/Cabin-blank,10438,db02f3e9-ace4-46eb-a4bf-40fe02d05719,Sticks and Stones Farm,Cabins,Cabin,CT,2,105,,,,https://www.sticksandstonesfarm.com,,,Sage
+P0-Safari/Cabin-blank,10455,bb8cc55d-e650-46e9-8927-02f6c41ea09f,Moose Creek Ranch,Rendezvous Cabins,Cabin,ID,2,317.33,,,No,https://www.moosecreekranch.com/,,,Sage
+P0-Safari/Cabin-blank,10488,8f11f6d8-7792-431e-b735-96240a4fa556,Stay Nantahala,MoonShadow Lakeview Cabin-3 Story,Cabin,NC,2,638,,,,https://www.visitlakesend.com/yurt-90,,,Sage; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,10489,8f11f6d8-7792-431e-b735-96240a4fa556,Stay Nantahala,Cozy Lakefront Cabin,Cabin,NC,2,439.25,,,,https://www.visitlakesend.com/yurt-90,,,Sage; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,10497,1287d85c-10d6-4815-ac49-f65bb6edd555,Camp Catskills,Rustic Cabin,Cabin,NY,2,127.25,,,No,https://campcatskillsrvpark.com,,,Sage
+P0-Safari/Cabin-blank,10518,4338de66-62c4-401c-b917-b3be49563272,Tipi Village Retreat,Cabins,Cabin,OR,2,160,,,No,http://tipivillageretreat.com/,,,Sage
+P0-Safari/Cabin-blank,10529,759d1ef3-a43b-48ee-8579-a507e07ff71e,Glamping Retro,The Pond House/Trent Treehouse,Cabin,TN,2,156,,,No,https://glampingretro.com/,,,Sage
+P0-Safari/Cabin-blank,10532,ac89f130-229c-4ac5-b9d6-2ac6ec410be1,Camp Ledgerock Retreat - Luxury Glamping on Canyon Lake,Cottage,Cabin,TX,2,251.25,,,,https://campledgerockretreat.com/,,,Sage
+P0-Safari/Cabin-blank,10536,f4a66596-a81c-4f9c-bb64-3bf24d0ce22d,GLAT Austin,Glat #1 / Glat #2,Cabin,TX,2,225,,,,https://glataustin.com/,,,Sage
+P0-Safari/Cabin-blank,11510,14a0d295-0df6-4ea2-bc9a-9823c67ef6ae,Timberline Glamping at Kingston Downs,Standard Safari Tent,Safari Tent,GA,2,168.5,,,,https://kingstondowns.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11513,7a37d2a5-d378-45bb-82b4-93eba7ea205d,Timberline Glamping at Lake Lanier River Forks,Standard Safari Tent,Safari Tent,GA,2,212,,,,https://riverforks.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11516,bf189a9d-fa5e-49b6-9b59-dece38f04ac2,Timberline Glamping at Lula,Standard Safari Tent,Safari Tent,GA,2,265,,,,https://lula.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11534,2c7cc642-7bde-4914-aae6-06180e93de32,Timberline Glamping at Williamsburg,Standard Safari Tent,Safari Tent,VA,2,58.25,,,,https://williamsburg.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,9516,09eb4831-15c0-484a-ace9-f9a642ce6c8a,The Fields of Michigan,Tent,Safari Tent,MI,1,287.5,,,,https://www.undercanvas.com/outdoor-collection/the-fields-of-michigan/,,,Sage
+P0-Safari/Cabin-blank,9517,09eb4831-15c0-484a-ace9-f9a642ce6c8a,The Fields of Michigan,Cottage,Cabin,MI,1,225,,,,https://www.undercanvas.com/outdoor-collection/the-fields-of-michigan/,,,Sage
+P0-Safari/Cabin-blank,9518,d396799a-7105-47ea-b853-54674fd2b142,Bar N Ranch,Lodge Room,Cabin,MT,1,243.75,,,,https://www.undercanvas.com/outdoor-collection/bar-n-ranch/,,,Sage
+P0-Safari/Cabin-blank,9519,d396799a-7105-47ea-b853-54674fd2b142,Bar N Ranch,Log Cabin,Cabin,MT,1,265.63,,,,https://www.undercanvas.com/outdoor-collection/bar-n-ranch/,,,Sage
+P0-Safari/Cabin-blank,9528,925d4e5e-669d-430c-95bd-7a3e479aceb7,The Hemlocks by NOC,Bungalow,Cabin,NC,1,225,,,,https://noc.com/,,,Sage
+P0-Safari/Cabin-blank,9533,8949d1c7-157b-408c-a8d8-fe43ee74d4a5,Firesong Ranch,Safari Tent,Safari Tent,TX,1,225,,,,https://www.firesongranch.com/,,,Sage
+P0-Safari/Cabin-blank,9544,2551899b-ab5c-47a9-aabd-7bcb5251c54f,Colorado Cabin Adventures at Grand Lake,Log Cabin,Cabin,CO,1,243.75,,,,https://www.coloradocabinadventures.com/,,,Sage
+P0-Safari/Cabin-blank,9555,17f8dcfc-873f-44f8-9288-9ffeee764ae5,Treebones Resort,Autonomous Tent,Safari Tent,CA,1,948.33,,,,http://www.treebonesresort.com/,,,Sage
+P0-Safari/Cabin-blank,9558,7e8a4411-b439-4967-8b26-c04339debd7d,Wildhaven Sonoma,Safari Tent,Safari Tent,CA,1,178.13,,,,https://www.wildhavensonoma.com/,,,Sage
+P0-Safari/Cabin-blank,9559,80a8b343-3d15-4b85-9b99-df2626de19d4,El Capitan Canyon,Safari Tent,Safari Tent,CA,1,243.75,,,,https://elcapitancanyon.com,,,Sage
+P0-Safari/Cabin-blank,9561,80a8b343-3d15-4b85-9b99-df2626de19d4,El Capitan Canyon,Cedar Cabin,Cabin,CA,1,256.25,,,,https://elcapitancanyon.com,,,Sage
+P0-Safari/Cabin-blank,9563,04a1d272-282b-48fa-b176-c2311d88ac46,Sequoia High Sierra Camp,Safari Tent,Safari Tent,CA,1,350,,,,https://www.thesequoiahighsierracamp.com/,,,Sage
+P0-Safari/Cabin-blank,9576,458e03a4-9499-4fff-b48b-a52af9198e65,Camp McCarthy,Luxury Tent,Safari Tent,AK,1,233.13,,,,http://www.campmccarthyak.com/,,,Sage
+P0-Safari/Cabin-blank,9577,925c1c4e-82c9-49d6-805e-18db3df21492,Log Cabin Wilderness Lodge,Glamping Tent,Safari Tent,AK,1,147.5,,,,https://www.logcabinwildernesslodge.com/,,,Sage; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,9580,bbe11add-1857-4bf9-814f-f33156a1ed22,Glacier View Adventures,Canvas Tent,Safari Tent,AK,1,141.25,,,,https://glacierviewadventures.com/,,,Sage
+P0-Safari/Cabin-blank,9583,f5830e85-677d-43ba-bd3d-d2c7055ab6e0,Tahuya Adventure Resort,Glamping Tent,Safari Tent,WA,1,176.88,,,,http://www.tahuyaresort.com/,,,Sage
+P0-Safari/Cabin-blank,9589,1779b484-c8a1-4649-8a1f-f7401dd7c699,Washington Glamping,Canvas Cabin,Cabin,WA,1,226.25,,,,https://washingtonglamping.com/,,,Sage
+P0-Safari/Cabin-blank,9591,d0259117-cb1a-4dfe-8700-bc2dbc747acc,Starlight Retreat Yellowstone,Canvas Tent,Safari Tent,ID,1,208.75,,,,https://starlightretreat.com/,,,Sage
+P0-Safari/Cabin-blank,9593,e78e9ae2-8524-421d-a8fc-ea0b3f5814ce,Linn Canyon Ranch,Glamping Tent,Safari Tent,ID,1,210,,,,http://linncanyonranch.com/,,,Sage
+P0-Safari/Cabin-blank,9604,4a05bac3-444d-4f7f-8856-ca42a976134d,Cave Lakes Canyon,Canvas Cabin,Cabin,UT,1,220,,,,http://www.cavelakescanyon.com/,,,Sage
+P0-Safari/Cabin-blank,9605,4a05bac3-444d-4f7f-8856-ca42a976134d,Cave Lakes Canyon,Waterfront Tent,Safari Tent,UT,1,172.5,,,,http://www.cavelakescanyon.com/,,,Sage
+P0-Safari/Cabin-blank,9614,c2391dd3-669b-4b50-a0bb-4e25ee9959c2,Summer Star Ranch,Glamping Tent,Safari Tent,MT,1,150,,,,http://www.summerstarranch.com/,,,Sage
+P0-Safari/Cabin-blank,9623,09eb4831-15c0-484a-ace9-f9a642ce6c8a,The Fields of Michigan,Glamping Tent,Safari Tent,MI,1,287.5,,,,https://www.thefieldsofmichigan.com/,,,Sage
+P0-Safari/Cabin-blank,9631,e7deb493-0327-47ac-b520-0b565d8023c4,Paddler's Village,Safari Tent,Safari Tent,MI,1,142.5,,,,http://paddlersvillage.com/,,,Sage
+P0-Safari/Cabin-blank,9632,02d9072d-da44-414f-afc7-a78786ffb1df,Timberglow Getaway,Glamping Tent,Safari Tent,MI,1,152.5,,,,https://timberglowgetaway.com/,,,Sage
+P0-Safari/Cabin-blank,9634,752b08f7-ffb1-42f9-91c2-661b4792cf2d,Glamping on the Greys,Canvas Wall Tent,Safari Tent,WY,1,243.75,,,,https://www.glampingonthegreys.com,,,Sage
+P0-Safari/Cabin-blank,9649,4dc3c9cd-aacc-415a-85e8-c8f5bdbc617e,SaguaroGlamp,Glamping Tent,Safari Tent,AZ,1,171.25,,,,https://www.saguaroglamp.com/,,,Sage
+P0-Safari/Cabin-blank,9650,9a6fd48f-4527-4e83-a0de-155720d9f183,American Safari Camp,Canvas Tent,Safari Tent,AZ,1,250,,,,http://www.americansafaricamp.com/,,,Sage
+P0-Safari/Cabin-blank,9660,d936017c-ca1f-4d28-aa34-459211ad287a,Field Trip,Glamping Tent,Safari Tent,NM,1,175,,,,https://fieldtripnm.com/,,,Sage
+P0-Safari/Cabin-blank,9661,d936017c-ca1f-4d28-aa34-459211ad287a,Field Trip,Cabin,Cabin,NM,1,225,,,,https://fieldtripnm.com/,,,Sage
+P0-Safari/Cabin-blank,9667,d7f6275f-92af-423f-9701-a5ee364f2bba,ReTreet Resort,Glamping Tent,Safari Tent,AL,1,152.5,,,,https://retreetresort.com/,,,Sage
+P0-Safari/Cabin-blank,9668,d7f6275f-92af-423f-9701-a5ee364f2bba,ReTreet Resort,Tiny Cottage,Cabin,AL,1,180,,,,https://retreetresort.com/,,,Sage
+P0-Safari/Cabin-blank,9679,aaec3515-b00b-4a9b-84dd-77206149f5d2,Eden Reserve,Luxury Cabin,Cabin,KY,1,250,,,,https://stayedenreserve.com/,,,Sage
+P0-Safari/Cabin-blank,9680,aaec3515-b00b-4a9b-84dd-77206149f5d2,Eden Reserve,Glamping Tent,Safari Tent,KY,1,171.25,,,,https://stayedenreserve.com/,,,Sage
+P0-Safari/Cabin-blank,9682,09d919a8-2f4b-47dc-a51c-71d2f5ca2b62,The Whippoorwill's Nest Glamping Tent,Glamping Tent,Safari Tent,KY,1,150,,,,https://redriveradventure.net/glamp-camp,,,Sage
+P0-Safari/Cabin-blank,9685,8de439c9-a48f-499b-ac2f-0a4ac24d222a,Lynnhurst Family Resort,Glamping Tent,Safari Tent,KY,1,141.25,,,,http://www.lynnhurstfamilyresort.com/,,,Sage
+P0-Safari/Cabin-blank,9690,8da24c87-7101-4c86-97b2-ef4c3713b4ac,Lake Cumberland Glamping,Safari Tent,Safari Tent,KY,1,141.25,,,,http://www.lakecumberlandglamping.com/,,,Sage
+P0-Safari/Cabin-blank,9694,e4f6267a-0623-44b4-9871-7d256ca0921d,The Wildflower Boutique Retreat,Glamping Tent,Safari Tent,IL,1,171.25,,,,https://www.thewildfloweril.com/,,,Sage
+P0-Safari/Cabin-blank,9695,993c3c37-1d24-42a4-9a4f-d7a20ea421dd,Sankoty Lakes,Glamping Tent,Safari Tent,IL,1,171.25,,,,https://sankotylakes.com/,,,Sage
+P0-Safari/Cabin-blank,9698,588c4cc8-9236-4533-a81b-3efa4745f885,Shawnee Hills Glamping,Glamping Tent,Safari Tent,IL,1,155,,,,https://www.shawneehillsglamping.com/,,,Sage
+P0-Safari/Cabin-blank,9709,4235158e-b2f5-4afd-8029-418b4b97d8e6,Gingerhill Farm Retreat,Cabin,Cabin,HI,1,250,,,,https://www.gingerhillfarm.com/,,,Sage
+P0-Safari/Cabin-blank,9719,aff52948-14b4-4d01-bc12-906fd9444754,The Woods Luxury Camping,Cabin,Cabin,MI,1,232.5,,,,http://bookthewoods.com/,,,Sage
+P0-Safari/Cabin-blank,9723,e7deb493-0327-47ac-b520-0b565d8023c4,Paddler's Village,Platform Tent,Safari Tent,MI,1,112.5,,,,https://www.paddlersvillage.com/,,,Sage
+P0-Safari/Cabin-blank,9727,b6a5aa61-0ea5-4fb1-9563-1e6ac0fa6053,Camptown,Log Cabin,Cabin,NY,1,243.75,,,,http://www.camptowncatskills.com/,,,Sage
+P0-Safari/Cabin-blank,9728,69245ad2-6271-417f-80ff-f063f16b2740,Glampful,Safari Tent,Safari Tent,NY,1,166.88,,,,http://www.glampful.com/,,,Sage
+P0-Safari/Cabin-blank,9735,7fe19a8f-6369-4631-9645-0e4e964f4431,Terra Glamping,Safari Tent,Safari Tent,NY,1,225,,,,https://www.terraglamping.com/,,,Sage
+P0-Safari/Cabin-blank,9742,a9e28d07-034a-4fb7-acca-6bf1e2361097,Glamping Downeast,Safari Tent,Safari Tent,ME,1,135,,,,https://glampingdowneast.com/,,,Sage
+P0-Safari/Cabin-blank,9745,67ee475d-5930-40de-898a-e3863d41c4e0,Point Sebago Resort,Safari Tent,Safari Tent,ME,1,158.13,,,,https://cove.info/PointSebagoResortGMB,,,Sage
+P0-Safari/Cabin-blank,9747,c7f23903-b73a-438c-89a0-674021a7e88c,Blue Heron Farm and Retreat,Safari Tent,Safari Tent,ME,1,166.25,,,,https://blueheronfarmandretreat.com/,,,Sage
+P0-Safari/Cabin-blank,9748,524ecb2e-53a2-4b34-92e2-bf5c9fa09427,Wolfe's Neck Oceanfront Camping & Glamping,Cabin,Cabin,ME,1,135,,,,http://www.freeportcamping.com/,,,Sage
+P0-Safari/Cabin-blank,9749,baf64c8e-94e4-4ac6-86ad-fa1e52e693d5,Alpine Garden Camping Village & Winery,Cabin,Cabin,NH,1,232.5,,,,https://www.alpinegardenglamping.com/,,,Sage
+P0-Safari/Cabin-blank,9757,e114dba1-6ed3-4c8e-9a95-759fb4e95238,Milk & Honey Glamping and Wellness Retreat,Safari Tent,Safari Tent,SC,1,226.25,,,,http://www.untamedhoneyglampsites.com/,,,Sage
+P0-Safari/Cabin-blank,9762,deadd4d0-1208-4529-a930-1a09b2470620,Flowertown Glampground,Safari Tent,Safari Tent,SC,1,151.25,,,,https://www.facebook.com/FlowertownGlampground,,,Sage
+P0-Safari/Cabin-blank,9763,dcdbe7f6-507c-4fab-903c-42d0e5adf4c0,Chattooga River Lodge and Campground,Safari Tent,Safari Tent,SC,1,151.25,,,,https://chattoogalodge.com/,,,Sage
+P0-Safari/Cabin-blank,9764,dcdbe7f6-507c-4fab-903c-42d0e5adf4c0,Chattooga River Lodge and Campground,Cabin,Cabin,SC,1,150,,,,https://chattoogalodge.com/,,,Sage
+P0-Safari/Cabin-blank,9932,a58938ca-5f23-4953-8074-aac8133c23f6,Backland,Grand Sky Suite ADA,Safari Tent,AZ,1,556.33,,,No,https://www.travelbackland.com/,,,web_research_travelbackland_2026_05
+P0-Safari/Cabin-blank,9933,a58938ca-5f23-4953-8074-aac8133c23f6,Backland,Sky Suite,Safari Tent,AZ,1,540.17,,,No,https://www.travelbackland.com/,,,web_research_travelbackland_2026_05
+P0-Safari/Cabin-blank,9934,a58938ca-5f23-4953-8074-aac8133c23f6,Backland,Grand Suite,Safari Tent,AZ,1,531.33,,,No,https://www.travelbackland.com/,,,web_research_travelbackland_2026_05
+P0-Safari/Cabin-blank,9935,a58938ca-5f23-4953-8074-aac8133c23f6,Backland,Backland Suite,Safari Tent,AZ,1,501.33,,,No,https://www.travelbackland.com/,,,web_research_travelbackland_2026_05
+P0-Safari/Cabin-blank,10085,925c1c4e-82c9-49d6-805e-18db3df21492,Log Cabin Wilderness Lodge,Safari Tent,Safari Tent,AK,1,289,,,No,https://www.logcabinwildernesslodge.com,,,Sage; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,10096,db05cc90-716b-496c-b72c-8f6874caeab1,Huttopia Wine Country,Canadienne Pacific,Safari Tent,CA,1,150,,,,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10097,db05cc90-716b-496c-b72c-8f6874caeab1,Huttopia Wine Country,Trappeur Pacific,Safari Tent,CA,1,192.5,,,,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10098,db05cc90-716b-496c-b72c-8f6874caeab1,Huttopia Wine Country,Trappeur Duo Pacific,Safari Tent,CA,1,171.25,,,,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10099,4b802f57-c33a-4f21-8b3e-0ed4679a2b21,Huttopia Paradise Springs,Canadienne Pacific,Safari Tent,CA,1,152.5,,,,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10100,4b802f57-c33a-4f21-8b3e-0ed4679a2b21,Huttopia Paradise Springs,Trappeur Pacific,Safari Tent,CA,1,141.25,,,,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10101,4b802f57-c33a-4f21-8b3e-0ed4679a2b21,Huttopia Paradise Springs,Trappeur Duo Pacific,Safari Tent,CA,1,152.5,,,,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10122,b0affc2b-2220-4aee-9825-55cd1427a274,Home Field Advantage Farmstead,Glamping Tent,Safari Tent,FL,1,157.5,,,No,https://homefieldadvantagefarm.com,,,Sage
+P0-Safari/Cabin-blank,10128,8be728cd-a2a5-43e3-b167-e4d7cd0a114e,Timberline Glamping Co. Clarks Hill Lake,Deluxe Safari Tent,Safari Tent,GA,1,179,,,No,https://www.timberlineglamping.com/clarks-hill,,,Sage
+P0-Safari/Cabin-blank,10129,8be728cd-a2a5-43e3-b167-e4d7cd0a114e,Timberline Glamping Co. Clarks Hill Lake,Double Safari Tent,Safari Tent,GA,1,179,,,No,https://www.timberlineglamping.com/clarks-hill,,,Sage
+P0-Safari/Cabin-blank,10168,b5bd4969-bddb-48ae-91cd-91c3f78d0756,Hawley Farm Glamping,Juliet,Safari Tent,MO,1,165,,,No,https://www.hawleyfarmglamping.com,,,Sage
+P0-Safari/Cabin-blank,10206,69245ad2-6271-417f-80ff-f063f16b2740,Glampful,Group Deluxe,Safari Tent,NY,1,418,,,,https://glampful.com/,,,Sage
+P0-Safari/Cabin-blank,10207,69245ad2-6271-417f-80ff-f063f16b2740,Glampful,Family Deluxe,Safari Tent,NY,1,242.5,,,No,https://glampful.com/,,,Sage
+P0-Safari/Cabin-blank,10208,69245ad2-6271-417f-80ff-f063f16b2740,Glampful,King Deluxe,Safari Tent,NY,1,221.25,,,No,https://glampful.com/,,,Sage
+P0-Safari/Cabin-blank,10209,69245ad2-6271-417f-80ff-f063f16b2740,Glampful,Queen Suite,Safari Tent,NY,1,213,,,No,https://glampful.com/,,,Sage
+P0-Safari/Cabin-blank,10228,65b0bdf6-39c6-4148-ab1e-b4534efa2248,Umpqua's Last Resort,Homesteader,Safari Tent,OR,1,175,,No,No,http://www.umpquaslastresort.com/,,,Sage; web_research_hot_tub_2026_05_27
+P0-Safari/Cabin-blank,10238,7da52617-2e52-417d-88e3-b6971bec9bac,Outpost Adventures,Buffalo Canvas Tent,Safari Tent,SD,1,135,,,,http://www.outpostadventures.com/,,,Sage
+P0-Safari/Cabin-blank,10252,946432a4-c5f2-402b-9aa6-c48eccde7050,Collective Retreats Hill Country,Honeymoon Tent,Safari Tent,TX,1,359,,,No,https://www.collectiveretreats.com/retreat/collective-hill-country/,,,Sage
+P0-Safari/Cabin-blank,10253,946432a4-c5f2-402b-9aa6-c48eccde7050,Collective Retreats Hill Country,Family Suite,Safari Tent,TX,1,287,,,No,https://www.collectiveretreats.com/retreat/collective-hill-country/,,,Sage
+P0-Safari/Cabin-blank,10257,f4a66596-a81c-4f9c-bb64-3bf24d0ce22d,GLAT Austin,Texas #3,Safari Tent,TX,1,175,,,,https://glataustin.com/,,,Sage
+P0-Safari/Cabin-blank,10259,6b27b3a7-2b52-4d30-a91c-a6eba46eff00,Khushatta Hills Ranch,A-Frame,Safari Tent,TX,1,150,,,,https://khushattahillsranch.com/,,,Sage
+P0-Safari/Cabin-blank,10263,01919110-e68a-4a32-8df0-964fc9b9aec9,Outdoorsy Hill Country,Luxury Glamping Lodge,Safari Tent,TX,1,230.63,,,,https://outdoorsyhillcountry.com/,,,Sage
+P0-Safari/Cabin-blank,10264,01919110-e68a-4a32-8df0-964fc9b9aec9,Outdoorsy Hill Country,Hilltop Hideaway / Luxury Glamping Suite,Safari Tent,TX,1,235,,,No,https://outdoorsyhillcountry.com/,,,Sage
+P0-Safari/Cabin-blank,10269,7824773f-426e-4eb0-b4a1-ee646595fb65,Sinya on Lone Man Creek,Sinya,Safari Tent,TX,1,410,,,No,https://www.hillcountrysinya.com/,,,Sage
+P0-Safari/Cabin-blank,10306,73c43cb7-39e5-457b-bcff-187a6f9b7c75,Glamping of Jackson Hole,African Safari-Style tents,Safari Tent,WY,1,243.75,,,No,https://glampingofjacksonhole.com/,,,Sage
+P0-Safari/Cabin-blank,10324,dd10bd1a-9dc0-4fe4-b0f1-5d7cbfa78b64,Domance Glamping,HoneyHive,Cabin,TX,1,157.5,,,,http://www.domanceglamping.com/,,,Sage
+P0-Safari/Cabin-blank,10415,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,KYOOB,Cabin,AZ,1,420,,,No,https://www.shashdine.com/,,,Sage
+P0-Safari/Cabin-blank,10425,4b802f57-c33a-4f21-8b3e-0ed4679a2b21,Huttopia Paradise Springs,Chaplain Cabin,Cabin,CA,1,226.25,,,,https://canada-usa.huttopia.com/en/,,,Sage
+P0-Safari/Cabin-blank,10431,03973add-9b42-4a1d-a814-bd2d97b3f908,Camp V,Bunk House Cabin,Cabin,CO,1,352.5,,,No,https://www.campv.com/,,,Sage
+P0-Safari/Cabin-blank,10432,03973add-9b42-4a1d-a814-bd2d97b3f908,Camp V,Studio Cabin,Cabin,CO,1,183,,,No,https://www.campv.com/,,,Sage
+P0-Safari/Cabin-blank,10442,879be8ec-96e0-4781-8f11-89a53e828126,"Glamping Florida, by River Ranch",Saddle Club Cabins,Cabin,FL,1,344.5,,,No,https://www.westgateresorts.com/,,,Sage
+P0-Safari/Cabin-blank,10458,c30e638f-8dee-4125-a1c7-7cf492cc7f58,Coy and Wilma's Campsites and Cabins,Big Cabin,Cabin,IL,1,147,,,No,https://www.coyandwilmas.com,,,Sage
+P0-Safari/Cabin-blank,10459,c30e638f-8dee-4125-a1c7-7cf492cc7f58,Coy and Wilma's Campsites and Cabins,Medium Cabin,Cabin,IL,1,120,,,No,https://www.coyandwilmas.com,,,Sage
+P0-Safari/Cabin-blank,10460,c30e638f-8dee-4125-a1c7-7cf492cc7f58,Coy and Wilma's Campsites and Cabins,Small Cabin,Cabin,IL,1,100,,,No,https://www.coyandwilmas.com,,,Sage
+P0-Safari/Cabin-blank,10461,8347b480-e3cd-4895-b200-1f750a65a2c7,Shale Lake,Floating Cabin,Cabin,IL,1,159,,,,https://shalewine.com/home-page,,,Sage
+P0-Safari/Cabin-blank,10476,144e34c5-ba80-4c27-aaea-dbbd191b4494,Fredrock,Rustic Rose,Cabin,MO,1,139,,,No,https://www.fredrock.us/,,,Sage
+P0-Safari/Cabin-blank,10478,f57c8736-cb9b-430e-86ce-a4f6d9c3046a,Longleaf Piney Resort,Lake House,Cabin,MS,1,380,,,No,https://longleafpineyresort.com,,,Sage
+P0-Safari/Cabin-blank,10479,73b983a9-3b09-47f7-9799-23da76458749,Bison Creek Ranch,Beaver Lodge,Cabin,MT,1,275,,,No,https://bisoncreekranch.com,,,Sage
+P0-Safari/Cabin-blank,10484,4ccbe46a-49e6-4430-b86a-293e03af4abb,Moravian Falls Family Campground & Cabins,The Villa,Cabin,NC,1,152.5,,,No,https://www.moravianfallscampground.com/?_ga-ft=1Z1KIz.0.0.0.0.4K0ZOv-1PX66Pv.0.0,,,Sage
+P0-Safari/Cabin-blank,10485,4ccbe46a-49e6-4430-b86a-293e03af4abb,Moravian Falls Family Campground & Cabins,The Cabin,Cabin,NC,1,128.75,,,No,https://www.moravianfallscampground.com/?_ga-ft=1Z1KIz.0.0.0.0.4K0ZOv-1PX66Pv.0.0,,,Sage
+P0-Safari/Cabin-blank,10486,45e418ea-1669-4eb1-b6ce-45f9eb7a2087,Rusty's Roost Rentals,Cabin,Cabin,NC,1,176.25,,,No,https://rustysroostnc.com,,,Sage
+P0-Safari/Cabin-blank,10496,1287d85c-10d6-4815-ac49-f65bb6edd555,Camp Catskills,Hilltop Premier Cabin,Cabin,NY,1,130,,,No,https://campcatskillsrvpark.com,,,Sage
+P0-Safari/Cabin-blank,10519,7f718634-16a8-41ae-a95a-ec1d2dce9a92,Deerpath Cabins,Coyote Run Cabin,Cabin,PA,1,179,,,No,https://www.deerpathcabin.com,,,Sage
+P0-Safari/Cabin-blank,10520,7f718634-16a8-41ae-a95a-ec1d2dce9a92,Deerpath Cabins,Little Bear Camp,Cabin,PA,1,161.2,,,No,https://www.deerpathcabin.com,,,Sage
+P0-Safari/Cabin-blank,10521,7f718634-16a8-41ae-a95a-ec1d2dce9a92,Deerpath Cabins,Deerpath Cabin,Cabin,PA,1,90,,,No,https://www.deerpathcabin.com,,,Sage
+P0-Safari/Cabin-blank,10523,8a892d66-34a5-40af-9487-c40ede65502a,Saluda Outdoor Center,Family Camping Pod,Cabin,SC,1,117,,,No,https://www.saludaoutdoorcenter.com/lodging,,,Sage
+P0-Safari/Cabin-blank,10524,cc0df0a7-9a9e-453c-8b8a-81313fbfafe9,Bear Den Cabins & Camp,Rustic Cabin,Cabin,SD,1,65,,,,https://beardencabinsandcamp.com/?utm_source=GMB&utm_medium=GMB&utm_campaign=GMB,,,Sage
+P0-Safari/Cabin-blank,10533,c0f80c53-cb26-4f40-8ee9-9485b72a83bf,Cathys Dream Glamping,Mellow Yellow Cabin,Cabin,TX,1,178.75,,,,http://www.dreamglamping.com/,,,Sage
+P0-Safari/Cabin-blank,10534,c0f80c53-cb26-4f40-8ee9-9485b72a83bf,Cathys Dream Glamping,Grasshopper Getaway Cabin,Cabin,TX,1,183.75,,,,http://www.dreamglamping.com/,,,Sage
+P0-Safari/Cabin-blank,10537,f4a66596-a81c-4f9c-bb64-3bf24d0ce22d,GLAT Austin,Glat #3,Cabin,TX,1,175,,,,https://glataustin.com/,,,Sage
+P0-Safari/Cabin-blank,10547,f681a445-3519-4d98-be68-5c0a48f83656,Alpine Lakes Lodge,Lodge,Cabin,WA,1,850,,,No,https://alpinelakeslodge.com/,,,Sage
+P0-Safari/Cabin-blank,10672,4c22f20d-975f-4813-92aa-7659db882668,Postcard Cabins Hocking Hills,,Cabin,OH,1,250,,,,https://www.marriott.com/en-us/hotels/cmhhh-postcard-cabins-hocking-hills-outdoor-collection-bonvoy/overview/,,,Sage
+P0-Safari/Cabin-blank,10675,a44736de-5cb1-4c20-bf04-5ec50893675c,Postcard Cabins Shenandoah North,,Cabin,VA,1,251.25,,,,https://www.marriott.com/en-us/hotels/shdsn-postcard-cabins-shenandoah-north-outdoor-collection-bonvoy/overview/,,,Sage
+P0-Safari/Cabin-blank,10843,d732c43a-e231-4dfb-b535-65816db127e6,Ithaca by Firelight Camp,,Safari Tent,NY,1,246.25,,Yes,,https://firelightcamps.com/,,,Glamping.com; web_research_hot_tub_2026_05_28
+P0-Safari/Cabin-blank,10883,1732b969-26c6-4147-a2b4-931e16d4adcf,Outdoors Elevated,Royal Tent,Safari Tent,UT,1,218.75,,,,https://theoutdoorselevated.net/,,,Web Research 2025 - Utah Focus
+P0-Safari/Cabin-blank,10895,28e6edff-b668-4e00-86c7-67a7d27253e0,Mt. Hood Tiny House Village,Tiny House,Cabin,OR,1,175.63,,,Yes,https://www.mthoodtinyhouse.com/,,,Web Research 2025 - Oregon Focus
+P0-Safari/Cabin-blank,10900,65b68658-29ed-48a3-9ce7-26b6a5ddc236,The Hill - Olympic Peninsula Glamping,Safari Tent,Safari Tent,WA,1,163.75,,,,https://www.olympicpeninsulaglamping.com/,,,Web Research 2025
+P0-Safari/Cabin-blank,10930,24838276-9f5c-4ee4-8a44-2adb3eefce6e,Flamingo Everglades Glamping Tents,Safari Tent,Safari Tent,FL,1,157.5,,,,https://flamingoeverglades.com/,,,Web Research 2025
+P0-Safari/Cabin-blank,10932,723e7d6c-453f-4bc5-9275-00e015441a3a,Safari Wilderness Glamping,Safari Tent,Safari Tent,FL,1,260,,,,https://safariwilderness.com/,,,Web Research 2025
+P0-Safari/Cabin-blank,11313,2fcd6147-2c08-4112-b2a5-c23c7152dc43,Redfish Lake Lodge,,Cabin,ID,1,250,,No,,https://www.redfishlake.com,,,OpenAI Research
+P0-Safari/Cabin-blank,11508,14a0d295-0df6-4ea2-bc9a-9823c67ef6ae,Timberline Glamping at Kingston Downs,Deluxe Safari Tent,Safari Tent,GA,1,168.5,,,,https://kingstondowns.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11509,14a0d295-0df6-4ea2-bc9a-9823c67ef6ae,Timberline Glamping at Kingston Downs,Double Safari Tent,Safari Tent,GA,1,168.5,,,,https://kingstondowns.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11511,7a37d2a5-d378-45bb-82b4-93eba7ea205d,Timberline Glamping at Lake Lanier River Forks,Deluxe Safari Tent,Safari Tent,GA,1,212,,,,https://riverforks.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11512,7a37d2a5-d378-45bb-82b4-93eba7ea205d,Timberline Glamping at Lake Lanier River Forks,Double Safari Tent,Safari Tent,GA,1,212,,,,https://riverforks.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11514,bf189a9d-fa5e-49b6-9b59-dece38f04ac2,Timberline Glamping at Lula,Deluxe Safari Tent,Safari Tent,GA,1,265,,,,https://lula.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11532,2c7cc642-7bde-4914-aae6-06180e93de32,Timberline Glamping at Williamsburg,Deluxe Safari Tent,Safari Tent,VA,1,58.25,,,,https://williamsburg.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11533,2c7cc642-7bde-4914-aae6-06180e93de32,Timberline Glamping at Williamsburg,Double Safari Tent,Safari Tent,VA,1,58.25,,,,https://williamsburg.tlglamping.com/,,,Manual Research
+P0-Safari/Cabin-blank,11578,1ae105c8-ef01-471e-972f-f481763d7f57,Mossquatch Resort,Trapper Cabin,Cabin,WA,1,376.25,,,,https://resnexus.com/resnexus/reservations/book/61FB2386-B719-4DA9-8F87-F86A2A9E8065,,,web_research_mossquatch_resnexus_2026_05
+P0-Safari/Cabin-blank,11610,48bb4f91-7b3b-4811-bd3a-d4b351532275,Hardscrabble Ranch,,Safari Tent,MT,1,265,,,,https://www.hardscrabbleranch.com/glamping-tents,,,market_report_coverage_gap_bozeman_250mi
+P0-Safari/Cabin-blank,11630,e09490fa-37e6-42bf-b562-6f3d40b24703,The Highlands Resort,The Highlands Resort,Cabin,CA,1,265,,,,https://www.highlandsresort.com/,,,market_report_coverage_gap_fresno_250mi
+P0-Safari/Cabin-blank,11936,08a93e36-c9c7-4bce-b74c-64afeac27b60,Ouachita Wilde,The Forest Hideout,Safari Tent,AR,1,125,,,,https://resnexus.com/resnexus/reservations/book/A699365C-E037-4019-A7CB-04ECD6099F79,,,web_research_ouachita_wilde_resnexus_2026_05
+P0-Safari/Cabin-blank,11937,08a93e36-c9c7-4bce-b74c-64afeac27b60,Ouachita Wilde,Treehouse Safari Tent,Safari Tent,AR,1,125,,,,https://resnexus.com/resnexus/reservations/book/A699365C-E037-4019-A7CB-04ECD6099F79,,,web_research_ouachita_wilde_resnexus_2026_05
+P0-Safari/Cabin-blank,12019,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Pine Marten Cabin,Cabin,MT,1,1050,,No,,https://lonemountainranch.com/cabins/pine-marten/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12020,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Bitterroot Cabin,Cabin,MT,1,1100,,No,,https://lonemountainranch.com/cabins/bitterroot/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12021,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Bald Eagle Cabin,Cabin,MT,1,1050,,No,,https://lonemountainranch.com/cabins/bald-eagle/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12022,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Meadowlark Cabin,Cabin,MT,1,1000,,No,,https://lonemountainranch.com/cabins/meadowlark/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12023,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Porcupine Cabin,Cabin,MT,1,1000,,No,,https://lonemountainranch.com/cabins/porcupine/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12024,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Lodgepole Cabin,Cabin,MT,1,1050,,No,,https://lonemountainranch.com/cabins/lodgepole/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12025,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Chipmunk Cabin,Cabin,MT,1,1000,,No,,https://lonemountainranch.com/cabins/chipmunk/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12026,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Blue Spruce Cabin,Cabin,MT,1,1050,,No,,https://lonemountainranch.com/cabins/blue-spruce/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12027,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Bull Moose Cabin,Cabin,MT,1,1100,,No,,https://lonemountainranch.com/cabins/bull-moose/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12028,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Black Bear Cabin,Cabin,MT,1,1100,,No,,https://lonemountainranch.com/cabins/blackbear/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12029,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Shooting Star Cabin,Cabin,MT,1,2300,,No,,https://lonemountainranch.com/cabins/shooting-star/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12030,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Cougar Cabin,Cabin,MT,1,1100,,No,,https://lonemountainranch.com/cabins/cougar/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12031,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Lame Deer Cabin,Cabin,MT,1,1100,,No,,https://lonemountainranch.com/cabins/lame-deer/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12032,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Canyon Cabin,Cabin,MT,1,1100,,No,,https://lonemountainranch.com/cabins/canyon/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12033,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Rainbow Cabin,Cabin,MT,1,1050,,No,,https://lonemountainranch.com/cabins/rainbow/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12034,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Grayling Cabin,Cabin,MT,1,1050,,No,,https://lonemountainranch.com/cabins/grayling/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12035,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Aspen Cabin,Cabin,MT,1,2300,,No,,https://lonemountainranch.com/cabins/aspen/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12036,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Bighorn Cabin,Cabin,MT,1,2300,,No,,https://lonemountainranch.com/cabins/bighorn/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12037,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Hilltop Cabin,Cabin,MT,1,2300,,No,,https://lonemountainranch.com/cabins/hilltop/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12038,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Coyote Cabin,Cabin,MT,1,2300,,No,,https://lonemountainranch.com/cabins/coyote/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12039,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Larkspur Cabin,Cabin,MT,1,2300,,No,,https://lonemountainranch.com/cabins/larkspur/,,,web_research_lonemountainranch_synxis_2026_05
+P0-Safari/Cabin-blank,12050,a3457bc3-69fc-4530-890f-bbd821a31557,Strawberry Park Hot Springs,Rustic Retreat Cabin,Cabin,CO,1,200,,Yes,,https://strawberryhotsprings.com/lodging/,,,web_research_strawberryhotsprings_checkfront_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12051,a3457bc3-69fc-4530-890f-bbd821a31557,Strawberry Park Hot Springs,Large Rustic Cabin,Cabin,CO,1,160,,Yes,,https://strawberryhotsprings.com/lodging/,,,web_research_strawberryhotsprings_checkfront_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12052,a3457bc3-69fc-4530-890f-bbd821a31557,Strawberry Park Hot Springs,Small Rustic Cabin,Cabin,CO,1,145,,Yes,,https://strawberryhotsprings.com/lodging/,,,web_research_strawberryhotsprings_checkfront_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12059,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Luxury Glamping,Safari Tent,FL,1,265,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/luxury-glamping-experiences/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12060,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Glamping,Safari Tent,FL,1,250,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/glamping/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12066,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Saddle Club Studio Cabin,Cabin,FL,1,345,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/saddle-club/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12067,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Saddle Club Rail Car,Cabin,FL,1,350.13,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/saddle-club/,,,web_research_westgateresorts_2026_05
+P0-Safari/Cabin-blank,12069,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Saddle Club One-Bedroom Grand Cabin,Cabin,FL,1,345,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/saddle-club/,,,web_research_westgateresorts_2026_05
+P0-Safari/Cabin-blank,12071,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Saddle Club Two-Bedroom Cabin,Cabin,FL,1,345,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/saddle-club/,,,web_research_westgateresorts_2026_05
+P0-Safari/Cabin-blank,12089,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,The Bottling Room,Cabin,NV,1,113.5,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-Safari/Cabin-blank,12099,a1945707-91b3-4bb5-b71a-fef68e433e80,Vegas Glamping,Desert Oasis,Safari Tent,NV,1,211,,,,https://vegasglamping.com/our-destination/desert-oasis-tent/,,,web_research_vegasglamping_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12101,a1945707-91b3-4bb5-b71a-fef68e433e80,Vegas Glamping,Queen Safari Tent,Safari Tent,NV,1,211,,,,https://vegasglamping.com/our-destination/queen-safari-tent-las-vegas,,,web_research_vegasglamping_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12102,a1945707-91b3-4bb5-b71a-fef68e433e80,Vegas Glamping,Sunrise Safari Tent,Safari Tent,NV,1,211,,,,https://vegasglamping.com/our-destination/sunrise-safari-tent/,,,web_research_vegasglamping_2026_05; web_research_sauna_2026_05_27
+P0-Safari/Cabin-blank,12118,ea257743-1b29-48da-bf41-5cfede9bdc73,Highwood Retreat,The East Camp,Safari Tent,VT,1,195,,,,https://resnexus.com/resnexus/reservations/book/C19E9143-1FF2-4069-9DF7-941074AC9852,,,web_research_highwood_resnexus_2026_05
+P0-Safari/Cabin-blank,12119,ea257743-1b29-48da-bf41-5cfede9bdc73,Highwood Retreat,The West Camp,Safari Tent,VT,1,195,,,,https://resnexus.com/resnexus/reservations/book/C19E9143-1FF2-4069-9DF7-941074AC9852,,,web_research_highwood_resnexus_2026_05
+P0-Safari/Cabin-blank,12135,1ae105c8-ef01-471e-972f-f481763d7f57,Mossquatch Resort,Sawyer Cabin,Cabin,WA,1,355,,,,https://resnexus.com/resnexus/reservations/book/61FB2386-B719-4DA9-8F87-F86A2A9E8065,,,web_research_mossquatch_resnexus_2026_05
+P0-Safari/Cabin-blank,12136,1ae105c8-ef01-471e-972f-f481763d7f57,Mossquatch Resort,Logger Cabin,Cabin,WA,1,355,,,,https://resnexus.com/resnexus/reservations/book/61FB2386-B719-4DA9-8F87-F86A2A9E8065,,,web_research_mossquatch_resnexus_2026_05
+P0-Safari/Cabin-blank,12301,ffbb1bd6-a231-4912-90fd-fc4f35ef6e1a,Timberline Glamping at Pine Acres,,Safari Tent,GA,1,159,,,,https://lakeallatoona.tlglamping.com/,,,web_research_2026_05_brand_anchors
+P0-Safari/Cabin-blank,12381,b0d08d0f-71b7-4c40-94b6-a76808a8f2c5,Wildhaven Yosemite,Classic Cabin Studio,Cabin,CA,1,251.25,,,,https://wildhavenyosemite.com/glamping-cabins,,,web_research_2026_05_wildhaven_usa
+P0-Safari/Cabin-blank,12382,b0d08d0f-71b7-4c40-94b6-a76808a8f2c5,Wildhaven Yosemite,Classic Cabin 1 Bedroom,Cabin,CA,1,251.25,,,,https://wildhavenyosemite.com/glamping-cabins,,,web_research_2026_05_wildhaven_usa
+P0-other-blank,9514,cda3f398-c2f0-4341-b0dd-999690a94afe,AutoCamp Hill Country,Airstream Suite,Airstream,TX,120,264,,,,https://autocamp.com/location/hill-country/,,,Sage
+P0-other-blank,10651,47cdea9e-d3af-4cdb-9e71-4ffff8722e65,AutoCamp Catskills,Classic Airstream Suite,Airstream,NY,65,327.5,,,No,https://autocamp.com/catskills/,,,Sage
+P0-other-blank,10286,c8dc6e4c-cbc5-4643-b7fd-715fe0ef9203,ULUM Moab,Suite Tent,Canvas Tent,UT,50,604,,,No,https://www.ulumresorts.com/contact/,,,Sage
+P0-other-blank,10407,5cb35373-581a-4767-a667-32dcd400d090,Zion Wildflower Resort,Small Canvas/ Grand Mesa Tents,Canvas Tent,UT,40,152.5,,,Yes,https://zionwildflower.com/,,,Sage
+P0-other-blank,9975,3908b7fe-a3d0-4787-b0d0-e680f39bdb6f,Postcard Cabins Kettle River,Two Bed Cabin,Tiny Home,MN,25,338,,,No,https://www.marriott.com/en-us/hotels/dlhkr-postcard-cabins-kettle-river-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10046,8b81b3d6-f779-43d9-8010-1a51ddd3f2bd,Postcard Cabins Dale Hollow,Two Bed Cabin,Tiny Home,TN,25,142.17,,,No,https://www.marriott.com/en-us/hotels/bnadl-postcard-cabins-dale-hollow-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10047,8b81b3d6-f779-43d9-8010-1a51ddd3f2bd,Postcard Cabins Dale Hollow,One Bed Cabin,Tiny Home,TN,25,127.83,,,No,https://www.marriott.com/en-us/hotels/bnadl-postcard-cabins-dale-hollow-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,9976,3908b7fe-a3d0-4787-b0d0-e680f39bdb6f,Postcard Cabins Kettle River,One Bed Cabin,Tiny Home,MN,24,176.17,,,No,https://www.marriott.com/en-us/hotels/dlhkr-postcard-cabins-kettle-river-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10056,1d63f473-12ec-4af6-a0cb-4c935acb3b32,Postcard Cabins Brazos Valley,Two Bed Cabin,Tiny Home,TX,23,125.33,,,No,,,,Sage
+P0-other-blank,10057,1d63f473-12ec-4af6-a0cb-4c935acb3b32,Postcard Cabins Brazos Valley,One Bed Cabin,Tiny Home,TX,23,125.33,,,No,,,,Sage
+P0-other-blank,10077,e29508f0-3484-4302-b4c5-d4cb06642bd0,Postcard Cabins Shenandoah,One Bed Cabin,Tiny Home,VA,23,266.83,,,No,https://www.marriott.com/en-us/hotels/chosh-postcard-cabins-shenandoah-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,9543,92ae42d7-d8a9-43d5-901a-a36f874d0ee0,WeeCasa Tiny House Resort,Tiny House,Tiny Home,CO,22,210,,,,https://weecasa.com/,,,Sage
+P0-other-blank,9568,caae79d5-aaed-4d9a-add8-0638a6c88f69,Lost Lake Resort,Yurt,Yurt,OR,22,140,,,,https://lostlakeresort.org/,,,Sage
+P0-other-blank,10076,e29508f0-3484-4302-b4c5-d4cb06642bd0,Postcard Cabins Shenandoah,Two Bed Cabin,Tiny Home,VA,22,270.5,,,No,https://www.marriott.com/en-us/hotels/chosh-postcard-cabins-shenandoah-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,9972,c2d13ed2-db7b-47fb-a522-ece3af42fca0,Postcard Cabins Barber Creek,One Bed Cabin,Tiny Home,MI,21,217,,,No,https://www.marriott.com/en-us/hotels/azobc-postcard-cabins-barber-creek-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10005,3930b5f6-7b2e-4e81-b12e-4c76a09c10a6,Postcard Cabins Blake Brook,Two Bed Cabin,Tiny Home,NH,21,238.67,,,No,https://www.marriott.com/en-us/hotels/mhtbb-postcard-cabins-blake-brook-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10006,3930b5f6-7b2e-4e81-b12e-4c76a09c10a6,Postcard Cabins Blake Brook,One Bed Cabin,Tiny Home,NH,21,238.67,,,No,https://www.marriott.com/en-us/hotels/mhtbb-postcard-cabins-blake-brook-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,9943,1f5383a3-36ea-4832-a5d3-a371288e2dd3,Postcard Cabins Big Bear,Two Bed Cabin,Tiny Home,CA,20,338.17,,,No,https://postcardcabins.com/los-angeles/,,,Sage
+P0-other-blank,9944,1f5383a3-36ea-4832-a5d3-a371288e2dd3,Postcard Cabins Big Bear,One Bed Cabin,Tiny Home,CA,20,325,,,No,https://postcardcabins.com/los-angeles/,,,Sage
+P0-other-blank,9973,c2d13ed2-db7b-47fb-a522-ece3af42fca0,Postcard Cabins Barber Creek,Two Bed Cabin,Tiny Home,MI,20,196.33,,,No,https://www.marriott.com/en-us/hotels/azobc-postcard-cabins-barber-creek-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10031,064662a3-a05f-4250-b260-50e4e7ca120a,Happydale Retreat,Cabin,Tiny Home,OH,20,155,,,,https://glamplyfe.com,,,Sage
+P0-other-blank,10058,dcffd8d8-46d8-4bb4-a225-f10b1b7f275a,Postcard Cabins Hill Country,Two Bed Cabin,Tiny Home,TX,20,145.83,,,No,,,,Sage
+P0-other-blank,10059,dcffd8d8-46d8-4bb4-a225-f10b1b7f275a,Postcard Cabins Hill Country,One Bed Cabin,Tiny Home,TX,20,145.83,,,No,,,,Sage
+P0-other-blank,10060,8ba94be0-9f82-4940-9b93-24e35bfb25a8,Postcard Cabins Piney Woods,Two Bed Cabin,Tiny Home,TX,20,149.17,,,No,,,,Sage
+P0-other-blank,10061,8ba94be0-9f82-4940-9b93-24e35bfb25a8,Postcard Cabins Piney Woods,One Bed Cabin,Tiny Home,TX,20,149.17,,,No,,,,Sage
+P0-other-blank,10078,85186daa-d73d-4949-8ae9-f3757a0e38f8,Postcard Cabins Mount Adams,Classic Cabin — 2 Bed,Tiny Home,WA,20,157,,,No,,,,Sage
+P0-other-blank,10079,85186daa-d73d-4949-8ae9-f3757a0e38f8,Postcard Cabins Mount Adams,Classic Cabin — 1 Bed,Tiny Home,WA,20,157,,,No,,,,Sage
+P0-other-blank,10403,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Glamping,Canvas Tent,FL,20,250,,,No,https://www.westgateresorts.com/,,,Sage
+P0-other-blank,10029,f89d3868-0374-4d14-a333-c936c8eefdb2,Postcard Cabins Beaver Creek,Classic Cabin — 1 Bed,Tiny Home,OH,19,173.33,,,No,https://www.marriott.com/en-us/hotels/pitbc-postcard-cabins-beaver-creek-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10030,f89d3868-0374-4d14-a333-c936c8eefdb2,Postcard Cabins Beaver Creek,Classic Cabin — 2 Bed,Tiny Home,OH,19,151.17,,,No,https://www.marriott.com/en-us/hotels/pitbc-postcard-cabins-beaver-creek-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10080,b0286a5c-1371-4822-ba45-acc6bfbd37b3,Postcard Cabins Skagit Valley,Two Bed Cabin,Tiny Home,WA,18,138.5,,,No,https://www.marriott.com/en-us/hotels/blisv-postcard-cabins-skagit-valley-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10081,b0286a5c-1371-4822-ba45-acc6bfbd37b3,Postcard Cabins Skagit Valley,One Bed Cabin,Tiny Home,WA,18,138.5,,,No,https://www.marriott.com/en-us/hotels/blisv-postcard-cabins-skagit-valley-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,11470,51e2e968-f07d-4e5d-9efa-3b8dfa30827c,Wander Camp Bear Lake,King Tent,Bell Tent,UT,17,115.5,,,,https://thewandercamp.com/glamping/utah/bear-lake,,,Manual Research
+P0-other-blank,9990,ca8ad404-7a2b-417d-964a-0fce67758270,Postcard Cabins Asheboro,One Bed Cabin,Tiny Home,NC,16,156.83,,,No,https://www.marriott.com/en-us/hotels/gsoas-postcard-cabins-asheboro-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,9991,ca8ad404-7a2b-417d-964a-0fce67758270,Postcard Cabins Asheboro,Two Bed Cabin,Tiny Home,NC,16,151.5,,,No,https://www.marriott.com/en-us/hotels/gsoas-postcard-cabins-asheboro-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,9564,d4a351a9-0cca-414a-8b06-1d017de5836c,Two Capes Lookout,Geodesic Dome,Dome,OR,15,300.5,,,,https://twocapeslookout.com/,,,Sage
+P0-other-blank,10601,16f3e94c-a56b-4164-8fa6-9e0e28a60816,Adirondack Safari,Bell Tent,Bell Tent,NY,15,271.5,,,No,https://www.adirondacksafari.com/,,,Sage
+P0-other-blank,10602,16f3e94c-a56b-4164-8fa6-9e0e28a60816,Adirondack Safari,,Bell Tent,NY,15,219,,,No,https://www.adirondacksafari.com/,,,Sage
+P0-other-blank,10603,16f3e94c-a56b-4164-8fa6-9e0e28a60816,Adirondack Safari,Bell Tent - 2 Person,Bell Tent,NY,15,219,,,No,https://www.adirondacksafari.com/,,,Sage
+P0-other-blank,9774,17f8dcfc-873f-44f8-9288-9ffeee764ae5,Treebones Resort,Yurts for 2 Guests,Yurt,CA,14,415,,,No,https://www.treebonesresort.com/,,,Sage
+P0-other-blank,9923,3a8e7766-9d10-42ad-8df0-85b143209337,North Texas Jellystone Park,Tipis,Tipi,TX,14,152.5,,,No,https://www.northtexasjellystone.com/,,,Sage
+P0-other-blank,10332,43b7c289-4abc-41d8-bde9-e51abd34f1d0,Pagosa River Domes,Domes,Dome,CO,14,245,,,No,https://www.larkindependent.com/hotels/pagosa-river-domes,,,Sage
+P0-other-blank,10596,fe5faade-9505-4f0f-8215-ac61e183c512,Wander Camp Glacier,King Tent,Bell Tent,MT,14,174.75,,,No,https://thewandercamp.com/glamping/montana/glacier,,,Sage
+P0-other-blank,10638,89838adb-89bd-4d5b-b62d-ec7ff0391861,AutoCamp Russian River,Classic Airstream Suite,Airstream,CA,13,338.38,,,No,https://autocamp.com/russian-river/,,,Sage
+P0-other-blank,9531,95799e27-51c0-4863-b001-67bb75cf4022,SKYE Texas Hill Country Resort,Glamping Pod,Dome,TX,12,250,,,,https://www.skyetexashillcountry.com/,,,Sage
+P0-other-blank,9606,c398deea-8d5f-480f-9560-9b080d019358,Hope Acres Glampground,Yurt,Yurt,UT,12,152.5,,,,https://hopeacresglampground.com/,,,Sage
+P0-other-blank,10906,95799e27-51c0-4863-b001-67bb75cf4022,SKYE Texas Hill Country Resort,Dome,Dome,TX,12,253.75,,,,https://skyetexashillcountry.com/,,,Web Research 2025
+P0-other-blank,12920,d17b62c4-5a8f-4e2b-9c1d-7f3a6e8b0d42,Glamping Loft Lake Geneva,Main Street Loft (12 Tent Suites),Canvas Tent,WI,12,737.5,,,,https://www.genevalakesvacations.com/vrp/unit/Main_Street_Loft-95-15/,,,web_research_lake_geneva_micro_market_2026_06
+P0-other-blank,165,8547d712-7bc2-45db-a5fe-514e2c286928,Silver Bullet Retreats,,Airstream,FL,10,132.63,,No,,https://silverbulletretreats.com/,,,OpenAI Research - Airstreams
+P0-other-blank,9780,bd56425b-6170-445c-aa32-e79fb34f1449,Royal Gorge Yurts,Yurts,Yurt,CO,10,212.25,,,No,https://www.royalgorgeyurts.com/,,,Sage
+P0-other-blank,9846,06544c3e-1326-487f-9bec-1f8ee6c5e9a3,Costanoa,Coastal RV Units,Vintage Trailer,CA,10,251.25,,,No,https://costanoa.com,,,Sage
+P0-other-blank,9901,879be8ec-96e0-4781-8f11-89a53e828126,"Glamping Florida, by River Ranch",Luxe Teepee,Tipi,FL,10,628,,,No,https://www.westgateresorts.com/,,,Sage
+P0-other-blank,9902,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Teepee,Tipi,FL,10,718.5,,,No,https://resort.to/wrrrr?y_source=1_OTc1MjIxNy03MTUtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D,,,Sage
+P0-other-blank,9907,a0c2f25d-570c-4a14-95c0-7884e5eb29dd,Mustang Monument,Luxury Tipis,Tipi,NV,10,2400,,,No,https://www.mustangmonument.com/,,,web_research_mustangmonument_2026_05
+P0-other-blank,9971,74949d28-3c5e-4c78-80f4-c70b4b5689ff,Tops'l Farm,A-Frame Cabins,Tiny Home,ME,10,210,,,No,https://www.topslfarm.com/,,,Sage
+P0-other-blank,10015,47cdea9e-d3af-4cdb-9e71-4ffff8722e65,AutoCamp Catskills,X Suites,Tiny Home,NY,10,493,,,No,https://autocamp.com/catskills/,,,Sage
+P0-other-blank,10032,064662a3-a05f-4250-b260-50e4e7ca120a,Happydale Retreat,A-Frame/Cabin,Tiny Home,OH,10,155,,,No,https://glamplyfe.com,,,Sage
+P0-other-blank,10033,65b0bdf6-39c6-4148-ab1e-b4534efa2248,Umpqua's Last Resort,Tiny Home,Tiny Home,OR,10,218.67,,No,No,http://www.umpquaslastresort.com/,,,Sage; web_research_hot_tub_2026_05_27
+P0-other-blank,10313,e4f4ed9a-cfa5-4955-9b6c-503cf93d0a92,CampV,Jupes,Jupe,CO,10,150,,,No,https://www.campv.com/,,,Sage
+P0-other-blank,10314,879be8ec-96e0-4781-8f11-89a53e828126,"Glamping Florida, by River Ranch",Cottages,Cottage,FL,10,536.5,,,No,https://www.westgateresorts.com/,,,Sage
+P0-other-blank,10382,879be8ec-96e0-4781-8f11-89a53e828126,"Glamping Florida, by River Ranch",Luxe Conestoga Wagon,Covered Wagon,FL,10,648,,,No,https://www.westgateresorts.com/,,,Sage
+P0-other-blank,10383,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Conestoga Wagon,Covered Wagon,FL,10,864,,,No,https://resort.to/wrrrr?y_source=1_OTc1MjIxNy03MTUtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D,,,Sage
+P0-other-blank,10396,5cb35373-581a-4767-a667-32dcd400d090,Zion Wildflower Resort,Covered Wagons,Covered Wagon,UT,10,176.25,,,Yes,https://zionwildflower.com/,,,Sage
+P0-other-blank,10597,fe5faade-9505-4f0f-8215-ac61e183c512,Wander Camp Glacier,Twin Tent,Bell Tent,MT,10,174.75,,,No,https://thewandercamp.com/glamping/montana/glacier,,,Sage
+P0-other-blank,10637,89838adb-89bd-4d5b-b62d-ec7ff0391861,AutoCamp Russian River,Premium Airstream Suite,Airstream,CA,10,370,,,No,https://autocamp.com/russian-river/,,,Sage
+P0-other-blank,164,53937332-9514-4e1e-9b74-680cbc1c3389,The Shady Dell,,Airstream,AZ,9,97.5,,No,,http://theshadydell.com/,,,OpenAI Research - Airstreams
+P0-other-blank,9856,51425191-f9f6-4b78-bc49-658a7f34baeb,Emberglow Outdoor Resort,Campers/Trailers,Vintage Trailer,NC,9,180.33,,,No,https://emberglowoutdoorresort.com,,,Sage
+P0-other-blank,9948,304685ba-bc17-45bf-bdce-90daac4ab8b8,Royal Gorge Cabins,Cabins,Tiny Home,CO,9,505.17,,,No,https://www.royalgorgecabins.com,,,Sage
+P0-other-blank,10605,850fc643-d467-459f-ab65-db87cc88fbce,Naturluxe & Stars,Bell Tent,Bell Tent,NY,9,485,,,,http://www.naturluxeandstars.com/,,,Sage
+P0-other-blank,11886,5da96886-5efd-4fd8-a857-ce237e5de966,Camp Ferncrest - Ocoee,,Dome,TN,9,300,,,,https://campferncrest.com/locations,,,camp_ferncrest_brand_2026_05
+P0-other-blank,108,fd7bf646-7c94-49df-b4a7-56fe9b7206d0,Falling Waters Adventure Resort,,Yurt,NC,8,74.38,,No,,https://www.fallingwatersresort.com,,,OpenAI Research - Yurts
+P0-other-blank,9783,01733900-af68-4857-a404-5c38803657a9,Savage River Lodge,Yurts,Yurt,MD,8,265,,,No,https://www.savageriverlodge.com/,,,Sage
+P0-other-blank,9799,0c2de48d-ea74-4c87-b2a7-b4cd3732852d,Sky Ridge Yurts,Yurt,Yurt,NC,8,228,,,No,https://www.skyridgeyurts.com/,,,Sage
+P0-other-blank,10594,fe5faade-9505-4f0f-8215-ac61e183c512,Wander Camp Glacier,Family Tent,Bell Tent,MT,8,194.75,,,No,https://thewandercamp.com/glamping/montana/glacier,,,Sage
+P0-other-blank,10595,fe5faade-9505-4f0f-8215-ac61e183c512,Wander Camp Glacier,Triple Tent,Bell Tent,MT,8,194.75,,,No,https://thewandercamp.com/glamping/montana/glacier,,,Sage
+P0-other-blank,10653,353ef70b-105b-4f09-a899-704f6513c892,Treetopia Campground,Airstreams Standard,Airstream,NY,8,425.8,,,No,https://www.treetopiacampground.com/,,,Sage
+P0-other-blank,11472,51e2e968-f07d-4e5d-9efa-3b8dfa30827c,Wander Camp Bear Lake,Triple Tent,Bell Tent,UT,8,115.5,,,,https://thewandercamp.com/glamping/utah/bear-lake,,,Manual Research
+P0-other-blank,33,11aa2819-c3a3-4286-b799-337431e9b00b,River's Edge Treehouse Resort,,Treehouse,NC,7,,,No,,https://www.riversedgetreehouses.com,,,OpenAI Research - Treehouses
+P0-other-blank,39,014c6750-6123-4fcd-9ebe-cef01111852b,Branson Treehouse Adventures,,Treehouse,MO,7,285.38,,No,,https://www.bransontreehouseadventures.com,,,OpenAI Research - Treehouses
+P0-other-blank,9982,f57c8736-cb9b-430e-86ce-a4f6d9c3046a,Longleaf Piney Resort,Tiny Houses,Tiny Home,MS,7,135.25,,,No,https://longleafpineyresort.com,,,Sage
+P0-other-blank,10338,799c8cad-035f-449d-b6b4-1bd16c7fcd96,Beehive Domes,Domes,Dome,MD,7,275,,,Yes,https://www.bumblebee.camp/,,,Sage
+P0-other-blank,31,a3178651-a97d-4c5d-8de3-fc0c05e3ce26,Treehouse Point,,Treehouse,WA,6,494.5,,No,,https://www.treehousepoint.com,,,OpenAI Research - Treehouses
+P0-other-blank,110,5952966b-66de-453e-a0b2-35962fb3dca5,The Yurt Village at Frost Mountain,,Yurt,ME,6,148.5,,No,,https://www.frostmountainyurts.com,,,OpenAI Research - Yurts
+P0-other-blank,9772,2e4d1813-cbfd-4f79-a257-a1af6ca5a0db,The Castle House Estate,Yurt,Yurt,CA,6,239.67,,,No,https://www.thecastlehouseestate.com,,,Sage
+P0-other-blank,9781,367108eb-b341-49fc-9fd1-27a566b4c280,Tennessee Pass,Yurt,Yurt,CO,6,300,,,No,https://www.tennesseepass.com,,,Sage
+P0-other-blank,9786,685bca33-72fd-4506-bb84-d108d61ff57c,Frost Mountain Yurts,Yurts,Yurt,ME,6,147.5,,,No,https://www.frostmountainyurts.com,,,Sage
+P0-other-blank,9865,c84f72a8-6685-4228-8268-3451cdc34bb8,Sonoma Zipline Adventure,Treehouse,Treehouse,CA,6,1144.5,,,,https://www.sonomacanopytours.com/,,,Sage
+P0-other-blank,9989,51425191-f9f6-4b78-bc49-658a7f34baeb,Emberglow Outdoor Resort,Tree Houses/Tiny Homes,Tiny Home,NC,6,245,,,No,https://emberglowoutdoorresort.com,,,Sage
+P0-other-blank,10037,75101b68-7ea1-4a3c-8ccb-6e4b061b585a,Postcard Cabins Lake Hartwell,Two Bed Cabin,Tiny Home,SC,6,118.5,,,No,https://www.marriott.com/en-us/hotels/gsplh-postcard-cabins-lake-hartwell-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10038,75101b68-7ea1-4a3c-8ccb-6e4b061b585a,Postcard Cabins Lake Hartwell,One Bed Cabin,Tiny Home,SC,6,118.5,,,No,https://www.marriott.com/en-us/hotels/gsplh-postcard-cabins-lake-hartwell-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10082,1ce80e70-c2d3-428f-8bf4-cb21627969e8,Postcard Cabins Wild Rose,Two Bed Cabins,Tiny Home,WI,6,159,,,No,https://www.marriott.com/en-us/hotels/atwwr-postcard-cabins-wild-rose-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10310,d3bc7200-e81e-49c8-92f5-cf95eadd57a4,Jupe Redwoods,Jupes,Jupe,CA,6,190,,,No,https://www.jupe.com/destinations/redwoods,,,Sage
+P0-other-blank,10575,f80c90f7-5811-4be5-ada6-6e710be68f2d,Untamed Honey,BEE,Bell Tent,GA,6,150,,,,https://untamedhoneyglampsites.com/,,,Sage
+P0-other-blank,10652,1287d85c-10d6-4815-ac49-f65bb6edd555,Camp Catskills,Airstream,Airstream,NY,6,160,,,No,https://campcatskillsrvpark.com,,,Sage
+P0-other-blank,36,fb77589c-e072-48da-90c2-586e31f318a1,In The Trees ,,Treehouse,VA,5,327.5,,No,,https://www.inthetreesmaine.com/,,,OpenAI Research - Treehouses
+P0-other-blank,40,e37464c8-5acf-438d-b3ad-d37105868d95,Treehouse Resort at River Road,,Treehouse,TX,5,120.88,,No,,https://www.treehouseresort.com,,,OpenAI Research - Treehouses
+P0-other-blank,9557,bcd1535d-08b5-49f0-adff-4c464746548e,The Trailer Pond at Alta Colina,Vintage Trailer,Vintage Trailer,CA,5,250,,,,https://www.thetrailerpond.com/,,,Sage
+P0-other-blank,9794,51425191-f9f6-4b78-bc49-658a7f34baeb,Emberglow Outdoor Resort,Yurts,Yurt,NC,5,157.17,,,No,https://emberglowoutdoorresort.com,,,Sage
+P0-other-blank,9830,2e8007c8-a8d3-4489-91a1-f00a536a4406,Texas Yurt Haus,Yurt,Yurt,TX,5,156.25,,,No,http://www.texasyurthaus.com/,,,Sage
+P0-other-blank,9834,0568e0e1-8bfe-415a-b2c3-f06c5cfd2901,Escalante Yurts (hotel near Bryce Canyon),Elm / Birch / Ash / Aspen / Willow,Yurt,UT,5,226.25,,,,https://escalanteyurts.com/,,,Sage
+P0-other-blank,9848,bcd1535d-08b5-49f0-adff-4c464746548e,The Trailer Pond at Alta Colina,Trailers,Vintage Trailer,CA,5,391,,,No,https://www.thetrailerpond.com/home,,,Sage
+P0-other-blank,9897,a00f8f1b-2ccf-43f2-8cef-0d5844435cf7,Arapaho Valley Ranch,Tipis,Tipi,CO,5,153,,,No,https://arapahovalleyranch.com/,,,Sage
+P0-other-blank,9983,c3125bfd-0352-4132-a223-5b7be2891639,Tiny Town Campground,A-Frames,Tiny Home,MT,5,128.67,,,No,https://www.emigrantcabins.com/,,,Sage
+P0-other-blank,9998,f788f438-1a06-428e-9134-603393a03378,Pilot Cove,Two Bedroom,Tiny Home,NC,5,384,,,No,https://www.pilotcove.com,,,Sage
+P0-other-blank,9999,f788f438-1a06-428e-9134-603393a03378,Pilot Cove,One Bedroom,Tiny Home,NC,5,330.67,,,No,https://www.pilotcove.com,,,Sage
+P0-other-blank,10000,f788f438-1a06-428e-9134-603393a03378,Pilot Cove,Efficiency Cabin,Tiny Home,NC,5,225.67,,,No,https://www.pilotcove.com,,,Sage
+P0-other-blank,10083,1ce80e70-c2d3-428f-8bf4-cb21627969e8,Postcard Cabins Wild Rose,One Bed Cabins,Tiny Home,WI,5,159,,,No,https://www.marriott.com/en-us/hotels/atwwr-postcard-cabins-wild-rose-outdoor-collection-bonvoy/overview/,,,Sage
+P0-other-blank,10354,d4a351a9-0cca-414a-8b06-1d017de5836c,Two Capes Lookout,North Peak Dome,Dome,OR,5,408,,,,https://www.twocapeslookout.com/,,,Sage
+P0-other-blank,10356,d4a351a9-0cca-414a-8b06-1d017de5836c,Two Capes Lookout,North Cape Dome,Dome,OR,5,309,,,,https://www.twocapeslookout.com/,,,Sage
+P0-other-blank,10388,8ed711c4-08bf-4066-ab4c-c17a11d54c15,Catskill Conestoga Wagon Outpost,Wagons,Covered Wagon,NY,5,205.25,,,No,https://catskillwagonoutpost.com,,,Sage
+P0-other-blank,10559,13237df5-8c3f-4f42-bff1-8d03cda1472a,Silver Spur Homestead,Khushatta Hills Ranch,Bell Tent,AZ,5,205,,,,https://www.silverspurhomestead.com/,,,Sage
+P0-other-blank,11566,f2b14797-003c-4e06-b6ce-a07baaa4f220,Roadhouse Ranch & Camp,,Yurt,OR,5,55,,,,https://www.roadhouseranch.com/,,,market_report_coverage_gap
+P0-other-blank,11801,21a3f40b-0ce7-4594-bec3-dd624361e9bc,Pilot Mountain Glamping Resort,,Dome,NC,5,275,,,,https://pilotmountainglampingresort.com/,,,Web research + all_campground_properties parity
+P0-other-blank,9613,c66d290b-e984-49a3-8f09-1d3ef5c55aaa,Norwegian Wood Ranch,Glamping Tent,Bell Tent,MT,4,140,,,,,,,Sage
+P0-other-blank,9769,80a8b343-3d15-4b85-9b99-df2626de19d4,El Capitan Canyon,Yurts,Yurt,CA,4,259.83,,,No,https://elcapitancanyon.com/,,,Sage
+P0-other-blank,9779,824b3210-64b7-4fd5-b79d-da477477b950,Lawson Adventure Park,Yurts,Yurt,CO,4,122.33,,,No,https://lawsonadventurepark.com/,,,Sage
+P0-other-blank,9787,5632f805-aafd-4962-9bc7-d38cbdd6a5c5,Maine Forest Yurts,Yurt,Yurt,ME,4,155,,,,https://maineforestyurts.com/,,,Sage
+P0-other-blank,9879,353ef70b-105b-4f09-a899-704f6513c892,Treetopia Campground,Treehouses,Treehouse,NY,4,200,,,No,https://www.treetopiacampground.com/,,,Sage
+P0-other-blank,9912,9074ccb2-7092-49a8-936d-cbe63d0f738a,Sunny Valley Resort,Tipi,Tipi,OR,4,152.5,,,,https://www.tipisatsunnyvalley.com/,,,Sage
+P0-other-blank,9915,4338de66-62c4-401c-b917-b3be49563272,Tipi Village Retreat,2 Person Tipis,Tipi,OR,4,160,,,,http://tipivillageretreat.com/,,,Sage
+P0-other-blank,9992,d3a3ab4b-c36d-4025-9489-3e6617851273,Gorgeous Stays,Tiny Houses,Tiny Home,NC,4,133.33,,,No,https://www.gorgeousstays.com,,,Sage
+P0-other-blank,10026,b7334799-a250-4250-82a0-a2985f37192d,The Outlier Inn,Tiny Houses,Tiny Home,NY,4,214.33,,,,https://www.outlierinn.com/,,,Sage
+P0-other-blank,10319,00616bd2-e669-4ada-94cd-32efb6d695ca,Trout Creek Wilderness Lodge,Jupes,Jupe,OR,4,289.33,,,No,https://www.troutcreekwildernesslodge.com/,,,Sage
+P0-other-blank,10326,d4a351a9-0cca-414a-8b06-1d017de5836c,Two Capes Lookout,South Cape Mirror Cabin,Mirror Cabin,OR,4,483.5,,,,https://www.twocapeslookout.com/,,,Sage
+P0-other-blank,10339,11af8fab-5865-4193-bf89-c5b2b826b8d2,"Klarhet, Lusten, Minnesota",Raidho / Dagaz / Laguz / Berkanan,Dome,MN,4,442.33,,,No,https://www.liveklarhet.com/,,,Sage
+P0-other-blank,10355,d4a351a9-0cca-414a-8b06-1d017de5836c,Two Capes Lookout,North Cape Family Dome,Dome,OR,4,397,,,,https://www.twocapeslookout.com/,,,Sage
+P0-other-blank,10397,4c54a6fe-6c00-4796-af86-64161b5e8cc9,Goosewing Ranch,Wagon Lovers,Covered Wagon,WY,4,2091,,,,https://goosewingranch.com/,,,Sage
+P0-other-blank,10494,0e7a4d64-eb2e-45c9-aa22-fa4d6f3741cb,Huttopia White Mountains,Vista Tiny House,Tiny Home,NH,4,313.5,,,No,https://canada-usa.huttopia.com/en/,,,Sage
+P0-other-blank,10555,8ff21da9-84ee-4198-a39c-7b3517015b53,Arizonea Luxury Expeditions,Gems of Utah and Northern Arizona Tour,Bell Tent,AZ,4,1200,,,No,https://azluxtours.com/,,,Sage
+P0-other-blank,10556,8ff21da9-84ee-4198-a39c-7b3517015b53,Arizonea Luxury Expeditions,Luxury Tent Camping at the Grand Canyon,Bell Tent,AZ,4,300,,,No,https://azluxtours.com/,,,Sage
+P0-other-blank,10560,13237df5-8c3f-4f42-bff1-8d03cda1472a,Silver Spur Homestead,Fires Winery,Bell Tent,AZ,4,139,,,,https://www.silverspurhomestead.com/,,,Sage
+P0-other-blank,10561,b0202696-2b33-4309-8136-0a877b900ad2,Wander Camp Olympic,Bryce Canyon - Escalante Family Tent,Bell Tent,WA,4,118,,,No,https://thewandercamp.com/glamping/locations?_gl=1*1hxab6h*_ga*MzMyNzYwOTkzLjE3MzEwMTMzNTk.*_ga_4E8QBD28QF*MTczMTAxMzM1OC4xLjEuMTczMTAxMzM2Mi4wLjAuMA..,,,Sage
+P0-other-blank,10643,bd56425b-6170-445c-aa32-e79fb34f1449,Royal Gorge Yurts,Airstreams,Airstream,CO,4,299,,,No,https://www.royalgorgeyurts.com/,,,Sage
+P0-other-blank,9833,57202682-9390-450e-a6f8-4f0c013e83d5,Boulder Mountain Guest Ranch,Mongolian Yurts,Yurt,UT,3,175.25,,,No,https://bouldermountainguestranch.com,,,Sage
+P0-other-blank,9852,cfa7617a-b0eb-4ee4-9981-9ec8b9a15d27,Kentucky Lake Glamping,Trailers / Regency,Vintage Trailer,KY,3,172,,,No,https://www.kentuckylakeglamping.com/,,,Sage; web_research_sauna_2026_05_27
+P0-other-blank,9857,d3a3ab4b-c36d-4025-9489-3e6617851273,Gorgeous Stays,Unique Stays,Vintage Trailer,NC,3,115.83,,,No,https://www.gorgeousstays.com,,,Sage
+P0-other-blank,9874,67ff4f78-23d6-4538-9dc9-3471dca5cf07,Cherry Treesort,5-6 Person Treehouses,Treehouse,NC,3,195,,,No,https://www.cherrytreesort.com/,,,Sage
+P0-other-blank,9875,67ff4f78-23d6-4538-9dc9-3471dca5cf07,Cherry Treesort,4 Person Treehouses,Treehouse,NC,3,195,,,No,https://www.cherrytreesort.com/,,,Sage
+P0-other-blank,9955,db89ebba-eb1a-4904-9a4d-b049c6f9958e,Twin Lakes Camp Resort,Tiny Homes,Tiny Home,FL,3,238,,,No,https://twinlakescampresort.com/,,,Sage
+P0-other-blank,10040,8a892d66-34a5-40af-9487-c40ede65502a,Saluda Outdoor Center,1 Bedroom Tiny Homes,Tiny Home,SC,3,147.33,,,No,https://www.saludaoutdoorcenter.com/lodging,,,Sage
+P0-other-blank,10364,7491c4e3-94bf-44e9-a685-705c03eb406c,Dallas Glamping Adventures LLC,"Honeycomb, Pacific Blue & Red",Dome,TX,3,263,,,No,https://www.dallasglampingadventures.com/,,,Sage
+P0-other-blank,10398,4c54a6fe-6c00-4796-af86-64161b5e8cc9,Goosewing Ranch,Wagon Settlers,Covered Wagon,WY,3,1882,,,No,https://goosewingranch.com/,,,Sage
+P0-other-blank,10557,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Bell Tents,Bell Tent,AZ,3,187.5,,,No,https://www.shashdine.com/,,,Sage
+P0-other-blank,10586,5ff1e00d-8dde-4576-b647-79eb3f13b219,Sleepy Teepee,Tents,Bell Tent,MT,3,178.33,,,No,https://www.sleepyteepeemt.com,,,Sage
+P0-other-blank,10599,11d402a4-6ca1-4cc8-a855-e95e05eefc56,Hub North,Bell Tents,Bell Tent,NH,3,130,,,No,http://hubnorthnh.com,,,Sage
+P0-other-blank,10648,144e34c5-ba80-4c27-aaea-dbbd191b4494,Fredrock,Trailers,Airstream,MO,3,119,,,No,https://www.fredrock.us/,,,Sage
+P0-other-blank,11591,00a9b25b-2a69-4690-8a4d-35765840b953,Boonies Farm,,Dome,IL,3,76.38,,,,https://www.booniesfarm.com/,,,market_report_coverage_gap_chicago_250mi
+P0-other-blank,9520,260f5a81-f77f-4e2c-8c9b-4e24e35c68af,Tuxedo Falls,Treehouse,Treehouse,NC,2,250,,,,https://woodallscm.com/n-c-glamping-retreat-opens-with-2-treehouses-4-tents/,,,Sage
+P0-other-blank,9773,17f8dcfc-873f-44f8-9288-9ffeee764ae5,Treebones Resort,Yurts for 4 Guests,Yurt,CA,2,517.33,,,No,https://www.treebonesresort.com/,,,Sage
+P0-other-blank,9776,7d10646a-705b-4c8e-9859-b9feca370209,Cedar Ridge Ranch,Star Gazer,Yurt,CO,2,319.17,,,No,https://www.cedarridgeranch.com/,,,Sage
+P0-other-blank,9802,11d402a4-6ca1-4cc8-a855-e95e05eefc56,Hub North,Yurts,Yurt,NH,2,108,,,No,http://hubnorthnh.com,,,Sage
+P0-other-blank,9817,ad337aa3-0ad1-4f77-bcd1-ba6bde0f3f32,Camposanto ATX Glamping,The Macaw Yurt / The Peacock Yurt,Yurt,TX,2,256.33,,,,https://www.camposantoatx.com/,,,Sage
+P0-other-blank,9835,0568e0e1-8bfe-415a-b2c3-f06c5cfd2901,Escalante Yurts (hotel near Bryce Canyon),Cottonwood / Cedar,Yurt,UT,2,201.25,,,,https://escalanteyurts.com/,,,Sage
+P0-other-blank,9862,4e2275ae-916b-478a-987b-be4abadba9bd,Evanscliff,Campers,Vintage Trailer,SD,2,141.25,,,No,https://www.evanscliff.com,,,Sage
+P0-other-blank,9863,4e2275ae-916b-478a-987b-be4abadba9bd,Evanscliff,Campers & Bells,Vintage Trailer,SD,2,141.25,,,No,https://www.evanscliff.com,,,Sage
+P0-other-blank,9868,76ee068f-8cf1-453b-a257-e0ebe63515e1,Treetop Hideaways,Treehouse,Treehouse,GA,2,456,,,,https://treetophideaways.com/,,,Sage
+P0-other-blank,9873,67ff4f78-23d6-4538-9dc9-3471dca5cf07,Cherry Treesort,8 Person Treehouses,Treehouse,NC,2,319.5,,,No,https://www.cherrytreesort.com/,,,Sage
+P0-other-blank,9885,0b197347-1fb9-4534-b975-35a6c59c521f,Airydale Retreat,Cardinal,Treehouse,PA,2,185,,,No,https://www.airydaleretreat.com/,,,Sage
+P0-other-blank,9903,144e34c5-ba80-4c27-aaea-dbbd191b4494,Fredrock,Tipis,Tipi,MO,2,159,,,No,https://www.fredrock.us/,,,Sage
+P0-other-blank,9906,6853739f-3222-4f71-a91e-addd936ec5c1,New Mexico Tipis and Treehouse,Tipis,Tipi,NM,2,145,,,No,https://www.newmexicotipis.com/,,,Sage
+P0-other-blank,9936,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Cabins,Tiny Home,AZ,2,300,,,No,https://www.shashdine.com/,,,Sage
+P0-other-blank,9946,2e4d1813-cbfd-4f79-a257-a1af6ca5a0db,The Castle House Estate,Castle House,Tiny Home,CA,2,290,,,No,https://www.thecastlehouseestate.com,,,Sage
+P0-other-blank,9954,b0affc2b-2220-4aee-9825-55cd1427a274,Home Field Advantage Farmstead,Tiny Cabins,Tiny Home,FL,2,157.5,,,No,https://homefieldadvantagefarm.com,,,Sage
+P0-other-blank,9970,2fea5bba-9b34-43d4-8f6a-2743f50cf24f,Sandy Pines Campground,Whimsical Retreats,Tiny Home,ME,2,371.5,,,No,https://sandypinescamping.com/,,,Sage
+P0-other-blank,9988,67ff4f78-23d6-4538-9dc9-3471dca5cf07,Cherry Treesort,Hobbit Holes,Tiny Home,NC,2,195,,,No,https://www.cherrytreesort.com/,,,Sage
+P0-other-blank,10039,8a892d66-34a5-40af-9487-c40ede65502a,Saluda Outdoor Center,2 Bedroom Tiny Homes,Tiny Home,SC,2,179.5,,,No,https://www.saludaoutdoorcenter.com/lodging,,,Sage
+P0-other-blank,10041,8a892d66-34a5-40af-9487-c40ede65502a,Saluda Outdoor Center,River Pod No. 2 + 3,Tiny Home,SC,2,57.67,,,No,https://www.saludaoutdoorcenter.com/lodging,,,Sage
+P0-other-blank,10044,7da52617-2e52-417d-88e3-b6971bec9bac,Outpost Adventures,Blue Jay Outpost / Grey Wolf Outpost,Tiny Home,SD,2,165,,,No,http://www.outpostadventures.com/,,,Sage
+P0-other-blank,10308,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Hogans,Other Glamping Unit,AZ,2,191.67,,,No,https://www.shashdine.com/,,,Sage
+P0-other-blank,10309,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Hogan,Other Glamping Unit,AZ,2,280,,,No,https://www.shashdine.com/,,,Sage
+P0-other-blank,10312,17f8dcfc-873f-44f8-9288-9ffeee764ae5,Treebones Resort,Campsite with Hut,Hut,CA,2,243.33,,,No,https://www.treebonesresort.com/,,,Sage
+P0-other-blank,10340,af550bcb-49a4-4de3-bfa7-b0be7ccbe24c,River Rock Point,Summer Bubbles,Dome,MO,2,110,,,No,https://www.riverrockpoint.com,,,Sage
+P0-other-blank,10341,af550bcb-49a4-4de3-bfa7-b0be7ccbe24c,River Rock Point,Bubbles,Dome,MO,2,110,,,,https://www.riverrockpoint.com,,,Sage
+P0-other-blank,10345,51425191-f9f6-4b78-bc49-658a7f34baeb,Emberglow Outdoor Resort,Pods,Dome,NC,2,139.83,,,No,https://emberglowoutdoorresort.com,,,Sage
+P0-other-blank,10358,0b197347-1fb9-4534-b975-35a6c59c521f,Airydale Retreat,Dome,Dome,PA,2,250,,,No,https://www.airydaleretreat.com/,,,Sage
+P0-other-blank,10361,454bc60b-b4fd-40a5-878b-8778908678e1,Five Meadows Farms by Your Glamping Adventure,Morning Mist Dome / Highland Views Dome,Dome,TN,2,230,,,,https://yourglampingadventure.com/,,,Sage
+P0-other-blank,10370,0487d71d-9814-4eba-bd2f-1ea9e68fc04c,StarStruck Glamping,Domes,Dome,TX,2,253.75,,,,http://www.starstruckglamping.com/,,,Sage
+P0-other-blank,10378,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Wagons,Covered Wagon,AZ,2,160,,,No,https://www.shashdine.com/,,,Sage
+P0-other-blank,10379,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Sheep Wagon,Covered Wagon,AZ,2,240,,,No,https://www.shashdine.com/,,,Sage
+P0-other-blank,10381,70c7c5a9-0412-4032-b873-e7cb778bc0f7,Cutty's Hayden Creek Resort,Wagons,Covered Wagon,CO,2,179,,,No,https://cuttysresort.net,,,Sage
+P0-other-blank,10384,2fea5bba-9b34-43d4-8f6a-2743f50cf24f,Sandy Pines Campground,Conestoga Wagon,Covered Wagon,ME,2,265.5,,,No,https://sandypinescamping.com/,,,Sage
+P0-other-blank,10566,07624e36-6048-48bd-91aa-602148890fc6,Alter Experiences (Glamping in Mt Laguna & Lake Cuyamaca),Fox Den / Blue Jay Nest,Bell Tent,CA,2,327.5,,,,https://alterexperiences.com/,,,Sage
+P0-other-blank,10573,8be728cd-a2a5-43e3-b167-e4d7cd0a114e,Timberline Glamping Co. Clarks Hill Lake,Bell Tents,Bell Tent,GA,2,149,,,No,https://www.timberlineglamping.com/clarks-hill,,,Sage
+P0-other-blank,10585,58659cee-2d0a-4880-8ecf-06e064c52507,Pickwick Adventures,Bell Tent,Bell Tent,MS,2,110,,,No,https://www.pickwickadventures.com,,,Sage
+P0-other-blank,10610,4e2275ae-916b-478a-987b-be4abadba9bd,Evanscliff,Sibley Bell,Bell Tent,SD,2,141.25,,,No,https://www.evanscliff.com,,,Sage
+P0-other-blank,10649,e52ed16f-1bfb-4290-a311-c41b5fceffdb,Tobacco River Ranch Glamping,2 Person Airstream,Airstream,MT,2,139,,,No,https://tobaccoriverranch.com/,,,Sage
+P0-other-blank,10655,759d1ef3-a43b-48ee-8579-a507e07ff71e,Glamping Retro,Airstream,Airstream,TN,2,112.5,,,Yes,https://glampingretro.com/,,,Sage
+P0-other-blank,10902,bfe27649-7d1e-4e4c-8aec-2cde8a83c1a3,Alexander's Lodge Yurts,Yurt,Yurt,WA,2,177.5,,,,https://alexanderslodge.com/,,,Web Research 2025
+P0-other-blank,10949,24e4fb67-5d63-4837-915e-a3766aac2483,Glacier Rock Wellness Rock Ranch,,Canvas Tent,WA,2,227.5,,,,https://glacierrockintents.com/,,,Inbound Request
+P0-other-blank,4,878ac4e4-9850-408d-8d40-b96ee685df2a,Treehouse Utopia,,Luxury Treehouse,TX,1,475,,No,,https://www.treehouseutopia.com,,,OpenAI Research - Popular North America
+P0-other-blank,9522,29557581-18cf-4d01-a3a7-8ab207ac9eb8,Glamping Wild,Geodesic Dome,Dome,NC,1,230,,,,https://goglampingwild.com/,,,Sage
+P0-other-blank,9534,a3063844-2cc9-4a5f-8ebc-7b74b337ff4b,Basecamp Terlingua,Bubble Tent,Bubble Tent,TX,1,250,,,,https://www.basecampterlingua.com/,,,Sage
+P0-other-blank,9535,a3063844-2cc9-4a5f-8ebc-7b74b337ff4b,Basecamp Terlingua,Luxury Tipi,Tipi,TX,1,253.13,,,,https://www.basecampterlingua.com/,,,Sage
+P0-other-blank,9554,17f8dcfc-873f-44f8-9288-9ffeee764ae5,Treebones Resort,Yurt,Yurt,CA,1,350,,,,http://www.treebonesresort.com/,,,Sage
+P0-other-blank,9560,80a8b343-3d15-4b85-9b99-df2626de19d4,El Capitan Canyon,Yurt,Yurt,CA,1,251.25,,,,https://elcapitancanyon.com,,,Sage
+P0-other-blank,9562,e9624294-46e6-49bd-9c30-b77759e5b316,Flying Flags Avila Beach,Jupe Tent,Jupe,CA,1,251.25,,,,https://www.flyingflags.com/avila-beach/,,,Sage
+P0-other-blank,9608,b8ddcd8c-8ffb-4bd4-92fb-6841bb98d9c1,Zion Backcountry Glamping,Yurt,Yurt,UT,1,150,,,,http://www.zionbackcountryglamping.com/,,,Sage
+P0-other-blank,9609,b8ddcd8c-8ffb-4bd4-92fb-6841bb98d9c1,Zion Backcountry Glamping,Sheep Camp Wagon,Covered Wagon,UT,1,150,,,,http://www.zionbackcountryglamping.com/,,,Sage
+P0-other-blank,9629,87910684-b77c-4103-9d35-84f372979487,Butter & Grahams - Bell Tent Glamping,Bell Tent,Bell Tent,MI,1,150,,,,https://butterandgrahams.com/,,,Sage
+P0-other-blank,9630,e7deb493-0327-47ac-b520-0b565d8023c4,Paddler's Village,Yurt,Yurt,MI,1,132.5,,,,http://paddlersvillage.com/,,,Sage
+P0-other-blank,9637,ed6a3cb7-cf9f-4e17-9c96-11b662c7410e,Oklahoma Glamping Company,Bell Tent,Bell Tent,OK,1,151.25,,,,http://www.okglampingco.com/,,,Sage
+P0-other-blank,9638,38d98a3e-235e-483e-a043-c1e76f0a8627,Turner Falls Park,Covered Wagon,Covered Wagon,OK,1,123.75,,,,http://www.turnerfallspark.com/,,,Sage
+P0-other-blank,9639,77b660f6-c1c6-4b19-af0b-80637bbc1bc5,Blue River Bells,Bell Tent,Bell Tent,OK,1,152.5,,,,https://www.blueriverbells.com/,,,Sage
+P0-other-blank,9643,087f2a1d-f0f9-4e8b-8e44-a54029df1d97,Tiger Safari Zoological Park,Treehouse,Treehouse,OK,1,250,,,,https://www.tigersafari.us/,,,Sage
+P0-other-blank,9645,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Bell Tent,Bell Tent,AZ,1,280,,,,https://www.shashdine.com/,,,Sage
+P0-other-blank,9646,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Sheepherder Wagon,Covered Wagon,AZ,1,250,,,,https://www.shashdine.com/,,,Sage
+P0-other-blank,9647,3f8fb0d0-a949-401e-8b08-096e6f1a1a17,Shash Dine' EcoRetreat,Navajo Hogan,Other Glamping Unit,AZ,1,250,,,,https://www.shashdine.com/,,,Sage
+P0-other-blank,9648,31e7afdb-036c-4208-907e-74d1436d16c9,Clear Sky Resorts - Grand Canyon,Sky Dome,Dome,AZ,1,293.75,,,,https://www.clearskyresorts.com/,,,Sage
+P0-other-blank,9651,cd9e1798-5e4e-451a-b714-12aa99a71e36,Arizona Nordic Village,Yurt,Yurt,AZ,1,126.25,,,,https://www.arizonanordicvillage.com/,,,Sage
+P0-other-blank,9656,1dfa7912-77f8-4edb-b679-b4fe64b89e73,Nomad Landing,Teepee,Tipi,NM,1,150,,,,https://nomad-landing.com/,,,Sage
+P0-other-blank,9657,1dfa7912-77f8-4edb-b679-b4fe64b89e73,Nomad Landing,Yurt,Yurt,NM,1,150,,,,https://nomad-landing.com/,,,Sage
+P0-other-blank,9662,18e7aedf-823f-4426-bcf2-aff83342cfef,El Mistico Ranch,Geodesic Dome,Dome,NM,1,180,,,,https://elmisticoranch.com/,,,Sage
+P0-other-blank,9663,18e7aedf-823f-4426-bcf2-aff83342cfef,El Mistico Ranch,Airstream,Vintage Trailer,NM,1,150,,,,https://elmisticoranch.com/,,,Sage
+P0-other-blank,9664,18e7aedf-823f-4426-bcf2-aff83342cfef,El Mistico Ranch,Treehouse,Treehouse,NM,1,250,,,,https://elmisticoranch.com/,,,Sage
+P0-other-blank,9666,d7f6275f-92af-423f-9701-a5ee364f2bba,ReTreet Resort,Treehouse,Treehouse,AL,1,251.25,,,,https://retreetresort.com/,,,Sage
+P0-other-blank,9684,8de439c9-a48f-499b-ac2f-0a4ac24d222a,Lynnhurst Family Resort,Yurt,Yurt,KY,1,150,,,,http://www.lynnhurstfamilyresort.com/,,,Sage
+P0-other-blank,9687,2c924fa1-de6a-4319-a377-7870e451df57,HomeGrown HideAways,Yurt,Yurt,KY,1,122.5,,,,http://www.homegrownhideaways.org/,,,Sage
+P0-other-blank,9688,2c924fa1-de6a-4319-a377-7870e451df57,HomeGrown HideAways,Teepee,Tipi,KY,1,128.75,,,,http://www.homegrownhideaways.org/,,,Sage
+P0-other-blank,9689,2c924fa1-de6a-4319-a377-7870e451df57,HomeGrown HideAways,Treehouse,Treehouse,KY,1,152.5,,,,http://www.homegrownhideaways.org/,,,Sage
+P0-other-blank,9691,baef34c0-9652-4906-b7fe-277b94ecc2c2,The Canopy Crew,Treehouse,Treehouse,KY,1,252.5,,,,https://www.thecanopycrew.com/,,,Sage
+P0-other-blank,9692,baef34c0-9652-4906-b7fe-277b94ecc2c2,The Canopy Crew,Geodesic Dome,Dome,KY,1,250,,,,https://www.thecanopycrew.com/,,,Sage
+P0-other-blank,9699,3cfe74b2-13c2-40dd-99fe-60c46778d93f,Black Sheep Flower Farm,Bell Tent,Bell Tent,IL,1,150,,,,https://www.blacksheepflowerfarm.com/,,,Sage
+P0-other-blank,9703,97e131c6-116f-48fd-abd1-219a2718c593,The Haven at Hawi Nani Ranch,Bell Tent,Bell Tent,HI,1,150,,,,https://www.thehavenathawinaniranch.com/,,,Sage
+P0-other-blank,9704,885f6896-7ff3-4ea0-8a82-2edbe7418a5f,The Point at Haleiwa,Airstream,Vintage Trailer,HI,1,250,,,,https://pointathaleiwa.com/glamping/,,,Sage
+P0-other-blank,9707,8d0a10a0-34ee-4044-9dda-23700cce8ef5,The Sunset Yurt,Yurt,Yurt,HI,1,250,,,,http://www.sunsetranchhawaii.com/,,,Sage
+P0-other-blank,9729,edf1bd91-4689-474a-a5db-ca69f041a2ad,Hotel Caravana,Airstream,Vintage Trailer,NY,1,225,,,,http://www.playeatdrink.com/,,,Sage
+P0-other-blank,9732,b7334799-a250-4250-82a0-a2985f37192d,The Outlier Inn,Geodesic Dome,Dome,NY,1,359.5,,,,https://www.outlierinn.com/,,,Sage
+P0-other-blank,9733,b7334799-a250-4250-82a0-a2985f37192d,The Outlier Inn,Tiny Home,Tiny Home,NY,1,147.5,,,,https://www.outlierinn.com/,,,Sage
+P0-other-blank,9734,97008ea0-6d5e-4221-848b-f0dbcec41058,Boheme Retreats,Vintage Trailer,Vintage Trailer,NY,1,168.75,,,,https://www.bohemeretreats.com/,,,Sage
+P0-other-blank,9739,74949d28-3c5e-4c78-80f4-c70b4b5689ff,Tops'l Farm,A-Frame Cabin,A-Frame,ME,1,211.25,,,,http://www.topslfarm.com/,,,Sage
+P0-other-blank,9740,74949d28-3c5e-4c78-80f4-c70b4b5689ff,Tops'l Farm,Yurt,Yurt,ME,1,211.25,,,,http://www.topslfarm.com/,,,Sage
+P0-other-blank,9741,a9e28d07-034a-4fb7-acca-6bf1e2361097,Glamping Downeast,Airstream,Vintage Trailer,ME,1,210,,,,https://glampingdowneast.com/,,,Sage
+P0-other-blank,9746,67ee475d-5930-40de-898a-e3863d41c4e0,Point Sebago Resort,Tiny Home,Tiny Home,ME,1,200,,,,https://cove.info/PointSebagoResortGMB,,,Sage
+P0-other-blank,9750,baf64c8e-94e4-4ac6-86ad-fa1e52e693d5,Alpine Garden Camping Village & Winery,Treehouse,Treehouse,NH,1,243.75,,,,https://www.alpinegardenglamping.com/,,,Sage
+P0-other-blank,9752,88ae7c48-03d5-4296-9134-c6226da29598,Streeter Mountain Farm,Tiny Home,Tiny Home,NH,1,155,,,,https://streetermountainfarm.com/,,,Sage
+P0-other-blank,9753,88ae7c48-03d5-4296-9134-c6226da29598,Streeter Mountain Farm,Skoolie,Vintage Trailer,NH,1,155,,,,https://streetermountainfarm.com/,,,Sage
+P0-other-blank,9759,0f073e76-9139-45e4-bf0b-0713c0a89187,Nature Nook Retreats,A-Frame Cabin,A-Frame,SC,1,178.75,,,,https://www.wyldstaygreenvillesc.com/,,,Sage
+P0-other-blank,9777,7d10646a-705b-4c8e-9859-b9feca370209,Cedar Ridge Ranch,Yurt,Yurt,CO,1,315.75,,,No,https://www.cedarridgeranch.com/,,,Sage
+P0-other-blank,9789,b5bd4969-bddb-48ae-91cd-91c3f78d0756,Hawley Farm Glamping,Big Bear,Yurt,MO,1,165,,,No,https://www.hawleyfarmglamping.com,,,Sage
+P0-other-blank,9790,342085ae-9f64-4b56-9edb-b1b52d780ffa,Dupont Yurts,Ridgeline,Yurt,NC,1,233.5,,,No,https://www.dupontyurts.com/,,,Sage
+P0-other-blank,9791,342085ae-9f64-4b56-9edb-b1b52d780ffa,Dupont Yurts,Bridal Veil,Yurt,NC,1,230,,,No,https://www.dupontyurts.com/,,,Sage
+P0-other-blank,9792,342085ae-9f64-4b56-9edb-b1b52d780ffa,Dupont Yurts,Buckhorn,Yurt,NC,1,207.5,,,No,https://www.dupontyurts.com/,,,Sage
+P0-other-blank,9793,342085ae-9f64-4b56-9edb-b1b52d780ffa,Dupont Yurts,Cascade,Yurt,NC,1,202.5,,,No,https://www.dupontyurts.com/,,,Sage
+P0-other-blank,9795,bf108d78-9b83-4235-9ad7-d7e99dc68caa,Hidden Flower Tiny Farm,Yurt,Yurt,NC,1,190,,,No,https://www.hiddenflowertinyfarm.com,,,Sage
+P0-other-blank,9808,416cccea-0d9b-46dd-ac14-5ecd5987ab73,Loomis Lair,Yurt,Yurt,NY,1,168,,,No,https://loomislair.com/index.html,,,Sage
+P0-other-blank,9818,c0f80c53-cb26-4f40-8ee9-9485b72a83bf,Cathys Dream Glamping,Yurt,Yurt,TX,1,185,,,,http://www.dreamglamping.com/,,,Sage
+P0-other-blank,9832,57202682-9390-450e-a6f8-4f0c013e83d5,Boulder Mountain Guest Ranch,Colorado Yurt,Yurt,UT,1,200,,,No,https://bouldermountainguestranch.com,,,Sage
+P0-other-blank,9841,e469b772-121b-462a-9e97-ac02171816a8,French Creek at Bush Creek Ranch,Yurt,Yurt,WY,1,1500,,,No,https://www.brushcreekranch.com/frenchcreek,,,Sage
+P0-other-blank,9845,89838adb-89bd-4d5b-b62d-ec7ff0391861,AutoCamp Russian River,Happier Camper,Vintage Trailer,CA,1,200.38,,,No,https://autocamp.com/russian-river/,,,Sage
+P0-other-blank,9858,b7334799-a250-4250-82a0-a2985f37192d,The Outlier Inn,Vintage Trailer,Vintage Trailer,NY,1,344,,,,https://www.outlierinn.com/,,,Sage
+P0-other-blank,9859,6de72182-4fe8-4678-a9f4-601e678f084d,Copperhead Retreat,Wolfpup Trailer,Vintage Trailer,PA,1,152.5,,,No,https://copperheadretreat.com,,,Sage
+P0-other-blank,9861,8a892d66-34a5-40af-9487-c40ede65502a,Saluda Outdoor Center,Sassafras Container Tiny Home,Vintage Trailer,SC,1,150.67,,,No,https://www.saludaoutdoorcenter.com/lodging,,,Sage
+P0-other-blank,9866,17f8dcfc-873f-44f8-9288-9ffeee764ae5,Treebones Resort,Treehouse,Treehouse,CA,1,425,,,No,https://www.treebonesresort.com/,,,Sage
+P0-other-blank,9867,8f833666-eec4-4cee-af22-05e8cb1f2bd8,Coldwater Gardens,Treehouse,Treehouse,FL,1,240,,,No,https://coldwatergardens.com/,,,Sage
+P0-other-blank,9871,58659cee-2d0a-4880-8ecf-06e064c52507,Pickwick Adventures,Harlee's Treehouse,Treehouse,MS,1,155,,,No,https://www.pickwickadventures.com,,,Sage
+P0-other-blank,9877,6853739f-3222-4f71-a91e-addd936ec5c1,New Mexico Tipis and Treehouse,Casa Montana Treehouse,Treehouse,NM,1,233.5,,,No,https://www.newmexicotipis.com/,,,Sage
+P0-other-blank,9914,4338de66-62c4-401c-b917-b3be49563272,Tipi Village Retreat,8 Person Tipi,Tipi,OR,1,218.75,,,No,http://tipivillageretreat.com/,,,Sage
+P0-other-blank,9916,6de72182-4fe8-4678-a9f4-601e678f084d,Copperhead Retreat,Big Tipi,Tipi,PA,1,140,,,No,https://copperheadretreat.com,,,Sage
+P0-other-blank,9917,6de72182-4fe8-4678-a9f4-601e678f084d,Copperhead Retreat,Tipi Two,Tipi,PA,1,120,,,No,https://copperheadretreat.com,,,Sage
+P0-other-blank,9940,89838adb-89bd-4d5b-b62d-ec7ff0391861,AutoCamp Russian River,Premium Suite Accessible,Tiny Home,CA,1,370,,,No,https://autocamp.com/russian-river/,,,Sage
+P0-other-blank,9941,1f5383a3-36ea-4832-a5d3-a371288e2dd3,Postcard Cabins Big Bear,Forest View 2 Beds (Cabin),Tiny Home,CA,1,350,,,,https://postcardcabins.com/los-angeles/,,,Sage
+P0-other-blank,9942,1f5383a3-36ea-4832-a5d3-a371288e2dd3,Postcard Cabins Big Bear,Forest View 1 Bed (Cabin),Tiny Home,CA,1,314.5,,,No,https://postcardcabins.com/los-angeles/,,,Sage
+P0-other-blank,9952,8f833666-eec4-4cee-af22-05e8cb1f2bd8,Coldwater Gardens,Cabana,Tiny Home,FL,1,190,,,No,https://coldwatergardens.com/,,,Sage
+P0-other-blank,9953,8f833666-eec4-4cee-af22-05e8cb1f2bd8,Coldwater Gardens,Tiny House,Tiny Home,FL,1,185,,,No,https://coldwatergardens.com/,,,Sage
+P0-other-blank,9961,cfa7617a-b0eb-4ee4-9981-9ec8b9a15d27,Kentucky Lake Glamping,Gull House,Tiny Home,KY,1,239.5,,,No,https://www.kentuckylakeglamping.com/,,,Sage; web_research_sauna_2026_05_27
+P0-other-blank,9962,cfa7617a-b0eb-4ee4-9981-9ec8b9a15d27,Kentucky Lake Glamping,Lakeway Loft,Tiny Home,KY,1,207.5,,,No,https://www.kentuckylakeglamping.com/,,,Sage; web_research_sauna_2026_05_27
+P0-other-blank,9981,b5bd4969-bddb-48ae-91cd-91c3f78d0756,Hawley Farm Glamping,Hillside,Tiny Home,MO,1,165,,,No,https://www.hawleyfarmglamping.com,,,Sage
+P0-other-blank,9984,e52ed16f-1bfb-4290-a311-c41b5fceffdb,Tobacco River Ranch Glamping,A-Frame,Tiny Home,MT,1,106.83,,,No,https://tobaccoriverranch.com/,,,Sage
+P0-other-blank,9993,bf108d78-9b83-4235-9ad7-d7e99dc68caa,Hidden Flower Tiny Farm,Tiny Red Home,Tiny Home,NC,1,190,,,No,https://www.hiddenflowertinyfarm.com,,,Sage
+P0-other-blank,9994,bf108d78-9b83-4235-9ad7-d7e99dc68caa,Hidden Flower Tiny Farm,Tiny Home Green Home,Tiny Home,NC,1,190,,,No,https://www.hiddenflowertinyfarm.com,,,Sage
+P0-other-blank,9995,bf108d78-9b83-4235-9ad7-d7e99dc68caa,Hidden Flower Tiny Farm,Tiny Blue Home,Tiny Home,NC,1,176,,,No,https://www.hiddenflowertinyfarm.com,,,Sage
+P0-other-blank,10027,353ef70b-105b-4f09-a899-704f6513c892,Treetopia Campground,Tiny House,Tiny Home,NY,1,355,,,No,https://www.treetopiacampground.com/,,,Sage
+P0-other-blank,10028,353ef70b-105b-4f09-a899-704f6513c892,Treetopia Campground,A-Frame Cabin,Tiny Home,NY,1,270,,,No,https://www.treetopiacampground.com/,,,Sage
+P0-other-blank,10042,8a892d66-34a5-40af-9487-c40ede65502a,Saluda Outdoor Center,The Daffodil River Pod,Tiny Home,SC,1,57.67,,,No,https://www.saludaoutdoorcenter.com/lodging,,,Sage
+P0-other-blank,10063,6b27b3a7-2b52-4d30-a91c-a6eba46eff00,Khushatta Hills Ranch,Aunt B,Tiny Home,TX,1,150,,,No,https://khushattahillsranch.com/,,,Sage
+P0-other-blank,10070,03f71ff5-8024-490c-b591-568be27c3e1d,Wahwahtaysee Resort,Cabin,Tiny Home,TX,1,322.5,,,,http://www.wahwahtayseeresort.com/,,,Sage
+P0-other-blank,10315,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Cottages,Cottage,FL,1,611.5,,,No,https://resort.to/wrrrr?y_source=1_OTc1MjIxNy03MTUtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D,,,Sage
+P0-other-blank,10320,454bc60b-b4fd-40a5-878b-8778908678e1,Five Meadows Farms by Your Glamping Adventure,Cedar Ridge Tree Tent,Tree Tent,TN,1,150,,,,https://yourglampingadventure.com/,,,Sage
+P0-other-blank,10321,454bc60b-b4fd-40a5-878b-8778908678e1,Five Meadows Farms by Your Glamping Adventure,Fern Gully Tree Tent,Tree Tent,TN,1,152.5,,,,https://yourglampingadventure.com/,,,Sage
+P0-other-blank,10322,454bc60b-b4fd-40a5-878b-8778908678e1,Five Meadows Farms by Your Glamping Adventure,Snuggle Buggle Tree Tent,Tree Tent,TN,1,150,,,,https://yourglampingadventure.com/,,,Sage
+P0-other-blank,10337,1f6f4e92-f05f-492e-9fec-95242f4fa76e,Scruffy Buffalo,Geodesic Domes,Dome,ID,1,180,,,,https://www.scruffybuffaloranch.com/,,,Sage
+P0-other-blank,10350,b7334799-a250-4250-82a0-a2985f37192d,The Outlier Inn,Geodisic Dome 2,Dome,NY,1,594,,,No,https://www.outlierinn.com/,,,Sage
+P0-other-blank,10366,dd10bd1a-9dc0-4fe4-b0f1-5d7cbfa78b64,Domance Glamping,Nestscape,Dome,TX,1,225,,,,http://www.domanceglamping.com/,,,Sage
+P0-other-blank,10385,144e34c5-ba80-4c27-aaea-dbbd191b4494,Fredrock,Tipsy Gypsy,Covered Wagon,MO,1,139,,,No,https://www.fredrock.us/,,,Sage
+P0-other-blank,10389,1f2ece7a-e082-42bb-8fd8-986a8149f39a,Hilltop Resorts and Campground,Wagon,Covered Wagon,OH,1,131.25,,,No,https://www.hilltopresorts.com,,,Sage
+P0-other-blank,10582,3228cc0f-e0e4-407d-bc87-44b5ba357511,Sundance Ranch KC,Dreamcatcher Tipi Glampsite,Bell Tent,MO,1,210,,,,https://www.sundancekc.com,,,Sage
+P0-other-blank,10584,58659cee-2d0a-4880-8ecf-06e064c52507,Pickwick Adventures,Tent Group,Bell Tent,MS,1,192.67,,,No,https://www.pickwickadventures.com,,,Sage
+P0-other-blank,10604,0d143092-7a34-4df4-8d9d-2d97527ce670,Good Natured Glamping,Stargazer Tent,Bell Tent,NY,1,160,,,,https://www.goodnaturedglamping.com/,,,Sage
+P0-other-blank,10607,da411016-eb8d-438d-b1db-59c6f6dffa90,City Lights Glamping,Glamping Tent / Lounge Tent,Bell Tent,OR,1,165,,,,http://citylightsglamping.com/,,,Sage
+P0-other-blank,10644,bb8cc55d-e650-46e9-8927-02f6c41ea09f,Moose Creek Ranch,Creekside Airstream,Airstream,ID,1,519,,,No,https://www.moosecreekranch.com/,,,Sage
+P0-other-blank,10645,cfa7617a-b0eb-4ee4-9981-9ec8b9a15d27,Kentucky Lake Glamping,Regency Airstream,Airstream,KY,1,172,,,No,https://www.kentuckylakeglamping.com/,,,Sage; web_research_sauna_2026_05_27
+P0-other-blank,10657,c0f80c53-cb26-4f40-8ee9-9485b72a83bf,Cathys Dream Glamping,Moonbeam Airstream,Airstream,TX,1,239.38,,,,http://www.dreamglamping.com/,,,Sage
+P0-other-blank,10665,ef2e3cfd-80d9-4958-b901-4e0ab1231635,Zion Ponderosa,,,UT,1,455.67,,Yes,No,https://www.zionponderosa.com/?utm_source=google&utm_medium=organic&utm_campaign=gmb,,,Sage; web_research_hot_tub_2026_05_27
+P0-other-blank,10671,39f3050c-c016-44d6-a6b5-f1dab675a648,Quaint Glamping,,Dome,NH,1,180,,,,https://www.quaintglamping.com/,,,Sage
+P0-other-blank,10673,b9d265f9-2853-4a93-b24a-061e14b274d9,Black Hills Glamping,,,SD,1,165,,,,https://www.glampingblackhills.com/,,,Sage
+P0-other-blank,10793,e4bfdf06-b255-411b-be22-2450d12824f4,Key Largo Kampground,,,,1,100,,,,https://keylargokampground.com/,,,Sage
+P0-other-blank,10794,85c5b687-4623-48de-bd91-3e08a3cb44b7,Monument Glamping,,,,1,180,,No,,https://monumentglamping.com/,,,Sage; web_research_hot_tub_2026_05_28
+P0-other-blank,10840,7c6d48ab-f90d-4aca-9c4c-6301e65ea381,The Green O,,,MT,1,2000,,No,,https://www.thegreeno.com/,,,Glamping.com; web_research_hot_tub_2026_05_28
+P0-other-blank,10841,062455a0-63d5-4c83-b047-87df70420ee6,The Griffin Ranch,,,FL,1,150,,,,https://www.thegriffinranch.com/,,,Glamping.com
+P0-other-blank,10842,838cd515-c12c-4111-9d41-1e0d28fafa95,Dunton Hot Springs,,,CO,1,1500,,Yes,,https://www.duntondestinations.com/hot-springs,,,Glamping.com; web_research_hot_tub_2026_05_28
+P0-other-blank,10847,f8a24d87-aebc-4a05-83b4-5d7124519036,Blue Bear Mountain Camp,,,NC,1,150,,,,https://www.bluebearmountain.com/,,,Glamping.com
+P0-other-blank,10857,38b37797-1ecc-4c2b-9b0e-b29986c6690c,Wylder Hope Valley,,,CA,1,253.75,,No,,https://www.desolationhotel.com/hope-valley,,,Field Mag; web_research_hot_tub_2026_05_28
+P0-other-blank,10859,3e48ad3e-072a-4c0e-b354-5e67d1ce71ed,Huttopia Berkshires,,,MA,1,160,,,,https://canada-usa.huttopia.com/en/site/berkshires/,,,Huttopia
+P0-other-blank,10861,f8f8501e-858a-4d89-946b-995afa5348ac,Catalina Island Camp,,,CA,1,250,,,,https://catalinaislandcamps.com/,,,LA Times
+P0-other-blank,10867,74e34101-0071-497c-b004-e96880a609b5,KitFox,,Luxury Tent,NM,1,250,,,,https://www.kitfoxsantafe.com,,,Google Search
+P0-other-blank,10869,e3778afd-4189-442e-98fd-49d2732b0318,Moose Meadow Lodge,,Treehouse,VT,1,276.25,,,Yes,http://www.moosemeadowlodge.net,,,Google Search
+P0-other-blank,10872,acac94a6-b62c-41f8-9815-7c856ca97103,Treetop Villas at Mirror Lake,,Treehouse,WI,1,246.25,,,,https://www.treetopvillas.com,,,Google Search
+P0-other-blank,10878,91308d0e-ed9f-48ee-b682-e34bb1734314,Triple G's Resort,,,MT,1,227.5,,,,https://www.triplegsresort.com/,,,Web Research 2025
+P0-other-blank,10887,1f7fdc39-28c6-400b-b0bd-bfa117aeaf7a,Summit Big Bend,Cave Room,Cave House,TX,1,250,,,,https://summitbigbend.com/,,,Web Research 2025 - Texas Focus
+P0-other-blank,10892,7b50221d-6491-4663-bc06-959d3b1f56b0,Hart's Camp,Airstream,Airstream,OR,1,226.25,,,,https://www.hartscamp.com/,,,Web Research 2025
+P0-other-blank,10898,e615c6ce-c944-4998-8a03-540189a40092,Stargazer Dome,Dome,Dome,WA,1,245,,,,https://visitrainier.com/the-stargazer-dome/,,,Web Research 2025
+P0-other-blank,10901,8203ec3e-ab51-428a-988a-1b7dbe0eb64a,Iron & Vine Luxury Treehouse,Treehouse,Treehouse,WA,1,343.75,,,,https://ironandvinetreehouse.com/,,,Web Research 2025
+P0-other-blank,10933,eb163e7b-f8a4-4226-9c78-c09704d64943,Shell Camp Florida,Tent,Canvas Tent,FL,1,150,,,,https://www.shellcampflorida.com/,,,Web Research 2025
+P0-other-blank,10948,caae79d5-aaed-4d9a-add8-0638a6c88f69,Lost Lake Resort,A-frame,A-Frame,OR,1,208.75,,,,https://lostlakeresort.org/,,,Sage
+P0-other-blank,10951,dc56af74-f2b0-43af-a5b4-d2c577a16ac9,Ancient Lore Village,Bokees Bungalow,Hobbit House,TN,1,1004,,,,https://www.ancientlorevillage.com/,,,Greg Garwood
+P0-other-blank,11307,8d4ee921-b6b0-488c-a9e7-63a184208db1,The Cozy Peach at Schnepf Farms,,Airstream,AZ,1,150,,No,,https://schnepffarms.com/glamping/,,,Sage
+P0-other-blank,11333,00f75a4e-0f86-4960-b2bf-434dc681d94d,Treehouse Grove at Norton Creek,,Treehouse,TN,1,350,,No,,https://www.treehouse-grove.com,,,OpenAI Research - Landscape Hotels
+P0-other-blank,11353,4b2e5aa9-ad6f-4272-a8de-db20e3102974,Wild Yough Glamping Huts,,Hut,MD,1,152.5,,,,https://www.wildyough.com,,,OpenAI Research - Location Radius
+P0-other-blank,11441,ff26f12f-f2fb-4486-a925-c2f9e3b00d43,Somerset Resort,,,PA,1,127.38,,,,https://somersetresort.com/,,,Tavily Search
+P0-other-blank,11462,77761442-2481-4901-a293-18ef22bf34a6,Haven Hills Campground & Resort,,,IL,1,165.25,,Yes,,https://www.havenhillscampground.com/,,,Tavily Search; web_research_hot_tub_2026_05_28
+P0-other-blank,11573,a6a4956b-e4eb-4e5e-8d47-f091395afc68,Bespoke Outdoor Bubbles,Blissful Bubble Dome,Bubble Tent,TX,1,224,,Yes,,https://bespokeoutdoorbubbles.com/blissful-bubble-dome/,,,web_research_bespokeoutdoorbubbles_2026_05
+P0-other-blank,11595,cfadc6b0-905b-4d01-ac51-1e5f8efcd3c6,Bliss Camps Glamping (Rocky Mountain Glamping),,,CO,1,116.5,,No,,https://blisscamps.com/,,,market_report_coverage_gap_denver_250mi; web_research_hot_tub_2026_05_28
+P0-other-blank,11603,7224b076-38a8-4a71-bc17-d0ff6917c2de,Oso Blu Yurts,,Yurt,UT,1,419.75,,,,https://bearlakeutahvacationrental.com/,,,market_report_coverage_gap_salt_lake_city_250mi
+P0-other-blank,11605,ebbbde2b-6412-4890-b36e-62ef68a55d4d,Yurts of the World,,Yurt,ID,1,269.25,,,,https://www.yurtsoftheworld.com/,,,market_report_coverage_gap_salt_lake_city_250mi
+P0-other-blank,11611,76a8d0fc-de87-4e62-b762-e0dcb7823b6d,Pitch Yellowstone,,Dome,MT,1,58.25,,,,https://pitchyellowstone.com/,,,market_report_coverage_gap_bozeman_250mi
+P0-other-blank,11627,3347a615-917c-4975-a95b-f05c4266a815,Loloma Lodge,Loloma Lodge,,OR,1,238.63,,,,https://www.lolomalodge.com/,,,market_report_coverage_gap_portland_250mi
+P0-other-blank,11659,a3457bc3-69fc-4530-890f-bbd821a31557,Strawberry Park Hot Springs,Train Caboose,Caboose,CO,1,240,,Yes,,https://strawberryhotsprings.com/lodging/,,,web_research_strawberryhotsprings_checkfront_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,11747,cfadc6b0-905b-4d01-ac51-1e5f8efcd3c6,Bliss Camps Glamping (Rocky Mountain Glamping),Bliss Camp Event Venue in Paradise,Property buyout,CO,1,,,,,https://blisscamps.com/,,,"ResNexus booking engine (2 nights May 16–18, 2026, Standard Rate)"
+P0-other-blank,11797,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Luxe Conestoga Wagon,Covered Wagon,FL,1,864,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,11848,0acc42b6-d6c3-4e3f-8ed4-278e23da1fac,Terranova Nirvana,Mirror glamping dome (primary SKU),Dome,AZ,1,636,,,,https://terranovanirvana.com/,,,web_research_2026_05_usa
+P0-other-blank,11854,0acc42b6-d6c3-4e3f-8ed4-278e23da1fac,Terranova Nirvana,Mirror glamping dome (SKU 2),Dome,AZ,1,636,,,,https://terranovanirvana.com/,,,web_research_terranova_enrichment_2026_05
+P0-other-blank,11855,0acc42b6-d6c3-4e3f-8ed4-278e23da1fac,Terranova Nirvana,Mirror glamping dome (SKU 3),Dome,AZ,1,636,,,,https://terranovanirvana.com/,,,web_research_terranova_enrichment_2026_05
+P0-other-blank,11877,08a93e36-c9c7-4bce-b74c-64afeac27b60,Ouachita Wilde,Mountain View Dome,Dome,AR,1,145,,,,https://resnexus.com/resnexus/reservations/book/A699365C-E037-4019-A7CB-04ECD6099F79,,,web_research_ouachita_wilde_resnexus_2026_05
+P0-other-blank,12040,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Bison Lodge,Lodge,MT,1,442,,Yes,,https://lonemountainranch.com/cabins/bison-lodge/,,,web_research_lonemountainranch_synxis_2026_05
+P0-other-blank,12041,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Ridgetop Lodge,Lodge,MT,1,442,,Yes,,https://lonemountainranch.com/cabins/ridgetop-lodge/,,,web_research_lonemountainranch_synxis_2026_05
+P0-other-blank,12042,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,B-K Lodge,Lodge,MT,1,442,,No,,https://lonemountainranch.com/cabins/b-k/,,,web_research_lonemountainranch_synxis_2026_05
+P0-other-blank,12043,88e6fdfd-3aed-4c1e-8726-509900bea596,Lone Mountain Ranch,Douglas Fir House,Lodge,MT,1,442,,No,,https://lonemountainranch.com/cabins/douglas-fir-house/,,,web_research_lonemountainranch_synxis_2026_05
+P0-other-blank,12053,a3457bc3-69fc-4530-890f-bbd821a31557,Strawberry Park Hot Springs,Covered Wagon,Covered Wagon,CO,1,130,,Yes,,https://strawberryhotsprings.com/lodging/,,,web_research_strawberryhotsprings_checkfront_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12054,a3457bc3-69fc-4530-890f-bbd821a31557,Strawberry Park Hot Springs,Tent Site,Tent,CO,1,120,,Yes,,https://strawberryhotsprings.com/lodging/,,,web_research_strawberryhotsprings_checkfront_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12055,a3457bc3-69fc-4530-890f-bbd821a31557,Strawberry Park Hot Springs,Vehicle Camping Site,Campsite,CO,1,120,,Yes,,https://strawberryhotsprings.com/lodging/,,,web_research_strawberryhotsprings_checkfront_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12056,a6a4956b-e4eb-4e5e-8d47-f091395afc68,Bespoke Outdoor Bubbles,Unique Sky Bubble Dome,Bubble Tent,TX,1,224,,Yes,,https://bespokeoutdoorbubbles.com/unique-sky-bubble-dome/,,,web_research_bespokeoutdoorbubbles_2026_05
+P0-other-blank,12057,a6a4956b-e4eb-4e5e-8d47-f091395afc68,Bespoke Outdoor Bubbles,Exquisite Luxurious Bubble,Bubble Tent,TX,1,224,,Yes,,https://bespokeoutdoorbubbles.com/exquisite-luxurious-bubble/,,,web_research_bespokeoutdoorbubbles_2026_05
+P0-other-blank,12058,a6a4956b-e4eb-4e5e-8d47-f091395afc68,Bespoke Outdoor Bubbles,Ultimate Bubble Bundle,Bubble Tent,TX,1,630,,Yes,,https://bespokeoutdoorbubbles.com/ultimate-bubble-bundle/,,,web_research_bespokeoutdoorbubbles_2026_05
+P0-other-blank,12061,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Luxe Teepee,Tipi,FL,1,719,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12062,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Lodge Suite,Suite,FL,1,165.25,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/lodge-rooms/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12063,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Lodge Guest Room,Hotel Room,FL,1,90,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/lodge-rooms/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12064,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Deluxe Lodge Suite,Suite,FL,1,165.25,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/lodge-rooms/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12065,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Premium Lodge Suite,Suite,FL,1,165.25,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/lodge-rooms/,,,web_research_westgateresorts_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12068,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Lodge One-Bedroom Cottage,Cottage,FL,1,612,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/lodge-rooms/,,,web_research_westgateresorts_2026_05
+P0-other-blank,12070,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Lodge Two-Bedroom Cottage,Cottage,FL,1,612,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/lodge-rooms/,,,web_research_westgateresorts_2026_05
+P0-other-blank,12072,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Platform Camping,Campsite,FL,1,58.25,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/camping/,,,web_research_westgateresorts_2026_05
+P0-other-blank,12074,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,Tent Camping,Tent,FL,1,58.25,,Yes,,https://www.westgateresorts.com/hotels/florida/river-ranch/westgate-river-ranch-resort/accommodations/camping/,,,web_research_westgateresorts_2026_05
+P0-other-blank,12100,a1945707-91b3-4bb5-b71a-fef68e433e80,Vegas Glamping,Star Gazer,Bell Tent,NV,1,158,,,,https://vegasglamping.com/our-destination/queen-suite,,,web_research_vegasglamping_2026_05; web_research_sauna_2026_05_27
+P0-other-blank,12103,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 1 {EV Charger},Vintage Trailer,NV,1,101.75,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12104,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 2,Vintage Trailer,NV,1,96.3,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12105,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 3,Vintage Trailer,NV,1,96.3,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12106,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 4,Vintage Trailer,NV,1,96.3,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12107,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 5,Vintage Trailer,NV,1,96.3,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12108,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 6,Vintage Trailer,NV,1,96.3,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12109,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 9,Vintage Trailer,NV,1,96.3,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12110,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 10,Vintage Trailer,NV,1,96.3,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12111,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Glamping Site 11,Vintage Trailer,NV,1,80.25,,,,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,,,web_research_tarantula_resnexus_2026_05
+P0-other-blank,12137,1ae105c8-ef01-471e-972f-f481763d7f57,Mossquatch Resort,Canvas Glamping Tent #1,Canvas Tent,WA,1,235,,,,https://resnexus.com/resnexus/reservations/book/61FB2386-B719-4DA9-8F87-F86A2A9E8065,,,web_research_mossquatch_resnexus_2026_05
