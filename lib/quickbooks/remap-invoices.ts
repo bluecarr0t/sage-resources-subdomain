@@ -12,9 +12,18 @@ import {
 } from '@/lib/quickbooks/client';
 import {
   findMatchingInvoiceLines,
+  getInvoiceRemapSkipReason,
+  buildInvoiceRemapUpdatePayload,
   invoiceMatchesRemapCriteria,
   remapInvoiceLines,
+  totalsDiffer,
+  txnTaxDetailChanged,
+  type RemapTargetRef,
 } from '@/lib/quickbooks/invoice-match';
+import {
+  QBO_REMAP_RULES,
+  uniqueRemapTargetItemNames,
+} from '@/lib/quickbooks/remap-rules';
 import {
   recordRemapHistoryEntries,
   type RemapHistoryActor,
@@ -26,8 +35,10 @@ import type {
   RemapInvoicesSummary,
 } from '@/lib/quickbooks/qbo-types';
 
-export async function ensureTargetItem(): Promise<{ id: string; name: string }> {
-  const existing = await qboFindItemByName(QBO_TARGET_ITEM_NAME);
+export async function ensureTargetItem(
+  targetItemName: string = QBO_TARGET_ITEM_NAME
+): Promise<RemapTargetRef> {
+  const existing = await qboFindItemByName(targetItemName);
   if (existing?.Id) {
     return { id: existing.Id, name: existing.Name };
   }
@@ -36,18 +47,27 @@ export async function ensureTargetItem(): Promise<{ id: string; name: string }> 
   const incomeAccountId = source?.IncomeAccountRef?.value;
   if (!incomeAccountId) {
     throw new Error(
-      `Target Item "${QBO_TARGET_ITEM_NAME}" does not exist, and source Item "${QBO_SOURCE_ITEM_NAME}" has no IncomeAccountRef to clone from. Create the target Item in QuickBooks first.`
+      `Target Item "${targetItemName}" does not exist, and source Item "${QBO_SOURCE_ITEM_NAME}" has no IncomeAccountRef to clone from. Create the target Item in QuickBooks first.`
     );
   }
 
   const created = await qboCreateServiceItem({
-    name: QBO_TARGET_ITEM_NAME,
+    name: targetItemName,
     incomeAccountRefValue: incomeAccountId,
-    description: QBO_TARGET_ITEM_NAME,
+    description: targetItemName,
     unitPrice: typeof source.UnitPrice === 'number' ? source.UnitPrice : undefined,
   });
 
   return { id: created.Id, name: created.Name };
+}
+
+export async function ensureRemapTargetItems(): Promise<Record<string, RemapTargetRef>> {
+  const names = uniqueRemapTargetItemNames();
+  const targets: Record<string, RemapTargetRef> = {};
+  for (const name of names) {
+    targets[name] = await ensureTargetItem(name);
+  }
+  return targets;
 }
 
 function toMatchBase(invoice: QboInvoice): Omit<RemapInvoiceResult, 'updated' | 'error'> {
@@ -64,19 +84,39 @@ function toMatchBase(invoice: QboInvoice): Omit<RemapInvoiceResult, 'updated' | 
   };
 }
 
+function primaryTarget(targets: Record<string, RemapTargetRef>): RemapTargetRef {
+  return (
+    targets[QBO_TARGET_ITEM_NAME] ??
+    targets[Object.keys(targets)[0] ?? ''] ?? {
+      id: '',
+      name: QBO_TARGET_ITEM_NAME,
+    }
+  );
+}
+
 async function updateMatchedInvoice(input: {
   invoice: QboInvoice;
-  targetItemId: string;
-  targetItemName: string;
+  targetsByName: Record<string, RemapTargetRef>;
   dryRun: boolean;
 }): Promise<RemapInvoiceResult> {
   const matchBase = toMatchBase(input.invoice);
+
+  const skipReason = getInvoiceRemapSkipReason(input.invoice);
+  if (skipReason) {
+    return {
+      ...matchBase,
+      matchedLineIds: [],
+      matchedDescriptions: [],
+      updated: false,
+      error: skipReason,
+    };
+  }
 
   if (!invoiceMatchesRemapCriteria(input.invoice)) {
     return {
       ...matchBase,
       updated: false,
-      error: 'Invoice does not match INV- + Appraisal Review criteria',
+      error: 'Invoice does not match INV- remap criteria',
     };
   }
 
@@ -85,6 +125,17 @@ async function updateMatchedInvoice(input: {
   }
 
   const fresh = await qboGetInvoice(input.invoice.Id);
+  const freshSkipReason = getInvoiceRemapSkipReason(fresh);
+  if (freshSkipReason) {
+    return {
+      ...toMatchBase(fresh),
+      matchedLineIds: [],
+      matchedDescriptions: [],
+      updated: false,
+      error: freshSkipReason,
+    };
+  }
+
   if (!invoiceMatchesRemapCriteria(fresh)) {
     return {
       ...toMatchBase(fresh),
@@ -95,25 +146,67 @@ async function updateMatchedInvoice(input: {
 
   const remapped = remapInvoiceLines({
     lines: fresh.Line ?? [],
-    sourceItemName: QBO_SOURCE_ITEM_NAME,
-    targetItemId: input.targetItemId,
-    targetItemName: input.targetItemName,
+    rules: QBO_REMAP_RULES,
+    targetsByName: input.targetsByName,
   });
 
   if (!remapped.changed) {
     return { ...toMatchBase(fresh), updated: false };
   }
 
-  await qboUpdateInvoice({
-    Id: fresh.Id,
-    SyncToken: fresh.SyncToken,
-    sparse: true,
-    Line: remapped.lines,
-  });
+  const beforeTotal =
+    typeof fresh.TotalAmt === 'number' && Number.isFinite(fresh.TotalAmt)
+      ? fresh.TotalAmt
+      : null;
+  const beforeTaxDetail = fresh.TxnTaxDetail;
+
+  await qboUpdateInvoice(
+    buildInvoiceRemapUpdatePayload({
+      invoice: fresh,
+      lines: remapped.lines,
+    })
+  );
+
+  const after = await qboGetInvoice(fresh.Id);
+  const afterTotal =
+    typeof after.TotalAmt === 'number' && Number.isFinite(after.TotalAmt)
+      ? after.TotalAmt
+      : null;
+
+  const matchedDescriptions = remapped.changedLineIds
+    .map((lineId) => {
+      const line = (fresh.Line ?? []).find((row) => row.Id === lineId);
+      return line?.Description || line?.SalesItemLineDetail?.ItemRef?.name || '';
+    })
+    .filter(Boolean);
+
+  if (totalsDiffer(beforeTotal, afterTotal)) {
+    return {
+      ...toMatchBase(fresh),
+      matchedLineIds: remapped.changedLineIds,
+      matchedDescriptions,
+      appliedRules: remapped.appliedRules,
+      updated: false,
+      error: `Remap safety check failed: TotalAmt changed from ${beforeTotal} to ${afterTotal} on ${fresh.DocNumber ?? fresh.Id}`,
+    };
+  }
+
+  if (txnTaxDetailChanged(beforeTaxDetail, after.TxnTaxDetail)) {
+    return {
+      ...toMatchBase(fresh),
+      matchedLineIds: remapped.changedLineIds,
+      matchedDescriptions,
+      appliedRules: remapped.appliedRules,
+      updated: false,
+      error: `Remap safety check failed: TxnTaxDetail.TaxLine changed on ${fresh.DocNumber ?? fresh.Id}`,
+    };
+  }
 
   return {
     ...toMatchBase(fresh),
     matchedLineIds: remapped.changedLineIds,
+    matchedDescriptions,
+    appliedRules: remapped.appliedRules,
     updated: true,
   };
 }
@@ -121,12 +214,12 @@ async function updateMatchedInvoice(input: {
 function summarizeResults(input: {
   dryRun: boolean;
   scanned: number;
-  targetItemId: string;
-  targetItemName: string;
+  targetsByName: Record<string, RemapTargetRef>;
   results: RemapInvoiceResult[];
 }): RemapInvoicesSummary {
   const updated = input.results.filter((row) => row.updated).length;
   const errors = input.results.filter((row) => Boolean(row.error)).length;
+  const primary = primaryTarget(input.targetsByName);
   return {
     dryRun: input.dryRun,
     scanned: input.scanned,
@@ -134,8 +227,9 @@ function summarizeResults(input: {
     updated,
     skipped: input.results.length - updated - errors,
     errors,
-    targetItemId: input.targetItemId,
-    targetItemName: input.targetItemName,
+    targetItemId: primary.id,
+    targetItemName: primary.name,
+    targetItems: Object.values(input.targetsByName),
     results: input.results,
   };
 }
@@ -158,14 +252,14 @@ export async function remapInvoiceById(input: {
 }): Promise<RemapInvoiceResult> {
   const dryRun = input.dryRun === true;
   const source = input.source ?? 'webhook';
-  const target = await ensureTargetItem();
+  const targetsByName = await ensureRemapTargetItems();
+  const primary = primaryTarget(targetsByName);
   const invoice = await qboGetInvoice(input.invoiceId);
   let result: RemapInvoiceResult;
   try {
     result = await updateMatchedInvoice({
       invoice,
-      targetItemId: target.id,
-      targetItemName: target.name,
+      targetsByName,
       dryRun,
     });
   } catch (err) {
@@ -181,8 +275,8 @@ export async function remapInvoiceById(input: {
     context: {
       source,
       dryRun,
-      targetItemId: target.id,
-      targetItemName: target.name,
+      targetItemId: primary.id,
+      targetItemName: primary.name,
       actor: input.actor,
     },
   });
@@ -195,7 +289,8 @@ export async function remapMatchingInvoices(
 ): Promise<RemapInvoicesSummary> {
   const pageSize = options.pageSize ?? 100;
   const maxPages = options.maxPages ?? 50;
-  const target = await ensureTargetItem();
+  const targetsByName = await ensureRemapTargetItems();
+  const primary = primaryTarget(targetsByName);
 
   const results: RemapInvoiceResult[] = [];
   let scanned = 0;
@@ -214,13 +309,13 @@ export async function remapMatchingInvoices(
 
     for (const invoice of invoices) {
       scanned += 1;
+      if (getInvoiceRemapSkipReason(invoice)) continue;
       if (!invoiceMatchesRemapCriteria(invoice)) continue;
 
       try {
         const result = await updateMatchedInvoice({
           invoice,
-          targetItemId: target.id,
-          targetItemName: target.name,
+          targetsByName,
           dryRun: options.dryRun,
         });
         results.push(result);
@@ -242,8 +337,8 @@ export async function remapMatchingInvoices(
     context: {
       source: options.source,
       dryRun: options.dryRun,
-      targetItemId: target.id,
-      targetItemName: target.name,
+      targetItemId: primary.id,
+      targetItemName: primary.name,
       actor: options.actor,
     },
   });
@@ -251,8 +346,7 @@ export async function remapMatchingInvoices(
   return summarizeResults({
     dryRun: options.dryRun,
     scanned,
-    targetItemId: target.id,
-    targetItemName: target.name,
+    targetsByName,
     results,
   });
 }

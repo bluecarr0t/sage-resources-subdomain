@@ -13,7 +13,7 @@ describe('quickbooks remap history action resolution', () => {
     ).toBe('matched_dry_run');
   });
 
-  it('records errors except non-matching webhook probes', () => {
+  it('records errors except non-matching / intentional skip probes', () => {
     expect(
       resolveRemapHistoryAction({ updated: false, error: 'QBO timeout' }, false)
     ).toBe('error');
@@ -23,6 +23,15 @@ describe('quickbooks remap history action resolution', () => {
           updated: false,
           error: 'Invoice does not match INV- + Appraisal Review criteria',
         },
+        false
+      )
+    ).toBeNull();
+    expect(
+      resolveRemapHistoryAction({ updated: false, error: 'Invoice is voided' }, false)
+    ).toBeNull();
+    expect(
+      resolveRemapHistoryAction(
+        { updated: false, error: 'All sales lines are already $0' },
         false
       )
     ).toBeNull();

@@ -46,14 +46,36 @@ describe('quickbooks scoped remapper', () => {
           Id: '1',
           DetailType: 'SalesItemLineDetail',
           Description: 'Consulting',
+          Amount: 100,
           SalesItemLineDetail: { ItemRef: { value: '3', name: 'Consulting' } },
         },
       ],
     });
+    const voided = makeInvoice({ PrivateNote: 'Voided', TotalAmt: 0 });
 
     expect(invoiceMatchesRemapCriteria(match)).toBe(true);
     expect(invoiceMatchesRemapCriteria(wrongPrefix)).toBe(false);
     expect(invoiceMatchesRemapCriteria(wrongItem)).toBe(false);
+    expect(invoiceMatchesRemapCriteria(voided)).toBe(false);
+  });
+
+  it('matches INV- invoices with Appraisal in the description', () => {
+    const invoice = makeInvoice({
+      Line: [
+        {
+          Id: '1',
+          DetailType: 'SalesItemLineDetail',
+          Description: 'Site Appraisal Add-on',
+          Amount: 500,
+          SalesItemLineDetail: {
+            ItemRef: { value: '4', name: 'Feasibility Study - Outdoor Resort' },
+            Qty: 1,
+            UnitPrice: 500,
+          },
+        },
+      ],
+    });
+    expect(invoiceMatchesRemapCriteria(invoice)).toBe(true);
   });
 
   it('does not alter non-matching lines on a matched invoice', () => {
@@ -63,18 +85,28 @@ describe('quickbooks scoped remapper', () => {
           Id: '1',
           DetailType: 'SalesItemLineDetail',
           Description: 'Appraisal Review',
-          SalesItemLineDetail: { ItemRef: { value: '9', name: 'Appraisal Review' } },
+          Amount: 2500,
+          SalesItemLineDetail: {
+            ItemRef: { value: '9', name: 'Appraisal Review' },
+            Qty: 1,
+            UnitPrice: 2500,
+          },
         },
         {
           Id: '2',
           DetailType: 'SalesItemLineDetail',
           Description: 'Travel',
-          SalesItemLineDetail: { ItemRef: { value: '4', name: 'Travel' } },
+          Amount: 100,
+          SalesItemLineDetail: {
+            ItemRef: { value: '4', name: 'Travel' },
+            Qty: 1,
+            UnitPrice: 100,
+          },
         },
         {
           Id: '3',
           DetailType: 'SubTotalLineDetail',
-          Amount: 100,
+          Amount: 2600,
         },
       ],
     });
@@ -83,17 +115,19 @@ describe('quickbooks scoped remapper', () => {
       lines: invoice.Line ?? [],
       sourceItemName: 'Appraisal Review',
       targetItemId: '42',
-      targetItemName: 'Feasibility Study - Outdoor Report',
+      targetItemName: 'Feasibility Study - Outdoor Resort',
     });
 
     expect(remapped.changedLineIds).toEqual(['1']);
     expect(remapped.lines[0]?.SalesItemLineDetail?.ItemRef?.name).toBe(
-      'Feasibility Study - Outdoor Report'
+      'Feasibility Study - Outdoor Resort'
     );
+    expect(remapped.lines[0]?.Amount).toBe(2500);
     expect(remapped.lines[1]?.SalesItemLineDetail?.ItemRef).toEqual({
       value: '4',
       name: 'Travel',
     });
+    expect(remapped.lines[1]?.Amount).toBe(100);
     expect(remapped.lines[2]?.DetailType).toBe('SubTotalLineDetail');
   });
 

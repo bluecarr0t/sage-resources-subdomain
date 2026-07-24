@@ -1,0 +1,218 @@
+{
+  "pipelines": [
+    {
+      "id": "rO6XJNSLcA77t96a7yFb",
+      "name": "Sage Client Pipeline",
+      "showInFunnel": true,
+      "showInPieChart": true,
+      "useOpportunityProbability": false,
+      "dateAdded": "2023-07-26T16:25:38.419Z",
+      "dateUpdated": "2026-06-30T20:46:15.064Z",
+      "stages": [
+        {
+          "id": "ea06f6fe-468e-4ed3-a758-ad785031043e",
+          "name": "Client Lead",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 0,
+          "stageWinProbability": 3.85
+        },
+        {
+          "id": "cbf4b7d3-003c-4910-a950-673fa9e5a1e0",
+          "name": "Email Referral Lead",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 1,
+          "stageWinProbability": 7.69,
+          "color": "#64748B"
+        },
+        {
+          "id": "ae2b7b1d-ea27-474d-a306-5f09e1c5a11e",
+          "name": "Intro Call Scheduled",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 2,
+          "stageWinProbability": 11.54
+        },
+        {
+          "id": "0a39e0e4-d9a4-4e0c-a20d-14bd8bf54e72",
+          "name": "Contract Sent to Client",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 3,
+          "stageWinProbability": 15.38
+        },
+        {
+          "id": "f60e26e1-d419-4c7c-b575-7cc1ff425ffb",
+          "name": "Contract Sent-60 Day Follow Up",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 4,
+          "stageWinProbability": 19.23
+        },
+        {
+          "id": "39568110-37a3-47c5-8bbb-bf7e4bff4714",
+          "name": "2nd Follow Up-Long Term",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 5,
+          "stageWinProbability": 23.08
+        },
+        {
+          "id": "29bed3c0-24fe-4c03-ba07-7a5958ae56fa",
+          "name": "1 Year Follow Up",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 6,
+          "stageWinProbability": 26.92
+        },
+        {
+          "id": "e07b1562-ddfc-40bd-b35a-f899e1ed9b18",
+          "name": "Contract Signed by Client",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 7,
+          "stageWinProbability": 30.77
+        },
+        {
+          "id": "2ade1814-7afb-4b21-96d6-fee702828113",
+          "name": "1st Payment Invoice Sent",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 8,
+          "stageWinProbability": 34.62
+        },
+        {
+          "id": "386b0fc4-f0bd-4dde-98e1-95b0a41a5862",
+          "name": "Data Request Form Sent",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 9,
+          "stageWinProbability": 38.46
+        },
+        {
+          "id": "73a5cdd3-b887-4316-9e64-8dc7ea499250",
+          "name": "Client Paid Invoice",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 10,
+          "stageWinProbability": 42.31
+        },
+        {
+          "id": "d04f8d51-dd6a-4e33-ae45-dd48b72e2d35",
+          "name": "Assign Author/Schedule Onboarding Call/Create Job Folder",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 11,
+          "stageWinProbability": 46.15
+        },
+        {
+          "id": "895a93ea-f65f-42e5-8fb9-88a7c9dc515e",
+          "name": "Kick Off Call Scheduled",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 12,
+          "stageWinProbability": 50
+        },
+        {
+          "id": "899baca4-3f88-4fe7-be77-f543ac0e44fe",
+          "name": "Report In Process",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 13,
+          "stageWinProbability": 53.85
+        },
+        {
+          "id": "45abd302-47d9-4dfa-900d-8c8f33274e3c",
+          "name": "Mid Project Client Call",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 14,
+          "stageWinProbability": 57.69
+        },
+        {
+          "id": "f0be745f-a3a9-48a4-a243-fee2e690d8fa",
+          "name": "Review-Final Approval",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 15,
+          "stageWinProbability": 61.54
+        },
+        {
+          "id": "07fff2ad-7cfa-43d0-b464-dc13a4767a4e",
+          "name": "Report Sent to Client",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 16,
+          "stageWinProbability": 65.38
+        },
+        {
+          "id": "f2852398-2ffe-435e-a269-55b2f760f123",
+          "name": "2nd Payment Invoice Sent",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 17,
+          "stageWinProbability": 69.23
+        },
+        {
+          "id": "3a5b7408-f200-412c-b7bd-1a2c45b8b7db",
+          "name": "2nd Payment Invoice Paid",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 18,
+          "stageWinProbability": 73.08
+        },
+        {
+          "id": "773b6388-41ab-4d92-9439-a50ec15915e8",
+          "name": "Optional Client Review Call",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 19,
+          "stageWinProbability": 76.92
+        },
+        {
+          "id": "a581c01a-f4cc-4072-bb90-f87b7a0fbc46",
+          "name": "Final Project Follow Up - 6 months",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 20,
+          "stageWinProbability": 80.77
+        },
+        {
+          "id": "db748f14-0d02-48ca-89ca-f8bae91051ff",
+          "name": "Project Follow Up - 1 year - get quote for website",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 21,
+          "stageWinProbability": 84.62
+        },
+        {
+          "id": "aa94dedf-498c-445f-87c1-6ff0bba36b22",
+          "name": "Project Follow Up - 2 year - feedback on operational & construction costs",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 22,
+          "stageWinProbability": 88.46
+        },
+        {
+          "id": "b8b42355-8621-475b-87b7-3f443f9bc5d3",
+          "name": "Job Cancelled",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 23,
+          "stageWinProbability": 92.31
+        },
+        {
+          "id": "fcc23546-c1e3-428e-96fa-3a31b6fb21a2",
+          "name": "Job on Hold",
+          "showInFunnel": true,
+          "showInPieChart": true,
+          "position": 24,
+          "stageWinProbability": 96.15
+        }
+      ],
+      "locationId": "JCHQyFysCX49WT31jkM1"
+    }
+  ],
+  "traceId": "80e044b1-8a1e-40d7-8b5d-5d4dcaeae518"
+}

@@ -21,11 +21,37 @@ export type QboInvoiceLine = {
   [key: string]: unknown;
 };
 
+export type QboTaxLineDetail = {
+  TaxRateRef?: QboRef;
+  PercentBased?: boolean;
+  TaxPercent?: number;
+  NetAmountTaxable?: number;
+  [key: string]: unknown;
+};
+
+export type QboTaxLine = {
+  Amount?: number;
+  DetailType?: string;
+  TaxLineDetail?: QboTaxLineDetail;
+  [key: string]: unknown;
+};
+
+export type QboTxnTaxDetail = {
+  TxnTaxCodeRef?: QboRef;
+  TotalTax?: number;
+  TaxLine?: QboTaxLine[];
+  [key: string]: unknown;
+};
+
 export type QboInvoice = {
   Id: string;
   SyncToken: string;
   DocNumber?: string;
   TxnDate?: string;
+  TotalAmt?: number;
+  Balance?: number;
+  PrivateNote?: string;
+  TxnTaxDetail?: QboTxnTaxDetail;
   sparse?: boolean;
   Line?: QboInvoiceLine[];
   CustomerRef?: QboRef;
@@ -67,9 +93,16 @@ export type RemapInvoiceMatch = {
   matchedDescriptions: string[];
 };
 
+export type RemapInvoiceAppliedRule = {
+  ruleId: string;
+  targetItemName: string;
+  lineIds: string[];
+};
+
 export type RemapInvoiceResult = RemapInvoiceMatch & {
   updated: boolean;
   error?: string;
+  appliedRules?: RemapInvoiceAppliedRule[];
 };
 
 export type RemapInvoicesSummary = {
@@ -81,5 +114,6 @@ export type RemapInvoicesSummary = {
   errors: number;
   targetItemId: string;
   targetItemName: string;
+  targetItems?: Array<{ id: string; name: string }>;
   results: RemapInvoiceResult[];
 };

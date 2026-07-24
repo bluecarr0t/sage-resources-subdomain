@@ -1,5 +1,6 @@
 import {
   countProjectPipelineReviewTodos,
+  isJobAwaitingSentToClient,
   isProjectPipelineJobProjMgr,
   isProjectPipelineReviewTodoForUser,
   resolveDefaultProjectPipelineTableStatusFilter,
@@ -116,5 +117,24 @@ describe('review-todos', () => {
         managedUser: { role: 'author', division: 'outdoor' },
       })
     ).toBe('In-Progress');
+  });
+
+  it('treats approved-but-not-sent jobs as author todos', () => {
+    const approved = sampleJob({
+      reviewStatus: 'Approved - No Changes, Send to Client',
+      sentToClient: 'No',
+      appraiserConsultant: 'Luke Marran',
+    });
+
+    expect(isJobAwaitingSentToClient(approved)).toBe(true);
+    expect(
+      isProjectPipelineReviewTodoForUser(approved, { displayName: 'Luke Marran' })
+    ).toBe(true);
+    expect(
+      isProjectPipelineReviewTodoForUser(approved, { displayName: 'Shari Heilala' })
+    ).toBe(false);
+    expect(
+      isJobAwaitingSentToClient(sampleJob({ ...approved, sentToClient: 'Yes' }))
+    ).toBe(false);
   });
 });

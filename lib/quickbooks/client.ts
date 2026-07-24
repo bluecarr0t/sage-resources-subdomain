@@ -53,6 +53,16 @@ export async function qboGetInvoice(invoiceId: string): Promise<QboInvoice> {
   return json.Invoice;
 }
 
+export async function qboFindInvoiceByDocNumber(
+  docNumber: string
+): Promise<QboInvoice | null> {
+  const escaped = escapeQboQueryLiteral(docNumber);
+  const response = await qboQuery<QboInvoice>(
+    `select * from Invoice where DocNumber = '${escaped}' maxresults 1`
+  );
+  return response.QueryResponse?.Invoice?.[0] ?? null;
+}
+
 export async function qboUpdateInvoice(invoice: QboInvoice): Promise<QboInvoice> {
   const json = await qboFetch<{ Invoice: QboInvoice }>('/invoice?minorversion=75', {
     method: 'POST',

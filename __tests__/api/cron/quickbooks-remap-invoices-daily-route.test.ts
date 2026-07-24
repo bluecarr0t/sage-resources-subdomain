@@ -21,13 +21,17 @@ jest.mock('@/lib/quickbooks', () => ({
   })),
   remapMatchingInvoices: jest.fn(async () => ({
     dryRun: false,
-    scanned: 3,
-    matched: 1,
-    updated: 1,
+    scanned: 10,
+    matched: 2,
+    updated: 2,
     skipped: 0,
     errors: 0,
-    targetItemId: '42',
+    targetItemId: '4',
     targetItemName: 'Feasibility Study - Outdoor Resort',
+    targetItems: [
+      { id: '4', name: 'Feasibility Study - Outdoor Resort' },
+      { id: '5', name: 'Appraisal Services - Outdoor Resort' },
+    ],
     results: [],
   })),
 }));
@@ -38,9 +42,9 @@ import {
   loadQuickbooksConnection,
   remapMatchingInvoices,
 } from '@/lib/quickbooks';
-import { GET } from '@/app/api/cron/quickbooks-remap-invoices/route';
+import { GET } from '@/app/api/cron/quickbooks-remap-invoices-daily/route';
 
-describe('GET /api/cron/quickbooks-remap-invoices', () => {
+describe('GET /api/cron/quickbooks-remap-invoices-daily', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (authorizeVercelCronRequest as jest.Mock).mockReturnValue(true);
@@ -58,30 +62,31 @@ describe('GET /api/cron/quickbooks-remap-invoices', () => {
 
   it('returns 401 when cron auth fails', async () => {
     (authorizeVercelCronRequest as jest.Mock).mockReturnValue(false);
-    const res = await GET(new NextRequest('http://localhost/api/cron/quickbooks-remap-invoices'));
+    const res = await GET(
+      new NextRequest('http://localhost/api/cron/quickbooks-remap-invoices-daily')
+    );
     expect(res.status).toBe(401);
   });
 
-  it('skips when app is not configured', async () => {
-    (isQuickbooksAppConfigured as jest.Mock).mockReturnValue(false);
-    const res = await GET(new NextRequest('http://localhost/api/cron/quickbooks-remap-invoices'));
-    const body = await res.json();
-    expect(res.status).toBe(200);
-    expect(body.skipped).toBe(true);
-    expect(remapMatchingInvoices).not.toHaveBeenCalled();
-  });
-
-  it('runs live remap for recently updated invoices', async () => {
-    const res = await GET(new NextRequest('http://localhost/api/cron/quickbooks-remap-invoices'));
+  it('runs a full-scan live remap without updatedSince', async () => {
+    const res = await GET(
+      new NextRequest('http://localhost/api/cron/quickbooks-remap-invoices-daily')
+    );
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.ok).toBe(true);
-    expect(body.updated).toBe(1);
+    expect(body.mode).toBe('daily-full-scan');
+    expect(body.updated).toBe(2);
     expect(remapMatchingInvoices).toHaveBeenCalledWith(
       expect.objectContaining({
         dryRun: false,
         source: 'cron',
-        updatedSince: expect.any(Date),
+        maxPages: 50,
+      })
+    );
+    expect(remapMatchingInvoices).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        updatedSince: expect.anything(),
       })
     );
   });

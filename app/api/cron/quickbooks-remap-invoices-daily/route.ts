@@ -1,9 +1,11 @@
 /**
- * Cron: remap recent GHL-to-QBO invoices matching INV- remap rules.
+ * Daily cron: full scan of INV- invoices for QuickBooks line remaps.
  *
- * Schedule in vercel.json: every 15 minutes.
- * Looks at invoices updated in the last 2 hours so GHL re-syncs are caught.
- * A separate daily cron performs a full invoice scan.
+ * Applies all remap rules (Appraisal Review item → Feasibility Study;
+ * description contains "Appraisal" → Appraisal Services - Outdoor Resort).
+ *
+ * Schedule in vercel.json: once daily.
+ * Complements the 15-minute recent-updates cron.
  *
  * Auth: authorizeVercelCronRequest (CRON_SECRET / Vercel cron headers).
  * No-op (200) when QuickBooks is not configured/connected.
@@ -19,8 +21,6 @@ import {
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
-
-const LOOKBACK_MS = 2 * 60 * 60 * 1000;
 
 async function run(request: NextRequest): Promise<NextResponse> {
   if (!authorizeVercelCronRequest(request)) {
@@ -49,25 +49,23 @@ async function run(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const updatedSince = new Date(Date.now() - LOOKBACK_MS);
     const summary = await remapMatchingInvoices({
       dryRun: false,
       source: 'cron',
-      updatedSince,
-      maxPages: 10,
+      maxPages: 50,
       pageSize: 100,
     });
 
     return NextResponse.json({
       ok: true,
       cronSkipped: false,
-      updatedSince: updatedSince.toISOString(),
+      mode: 'daily-full-scan',
       ...summary,
       elapsedMs: Date.now() - started,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[cron/quickbooks-remap-invoices]', message);
+    console.error('[cron/quickbooks-remap-invoices-daily]', message);
     return NextResponse.json(
       { ok: false, error: message, elapsedMs: Date.now() - started },
       { status: 500 }

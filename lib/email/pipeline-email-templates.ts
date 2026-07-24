@@ -1,4 +1,5 @@
 import { getReviewStatusDisplayLabel } from '@/lib/project-pipeline/review-status';
+import { isProjectPipelineReviewStatusApproved } from '@/lib/project-pipeline/review-workflow';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 import { formatProjectPipelineSheetDate } from '@/lib/project-pipeline/due-date-emphasis';
 
@@ -283,11 +284,18 @@ export function buildReviewStatusChangeEmail(input: {
   const subject = `Review update: Job #${input.job.jobNumber} — ${client}`;
   const previous = getReviewStatusDisplayLabel(input.previousStatus);
   const next = getReviewStatusDisplayLabel(input.newStatus);
+  const approved = isProjectPipelineReviewStatusApproved(input.newStatus);
+  const sentToClientCta = approved
+    ? `<p style="margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:${BRAND.text}">
+      When the report is delivered to the client, open Job Pipeline and set <strong>Sent to Client = Yes</strong> on this job.
+    </p>`
+    : '';
 
   const bodyHtml = `
     <p style="margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:${BRAND.text}">
       Review status changed from <strong>${escapeHtml(previous)}</strong> to <strong>${escapeHtml(next)}</strong>.
     </p>
+    ${sentToClientCta}
     ${buildJobContextTable(input.job, input.actorDisplayName)}
   `;
 
@@ -295,7 +303,7 @@ export function buildReviewStatusChangeEmail(input: {
     subject,
     html: buildEmailShell({
       title: subject,
-      headline: 'Review status updated',
+      headline: approved ? 'Approved — mark Sent to Client' : 'Review status updated',
       bodyHtml,
       ctaLabel: 'Open Job Pipeline',
       ctaUrl: buildJobPipelineAdminUrl(input.activeJobsUrl),
@@ -453,4 +461,32 @@ export function buildDueDateOverdueReminderEmail(input: {
     lead: 'This project is past its due date and is not marked complete. Please finish the deliverable or update the due date and status.',
     activeJobsUrl: input.activeJobsUrl,
   });
+}
+
+export function buildSentToClientReminderEmail(input: {
+  job: ProjectPipelineJob;
+  activeJobsUrl?: string;
+}): { subject: string; html: string } {
+  const client = input.job.client?.trim() || 'Unknown client';
+  const subject = `Mark Sent to Client: Job #${input.job.jobNumber} — ${client}`;
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:${BRAND.text}">
+      This project was <strong>approved</strong> in review but <strong>Sent to Client</strong> is still not set to Yes.
+    </p>
+    <p style="margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:${BRAND.text}">
+      After you deliver the report, open Job Pipeline and set <strong>Sent to Client = Yes</strong> so the job can be marked complete.
+    </p>
+    ${buildDueDateReminderJobTable(input.job)}
+  `;
+
+  return {
+    subject,
+    html: buildEmailShell({
+      title: subject,
+      headline: 'Reminder: mark Sent to Client',
+      bodyHtml,
+      ctaLabel: 'Open Job Pipeline',
+      ctaUrl: buildJobPipelineAdminUrl(input.activeJobsUrl),
+    }),
+  };
 }

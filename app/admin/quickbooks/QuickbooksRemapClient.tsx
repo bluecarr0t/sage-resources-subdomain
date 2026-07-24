@@ -46,6 +46,9 @@ type StatusResponse = {
     docNumberPrefix: string;
     sourceItemName: string;
     targetItemName: string;
+    appraisalDescriptionMatch?: string;
+    appraisalDescriptionTargetItemName?: string;
+    rules?: Array<{ id: string; label: string; targetItemName: string }>;
   };
   error?: string;
 };
@@ -358,15 +361,20 @@ export default function QuickbooksRemapClient() {
               })}
             </li>
             <li>
-              {t('ruleSourceItem', {
-                name: status?.remapRules.sourceItemName ?? 'Appraisal Review',
+              {t('ruleDescriptionContains', {
+                match:
+                  status?.remapRules.appraisalDescriptionMatch ?? 'Appraisal',
+                target:
+                  status?.remapRules.appraisalDescriptionTargetItemName ??
+                  'Appraisal Services - Outdoor Resort',
               })}
             </li>
             <li>
-              {t('ruleTargetItem', {
-                name:
+              {t('ruleSourceItem', {
+                name: status?.remapRules.sourceItemName ?? 'Appraisal Review',
+                target:
                   status?.remapRules.targetItemName ??
-                  'Feasibility Study - Outdoor Report',
+                  'Feasibility Study - Outdoor Resort',
               })}
             </li>
           </ul>

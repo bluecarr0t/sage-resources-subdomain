@@ -41,8 +41,16 @@
       "schedule": "0 13 * * *"
     },
     {
+      "path": "/api/cron/pipeline-sent-to-client-reminders",
+      "schedule": "0 13 * * *"
+    },
+    {
       "path": "/api/cron/quickbooks-remap-invoices",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/quickbooks-remap-invoices-daily",
+      "schedule": "0 14 * * *"
     }
   ],
   "redirects": [

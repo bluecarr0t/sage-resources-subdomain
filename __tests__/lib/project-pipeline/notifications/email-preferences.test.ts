@@ -85,6 +85,7 @@ describe('getVisiblePipelineEmailPreferenceKeys', () => {
       'dueDateReminderUpcoming',
       'dueDateReminderDueToday',
       'dueDateReminderOverdue',
+      'sentToClientReminder',
     ]);
   });
 
@@ -103,6 +104,7 @@ describe('getVisiblePipelineEmailPreferenceKeys', () => {
       'dueDateReminderUpcoming',
       'dueDateReminderDueToday',
       'dueDateReminderOverdue',
+      'sentToClientReminder',
     ]);
   });
 

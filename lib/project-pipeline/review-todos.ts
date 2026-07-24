@@ -5,14 +5,17 @@ import type { ManagedUser } from '@/lib/auth-helpers';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 import {
   DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER,
+  normalizeProjectPipelineProjectStatus,
   type ProjectPipelineProjectStatus,
 } from '@/lib/project-pipeline/project-status';
 import {
+  isProjectPipelineReviewStatusApproved,
   isProjectPipelineReviewStatusChangesRequested,
   PROJECT_PIPELINE_SUBMIT_REVIEW_STATUS,
 } from '@/lib/project-pipeline/review-workflow';
 import { normalizeProjectPipelineReviewStatus } from '@/lib/project-pipeline/review-status';
 import { resolveProjectPipelineJobSegment } from '@/lib/project-pipeline/segment';
+import { isProjectPipelineSentToClientYes } from '@/lib/project-pipeline/sent-to-client';
 
 export function isProjectPipelineJobProjMgr(
   job: Pick<ProjectPipelineJob, 'projMgr'>,
@@ -52,6 +55,24 @@ export function isJobAwaitingAuthorResubmission(
   return isProjectPipelineReviewStatusChangesRequested(job.reviewStatus);
 }
 
+export function isJobAwaitingSentToClient(
+  job: Pick<
+    ProjectPipelineJob,
+    'reviewStatus' | 'sentToClient' | 'dateCompleted' | 'projectStatus'
+  >
+): boolean {
+  if (!isProjectPipelineReviewStatusApproved(job.reviewStatus)) return false;
+  if (isProjectPipelineSentToClientYes(job.sentToClient)) return false;
+  if (job.dateCompleted.trim()) return false;
+
+  const status = normalizeProjectPipelineProjectStatus(job.projectStatus);
+  if (status === 'Completed' || status === 'Cancelled' || status === 'On Hold') {
+    return false;
+  }
+
+  return true;
+}
+
 export function isProjectPipelineReviewTodoForUser(
   job: ProjectPipelineJob,
   input: {
@@ -64,6 +85,13 @@ export function isProjectPipelineReviewTodoForUser(
 
   if (
     isJobAwaitingAuthorResubmission(job) &&
+    isJobAuthoredByConsultant(job.appraiserConsultant, displayName ?? '')
+  ) {
+    return true;
+  }
+
+  if (
+    isJobAwaitingSentToClient(job) &&
     isJobAuthoredByConsultant(job.appraiserConsultant, displayName ?? '')
   ) {
     return true;

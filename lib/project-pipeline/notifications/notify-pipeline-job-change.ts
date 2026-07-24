@@ -45,6 +45,7 @@ import {
 } from '@/lib/project-pipeline/notifications/resolve-slack-recipients';
 import { schedulePipelineReviewCalendarEventsAsync } from '@/lib/project-pipeline/notifications/schedule-review-calendar-event';
 import {
+  isProjectPipelineReviewStatusApproved,
   isProjectPipelineReviewStatusChangesRequested,
   PROJECT_PIPELINE_SUBMIT_REVIEW_STATUS,
 } from '@/lib/project-pipeline/review-workflow';
@@ -584,14 +585,26 @@ export async function notifyPipelineJobChanges(
         slackPrefsMap
       );
 
+      const approved =
+        !submit &&
+        !resubmit &&
+        isProjectPipelineReviewStatusApproved(change.newValue);
       const headline = resubmit
         ? 'Resubmitted for review'
         : submit
           ? 'Submitted for review'
-          : `Review status: ${change.newValue || 'updated'}`;
-      const detailLines = input.reviewActionNote?.trim()
-        ? [`Note: ${input.reviewActionNote.trim()}`]
-        : undefined;
+          : approved
+            ? 'Approved — mark Sent to Client = Yes when delivered'
+            : `Review status: ${change.newValue || 'updated'}`;
+      const detailLines: string[] = [];
+      if (input.reviewActionNote?.trim()) {
+        detailLines.push(`Note: ${input.reviewActionNote.trim()}`);
+      }
+      if (approved) {
+        detailLines.push(
+          'When the report is delivered, set Sent to Client = Yes on the job.'
+        );
+      }
 
       sendPipelineSlackToRecipients(
         slackRecipients.map((recipient) => recipient.email),
@@ -601,7 +614,7 @@ export async function notifyPipelineJobChanges(
         client: input.savedJob.client,
         propertyLocation: input.savedJob.propertyLocation,
         headline,
-        detailLines,
+        detailLines: detailLines.length ? detailLines : undefined,
       });
 
       if (submit || resubmit) {

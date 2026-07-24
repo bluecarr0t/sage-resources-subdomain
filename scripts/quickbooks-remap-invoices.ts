@@ -6,14 +6,22 @@
  *   npx tsx scripts/quickbooks-remap-invoices.ts --dry-run
  *   npx tsx scripts/quickbooks-remap-invoices.ts --live
  *   npx tsx scripts/quickbooks-remap-invoices.ts --live --updated-since-hours=2
+ *   npx tsx scripts/quickbooks-remap-invoices.ts --dry-run --doc-number=INV-25-109A-01
+ *   npx tsx scripts/quickbooks-remap-invoices.ts --live --doc-number=INV-25-109A-01
  *
  * Requires QUICKBOOKS_CLIENT_ID/SECRET and a stored connection
  * (admin OAuth or QUICKBOOKS_REFRESH_TOKEN + QUICKBOOKS_REALM_ID).
  */
 
+import { config } from 'dotenv';
+
+config({ path: '.env.local' });
+
+import { qboFindInvoiceByDocNumber } from '../lib/quickbooks/client';
 import {
   isQuickbooksAppConfigured,
   loadQuickbooksConnection,
+  remapInvoiceById,
   remapMatchingInvoices,
 } from '../lib/quickbooks';
 
@@ -21,14 +29,17 @@ function parseArgs(argv: string[]) {
   const dryRun = !argv.includes('--live');
   const hoursArg = argv.find((arg) => arg.startsWith('--updated-since-hours='));
   const hours = hoursArg ? Number(hoursArg.split('=')[1]) : null;
+  const docArg = argv.find((arg) => arg.startsWith('--doc-number='));
+  const docNumber = docArg ? docArg.slice('--doc-number='.length).trim() : null;
   return {
     dryRun,
     updatedSinceHours: Number.isFinite(hours) && hours !== null && hours > 0 ? hours : null,
+    docNumber: docNumber || null,
   };
 }
 
 async function main() {
-  const { dryRun, updatedSinceHours } = parseArgs(process.argv.slice(2));
+  const { dryRun, updatedSinceHours, docNumber } = parseArgs(process.argv.slice(2));
 
   if (!isQuickbooksAppConfigured()) {
     throw new Error('Set QUICKBOOKS_CLIENT_ID and QUICKBOOKS_CLIENT_SECRET');
@@ -51,12 +62,33 @@ async function main() {
       {
         mode: dryRun ? 'dry-run' : 'live',
         realmId: connection.realmId,
+        docNumber,
         updatedSince: updatedSince?.toISOString() ?? null,
       },
       null,
       2
     )
   );
+
+  if (docNumber) {
+    const invoice = await qboFindInvoiceByDocNumber(docNumber);
+    if (!invoice?.Id) {
+      throw new Error(`Invoice not found for DocNumber "${docNumber}"`);
+    }
+
+    const result = await remapInvoiceById({
+      invoiceId: invoice.Id,
+      dryRun,
+      source: 'script',
+    });
+
+    console.log(JSON.stringify({ invoiceId: invoice.Id, result }, null, 2));
+
+    if (result.error) {
+      process.exitCode = 1;
+    }
+    return;
+  }
 
   const summary = await remapMatchingInvoices({
     dryRun,

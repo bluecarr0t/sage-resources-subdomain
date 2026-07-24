@@ -1,0 +1,116 @@
+{
+  "openTotal": 286,
+  "byStage": [
+    {
+      "stage": "Client Lead",
+      "count": 159
+    },
+    {
+      "stage": "Email Referral Lead",
+      "count": 2
+    },
+    {
+      "stage": "Intro Call Scheduled",
+      "count": 3
+    },
+    {
+      "stage": "Contract Sent to Client",
+      "count": 50
+    },
+    {
+      "stage": "Contract Sent-60 Day Follow Up",
+      "count": 51
+    },
+    {
+      "stage": "2nd Follow Up-Long Term",
+      "count": 10
+    },
+    {
+      "stage": "1 Year Follow Up",
+      "count": 8
+    },
+    {
+      "stage": "Contract Signed by Client",
+      "count": 0
+    },
+    {
+      "stage": "1st Payment Invoice Sent",
+      "count": 0
+    },
+    {
+      "stage": "Data Request Form Sent",
+      "count": 0
+    },
+    {
+      "stage": "Client Paid Invoice",
+      "count": 0
+    },
+    {
+      "stage": "Assign Author/Schedule Onboarding Call/Create Job Folder",
+      "count": 0
+    },
+    {
+      "stage": "Kick Off Call Scheduled",
+      "count": 0
+    },
+    {
+      "stage": "Report In Process",
+      "count": 0
+    },
+    {
+      "stage": "Mid Project Client Call",
+      "count": 0
+    },
+    {
+      "stage": "Review-Final Approval",
+      "count": 0
+    },
+    {
+      "stage": "Report Sent to Client",
+      "count": 0
+    },
+    {
+      "stage": "2nd Payment Invoice Sent",
+      "count": 0
+    },
+    {
+      "stage": "2nd Payment Invoice Paid",
+      "count": 0
+    },
+    {
+      "stage": "Optional Client Review Call",
+      "count": 0
+    },
+    {
+      "stage": "Final Project Follow Up - 6 months",
+      "count": 0
+    },
+    {
+      "stage": "Project Follow Up - 1 year - get quote for website",
+      "count": 0
+    },
+    {
+      "stage": "Project Follow Up - 2 year - feedback on operational & construction costs",
+      "count": 0
+    },
+    {
+      "stage": "Job Cancelled",
+      "count": 2
+    },
+    {
+      "stage": "Job on Hold",
+      "count": 1
+    }
+  ],
+  "rawCounts": {
+    "Intro Call Scheduled": 3,
+    "Contract Sent-60 Day Follow Up": 51,
+    "Contract Sent to Client": 50,
+    "Client Lead": 159,
+    "Email Referral Lead": 2,
+    "1 Year Follow Up": 8,
+    "Job Cancelled": 2,
+    "Job on Hold": 1,
+    "2nd Follow Up-Long Term": 10
+  }
+}

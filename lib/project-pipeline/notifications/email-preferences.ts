@@ -16,6 +16,7 @@ export const CONSULTANT_PIPELINE_EMAIL_PREFERENCE_KEYS = [
   'dueDateReminderUpcoming',
   'dueDateReminderDueToday',
   'dueDateReminderOverdue',
+  'sentToClientReminder',
 ] as const;
 
 export const PROJECT_MANAGER_PIPELINE_EMAIL_PREFERENCE_KEYS = [
@@ -64,6 +65,7 @@ export const DEFAULT_PIPELINE_EMAIL_PREFERENCES: PipelineEmailPreferences = {
   dueDateReminderUpcoming: true,
   dueDateReminderDueToday: true,
   dueDateReminderOverdue: true,
+  sentToClientReminder: true,
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

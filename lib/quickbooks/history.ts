@@ -46,8 +46,10 @@ export function resolveRemapHistoryAction(
   dryRun: boolean
 ): QuickbooksRemapHistoryAction | null {
   if (result.error) {
-    // Webhook probes of non-matching invoices — skip noisy history.
+    // Webhook probes of non-matching / intentionally skipped invoices — skip noisy history.
     if (result.error.includes('does not match INV-')) return null;
+    if (result.error.includes('Invoice is voided')) return null;
+    if (result.error.includes('All sales lines are already $0')) return null;
     return 'error';
   }
   if (result.updated) return 'updated';
@@ -79,9 +81,14 @@ export async function recordRemapHistoryEntries(input: {
         txn_date: result.txnDate,
         matched_line_ids: result.matchedLineIds,
         matched_descriptions: result.matchedDescriptions,
-        source_item_name: QBO_SOURCE_ITEM_NAME,
+        source_item_name:
+          result.appliedRules?.map((rule) => rule.ruleId).join(' | ') ||
+          QBO_SOURCE_ITEM_NAME,
         target_item_id: input.context.targetItemId ?? null,
-        target_item_name: input.context.targetItemName ?? QBO_TARGET_ITEM_NAME,
+        target_item_name:
+          result.appliedRules?.map((rule) => rule.targetItemName).join(' | ') ||
+          input.context.targetItemName ||
+          QBO_TARGET_ITEM_NAME,
         error_message: result.error ?? null,
         actor_user_id: input.context.actor?.userId ?? null,
         actor_email: input.context.actor?.email ?? null,

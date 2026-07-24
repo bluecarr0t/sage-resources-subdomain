@@ -4,8 +4,15 @@ export const QBO_REMAP_DOC_NUMBER_PREFIX = 'INV-';
 /** Source product/service name assigned by GHL → QBO sync. */
 export const QBO_SOURCE_ITEM_NAME = 'Appraisal Review';
 
-/** Target product/service name for matched invoice lines. */
-export const QBO_TARGET_ITEM_NAME = 'Feasibility Study - Outdoor Report';
+/** Target product/service for GHL "Appraisal Review" item lines (no Appraisal in description). */
+export const QBO_TARGET_ITEM_NAME = 'Feasibility Study - Outdoor Resort';
+
+/** Target when an INV- line description contains "Appraisal". */
+export const QBO_APPRAISAL_DESCRIPTION_TARGET_ITEM_NAME =
+  'Appraisal Services - Outdoor Resort';
+
+/** Case-insensitive substring matched against line Description. */
+export const QBO_APPRAISAL_DESCRIPTION_MATCH = 'Appraisal';
 
 export const QBO_OAUTH_SCOPES = 'com.intuit.quickbooks.accounting';
 

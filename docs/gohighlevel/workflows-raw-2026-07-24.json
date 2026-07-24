@@ -1,0 +1,335 @@
+[
+  {
+    "id": "dfc773f3-5eaa-4885-b722-1c6a525b7e53",
+    "name": "(1) Onboarding Call - Appointment Confirmation + Reminder",
+    "status": "draft",
+    "version": 4,
+    "createdAt": "2025-06-06T16:08:21.085Z",
+    "updatedAt": "2025-12-12T22:27:07.847Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "cb7a4cb6-75fa-4ab6-a28a-5bff809e06b1",
+    "name": "(5) Invoice \u2013 Payment 1 of 2 - Paid Notification - OLD",
+    "status": "draft",
+    "version": 28,
+    "createdAt": "2023-08-22T16:43:11.788Z",
+    "updatedAt": "2025-05-14T16:38:29.301Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "94738f5d-88d7-4da5-82ce-26ea93f868c2",
+    "name": "COE 2025 Form - Email Automations",
+    "status": "published",
+    "version": 11,
+    "createdAt": "2025-12-03T17:51:01.321Z",
+    "updatedAt": "2025-12-03T18:23:30.096Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "0bc42ea1-8e24-41c9-a13a-8146434ef82b",
+    "name": "CampEx 2024 Form - Email Automations",
+    "status": "published",
+    "version": 8,
+    "createdAt": "2024-11-18T18:48:43.287Z",
+    "updatedAt": "2025-11-04T22:33:15.427Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "323d8746-ff5e-4271-acf7-12b846ed46e2",
+    "name": "Campex 2024 Form Auto-Email Presentation\u00a0Deck",
+    "status": "published",
+    "version": 10,
+    "createdAt": "2024-11-14T17:55:01.447Z",
+    "updatedAt": "2025-11-04T22:33:22.879Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "873a4560-17ae-4a03-9a0b-77a01141f5a1",
+    "name": "Campground Solutions Summit West 2025 Form Auto-Email Market Report",
+    "status": "published",
+    "version": 17,
+    "createdAt": "2025-04-01T22:19:45.417Z",
+    "updatedAt": "2025-11-04T22:33:33.848Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "83d5e877-a22e-4dc5-a96d-ab7268f4a76e",
+    "name": "Contract Signed - Referral Email Reminder",
+    "status": "published",
+    "version": 6,
+    "createdAt": "2026-02-19T17:56:54.770Z",
+    "updatedAt": "2026-02-19T18:06:50.407Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "da67adb4-5495-47b3-acea-ebf81768c6f0",
+    "name": "Contract \u2013 Initial Info 1 YR Follow up If not Signed",
+    "status": "published",
+    "version": 3,
+    "createdAt": "2025-07-10T18:28:17.153Z",
+    "updatedAt": "2025-07-10T20:45:01.802Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "1eb16ce0-4439-4731-bbe4-45a46798088a",
+    "name": "Contract \u2013 Response from FU and send 2nd FU",
+    "status": "published",
+    "version": 4,
+    "createdAt": "2025-07-10T18:43:43.345Z",
+    "updatedAt": "2026-07-08T16:42:55.389Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "c9658794-2978-4ff1-ad07-3db845668b2a",
+    "name": "Contract \u2014 Follow up If not Signed",
+    "status": "published",
+    "version": 21,
+    "createdAt": "2024-02-21T17:31:20.335Z",
+    "updatedAt": "2026-06-24T20:04:38.871Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "e9f26738-b64c-48ff-9cfa-1ef4f74a9379",
+    "name": "Contract \u2014 Initial Info LT Follow up If not Signed",
+    "status": "published",
+    "version": 3,
+    "createdAt": "2024-12-04T19:06:16.277Z",
+    "updatedAt": "2026-02-19T18:07:21.203Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "344d4a93-35d4-40ee-8d15-4ccb311b31de",
+    "name": "Contract \u2014 Signed - Confirmation Email",
+    "status": "draft",
+    "version": 23,
+    "createdAt": "2024-07-05T16:45:55.943Z",
+    "updatedAt": "2026-02-19T23:28:20.778Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "bdb2002c-3056-47ef-ad8c-aa916e295a56",
+    "name": "Contract \u2014 Signed - Update Opportunity & Contact",
+    "status": "published",
+    "version": 14,
+    "createdAt": "2024-12-03T21:00:52.411Z",
+    "updatedAt": "2026-02-20T00:18:16.179Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "7ff92da8-ae0e-46eb-a780-a34faac62e62",
+    "name": "Data Form \u2014 Submitted",
+    "status": "published",
+    "version": 32,
+    "createdAt": "2023-09-19T14:54:48.490Z",
+    "updatedAt": "2026-03-09T17:31:12.907Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "41c1a8da-a5d5-47ea-a18c-fc062db67ddd",
+    "name": "Follow Up Client Data Form",
+    "status": "published",
+    "version": 11,
+    "createdAt": "2025-05-14T17:05:00.622Z",
+    "updatedAt": "2026-02-19T18:08:15.021Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "a0cf2153-ec34-4211-9865-a278a40400ef",
+    "name": "Glamping Show 2024 Form Auto-Email Presentation\u00a0 Deck",
+    "status": "published",
+    "version": 19,
+    "createdAt": "2024-09-20T21:44:23.731Z",
+    "updatedAt": "2025-11-04T22:33:28.377Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "211847a9-41e4-4f3e-ba2d-f874d07445a3",
+    "name": "Google Contact - Add 'Email Referral' Tag Trigger",
+    "status": "published",
+    "version": 4,
+    "createdAt": "2026-04-09T17:12:23.552Z",
+    "updatedAt": "2026-04-09T17:19:36.594Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "43fbe425-4b1c-4528-a323-b808617076e0",
+    "name": "Google Contacts Sync",
+    "status": "published",
+    "version": 12,
+    "createdAt": "2026-04-07T20:38:39.865Z",
+    "updatedAt": "2026-04-09T17:11:34.894Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "dd125847-7c07-42c5-b0c3-61623699e590",
+    "name": "Invoice \u2014 1st Invoice Sent to Client",
+    "status": "published",
+    "version": 19,
+    "createdAt": "2024-03-20T16:36:01.559Z",
+    "updatedAt": "2026-02-19T23:40:10.137Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "23092a85-c0ab-403e-835d-0bcf992b6fe9",
+    "name": "Invoice \u2014 Once Sent, Automatically Add Job Number to Contact",
+    "status": "published",
+    "version": 12,
+    "createdAt": "2024-12-06T17:30:52.054Z",
+    "updatedAt": "2026-05-06T20:28:52.847Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "77b60e61-4b6f-4879-83a1-6226774f9d03",
+    "name": "Invoice \u2014 Payment 1 Sent: Send Data Form",
+    "status": "published",
+    "version": 5,
+    "createdAt": "2026-06-29T18:04:22.817Z",
+    "updatedAt": "2026-06-30T21:00:48.686Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "8f4fa569-846f-4a05-8e65-c54066a6c776",
+    "name": "Invoice \u2014 Payment 1 of 2 Completed: Update Contact, etc.",
+    "status": "published",
+    "version": 66,
+    "createdAt": "2024-09-06T19:21:36.822Z",
+    "updatedAt": "2026-06-29T18:16:50.178Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "7273d4ac-299e-4a95-961e-f77f2cfd6b2a",
+    "name": "Invoice \u2014 Payment 2 of 2 - Payment Completed Internal Notification",
+    "status": "published",
+    "version": 16,
+    "createdAt": "2023-09-22T20:30:27.291Z",
+    "updatedAt": "2026-02-19T23:40:26.203Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "0ec3fe0f-aadc-4076-8fc2-5a39c015f0c6",
+    "name": "Invoice \u2014 Payment 2 of 2 - Send 2nd Invoice for Payment",
+    "status": "published",
+    "version": 18,
+    "createdAt": "2023-10-27T20:50:30.277Z",
+    "updatedAt": "2026-02-19T23:40:32.903Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "4146529f-bdc2-4e0a-a501-d54e74696157",
+    "name": "Marketing \u2013 Glamping Show 2025 Form Auto-Email Presentation\u00a0 Deck",
+    "status": "published",
+    "version": 5,
+    "createdAt": "2025-09-30T13:23:18.910Z",
+    "updatedAt": "2025-10-01T16:29:22.632Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "84fe8093-4b5b-433c-a9a1-2cb8cab02f07",
+    "name": "Marketing \u2013 The Glamping Show 2025 Form - Email Automations",
+    "status": "published",
+    "version": 8,
+    "createdAt": "2025-09-30T13:23:35.068Z",
+    "updatedAt": "2025-10-01T18:41:49.009Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "2017c360-d9ff-4aea-90d8-b526ea55fad7",
+    "name": "Marketing \u2014 Glamping Report Delivery",
+    "status": "published",
+    "version": 9,
+    "createdAt": "2023-08-30T23:15:16.464Z",
+    "updatedAt": "2026-02-19T18:07:48.750Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "a1e0aa5a-0c3c-4ce8-8bae-6287b31c78da",
+    "name": "Marketing \u2014 Newsletter Signup: Add Tag to Contact",
+    "status": "published",
+    "version": 6,
+    "createdAt": "2024-09-10T20:01:17.272Z",
+    "updatedAt": "2026-02-19T18:07:55.915Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "78d0d5c9-359a-42ed-9d82-83d9c1d57bf5",
+    "name": "OHCE 2025 Form - Email Automations",
+    "status": "published",
+    "version": 19,
+    "createdAt": "2025-11-04T22:33:01.117Z",
+    "updatedAt": "2025-11-08T00:09:07.259Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "8352b40d-593d-4765-a81f-2f21091d4147",
+    "name": "Project Complete \u2014 Author to Author Email",
+    "status": "published",
+    "version": 6,
+    "createdAt": "2025-01-20T22:49:53.259Z",
+    "updatedAt": "2026-02-19T18:08:23.553Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "6f2b8987-647d-4113-954d-195c5f9eaa7d",
+    "name": "Project Complete \u2014 Send Satisfaction Survey",
+    "status": "draft",
+    "version": 8,
+    "createdAt": "2025-01-20T18:26:14.798Z",
+    "updatedAt": "2026-02-19T18:08:32.427Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "798859d4-5c50-443a-8d78-e800d6f866d2",
+    "name": "Review Process: Move Opportunity to 'Report Sent to Client'",
+    "status": "draft",
+    "version": 2,
+    "createdAt": "2026-02-11T20:01:50.080Z",
+    "updatedAt": "2026-02-11T20:06:41.053Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "014313ba-4ed2-44ee-9567-debcbdbad15e",
+    "name": "Sales \u2013 Onboarding Call - Appointment Confirmation + Reminder",
+    "status": "published",
+    "version": 6,
+    "createdAt": "2025-12-17T20:41:28.611Z",
+    "updatedAt": "2026-01-26T19:10:50.354Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "ea3bcf31-fe9c-491e-82a3-96bcfde0f549",
+    "name": "Sales \u2014 Intro Call - Appointment Confirmation + Reminder",
+    "status": "published",
+    "version": 36,
+    "createdAt": "2023-07-28T20:08:12.274Z",
+    "updatedAt": "2026-02-19T18:08:42.947Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "92ae578b-bec2-4362-bf67-04c7970eaa7e",
+    "name": "Sales \u2014 Kristin 1-on-1 Call - Appointment Confirmation + Reminder",
+    "status": "published",
+    "version": 8,
+    "createdAt": "2023-09-13T19:24:45.010Z",
+    "updatedAt": "2026-02-19T18:08:50.000Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "85c604a1-740e-498d-9a5c-0da4e7830c60",
+    "name": "Sales \u2014 Shari Consulting Call - Appointment Confirmation + Reminder",
+    "status": "published",
+    "version": 10,
+    "createdAt": "2023-08-25T22:30:45.994Z",
+    "updatedAt": "2026-02-19T18:08:57.383Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  },
+  {
+    "id": "47a6f370-f368-45b9-9d74-6287539f1529",
+    "name": "The Glamping Show 2024 Form - Email Automations",
+    "status": "published",
+    "version": 8,
+    "createdAt": "2024-10-21T21:33:00.035Z",
+    "updatedAt": "2025-11-04T22:33:39.795Z",
+    "locationId": "JCHQyFysCX49WT31jkM1"
+  }
+]

@@ -2,6 +2,10 @@
   "mcpServers": {
     "Dropbox Dash MCP": {
       "url": "https://mcp.dropbox.com/mcp"
+    },
+    "zapier": {
+      "type": "http",
+      "url": "https://mcp.zapier.com/api/v1/connect"
     }
   }
 }

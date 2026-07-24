@@ -929,6 +929,10 @@
           "label": "Past due reminders",
           "description": "After the due date until the project is complete, for projects you are assigned to as a consultant."
         },
+        "sentToClientReminder": {
+          "label": "Sent to Client reminders",
+          "description": "Daily reminders after review approval until you mark Sent to Client = Yes on projects you are assigned to as a consultant."
+        },
         "pmReviewStatusChange": {
           "label": "Review status updates",
           "description": "When review status changes on projects you manage as project manager."
@@ -978,6 +982,9 @@
         },
         "dueDateReminderOverdue": {
           "description": "Slack DM after the due date until the project is complete, for projects you are assigned to as a consultant."
+        },
+        "sentToClientReminder": {
+          "description": "Slack DM after review approval until you mark Sent to Client = Yes on projects you are assigned to as a consultant."
         },
         "pmDueDateChange": {
           "description": "Slack DM when the due date changes on projects you manage as project manager."
@@ -1222,7 +1229,7 @@
     },
     "quickbooks": {
       "title": "QuickBooks invoice remapper",
-      "subtitle": "Update GHL-synced invoices whose DocNumber starts with INV- and include the Appraisal Review product/service.",
+      "subtitle": "Update GHL-synced INV- invoices: remap Appraisal Review lines and lines whose description contains Appraisal.",
       "connectionHeading": "Connection",
       "connectionHelp": "Connect the Sage Outdoor Advisory QuickBooks Online company. Requires an Intuit developer app and Admin role.",
       "loadingStatus": "Loading connection status…",
@@ -1240,9 +1247,9 @@
       "oauthError": "QuickBooks OAuth failed.",
       "rulesHeading": "Remap rules",
       "ruleDocPrefix": "Invoice number starts with {prefix}",
-      "ruleSourceItem": "Line product/service or description is “{name}”",
-      "ruleTargetItem": "Replace with “{name}”",
-      "rulesNote": "The catalog Item named Appraisal Review is left unchanged so non-INV- invoices are unaffected. A 15-minute cron and optional Intuit webhook keep remapping new GHL syncs.",
+      "ruleSourceItem": "Line product/service or description is “{name}” → “{target}”",
+      "ruleDescriptionContains": "Line description contains “{match}” → “{target}”",
+      "rulesNote": "Catalog Items are left unchanged; only INV- invoice line Product/Service refs are updated. A 15-minute cron covers recent syncs, a daily full scan catches anything missed, and an optional Intuit webhook remaps on create/update.",
       "actionsHeading": "Run remapper",
       "actionsHelp": "Dry run lists matches only. Live run updates matching invoice lines in QuickBooks.",
       "dryRun": "Dry run",

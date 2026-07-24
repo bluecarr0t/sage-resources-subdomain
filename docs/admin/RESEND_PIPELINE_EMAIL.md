@@ -27,6 +27,7 @@ Set in **Vercel → Project → Environment Variables** (server-only — no `NEX
 | `RESEND_REPLY_TO` | No | Reply-To header (recommended: real ops inbox) |
 | `PIPELINE_EMAIL_ENABLED` | Yes (prod) | Must be `true` to send; use `false` locally |
 | `PIPELINE_DUE_DATE_REMINDERS_ENABLED` | No | Must be `true` to run scheduled due-date reminders (off by default) |
+| `PIPELINE_SENT_TO_CLIENT_REMINDERS_ENABLED` | No | Must be `true` to run scheduled Sent to Client reminders (off by default) |
 | `SITE_URL` | No | Deep link base; defaults to `https://resources.sageoutdooradvisory.com` |
 
 Local development: leave `RESEND_API_KEY` unset or set `PIPELINE_EMAIL_ENABLED=false` so saves never send email.
@@ -36,7 +37,7 @@ Local development: leave `RESEND_API_KEY` unset or set `PIPELINE_EMAIL_ENABLED=f
 Emails fire **after a successful job save** when:
 
 1. **Submit for review** / **Resubmit** (`POST /api/admin/project-pipeline/jobs/review-action`) → **project manager** (`projMgr`) with the author's note in the body; optional **Google Calendar** 30-minute block on the PM's primary calendar (next business day at 9:00 AM) when `PIPELINE_CALENDAR_ENABLED=true` — see [PIPELINE_REVIEW_CALENDAR.md](./PIPELINE_REVIEW_CALENDAR.md)
-2. **Review status** changes on save (`PUT /api/admin/project-pipeline/jobs` or review-action) → consultant or PM per routing rules
+2. **Review status** changes on save (`PUT /api/admin/project-pipeline/jobs` or review-action) → consultant or PM per routing rules. When status becomes an **Approved** variant, the consultant email/Slack DM includes a CTA to set **Sent to Client = Yes** after delivery.
 3. **Due date** changes → assigned **Consultant** and/or **Project Manager**
 
 **Recipients:** resolved via `managed_users` + name aliases. The actor is excluded.
@@ -57,16 +58,28 @@ Daily cron: `GET/POST /api/cron/pipeline-due-date-reminders` (Vercel schedule `0
 
 Skipped for Completed, Cancelled, On Hold, missing/invalid due dates, and jobs with a completion date. Consultant + PM receive emails per `/admin/account` reminder toggles.
 
+## Scheduled Sent to Client reminders (opt-in)
+
+Daily cron: `GET/POST /api/cron/pipeline-sent-to-client-reminders` (same `0 13 * * *` schedule).
+
+**Disabled by default.** Set `PIPELINE_SENT_TO_CLIENT_REMINDERS_ENABLED=true` in Vercel when ready. Also requires email and/or Slack enabled, plus migration `scripts/migrations/add-project-pipeline-sent-to-client-reminder-sent-2026-07-24.sql`.
+
+| Reminder | When |
+|----------|------|
+| Mark Sent to Client | Next business day after review approval, then every business day until Sent to Client = Yes |
+
+Recipients: **assigned consultant only**. Skipped when Sent to Client is already Yes, or project status is Completed / Cancelled / On Hold. Deduped once per job per ET calendar day.
+
 ## User notification preferences
 
-Each managed user can opt out of specific Job Pipeline **email** types on **`/admin/account`** (click your profile in the sidebar footer). Preferences are stored on `managed_users.pipeline_email_preferences` as JSON.
+Each managed user can opt out of specific Job Pipeline **email** and **Slack** types on **`/admin/account`** (click your profile in the sidebar footer). Preferences are stored on `managed_users.pipeline_email_preferences` / `pipeline_slack_preferences` as JSON.
 
 **Project Manager** vs **Consultant** toggles depend on `managed_users.is_project_manager` (set on **`/admin/users`**):
 
 | `is_project_manager` | Account page shows |
 |----------------------|-------------------|
-| `false` | Consultant emails only (`reviewStatusChange`, `dueDateChange`) |
-| `true` | Project Manager + Consultant emails (all four keys) |
+| `false` | Consultant emails only |
+| `true` | Project Manager + Consultant emails |
 
 A user marked as Project Manager can still be assigned as a consultant on jobs and receives both sets of notifications when applicable.
 
@@ -76,8 +89,9 @@ A user marked as Project Manager can still be assigned as a consultant on jobs a
 | `resubmitForReview` | Resubmit for review (to project manager) |
 | `reviewStatusChange` | Review status updates (Consultant or Project Manager) |
 | `dueDateChange` | Due date changes (Consultant or Project Manager) |
+| `sentToClientReminder` | Daily Sent to Client reminders (consultant) |
 
-Defaults are **all enabled** (opt-out). Slack DMs are **not** gated by these toggles.
+Defaults are **all enabled** (opt-out).
 
 API:
 
@@ -86,14 +100,14 @@ API:
 
 ## Slack DMs (optional)
 
-Set `SLACK_BOT_TOKEN` and `PIPELINE_SLACK_ENABLED=true`. Uses `users.lookupByEmail` for the same recipients as email. Job `authorSlackUsername` is stored for sheet parity; Slack delivery uses managed-user emails.
+Set `SLACK_BOT_TOKEN` and `PIPELINE_SLACK_ENABLED=true`. Uses `users.lookupByEmail` for the same recipients as email. Job `authorSlackUsername` is stored for sheet parity; Slack delivery uses managed-user emails. Sent to Client reminders also send Slack DMs when enabled.
 
 ## Manual QA checklist
 
 1. Set `RESEND_API_KEY` and `PIPELINE_EMAIL_ENABLED=true` in a preview/staging deployment.
 2. Open **Job Pipeline** (`/admin/job-pipeline`) as an admin (`pipeline_view_all` or admin role).
 3. Pick a job assigned to a consultant with a `managed_users` row (e.g. Luke Marran).
-4. Change **Review status** → save → consultant inbox receives “Review update” email.
+4. Change **Review status** → Approved → consultant inbox receives “Review update” email with Sent to Client CTA.
 5. Change **Due date** → save → Consultant and/or Project Manager receive “Due date updated” email.
 6. Save a change as the consultant themselves → they should **not** receive their own notification.
 7. Unset `RESEND_API_KEY` locally → save still returns 200.
@@ -117,6 +131,8 @@ Requires `RESEND_API_KEY` and `PIPELINE_EMAIL_ENABLED=true`. Subjects are prefix
 | `lib/project-pipeline/notifications/detect-job-changes.ts` | Diff previous vs saved job |
 | `lib/project-pipeline/notifications/resolve-recipients.ts` | Consultant → email lookup |
 | `lib/project-pipeline/notifications/notify-pipeline-job-change.ts` | Orchestrator + preference gating |
+| `lib/project-pipeline/sent-to-client-reminders/` | Scheduled Sent to Client reminders |
+| `app/api/cron/pipeline-sent-to-client-reminders/route.ts` | Cron entrypoint |
 | `app/api/admin/account/route.ts` | Account profile API |
 | `app/api/admin/account/notifications/route.ts` | Preference update API |
 | `app/admin/account/page.tsx` | Account settings UI |
@@ -125,7 +141,5 @@ Requires `RESEND_API_KEY` and `PIPELINE_EMAIL_ENABLED=true`. Subjects are prefix
 
 ## Future extensions
 
-- Sent to client, admin flags, cancelled status
+- Admin flags, cancelled status notifications
 - Sheet-sync–driven changes (cron)
-- Daily due-date reminder cron
-- Slack DM preferences

@@ -5,7 +5,10 @@ import {
   getQuickbooksEnvironment,
   isQuickbooksAppConfigured,
   loadQuickbooksConnection,
+  QBO_APPRAISAL_DESCRIPTION_MATCH,
+  QBO_APPRAISAL_DESCRIPTION_TARGET_ITEM_NAME,
   QBO_REMAP_DOC_NUMBER_PREFIX,
+  QBO_REMAP_RULES,
   QBO_SOURCE_ITEM_NAME,
   QBO_TARGET_ITEM_NAME,
 } from '@/lib/quickbooks';
@@ -35,6 +38,13 @@ export const GET = withAdminAuth(async () => {
       docNumberPrefix: QBO_REMAP_DOC_NUMBER_PREFIX,
       sourceItemName: QBO_SOURCE_ITEM_NAME,
       targetItemName: QBO_TARGET_ITEM_NAME,
+      appraisalDescriptionMatch: QBO_APPRAISAL_DESCRIPTION_MATCH,
+      appraisalDescriptionTargetItemName: QBO_APPRAISAL_DESCRIPTION_TARGET_ITEM_NAME,
+      rules: QBO_REMAP_RULES.map((rule) => ({
+        id: rule.id,
+        label: rule.label,
+        targetItemName: rule.targetItemName,
+      })),
     },
   });
 }, { requireRole: 'admin' });
