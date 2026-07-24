@@ -237,12 +237,12 @@ export function GlampingMarketAccessGate({
         ref={panelRef}
         className="relative z-10 w-full max-w-md border border-sage-200/90 bg-white/95 p-6 shadow-lg sm:max-w-lg sm:p-8"
       >
-        <h1
+        <h2
           id="gate-dialog-title"
           className={`${EDITORIAL_H1_CLASS} sm:whitespace-nowrap sm:tracking-[0.22em]`}
         >
           {title}
-        </h1>
+        </h2>
 
         {step === 'form' ? (
           <>

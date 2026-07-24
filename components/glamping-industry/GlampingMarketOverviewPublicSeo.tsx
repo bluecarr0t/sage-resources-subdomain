@@ -27,20 +27,22 @@ export function GlampingMarketOverviewPublicSeo({ variant = 'overview' }: Props)
       />
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-12 sm:py-16">
         <p className="font-[Georgia] text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500">
-          Sage market research
+          Sage market research · 2026
         </p>
         <h1
           id="glamping-market-public-seo-heading"
           className="mt-3 font-[Georgia] text-2xl font-medium tracking-tight text-neutral-900 sm:text-3xl"
         >
-          {isBrands ? 'Top glamping brands in the United States' : 'Glamping market overview: US & Canada'}
+          {isBrands
+            ? 'Top glamping brands in the US: 2026 rankings'
+            : 'Glamping market data 2026: US & Canada'}
         </h1>
         <p className="speakable-answer mt-4 max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base">
           {isBrands ? (
             <>
               Compare the largest multi-property glamping operators in the United States by published
-              location count, glamping units, and average retail nightly rates. Rankings use Sage
-              research on private commercial glamping, the same database that powers our{' '}
+              location count, glamping units, and average retail nightly rates. Live 2026 rankings use
+              Sage research on private commercial glamping—the same database that powers our{' '}
               <Link href="/en/map" className={EDITORIAL_LINK_CLASS}>
                 interactive property map
               </Link>
@@ -48,10 +50,11 @@ export function GlampingMarketOverviewPublicSeo({ variant = 'overview' }: Props)
             </>
           ) : (
             <>
-              Benchmark private commercial glamping supply, unit inventory, and average retail daily
-              rates (ARDR) across the United States and Canada. Sage aggregates published research into
-              property totals, unit-type mix, state and province rankings, and interactive US and
-              Canada maps, scoped to {GLAMPING_MARKET_SCOPE_SHORT_LABEL.toLowerCase()} operators only.
+              Live glamping market data for private commercial operators across the United States and
+              Canada: property counts, unit inventory, average retail daily rates (ARDR), unit-type mix,
+              and state or province rankings. Sage aggregates published research into market-level
+              totals and maps, scoped to {GLAMPING_MARKET_SCOPE_SHORT_LABEL.toLowerCase()} operators
+              only—updated on a rolling basis for 2026.
             </>
           )}
         </p>

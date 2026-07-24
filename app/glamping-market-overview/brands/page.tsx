@@ -55,7 +55,7 @@ export default async function BrandOverviewPage() {
           ← Glamping Market Overview
         </Link>
         <h1 className="mt-6 font-[Georgia] text-sm font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg">
-          Top Glamping Brands
+          Top Glamping Brands 2026
         </h1>
 
         {result.ok ? (
@@ -65,7 +65,7 @@ export default async function BrandOverviewPage() {
         ) : null}
 
         <p className="mt-6 max-w-xl text-sm font-light leading-relaxed text-neutral-600">
-          Largest multi-property US glamping operators in Sage research. Open, privately operated
+          Largest multi-property US glamping operators in Sage 2026 research. Open, privately operated
           locations only; portfolio totals include sub-brands.
         </p>
 

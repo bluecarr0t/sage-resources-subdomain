@@ -13,8 +13,11 @@ export const GLAMPING_MARKET_OVERVIEW_OG_IMAGE = {
   url: 'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg',
   width: 1200,
   height: 630,
-  alt: 'Glamping market overview: US and Canada private commercial glamping metrics by Sage Outdoor Advisory',
+  alt: '2026 glamping market data: US and Canada private commercial supply, rates, and brand rankings by Sage Outdoor Advisory',
 } as const;
+
+/** Calendar year surfaced in titles/snippets for SERP freshness vs dated blog posts. */
+export const GLAMPING_MARKET_OVERVIEW_SEO_YEAR = 2026;
 
 export type GlampingMarketOverviewSeoVariant = 'overview' | 'brands';
 
@@ -28,21 +31,34 @@ export function glampingMarketOverviewPathForVariant(
 }
 
 export const GLAMPING_MARKET_OVERVIEW_KEYWORDS = [
-  'glamping market overview',
+  'glamping data',
   'glamping market data',
+  'glamping market data 2026',
+  'glamping statistics',
+  'glamping industry report',
+  'glamping market size',
+  'glamping market overview',
   'glamping industry statistics',
   'glamping ARDR',
   'average retail daily rate glamping',
   'glamping supply data',
   'US glamping market',
   'Canada glamping market',
+  'North American glamping data',
   'glamping property count',
   'outdoor hospitality market research',
   'glamping feasibility data',
   'glamping brand rankings',
+  'top glamping brands',
+  'largest glamping companies',
 ] as const;
 
 export const GLAMPING_MARKET_OVERVIEW_FAQS: FAQItem[] = [
+  {
+    question: 'Where can I find current glamping market data for 2026?',
+    answer:
+      'Sage Outdoor Advisory’s Glamping Market Overview is a live 2026 research dashboard for private commercial glamping in the United States and Canada. It covers property counts, unit inventory, average retail daily rates (ARDR), unit-type mix, and state or province rankings—updated on a rolling basis, not a one-time annual PDF.',
+  },
   {
     question: 'What is the Sage Glamping Market Overview?',
     answer:
@@ -61,7 +77,7 @@ export const GLAMPING_MARKET_OVERVIEW_FAQS: FAQItem[] = [
   {
     question: 'How often is the glamping market data updated?',
     answer:
-      'Sage refreshes the Glamping Market Overview on a rolling basis as new properties are researched and published in the Sage database. Each view shows a “Last updated” date so you know how current the snapshot is.',
+      'Sage refreshes the Glamping Market Overview on a rolling basis as new properties are researched and published in the Sage database. Each view shows a “Last updated” date so you know how current the 2026 snapshot is—unlike static annual trend posts.',
   },
   {
     question: 'Who uses Sage glamping market data?',
@@ -79,7 +95,7 @@ export const GLAMPING_MARKET_BRANDS_FAQS: FAQItem[] = [
   {
     question: 'What is the Top Glamping Brands ranking?',
     answer:
-      'The Top Glamping Brands page ranks the largest multi-property glamping operators in the United States by published Glamping property count. Each row shows properties, glamping units, and average retail nightly rate where rates are published. Portfolio brands roll up sub-brand locations.',
+      'The Top Glamping Brands page ranks the largest multi-property glamping operators in the United States by published Glamping property count. Each row shows properties, glamping units, and average retail nightly rate where rates are published. Portfolio brands roll up sub-brand locations. Rankings refresh with Sage’s 2026 market research.',
   },
   {
     question: 'How does Sage define a glamping brand for this ranking?',
@@ -108,15 +124,14 @@ export function buildGlampingMarketOverviewMetadata(
   const canonicalUrl = `${GLAMPING_MARKET_OVERVIEW_BASE_URL}${path}`;
 
   if (variant === 'brands') {
-    const title = 'Top Glamping Brands in the US | Rankings & ARDR | Sage';
-    const description =
-      'Rank the largest US glamping brands by property count, glamping units, and average retail nightly rates. Sage research for developers, investors, and lenders. Free access with email sign-in.';
+    const title = `Top Glamping Brands ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} | US Rankings & Rates | Sage`;
+    const description = `Compare the largest US glamping brands by property count, units, and average retail rates. Live ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} Sage market data for developers and investors—free email access.`;
     return {
       title,
       description,
-      keywords: [...GLAMPING_MARKET_OVERVIEW_KEYWORDS, 'top glamping brands', 'largest glamping companies'],
+      keywords: [...GLAMPING_MARKET_OVERVIEW_KEYWORDS],
       openGraph: {
-        title: 'Top Glamping Brands | Sage Outdoor Advisory',
+        title: `Top Glamping Brands ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} | Sage Outdoor Advisory`,
         description,
         url: canonicalUrl,
         siteName: 'Sage Outdoor Advisory',
@@ -125,9 +140,8 @@ export function buildGlampingMarketOverviewMetadata(
       },
       twitter: {
         card: 'summary_large_image',
-        title: 'Top Glamping Brands in the US',
-        description:
-          'US glamping brand rankings by property count, units, and avg. retail daily rate (ARDR). Sage Outdoor Advisory market research.',
+        title: `Top Glamping Brands ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} | US Rankings`,
+        description: `US glamping brand rankings by property count, units, and avg. retail daily rate (ARDR). Live ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} Sage market data.`,
         images: [GLAMPING_MARKET_OVERVIEW_OG_IMAGE.url],
       },
       alternates: {
@@ -142,20 +156,22 @@ export function buildGlampingMarketOverviewMetadata(
           follow: true,
           'max-image-preview': 'large',
           'max-snippet': -1,
+          'max-video-preview': -1,
         },
       },
     };
   }
 
-  const title = 'Glamping Market Overview | US & Canada Supply, ARDR & Unit Data | Sage';
-  const description =
-    'Research-grade glamping market snapshot for the US and Canada: property counts, unit inventory, mean and median avg. retail daily rate (ARDR), top unit types, and state maps. Private commercial glamping only. Free access with email sign-in.';
+  // Lead with "Glamping Market Data YYYY" to match high-intent SERP queries (e.g. "glamping data")
+  // and outrank dated annual blog posts that still hold positions for those terms.
+  const title = `Glamping Market Data ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} | US & Canada Supply & Rates | Sage`;
+  const description = `Live ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} glamping market data for the US & Canada: property counts, unit inventory, average retail daily rates (ARDR), unit-type mix, and state maps. Free email access.`;
   return {
     title,
     description,
     keywords: [...GLAMPING_MARKET_OVERVIEW_KEYWORDS],
     openGraph: {
-      title: 'Glamping Market Overview | Sage Outdoor Advisory',
+      title: `Glamping Market Data ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} | Sage Outdoor Advisory`,
       description,
       url: canonicalUrl,
       siteName: 'Sage Outdoor Advisory',
@@ -164,9 +180,8 @@ export function buildGlampingMarketOverviewMetadata(
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Glamping Market Overview: US & Canada',
-      description:
-        'Glamping supply, ARDR benchmarks, and geographic rankings from Sage Outdoor Advisory. Sign in free to unlock full metrics.',
+      title: `Glamping Market Data ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR}: US & Canada`,
+      description: `Live glamping supply, ARDR benchmarks, and geographic rankings from Sage Outdoor Advisory. Sign in free to unlock ${GLAMPING_MARKET_OVERVIEW_SEO_YEAR} metrics.`,
       images: [GLAMPING_MARKET_OVERVIEW_OG_IMAGE.url],
     },
     alternates: {
@@ -181,6 +196,7 @@ export function buildGlampingMarketOverviewMetadata(
         follow: true,
         'max-image-preview': 'large',
         'max-snippet': -1,
+        'max-video-preview': -1,
       },
     },
   };
@@ -192,12 +208,13 @@ export function generateGlampingMarketOverviewWebPageSchema(
   const path = glampingMarketOverviewPathForVariant(variant);
   const url = `${GLAMPING_MARKET_OVERVIEW_BASE_URL}${path}`;
   const isBrands = variant === 'brands';
+  const year = GLAMPING_MARKET_OVERVIEW_SEO_YEAR;
   const name = isBrands
-    ? 'Top Glamping Brands: United States Rankings'
-    : 'Glamping Market Overview: US & Canada';
+    ? `Top Glamping Brands ${year}: United States Rankings`
+    : `Glamping Market Data ${year}: US & Canada`;
   const description = isBrands
-    ? 'Rankings of the largest United States glamping brands by published property count, glamping units, and average retail nightly rates from Sage Outdoor Advisory research.'
-    : 'Aggregated glamping market metrics for private commercial operators in the United States and Canada, including property counts, unit inventory, avg. retail daily rate (ARDR) benchmarks, and geographic breakdowns.';
+    ? `Live ${year} rankings of the largest United States glamping brands by published property count, glamping units, and average retail nightly rates from Sage Outdoor Advisory research.`
+    : `Live ${year} glamping market data for private commercial operators in the United States and Canada, including property counts, unit inventory, avg. retail daily rate (ARDR) benchmarks, and geographic breakdowns.`;
 
   return {
     '@context': 'https://schema.org',
@@ -206,6 +223,7 @@ export function generateGlampingMarketOverviewWebPageSchema(
     description,
     url,
     inLanguage: 'en-US',
+    dateModified: `${year}-01-01`,
     isAccessibleForFree: false,
     isPartOf: {
       '@type': 'WebSite',
@@ -228,9 +246,9 @@ export function generateGlampingMarketOverviewWebPageSchema(
     },
     about: {
       '@type': 'Thing',
-      name: 'Glamping market intelligence',
+      name: 'Glamping market data',
       description:
-        'Market-level data on glamping supply, rates, and geography for outdoor hospitality research.',
+        'Market-level data on glamping supply, rates, brands, and geography for outdoor hospitality research.',
     },
     spatialCoverage: [
       { '@type': 'Country', name: 'United States' },
@@ -246,15 +264,17 @@ export function generateGlampingMarketOverviewDatasetSchema(
   const url = `${GLAMPING_MARKET_OVERVIEW_BASE_URL}${path}`;
   const isBrands = variant === 'brands';
 
+  const year = GLAMPING_MARKET_OVERVIEW_SEO_YEAR;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: isBrands
-      ? 'US Top Glamping Brands Rankings'
-      : 'North America Glamping Market Snapshot',
+      ? `US Top Glamping Brands Rankings ${year}`
+      : `North America Glamping Market Data ${year}`,
     description: isBrands
-      ? 'Ranked list of the largest US glamping operators by published Glamping property count, with unit totals and average retail nightly rates from Sage Outdoor Advisory.'
-      : 'Aggregated counts of private commercial glamping properties and units, retail ARDR benchmarks, unit-type mix, and US state / Canadian province breakdowns maintained by Sage Outdoor Advisory.',
+      ? `Ranked list of the largest US glamping operators by published Glamping property count, with unit totals and average retail nightly rates from Sage Outdoor Advisory ${year} research.`
+      : `Live ${year} glamping market data: aggregated counts of private commercial glamping properties and units, retail ARDR benchmarks, unit-type mix, and US state / Canadian province breakdowns maintained by Sage Outdoor Advisory.`,
     keywords: GLAMPING_MARKET_OVERVIEW_KEYWORDS,
     creator: {
       '@type': 'Organization',
@@ -270,7 +290,7 @@ export function generateGlampingMarketOverviewDatasetSchema(
       '@type': 'Place',
       name: 'United States and Canada',
     },
-    temporalCoverage: '2024-01-01/..',
+    temporalCoverage: `${year}-01-01/..`,
     isAccessibleForFree: false,
     distribution: {
       '@type': 'DataDownload',
@@ -299,7 +319,7 @@ export function generateGlampingMarketOverviewBreadcrumbSchema(
     {
       '@type': 'ListItem' as const,
       position: 2,
-      name: 'Glamping Market Overview',
+      name: 'Glamping Market Data',
       item: `${GLAMPING_MARKET_OVERVIEW_BASE_URL}${OVERVIEW_PATH}`,
     },
   ];

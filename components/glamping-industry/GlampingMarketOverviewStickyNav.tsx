@@ -60,7 +60,7 @@ export function GlampingMarketOverviewStickyNav({
         ref={titleRef}
         className="font-[Georgia] text-base font-medium uppercase tracking-[0.28em] text-neutral-900 sm:text-lg"
       >
-        Glamping Market Overview
+        Glamping Market Data 2026
       </h1>
 
       {lastUpdated}
@@ -89,7 +89,7 @@ export function GlampingMarketOverviewStickyNav({
       >
         <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-start gap-3 px-6 py-3 sm:justify-between">
           <p className="font-[Georgia] text-xs font-medium uppercase tracking-[0.22em] text-neutral-900">
-            Glamping Market Overview
+            Glamping Market Data 2026
           </p>
           <div className="flex min-w-0 flex-wrap items-center justify-start gap-2 sm:justify-end sm:gap-3">
             <GlampingMarketSnapshotToggle

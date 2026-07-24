@@ -2,7 +2,10 @@ import { GlampingMarketAccessGate } from '@/components/glamping-industry/Glampin
 import { GlampingMarketOverviewLockedPreview } from '@/components/glamping-industry/GlampingMarketOverviewLockedPreview';
 import { GlampingMarketOverviewPublicSeo } from '@/components/glamping-industry/GlampingMarketOverviewPublicSeo';
 import { GATED_PAGE_GLAMPING_MARKET_OVERVIEW } from '@/lib/gated-access';
-import type { GlampingMarketOverviewSeoVariant } from '@/lib/glamping-market-overview-seo';
+import {
+  GLAMPING_MARKET_OVERVIEW_SEO_YEAR,
+  type GlampingMarketOverviewSeoVariant,
+} from '@/lib/glamping-market-overview-seo';
 
 /**
  * Locked experience: crawlable SEO (visually hidden; single document H1),
@@ -16,6 +19,12 @@ export function GlampingMarketOverviewGatedShell({
   pageSlug?: string;
   seoVariant?: GlampingMarketOverviewSeoVariant;
 }) {
+  const year = GLAMPING_MARKET_OVERVIEW_SEO_YEAR;
+  const gateTitle =
+    seoVariant === 'brands'
+      ? `Top Glamping Brands ${year}`
+      : `Glamping Market Data ${year}`;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#faf9f3]">
       <div className="sr-only">
@@ -29,7 +38,7 @@ export function GlampingMarketOverviewGatedShell({
           <GlampingMarketOverviewLockedPreview variant={seoVariant} />
         </div>
       </div>
-      <GlampingMarketAccessGate pageSlug={pageSlug} />
+      <GlampingMarketAccessGate pageSlug={pageSlug} title={gateTitle} />
     </div>
   );
 }
