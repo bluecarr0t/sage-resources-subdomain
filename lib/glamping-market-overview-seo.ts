@@ -10,10 +10,10 @@ export const GLAMPING_MARKET_OVERVIEW_BASE_URL =
   'https://resources.sageoutdooradvisory.com';
 
 export const GLAMPING_MARKET_OVERVIEW_OG_IMAGE = {
-  url: 'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/mountain-view.jpg',
+  url: `${GLAMPING_MARKET_OVERVIEW_BASE_URL}/images/glamping-market-overview-og.png`,
   width: 1200,
   height: 630,
-  alt: '2026 glamping market data: US and Canada private commercial supply, rates, and brand rankings by Sage Outdoor Advisory',
+  alt: 'Glamping Market Overview — Sage Outdoor Advisory',
 } as const;
 
 /** Calendar year surfaced in titles/snippets for SERP freshness vs dated blog posts. */
