@@ -3,13 +3,13 @@
  * All queries run inside READ ONLY transactions — never writes to DO.
  */
 
-import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
+import { Pool, type PoolConfig, PoolClient, QueryResult, QueryResultRow } from 'pg';
 
 const WRITE_PATTERN = /\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|GRANT|REVOKE|COPY\s+\S+\s+FROM)\b/i;
 
 export type DigitalOceanDatabase = 'campings' | 'hipcamp' | 'campspot';
 
-function getBaseConfig() {
+function getBaseConfig(): PoolConfig {
   return {
     host: process.env.DIGITALOCEAN_DB_HOST || process.env.LEGACY_CAMPING_DB_HOST || '146.190.212.63',
     port: parseInt(process.env.DIGITALOCEAN_DB_PORT || process.env.LEGACY_CAMPING_DB_PORT || '5432', 10),
