@@ -10,7 +10,10 @@ export const SNAPSHOT_FULL_REPLACE_TABLES = new Set([
   'campspot.old_data_table',
 ]);
 
-/** Legacy DB tables — skip unless explicitly syncing legacy DBs. */
+/**
+ * Legacy archive tables that dominate disk (~90GB). Prefer pg_dump/COPY bulk path
+ * (`npm run sync:do:legacy-bulk`) instead of row upserts. Skipped when `--no-large`.
+ */
 export const LEGACY_ONLY_LARGE_TABLES = new Set([
   'hipcamp_public.sites',
   'campspot_public.sites',
@@ -18,9 +21,14 @@ export const LEGACY_ONLY_LARGE_TABLES = new Set([
   'campspot_public.average',
   'hipcamp_public.listings',
   'campspot_public.listings',
-  'campspot_public.average_general',
-  'hipcamp_public.average_general',
 ]);
+
+/** Never sync from legacy DBs (secrets / PostGIS catalog). */
+export const LEGACY_SKIP_TABLES = new Set(['password', 'spatial_ref_sys']);
+
+export function shouldSkipLegacyTable(table: string): boolean {
+  return LEGACY_SKIP_TABLES.has(table);
+}
 
 /** Campings large fact tables — included in weekly incremental by default (Phase 2). */
 export const CAMPINGS_LARGE_TABLES = new Set([

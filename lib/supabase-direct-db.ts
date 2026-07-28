@@ -15,8 +15,11 @@ export function getSupabaseDirectPool(): Pool {
   pool = new Pool({
     connectionString: url,
     max: 5,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 30000,
+    // Bulk legacy restore / large upserts can idle between batches for a long time.
+    idleTimeoutMillis: 600_000,
+    connectionTimeoutMillis: 120_000,
+    statement_timeout: false,
+    query_timeout: 0,
   });
   return pool;
 }

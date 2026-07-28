@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Snapshot campings matviews (latest_sites, site_monthly_analytics) to Supabase tables.
+ * Snapshot campings matviews to Supabase tables (latest_sites, monthly/yearly analytics).
  * Also run automatically by npm run transform:flat-sites.
  */
 

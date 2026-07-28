@@ -16,8 +16,11 @@ function getBaseConfig() {
     user: process.env.DIGITALOCEAN_DB_USER || process.env.LEGACY_CAMPING_DB_USER || 'rou',
     password: process.env.DIGITALOCEAN_DB_PASSWORD || process.env.LEGACY_CAMPING_DB_PASSWORD,
     max: 5,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 30000,
+    // Long-running legacy / large-table syncs need generous idle + connect budgets.
+    idleTimeoutMillis: 600_000,
+    connectionTimeoutMillis: 120_000,
+    statement_timeout: false,
+    query_timeout: 0,
   };
 }
 

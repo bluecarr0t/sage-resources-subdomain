@@ -16,13 +16,13 @@ on:
         required: false
         default: 'campings'
       include_large:
-        description: 'Include large tables (sites, propertys). Set false to use --no-large.'
-        type: boolean
-        default: true
-      no_large:
-        description: 'Skip large tables (overrides include_large)'
+        description: 'Include large tables (sites, propertys). Emergency only — condensed default is false.'
         type: boolean
         default: false
+      no_large:
+        description: 'Skip large tables (default condensed mode; redundant when include_large is false)'
+        type: boolean
+        default: true
       full:
         description: 'Full reload (ignore watermarks)'
         type: boolean
@@ -57,13 +57,14 @@ jobs:
           DIGITALOCEAN_DB_USER: 'rou'
           DIGITALOCEAN_DB_PASSWORD: ${{ secrets.DIGITALOCEAN_DB_PASSWORD }}
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-          SYNC_INCLUDE_LARGE_DEFAULT: '1'
+          # Condensed default: dims only. Set to '1' only with include_large=true.
+          SYNC_INCLUDE_LARGE_DEFAULT: '0'
         run: |
           ARGS="--databases=${{ github.event.inputs.databases || 'campings' }}"
-          if [ "${{ github.event.inputs.no_large }}" = "true" ]; then
-            ARGS="$ARGS --no-large"
-          elif [ "${{ github.event.inputs.include_large }}" != "false" ]; then
+          if [ "${{ github.event.inputs.include_large }}" = "true" ] && [ "${{ github.event.inputs.no_large }}" != "true" ]; then
             ARGS="$ARGS --include-large"
+          else
+            ARGS="$ARGS --no-large"
           fi
           if [ "${{ github.event.inputs.full }}" = "true" ]; then
             ARGS="$ARGS --full"

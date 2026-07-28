@@ -100,9 +100,14 @@ Legacy fallback: UI CSV + `upload-*-csv.ts` if transform parity is not yet confi
 
 ## 3. Keep normalized `hipcamp.*` / `campspot.*` in sync?
 
-**Decision:** **Yes.**
+**Decision (updated Phase 1 condensed):** **Yes for dimensions + analytics snapshots; no for full scrape history.**
 
-This is what `scripts/sync-do-to-supabase/run-sync.ts` implements: identical schema and table names on Supabase, read-only pull from DO `campings` database.
+Weekly sync pulls:
+
+- Dimension / metadata tables (`scrapings`, `propertydetails`, `sitedetails`, …) with `--no-large`
+- Matview snapshots: `latest_sites`, `site_monthly_analytics`, `site_yearly_analytics`
+
+It does **not** grow `hipcamp.sites` / `campspot.sites` / `propertys` history on the weekly cadence. DigitalOcean remains the system of record for raw scrape stacks. Use `npm run sync:do:full` / `--include-large` only as an intentional emergency.
 
 `public.hipcamp` / `public.campspot` remain separate until Phase 3 links or replaces them.
 
@@ -110,15 +115,14 @@ This is what `scripts/sync-do-to-supabase/run-sync.ts` implements: identical sch
 
 ## 4. Where to run the weekly job?
 
-**Decision:** **GitHub Actions**
+**Decision:** **Local launchd (allowlisted IP)**; GitHub Actions `workflow_dispatch` kept for self-hosted/whitelisted runners only.
 
-- Workflow: `.github/workflows/weekly-do-sync.yml`
-- Schedule: Mondays 08:00 UTC
+- Local: `~/Library/LaunchAgents/com.sage.do-supabase-sync.plist` → [`run-local-sync.sh`](../../scripts/sync-do-to-supabase/run-local-sync.sh) (Mondays 09:00 local), always `--databases=campings --no-large` then matviews
+- Workflow: [`.github/workflows/weekly-do-sync.yml`](../../.github/workflows/weekly-do-sync.yml) — GH-hosted cron disabled (cannot reach DO Trusted Sources)
 - Secrets: `DIGITALOCEAN_DB_PASSWORD`, `SUPABASE_DB_URL`
+- Condensed default: **`--no-large`** (do not include large tables on the weekly schedule)
 
-**After one-time backfill**, set scheduled runs to include large tables (incremental on `sites` / `propertys`), not `--exclude-large`.
-
-Manual runs: Actions → “Weekly DO to Supabase sync” → `workflow_dispatch`.
+Manual runs: launchd script, or Actions → “Weekly DO to Supabase sync” → `workflow_dispatch` with `include_large` only when needed.
 
 ---
 
@@ -157,17 +161,23 @@ Failed GitHub Action runs still appear in the Actions UI; Supabase row is the so
 - [x] `INSERT … ON CONFLICT DO UPDATE` for all campings base tables
 - [x] `old_data_table` → `--replace-snapshots` (truncate + reload); skipped on weekly default
 - [x] 5-minute watermark overlap
-- [x] Default weekly includes large tables (`--no-large` to opt out)
 - [x] Audit: `do_sync_runs` / `do_sync_watermarks`
+
+### Phase 1 — Condensed weekly (done)
+
+- [x] Default weekly **skips** large tables (`--include-large` / `sync:do:full` emergency only)
+- [x] `run-local-sync.sh` bakes `--databases=campings --no-large` + matview snapshots
+- [x] Matview snapshots: `latest_sites`, `site_monthly_analytics`, `site_yearly_analytics`
+- [x] Legacy `*_public` one-time archive complete (frozen; not weekly)
 
 ### CSV migration path (deprecated)
 
 - [x] `migrate:legacy-export` / `migrate:legacy-import` / `migrate:legacy` → blocked; use `sync:do`
 - [x] Escape hatch: `migrate:legacy:csv-*` with `ALLOW_LEGACY_CSV_MIGRATION=1`
 
-### Phase 1 / ops (remaining)
+### Phase 2+ / ops (remaining)
 
-- [ ] One-time: `npm run sync:do:full`
-- [ ] GitHub secrets: `DIGITALOCEAN_DB_PASSWORD`, `SUPABASE_DB_URL`
-- [ ] Document flat-table weekly: UI export + `upload-*-csv.ts`
-- [ ] Phase 3 backlog: matview snapshots + optional flat transform
+- [ ] Truncate or freeze partial SB `sites`/`propertys` to reclaim disk
+- [ ] Wire `transform:flat-sites` into weekly script (preflight today still requires base `sites`)
+- [ ] Thin `kpi_*` calculation marts
+- [ ] Drop DO legacy `hipcamp` / `campspot` DBs after sign-off

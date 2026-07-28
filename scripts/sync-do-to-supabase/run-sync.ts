@@ -5,10 +5,11 @@
  * NEVER writes to DigitalOcean.
  *
  * Usage:
- *   npm run sync:do                              # weekly: campings, all tables incl. large, incremental
+ *   npm run sync:do                              # weekly: campings dims only (skips sites/propertys)
+ *   npm run sync:do -- --include-large           # also sync large fact tables (emergency)
  *   npm run sync:do -- --full                    # ignore watermarks (full scan + upsert)
  *   npm run sync:do -- --replace-snapshots       # truncate+reload old_data_table
- *   npm run sync:do -- --no-large                # skip sites/propertys
+ *   npm run sync:do -- --no-large                # explicit skip (default already)
  *   npm run sync:do -- --tables=propertydetails
  *   npm run sync:do -- --dry-run
  *   npm run sync:do -- --continue-on-error
@@ -20,30 +21,22 @@ import { closeDigitalOceanPools } from '../../lib/digitalocean-readonly-db';
 import { closeSupabaseDirectPool, getSupabaseDirectPool } from '../../lib/supabase-direct-db';
 import {
   DATABASE_SYNC_CONFIGS,
-  parseDatabaseFilter,
   qualifiedTable,
   resolveTargetSchema,
 } from './config';
-import { fetchTableMetaFromDigitalOcean, listTablesInSchema } from './schema-utils';
+import { parseSyncCliArgs, type SyncCliOptions } from './cli-args';
+import { fetchTableMetaFromDigitalOcean, listTablesInSchema, ensureTableInSupabase } from './schema-utils';
 import { syncTableFromDigitalOcean, type SyncTableResult } from './sync-table';
 import {
   getTableSyncMode,
   shouldSkipLargeTable,
-  SNAPSHOT_FULL_REPLACE_TABLES,
+  shouldSkipLegacyTable,
   sortTablesForSchema,
 } from './table-sync-config';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
-interface CliOptions {
-  databases: Set<string> | null;
-  tables: Set<string> | null;
-  includeLarge: boolean;
-  dryRun: boolean;
-  full: boolean;
-  replaceSnapshots: boolean;
-  continueOnError: boolean;
-}
+type CliOptions = SyncCliOptions;
 
 interface TableRunResult extends SyncTableResult {
   sourceKey: string;
@@ -52,21 +45,7 @@ interface TableRunResult extends SyncTableResult {
 }
 
 function parseArgs(): CliOptions {
-  const args = process.argv.slice(2);
-  const dbArg = args.find((a) => a.startsWith('--databases='));
-  const tablesArg = args.find((a) => a.startsWith('--tables='));
-  const includeLargeDefault =
-    process.env.SYNC_INCLUDE_LARGE_DEFAULT !== '0' && !args.includes('--no-large');
-
-  return {
-    databases: dbArg ? new Set(dbArg.slice(12).split(',').map((s) => s.trim())) : null,
-    tables: tablesArg ? new Set(tablesArg.slice(9).split(',').map((s) => s.trim())) : null,
-    includeLarge: args.includes('--include-large') || includeLargeDefault,
-    dryRun: args.includes('--dry-run'),
-    full: args.includes('--full'),
-    replaceSnapshots: args.includes('--replace-snapshots'),
-    continueOnError: args.includes('--continue-on-error'),
-  };
+  return parseSyncCliArgs();
 }
 
 function tableMatchesFilter(
@@ -134,6 +113,7 @@ async function main(): Promise<void> {
   console.log('=== DO → Supabase sync (Phase 2 incremental upsert) ===\n');
   if (opts.dryRun) console.log('DRY RUN — no Supabase writes\n');
   if (opts.includeLarge) console.log('Including large tables (sites, propertys)\n');
+  else console.log('Skipping large tables (condensed default — pass --include-large to override)\n');
   if (opts.full) console.log('Full scan mode (ignoring watermarks)\n');
 
   await ensureAuditTables();
@@ -141,9 +121,9 @@ async function main(): Promise<void> {
   const pool = getSupabaseDirectPool();
   const client = await pool.connect();
 
-  const configs = DATABASE_SYNC_CONFIGS.filter(
-    (c) => !opts.databases || opts.databases.has(c.database)
-  );
+  const configs = DATABASE_SYNC_CONFIGS.filter((c) => opts.databases.has(c.database));
+  console.log(`Databases: ${[...opts.databases].join(', ')}\n`);
+  if (opts.schemaOnly) console.log('Schema-only — create tables, no row copy\n');
 
   let runId: number | null = null;
   if (!opts.dryRun) {
@@ -181,6 +161,20 @@ async function main(): Promise<void> {
           const sourceKey = `${dbConfig.database}.${sourceSchema}.${table}`;
           const targetKey = qualifiedTable(targetSchema, table);
 
+          if (dbConfig.database !== 'campings' && shouldSkipLegacyTable(table)) {
+            console.log(`  skip ${targetKey} (legacy exclude list)`);
+            results.push({
+              sourceKey,
+              table: targetKey,
+              mode: 'incremental',
+              exported: 0,
+              upserted: 0,
+              durationMs: 0,
+              status: 'skipped',
+            });
+            continue;
+          }
+
           if (shouldSkipLargeTable(targetKey, opts.includeLarge, dbConfig.database)) {
             console.log(`  skip ${targetKey} (large; use --include-large or default)`);
             results.push({
@@ -200,6 +194,44 @@ async function main(): Promise<void> {
             sourceSchema,
             table
           );
+
+          if (opts.schemaOnly) {
+            console.log(`  schema ${sourceKey} → ${targetKey}`);
+            try {
+              if (!opts.dryRun) {
+                await ensureTableInSupabase(client, targetSchema, meta);
+              }
+              results.push({
+                sourceKey,
+                table: targetKey,
+                mode: 'full_upsert',
+                exported: 0,
+                upserted: 0,
+                durationMs: 0,
+                status: 'success',
+              });
+              console.log(`  ✓ ${targetKey}: schema ensured`);
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              console.error(`  ✗ ${targetKey}: ${message}`);
+              results.push({
+                sourceKey,
+                table: targetKey,
+                mode: 'full_upsert',
+                exported: 0,
+                upserted: 0,
+                durationMs: 0,
+                status: 'failed',
+                error: message,
+              });
+              if (!opts.continueOnError) {
+                fatalError = err instanceof Error ? err : new Error(message);
+                break;
+              }
+            }
+            continue;
+          }
+
           const hasUpdatedAt = meta.columns.some((c) => c.column_name === 'updated_at');
           const syncMode = getTableSyncMode(targetKey, hasUpdatedAt, {
             full: opts.full,

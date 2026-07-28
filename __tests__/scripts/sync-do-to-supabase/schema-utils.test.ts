@@ -2,7 +2,7 @@ import {
   buildUpsertSql,
   type TableMeta,
 } from '../../../scripts/sync-do-to-supabase/upsert-sql';
-import { getTableSyncMode } from '../../../scripts/sync-do-to-supabase/table-sync-config';
+import { getTableSyncMode, shouldSkipLegacyTable } from '../../../scripts/sync-do-to-supabase/table-sync-config';
 import { serializeRowValue } from '../../../scripts/sync-do-to-supabase/row-values';
 
 function meta(partial: Partial<TableMeta> & Pick<TableMeta, 'primaryKey'>): TableMeta {
@@ -52,6 +52,14 @@ describe('getTableSyncMode', () => {
     expect(
       getTableSyncMode('campspot.old_data_table', false, { full: false, replaceSnapshots: true })
     ).toBe('full_replace');
+  });
+});
+
+describe('shouldSkipLegacyTable', () => {
+  it('skips password and spatial_ref_sys', () => {
+    expect(shouldSkipLegacyTable('password')).toBe(true);
+    expect(shouldSkipLegacyTable('spatial_ref_sys')).toBe(true);
+    expect(shouldSkipLegacyTable('sites')).toBe(false);
   });
 });
 

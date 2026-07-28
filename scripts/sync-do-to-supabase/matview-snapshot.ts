@@ -1,25 +1,19 @@
 /**
  * Snapshot DigitalOcean materialized views into Supabase as regular tables.
- * Required for Phase 3 flat transform (site_monthly_analytics, latest_sites).
+ * Required for Phase 3 flat transform (site_monthly_analytics, latest_sites)
+ * and condensed yearly analytics for calculations.
  */
 
 import type { PoolClient } from 'pg';
 import { queryDigitalOceanReadOnly } from '../../lib/digitalocean-readonly-db';
 import { syncTableFromDigitalOcean } from './sync-table';
+import {
+  CAMPINGS_MATVIEW_SNAPSHOTS,
+  type MatviewSnapshotSpec,
+} from './matview-config';
 
-export interface MatviewSnapshotSpec {
-  schema: string;
-  name: string;
-}
-
-/** Matviews on campings DB that the flat transform reads from Supabase. */
-export const CAMPINGS_MATVIEW_SNAPSHOTS: MatviewSnapshotSpec[] = [
-  { schema: 'campspot', name: 'site_monthly_analytics' },
-  { schema: 'campspot', name: 'latest_sites' },
-  { schema: 'hipcamp', name: 'site_monthly_analytics' },
-  { schema: 'hipcamp', name: 'latest_sites' },
-];
-
+export type { MatviewSnapshotSpec };
+export { CAMPINGS_MATVIEW_SNAPSHOTS };
 export interface SyncMatviewsOptions {
   supabaseClient: PoolClient;
   dryRun?: boolean;
