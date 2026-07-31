@@ -2,6 +2,10 @@
  * Server-only lookups for gated-content lead rows (magic-link registrants).
  */
 
+import {
+  parseGatedAccessBusinessType,
+  type GatedAccessBusinessType,
+} from '@/lib/gated-access-business-type';
 import { createServerClient } from '@/lib/supabase';
 import { joinFullName } from '@/lib/person-name';
 
@@ -10,6 +14,7 @@ export type GatedLeadLookup = {
   name: string | null;
   firstName: string | null;
   lastName: string | null;
+  businessType: GatedAccessBusinessType | null;
 };
 
 /**
@@ -23,13 +28,19 @@ export async function lookupGatedLead(
     const admin = createServerClient();
     const { data } = await admin
       .from('gated_content_leads')
-      .select('name, first_name, last_name')
+      .select('name, first_name, last_name, business_type')
       .eq('email', email.trim().toLowerCase())
       .eq('page_slug', pageSlug)
       .maybeSingle();
 
     if (!data) {
-      return { exists: false, name: null, firstName: null, lastName: null };
+      return {
+        exists: false,
+        name: null,
+        firstName: null,
+        lastName: null,
+        businessType: null,
+      };
     }
 
     const firstName =
@@ -50,8 +61,15 @@ export async function lookupGatedLead(
       name: combined,
       firstName,
       lastName,
+      businessType: parseGatedAccessBusinessType(data.business_type),
     };
   } catch {
-    return { exists: false, name: null, firstName: null, lastName: null };
+    return {
+      exists: false,
+      name: null,
+      firstName: null,
+      lastName: null,
+      businessType: null,
+    };
   }
 }

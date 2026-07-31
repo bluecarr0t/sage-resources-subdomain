@@ -13,10 +13,24 @@ config({ path: resolve(process.cwd(), '.env.local') });
 
 async function main(): Promise<void> {
   const dryRun = process.argv.includes('--dry-run');
+  const onlyArg = process.argv.find((a) => a.startsWith('--only='));
+  const only = onlyArg
+    ? new Set(
+        onlyArg
+          .slice('--only='.length)
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      )
+    : undefined;
   const pool = getSupabaseDirectPool();
   const client = await pool.connect();
   try {
-    const results = await syncCampingsMatviewSnapshots({ supabaseClient: client, dryRun });
+    const results = await syncCampingsMatviewSnapshots({
+      supabaseClient: client,
+      dryRun,
+      only,
+    });
     console.log('\nMatview snapshot summary:');
     for (const r of results) {
       console.log(`  ${r.name}: ${r.exported} exported, ${r.upserted} upserted`);

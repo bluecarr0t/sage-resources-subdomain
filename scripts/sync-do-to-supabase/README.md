@@ -14,8 +14,9 @@ Read-only pull from DigitalOcean Postgres into **identical schemas and table nam
 - Launchd (`run-local-sync.sh`) always passes `--databases=campings --no-large`, then `sync:do:matviews`.
 - Bare `npm run sync:do` defaults to **campings** + **skip large tables**.
 - Set `SYNC_INCLUDE_LARGE_DEFAULT=1` or pass `--include-large` only when intentionally pulling history.
-- Legacy `hipcamp_public` / `campspot_public` are a **frozen** 2023–early‑2025 archive (one-time transfer); not part of weekly sync.
-- Flat app tables (`public.hipcamp` / `public.campspot`) remain a separate path (Phase 2+: `transform:flat-sites`).
+- Truncate leftover partial daily facts after matviews are healthy:
+  `CONFIRM_CAMPINGS_DAILY_TRUNCATE=1 npm run sync:do:truncate-daily-facts -- --truncate-daily-facts`
+- Legacy `*_public` daily archives were condensed to `*_public_monthly`; flat app tables (`public.hipcamp` / `public.campspot`) remain a separate path (`transform:flat-sites`).
 
 ## Legacy archives (`hipcamp` / `campspot` DBs → `*_public`)
 
@@ -26,7 +27,9 @@ One-time transfer of the ~90 GB pre-2025 standalone databases. **Not** part of t
 | Small/medium tables | `npm run sync:do:legacy-small` | Upserts `dates`, `average_general`, etc.; skips `listings`/`average`/`sites` |
 | Create empty xlarge tables | `npm run sync:do:legacy-schema` | `CREATE SCHEMA/TABLE` only for all legacy tables (incl. large) |
 | Bulk COPY xlarge | `npm run sync:do:legacy-bulk -- hipcamp all` then `… campspot all` | Streams `listings` → `average` → `sites` via `psql \\COPY` |
-| RLS | Run [`04-legacy-public-rls.sql`](./04-legacy-public-rls.sql) in SQL Editor | Authenticated read policies |
+| Monthly condense | `npm run sync:do:legacy-monthly` | Builds `*_public_monthly` (one fullest scrape/month); verify only |
+| Drop daily big (gated) | `CONFIRM_LEGACY_MONTHLY_DROP=1 npm run sync:do:legacy-monthly -- --drop-daily-big` | Drops `*_public` sites/average/listings after sign-off |
+| RLS | Run [`04-legacy-public-rls.sql`](./04-legacy-public-rls.sql) in SQL Editor | Authenticated read policies (daily + monthly schemas) |
 
 Always run from a DO allowlisted IP. Use direct `SUPABASE_DB_URL` (`:5432`), not the pooler. Skips `password` and `spatial_ref_sys`. Logs under `~/Library/Logs/sage-do-sync/`.
 

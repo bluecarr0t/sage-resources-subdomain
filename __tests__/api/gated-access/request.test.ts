@@ -55,6 +55,7 @@ function makeRequest(body: unknown): NextRequest {
 const validLead = {
   firstName: 'Jane',
   lastName: 'Doe',
+  businessType: 'investor',
   email: 'Jane@Example.com',
 };
 
@@ -68,7 +69,7 @@ describe('POST /api/gated-access/request', () => {
     mockLogGatedContentEvent.mockResolvedValue(undefined);
   });
 
-  it('sends a magic link for a valid first + last name + email', async () => {
+  it('sends a magic link for a valid first + last name + business type + email', async () => {
     const res = await POST(makeRequest(validLead));
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ ok: true });
@@ -82,13 +83,38 @@ describe('POST /api/gated-access/request', () => {
     expect(arg.options.data.full_name).toBe('Jane Doe');
     expect(arg.options.data.first_name).toBe('Jane');
     expect(arg.options.data.last_name).toBe('Doe');
+    expect(arg.options.data.business_type).toBe('investor');
     expect(arg.options.emailRedirectTo).toContain('/auth/callback?redirect=');
     expect(mockLogGatedContentEvent).toHaveBeenCalledWith({
       eventType: 'form_submit',
       email: 'jane@example.com',
       pageSlug: 'glamping-market-overview',
-      metadata: { email_only: false },
+      metadata: { email_only: false, business_type: 'investor' },
     });
+  });
+
+  it('rejects a missing business type with 400 and does not send a link', async () => {
+    const res = await POST(
+      makeRequest({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' })
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toMatch(/what best describes you/i);
+    expect(mockSignInWithOtp).not.toHaveBeenCalled();
+    expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid business type with 400', async () => {
+    const res = await POST(
+      makeRequest({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: 'not-a-role',
+        email: 'jane@example.com',
+      })
+    );
+    expect(res.status).toBe(400);
+    expect(mockSignInWithOtp).not.toHaveBeenCalled();
   });
 
   it('rejects a missing/short name with 400 and does not send a link', async () => {
@@ -102,7 +128,12 @@ describe('POST /api/gated-access/request', () => {
 
   it('sends a magic link for email-only sign-in (returning user, no auto-signup)', async () => {
     mockMaybeSingle.mockResolvedValueOnce({
-      data: { name: 'Jane Doe', first_name: 'Jane', last_name: 'Doe' },
+      data: {
+        name: 'Jane Doe',
+        first_name: 'Jane',
+        last_name: 'Doe',
+        business_type: 'operator',
+      },
     });
 
     const res = await POST(
@@ -136,7 +167,12 @@ describe('POST /api/gated-access/request', () => {
 
   it('sends only one OTP for email-only sign-in when the lead already exists', async () => {
     mockMaybeSingle.mockResolvedValueOnce({
-      data: { name: 'Jane Doe', first_name: 'Jane', last_name: 'Doe' },
+      data: {
+        name: 'Jane Doe',
+        first_name: 'Jane',
+        last_name: 'Doe',
+        business_type: 'investor',
+      },
     });
 
     const res = await POST(
@@ -149,7 +185,12 @@ describe('POST /api/gated-access/request', () => {
 
   it('includes stored lead name on email-only resend when available', async () => {
     mockMaybeSingle.mockResolvedValue({
-      data: { name: 'Jane Doe', first_name: 'Jane', last_name: 'Doe' },
+      data: {
+        name: 'Jane Doe',
+        first_name: 'Jane',
+        last_name: 'Doe',
+        business_type: 'developer',
+      },
     });
 
     const res = await POST(
@@ -159,15 +200,28 @@ describe('POST /api/gated-access/request', () => {
     expect(mockSignInWithOtp.mock.calls[0][0].options.data.full_name).toBe('Jane Doe');
     expect(mockSignInWithOtp.mock.calls[0][0].options.data.first_name).toBe('Jane');
     expect(mockSignInWithOtp.mock.calls[0][0].options.data.last_name).toBe('Doe');
+    expect(mockSignInWithOtp.mock.calls[0][0].options.data.business_type).toBe(
+      'developer'
+    );
   });
 
   it('returns existing_lead when the lead form is used for a registered email', async () => {
     mockMaybeSingle.mockResolvedValueOnce({
-      data: { name: 'Jane Doe', first_name: 'Jane', last_name: 'Doe' },
+      data: {
+        name: 'Jane Doe',
+        first_name: 'Jane',
+        last_name: 'Doe',
+        business_type: 'lender',
+      },
     });
 
     const res = await POST(
-      makeRequest({ firstName: 'Jane', lastName: 'Doe', email: 'returning@example.com' })
+      makeRequest({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: 'investor',
+        email: 'returning@example.com',
+      })
     );
     expect(res.status).toBe(400);
     const body = await res.json();
@@ -182,7 +236,12 @@ describe('POST /api/gated-access/request', () => {
 
   it('rejects an invalid email with 400', async () => {
     const res = await POST(
-      makeRequest({ firstName: 'Jane', lastName: 'Doe', email: 'not-an-email' })
+      makeRequest({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: 'investor',
+        email: 'not-an-email',
+      })
     );
     expect(res.status).toBe(400);
     expect(mockSignInWithOtp).not.toHaveBeenCalled();
@@ -191,7 +250,12 @@ describe('POST /api/gated-access/request', () => {
   it('returns 429 when the rate limiter denies the request', async () => {
     mockLimit.mockResolvedValueOnce({ success: false, limit: 3, remaining: 0, reset: 0 });
     const res = await POST(
-      makeRequest({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' })
+      makeRequest({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: 'investor',
+        email: 'jane@example.com',
+      })
     );
     expect(res.status).toBe(429);
     expect(mockSignInWithOtp).not.toHaveBeenCalled();
@@ -203,7 +267,12 @@ describe('POST /api/gated-access/request', () => {
       error: { message: '429: email rate limit exceeded' },
     });
     const res = await POST(
-      makeRequest({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' })
+      makeRequest({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: 'investor',
+        email: 'jane@example.com',
+      })
     );
     expect(res.status).toBe(429);
     const body = await res.json();
@@ -214,7 +283,7 @@ describe('POST /api/gated-access/request', () => {
       eventType: 'form_submit',
       email: 'jane@example.com',
       pageSlug: 'glamping-market-overview',
-      metadata: { email_only: false },
+      metadata: { email_only: false, business_type: 'investor' },
     });
   });
 
@@ -225,7 +294,12 @@ describe('POST /api/gated-access/request', () => {
       },
     });
     const res = await POST(
-      makeRequest({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' })
+      makeRequest({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: 'investor',
+        email: 'jane@example.com',
+      })
     );
     expect(res.status).toBe(429);
     const body = await res.json();
@@ -238,7 +312,12 @@ describe('POST /api/gated-access/request', () => {
   it('returns generic success for non-rate-limit Supabase errors (no enumeration)', async () => {
     mockSignInWithOtp.mockResolvedValueOnce({ error: { message: 'unexpected provider error' } });
     const res = await POST(
-      makeRequest({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' })
+      makeRequest({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: 'investor',
+        email: 'jane@example.com',
+      })
     );
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ ok: true });

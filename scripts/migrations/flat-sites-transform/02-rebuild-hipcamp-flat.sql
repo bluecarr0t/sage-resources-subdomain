@@ -81,14 +81,6 @@ WITH ls AS (
   FROM hipcamp.latest_sites
   ORDER BY property_id, site_id, site_updated_at DESC NULLS LAST
 ),
-site_parent AS (
-  SELECT DISTINCT ON (id, property_id)
-    id,
-    property_id,
-    parent_id
-  FROM hipcamp.sites
-  ORDER BY id, property_id, scraping_id DESC NULLS LAST
-),
 parent_sd AS (
   SELECT DISTINCT ON (property_id, id)
     id,
@@ -264,8 +256,7 @@ SELECT
   now()
 FROM ls
 JOIN hipcamp.propertydetails pd ON pd.id = ls.property_id
-LEFT JOIN site_parent sp ON sp.id = ls.site_id AND sp.property_id = ls.property_id
-LEFT JOIN parent_sd psd ON psd.id = COALESCE(ls.parent_id, sp.parent_id) AND psd.property_id = ls.property_id
+LEFT JOIN parent_sd psd ON psd.id = ls.parent_id AND psd.property_id = ls.property_id
 LEFT JOIN core ON core.property_id = ls.property_id AND core.site_id = ls.site_id
 LEFT JOIN year_metrics ym ON ym.property_id = ls.property_id AND ym.site_id = ls.site_id
 LEFT JOIN high_low_2025 hl5 ON hl5.property_id = ls.property_id AND hl5.site_id = ls.site_id

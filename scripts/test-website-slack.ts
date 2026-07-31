@@ -33,6 +33,7 @@ async function main() {
     signupNumber: 43,
     email: 'test@example.com',
     name: 'Test Signup',
+    businessType: 'Investor',
   });
 
   console.log('Posting sample Market Overview signup to #website…');

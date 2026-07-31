@@ -47,7 +47,7 @@ describe('shouldSkipLargeTable with condensed default', () => {
 });
 
 describe('CAMPINGS_MATVIEW_SNAPSHOTS', () => {
-  it('includes monthly, yearly, and latest_sites for hipcamp and campspot', () => {
+  it('includes monthly, yearly, and latest_sites for hipcamp and campspot with unique keys', () => {
     const keys = CAMPINGS_MATVIEW_SNAPSHOTS.map((s) => `${s.schema}.${s.name}`).sort();
     expect(keys).toEqual(
       [
@@ -59,5 +59,8 @@ describe('CAMPINGS_MATVIEW_SNAPSHOTS', () => {
         'hipcamp.site_yearly_analytics',
       ].sort()
     );
+    for (const spec of CAMPINGS_MATVIEW_SNAPSHOTS) {
+      expect(spec.uniqueKey.length).toBeGreaterThan(0);
+    }
   });
 });

@@ -7,6 +7,7 @@ import {
   EDITORIAL_H1_CLASS,
   EDITORIAL_INPUT_CLASS,
 } from '@/components/editorial/EditorialPageShell';
+import { DropdownSelect } from '@/components/ui';
 import { trackFormSubmission } from '@/lib/analytics';
 import { fireGateAccessConfetti } from '@/lib/gate-access-confetti';
 import {
@@ -14,7 +15,17 @@ import {
   GATED_ACCESS_REQUIRE_LEAD_FORM_CODE,
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
 } from '@/lib/gated-access';
+import {
+  GATED_ACCESS_BUSINESS_TYPES,
+  gatedAccessBusinessTypeLabel,
+  type GatedAccessBusinessType,
+} from '@/lib/gated-access-business-type';
 import { supabase } from '@/lib/supabase';
+
+const BUSINESS_TYPE_OPTIONS = GATED_ACCESS_BUSINESS_TYPES.map((type) => ({
+  value: type,
+  label: gatedAccessBusinessTypeLabel(type),
+}));
 
 type GateStep = 'form' | 'sent';
 type FormMode = 'lead' | 'email-only';
@@ -44,7 +55,7 @@ export type GlampingMarketAccessGateCopy = {
 export function GlampingMarketAccessGate({
   pageSlug = GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   title = 'Glamping Market Overview',
-  leadDescription = 'Enter your name and work email to unlock US & Canada glamping metrics. We\u2019ll send a secure sign-in link\u2014no password required.',
+  leadDescription = 'Enter your name, role, and work email to unlock US & Canada glamping metrics. We\u2019ll send a secure sign-in link\u2014no password required.',
   emailOnlyDescription = 'Enter your work email and we\u2019ll send a secure sign-in link. No password required.',
   successDescription = 'Open it on this device to unlock the Glamping Market Overview.',
 }: {
@@ -54,6 +65,9 @@ export function GlampingMarketAccessGate({
   const [formMode, setFormMode] = useState<FormMode>('lead');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [businessType, setBusinessType] = useState<GatedAccessBusinessType | ''>(
+    ''
+  );
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,6 +101,14 @@ export function GlampingMarketAccessGate({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        // Let an open custom listbox close itself first.
+        if (
+          panel.querySelector(
+            '[aria-expanded="true"][aria-haspopup="listbox"]'
+          )
+        ) {
+          return;
+        }
         event.preventDefault();
         event.stopPropagation();
         focusFirst();
@@ -140,6 +162,10 @@ export function GlampingMarketAccessGate({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    if (!emailOnly && !businessType) {
+      setError('Please select what best describes you.');
+      return;
+    }
     setSubmitting(true);
     const formName = emailOnly
       ? 'glamping_market_overview_gate_email'
@@ -157,7 +183,7 @@ export function GlampingMarketAccessGate({
           email,
           pageSlug,
           emailOnly,
-          ...(emailOnly ? {} : { firstName, lastName }),
+          ...(emailOnly ? {} : { firstName, lastName, businessType }),
         }),
       });
       const data = (await res.json().catch(() => null)) as
@@ -220,6 +246,7 @@ export function GlampingMarketAccessGate({
     if (mode === 'email-only') {
       setFirstName('');
       setLastName('');
+      setBusinessType('');
     }
   }
 
@@ -298,6 +325,39 @@ export function GlampingMarketAccessGate({
                       placeholder="Vale"
                     />
                   </div>
+                </div>
+              ) : null}
+              {!emailOnly ? (
+                <div>
+                  <label
+                    id="gate-business-type-label"
+                    htmlFor="gate-business-type"
+                    className="mb-1.5 block text-[11px] uppercase tracking-widest text-neutral-500"
+                  >
+                    I am a…
+                  </label>
+                  <DropdownSelect
+                    id="gate-business-type"
+                    variant="editorial"
+                    value={businessType}
+                    placeholder="Select one…"
+                    aria-labelledby="gate-business-type-label"
+                    aria-required
+                    aria-invalid={Boolean(
+                      error && !businessType && !emailOnly
+                    )}
+                    options={BUSINESS_TYPE_OPTIONS}
+                    onChange={(next) => {
+                      setBusinessType(
+                        GATED_ACCESS_BUSINESS_TYPES.includes(
+                          next as GatedAccessBusinessType
+                        )
+                          ? (next as GatedAccessBusinessType)
+                          : ''
+                      );
+                      if (error) setError(null);
+                    }}
+                  />
                 </div>
               ) : null}
               <div>

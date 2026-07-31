@@ -52,6 +52,9 @@ export async function syncCampingsMatviewSnapshots(
       supabaseClient: options.supabaseClient,
       mode: 'full_replace',
       dryRun: options.dryRun,
+      // DO matviews have no PK — without this, keyset pagination sorts by the
+      // first column only and silently skips most rows.
+      paginationKey: spec.uniqueKey,
     });
 
     results.push({

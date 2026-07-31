@@ -24,6 +24,8 @@ export interface SyncTableOptions {
   mode: TableSyncMode;
   since?: Date | null;
   dryRun?: boolean;
+  /** Override DO primary key for pagination + upsert (e.g. matview unique keys). */
+  paginationKey?: string[];
 }
 
 export interface SyncTableResult {
@@ -43,7 +45,12 @@ function effectiveBatchSize(meta: TableMeta): number {
   return Math.min(DEFAULT_BATCH_SIZE, Math.floor(MAX_PARAMS / colCount));
 }
 
-function orderColumnsForPagination(meta: TableMeta, mode: TableSyncMode): string[] {
+function orderColumnsForPagination(
+  meta: TableMeta,
+  mode: TableSyncMode,
+  paginationKey?: string[]
+): string[] {
+  if (paginationKey && paginationKey.length > 0) return paginationKey;
   if (mode === 'incremental') {
     const pk = meta.primaryKey.filter((c) => c !== 'updated_at');
     return ['updated_at', ...pk];
@@ -59,6 +66,20 @@ function buildKeysetWhere(orderCols: string[], cursor: unknown[]): string {
 
 function rowCursorValues(row: Record<string, unknown>, orderCols: string[]): unknown[] {
   return orderCols.map((c) => row[c] ?? null);
+}
+
+/** Keep last row per key — avoids ON CONFLICT "affect row a second time" within one INSERT. */
+function dedupeRowsByKey(
+  rows: Record<string, unknown>[],
+  keyCols: string[]
+): Record<string, unknown>[] {
+  if (keyCols.length === 0 || rows.length === 0) return rows;
+  const map = new Map<string, Record<string, unknown>>();
+  for (const row of rows) {
+    const key = keyCols.map((c) => String(row[c] ?? '')).join('\0');
+    map.set(key, row);
+  }
+  return [...map.values()];
 }
 
 async function upsertBatch(
@@ -133,7 +154,7 @@ async function syncPaginated(
   const { database, sourceSchema, targetSchema, table, supabaseClient, since, dryRun } = options;
   const batchSize = effectiveBatchSize(meta);
   const selectList = buildSelectList(meta);
-  const orderCols = orderColumnsForPagination(meta, mode);
+  const orderCols = orderColumnsForPagination(meta, mode, options.paginationKey);
 
   const effectiveSince =
     mode === 'incremental' && since
@@ -162,8 +183,12 @@ async function syncPaginated(
     exported += rows.length;
 
     if (!dryRun) {
-      await upsertBatch(supabaseClient, targetSchema, meta, rows);
-      upserted += rows.length;
+      const toWrite =
+        options.paginationKey && options.paginationKey.length > 0
+          ? dedupeRowsByKey(rows, options.paginationKey)
+          : rows;
+      await upsertBatch(supabaseClient, targetSchema, meta, toWrite);
+      upserted += toWrite.length;
     }
 
     process.stdout.write(`\r  ${targetSchema}.${table}: ${exported} rows from DO (${mode})...`);
@@ -191,7 +216,11 @@ async function syncFullReplace(
     console.log(`  ${fullTable}: truncated (full_replace).`);
   }
 
-  return syncPaginated(options, meta, 'full_upsert');
+  // After truncate, plain INSERT is enough. Keep paginationKey for keyset
+  // ordering, but clear PK so we do not ON CONFLICT (matviews can have
+  // duplicate natural keys within a batch).
+  const insertMeta: TableMeta = { ...meta, primaryKey: [] };
+  return syncPaginated({ ...options }, insertMeta, 'full_upsert');
 }
 
 export async function syncTableFromDigitalOcean(
@@ -204,6 +233,17 @@ export async function syncTableFromDigitalOcean(
   const meta = await fetchTableMetaFromDigitalOcean(database, sourceSchema, table);
   if (meta.columns.length === 0) {
     throw new Error(`No columns found for ${database}.${qualified}`);
+  }
+
+  if (options.paginationKey && options.paginationKey.length > 0) {
+    const missing = options.paginationKey.filter(
+      (c) => !meta.columns.some((col) => col.column_name === c)
+    );
+    if (missing.length > 0) {
+      throw new Error(
+        `${qualified}: paginationKey columns missing on DO: ${missing.join(', ')}`
+      );
+    }
   }
 
   if (meta.primaryKey.length === 0 && mode !== 'full_replace') {

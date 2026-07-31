@@ -20,6 +20,8 @@ export type MarketOverviewSignupSlackPayload = {
   signupNumber: number;
   email: string;
   name?: string | null;
+  /** Self-reported role label (e.g. Investor), when collected. */
+  businessType?: string | null;
   /** Current verified total; defaults to signupNumber when omitted. */
   totalVerifiedEmails?: number;
 };
@@ -27,6 +29,8 @@ export type MarketOverviewSignupSlackPayload = {
 export type MarketOverviewReturnSigninSlackPayload = {
   email: string;
   name?: string | null;
+  /** Self-reported role label (e.g. Investor), when collected. */
+  businessType?: string | null;
   /** Total magic-link verifies for this email+page (including this one). */
   signInCount: number;
   /** ISO timestamp of the lead's first verification, if known. */
@@ -61,10 +65,12 @@ export function buildMarketOverviewSignupSlackMessage(
   const who = payload.name?.trim() || payload.email;
   const n = payload.signupNumber;
   const total = payload.totalVerifiedEmails ?? n;
+  const businessType = payload.businessType?.trim() || null;
   const text = [
     `🎉 New Glamping Market Overview signup — *#${n}*!`,
     `${who} just unlocked the free market overview.`,
     `Email: ${payload.email}`,
+    ...(businessType ? [`I am a: ${businessType}`] : []),
     `Total verified emails: ${total}`,
   ].join('\n');
 
@@ -86,6 +92,7 @@ export function buildMarketOverviewSignupSlackMessage(
           '',
           `*Name:* ${payload.name?.trim() || '_Not provided_'}`,
           `*Email:* ${payload.email}`,
+          `*I am a:* ${businessType || '_Not provided_'}`,
         ].join('\n'),
       },
     },
@@ -115,10 +122,12 @@ export function buildMarketOverviewReturnSigninSlackMessage(
 ): WebsiteSlackMessage {
   const who = payload.name?.trim() || payload.email;
   const visits = payload.signInCount;
+  const businessType = payload.businessType?.trim() || null;
   const text = [
     `🔁 Return sign-in — Glamping Market Overview`,
     `${who} signed in again (visit #${visits}).`,
     `Email: ${payload.email}`,
+    ...(businessType ? [`I am a: ${businessType}`] : []),
     `Total verified emails: ${payload.totalVerifiedEmails}`,
   ].join('\n');
 
@@ -140,6 +149,7 @@ export function buildMarketOverviewReturnSigninSlackMessage(
           '',
           `*Name:* ${payload.name?.trim() || '_Not provided_'}`,
           `*Email:* ${payload.email}`,
+          `*I am a:* ${businessType || '_Not provided_'}`,
           `*First verified:* ${formatSlackDate(payload.firstVerifiedAt)}`,
         ].join('\n'),
       },

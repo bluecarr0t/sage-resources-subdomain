@@ -111,7 +111,7 @@ export const GATED_ACCESS_NAME_MIN_LENGTH = 2;
 
 /** User-facing copy when email-only sign-in is used before a lead row exists. */
 export const GATED_ACCESS_REQUIRE_LEAD_FORM_MESSAGE =
-  'First-time access requires your name. Please complete the form below to request access.';
+  'First-time access requires your name and role. Please complete the form below to request access.';
 
 /** API response code: switch the gate UI to the name + email form. */
 export const GATED_ACCESS_REQUIRE_LEAD_FORM_CODE = 'require_lead_form';

@@ -19,6 +19,10 @@ import {
   isEmailOtpType,
   isGatedPageSlug,
 } from '@/lib/gated-access';
+import {
+  gatedAccessBusinessTypeLabel,
+  parseGatedAccessBusinessType,
+} from '@/lib/gated-access-business-type';
 import { logGatedContentEvent } from '@/lib/gated-content-events';
 import { joinFullName, splitFullName } from '@/lib/person-name';
 import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
@@ -71,6 +75,7 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
   const metaLast = typeof meta.last_name === 'string' ? meta.last_name.trim() : '';
   const metaFull =
     typeof meta.full_name === 'string' ? meta.full_name.trim() : '';
+  const metaBusinessType = parseGatedAccessBusinessType(meta.business_type);
 
   const split = splitFullName(metaFull);
   const firstName = metaFirst || split.first_name || null;
@@ -84,13 +89,15 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
 
   const { data: existing } = await supabase
     .from('gated_content_leads')
-    .select('verified_at')
+    .select('verified_at, business_type')
     .eq('email', email)
     .eq('page_slug', pageSlug)
     .maybeSingle();
 
   const isNewSignup = Boolean(email) && !existing?.verified_at;
   const firstVerifiedAt = existing?.verified_at ?? verifiedAt;
+  const existingBusinessType = parseGatedAccessBusinessType(existing?.business_type);
+  const businessType = metaBusinessType ?? existingBusinessType;
 
   const { error } = await supabase.from('gated_content_leads').upsert(
     {
@@ -99,6 +106,7 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       name,
       first_name: firstName,
       last_name: lastName,
+      business_type: businessType,
       page_slug: pageSlug,
       // Keep the original first-verify timestamp on return sign-ins.
       verified_at: firstVerifiedAt,
@@ -117,6 +125,7 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       userId: user.id,
       metadata: {
         ...(name ? { name, first_name: firstName, last_name: lastName } : {}),
+        ...(businessType ? { business_type: businessType } : {}),
         is_new_signup: isNewSignup,
         is_return: !isNewSignup,
       },
@@ -126,6 +135,7 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       name,
       first_name: firstName,
       last_name: lastName,
+      business_type: businessType,
       page_slug: pageSlug,
       verified_at: verifiedAt,
     });
@@ -164,6 +174,9 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
         typeof totalVerified === 'number' ? totalVerified : 0,
         signupNumber
       );
+      const businessTypeLabel = businessType
+        ? gatedAccessBusinessTypeLabel(businessType)
+        : null;
 
       if (isNewSignup && signupNumber > 0) {
         console.info(
@@ -174,6 +187,7 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
           signupNumber,
           email,
           name,
+          businessType: businessTypeLabel,
           totalVerifiedEmails: totalForSlack,
         });
       } else if (!isNewSignup) {
@@ -187,6 +201,7 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
         await notifyMarketOverviewReturnSigninSlack({
           email,
           name,
+          businessType: businessTypeLabel,
           signInCount,
           firstVerifiedAt,
           totalVerifiedEmails: totalForSlack,

@@ -1,7 +1,7 @@
 /**
  * POST /api/gated-access/request
  *
- * Public endpoint that captures a name + email lead and sends a Supabase
+ * Public endpoint that captures a name + role + email lead and sends a Supabase
  * magic link so the visitor can unlock a gated content page (currently
  * `/glamping-market-overview`).
  *
@@ -33,6 +33,10 @@ import {
   isValidEmail,
   normalizeAuthSiteOrigin,
 } from '@/lib/gated-access';
+import {
+  parseGatedAccessBusinessType,
+  type GatedAccessBusinessType,
+} from '@/lib/gated-access-business-type';
 import { joinFullName, parsePersonNameFields, splitFullName } from '@/lib/person-name';
 
 export const dynamic = 'force-dynamic';
@@ -52,22 +56,24 @@ function getRequestOrigin(request: NextRequest): string {
   return normalizeAuthSiteOrigin(new URL(request.url).origin);
 }
 
-type LeadNameParts = {
+type LeadProfileParts = {
   fullName: string;
   firstName: string;
   lastName: string;
+  businessType: GatedAccessBusinessType | null;
 };
 
-async function lookupLeadNameParts(
+async function lookupLeadProfileParts(
   email: string,
   pageSlug: string
-): Promise<LeadNameParts | null> {
+): Promise<LeadProfileParts | null> {
   const lead = await lookupGatedLead(email, pageSlug);
   if (lead.firstName && lead.lastName) {
     return {
       firstName: lead.firstName,
       lastName: lead.lastName,
       fullName: joinFullName(lead.firstName, lead.lastName),
+      businessType: lead.businessType,
     };
   }
   const name = lead.name?.trim() ?? '';
@@ -77,6 +83,7 @@ async function lookupLeadNameParts(
     fullName: name,
     firstName: split.first_name,
     lastName: split.last_name,
+    businessType: lead.businessType,
   };
 }
 
@@ -85,6 +92,7 @@ export async function POST(request: NextRequest) {
     name?: unknown;
     firstName?: unknown;
     lastName?: unknown;
+    businessType?: unknown;
     email?: unknown;
     pageSlug?: unknown;
     emailOnly?: unknown;
@@ -101,7 +109,7 @@ export async function POST(request: NextRequest) {
     ? body.pageSlug
     : GATED_PAGE_GLAMPING_MARKET_OVERVIEW;
 
-  let leadNames: LeadNameParts | null = null;
+  let leadProfile: LeadProfileParts | null = null;
   if (!emailOnly) {
     const parsed = parsePersonNameFields(body);
     if (!parsed) {
@@ -110,10 +118,18 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    leadNames = {
+    const businessType = parseGatedAccessBusinessType(body.businessType);
+    if (!businessType) {
+      return NextResponse.json(
+        { ok: false, error: 'Please select what best describes you.' },
+        { status: 400 }
+      );
+    }
+    leadProfile = {
       firstName: parsed.firstName,
       lastName: parsed.lastName,
       fullName: joinFullName(parsed.firstName, parsed.lastName),
+      businessType,
     };
   }
 
@@ -171,7 +187,12 @@ export async function POST(request: NextRequest) {
     eventType: 'form_submit',
     email,
     pageSlug,
-    metadata: { email_only: emailOnly },
+    metadata: {
+      email_only: emailOnly,
+      ...(leadProfile?.businessType
+        ? { business_type: leadProfile.businessType }
+        : {}),
+    },
   });
 
   const response = NextResponse.json({ ok: true });
@@ -182,8 +203,8 @@ export async function POST(request: NextRequest) {
     // (returning-user sign-in can noop when a partial session is present).
     await supabase.auth.signOut();
 
-    const names =
-      leadNames ?? (emailOnly ? await lookupLeadNameParts(email, pageSlug) : null);
+    const profile =
+      leadProfile ?? (emailOnly ? await lookupLeadProfileParts(email, pageSlug) : null);
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -191,11 +212,14 @@ export async function POST(request: NextRequest) {
         // same request (Supabase enforces a short cooldown between sends).
         shouldCreateUser: true,
         data: {
-          ...(names
+          ...(profile
             ? {
-                full_name: names.fullName,
-                first_name: names.firstName,
-                last_name: names.lastName,
+                full_name: profile.fullName,
+                first_name: profile.firstName,
+                last_name: profile.lastName,
+                ...(profile.businessType
+                  ? { business_type: profile.businessType }
+                  : {}),
               }
             : {}),
           gated_page: pageSlug,

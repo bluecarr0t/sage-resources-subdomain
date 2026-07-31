@@ -66,6 +66,7 @@ export type GatedLeadZapierPayload = {
   name?: string | null;
   first_name?: string | null;
   last_name?: string | null;
+  business_type?: string | null;
   page_slug: string;
   verified_at: string;
 };
@@ -82,6 +83,7 @@ export function notifyZapierGatedLead(payload: GatedLeadZapierPayload): void {
     last_name,
     name:
       payload.name?.trim() || joinFullName(first_name, last_name) || undefined,
+    business_type: payload.business_type?.trim() || undefined,
     page_slug: payload.page_slug,
     verified_at: payload.verified_at,
   });

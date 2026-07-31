@@ -105,7 +105,7 @@ export const GLAMPING_MARKET_BRANDS_FAQS: FAQItem[] = [
   {
     question: 'How do I access the Top Glamping Brands list?',
     answer:
-      'Request access on the Glamping Market Overview with your name and work email. Sage sends a secure magic-link sign-in; no password required. The same login unlocks market totals and the brand rankings.',
+      'Request access on the Glamping Market Overview with your name, role, and work email. Sage sends a secure magic-link sign-in; no password required. The same login unlocks market totals and the brand rankings.',
   },
 ];
 

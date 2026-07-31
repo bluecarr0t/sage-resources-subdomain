@@ -88,6 +88,7 @@ describe('zapier-webhook', () => {
       name: 'Jane Doe',
       first_name: 'Jane',
       last_name: 'Doe',
+      business_type: 'investor',
       page_slug: 'glamping-market-overview',
       verified_at: '2026-06-05T20:00:00.000Z',
     });
@@ -103,6 +104,7 @@ describe('zapier-webhook', () => {
           first_name: 'Jane',
           last_name: 'Doe',
           name: 'Jane Doe',
+          business_type: 'investor',
           page_slug: 'glamping-market-overview',
           verified_at: '2026-06-05T20:00:00.000Z',
         }),

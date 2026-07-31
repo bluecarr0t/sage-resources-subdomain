@@ -2,16 +2,23 @@ import type { PoolClient } from 'pg';
 
 export type FlatOta = 'campspot' | 'hipcamp';
 
-/** Base tables from sync:do — must be populated before transform. */
-const REQUIRED_BASE_TABLES: Record<FlatOta, string[]> = {
-  campspot: ['campspot.propertydetails', 'campspot.sites', 'campspot.sitedetails'],
-  hipcamp: ['hipcamp.propertydetails', 'hipcamp.sites', 'hipcamp.sitedetails'],
-};
-
-/** Snapshotted from DO matviews at transform time (unless --skip-matviews). */
-const MATVIEW_SNAPSHOT_TABLES: Record<FlatOta, string[]> = {
-  campspot: ['campspot.latest_sites', 'campspot.site_monthly_analytics'],
-  hipcamp: ['hipcamp.latest_sites', 'hipcamp.site_monthly_analytics'],
+/**
+ * Condensed Approach A: flat transform reads dimensions + matview snapshots.
+ * Base daily `sites` / `propertys` are not required (and should stay truncated).
+ */
+const REQUIRED_TABLES: Record<FlatOta, string[]> = {
+  campspot: [
+    'campspot.propertydetails',
+    'campspot.sitedetails',
+    'campspot.latest_sites',
+    'campspot.site_monthly_analytics',
+  ],
+  hipcamp: [
+    'hipcamp.propertydetails',
+    'hipcamp.sitedetails',
+    'hipcamp.latest_sites',
+    'hipcamp.site_monthly_analytics',
+  ],
 };
 
 export interface PreflightResult {
@@ -23,18 +30,13 @@ export interface PreflightResult {
 export async function runFlatTransformPreflight(
   client: PoolClient,
   otas: FlatOta[],
-  options?: { requireMatviewSnapshots?: boolean }
+  _options?: { requireMatviewSnapshots?: boolean }
 ): Promise<PreflightResult> {
   const missing: string[] = [];
   const counts: Record<string, number> = {};
-  const requireMatviews = options?.requireMatviewSnapshots ?? false;
 
   for (const ota of otas) {
-    const tables = [
-      ...REQUIRED_BASE_TABLES[ota],
-      ...(requireMatviews ? MATVIEW_SNAPSHOT_TABLES[ota] : []),
-    ];
-    for (const qualified of tables) {
+    for (const qualified of REQUIRED_TABLES[ota]) {
       const [schema, table] = qualified.split('.');
       const exists = await client.query<{ exists: boolean }>(
         `
@@ -59,7 +61,7 @@ export async function runFlatTransformPreflight(
       counts[qualified] = count;
 
       if (count === 0) {
-        missing.push(`${qualified} (empty — run npm run sync:do:full first)`);
+        missing.push(`${qualified} (empty — run npm run sync:do:matviews / sync:do -- --no-large)`);
       }
     }
   }

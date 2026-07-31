@@ -45,12 +45,15 @@ describe('website-slack-client', () => {
       signupNumber: 43,
       email: 'jane@example.com',
       name: 'Jane Doe',
+      businessType: 'Investor',
     });
 
     expect(message.text).toContain('#43');
     expect(message.text).toContain('jane@example.com');
     expect(message.text).toContain('Jane Doe');
+    expect(message.text).toContain('I am a: Investor');
     expect(JSON.stringify(message.blocks)).toContain('Market Overview signup #43');
+    expect(JSON.stringify(message.blocks)).toContain('*I am a:* Investor');
     expect(JSON.stringify(message.blocks)).toContain('Total verified emails: *43*');
   });
 
@@ -63,6 +66,7 @@ describe('website-slack-client', () => {
     const message = buildMarketOverviewReturnSigninSlackMessage({
       email: 'jane@example.com',
       name: 'Jane Doe',
+      businessType: 'Operator',
       signInCount: 4,
       firstVerifiedAt: '2026-01-15T12:00:00.000Z',
       totalVerifiedEmails: 43,
@@ -72,6 +76,7 @@ describe('website-slack-client', () => {
     expect(message.text).toContain('visit #4');
     expect(JSON.stringify(message.blocks)).toContain('return sign-in');
     expect(JSON.stringify(message.blocks)).toContain('sign-in *#4*');
+    expect(JSON.stringify(message.blocks)).toContain('*I am a:* Operator');
     expect(JSON.stringify(message.blocks)).toContain('Total verified emails: *43*');
   });
 });

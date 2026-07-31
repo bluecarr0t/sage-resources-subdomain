@@ -75,14 +75,6 @@ WITH ls AS (
   FROM campspot.latest_sites
   ORDER BY property_id, site_id, site_updated_at DESC NULLS LAST
 ),
-site_parent AS (
-  SELECT DISTINCT ON (id, property_id)
-    id,
-    property_id,
-    parent_id
-  FROM campspot.sites
-  ORDER BY id, property_id, scraping_id DESC NULLS LAST
-),
 parent_sd AS (
   SELECT DISTINCT ON (property_id, id)
     id,
@@ -288,8 +280,7 @@ SELECT
   now() AS updated_at
 FROM ls
 JOIN campspot.propertydetails pd ON pd.id = ls.property_id
-LEFT JOIN site_parent sp ON sp.id = ls.site_id AND sp.property_id = ls.property_id
-LEFT JOIN parent_sd psd ON psd.id = COALESCE(ls.parent_id, sp.parent_id) AND psd.property_id = ls.property_id
+LEFT JOIN parent_sd psd ON psd.id = ls.parent_id AND psd.property_id = ls.property_id
 LEFT JOIN year_metrics ym ON ym.property_id = ls.property_id AND ym.site_id = ls.site_id
 LEFT JOIN high_low_2025 hl5 ON hl5.property_id = ls.property_id AND hl5.site_id = ls.site_id
 LEFT JOIN high_low_2026 hl6 ON hl6.property_id = ls.property_id AND hl6.site_id = ls.site_id

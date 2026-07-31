@@ -170,6 +170,21 @@ Failed GitHub Action runs still appear in the Actions UI; Supabase row is the so
 - [x] Matview snapshots: `latest_sites`, `site_monthly_analytics`, `site_yearly_analytics`
 - [x] Legacy `*_public` one-time archive complete (frozen; not weekly)
 
+### Legacy monthly condense (2023–2024 `*_public`)
+
+Daily scrape snapshots in `hipcamp_public` / `campspot_public` are condensed to **one fullest scrape per calendar month** (score = `sites` + `average` row counts; tie-break later date). Full columns kept.
+
+| Step | Command |
+|------|---------|
+| Build + verify (default) | `npm run sync:do:legacy-monthly` |
+| One brand only | `npm run sync:do:legacy-monthly -- --schema=hipcamp` |
+| Drop daily big tables (after sign-off) | `CONFIRM_LEGACY_MONTHLY_DROP=1 npm run sync:do:legacy-monthly -- --drop-daily-big` |
+
+- Targets: `hipcamp_public_monthly` / `campspot_public_monthly` (`month_picks`, `dates`, `sites`, `average`, `listings`, plus small tables).
+- Drop gate requires **both** `--drop-daily-big` and `CONFIRM_LEGACY_MONTHLY_DROP=1`. Drops only `sites` / `average` / `listings` in `*_public`.
+- Does **not** delete DigitalOcean `hipcamp` / `campspot` DBs. After drop, run/wait for VACUUM so disk reclaim shows up.
+- Script: [`scripts/sync-do-to-supabase/legacy-monthly-condense.ts`](../../scripts/sync-do-to-supabase/legacy-monthly-condense.ts)
+
 ### CSV migration path (deprecated)
 
 - [x] `migrate:legacy-export` / `migrate:legacy-import` / `migrate:legacy` → blocked; use `sync:do`
@@ -177,7 +192,23 @@ Failed GitHub Action runs still appear in the Actions UI; Supabase row is the so
 
 ### Phase 2+ / ops (remaining)
 
-- [ ] Truncate or freeze partial SB `sites`/`propertys` to reclaim disk
-- [ ] Wire `transform:flat-sites` into weekly script (preflight today still requires base `sites`)
+- [x] Truncate partial SB `sites`/`propertys` (Approach A — `sync:do:truncate-daily-facts`)
+- [x] Flat-transform preflight uses matviews + dims (no base `sites` required)
+- [ ] Wire `transform:flat-sites` into weekly script
 - [ ] Thin `kpi_*` calculation marts
 - [ ] Drop DO legacy `hipcamp` / `campspot` DBs after sign-off
+
+### Approach A — 2025–2026 campings (condensed)
+
+DigitalOcean `campings` remains the daily firehose. Supabase holds:
+
+- Dimension tables (`scrapings`, `propertydetails`, `sitedetails`, `siteseasonals`, …) via weekly `--no-large`
+- Matview snapshots: `latest_sites`, `site_monthly_analytics`, `site_yearly_analytics`
+
+It does **not** retain growing daily `sites` / `propertys` history. Truncate leftovers after matviews are healthy:
+
+```bash
+CONFIRM_CAMPINGS_DAILY_TRUNCATE=1 npm run sync:do:truncate-daily-facts -- --truncate-daily-facts
+```
+
+Flat transform (`transform:flat-sites`) reads `latest_sites` + `site_monthly_analytics` (+ details); preflight no longer requires base `sites`.

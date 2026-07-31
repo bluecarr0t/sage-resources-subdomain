@@ -103,6 +103,8 @@
     "sync:do:legacy-small": "tsx scripts/sync-do-to-supabase/run-sync.ts --databases=hipcamp,campspot --no-large --full --continue-on-error",
     "sync:do:legacy-schema": "tsx scripts/sync-do-to-supabase/run-sync.ts --databases=hipcamp,campspot --include-large --schema-only --continue-on-error",
     "sync:do:legacy-bulk": "tsx scripts/sync-do-to-supabase/legacy-bulk-copy.ts",
+    "sync:do:legacy-monthly": "tsx scripts/sync-do-to-supabase/legacy-monthly-condense.ts",
+    "sync:do:truncate-daily-facts": "tsx scripts/sync-do-to-supabase/truncate-campings-daily-facts.ts",
     "transform:flat-sites": "tsx scripts/flat-sites-transform/run-flat-transform.ts",
     "transform:flat-sites:dry-run": "tsx scripts/flat-sites-transform/run-flat-transform.ts --dry-run",
     "refresh:downstream": "tsx scripts/downstream-refresh/run-downstream-refresh.ts",

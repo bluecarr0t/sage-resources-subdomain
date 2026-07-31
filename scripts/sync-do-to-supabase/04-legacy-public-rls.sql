@@ -1,5 +1,5 @@
--- RLS for legacy archive schemas (hipcamp_public / campspot_public)
--- Run after legacy bulk transfer completes.
+-- RLS for legacy archive schemas (daily + monthly)
+-- Run after legacy bulk transfer / monthly condense.
 -- service_role bypasses RLS; authenticated gets read-only SELECT.
 
 DO $$
@@ -11,7 +11,12 @@ BEGIN
     FROM pg_class c
     JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE c.relkind = 'r'
-      AND n.nspname IN ('hipcamp_public', 'campspot_public')
+      AND n.nspname IN (
+        'hipcamp_public',
+        'campspot_public',
+        'hipcamp_public_monthly',
+        'campspot_public_monthly'
+      )
   LOOP
     EXECUTE format('ALTER TABLE %I.%I ENABLE ROW LEVEL SECURITY', r.schema_name, r.table_name);
     EXECUTE format('DROP POLICY IF EXISTS "Allow authenticated read" ON %I.%I', r.schema_name, r.table_name);
