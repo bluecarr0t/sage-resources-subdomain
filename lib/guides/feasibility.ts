@@ -967,7 +967,20 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p><strong>Review Regularly:</strong> As your project evolves, revisit the recommendations to ensure they remain relevant and aligned with your progress.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Start with the executive summary to get the study's bottom-line viability call before reading the detail.",
+      "Cross-check market analysis assumptions—demand drivers, competitive set, seasonality—against what you can independently verify.",
+      "Financial projections are the core of the report; scrutinize occupancy, ADR, and expense ratios against comparable properties.",
+      "Risk assessment sections should name specific risks and matching mitigation strategies, not generic boilerplate.",
+      "Strategic recommendations translate findings into action—prioritize by impact and feasibility for your project.",
+      "If projections or conclusions seem off, ask the consultant directly rather than guessing at their methodology.",
+    ],
+    citations: [
+      { id: 1, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+      { id: 2, title: "Feasibility Studies Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/feasibility-studies-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "KOA North American Camping Report", url: "https://koa.com/north-american-camping-report/", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["how to read feasibility study", "feasibility study interpretation", "understanding feasibility studies"],
     relatedServices: {
       title: "Feasibility Study Services",
@@ -995,7 +1008,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     slug: "feasibility-study-vs-appraisal",
     title: "Feasibility Study vs. Appraisal: Key Differences | Sage Outdoor Advisory",
     metaDescription: "Feasibility study vs appraisal for glamping, RV resorts & campgrounds: forward-looking viability vs present property value. When lenders require both and typical timelines.",
-    quickAnswer: "A feasibility study tests whether a proposed outdoor hospitality project can succeed financially (forward-looking). An appraisal states what an existing property is worth today (present-focused). Development financing usually requires both: the feasibility study for project viability and the appraisal for collateral value.",
+    quickAnswer: "A feasibility study tests whether a proposed outdoor hospitality project can succeed financially (forward-looking). An appraisal states what an existing property is worth today (present-focused). Development financing usually requires both: the feasibility study for project viability and the appraisal for collateral value. Lenders often request both documents together when underwriting new glamping, RV resort, or campground developments.",
     category: "feasibility",
     hero: {
       headline: "Feasibility Study vs. Appraisal",
@@ -1183,7 +1196,12 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p>On development deals, the feasibility study typically starts first to validate the concept; appraisals may follow at pre-development, completion, or stabilization depending on lender requirements.</p>`
       }
     ],
-    lastModified: "2026-05-20",
+    citations: [
+      { id: 1, title: "Uniform Standards of Professional Appraisal Practice (USPAP)", url: "https://www.appraisalfoundation.org/imis/TAF/Standards/Appraisal_Standards/USPAP/USPAP.aspx", accessed: "July 2026" },
+      { id: 2, title: "Feasibility Studies Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/feasibility-studies-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "Property Appraisals Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/property-appraisals-complete-guide", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["feasibility study vs appraisal", "difference between feasibility study and appraisal"],
     cta: {
       title: "Need Help Understanding Which You Need?",
@@ -1196,7 +1214,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     slug: "feasibility-study-process-timeline",
     title: `How Long Does a Feasibility Study Take? Process & Timeline (${FEASIBILITY_STUDY_TIMELINE}) | Sage Outdoor Advisory`,
     metaDescription: `Outdoor hospitality feasibility study timeline: kickoff, market research, financial modeling, and report delivery. Typical ${FEASIBILITY_STUDY_TIMELINE} for glamping, RV resorts, and campgrounds—what to expect at each phase.`,
-    quickAnswer: `Most bank-ready outdoor hospitality feasibility studies take ${FEASIBILITY_STUDY_TIMELINE} from kickoff to draft delivery. Week 1 covers scope and site context; weeks 2–5 focus on market and financial modeling; weeks 6–8 finalize the lender-ready report. Timelines stretch when market data is thin or client inputs are delayed.`,
+    quickAnswer: `Most bank-ready outdoor hospitality feasibility studies take ${FEASIBILITY_STUDY_TIMELINE} from kickoff to draft delivery. Week 1 covers scope and site context; weeks 2–5 focus on market and financial modeling; weeks 6–8 finalize the lender-ready report. Timelines stretch when market data is thin or client inputs are delayed. Confirming site access and financial data early is the single biggest lever for keeping the process on schedule.`,
     category: "feasibility",
     hero: {
       headline: "Feasibility Study Process & Timeline",
@@ -1360,7 +1378,12 @@ export const feasibilityGuides: Record<string, GuideContent> = {
       "Glamping, RV resort, and campground studies follow the same phase structure with different unit-mix emphasis.",
       "This page is the canonical timeline reference—link here instead of duplicating week-by-week detail elsewhere.",
     ],
-    lastModified: "2026-05-20",
+    citations: [
+      { id: 1, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+      { id: 2, title: "Feasibility Studies Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/feasibility-studies-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "What Banks Look for in Feasibility Studies", url: "https://resources.sageoutdooradvisory.com/en/guides/what-banks-look-for-feasibility-study", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["feasibility study timeline", "feasibility study process", "how long does a feasibility study take"],
     cta: {
       title: "Ready to Start Your Feasibility Study?",
@@ -1373,6 +1396,7 @@ export const feasibilityGuides: Record<string, GuideContent> = {
     slug: "what-banks-look-for-feasibility-study",
     title: "What Banks Look for in Feasibility Studies | Lender Requirements | Sage Outdoor Advisory",
     metaDescription: "Learn what banks and lenders require in feasibility studies for outdoor hospitality financing. Understand lender requirements and how to meet them.",
+    quickAnswer: `Lenders review feasibility studies for realistic, well-supported projections rather than optimistic guesses. They expect comprehensive market analysis, multi-year revenue and expense forecasts, identified risks with mitigation plans, and documentation from a credible, industry-experienced consultant. Reports should compare assumptions to real market data and industry benchmarks, not just management estimates. Missing risk analysis, thin market support, or unrecognized consultants are common reasons banks reject or delay a feasibility study. A bank-ready outdoor hospitality feasibility study typically follows the same ${FEASIBILITY_STUDY_TIMELINE} process used to finance glamping, RV resort, and campground projects.`,
     category: "feasibility",
     hero: {
       headline: "What Banks Look for in Feasibility Studies",
@@ -1521,7 +1545,19 @@ export const feasibilityGuides: Record<string, GuideContent> = {
         <p>We've helped numerous clients secure financing for their glamping, RV resort, and campground projects.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Lenders want realistic, conservative financial projections backed by market data, not optimistic guesses.",
+      "A bank-ready feasibility study needs comprehensive market analysis, competitive review, and a multi-year pro forma.",
+      "Risk assessment must name specific risks and mitigation strategies—vague or missing risk sections are a red flag.",
+      "Consultant credibility matters: banks prefer studies from recognized, outdoor-hospitality-specific firms.",
+      `Most bank-ready studies take ${FEASIBILITY_STUDY_TIMELINE} and should include sensitivity analysis and benchmark comparisons.`,
+    ],
+    citations: [
+      { id: 1, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+      { id: 2, title: "Uniform Standards of Professional Appraisal Practice (USPAP)", url: "https://www.appraisalfoundation.org/imis/TAF/Standards/Appraisal_Standards/USPAP/USPAP.aspx", accessed: "July 2026" },
+      { id: 3, title: "Feasibility Studies Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/feasibility-studies-complete-guide", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["bank feasibility study requirements", "lender feasibility study", "feasibility study for financing"],
     cta: {
       title: "Need a Bank-Approved Feasibility Study?",

@@ -65,8 +65,31 @@ const nextConfig = {
       { source: '/admin/comparables/:path+', destination: '/admin/glamping-properties/:path+', permanent: false },
       { source: '/admin/comps', destination: '/admin/glamping-properties', permanent: true },
       { source: '/admin/comps/:path+', destination: '/admin/glamping-properties/:path+', permanent: true },
-      { source: '/map', destination: '/en/map', permanent: true },
-      { source: '/map/:path*', destination: '/en/map/:path*', permanent: true },
+      {
+        source: '/map',
+        destination: '/en/map',
+        permanent: true,
+      },
+      {
+        source: '/map/:path*',
+        destination: '/en/map/:path*',
+        permanent: true,
+      },
+      {
+        source: '/partners',
+        destination: '/en/partners',
+        permanent: true,
+      },
+      {
+        source: '/:locale(en|es|fr|de)/guides/glamping-market-trends-2025',
+        destination: '/en/guides/glamping-market-trends-2026',
+        permanent: true,
+      },
+      {
+        source: '/guides/glamping-market-trends-2025',
+        destination: '/en/guides/glamping-market-trends-2026',
+        permanent: true,
+      },
       {
         source: '/admin/sage-glamping-data-breakdown',
         destination: '/admin/sage-data',

@@ -7,7 +7,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "glamping-industry-complete-guide",
     title: "Glamping Industry Complete Guide | 2025 | Sage Outdoor Advisory",
     metaDescription: "Comprehensive guide to the glamping industry. Learn about glamping trends, business models, how to start a glamping business, financing, regulations, and more. Essential reading for glamping entrepreneurs and investors.",
-    quickAnswer: "Glamping pairs outdoor settings with real beds, privacy, and often upscale touches. Operators earn from nightly stays, add-ons, and events. This guide covers trends, typical unit types, operations, and how feasibility and appraisals fit in. Read it if you invest, develop, or run an outdoor hospitality brand.",
+    quickAnswer: "Glamping pairs outdoor settings with real beds, privacy, and often upscale touches. Operators earn from nightly stays, add-ons, and events. This guide covers trends, typical unit types, operations, and how feasibility and appraisals fit in. Read it if you invest, develop, or run an outdoor hospitality brand. Sage Outdoor Advisory has completed over 350 glamping feasibility studies and appraisals nationwide.",
     category: "industry",
     hero: {
       headline: "Glamping Industry Complete Guide",
@@ -114,7 +114,7 @@ export const industryGuides: Record<string, GuideContent> = {
           <li>Multi-generational appeal</li>
         </ul>
         
-        <p>For detailed trend analysis and market data, explore our <a href="https://sageoutdooradvisory.com/blog/glamping-market-trends-2025/" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Market Data 2025</a> blog post and <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" class="text-[#006b5f] hover:text-[#005a4f] underline">2025 Outdoor Hospitality Industry Overview</a> for comprehensive insights. You can also see our <a href="/guides/glamping-market-trends-2025" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping market trends 2025 guide</a>.</p>`
+        <p>For detailed trend analysis and live market data, explore the <a href="/glamping-market-overview" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Market Overview</a> (supply, ARDR, unit mix), <a href="/glamping-market-overview/brands" class="text-[#006b5f] hover:text-[#005a4f] underline">Top Glamping Brands 2026</a>, and our <a href="/guides/glamping-market-trends-2026" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping market trends 2026 guide</a>. For narrative industry context, see the <a href="https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/" class="text-[#006b5f] hover:text-[#005a4f] underline">Outdoor Hospitality Industry Overview</a> on the Sage blog.</p>`
       },
       {
         id: "start-business",
@@ -254,9 +254,9 @@ export const industryGuides: Record<string, GuideContent> = {
         description: "Detailed guide to different glamping accommodation options."
       },
       {
-        title: "Glamping Market Trends 2025",
-        url: "/guides/glamping-market-trends-2025",
-        description: "Current and emerging trends in the glamping industry."
+        title: "Glamping Market Trends 2026",
+        url: "/guides/glamping-market-trends-2026",
+        description: "Current and emerging trends in the glamping industry, with links to live Sage market data."
       },
       {
         title: "How to Start a Glamping Business",
@@ -374,7 +374,21 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>Banks and lenders want to see comprehensive planning and professional documentation. Working with specialized consultants who understand glamping projects can significantly improve your financing prospects.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Glamping combines outdoor settings with real beds, privacy, and upscale amenities, commanding higher per-night rates than traditional camping.",
+      "Revenue comes primarily from accommodation rentals, supplemented by experiences, food & beverage, and event hosting.",
+      "Popular unit types—yurts, A-frames, safari tents, treehouses—each carry different costs, permitting needs, and guest appeal.",
+      "Lenders require a bank-approved feasibility study and specialized appraisal before financing most glamping developments.",
+      "Sage Outdoor Advisory has completed over 350 feasibility studies and appraisals across glamping, RV resort, and campground properties.",
+      "Sage's research spans {PROPERTY_COUNT} unique properties, providing a proprietary data set for glamping market analysis.",
+    ],
+    citations: [
+      { id: 1, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+      { id: 2, title: "Glamping Market Overview", url: "https://resources.sageoutdooradvisory.com/glamping-market-overview", accessed: "July 2026" },
+      { id: 3, title: "KOA North American Camping Report", url: "https://koa.com/north-american-camping-report/", accessed: "July 2026" },
+      { id: 4, title: "Glamping Unit Type Classification", url: "https://resources.sageoutdooradvisory.com/glamping-unit-type-classification", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["glamping industry", "glamping resort guide", "how to start glamping business", "glamping trends", "glamping market"],
     relatedServices: {
       title: "Glamping Services",
@@ -402,7 +416,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "rv-resort-industry-complete-guide",
     title: "RV Resort Industry Complete Guide | 2025 | Sage Outdoor Advisory",
     metaDescription: "Comprehensive guide to the RV resort industry. Learn about RV resort business models, market trends, how to start an RV resort, financing, amenities, and more. Essential reading for RV resort developers and investors.",
-    quickAnswer: "An RV resort focuses on longer-stay guests, strong utilities, and amenity-rich sites. Revenue comes from site rent, storage, and extras such as cabins or retail. Demand ties to drive markets, highways, and nearby attractions. This guide explains operations, financing norms, and how studies and appraisals support decisions.",
+    quickAnswer: "An RV resort focuses on longer-stay guests, strong utilities, and amenity-rich sites. Revenue comes from site rent, storage, and extras such as cabins or retail. Demand ties to drive markets, highways, and nearby attractions. This guide explains operations, financing norms, and how studies and appraisals support decisions. Sage Outdoor Advisory has completed feasibility studies and appraisals for major RV resort developments nationwide.",
     category: "industry",
     hero: {
       headline: "RV Resort Industry Complete Guide",
@@ -884,7 +898,19 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>Learn more in our <a href="/guides/feasibility-studies-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility studies complete guide</a>.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "RV resorts differ from RV parks and campgrounds through premium sites, extensive amenities, and higher nightly rates.",
+      "Revenue centers on site rentals, with long-term and seasonal stays providing stable cash flow alongside amenity and retail income.",
+      "Industry tailwinds include demand for unique, nature-immersive stays, while headwinds include rising development and staffing costs.",
+      "Institutional investment interest continues to outweigh the limited supply of large, multi-site RV resort operations.",
+      "A professional feasibility study and specialized appraisal are typically required before securing development financing.",
+    ],
+    citations: [
+      { id: 1, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+      { id: 2, title: "KOA North American Camping Report", url: "https://koa.com/north-american-camping-report/", accessed: "July 2026" },
+      { id: 3, title: "RV Resort Market Trends", url: "https://resources.sageoutdooradvisory.com/en/guides/rv-resort-market-trends", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["RV resort industry", "RV resort guide", "how to start RV resort", "RV resort trends", "RV resort market"],
     relatedServices: {
       title: "RV Resort Services",
@@ -912,6 +938,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "glamping-accommodation-types",
     title: "Glamping Accommodation Types | Complete Guide | Sage Outdoor Advisory",
     metaDescription: "Complete guide to glamping accommodation types including yurts, A-frames, safari tents, treehouses, and more. Learn the pros and cons of each type.",
+    quickAnswer: "Glamping accommodations range from yurts and A-frame cabins to safari tents, treehouses, geodesic domes, and tiny homes. Each type carries different construction costs, permitting requirements, climate suitability, and guest appeal. Safari tents and yurts are common entry points due to moderate cost and strong guest appeal; treehouses and domes command premium pricing but cost more to build. The right mix depends on target market, location, budget, and local zoning rules—most successful properties combine two or three unit types rather than a single design.",
     category: "industry",
     hero: {
       headline: "Glamping Accommodation Types",
@@ -1039,7 +1066,19 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>See our comprehensive <a href="/guides/glamping-accommodation-types" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping accommodation types guide</a> for detailed information on each option.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Yurts, A-frames, safari tents, treehouses, and domes are the most common glamping accommodation types.",
+      "Construction cost, weather resistance, and permitting complexity vary significantly by unit type.",
+      "Treehouses and domes typically command premium pricing but require more complex construction.",
+      "Safari tents and yurts offer a strong balance of guest appeal and moderate development cost.",
+      "Most successful glamping properties mix two or three accommodation types rather than building a single design.",
+    ],
+    citations: [
+      { id: 1, title: "Glamping Unit Type Classification", url: "https://resources.sageoutdooradvisory.com/glamping-unit-type-classification", accessed: "July 2026" },
+      { id: 2, title: "Glamping Industry Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/glamping-industry-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "Glamping Market Overview", url: "https://resources.sageoutdooradvisory.com/glamping-market-overview", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["glamping accommodation types", "glamping structures", "yurts glamping", "A-frame glamping"],
     cta: {
       title: "Need Help Choosing Accommodation Types?",
@@ -1048,14 +1087,15 @@ export const industryGuides: Record<string, GuideContent> = {
       buttonLink: "https://sageoutdooradvisory.com/contact-us"
     }
   },
-"glamping-market-trends-2025": {
-    slug: "glamping-market-trends-2025",
-    title: "Glamping Market Trends 2025 | Industry Analysis | Sage Outdoor Advisory",
-    metaDescription: "Current and emerging glamping market trends for 2025. Industry statistics, growth projections, and market insights for glamping operators.",
+"glamping-market-trends-2026": {
+    slug: "glamping-market-trends-2026",
+    title: "Glamping Market Trends 2026 | Industry Analysis | Sage Outdoor Advisory",
+    metaDescription: "Current and emerging glamping market trends for 2026. Live supply, ARDR, and brand rankings from Sage Glamping Market Overview, plus industry statistics and operator insights.",
+    quickAnswer: "Glamping demand keeps growing in 2026, driven by experiential travel, luxury amenity expectations, and sustainability-focused guests. Operators are professionalizing operations, diversifying accommodation types, and expanding into new markets. Investment activity is shifting toward larger-scale developments and institutional capital, with strategic location selection becoming a bigger differentiator. For live US and Canada supply, ARDR benchmarks, unit-type mix, and brand rankings, use Sage’s Glamping Market Overview datasets alongside this trends guide.",
     category: "industry",
     hero: {
-      headline: "Glamping Market Trends 2025",
-      subheadline: "Current trends and insights shaping the glamping industry",
+      headline: "Glamping Market Trends 2026",
+      subheadline: "Current trends and live Sage market data shaping the glamping industry",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us"
     },
@@ -1071,9 +1111,9 @@ export const industryGuides: Record<string, GuideContent> = {
       {
         id: "introduction",
         title: "Introduction",
-        content: `<p>The glamping industry continues to evolve with new trends, consumer preferences, and market dynamics. This guide explores current trends shaping the industry in 2025.</p>
+        content: `<p>The glamping industry continues to evolve with new trends, consumer preferences, and market dynamics. This guide explores current trends shaping the industry in 2026 and links to Sage’s live market datasets for operators, developers, and investors.</p>
         
-        <p>See our <a href="/guides/glamping-industry-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Industry Complete Guide</a> for comprehensive information.</p>`
+        <p>See our <a href="/guides/glamping-industry-complete-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Industry Complete Guide</a> for comprehensive background, and the live <a href="/glamping-market-overview" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Market Overview</a> for current US and Canada supply, ARDR, and unit-type mix.</p>`
       },
       {
         id: "market-growth",
@@ -1084,7 +1124,9 @@ export const industryGuides: Record<string, GuideContent> = {
           <li>Luxury travel preferences</li>
           <li>Investment in new properties</li>
           <li>Expanding consumer awareness</li>
-        </ul>`
+        </ul>
+        
+        <p>Track live property counts, state rankings, and rate benchmarks in the <a href="/glamping-market-overview" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Market Overview</a> (free magic-link access for detailed metrics).</p>`
       },
       {
         id: "consumer-trends",
@@ -1106,7 +1148,9 @@ export const industryGuides: Record<string, GuideContent> = {
           <li>Diversification of accommodation types</li>
           <li>Expansion into new markets</li>
           <li>Enhanced guest experiences</li>
-        </ul>`
+        </ul>
+        
+        <p>Compare unit-type mix and canonical labels in the <a href="/glamping-unit-type-classification" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Unit Type Classification</a>, and see which operators scale fastest on <a href="/glamping-market-overview/brands" class="text-[#006b5f] hover:text-[#005a4f] underline">Top Glamping Brands 2026</a>.</p>`
       },
       {
         id: "investment-trends",
@@ -1125,13 +1169,23 @@ export const industryGuides: Record<string, GuideContent> = {
         title: "Glamping Industry Complete Guide",
         url: "/guides/glamping-industry-complete-guide",
         description: "Comprehensive guide to the glamping industry."
+      },
+      {
+        title: "Glamping Market Overview",
+        url: "/glamping-market-overview",
+        description: "Live US and Canada glamping supply, ARDR, and unit-type mix."
+      },
+      {
+        title: "Top Glamping Brands 2026",
+        url: "/glamping-market-overview/brands",
+        description: "Largest US glamping operators ranked by properties, units, and rates."
       }
     ],
     relatedGuides: ["glamping-industry-complete-guide"],
     faqs: [
       {
         question: "What are the current glamping market trends?",
-        answer: `<p>Key glamping market trends for 2025 include:</p>
+        answer: `<p>Key glamping market trends for 2026 include:</p>
         
         <ul class="list-disc list-inside space-y-1 ml-4">
           <li><strong>Market Growth:</strong> Continued expansion of the glamping market with increasing consumer demand</li>
@@ -1143,11 +1197,24 @@ export const industryGuides: Record<string, GuideContent> = {
         
         <p>Understanding these trends can help you position your glamping business for success and align your offerings with market demands.</p>
         
-        <p>See our <a href="/guides/glamping-market-trends-2025" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping market trends 2025 guide</a> for detailed analysis and insights.</p>`
+        <p>For live benchmarks, see the <a href="/glamping-market-overview" class="text-[#006b5f] hover:text-[#005a4f] underline">Glamping Market Overview</a> and this <a href="/guides/glamping-market-trends-2026" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping market trends 2026 guide</a>.</p>`
       }
     ],
-    lastModified: "2025-01-15",
-    keywords: ["glamping trends 2025", "glamping market trends", "glamping industry statistics"],
+    keyTakeaways: [
+      "Demand for unique, experiential accommodations continues to drive glamping market growth in 2026.",
+      "Guests increasingly expect luxury amenities, sustainability practices, and technology integration as standard, not optional.",
+      "Operations are professionalizing, with more sophisticated management practices replacing ad hoc approaches.",
+      "Institutional investors are showing growing interest in larger-scale, multi-property glamping developments.",
+      "Use live Sage datasets (Market Overview, Brands, Unit Type Classification) alongside this guide for citeable supply and rate context.",
+    ],
+    citations: [
+      { id: 1, title: "Glamping Market Overview 2026", url: "https://resources.sageoutdooradvisory.com/glamping-market-overview", accessed: "July 2026" },
+      { id: 2, title: "Top Glamping Brands 2026", url: "https://resources.sageoutdooradvisory.com/glamping-market-overview/brands", accessed: "July 2026" },
+      { id: 3, title: "Glamping Unit Type Classification", url: "https://resources.sageoutdooradvisory.com/glamping-unit-type-classification", accessed: "July 2026" },
+      { id: 4, title: "KOA North American Camping Report", url: "https://koa.com/north-american-camping-report/", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
+    keywords: ["glamping trends 2026", "glamping market trends", "glamping industry statistics", "glamping ARDR"],
     cta: {
       title: "Want to Understand Market Trends for Your Project?",
       description: "Schedule a consultation to discuss market analysis",
@@ -1159,7 +1226,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "how-to-start-glamping-business",
     title: "How to Start a Glamping Business | Step-by-Step Guide | Sage Outdoor Advisory",
     metaDescription: "Complete step-by-step guide to starting a glamping business. Learn everything you need to know from planning to launch.",
-    quickAnswer: "You move from idea to open gates in clear phases: validate the market, secure land, fund the plan, permit the build, and launch marketing. A feasibility study early on saves costly surprises. This guide lists each step with what to decide before you advance.",
+    quickAnswer: "You move from idea to open gates in clear phases: validate the market, secure land, fund the plan, permit the build, and launch marketing. A feasibility study early on saves costly surprises. This guide lists each step with what to decide before you advance. Most successful projects complete a professional feasibility study before finalizing site selection or applying for financing.",
     category: "industry",
     hero: {
       headline: "How to Start a Glamping Business",
@@ -1842,7 +1909,19 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>See our comprehensive <a href="/guides/how-to-start-glamping-business" class="text-[#006b5f] hover:text-[#005a4f] underline">how to start a glamping business guide</a> for detailed information on each step.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Validate your concept with market research and a professional feasibility study before committing capital.",
+      "Site selection, zoning, and permitting requirements vary significantly by location and should be confirmed early.",
+      "A comprehensive business plan and financial projections are essential for securing financing.",
+      "Design, construction, and operations setup typically follow financing and permitting approval.",
+      "Marketing and a strong opening strategy are critical for building initial occupancy and reviews.",
+    ],
+    citations: [
+      { id: 1, title: "Feasibility Studies Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/feasibility-studies-complete-guide", accessed: "July 2026" },
+      { id: 2, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+      { id: 3, title: "Glamping Industry Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/glamping-industry-complete-guide", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["how to start glamping business", "starting glamping business", "glamping business guide"],
     cta: {
       title: "Ready to Start Your Glamping Business?",
@@ -1855,6 +1934,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "glamping-vs-rv-resort",
     title: "Glamping vs. RV Resort | Comparison Guide | Sage Outdoor Advisory",
     metaDescription: "Compare glamping resorts and RV resorts. Understand the differences, business models, and which is right for your investment.",
+    quickAnswer: "Glamping properties provide furnished accommodations—yurts, tents, cabins—so guests don't need their own gear, and typically command higher per-night rates. RV resorts provide sites and amenities for guests who bring their own RVs, generally at lower per-night rates but with potential for more units and long-term stays. Glamping usually requires higher per-unit construction and furnishing costs, while RV resorts require heavier infrastructure investment in utilities and common areas. The better fit depends on your capital, target market, and location.",
     category: "industry",
     hero: {
       headline: "Glamping vs. RV Resort",
@@ -1970,7 +2050,19 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>See our <a href="/guides/glamping-vs-rv-resort" class="text-[#006b5f] hover:text-[#005a4f] underline">glamping vs RV resort guide</a> for a detailed comparison.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Glamping offers furnished accommodations; RV resorts provide sites and amenities for guest-owned RVs.",
+      "Glamping typically commands higher per-night rates; RV resorts can scale to more units at lower rates.",
+      "Glamping requires more per-unit construction and furnishing investment; RV resorts require more infrastructure investment.",
+      "Both models benefit from amenity revenue, but revenue mix and guest expectations differ significantly.",
+      "A feasibility study can clarify which model best fits your site, capital, and target market.",
+    ],
+    citations: [
+      { id: 1, title: "Glamping Industry Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/glamping-industry-complete-guide", accessed: "July 2026" },
+      { id: 2, title: "RV Resort Industry Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/rv-resort-industry-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["glamping vs RV resort", "glamping vs RV park", "glamping comparison"],
     cta: {
       title: "Need Help Choosing Between Glamping and RV Resort?",
@@ -1983,6 +2075,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "rv-resort-vs-rv-park",
     title: "RV Resort vs. RV Park | Complete Comparison | Sage Outdoor Advisory",
     metaDescription: "Detailed comparison of RV resorts and RV parks. Understand the differences in amenities, pricing, target markets, and business models.",
+    quickAnswer: "RV resorts are premium properties with extensive amenities—pools, clubhouses, restaurants—commanding roughly $50–$150+ per night. RV parks are more basic, offering essential hookups and services at $25–$75 per night for cost-conscious travelers. The choice affects investment size, target market, and operating complexity: RV resorts need larger amenity and staffing investments, while RV parks require lower capital but generate less revenue per site. Understanding this distinction helps position your property and set realistic pricing and investment expectations.",
     category: "industry",
     hero: {
       headline: "RV Resort vs. RV Park",
@@ -2090,7 +2183,19 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>See our <a href="/guides/rv-resort-vs-rv-park" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort vs RV park guide</a> for a detailed comparison.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "RV resorts offer premium amenities and command $50–$150+ per night; RV parks offer basic services at $25–$75 per night.",
+      "RV resorts require larger investment in amenities, landscaping, and staffing than RV parks.",
+      "RV parks focus on functionality and value; RV resorts focus on guest experience and resort-style design.",
+      "Target markets differ: discerning RVers seeking luxury versus cost-conscious RVers seeking basic services.",
+      "Investment capacity and target market should drive the choice between an RV resort and RV park model.",
+    ],
+    citations: [
+      { id: 1, title: "RV Resort Industry Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/rv-resort-industry-complete-guide", accessed: "July 2026" },
+      { id: 2, title: "RV Resort Amenities Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/rv-resort-amenities-guide", accessed: "July 2026" },
+      { id: 3, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["RV resort vs RV park", "difference between RV resort and RV park", "RV resort comparison"],
     cta: {
       title: "Need Help Choosing Between RV Resort and RV Park?",
@@ -2103,6 +2208,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "rv-resort-amenities-guide",
     title: "RV Resort Amenities Guide | Design & Planning | Sage Outdoor Advisory",
     metaDescription: "Complete guide to RV resort amenities and design. Learn what amenities drive revenue, guest satisfaction, and competitive positioning.",
+    quickAnswer: "Essential RV resort amenities include full hookups (water, sewer, electric), Wi-Fi, restrooms, laundry, and waste disposal. Premium amenities—pools, clubhouses, restaurants, activity programming—enhance guest appeal and support higher pricing. Revenue-generating amenities like food service, retail, and premium site upgrades add income beyond base site rentals. The right amenity mix depends on target market, competitive positioning, budget, and expected revenue impact, so design decisions should tie back to your feasibility study assumptions.",
     category: "industry",
     hero: {
       headline: "RV Resort Amenities Guide",
@@ -2218,7 +2324,19 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>See our <a href="/guides/rv-resort-amenities-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort amenities guide</a> for comprehensive information.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Full hookups, Wi-Fi, restrooms, and laundry are essential baseline amenities for any RV resort.",
+      "Pools, clubhouses, restaurants, and activity programming are premium amenities that support higher pricing.",
+      "Food service, retail, and premium site upgrades create revenue streams beyond base site rentals.",
+      "Amenity decisions should align with target market preferences, competitive positioning, and budget constraints.",
+      "Amenity planning works best when tied directly to feasibility study revenue and cost assumptions.",
+    ],
+    citations: [
+      { id: 1, title: "RV Resort Industry Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/rv-resort-industry-complete-guide", accessed: "July 2026" },
+      { id: 2, title: "RV Resort Market Trends", url: "https://resources.sageoutdooradvisory.com/en/guides/rv-resort-market-trends", accessed: "July 2026" },
+      { id: 3, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["RV resort amenities", "RV park amenities", "RV resort design"],
     cta: {
       title: "Need Help Planning RV Resort Amenities?",
@@ -2231,6 +2349,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "rv-resort-market-trends",
     title: "RV Resort Market Trends | Industry Analysis | Sage Outdoor Advisory",
     metaDescription: "Current RV resort market trends, statistics, and insights. Industry analysis for RV resort investors and operators.",
+    quickAnswer: "The RV resort industry keeps growing but has softened since 2023 amid inflation, higher interest rates, and rising development costs. Tailwinds include demand for unique, nature-immersive stays, wellness amenities, and long-term snowbird markets, plus consistent institutional investment interest. Headwinds include higher construction costs, staffing challenges in remote locations, and potential declines in international travel. Upper-scale and luxury RV resorts have outperformed economy and midscale segments, mirroring broader hotel industry patterns.",
     category: "industry",
     hero: {
       headline: "RV Resort Market Trends",
@@ -2372,7 +2491,19 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>See our <a href="/guides/rv-resort-market-trends" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort market trends guide</a> for detailed analysis and insights.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "RV resort demand has softened since 2023 due to inflation, higher rates, and economic uncertainty.",
+      "Upper-scale and luxury RV resort segments continue to outperform economy and midscale properties.",
+      "Institutional investment interest remains strong, outweighing the limited supply of large, multi-site operations.",
+      "Rising development and staffing costs, especially in remote locations, are key operational headwinds.",
+      "Outdoor recreation and national park visitation have grown roughly 2–3% year-over-year over the past decade.",
+    ],
+    citations: [
+      { id: 1, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+      { id: 2, title: "KOA North American Camping Report", url: "https://koa.com/north-american-camping-report/", accessed: "July 2026" },
+      { id: 3, title: "RV Resort Industry Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/rv-resort-industry-complete-guide", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["RV resort trends", "RV resort market trends", "RV industry statistics"],
     cta: {
       title: "Want to Understand Market Trends for Your Project?",
@@ -2385,6 +2516,7 @@ export const industryGuides: Record<string, GuideContent> = {
     slug: "rv-resort-investment-guide",
     title: "RV Resort Investment Guide | Analysis & Strategy | Sage Outdoor Advisory",
     metaDescription: "Complete guide to investing in RV resorts. Learn about investment analysis, ROI, risks, and strategies for RV resort investments.",
+    quickAnswer: "RV resort investments offer income potential, real estate appreciation, and portfolio diversification, but require careful financial and market analysis. Key evaluation areas include revenue projections, operating expenses, ROI, location, property condition, amenities, and management quality. A professional feasibility study is the standard tool for validating assumptions across all these areas before committing capital. Strategies range from acquiring existing properties to ground-up development or value-add improvements, each with different risk and return profiles.",
     category: "industry",
     hero: {
       headline: "RV Resort Investment Guide",
@@ -2507,7 +2639,19 @@ export const industryGuides: Record<string, GuideContent> = {
         <p>See our <a href="/guides/rv-resort-investment-guide" class="text-[#006b5f] hover:text-[#005a4f] underline">RV resort investment guide</a> for detailed information.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Evaluate RV resort investments across financial projections, market demand, property condition, and management quality.",
+      "A professional feasibility study is the standard tool for validating investment assumptions before committing capital.",
+      "Location, amenities, and competitive positioning are among the most important property-level investment factors.",
+      "Investment strategies range from acquiring existing properties to ground-up development and value-add improvements.",
+      "Risk assessment should cover market, financial, operational, and regulatory factors specific to RV resorts.",
+    ],
+    citations: [
+      { id: 1, title: "Feasibility Studies Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/feasibility-studies-complete-guide", accessed: "July 2026" },
+      { id: 2, title: "RV Resort Industry Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/rv-resort-industry-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["RV resort investment", "RV resort ROI", "investing in RV resorts"],
     cta: {
       title: "Need Help Analyzing an RV Resort Investment?",

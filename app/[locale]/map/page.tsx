@@ -28,8 +28,9 @@ import {
   mapIndexLocationsTitle,
   mapIndexPropertyCountDisplay,
 } from '@/lib/map-seo';
-import { isMapClientWorkOnlyLayer, isMapEmbedMode } from '@/lib/map-embed-mode';
 import { getPublicMapDisplayedPropertyCount } from '@/lib/public-map-property-count';
+import { getAllSageUniquePropertyCount } from '@/lib/all-sage-unique-property-count';
+import { isMapClientWorkOnlyLayer, isMapEmbedMode } from '@/lib/map-embed-mode';
 
 interface PageProps {
   params: {
@@ -148,7 +149,13 @@ async function getPropertyStatistics() {
 
     if (error) {
       console.error('Error fetching property count:', error);
-      return { uniqueProperties: 1266, states: 43, provinces: 5, countries: 2 }; // Fallback values
+      try {
+        const fallbackCount = await getPublicMapDisplayedPropertyCount();
+        return { uniqueProperties: fallbackCount, states: 43, provinces: 5, countries: 2 };
+      } catch {
+        const uniqueFallback = await getAllSageUniquePropertyCount().catch(() => 0);
+        return { uniqueProperties: uniqueFallback, states: 43, provinces: 5, countries: 2 };
+      }
     }
 
     // Count unique property names
@@ -178,7 +185,7 @@ async function getPropertyStatistics() {
     });
 
     const stats = {
-      uniqueProperties: uniquePropertyNames.size || 1266,
+      uniqueProperties: uniquePropertyNames.size || (await getPublicMapDisplayedPropertyCount().catch(() => 0)),
       states: uniqueStates.size,
       provinces: uniqueProvinces.size,
       countries: uniqueCountries.size,
@@ -192,7 +199,13 @@ async function getPropertyStatistics() {
     return stats;
   } catch (error) {
     console.error('Error in getPropertyStatistics:', error);
-    return { uniqueProperties: 1266, states: 43, provinces: 5, countries: 2 }; // Fallback values
+    try {
+      const fallbackCount = await getPublicMapDisplayedPropertyCount();
+      return { uniqueProperties: fallbackCount, states: 43, provinces: 5, countries: 2 };
+    } catch {
+      const uniqueFallback = await getAllSageUniquePropertyCount().catch(() => 0);
+      return { uniqueProperties: uniqueFallback, states: 43, provinces: 5, countries: 2 };
+    }
   }
 }
 

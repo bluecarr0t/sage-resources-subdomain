@@ -4,41 +4,75 @@ import Image from "next/image";
 import Footer from "@/components/Footer";
 import FloatingHeader from "@/components/FloatingHeader";
 import { locales, type Locale } from "@/i18n";
+import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { notFound } from "next/navigation";
+import { resourcesContactUsUrl } from "@/lib/root-domain-attribution";
 
-export const metadata: Metadata = {
-  title: "Sage Partners | Outdoor Hospitality Experts | Sage Outdoor Advisory",
-  description: "Trusted partners for outdoor hospitality development. Industry-leading firms in architecture, engineering, financing, management, and planning for your project.",
-  keywords: "outdoor hospitality partners, glamping consultants, RV resort partners, campground development partners, hospitality financing",
-  openGraph: {
-    title: "Sage Partners | Outdoor Hospitality Experts | Sage",
-    description: "Trusted partners for outdoor hospitality development. Industry-leading firms in architecture, engineering, financing, management, and planning",
-    url: "https://resources.sageoutdooradvisory.com/partners",
-    siteName: "Sage Outdoor Advisory",
-    type: "website",
-    images: [
-      {
-        url: "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/forest-scene.jpg",
-        width: 1920,
-        height: 1080,
-        alt: "Sage Outdoor Advisory partners background featuring scenic landscape",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: ["https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/forest-scene.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+const PARTNERS_TITLE =
+  "Sage Partners | Outdoor Hospitality Experts | Sage Outdoor Advisory";
+const PARTNERS_DESCRIPTION =
+  "Trusted partners for outdoor hospitality development. Industry-leading firms in architecture, engineering, financing, management, and planning for your project.";
+const PARTNERS_OG_IMAGE =
+  "https://b0evzueuuq9l227n.public.blob.vercel-storage.com/glamping-units/forest-scene.jpg";
+
+interface PageProps {
+  params: { locale: string };
+}
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = params;
+  if (!locales.includes(locale as Locale)) {
+    notFound();
+  }
+
+  const pathname = `/${locale}/partners`;
+  const url = `https://resources.sageoutdooradvisory.com${pathname}`;
+
+  return {
+    title: PARTNERS_TITLE,
+    description: PARTNERS_DESCRIPTION,
+    keywords:
+      "outdoor hospitality partners, glamping consultants, RV resort partners, campground development partners, hospitality financing",
+    openGraph: {
+      title: "Sage Partners | Outdoor Hospitality Experts | Sage",
+      description:
+        "Trusted partners for outdoor hospitality development. Industry-leading firms in architecture, engineering, financing, management, and planning",
+      url,
+      siteName: "Sage Outdoor Advisory",
+      locale: getOpenGraphLocale(locale as Locale),
+      type: "website",
+      images: [
+        {
+          url: PARTNERS_OG_IMAGE,
+          width: 1920,
+          height: 1080,
+          alt: "Sage Outdoor Advisory partners background featuring scenic landscape",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [PARTNERS_OG_IMAGE],
+    },
+    alternates: {
+      canonical: url,
+      ...generateHreflangAlternates(pathname),
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+      },
     },
-  },
-};
+  };
+}
 
 interface Partner {
   name: string;
@@ -55,15 +89,13 @@ interface PartnerCategory {
   partners: Partner[];
 }
 
-interface PageProps {
-  params: { locale: string };
-}
-
 export default function PartnersPage({ params }: PageProps) {
   const { locale } = params;
   if (!locales.includes(locale as Locale)) {
     notFound();
   }
+  const attributionPath = '/partners';
+  const contactHref = resourcesContactUsUrl(attributionPath);
 
   const partnerCategories: PartnerCategory[] = [
     {
@@ -298,7 +330,7 @@ export default function PartnersPage({ params }: PageProps) {
             Schedule a call with us to discuss partnership opportunities.
           </p>
           <Link
-            href="https://sageoutdooradvisory.com/contact-us/"
+            href={contactHref}
             className="inline-block px-8 py-4 bg-[#007a6e] text-white text-lg font-semibold rounded-lg hover:bg-[#006b5f] transition-colors shadow-lg"
           >
             Schedule a Call with Us
@@ -317,7 +349,7 @@ export default function PartnersPage({ params }: PageProps) {
             development journey.
           </p>
           <Link
-            href="https://sageoutdooradvisory.com/contact-us/"
+            href={contactHref}
             className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
           >
             Get In Touch
@@ -327,7 +359,7 @@ export default function PartnersPage({ params }: PageProps) {
       </main>
 
       {/* Footer */}
-      <Footer locale={locale} />
+      <Footer locale={locale} attributionPath={attributionPath} />
     </div>
   );
 }

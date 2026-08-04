@@ -44,7 +44,7 @@ export const GUIDE_PODCAST_PLACEMENTS: Record<string, GuidePodcastPlacement[]> =
         'For operator perspectives on scaling iconic outdoor hospitality brands, listen to ',
     },
   ],
-  'glamping-market-trends-2025': [
+  'glamping-market-trends-2026': [
     {
       sectionId: 'introduction',
       links: [{ episodeKey: 'mythBusting', episodeTitle: 'Outdoor Hospitality Myth Busting' }],

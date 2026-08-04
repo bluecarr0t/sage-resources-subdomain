@@ -3,12 +3,16 @@ import { getGuide, getAllGuideSlugs } from "@/lib/guides";
 import { notFound } from "next/navigation";
 import PillarPageTemplate from "@/components/PillarPageTemplate";
 import { locales, type Locale } from "@/i18n";
-import { getOpenGraphLocale } from "@/lib/i18n-utils";
+import { getOpenGraphLocale, generateEnOnlyHreflangAlternates } from "@/lib/i18n-utils";
 import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 import {
   getGuideCanonicalUrl,
   guideMetadataOverridesEn,
 } from "@/lib/guides-metadata-overrides";
+import {
+  applyPropertyCountToContentFields,
+  getPublicContentStats,
+} from "@/lib/public-content-stats";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -66,7 +70,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const modifiedDate = guide.lastModified || publishDate;
   const override = locale === 'en' ? guideMetadataOverridesEn[guide.slug] : undefined;
   const title = override?.title ?? guide.title;
-  const description = override?.description ?? guide.metaDescription;
+  let description = override?.description ?? guide.metaDescription;
+
+  try {
+    const stats = await getPublicContentStats();
+    const withCount = applyPropertyCountToContentFields(
+      { metaDescription: description, quickAnswer: guide.quickAnswer },
+      stats.propertyCountDisplay
+    );
+    description = withCount.metaDescription ?? description;
+  } catch (error) {
+    console.error('[GuidePage metadata] public content stats failed:', error);
+  }
 
   return {
     title,
@@ -98,10 +113,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: canonicalUrl,
-      languages: {
-        en: canonicalUrl,
-        'x-default': canonicalUrl,
-      },
+      ...generateEnOnlyHreflangAlternates(`/en/guides/${guide.slug}`),
     },
     robots: {
       index: true,
@@ -131,6 +143,14 @@ export default async function GuidePage({ params }: PageProps) {
     notFound();
   }
 
-  return <PillarPageTemplate content={guide} locale={locale} />;
+  let content = guide;
+  try {
+    const stats = await getPublicContentStats();
+    content = applyPropertyCountToContentFields(guide, stats.propertyCountDisplay);
+  } catch (error) {
+    console.error('[GuidePage] public content stats failed:', error);
+  }
+
+  return <PillarPageTemplate content={content} locale={locale} />;
 }
 

@@ -11,6 +11,10 @@ import { generateGeoMetadata } from "@/lib/geo-metadata";
 import { getAvailableLocalesForLandingSlug } from "@/lib/i18n-content";
 import { landingSlugHasLocaleTranslation } from "@/lib/landing-i18n";
 import { landingMetadataOverridesEn } from "@/lib/landing-metadata-overrides";
+import {
+  applyPropertyCountToContentFields,
+  getPublicContentStats,
+} from "@/lib/public-content-stats";
 
 // ISR: Revalidate pages every 24 hours
 export const revalidate = 86400;
@@ -131,6 +135,14 @@ export default async function LandingPage({ params }: PageProps) {
     notFound();
   }
 
-  return <LandingPageTemplate content={page} locale={locale} />;
+  let content = page;
+  try {
+    const stats = await getPublicContentStats();
+    content = applyPropertyCountToContentFields(page, stats.propertyCountDisplay);
+  } catch (error) {
+    console.error('[LandingPage] public content stats failed:', error);
+  }
+
+  return <LandingPageTemplate content={content} locale={locale} />;
 }
 

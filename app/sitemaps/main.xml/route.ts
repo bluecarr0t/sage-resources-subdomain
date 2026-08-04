@@ -8,6 +8,7 @@ import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 import {
   MAIN_SITEMAP_PAGE_PATHS,
   getLocalesForMainSitemapPage,
+  getNonLocalePublicSitemapEntries,
 } from '@/lib/sitemap-main-pages';
 import {
   generateEnOnlyHreflangTags,
@@ -111,6 +112,17 @@ ${generateEnOnlyHreflangTags('/glamping-market-overview/brands')}
     <priority>0.9</priority>
 ${generateEnOnlyHreflangTags('/glamping-market-overview')}
   </url>`);
+
+  // Root-level public pages (taxonomy + legal) — no locale prefix
+  for (const entry of getNonLocalePublicSitemapEntries()) {
+    urls.push(`  <url>
+    <loc>${baseUrl}${entry.path}</loc>
+    <lastmod>${contentLastmod}</lastmod>
+    <changefreq>${entry.changefreq}</changefreq>
+    <priority>${entry.priority}</priority>
+${generateEnOnlyHreflangTags(entry.path)}
+  </url>`);
+  }
 
   // Add glamping near national parks index (priority 0.8)
   for (const locale of glampingLocales) {

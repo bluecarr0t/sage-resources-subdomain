@@ -2,6 +2,7 @@ import { getReviewStatusDisplayLabel } from '@/lib/project-pipeline/review-statu
 import { isProjectPipelineReviewStatusApproved } from '@/lib/project-pipeline/review-workflow';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 import { formatProjectPipelineSheetDate } from '@/lib/project-pipeline/due-date-emphasis';
+import { formatSubmissionTimestamp } from '@/lib/project-pipeline/format-submission-timestamp';
 
 const BRAND = {
   pageBg: '#f3f2ec',
@@ -171,19 +172,6 @@ export function buildSubmitForReviewEmail(input: {
   return buildSubmitReviewEmail({ ...input, resubmit: false });
 }
 
-function formatSubmittedAtLabel(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
-
 function buildSubmissionReceiptTable(input: {
   job: ProjectPipelineJob;
   submittedAt: string;
@@ -194,7 +182,7 @@ function buildSubmissionReceiptTable(input: {
     ['Client', input.job.client],
     ['Property', input.job.propertyLocation],
     ['Project Manager', input.job.projMgr],
-    ['Submitted', formatSubmittedAtLabel(input.submittedAt)],
+    ['Submitted', formatSubmissionTimestamp(input.submittedAt)],
     ['Your note', input.note],
   ];
 
@@ -224,7 +212,7 @@ function buildSubmissionReceiptEmail(input: {
 
   const bodyHtml = `
     <p style="margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:${BRAND.text}">
-      This confirms your ${resubmit ? 'resubmission' : 'submission'} for review was recorded on <strong>${escapeHtml(formatSubmittedAtLabel(input.submittedAt))}</strong>.
+      This confirms your ${resubmit ? 'resubmission' : 'submission'} for review was recorded on <strong>${escapeHtml(formatSubmissionTimestamp(input.submittedAt))}</strong>.
       ${trimmedNote ? ' A copy of your note and project details are below for your records.' : ' Project details are below for your records.'}
     </p>
     ${buildSubmissionReceiptTable({

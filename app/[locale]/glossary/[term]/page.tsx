@@ -5,7 +5,7 @@ import GlossaryTermTemplate from "@/components/GlossaryTermTemplate";
 import { locales, type Locale } from "@/i18n";
 import {
   buildGlossaryTermMetaDescription,
-  generateHreflangAlternates,
+  generateHreflangAlternatesForLocales,
   getOpenGraphLocale,
 } from "@/lib/i18n-utils";
 import { glossaryMetadataOverridesEn } from "@/lib/glossary-metadata-overrides";
@@ -84,26 +84,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }]
     : undefined;
 
-  // Generate hreflang tags: include all locales with content + current locale for self-referencing (required by Google)
+  // Generate hreflang tags from content availability (glossary is English-primary)
   const availableLocales = getAvailableLocalesForContent('glossary');
-  const hreflangAlternates: Metadata['alternates'] = {
-    languages: {},
-  };
-  
-  availableLocales.forEach((availableLocale) => {
-    const localePath = pathname.replace(/^\/[a-z]{2}(\/|$)/, `/${availableLocale}$1`);
-    hreflangAlternates.languages![availableLocale] = `https://resources.sageoutdooradvisory.com${localePath}`;
-  });
-  
-  // Always include current locale for self-referencing hreflang (fixes SEMrush "No self-referencing hreflang" errors)
-  const localeKey = locale as Locale;
-  if (!hreflangAlternates.languages![localeKey]) {
-    hreflangAlternates.languages![localeKey] = url;
-  }
-  
-  // Add x-default pointing to default locale
-  const defaultPath = pathname.replace(/^\/[a-z]{2}(\/|$)/, `/en$1`);
-  hreflangAlternates.languages!['x-default'] = `https://resources.sageoutdooradvisory.com${defaultPath}`;
+  const hreflangAlternates = generateHreflangAlternatesForLocales(
+    pathname,
+    availableLocales
+  );
 
   return {
     title,

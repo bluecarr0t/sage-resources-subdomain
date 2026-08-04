@@ -12,7 +12,7 @@ Common glamping accommodations include safari tents, yurts, treehouses, Airstrea
 
 The glamping industry has experienced significant growth as travelers seek unique, experiential accommodations that connect them with nature while maintaining modern conveniences. Glamping appeals to a wide demographic, from couples seeking romantic getaways to families wanting outdoor adventures with comfort.
 
-Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping properties, understanding the unique market dynamics, revenue models, and valuation methods required for these specialized accommodations. For comprehensive insights into glamping unit types, costs, and ROI considerations, see our <a href="https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/">Complete Guide to Glamping Unit Types</a> on the Sage blog. For market trends and data, see our <a href="/guides/glamping-market-trends-2025">glamping market trends guide</a>.
+Sage Outdoor Advisory provides feasibility studies and appraisals specifically for glamping properties, understanding the unique market dynamics, revenue models, and valuation methods required for these specialized accommodations. For comprehensive insights into glamping unit types, costs, and ROI considerations, see our <a href="https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/">Complete Guide to Glamping Unit Types</a> on the Sage blog. For market trends and live data, see our <a href="/guides/glamping-market-trends-2026">glamping market trends guide</a> and the <a href="/glamping-market-overview">Glamping Market Overview</a>.
 `,
     category: "Glamping",
     relatedTerms: ["glamping-resort", "safari-tent", "yurt", "outdoor-hospitality"],
@@ -33,7 +33,8 @@ Sage Outdoor Advisory provides feasibility studies and appraisals specifically f
       { text: "Glamping Appraisal", url: "/landing/glamping-appraisal" },
       { text: "Glamping Market Report", url: "https://sageoutdooradvisory.com/shop/" },
       { text: "Complete Guide to Glamping Unit Types", url: "https://sageoutdooradvisory.com/blog/the-complete-guide-to-glamping-unit-types/" },
-      { text: "Glamping Market Trends Guide", url: "/guides/glamping-market-trends-2025" }
+      { text: "Glamping Market Trends Guide", url: "/guides/glamping-market-trends-2026" },
+      { text: "Glamping Market Overview", url: "/glamping-market-overview" }
     ],
     faqs: [
       {

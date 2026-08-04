@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 import { getAllGuideSlugs, getGuideSync } from '@/lib/guides';
 import { getAllLandingPageSlugs, getLandingPageSync } from '@/lib/landing-pages';
 import { getAllGlossaryTerms } from '@/lib/glossary/index';
+import {
+  formatPropertyCountPlus,
+  getPublicContentStats,
+} from '@/lib/public-content-stats';
+
+/**
+ * Sole generator for https://resources.sageoutdooradvisory.com/llms.txt
+ * Do not add public/llms.txt — a static file would override or diverge from this route.
+ */
 
 const baseUrl = 'https://resources.sageoutdooradvisory.com';
 const enBase = `${baseUrl}/en`;
@@ -12,6 +21,8 @@ export async function GET() {
   const guideSlugs = getAllGuideSlugs();
   const landingSlugs = getAllLandingPageSlugs();
   const glossaryTerms = getAllGlossaryTerms();
+  const stats = await getPublicContentStats();
+  const propertyCountPlus = formatPropertyCountPlus(stats.propertyCountDisplay);
 
   // Pillar guides (highest priority - comprehensive guides)
   const pillarGuides = guideSlugs.filter((s) =>
@@ -38,7 +49,7 @@ export async function GET() {
   const lines: string[] = [
     '# Sage Outdoor Advisory Resources',
     '',
-    '> Comprehensive resources for the outdoor hospitality industry: glamping feasibility studies, RV resort appraisals, campground market analysis, and expert guides. 1,266+ glamping properties database with interactive map. Industry expertise from 350+ completed projects.',
+    `> Comprehensive resources for the outdoor hospitality industry: glamping feasibility studies, RV resort appraisals, campground market analysis, and expert guides. ${propertyCountPlus} unique properties in Sage research (all_sage_data) with interactive map. ${stats.guideCount} guides and ${stats.glossaryCount} glossary terms. Industry expertise from 350+ completed projects.`,
     '',
     'Sage Outdoor Advisory provides feasibility studies, appraisals, and market analysis for glamping resorts, RV parks, and campgrounds across North America and Europe.',
     '',
@@ -60,7 +71,7 @@ export async function GET() {
     `- [Glamping Unit Type Classification](${baseUrl}/glamping-unit-type-classification): Canonical taxonomy of glamping unit types used in Sage market data`,
     '',
     '## Map and Properties',
-    `- [Interactive Glamping Map](${enBase}/map): Explore 1,266+ glamping properties across US, Canada, and Europe with filters by location, unit type, and price`,
+    `- [Interactive Glamping Map](${enBase}/map): Explore ${propertyCountPlus} unique properties across US, Canada, and Europe with filters by location, unit type, and price`,
     `- [Glamping Near National Parks](${enBase}/glamping/near-national-parks): Find glamping properties within 75 miles of Yellowstone, Yosemite, Great Smoky Mountains, and 60+ national parks`,
     `- [Glamping Yurts](${enBase}/glamping/yurts): Properties offering yurt accommodations`,
     `- [Glamping Safari Tents](${enBase}/glamping/safari-tents): Properties offering safari tent accommodations`,

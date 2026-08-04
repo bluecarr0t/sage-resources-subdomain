@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAllGuideSlugs, getGuideSync } from '@/lib/guides';
 import { getAvailableLocalesForContent } from '@/lib/i18n-content';
 import { getGuideSitemapPriority } from '@/lib/sitemap-priority';
+import { generateEnOnlyHreflangTags } from '@/lib/sitemap-hreflang';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
@@ -23,12 +24,14 @@ export async function GET() {
     
     for (const locale of availableLocales) {
       const fullPath = `/${locale}/guides/${slug}`;
+      const hreflangs = generateEnOnlyHreflangTags(fullPath);
       
       urls.push(`  <url>
     <loc>${baseUrl}${fullPath}</loc>
     <lastmod>${lastModified}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>${priority}</priority>
+${hreflangs}
   </url>`);
     }
   }

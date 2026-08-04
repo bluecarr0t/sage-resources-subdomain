@@ -25,8 +25,8 @@ export interface FAQItem {
   answer: string;
 }
 
-export function generateOrganizationSchema(includeRating: boolean = false) {
-  const schema: any = {
+export function generateOrganizationSchema() {
+  return {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Sage Outdoor Advisory",
@@ -47,20 +47,6 @@ export function generateOrganizationSchema(includeRating: boolean = false) {
     "logo": "https://sageoutdooradvisory.com/logo.png",
     "description": "Leading consultancy for feasibility studies and appraisals in the outdoor hospitality industry"
   };
-
-  // Add aggregate rating to organization schema for rich results
-  if (includeRating) {
-    schema.aggregateRating = {
-      "@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "ratingCount": "127",
-      "reviewCount": "127",
-      "bestRating": "5",
-      "worstRating": "1"
-    };
-  }
-
-  return schema;
 }
 
 export function generateLocalBusinessSchema() {

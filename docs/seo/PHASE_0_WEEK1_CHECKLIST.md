@@ -9,7 +9,7 @@
 |------|--------|
 | 0.1 Single `<html>` / `<body>` (root layout only) | Done |
 | 0.2 `main.xml` — en-only for `/guides` and `/glossary` hubs | Done |
-| 0.5 `public/llms.txt` — canonical `/en/...` URLs | Done |
+| 0.5 `app/llms.txt/route.ts` — canonical `/en/...` URLs (sole generator; no `public/llms.txt`) | Done |
 
 ## Manual steps (Vercel + GSC)
 

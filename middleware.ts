@@ -131,6 +131,44 @@ function getLocaleFromPathname(pathname: string): Locale | null {
 }
 
 /**
+ * Stamp path locale onto the *request* (via middleware override headers) so root
+ * layout `headers().get('x-locale')` matches the URL segment, not only NEXT_LOCALE.
+ * next-intl also sets X-NEXT-INTL-LOCALE on its own rewrites; we keep x-locale as a
+ * stable app-level signal for landing rewrites and layout.
+ */
+function withRequestLocaleHeader(request: NextRequest, response: NextResponse): NextResponse {
+  const pathLocale = getLocaleFromPathname(request.nextUrl.pathname);
+  if (!pathLocale) {
+    return response;
+  }
+
+  response.headers.set('x-middleware-request-x-locale', pathLocale);
+  const existing = response.headers.get('x-middleware-override-headers');
+  const names = existing
+    ? existing.split(',').map((name) => name.trim()).filter(Boolean)
+    : [];
+  if (!names.includes('x-locale')) {
+    names.push('x-locale');
+    response.headers.set('x-middleware-override-headers', names.join(','));
+  }
+  return response;
+}
+
+function nextWithLocale(request: NextRequest, locale: Locale, init?: { rewrite?: URL }) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-locale', locale);
+  if (init?.rewrite) {
+    return NextResponse.rewrite(init.rewrite, { request: { headers: requestHeaders } });
+  }
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+async function applyIntlMiddleware(request: NextRequest): Promise<NextResponse> {
+  const response = await intlMiddleware(request);
+  return withRequestLocaleHeader(request, response);
+}
+
+/**
  * Detect if the request is from a crawler/bot.
  * Crawlers should receive the actual page for the URL they request (no geo redirect),
  * so sitemap URLs don't appear as "redirect" in SEO audits.
@@ -188,6 +226,7 @@ const excludedRoutes = [
   'privacy-policy',
   'terms-of-service',
   'glamping-market-overview',
+  'glamping-unit-type-classification',
   'outdoor-hospitality-pipeline',
   'glamping-market-snapshot',
   'admin',
@@ -250,6 +289,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url, 301);
     }
 
+    // Legacy guide slug: market trends year refresh (before /guides → /en/guides hop)
+    const trends2025Redirect = pathname.match(
+      /^\/(?:[a-z]{2}\/)?guides\/glamping-market-trends-2025\/?$/
+    );
+    if (trends2025Redirect) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/en/guides/glamping-market-trends-2026';
+      return NextResponse.redirect(url, 301);
+    }
+
     // Legacy SEO: indexed duplicates without /{locale}/ prefix → canonical /en/... (query preserved)
     if (!pathnameHasLocale) {
       const legacyBrandDetail = pathname.match(/^\/brand\/(.+)$/);
@@ -300,11 +349,13 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
-    // Redirect de/es/fr guide URLs to en - guides are English-only, these return 500
-    const guideRedirectMatch = pathname.match(/^\/(de|es|fr)\/guides\/(.+)$/);
-    if (guideRedirectMatch) {
+    // Guides + glossary are English-primary → consolidate non-en locales to /en for SEO
+    const guidesGlossaryRedirect = pathname.match(
+      /^\/(de|es|fr)\/(guides|glossary)(\/.*)?$/
+    );
+    if (guidesGlossaryRedirect) {
       const url = request.nextUrl.clone();
-      url.pathname = `/en/guides/${guideRedirectMatch[2]}`;
+      url.pathname = `/en/${guidesGlossaryRedirect[2]}${guidesGlossaryRedirect[3] || ''}`;
       return NextResponse.redirect(url, 301);
     }
 
@@ -416,18 +467,19 @@ export async function middleware(request: NextRequest) {
           pathname.startsWith('/pipeline-oauth-sync') ||
           pathname === '/privacy-policy' ||
           pathname === '/terms-of-service' ||
+          pathname === '/glamping-unit-type-classification' ||
           pathname === '/glamping-market-snapshot'
         ) {
           return NextResponse.next();
         }
       // Still apply i18n middleware for other excluded routes
-      return await intlMiddleware(request);
+      return await applyIntlMiddleware(request);
     }
 
     // If pathname is just a locale (e.g., /en), let i18n middleware handle it
     // This allows the locale-only route to work properly
     if (isLocaleOnly) {
-      return await intlMiddleware(request);
+      return await applyIntlMiddleware(request);
     }
 
     // If pathname has multiple segments, let Next.js handle it
@@ -445,11 +497,11 @@ export async function middleware(request: NextRequest) {
       // Rewrite to /[locale]/landing/:slug
       const url = request.nextUrl.clone();
       url.pathname = `/${detectedLocale}/landing/${segments[0]}`;
-      return NextResponse.rewrite(url);
+      return nextWithLocale(request, detectedLocale, { rewrite: url });
     }
 
     // Apply i18n middleware for all other routes
-    return await intlMiddleware(request);
+    return await applyIntlMiddleware(request);
   } catch (error) {
     // Fallback: if anything goes wrong, redirect to default locale
     console.error('Middleware error:', error);

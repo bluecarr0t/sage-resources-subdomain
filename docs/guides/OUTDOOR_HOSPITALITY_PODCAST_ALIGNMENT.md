@@ -86,7 +86,7 @@ Helpers:
 | `property-appraisals-complete-guide` | Ben Wolff REIT; transaction roundtables |
 | `glamping-industry-complete-guide` | Paws Up / AutoCamp / Wildhaven; Under Canvas acquisition |
 | `how-to-start-glamping-business` | Founder stories (Live Oak Lake, Sandy Vans, Joe Lisa) |
-| `glamping-market-trends-2025` | Myth busting; data deep dive with Shari |
+| `glamping-market-trends-2026` | Myth busting; data deep dive with Shari |
 | `what-banks-look-for-feasibility-study` | Portfolio / financing episodes |
 
 **Rebrand cleanup (complete):** `lib/guides/industry.ts`

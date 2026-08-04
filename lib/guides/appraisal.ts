@@ -7,7 +7,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     slug: "property-appraisals-complete-guide",
     title: "Property Appraisals Complete Guide | 2025 | Sage Outdoor Advisory",
     metaDescription: "Comprehensive guide to property appraisals for outdoor hospitality. Learn about appraisal methods, timelines, and how to choose an appraiser for glamping, RV resort, and campground properties.",
-    quickAnswer: "An appraisal is a licensed specialist’s opinion of what a property is worth today. Lenders rely on it for loan sizing; buyers and sellers use it to set a fair price. Outdoor hospitality assets usually need income-based methods, not just home comps. Timelines and scope vary by property complexity.",
+    quickAnswer: "An appraisal is a licensed specialist’s opinion of what a property is worth today. Lenders rely on it for loan sizing; buyers and sellers use it to set a fair price. Outdoor hospitality assets usually need income-based methods, not just home comps. Timelines and scope vary by property complexity. Most appraisals for glamping, RV resort, or campground properties take about two to four weeks to complete.",
     category: "appraisal",
     hero: {
       headline: "Appraisals Complete Guide",
@@ -385,7 +385,20 @@ export const appraisalGuides: Record<string, GuideContent> = {
         <p>Standard appraisers may not understand these nuances, which can result in inaccurate valuations that don't reflect the property's true value. Working with a specialized appraiser ensures you get an accurate, defensible valuation.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "An appraisal is a licensed professional's opinion of current market value, not a projection of future performance.",
+      "Outdoor hospitality appraisals typically lean on the income approach, since these properties are valued mainly on cash flow.",
+      "Sales comparison and cost approaches support but rarely replace income-based valuation for glamping, RV resort, and campground assets.",
+      "Most appraisals take 2–4 weeks, depending on property complexity and data availability.",
+      "Lenders require bank-approved, USPAP-compliant appraisals with clear documentation and multiple valuation approaches.",
+      "Choose an appraiser with direct outdoor hospitality experience—general commercial appraisers often lack relevant comparables.",
+    ],
+    citations: [
+      { id: 1, title: "Uniform Standards of Professional Appraisal Practice (USPAP)", url: "https://www.appraisalfoundation.org/imis/TAF/Standards/Appraisal_Standards/USPAP/USPAP.aspx", accessed: "July 2026" },
+      { id: 2, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+      { id: 3, title: "Income Approach Appraisal", url: "https://resources.sageoutdooradvisory.com/en/guides/income-approach-appraisal", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["property appraisal", "outdoor hospitality appraisal", "glamping property appraisal guide", "RV resort appraisal", "campground appraisal"],
     relatedServices: {
       title: "Appraisal Services",
@@ -418,6 +431,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     slug: "income-approach-appraisal",
     title: "Income Approach Appraisal | Complete Guide | Sage Outdoor Advisory",
     metaDescription: "Complete guide to income approach appraisals for outdoor hospitality properties. Learn how income-based valuation works and when it's used.",
+    quickAnswer: "The income approach values a property based on its ability to generate cash flow: Value = Net Operating Income ÷ Capitalization Rate. Appraisers project potential income, subtract vacancy and operating expenses to get NOI, then apply a cap rate reflecting market risk. For outdoor hospitality properties—glamping resorts, RV parks, and campgrounds—this is usually the primary valuation method because value tracks income potential rather than comparable home sales. Sales comparison and cost approaches typically support, rather than replace, the income approach for these asset types.",
     category: "appraisal",
     hero: {
       headline: "Income Approach Appraisal Guide",
@@ -548,7 +562,19 @@ export const appraisalGuides: Record<string, GuideContent> = {
         <p>Appraisers may also use sales comparison and cost approaches to support or validate the income approach valuation, but the income approach is typically the primary method for these property types.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Property Value = Net Operating Income (NOI) ÷ Capitalization Rate—the core income approach formula.",
+      "NOI is income after operating expenses but before debt service; it reflects the property's cash-generating ability.",
+      "The capitalization rate reflects market risk and expected returns—higher cap rates generally mean lower value.",
+      "The income approach is typically the primary valuation method for glamping resorts, RV parks, and campgrounds.",
+      "Appraisers often use sales comparison and cost approaches to validate, not replace, income-based valuations for these properties.",
+    ],
+    citations: [
+      { id: 1, title: "Uniform Standards of Professional Appraisal Practice (USPAP)", url: "https://www.appraisalfoundation.org/imis/TAF/Standards/Appraisal_Standards/USPAP/USPAP.aspx", accessed: "July 2026" },
+      { id: 2, title: "Property Appraisals Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/property-appraisals-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["income approach appraisal", "income-based valuation", "NOI appraisal"],
     cta: {
       title: "Need an Income Approach Appraisal?",
@@ -561,6 +587,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     slug: "appraisal-vs-feasibility-study",
     title: "Appraisal vs Feasibility Study for Glamping & RV Resorts | Sage Outdoor Advisory",
     metaDescription: "Compare appraisal vs feasibility study for outdoor hospitality: property value vs project viability, what banks require, timelines, and when developers need both for glamping, RV parks, and campgrounds.",
+    quickAnswer: "An appraisal states what an existing property is worth today; a feasibility study tests whether a proposed project can succeed financially. Appraisals are present-focused and used for financing, transactions, and refinancing. Feasibility studies are forward-looking and used for planning, expansions, and go/no-go decisions. Development projects for glamping, RV resorts, and campgrounds typically require both: the feasibility study validates project viability, while the appraisal establishes collateral value for lenders.",
     category: "appraisal",
     hero: {
       headline: "Appraisal vs. Feasibility Study",
@@ -664,7 +691,19 @@ export const appraisalGuides: Record<string, GuideContent> = {
         <p>Learn more about the differences in our <a href="/guides/feasibility-study-vs-appraisal" class="text-[#006b5f] hover:text-[#005a4f] underline">feasibility study vs appraisal guide</a>.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "Appraisals determine current property value; feasibility studies determine whether a proposed project is viable.",
+      "Appraisals are present-focused; feasibility studies are forward-looking and analyze a project that doesn't yet exist.",
+      "Lenders financing new development typically require both documents, but for different reasons.",
+      "Feasibility studies usually come first in development timelines, validating the concept before construction begins.",
+      "Outdoor hospitality assets need specialists in both disciplines—generic hotel analysis rarely satisfies lenders.",
+    ],
+    citations: [
+      { id: 1, title: "Feasibility Studies Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/feasibility-studies-complete-guide", accessed: "July 2026" },
+      { id: 2, title: "Property Appraisals Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/property-appraisals-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "Uniform Standards of Professional Appraisal Practice (USPAP)", url: "https://www.appraisalfoundation.org/imis/TAF/Standards/Appraisal_Standards/USPAP/USPAP.aspx", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["appraisal vs feasibility study", "difference between appraisal and feasibility study"],
     cta: {
       title: "Need Help Understanding Which You Need?",
@@ -677,6 +716,7 @@ export const appraisalGuides: Record<string, GuideContent> = {
     slug: "bank-appraisal-requirements",
     title: "Bank Appraisal Requirements | Lender Standards | Sage Outdoor Advisory",
     metaDescription: "Learn what banks and lenders require in property appraisals for outdoor hospitality financing. Understand lender requirements and standards.",
+    quickAnswer: "Banks require appraisals that follow USPAP standards, use multiple valuation approaches (income, sales comparison, cost), and come from a qualified, licensed appraiser with relevant property-type experience. For outdoor hospitality assets, lenders expect the income approach to carry the most weight, supported by comparable sales and replacement-cost analysis where available. Reports must include clear documentation, market data, and appraiser certification. Appraisers unfamiliar with glamping, RV resort, or campground properties are a common reason lenders reject or delay financing.",
     category: "appraisal",
     hero: {
       headline: "Bank Appraisal Requirements",
@@ -802,7 +842,19 @@ export const appraisalGuides: Record<string, GuideContent> = {
         <p>We've helped numerous clients secure financing for their glamping, RV resort, and campground properties.</p>`
       }
     ],
-    lastModified: "2025-01-15",
+    keyTakeaways: [
+      "USPAP compliance is the baseline standard banks require for any property appraisal used in financing.",
+      "Lenders expect multiple valuation approaches, with the income approach weighted most heavily for outdoor hospitality assets.",
+      "Appraiser qualifications matter—banks prefer licensed appraisers with direct experience in glamping, RV resort, or campground properties.",
+      "Comprehensive documentation, comparable sales data, and clear certification are non-negotiable for bank acceptance.",
+      "Using a generalist appraiser unfamiliar with outdoor hospitality is a common cause of financing delays.",
+    ],
+    citations: [
+      { id: 1, title: "Uniform Standards of Professional Appraisal Practice (USPAP)", url: "https://www.appraisalfoundation.org/imis/TAF/Standards/Appraisal_Standards/USPAP/USPAP.aspx", accessed: "July 2026" },
+      { id: 2, title: "Property Appraisals Complete Guide", url: "https://resources.sageoutdooradvisory.com/en/guides/property-appraisals-complete-guide", accessed: "July 2026" },
+      { id: 3, title: "2025 Outdoor Hospitality Industry Overview", url: "https://sageoutdooradvisory.com/blog/2025-outdoor-hospitality-industry-overview/", accessed: "July 2026" },
+    ],
+    lastModified: "2026-07-31",
     keywords: ["bank appraisal requirements", "lender appraisal standards", "appraisal for financing"],
     cta: {
       title: "Need a Bank-Approved Appraisal?",

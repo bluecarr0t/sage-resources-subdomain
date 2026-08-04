@@ -16,6 +16,7 @@ import FloatingHeader from "@/components/FloatingHeader";
 import { GoogleMapsProvider } from "@/components/GoogleMapsProvider";
 import CountUpMetric from "@/components/editorial/CountUpMetric";
 import { EditorialPageShell } from "@/components/editorial/EditorialPageShell";
+import { resourcesContactUsUrl } from "@/lib/root-domain-attribution";
 import {
   EDITORIAL_BODY_CLASS,
   EDITORIAL_BUTTON_OUTLINE_CLASS,
@@ -29,9 +30,11 @@ import {
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
-import { getPublicMapDisplayedPropertyCount } from "@/lib/public-map-property-count";
 import { getPublicMapGlampingUnitCount } from "@/lib/public-map-unit-count";
-import { roundDownToStep } from "@/lib/round-down-to-step";
+import {
+  formatPropertyCountPlus,
+  getPublicContentStats,
+} from "@/lib/public-content-stats";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createServerClientWithCookies } from "@/lib/supabase-server";
@@ -82,8 +85,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
     
     const title = t('metadata.title');
-    const description = t('metadata.description');
+    let description = t('metadata.description');
     const keywords = t('metadata.keywords');
+
+    try {
+      const stats = await getPublicContentStats();
+      description = t('metadata.description', {
+        propertyCount: stats.propertyCountDisplay,
+        guideCount: stats.guideCount,
+        glossaryCount: stats.glossaryCount,
+      });
+    } catch (error) {
+      console.error('Error loading public content stats for metadata:', error);
+    }
     
     let hreflangAlternates: Metadata['alternates'] = {};
     try {
@@ -179,6 +193,8 @@ export default async function HomePage({ params }: PageProps) {
     
     // Create locale-aware links
     const links = createLocaleLinks(locale);
+    const attributionPath = '/';
+    const contactHref = resourcesContactUsUrl(attributionPath);
     
     // Get featured content for homepage with error handling
     let allGuides: Array<NonNullable<ReturnType<typeof getGuideSync>>> = [];
@@ -210,14 +226,20 @@ export default async function HomePage({ params }: PageProps) {
     }
     const featuredTerms = glossaryTerms.slice(0, 12); // Top 12 terms
 
-    const [mapPropertyCount, glampingUnitCount] = await Promise.all([
-      getPublicMapDisplayedPropertyCount(),
+    const [glampingUnitCount, contentStats] = await Promise.all([
       getPublicMapGlampingUnitCount(),
+      getPublicContentStats(),
     ]);
-    const benchmarkCountDisplay = roundDownToStep(mapPropertyCount, 25);
+    const benchmarkCountDisplay = contentStats.propertyCountDisplay;
+    const propertyCountPlus = formatPropertyCountPlus(benchmarkCountDisplay);
 
-    // Homepage FAQs from translations
-    const homepageFAQs: FAQItem[] = t.raw('faq.items') as FAQItem[];
+    // Homepage FAQs from translations — inject live unique property count
+    const homepageFAQs: FAQItem[] = (t.raw('faq.items') as FAQItem[]).map((item) => ({
+      ...item,
+      answer: item.answer
+        .replaceAll('{count}+', propertyCountPlus)
+        .replaceAll('{count}', String(benchmarkCountDisplay)),
+    }));
 
     // Generate schema markup
     const organizationSchema = generateOrganizationSchema();
@@ -281,7 +303,7 @@ export default async function HomePage({ params }: PageProps) {
                   <DynamicLocationSearch locale={locale} variant="default" />
                 </div>
                 <ul className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[11px] font-light uppercase tracking-widest text-white/85">
-                  <li>{t('hero.quickStats.properties', { count: mapPropertyCount })}</li>
+                  <li>{t('hero.quickStats.properties', { count: contentStats.propertyCount })}</li>
                   <li>{t('hero.quickStats.usCanada')}</li>
                   <li>{t('hero.quickStats.verified')}</li>
                 </ul>
@@ -294,7 +316,7 @@ export default async function HomePage({ params }: PageProps) {
               <div>
                 <p className={EDITORIAL_SECTION_LABEL_CLASS}>{t('stats.properties')}</p>
                 <CountUpMetric
-                  value={mapPropertyCount}
+                  value={contentStats.propertyCount}
                   className={EDITORIAL_METRIC_VALUE_CLASS}
                   durationMs={2500}
                 />
@@ -370,7 +392,7 @@ export default async function HomePage({ params }: PageProps) {
             )}
 
             <section className="mt-14 border-b border-sage-200/80 pb-14">
-              <h2 className={EDITORIAL_H2_CLASS}>{t('sections.map.title')}</h2>
+              <h2 className={EDITORIAL_H2_CLASS}>{t('sections.map.title', { count: benchmarkCountDisplay })}</h2>
               <p className={`mt-4 max-w-2xl ${EDITORIAL_BODY_CLASS}`}>{t('sections.map.description')}</p>
               <Link href={links.map} className={`${EDITORIAL_BUTTON_PRIMARY_CLASS} mt-6`}>
                 {t('sections.map.cta')}
@@ -418,7 +440,7 @@ export default async function HomePage({ params }: PageProps) {
               <h2 className={EDITORIAL_H2_CLASS}>{t('sections.cta.title')}</h2>
               <p className={`mt-4 max-w-xl ${EDITORIAL_BODY_CLASS}`}>{t('sections.cta.description')}</p>
               <a
-                href="https://sageoutdooradvisory.com/contact-us/"
+                href={contactHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`${EDITORIAL_BUTTON_OUTLINE_CLASS} mt-6`}
@@ -442,7 +464,7 @@ export default async function HomePage({ params }: PageProps) {
               </dl>
             </section>
           </main>
-          <Footer locale={locale} />
+          <Footer locale={locale} attributionPath={attributionPath} />
         </EditorialPageShell>
       </GoogleMapsProvider>
     </>

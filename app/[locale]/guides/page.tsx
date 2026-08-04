@@ -7,9 +7,11 @@ import { EditorialMarketingLayout } from "@/components/editorial/EditorialMarket
 import { PodcastSecondaryCta } from "@/components/editorial/PodcastSecondaryCta";
 import { buildPodcastUrl } from "@/lib/outdoor-hospitality-podcast";
 import { locales, type Locale } from "@/i18n";
-import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { generateEnOnlyHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
+import { getAvailableLocalesForContent } from "@/lib/i18n-content";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { resourcesContactUsUrl } from "@/lib/root-domain-attribution";
 
 interface PageProps {
   params: {
@@ -18,7 +20,7 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return getAvailableLocalesForContent('guide').map((locale) => ({ locale }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -58,7 +60,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: url,
-      ...generateHreflangAlternates(pathname),
+      ...generateEnOnlyHreflangAlternates(pathname),
     },
     robots: {
       index: true,
@@ -142,7 +144,7 @@ export default async function GuidesPage({ params }: PageProps) {
         title={t('cta.title')}
         description={t('cta.description')}
         buttonLabel={t('cta.button')}
-        buttonHref="https://sageoutdooradvisory.com/contact-us/"
+        buttonHref={resourcesContactUsUrl('/guides')}
         external
       />
       <PodcastSecondaryCta
