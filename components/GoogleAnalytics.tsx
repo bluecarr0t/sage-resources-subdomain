@@ -7,7 +7,15 @@ import {
   getSeoPageContextParams,
   trackScrollDepth,
   trackPageEngagement,
+  trackOutboundLink,
+  trackCTAClick,
+  trackFileDownload,
 } from '@/lib/analytics';
+import { isRootDomainContactUrl } from '@/lib/root-domain-attribution';
+import {
+  buildGa4ConfigOptions,
+  serializeGa4ConfigForInlineScript,
+} from '@/lib/ga4-cross-domain';
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
@@ -22,25 +30,17 @@ export default function GoogleAnalytics() {
     const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
 
     // Track page view + SEO section (Phase 0 organic dashboards)
-    if (typeof window !== 'undefined' && (window as any).gtag) {
+    if (typeof window !== 'undefined' && window.gtag) {
       const seoContext = getSeoPageContextParams(pathname);
-      (window as any).gtag('config', GA_MEASUREMENT_ID, {
-        page_path: url,
-        ...seoContext,
-        // Enhanced measurement settings
-        send_page_view: true,
-        // Enable enhanced measurement features
-        allow_enhanced_conversions: true,
-        allow_google_signals: true,
-        allow_ad_personalization_signals: true,
-        // Cross-domain tracking configuration
-        linker: {
-          domains: ['sageoutdooradvisory.com', 'resources.sageoutdooradvisory.com']
-        },
-        cookie_flags: 'SameSite=None;Secure',
-        // Debug mode in development
-        debug_mode: IS_DEVELOPMENT,
-      });
+      window.gtag(
+        'config',
+        GA_MEASUREMENT_ID,
+        buildGa4ConfigOptions({
+          pagePath: url,
+          debugMode: IS_DEVELOPMENT,
+          extra: seoContext,
+        })
+      );
     }
   }, [pathname, searchParams]);
 
@@ -117,7 +117,7 @@ export default function GoogleAnalytics() {
     const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest('a') as HTMLAnchorElement;
-      
+
       if (!link) return;
 
       const href = link.getAttribute('href');
@@ -127,13 +127,19 @@ export default function GoogleAnalytics() {
       try {
         const linkUrl = new URL(href, window.location.origin);
         const currentUrl = new URL(window.location.href);
-        
+
         // Track if it's an external link
         if (linkUrl.hostname !== currentUrl.hostname && !href.startsWith('#')) {
-          const { trackOutboundLink } = require('@/lib/analytics');
           trackOutboundLink(href, link.textContent || undefined);
+          if (isRootDomainContactUrl(href)) {
+            trackCTAClick(
+              (link.textContent || 'Contact').trim(),
+              'outbound_contact_link',
+              href
+            );
+          }
         }
-      } catch (e) {
+      } catch {
         // Invalid URL, skip
       }
     };
@@ -149,7 +155,7 @@ export default function GoogleAnalytics() {
     const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest('a') as HTMLAnchorElement;
-      
+
       if (!link) return;
 
       const href = link.getAttribute('href');
@@ -157,12 +163,11 @@ export default function GoogleAnalytics() {
 
       // Check if it's a file download
       const fileExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.zip', '.csv'];
-      const isFileDownload = fileExtensions.some(ext => href.toLowerCase().endsWith(ext));
+      const isFileDownload = fileExtensions.some((ext) => href.toLowerCase().endsWith(ext));
 
       if (isFileDownload) {
         const fileName = href.split('/').pop() || '';
         const fileType = fileName.split('.').pop() || '';
-        const { trackFileDownload } = require('@/lib/analytics');
         trackFileDownload(fileName, fileType);
       }
     };
@@ -176,8 +181,8 @@ export default function GoogleAnalytics() {
     if (!GA_MEASUREMENT_ID) return;
 
     const handleError = (event: ErrorEvent) => {
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'exception', {
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'exception', {
           description: event.message,
           fatal: false,
           error_file: event.filename,
@@ -194,6 +199,21 @@ export default function GoogleAnalytics() {
     return null;
   }
 
+  const bootstrapHostname =
+    typeof window !== 'undefined'
+      ? window.location.hostname
+      : process.env.NODE_ENV === 'production'
+        ? 'resources.sageoutdooradvisory.com'
+        : 'localhost';
+
+  const bootstrapConfig = serializeGa4ConfigForInlineScript(
+    buildGa4ConfigOptions({
+      pagePath: typeof window !== 'undefined' ? window.location.pathname : '/',
+      debugMode: IS_DEVELOPMENT,
+      hostname: bootstrapHostname,
+    })
+  );
+
   return (
     <>
       <Script
@@ -208,19 +228,7 @@ export default function GoogleAnalytics() {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}', {
-              page_path: window.location.pathname,
-              send_page_view: true,
-              allow_enhanced_conversions: true,
-              allow_google_signals: true,
-              allow_ad_personalization_signals: true,
-              // Cross-domain tracking configuration
-              linker: {
-                domains: ['sageoutdooradvisory.com', 'resources.sageoutdooradvisory.com']
-              },
-              cookie_flags: 'SameSite=None;Secure',
-              ${IS_DEVELOPMENT ? "debug_mode: true," : ""}
-            });
+            gtag('config', '${GA_MEASUREMENT_ID}', ${bootstrapConfig});
           `,
         }}
       />

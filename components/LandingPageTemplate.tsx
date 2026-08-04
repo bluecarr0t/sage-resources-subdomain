@@ -22,6 +22,11 @@ import TableOfContents from "@/components/TableOfContents";
 import RelatedLandingPages from "@/components/RelatedLandingPages";
 import Footer from "./Footer";
 import FloatingHeader from "./FloatingHeader";
+import {
+  attributeRootDomainContactHrefsInHtml,
+  resourcesContactUsUrl,
+  withResourcesAttribution,
+} from "@/lib/root-domain-attribution";
 
 // Helper function to create a slug from a title (must match TOC component)
 function slugify(text: string): string {
@@ -40,9 +45,16 @@ interface LandingPageTemplateProps {
 
 export default function LandingPageTemplate({ content, locale }: LandingPageTemplateProps) {
   const links = createLocaleLinks(locale);
+  const attributionPath = `/landing/${content.slug}`;
+  const contactHref = resourcesContactUsUrl(attributionPath);
+  const prepareHtml = (html: string) =>
+    attributeRootDomainContactHrefsInHtml(
+      prefixInternalResourceHrefsInHtml(html, locale),
+      attributionPath
+    );
   const pageCanonicalUrl = `https://resources.sageoutdooradvisory.com/${locale}/landing/${content.slug}`;
   // Generate structured data
-  const organizationSchema = generateOrganizationSchema(false);
+  const organizationSchema = generateOrganizationSchema();
   const localBusinessSchema = generateLocalBusinessSchema();
   const breadcrumbSchema = generateBreadcrumbSchema(content.slug, content.hero.headline);
   const serviceSchema = generateServiceSchema(content);
@@ -109,7 +121,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
       {/* Floating CTA Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <Link
-          href="https://sageoutdooradvisory.com/contact-us/"
+          href={contactHref}
           className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-full shadow-2xl hover:bg-[#005a4f] transition-all transform hover:scale-105"
         >
           Get In Touch
@@ -140,7 +152,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
               </div>
             )}
             <Link
-              href={content.hero.ctaLink}
+              href={withResourcesAttribution(content.hero.ctaLink, attributionPath)}
               className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
             >
               {content.hero.ctaText}
@@ -212,7 +224,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
               <div 
                 className="text-gray-700 mb-6 leading-relaxed"
                 dangerouslySetInnerHTML={{
-                  __html: prefixInternalResourceHrefsInHtml(section.content, locale),
+                  __html: prepareHtml(section.content),
                 }}
               />
               {section.bullets && (
@@ -222,7 +234,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
                       key={bulletIndex} 
                       className="leading-relaxed"
                       dangerouslySetInnerHTML={{
-                        __html: prefixInternalResourceHrefsInHtml(bullet, locale),
+                        __html: prepareHtml(bullet),
                       }}
                     />
                   ))}
@@ -232,7 +244,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
               {index % 2 === 1 && index < content.sections.length - 1 && (
                 <div className="mt-8 text-center">
                   <Link
-                    href="https://sageoutdooradvisory.com/contact-us/"
+                    href={contactHref}
                     className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
                   >
                     Get In Touch
@@ -265,7 +277,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
             </div>
             <div className="mt-12 text-center">
               <Link
-                href="https://sageoutdooradvisory.com/contact-us/"
+                href={contactHref}
                 className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
                 Get In Touch
@@ -328,7 +340,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
             <div className="mt-8 text-center">
               <p className="text-gray-700 mb-4">Ready to join our success stories?</p>
               <Link
-                href="https://sageoutdooradvisory.com/contact-us/"
+                href={contactHref}
                 className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
                 Get In Touch
@@ -376,7 +388,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
               </Link>
               <p className="text-gray-700 mb-2">Ready to get started with your project?</p>
               <Link
-                href="https://sageoutdooradvisory.com/contact-us/"
+                href={contactHref}
                 className="inline-block px-6 py-3 bg-[#006b5f] text-white font-semibold rounded-lg hover:bg-[#005a4f] transition-colors"
               >
                 Get In Touch
@@ -629,7 +641,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
                   <div 
                     className="text-gray-700 leading-relaxed speakable-answer"
                     dangerouslySetInnerHTML={{
-                      __html: prefixInternalResourceHrefsInHtml(faq.answer, locale),
+                      __html: prepareHtml(faq.answer),
                     }}
                   />
                 </div>
@@ -640,7 +652,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
                 Have more questions? Let&apos;s discuss your project.
               </p>
               <Link
-                href="https://sageoutdooradvisory.com/contact-us/"
+                href={contactHref}
                 className="inline-block px-8 py-4 bg-[#006b5f] text-white text-lg font-semibold rounded-lg hover:bg-[#005a4f] transition-colors shadow-lg"
               >
                 Get In Touch
@@ -687,7 +699,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              href="https://sageoutdooradvisory.com/contact-us/"
+              href={contactHref}
               className="inline-block px-8 py-4 bg-white text-[#006b5f] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
             >
               Get In Touch
@@ -709,7 +721,7 @@ export default function LandingPageTemplate({ content, locale }: LandingPageTemp
       </main>
 
       {/* Footer */}
-      <Footer locale={locale} />
+      <Footer locale={locale} attributionPath={attributionPath} />
     </div>
     </>
   );

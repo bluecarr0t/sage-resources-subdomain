@@ -34,6 +34,10 @@ import {
   EDITORIAL_SECTION_LABEL_CLASS,
 } from '@/components/editorial/EditorialPageShell';
 import { getTranslations } from 'next-intl/server';
+import {
+  attributeRootDomainContactHrefsInHtml,
+  resourcesContactUsUrl,
+} from '@/lib/root-domain-attribution';
 
 interface GlossaryTermTemplateProps {
   term: GlossaryTerm;
@@ -47,8 +51,11 @@ function getArticle(term: string): string {
   return vowels.includes(firstChar) ? 'an' : 'a';
 }
 
-function prepareGlossaryHtml(html: string, locale: string): string {
-  return prefixInternalResourceHrefsInHtml(normalizeGlossaryBodyHtml(html), locale);
+function prepareGlossaryHtml(html: string, locale: string, attributionPath: string): string {
+  return attributeRootDomainContactHrefsInHtml(
+    prefixInternalResourceHrefsInHtml(normalizeGlossaryBodyHtml(html), locale),
+    attributionPath
+  );
 }
 
 export default async function GlossaryTermTemplate({
@@ -60,6 +67,8 @@ export default async function GlossaryTermTemplate({
   const tPage = await getTranslations({ locale, namespace: 'glossary.termPage' });
   const tPodcast = await getTranslations({ locale, namespace: 'podcast' });
   const links = createLocaleLinks(locale);
+  const attributionPath = `/glossary/${term.slug}`;
+  const contactHref = resourcesContactUsUrl(attributionPath);
   const accent = getGlossaryCategoryAccent(term.category);
   const podcastPlacement = term.podcastLinks ?? getGlossaryPodcastPlacement(term.slug);
   const categoryLabel = t(`categories.${getGlossaryCategoryMessageKey(term.category)}`);
@@ -70,9 +79,13 @@ export default async function GlossaryTermTemplate({
       ? generateSpeakableSchema(['.speakable-answer', 'h1', 'h2'])
       : null;
 
-  const extendedHtml = prepareGlossaryHtml(term.extendedDefinition.replace(/\n/g, '<br />'), locale);
+  const extendedHtml = prepareGlossaryHtml(
+    term.extendedDefinition.replace(/\n/g, '<br />'),
+    locale,
+    attributionPath
+  );
   const disambiguationHtml = term.disambiguation
-    ? prepareGlossaryHtml(term.disambiguation.body, locale)
+    ? prepareGlossaryHtml(term.disambiguation.body, locale, attributionPath)
     : null;
 
   return (
@@ -251,7 +264,7 @@ export default async function GlossaryTermTemplate({
                         <dd
                           className={`mt-2 border-l border-sage-200 pl-4 ${EDITORIAL_BODY_CLASS} speakable-answer`}
                           dangerouslySetInnerHTML={{
-                            __html: prepareGlossaryHtml(faq.answer, locale),
+                            __html: prepareGlossaryHtml(faq.answer, locale, attributionPath),
                           }}
                         />
                       </div>
@@ -264,7 +277,7 @@ export default async function GlossaryTermTemplate({
                 title={tPage('cta.title')}
                 description={tPage('cta.description', { term: term.term })}
                 buttonLabel={tPage('cta.button')}
-                buttonHref="https://sageoutdooradvisory.com/contact-us/"
+                buttonHref={contactHref}
                 external
               />
 
@@ -340,7 +353,7 @@ export default async function GlossaryTermTemplate({
                     </li>
                     <li>
                       <a
-                        href="https://sageoutdooradvisory.com/contact-us/"
+                        href={contactHref}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={EDITORIAL_LINK_CLASS}
@@ -357,7 +370,7 @@ export default async function GlossaryTermTemplate({
           <RelatedGlossaryTerms currentTerm={term} locale={locale} maxTerms={8} />
         </main>
 
-        <Footer locale={locale} />
+        <Footer locale={locale} attributionPath={attributionPath} />
       </EditorialPageShell>
     </>
   );

@@ -8,6 +8,7 @@ import { createLocaleLinks } from '@/lib/locale-links';
 import { locales } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { EDITORIAL_BUTTON_PRIMARY_CLASS } from '@/components/editorial/EditorialPageShell';
+import AttributedRootContactLink from '@/components/AttributedRootContactLink';
 
 const HEADER_LOGO_URL =
   'https://b0evzueuuq9l227n.public.blob.vercel-storage.com/logos/sage-logo-header-nav.png';
@@ -398,12 +399,13 @@ export default function FloatingHeader({
               </button>
             ) : null}
 
-            <Link
-              href="https://sageoutdooradvisory.com/contact-us/"
+            <AttributedRootContactLink
               className={`${EDITORIAL_BUTTON_PRIMARY_CLASS} shrink-0 px-4 py-2 text-[10px] sm:px-5 sm:text-[11px]`}
+              ctaLocation="header_get_in_touch"
+              external={false}
             >
               Get In Touch
-            </Link>
+            </AttributedRootContactLink>
 
             {showFullNav ? (
               <button

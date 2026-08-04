@@ -14,6 +14,7 @@ This guide documents the enhanced GA4 implementation for the Sage Outdoor Adviso
 4. **Outbound Links** - Automatically tracks clicks to external domains (e.g., sageoutdooradvisory.com)
 5. **File Downloads** - Tracks downloads of PDFs, Word docs, Excel files, etc.
 6. **Error Tracking** - Captures JavaScript errors automatically
+7. **Subdomain / root session stitching** - Parent `cookie_domain` + linker for `resources` ↔ apex (see below)
 
 ### ✅ Custom Event Tracking
 
@@ -149,6 +150,52 @@ In development, GA4 debug mode is automatically enabled. You can:
 1. Go to GA4 → Reports → Engagement → Events
 2. Wait 24-48 hours for data to appear (or use DebugView for real-time)
 3. Check that events are firing correctly
+
+## Subdomain ↔ root session stitching
+
+Resources and the marketing root must share one GA4 client identity so funnels like
+`resources → sageoutdooradvisory.com → booked meeting` stay in a single session/user.
+
+### Resources (this repo)
+
+`lib/ga4-cross-domain.ts` drives `components/GoogleAnalytics.tsx`:
+
+| Setting | Value |
+| --- | --- |
+| Measurement ID | `NEXT_PUBLIC_GA_MEASUREMENT_ID` (must match root) |
+| `cookie_domain` | `.sageoutdooradvisory.com` on production parent hosts |
+| `linker.domains` | `sageoutdooradvisory.com`, `www.sageoutdooradvisory.com`, `resources.sageoutdooradvisory.com` |
+| `linker.accept_incoming` | `true` |
+| `linker.decorate_forms` | `true` |
+| Local / Vercel preview | Parent cookie domain omitted (avoids broken local cookies) |
+
+### Root domain checklist (WordPress / GTM / gtag)
+
+Apply the **same measurement ID** and matching config on `sageoutdooradvisory.com` / `www`:
+
+```js
+gtag('config', 'G-XXXXXXXXXX', {
+  cookie_domain: '.sageoutdooradvisory.com',
+  cookie_flags: 'SameSite=None;Secure',
+  linker: {
+    domains: [
+      'sageoutdooradvisory.com',
+      'www.sageoutdooradvisory.com',
+      'resources.sageoutdooradvisory.com',
+    ],
+    accept_incoming: true,
+    decorate_forms: true,
+  },
+});
+```
+
+Verify in DevTools after a resources → `/contact-us/` click:
+
+1. `_ga` cookie Domain is `.sageoutdooradvisory.com`
+2. Outbound URL may include a `_gl=` linker param (especially www/apex edge cases)
+3. GA4 DebugView shows one continuous user across both hosts
+
+This does **not** populate GoHighLevel attribution by itself — combine with resources UTM handoff (`lib/root-domain-attribution.ts`).
 
 ## Privacy Considerations
 

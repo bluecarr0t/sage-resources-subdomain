@@ -21,8 +21,20 @@ import {
   extractSeoContentSlug,
   type SeoPageSection,
 } from '@/lib/seo-page-section';
+import { getResourcesAttributionParamsFromUrl } from '@/lib/root-domain-attribution';
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
+function attributionEventParams(url?: string): Record<string, string> {
+  if (!url) return {};
+  const params = getResourcesAttributionParamsFromUrl(url);
+  const out: Record<string, string> = {};
+  if (params.utm_source) out.utm_source = params.utm_source;
+  if (params.utm_medium) out.utm_medium = params.utm_medium;
+  if (params.utm_campaign) out.utm_campaign = params.utm_campaign;
+  if (params.utm_content) out.utm_content = params.utm_content;
+  return out;
+}
 
 /**
  * Check if GA4 is available
@@ -57,6 +69,7 @@ export function trackOutboundLink(url: string, linkText?: string): void {
     link_url: url,
     link_text: linkText,
     transport_type: 'beacon',
+    ...attributionEventParams(url),
   });
 }
 
@@ -72,6 +85,7 @@ export function trackCTAClick(
     cta_text: ctaText,
     cta_location: ctaLocation,
     destination: destination,
+    ...attributionEventParams(destination),
   });
 }
 

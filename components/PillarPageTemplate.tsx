@@ -29,6 +29,11 @@ import { EditorialCtaBand } from '@/components/editorial/EditorialCtaBand';
 import { PodcastContextLinks } from '@/components/podcast/PodcastContextLinks';
 import { getGuidePodcastPlacement } from '@/lib/guide-podcast-links';
 import {
+  attributeRootDomainContactHrefsInHtml,
+  resourcesContactUsUrl,
+  withResourcesAttribution,
+} from '@/lib/root-domain-attribution';
+import {
   EditorialPageShell,
   EDITORIAL_BODY_CLASS,
   EDITORIAL_BUTTON_OUTLINE_CLASS,
@@ -60,9 +65,16 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
   const [activeSection, setActiveSection] = useState<string>('');
   const [showTOC, setShowTOC] = useState(false);
   const links = createLocaleLinks(locale);
+  const attributionPath = `/guides/${content.slug}`;
+  const contactHref = resourcesContactUsUrl(attributionPath);
+  const prepareHtml = (html: string) =>
+    attributeRootDomainContactHrefsInHtml(
+      prefixInternalResourceHrefsInHtml(html, locale),
+      attributionPath
+    );
   const pageCanonicalUrl = `https://resources.sageoutdooradvisory.com/${locale}/guides/${content.slug}`;
 
-  const organizationSchema = generateOrganizationSchema(false);
+  const organizationSchema = generateOrganizationSchema();
   const breadcrumbSchema = generateGuideBreadcrumbSchema(content.slug, content.hero.headline);
   const articleSchema = generateArticleSchema(content);
   const faqSchema = content.faqs ? generateFAQSchema(content.faqs) : null;
@@ -194,7 +206,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
         </button>
 
         <a
-          href="https://sageoutdooradvisory.com/contact-us/"
+          href={contactHref}
           target="_blank"
           rel="noopener noreferrer"
           className={`fixed bottom-6 right-6 z-40 hidden sm:inline-block ${EDITORIAL_BUTTON_PRIMARY_CLASS}`}
@@ -224,7 +236,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
             ) : null}
             {content.hero.ctaText && content.hero.ctaLink ? (
               <a
-                href={content.hero.ctaLink}
+                href={withResourcesAttribution(content.hero.ctaLink, attributionPath)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`${EDITORIAL_BUTTON_OUTLINE_CLASS} mt-8`}
@@ -346,7 +358,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
                     <div className={`guide-prose mt-6 ${EDITORIAL_GUIDE_PROSE_CLASS}`}>
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: prefixInternalResourceHrefsInHtml(section.content, locale),
+                          __html: prepareHtml(section.content),
                         }}
                       />
                       {podcastPlacement ? (
@@ -371,10 +383,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
                             <div
                               className={`mt-4 ${EDITORIAL_GUIDE_PROSE_CLASS}`}
                               dangerouslySetInnerHTML={{
-                                __html: prefixInternalResourceHrefsInHtml(
-                                  subsection.content,
-                                  locale
-                                ),
+                                __html: prepareHtml(subsection.content),
                               }}
                             />
                           </div>
@@ -485,7 +494,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
                     <dd
                       className={`mt-2 border-l border-sage-200 pl-4 ${EDITORIAL_BODY_CLASS} speakable-answer`}
                       dangerouslySetInnerHTML={{
-                        __html: prefixInternalResourceHrefsInHtml(faq.answer, locale),
+                        __html: prepareHtml(faq.answer),
                       }}
                     />
                   </div>
@@ -495,7 +504,7 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
                 title="Have more questions?"
                 description="Let's discuss your outdoor hospitality project."
                 buttonLabel="Get In Touch"
-                buttonHref="https://sageoutdooradvisory.com/contact-us/"
+                buttonHref={contactHref}
                 external
               />
             </section>
@@ -529,13 +538,13 @@ export default function PillarPageTemplate({ content, locale }: PillarPageTempla
               title={content.cta.title}
               description={content.cta.description}
               buttonLabel={content.cta.buttonText}
-              buttonHref={content.cta.buttonLink}
+              buttonHref={withResourcesAttribution(content.cta.buttonLink, attributionPath)}
               external={content.cta.buttonLink.startsWith('http')}
             />
           ) : null}
         </main>
 
-        <Footer locale={locale} />
+        <Footer locale={locale} attributionPath={attributionPath} />
       </EditorialPageShell>
     </>
   );

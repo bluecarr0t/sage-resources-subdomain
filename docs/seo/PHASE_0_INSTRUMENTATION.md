@@ -88,7 +88,8 @@ Use **Page** filter in Performance:
 
 ### Property
 
-- Use the same GA4 property as the root site **or** a dedicated subdomain property (either works with cross-domain linker already in `components/GoogleAnalytics.tsx`).
+- Use the **same** GA4 measurement ID on `resources.sageoutdooradvisory.com` and `sageoutdooradvisory.com` (`NEXT_PUBLIC_GA_MEASUREMENT_ID`).
+- Session stitching is configured in `lib/ga4-cross-domain.ts` / `components/GoogleAnalytics.tsx` (`cookie_domain=.sageoutdooradvisory.com` + linker). Mirror that config on the root site (see [GA4_IMPLEMENTATION_GUIDE.md](../analytics/GA4_IMPLEMENTATION_GUIDE.md#subdomain--root-session-stitching)).
 - Confirm realtime shows traffic on `/en/map` after deploy.
 
 ### Register custom dimensions (one-time)

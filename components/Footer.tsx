@@ -1,6 +1,7 @@
 import Link from "next/link";
 import FooterLocationMap from "@/components/FooterLocationMap";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
+import AttributedRootContactLink from "@/components/AttributedRootContactLink";
 import { defaultLocale } from "@/i18n";
 import { createLocaleLinks } from "@/lib/locale-links";
 import { buildPodcastUrl } from "@/lib/outdoor-hospitality-podcast";
@@ -9,9 +10,11 @@ import { generateLocalBusinessSchema } from "@/lib/schema";
 interface FooterProps {
   /** Subdomain routes use `/[locale]/...`; legal pages stay at site root. */
   locale?: string;
+  /** Optional path for contact CTA utm_content (defaults to client pathname). */
+  attributionPath?: string;
 }
 
-export default function Footer({ locale = defaultLocale }: FooterProps) {
+export default function Footer({ locale = defaultLocale, attributionPath }: FooterProps) {
   const links = createLocaleLinks(locale);
   const localBusinessSchema = generateLocalBusinessSchema();
 
@@ -61,9 +64,14 @@ export default function Footer({ locale = defaultLocale }: FooterProps) {
             <h4 className="font-semibold mb-4">Connect</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <Link href="https://sageoutdooradvisory.com/contact-us/" className="hover:text-white font-semibold">
+                <AttributedRootContactLink
+                  className="hover:text-white font-semibold"
+                  attributionPath={attributionPath}
+                  ctaLocation="footer_get_in_touch"
+                  external={false}
+                >
                   Get In Touch →
-                </Link>
+                </AttributedRootContactLink>
               </li>
               <li>
                 <Link href="https://sageoutdooradvisory.com/clients/" className="hover:text-white">
