@@ -51,20 +51,23 @@ export function canEditProjectPipelineJob(input: {
     return false;
   }
 
-  if (input.job.sheetRowIndex === 0) {
-    return input.pipelineViewAll || input.isAdmin;
-  }
-
-  if (input.job.sheetRowIndex < 2) {
-    return false;
-  }
-
   if (input.pipelineViewAll || input.isAdmin) {
     return true;
   }
 
+  // Existing mirrored rows (including uiSourceOfTruth saves that force sheetRowIndex
+  // to 0) — allow the assigned consultant / PM to edit.
   if (input.existingJob != null && input.viewerDisplayName !== undefined) {
     return isJobAssignedToUser(input.existingJob, input.viewerDisplayName);
+  }
+
+  // UI-created marker with no existing row: create path only (admin / view-all above).
+  if (input.job.sheetRowIndex === 0) {
+    return false;
+  }
+
+  if (input.job.sheetRowIndex < 2) {
+    return false;
   }
 
   if (input.visibleJobs) {

@@ -110,6 +110,52 @@ describe('resolve-job-for-edit', () => {
     ).toBe(false);
   });
 
+  it('allows assigned authors to edit existing uiSourceOfTruth jobs (sheetRowIndex 0 on save)', () => {
+    const existing = sampleJob({
+      appraiserConsultant: 'Greg',
+      uiSourceOfTruth: true,
+      sheetRowIndex: 150,
+    });
+    const savePayload = sampleJob({
+      appraiserConsultant: 'Greg',
+      uiSourceOfTruth: true,
+      sheetRowIndex: 0,
+    });
+
+    expect(
+      canEditProjectPipelineJob({
+        job: savePayload,
+        sheetName: '2026 Jobs',
+        existingJob: existing,
+        viewerDisplayName: 'Greg Garwood',
+        pipelineViewAll: false,
+        isAdmin: false,
+      })
+    ).toBe(true);
+
+    expect(
+      canEditProjectPipelineJob({
+        job: savePayload,
+        sheetName: '2026 Jobs',
+        existingJob: existing,
+        viewerDisplayName: 'Luke Marran',
+        pipelineViewAll: false,
+        isAdmin: false,
+      })
+    ).toBe(false);
+
+    expect(
+      canEditProjectPipelineJob({
+        job: savePayload,
+        sheetName: '2026 Jobs',
+        existingJob: null,
+        viewerDisplayName: 'Greg Garwood',
+        pipelineViewAll: false,
+        isAdmin: false,
+      })
+    ).toBe(false);
+  });
+
   it('finds jobs by job number when row indexes differ', () => {
     const visible = sampleJob({ sheetRowIndex: 12 });
     const editing = sampleJob({ sheetRowIndex: 38 });
