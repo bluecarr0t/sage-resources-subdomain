@@ -29,6 +29,68 @@
     },
     "glossarySidebarLink": "Outdoor Hospitality Podcast"
   },
+  "journeys": {
+    "breadcrumb": {
+      "home": "Home",
+      "journeys": "Journeys"
+    },
+    "focusLabel": "Study focus",
+    "focus": {
+      "feasibility": "Feasibility study",
+      "appraisal": "USPAP appraisal",
+      "both": "Feasibility and appraisal"
+    },
+    "stepsHeading": "The path",
+    "outcomeHeading": "What this path produces",
+    "openMapCta": "Open comps map",
+    "openMarketCta": "Open market page",
+    "openLandingCta": "Open study landing",
+    "learnMore": "Learn more",
+    "relatedHeading": "Related journeys",
+    "ctaTitle": "Ready to go from comps to a financed study?",
+    "ctaDescription": "Book a Sage Introduction. Bring the market you filtered on the map—we'll scope a bank-ready feasibility study or USPAP appraisal.",
+    "ctaButton": "Book an introduction",
+    "index": {
+      "title": "From Comps Map to Financed Study",
+      "subtitle": "Case-style journeys that match how quality Organic leads research—then book Sage.",
+      "intro": "These pages narrate the comps → underwriting path: interactive map and market pages first, then a lender-ready feasibility study or USPAP appraisal. Use them when you want the process story, not a tourism guide.",
+      "compositeNote": "Composite journeys based on Organic Search → resources research → Sage Introduction patterns. Not named client testimonials; no invented financing outcomes.",
+      "listHeading": "Journeys",
+      "metaTitle": "From Comps Map to Financed Study | Sage Journeys",
+      "metaDescription": "Case-style pages showing how developers use the Sage comps map, then book bank-ready feasibility studies or USPAP appraisals for financing."
+    }
+  },
+  "markets": {
+    "breadcrumb": {
+      "home": "Home",
+      "markets": "Markets"
+    },
+    "subtitle": "Indexable market research for {label} — deep-links into the Sage comps map.",
+    "stats": {
+      "comps": "Tracked comps (state)",
+      "adr": "ADR framing (published rates)",
+      "occupancyNote": "Occupancy is modeled in feasibility and appraisal scopes—it is not published as a public map metric."
+    },
+    "adrSummary": "Average published retail ADR ≈ ${average} (range ${low}–${high}).",
+    "adrSummaryFallback": "Filter the interactive map for retail rate bands in this market; a Sage study validates achievable ADR.",
+    "studyHeading": "What Sage would study here",
+    "studyBody": "For {market}, Sage would assemble ~{count, number} tracked comps from this market view, then deepen into {focus}: competitive set selection, ADR and occupancy underwriting, and a bank-ready narrative for your site.",
+    "openMapCta": "Open filtered comps map",
+    "relatedHeading": "Related markets",
+    "ctaTitle": "Get a feasibility or appraisal for this market",
+    "ctaDescription": "Talk with Sage about a bank-ready feasibility study or USPAP-aligned appraisal grounded in the comps you are reviewing.",
+    "ctaButton": "Book an introduction",
+    "index": {
+      "title": "Glamping & Outdoor Hospitality Markets",
+      "subtitle": "Intent pages for Organic research—each market deep-links into map filters.",
+      "intro": "Use these indexable market URLs when researching supply, ADR bands, and competitor density. Each page opens the interactive map with state and unit-type filters applied so search landings are not SPA-only.",
+      "journeyTeaser": "how Organic research on the map becomes a bank-ready engagement.",
+      "listHeading": "Markets",
+      "openMap": "Open on map →",
+      "metaTitle": "Glamping Market Research Pages | Sage Outdoor Advisory",
+      "metaDescription": "Indexable glamping and outdoor hospitality market pages with map deep-links for Colorado, California, Texas, and more—comps research for feasibility and appraisal."
+    }
+  },
   "landing": {
     "glampingFeasibilityStudy": {
       "title": "Glamping Feasibility Study | Sage Outdoor Advisory",
@@ -43,6 +105,8 @@
   },
   "map": {
     "title": "Glamping Properties Map",
+    "hubJourneyLink": "From comps map → financed study",
+    "hubMarketsLink": "Market pages",
     "hubFeasibilityLink": "Feasibility study guide",
     "hubGlossaryLink": "Feasibility glossary",
     "loading": "Loading map...",
@@ -167,6 +231,20 @@
       "loadingMaps": "Loading Google Maps...",
       "loadingScript": "Loading Google Maps script...",
       "loadingScriptHint": "This may take a few seconds"
+    },
+    "lead": {
+      "ctaLabel": "Get a market study",
+      "ctaHint": "Bank-ready market comps, ADR framing, and occupancy analysis for your site.",
+      "studyTitle": "What Sage would study here",
+      "studyIntro": "For {market}, a Sage engagement starts with the competitor set on this map—then deepens into rates, demand, and underwriting.",
+      "defaultMarketLabel": "this market",
+      "compsLabel": "Comps in view",
+      "adrLabel": "ADR framing",
+      "adrFraming": "Public comps cluster in {bands} retail rate bands; a study validates achievable ADR against your unit mix and seasonality.",
+      "adrFramingFallback": "Filter a state or unit type to surface retail rate bands; a study validates achievable ADR against your unit mix.",
+      "occupancyLabel": "Occupancy",
+      "occupancyFraming": "Occupancy is not published on the public map—feasibility and appraisal scopes model seasonality, drive markets, and competitive set performance.",
+      "marketPagesHint": "Indexable market page:"
     },
     "metadata": {
       "title": "Glamping Properties Map | 500+ Locations | Sage Outdoor Advisory",
@@ -1363,13 +1441,6 @@
       "dueSoon": "Due soon",
       "coConsultantBadge": "With {names}",
       "sharedWithConsultants": "Shared with {names}",
-      "columnJobNumber": "Job #",
-      "columnClient": "Client",
-      "columnSegment": "Segment",
-      "columnService": "Service",
-      "columnProjMgr": "Proj mgr",
-      "columnReviewStatus": "Review status",
-      "columnDueDate": "Due date",
       "oauthTitle": "Connect Google Sheets",
       "oauthDescription": "The Supabase mirror is empty for this sheet tab. Connect Google Sheets only if needed; routine workload views use the mirror to avoid API quota limits.",
       "oauthConnect": "Connect Google Sheets",
@@ -2362,7 +2433,9 @@
       "downloadJpg": "Download",
       "downloadJpgLoading": "Saving…",
       "downloadJpgError": "Could not save image.",
-      "exportMenu": { "button": "Export" },
+      "exportMenu": {
+        "button": "Export"
+      },
       "downloadAllJpg": "Download All (JPGs)",
       "downloadAllJpgLoading": "Saving all…",
       "exportPack": {

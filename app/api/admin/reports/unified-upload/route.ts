@@ -21,13 +21,15 @@ import { isGarbageReportCity } from '@/lib/report-location-quality';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
 import { isValidTempUploadPath } from '@/lib/sanitize-filename';
 import { logAdminAudit } from '@/lib/admin-audit';
+import { getTrustedAppOrigin } from '@/lib/trusted-app-origin';
+import { enqueueStyleCorpusExtractForReport } from '@/lib/ai-report-builder/style-corpus-ingest';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 const MAX_FILES = 20;
 const MAX_XLSX_SIZE_MB = 50;
-const MAX_DOCX_SIZE_MB = 100; // Supabase Free: 50MB; Pro: 500GB
+const MAX_DOCX_SIZE_MB = 150; // large past-report narratives (legacy .doc can exceed 100MB)
 const MAX_XLSX_SIZE_BYTES = MAX_XLSX_SIZE_MB * 1024 * 1024;
 const MAX_DOCX_SIZE_BYTES = MAX_DOCX_SIZE_MB * 1024 * 1024;
 const BUCKET_NAME = 'report-uploads';
@@ -163,12 +165,22 @@ export async function POST(request: NextRequest) {
 
         const name = value.name.toLowerCase();
         if (name.endsWith('.xlsx') || name.endsWith('.xlsm') || name.endsWith('.xlsxm')) {
-          if (value.size <= MAX_XLSX_SIZE_BYTES) xlsxFiles.push(value);
+          if (value.size <= MAX_XLSX_SIZE_BYTES) {
+            xlsxFiles.push(value);
+          } else {
+            console.warn(
+              `[unified-upload] Skipping oversized XLSX ${value.name} (${(value.size / 1024 / 1024).toFixed(1)}MB > ${MAX_XLSX_SIZE_MB}MB)`
+            );
+          }
         } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
           if (value.size <= MAX_DOCX_SIZE_BYTES) {
             docxEntries.push({ name: value.name, storagePath: '' });
             // Store File reference for FormData mode (local dev)
             formDataDocxFiles.set(value.name, value);
+          } else {
+            console.warn(
+              `[unified-upload] Skipping oversized DOCX/DOC ${value.name} (${(value.size / 1024 / 1024).toFixed(1)}MB > ${MAX_DOCX_SIZE_MB}MB)`
+            );
           }
         }
         totalFileCount++;
@@ -220,12 +232,7 @@ export async function POST(request: NextRequest) {
       try {
         // Step 1: Process XLSX via internal API call
         if (pair.xlsx) {
-          const origin =
-            (typeof request.url === 'string' ? new URL(request.url).origin : null) ||
-            (request.headers.get('x-forwarded-host')
-              ? `https://${request.headers.get('x-forwarded-host')}`
-              : null) ||
-            'http://localhost:3000';
+          const origin = getTrustedAppOrigin();
 
           const headers: Record<string, string> = {};
           const internalKey = process.env.ADMIN_INTERNAL_API_KEY;
@@ -289,6 +296,26 @@ export async function POST(request: NextRequest) {
             if (existingReport) reportId = existingReport.id;
           }
           if (!reportId && !pair.xlsx) {
+            const { data: newReport, error: reportError } = await supabaseAdmin
+              .from('reports')
+              .insert({
+                user_id: userId,
+                title: pair.studyId,
+                property_name: pair.studyId,
+                study_id: pair.studyId,
+                location: pair.studyId,
+                status: 'completed',
+                market_type: 'outdoor_hospitality',
+              })
+              .select('id')
+              .single();
+
+            if (reportError) throw new Error(`Failed to create report: ${reportError.message} (${reportError.code})`);
+            reportId = newReport.id;
+          }
+          // XLSX present but failed to parse (e.g. Market Profile-only) — still create a
+          // report shell so the companion DOCX can be stored and extracted.
+          if (!reportId && pair.xlsx && !result.xlsx_processed) {
             const { data: newReport, error: reportError } = await supabaseAdmin
               .from('reports')
               .insert({
@@ -427,12 +454,32 @@ export async function POST(request: NextRequest) {
                 }
               }
 
-              await supabaseAdmin
+              const { error: reportUpdateError } = await supabaseAdmin
                 .from('reports')
                 .update(reportUpdate)
                 .eq('id', reportId);
 
-              result.docx_processed = true;
+              if (reportUpdateError) {
+                console.error(
+                  `[unified-upload] Report update failed for ${pair.studyId}:`,
+                  reportUpdateError.message
+                );
+                result.error =
+                  result.error || `Failed to update report after DOCX: ${reportUpdateError.message}`;
+              } else {
+                result.docx_processed = true;
+                // Fire-and-forget: refresh style corpus after past-report DOCX ingest
+                void enqueueStyleCorpusExtractForReport({
+                  supabase: supabaseAdmin,
+                  reportId,
+                  studyId: pair.studyId,
+                }).catch((err) => {
+                  console.warn(
+                    `[unified-upload] style corpus enqueue failed for ${pair.studyId}:`,
+                    err instanceof Error ? err.message : err
+                  );
+                });
+              }
             }
           }
         }

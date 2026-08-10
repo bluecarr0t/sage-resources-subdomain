@@ -69,11 +69,11 @@ export interface LandingPageContent {
 export const landingPages: Record<string, LandingPageContent> = {
   "glamping-feasibility-study": {
     slug: "glamping-feasibility-study",
-    title: "Glamping Feasibility Study | Sage Outdoor Advisory",
-    metaDescription: "Expert glamping feasibility studies for Texas, California & nationwide. Get comprehensive market analysis, financial projections & ROI estimates. Free consultation available.",
+    title: "Glamping Feasibility Study for Bank Financing | Sage",
+    metaDescription: "Bank-ready glamping feasibility studies: market comps, ADR & occupancy underwriting, and 10-year pro formas lenders use. Book a Sage introduction.",
     quickAnswer: "A glamping feasibility study is a professional analysis that validates whether a glamping or outdoor hospitality project is financially viable. It includes market demand research, competitive analysis of nearby glamping and RV properties, revenue projections by unit type, capital requirements, and ROI timelines. Key components are industry overview, area analysis, market analysis, revenue and expense projections, and a 10-year pro forma. Sage uses proprietary data on {PROPERTY_COUNT} glamping properties across North America. Typical deliverables help secure financing, guide development decisions, and identify market gaps. Core failure points include underestimating seasonality, ignoring local permitting, and overestimating demand. Studies typically take 6–8 weeks.",
     hero: {
-      headline: "Glamping Feasibility Study",
+      headline: "Bank-Ready Glamping Feasibility Study",
       subheadline: "In the rapidly growing glamping market, understanding nuances and market demands is key to success. Our feasibility studies provide a thorough examination of potential for upscale and unique outdoor accommodations.",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
@@ -274,11 +274,11 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
   "rv-resort-feasibility-study": {
     slug: "rv-resort-feasibility-study",
-    title: "RV Resort Feasibility Study | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort feasibility studies nationwide. Expert market analysis, financial projections & ROI estimates. Trusted by investors & developers. Free consultation.",
+    title: "RV Resort Feasibility Study | Bank-Ready Analysis | Sage",
+    metaDescription: "Lender-ready RV resort feasibility studies—competitive comps, occupancy & ADR framing, development costs, and ROI pro formas. Book a Sage introduction.",
     quickAnswer: `An RV resort feasibility study is a professional analysis that evaluates whether a proposed RV resort or RV park is financially viable before you invest in land or construction. It covers market demand, competitive positioning against nearby RV resorts and campgrounds, site-specific revenue and expense projections, development costs, and debt-coverage analysis. Sage's studies typically take ${FEASIBILITY_STUDY_TIMELINE} and are built to meet lender requirements for construction and acquisition financing. Deliverables include a 10-year pro forma, ROI projections, and a feasibility conclusion with recommendations. Common failure points are overestimating occupancy, underestimating site development costs, and ignoring seasonal demand swings in the target market.`,
     hero: {
-      headline: "RV Resort Feasibility Study",
+      headline: "Bank-Ready RV Resort Feasibility Study",
       subheadline: "Make informed investment decisions with comprehensive RV resort market analysis",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
@@ -385,11 +385,11 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
   "campground-feasibility-study": {
     slug: "campground-feasibility-study",
-    title: "Campground Feasibility Study | Sage Outdoor Advisory",
-    metaDescription: "Professional campground feasibility studies nationwide. Expert market analysis, financial projections & ROI estimates. Trusted by investors & developers. Free consultation.",
+    title: "Campground Feasibility Study | Lender-Ready | Sage",
+    metaDescription: "Bank-ready campground feasibility studies: site-type mix, seasonal demand, comps, and underwriting pro formas for financing. Book a Sage introduction.",
     quickAnswer: `A campground feasibility study evaluates whether a proposed or expanding campground is financially viable given local market demand, competition, and development costs. It includes market and competitive analysis, revenue and occupancy projections by site type, operating expense benchmarks, development cost estimates, and a 10-year pro forma with return-on-investment analysis. Sage's campground feasibility studies typically take ${FEASIBILITY_STUDY_TIMELINE} and are built to satisfy bank underwriting requirements for land acquisition and development loans. Seasonality is a critical variable: campgrounds in cooler climates often see concentrated demand in a 4–6 month season, which materially affects revenue projections and debt-service coverage calculations. Reports also flag zoning, permitting, and flood-risk considerations.`,
     hero: {
-      headline: "Campground Feasibility Study",
+      headline: "Lender-Ready Campground Feasibility Study",
       subheadline: "Expert market analysis and financial projections for your campground project",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
@@ -494,11 +494,11 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
   "glamping-appraisal": {
     slug: "glamping-appraisal",
-    title: "Glamping Appraisal & Valuation | Sage Outdoor Advisory",
-    metaDescription: "Professional glamping property appraisals nationwide. Bank-approved valuations for financing, acquisitions & investment decisions. Trusted by lenders. Free consultation.",
+    title: "Glamping Appraisal | USPAP Bank Valuation | Sage",
+    metaDescription: "USPAP-compliant glamping appraisals for bank financing, acquisitions & refinances—income, sales & cost approaches. Trusted by outdoor hospitality lenders.",
     quickAnswer: "A glamping appraisal is a USPAP-compliant valuation of a glamping resort or outdoor hospitality asset using income, sales comparison, and cost approaches. Sage specializes in yurts, safari tents, domes, and other unique units—delivering lender-ready reports banks accept for financing, acquisitions, and refinances. Typical turnaround is 2–4 weeks after site access and financials are provided.",
     hero: {
-      headline: "Glamping Property Appraisal",
+      headline: "USPAP Glamping Appraisal for Bank Financing",
       subheadline: "Bank-approved glamping appraisals built for lenders—not generic hotel templates. Income, sales, and cost approaches grounded in 350+ outdoor hospitality valuations across North America.",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
@@ -706,11 +706,11 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
   "rv-resort-appraisal": {
     slug: "rv-resort-appraisal",
-    title: "RV Resort Appraisal & Valuation | Sage Outdoor Advisory",
-    metaDescription: "Professional RV resort appraisals nationwide. Bank-approved valuations for financing, acquisitions & investment decisions. Trusted by lenders. Free consultation.",
+    title: "RV Resort Appraisal | USPAP Bank Valuation | Sage",
+    metaDescription: "USPAP-compliant RV park & resort appraisals for lenders—income, sales & cost approaches for financing, refinance, and acquisitions. Book Sage.",
     quickAnswer: "An RV resort appraisal is a USPAP-compliant valuation that determines the current market value of an existing or proposed RV resort or RV park using the income, sales comparison, and cost approaches. Lenders typically weight the income approach most heavily, using stabilized net operating income, site-type revenue mix, and market cap rates. Sage's RV resort appraisals are bank-ready and support financing, acquisitions, and refinances nationwide. Turnaround is typically 2–4 weeks once site access, financials, and comparable sales data are available. Appraisals differ from feasibility studies: appraisals value a property as-is, as-complete, or as-stabilized, while feasibility studies test the viability of a proposed project before it's built.",
     hero: {
-      headline: "RV Resort Appraisal & Valuation",
+      headline: "USPAP RV Resort Appraisal for Lenders",
       subheadline: "Expert RV resort appraisals trusted by banks and investors",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
@@ -856,11 +856,11 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
   "how-to-finance-glamping-resort": {
     slug: "how-to-finance-glamping-resort",
-    title: "How to Finance a Glamping Resort | Complete Guide | Sage Outdoor Advisory",
-    metaDescription: "Learn how to finance your glamping resort project. Expert guidance on bank loans, feasibility studies & appraisal requirements. Get financing help today. Free consultation.",
+    title: "How to Finance a Glamping Resort | What Banks Require | Sage",
+    metaDescription: "What banks require to finance a glamping resort: feasibility study, USPAP appraisal, projections, and underwriting docs. Partner guidance from Sage.",
     quickAnswer: `Financing a glamping resort typically requires a bank-approved feasibility study, a USPAP-compliant appraisal, a detailed business plan with financial projections, and personal financial statements. Lenders use the feasibility study to assess project viability and the appraisal to determine collateral value, since glamping properties don't fit standard hotel or multifamily lending templates. Sage Outdoor Advisory prepares both documents and partners with lenders like Live Oak Bank, which specializes in outdoor hospitality financing. Projects with strong market data, realistic occupancy assumptions, and clear permitting status move through underwriting faster. Most glamping resort feasibility work runs ${FEASIBILITY_STUDY_COST_RANGE}, in addition to a separate appraisal fee.`,
     hero: {
-      headline: "How to Finance a Glamping Resort",
+      headline: "How to Finance a Glamping Resort: What Banks Require",
       subheadline: "Complete guide to securing financing for your glamping resort project. Learn what banks require and how to prepare.",
       ctaText: "Get Financing Help",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
@@ -1450,11 +1450,11 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
   "campground-appraisal": {
     slug: "campground-appraisal",
-    title: "Campground Appraisal & Valuation | Sage Outdoor Advisory",
-    metaDescription: "Professional campground appraisals nationwide. Bank-approved valuations for financing, acquisitions & investment decisions. Trusted by lenders. Free consultation available.",
+    title: "Campground Appraisal | USPAP Bank Valuation | Sage",
+    metaDescription: "USPAP-compliant campground appraisals for bank financing & acquisitions—seasonal income normalization and comps lenders trust. Book a Sage introduction.",
     quickAnswer: "A campground appraisal is a USPAP-compliant valuation that determines the current market value of an existing or proposed campground using the income, sales comparison, and cost approaches. Appraisers evaluate site-type revenue mix, seasonal occupancy patterns, comparable campground sales, and the replacement cost of infrastructure and improvements. Sage's campground appraisals are bank-ready and used for financing, acquisitions, refinances, and estate or partnership matters. Turnaround is typically 2–4 weeks once site access, financials, and comparable sales data are available. Because campground revenue is often highly seasonal, appraisers must normalize income data carefully to reach an accurate, defensible valuation that lenders and investors can rely on.",
     hero: {
-      headline: "Campground Property Appraisal",
+      headline: "USPAP Campground Appraisal for Bank Financing",
       subheadline: "Get bank-approved appraisals for your campground property",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
@@ -1541,11 +1541,11 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
   "feasibility-study-faq": {
     slug: "feasibility-study-faq",
-    title: "Feasibility Study FAQ | Frequently Asked Questions | Sage Outdoor Advisory",
-    metaDescription: "FAQ about feasibility studies for outdoor hospitality projects. Get answers on timelines, requirements & what to expect. Expert guidance from Sage Outdoor Advisory.",
+    title: "Feasibility Study FAQ | Bank Requirements | Sage",
+    metaDescription: "Answers on outdoor hospitality feasibility studies: bank requirements, timeline, cost, vs appraisal, and what lenders underwrite. From Sage Outdoor Advisory.",
     quickAnswer: `A feasibility study is a comprehensive analysis that evaluates whether a proposed outdoor hospitality project—glamping resort, RV resort, or campground—is financially viable before construction begins. It combines market and competitive analysis, site-specific revenue and expense projections, development cost estimates, and a 10-year pro forma to support investment and financing decisions. Sage's feasibility studies typically take ${FEASIBILITY_STUDY_TIMELINE} and cost ${FEASIBILITY_STUDY_COST_RANGE}, and are built to meet bank underwriting requirements. Unlike an appraisal, which determines a property's current value, a feasibility study is forward-looking and tests whether a proposed project will perform well enough to justify the investment and repay project debt.`,
     hero: {
-      headline: "Feasibility Study FAQ",
+      headline: "Feasibility Study FAQ: Bank Requirements",
       subheadline: "Answers to common questions about feasibility studies for outdoor hospitality projects",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",
@@ -1642,11 +1642,11 @@ export const landingPages: Record<string, LandingPageContent> = {
   },
   "appraisal-faq": {
     slug: "appraisal-faq",
-    title: "Property Appraisal FAQ | Frequently Asked Questions | Sage Outdoor Advisory",
-    metaDescription: "FAQ about property appraisals for outdoor hospitality. Get answers on timelines, methods & what to expect. Expert guidance from Sage Outdoor Advisory.",
+    title: "Appraisal FAQ | USPAP Outdoor Hospitality | Sage",
+    metaDescription: "FAQ on USPAP appraisals for glamping, RV resorts & campgrounds—methods, timelines, and what lenders need. Expert answers from Sage Outdoor Advisory.",
     quickAnswer: "A property appraisal is an unbiased, USPAP-compliant professional opinion of an outdoor hospitality property's market value, used for financing, acquisitions, refinances, and estate or partnership matters. Appraisers typically use three approaches—income, sales comparison, and cost—and reconcile them into a final value conclusion. For outdoor hospitality assets like glamping resorts, RV resorts, and campgrounds, lenders usually weight the income approach most heavily. Sage's appraisals are bank-ready and typically take 2–4 weeks once site access, financial statements, and comparable sales data are available. Unlike a feasibility study, which is forward-looking and tests a proposed project's viability, an appraisal values a property as it exists (or as proposed) today.",
     hero: {
-      headline: "Property Appraisal FAQ",
+      headline: "Appraisal FAQ: USPAP for Outdoor Hospitality",
       subheadline: "Answers to common questions about property appraisals for outdoor hospitality",
       ctaText: "Get In Touch",
       ctaLink: "https://sageoutdooradvisory.com/contact-us",

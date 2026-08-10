@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 
 interface MissingFieldsBreakdown {
   total_count: number;
@@ -58,27 +57,19 @@ export default function AdminMissingFieldsBreakdown() {
   useEffect(() => {
     const fetchBreakdown = async () => {
       try {
-        const { data: raw, error: rpcError } = await supabase.rpc(
-          'get_missing_fields_breakdown'
-        );
-
-        if (rpcError) {
-          throw new Error(rpcError.message);
+        const res = await fetch('/api/admin/sage-glamping-data/missing-fields', {
+          credentials: 'include',
+        });
+        const json = (await res.json()) as {
+          success?: boolean;
+          error?: string;
+          breakdown?: MissingFieldsBreakdown;
+        };
+        if (!res.ok || !json.success || !json.breakdown) {
+          throw new Error(json.error || 'Failed to load breakdown');
         }
 
-        setData({
-          total_count: Number(raw?.total_count ?? 0),
-          missing_site_name: Number(raw?.missing_site_name ?? 0),
-          missing_rate_avg_retail_daily_rate: Number(
-            raw?.missing_rate_avg_retail_daily_rate ?? 0
-          ),
-          missing_unit_type: Number(raw?.missing_unit_type ?? 0),
-          missing_unit_private_bathroom: Number(
-            raw?.missing_unit_private_bathroom ?? 0
-          ),
-          missing_url: Number(raw?.missing_url ?? 0),
-          missing_description: Number(raw?.missing_description ?? 0),
-        });
+        setData(json.breakdown);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load breakdown');
       } finally {

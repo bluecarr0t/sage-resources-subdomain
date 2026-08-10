@@ -13,6 +13,7 @@ import { withAdminAuth } from '@/lib/require-admin-auth';
 import { logAdminAudit } from '@/lib/admin-audit';
 import {
   enrichReportInput,
+  deriveDevelopmentCosts,
   generateExecutiveSummary,
   generateLetterOfTransmittal,
   generateSWOTAnalysis,
@@ -22,6 +23,13 @@ import {
   assembleDraftXlsx,
   factCheckExecutiveSummary,
 } from '@/lib/ai-report-builder';
+import {
+  proposeAssumptions,
+  runFeasibilityModel,
+  formatModelMetricsForPrompt,
+} from '@/lib/feasibility-model';
+import type { FeasibilityProjectInput } from '@/lib/feasibility-model';
+import { exportCostAnalysisToXlsx } from '@/lib/site-builder/export-cost-analysis-xlsx';
 import type { ReportDraftInput } from '@/lib/ai-report-builder';
 
 export const dynamic = 'force-dynamic';
@@ -117,21 +125,48 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
       unit_mix,
       amenities_description: keyAmenities.length > 0 ? keyAmenities.join(', ') : undefined,
       study_id: studyId,
-      market_type: report.market_type ?? 'rv',
+      // Align with generate-draft / ReportBuilderClient: glamping default, web research on
+      market_type: report.market_type ?? 'glamping',
       include_web_research: true,
       service: report.service ?? undefined,
     };
 
     const enriched = await enrichReportInput(input);
+    const supabaseAdminForCosts = supabaseAdmin;
 
-    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators] =
-      await Promise.all([
-        generateExecutiveSummary(enriched),
-        generateLetterOfTransmittal(enriched),
-        generateSWOTAnalysis(enriched),
-        generateSiteAnalysis(enriched),
-        generateDemandIndicators(enriched),
-      ]);
+    const devCostsResult = await deriveDevelopmentCosts(supabaseAdminForCosts, enriched);
+    const assumptions = proposeAssumptions(enriched);
+    const projectInput: FeasibilityProjectInput = {
+      propertyName: enriched.property_name,
+      city: enriched.city,
+      state: enriched.state,
+      acres: enriched.acres,
+      parcelNumber: enriched.parcel_number,
+      unitMix: enriched.unit_mix,
+      siteDevCost: devCostsResult.data.totalProjectCost.siteDev,
+      unitCost: devCostsResult.data.totalProjectCost.unitCosts,
+      addBldgCost: devCostsResult.data.totalProjectCost.addBldg,
+      hardCostOverride:
+        devCostsResult.data.totalProjectCost.hardCosts > 0
+          ? devCostsResult.data.totalProjectCost.hardCosts
+          : undefined,
+    };
+    const modelOutput = runFeasibilityModel(projectInput, assumptions);
+    const modelMetricsText = formatModelMetricsForPrompt(modelOutput);
+
+    const [
+      execSummaryResult,
+      letter_of_transmittal,
+      swot_analysis,
+      site_analysis,
+      demand_indicators,
+    ] = await Promise.all([
+      generateExecutiveSummary(enriched, modelMetricsText),
+      generateLetterOfTransmittal(enriched),
+      generateSWOTAnalysis(enriched),
+      generateSiteAnalysis(enriched),
+      generateDemandIndicators(enriched),
+    ]);
 
     let executive_summary = execSummaryResult.executive_summary;
     const citations = execSummaryResult.citations;
@@ -141,17 +176,43 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
       executive_summary += `\n\n[Note: AI-generated draft. Some figures may require verification: ${factCheck.flags.map((f) => f.claim).join('; ')}.]`;
     }
 
+    let costAnalysisBuffer: Buffer | null = null;
+    if (devCostsResult.configs.length > 0) {
+      try {
+        costAnalysisBuffer = await exportCostAnalysisToXlsx({
+          configs: devCostsResult.configs,
+          costResult: devCostsResult.costResult,
+          amenityBreakdown: [],
+        });
+      } catch (err) {
+        console.warn('[regenerate] Cost Analysis XLSX failed (non-fatal):', err);
+      }
+    }
+
     const [docxBuffer, xlsxBuffer] = await Promise.all([
       assembleDraftDocx(
         enriched,
-        { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators },
+        {
+          executive_summary,
+          citations,
+          letter_of_transmittal,
+          swot_analysis,
+          site_analysis,
+          demand_indicators,
+          development_costs_data: devCostsResult.data,
+          model_output: modelOutput,
+        },
         { marketType: input.market_type }
-      ),
-      assembleDraftXlsx(enriched, { marketType: input.market_type }),
+      ).then((r) => r.buffer),
+      assembleDraftXlsx(enriched, {
+        marketType: input.market_type,
+        modelOutput: enriched.unit_mix.some((u) => u.count > 0) ? modelOutput : null,
+      }),
     ]);
 
     const docxStoragePath = `${report.id}/report.docx`;
     const xlsxStoragePath = `${report.id}/template.xlsx`;
+    const costAnalysisStoragePath = `${report.id}/cost-analysis.xlsx`;
 
     const [docxUpload, xlsxUpload] = await Promise.all([
       supabaseAdmin.storage.from(BUCKET_NAME).upload(docxStoragePath, docxBuffer, {
@@ -165,6 +226,16 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
         upsert: true,
       }),
     ]);
+
+    if (costAnalysisBuffer) {
+      await supabaseAdmin.storage.from(BUCKET_NAME).upload(costAnalysisStoragePath, costAnalysisBuffer, {
+        contentType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        upsert: true,
+      }).catch((err) => {
+        console.warn('[regenerate] Cost analysis upload failed (non-fatal):', err);
+      });
+    }
 
     if (docxUpload.error) {
       console.error('[regenerate] DOCX storage error:', docxUpload.error);
@@ -188,6 +259,10 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
       updatePayload.has_xlsx = true;
     } else {
       console.warn('[regenerate] XLSX storage error (non-fatal):', xlsxUpload.error.message);
+    }
+
+    if (costAnalysisBuffer) {
+      updatePayload.cost_analysis_file_path = costAnalysisStoragePath;
     }
 
     const { error: updateError } = await supabaseAdmin

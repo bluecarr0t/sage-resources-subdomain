@@ -71,6 +71,23 @@ curl -s "https://resources.sageoutdooradvisory.com/llms.txt" | head -15
 INDEXNOW_KEY=xxx SITE_URL=https://resources.sageoutdooradvisory.com npm run indexnow:submit
 ```
 
+### IndexNow for markets + journeys hubs (P1)
+
+Sitemap already lists `/[locale]/markets/*` and `/[locale]/journeys/*` in `app/sitemaps/main.xml/route.ts`. After those routes are **deployed and returning 200**:
+
+```bash
+# Dry-run URL list (no POST)
+npm run indexnow:submit:hubs:dry-run
+
+# Submit to Bing + Yandex IndexNow (requires INDEXNOW_KEY)
+npm run indexnow:submit:hubs
+
+# Fail closed if hubs are not live yet
+npx tsx scripts/submit-indexnow.ts --hubs=markets,journeys --require-live
+```
+
+Then verify in Bing Webmaster (URL Inspection) and GSC (URL Inspection — Google does not use IndexNow).
+
 ## Related docs
 
 - [PHASE_0_INSTRUMENTATION.md](./PHASE_0_INSTRUMENTATION.md)

@@ -19,6 +19,11 @@ export type GatedContentEventMetadata = {
   is_new_signup?: boolean;
   /** True when this auth_verified is a later return sign-in. */
   is_return?: boolean;
+  /**
+   * True when an unlocked lead submitted “I am a…” via the hard-required
+   * backfill modal (pre-field signups / email-only returns missing the role).
+   */
+  business_type_backfill?: boolean;
 };
 
 export type LogGatedContentEventParams = {

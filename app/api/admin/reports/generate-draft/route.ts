@@ -1,381 +1,294 @@
 /**
- * API Route: Generate report draft (AI Report Builder MVP)
+ * API Route: Generate report draft (AI Report Builder)
  * POST /api/admin/reports/generate-draft
  *
- * Accepts JSON body with property name, location, unit mix, etc.
- * Enriches with DB benchmarks, generates executive summary via OpenAI,
- * assembles DOCX, creates report record, uploads to storage, returns DOCX for download.
+ * Supports:
+ * - JSON body (legacy) → DOCX blob response
+ * - `{ stream: true }` → NDJSON progress + result URLs
+ * - `format: 'xlsx'` → XLSX only
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClientWithCookies } from '@/lib/supabase-server';
-import { createServerClient } from '@/lib/supabase';
-import { isManagedUser, isAllowedEmailDomain } from '@/lib/auth-helpers';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
-import { logAdminAudit } from '@/lib/admin-audit';
+import { requireAdminAuth } from '@/lib/require-admin-auth';
 import { isValidStudyIdFormat } from '@/lib/report-constants';
-import {
-  enrichReportInput,
-  deriveDevelopmentCosts,
-  generateExecutiveSummary,
-  generateLetterOfTransmittal,
-  generateSWOTAnalysis,
-  generateSiteAnalysis,
-  generateDemandIndicators,
-  assembleDraftDocx,
-  assembleDraftXlsx,
-  factCheckExecutiveSummary,
-} from '@/lib/ai-report-builder';
-import { exportCostAnalysisToXlsx } from '@/lib/site-builder/export-cost-analysis-xlsx';
 import type { ReportDraftInput } from '@/lib/ai-report-builder';
+import { executeGenerateDraft } from '@/lib/ai-report-builder/execute-generate-draft';
+import type { DraftProgressEvent } from '@/lib/ai-report-builder/draft-progress-events';
+import type { FeasibilityAssumptions } from '@/lib/feasibility-model';
+import type { StdbParseResult } from '@/lib/ai-report-builder/stdb-import';
 
 export const dynamic = 'force-dynamic';
-
-const BUCKET_NAME = 'report-uploads';
+export const maxDuration = 300;
 
 function generateStudyId(): string {
   const now = new Date();
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, '0');
   const dd = String(now.getDate()).padStart(2, '0');
-  const hex = Math.random().toString(16).slice(2, 10); // 8 chars to reduce collision risk
+  const hex = Math.random().toString(16).slice(2, 10);
   return `DRAFT-${yyyy}${mm}${dd}-${hex}`;
 }
 
-function buildReportInsertPayload(params: {
-  userId: string;
+function parseInput(raw: Record<string, unknown>): {
   input: ReportDraftInput;
-  enriched: { latitude?: number; longitude?: number; enrichment_metadata?: unknown };
-  executive_summary: string;
-}) {
-  const { userId, input, enriched, executive_summary } = params;
-  const location = [input.address_1, input.city, input.state, input.zip_code]
-    .filter(Boolean)
-    .join(', ');
-  const total_sites = input.unit_mix.reduce((sum, u) => sum + u.count, 0) || null;
+  format: 'docx' | 'xlsx';
+  stream: boolean;
+  draftMode: boolean;
+  assumptionsOverride: FeasibilityAssumptions | null;
+  stdbParse: StdbParseResult | null;
+  stdbWaiver: boolean;
+} | { error: string; status: number } {
+  const property_name = typeof raw.property_name === 'string' ? raw.property_name.trim() : '';
+  const city = typeof raw.city === 'string' ? raw.city.trim() : '';
+  const state = typeof raw.state === 'string' ? raw.state.trim() : '';
+  if (!property_name || !city || !state) {
+    return { error: 'property_name, city, and state are required', status: 400 };
+  }
+
+  const zip_code = typeof raw.zip_code === 'string' ? raw.zip_code.trim() : undefined;
+  const address_1 = typeof raw.address_1 === 'string' ? raw.address_1.trim() : undefined;
+  const acres =
+    typeof raw.acres === 'number'
+      ? raw.acres
+      : typeof raw.acres === 'string'
+        ? parseFloat(raw.acres)
+        : undefined;
+  const client_entity = typeof raw.client_entity === 'string' ? raw.client_entity.trim() : undefined;
+  const client_contact_name =
+    typeof raw.client_contact_name === 'string' ? raw.client_contact_name.trim() : undefined;
+  const client_phone = typeof raw.client_phone === 'string' ? raw.client_phone.trim() : undefined;
+  const client_email = typeof raw.client_email === 'string' ? raw.client_email.trim() : undefined;
+  const client_address =
+    typeof raw.client_address === 'string' ? raw.client_address.trim() : undefined;
+  const client_city_state_zip =
+    typeof raw.client_city_state_zip === 'string' ? raw.client_city_state_zip.trim() : undefined;
+  const client_salutation =
+    typeof raw.client_salutation === 'string' ? raw.client_salutation.trim() : undefined;
+  const parcel_number =
+    typeof raw.parcel_number === 'string' ? raw.parcel_number.trim() : undefined;
+  const resort_type = typeof raw.resort_type === 'string' ? raw.resort_type.trim() : undefined;
+  const intended_use_of_study =
+    typeof raw.intended_use_of_study === 'string' ? raw.intended_use_of_study.trim() : undefined;
+  const engagement_date =
+    typeof raw.engagement_date === 'string' ? raw.engagement_date.trim() : undefined;
+  const amenities_description =
+    typeof raw.amenities_description === 'string' ? raw.amenities_description.trim() : undefined;
+  const study_id = typeof raw.study_id === 'string' ? raw.study_id.trim() : undefined;
+  const market_type = typeof raw.market_type === 'string' ? raw.market_type.trim() : undefined;
+  const service = typeof raw.service === 'string' ? raw.service.trim() : undefined;
+  const county = typeof raw.county === 'string' ? raw.county.trim() : undefined;
+  const include_web_research = raw.include_web_research !== false;
+  const format = raw.format === 'xlsx' ? 'xlsx' : 'docx';
+  const stream = raw.stream === true;
+  const draftMode = raw.draft_mode !== false;
+  const stdbWaiver = raw.stdb_waiver === true;
+
+  const unit_mix_raw = Array.isArray(raw.unit_mix) ? raw.unit_mix : [];
+  const unit_mix = unit_mix_raw
+    .map((u) => {
+      if (!u || typeof u !== 'object') return null;
+      const row = u as Record<string, unknown>;
+      const type = typeof row.type === 'string' ? row.type.trim() : '';
+      const count =
+        typeof row.count === 'number'
+          ? row.count
+          : typeof row.count === 'string'
+            ? parseInt(row.count, 10)
+            : 0;
+      if (!type || !Number.isFinite(count) || count < 0) return null;
+      return { type, count };
+    })
+    .filter((u): u is { type: string; count: number } => !!u);
+
+  if (study_id && !isValidStudyIdFormat(study_id)) {
+    return {
+      error:
+        'Job number must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01)',
+      status: 400,
+    };
+  }
+
+  const num = (v: unknown) =>
+    typeof v === 'number' ? v : typeof v === 'string' ? parseFloat(v) : undefined;
+
+  const input: ReportDraftInput = {
+    property_name,
+    city,
+    state,
+    zip_code,
+    address_1,
+    acres: acres != null && Number.isFinite(acres) ? acres : undefined,
+    unit_mix,
+    client_entity,
+    client_contact_name,
+    client_phone,
+    client_email,
+    client_address,
+    client_city_state_zip,
+    client_salutation,
+    parcel_number,
+    resort_type,
+    intended_use_of_study,
+    engagement_date,
+    amenities_description,
+    study_id: study_id || generateStudyId(),
+    market_type: market_type || 'glamping',
+    include_web_research,
+    service,
+    county,
+    loan_to_cost: (() => {
+      const v = num(raw.loan_to_cost);
+      return v != null && Number.isFinite(v) ? v : undefined;
+    })(),
+    interest_rate_pct: (() => {
+      const v = num(raw.interest_rate_pct);
+      return v != null && Number.isFinite(v) ? v : undefined;
+    })(),
+    loan_term_years: (() => {
+      const v = num(raw.loan_term_years);
+      return v != null && Number.isFinite(v) ? v : undefined;
+    })(),
+    land_cost: (() => {
+      const v = num(raw.land_cost);
+      return v != null && Number.isFinite(v) ? v : undefined;
+    })(),
+    soft_cost_pct: (() => {
+      const v = num(raw.soft_cost_pct);
+      return v != null && Number.isFinite(v) ? v : undefined;
+    })(),
+    assessment_ratio: (() => {
+      const v = num(raw.assessment_ratio);
+      return v != null && Number.isFinite(v) ? v : undefined;
+    })(),
+    mill_levy_pct: (() => {
+      const v = num(raw.mill_levy_pct);
+      return v != null && Number.isFinite(v) ? v : undefined;
+    })(),
+  };
+
+  const assumptionsOverride =
+    raw.assumptions && typeof raw.assumptions === 'object'
+      ? (raw.assumptions as FeasibilityAssumptions)
+      : null;
+  const stdbParse =
+    raw.stdb_parse && typeof raw.stdb_parse === 'object'
+      ? (raw.stdb_parse as StdbParseResult)
+      : null;
 
   return {
-    user_id: userId,
-    study_id: input.study_id,
-    title: `${input.property_name} Feasibility Study - ${input.study_id}`,
-    property_name: input.property_name,
-    location: location || null,
-    city: input.city,
-    state: input.state,
-    zip_code: input.zip_code ?? null,
-    address_1: input.address_1 ?? null,
-    lot_size_acres: input.acres ?? null,
-    client_entity: input.client_entity ?? null,
-    unit_mix: input.unit_mix.length > 0 ? input.unit_mix : null,
-    total_sites,
-    executive_summary,
-    status: 'draft',
-    has_docx: true,
-    docx_file_path: null,
-    has_xlsx: false,
-    xlsx_file_path: null,
-    market_type: input.market_type ?? 'glamping',
-    service: input.service ?? null,
-    latitude: enriched.latitude ?? null,
-    longitude: enriched.longitude ?? null,
-    enrichment_metadata: enriched.enrichment_metadata ?? null,
+    input,
+    format,
+    stream,
+    draftMode,
+    assumptionsOverride,
+    stdbParse,
+    stdbWaiver,
   };
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const supabaseAuth = await createServerClientWithCookies();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseAuth.auth.getSession();
-
-    if (sessionError || !session?.user) return unauthorizedResponse();
-    if (!isAllowedEmailDomain(session.user.email)) return forbiddenResponse();
-    const hasAccess = await isManagedUser(session.user.id);
-    if (!hasAccess) return forbiddenResponse();
+    const auth = await requireAdminAuth(request);
+    if (!auth.ok) return auth.response;
 
     let body: unknown;
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
-        { success: false, error: 'Invalid JSON body' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    const raw = body as Record<string, unknown>;
-    const property_name = typeof raw.property_name === 'string' ? raw.property_name.trim() : '';
-    const city = typeof raw.city === 'string' ? raw.city.trim() : '';
-    const state = typeof raw.state === 'string' ? raw.state.trim() : '';
-    const zip_code = typeof raw.zip_code === 'string' ? raw.zip_code.trim() : undefined;
-    const address_1 = typeof raw.address_1 === 'string' ? raw.address_1.trim() : undefined;
-    const acres = typeof raw.acres === 'number' ? raw.acres : typeof raw.acres === 'string' ? parseFloat(raw.acres) : undefined;
-    const client_entity = typeof raw.client_entity === 'string' ? raw.client_entity.trim() : undefined;
-    const client_contact_name = typeof raw.client_contact_name === 'string' ? raw.client_contact_name.trim() : undefined;
-    const client_address = typeof raw.client_address === 'string' ? raw.client_address.trim() : undefined;
-    const client_city_state_zip = typeof raw.client_city_state_zip === 'string' ? raw.client_city_state_zip.trim() : undefined;
-    const client_salutation = typeof raw.client_salutation === 'string' ? raw.client_salutation.trim() : undefined;
-    const parcel_number = typeof raw.parcel_number === 'string' ? raw.parcel_number.trim() : undefined;
-    const amenities_description = typeof raw.amenities_description === 'string' ? raw.amenities_description.trim() : undefined;
-    const study_id = typeof raw.study_id === 'string' ? raw.study_id.trim() || undefined : undefined;
-    const market_type = typeof raw.market_type === 'string' ? raw.market_type.trim() : undefined;
-    const service = typeof raw.service === 'string' ? raw.service.trim() || undefined : undefined;
-    const format = typeof raw.format === 'string' ? raw.format.trim().toLowerCase() : 'docx';
-    const include_web_research =
-      format === 'docx' && typeof raw.include_web_research === 'boolean'
-        ? raw.include_web_research
-        : false;
-
-    let unit_mix: Array<{ type: string; count: number }> = [];
-    if (Array.isArray(raw.unit_mix)) {
-      unit_mix = raw.unit_mix
-        .filter((u): u is Record<string, unknown> => u && typeof u === 'object')
-        .map((u) => ({
-          type: String(u.type ?? '').trim(),
-          count: typeof u.count === 'number' ? u.count : parseInt(String(u.count ?? 0), 10) || 0,
-        }))
-        .filter((u) => u.type && u.count > 0);
+    const parsed = parseInput(body as Record<string, unknown>);
+    if ('error' in parsed) {
+      return NextResponse.json({ success: false, error: parsed.error }, { status: parsed.status });
     }
 
-    if (!property_name || !city || !state) {
-      return NextResponse.json(
-        { success: false, error: 'property_name, city, and state are required' },
-        { status: 400 }
-      );
-    }
+    const {
+      input,
+      format,
+      stream,
+      draftMode,
+      assumptionsOverride,
+      stdbParse,
+      stdbWaiver,
+    } = parsed;
 
-    if (zip_code && !/^\d{5}(-\d{4})?$/.test(zip_code)) {
-      return NextResponse.json(
-        { success: false, error: 'ZIP code must be 5 digits or 5+4 format (e.g. 12345 or 12345-6789)' },
-        { status: 400 }
-      );
-    }
-
-    const acresNum = acres != null && !Number.isNaN(acres) ? acres : undefined;
-    if (acresNum != null && (acresNum < 0 || !Number.isFinite(acresNum))) {
-      return NextResponse.json(
-        { success: false, error: 'Acres must be a non-negative number' },
-        { status: 400 }
-      );
-    }
-
-    if (study_id && !isValidStudyIdFormat(study_id)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            'Job number must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01)',
+    if (stream) {
+      const encoder = new TextEncoder();
+      const readable = new ReadableStream({
+        async start(controller) {
+          const send = (ev: DraftProgressEvent) => {
+            controller.enqueue(encoder.encode(`${JSON.stringify(ev)}\n`));
+          };
+          try {
+            await executeGenerateDraft({
+              input,
+              userId: auth.session.user.id,
+              userEmail: auth.session.user.email ?? undefined,
+              format,
+              draftMode,
+              assumptionsOverride,
+              stdbParse,
+              stdbWaiver,
+              emit: send,
+              request,
+            });
+          } catch (err) {
+            send({
+              type: 'error',
+              success: false,
+              message: err instanceof Error ? err.message : 'Generation failed',
+              status: 500,
+            });
+          } finally {
+            controller.close();
+          }
         },
-        { status: 400 }
-      );
+      });
+      return new NextResponse(readable, {
+        headers: {
+          'Content-Type': 'application/x-ndjson; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'X-Study-Id': input.study_id ?? '',
+        },
+      });
     }
 
-    const input: ReportDraftInput = {
-      property_name,
-      city,
-      state,
-      zip_code,
-      address_1,
-      acres: acresNum,
-      unit_mix,
-      client_entity,
-      client_contact_name,
-      client_address,
-      client_city_state_zip,
-      client_salutation,
-      parcel_number,
-      amenities_description,
-      study_id: study_id || generateStudyId(),
-      market_type: market_type || 'glamping',
-      include_web_research,
-      service,
-    };
-
-    const enriched = await enrichReportInput(input);
+    const result = await executeGenerateDraft({
+      input,
+      userId: auth.session.user.id,
+      userEmail: auth.session.user.email ?? undefined,
+      format,
+      draftMode,
+      assumptionsOverride,
+      stdbParse,
+      stdbWaiver,
+      request,
+    });
 
     if (format === 'xlsx') {
-      const xlsxBuffer = await assembleDraftXlsx(enriched, { marketType: input.market_type });
-      const filename = `${input.study_id}-template.xlsx`;
-      const blob = new Blob([new Uint8Array(xlsxBuffer)], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-      return new NextResponse(blob, {
+      const filename = `${result.studyId}-template.xlsx`;
+      return new NextResponse(new Uint8Array(result.xlsxBuffer), {
         status: 200,
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           'Content-Disposition': `attachment; filename="${filename}"`,
-          'Content-Length': blob.size.toString(),
+          'Content-Length': result.xlsxBuffer.length.toString(),
+          'X-Study-Id': result.studyId,
         },
       });
     }
 
-    const supabaseAdmin = createServerClient();
-    const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators, devCostsResult] =
-      await Promise.all([
-        generateExecutiveSummary(enriched),
-        generateLetterOfTransmittal(enriched),
-        generateSWOTAnalysis(enriched),
-        generateSiteAnalysis(enriched),
-        generateDemandIndicators(enriched),
-        deriveDevelopmentCosts(supabaseAdmin, enriched),
-      ]);
-    let executive_summary = execSummaryResult.executive_summary;
-    const citations = execSummaryResult.citations;
-
-    const factCheck = factCheckExecutiveSummary(executive_summary, enriched);
-    if (!factCheck.passed && factCheck.flags.length > 0) {
-      const disclaimer = `\n\n[Note: AI-generated draft. Some figures may require verification: ${factCheck.flags.map((f) => f.claim).join('; ')}.]`;
-      executive_summary = executive_summary + disclaimer;
-    }
-
-    const [docxBuffer, xlsxBuffer] = await Promise.all([
-      assembleDraftDocx(
-        enriched,
-        {
-          executive_summary,
-          citations,
-          letter_of_transmittal,
-          swot_analysis,
-          site_analysis,
-          demand_indicators,
-          development_costs_data: devCostsResult.data,
-        },
-        { marketType: input.market_type }
-      ),
-      assembleDraftXlsx(enriched, { marketType: input.market_type }),
-    ]);
-
-    const insertPayload = buildReportInsertPayload({
-      userId: session.user.id,
-      input,
-      enriched,
-      executive_summary,
-    });
-
-    const { data: newReport, error: insertError } = await supabaseAdmin
-      .from('reports')
-      .insert(insertPayload)
-      .select('id')
-      .single();
-
-    if (insertError) {
-      console.error('[generate-draft] Insert error:', insertError);
-      return NextResponse.json(
-        { success: false, error: `Failed to create report: ${insertError.message}` },
-        { status: 500 }
-      );
-    }
-
-    const docxStoragePath = `${newReport.id}/report.docx`;
-    const xlsxStoragePath = `${newReport.id}/template.xlsx`;
-    const costAnalysisStoragePath = `${newReport.id}/cost-analysis.xlsx`;
-
-    const uploads: Promise<{ error: { message: string } | null }>[] = [
-      supabaseAdmin.storage.from(BUCKET_NAME).upload(docxStoragePath, docxBuffer, {
-        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        upsert: true,
-      }).then((r) => ({ error: r.error })),
-      supabaseAdmin.storage.from(BUCKET_NAME).upload(xlsxStoragePath, xlsxBuffer, {
-        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        upsert: true,
-      }).then((r) => ({ error: r.error })),
-    ];
-
-    if (devCostsResult.configs.length > 0) {
-      try {
-        const costAnalysisBuffer = await exportCostAnalysisToXlsx({
-          configs: devCostsResult.configs,
-          costResult: devCostsResult.costResult,
-          amenityBreakdown: [],
-        });
-        uploads.push(
-          supabaseAdmin.storage.from(BUCKET_NAME).upload(costAnalysisStoragePath, costAnalysisBuffer, {
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            upsert: true,
-          }).then((r) => ({ error: r.error }))
-        );
-      } catch (costErr) {
-        console.warn('[generate-draft] Cost Analysis XLSX export failed (non-fatal):', costErr);
-      }
-    }
-
-    const uploadResults = await Promise.all(uploads);
-    const docxUpload = uploadResults[0];
-    const xlsxUpload = uploadResults[1];
-    const costAnalysisUpload = uploadResults[2];
-
-    if (docxUpload.error) {
-      console.error('[generate-draft] DOCX storage error:', docxUpload.error);
-      await supabaseAdmin.from('reports').delete().eq('id', newReport.id);
-      return NextResponse.json(
-        { success: false, error: `Failed to save DOCX: ${docxUpload.error.message}` },
-        { status: 500 }
-      );
-    }
-
-    if (xlsxUpload.error) {
-      console.warn('[generate-draft] XLSX storage error (non-fatal):', xlsxUpload.error.message);
-    }
-
-    const updatePayload: Record<string, string | boolean | null> = {
-      docx_file_path: docxStoragePath,
-    };
-    if (!xlsxUpload.error) {
-      updatePayload.xlsx_file_path = xlsxStoragePath;
-      updatePayload.has_xlsx = true;
-    }
-    if (costAnalysisUpload && !costAnalysisUpload.error) {
-      updatePayload.cost_analysis_file_path = costAnalysisStoragePath;
-    }
-
-    const { error: updateError } = await supabaseAdmin
-      .from('reports')
-      .update(updatePayload)
-      .eq('id', newReport.id);
-
-    if (updateError) {
-      console.error('[generate-draft] Update file paths error:', updateError);
-      const { error: retryError } = await supabaseAdmin
-        .from('reports')
-        .update(updatePayload)
-        .eq('id', newReport.id);
-      if (retryError) {
-        console.error('[generate-draft] Retry update failed:', retryError);
-        await supabaseAdmin.from('reports').delete().eq('id', newReport.id);
-        return NextResponse.json(
-          { success: false, error: 'Failed to link files to report. Please try again.' },
-          { status: 500 }
-        );
-      }
-    }
-
-    await logAdminAudit(
-      {
-        user_id: session.user.id,
-        user_email: session.user.email ?? undefined,
-        action: 'upload',
-        resource_type: 'report',
-        resource_id: newReport.id,
-        study_id: input.study_id,
-        details: { property_name: input.property_name, generated_draft: true },
-        source: 'session',
-      },
-      request
-    );
-
-    const filename = `${input.study_id}-report.docx`;
-    const blob = new Blob([new Uint8Array(docxBuffer)], {
-      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    });
-    return new NextResponse(blob, {
+    const filename = `${result.studyId}-report.docx`;
+    return new NextResponse(new Uint8Array(result.docxBuffer), {
       status: 200,
       headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Type':
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': blob.size.toString(),
-        'X-Study-Id': input.study_id ?? '',
+        'Content-Length': result.docxBuffer.length.toString(),
+        'X-Study-Id': result.studyId,
+        'X-Report-Id': result.reportId,
       },
     });
   } catch (err) {

@@ -10,6 +10,8 @@ const LOCALE_SCOPED_ROOT_SEGMENTS = new Set([
   'guides',
   'landing',
   'map',
+  'markets',
+  'journeys',
   'partners',
   'property',
   'brand',
@@ -40,11 +42,18 @@ export function prefixInternalResourceHrefsInHtml(html: string, locale: string):
  */
 export function localizeInternalHref(href: string, locale: string): string {
   if (!href.startsWith('/') || href.startsWith('//')) return href;
-  const parts = href.split('/').filter(Boolean);
+  const hashIndex = href.indexOf('#');
+  const hash = hashIndex >= 0 ? href.slice(hashIndex) : '';
+  const withoutHash = hashIndex >= 0 ? href.slice(0, hashIndex) : href;
+  const qIndex = withoutHash.indexOf('?');
+  const query = qIndex >= 0 ? withoutHash.slice(qIndex) : '';
+  const pathOnly = qIndex >= 0 ? withoutHash.slice(0, qIndex) : withoutHash;
+
+  const parts = pathOnly.split('/').filter(Boolean);
   if (parts.length === 0) return href;
   if (locales.includes(parts[0] as Locale)) return href;
   if (!LOCALE_SCOPED_ROOT_SEGMENTS.has(parts[0])) return href;
-  return `/${locale}/${parts.join('/')}`;
+  return `/${locale}/${parts.join('/')}${query}${hash}`;
 }
 
 /**
@@ -89,6 +98,10 @@ export function createLocaleLinks(locale: string) {
     guides: getLocalePath(locale, '/guides'),
     glossary: getLocalePath(locale, '/glossary'),
     map: getLocalePath(locale, '/map'),
+    markets: getLocalePath(locale, '/markets'),
+    market: (slug: string) => getLocalePath(locale, `/markets/${slug}`),
+    journeys: getLocalePath(locale, '/journeys'),
+    journey: (slug: string) => getLocalePath(locale, `/journeys/${slug}`),
     partners: getLocalePath(locale, '/partners'),
     sitemap: getLocalePath(locale, '/sitemap'),
     landing: (slug: string) => getLocalePath(locale, `/landing/${slug}`),

@@ -19,6 +19,7 @@ import { geocodeAddress } from '@/lib/geocode';
 import { isGarbageReportCity } from '@/lib/report-location-quality';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
 import { logAdminAudit } from '@/lib/admin-audit';
+import { enqueueStyleCorpusExtractForReport } from '@/lib/ai-report-builder/style-corpus-ingest';
 
 const BUCKET_NAME = 'report-uploads';
 const MAX_DOCX_SIZE_BYTES = 100 * 1024 * 1024; // 100MB (Supabase Free: 50MB; Pro: 500GB)
@@ -197,6 +198,17 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
       },
       request
     );
+
+    void enqueueStyleCorpusExtractForReport({
+      supabase: supabaseAdmin,
+      reportId: report.id,
+      studyId,
+    }).catch((err) => {
+      console.warn(
+        `[upload-docx] style corpus enqueue failed for ${studyId}:`,
+        err instanceof Error ? err.message : err
+      );
+    });
 
     return NextResponse.json({
       success: true,

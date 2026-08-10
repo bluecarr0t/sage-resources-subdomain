@@ -93,6 +93,15 @@ describe('public-map-api-guard', () => {
     expect(isAllowedPublicMapApiCaller(req)).toBe(true);
   });
 
+  it('allows localhost:3003 origin used by local next dev', () => {
+    const req = requestWith({
+      origin: 'http://localhost:3003',
+      'user-agent': 'Mozilla/5.0',
+    });
+    expect(isAllowedPublicMapApiCaller(req)).toBe(true);
+    expect(getAllowedPublicMapApiOrigins()).toContain('http://localhost:3003');
+  });
+
   it('includes SITE_URL in allowed origins', () => {
     process.env.SITE_URL = 'https://preview.example.com';
     expect(getAllowedPublicMapApiOrigins()).toContain('https://preview.example.com');

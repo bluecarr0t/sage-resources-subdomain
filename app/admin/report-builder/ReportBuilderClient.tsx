@@ -3,41 +3,69 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input, Select } from '@/components/ui';
-import { FilePlus, Loader2, Plus, Trash2, X, Clock, CheckCircle2, FileText, FileSpreadsheet, List } from 'lucide-react';
+import {
+  FilePlus,
+  Loader2,
+  Plus,
+  Trash2,
+  X,
+  Clock,
+  CheckCircle2,
+  FileText,
+  FileSpreadsheet,
+  List,
+  Upload,
+} from 'lucide-react';
 import { UNIT_TYPES } from '@/lib/unit-types';
 import { US_STATES_OPTIONS, isValidUsZip } from '@/lib/us-states';
 import { REPORT_MARKET_TYPE_OPTIONS, isValidStudyIdFormat } from '@/lib/report-constants';
 import { generateUniqueId } from '@/lib/random-id';
 import { adminPageDescription, adminPageHeadingMargin, adminPageTitle } from '@/lib/admin-ui';
+import type { EngagementLetterExtract } from '@/lib/ai-report-builder/engagement-letter-fields';
+import { consumeDraftProgressNdjson } from '@/lib/ai-report-builder/draft-ndjson-client';
+import type { DraftProgressEvent } from '@/lib/ai-report-builder/draft-progress-events';
+import type { StdbParseResult } from '@/lib/ai-report-builder/stdb-import';
+import type { FeasibilityAssumptions } from '@/lib/feasibility-model';
+import {
+  markAssumptionsReviewed,
+  patchUnitAssumption,
+  type AssumptionEvidence,
+} from '@/lib/ai-report-builder/assumption-helpers';
 
-const REQUEST_TIMEOUT_MS = 180_000;
+const REQUEST_TIMEOUT_MS = 300_000;
 
 interface ProgressStep {
   label: string;
-  /** Estimated duration in seconds */
+  /** Estimated duration in seconds (fallback timer only) */
   duration: number;
+  phases?: string[];
 }
 
 const PROGRESS_STEPS_BASE: ProgressStep[] = [
-  { label: 'Enriching property data & benchmarks', duration: 8 },
-  { label: 'Fetching comparable properties', duration: 10 },
-  { label: 'Generating executive summary', duration: 15 },
-  { label: 'Generating letter of transmittal', duration: 8 },
-  { label: 'Generating SWOT analysis', duration: 8 },
-  { label: 'Assembling DOCX & XLSX', duration: 6 },
-  { label: 'Uploading to storage', duration: 5 },
+  { label: 'Enriching property data & benchmarks', duration: 8, phases: ['enrich'] },
+  { label: 'STDB / market profile', duration: 3, phases: ['stdb'] },
+  { label: 'Assumptions & financial model', duration: 10, phases: ['assumptions', 'model'] },
+  {
+    label: 'Generating report sections',
+    duration: 40,
+    phases: ['section:executive_summary', 'section:swot', 'section:area_analysis'],
+  },
+  { label: 'Assembling DOCX & XLSX', duration: 15, phases: ['assemble_docx', 'assemble_xlsx'] },
+  { label: 'QA & uploading to storage', duration: 8, phases: ['qa', 'upload'] },
 ];
 
 const PROGRESS_STEPS_WEB: ProgressStep[] = [
-  { label: 'Enriching property data & benchmarks', duration: 8 },
-  { label: 'Searching web for market context', duration: 12 },
-  { label: 'Researching comparable properties', duration: 15 },
-  { label: 'Querying past Sage reports', duration: 5 },
-  { label: 'Generating executive summary', duration: 15 },
-  { label: 'Generating letter of transmittal', duration: 8 },
-  { label: 'Generating SWOT analysis', duration: 8 },
-  { label: 'Assembling DOCX & XLSX', duration: 6 },
-  { label: 'Uploading to storage', duration: 5 },
+  { label: 'Enriching property data & benchmarks', duration: 8, phases: ['enrich'] },
+  { label: 'Web research & comps (inside enrich)', duration: 20, phases: ['enrich'] },
+  { label: 'STDB / market profile', duration: 3, phases: ['stdb'] },
+  { label: 'Assumptions & financial model', duration: 10, phases: ['assumptions', 'model'] },
+  {
+    label: 'Generating report sections',
+    duration: 45,
+    phases: ['section:executive_summary', 'section:demand_indicators', 'section:supply_competition'],
+  },
+  { label: 'Assembling DOCX & XLSX', duration: 15, phases: ['assemble_docx', 'assemble_xlsx'] },
+  { label: 'QA & uploading to storage', duration: 8, phases: ['qa', 'upload'] },
 ];
 
 function formatElapsed(ms: number): string {
@@ -82,9 +110,14 @@ export default function ReportBuilderClient() {
   const [includeWebResearch, setIncludeWebResearch] = useState(true);
   const [clientEntity, setClientEntity] = useState('');
   const [clientContactName, setClientContactName] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
+  const [clientEmail, setClientEmail] = useState('');
   const [clientAddress, setClientAddress] = useState('');
   const [clientCityStateZip, setClientCityStateZip] = useState('');
   const [parcelNumber, setParcelNumber] = useState('');
+  const [resortType, setResortType] = useState('');
+  const [intendedUseOfStudy, setIntendedUseOfStudy] = useState('');
+  const [engagementDate, setEngagementDate] = useState('');
   const [amenitiesDescription, setAmenitiesDescription] = useState('');
   const [studyId, setStudyId] = useState('');
   const [unitMix, setUnitMix] = useState<UnitMixRow[]>([createUnitRow()]);
@@ -94,9 +127,32 @@ export default function ReportBuilderClient() {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ message: string; studyId?: string } | null>(null);
+  const [parseLoading, setParseLoading] = useState(false);
+  const [parseNotice, setParseNotice] = useState<string | null>(null);
+  const [engagementFileName, setEngagementFileName] = useState<string | null>(null);
+  /** Manual intake fields are hidden until PDF parse or "add manually". */
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [streamDriven, setStreamDriven] = useState(false);
+  const [draftMode, setDraftMode] = useState(true);
+  const [stdbWaiver, setStdbWaiver] = useState(false);
+  const [stdbParse, setStdbParse] = useState<StdbParseResult | null>(null);
+  const [stdbFileName, setStdbFileName] = useState<string | null>(null);
+  const [stdbLoading, setStdbLoading] = useState(false);
+  const [landCost, setLandCost] = useState('');
+  const [loanToCost, setLoanToCost] = useState('0.75');
+  const [interestRatePct, setInterestRatePct] = useState('9.5');
+  const [millLevyPct, setMillLevyPct] = useState('');
+  const [intakeConfirmed, setIntakeConfirmed] = useState(false);
+  const [assumptions, setAssumptions] = useState<FeasibilityAssumptions | null>(null);
+  const [assumptionEvidence, setAssumptionEvidence] = useState<AssumptionEvidence | null>(null);
+  const [assumptionsReviewed, setAssumptionsReviewed] = useState(false);
+  const [proposeLoading, setProposeLoading] = useState(false);
+  const engagementInputRef = useRef<HTMLInputElement>(null);
+  const stdbInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const errorRef = useRef<HTMLDivElement>(null);
   const progressStartRef = useRef<number | null>(null);
+  const formTopRef = useRef<HTMLDivElement>(null);
 
   const steps = includeWebResearch ? PROGRESS_STEPS_WEB : PROGRESS_STEPS_BASE;
   const totalEstimatedSec = steps.reduce((sum, s) => sum + s.duration, 0);
@@ -106,12 +162,14 @@ export default function ReportBuilderClient() {
       setProgressStep(0);
       setElapsedMs(0);
       progressStartRef.current = null;
+      setStreamDriven(false);
       return;
     }
     progressStartRef.current = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - (progressStartRef.current ?? 0);
       setElapsedMs(elapsed);
+      if (streamDriven) return;
 
       let cumulative = 0;
       let step = 0;
@@ -126,7 +184,7 @@ export default function ReportBuilderClient() {
       setProgressStep(step);
     }, 500);
     return () => clearInterval(interval);
-  }, [loading, steps]);
+  }, [loading, steps, streamDriven]);
 
   // Focus error region when error is set (accessibility)
   useEffect(() => {
@@ -161,6 +219,88 @@ export default function ReportBuilderClient() {
     );
   }, []);
 
+  const applyEngagementExtract = useCallback((extract: EngagementLetterExtract) => {
+    if (extract.property_name) setPropertyName(extract.property_name);
+    if (extract.service) setService(extract.service);
+    if (extract.address_1) setAddress1(extract.address_1);
+    if (extract.city) setCity(extract.city);
+    if (extract.state) setState(extract.state);
+    if (extract.zip_code) setZipCode(extract.zip_code);
+    if (extract.market_type) setMarketType(extract.market_type);
+    if (extract.parcel_number) setParcelNumber(extract.parcel_number);
+    if (extract.client_entity) setClientEntity(extract.client_entity);
+    if (extract.client_contact_name) setClientContactName(extract.client_contact_name);
+    if (extract.client_phone) setClientPhone(extract.client_phone);
+    if (extract.client_email) setClientEmail(extract.client_email);
+    if (extract.client_address) setClientAddress(extract.client_address);
+    if (extract.client_city_state_zip) setClientCityStateZip(extract.client_city_state_zip);
+    if (extract.resort_type_raw) setResortType(extract.resort_type_raw);
+    if (extract.intended_use_of_study) setIntendedUseOfStudy(extract.intended_use_of_study);
+    if (extract.engagement_date) setEngagementDate(extract.engagement_date);
+    if (extract.amenities_description) setAmenitiesDescription(extract.amenities_description);
+    // Engagement letters rarely include unit counts — leave unit mix for analyst
+    setAddUnitMixLater(true);
+  }, []);
+
+  const handleEngagementUpload = useCallback(
+    async (file: File | null) => {
+      if (!file) return;
+      setError(null);
+      setParseNotice(null);
+      setSuccess(null);
+      setParseLoading(true);
+      setEngagementFileName(file.name);
+
+      try {
+        const body = new FormData();
+        body.append('file', file);
+        const res = await fetch('/api/admin/reports/parse-engagement-letter', {
+          method: 'POST',
+          credentials: 'include',
+          body,
+        });
+        const data = (await res.json()) as {
+          success?: boolean;
+          error?: string;
+          extract?: EngagementLetterExtract;
+          source_filename?: string;
+        };
+        if (!res.ok || !data.success || !data.extract) {
+          throw new Error(data.error || 'Failed to parse engagement letter');
+        }
+
+        applyEngagementExtract(data.extract);
+        setShowManualForm(true);
+        setIntakeConfirmed(false);
+        setAssumptions(null);
+        setAssumptionEvidence(null);
+        setAssumptionsReviewed(false);
+        const missing: string[] = [];
+        if (!data.extract.property_name) missing.push('property name');
+        if (!data.extract.address_1) missing.push('address');
+        if (!data.extract.city) missing.push('city');
+        if (!data.extract.state) missing.push('state');
+        if (!data.extract.market_type) missing.push('market type (RV/glamping)');
+        const warnBits = [
+          ...(data.extract.warnings ?? []),
+          missing.length ? `Missing: ${missing.join(', ')} — please fill in` : null,
+          'Confirm address, market type, unit mix, and STDB before generating. Unit mix is usually not on the engagement letter.',
+        ].filter(Boolean);
+        setParseNotice(warnBits.join(' '));
+        requestAnimationFrame(() => {
+          formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      } catch (err) {
+        setEngagementFileName(null);
+        setError(err instanceof Error ? err.message : 'Failed to parse engagement letter');
+      } finally {
+        setParseLoading(false);
+        if (engagementInputRef.current) engagementInputRef.current.value = '';
+      }
+    },
+    [applyEngagementExtract]
+  );
+
   const buildPayload = useCallback(
     () => {
       const trimmedName = propertyName.trim();
@@ -185,14 +325,31 @@ export default function ReportBuilderClient() {
         unit_mix: validUnitMix,
         client_entity: clientEntity.trim() || undefined,
         client_contact_name: clientContactName.trim() || undefined,
+        client_phone: clientPhone.trim() || undefined,
+        client_email: clientEmail.trim() || undefined,
         client_address: clientAddress.trim() || undefined,
         client_city_state_zip: clientCityStateZip.trim() || undefined,
         parcel_number: parcelNumber.trim() || undefined,
+        resort_type: resortType.trim() || undefined,
+        intended_use_of_study: intendedUseOfStudy.trim() || undefined,
+        engagement_date: engagementDate.trim() || undefined,
         amenities_description: amenitiesDescription.trim() || undefined,
         study_id: trimmedStudyId || undefined,
         market_type: marketType,
         include_web_research: includeWebResearch,
         format: 'docx',
+        stream: true,
+        draft_mode: draftMode,
+        stdb_waiver: stdbWaiver,
+        stdb_parse: stdbParse ?? undefined,
+        land_cost: landCost ? parseFloat(landCost) : undefined,
+        loan_to_cost: loanToCost ? parseFloat(loanToCost) : undefined,
+        interest_rate_pct: interestRatePct ? parseFloat(interestRatePct) : undefined,
+        mill_levy_pct: millLevyPct ? parseFloat(millLevyPct) : undefined,
+        assumptions:
+          assumptions && assumptionsReviewed
+            ? markAssumptionsReviewed(assumptions, draftMode ? 'analyst_set' : 'locked')
+            : assumptions ?? undefined,
       };
     },
     [
@@ -207,13 +364,27 @@ export default function ReportBuilderClient() {
       addUnitMixLater,
       clientEntity,
       clientContactName,
+      clientPhone,
+      clientEmail,
       clientAddress,
       clientCityStateZip,
       parcelNumber,
+      resortType,
+      intendedUseOfStudy,
+      engagementDate,
       amenitiesDescription,
       studyId,
       marketType,
       includeWebResearch,
+      draftMode,
+      stdbWaiver,
+      stdbParse,
+      landCost,
+      loanToCost,
+      interestRatePct,
+      millLevyPct,
+      assumptions,
+      assumptionsReviewed,
     ]
   );
 
@@ -227,6 +398,12 @@ export default function ReportBuilderClient() {
     if (!trimmedName || !trimmedCity || !trimmedState) {
       return 'Property name, city, and state are required.';
     }
+    if (!address1.trim()) {
+      return 'Street address is required for accurate radius comps and maps.';
+    }
+    if (!intakeConfirmed) {
+      return 'Confirm the intake checklist (address, market type, unit mix) before generating.';
+    }
     if (trimmedZip && !isValidUsZip(trimmedZip)) {
       return 'ZIP code must be 5 digits or 5+4 format (e.g. 12345 or 12345-6789).';
     }
@@ -237,8 +414,39 @@ export default function ReportBuilderClient() {
     if (trimmedStudyId && !isValidStudyIdFormat(trimmedStudyId)) {
       return 'Job number must be blank (auto-generate), DRAFT-YYYYMMDD-xxxx, or NN-NNN[A]?-NN (e.g. 25-100A-01).';
     }
+    const unitTotal = addUnitMixLater
+      ? 0
+      : unitMix.reduce((sum, r) => sum + (r.count > 0 ? r.count : 0), 0);
+    if (!draftMode && unitTotal <= 0) {
+      return 'Unit mix is required for full (non-draft) generate so XLSX model drivers can be written.';
+    }
+    if (!stdbParse && !stdbWaiver) {
+      return 'Upload an STDB Market Profile export or check “Waive STDB import” before generating.';
+    }
+    if (!draftMode && !assumptionsReviewed) {
+      return 'Review and lock ★ assumptions (Propose from market data → confirm) before full generate.';
+    }
+    if (!draftMode && !assumptions) {
+      return 'Propose assumptions from market data before full (non-draft) generate.';
+    }
     return null;
-  }, [propertyName, city, state, zipCode, acres, studyId]);
+  }, [
+    propertyName,
+    city,
+    state,
+    zipCode,
+    acres,
+    studyId,
+    address1,
+    intakeConfirmed,
+    draftMode,
+    unitMix,
+    addUnitMixLater,
+    stdbParse,
+    stdbWaiver,
+    assumptionsReviewed,
+    assumptions,
+  ]);
 
   function triggerDownload(blob: Blob, filename: string) {
     const url = URL.createObjectURL(blob);
@@ -250,6 +458,115 @@ export default function ReportBuilderClient() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+
+  const advanceProgressForPhase = useCallback(
+    (phase: string) => {
+      setStreamDriven(true);
+      let best = 0;
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].phases?.includes(phase)) best = Math.max(best, i);
+      }
+      setProgressStep((prev) => Math.max(prev, best));
+    },
+    [steps]
+  );
+
+  const handleStdbUpload = useCallback(async (file: File | null) => {
+    if (!file) return;
+    setStdbLoading(true);
+    setError(null);
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      const res = await fetch('/api/admin/reports/import-stdb', {
+        method: 'POST',
+        credentials: 'include',
+        body,
+      });
+      const data = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        parse?: StdbParseResult;
+      };
+      if (!res.ok || !data.success || !data.parse) {
+        throw new Error(data.error || 'STDB import failed');
+      }
+      setStdbParse(data.parse);
+      setStdbFileName(file.name);
+      setStdbWaiver(false);
+    } catch (err) {
+      setStdbParse(null);
+      setStdbFileName(null);
+      setError(err instanceof Error ? err.message : 'STDB import failed');
+    } finally {
+      setStdbLoading(false);
+      if (stdbInputRef.current) stdbInputRef.current.value = '';
+    }
+  }, []);
+
+  const handleProposeAssumptions = useCallback(async () => {
+    setProposeLoading(true);
+    setError(null);
+    try {
+      const acresNum = acres ? parseFloat(acres) : undefined;
+      const validUnitMix = addUnitMixLater
+        ? []
+        : unitMix
+            .filter((r) => r.type && r.count > 0)
+            .map((r) => ({ type: r.type, count: r.count }));
+      const res = await fetch('/api/admin/reports/propose-assumptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          property_name: propertyName.trim(),
+          city: city.trim(),
+          state: state.trim(),
+          address_1: address1.trim() || undefined,
+          zip_code: zipCode.trim() || undefined,
+          acres: acresNum,
+          market_type: marketType,
+          unit_mix: validUnitMix,
+          include_web_research: includeWebResearch,
+          land_cost: landCost ? parseFloat(landCost) : undefined,
+          loan_to_cost: loanToCost ? parseFloat(loanToCost) : undefined,
+          interest_rate_pct: interestRatePct ? parseFloat(interestRatePct) : undefined,
+          mill_levy_pct: millLevyPct ? parseFloat(millLevyPct) : undefined,
+        }),
+      });
+      const data = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        assumptions?: FeasibilityAssumptions;
+        evidence?: AssumptionEvidence;
+      };
+      if (!res.ok || !data.success || !data.assumptions) {
+        throw new Error(data.error || 'Failed to propose assumptions');
+      }
+      setAssumptions(data.assumptions);
+      setAssumptionEvidence(data.evidence ?? null);
+      setAssumptionsReviewed(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to propose assumptions');
+    } finally {
+      setProposeLoading(false);
+    }
+  }, [
+    acres,
+    addUnitMixLater,
+    unitMix,
+    propertyName,
+    city,
+    state,
+    address1,
+    zipCode,
+    marketType,
+    includeWebResearch,
+    landCost,
+    loanToCost,
+    interestRatePct,
+    millLevyPct,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,6 +581,7 @@ export default function ReportBuilderClient() {
     abortRef.current = new AbortController();
     const timeoutId = setTimeout(() => abortRef.current?.abort(), REQUEST_TIMEOUT_MS);
     setLoading(true);
+    setStreamDriven(false);
 
     try {
       const payload = buildPayload();
@@ -275,50 +593,113 @@ export default function ReportBuilderClient() {
         body: JSON.stringify(payload),
       });
 
-      clearTimeout(timeoutId);
-      abortRef.current = null;
+      const contentType = res.headers.get('content-type') || '';
 
-      if (!res.ok) {
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const data = await res.json();
-          throw new Error(data.error || 'Generation failed');
-        }
-        const text = await res.text();
-        throw new Error(text || `Request failed (${res.status})`);
-      }
-
-      const docxBlob = await res.blob();
-      const disposition = res.headers.get('content-disposition');
-      const match = disposition?.match(/filename="?([^";]+)"?/);
-      const docxFilename = match?.[1] ?? 'report-draft.docx';
-      const studyIdFromHeader = res.headers.get('X-Study-Id');
-
-      triggerDownload(docxBlob, docxFilename);
-
-      // Download the XLSX file too (generated alongside the DOCX)
-      if (studyIdFromHeader) {
-        try {
-          const xlsxRes = await fetch(
-            `/api/admin/reports/study/${encodeURIComponent(studyIdFromHeader)}/download-xlsx`,
-            { credentials: 'include' },
-          );
-          if (xlsxRes.ok) {
-            const xlsxBlob = await xlsxRes.blob();
-            const xlsxDisp = xlsxRes.headers.get('content-disposition');
-            const xlsxMatch = xlsxDisp?.match(/filename="?([^";]+)"?/);
-            const xlsxFilename = xlsxMatch?.[1] ?? `${studyIdFromHeader}-template.xlsx`;
-            setTimeout(() => triggerDownload(xlsxBlob, xlsxFilename), 500);
+      if (contentType.includes('application/x-ndjson')) {
+        let resultEv: Extract<DraftProgressEvent, { type: 'result' }> | null = null;
+        let errorMsg: string | null = null;
+        const consumed = await consumeDraftProgressNdjson(
+          res,
+          abortRef.current.signal,
+          (ev) => {
+            if (ev.type === 'phase' && (ev.status === 'complete' || ev.status === 'started')) {
+              advanceProgressForPhase(ev.step);
+            }
+            if (ev.type === 'result') resultEv = ev;
+            if (ev.type === 'error') errorMsg = ev.message;
           }
-        } catch {
-          // XLSX download is best-effort; DOCX is the primary output
+        );
+        clearTimeout(timeoutId);
+        abortRef.current = null;
+        if (!consumed.ok) throw new Error(consumed.message);
+        if (errorMsg) throw new Error(errorMsg);
+        if (!resultEv) throw new Error('Generation finished without a result');
+
+        const result = resultEv as Extract<DraftProgressEvent, { type: 'result' }>;
+        if (result.assumptions) {
+          setAssumptions(result.assumptions);
         }
+        if (result.docxUrl) {
+          const docxRes = await fetch(result.docxUrl);
+          if (docxRes.ok) {
+            triggerDownload(await docxRes.blob(), `${result.studyId}-report.docx`);
+          }
+        }
+        if (result.xlsxUrl) {
+          setTimeout(async () => {
+            try {
+              const xlsxRes = await fetch(result.xlsxUrl!);
+              if (xlsxRes.ok) {
+                triggerDownload(await xlsxRes.blob(), `${result.studyId}-template.xlsx`);
+              }
+            } catch {
+              /* best-effort */
+            }
+          }, 500);
+        }
+
+        const qaBlocked = result.qa && !result.qa.passed && !draftMode;
+        const qaNote =
+          result.qa && !result.qa.passed
+            ? ` QA flags: ${result.qa.flags.join('; ')}.`
+            : result.qa?.passed
+              ? ' QA passed.'
+              : '';
+        const diag = result.docxDiagnostics;
+        const diagNote = diag
+          ? ` Assemble: identity×${diag.identityReplacements}, placeholders=${diag.imagesPlaceholdered}, fingerprints=${diag.sampleFingerprintsRemaining.length ? diag.sampleFingerprintsRemaining.join(', ') : 'none'}.`
+          : '';
+        const taskNote =
+          result.analystTasks?.length
+            ? ` Analyst tasks: ${result.analystTasks.slice(0, 3).join(' | ')}`
+            : '';
+        setSuccess({
+          message: qaBlocked
+            ? `Ship blocked by QA.${qaNote}${taskNote}`
+            : `Report draft generated — DOCX and XLSX ready.${qaNote}${diagNote}${taskNote}`,
+          studyId: result.studyId,
+        });
+      } else {
+        clearTimeout(timeoutId);
+        abortRef.current = null;
+        if (!res.ok) {
+          if (contentType.includes('application/json')) {
+            const data = await res.json();
+            throw new Error(data.error || 'Generation failed');
+          }
+          const text = await res.text();
+          throw new Error(text || `Request failed (${res.status})`);
+        }
+
+        const docxBlob = await res.blob();
+        const disposition = res.headers.get('content-disposition');
+        const match = disposition?.match(/filename="?([^";]+)"?/);
+        const docxFilename = match?.[1] ?? 'report-draft.docx';
+        const studyIdFromHeader = res.headers.get('X-Study-Id');
+        triggerDownload(docxBlob, docxFilename);
+        if (studyIdFromHeader) {
+          try {
+            const xlsxRes = await fetch(
+              `/api/admin/reports/study/${encodeURIComponent(studyIdFromHeader)}/download-xlsx`,
+              { credentials: 'include' }
+            );
+            if (xlsxRes.ok) {
+              const xlsxBlob = await xlsxRes.blob();
+              setTimeout(
+                () => triggerDownload(xlsxBlob, `${studyIdFromHeader}-template.xlsx`),
+                500
+              );
+            }
+          } catch {
+            /* best-effort */
+          }
+        }
+        setSuccess({
+          message: 'Report draft generated — DOCX and XLSX downloaded.',
+          studyId: studyIdFromHeader ?? undefined,
+        });
       }
 
-      setSuccess({
-        message: 'Report draft generated — DOCX and XLSX downloaded.',
-        studyId: studyIdFromHeader ?? undefined,
-      });
       setError(null);
       setPropertyName('');
       setService('');
@@ -329,17 +710,32 @@ export default function ReportBuilderClient() {
       setAcres('');
       setClientEntity('');
       setClientContactName('');
+      setClientPhone('');
+      setClientEmail('');
       setClientAddress('');
       setClientCityStateZip('');
       setParcelNumber('');
+      setResortType('');
+      setIntendedUseOfStudy('');
+      setEngagementDate('');
       setAmenitiesDescription('');
       setStudyId('');
       setUnitMix([createUnitRow()]);
+      setAddUnitMixLater(false);
+      setEngagementFileName(null);
+      setParseNotice(null);
+      setShowManualForm(false);
+      setStdbParse(null);
+      setStdbFileName(null);
+      setLandCost('');
+      setMillLevyPct('');
     } catch (err) {
       setSuccess(null);
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
-          setError('Request timed out. Generation can take 60–120 seconds with web research. Please try again.');
+          setError(
+            'Request timed out. Generation can take up to 5 minutes with web research. Please try again.'
+          );
         } else {
           setError(err.message);
         }
@@ -347,6 +743,7 @@ export default function ReportBuilderClient() {
         setError('Generation failed');
       }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -370,8 +767,9 @@ export default function ReportBuilderClient() {
               Report Builder
             </h1>
             <p className={adminPageDescription}>
-              Enter property details to generate an AI-assisted feasibility study draft. The system
-              will enrich with regional benchmarks and produce a downloadable DOCX and XLSX.
+              Start from a signed Feasibility Study engagement letter PDF. The system extracts
+              client and property details, enriches with regional benchmarks, and produces a
+              downloadable DOCX and XLSX.
             </p>
           </div>
           <Link
@@ -433,8 +831,119 @@ export default function ReportBuilderClient() {
           </div>
         )}
 
+        {parseNotice && (
+          <div
+            className="mb-6 p-4 bg-sage-50 dark:bg-sage-900/20 border border-sage-200 dark:border-sage-800 text-sage-900 dark:text-sage-100 rounded-lg flex items-start justify-between gap-2"
+            role="status"
+          >
+            <span className="text-sm">
+              {engagementFileName ? (
+                <strong className="font-medium">{engagementFileName}: </strong>
+              ) : null}
+              {parseNotice}
+            </span>
+            <button
+              type="button"
+              onClick={() => setParseNotice(null)}
+              className="shrink-0 p-1 rounded hover:bg-sage-100 dark:hover:bg-sage-800/50 focus:outline-none focus:ring-2 focus:ring-sage-500"
+              aria-label="Dismiss notice"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        <Card className="p-8 mb-6">
+          <div className="flex flex-col items-center text-center gap-5">
+            <div className="rounded-full bg-sage-100 dark:bg-sage-900/40 p-4">
+              <Upload className="w-8 h-8 text-sage-700 dark:text-sage-300" aria-hidden />
+            </div>
+            <div className="max-w-md space-y-2">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Upload engagement letter PDF
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Use the standard Sage Feasibility Study engagement letter. We extract resort,
+                client, parcel, and study scope, then open the form for review.
+              </p>
+              {engagementFileName && showManualForm ? (
+                <p className="text-sm text-sage-800 dark:text-sage-200 font-medium">
+                  Loaded: {engagementFileName}
+                </p>
+              ) : null}
+            </div>
+            <input
+              ref={engagementInputRef}
+              type="file"
+              accept="application/pdf,.pdf"
+              className="sr-only"
+              id="engagement-letter-upload"
+              disabled={parseLoading || loading}
+              onChange={(e) => {
+                const f = e.target.files?.[0] ?? null;
+                void handleEngagementUpload(f);
+              }}
+            />
+            <Button
+              type="button"
+              disabled={parseLoading || loading}
+              className="inline-flex items-center gap-2 min-w-[12rem] justify-center"
+              onClick={() => engagementInputRef.current?.click()}
+            >
+              {parseLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                  Parsing…
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4" aria-hidden />
+                  {showManualForm ? 'Upload a different PDF' : 'Upload PDF'}
+                </>
+              )}
+            </Button>
+            {!showManualForm ? (
+              <button
+                type="button"
+                className="text-sm text-gray-600 dark:text-gray-400 underline-offset-2 hover:underline hover:text-gray-900 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-sage-500 rounded px-1"
+                disabled={parseLoading || loading}
+                onClick={() => {
+                  setShowManualForm(true);
+                  setParseNotice(null);
+                  requestAnimationFrame(() => {
+                    formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  });
+                }}
+              >
+                Instead, add manually
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="text-sm text-gray-600 dark:text-gray-400 underline-offset-2 hover:underline hover:text-gray-900 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-sage-500 rounded px-1"
+                disabled={parseLoading || loading}
+                onClick={() => {
+                  setShowManualForm(false);
+                  setParseNotice(null);
+                  setEngagementFileName(null);
+                }}
+              >
+                Hide form and start from PDF again
+              </button>
+            )}
+          </div>
+        </Card>
+
+        {showManualForm ? (
+        <div ref={formTopRef}>
         <Card className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex items-center justify-between gap-3 pb-2 border-b border-gray-200 dark:border-neutral-700">
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {engagementFileName ? 'Review extracted details' : 'Enter property details'}
+              </h2>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="Property Name"
@@ -629,6 +1138,23 @@ export default function ReportBuilderClient() {
               />
 
               <Input
+                label="Client Phone (optional)"
+                name="client_phone"
+                value={clientPhone}
+                onChange={(e) => setClientPhone(e.target.value)}
+                placeholder="e.g. 2166500625"
+              />
+
+              <Input
+                label="Client Email (optional)"
+                name="client_email"
+                type="email"
+                value={clientEmail}
+                onChange={(e) => setClientEmail(e.target.value)}
+                placeholder="e.g. client@example.com"
+              />
+
+              <Input
                 label="Client Address (optional)"
                 name="client_address"
                 value={clientAddress}
@@ -645,11 +1171,35 @@ export default function ReportBuilderClient() {
               />
 
               <Input
+                label="Resort Type (optional)"
+                name="resort_type"
+                value={resortType}
+                onChange={(e) => setResortType(e.target.value)}
+                placeholder="e.g. Glamping- Wellness"
+              />
+
+              <Input
+                label="Engagement Date (optional)"
+                name="engagement_date"
+                value={engagementDate}
+                onChange={(e) => setEngagementDate(e.target.value)}
+                placeholder="YYYY-MM-DD"
+              />
+
+              <Input
                 label="Parcel Number (optional)"
                 name="parcel_number"
                 value={parcelNumber}
                 onChange={(e) => setParcelNumber(e.target.value)}
                 placeholder="e.g. 144 009.00"
+              />
+
+              <Input
+                label="Purpose of Report (optional)"
+                name="intended_use_of_study"
+                value={intendedUseOfStudy}
+                onChange={(e) => setIntendedUseOfStudy(e.target.value)}
+                placeholder="e.g. Decision making, Financing and Investor Support"
               />
             </div>
 
@@ -677,6 +1227,241 @@ export default function ReportBuilderClient() {
               onChange={(e) => setStudyId(e.target.value)}
               placeholder="e.g. 25-100A-01 (leave blank to auto-generate DRAFT-YYYYMMDD-xxxx)"
             />
+
+            <div className="space-y-3 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                ★ Assumptions &amp; STDB
+              </h3>
+              <label className="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <input
+                  type="checkbox"
+                  checked={intakeConfirmed}
+                  onChange={(e) => setIntakeConfirmed(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300"
+                />
+                <span>
+                  I confirmed address, market type (RV/glamping), acreage/parcels, and unit mix
+                  after engagement-letter parse.
+                </span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input
+                  label="Land cost ($)"
+                  name="land_cost"
+                  value={landCost}
+                  onChange={(e) => setLandCost(e.target.value)}
+                  placeholder="e.g. 500000"
+                />
+                <Input
+                  label="Loan-to-cost (0–1)"
+                  name="loan_to_cost"
+                  value={loanToCost}
+                  onChange={(e) => setLoanToCost(e.target.value)}
+                  placeholder="0.75"
+                />
+                <Input
+                  label="Interest rate (%)"
+                  name="interest_rate_pct"
+                  value={interestRatePct}
+                  onChange={(e) => setInterestRatePct(e.target.value)}
+                  placeholder="9.5"
+                />
+                <Input
+                  label="Mill levy (%)"
+                  name="mill_levy_pct"
+                  value={millLevyPct}
+                  onChange={(e) => setMillLevyPct(e.target.value)}
+                  placeholder="e.g. 4.98"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  STDB export (Market Profile)
+                </label>
+                <input
+                  ref={stdbInputRef}
+                  type="file"
+                  accept=".csv,.xlsx,.xls,.txt"
+                  className="block w-full text-sm text-gray-600 dark:text-gray-300"
+                  onChange={(e) => handleStdbUpload(e.target.files?.[0] ?? null)}
+                  disabled={stdbLoading || loading}
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Upload Site To Do Business export (CSV/XLSX) for 60/120/180 drive-time rings.{' '}
+                  {stdbFileName
+                    ? `Loaded: ${stdbFileName}`
+                    : 'Required unless waived (haversine fallback is less accurate).'}
+                  {stdbLoading ? ' Uploading…' : ''}
+                </p>
+              </div>
+
+              <div className="rounded-md border border-dashed border-neutral-300 dark:border-neutral-600 p-3 space-y-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={proposeLoading || loading || !propertyName.trim() || !city.trim() || !state.trim()}
+                    onClick={() => void handleProposeAssumptions()}
+                    className="flex items-center gap-2"
+                  >
+                    {proposeLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                        Proposing…
+                      </>
+                    ) : (
+                      'Propose ★ assumptions from market data'
+                    )}
+                  </Button>
+                  {assumptions && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {assumptions.units.length} unit row(s) proposed
+                    </span>
+                  )}
+                </div>
+                {assumptionEvidence && (
+                  <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                    <p>
+                      <span className="font-medium text-gray-800 dark:text-gray-200">Rates:</span>{' '}
+                      {assumptionEvidence.ratesSource}
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-800 dark:text-gray-200">Occ:</span>{' '}
+                      {assumptionEvidence.occSource}
+                    </p>
+                    <p>
+                      Comps: {assumptionEvidence.compCount} (past {assumptionEvidence.pastReportCompCount},
+                      web {assumptionEvidence.webCompCount})
+                      {assumptionEvidence.stvrSummary
+                        ? ` · STVR ${assumptionEvidence.stvrSummary}`
+                        : ''}
+                    </p>
+                    <pre className="whitespace-pre-wrap rounded bg-neutral-50 dark:bg-neutral-900/50 p-2 text-[11px]">
+                      {assumptionEvidence.pivotSummary}
+                    </pre>
+                  </div>
+                )}
+                {assumptions?.units?.map((u) => (
+                  <div
+                    key={u.value.unitType}
+                    className="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end"
+                  >
+                    <Input
+                      label={`${u.value.unitType} qty`}
+                      value={String(u.value.quantity)}
+                      onChange={(e) =>
+                        setAssumptions((prev) =>
+                          prev
+                            ? patchUnitAssumption(prev, u.value.unitType, {
+                                quantity: Math.max(0, parseInt(e.target.value, 10) || 0),
+                              })
+                            : prev
+                        )
+                      }
+                    />
+                    <Input
+                      label="Low ADR"
+                      value={String(Math.round(u.value.lowAdr))}
+                      onChange={(e) =>
+                        setAssumptions((prev) =>
+                          prev
+                            ? patchUnitAssumption(prev, u.value.unitType, {
+                                lowAdr: parseFloat(e.target.value) || 0,
+                              })
+                            : prev
+                        )
+                      }
+                    />
+                    <Input
+                      label="Peak ADR"
+                      value={String(Math.round(u.value.peakAdr))}
+                      onChange={(e) =>
+                        setAssumptions((prev) =>
+                          prev
+                            ? patchUnitAssumption(prev, u.value.unitType, {
+                                peakAdr: parseFloat(e.target.value) || 0,
+                              })
+                            : prev
+                        )
+                      }
+                    />
+                    <Input
+                      label="Low occ (0–1)"
+                      value={String(u.value.lowOccupancy)}
+                      onChange={(e) =>
+                        setAssumptions((prev) =>
+                          prev
+                            ? patchUnitAssumption(prev, u.value.unitType, {
+                                lowOccupancy: parseFloat(e.target.value) || 0,
+                              })
+                            : prev
+                        )
+                      }
+                    />
+                    <Input
+                      label="Peak occ (0–1)"
+                      value={String(u.value.peakOccupancy)}
+                      onChange={(e) =>
+                        setAssumptions((prev) =>
+                          prev
+                            ? patchUnitAssumption(prev, u.value.unitType, {
+                                peakOccupancy: parseFloat(e.target.value) || 0,
+                              })
+                            : prev
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+                {assumptions && (
+                  <label className="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={assumptionsReviewed}
+                      onChange={(e) => setAssumptionsReviewed(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-gray-300"
+                    />
+                    <span>
+                      I reviewed ★ rates/occupancy against the evidence above (required to ship
+                      outside draft mode).
+                    </span>
+                  </label>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={draftMode}
+                    onChange={(e) => setDraftMode(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  Draft mode (allow proposed ★ assumptions; XLSX drivers skipped if unit mix empty)
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={stdbWaiver}
+                    onChange={(e) => setStdbWaiver(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  Waive STDB import for this draft
+                </label>
+              </div>
+              {!draftMode && totalUnits <= 0 && (
+                <p className="text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 rounded-md px-3 py-2">
+                  Full generate requires a unit mix (types + counts), STDB upload or waiver, and
+                  reviewed assumptions. Ship mode blocks upload if QA fails.
+                </p>
+              )}
+              {draftMode && totalUnits <= 0 && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Draft without unit mix: narrative DOCX will generate; XLSX model drivers will be
+                  skipped until unit counts are entered.
+                </p>
+              )}
+            </div>
 
             <div className="flex items-start gap-3">
               <input
@@ -789,6 +1574,8 @@ export default function ReportBuilderClient() {
             </div>
           </form>
         </Card>
+        </div>
+        ) : null}
       </div>
     </main>
   );

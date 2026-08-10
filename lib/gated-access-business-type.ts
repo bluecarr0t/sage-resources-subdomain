@@ -8,6 +8,7 @@ export const GATED_ACCESS_BUSINESS_TYPES = [
   'developer',
   'operator',
   'lender',
+  'unit_supplier',
   'consultant',
   'media',
   'other',
@@ -49,6 +50,8 @@ export function gatedAccessBusinessTypeLabel(
       return 'Operator';
     case 'lender':
       return 'Lender';
+    case 'unit_supplier':
+      return 'Unit Supplier';
     case 'consultant':
       return 'Consultant';
     case 'media':

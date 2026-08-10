@@ -1,5 +1,6 @@
 -- Fix Security Advisor: RLS Policy Always True (0024)
--- Run in Supabase SQL Editor
+-- SUPERSEDED by harden-sensitive-rls-and-rpc-grants-2026-08-10.sql
+-- (applied to sage-outdoor-advisory on 2026-08-10). Keep for history only.
 --
 -- Policies with USING (true) / WITH CHECK (true) apply to all roles by default.
 -- Restrict them to TO service_role so only server-side (service key) can use them.

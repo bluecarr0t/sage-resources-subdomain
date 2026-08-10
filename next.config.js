@@ -112,6 +112,9 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '110mb',
     },
+    // Keep pdf-parse / pdfjs-dist out of the webpack graph. Bundling pdfjs-dist ESM
+    // triggers "Object.defineProperty called on non-object" under Next 14 webpack.
+    serverComponentsExternalPackages: ['pdf-parse', 'pdfjs-dist'],
   },
   
   images: {
@@ -146,7 +149,23 @@ const nextConfig = {
       ...config.resolve.fallback,
       fs: false,
     };
-    
+
+    // Also mark as webpack externals for API routes (serverComponentsExternalPackages
+    // alone is not always enough for app-route bundling of pdfjs-dist ESM).
+    if (isServer) {
+      const externals = ['pdf-parse', 'pdfjs-dist'];
+      const prev = config.externals;
+      config.externals = [
+        ...(Array.isArray(prev) ? prev : prev ? [prev] : []),
+        ({ request }, callback) => {
+          if (request && externals.some((pkg) => request === pkg || request.startsWith(`${pkg}/`))) {
+            return callback(null, `commonjs ${request}`);
+          }
+          callback();
+        },
+      ];
+    }
+
     return config;
   },
   // Exclude test scripts from build

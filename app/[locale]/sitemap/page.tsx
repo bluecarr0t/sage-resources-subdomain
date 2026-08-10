@@ -100,6 +100,16 @@ export default async function SitemapPage({ params }: PageProps) {
               </Link>
             </li>
             <li>
+              <Link href={links.markets} className="text-[#006b5f] hover:underline">
+                Market research pages
+              </Link>
+            </li>
+            <li>
+              <Link href={links.journeys} className="text-[#006b5f] hover:underline">
+                Comps → financed study journeys
+              </Link>
+            </li>
+            <li>
               <Link href={links.guides} className="text-[#006b5f] hover:underline">
                 Guides
               </Link>

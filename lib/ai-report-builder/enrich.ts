@@ -1,24 +1,41 @@
 /**
- * Enrich report draft input with DB benchmarks, geocoding, Census/GDP, web research,
- * and comparables from all sources (Supabase market tables, past reports, Tavily).
- *
- * Phase 1 (parallel): benchmarks, geocoding, county data, Census API, web context,
- *                      past report comps, Tavily comp research
- * Phase 2 (sequential, needs geocode): merge all comp sources via fetchNearbyComps
+ * Enrich report draft input with DB benchmarks, geocoding, county metrics,
+ * demand drivers, drive-time demographics, site risk, STVR indicators,
+ * tourism economics, and comparables from all sources.
  */
 
 import { createServerClient } from '@/lib/supabase';
 import { geocodeAddress } from '@/lib/geocode';
 import { normaliseUnitCategory } from '@/lib/csv/feasibility-parser';
 import { fetchCountyLookups } from '@/lib/anchor-point-insights/fetch-county-data';
+import { fetchCountyMetrics } from '@/lib/market-report/county-metrics';
+import { fetchDemandDrivers } from '@/lib/market-report/demand-drivers';
 import { fetchCensusStateDemographics } from './census-api';
 import { fetchWebContextForReport } from './tavily-context';
 import { fetchNearbyComps } from './fetch-comps';
 import { fetchPastReportComps } from './fetch-past-report-comps';
-import { fetchTavilyComps } from './tavily-comp-research';
+import { attachSubjectDistanceToWebComps, fetchTavilyComps, gapFillComparableDetails } from './tavily-comp-research';
 import { fetchWeatherSparkData } from './weatherspark';
-import type { ReportDraftInput, EnrichedInput, BenchmarkRow, ComparableProperty } from './types';
 import type { WeatherSparkData } from './weatherspark';
+import { fetchCompRadiusPivots } from './comp-radius-pivots';
+import { fetchDriveTimeDemographics } from './drive-time-demographics';
+import { fetchSiteRisk } from './site-risk';
+import { fetchMarketOccupancyIndicators } from './stvr-indicators';
+import { fetchTourismEconomics } from './tourism-economics';
+import { fetchNearestAirport } from './nearest-airport';
+import {
+  researchedStateParksToDemandItems,
+  researchNearbyStateParks,
+} from './state-parks-research';
+import { selectStateParkRows } from './park-visitation';
+import type {
+  ReportDraftInput,
+  EnrichedInput,
+  BenchmarkRow,
+  ComparableProperty,
+  CountyMetricsBlock,
+  DemandDriversBlock,
+} from './types';
 
 function buildComparablesSummary(comps: ComparableProperty[]): string {
   return comps
@@ -36,6 +53,66 @@ function buildComparablesSummary(comps: ComparableProperty[]): string {
     .join('; ');
 }
 
+function toDemandDriversBlock(
+  raw: Awaited<ReturnType<typeof fetchDemandDrivers>>
+): DemandDriversBlock {
+  const toItems = (
+    items: Array<{
+      name: string;
+      state: string | null;
+      distance_miles: number;
+      visitors?: number | null;
+      siteType?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
+    }>
+  ) =>
+    items.slice(0, 8).map((i) => ({
+      name: i.name,
+      state: i.state,
+      distance_miles: i.distance_miles,
+      visitors: i.visitors ?? null,
+      site_type: i.siteType ?? null,
+      latitude: i.latitude ?? null,
+      longitude: i.longitude ?? null,
+    }));
+  const topNames = (items: { name: string }[]) => items.slice(0, 5).map((i) => i.name);
+  return {
+    national_parks: {
+      count: raw.nationalParks.count,
+      top_names: topNames(raw.nationalParks.top),
+      items: toItems(raw.nationalParks.top),
+      radius_miles: raw.nationalParks.radiusMiles,
+    },
+    ski_resorts: {
+      count: raw.skiResorts.count,
+      top_names: topNames(raw.skiResorts.top),
+      items: toItems(raw.skiResorts.top),
+      radius_miles: raw.skiResorts.radiusMiles,
+    },
+    wineries: {
+      count: raw.wineries.count,
+      top_names: topNames(raw.wineries.top),
+      items: toItems(raw.wineries.top),
+      radius_miles: raw.wineries.radiusMiles,
+    },
+    major_outdoor_sites: {
+      count: raw.majorOutdoorSites.count,
+      top_names: topNames(raw.majorOutdoorSites.top),
+      items: toItems(raw.majorOutdoorSites.top),
+      radius_miles: raw.majorOutdoorSites.radiusMiles,
+    },
+    major_cities: {
+      count: raw.majorAndLargeCities.count,
+      top_names: topNames(raw.majorAndLargeCities.top),
+      items: toItems(raw.majorAndLargeCities.top),
+      radius_miles: raw.majorAndLargeCities.radiusMiles,
+    },
+    source: 'national-parks,outdoor_recreation_sites,ski_resorts,wineries',
+    fetched_at: new Date().toISOString(),
+  };
+}
+
 export async function enrichReportInput(input: ReportDraftInput): Promise<EnrichedInput> {
   const enriched: EnrichedInput = { ...input };
   const supabase = createServerClient();
@@ -45,11 +122,11 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
   ].filter(Boolean);
 
   const state = input.state?.trim();
+  const stateAbbr = state ? state.toUpperCase().slice(0, 2) : '';
 
-  // Phase 1: run all independent data fetches in parallel
-  const [benchResult, coords, countyLookups, censusData, webContext, pastReportComps, tavilyComps, weatherSparkResult] =
+  // Phase 1: independent fetches (past-report comps wait for geocode so distance is to subject)
+  const [benchResult, coords, countyLookups, censusData, webContext, tavilyComps, weatherSparkResult] =
     await Promise.all([
-      // Benchmarks: aggregate feasibility_comp_units by unit_category
       unitCategories.length > 0
         ? supabase
             .from('feasibility_comp_units')
@@ -59,7 +136,6 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
             .not('peak_adr', 'is', null)
             .limit(5000)
         : Promise.resolve({ data: [] }),
-      // Geocode
       geocodeAddress(
         input.address_1 || '',
         input.city,
@@ -67,29 +143,17 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
         input.zip_code || '',
         'USA',
       ),
-      // State-level Census population + BEA GDP
       fetchCountyLookups(supabase),
-      // Optional Census API (fresh ACS data)
       input.include_web_research && state
         ? fetchCensusStateDemographics(state)
         : Promise.resolve({ population: null, median_household_income: null }),
-      // General web context via Tavily (tourism, market overview)
       input.include_web_research ? fetchWebContextForReport(input) : Promise.resolve(null),
-      // Past Sage report comps (feasibility_comparables + feasibility_comp_units)
-      state
-        ? fetchPastReportComps(supabase, state, input.market_type, input.study_id).catch((err) => {
-            console.warn('[enrich] Past report comps failed:', err);
-            return [] as ComparableProperty[];
-          })
-        : Promise.resolve([] as ComparableProperty[]),
-      // Tavily comp-specific web research
       input.include_web_research && state
         ? fetchTavilyComps(input.city, state, input.market_type).catch((err) => {
             console.warn('[enrich] Tavily comp research failed:', err);
             return [] as ComparableProperty[];
           })
         : Promise.resolve([] as ComparableProperty[]),
-      // WeatherSpark climate data for Demand Indicators
       input.include_web_research && state
         ? fetchWeatherSparkData(input.city, state).catch((err) => {
             console.warn('[enrich] WeatherSpark fetch failed:', err);
@@ -98,7 +162,33 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
         : Promise.resolve(null as WeatherSparkData | null),
     ]);
 
-  // Process benchmarks
+  let pastReportComps: ComparableProperty[] = [];
+  if (state) {
+    try {
+      pastReportComps = await fetchPastReportComps(
+        supabase,
+        state,
+        input.market_type,
+        input.study_id,
+        coords
+          ? { subjectLat: coords.lat, subjectLng: coords.lng }
+          : undefined,
+      );
+    } catch (err) {
+      console.warn('[enrich] Past report comps failed:', err);
+      pastReportComps = [];
+    }
+  }
+
+  // Attach true distance to web comps once subject geocode is known
+  if (coords && tavilyComps.length > 0) {
+    try {
+      await attachSubjectDistanceToWebComps(tavilyComps, coords.lat, coords.lng);
+    } catch (err) {
+      console.warn('[enrich] Web comps geocode/distance failed:', err);
+    }
+  }
+
   const benchData = benchResult.data;
   if (benchData && benchData.length > 0) {
     const byCategory = new Map<string, { low: number[]; peak: number[] }>();
@@ -119,35 +209,207 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
     ) as BenchmarkRow[];
   }
 
-  // Phase 2: merge all comp sources (DB tables need geocode for lat/lng)
+  // Phase 2 connectors (need geocode) — each soft-fails independently
   if (coords) {
     enriched.latitude = coords.lat;
     enriched.longitude = coords.lng;
 
-    try {
-      const nearbyComps = await fetchNearbyComps(
+    const countyHint = input.county?.trim() || coords.countyLevel2 || null;
+    const addressLine = [input.address_1, input.city, input.state, input.zip_code]
+      .filter(Boolean)
+      .join(', ');
+
+    const [
+      nearbyResult,
+      pivotsResult,
+      demandResult,
+      countyMetricsResult,
+      driveTimeResult,
+      siteRiskResult,
+      stvrResult,
+      airportResult,
+      tourismResult,
+    ] = await Promise.all([
+      fetchNearbyComps(
         supabase,
         coords.lat,
         coords.lng,
         state ?? '',
         input.market_type,
         { pastReportComps, tavilyComps },
-      );
-      if (nearbyComps.length > 0) {
-        enriched.nearby_comps = nearbyComps;
-        enriched.comparables_summary = buildComparablesSummary(nearbyComps);
-      }
-    } catch (err) {
-      console.warn('[enrich] Nearby comps fetch failed:', err);
-      // If DB query fails, still use past reports + Tavily
+      ).catch((err) => {
+        console.warn('[enrich] Nearby comps fetch failed:', err);
+        return null;
+      }),
+      state
+        ? fetchCompRadiusPivots(supabase, coords.lat, coords.lng, state, input.market_type).catch(
+            (err) => {
+              console.warn('[enrich] Comp radius pivots failed:', err);
+              return null;
+            }
+          )
+        : Promise.resolve(null),
+      fetchDemandDrivers(supabase, {
+        anchorLat: coords.lat,
+        anchorLng: coords.lng,
+        // 250 mi covers destination NPS anchors (e.g. Glacier / Yellowstone from western MT)
+        parksRadiusMiles: 250,
+        skiRadiusMiles: 100,
+        wineriesRadiusMiles: 100,
+        majorOutdoorRadiusMiles: 150,
+        anchorStateUsAbbr: stateAbbr || null,
+      }).catch((err) => {
+        console.warn('[enrich] Demand drivers failed:', err);
+        return null;
+      }),
+      stateAbbr
+        ? fetchCountyMetrics(supabase, {
+            stateAbbr,
+            addressLine,
+            countyHint,
+            anchorLat: coords.lat,
+            anchorLng: coords.lng,
+          }).catch((err) => {
+            console.warn('[enrich] County metrics failed:', err);
+            return null;
+          })
+        : Promise.resolve(null),
+      stateAbbr
+        ? fetchDriveTimeDemographics(supabase, {
+            lat: coords.lat,
+            lng: coords.lng,
+            stateAbbr,
+            studyId: input.study_id,
+          }).catch((err) => {
+            console.warn('[enrich] Drive-time demographics failed:', err);
+            return null;
+          })
+        : Promise.resolve(null),
+      fetchSiteRisk(coords.lat, coords.lng).catch((err) => {
+        console.warn('[enrich] Site risk failed:', err);
+        return null;
+      }),
+      state
+        ? fetchMarketOccupancyIndicators(supabase, coords.lat, coords.lng, state, 50).catch(
+            (err) => {
+              console.warn('[enrich] STVR indicators failed:', err);
+              return null;
+            }
+          )
+        : Promise.resolve(null),
+      fetchNearestAirport(coords.lat, coords.lng).catch((err) => {
+        console.warn('[enrich] Nearest airport failed:', err);
+        return null;
+      }),
+      stateAbbr
+        ? fetchTourismEconomics(supabase, {
+            stateAbbr,
+            countyName: countyHint,
+          }).catch((err) => {
+            console.warn('[enrich] Tourism economics failed:', err);
+            return null;
+          })
+        : Promise.resolve(null),
+    ]);
+
+    if (nearbyResult && nearbyResult.length > 0) {
+      enriched.nearby_comps = nearbyResult;
+      enriched.comparables_summary = buildComparablesSummary(nearbyResult);
+    } else {
       const fallbackComps = [...pastReportComps, ...tavilyComps];
       if (fallbackComps.length > 0) {
         enriched.nearby_comps = fallbackComps;
         enriched.comparables_summary = buildComparablesSummary(fallbackComps);
       }
     }
+
+    if (enriched.nearby_comps?.length && input.include_web_research !== false) {
+      try {
+        await gapFillComparableDetails(enriched.nearby_comps, {
+          maxLookups: 6,
+          marketType: input.market_type,
+        });
+        enriched.comparables_summary = buildComparablesSummary(enriched.nearby_comps);
+      } catch (err) {
+        console.warn('[enrich] Comp gap-fill failed:', err);
+      }
+    }
+
+    if (pivotsResult) enriched.comp_radius_pivots = pivotsResult;
+    if (demandResult) enriched.demand_drivers = toDemandDriversBlock(demandResult);
+
+    // outdoor_recreation_sites is thinly seeded; web-research state parks when empty.
+    if (
+      enriched.demand_drivers &&
+      selectStateParkRows(enriched.demand_drivers, 1).length === 0 &&
+      state
+    ) {
+      try {
+        const researched = await researchNearbyStateParks({
+          city: input.city,
+          state,
+          lat: coords.lat,
+          lng: coords.lng,
+          limit: 4,
+        });
+        if (researched.length > 0) {
+          const items = researchedStateParksToDemandItems(researched);
+          const existing = enriched.demand_drivers.major_outdoor_sites.items ?? [];
+          enriched.demand_drivers = {
+            ...enriched.demand_drivers,
+            major_outdoor_sites: {
+              ...enriched.demand_drivers.major_outdoor_sites,
+              count: existing.length + items.length,
+              top_names: [
+                ...items.map((i) => i.name),
+                ...enriched.demand_drivers.major_outdoor_sites.top_names,
+              ].slice(0, 5),
+              items: [...items, ...existing].slice(0, 8),
+            },
+            source: `${enriched.demand_drivers.source},tavily_state_parks`,
+          };
+        }
+      } catch (err) {
+        console.warn('[enrich] State parks web research failed:', err);
+      }
+    }
+
+    if (countyMetricsResult) {
+      const block: CountyMetricsBlock = {
+        county_name: countyMetricsResult.countyName,
+        state_abbr: countyMetricsResult.stateAbbr,
+        population_2020: countyMetricsResult.population2020,
+        population_change_pct: countyMetricsResult.populationChangePct,
+        gdp_2023: countyMetricsResult.gdp2023,
+        gdp_growth_maa_pct: countyMetricsResult.gdpGrowthMaaPct,
+        high_confidence: countyMetricsResult.highConfidence,
+        source: 'county-population,county-gdp',
+        fetched_at: new Date().toISOString(),
+      };
+      enriched.county_metrics = block;
+      if (!enriched.county) {
+        enriched.county = countyMetricsResult.countyName.replace(/,\s*[A-Za-z\s]+$/, '').trim();
+      }
+      // Prefer county metrics over state rollups when present
+      if (countyMetricsResult.population2020 != null) {
+        enriched.population_2020 = countyMetricsResult.population2020;
+      }
+      if (countyMetricsResult.populationChangePct != null) {
+        enriched.population_change_pct = countyMetricsResult.populationChangePct;
+      }
+      if (countyMetricsResult.gdp2023 != null) {
+        enriched.gdp_2023 = countyMetricsResult.gdp2023;
+      }
+    } else if (countyHint && !enriched.county) {
+      enriched.county = countyHint;
+    }
+
+    if (driveTimeResult) enriched.drive_time_demographics = driveTimeResult;
+    if (siteRiskResult) enriched.site_risk = siteRiskResult;
+    if (stvrResult) enriched.stvr_indicators = stvrResult;
+    if (airportResult) enriched.nearest_airport = airportResult;
+    if (tourismResult) enriched.tourism_economics = tourismResult;
   } else if (pastReportComps.length > 0 || tavilyComps.length > 0) {
-    // No geocode but still have comps from other sources
     enriched.nearby_comps = [...pastReportComps, ...tavilyComps];
     enriched.comparables_summary = buildComparablesSummary(enriched.nearby_comps);
   }
@@ -156,10 +418,11 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
     enriched.web_context = webContext;
   }
 
-  if (state && countyLookups) {
-    const stateAbbr = state.toUpperCase().slice(0, 2);
-    const pop = countyLookups.statePopulationLookup[stateAbbr];
-    const gdp = countyLookups.stateGDPLookup[stateAbbr];
+  // State-level fallback when county metrics unavailable
+  if (!enriched.county_metrics && state && countyLookups) {
+    const abbr = state.toUpperCase().slice(0, 2);
+    const pop = countyLookups.statePopulationLookup[abbr];
+    const gdp = countyLookups.stateGDPLookup[abbr];
     if (pop) {
       enriched.population_2010 = pop.population_2010;
       enriched.population_2020 = pop.population_2020;
@@ -186,29 +449,52 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
       url: weatherSparkResult.url,
       climate_text: weatherSparkResult.climate_text,
       image_urls: weatherSparkResult.image_urls,
+      chart_images: weatherSparkResult.chart_images,
       city: weatherSparkResult.city,
       state: weatherSparkResult.state,
     };
   }
 
-  // Build enrichment metadata with all data sources
   const dataSources: string[] = ['feasibility_comp_units', 'geocode'];
   if (enriched.nearby_comps?.length) {
     const compSources = [...new Set(enriched.nearby_comps.map((c) => c.source_table))];
     dataSources.push(...compSources);
   }
-  if (state && countyLookups) {
+  if (enriched.comp_radius_pivots) {
+    dataSources.push('all_sage_data', 'hipcamp', 'campspot', 'all_roverpass_data_new');
+  }
+  if (enriched.demand_drivers) {
+    dataSources.push('national-parks', 'outdoor_recreation_sites', 'ski_resorts', 'wineries');
+  }
+  if (enriched.county_metrics) {
+    dataSources.push('county-population', 'county-gdp');
+  } else if (state && countyLookups) {
     dataSources.push('county-population', 'county-gdp');
   }
+  if (enriched.drive_time_demographics) dataSources.push(enriched.drive_time_demographics.source);
+  if (enriched.site_risk) {
+    dataSources.push('fema_nfhl', 'fws_wetlands', 'fema_nri');
+  }
+  if (enriched.stvr_indicators) {
+    dataSources.push(...enriched.stvr_indicators.sources);
+    if (enriched.stvr_indicators.airdna) dataSources.push('airdna');
+  }
+  if (enriched.nearest_airport) dataSources.push('airports');
+  if (enriched.tourism_economics) dataSources.push('tourism_economics');
   if (censusData?.population != null) dataSources.push('census_api');
   if (webContext) dataSources.push('tavily_market_context');
-  if (weatherSparkResult) dataSources.push('weatherspark');
+  if (weatherSparkResult) {
+    dataSources.push('weatherspark');
+    if (weatherSparkResult.chart_images?.length) {
+      dataSources.push('weatherspark_charts');
+    }
+  }
 
   enriched.enrichment_metadata = {
     benchmark_sample_count: enriched.benchmarks?.reduce((sum, b) => sum + b.sample_count, 0) ?? 0,
     benchmark_categories: enriched.benchmarks?.map((b) => b.unit_category) ?? [],
     enrichment_date: new Date().toISOString(),
-    data_sources: dataSources,
+    data_sources: [...new Set(dataSources)],
   };
 
   return enriched;

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
 import { ChevronRight } from 'lucide-react';
 
 interface Metrics {
@@ -58,21 +57,19 @@ export default function AdminGlampingMetrics() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const { data: raw, error: rpcError } = await supabase.rpc('get_glamping_metrics');
-
-        if (rpcError) {
-          throw new Error(rpcError.message);
+        const res = await fetch('/api/admin/sage-glamping-data/metrics', {
+          credentials: 'include',
+        });
+        const json = (await res.json()) as {
+          success?: boolean;
+          error?: string;
+          metrics?: Metrics;
+        };
+        if (!res.ok || !json.success || !json.metrics) {
+          throw new Error(json.error || 'Failed to load metrics');
         }
 
-        setMetrics({
-          usaPropertyCount: Number(raw?.usa_property_count ?? 0),
-          usaUnitCount: Number(raw?.usa_unit_count ?? 0),
-          totalPropertyCount: Number(raw?.total_property_count ?? 0),
-          totalUnitCount: Number(raw?.total_unit_count ?? 0),
-          researchStatusNew: Number(raw?.research_status_new ?? 0),
-          researchStatusInProgress: Number(raw?.research_status_in_progress ?? 0),
-          researchStatusPublished: Number(raw?.research_status_published ?? 0),
-        });
+        setMetrics(json.metrics);
         setLastFetched(Date.now());
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load metrics');

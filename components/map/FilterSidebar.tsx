@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useMapContext } from '../MapContext';
 import { filterParksWithCoordinates, NationalPark } from '@/lib/types/national-parks';
@@ -12,6 +13,8 @@ import {
   EDITORIAL_METRIC_COMPACT_CLASS,
   EDITORIAL_SECTION_LABEL_CLASS,
 } from '@/components/editorial/EditorialPageShell';
+import MapLeadStudyPanel from '@/components/map/MapLeadStudyPanel';
+import { locales, type Locale } from '@/i18n';
 
 const MultiSelect = dynamic(() => import('../MultiSelect'), {
   ssr: false,
@@ -59,6 +62,11 @@ export default function FilterSidebar({
   } = useMapContext();
 
   const t = useTranslations('map');
+  const pathname = usePathname() || '/en/map';
+  const locale = useMemo(() => {
+    const seg = pathname.split('/').filter(Boolean)[0];
+    return locales.includes(seg as Locale) ? seg : 'en';
+  }, [pathname]);
 
   const {
     uniqueStates,
@@ -414,6 +422,17 @@ export default function FilterSidebar({
               onToggle={toggleRateRange}
               onClear={() => setFilterRateRange([])}
               activeColor="green"
+            />
+          )}
+
+          {(filterState.length > 0 || filterUnitType.length > 0) && (
+            <MapLeadStudyPanel
+              locale={locale}
+              compsCount={calculatedDisplayedCount}
+              filterState={filterState}
+              filterUnitType={filterUnitType}
+              rateCategoryCounts={rateCategoryCounts}
+              loading={loading}
             />
           )}
 

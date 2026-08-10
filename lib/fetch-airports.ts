@@ -48,7 +48,8 @@ function normalizeAirportRow(row: Record<string, unknown>): Airport | null {
   };
 }
 
-async function loadAirports(options: FetchAirportsOptions = {}): Promise<Airport[]> {
+/** Uncached load — preferred for report enrich / scripts / tests. */
+export async function loadAirports(options: FetchAirportsOptions = {}): Promise<Airport[]> {
   const supabase = createServerClient();
   const hubSizes = options.hubSizes ?? (['large', 'medium'] as AirportHubSize[]);
   const market = options.market ?? 'all';

@@ -69,7 +69,7 @@ IMPORTANT STYLE AND TERMINOLOGY RULES:
 - Reference amenities with professional phrasing: "The proposed resort will feature..." not "It will have..."
 - Use "positive demand indicator" for favorable market conditions
 - Write numbers formally: "approximately 47 acres" not "about 47 acres" and never use the "~" symbol
-- For feasibility conclusions, use the phrase: "the project is deemed feasible, with an adequate internal rate of return"
+- For feasibility conclusions, cite computed model metrics when provided (IRR, DCR, CoC). If model metrics are not provided, write: "Feasibility conclusion pending financial model confirmation by the analyst." Do not invent an IRR or claim the project is feasible without model support.
 - For unfavorable conclusions: "further analysis is recommended" or "the project requires refinement"
 - Maintain a professional, neutral, investment-grade consulting tone
 - Keep output organized and consistent; use concise section-ready prose

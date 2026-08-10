@@ -50,7 +50,17 @@ Runs daily at 6:00 UTC. Set `CRON_SECRET` in Vercel; the cron sends it as `Autho
 **Option B: Manual after deploy**
 
 ```bash
+# Full sitemap
 INDEXNOW_KEY=your-key SITE_URL=https://resources.sageoutdooradvisory.com npm run indexnow:submit
+
+# Markets + journeys hubs only (source-of-truth URLs; prefer after those routes ship)
+INDEXNOW_KEY=your-key npm run indexnow:submit:hubs
+
+# Preview URL list without POSTing
+npm run indexnow:submit:hubs:dry-run
+
+# Abort if any hub URL is not live yet
+INDEXNOW_KEY=your-key npx tsx scripts/submit-indexnow.ts --hubs=markets,journeys --require-live
 ```
 
 **Option C: API route**
@@ -64,8 +74,10 @@ curl -X POST https://resources.sageoutdooradvisory.com/api/indexnow \
 
 1. Deploy with `INDEXNOW_KEY` set.
 2. Visit `https://resources.sageoutdooradvisory.com/{your-key}.txt` – it should display your key.
-3. Trigger submission (cron or manual).
-4. Check Bing Webmaster Tools for indexing status.
+3. Confirm hubs are live (`/en/markets`, `/en/journeys/...` return 200) and appear in `/sitemaps/main.xml`.
+4. Trigger hub submission: `npm run indexnow:submit:hubs` (or wait for daily cron).
+5. **Bing Webmaster Tools** → URL Inspection / Index Explorer for sample hub URLs (e.g. `/en/markets/colorado-glamping`).
+6. **Google Search Console** → URL Inspection + request indexing for the same samples (GSC has no IndexNow; sitemap coverage is the path).
 
 ## References
 

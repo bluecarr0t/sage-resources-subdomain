@@ -11,12 +11,10 @@ import { getRedis } from '@/lib/upstash';
 import {
   hashVisitorIp,
   marketOverviewPromoRedisKey,
+  MARKET_OVERVIEW_PROMO_SEEN_TTL_SECONDS,
 } from '@/lib/promo-market-overview';
 
 export const dynamic = 'force-dynamic';
-
-/** Keep seen flags for ~1 year (campaign lifetime). */
-const SEEN_TTL_SECONDS = 60 * 60 * 24 * 365;
 
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -59,7 +57,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const ipHash = hashVisitorIp(ip);
-    await redis.set(marketOverviewPromoRedisKey(ipHash), '1', { ex: SEEN_TTL_SECONDS });
+    await redis.set(marketOverviewPromoRedisKey(ipHash), '1', {
+      ex: MARKET_OVERVIEW_PROMO_SEEN_TTL_SECONDS,
+    });
     return NextResponse.json({ ok: true, tracked: true });
   } catch (err) {
     console.error('[promo/market-overview] POST failed:', err);

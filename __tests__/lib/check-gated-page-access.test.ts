@@ -23,6 +23,7 @@ const mockCreateServerClient = createServerClient as jest.MockedFunction<
 
 function mockAdminClient(rows: { id: string } | null) {
   const chain = {
+    in: jest.fn().mockReturnThis(),
     eq: jest.fn().mockReturnThis(),
     not: jest.fn().mockReturnThis(),
     limit: jest.fn().mockReturnThis(),

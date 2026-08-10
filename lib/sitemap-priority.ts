@@ -31,6 +31,8 @@ export function getPropertySitemapPriority(tier: 'a' | 'b'): string {
 export function getMainPageSitemapPriority(pagePath: string): string {
   if (pagePath === '') return '1.0';
   if (pagePath === '/map') return '0.95';
+  if (pagePath === '/markets') return '0.9';
+  if (pagePath === '/journeys') return '0.85';
   if (pagePath === '/guides') return '0.9';
   return pagePath === '/partners' ? '0.8' : '0.85';
 }

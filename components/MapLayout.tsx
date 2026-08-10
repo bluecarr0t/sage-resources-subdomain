@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import MapEmbedOpenFullLink from '@/components/map/MapEmbedOpenFullLink';
 import MapPageLoadingOverlay from '@/components/map/MapPageLoadingOverlay';
+import MapMarketLeadCta from '@/components/map/MapMarketLeadCta';
 
 // Single dynamic import — one Maps bundle for sidebar + main (avoids double download)
 const DynamicGooglePropertyMap = dynamic(() => import('@/components/GooglePropertyMap'), {
@@ -40,7 +41,8 @@ export default function MapLayout({
   hubIntro,
   hubIntroSecondary,
 }: MapLayoutProps) {
-  const { isFullscreen, toggleFullscreen, clientWorkOnly, embedMode } = useMapContext();
+  const { isFullscreen, toggleFullscreen, clientWorkOnly, embedMode, filterState, filterUnitType } =
+    useMapContext();
   const [embedPanelOpen, setEmbedPanelOpen] = useState(false);
   const t = useTranslations('map');
   const mapTitle = pageTitle ?? (clientWorkOnly ? t('layers.clientWork.label') : t('title'));
@@ -107,7 +109,17 @@ export default function MapLayout({
                     {t('hubGlossaryLink')}
                   </Link>
                 </p>
-              ) : null}
+              ) : (
+                <p className="mt-4 text-[11px] font-light leading-relaxed">
+                  <Link href={links.journey('from-comps-map-to-financed-study')} className={EDITORIAL_LINK_CLASS}>
+                    {t('hubJourneyLink')}
+                  </Link>
+                  <span className="text-neutral-400"> · </span>
+                  <Link href={links.markets} className={EDITORIAL_LINK_CLASS}>
+                    {t('hubMarketsLink')}
+                  </Link>
+                </p>
+              )}
             </section>
           </>
         )}
@@ -123,7 +135,14 @@ export default function MapLayout({
       </section>
 
       {!embedMode ? (
-        <div className="mt-auto border-t border-sage-200/80 px-4 py-4 md:px-5">
+        <div className="mt-auto space-y-3 border-t border-sage-200/80 px-4 py-4 md:px-5">
+          {!clientWorkOnly ? (
+            <MapMarketLeadCta
+              states={filterState}
+              unitTypes={filterUnitType}
+              compact
+            />
+          ) : null}
           <p className="text-center text-xs font-light leading-relaxed text-neutral-500">
             {t('poweredBy')}{' '}
             <a

@@ -2,6 +2,14 @@
  * Types for the AI Report Builder (Create Report Draft)
  */
 
+import type { FeasibilityModelOutput } from '@/lib/feasibility-model';
+import type { CompRadiusPivotsResult } from './comp-radius-pivots';
+import type { DriveTimeDemographicsResult } from './drive-time-demographics';
+import type { NearestAirportResult } from './nearest-airport';
+import type { SiteRiskResult } from './site-risk';
+import type { StvrIndicators } from './stvr-indicators';
+import type { TourismEconomicsResult } from './tourism-economics';
+
 export interface ReportDraftInput {
   property_name: string;
   city: string;
@@ -13,6 +21,10 @@ export interface ReportDraftInput {
   client_entity?: string;
   /** Client contact name for letter of transmittal */
   client_contact_name?: string;
+  /** Client phone (engagement letter / ToT Owner Summary) */
+  client_phone?: string;
+  /** Client email (engagement letter; written with phone on ToT when no email column) */
+  client_email?: string;
   /** Client mailing address */
   client_address?: string;
   /** Client city, state, zip */
@@ -23,12 +35,48 @@ export interface ReportDraftInput {
   market_type?: string;
   /** Property parcel number */
   parcel_number?: string;
+  /** Resort type from engagement letter (e.g. Glamping- Wellness) */
+  resort_type?: string;
+  /** Intended use of the study / purpose of the report */
+  intended_use_of_study?: string;
+  /** Engagement letter acceptance date (YYYY-MM-DD when known) */
+  engagement_date?: string;
   /** Open property & client brief: parcel, amenities, client goals, and any context for AI research and report generation */
   amenities_description?: string;
   /** Whether to include web research in enrichment */
   include_web_research?: boolean;
   /** Report service type (e.g. Feasibility Study, Appraisal) */
   service?: string;
+  /** County name when known */
+  county?: string;
+  /** Loan-to-cost fraction (e.g. 0.75) */
+  loan_to_cost?: number;
+  /** Annual interest rate as percent (e.g. 9.5) */
+  interest_rate_pct?: number;
+  /** Loan term in years */
+  loan_term_years?: number;
+  /** Land / acquisition cost basis */
+  land_cost?: number;
+  /** Soft-cost fraction of hard costs (default 0.15 when unset) */
+  soft_cost_pct?: number;
+  /** Assessment ratio for RE taxes (e.g. 0.5) */
+  assessment_ratio?: number;
+  /** Mill levy / tax rate as percent (e.g. 4.9846) */
+  mill_levy_pct?: number;
+  /**
+   * Whether the signing appraiser / team made a personal site visit.
+   * Drives Certification ("have" / "have not") and Scope of Work visit bullet.
+   */
+  site_visit_conducted?: boolean;
+  /**
+   * When true, Letter of Transmittal uses the "ownership provided limited cost
+   * information" extraordinary-assumption variant.
+   */
+  client_provided_cost_info?: boolean;
+  /** Names credited for significant professional assistance on Certification */
+  report_assistants?: string;
+  /** Override for the prior-services Certification disclosure sentence */
+  prior_services_disclosure?: string;
 }
 
 export interface BenchmarkRow {
@@ -74,6 +122,11 @@ export interface ComparableProperty {
   location_detail?: string | null;
   /** Miles from search anchor; null when unknown (e.g. web gap-fill before geocode). */
   distance_miles: number | null;
+  /**
+   * Distance recorded in the original past study (relative to that study's subject).
+   * Not comparable to the current subject — use `distance_miles` for ranking.
+   */
+  original_study_distance_miles?: number | null;
   source_table: string;
   /** WGS84 when known (e.g. comps map markers). */
   geo_lat?: number | null;
@@ -95,6 +148,16 @@ export interface ComparableProperty {
   peak_occupancy?: number | null;
 }
 
+export interface WeatherChartImageData {
+  key: 'temperature' | 'precip' | 'snowfall' | 'tourism';
+  title: string;
+  /** PNG bytes captured from WeatherSpark SVG figures */
+  buffer: Buffer;
+  ext: 'png';
+  width: number;
+  height: number;
+}
+
 export interface WeatherData {
   /** Resolved weatherspark.com URL */
   url: string;
@@ -102,8 +165,72 @@ export interface WeatherData {
   climate_text: string;
   /** Image URLs extracted from the page (may be empty for Canvas-rendered charts) */
   image_urls: string[];
+  /**
+   * Rasterized WeatherSpark figure charts (temp / precip / snow / tourism).
+   * Preferred over image_urls when present — charts are SVG-drawn, not static assets.
+   */
+  chart_images?: WeatherChartImageData[];
   city: string;
   state: string;
+}
+
+/** County metrics from county-population + county-gdp */
+export interface CountyMetricsBlock {
+  county_name: string;
+  state_abbr: string;
+  population_2020: number | null;
+  population_change_pct: number | null;
+  gdp_2023: number | null;
+  gdp_growth_maa_pct: number | null;
+  high_confidence: boolean;
+  source: string;
+  fetched_at: string;
+}
+
+/** Compact demand-drivers snapshot for enrich / prompts / Excel+Word tables */
+export interface DemandDriverItemBlock {
+  name: string;
+  state: string | null;
+  distance_miles: number;
+  visitors: number | null;
+  site_type?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface DemandDriversBlock {
+  national_parks: {
+    count: number;
+    top_names: string[];
+    items: DemandDriverItemBlock[];
+    radius_miles: number;
+  };
+  ski_resorts: {
+    count: number;
+    top_names: string[];
+    items: DemandDriverItemBlock[];
+    radius_miles: number;
+  };
+  wineries: {
+    count: number;
+    top_names: string[];
+    items: DemandDriverItemBlock[];
+    radius_miles: number;
+  };
+  major_outdoor_sites: {
+    count: number;
+    top_names: string[];
+    items: DemandDriverItemBlock[];
+    radius_miles: number;
+  };
+  major_cities: {
+    count: number;
+    top_names: string[];
+    items: DemandDriverItemBlock[];
+    radius_miles: number;
+  };
+  source: string;
+  fetched_at: string;
 }
 
 export interface EnrichedInput extends ReportDraftInput {
@@ -126,6 +253,22 @@ export interface EnrichedInput extends ReportDraftInput {
   census_median_household_income?: number;
   /** WeatherSpark climate data for Demand Indicators section */
   weather_data?: WeatherData;
+  /** Phase 2: county-level metrics */
+  county_metrics?: CountyMetricsBlock;
+  /** Phase 2: parks / outdoor / ski / wineries / cities */
+  demand_drivers?: DemandDriversBlock;
+  /** Phase 2: drive-time demographic rings + demand rubric */
+  drive_time_demographics?: DriveTimeDemographicsResult;
+  /** Phase 2: FEMA / wetlands / wildfire */
+  site_risk?: SiteRiskResult;
+  /** Phase 2: Hipcamp/Campspot occ (+ optional AirDNA) */
+  stvr_indicators?: StvrIndicators;
+  /** Phase 2: radius supply pivots */
+  comp_radius_pivots?: CompRadiusPivotsResult;
+  /** Phase 2: nearest major airport */
+  nearest_airport?: NearestAirportResult;
+  /** Phase 2: tourism economics cache */
+  tourism_economics?: TourismEconomicsResult;
 }
 
 export interface Citation {
@@ -177,6 +320,14 @@ export interface GeneratedSections {
   site_analysis?: string;
   /** Expanded Demand Indicators writeup (multi-paragraph, weather-enriched) */
   demand_indicators?: string;
+  /** Area Analysis (state / county / local) */
+  area_analysis?: string;
+  /** Supply and Competition Analysis */
+  supply_competition?: string;
+  /** Industry Overview (boilerplate + light polish) */
+  industry_overview?: string;
   /** Development Costs tables for DOCX section and Cost Analysis XLSX */
   development_costs_data?: DevelopmentCostsData;
+  /** Deterministic financial model output for PF / feasibility sections */
+  model_output?: FeasibilityModelOutput;
 }

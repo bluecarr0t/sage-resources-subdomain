@@ -65,8 +65,9 @@ export async function deriveDevelopmentCosts(
   // Report Builder: no amenity breakdown from unit_mix; addBldg = 0 for now
   const addBldgTotal = 0;
   const hardCosts = costResult.totalSiteBuild + addBldgTotal;
-  const softCosts = Math.round(hardCosts * 0.15); // 15% soft costs placeholder
-  const land = 0;
+  const softPct = input.soft_cost_pct != null && Number.isFinite(input.soft_cost_pct) ? input.soft_cost_pct : 0.15;
+  const softCosts = Math.round(hardCosts * softPct);
+  const land = input.land_cost != null && Number.isFinite(input.land_cost) ? Math.round(input.land_cost) : 0;
 
   return {
     data: {

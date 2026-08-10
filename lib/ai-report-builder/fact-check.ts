@@ -16,31 +16,50 @@ export interface FactCheckResult {
   flags: FactCheckFlag[];
 }
 
-/** Extract dollar amounts (e.g. $285, $300) */
-const ADR_PATTERN = /\$[\d,]+(?:\.[\d]+)?/g;
+/** Acreage mentions — capture the numeric group without stripping the decimal */
+const ACRES_PATTERN = /(?:approximately\s+)?(\d+(?:\.\d+)?)\s*acres?\b/gi;
 
-/** Extract percentages (e.g. 5.2%, 10%) */
-const PCT_PATTERN = /[\d.]+%/g;
+/**
+ * Nightly-rate-like dollar amounts in ADR context.
+ * Avoids matching large project costs / financing figures.
+ */
+const ADR_CONTEXT_PATTERN =
+  /(?:ADR|average daily rate|nightly rate|daily rate|\/night|per night)[^\n$.]{0,40}\$[\d,]+(?:\.\d+)?|\$[\d,]+(?:\.\d+)?[^\n.]{0,40}(?:ADR|\/night|per night|nightly)/gi;
 
-/** Extract acreage (e.g. "approximately 25 acres", "25 acres") */
-const ACRES_PATTERN = /(?:approximately\s+)?(\d+(?:\.\d+)?)\s*acres?/gi;
+const STANDALONE_ADR_DOLLAR = /\$(\d{2,4})(?:\.\d{1,2})?\b/g;
 
-/** Extract population numbers (e.g. "1.2 million", "500,000") */
-const POP_PATTERN = /(\d+(?:,\d{3})*(?:\.\d+)?)\s*(?:million|M|m)?/g;
+function extractAdrCandidates(text: string): number[] {
+  const fromContext: number[] = [];
+  const ctxMatches = text.match(ADR_CONTEXT_PATTERN) ?? [];
+  for (const chunk of ctxMatches) {
+    const dollars = chunk.match(/\$[\d,]+(?:\.\d+)?/g) ?? [];
+    for (const d of dollars) {
+      const n = parseFloat(d.replace(/[$,]/g, ''));
+      if (Number.isFinite(n) && n >= 40 && n <= 2000) fromContext.push(n);
+    }
+  }
+  if (fromContext.length > 0) return fromContext;
 
-function extractFirstMatch(text: string, pattern: RegExp): number | null {
-  const m = text.match(pattern);
-  if (!m) return null;
-  const raw = m[0].replace(/[$,%\s]/g, '').replace(/,/g, '');
-  const n = parseFloat(raw);
-  return Number.isFinite(n) ? n : null;
+  // Fallback: only small dollar amounts typical of nightly rates (not project costs)
+  const standalone: number[] = [];
+  let m: RegExpExecArray | null;
+  const re = new RegExp(STANDALONE_ADR_DOLLAR.source, 'g');
+  while ((m = re.exec(text)) !== null) {
+    const n = parseFloat(m[1].replace(/,/g, ''));
+    if (Number.isFinite(n) && n >= 40 && n <= 800) standalone.push(n);
+  }
+  return standalone;
 }
 
-function extractAdrValues(text: string): number[] {
-  const matches = text.match(ADR_PATTERN) ?? [];
-  return matches
-    .map((s) => parseFloat(s.replace(/[$,]/g, '')))
-    .filter((n) => Number.isFinite(n));
+function extractAcreValues(text: string): number[] {
+  const values: number[] = [];
+  const re = new RegExp(ACRES_PATTERN.source, 'gi');
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const n = parseFloat(m[1]);
+    if (Number.isFinite(n)) values.push(n);
+  }
+  return values;
 }
 
 /**
@@ -52,28 +71,23 @@ export function factCheckExecutiveSummary(
 ): FactCheckResult {
   const flags: FactCheckFlag[] = [];
 
-  // Check acres
+  // Check acres — preserve decimals (do not strip "." via \D)
   if (enriched.acres != null && enriched.acres > 0) {
-    const acresMatch = summary.match(ACRES_PATTERN);
-    if (acresMatch) {
-      const match = acresMatch[0];
-      const extracted = parseFloat(match.replace(/\D/g, ''));
-      if (Number.isFinite(extracted)) {
-        const diff = Math.abs(extracted - enriched.acres);
-        if (diff > 1) {
-          flags.push({
-            claim: `"${match.trim()}"`,
-            expected: `${enriched.acres} acres`,
-            actual: match.trim(),
-          });
-        }
+    for (const extracted of extractAcreValues(summary)) {
+      const diff = Math.abs(extracted - enriched.acres);
+      if (diff > 1) {
+        flags.push({
+          claim: `${extracted} acres`,
+          expected: `${enriched.acres} acres`,
+          actual: `${extracted} acres`,
+        });
       }
     }
   }
 
-  // Check ADR claims against benchmarks
+  // Check ADR claims against benchmarks (context-aware; skip project-cost dollars)
   if (enriched.benchmarks?.length) {
-    const adrValues = extractAdrValues(summary);
+    const adrValues = extractAdrCandidates(summary);
     const benchmarkAdrs = enriched.benchmarks.flatMap((b) => [
       Math.round(b.avg_low_adr),
       Math.round(b.avg_peak_adr),
@@ -82,7 +96,6 @@ export function factCheckExecutiveSummary(
     const maxBench = Math.max(...benchmarkAdrs);
 
     for (const adr of adrValues) {
-      if (adr < 50 || adr > 2000) continue;
       const withinRange = adr >= minBench * 0.7 && adr <= maxBench * 1.3;
       if (!withinRange) {
         flags.push({
@@ -94,17 +107,22 @@ export function factCheckExecutiveSummary(
     }
   }
 
-  // Check population if provided
+  // Population: only check phrases that explicitly mention population
   if (enriched.population_2020 != null && enriched.population_2020 > 0) {
-    const popMatch = summary.match(/(\d+(?:,\d{3})*(?:\.\d+)?)\s*(?:million|M|m)?/);
+    const popMatch = summary.match(
+      /population[^.]{0,80}?(\d+(?:,\d{3})*(?:\.\d+)?)\s*(million|M)?|(\d+(?:,\d{3})*(?:\.\d+)?)\s*(million|M)?[^.']{0,40}population/i
+    );
     if (popMatch) {
-      const extracted = parseInt(popMatch[1].replace(/,/g, ''), 10);
-      if (Number.isFinite(extracted)) {
+      const raw = (popMatch[1] || popMatch[3] || '').replace(/,/g, '');
+      const unit = (popMatch[2] || popMatch[4] || '').toLowerCase();
+      let extracted = parseFloat(raw);
+      if (unit.startsWith('m')) extracted *= 1_000_000;
+      if (Number.isFinite(extracted) && extracted > 1000) {
         const diff = Math.abs(extracted - enriched.population_2020);
         const pctDiff = (diff / enriched.population_2020) * 100;
         if (pctDiff > 20) {
           flags.push({
-            claim: `"${popMatch[0].trim()}" population`,
+            claim: `population ${extracted.toLocaleString()}`,
             expected: `~${enriched.population_2020.toLocaleString()}`,
             actual: extracted.toLocaleString(),
           });

@@ -8,6 +8,8 @@ export const MAIN_SITEMAP_PAGE_PATHS = [
   '/glossary',
   '/partners',
   '/map',
+  '/markets',
+  '/journeys',
   '/sitemap',
 ] as const;
 

@@ -32,6 +32,10 @@ export interface DemandDriverItem {
   rating?: number | null;
   /** outdoor_recreation_sites.site_type when present. */
   siteType?: string | null;
+  /** WGS84 latitude when known (for proximity map markers). */
+  latitude?: number | null;
+  /** WGS84 longitude when known (for proximity map markers). */
+  longitude?: number | null;
 }
 
 export interface DemandDriversResult {
@@ -180,13 +184,14 @@ async function fetchNationalParks(
       distance_miles: Math.round(dist * 10) / 10,
       visitors:
         parseVisitors(r.recreation_visitors_2023) ?? parseVisitors(r.recreation_visitors_2022),
+      latitude: lat,
+      longitude: lon,
     });
   }
+  // Prefer closest parks for Demand Indicators maps/tables; break ties by visitors.
   inRadius.sort((a, b) => {
-    const va = a.visitors ?? 0;
-    const vb = b.visitors ?? 0;
-    if (vb !== va) return vb - va;
-    return a.distance_miles - b.distance_miles;
+    if (a.distance_miles !== b.distance_miles) return a.distance_miles - b.distance_miles;
+    return (b.visitors ?? 0) - (a.visitors ?? 0);
   });
   return { count: inRadius.length, top: inRadius.slice(0, PER_TYPE_CAP), radiusMiles };
 }
@@ -223,13 +228,13 @@ async function fetchOutdoorRecreationSites(
       distance_miles: Math.round(dist * 10) / 10,
       visitors: parseVisitors(r.annual_visitors),
       siteType: r.site_type != null ? String(r.site_type) : null,
+      latitude: lat,
+      longitude: lon,
     });
   }
   inRadius.sort((a, b) => {
-    const va = a.visitors ?? 0;
-    const vb = b.visitors ?? 0;
-    if (vb !== va) return vb - va;
-    return a.distance_miles - b.distance_miles;
+    if (a.distance_miles !== b.distance_miles) return a.distance_miles - b.distance_miles;
+    return (b.visitors ?? 0) - (a.visitors ?? 0);
   });
   return { count: inRadius.length, top: inRadius.slice(0, PER_TYPE_CAP), radiusMiles };
 }

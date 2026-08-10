@@ -1,14 +1,18 @@
 /**
- * Fetch weather/climate data from WeatherSpark via Tavily search + extract.
- * Used to enrich the Demand Indicators section with temperature, precipitation,
- * comfort scores, and tourism season data.
+ * Fetch weather/climate data from WeatherSpark via Tavily search + extract,
+ * then capture figure charts via Firecrawl (SVG → PNG).
  *
  * Pipeline:
  *  1. Tavily search to resolve the WeatherSpark URL for the target city
  *  2. Tavily extract to pull structured climate prose + any image URLs
+ *  3. Firecrawl JS extract of figure SVGs (temp/precip/snow/tourism) + sharp PNG
  */
 
 import { tavily } from '@tavily/core';
+import {
+  captureWeatherSparkChartImages,
+  type WeatherSparkChartImage,
+} from './weatherspark-charts';
 
 export interface WeatherSparkData {
   /** Resolved weatherspark.com URL for this city */
@@ -17,6 +21,8 @@ export interface WeatherSparkData {
   climate_text: string;
   /** Image URLs extracted from the page (may be empty for Canvas-rendered charts) */
   image_urls: string[];
+  /** Rasterized figure charts (preferred for DOCX embed) */
+  chart_images: WeatherSparkChartImage[];
   /** City used in the lookup */
   city: string;
   /** State used in the lookup */
@@ -112,10 +118,21 @@ export async function fetchWeatherSparkData(
       `[weatherspark] Extracted ${climateText.length} chars + ${imageUrls.length} images for ${city}, ${state}`,
     );
 
+    let chartImages: WeatherSparkChartImage[] = [];
+    try {
+      chartImages = await captureWeatherSparkChartImages(weatherSparkUrl);
+    } catch (err) {
+      console.warn(
+        '[weatherspark] Chart capture failed:',
+        err instanceof Error ? err.message : err,
+      );
+    }
+
     return {
       url: weatherSparkUrl,
       climate_text: climateText,
       image_urls: imageUrls,
+      chart_images: chartImages,
       city,
       state,
     };

@@ -1,13 +1,15 @@
 /**
  * Fetch comparable properties from past Sage reports (feasibility_comparables + feasibility_comp_units).
- * Pulls comp data from previously completed feasibility studies in the same region,
- * providing rate/occupancy data that was manually verified and curated.
+ * When subject lat/lng are provided, resolves true Haversine distance to the new subject
+ * (does not reuse distance_miles from the original study).
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ComparableProperty, SeasonalRates } from './types';
+import { fetchPastReportCompsNearAnchor } from '@/lib/comps-v2/past-reports-nearby';
 
 const MAX_PAST_REPORT_COMPS = 10;
+const DEFAULT_RADIUS_MILES = 150;
 
 const EMPTY_SEASONAL: SeasonalRates = {
   winter_weekday: null, winter_weekend: null,
@@ -22,16 +24,64 @@ function parseNum(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+export interface FetchPastReportCompsOptions {
+  /** Subject property latitude — enables true distance ranking */
+  subjectLat?: number | null;
+  /** Subject property longitude — enables true distance ranking */
+  subjectLng?: number | null;
+  /** Max radius when subject coords are known (default 150) */
+  radiusMiles?: number;
+}
+
 /**
  * Query feasibility_comparables + feasibility_comp_units for properties
- * from past reports in the same state (or nearby states).
+ * from past reports in the same state (or nearby when geocoded).
  */
 export async function fetchPastReportComps(
   supabase: SupabaseClient,
   state: string,
   marketType?: string | null,
   currentStudyId?: string | null,
+  options?: FetchPastReportCompsOptions,
 ): Promise<ComparableProperty[]> {
+  void marketType;
+
+  const subjectLat = options?.subjectLat;
+  const subjectLng = options?.subjectLng;
+  if (
+    subjectLat != null &&
+    subjectLng != null &&
+    Number.isFinite(subjectLat) &&
+    Number.isFinite(subjectLng)
+  ) {
+    const nearby = await fetchPastReportCompsNearAnchor(
+      supabase,
+      subjectLat,
+      subjectLng,
+      state,
+      options?.radiusMiles ?? DEFAULT_RADIUS_MILES,
+    );
+    const filtered = nearby.filter((c) => {
+      if (currentStudyId && c.past_report_study_id === currentStudyId) return false;
+      return true;
+    });
+    // Prefer comps with known distance, then by distance ascending, then quality
+    filtered.sort((a, b) => {
+      const da = a.distance_miles;
+      const db = b.distance_miles;
+      if (da != null && db != null) return da - db;
+      if (da != null) return -1;
+      if (db != null) return 1;
+      return (b.quality_score ?? 0) - (a.quality_score ?? 0);
+    });
+    console.log(
+      `[fetch-past-report-comps] Found ${filtered.length} comps near subject in ${state} (true distance)`,
+    );
+    return filtered.slice(0, MAX_PAST_REPORT_COMPS);
+  }
+
+  // Fallback without subject coords: state filter only; do NOT treat original-study
+  // distance_miles as distance to the new subject.
   const stateUpper = state.trim().toUpperCase().slice(0, 2);
 
   const { data: pastComps, error: compsError } = await supabase
@@ -105,6 +155,7 @@ export async function fetchPastReportComps(
 
   for (const comp of filteredComps) {
     const units = unitsByCompId.get(comp.id) || [];
+    const originalDist = parseNum(comp.distance_miles);
 
     if (units.length > 0) {
       for (const unit of units) {
@@ -127,7 +178,8 @@ export async function fetchPastReportComps(
           operating_season_months: null,
           url: null,
           description: comp.overview ?? null,
-          distance_miles: parseNum(comp.distance_miles) ?? null,
+          distance_miles: null,
+          original_study_distance_miles: originalDist,
           source_table: 'past_reports',
           amenities: comp.amenities ?? null,
           quality_score: parseNum(unit.quality_score) ?? parseNum(comp.quality_score) ?? null,
@@ -151,7 +203,8 @@ export async function fetchPastReportComps(
         operating_season_months: null,
         url: null,
         description: comp.overview ?? null,
-        distance_miles: parseNum(comp.distance_miles) ?? null,
+        distance_miles: null,
+        original_study_distance_miles: originalDist,
         source_table: 'past_reports',
         amenities: comp.amenities ?? null,
         quality_score: parseNum(comp.quality_score) ?? null,
@@ -173,7 +226,7 @@ export async function fetchPastReportComps(
   deduped.sort((a, b) => (b.quality_score ?? 0) - (a.quality_score ?? 0));
 
   console.log(
-    `[fetch-past-report-comps] Found ${deduped.length} comps from past reports in ${state}`,
+    `[fetch-past-report-comps] Found ${deduped.length} comps from past reports in ${state} (no subject coords; distances unset)`,
   );
   return deduped.slice(0, MAX_PAST_REPORT_COMPS);
 }

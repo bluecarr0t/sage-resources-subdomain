@@ -79,4 +79,23 @@ describe('website-slack-client', () => {
     expect(JSON.stringify(message.blocks)).toContain('*I am a:* Operator');
     expect(JSON.stringify(message.blocks)).toContain('Total verified emails: *43*');
   });
+
+  it('builds a business-type backfill message', async () => {
+    process.env.SITE_URL = 'https://resources.sageoutdooradvisory.com';
+    const { buildMarketOverviewBusinessTypeBackfillSlackMessage } = await import(
+      '@/lib/slack/website-slack-client'
+    );
+
+    const message = buildMarketOverviewBusinessTypeBackfillSlackMessage({
+      email: 'jane@example.com',
+      name: 'Jane Doe',
+      businessType: 'Developer',
+    });
+
+    expect(message.text).toContain('I am a');
+    expect(message.text).toContain('Developer');
+    expect(message.text).toContain('jane@example.com');
+    expect(JSON.stringify(message.blocks)).toContain('*I am a:* Developer');
+    expect(JSON.stringify(message.blocks)).toContain('Backfill');
+  });
 });

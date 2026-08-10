@@ -213,6 +213,8 @@ function removeLocaleFromPathname(pathname: string): string {
 // Routes that should NOT be rewritten to /landing
 const excludedRoutes = [
   'map',
+  'markets',
+  'journeys',
   'glossary',
   'guides',
   'partners',

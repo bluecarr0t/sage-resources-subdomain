@@ -124,6 +124,8 @@ export function computeMajorLargeCitiesNear(
     distance_miles: number;
     visitors?: number | null;
     siteType?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   }>;
   radiusMiles: number;
 } {
@@ -133,6 +135,8 @@ export function computeMajorLargeCitiesNear(
     distance_miles: number;
     visitors?: number | null;
     siteType?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   }> = [];
   for (const [name, st, lat, lng, pop] of filterMajorLargeCityRows()) {
     const dist = haversineDistanceMiles(anchorLat, anchorLng, lat, lng);
@@ -144,6 +148,8 @@ export function computeMajorLargeCitiesNear(
       distance_miles: Math.round(dist * 10) / 10,
       visitors: pop,
       siteType: tier,
+      latitude: lat,
+      longitude: lng,
     });
   }
   inRadius.sort((a, b) => {

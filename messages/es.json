@@ -19,6 +19,68 @@
       "defaultDescription": "Consultoría líder en estudios de viabilidad y valoraciones en la industria de hospitalidad al aire libre"
     }
   },
+  "journeys": {
+    "breadcrumb": {
+      "home": "Inicio",
+      "journeys": "Trayectorias"
+    },
+    "focusLabel": "Enfoque del estudio",
+    "focus": {
+      "feasibility": "Estudio de viabilidad",
+      "appraisal": "Tasación USPAP",
+      "both": "Viabilidad y tasación"
+    },
+    "stepsHeading": "El camino",
+    "outcomeHeading": "Qué produce este camino",
+    "openMapCta": "Abrir mapa de comps",
+    "openMarketCta": "Abrir página de mercado",
+    "openLandingCta": "Abrir landing del estudio",
+    "learnMore": "Saber más",
+    "relatedHeading": "Trayectorias relacionadas",
+    "ctaTitle": "¿Listo para pasar de comps a un estudio financiable?",
+    "ctaDescription": "Reserve una introducción con Sage. Traiga el mercado que filtró en el mapa: delimitaremos un estudio de viabilidad listo para el banco o una tasación USPAP.",
+    "ctaButton": "Reservar una introducción",
+    "index": {
+      "title": "Del mapa de comps al estudio financiable",
+      "subtitle": "Trayectorias tipo caso que reflejan cómo investigan los leads orgánicos de calidad—y luego reservan Sage.",
+      "intro": "Estas páginas narran el camino comps → underwriting: primero el mapa y las páginas de mercado, luego un estudio de viabilidad o tasación USPAP listo para el prestamista.",
+      "compositeNote": "Trayectorias compuestas basadas en búsqueda orgánica → investigación en resources → introducción Sage. No son testimonios de clientes nombrados; no inventamos resultados de financiamiento.",
+      "listHeading": "Trayectorias",
+      "metaTitle": "Del mapa de comps al estudio financiable | Trayectorias Sage",
+      "metaDescription": "Páginas tipo caso sobre cómo los desarrolladores usan el mapa de comps de Sage y luego solicitan estudios de viabilidad o tasaciones USPAP para financiamiento."
+    }
+  },
+  "markets": {
+    "breadcrumb": {
+      "home": "Inicio",
+      "markets": "Mercados"
+    },
+    "subtitle": "Investigación de mercado indexable para {label}: enlaza con el mapa de comps de Sage.",
+    "stats": {
+      "comps": "Comps rastreados (estado)",
+      "adr": "Encuadre ADR (tarifas publicadas)",
+      "occupancyNote": "La ocupación se modela en alcances de viabilidad y tasación; no se publica como métrica del mapa público."
+    },
+    "adrSummary": "ADR retail publicado medio ≈ ${average} (rango ${low}–${high}).",
+    "adrSummaryFallback": "Filtre el mapa interactivo para ver bandas de tarifa; un estudio Sage valida el ADR alcanzable.",
+    "studyHeading": "Qué estudiaría Sage aquí",
+    "studyBody": "Para {market}, Sage reuniría ~{count, number} comps rastreados de esta vista y profundizaría en {focus}: set competitivo, underwriting de ADR y ocupación, y narrativa lista para la banca.",
+    "openMapCta": "Abrir mapa de comps filtrado",
+    "relatedHeading": "Mercados relacionados",
+    "ctaTitle": "Solicitar viabilidad o tasación para este mercado",
+    "ctaDescription": "Hable con Sage sobre un estudio de viabilidad listo para el banco o una tasación alineada con USPAP basada en los comps que está revisando.",
+    "ctaButton": "Reservar una introducción",
+    "index": {
+      "title": "Mercados de glamping y hospitalidad outdoor",
+      "subtitle": "Páginas de intención para investigación orgánica: cada mercado enlaza filtros del mapa.",
+      "intro": "Use estas URLs indexables para investigar oferta, bandas de ADR y densidad competitiva. Cada página abre el mapa interactivo con filtros de estado y tipo de unidad.",
+      "journeyTeaser": "cómo la investigación orgánica en el mapa se convierte en un encargo listo para el banco.",
+      "listHeading": "Mercados",
+      "openMap": "Abrir en el mapa →",
+      "metaTitle": "Páginas de investigación de mercado de glamping | Sage Outdoor Advisory",
+      "metaDescription": "Páginas indexables de mercados de glamping con enlaces al mapa para Colorado, California, Texas y más."
+    }
+  },
   "landing": {
     "glampingFeasibilityStudy": {
       "title": "Estudio de Viabilidad de Glamping | Sage Outdoor Advisory",
@@ -691,6 +753,8 @@
   },
   "map": {
     "title": "Mapa de Propiedades de Glamping",
+    "hubJourneyLink": "Del mapa de comps al estudio financiable",
+    "hubMarketsLink": "Páginas de mercado",
     "loading": "Cargando mapa...",
     "fullscreen": {
       "enter": "Pantalla completa",
@@ -799,6 +863,20 @@
       "loadingScript": "Cargando script de Google Maps...",
       "loadingScriptHint": "Esto puede tardar unos segundos"
     },
+    "lead": {
+      "ctaLabel": "Solicitar un estudio de mercado",
+      "ctaHint": "Comps bancarios, encuadre de ADR y análisis de ocupación para su emplazamiento.",
+      "studyTitle": "Qué estudiaría Sage aquí",
+      "studyIntro": "Para {market}, un encargo de Sage comienza con el conjunto de competidores de este mapa y luego profundiza en tarifas, demanda y underwriting.",
+      "defaultMarketLabel": "este mercado",
+      "compsLabel": "Comps a la vista",
+      "adrLabel": "Encuadre ADR",
+      "adrFraming": "Los comps públicos se concentran en bandas de tarifa {bands}; un estudio valida el ADR alcanzable según su mix de unidades y estacionalidad.",
+      "adrFramingFallback": "Filtre por estado o tipo de unidad para ver bandas de tarifa; un estudio valida el ADR alcanzable.",
+      "occupancyLabel": "Ocupación",
+      "occupancyFraming": "La ocupación no se publica en el mapa público: los alcances de viabilidad y tasación modelan estacionalidad, mercados de origen y rendimiento del set competitivo.",
+      "marketPagesHint": "Página de mercado indexable:"
+    },
     "metadata": {
       "title": "Mapa de Propiedades de Glamping | 500+ Ubicaciones | Sage Outdoor Advisory",
       "description": "Explore más de 500 propiedades de glamping en Estados Unidos y Canadá en nuestro mapa interactivo. Compare ubicaciones de glamping con datos de crecimiento poblacional para identificar mercados de alto crecimiento. Filtre por ubicación, tipo de unidad y rango de precios.",
@@ -904,7 +982,13 @@
           "answer": "<p>Un estudio de viabilidad es un análisis integral que evalúa la viabilidad, el potencial del mercado y las perspectivas financieras de un proyecto propuesto de hospitalidad al aire libre.</p><p>Ayuda a desarrolladores, inversionistas y prestamistas a comprender:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Si vale la pena perseguir un proyecto</li><li>Qué riesgos existen</li><li>Cómo maximizar el éxito</li></ul><p>Piense en él como una hoja de ruta detallada que combina análisis financiero cuantitativo con información cualitativa del mercado para crear una evaluación integral del potencial de su proyecto.</p>"
         }
       ],
-      "keywords": ["estudio de viabilidad", "estudio de viabilidad hospitalidad al aire libre", "guía estudio de viabilidad glamping", "viabilidad resort autocaravanas", "viabilidad camping"],
+      "keywords": [
+        "estudio de viabilidad",
+        "estudio de viabilidad hospitalidad al aire libre",
+        "guía estudio de viabilidad glamping",
+        "viabilidad resort autocaravanas",
+        "viabilidad camping"
+      ],
       "cta": {
         "title": "¿Listo para Comenzar Su Estudio de Viabilidad?",
         "description": "Programe una consulta gratuita con nuestros expertos en estudios de viabilidad para discutir su proyecto",
@@ -949,7 +1033,13 @@
           "answer": "<p>Una valoración de propiedad es una opinión profesional imparcial del valor de una propiedad. Para propiedades de hospitalidad al aire libre, las valoraciones determinan el valor de mercado justo según el potencial de ingresos de la propiedad, ventas comparables y costo de reemplazo.</p><p>Las valoraciones sirven varios propósitos críticos:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Financiamiento:</strong> Los prestamistas requieren valoraciones para determinar los montos de préstamo</li><li><strong>Transacciones:</strong> Compradores y vendedores usan valoraciones para establecer precios de compra justos</li><li><strong>Refinanciamiento:</strong> Los propietarios necesitan valoraciones al refinanciar préstamos</li><li><strong>Análisis de Inversión:</strong> Los inversionistas usan valoraciones para evaluar oportunidades</li></ul>"
         }
       ],
-      "keywords": ["valoración de propiedad", "valoración hospitalidad al aire libre", "guía valoración propiedad glamping", "valoración resort autocaravanas", "valoración camping"],
+      "keywords": [
+        "valoración de propiedad",
+        "valoración hospitalidad al aire libre",
+        "guía valoración propiedad glamping",
+        "valoración resort autocaravanas",
+        "valoración camping"
+      ],
       "cta": {
         "title": "¿Necesita una Valoración de Propiedad?",
         "description": "Programe una consulta gratuita con nuestros expertos en valoración para discutir su propiedad",
@@ -994,7 +1084,13 @@
           "answer": "<p>El glamping es una fusión de <em>\"glamorous\"</em> y <em>\"camping\"</em>—alojamientos de lujo en entornos naturales que ofrecen experiencias al aire libre sin sacrificar la comodidad.</p><p>A diferencia del camping tradicional, el glamping proporciona:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Alojamientos cómodos y amueblados</li><li>Servicios y amenidades premium</li><li>Experiencias únicas y memorables</li><li>Conexión con la naturaleza con comodidades modernas</li></ul><p>El glamping atrae a viajeros que desean experimentar el aire libre mientras disfrutan de comodidad y servicios similares a hoteles.</p>"
         }
       ],
-      "keywords": ["industria del glamping", "guía resort glamping", "cómo iniciar negocio glamping", "tendencias glamping", "mercado glamping"],
+      "keywords": [
+        "industria del glamping",
+        "guía resort glamping",
+        "cómo iniciar negocio glamping",
+        "tendencias glamping",
+        "mercado glamping"
+      ],
       "cta": {
         "title": "¿Listo para Iniciar Su Negocio de Glamping?",
         "description": "Programe una consulta gratuita con nuestros expertos en glamping para discutir su proyecto",
@@ -1035,7 +1131,13 @@
           "answer": "<p>Un resort para autocaravanas es una propiedad de hospitalidad al aire libre premium diseñada para autocaravanas, que ofrece servicios, instalaciones y amenidades mejoradas en comparación con los parques para autocaravanas tradicionales.</p><p>Los resorts para autocaravanas típicamente presentan:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Sitios premium con conexiones completas (agua, alcantarillado, electricidad)</li><li>Amenidades mejoradas como piscinas, centros recreativos y restaurantes</li><li>Instalaciones y mantenimiento de terrenos de mayor calidad</li><li>Servicios adicionales y servicio al cliente de nivel conserje</li><li>Precios premium que reflejan la experiencia mejorada</li></ul><p>Los resorts para autocaravanas atraen a los amantes de las autocaravanas que buscan una experiencia más lujosa y rica en amenidades en comparación con los parques para autocaravanas básicos.</p>"
         }
       ],
-      "keywords": ["industria resort autocaravanas", "guía resort autocaravanas", "cómo iniciar resort autocaravanas", "tendencias resort autocaravanas", "mercado resort autocaravanas"],
+      "keywords": [
+        "industria resort autocaravanas",
+        "guía resort autocaravanas",
+        "cómo iniciar resort autocaravanas",
+        "tendencias resort autocaravanas",
+        "mercado resort autocaravanas"
+      ],
       "cta": {
         "title": "¿Listo para Iniciar Su Resort para Autocaravanas?",
         "description": "Programe una consulta gratuita con nuestros expertos en resorts para autocaravanas para discutir su proyecto",
@@ -1076,7 +1178,11 @@
           "answer": "<p>Al leer un estudio de viabilidad, siga este enfoque recomendado:</p><p><strong>1. Comience con el Resumen Ejecutivo</strong></p><p>El resumen ejecutivo proporciona una visión general de alto nivel de los hallazgos clave, recomendaciones y conclusiones. Esto le brinda información esencial de un vistazo.</p><p><strong>2. Revise el Análisis de Mercado</strong></p><p>La sección de análisis de mercado proporciona contexto para las proyecciones financieras. Preste atención a los impulsores de la demanda, el posicionamiento competitivo y las tendencias del mercado.</p><p><strong>3. Examine las Proyecciones Financieras</strong></p><p>Las proyecciones financieras son el corazón de un estudio de viabilidad. Comprenda las proyecciones de ingresos, las tasas de ocupación, los gastos operativos y los plazos de flujo de efectivo.</p><p>Para orientación más detallada, consulte nuestra <a href=\"/es/guides/how-to-read-feasibility-study\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía sobre cómo leer un estudio de viabilidad</a>.</p>"
         }
       ],
-      "keywords": ["cómo leer estudio de viabilidad", "interpretación estudio de viabilidad", "entender estudios de viabilidad"],
+      "keywords": [
+        "cómo leer estudio de viabilidad",
+        "interpretación estudio de viabilidad",
+        "entender estudios de viabilidad"
+      ],
       "cta": {
         "title": "¿Necesita Ayuda para Entender Su Estudio de Viabilidad?",
         "description": "Programe una consulta para discutir los hallazgos de su estudio de viabilidad",
@@ -1104,7 +1210,10 @@
           "answer": "<p><strong>Sí, para proyectos de desarrollo, generalmente necesita ambos.</strong></p><p>Un estudio de viabilidad valida el concepto del proyecto y evalúa si el proyecto propuesto es viable y rentable. Está orientado al futuro y ayuda a responder \"¿Debo construir esto?\"</p><p>Una valoración determina el valor de la propiedad, ya sea el valor actual o el valor proyectado después del desarrollo. Es esencial para el financiamiento, ya que los prestamistas necesitan conocer el valor de la propiedad.</p><p>Los prestamistas a menudo requieren ambos documentos para el financiamiento del desarrollo porque proporcionan información complementaria: el estudio de viabilidad evalúa la viabilidad del proyecto, mientras que la valoración determina el valor de la garantía.</p>"
         }
       ],
-      "keywords": ["estudio de viabilidad vs valoración", "diferencia entre estudio de viabilidad y valoración"],
+      "keywords": [
+        "estudio de viabilidad vs valoración",
+        "diferencia entre estudio de viabilidad y valoración"
+      ],
       "cta": {
         "title": "¿Necesita Ayuda para Entender Cuál Necesita?",
         "description": "Programe una consulta para discutir las necesidades de su proyecto",
@@ -1132,7 +1241,10 @@
           "answer": "<p>Las valoraciones y los estudios de viabilidad sirven propósitos diferentes:</p><p><strong>Valoración:</strong> Determina el <em>valor actual</em> de una propiedad existente. Está enfocada en el presente y responde \"¿Cuánto vale esta propiedad hoy?\" Las valoraciones generalmente se usan para financiamiento, transacciones o refinanciamiento.</p><p><strong>Estudio de Viabilidad:</strong> Evalúa si un <em>proyecto propuesto</em> es viable y rentable. Está orientado al futuro y responde \"¿Debo construir esto?\" y \"¿Cuáles serán los ingresos?\" Los estudios de viabilidad se usan para planificar nuevos desarrollos o expansiones.</p><p>Aunque ambos involucran análisis de propiedades, sirven diferentes propósitos de toma de decisiones en diferentes etapas de propiedad o desarrollo de propiedades.</p>"
         }
       ],
-      "keywords": ["valoración vs estudio de viabilidad", "diferencia entre valoración y estudio de viabilidad"],
+      "keywords": [
+        "valoración vs estudio de viabilidad",
+        "diferencia entre valoración y estudio de viabilidad"
+      ],
       "cta": {
         "title": "¿Necesita Ayuda para Entender Cuál Necesita?",
         "description": "Programe una consulta para discutir las necesidades de su proyecto",
@@ -1194,7 +1306,11 @@
           "answer": "<p>Varios factores pueden causar retrasos en el proceso del estudio de viabilidad:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Retrasos en la Información del Cliente:</strong> Si la información solicitada no se proporciona oportunamente, puede ralentizar la fase de análisis</li><li><strong>Disponibilidad de Datos del Mercado:</strong> Los datos del mercado difíciles de obtener o limitados pueden extender el tiempo de investigación</li><li><strong>Cambios en el Alcance del Proyecto:</strong> Los cambios significativos en el alcance del proyecto durante el estudio pueden requerir análisis adicional</li><li><strong>Ciclos de Revisión:</strong> Los períodos de revisión prolongados pueden retrasar la finalización</li></ul><p>Para mantener el proceso encaminado, proporcione la información solicitada oportunamente y responda a preguntas y aclaraciones rápidamente. Consulte nuestra <a href=\"/en/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía del proceso y cronograma</a> para más detalles.</p>"
         }
       ],
-      "keywords": ["cronograma estudio de viabilidad", "proceso estudio de viabilidad", "cuánto tiempo tarda un estudio de viabilidad"],
+      "keywords": [
+        "cronograma estudio de viabilidad",
+        "proceso estudio de viabilidad",
+        "cuánto tiempo tarda un estudio de viabilidad"
+      ],
       "cta": {
         "title": "¿Listo para Comenzar Su Estudio de Viabilidad?",
         "description": "Programe una consulta para discutir el cronograma de su proyecto",
@@ -1251,7 +1367,11 @@
           "answer": "<p>El enfoque de ingresos es típicamente el <strong>método principal</strong> para propiedades generadoras de ingresos como las propiedades de hospitalidad al aire libre, ya que refleja su potencial de generación de ingresos.</p><p><strong>Ideal Para:</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Propiedades generadoras de ingresos (propiedades de alquiler, propiedades de hospitalidad)</li><li>Propiedades con flujos de ingresos estables o predecibles</li><li>Propiedades de inversión donde los ingresos son el principal motor de valor</li></ul><p><strong>Propiedades de Hospitalidad al Aire Libre:</strong> Para resorts de glamping, parques para autocaravanas y campamentos, el enfoque de ingresos típicamente recibe el mayor peso porque estas propiedades se valoran principalmente en función de su capacidad para generar ingresos por alquiler e ingresos de explotación.</p><p>Los tasadores también pueden usar los enfoques de comparación de ventas y de costo para apoyar o validar la valoración del enfoque de ingresos, pero el enfoque de ingresos es típicamente el método principal para estos tipos de propiedades.</p>"
         }
       ],
-      "keywords": ["valoración enfoque de ingresos", "valoración basada en ingresos", "valoración NOI"],
+      "keywords": [
+        "valoración enfoque de ingresos",
+        "valoración basada en ingresos",
+        "valoración NOI"
+      ],
       "cta": {
         "title": "¿Necesita una Valoración por Enfoque de Ingresos?",
         "description": "Programe una consulta para discutir sus necesidades de valoración",
@@ -1279,7 +1399,11 @@
           "answer": "<p>Iniciar un negocio de glamping implica varios pasos clave:</p><ol class=\"list-decimal list-inside space-y-1 ml-4\"><li><strong>Investigación y Planificación:</strong> Comprenda su mercado objetivo y la competencia</li><li><strong>Estudio de Viabilidad:</strong> Valide su concepto con un análisis profesional</li><li><strong>Selección del Sitio:</strong> Elija una ubicación con atributos apropiados</li><li><strong>Planificación Comercial:</strong> Desarrolle un plan comercial completo</li><li><strong>Permisos y Regulaciones:</strong> Navegue los requisitos regulatorios</li><li><strong>Financiamiento:</strong> Obtenga financiamiento para el desarrollo y operaciones</li><li><strong>Diseño y Construcción:</strong> Gestione el desarrollo del sitio y la construcción</li><li><strong>Configuración de Operaciones:</strong> Establezca sistemas operativos</li><li><strong>Marketing y Lanzamiento:</strong> Lance con marketing efectivo</li></ol><p>Consulte nuestra <a href=\"/es/guides/how-to-start-glamping-business\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía completa sobre cómo iniciar un negocio de glamping</a> para información detallada.</p>"
         }
       ],
-      "keywords": ["cómo iniciar negocio glamping", "iniciar empresa glamping", "guía inicio glamping"],
+      "keywords": [
+        "cómo iniciar negocio glamping",
+        "iniciar empresa glamping",
+        "guía inicio glamping"
+      ],
       "cta": {
         "title": "¿Listo para Iniciar Su Negocio de Glamping?",
         "description": "Programe una consulta gratuita con nuestros expertos en glamping para discutir su proyecto",
@@ -1354,7 +1478,11 @@
           "answer": "<p><strong>Sí, absolutamente.</strong> Los estudios de viabilidad de Sage Outdoor Advisory están aprobados por bancos y confiables para instituciones financieras en todo el país para el financiamiento de hospitalidad al aire libre.</p><p>Hemos completado más de 350 estudios de viabilidad y valoraciones en la industria de hospitalidad al aire libre. Nuestros estudios están específicamente diseñados para cumplir con los requisitos de los prestamistas con:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Análisis completo de mercado y financiero</li><li>Documentación profesional</li><li>Experiencia y credibilidad de la industria</li><li>Historial comprobado con prestamistas</li></ul><p>Hemos ayudado a numerosos clientes a obtener financiamiento para sus proyectos de glamping, resorts para autocaravanas y campamentos.</p>"
         }
       ],
-      "keywords": ["requisitos bancos estudios de viabilidad", "requisitos prestamistas estudios de viabilidad", "estudios de viabilidad financiamiento"],
+      "keywords": [
+        "requisitos bancos estudios de viabilidad",
+        "requisitos prestamistas estudios de viabilidad",
+        "estudios de viabilidad financiamiento"
+      ],
       "cta": {
         "title": "¿Necesita un Estudio de Viabilidad Aprobado por Bancos?",
         "description": "Programe una consulta para discutir sus necesidades de financiamiento",
@@ -1406,7 +1534,11 @@
           "answer": "<p><strong>Sí, absolutamente.</strong> Las valoraciones de Sage Outdoor Advisory están aprobadas por bancos y confiables para instituciones financieras en todo el país para el financiamiento de propiedades de hospitalidad al aire libre.</p><p>Hemos completado más de 350 valoraciones en la industria de hospitalidad al aire libre. Nuestras valoraciones cumplen con todos los requisitos de los prestamistas con:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Tasadores calificados y certificados con experiencia especializada</li><li>Análisis completo de la propiedad</li><li>Múltiples enfoques de valoración</li><li>Documentación profesional conforme a USPAP</li><li>Historial comprobado con prestamistas en todo el país</li></ul><p>Hemos ayudado a numerosos clientes a obtener financiamiento para sus propiedades de glamping, resorts para autocaravanas y campamentos.</p>"
         }
       ],
-      "keywords": ["requisitos valoración bancaria", "estándares valoración prestamistas", "valoración financiamiento"],
+      "keywords": [
+        "requisitos valoración bancaria",
+        "estándares valoración prestamistas",
+        "valoración financiamiento"
+      ],
       "cta": {
         "title": "¿Necesita una Valoración Aprobada por Bancos?",
         "description": "Programe una consulta para discutir sus necesidades de financiamiento",
@@ -1469,7 +1601,12 @@
           "answer": "<p>Los tipos de alojamiento glamping populares incluyen:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Yurtas:</strong> Estructuras circulares con atractivo estético único y buen aislamiento</li><li><strong>Cabañas A-frame:</strong> Estructuras geométricas modernas populares entre viajeros contemporáneos</li><li><strong>Tiendas Safari:</strong> Tiendas grandes y lujosas con todas las amenidades</li><li><strong>Casas en Árboles:</strong> Alojamientos elevados que ofrecen perspectivas y experiencias únicas</li><li><strong>Domos Geodésicos:</strong> Estructuras futuristas que maximizan las vistas y la luz natural</li></ul><p>Cada tipo de alojamiento ofrece características únicas y atrae diferentes mercados. La mejor elección depende de sus huéspedes objetivo, ubicación, presupuesto y regulaciones locales.</p><p>Consulte nuestra <a href=\"/es/guides/glamping-accommodation-types\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía completa de tipos de alojamiento glamping</a> para información detallada sobre cada opción.</p>"
         }
       ],
-      "keywords": ["tipos alojamiento glamping", "estructuras glamping", "yurtas glamping", "A-frame glamping"],
+      "keywords": [
+        "tipos alojamiento glamping",
+        "estructuras glamping",
+        "yurtas glamping",
+        "A-frame glamping"
+      ],
       "cta": {
         "title": "¿Necesita Ayuda para Elegir Tipos de Alojamiento?",
         "description": "Programe una consulta para discutir su proyecto de glamping",
@@ -1517,7 +1654,11 @@
           "answer": "<p>Las tendencias clave del mercado glamping para 2026 incluyen:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Crecimiento del Mercado:</strong> Expansión continua del mercado del glamping con demanda creciente de los consumidores</li><li><strong>Demanda de Amenidades de Lujo:</strong> Los huéspedes esperan amenidades y servicios premium en las propiedades de glamping</li><li><strong>Enfoque en Sostenibilidad:</strong> Mayor énfasis en prácticas ecológicas y responsabilidad ambiental</li><li><strong>Profesionalización de las Operaciones:</strong> Operaciones comerciales y prácticas de gestión más sofisticadas</li><li><strong>Inversión Institucional:</strong> Interés creciente de inversionistas institucionales y grandes empresas de hospitalidad</li></ul><p>Entender estas tendencias puede ayudarlo a posicionar su negocio de glamping para el éxito y alinear sus ofertas con las demandas del mercado.</p><p>Consulte nuestra <a href=\"/es/guides/glamping-market-trends-2026\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía de tendencias del mercado glamping 2026</a> y el <a href=\"/glamping-market-overview\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Glamping Market Overview</a> para datos en vivo.</p>"
         }
       ],
-      "keywords": ["tendencias glamping 2026", "tendencias mercado glamping", "estadísticas industria glamping"],
+      "keywords": [
+        "tendencias glamping 2026",
+        "tendencias mercado glamping",
+        "estadísticas industria glamping"
+      ],
       "cta": {
         "title": "¿Quiere Entender las Tendencias del Mercado para Su Proyecto?",
         "description": "Programe una consulta para discutir el análisis del mercado",
@@ -1575,7 +1716,11 @@
           "answer": "<p>Las principales diferencias entre resorts para autocaravanas y parques para autocaravanas incluyen:</p><p><strong>Resorts para Autocaravanas:</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Amenidades y experiencias premium</li><li>Precios más altos</li><li>Instalaciones mejoradas (piscinas, centros recreativos, restaurantes)</li><li>Paisajismo y mantenimiento superiores</li><li>Servicios adicionales y servicio al cliente de nivel conserje</li><li>Mercado objetivo: Entusiastas de autocaravanas exigentes que buscan experiencias de lujo</li></ul><p><strong>Parques para Autocaravanas:</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Amenidades y servicios básicos</li><li>Precios más bajos</li><li>Instalaciones esenciales (conexiones, baños, lavandería)</li><li>Enfoque en funcionalidad y valor</li><li>Servicios adicionales mínimos</li><li>Mercado objetivo: Entusiastas de autocaravanas conscientes de los costos que buscan servicios básicos</li></ul><p>Ambos sirven a los entusiastas de autocaravanas pero atienden diferentes segmentos de mercado con diferentes expectativas y precios.</p><p>Consulte nuestra <a href=\"/es/guides/rv-resort-vs-rv-park\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía resort para autocaravanas vs parque para autocaravanas</a> para una comparación detallada.</p>"
         }
       ],
-      "keywords": ["resort autocaravanas vs parque autocaravanas", "diferencia resort autocaravanas parque autocaravanas", "comparación resort autocaravanas"],
+      "keywords": [
+        "resort autocaravanas vs parque autocaravanas",
+        "diferencia resort autocaravanas parque autocaravanas",
+        "comparación resort autocaravanas"
+      ],
       "cta": {
         "title": "¿Necesita Ayuda para Elegir Entre Resort y Parque para Autocaravanas?",
         "description": "Programe una consulta para discutir sus opciones",
@@ -1628,7 +1773,11 @@
           "answer": "<p>Los resorts para autocaravanas deben incluir tanto amenidades esenciales como premium:</p><p><strong>Amenidades Esenciales:</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Conexiones Completas:</strong> Conexiones de agua, alcantarillado y eléctricas</li><li><strong>Wi-Fi:</strong> Acceso a Internet confiable</li><li><strong>Baños y Duchas:</strong> Instalaciones limpias y bien mantenidas</li><li><strong>Instalaciones de Lavandería:</strong> Lavadoras y secadoras para huéspedes</li><li><strong>Eliminación de Desechos:</strong> Estaciones de descarga y gestión de desechos</li></ul><p><strong>Amenidades Premium (Mejoran el Atractivo):</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Piscinas y jacuzzis</li><li>Centros recreativos y salas comunitarias</li><li>Restaurantes y opciones de comida</li><li>Centros de fitness e instalaciones deportivas</li><li>Entretenimiento y programación de actividades</li><li>Instalaciones y servicios para mascotas</li></ul><p>La combinación correcta de amenidades depende de su mercado objetivo, ubicación y estrategia de posicionamiento.</p><p>Consulte nuestra <a href=\"/es/guides/rv-resort-amenities-guide\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">guía de amenidades de resort para autocaravanas</a> para información completa.</p>"
         }
       ],
-      "keywords": ["amenidades resort autocaravanas", "amenidades parque autocaravanas", "diseño resort autocaravanas"],
+      "keywords": [
+        "amenidades resort autocaravanas",
+        "amenidades parque autocaravanas",
+        "diseño resort autocaravanas"
+      ],
       "cta": {
         "title": "¿Necesita Ayuda para Planificar las Amenidades del Resort para Autocaravanas?",
         "description": "Programe una consulta para discutir su proyecto de resort para autocaravanas",
@@ -1713,7 +1862,13 @@
           "Tomar decisiones de seguir/no seguir en proyectos",
           "Comprender el potencial del mercado antes de la compra"
         ],
-        "seoKeywords": ["estudio de viabilidad", "análisis de viabilidad", "viabilidad de proyecto", "viabilidad empresarial", "informe de viabilidad"],
+        "seoKeywords": [
+          "estudio de viabilidad",
+          "análisis de viabilidad",
+          "viabilidad de proyecto",
+          "viabilidad empresarial",
+          "informe de viabilidad"
+        ],
         "faqs": [
           {
             "question": "¿Cuánto tiempo toma un estudio de viabilidad?",
@@ -1745,7 +1900,13 @@
           "Valoración para seguros",
           "Análisis de inversión"
         ],
-        "seoKeywords": ["tasación de propiedad", "tasación inmobiliaria", "tasación empresarial", "valoración", "valor tasado"],
+        "seoKeywords": [
+          "tasación de propiedad",
+          "tasación inmobiliaria",
+          "tasación empresarial",
+          "valoración",
+          "valor tasado"
+        ],
         "faqs": [
           {
             "question": "¿Cuánto tiempo toma una tasación?",
@@ -1772,7 +1933,13 @@
           "Convertir terrenos para uso de glamping",
           "Valorar propiedades de glamping"
         ],
-        "seoKeywords": ["glamping", "camping glamoroso", "camping de lujo", "resort de glamping", "alojamiento de glamping"],
+        "seoKeywords": [
+          "glamping",
+          "camping glamoroso",
+          "camping de lujo",
+          "resort de glamping",
+          "alojamiento de glamping"
+        ],
         "faqs": [
           {
             "question": "¿Cuál es la diferencia entre glamping y camping?",
@@ -1803,7 +1970,13 @@
           "Posicionamiento competitivo",
           "Desarrollo de estrategia de precios"
         ],
-        "seoKeywords": ["análisis de mercado", "investigación de mercado", "evaluación de mercado", "análisis de mercado", "análisis de demanda"],
+        "seoKeywords": [
+          "análisis de mercado",
+          "investigación de mercado",
+          "evaluación de mercado",
+          "análisis de mercado",
+          "análisis de demanda"
+        ],
         "faqs": [
           {
             "question": "¿Qué incluye un análisis de mercado?",
@@ -1828,7 +2001,12 @@
           "Mejorar parques para autocaravanas a estatus de resort",
           "Valorar propiedades de resorts para autocaravanas"
         ],
-        "seoKeywords": ["resort para autocaravanas", "parque para autocaravanas de lujo", "comodidades de resort para autocaravanas", "parque para autocaravanas premium"],
+        "seoKeywords": [
+          "resort para autocaravanas",
+          "parque para autocaravanas de lujo",
+          "comodidades de resort para autocaravanas",
+          "parque para autocaravanas premium"
+        ],
         "faqs": [
           {
             "question": "¿Cuál es la diferencia entre un resort para autocaravanas y un parque para autocaravanas?",
@@ -1849,7 +2027,12 @@
           "Expandir instalaciones de camping",
           "Valorar propiedades de camping"
         ],
-        "seoKeywords": ["camping", "instalación de camping", "camping en tiendas", "desarrollo de camping"],
+        "seoKeywords": [
+          "camping",
+          "instalación de camping",
+          "camping en tiendas",
+          "desarrollo de camping"
+        ],
         "faqs": [
           {
             "question": "¿Cuál es la diferencia entre un camping y un parque para autocaravanas?",
@@ -1871,7 +2054,13 @@
           "Análisis competitivo",
           "Modelado financiero"
         ],
-        "seoKeywords": ["ADR", "tarifa diaria promedio", "tarifa de habitación", "tarifa diaria", "ingreso por habitación"],
+        "seoKeywords": [
+          "ADR",
+          "tarifa diaria promedio",
+          "tarifa de habitación",
+          "tarifa diaria",
+          "ingreso por habitación"
+        ],
         "faqs": [
           {
             "question": "¿Cómo se calcula el ADR?",
@@ -1901,7 +2090,12 @@
           "Estrategia de precios",
           "Análisis de mercado"
         ],
-        "seoKeywords": ["tasa de ocupación", "porcentaje de ocupación", "ocupación de habitaciones", "métricas de ocupación"],
+        "seoKeywords": [
+          "tasa de ocupación",
+          "porcentaje de ocupación",
+          "ocupación de habitaciones",
+          "métricas de ocupación"
+        ],
         "faqs": [
           {
             "question": "¿Cuál es una buena tasa de ocupación?",
@@ -1930,7 +2124,12 @@
           "Suscripción de préstamos",
           "Planificación financiera"
         ],
-        "seoKeywords": ["NOI", "ingreso operativo neto", "ingreso operativo", "NOI de propiedad"],
+        "seoKeywords": [
+          "NOI",
+          "ingreso operativo neto",
+          "ingreso operativo",
+          "NOI de propiedad"
+        ],
         "faqs": [
           {
             "question": "¿Qué gastos se incluyen en el NOI?",
@@ -1955,7 +2154,12 @@
           "Análisis de retorno",
           "Decisiones de compra"
         ],
-        "seoKeywords": ["tasa cap", "tasa de capitalización", "tasa cap inmobiliaria", "tasa cap de inversión"],
+        "seoKeywords": [
+          "tasa cap",
+          "tasa de capitalización",
+          "tasa cap inmobiliaria",
+          "tasa cap de inversión"
+        ],
         "faqs": [
           {
             "question": "¿Cuál es una buena tasa cap?",

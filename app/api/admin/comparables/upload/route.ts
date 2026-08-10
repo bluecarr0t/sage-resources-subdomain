@@ -16,7 +16,7 @@ import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-auth-errors';
 import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
 import { parseWorkbook } from '@/lib/parsers/feasibility-xlsx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
-import { sanitizeFilename } from '@/lib/sanitize-filename';
+import { sanitizeFilename, isValidTempUploadPath } from '@/lib/sanitize-filename';
 import { logAdminAudit } from '@/lib/admin-audit';
 
 export const dynamic = 'force-dynamic';
@@ -248,6 +248,16 @@ export async function POST(request: NextRequest) {
         const fn = fp.name.toLowerCase();
         if (!fn.endsWith('.xlsx') && !fn.endsWith('.xlsm') && !fn.endsWith('.xlsxm')) continue;
 
+        if (!isValidTempUploadPath(fp.storagePath)) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `Invalid storage path for ${fp.name}: only temp-uploads/{uuid}/{filename} is allowed`,
+            },
+            { status: 400 }
+          );
+        }
+
         const { data: blob, error: dlError } = await supabaseAdmin.storage
           .from(BUCKET_NAME)
           .download(fp.storagePath);
@@ -331,6 +341,9 @@ export async function POST(request: NextRequest) {
           .from('reports')
           .select('id')
           .eq('study_id', parsed.study_id)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle();
 
         const { title, propertyName } = await normalizeReportTitle({

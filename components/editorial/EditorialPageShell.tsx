@@ -5,13 +5,14 @@ export const EDITORIAL_TOPO_BG_URL = '/images/glamping-market-snapshot-topo.png'
 
 export const EDITORIAL_PAGE_BG_STYLE = {
   backgroundColor: '#faf9f3',
-  backgroundImage: `linear-gradient(to bottom, rgb(250 249 243 / 0.55), rgb(250 249 243 / 0.9)), url(${EDITORIAL_TOPO_BG_URL})`,
+  // ~3% topo visibility: heavy cream wash over the JPEG (no alpha channel)
+  backgroundImage: `linear-gradient(to bottom, rgb(250 249 243 / 0.97), rgb(250 249 243 / 0.985)), url(${EDITORIAL_TOPO_BG_URL})`,
 } as const;
 
 /** Map sidebar — same palette, slightly stronger wash for narrow panel readability */
 export const EDITORIAL_SIDEBAR_BG_STYLE = {
   backgroundColor: '#faf9f3',
-  backgroundImage: `linear-gradient(to bottom, rgb(250 249 243 / 0.65), rgb(250 249 243 / 0.92)), url(${EDITORIAL_TOPO_BG_URL})`,
+  backgroundImage: `linear-gradient(to bottom, rgb(250 249 243 / 0.95), rgb(250 249 243 / 0.98)), url(${EDITORIAL_TOPO_BG_URL})`,
 } as const;
 
 export const EDITORIAL_LINK_CLASS =
@@ -52,10 +53,10 @@ export function EditorialPageShell({
     >
       {useTopoLayer ? (
         <div
-          className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat mix-blend-multiply"
           style={{
             backgroundImage: `url(${EDITORIAL_TOPO_BG_URL})`,
-            opacity: topoOpacity / 100,
+            opacity: (topoOpacity ?? 0) / 100,
           }}
           aria-hidden
         />

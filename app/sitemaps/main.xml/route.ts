@@ -15,6 +15,8 @@ import {
   generateHreflangTags,
 } from '@/lib/sitemap-hreflang';
 import { getMainPageSitemapPriority } from '@/lib/sitemap-priority';
+import { getAllMapMarketSlugs } from '@/lib/map-market-pages';
+import { getAllJourneyCaseSlugs } from '@/lib/journey-case-pages';
 
 const baseUrl = "https://resources.sageoutdooradvisory.com";
 
@@ -71,6 +73,42 @@ ${hreflangs}
     }
   } catch (error) {
     console.error('Error generating state pages for sitemap:', error);
+  }
+
+  // Indexable market intent pages (deep-link into /map filters)
+  {
+    const lastmod = contentLastmod;
+    for (const slug of getAllMapMarketSlugs()) {
+      for (const locale of locales) {
+        const fullPath = `/${locale}/markets/${slug}`;
+        const hreflangs = generateHreflangTags(fullPath);
+        urls.push(`  <url>
+    <loc>${baseUrl}${fullPath}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.88</priority>
+${hreflangs}
+  </url>`);
+      }
+    }
+  }
+
+  // Case-style journeys: comps map → financed study
+  {
+    const lastmod = contentLastmod;
+    for (const slug of getAllJourneyCaseSlugs()) {
+      for (const locale of locales) {
+        const fullPath = `/${locale}/journeys/${slug}`;
+        const hreflangs = generateHreflangTags(fullPath);
+        urls.push(`  <url>
+    <loc>${baseUrl}${fullPath}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.82</priority>
+${hreflangs}
+  </url>`);
+      }
+    }
   }
 
   // Add city pages (priority 0.7)

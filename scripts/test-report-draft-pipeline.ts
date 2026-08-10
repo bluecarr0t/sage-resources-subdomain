@@ -85,11 +85,11 @@ async function main() {
       letter_of_transmittal: 'Integration test letter of transmittal.',
       swot_analysis: 'Integration test SWOT analysis.',
     };
-    const docxBuf = await assembleDraftDocx(enriched, sections, { marketType: 'rv' });
+    const docxAssembled = await assembleDraftDocx(enriched, sections, { marketType: 'rv' });
     const outPath = path.join(process.cwd(), 'reports', 'test-pipeline-output.docx');
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    fs.writeFileSync(outPath, docxBuf);
-    results.push(`✓ assembleDraftDocx completed (${(docxBuf.length / 1024).toFixed(1)} KB)`);
+    fs.writeFileSync(outPath, docxAssembled.buffer);
+    results.push(`✓ assembleDraftDocx completed (${(docxAssembled.buffer.length / 1024).toFixed(1)} KB)`);
     results.push(`  - Output: ${outPath}`);
   } catch (e) {
     errors.push(`assembleDraftDocx: ${e instanceof Error ? e.message : String(e)}`);
@@ -132,14 +132,14 @@ async function main() {
         execSummary += `\n\n[Note: AI-generated draft. Some figures may require verification.]`;
       }
 
-      const docxBuf = await assembleDraftDocx(
+      const docxAssembled = await assembleDraftDocx(
         enriched,
         { executive_summary: execSummary, citations, letter_of_transmittal: letter, swot_analysis: swot },
         { marketType: 'rv' }
       );
       const outPath = path.join(process.cwd(), 'reports', 'test-pipeline-full-ai.docx');
-      fs.writeFileSync(outPath, docxBuf);
-      results.push(`✓ Full AI pipeline completed (${(docxBuf.length / 1024).toFixed(1)} KB)`);
+      fs.writeFileSync(outPath, docxAssembled.buffer);
+      results.push(`✓ Full AI pipeline completed (${(docxAssembled.buffer.length / 1024).toFixed(1)} KB)`);
       results.push(`  - Output: ${outPath}`);
       results.push(`  - Citations: ${citations.length}`);
       if (factCheck.flags.length > 0) {

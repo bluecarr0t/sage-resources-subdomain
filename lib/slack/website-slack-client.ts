@@ -39,6 +39,13 @@ export type MarketOverviewReturnSigninSlackPayload = {
   totalVerifiedEmails: number;
 };
 
+export type MarketOverviewBusinessTypeBackfillSlackPayload = {
+  email: string;
+  name?: string | null;
+  /** Self-reported role label (e.g. Investor). */
+  businessType: string;
+};
+
 export function isWebsiteSlackEnabled(): boolean {
   if (process.env.WEBSITE_SLACK_ENABLED?.trim().toLowerCase() !== 'true') {
     return false;
@@ -248,6 +255,75 @@ export async function notifyMarketOverviewReturnSigninSlack(
     await sendWebsiteSlackMessage(buildMarketOverviewReturnSigninSlackMessage(payload));
   } catch (error) {
     console.error('[website-slack] market overview return sign-in notify failed:', error);
+  }
+}
+
+export function buildMarketOverviewBusinessTypeBackfillSlackMessage(
+  payload: MarketOverviewBusinessTypeBackfillSlackPayload
+): WebsiteSlackMessage {
+  const who = payload.name?.trim() || payload.email;
+  const businessType = payload.businessType.trim();
+  const text = [
+    `📝 Market Overview profile update — I am a`,
+    `${who} selected: ${businessType}`,
+    `Email: ${payload.email}`,
+  ].join('\n');
+
+  const blocks: Record<string, unknown>[] = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: `📝 Market Overview — I am a…`,
+        emoji: true,
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: [
+          `*${who}* completed the missing *I am a…* field on the *Glamping Market Overview*.`,
+          '',
+          `*Name:* ${payload.name?.trim() || '_Not provided_'}`,
+          `*Email:* ${payload.email}`,
+          `*I am a:* ${businessType}`,
+        ].join('\n'),
+      },
+    },
+    {
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: `<${marketOverviewUrl()}|Open Market Overview> · Backfill (pre-field signup)`,
+        },
+      ],
+    },
+  ];
+
+  return { text, blocks };
+}
+
+export async function notifyMarketOverviewBusinessTypeBackfillSlack(
+  payload: MarketOverviewBusinessTypeBackfillSlackPayload
+): Promise<void> {
+  if (!isWebsiteSlackEnabled()) {
+    console.warn(
+      '[website-slack] skipped market overview business-type backfill notify (not enabled or missing env)'
+    );
+    return;
+  }
+
+  try {
+    await sendWebsiteSlackMessage(
+      buildMarketOverviewBusinessTypeBackfillSlackMessage(payload)
+    );
+  } catch (error) {
+    console.error(
+      '[website-slack] market overview business-type backfill notify failed:',
+      error
+    );
   }
 }
 

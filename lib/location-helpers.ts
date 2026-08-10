@@ -6,6 +6,9 @@
 import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache } from '@/lib/redis';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
+import { slugifyLocation } from '@/lib/slugify-location';
+
+export { slugifyLocation };
 
 /**
  * State code to full name mapping
@@ -40,20 +43,6 @@ const STATE_NAME_TO_CODE: Record<string, string> = Object.fromEntries(
 );
 
 /**
- * Convert state/city name to URL-safe slug
- */
-export function slugifyLocation(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/[^\w\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-    .trim();
-}
-
-/**
  * Normalize state name to standard format
  * Handles both codes (CA) and full names (California)
  */
@@ -79,6 +68,42 @@ export function normalizeStateName(state: string): string {
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
+}
+
+/**
+ * Normalize to USPS / Canadian province code as stored on `all_sage_data.state`.
+ * Accepts codes ("CO") or full names ("Colorado"). Unknown regions are returned trimmed.
+ */
+export function normalizeStateCode(state: string): string {
+  if (!state) return '';
+
+  const trimmed = state.trim();
+  const upper = trimmed.toUpperCase();
+  if (STATE_CODE_TO_NAME[upper]) {
+    return upper;
+  }
+
+  const fromName = STATE_NAME_TO_CODE[trimmed.toLowerCase()];
+  if (fromName) {
+    return fromName;
+  }
+
+  return trimmed;
+}
+
+/**
+ * Match `all_sage_data.state` whether rows store codes ("CO") or full names ("Colorado").
+ */
+export function stateValuesForDbQuery(state: string): string[] {
+  const trimmed = state.trim();
+  if (!trimmed) return [];
+
+  const values = new Set<string>([trimmed]);
+  const code = normalizeStateCode(trimmed);
+  const full = normalizeStateName(trimmed);
+  if (code) values.add(code);
+  if (full) values.add(full);
+  return [...values];
 }
 
 /**
@@ -149,7 +174,7 @@ export async function getCityCoordinates(
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .ilike('city', city.trim())
-      .eq('state', normalizeStateName(state))
+      .in('state', stateValuesForDbQuery(state))
       .not('lat', 'is', null)
       .not('lon', 'is', null);
     

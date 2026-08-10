@@ -14,6 +14,8 @@ describe('getLocalesForMainSitemapPage', () => {
   it('lists all locales for translated hub pages', () => {
     expect(getLocalesForMainSitemapPage('')).toEqual(['en', 'es', 'fr', 'de']);
     expect(getLocalesForMainSitemapPage('/map')).toEqual(['en', 'es', 'fr', 'de']);
+    expect(getLocalesForMainSitemapPage('/markets')).toEqual(['en', 'es', 'fr', 'de']);
+    expect(getLocalesForMainSitemapPage('/journeys')).toEqual(['en', 'es', 'fr', 'de']);
     expect(getLocalesForMainSitemapPage('/partners')).toEqual(['en', 'es', 'fr', 'de']);
     expect(getLocalesForMainSitemapPage('/sitemap')).toEqual(['en', 'es', 'fr', 'de']);
   });

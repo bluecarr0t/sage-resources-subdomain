@@ -5,7 +5,12 @@
 
 import { createServerClient } from '@/lib/supabase';
 import { getCache, setCache } from '@/lib/redis';
-import { normalizeStateName, normalizeCityName } from '@/lib/location-helpers';
+import {
+  normalizeCityName,
+  normalizeStateCode,
+  normalizeStateName,
+  stateValuesForDbQuery,
+} from '@/lib/location-helpers';
 import { NationalPark } from '@/lib/types/national-parks';
 import { SageProperty } from '@/lib/types/sage';
 import { PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR } from '@/lib/glamping-land-operator-category';
@@ -47,8 +52,9 @@ export async function getStatePropertyStatistics(
   state: string,
   locale: string = 'en'
 ): Promise<LocationStatistics> {
-  const normalizedState = normalizeStateName(state);
-  const cacheKey = `state-stats:${normalizedState}:${locale}`;
+  const stateCode = normalizeStateCode(state);
+  const stateValues = stateValuesForDbQuery(state);
+  const cacheKey = `state-stats:${stateCode}:${locale}`;
   const ttlSeconds = 86400 * 7; // 7 days
   
   // Try cache first
@@ -67,7 +73,7 @@ export async function getStatePropertyStatistics(
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .eq('state', normalizedState);
+      .in('state', stateValues);
     
     if (error || !properties) {
       console.error('Error fetching state statistics:', error);
@@ -151,9 +157,10 @@ export async function getCityPropertyStatistics(
   state: string,
   locale: string = 'en'
 ): Promise<LocationStatistics> {
-  const normalizedState = normalizeStateName(state);
-  const normalizedCity = normalizeCityName(city, normalizedState);
-  const cacheKey = `city-stats:${normalizedCity}:${normalizedState}:${locale}`;
+  const stateCode = normalizeStateCode(state);
+  const stateValues = stateValuesForDbQuery(state);
+  const normalizedCity = normalizeCityName(city, normalizeStateName(state));
+  const cacheKey = `city-stats:${normalizedCity}:${stateCode}:${locale}`;
   const ttlSeconds = 86400 * 7; // 7 days
   
   // Try cache first
@@ -173,7 +180,7 @@ export async function getCityPropertyStatistics(
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
       .ilike('city', normalizedCity)
-      .eq('state', normalizedState);
+      .in('state', stateValues);
     
     if (error || !properties) {
       console.error('Error fetching city statistics:', error);
@@ -256,8 +263,9 @@ export async function getFeaturedPropertiesForState(
   state: string,
   limit: number = 20
 ): Promise<SageProperty[]> {
-  const normalizedState = normalizeStateName(state);
-  const cacheKey = `state-featured:${normalizedState}:${limit}`;
+  const stateCode = normalizeStateCode(state);
+  const stateValues = stateValuesForDbQuery(state);
+  const cacheKey = `state-featured:${stateCode}:${limit}`;
   const ttlSeconds = 86400 * 7; // 7 days
   
   // Try cache first
@@ -276,7 +284,7 @@ export async function getFeaturedPropertiesForState(
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .eq('state', normalizedState)
+      .in('state', stateValues)
       .not('property_name', 'is', null)
       .order('quality_score', { ascending: false })
       .limit(limit * 2); // Get more to filter duplicates
@@ -335,9 +343,10 @@ export async function getFeaturedPropertiesForCity(
   cityLon: number,
   limit: number = 20
 ): Promise<Array<SageProperty & { distance: number }>> {
-  const normalizedState = normalizeStateName(state);
-  const normalizedCity = normalizeCityName(city, normalizedState);
-  const cacheKey = `city-featured:${normalizedCity}:${normalizedState}:${limit}`;
+  const stateCode = normalizeStateCode(state);
+  const stateValues = stateValuesForDbQuery(state);
+  const normalizedCity = normalizeCityName(city, normalizeStateName(state));
+  const cacheKey = `city-featured:${normalizedCity}:${stateCode}:${limit}`;
   const ttlSeconds = 86400 * 7; // 7 days
   
   // Try cache first
@@ -357,7 +366,7 @@ export async function getFeaturedPropertiesForCity(
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .eq('state', normalizedState)
+      .in('state', stateValues)
       .not('lat', 'is', null)
       .not('lon', 'is', null)
       .not('property_name', 'is', null);
@@ -588,7 +597,7 @@ export async function getStateProperties(
   state: string,
   limit?: number
 ): Promise<SageProperty[]> {
-  const normalizedState = normalizeStateName(state);
+  const stateValues = stateValuesForDbQuery(state);
   
   try {
     const supabase = createServerClient();
@@ -600,7 +609,7 @@ export async function getStateProperties(
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .eq('state', normalizedState);
+      .in('state', stateValues);
     
     if (limit) {
       query = query.limit(limit);
@@ -630,7 +639,7 @@ export async function getCityProperties(
   cityLon: number,
   limit?: number
 ): Promise<SageProperty[]> {
-  const normalizedState = normalizeStateName(state);
+  const stateValues = stateValuesForDbQuery(state);
   const radiusMiles = 25;
   
   try {
@@ -644,7 +653,7 @@ export async function getCityProperties(
       .eq('is_open', 'Yes')
       .eq('research_status', 'published')
       .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-      .eq('state', normalizedState)
+      .in('state', stateValues)
       .not('lat', 'is', null)
       .not('lon', 'is', null);
     

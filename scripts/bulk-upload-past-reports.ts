@@ -28,7 +28,7 @@ import { existsSync } from 'fs';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
-const BASE_URL = process.env.BULK_UPLOAD_URL || 'http://localhost:3001';
+const BASE_URL = process.env.BULK_UPLOAD_URL || 'http://localhost:3003';
 const yearRaw = process.env.PAST_REPORTS_BULK_YEAR || process.argv[2] || '2023';
 const year = yearRaw.replace(/[^\d]/g, '') || '2023';
 const relativePath = `past_reports/${year}`;

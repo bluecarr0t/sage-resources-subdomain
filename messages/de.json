@@ -19,6 +19,68 @@
       "defaultDescription": "Führende Beratung für Machbarkeitsstudien und Bewertungen in der Outdoor-Hospitality-Branche"
     }
   },
+  "journeys": {
+    "breadcrumb": {
+      "home": "Startseite",
+      "journeys": "Journeys"
+    },
+    "focusLabel": "Studienfokus",
+    "focus": {
+      "feasibility": "Machbarkeitsstudie",
+      "appraisal": "USPAP-Bewertung",
+      "both": "Machbarkeit und Bewertung"
+    },
+    "stepsHeading": "Der Weg",
+    "outcomeHeading": "Was dieser Weg ergibt",
+    "openMapCta": "Comps-Karte öffnen",
+    "openMarketCta": "Marktseite öffnen",
+    "openLandingCta": "Studien-Landing öffnen",
+    "learnMore": "Mehr erfahren",
+    "relatedHeading": "Verwandte Journeys",
+    "ctaTitle": "Bereit, von Comps zu einer finanzierbaren Studie zu gehen?",
+    "ctaDescription": "Buchen Sie eine Sage-Einführung. Bringen Sie den auf der Karte gefilterten Markt mit—wir scopen eine bankfähige Machbarkeitsstudie oder USPAP-Bewertung.",
+    "ctaButton": "Einführung buchen",
+    "index": {
+      "title": "Von der Comps-Karte zur finanzierbaren Studie",
+      "subtitle": "Case-Journeys, die zeigen, wie Qualitäts-Organic-Leads recherchieren—und dann Sage buchen.",
+      "intro": "Diese Seiten erzählen den Weg Comps → Underwriting: zuerst Karte und Marktseiten, dann bankfähige Machbarkeit oder USPAP-Bewertung.",
+      "compositeNote": "Zusammengesetzte Journeys basierend auf Organic → Resources-Recherche → Sage-Einführung. Keine benannten Kunden-Testimonials; keine erfundenen Finanzierungsergebnisse.",
+      "listHeading": "Journeys",
+      "metaTitle": "Von der Comps-Karte zur finanzierbaren Studie | Sage Journeys",
+      "metaDescription": "Case-Seiten: wie Entwickler die Sage-Comps-Karte nutzen und dann Machbarkeit oder USPAP-Bewertung für Finanzierung anfragen."
+    }
+  },
+  "markets": {
+    "breadcrumb": {
+      "home": "Startseite",
+      "markets": "Märkte"
+    },
+    "subtitle": "Indexierbare Marktforschung für {label} — Deep-Links in die Sage-Comps-Karte.",
+    "stats": {
+      "comps": "Erfasste Comps (Bundesstaat)",
+      "adr": "ADR-Einordnung (veröffentlichte Raten)",
+      "occupancyNote": "Belegung wird in Machbarkeits- und Bewertungsscopes modelliert — sie ist keine öffentliche Kartenmetrik."
+    },
+    "adrSummary": "Durchschnittliches veröffentlichtes Retail-ADR ≈ ${average} (Spanne ${low}–${high}).",
+    "adrSummaryFallback": "Filtern Sie die interaktive Karte nach Ratenbändern; eine Sage-Studie validiert erreichbares ADR.",
+    "studyHeading": "Was Sage hier untersuchen würde",
+    "studyBody": "Für {market} würde Sage ~{count, number} erfasste Comps aus dieser Ansicht zusammenstellen und dann {focus} vertiefen: Wettbewerbs-Set, ADR-/Belegungs-Underwriting und bankfähige Narrative.",
+    "openMapCta": "Gefilterte Comps-Karte öffnen",
+    "relatedHeading": "Verwandte Märkte",
+    "ctaTitle": "Machbarkeit oder Bewertung für diesen Markt anfragen",
+    "ctaDescription": "Sprechen Sie mit Sage über eine bankfähige Machbarkeitsstudie oder USPAP-konforme Bewertung auf Basis der Comps, die Sie prüfen.",
+    "ctaButton": "Einführungsgespräch buchen",
+    "index": {
+      "title": "Glamping- & Outdoor-Hospitality-Märkte",
+      "subtitle": "Intent-Seiten für organische Recherche — jeder Markt öffnet Kartenfilter.",
+      "intro": "Nutzen Sie diese indexierbaren Markt-URLs für Angebot, ADR-Bänder und Wettbewerbsdichte. Jede Seite öffnet die interaktive Karte mit Bundesstaat- und Unit-Typ-Filtern.",
+      "journeyTeaser": "wie organische Recherche auf der Karte zu einem bankfähigen Auftrag wird.",
+      "listHeading": "Märkte",
+      "openMap": "Auf der Karte öffnen →",
+      "metaTitle": "Glamping-Marktforschungsseiten | Sage Outdoor Advisory",
+      "metaDescription": "Indexierbare Glamping-Marktseiten mit Karten-Deep-Links für Colorado, Kalifornien, Texas und mehr."
+    }
+  },
   "landing": {
     "glampingFeasibilityStudy": {
       "title": "Glamping-Machbarkeitsstudie | Sage Outdoor Advisory",
@@ -691,6 +753,8 @@
   },
   "map": {
     "title": "Glamping-Immobilienkarte",
+    "hubJourneyLink": "Von der Comps-Karte zur finanzierbaren Studie",
+    "hubMarketsLink": "Marktseiten",
     "loading": "Karte wird geladen...",
     "fullscreen": {
       "enter": "Vollbild",
@@ -799,6 +863,20 @@
       "loadingScript": "Google Maps-Skript wird geladen...",
       "loadingScriptHint": "Dies kann einige Sekunden dauern"
     },
+    "lead": {
+      "ctaLabel": "Marktstudie anfragen",
+      "ctaHint": "Bankfähige Comps, ADR-Einordnung und Belegungsanalyse für Ihren Standort.",
+      "studyTitle": "Was Sage hier untersuchen würde",
+      "studyIntro": "Für {market} beginnt ein Sage-Auftrag mit dem Wettbewerber-Set auf dieser Karte und vertieft dann Raten, Nachfrage und Underwriting.",
+      "defaultMarketLabel": "diesen Markt",
+      "compsLabel": "Comps in der Ansicht",
+      "adrLabel": "ADR-Einordnung",
+      "adrFraming": "Öffentliche Comps clusteren in den Retail-Ratenbändern {bands}; eine Studie validiert erreichbares ADR für Ihren Unit-Mix und die Saisonalität.",
+      "adrFramingFallback": "Filtern Sie nach Bundesstaat oder Unit-Typ für Ratenbänder; eine Studie validiert erreichbares ADR.",
+      "occupancyLabel": "Belegung",
+      "occupancyFraming": "Belegung ist auf der öffentlichen Karte nicht veröffentlicht — Machbarkeit und Bewertung modellieren Saisonalität, Quellmärkte und Wettbewerbs-Performance.",
+      "marketPagesHint": "Indexierbare Marktseite:"
+    },
     "metadata": {
       "title": "Glamping-Immobilienkarte | 500+ Standorte | Sage Outdoor Advisory",
       "description": "Erkunden Sie über 500 Glamping-Immobilien in den USA und Kanada auf unserer interaktiven Karte. Vergleichen Sie Glamping-Standorte mit Bevölkerungsdaten, um wachstumsstarke Märkte zu identifizieren. Filtern Sie nach Standort, Einheitstyp und Preisbereich.",
@@ -904,7 +982,13 @@
           "answer": "<p>Eine Machbarkeitsstudie ist eine umfassende Analyse, die die Machbarkeit, das Marktpotenzial und die finanziellen Aussichten eines vorgeschlagenen Outdoor-Hospitality-Projekts bewertet.</p><p>Sie hilft Entwicklern, Investoren und Kreditgebern zu verstehen:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Ob ein Projekt es wert ist, verfolgt zu werden</li><li>Welche Risiken bestehen</li><li>Wie der Erfolg maximiert werden kann</li></ul><p>Stellen Sie es sich als eine detaillierte Roadmap vor, die quantitative Finanzanalyse mit qualitativen Markteinblicken kombiniert, um eine umfassende Bewertung des Potenzials Ihres Projekts zu erstellen.</p>"
         }
       ],
-      "keywords": ["Machbarkeitsstudie", "Machbarkeitsstudie Outdoor-Hospitality", "Leitfaden Machbarkeitsstudie Glamping", "Wohnmobil-Resort-Machbarkeit", "Campingplatz-Machbarkeit"],
+      "keywords": [
+        "Machbarkeitsstudie",
+        "Machbarkeitsstudie Outdoor-Hospitality",
+        "Leitfaden Machbarkeitsstudie Glamping",
+        "Wohnmobil-Resort-Machbarkeit",
+        "Campingplatz-Machbarkeit"
+      ],
       "cta": {
         "title": "Bereit, Ihre Machbarkeitsstudie zu beginnen?",
         "description": "Vereinbaren Sie eine kostenlose Beratung mit unseren Experten für Machbarkeitsstudien, um Ihr Projekt zu besprechen",
@@ -949,7 +1033,13 @@
           "answer": "<p>Eine Immobilienbewertung ist eine unvoreingenommene professionelle Meinung über den Wert einer Immobilie. Für Outdoor-Hospitality-Immobilien bestimmen Bewertungen den fairen Marktwert basierend auf dem Ertragspotenzial der Immobilie, vergleichbaren Verkäufen und Wiederbeschaffungskosten.</p><p>Bewertungen dienen mehreren wichtigen Zwecken:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Finanzierung:</strong> Kreditgeber benötigen Bewertungen zur Bestimmung der Darlehensbeträge</li><li><strong>Transaktionen:</strong> Käufer und Verkäufer verwenden Bewertungen zur Festlegung fairer Kaufpreise</li><li><strong>Refinanzierung:</strong> Immobilienbesitzer benötigen Bewertungen bei der Refinanzierung von Darlehen</li><li><strong>Investitionsanalyse:</strong> Investoren verwenden Bewertungen zur Bewertung von Möglichkeiten</li></ul>"
         }
       ],
-      "keywords": ["Immobilienbewertung", "Outdoor-Hospitality-Bewertung", "Leitfaden Bewertung Glamping-Immobilie", "Wohnmobil-Resort-Bewertung", "Campingplatz-Bewertung"],
+      "keywords": [
+        "Immobilienbewertung",
+        "Outdoor-Hospitality-Bewertung",
+        "Leitfaden Bewertung Glamping-Immobilie",
+        "Wohnmobil-Resort-Bewertung",
+        "Campingplatz-Bewertung"
+      ],
       "cta": {
         "title": "Benötigen Sie eine Immobilienbewertung?",
         "description": "Vereinbaren Sie eine kostenlose Beratung mit unseren Bewertungsexperten, um Ihre Immobilie zu besprechen",
@@ -994,7 +1084,13 @@
           "answer": "<p>Glamping ist eine Verschmelzung von <em>\"glamorous\"</em> und <em>\"camping\"</em>—Luxusunterkünfte in natürlichen Umgebungen, die Outdoor-Erlebnisse bieten, ohne Komfort zu opfern.</p><p>Im Gegensatz zum traditionellen Camping bietet Glamping:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Komfortable, möblierte Unterkünfte</li><li>Premium-Services und Ausstattung</li><li>Einzigartige, unvergessliche Erlebnisse</li><li>Verbindung zur Natur mit modernen Annehmlichkeiten</li></ul><p>Glamping spricht Reisende an, die die Natur erleben möchten und gleichzeitig Hotel-Komfort und -Ausstattung genießen.</p>"
         }
       ],
-      "keywords": ["Glamping-Branche", "Glamping-Resort-Leitfaden", "Wie startet man ein Glamping-Geschäft", "Glamping-Trends", "Glamping-Markt"],
+      "keywords": [
+        "Glamping-Branche",
+        "Glamping-Resort-Leitfaden",
+        "Wie startet man ein Glamping-Geschäft",
+        "Glamping-Trends",
+        "Glamping-Markt"
+      ],
       "cta": {
         "title": "Bereit, Ihr Glamping-Geschäft zu starten?",
         "description": "Vereinbaren Sie eine kostenlose Beratung mit unseren Glamping-Experten, um Ihr Projekt zu besprechen",
@@ -1035,7 +1131,13 @@
           "answer": "<p>Ein Wohnmobil-Resort ist eine Premium-Outdoor-Hospitality-Immobilie, die speziell für Wohnmobile (Wohnmobil) konzipiert ist und verbesserte Ausstattung, Services und Einrichtungen im Vergleich zu traditionellen Wohnmobilparks bietet.</p><p>Wohnmobil-Resorts zeichnen sich typischerweise aus durch:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Premium-Stellplätze mit vollständigen Anschlüssen (Wasser, Abwasser, Strom)</li><li>Verbesserte Ausstattung wie Pools, Erholungszentren und Restaurants</li><li>Höherwertige Einrichtungen und Grundstückspflege</li><li>Zusätzliche Services und Kundenservice auf Concierge-Niveau</li><li>Premium-Preisgestaltung, die das verbesserte Erlebnis widerspiegelt</li></ul><p>Wohnmobil-Resorts sprechen Wohnmobil-Enthusiasten an, die ein luxuriöseres und ausstattungsreiches Erlebnis im Vergleich zu einfachen Wohnmobilparks suchen.</p>"
         }
       ],
-      "keywords": ["Wohnmobil-Resort-Branche", "Wohnmobil-Resort-Leitfaden", "Wie startet man ein Wohnmobil-Resort", "Wohnmobil-Resort-Trends", "Wohnmobil-Resort-Markt"],
+      "keywords": [
+        "Wohnmobil-Resort-Branche",
+        "Wohnmobil-Resort-Leitfaden",
+        "Wie startet man ein Wohnmobil-Resort",
+        "Wohnmobil-Resort-Trends",
+        "Wohnmobil-Resort-Markt"
+      ],
       "cta": {
         "title": "Bereit, Ihr Wohnmobil-Resort zu starten?",
         "description": "Vereinbaren Sie eine kostenlose Beratung mit unseren Wohnmobil-Resort-Experten, um Ihr Projekt zu besprechen",
@@ -1076,7 +1178,11 @@
           "answer": "<p>Beim Lesen einer Machbarkeitsstudie folgen Sie diesem empfohlenen Ansatz:</p><p><strong>1. Beginnen Sie mit der Exekutivzusammenfassung</strong></p><p>Die Exekutivzusammenfassung bietet einen Überblick auf hoher Ebene über die wichtigsten Erkenntnisse, Empfehlungen und Schlussfolgerungen. Dies gibt Ihnen wesentliche Informationen auf einen Blick.</p><p><strong>2. Überprüfen Sie die Marktanalyse</strong></p><p>Der Marktanalyse-Abschnitt bietet Kontext für die Finanzprognosen. Achten Sie auf Nachfragetreiber, Wettbewerbspositionierung und Markttrends.</p><p><strong>3. Untersuchen Sie die Finanzprognosen</strong></p><p>Die Finanzprognosen sind das Herzstück einer Machbarkeitsstudie. Verstehen Sie die Umsatzprognosen, Belegungsraten, Betriebsausgaben und Cashflow-Zeitpläne.</p><p>Für detailliertere Anleitung siehe unseren <a href=\"/de/guides/how-to-read-feasibility-study\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Leitfaden zum Lesen einer Machbarkeitsstudie</a>.</p>"
         }
       ],
-      "keywords": ["wie man Machbarkeitsstudie liest", "Interpretation Machbarkeitsstudie", "Machbarkeitsstudien verstehen"],
+      "keywords": [
+        "wie man Machbarkeitsstudie liest",
+        "Interpretation Machbarkeitsstudie",
+        "Machbarkeitsstudien verstehen"
+      ],
       "cta": {
         "title": "Benötigen Sie Hilfe beim Verstehen Ihrer Machbarkeitsstudie?",
         "description": "Vereinbaren Sie eine Beratung, um die Ergebnisse Ihrer Machbarkeitsstudie zu besprechen",
@@ -1104,7 +1210,10 @@
           "answer": "<p><strong>Für Entwicklungsprojekte benötigen Sie in der Regel beide.</strong></p><p>Eine Machbarkeitsstudie validiert das Projektkonzept und bewertet, ob das vorgeschlagene Projekt durchführbar und profitabel ist. Sie ist zukunftsorientiert und hilft zu beantworten \"Sollte ich dies bauen?\"</p><p>Eine Bewertung bestimmt den Immobilienwert—entweder den aktuellen Wert oder den prognostizierten Wert nach der Entwicklung. Sie ist für die Finanzierung unerlässlich, da Kreditgeber den Wert der Immobilie kennen müssen.</p><p>Kreditgeber verlangen häufig beide Dokumente für die Entwicklungsfinanzierung, da sie sich ergänzende Informationen liefern: Die Machbarkeitsstudie bewertet die Projektdurchführbarkeit, während die Bewertung den Sicherheitenwert bestimmt.</p>"
         }
       ],
-      "keywords": ["Machbarkeitsstudie vs Bewertung", "Unterschied zwischen Machbarkeitsstudie und Bewertung"],
+      "keywords": [
+        "Machbarkeitsstudie vs Bewertung",
+        "Unterschied zwischen Machbarkeitsstudie und Bewertung"
+      ],
       "cta": {
         "title": "Benötigen Sie Hilfe beim Verstehen, Welche Sie Benötigen?",
         "description": "Vereinbaren Sie eine Beratung, um Ihren Projektbedarf zu besprechen",
@@ -1132,7 +1241,10 @@
           "answer": "<p>Bewertungen und Machbarkeitsstudien dienen unterschiedlichen Zwecken:</p><p><strong>Bewertung:</strong> Bestimmt den <em>aktuellen Wert</em> einer bestehenden Immobilie. Sie ist gegenwartsorientiert und beantwortet \"Wie viel ist diese Immobilie heute wert?\" Bewertungen werden typischerweise für Finanzierung, Transaktionen oder Refinanzierung verwendet.</p><p><strong>Machbarkeitsstudie:</strong> Bewertet, ob ein <em>vorgeschlagenes Projekt</em> durchführbar und profitabel ist. Sie ist zukunftsorientiert und beantwortet \"Sollte ich dies bauen?\" und \"Wie werden die Einnahmen sein?\" Machbarkeitsstudien werden für die Planung neuer Entwicklungen oder Erweiterungen verwendet.</p><p>Obwohl beide Immobilienanalysen umfassen, dienen sie unterschiedlichen Entscheidungszwecken in verschiedenen Phasen des Immobilienbesitzes oder der Immobilienentwicklung.</p>"
         }
       ],
-      "keywords": ["Bewertung vs Machbarkeitsstudie", "Unterschied zwischen Bewertung und Machbarkeitsstudie"],
+      "keywords": [
+        "Bewertung vs Machbarkeitsstudie",
+        "Unterschied zwischen Bewertung und Machbarkeitsstudie"
+      ],
       "cta": {
         "title": "Benötigen Sie Hilfe beim Verstehen, Welche Sie Benötigen?",
         "description": "Vereinbaren Sie eine Beratung, um Ihren Projektbedarf zu besprechen",
@@ -1194,7 +1306,11 @@
           "answer": "<p>Mehrere Faktoren können Verzögerungen im Prozess der Machbarkeitsstudie verursachen:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Verzögerungen bei Kundeninformationen:</strong> Wenn angeforderte Informationen nicht zeitnah bereitgestellt werden, kann dies die Analysephase verlangsamen</li><li><strong>Verfügbarkeit von Marktdaten:</strong> Schwer zu beschaffende oder begrenzte Marktdaten können die Recherchezeit verlängern</li><li><strong>Projektumfangsänderungen:</strong> Erhebliche Änderungen am Projektumfang während der Studie können zusätzliche Analysen erfordern</li><li><strong>Überprüfungszyklen:</strong> Verlängerte Überprüfungsperioden können die Finalisierung verzögern</li></ul><p>Um den Prozess auf Kurs zu halten, stellen Sie angeforderte Informationen zeitnah bereit und reagieren Sie schnell auf Fragen und Klärungen. Siehe unseren <a href=\"/en/guides/feasibility-study-process-timeline\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Leitfaden zu Prozess und Zeitplan</a> für weitere Details.</p>"
         }
       ],
-      "keywords": ["Zeitplan Machbarkeitsstudie", "Prozess Machbarkeitsstudie", "wie lange dauert eine Machbarkeitsstudie"],
+      "keywords": [
+        "Zeitplan Machbarkeitsstudie",
+        "Prozess Machbarkeitsstudie",
+        "wie lange dauert eine Machbarkeitsstudie"
+      ],
       "cta": {
         "title": "Bereit, Ihre Machbarkeitsstudie zu starten?",
         "description": "Vereinbaren Sie eine Beratung, um Ihren Projektzeitplan zu besprechen",
@@ -1251,7 +1367,11 @@
           "answer": "<p>Das Ertragswertverfahren ist typischerweise die <strong>primäre Methode</strong> für einkommensgenerierende Immobilien wie Outdoor-Hospitality-Immobilien, da es ihr Einkommenspotenzial widerspiegelt.</p><p><strong>Ideal Für:</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Einkommensgenerierende Immobilien (Mietimmobilien, Hospitality-Immobilien)</li><li>Immobilien mit stabilen oder vorhersehbaren Einkommensströmen</li><li>Investmentimmobilien, bei denen Einkommen der primäre Werttreiber ist</li></ul><p><strong>Outdoor-Hospitality-Immobilien:</strong> Für Glamping-Resorts, Wohnmobilparks und Campingplätze erhält das Ertragswertverfahren typischerweise das meiste Gewicht, da diese Immobilien hauptsächlich basierend auf ihrer Fähigkeit, Mieteinnahmen und Betriebseinnahmen zu generieren, bewertet werden.</p><p>Bewerter können auch Vergleichswert- und Kostenverfahren verwenden, um die Ertragswertverfahren-Bewertung zu unterstützen oder zu validieren, aber das Ertragswertverfahren ist typischerweise die primäre Methode für diese Immobilientypen.</p>"
         }
       ],
-      "keywords": ["Bewertung Ertragswertverfahren", "einkommensbasierte Bewertung", "NOI Bewertung"],
+      "keywords": [
+        "Bewertung Ertragswertverfahren",
+        "einkommensbasierte Bewertung",
+        "NOI Bewertung"
+      ],
       "cta": {
         "title": "Benötigen Sie eine Bewertung nach Ertragswertverfahren?",
         "description": "Vereinbaren Sie eine Beratung, um Ihren Bewertungsbedarf zu besprechen",
@@ -1279,7 +1399,11 @@
           "answer": "<p>Ein Glamping-Geschäft zu starten umfasst mehrere wichtige Schritte:</p><ol class=\"list-decimal list-inside space-y-1 ml-4\"><li><strong>Recherche und Planung:</strong> Verstehen Sie Ihren Zielmarkt und die Konkurrenz</li><li><strong>Machbarkeitsstudie:</strong> Validieren Sie Ihr Konzept mit einer professionellen Analyse</li><li><strong>Standortauswahl:</strong> Wählen Sie einen Standort mit angemessenen Eigenschaften</li><li><strong>Geschäftsplanung:</strong> Entwickeln Sie einen umfassenden Geschäftsplan</li><li><strong>Genehmigungen und Vorschriften:</strong> Navigieren Sie durch regulatorische Anforderungen</li><li><strong>Finanzierung:</strong> Sichern Sie Finanzierung für Entwicklung und Betrieb</li><li><strong>Design und Bau:</strong> Verwalten Sie Standortentwicklung und Bau</li><li><strong>Betriebseinrichtung:</strong> Richten Sie Betriebssysteme ein</li><li><strong>Marketing und Start:</strong> Starten Sie mit effektivem Marketing</li></ol><p>Siehe unseren <a href=\"/de/guides/how-to-start-glamping-business\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">kompletten Leitfaden zum Starten eines Glamping-Geschäfts</a> für detaillierte Informationen.</p>"
         }
       ],
-      "keywords": ["wie startet man Glamping-Geschäft", "Glamping-Geschäft starten", "Leitfaden Glamping-Start"],
+      "keywords": [
+        "wie startet man Glamping-Geschäft",
+        "Glamping-Geschäft starten",
+        "Leitfaden Glamping-Start"
+      ],
       "cta": {
         "title": "Bereit, Ihr Glamping-Geschäft zu starten?",
         "description": "Vereinbaren Sie eine kostenlose Beratung mit unseren Glamping-Experten, um Ihr Projekt zu besprechen",
@@ -1354,7 +1478,11 @@
           "answer": "<p><strong>Ja, absolut.</strong> Die Machbarkeitsstudien von Sage Outdoor Advisory sind bankzugelassen und von Finanzinstituten bundesweit für Outdoor-Hospitality-Finanzierung vertrauenswürdig.</p><p>Wir haben über 350 Machbarkeitsstudien und Bewertungen in der Outdoor-Hospitality-Branche durchgeführt. Unsere Studien sind speziell darauf ausgelegt, die Anforderungen der Kreditgeber zu erfüllen mit:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Umfassender Markt- und Finanzanalyse</li><li>Professioneller Dokumentation</li><li>Branchenexpertise und Glaubwürdigkeit</li><li>Bewährtem Track-Record mit Kreditgebern</li></ul><p>Wir haben zahlreichen Kunden geholfen, Finanzierung für ihre Glamping-, Wohnmobil-Resort- und Campingplatz-Projekte zu sichern.</p>"
         }
       ],
-      "keywords": ["Anforderungen Banken Machbarkeitsstudien", "Anforderungen Kreditgeber Machbarkeitsstudien", "Machbarkeitsstudien Finanzierung"],
+      "keywords": [
+        "Anforderungen Banken Machbarkeitsstudien",
+        "Anforderungen Kreditgeber Machbarkeitsstudien",
+        "Machbarkeitsstudien Finanzierung"
+      ],
       "cta": {
         "title": "Benötigen Sie eine Bankzugelassene Machbarkeitsstudie?",
         "description": "Vereinbaren Sie eine Beratung, um Ihren Finanzierungsbedarf zu besprechen",
@@ -1406,7 +1534,11 @@
           "answer": "<p><strong>Ja, absolut.</strong> Die Bewertungen von Sage Outdoor Advisory sind bankzugelassen und von Finanzinstituten bundesweit für Outdoor-Hospitality-Immobilienfinanzierung vertrauenswürdig.</p><p>Wir haben über 350 Bewertungen in der Outdoor-Hospitality-Branche durchgeführt. Unsere Bewertungen erfüllen alle Kreditgeberanforderungen mit:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Qualifizierten, zertifizierten Bewertern mit spezialisierter Expertise</li><li>Umfassender Immobilienanalyse</li><li>Mehreren Bewertungsansätzen</li><li>USPAP-konformer professioneller Dokumentation</li><li>Bewährtem Track-Record mit Kreditgebern bundesweit</li></ul><p>Wir haben zahlreichen Kunden geholfen, Finanzierung für ihre Glamping-, Wohnmobil-Resort- und Campingplatz-Immobilien zu sichern.</p>"
         }
       ],
-      "keywords": ["Bankbewertungsanforderungen", "Bewertungsstandards Kreditgeber", "Bewertung Finanzierung"],
+      "keywords": [
+        "Bankbewertungsanforderungen",
+        "Bewertungsstandards Kreditgeber",
+        "Bewertung Finanzierung"
+      ],
       "cta": {
         "title": "Benötigen Sie eine Bankzugelassene Bewertung?",
         "description": "Vereinbaren Sie eine Beratung, um Ihren Finanzierungsbedarf zu besprechen",
@@ -1469,7 +1601,12 @@
           "answer": "<p>Beliebte Glamping-Unterkunftstypen umfassen:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Jurten:</strong> Runde Strukturen mit einzigartigem ästhetischen Reiz und guter Isolierung</li><li><strong>A-Frame-Hütten:</strong> Moderne geometrische Strukturen, beliebt bei zeitgenössischen Reisenden</li><li><strong>Safari-Zelte:</strong> Große luxuriöse Zelte mit vollständiger Ausstattung</li><li><strong>Baumhäuser:</strong> Erhöhte Unterkünfte, die einzigartige Perspektiven und Erlebnisse bieten</li><li><strong>Geodätische Kuppeln:</strong> Futuristisch aussehende Strukturen, die Aussichten und natürliches Licht maximieren</li></ul><p>Jeder Unterkunftstyp bietet einzigartige Merkmale und spricht verschiedene Märkte an. Die beste Wahl hängt von Ihren Zielgästen, Standort, Budget und lokalen Vorschriften ab.</p><p>Siehe unseren <a href=\"/de/guides/glamping-accommodation-types\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">kompletten Leitfaden zu Glamping-Unterkunftstypen</a> für detaillierte Informationen zu jeder Option.</p>"
         }
       ],
-      "keywords": ["Glamping-Unterkunftstypen", "Glamping-Strukturen", "Jurten Glamping", "A-Frame Glamping"],
+      "keywords": [
+        "Glamping-Unterkunftstypen",
+        "Glamping-Strukturen",
+        "Jurten Glamping",
+        "A-Frame Glamping"
+      ],
       "cta": {
         "title": "Benötigen Sie Hilfe bei der Auswahl der Unterkunftstypen?",
         "description": "Vereinbaren Sie eine Beratung, um Ihr Glamping-Projekt zu besprechen",
@@ -1517,7 +1654,11 @@
           "answer": "<p>Wichtige Glamping-Markttrends für 2026 umfassen:</p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Marktwachstum:</strong> Kontinuierliche Expansion des Glamping-Markts mit wachsender Verbrauchernachfrage</li><li><strong>Nachfrage nach Luxus-Ausstattung:</strong> Gäste erwarten Premium-Ausstattung und Services in Glamping-Immobilien</li><li><strong>Nachhaltigkeitsfokus:</strong> Wachsendes Augenmerk auf umweltfreundliche Praktiken und Umweltverantwortung</li><li><strong>Professionalisierung der Betriebe:</strong> Ausgereiftere Geschäftsbetriebe und Managementpraktiken</li><li><strong>Institutionelle Investitionen:</strong> Wachsendes Interesse von institutionellen Investoren und größeren Hospitality-Unternehmen</li></ul><p>Das Verständnis dieser Trends kann Ihnen helfen, Ihr Glamping-Geschäft für den Erfolg zu positionieren und Ihre Angebote an Marktanforderungen auszurichten.</p><p>Siehe unseren <a href=\"/de/guides/glamping-market-trends-2026\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Leitfaden zu Glamping-Markttrends 2026</a> und die <a href=\"/glamping-market-overview\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Glamping Market Overview</a> für Live-Daten.</p>"
         }
       ],
-      "keywords": ["Glamping-Trends 2026", "Glamping-Markttrends", "Glamping-Branchenstatistiken"],
+      "keywords": [
+        "Glamping-Trends 2026",
+        "Glamping-Markttrends",
+        "Glamping-Branchenstatistiken"
+      ],
       "cta": {
         "title": "Möchten Sie Markttrends für Ihr Projekt Verstehen?",
         "description": "Vereinbaren Sie eine Beratung, um Marktanalyse zu besprechen",
@@ -1575,7 +1716,11 @@
           "answer": "<p>Die Hauptunterschiede zwischen Wohnmobil-Resorts und Wohnmobilparks umfassen:</p><p><strong>Wohnmobil-Resorts:</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Premium-Ausstattung und Erlebnisse</li><li>Höhere Preise</li><li>Verbesserte Einrichtungen (Pools, Erholungszentren, Restaurants)</li><li>Überlegene Landschaftsgestaltung und Wartung</li><li>Zusätzliche Services und Kundenservice auf Concierge-Niveau</li><li>Zielmarkt: Anspruchsvolle Wohnmobil-Enthusiasten, die Luxuserlebnisse suchen</li></ul><p><strong>Wohnmobilparks:</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Grundlegende Ausstattung und Services</li><li>Niedrigere Preise</li><li>Wesentliche Einrichtungen (Anschlüsse, Toiletten, Waschsalons)</li><li>Fokus auf Funktionalität und Wert</li><li>Minimale zusätzliche Services</li><li>Zielmarkt: Kostenbewusste Wohnmobil-Enthusiasten, die grundlegende Services suchen</li></ul><p>Beide bedienen Wohnmobil-Enthusiasten, sprechen aber unterschiedliche Marktsegmente mit unterschiedlichen Erwartungen und Preisniveaus an.</p><p>Siehe unseren <a href=\"/de/guides/rv-resort-vs-rv-park\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Leitfaden Wohnmobil-Resort vs. Wohnmobilpark</a> für einen detaillierten Vergleich.</p>"
         }
       ],
-      "keywords": ["Wohnmobil-Resort vs Wohnmobilpark", "Unterschied Wohnmobil-Resort Wohnmobilpark", "Wohnmobil-Resort Vergleich"],
+      "keywords": [
+        "Wohnmobil-Resort vs Wohnmobilpark",
+        "Unterschied Wohnmobil-Resort Wohnmobilpark",
+        "Wohnmobil-Resort Vergleich"
+      ],
       "cta": {
         "title": "Benötigen Sie Hilfe bei der Wahl Zwischen Wohnmobil-Resort und Wohnmobilpark?",
         "description": "Vereinbaren Sie eine Beratung, um Ihre Optionen zu besprechen",
@@ -1628,7 +1773,11 @@
           "answer": "<p>Wohnmobil-Resorts sollten sowohl wesentliche als auch Premium-Ausstattung umfassen:</p><p><strong>Wesentliche Ausstattung:</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li><strong>Vollständige Anschlüsse:</strong> Wasser-, Abwasser- und Stromanschlüsse</li><li><strong>Wi-Fi:</strong> Zuverlässiger Internetzugang</li><li><strong>Toiletten und Duschen:</strong> Saubere, gut gepflegte Einrichtungen</li><li><strong>Waschsalons:</strong> Waschmaschinen und Trockner für Gäste</li><li><strong>Abfallentsorgung:</strong> Entsorgungsstationen und Abfallmanagement</li></ul><p><strong>Premium-Ausstattung (Erhöht den Reiz):</strong></p><ul class=\"list-disc list-inside space-y-1 ml-4\"><li>Schwimmbäder und Whirlpools</li><li>Erholungszentren und Clubhäuser</li><li>Restaurants und Essensmöglichkeiten</li><li>Fitnesszentren und Sporteinrichtungen</li><li>Unterhaltung und Aktivitätsprogrammierung</li><li>Haustier-Einrichtungen und Services</li></ul><p>Die richtige Mischung aus Ausstattung hängt von Ihrem Zielmarkt, Standort und Positionierungsstrategie ab.</p><p>Siehe unseren <a href=\"/de/guides/rv-resort-amenities-guide\" class=\"text-[#006b5f] hover:text-[#005a4f] underline\">Leitfaden zu Wohnmobil-Resort-Ausstattung</a> für vollständige Informationen.</p>"
         }
       ],
-      "keywords": ["Wohnmobil-Resort-Ausstattung", "Wohnmobilpark-Ausstattung", "Wohnmobil-Resort-Design"],
+      "keywords": [
+        "Wohnmobil-Resort-Ausstattung",
+        "Wohnmobilpark-Ausstattung",
+        "Wohnmobil-Resort-Design"
+      ],
       "cta": {
         "title": "Benötigen Sie Hilfe bei der Planung der Wohnmobil-Resort-Ausstattung?",
         "description": "Vereinbaren Sie eine Beratung, um Ihr Wohnmobil-Resort-Projekt zu besprechen",
@@ -1711,7 +1860,13 @@
           "Treffen von Go/No-Go-Entscheidungen bei Projekten",
           "Verständnis des Marktpotenzials vor dem Kauf"
         ],
-        "seoKeywords": ["Machbarkeitsstudie", "Machbarkeitsanalyse", "Projektmachbarkeit", "Geschäftsmachbarkeit", "Machbarkeitsbericht"],
+        "seoKeywords": [
+          "Machbarkeitsstudie",
+          "Machbarkeitsanalyse",
+          "Projektmachbarkeit",
+          "Geschäftsmachbarkeit",
+          "Machbarkeitsbericht"
+        ],
         "faqs": [
           {
             "question": "Wie lange dauert eine Machbarkeitsstudie?",
@@ -1743,7 +1898,13 @@
           "Versicherungsbewertung",
           "Investitionsanalyse"
         ],
-        "seoKeywords": ["Immobilienbewertung", "Immobilienbewertung", "Geschäftsbewertung", "Bewertung", "Bewerteter Wert"],
+        "seoKeywords": [
+          "Immobilienbewertung",
+          "Immobilienbewertung",
+          "Geschäftsbewertung",
+          "Bewertung",
+          "Bewerteter Wert"
+        ],
         "faqs": [
           {
             "question": "Wie lange dauert eine Bewertung?",
@@ -1770,7 +1931,13 @@
           "Umwandlung von Land für Glamping-Nutzung",
           "Bewertung von Glamping-Immobilien"
         ],
-        "seoKeywords": ["Glamping", "glamouröses Camping", "Luxus-Camping", "Glamping-Resort", "Glamping-Unterkunft"],
+        "seoKeywords": [
+          "Glamping",
+          "glamouröses Camping",
+          "Luxus-Camping",
+          "Glamping-Resort",
+          "Glamping-Unterkunft"
+        ],
         "faqs": [
           {
             "question": "Was ist der Unterschied zwischen Glamping und Camping?",
@@ -1801,7 +1968,13 @@
           "Wettbewerbspositionierung",
           "Entwicklung von Preisstrategien"
         ],
-        "seoKeywords": ["Marktanalyse", "Marktforschung", "Marktbewertung", "Marktanalyse", "Nachfrageanalyse"],
+        "seoKeywords": [
+          "Marktanalyse",
+          "Marktforschung",
+          "Marktbewertung",
+          "Marktanalyse",
+          "Nachfrageanalyse"
+        ],
         "faqs": [
           {
             "question": "Was ist in einer Marktanalyse enthalten?",
@@ -1826,7 +1999,12 @@
           "Aufwertung von Wohnmobil-Parks zum Resort-Status",
           "Bewertung von Wohnmobil-Resort-Immobilien"
         ],
-        "seoKeywords": ["Wohnmobil-Resort", "Luxus-Wohnmobil-Park", "Wohnmobil-Resort-Annehmlichkeiten", "Premium-Wohnmobil-Park"],
+        "seoKeywords": [
+          "Wohnmobil-Resort",
+          "Luxus-Wohnmobil-Park",
+          "Wohnmobil-Resort-Annehmlichkeiten",
+          "Premium-Wohnmobil-Park"
+        ],
         "faqs": [
           {
             "question": "Was ist der Unterschied zwischen einem Wohnmobil-Resort und einem Wohnmobil-Park?",
@@ -1847,7 +2025,12 @@
           "Erweiterung von Campingeinrichtungen",
           "Bewertung von Campingplatz-Immobilien"
         ],
-        "seoKeywords": ["Campingplatz", "Camping-Einrichtung", "Zeltcamping", "Campingplatz-Entwicklung"],
+        "seoKeywords": [
+          "Campingplatz",
+          "Camping-Einrichtung",
+          "Zeltcamping",
+          "Campingplatz-Entwicklung"
+        ],
         "faqs": [
           {
             "question": "Was ist der Unterschied zwischen einem Campingplatz und einem Wohnmobil-Park?",
@@ -1868,7 +2051,13 @@
           "Wettbewerbsanalyse",
           "Finanzmodellierung"
         ],
-        "seoKeywords": ["ADR", "Durchschnittlicher Tagespreis", "Zimmerpreis", "Tagespreis", "Umsatz pro Zimmer"],
+        "seoKeywords": [
+          "ADR",
+          "Durchschnittlicher Tagespreis",
+          "Zimmerpreis",
+          "Tagespreis",
+          "Umsatz pro Zimmer"
+        ],
         "faqs": [
           {
             "question": "Wie wird ADR berechnet?",
@@ -1897,7 +2086,12 @@
           "Preisstrategie",
           "Marktanalyse"
         ],
-        "seoKeywords": ["Auslastungsrate", "Auslastungsprozentsatz", "Zimmerauslastung", "Auslastungskennzahlen"],
+        "seoKeywords": [
+          "Auslastungsrate",
+          "Auslastungsprozentsatz",
+          "Zimmerauslastung",
+          "Auslastungskennzahlen"
+        ],
         "faqs": [
           {
             "question": "Was ist eine gute Auslastungsrate?",
@@ -1926,7 +2120,12 @@
           "Kreditprüfung",
           "Finanzplanung"
         ],
-        "seoKeywords": ["NOI", "Netto-Betriebsergebnis", "Betriebsergebnis", "Immobilien-NOI"],
+        "seoKeywords": [
+          "NOI",
+          "Netto-Betriebsergebnis",
+          "Betriebsergebnis",
+          "Immobilien-NOI"
+        ],
         "faqs": [
           {
             "question": "Welche Ausgaben sind im NOI enthalten?",
@@ -1951,7 +2150,12 @@
           "Renditeanalyse",
           "Kaufentscheidungen"
         ],
-        "seoKeywords": ["Cap Rate", "Kapitalisierungsrate", "Immobilien-Cap-Rate", "Investitions-Cap-Rate"],
+        "seoKeywords": [
+          "Cap Rate",
+          "Kapitalisierungsrate",
+          "Immobilien-Cap-Rate",
+          "Investitions-Cap-Rate"
+        ],
         "faqs": [
           {
             "question": "Was ist eine gute Cap Rate?",

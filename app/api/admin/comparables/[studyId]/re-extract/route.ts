@@ -16,6 +16,7 @@ import { parseDocxReport } from '@/lib/parsers/feasibility-docx-parser';
 import { normalizeReportTitle } from '@/lib/normalize-report-title';
 import { geocodeAddress } from '@/lib/geocode';
 import { logAdminAudit } from '@/lib/admin-audit';
+import { getTrustedAppOrigin } from '@/lib/trusted-app-origin';
 
 const BUCKET_NAME = 'report-uploads';
 
@@ -69,12 +70,7 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
             filename
           );
 
-          const origin =
-            (typeof request.url === 'string' ? new URL(request.url).origin : null) ||
-            (request.headers.get('x-forwarded-host')
-              ? `https://${request.headers.get('x-forwarded-host')}`
-              : null) ||
-            'http://localhost:3000';
+          const origin = getTrustedAppOrigin();
 
           const headers: Record<string, string> = {};
           const internalKey = process.env.ADMIN_INTERNAL_API_KEY;

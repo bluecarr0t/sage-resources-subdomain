@@ -16,7 +16,7 @@ type EditorialMarketingLayoutProps = {
   /** Use full site footer with links; default minimal shell footer */
   footerVariant?: 'full' | 'minimal';
   showFullNav?: boolean;
-  /** Topo line-art opacity (e.g. 2.5 = 2.5%). Omit for default gradient background. */
+  /** Topo line-art opacity percent (e.g. 3 = 3%). Defaults to 3% for readable pages. */
   topoOpacity?: number;
   /** Solid cream background with no topo image */
   solidPageBackground?: boolean;
@@ -32,7 +32,7 @@ export function EditorialMarketingLayout({
   children,
   footerVariant = 'full',
   showFullNav = true,
-  topoOpacity,
+  topoOpacity = 3,
   solidPageBackground,
 }: EditorialMarketingLayoutProps) {
   return (

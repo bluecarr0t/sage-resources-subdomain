@@ -9,7 +9,17 @@ import type { ReportDraftInput } from './types';
 const TAVILY_DELAY_MS = 600;
 const MAX_RESULTS_PER_QUERY = 2;
 const MAX_CONTENT_PER_RESULT = 2000;
-const MAX_TOTAL_CONTENT = 6000;
+const MAX_TOTAL_CONTENT = 9000;
+
+/** Strip emails / phone numbers before sending author briefs to third-party search. */
+export function stripContactPiiForWebQuery(text: string): string {
+  return text
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, ' ')
+    .replace(/\b(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}\b/g, ' ')
+    .replace(/\bClient\s+(?:email|phone)\s*:?\s*/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 /**
  * Fetch web context for a property/location via Tavily.
@@ -24,19 +34,29 @@ export async function fetchWebContextForReport(
   const client = tavily({ apiKey });
   const { city, state, property_name, amenities_description } = input;
 
+  const countyHint = input.county?.trim();
   const queries = [
     `${city} ${state} tourism statistics outdoor hospitality`,
     `${state} glamping RV campground market`,
+    `${state} population economy transportation airports highways`,
+    countyHint
+      ? `${countyHint} County ${state} population growth economy recreation`
+      : `${city} ${state} county demographics population recreation`,
+    `${city} ${state} local community history transportation access`,
   ];
 
   if (property_name) {
     queries.push(`${property_name} ${city} ${state} development`);
   }
 
-  // Use author-provided brief to target initial web research (first ~80 chars of meaningful terms)
+  // Use author-provided brief to target initial web research (PII stripped)
   if (amenities_description?.trim()) {
-    const brief = amenities_description.trim().slice(0, 120).replace(/\s+/g, ' ');
-    queries.push(`${city} ${state} ${brief}`);
+    const brief = stripContactPiiForWebQuery(amenities_description)
+      .slice(0, 120)
+      .replace(/\s+/g, ' ');
+    if (brief.length >= 8) {
+      queries.push(`${city} ${state} ${brief}`);
+    }
   }
 
   const allResults: Array<{ content: string; score: number }> = [];

@@ -28,6 +28,10 @@ describe('gated-access-business-type', () => {
       expect(gatedAccessBusinessTypeLabel(type).length).toBeGreaterThan(0);
     }
     expect(gatedAccessBusinessTypeLabel('investor')).toBe('Investor');
+    expect(gatedAccessBusinessTypeLabel('unit_supplier')).toBe('Unit Supplier');
     expect(gatedAccessBusinessTypeLabel('media')).toBe('Media');
+    expect(GATED_ACCESS_BUSINESS_TYPES.indexOf('unit_supplier')).toBeLessThan(
+      GATED_ACCESS_BUSINESS_TYPES.indexOf('consultant')
+    );
   });
 });

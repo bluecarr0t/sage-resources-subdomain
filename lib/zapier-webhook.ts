@@ -69,6 +69,8 @@ export type GatedLeadZapierPayload = {
   business_type?: string | null;
   page_slug: string;
   verified_at: string;
+  /** e.g. `business_type_backfill` when completing a missing role post-unlock. */
+  update_source?: string | null;
 };
 
 export function notifyZapierGatedLead(payload: GatedLeadZapierPayload): void {
@@ -86,5 +88,6 @@ export function notifyZapierGatedLead(payload: GatedLeadZapierPayload): void {
     business_type: payload.business_type?.trim() || undefined,
     page_slug: payload.page_slug,
     verified_at: payload.verified_at,
+    update_source: payload.update_source?.trim() || undefined,
   });
 }

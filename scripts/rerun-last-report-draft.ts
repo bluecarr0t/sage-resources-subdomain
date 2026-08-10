@@ -125,62 +125,58 @@ async function main() {
   console.log('\nInput data:');
   console.log(JSON.stringify(input, null, 2));
 
-  // Run pipeline
-  console.log('\n--- Running pipeline ---\n');
+  // Run full pipeline (enrich → model → all sections → assemble)
+  console.log('\n--- Running full executeGenerateDraft pipeline ---\n');
 
-  const { enrichReportInput } = await import('@/lib/ai-report-builder/enrich');
-  const {
-    generateExecutiveSummary,
-    generateLetterOfTransmittal,
-    generateSWOTAnalysis,
-    generateSiteAnalysis,
-    generateDemandIndicators,
-  } = await import('@/lib/ai-report-builder/generate');
-  const { factCheckExecutiveSummary } = await import('@/lib/ai-report-builder/fact-check');
-  const { assembleDraftDocx, assembleDraftXlsx } = await import('@/lib/ai-report-builder');
+  const { executeGenerateDraft } = await import('@/lib/ai-report-builder/execute-generate-draft');
 
-  const enriched = await enrichReportInput(input);
-  console.log('✓ Enriched');
+  const result = await executeGenerateDraft({
+    input,
+    userId: 'script-rerun-last-report',
+    userEmail: 'script@local',
+    format: 'docx',
+    draftMode: true,
+    stdbWaiver: true,
+    emit: (phase, status, detail) => {
+      if (status === 'started' || status === 'complete' || status === 'error') {
+        console.log(`  [${status}] ${phase}${detail ? ` — ${detail}` : ''}`);
+      }
+    },
+  });
 
-  const [execSummaryResult, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators] = await Promise.all([
-    generateExecutiveSummary(enriched),
-    generateLetterOfTransmittal(enriched),
-    generateSWOTAnalysis(enriched),
-    generateSiteAnalysis(enriched),
-    generateDemandIndicators(enriched),
-  ]);
-  let executive_summary = execSummaryResult.executive_summary;
-  const citations = execSummaryResult.citations ?? [];
-
-  const factCheck = factCheckExecutiveSummary(executive_summary, enriched);
-  if (!factCheck.passed && factCheck.flags.length > 0) {
-    executive_summary += `\n\n[Note: AI-generated draft. Some figures may require verification: ${factCheck.flags.map((f) => f.claim).join('; ')}.]`;
-  }
-  console.log('✓ Generated sections');
-
-  const [docxBuffer, xlsxBuffer] = await Promise.all([
-    assembleDraftDocx(
-      enriched,
-      { executive_summary, citations, letter_of_transmittal, swot_analysis, site_analysis, demand_indicators },
-      { marketType: input.market_type }
-    ),
-    assembleDraftXlsx(enriched, { marketType: input.market_type }),
-  ]);
-  console.log('✓ Assembled DOCX and XLSX');
-
-  const studyId = input.study_id!;
+  const studyId = result.studyId;
   const outDir = path.join(process.cwd(), 'reports');
   fs.mkdirSync(outDir, { recursive: true });
 
   const docxPath = path.join(outDir, `${studyId}-report.docx`);
   const xlsxPath = path.join(outDir, `${studyId}-template.xlsx`);
 
-  fs.writeFileSync(docxPath, docxBuffer);
-  fs.writeFileSync(xlsxPath, xlsxBuffer);
+  fs.writeFileSync(docxPath, result.docxBuffer);
+  fs.writeFileSync(xlsxPath, result.xlsxBuffer);
+
+  // Quick Executive Summary extraction for console review
+  try {
+    const PizZip = (await import('pizzip')).default;
+    const zip = new PizZip(result.docxBuffer.toString('binary'));
+    const xml = zip.file('word/document.xml')?.asText() ?? '';
+    const texts = [...xml.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)].map((m) => m[1]);
+    const plain = texts.join(' ').replace(/\s+/g, ' ');
+    const execStart = plain.indexOf('Executive Summary');
+    const swotStart = plain.indexOf('SWOT Analysis');
+    if (execStart >= 0 && swotStart > execStart) {
+      const exec = plain.slice(execStart, swotStart).trim();
+      console.log('\n--- Executive Summary (plain text excerpt) ---\n');
+      console.log(exec.slice(0, 2500));
+      console.log(exec.length > 2500 ? '\n…[truncated]…\n' : '\n');
+    }
+  } catch (err) {
+    console.warn('Could not extract Executive Summary preview:', err);
+  }
 
   console.log('\n--- Done ---');
-  console.log(`DOCX: ${docxPath} (${(docxBuffer.length / 1024).toFixed(1)} KB)`);
-  console.log(`XLSX: ${xlsxPath} (${(xlsxBuffer.length / 1024).toFixed(1)} KB)`);
+  console.log(`DOCX: ${docxPath} (${(result.docxBuffer.length / 1024).toFixed(1)} KB)`);
+  console.log(`XLSX: ${xlsxPath} (${(result.xlsxBuffer.length / 1024).toFixed(1)} KB)`);
+  console.log(`Report ID: ${result.reportId}`);
 }
 
 main().catch((e) => {

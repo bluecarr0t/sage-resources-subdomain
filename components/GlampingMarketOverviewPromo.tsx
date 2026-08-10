@@ -8,6 +8,7 @@ import {
   EDITORIAL_BUTTON_PRIMARY_CLASS,
 } from '@/components/editorial/EditorialPageShell';
 import {
+  isMarketOverviewPromoLocalSeen,
   MARKET_OVERVIEW_PROMO_HREF,
   MARKET_OVERVIEW_PROMO_STORAGE_KEY,
   shouldShowMarketOverviewPromoOnPath,
@@ -21,7 +22,9 @@ const FORCE_PROMO_EVERY_VISIT = process.env.NODE_ENV === 'development';
 function hasLocalSeenFlag(): boolean {
   if (FORCE_PROMO_EVERY_VISIT) return false;
   try {
-    return window.localStorage.getItem(MARKET_OVERVIEW_PROMO_STORAGE_KEY) === '1';
+    return isMarketOverviewPromoLocalSeen(
+      window.localStorage.getItem(MARKET_OVERVIEW_PROMO_STORAGE_KEY)
+    );
   } catch {
     return false;
   }
@@ -30,7 +33,7 @@ function hasLocalSeenFlag(): boolean {
 function setLocalSeenFlag(): void {
   if (FORCE_PROMO_EVERY_VISIT) return;
   try {
-    window.localStorage.setItem(MARKET_OVERVIEW_PROMO_STORAGE_KEY, '1');
+    window.localStorage.setItem(MARKET_OVERVIEW_PROMO_STORAGE_KEY, String(Date.now()));
   } catch {
     // Private mode / blocked storage — IP mark still applies when available.
   }
@@ -47,8 +50,8 @@ async function markPromoSeen(): Promise<void> {
 }
 
 /**
- * Site-wide first-visit promo for the free 2026 Glamping Market Overview.
- * One impression per visitor IP (Upstash) and per browser (localStorage).
+ * Site-wide promo for the free 2026 Glamping Market Overview.
+ * Re-shows about every 60 days per visitor IP (Upstash) and per browser (localStorage).
  */
 export default function GlampingMarketOverviewPromo() {
   const pathname = usePathname();
@@ -79,7 +82,7 @@ export default function GlampingMarketOverviewPromo() {
           const data = (await res.json()) as { show?: boolean };
           if (!cancelled && data.show === true && !hasLocalSeenFlag()) {
             setOpen(true);
-            // Count the impression so this IP is not prompted again.
+            // Count the impression so this IP is not prompted again until TTL expires.
             void markPromoSeen();
           }
         } catch {

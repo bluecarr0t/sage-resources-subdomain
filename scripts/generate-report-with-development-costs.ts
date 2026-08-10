@@ -99,7 +99,7 @@ async function main() {
   }
 
   console.log('Assembling DOCX...');
-  const docxBuf = await assembleDraftDocx(
+  const docxAssembled = await assembleDraftDocx(
     enriched,
     {
       executive_summary,
@@ -138,12 +138,12 @@ async function main() {
   const xlsxPath = path.join(outDir, 'dev-costs-test-template.xlsx');
   const costAnalysisPath = path.join(outDir, 'dev-costs-test-cost-analysis.xlsx');
 
-  fs.writeFileSync(docxPath, docxBuf);
+  fs.writeFileSync(docxPath, docxAssembled.buffer);
   if (xlsxBuf) fs.writeFileSync(xlsxPath, xlsxBuf);
   if (costAnalysisBuf) fs.writeFileSync(costAnalysisPath, costAnalysisBuf);
 
   console.log('\n--- Output ---');
-  console.log(`DOCX: ${docxPath} (${(docxBuf.length / 1024).toFixed(1)} KB)`);
+  console.log(`DOCX: ${docxPath} (${(docxAssembled.buffer.length / 1024).toFixed(1)} KB)`);
   if (xlsxBuf) {
     console.log(`XLSX template: ${xlsxPath} (${(xlsxBuf.length / 1024).toFixed(1)} KB)`);
   }

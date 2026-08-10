@@ -1,0 +1,33 @@
+[
+  {
+    "study_id": "GOLDEN-Spencer-TN",
+    "property_name": "Spencer RV & Glamping",
+    "city": "Spencer",
+    "state": "TN",
+    "address_1": "Spencer, TN",
+    "market_type": "rv",
+    "unit_mix": [
+      { "type": "RV Site", "count": 40 },
+      { "type": "Cabin", "count": 10 }
+    ],
+    "expected_min_comps_within_150": 3
+  },
+  {
+    "study_id": "GOLDEN-BuffaloJunction-VA",
+    "property_name": "Buffalo Junction Glamping",
+    "city": "Buffalo Junction",
+    "state": "VA",
+    "market_type": "glamping",
+    "unit_mix": [{ "type": "Safari Tent", "count": 20 }],
+    "expected_min_comps_within_150": 2
+  },
+  {
+    "study_id": "GOLDEN-Bridgeport-TX",
+    "property_name": "Bridgeport RV Resort",
+    "city": "Bridgeport",
+    "state": "TX",
+    "market_type": "rv",
+    "unit_mix": [{ "type": "RV Site", "count": 80 }],
+    "expected_min_comps_within_150": 3
+  }
+]

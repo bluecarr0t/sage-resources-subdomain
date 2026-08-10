@@ -23,6 +23,7 @@ import type { Dirent } from 'fs';
 import { join, resolve } from 'path';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
 import { checkRateLimitAsync, getRateLimitKey } from '@/lib/rate-limit';
+import { getTrustedAppOrigin } from '@/lib/trusted-app-origin';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 min for bulk
@@ -156,7 +157,8 @@ export async function POST(request: NextRequest) {
     const docxFiles: Array<{ name: string; path: string }> = [];
 
     for (const e of entries) {
-      if (!e.isFile()) continue;
+      // Accept regular files and symlinks to files (staging uploads from absolute paths)
+      if (!e.isFile() && !e.isSymbolicLink()) continue;
       if (fromLocalData && !looksLikePastReportStudyFilename(e.name)) continue;
       const p = join(dirPath, e.name);
       if (isXlsx(e.name)) xlsxFiles.push({ name: e.name, path: p });
@@ -210,10 +212,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const origin =
-      (typeof request.url === 'string' ? new URL(request.url).origin : null) ||
-      (request.headers.get('x-forwarded-host') ? `https://${request.headers.get('x-forwarded-host')}` : null) ||
-      'http://localhost:3000';
+    const origin = getTrustedAppOrigin();
 
     // Precompute batches
     const batches: Array<{ files: Array<{ path: string; name: string; type: 'xlsx' | 'docx' }>; pairs: typeof pairs }> = [];
