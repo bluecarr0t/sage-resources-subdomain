@@ -2,7 +2,10 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BrandDetailTemplate from '@/components/BrandDetailTemplate';
 import { GoogleMapsProvider } from '@/components/GoogleMapsProvider';
-import { getAllPublicBrandSlugs, getBrandPageData } from '@/lib/brand-public-pages';
+import {
+  getBrandPageData,
+  getBrandSlugsForStaticParams,
+} from '@/lib/brand-public-pages';
 import { locales, type Locale } from '@/i18n';
 import {
   generateEnOnlyHreflangAlternates,
@@ -25,11 +28,16 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const slugs = await getAllPublicBrandSlugs();
-  const availableLocales = getAvailableLocalesForContent('brand');
-  return slugs.flatMap((item) =>
-    availableLocales.map((locale) => ({ locale, slug: item.slug }))
-  );
+  try {
+    const slugs = await getBrandSlugsForStaticParams();
+    const availableLocales = getAvailableLocalesForContent('brand');
+    return slugs.flatMap((item) =>
+      availableLocales.map((locale) => ({ locale, slug: item.slug }))
+    );
+  } catch (err) {
+    console.error('[brand generateStaticParams]', err);
+    return [];
+  }
 }
 
 function buildBrandMetaDescription(

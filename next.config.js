@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Brand/property generateStaticParams talk to Supabase; 60s default timed out
+  // production deploys of the pipeline rotation cron.
+  staticPageGenerationTimeout: 180,
 
   async headers() {
     const frameAncestors = [

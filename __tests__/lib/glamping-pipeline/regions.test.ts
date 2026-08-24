@@ -8,7 +8,10 @@ import {
 } from '@/lib/glamping-pipeline/regions';
 import { buildRegionPipelineQueries } from '@/lib/glamping-pipeline/region-queries';
 import { isExtractedCountryAllowed } from '@/lib/glamping-pipeline/extract-from-article';
-import { sageDataEditorHrefForRegion } from '@/lib/glamping-pipeline/state-coverage';
+import {
+  sageDataEditorHrefForRegion,
+  selectPendingRegionsForRotation,
+} from '@/lib/glamping-pipeline/state-coverage';
 
 describe('pipeline regions', () => {
   it('covers all 50 US states and 13 Canadian provinces/territories', () => {
@@ -92,5 +95,33 @@ describe('sage data editor href', () => {
     expect(sageDataEditorHrefForRegion('United States', 'IL')).toBe(
       '/admin/sage-data/editor?country=United+States&state=IL&research_status=in_progress'
     );
+  });
+});
+
+describe('Tuesday rotation pending order', () => {
+  it('takes the next 5 pending P0 US regions when the coverage table is empty', () => {
+    const next = selectPendingRegionsForRotation(new Map(), 5);
+    expect(next.map((r) => r.code)).toEqual(['FL', 'NC', 'NM', 'OK', 'SC']);
+    expect(next.every((r) => r.country === 'United States' && r.priority === 0)).toBe(
+      true
+    );
+  });
+
+  it('rides P1 US after P0 US and Canada are marked complete', () => {
+    const statusByKey = new Map<string, 'complete' | 'pending'>();
+    for (const code of ['TX', 'FL', 'NC', 'SC', 'NM', 'OK']) {
+      statusByKey.set(`United States:${code}`, 'complete');
+    }
+    for (const code of ['QC', 'MB', 'PE', 'NL']) {
+      statusByKey.set(`Canada:${code}`, 'complete');
+    }
+    const next = selectPendingRegionsForRotation(statusByKey, 5);
+    expect(next.map((r) => `${r.country}:${r.code}`)).toEqual([
+      'United States:IL',
+      'United States:IN',
+      'United States:MN',
+      'United States:MO',
+      'United States:OH',
+    ]);
   });
 });

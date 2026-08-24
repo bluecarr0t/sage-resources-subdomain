@@ -347,6 +347,24 @@ export async function getBrandPageData(slug: string): Promise<{
   };
 }
 
+/**
+ * Brand slugs for `generateStaticParams`. One `glamping_brands` read — no
+ * per-brand property counts (those round-trips were timing out Vercel page-data
+ * collection). Pages with zero published listings still 404 at request time.
+ */
+export async function getBrandSlugsForStaticParams(): Promise<
+  Array<{ slug: string }>
+> {
+  const allBrands = await fetchAllBrands();
+  return [...new Set(
+    allBrands
+      .map((b) => (b.slug ?? '').trim())
+      .filter((slug) => slug.length > 0 && isPublicBrandPageSlug(slug))
+  )]
+    .sort()
+    .map((slug) => ({ slug }));
+}
+
 /** Brand slugs that have at least one published property (rollup-aware). */
 export async function getAllPublicBrandSlugs(): Promise<Array<{ slug: string }>> {
   noStore();
