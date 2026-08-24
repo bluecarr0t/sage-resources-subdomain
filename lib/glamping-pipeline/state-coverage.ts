@@ -73,6 +73,15 @@ function emptyLive(): PipelineLiveCounts {
   return { proposed: 0, underConstruction: 0, cancelled: 0 };
 }
 
+export class CoverageTableMissingError extends Error {
+  constructor() {
+    super(
+      'glamping_pipeline_state_coverage is missing. Apply scripts/migrations/create-glamping-pipeline-state-coverage-2026-08-24.sql before the Tuesday rotation can advance past the first five P0 states.'
+    );
+    this.name = 'CoverageTableMissingError';
+  }
+}
+
 function isSweepStatus(raw: string): raw is PipelineSweepStatus {
   return (PIPELINE_SWEEP_STATUSES as readonly string[]).includes(raw);
 }
@@ -167,19 +176,25 @@ export async function loadLivePipelineCountsByProperty(
   return out;
 }
 
-export async function loadCoverageMetadata(
+type CoverageMetadataLoad = {
+  map: Map<string, CoverageDbRow>;
+  tableMissing: boolean;
+};
+
+async function loadCoverageMetadataResult(
   sb: SupabaseClient
-): Promise<Map<string, CoverageDbRow>> {
+): Promise<CoverageMetadataLoad> {
   const map = new Map<string, CoverageDbRow>();
   const { data, error } = await sb.from(PIPELINE_STATE_COVERAGE_TABLE).select(
     'region_code, country, sweep_status, last_researched_at, last_run_id, last_articles_found, last_properties_inserted, notes, priority'
   );
 
   if (error) {
-    if (error.code !== '42P01') {
-      console.warn('[glamping-pipeline] coverage table:', error.message);
+    if (error.code === '42P01') {
+      return { map, tableMissing: true };
     }
-    return map;
+    console.warn('[glamping-pipeline] coverage table:', error.message);
+    return { map, tableMissing: false };
   }
 
   for (const row of (data ?? []) as CoverageDbRow[]) {
@@ -187,6 +202,13 @@ export async function loadCoverageMetadata(
     if (!country) continue;
     map.set(pipelineRegionKey(country, row.region_code), row);
   }
+  return { map, tableMissing: false };
+}
+
+export async function loadCoverageMetadata(
+  sb: SupabaseClient
+): Promise<Map<string, CoverageDbRow>> {
+  const { map } = await loadCoverageMetadataResult(sb);
   return map;
 }
 
@@ -262,7 +284,11 @@ export async function recordRegionSweep(
   }
 }
 
-/** Pending regions in sweep order: P0 US, P0 Canada, then P1…P5. */
+/**
+ * Pending regions in sweep order: P0 US, P0 Canada, then P1…P5.
+ * `in_progress` / `complete` / `no_projects_found` are skipped so a finished
+ * hand P0 lets Tuesday pick P1 (IL, IN, MN, MO, OH, then WI).
+ */
 export function selectPendingRegionsForRotation(
   statusByKey: Map<string, PipelineSweepStatus>,
   limit: number
@@ -273,14 +299,17 @@ export function selectPendingRegionsForRotation(
       'pending';
     return status === 'pending';
   });
-  return sortRegionsByPriority(pending).slice(0, Math.max(1, limit));
+  return sortRegionsByPriority(pending).slice(0, Math.max(0, limit));
 }
 
 export async function listPendingRegionsForRotation(
   sb: SupabaseClient,
   limit: number
 ): Promise<PipelineRegion[]> {
-  const meta = await loadCoverageMetadata(sb);
+  const { map: meta, tableMissing } = await loadCoverageMetadataResult(sb);
+  if (tableMissing) {
+    throw new CoverageTableMissingError();
+  }
   const statusByKey = new Map<string, PipelineSweepStatus>();
   for (const [key, row] of meta) {
     statusByKey.set(

@@ -640,6 +640,10 @@ National weekly sync (`npm run discover:glamping-pipeline`, Monday 16:00 UTC) is
 | Admin widget | Sage Research & Data → Pipeline coverage |
 | Rotation cron | `/api/cron/discover-glamping-pipeline-regions` (Tue 18:00 UTC, 5 pending regions) |
 
+Do **not** POST this cron by hand. After merge, Vercel fires it every Tuesday. Selection is the next 5 `pending` rows in priority order (P0 US → P0 Canada → P1 US `IL, IN, MN, MO, OH` then `WI` → …). Hand P0 (`--priority 0`) marks those regions complete; the following Tuesday then takes P1. `in_progress` / `complete` / `no_projects_found` are skipped.
+
+The coverage table **must** exist (`npm run migrate:glamping-pipeline-coverage` or the SQL in Supabase). If it is missing the Tuesday job returns 500 instead of re-running the same five P0 states.
+
 ```bash
 npx tsx scripts/research-pipeline-by-state.ts --state TX --dry-run
 npx tsx scripts/research-pipeline-by-state.ts --priority 0
@@ -647,7 +651,7 @@ npx tsx scripts/research-pipeline-by-state.ts --state QC --country Canada
 npx tsx scripts/research-pipeline-by-state.ts --all-states --skip-covered
 ```
 
-Manual cron: `/api/cron/discover-glamping-pipeline?state=TX` (optional `&country=Canada`).
+Manual single-region (not the Tuesday rotation): `/api/cron/discover-glamping-pipeline?state=TX` (optional `&country=Canada`).
 
 Apply coverage + gap-fill SQL: `npm run migrate:glamping-pipeline-coverage` (or run the SQL in Supabase).
 
