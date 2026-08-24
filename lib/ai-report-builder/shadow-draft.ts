@@ -5,7 +5,6 @@
 import type { EnrichedInput } from './types';
 import {
   generateExecutiveSummary,
-  generateLetterOfTransmittal,
   generateSWOTAnalysis,
 } from './generate';
 import {
@@ -63,9 +62,8 @@ export async function generateShadowDraftBundle(
   const prev = process.env.REPORT_LLM_MODEL;
   process.env.REPORT_LLM_MODEL = shadowModel;
   try {
-    const [exec, lot, swot] = await Promise.all([
+    const [exec, swot] = await Promise.all([
       generateExecutiveSummary(enriched, modelMetricsText),
-      generateLetterOfTransmittal(enriched),
       generateSWOTAnalysis(enriched),
     ]);
 
@@ -75,7 +73,7 @@ export async function generateShadowDraftBundle(
       primary,
       shadow: {
         executive_summary: exec.executive_summary,
-        letter_of_transmittal: lot,
+        letter_of_transmittal: '',
         swot_analysis: swot,
       },
       generated_at: new Date().toISOString(),

@@ -150,12 +150,55 @@ export default function ReportBuilderClient() {
   const engagementInputRef = useRef<HTMLInputElement>(null);
   const stdbInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const cancelledByUserRef = useRef(false);
   const errorRef = useRef<HTMLDivElement>(null);
   const progressStartRef = useRef<number | null>(null);
   const formTopRef = useRef<HTMLDivElement>(null);
 
   const steps = includeWebResearch ? PROGRESS_STEPS_WEB : PROGRESS_STEPS_BASE;
   const totalEstimatedSec = steps.reduce((sum, s) => sum + s.duration, 0);
+
+  const resetForm = useCallback(() => {
+    setPropertyName('');
+    setService('');
+    setAddress1('');
+    setCity('');
+    setState('');
+    setZipCode('');
+    setAcres('');
+    setMarketType('glamping');
+    setIncludeWebResearch(true);
+    setClientEntity('');
+    setClientContactName('');
+    setClientPhone('');
+    setClientEmail('');
+    setClientAddress('');
+    setClientCityStateZip('');
+    setParcelNumber('');
+    setResortType('');
+    setIntendedUseOfStudy('');
+    setEngagementDate('');
+    setAmenitiesDescription('');
+    setStudyId('');
+    setUnitMix([createUnitRow()]);
+    setAddUnitMixLater(false);
+    setParseNotice(null);
+    setEngagementFileName(null);
+    setDraftMode(true);
+    setStdbWaiver(false);
+    setStdbParse(null);
+    setStdbFileName(null);
+    setLandCost('');
+    setLoanToCost('0.75');
+    setInterestRatePct('9.5');
+    setMillLevyPct('');
+    setIntakeConfirmed(false);
+    setAssumptions(null);
+    setAssumptionEvidence(null);
+    setAssumptionsReviewed(false);
+    if (engagementInputRef.current) engagementInputRef.current.value = '';
+    if (stdbInputRef.current) stdbInputRef.current.value = '';
+  }, []);
 
   useEffect(() => {
     if (!loading) {
@@ -578,6 +621,14 @@ export default function ReportBuilderClient() {
       return;
     }
 
+    if (!draftMode) {
+      const confirmed = window.confirm(
+        'Generate and ship this report? Ship mode uploads only if QA passes.'
+      );
+      if (!confirmed) return;
+    }
+
+    cancelledByUserRef.current = false;
     abortRef.current = new AbortController();
     const timeoutId = setTimeout(() => abortRef.current?.abort(), REQUEST_TIMEOUT_MS);
     setLoading(true);
@@ -656,7 +707,7 @@ export default function ReportBuilderClient() {
         setSuccess({
           message: qaBlocked
             ? `Ship blocked by QA.${qaNote}${taskNote}`
-            : `Report draft generated — DOCX and XLSX ready.${qaNote}${diagNote}${taskNote}`,
+            : `Report draft generated — DOCX and XLSX ready.${qaNote}${diagNote}${taskNote} Generate another report below.`,
           studyId: result.studyId,
         });
       } else {
@@ -695,46 +746,21 @@ export default function ReportBuilderClient() {
           }
         }
         setSuccess({
-          message: 'Report draft generated — DOCX and XLSX downloaded.',
+          message: 'Report draft generated — DOCX and XLSX downloaded. Generate another report below.',
           studyId: studyIdFromHeader ?? undefined,
         });
       }
 
       setError(null);
-      setPropertyName('');
-      setService('');
-      setAddress1('');
-      setCity('');
-      setState('');
-      setZipCode('');
-      setAcres('');
-      setClientEntity('');
-      setClientContactName('');
-      setClientPhone('');
-      setClientEmail('');
-      setClientAddress('');
-      setClientCityStateZip('');
-      setParcelNumber('');
-      setResortType('');
-      setIntendedUseOfStudy('');
-      setEngagementDate('');
-      setAmenitiesDescription('');
-      setStudyId('');
-      setUnitMix([createUnitRow()]);
-      setAddUnitMixLater(false);
-      setEngagementFileName(null);
-      setParseNotice(null);
-      setShowManualForm(false);
-      setStdbParse(null);
-      setStdbFileName(null);
-      setLandCost('');
-      setMillLevyPct('');
+      resetForm();
     } catch (err) {
       setSuccess(null);
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
           setError(
-            'Request timed out. Generation can take up to 5 minutes with web research. Please try again.'
+            cancelledByUserRef.current
+              ? 'Generation cancelled.'
+              : 'Request timed out. Generation can take up to 5 minutes with web research. Please try again.'
           );
         } else {
           setError(err.message);
@@ -968,11 +994,12 @@ export default function ReportBuilderClient() {
             </div>
 
             <Input
-              label="Street Address (optional)"
+              label="Street Address"
               name="address_1"
               value={address1}
               onChange={(e) => setAddress1(e.target.value)}
               placeholder="e.g. 123 Main St"
+              required
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1490,23 +1517,37 @@ export default function ReportBuilderClient() {
             </div>
 
             <div className="pt-4 space-y-4">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
-                    Generating…
-                  </>
-                ) : (
-                  <>
-                    <FilePlus className="w-5 h-5" aria-hidden />
-                    Generate Draft
-                  </>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
+                      Generating…
+                    </>
+                  ) : (
+                    <>
+                      <FilePlus className="w-5 h-5" aria-hidden />
+                      {draftMode ? 'Generate Draft' : 'Generate & ship report'}
+                    </>
+                  )}
+                </Button>
+                {loading && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      cancelledByUserRef.current = true;
+                      abortRef.current?.abort();
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 )}
-              </Button>
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Generates both DOCX report and XLSX workbook for download.
               </p>

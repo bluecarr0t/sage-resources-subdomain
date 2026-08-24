@@ -10,10 +10,12 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 import { withAdminAuth } from '@/lib/require-admin-auth';
+import { reportsDbForAuth } from '@/lib/report-access';
 
 export const GET = withAdminAuth(async (_request, auth) => {
   try {
-    const { data, error } = await auth.supabase
+    const { supabase } = await reportsDbForAuth(auth);
+    const { data, error } = await supabase
       .from('reports')
       .select('id, title, property_name, location, address_1, city, state, market_type, total_sites, created_at, study_id, has_docx, has_xlsx, service, enrichment_metadata')
       .is('deleted_at', null)

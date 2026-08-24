@@ -2853,11 +2853,11 @@ function replaceFinancialModelSections(
   zip: PizZip,
   model: FeasibilityModelOutput | undefined,
   chrome: LayoutChromeCounter
-): void {
-  if (!model) return;
+): boolean {
+  if (!model) return false;
   const xmlPath = 'word/document.xml';
   const file = zip.file(xmlPath);
-  if (!file) return;
+  if (!file) return false;
 
   let xml = file.asText();
   const headings = [
@@ -2915,6 +2915,7 @@ function replaceFinancialModelSections(
   }
 
   if (injected) zip.file(xmlPath, xml);
+  return injected;
 }
 
 /** Build OOXML inline drawing for an embedded image (EMU defaults ≈ 5.5" x 4") */
@@ -4104,8 +4105,17 @@ export async function assembleDraftDocx(
   }
 
   replaceDevelopmentCostsSection(outZip, sections.development_costs_data, chrome);
-  // Do NOT replace Rate/Occ/PF/Financing LINK Excel objects with native tables —
-  // retarget + annotate so authors refresh from the companion workbook.
+  if (sections.model_output) {
+    sectionHits.financial_model = replaceFinancialModelSections(
+      outZip,
+      sections.model_output,
+      chrome
+    )
+      ? 'replaced'
+      : 'missed';
+  } else {
+    sectionHits.financial_model = 'missed';
+  }
   const companionWorkbookFileName =
     options?.companionWorkbookFileName?.trim() || 'template.xlsx';
   const linkRetarget = retargetLinkedExcelWorkbook(outZip, companionWorkbookFileName);

@@ -28,7 +28,9 @@ import {
   ChevronDown,
   FileBarChart,
   Files,
+  FilePlus,
   LineChart,
+  List,
   Briefcase,
   Table2,
   ScrollText,
@@ -58,6 +60,8 @@ function getActivePageId(pathname: string): string {
   if (pathname === '/map' || pathname.startsWith('/en/map')) return 'map';
   if (pathname.startsWith('/admin/client-map')) return 'client-map';
   if (pathname.startsWith('/admin/past-reports')) return 'past-reports';
+  if (pathname.startsWith('/admin/report-builder/generated')) return 'report-builder-generated';
+  if (pathname.startsWith('/admin/report-builder')) return 'report-builder';
   if (pathname.startsWith('/admin/glamping-properties')) return 'comps';
   if (pathname.startsWith('/admin/proximity-insights')) return 'proximity-insights';
   if (pathname.startsWith('/admin/market-report')) return 'market-report';
@@ -80,6 +84,8 @@ function getActivePageId(pathname: string): string {
 
 const REPORTS_PAGE_IDS = new Set([
   'past-reports',
+  'report-builder',
+  'report-builder-generated',
   'market-report',
   'rv-industry-overview',
   'glamping-industry-overview',
@@ -533,7 +539,6 @@ export default function AdminSidebar() {
                   isActive={activePageId === 'comps'}
                   isCollapsed={showCollapsed}
                 />
-                {/* Report Builder hidden from menu — page still accessible via direct URL */}
                 {!showCollapsed ? (
                   <div className="space-y-1">
                     <button
@@ -578,6 +583,22 @@ export default function AdminSidebar() {
                           icon={FileText}
                           pageId="past-reports"
                           isActive={activePageId === 'past-reports'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/report-builder"
+                          label={tSidebar('reportBuilder')}
+                          icon={FilePlus}
+                          pageId="report-builder"
+                          isActive={activePageId === 'report-builder'}
+                          isCollapsed={false}
+                        />
+                        <NavLink
+                          href="/admin/report-builder/generated"
+                          label={tSidebar('generatedReports')}
+                          icon={List}
+                          pageId="report-builder-generated"
+                          isActive={activePageId === 'report-builder-generated'}
                           isCollapsed={false}
                         />
                         <NavLink
@@ -648,6 +669,32 @@ export default function AdminSidebar() {
                         >
                           <FileText className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                           {tSidebar('pastReports')}
+                        </Link>
+                        <Link
+                          href="/admin/report-builder"
+                          role="menuitem"
+                          onClick={() => setReportsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'report-builder'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <FilePlus className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('reportBuilder')}
+                        </Link>
+                        <Link
+                          href="/admin/report-builder/generated"
+                          role="menuitem"
+                          onClick={() => setReportsFlyoutOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm ${
+                            activePageId === 'report-builder-generated'
+                              ? 'bg-neutral-100/90 font-medium text-neutral-900 dark:bg-neutral-900/60 dark:text-neutral-100'
+                              : 'text-neutral-700 hover:bg-neutral-100/80 dark:text-neutral-200 dark:hover:bg-neutral-900/45'
+                          }`}
+                        >
+                          <List className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                          {tSidebar('generatedReports')}
                         </Link>
                         <Link
                           href="/admin/market-report"

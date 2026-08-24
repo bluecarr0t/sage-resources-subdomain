@@ -10,23 +10,27 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { logAdminAudit } from '@/lib/admin-audit';
+import {
+  assertReportAccess,
+  reportAccessDeniedResponse,
+  reportsDbForAuth,
+} from '@/lib/report-access';
 
 type ParamsContext = { params: Promise<{ id: string }> };
 
 export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) => {
   const { id } = await context!.params;
-  const { data, error: fetchError } = await auth.supabase
+  const { actor, supabase } = await reportsDbForAuth(auth);
+  const { data, error: fetchError } = await supabase
     .from('reports')
     .select('*')
     .eq('id', id)
     .is('deleted_at', null)
     .single();
 
-  if (fetchError || !data) {
-    return NextResponse.json(
-      { success: false, error: 'Report not found' },
-      { status: 404 }
-    );
+  const access = assertReportAccess(actor, fetchError || !data ? null : data);
+  if (!access.ok) {
+    return reportAccessDeniedResponse(access);
   }
 
   return NextResponse.json({ success: true, report: data });
@@ -34,6 +38,19 @@ export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) 
 
 export const PUT = withAdminAuth<ParamsContext>(async (request, auth, context) => {
   const { id } = await context!.params;
+  const { actor, supabase } = await reportsDbForAuth(auth);
+  const { data: existing } = await supabase
+    .from('reports')
+    .select('id, user_id')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .maybeSingle();
+
+  const access = assertReportAccess(actor, existing);
+  if (!access.ok) {
+    return reportAccessDeniedResponse(access);
+  }
+
   const body = await request.json();
   const allowedFields = [
     'title', 'property_name', 'location', 'market_type', 'total_sites',
@@ -44,7 +61,7 @@ export const PUT = withAdminAuth<ParamsContext>(async (request, auth, context) =
   for (const key of allowedFields) {
     if (key in body) updateData[key] = body[key];
   }
-  const { data, error: updateError } = await auth.supabase
+  const { data, error: updateError } = await supabase
     .from('reports')
     .update(updateData)
     .eq('id', id)
@@ -78,14 +95,20 @@ export const PUT = withAdminAuth<ParamsContext>(async (request, auth, context) =
 
 export const DELETE = withAdminAuth<ParamsContext>(async (request, auth, context) => {
   const { id } = await context!.params;
-  const { data: report } = await auth.supabase
+  const { actor, supabase } = await reportsDbForAuth(auth);
+  const { data: report } = await supabase
     .from('reports')
-    .select('study_id')
+    .select('study_id, user_id')
     .eq('id', id)
     .is('deleted_at', null)
-    .single();
+    .maybeSingle();
 
-  const { error: deleteError } = await auth.supabase
+  const access = assertReportAccess(actor, report);
+  if (!access.ok) {
+    return reportAccessDeniedResponse(access);
+  }
+
+  const { error: deleteError } = await supabase
     .from('reports')
     .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)

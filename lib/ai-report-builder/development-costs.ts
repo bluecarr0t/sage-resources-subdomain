@@ -7,7 +7,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { EnrichedInput } from './types';
 import type { DevelopmentCostsData } from './types';
-import { unitMixToCostConfigs } from './unit-mix-to-cost-config';
+import { mapUnitMixToCostConfigs } from './unit-mix-to-cost-config';
 import {
   calculateSiteBuilderCosts,
   type ConfigCostResult,
@@ -18,6 +18,7 @@ export interface DeriveDevelopmentCostsResult {
   data: DevelopmentCostsData;
   configs: SiteBuilderConfig[];
   costResult: { configs: ConfigCostResult[]; totalSiteBuild: number };
+  unmappedTypes: string[];
 }
 
 /**
@@ -29,13 +30,14 @@ export async function deriveDevelopmentCosts(
   supabase: SupabaseClient,
   input: EnrichedInput
 ): Promise<DeriveDevelopmentCostsResult> {
-  const configs = unitMixToCostConfigs(input.unit_mix);
+  const { configs, unmappedTypes } = mapUnitMixToCostConfigs(input.unit_mix);
 
   if (configs.length === 0) {
     return {
       data: buildPlaceholderDevelopmentCosts(),
       configs: [],
       costResult: { configs: [], totalSiteBuild: 0 },
+      unmappedTypes,
     };
   }
 
@@ -98,6 +100,7 @@ export async function deriveDevelopmentCosts(
     },
     configs,
     costResult,
+    unmappedTypes,
   };
 }
 

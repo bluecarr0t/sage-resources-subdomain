@@ -91,6 +91,7 @@ export interface EnrichmentMetadata {
   benchmark_categories: string[];
   enrichment_date: string;
   data_sources: string[];
+  warnings?: string[];
 }
 
 export interface SeasonalRates {

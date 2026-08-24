@@ -66,6 +66,11 @@ const DEFAULT_SQFT_BY_SLUG: Record<string, number> = {
 /** Default quality tier for Report Builder (no Site Builder config) */
 const DEFAULT_QUALITY = 'Premium';
 
+export type UnitMixCostMapResult = {
+  configs: SiteBuilderConfig[];
+  unmappedTypes: string[];
+};
+
 /**
  * Convert Report Builder unit_mix to SiteBuilderConfig[] for cost calculation.
  * Glamping types use default sqft and quality; RV types use default site type.
@@ -73,7 +78,14 @@ const DEFAULT_QUALITY = 'Premium';
 export function unitMixToCostConfigs(
   unitMix: Array<{ type: string; count: number }>
 ): SiteBuilderConfig[] {
+  return mapUnitMixToCostConfigs(unitMix).configs;
+}
+
+export function mapUnitMixToCostConfigs(
+  unitMix: Array<{ type: string; count: number }>
+): UnitMixCostMapResult {
   const configs: SiteBuilderConfig[] = [];
+  const unmappedTypes: string[] = [];
 
   for (const { type, count } of unitMix) {
     if (!type || count <= 0) continue;
@@ -100,9 +112,10 @@ export function unitMixToCostConfigs(
         qualityType: DEFAULT_QUALITY,
         amenitySlugs: [],
       } satisfies GlampingConfig);
+    } else {
+      unmappedTypes.push(trimmed);
     }
-    // Unknown types are skipped (no cost config)
   }
 
-  return configs;
+  return { configs, unmappedTypes };
 }

@@ -2,7 +2,7 @@
  * Fact-check unit tests (acres decimals, ADR context, population phrasing).
  */
 
-import { factCheckExecutiveSummary } from '@/lib/ai-report-builder/fact-check';
+import { factCheckExecutiveSummary, factCheckNarrative } from '@/lib/ai-report-builder/fact-check';
 import type { EnrichedInput } from '@/lib/ai-report-builder/types';
 
 const base: EnrichedInput = {
@@ -40,5 +40,18 @@ describe('factCheckExecutiveSummary', () => {
     );
     // $200 is within benchmark range; $14M should not flag as ADR
     expect(r.flags.every((f) => !String(f.claim).includes('14440166'))).toBe(true);
+  });
+});
+
+describe('factCheckNarrative', () => {
+  it('flags a SWOT snippet that invents the wrong city and state', () => {
+    const r = factCheckNarrative(
+      'Strength: The site is in Denver, CO with strong weekend demand from ski traffic.',
+      base
+    );
+    expect(r.passed).toBe(false);
+    expect(r.flags.some((f) => f.claim.includes('Denver') && String(f.expected).includes('Austin'))).toBe(
+      true
+    );
   });
 });

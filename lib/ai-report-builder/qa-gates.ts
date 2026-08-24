@@ -24,6 +24,10 @@ export interface ReportQaGatesInput {
   stdbImported?: boolean;
   /** Explicit analyst waiver when STDB not imported */
   stdbWaived?: boolean;
+  /** True when an STDB parse was provided but workbook merge failed */
+  stdbMergeFailed?: boolean;
+  /** Unit mix types that did not map to Site Builder cost configs */
+  unmappedUnitTypes?: string[] | null;
   /** Count of `[Image placeholder]` / similar tokens when known */
   placeholderCount?: number | null;
   /** Max placeholders allowed before fail (default 12 after image allow-list) */
@@ -212,6 +216,19 @@ export function runReportQaGates(input: ReportQaGatesInput): ReportQaGatesResult
           }`
         );
       }
+    }
+  }
+
+  if (input.stdbMergeFailed) {
+    flags.push('stdb: merge failed');
+  }
+
+  if (input.unmappedUnitTypes?.length) {
+    const list = input.unmappedUnitTypes.join(', ');
+    if (!input.assumptionsDraftMode) {
+      flags.push(`unit_mix: unmapped types: ${list}`);
+    } else {
+      analystTasks.unshift(`Unit mix: unmapped types need a cost mapping: ${list}.`);
     }
   }
 

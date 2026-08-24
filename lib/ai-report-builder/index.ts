@@ -5,7 +5,7 @@
 export * from './types';
 export { enrichReportInput } from './enrich';
 export { deriveDevelopmentCosts } from './development-costs';
-export { unitMixToCostConfigs } from './unit-mix-to-cost-config';
+export { unitMixToCostConfigs, mapUnitMixToCostConfigs } from './unit-mix-to-cost-config';
 export {
   generateExecutiveSummary,
   generateLetterOfTransmittal,
@@ -33,7 +33,7 @@ export {
 export { getTemplateKeyForMarketType } from './template-key';
 export { assembleDraftXlsx } from './assemble-xlsx';
 export { applyXlsxDriverMap } from './xlsx-driver-maps';
-export { factCheckExecutiveSummary } from './fact-check';
+export { factCheckExecutiveSummary, factCheckNarrative } from './fact-check';
 export { normalizeTerminology } from './terminology';
 export { fetchPastReportComps } from './fetch-past-report-comps';
 export {
@@ -44,7 +44,8 @@ export {
 export { parseEngagementLetterText } from './engagement-letter-fields';
 export { parseStdbUpload, applyStdbToWorkbook } from './stdb-import';
 export { runReportQaGates } from './qa-gates';
-export { executeGenerateDraft } from './execute-generate-draft';
+export { executeGenerateDraft, REPORT_HOT_PATH_LLM_SECTIONS } from './execute-generate-draft';
+export { mapReportRowToDraftInput } from './report-row-to-input';
 export { assertXlsxMatchesModel, assertXlsxBufferMatchesModel } from './xlsx-model-assert';
 export {
   buildAssumptionEvidence,

@@ -109,4 +109,30 @@ describe('runReportQaGates', () => {
     expect(qa.passed).toBe(false);
     expect(qa.flags.some((f) => /sample_fingerprint/i.test(f))).toBe(true);
   });
+
+  it('flags unmapped unit types as ship-blocking outside draft mode', () => {
+    const qa = runReportQaGates({
+      enriched: { ...enriched, unit_mix: [{ type: 'Cabin', count: 4 }] },
+      model: stubModel(),
+      assumptionsDraftMode: false,
+      stdbWaived: true,
+      placeholderCount: 0,
+      unmappedUnitTypes: ['Unobtanium Pod'],
+    });
+    expect(qa.passed).toBe(false);
+    expect(qa.flags.some((f) => f.includes('unit_mix: unmapped types: Unobtanium Pod'))).toBe(true);
+  });
+
+  it('flags STDB merge failure', () => {
+    const qa = runReportQaGates({
+      enriched,
+      model: stubModel(),
+      assumptionsDraftMode: true,
+      stdbWaived: true,
+      placeholderCount: 0,
+      stdbMergeFailed: true,
+    });
+    expect(qa.passed).toBe(false);
+    expect(qa.flags.some((f) => f === 'stdb: merge failed')).toBe(true);
+  });
 });

@@ -898,6 +898,8 @@
       "reports": "Reports",
       "reportsMenu": "Reports menu",
       "pastReports": "Past Reports",
+      "reportBuilder": "Report Builder",
+      "generatedReports": "Generated Reports",
       "projectPipeline": "Job Pipeline",
       "reviewTodoBadge": "{count, plural, one {# review to-do} other {# review to-dos}}",
       "tools": "Tools",
