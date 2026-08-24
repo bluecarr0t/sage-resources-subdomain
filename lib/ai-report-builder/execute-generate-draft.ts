@@ -4,18 +4,17 @@
 
 import { createServerClient } from '@/lib/supabase';
 import { logAdminAudit } from '@/lib/admin-audit';
+import { enrichReportInput } from './enrich';
+import { deriveDevelopmentCosts } from './development-costs';
 import {
-  enrichReportInput,
-  deriveDevelopmentCosts,
   generateExecutiveSummary,
-  generateLetterOfTransmittal,
   generateSWOTAnalysis,
   generateSiteAnalysis,
   generateDemandIndicators,
-  assembleDraftDocx,
-  assembleDraftXlsx,
-  factCheckExecutiveSummary,
-} from '@/lib/ai-report-builder';
+} from './generate';
+import { assembleDraftDocx } from './assemble-docx';
+import { assembleDraftXlsx } from './assemble-xlsx';
+import { factCheckNarrative } from './fact-check';
 import {
   proposeAssumptions,
   runFeasibilityModel,
@@ -24,7 +23,7 @@ import {
   type FeasibilityProjectInput,
 } from '@/lib/feasibility-model';
 import { exportCostAnalysisToXlsx } from '@/lib/site-builder/export-cost-analysis-xlsx';
-import type { ReportDraftInput, EnrichedInput } from '@/lib/ai-report-builder';
+import type { ReportDraftInput, EnrichedInput } from './types';
 import type { DraftProgressEmit } from './draft-progress-events';
 import { runReportQaGates } from './qa-gates';
 import { assertXlsxBufferMatchesModel } from './xlsx-model-assert';
@@ -47,10 +46,33 @@ import PizZip from 'pizzip';
 const BUCKET_NAME = 'report-uploads';
 const EXPECTED_XLSX_SHEETS = ['ToT (Intake Form)'];
 
-class ReportQaBlockedError extends Error {
+/** LLM sections on the generate/regenerate hot path (LoT is rebuilt from intake). */
+export const REPORT_HOT_PATH_LLM_SECTIONS = [
+  'executive_summary',
+  'swot',
+  'site_analysis',
+  'demand_indicators',
+  'area_analysis',
+  'supply_competition',
+  'industry_overview',
+] as const;
+
+export class ReportQaBlockedError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'ReportQaBlockedError';
+  }
+}
+
+export class StudyIdConflictError extends Error {
+  readonly studyId: string;
+  readonly reportId?: string;
+
+  constructor(studyId: string, reportId?: string) {
+    super(`A report with study_id ${studyId} already exists`);
+    this.name = 'StudyIdConflictError';
+    this.studyId = studyId;
+    this.reportId = reportId;
   }
 }
 
@@ -87,6 +109,8 @@ export type ExecuteGenerateDraftParams = {
   stdbWaiver?: boolean;
   emit?: DraftProgressEmit;
   request?: Request;
+  /** When set, update this report in place instead of inserting a new row. */
+  existingReportId?: string;
 };
 
 export type ExecuteGenerateDraftResult = {
@@ -126,6 +150,7 @@ export async function executeGenerateDraft(
     stdbWaiver = false,
     emit,
     request,
+    existingReportId,
   } = params;
 
   const studyId = input.study_id!;
@@ -228,7 +253,7 @@ export async function executeGenerateDraft(
 
   if (format !== 'xlsx') {
     emitPhase(emit, 'section:executive_summary', 'started');
-    emitPhase(emit, 'section:letter_of_transmittal', 'started');
+    emitPhase(emit, 'section:letter_of_transmittal', 'skipped', 'rebuilt from intake');
     emitPhase(emit, 'section:swot', 'started');
     emitPhase(emit, 'section:site_analysis', 'started');
     emitPhase(emit, 'section:demand_indicators', 'started');
@@ -236,18 +261,8 @@ export async function executeGenerateDraft(
     emitPhase(emit, 'section:supply_competition', 'started');
     emitPhase(emit, 'section:industry_overview', 'started');
 
-    const [
-      execSummaryResult,
-      lot,
-      swot,
-      site,
-      demand,
-      area,
-      supply,
-      industry,
-    ] = await Promise.all([
+    const [execSummaryResult, swot, site, demand, area, supply, industry] = await Promise.all([
       generateExecutiveSummary(enriched, modelMetricsText),
-      generateLetterOfTransmittal(enriched),
       generateSWOTAnalysis(enriched),
       generateSiteAnalysis(enriched),
       generateDemandIndicators(enriched),
@@ -258,7 +273,7 @@ export async function executeGenerateDraft(
 
     executive_summary = execSummaryResult.executive_summary;
     citations = execSummaryResult.citations ?? [];
-    letter_of_transmittal = lot;
+    letter_of_transmittal = '';
     swot_analysis = swot;
     site_analysis = site;
     demand_indicators = demand;
@@ -266,13 +281,30 @@ export async function executeGenerateDraft(
     supply_competition = supply;
     industry_overview = industry;
 
-    const factCheck = factCheckExecutiveSummary(executive_summary, enriched);
-    if (!factCheck.passed && factCheck.flags.length > 0) {
-      executive_summary += `\n\n[Note: AI-generated draft. Some figures may require verification: ${factCheck.flags.map((f) => f.claim).join('; ')}.]`;
+    const narrativeNote = (flags: { claim: string }[]) =>
+      `\n\n[Note: AI-generated draft. Some figures may require verification: ${flags.map((f) => f.claim).join('; ')}.]`;
+    const execCheck = factCheckNarrative(executive_summary, enriched);
+    if (!execCheck.passed && execCheck.flags.length > 0) {
+      executive_summary += narrativeNote(execCheck.flags);
+    }
+    const swotCheck = factCheckNarrative(swot_analysis, enriched);
+    if (!swotCheck.passed && swotCheck.flags.length > 0) {
+      swot_analysis += narrativeNote(swotCheck.flags);
+    }
+    const demandCheck = factCheckNarrative(demand_indicators, enriched);
+    if (!demandCheck.passed && demandCheck.flags.length > 0) {
+      demand_indicators += narrativeNote(demandCheck.flags);
+    }
+    const areaCheck = factCheckNarrative(area_analysis, enriched);
+    if (!areaCheck.passed && areaCheck.flags.length > 0) {
+      area_analysis += narrativeNote(areaCheck.flags);
+    }
+    const supplyCheck = factCheckNarrative(supply_competition, enriched);
+    if (!supplyCheck.passed && supplyCheck.flags.length > 0) {
+      supply_competition += narrativeNote(supplyCheck.flags);
     }
 
     emitPhase(emit, 'section:executive_summary', 'complete');
-    emitPhase(emit, 'section:letter_of_transmittal', 'complete');
     emitPhase(emit, 'section:swot', 'complete');
     emitPhase(emit, 'section:site_analysis', 'complete');
     emitPhase(emit, 'section:demand_indicators', 'complete');
@@ -288,6 +320,7 @@ export async function executeGenerateDraft(
     modelOutput: hasUnitMix ? modelOutput : null,
   });
 
+  let stdbMergeFailed = false;
   if (stdbParse) {
     try {
       const wb = new ExcelJS.Workbook();
@@ -296,6 +329,7 @@ export async function executeGenerateDraft(
       const out = await wb.xlsx.writeBuffer();
       xlsxBuffer = Buffer.from(out);
     } catch (err) {
+      stdbMergeFailed = true;
       console.warn('[execute-generate-draft] STDB workbook merge failed:', err);
     }
   }
@@ -374,6 +408,8 @@ export async function executeGenerateDraft(
     assumptionsDraftMode: draftMode,
     stdbImported: !!stdbParse,
     stdbWaived: stdbWaiver,
+    stdbMergeFailed,
+    unmappedUnitTypes: devCostsResult.unmappedTypes,
     placeholderCount,
     placeholderThreshold: draftMode ? 200 : 12,
     docxTextSample: docxTextSample,
@@ -421,46 +457,78 @@ export async function executeGenerateDraft(
       tourism_economics: !!enriched.tourism_economics,
       site_risk: !!enriched.site_risk,
     },
+    unmapped_unit_types: devCostsResult.unmappedTypes,
+    stdb_merge_failed: stdbMergeFailed,
   };
 
-  const { data: newReport, error: insertError } = await supabaseAdmin
-    .from('reports')
-    .insert({
-      user_id: userId,
-      study_id: studyId,
-      title: `${input.property_name} Feasibility Study - ${studyId}`,
-      property_name: input.property_name,
-      location: location || null,
-      city: input.city,
-      state: input.state,
-      zip_code: input.zip_code ?? null,
-      address_1: input.address_1 ?? null,
-      lot_size_acres: input.acres ?? null,
-      client_entity: input.client_entity ?? null,
-      unit_mix: input.unit_mix.length > 0 ? input.unit_mix : null,
-      total_sites,
-      executive_summary: executive_summary || null,
-      status: 'draft',
-      has_docx: format !== 'xlsx',
-      docx_file_path: null,
-      has_xlsx: false,
-      xlsx_file_path: null,
-      market_type: input.market_type ?? 'glamping',
-      service: input.service ?? null,
-      latitude: enriched.latitude ?? null,
-      longitude: enriched.longitude ?? null,
-      enrichment_metadata: enrichmentWithProvenance,
-    })
-    .select('id')
-    .single();
+  const reportFields = {
+    study_id: studyId,
+    title: `${input.property_name} Feasibility Study - ${studyId}`,
+    property_name: input.property_name,
+    location: location || null,
+    city: input.city,
+    state: input.state,
+    zip_code: input.zip_code ?? null,
+    address_1: input.address_1 ?? null,
+    lot_size_acres: input.acres ?? null,
+    client_entity: input.client_entity ?? null,
+    unit_mix: input.unit_mix.length > 0 ? input.unit_mix : null,
+    total_sites,
+    executive_summary: executive_summary || null,
+    status: 'draft' as const,
+    has_docx: format !== 'xlsx',
+    has_xlsx: false,
+    market_type: input.market_type ?? 'glamping',
+    service: input.service ?? null,
+    latitude: enriched.latitude ?? null,
+    longitude: enriched.longitude ?? null,
+    enrichment_metadata: enrichmentWithProvenance,
+  };
 
-  if (insertError || !newReport) {
-    throw new Error(`Failed to create report: ${insertError?.message ?? 'unknown'}`);
+  let reportId: string;
+  if (existingReportId) {
+    const { error: updateError } = await supabaseAdmin
+      .from('reports')
+      .update({
+        ...reportFields,
+        docx_file_path: null,
+        xlsx_file_path: null,
+      })
+      .eq('id', existingReportId);
+    if (updateError) {
+      throw new Error(`Failed to update report: ${updateError.message}`);
+    }
+    reportId = existingReportId;
+  } else {
+    const { data: newReport, error: insertError } = await supabaseAdmin
+      .from('reports')
+      .insert({
+        user_id: userId,
+        ...reportFields,
+        docx_file_path: null,
+        xlsx_file_path: null,
+      })
+      .select('id')
+      .single();
+
+    if (insertError || !newReport) {
+      if (insertError?.code === '23505') {
+        const { data: existing } = await supabaseAdmin
+          .from('reports')
+          .select('id')
+          .eq('study_id', studyId)
+          .is('deleted_at', null)
+          .maybeSingle();
+        throw new StudyIdConflictError(studyId, existing?.id);
+      }
+      throw new Error(`Failed to create report: ${insertError?.message ?? 'unknown'}`);
+    }
+    reportId = newReport.id;
   }
 
-  const docxStoragePath = `${newReport.id}/report.docx`;
-  const xlsxStoragePath = `${newReport.id}/template.xlsx`;
-  const checklistStoragePath = `${newReport.id}/author-checklist.md`;
+  const docxStoragePath = `${reportId}/report.docx`;
+  const xlsxStoragePath = `${reportId}/template.xlsx`;
+  const checklistStoragePath = `${reportId}/author-checklist.md`;
   const authorChecklistMarkdown = buildTourismAuthorChecklistMarkdown({
     studyId,
     propertyName: input.property_name,
@@ -500,7 +568,7 @@ export async function executeGenerateDraft(
       if (bundle) {
         shadowUploadPath = await uploadShadowDraftBundle({
           supabase: supabaseAdmin,
-          reportId: newReport.id,
+          reportId,
           bundle,
         });
         if (shadowUploadPath) {
@@ -513,7 +581,7 @@ export async function executeGenerateDraft(
           await supabaseAdmin
             .from('reports')
             .update({ enrichment_metadata: enrichmentWithProvenance })
-            .eq('id', newReport.id);
+            .eq('id', reportId);
         }
       }
     } catch (shadowErr) {
@@ -553,7 +621,7 @@ export async function executeGenerateDraft(
       uploads.push(
         supabaseAdmin.storage
           .from(BUCKET_NAME)
-          .upload(`${newReport.id}/cost-analysis.xlsx`, costAnalysisBuffer, {
+          .upload(`${reportId}/cost-analysis.xlsx`, costAnalysisBuffer, {
             contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             upsert: true,
           })
@@ -569,7 +637,9 @@ export async function executeGenerateDraft(
   const xlsxUpload = format !== 'xlsx' ? uploadResults[1] : uploadResults[0];
 
   if (docxUpload?.error) {
-    await supabaseAdmin.from('reports').delete().eq('id', newReport.id);
+    if (!existingReportId) {
+      await supabaseAdmin.from('reports').delete().eq('id', reportId);
+    }
     throw new Error(`Failed to save DOCX: ${docxUpload.error.message}`);
   }
 
@@ -579,18 +649,22 @@ export async function executeGenerateDraft(
     updatePayload.xlsx_file_path = xlsxStoragePath;
     updatePayload.has_xlsx = true;
   }
-  await supabaseAdmin.from('reports').update(updatePayload).eq('id', newReport.id);
+  await supabaseAdmin.from('reports').update(updatePayload).eq('id', reportId);
 
   if (request) {
     await logAdminAudit(
       {
         user_id: userId,
         user_email: userEmail,
-        action: 'upload',
+        action: existingReportId ? 'edit' : 'upload',
         resource_type: 'report',
-        resource_id: newReport.id,
+        resource_id: reportId,
         study_id: studyId,
-        details: { property_name: input.property_name, generated_draft: true },
+        details: {
+          property_name: input.property_name,
+          generated_draft: !existingReportId,
+          regenerated: !!existingReportId,
+        },
         source: 'session',
       },
       request
@@ -613,7 +687,7 @@ export async function executeGenerateDraft(
     type: 'result',
     success: true,
     studyId,
-    reportId: newReport.id,
+    reportId,
     docxUrl: docxSigned?.signedUrl,
     xlsxUrl: xlsxSigned?.signedUrl,
     authorChecklistUrl: checklistSigned?.signedUrl,
@@ -625,7 +699,7 @@ export async function executeGenerateDraft(
 
   return {
     studyId,
-    reportId: newReport.id,
+    reportId,
     docxBuffer,
     xlsxBuffer,
     enriched,

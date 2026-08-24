@@ -29,6 +29,17 @@ jest.mock('@/lib/admin/resolve-sage-data-anchor-id', () => {
   };
 });
 
+jest.mock('@/lib/report-access', () => {
+  const actual = jest.requireActual<typeof import('@/lib/report-access')>('@/lib/report-access');
+  return {
+    ...actual,
+    reportsDbForAuth: async (auth: { supabase: unknown; session: { user: { id: string } } }) => ({
+      actor: { userId: auth.session.user.id, role: 'admin' as const },
+      supabase: auth.supabase,
+    }),
+  };
+});
+
 const mockMaybeSingle = jest.fn();
 const mockSingle = jest.fn();
 const mockUpdate = jest.fn();

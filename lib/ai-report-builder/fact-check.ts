@@ -136,3 +136,52 @@ export function factCheckExecutiveSummary(
     flags,
   };
 }
+
+/**
+ * Compare generated narrative to enriched data; flag significant mismatches.
+ * Covers executive summary, SWOT, demand, area, and supply sections.
+ */
+export function factCheckNarrative(
+  text: string,
+  enriched: EnrichedInput
+): FactCheckResult {
+  const flags: FactCheckFlag[] = [];
+  const summaryCheck = factCheckExecutiveSummary(text, enriched);
+  flags.push(...summaryCheck.flags);
+
+  const city = enriched.city?.trim();
+  const state = enriched.state?.trim();
+  if (city && state) {
+    const cityRe = new RegExp(`\\b${escapeRegExp(city)}\\b`, 'i');
+    const inventsOtherCity =
+      /\b(?:in|near|at)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:,\s*([A-Z]{2}))?\b/.exec(text);
+    if (inventsOtherCity) {
+      const mentionedCity = inventsOtherCity[1];
+      const mentionedState = inventsOtherCity[2];
+      if (
+        mentionedCity &&
+        !cityRe.test(mentionedCity) &&
+        mentionedCity.toLowerCase() !== city.toLowerCase()
+      ) {
+        const looksLikePlace =
+          !/^(The|This|Our|A|An|Strength|Weakness|Opportunity|Threat)$/i.test(mentionedCity);
+        if (looksLikePlace && mentionedState && mentionedState.toUpperCase() !== state.toUpperCase()) {
+          flags.push({
+            claim: `${mentionedCity}, ${mentionedState}`,
+            expected: `${city}, ${state}`,
+            actual: `${mentionedCity}, ${mentionedState}`,
+          });
+        }
+      }
+    }
+  }
+
+  return {
+    passed: flags.length === 0,
+    flags,
+  };
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

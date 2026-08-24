@@ -113,9 +113,16 @@ function toDemandDriversBlock(
   };
 }
 
+function captureEnrichWarning(warnings: string[], key: string, err: unknown): null {
+  console.warn(`[enrich] ${key} failed:`, err);
+  warnings.push(key);
+  return null;
+}
+
 export async function enrichReportInput(input: ReportDraftInput): Promise<EnrichedInput> {
   const enriched: EnrichedInput = { ...input };
   const supabase = createServerClient();
+  const warnings: string[] = [];
 
   const unitCategories = [
     ...new Set(input.unit_mix.map((u) => normaliseUnitCategory(u.type))),
@@ -150,13 +157,13 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
       input.include_web_research ? fetchWebContextForReport(input) : Promise.resolve(null),
       input.include_web_research && state
         ? fetchTavilyComps(input.city, state, input.market_type).catch((err) => {
-            console.warn('[enrich] Tavily comp research failed:', err);
+            captureEnrichWarning(warnings, 'tavily_comps', err);
             return [] as ComparableProperty[];
           })
         : Promise.resolve([] as ComparableProperty[]),
       input.include_web_research && state
         ? fetchWeatherSparkData(input.city, state).catch((err) => {
-            console.warn('[enrich] WeatherSpark fetch failed:', err);
+            captureEnrichWarning(warnings, 'weatherspark', err);
             return null as WeatherSparkData | null;
           })
         : Promise.resolve(null as WeatherSparkData | null),
@@ -175,7 +182,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
           : undefined,
       );
     } catch (err) {
-      console.warn('[enrich] Past report comps failed:', err);
+      captureEnrichWarning(warnings, 'past_report_comps', err);
       pastReportComps = [];
     }
   }
@@ -185,7 +192,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
     try {
       await attachSubjectDistanceToWebComps(tavilyComps, coords.lat, coords.lng);
     } catch (err) {
-      console.warn('[enrich] Web comps geocode/distance failed:', err);
+      captureEnrichWarning(warnings, 'web_comps_geocode', err);
     }
   }
 
@@ -238,13 +245,13 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
         input.market_type,
         { pastReportComps, tavilyComps },
       ).catch((err) => {
-        console.warn('[enrich] Nearby comps fetch failed:', err);
+        captureEnrichWarning(warnings, 'nearby_comps', err);
         return null;
       }),
       state
         ? fetchCompRadiusPivots(supabase, coords.lat, coords.lng, state, input.market_type).catch(
             (err) => {
-              console.warn('[enrich] Comp radius pivots failed:', err);
+              captureEnrichWarning(warnings, 'comp_radius_pivots', err);
               return null;
             }
           )
@@ -259,7 +266,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
         majorOutdoorRadiusMiles: 150,
         anchorStateUsAbbr: stateAbbr || null,
       }).catch((err) => {
-        console.warn('[enrich] Demand drivers failed:', err);
+        captureEnrichWarning(warnings, 'demand_drivers', err);
         return null;
       }),
       stateAbbr
@@ -270,7 +277,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
             anchorLat: coords.lat,
             anchorLng: coords.lng,
           }).catch((err) => {
-            console.warn('[enrich] County metrics failed:', err);
+            captureEnrichWarning(warnings, 'county_metrics', err);
             return null;
           })
         : Promise.resolve(null),
@@ -281,24 +288,24 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
             stateAbbr,
             studyId: input.study_id,
           }).catch((err) => {
-            console.warn('[enrich] Drive-time demographics failed:', err);
+            captureEnrichWarning(warnings, 'drive_time_demographics', err);
             return null;
           })
         : Promise.resolve(null),
       fetchSiteRisk(coords.lat, coords.lng).catch((err) => {
-        console.warn('[enrich] Site risk failed:', err);
+        captureEnrichWarning(warnings, 'site_risk', err);
         return null;
       }),
       state
         ? fetchMarketOccupancyIndicators(supabase, coords.lat, coords.lng, state, 50).catch(
             (err) => {
-              console.warn('[enrich] STVR indicators failed:', err);
+              captureEnrichWarning(warnings, 'stvr_indicators', err);
               return null;
             }
           )
         : Promise.resolve(null),
       fetchNearestAirport(coords.lat, coords.lng).catch((err) => {
-        console.warn('[enrich] Nearest airport failed:', err);
+        captureEnrichWarning(warnings, 'nearest_airport', err);
         return null;
       }),
       stateAbbr
@@ -306,7 +313,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
             stateAbbr,
             countyName: countyHint,
           }).catch((err) => {
-            console.warn('[enrich] Tourism economics failed:', err);
+            captureEnrichWarning(warnings, 'tourism_economics', err);
             return null;
           })
         : Promise.resolve(null),
@@ -331,7 +338,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
         });
         enriched.comparables_summary = buildComparablesSummary(enriched.nearby_comps);
       } catch (err) {
-        console.warn('[enrich] Comp gap-fill failed:', err);
+        captureEnrichWarning(warnings, 'comp_gap_fill', err);
       }
     }
 
@@ -370,7 +377,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
           };
         }
       } catch (err) {
-        console.warn('[enrich] State parks web research failed:', err);
+        captureEnrichWarning(warnings, 'state_parks_research', err);
       }
     }
 
@@ -495,6 +502,7 @@ export async function enrichReportInput(input: ReportDraftInput): Promise<Enrich
     benchmark_categories: enriched.benchmarks?.map((b) => b.unit_category) ?? [],
     enrichment_date: new Date().toISOString(),
     data_sources: [...new Set(dataSources)],
+    ...(warnings.length > 0 ? { warnings: [...new Set(warnings)] } : {}),
   };
 
   return enriched;

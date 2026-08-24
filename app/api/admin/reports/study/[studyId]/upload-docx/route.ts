@@ -4,7 +4,7 @@
  *
  * Accepts a single .docx/.doc file and stores it for the report.
  * Use this to fix reports where Download DOCX fails (file missing in storage).
- * RBAC: Admin role required.
+ * Access: report owner or admin.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -20,6 +20,11 @@ import { isGarbageReportCity } from '@/lib/report-location-quality';
 import { extractStudyId } from '@/lib/csv/feasibility-parser';
 import { logAdminAudit } from '@/lib/admin-audit';
 import { enqueueStyleCorpusExtractForReport } from '@/lib/ai-report-builder/style-corpus-ingest';
+import {
+  assertReportAccess,
+  getReportAccessActor,
+  reportAccessDeniedResponse,
+} from '@/lib/report-access';
 
 const BUCKET_NAME = 'report-uploads';
 const MAX_DOCX_SIZE_BYTES = 100 * 1024 * 1024; // 100MB (Supabase Free: 50MB; Pro: 500GB)
@@ -65,26 +70,32 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
       );
     }
 
+    const actor = await getReportAccessActor(auth.session.user.id);
     const supabaseAdmin = createServerClient();
 
     const { data: report, error: reportError } = await supabaseAdmin
       .from('reports')
-      .select('id, study_id')
+      .select('id, user_id, study_id')
       .eq('study_id', studyId)
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (reportError || !report) {
+    if (reportError) {
       return NextResponse.json(
         { success: false, error: 'Report not found' },
         { status: 404 }
       );
     }
 
+    const access = assertReportAccess(actor, report);
+    if (!access.ok) {
+      return reportAccessDeniedResponse(access);
+    }
+
     const docxBuffer = Buffer.from(await file.arrayBuffer());
-    const docxStoragePath = `${report.id}/report.docx`;
+    const docxStoragePath = `${report!.id}/report.docx`;
 
     const { error: uploadError } = await supabaseAdmin.storage
       .from(BUCKET_NAME)
@@ -175,7 +186,7 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
     const { error: updateError } = await supabaseAdmin
       .from('reports')
       .update(updatePayload)
-      .eq('id', report.id);
+      .eq('id', report!.id);
 
     if (updateError) {
       console.error('[upload-docx] Update error:', updateError);
@@ -191,7 +202,7 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
         user_email: auth.session.user.email ?? undefined,
         action: 'upload',
         resource_type: 'report',
-        resource_id: report.id,
+        resource_id: report!.id,
         study_id: studyId,
         details: { file_type: 'docx', filename: file.name },
         source: 'session',
@@ -201,7 +212,7 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
 
     void enqueueStyleCorpusExtractForReport({
       supabase: supabaseAdmin,
-      reportId: report.id,
+      reportId: report!.id,
       studyId,
     }).catch((err) => {
       console.warn(
@@ -221,4 +232,4 @@ export const POST = withAdminAuth<ParamsContext>(async (request, auth, context) 
       { status: 500 }
     );
   }
-}, { requireRole: 'admin' });
+});

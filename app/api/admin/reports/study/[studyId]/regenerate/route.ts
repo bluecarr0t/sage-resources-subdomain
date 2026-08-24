@@ -1,48 +1,42 @@
 /**
  * API Route: Regenerate report DOCX + XLSX from existing report data
  * POST /api/admin/reports/study/[studyId]/regenerate
- *
- * Reads the existing report row, builds ReportDraftInput from its fields,
- * runs the full pipeline (enrich → generate → assemble), uploads new
- * DOCX + XLSX to storage, and updates the report record.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
-import { logAdminAudit } from '@/lib/admin-audit';
+import { executeGenerateDraft, StudyIdConflictError } from '@/lib/ai-report-builder/execute-generate-draft';
+import { mapReportRowToDraftInput } from '@/lib/ai-report-builder/report-row-to-input';
 import {
-  enrichReportInput,
-  deriveDevelopmentCosts,
-  generateExecutiveSummary,
-  generateLetterOfTransmittal,
-  generateSWOTAnalysis,
-  generateSiteAnalysis,
-  generateDemandIndicators,
-  assembleDraftDocx,
-  assembleDraftXlsx,
-  factCheckExecutiveSummary,
-} from '@/lib/ai-report-builder';
+  assertReportAccess,
+  getReportAccessActor,
+  reportAccessDeniedResponse,
+} from '@/lib/report-access';
 import {
-  proposeAssumptions,
-  runFeasibilityModel,
-  formatModelMetricsForPrompt,
-} from '@/lib/feasibility-model';
-import type { FeasibilityProjectInput } from '@/lib/feasibility-model';
-import { exportCostAnalysisToXlsx } from '@/lib/site-builder/export-cost-analysis-xlsx';
-import type { ReportDraftInput } from '@/lib/ai-report-builder';
+  acquireRegenerateLock,
+  checkReportRateLimit,
+  generationInProgressResponse,
+  rateLimitExceededResponse,
+  releaseRegenerateLock,
+} from '@/lib/report-builder-limits';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 180;
-
-const BUCKET_NAME = 'report-uploads';
 
 type ParamsContext = { params: Promise<{ studyId: string }> };
 
 export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, auth, context) => {
   const { studyId } = await context!.params;
+  let lockHeld = false;
 
   try {
+    const rate = await checkReportRateLimit('regenerate', auth.session.user.id);
+    if (!rate.allowed) {
+      return rateLimitExceededResponse(rate.resetAt);
+    }
+
+    const actor = await getReportAccessActor(auth.session.user.id);
     const supabaseAdmin = createServerClient();
 
     const { data: report, error: fetchError } = await supabaseAdmin
@@ -62,244 +56,47 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
       );
     }
 
-    if (!report) {
-      return NextResponse.json(
-        { success: false, error: 'Report not found' },
-        { status: 404 }
-      );
+    const access = assertReportAccess(actor, report);
+    if (!access.ok) {
+      return reportAccessDeniedResponse(access);
     }
 
-    if (!report.property_name || !report.city || !report.state) {
+    if (!report!.property_name || !report!.city || !report!.state) {
       return NextResponse.json(
         { success: false, error: 'Report missing required fields (property_name, city, state)' },
         { status: 400 }
       );
     }
 
-    const rawUnitMix = report.unit_mix;
-    const unitMix = Array.isArray(rawUnitMix) ? rawUnitMix : [];
-    const rawUnitDesc = report.unit_descriptions;
-    const unitDescriptions = Array.isArray(rawUnitDesc) ? rawUnitDesc : [];
-
-    let unit_mix: Array<{ type: string; count: number }>;
-    if (unitMix.length > 0) {
-      unit_mix = unitMix
-        .filter((u: { type?: string; count?: number }) => u?.type && (u.count ?? 0) > 0)
-        .map((u: { type?: string; count?: number }) => ({
-          type: String(u.type),
-          count: Number(u.count) || 1,
-        }));
-    } else if (unitDescriptions.length > 0) {
-      unit_mix = unitDescriptions
-        .filter((u: { type?: string; quantity?: number | null }) => u?.type)
-        .map((u: { type?: string; quantity?: number | null }) => ({
-          type: String(u.type),
-          count: Number(u.quantity) || 1,
-        }));
-    } else {
-      const totalSites = report.total_sites;
-      if (typeof totalSites === 'number' && totalSites > 0) {
-        const marketType = (report.market_type ?? 'rv') as string;
-        const defaultType = marketType.toLowerCase().includes('glamping') ? 'Cabin' : 'RV Site';
-        unit_mix = [{ type: defaultType, count: totalSites }];
-      } else {
-        unit_mix = [];
-      }
+    lockHeld = await acquireRegenerateLock(studyId);
+    if (!lockHeld) {
+      return generationInProgressResponse();
     }
 
-    const keyAmenities = (report.key_amenities as string[] | null) ?? [];
-
-    const input: ReportDraftInput = {
-      property_name: report.property_name,
-      city: report.city,
-      state: report.state,
-      zip_code: report.zip_code ?? undefined,
-      address_1: report.address_1 ?? undefined,
-      acres: report.lot_size_acres != null ? Number(report.lot_size_acres) : undefined,
-      parcel_number: report.parcel_number ?? undefined,
-      client_entity: report.client_entity ?? undefined,
-      client_contact_name: report.client_contact_name ?? undefined,
-      client_salutation: report.client_salutation ?? undefined,
-      client_address: report.client_address ?? undefined,
-      client_city_state_zip: report.client_city_state_zip ?? undefined,
-      unit_mix,
-      amenities_description: keyAmenities.length > 0 ? keyAmenities.join(', ') : undefined,
-      study_id: studyId,
-      // Align with generate-draft / ReportBuilderClient: glamping default, web research on
-      market_type: report.market_type ?? 'glamping',
-      include_web_research: true,
-      service: report.service ?? undefined,
-    };
-
-    const enriched = await enrichReportInput(input);
-    const supabaseAdminForCosts = supabaseAdmin;
-
-    const devCostsResult = await deriveDevelopmentCosts(supabaseAdminForCosts, enriched);
-    const assumptions = proposeAssumptions(enriched);
-    const projectInput: FeasibilityProjectInput = {
-      propertyName: enriched.property_name,
-      city: enriched.city,
-      state: enriched.state,
-      acres: enriched.acres,
-      parcelNumber: enriched.parcel_number,
-      unitMix: enriched.unit_mix,
-      siteDevCost: devCostsResult.data.totalProjectCost.siteDev,
-      unitCost: devCostsResult.data.totalProjectCost.unitCosts,
-      addBldgCost: devCostsResult.data.totalProjectCost.addBldg,
-      hardCostOverride:
-        devCostsResult.data.totalProjectCost.hardCosts > 0
-          ? devCostsResult.data.totalProjectCost.hardCosts
-          : undefined,
-    };
-    const modelOutput = runFeasibilityModel(projectInput, assumptions);
-    const modelMetricsText = formatModelMetricsForPrompt(modelOutput);
-
-    const [
-      execSummaryResult,
-      letter_of_transmittal,
-      swot_analysis,
-      site_analysis,
-      demand_indicators,
-    ] = await Promise.all([
-      generateExecutiveSummary(enriched, modelMetricsText),
-      generateLetterOfTransmittal(enriched),
-      generateSWOTAnalysis(enriched),
-      generateSiteAnalysis(enriched),
-      generateDemandIndicators(enriched),
-    ]);
-
-    let executive_summary = execSummaryResult.executive_summary;
-    const citations = execSummaryResult.citations;
-
-    const factCheck = factCheckExecutiveSummary(executive_summary, enriched);
-    if (!factCheck.passed && factCheck.flags.length > 0) {
-      executive_summary += `\n\n[Note: AI-generated draft. Some figures may require verification: ${factCheck.flags.map((f) => f.claim).join('; ')}.]`;
-    }
-
-    let costAnalysisBuffer: Buffer | null = null;
-    if (devCostsResult.configs.length > 0) {
-      try {
-        costAnalysisBuffer = await exportCostAnalysisToXlsx({
-          configs: devCostsResult.configs,
-          costResult: devCostsResult.costResult,
-          amenityBreakdown: [],
-        });
-      } catch (err) {
-        console.warn('[regenerate] Cost Analysis XLSX failed (non-fatal):', err);
-      }
-    }
-
-    const [docxBuffer, xlsxBuffer] = await Promise.all([
-      assembleDraftDocx(
-        enriched,
-        {
-          executive_summary,
-          citations,
-          letter_of_transmittal,
-          swot_analysis,
-          site_analysis,
-          demand_indicators,
-          development_costs_data: devCostsResult.data,
-          model_output: modelOutput,
-        },
-        { marketType: input.market_type }
-      ).then((r) => r.buffer),
-      assembleDraftXlsx(enriched, {
-        marketType: input.market_type,
-        modelOutput: enriched.unit_mix.some((u) => u.count > 0) ? modelOutput : null,
-      }),
-    ]);
-
-    const docxStoragePath = `${report.id}/report.docx`;
-    const xlsxStoragePath = `${report.id}/template.xlsx`;
-    const costAnalysisStoragePath = `${report.id}/cost-analysis.xlsx`;
-
-    const [docxUpload, xlsxUpload] = await Promise.all([
-      supabaseAdmin.storage.from(BUCKET_NAME).upload(docxStoragePath, docxBuffer, {
-        contentType:
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        upsert: true,
-      }),
-      supabaseAdmin.storage.from(BUCKET_NAME).upload(xlsxStoragePath, xlsxBuffer, {
-        contentType:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        upsert: true,
-      }),
-    ]);
-
-    if (costAnalysisBuffer) {
-      await supabaseAdmin.storage.from(BUCKET_NAME).upload(costAnalysisStoragePath, costAnalysisBuffer, {
-        contentType:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        upsert: true,
-      }).catch((err) => {
-        console.warn('[regenerate] Cost analysis upload failed (non-fatal):', err);
-      });
-    }
-
-    if (docxUpload.error) {
-      console.error('[regenerate] DOCX storage error:', docxUpload.error);
-      return NextResponse.json(
-        { success: false, error: `Failed to save DOCX: ${docxUpload.error.message}` },
-        { status: 500 }
-      );
-    }
-
-    const updatePayload: Record<string, unknown> = {
-      executive_summary,
-      has_docx: true,
-      docx_file_path: docxStoragePath,
-      enrichment_metadata: enriched.enrichment_metadata ?? null,
-      latitude: enriched.latitude ?? null,
-      longitude: enriched.longitude ?? null,
-    };
-
-    if (!xlsxUpload.error) {
-      updatePayload.xlsx_file_path = xlsxStoragePath;
-      updatePayload.has_xlsx = true;
-    } else {
-      console.warn('[regenerate] XLSX storage error (non-fatal):', xlsxUpload.error.message);
-    }
-
-    if (costAnalysisBuffer) {
-      updatePayload.cost_analysis_file_path = costAnalysisStoragePath;
-    }
-
-    const { error: updateError } = await supabaseAdmin
-      .from('reports')
-      .update(updatePayload)
-      .eq('id', report.id);
-
-    if (updateError) {
-      console.error('[regenerate] Update error:', updateError);
-      return NextResponse.json(
-        { success: false, error: 'Report files saved but failed to update record' },
-        { status: 500 }
-      );
-    }
-
-    await logAdminAudit(
-      {
-        user_id: auth.session.user.id,
-        user_email: auth.session.user.email ?? undefined,
-        action: 'edit',
-        resource_type: 'report',
-        resource_id: report.id,
-        study_id: studyId,
-        details: { regenerated: true, property_name: report.property_name },
-        source: 'session',
-      },
-      request
-    );
+    const input = mapReportRowToDraftInput(report!, studyId);
+    const result = await executeGenerateDraft({
+      input,
+      userId: report!.user_id ?? auth.session.user.id,
+      userEmail: auth.session.user.email ?? undefined,
+      draftMode: true,
+      existingReportId: report!.id,
+      request,
+    });
 
     return NextResponse.json({
       success: true,
       message: 'Report regenerated successfully',
-      docx_size: docxBuffer.length,
-      xlsx_size: xlsxBuffer.length,
+      docx_size: result.docxBuffer.length,
+      xlsx_size: result.xlsxBuffer.length,
     });
   } catch (err) {
     console.error('[regenerate] Error:', err);
+    if (err instanceof StudyIdConflictError) {
+      return NextResponse.json(
+        { success: false, error: err.message, studyId: err.studyId, reportId: err.reportId },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       {
         success: false,
@@ -307,5 +104,9 @@ export const POST = withAdminAuth<ParamsContext>(async (request: NextRequest, au
       },
       { status: 500 }
     );
+  } finally {
+    if (lockHeld) {
+      await releaseRegenerateLock(studyId);
+    }
   }
 });

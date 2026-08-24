@@ -12,10 +12,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/require-admin-auth';
 import { isValidStudyIdFormat } from '@/lib/report-constants';
 import type { ReportDraftInput } from '@/lib/ai-report-builder';
-import { executeGenerateDraft } from '@/lib/ai-report-builder/execute-generate-draft';
+import { executeGenerateDraft, StudyIdConflictError } from '@/lib/ai-report-builder/execute-generate-draft';
 import type { DraftProgressEvent } from '@/lib/ai-report-builder/draft-progress-events';
 import type { FeasibilityAssumptions } from '@/lib/feasibility-model';
 import type { StdbParseResult } from '@/lib/ai-report-builder/stdb-import';
+import {
+  acquireGenerateDraftLock,
+  checkReportRateLimit,
+  generationInProgressResponse,
+  rateLimitExceededResponse,
+  releaseGenerateDraftLock,
+} from '@/lib/report-builder-limits';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -187,9 +194,22 @@ function parseInput(raw: Record<string, unknown>): {
 }
 
 export async function POST(request: NextRequest) {
+  let lockHeld = false;
+  let lockUserId: string | null = null;
   try {
     const auth = await requireAdminAuth(request);
     if (!auth.ok) return auth.response;
+
+    const rate = await checkReportRateLimit('generateDraft', auth.session.user.id);
+    if (!rate.allowed) {
+      return rateLimitExceededResponse(rate.resetAt);
+    }
+
+    lockHeld = await acquireGenerateDraftLock(auth.session.user.id);
+    if (!lockHeld) {
+      return generationInProgressResponse();
+    }
+    lockUserId = auth.session.user.id;
 
     let body: unknown;
     try {
@@ -215,6 +235,8 @@ export async function POST(request: NextRequest) {
 
     if (stream) {
       const encoder = new TextEncoder();
+      const userId = auth.session.user.id;
+      const userEmail = auth.session.user.email ?? undefined;
       const readable = new ReadableStream({
         async start(controller) {
           const send = (ev: DraftProgressEvent) => {
@@ -223,8 +245,8 @@ export async function POST(request: NextRequest) {
           try {
             await executeGenerateDraft({
               input,
-              userId: auth.session.user.id,
-              userEmail: auth.session.user.email ?? undefined,
+              userId,
+              userEmail,
               format,
               draftMode,
               assumptionsOverride,
@@ -234,17 +256,20 @@ export async function POST(request: NextRequest) {
               request,
             });
           } catch (err) {
+            const status = err instanceof StudyIdConflictError ? 409 : 500;
             send({
               type: 'error',
               success: false,
               message: err instanceof Error ? err.message : 'Generation failed',
-              status: 500,
+              status,
             });
           } finally {
+            await releaseGenerateDraftLock(userId);
             controller.close();
           }
         },
       });
+      lockHeld = false;
       return new NextResponse(readable, {
         headers: {
           'Content-Type': 'application/x-ndjson; charset=utf-8',
@@ -293,6 +318,12 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error('[generate-draft] Error:', err);
+    if (err instanceof StudyIdConflictError) {
+      return NextResponse.json(
+        { success: false, error: err.message, studyId: err.studyId, reportId: err.reportId },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       {
         success: false,
@@ -300,5 +331,9 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
+  } finally {
+    if (lockHeld && lockUserId) {
+      await releaseGenerateDraftLock(lockUserId);
+    }
   }
 }

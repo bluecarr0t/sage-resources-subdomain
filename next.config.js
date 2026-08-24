@@ -67,6 +67,7 @@ const nextConfig = {
       { source: '/admin/comparables', destination: '/admin/glamping-properties', permanent: false },
       { source: '/admin/comparables/:path+', destination: '/admin/glamping-properties/:path+', permanent: false },
       { source: '/admin/comps', destination: '/admin/glamping-properties', permanent: true },
+      { source: '/admin/create-report-draft', destination: '/admin/report-builder', permanent: true },
       { source: '/admin/comps/:path+', destination: '/admin/glamping-properties/:path+', permanent: true },
       {
         source: '/map',

@@ -10,6 +10,11 @@ export const dynamic = 'force-dynamic';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { logAdminAudit } from '@/lib/admin-audit';
+import {
+  assertReportAccess,
+  getReportAccessActor,
+  reportAccessDeniedResponse,
+} from '@/lib/report-access';
 
 const BUCKET_NAME = 'report-uploads';
 
@@ -19,11 +24,12 @@ export const GET = withAdminAuth<ParamsContext>(async (request, auth, context) =
   const { studyId } = await context!.params;
 
   try {
+    const actor = await getReportAccessActor(auth.session.user.id);
     const supabaseAdmin = createServerClient();
 
     const { data: report, error: queryError } = await supabaseAdmin
       .from('reports')
-      .select('id, docx_file_path, narrative_file_path, study_id')
+      .select('id, user_id, docx_file_path, narrative_file_path, study_id')
       .eq('study_id', studyId)
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
@@ -36,6 +42,11 @@ export const GET = withAdminAuth<ParamsContext>(async (request, auth, context) =
         { success: false, error: 'Failed to look up report' },
         { status: 500 }
       );
+    }
+
+    const access = assertReportAccess(actor, report);
+    if (!access.ok) {
+      return reportAccessDeniedResponse(access);
     }
 
     const docxPath = report?.docx_file_path;

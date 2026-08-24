@@ -9,6 +9,10 @@ import { enrichReportInput } from '@/lib/ai-report-builder/enrich';
 import { proposeAssumptions } from '@/lib/feasibility-model';
 import { buildAssumptionEvidence } from '@/lib/ai-report-builder/assumption-helpers';
 import type { ReportDraftInput } from '@/lib/ai-report-builder/types';
+import {
+  checkReportRateLimit,
+  rateLimitExceededResponse,
+} from '@/lib/report-builder-limits';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -16,6 +20,11 @@ export const maxDuration = 120;
 export async function POST(request: NextRequest) {
   const auth = await requireAdminAuth(request);
   if (!auth.ok) return auth.response;
+
+  const rate = await checkReportRateLimit('proposeAssumptions', auth.session.user.id);
+  if (!rate.allowed) {
+    return rateLimitExceededResponse(rate.resetAt);
+  }
 
   try {
     const body = (await request.json()) as Record<string, unknown>;

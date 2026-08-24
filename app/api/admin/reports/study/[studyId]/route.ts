@@ -15,11 +15,16 @@ import {
   SAGE_PROPERTY_SELECT_FIELDS,
 } from '@/lib/admin/resolve-sage-data-anchor-id';
 import { ALL_SAGE_DATA_TABLE } from '@/lib/all-sage-data-table';
+import {
+  assertReportAccess,
+  reportAccessDeniedResponse,
+  reportsDbForAuth,
+} from '@/lib/report-access';
 
 type ParamsContext = { params: Promise<{ studyId: string }> };
 
 async function fetchLinkedSageProperty(
-  supabase: Parameters<Parameters<typeof withAdminAuth>[0]>[1]['supabase'],
+  supabase: Awaited<ReturnType<typeof reportsDbForAuth>>['supabase'],
   anchorId: number | null | undefined
 ) {
   if (anchorId == null) return null;
@@ -39,7 +44,8 @@ export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) 
   const { studyId } = await context!.params;
 
   try {
-    const { data: report, error: fetchError } = await auth.supabase
+    const { actor, supabase } = await reportsDbForAuth(auth);
+    const { data: report, error: fetchError } = await supabase
       .from('reports')
       .select(`
         *,
@@ -63,17 +69,15 @@ export const GET = withAdminAuth<ParamsContext>(async (_request, auth, context) 
       );
     }
 
-    if (!report) {
-      return NextResponse.json(
-        { success: false, error: 'Report not found' },
-        { status: 404 }
-      );
+    const access = assertReportAccess(actor, report);
+    if (!access.ok) {
+      return reportAccessDeniedResponse(access);
     }
 
-    const client = Array.isArray(report.clients) ? report.clients[0] : report.clients;
+    const client = Array.isArray(report!.clients) ? report!.clients[0] : report!.clients;
     const sageProperty = await fetchLinkedSageProperty(
-      auth.supabase,
-      report.sage_data_anchor_id as number | null | undefined
+      supabase,
+      report!.sage_data_anchor_id as number | null | undefined
     );
 
     return NextResponse.json({
@@ -102,6 +106,7 @@ export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context)
   const { studyId } = await context!.params;
 
   try {
+    const { actor, supabase } = await reportsDbForAuth(auth);
     const body = await request.json();
     const updates: Record<string, unknown> = {};
 
@@ -150,7 +155,7 @@ export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context)
       if (body.sage_data_anchor_id === null) {
         updates.sage_data_anchor_id = null;
       } else {
-        const resolved = await resolveSageDataAnchorId(auth.supabase, body.sage_data_anchor_id);
+        const resolved = await resolveSageDataAnchorId(supabase, body.sage_data_anchor_id);
         if (!resolved.ok) {
           return NextResponse.json(
             { success: false, error: resolved.error },
@@ -168,26 +173,24 @@ export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context)
       );
     }
 
-    const { data: existing } = await auth.supabase
+    const { data: existing } = await supabase
       .from('reports')
-      .select('id')
+      .select('id, user_id')
       .eq('study_id', studyId)
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'Report not found' },
-        { status: 404 }
-      );
+    const access = assertReportAccess(actor, existing);
+    if (!access.ok) {
+      return reportAccessDeniedResponse(access);
     }
 
-    const { data, error } = await auth.supabase
+    const { data, error } = await supabase
       .from('reports')
       .update(updates)
-      .eq('id', existing.id)
+      .eq('id', existing!.id)
       .select()
       .single();
 
@@ -214,7 +217,7 @@ export const PATCH = withAdminAuth<ParamsContext>(async (request, auth, context)
     );
 
     const sageProperty = await fetchLinkedSageProperty(
-      auth.supabase,
+      supabase,
       data.sage_data_anchor_id as number | null | undefined
     );
 
