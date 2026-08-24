@@ -3,6 +3,7 @@ import {
   parseProjectPipelineSheetYear,
   PROJECT_PIPELINE_ALL_SHEETS_TAB,
   PROJECT_PIPELINE_SHEET_TABS,
+  resolveCurrentProjectPipelineSheetTab,
   resolveProjectPipelineSheetSelection,
   resolveProjectPipelineSheetTab,
 } from '@/lib/project-pipeline/sheet-tabs';
@@ -36,6 +37,26 @@ describe('formatProjectPipelineSheetYearLabel', () => {
 
   it('shows All Years for the combined view sentinel', () => {
     expect(formatProjectPipelineSheetYearLabel(PROJECT_PIPELINE_ALL_SHEETS_TAB)).toBe('All Years');
+  });
+});
+
+describe('resolveCurrentProjectPipelineSheetTab', () => {
+  it('selects the tab for the current UTC calendar year', () => {
+    expect(resolveCurrentProjectPipelineSheetTab(new Date(Date.UTC(2026, 5, 15)))).toBe(
+      '2026 Jobs'
+    );
+    expect(resolveCurrentProjectPipelineSheetTab(new Date(Date.UTC(2025, 0, 1)))).toBe(
+      '2025 Jobs'
+    );
+    expect(resolveCurrentProjectPipelineSheetTab(new Date(Date.UTC(2023, 11, 31)))).toBe(
+      '2023 Vanessa Only'
+    );
+  });
+
+  it('falls back to the newest known tab when the year is not listed yet', () => {
+    expect(resolveCurrentProjectPipelineSheetTab(new Date(Date.UTC(2027, 0, 2)))).toBe(
+      '2026 Jobs'
+    );
   });
 });
 

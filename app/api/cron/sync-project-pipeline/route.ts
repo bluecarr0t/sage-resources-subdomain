@@ -1,5 +1,7 @@
 /**
- * Cron: mirror Job Numbers Google Sheet rows into Supabase (`project_pipeline_jobs`).
+ * Cron: mirror the current-year Job Numbers Google Sheet tab into Supabase
+ * (`project_pipeline_jobs`). Historical years are not hourly-synced; use
+ * Job Pipeline Refresh (all years) or `npm run sync:project-pipeline -- --all`.
  *
  * Schedule in vercel.json: hourly at :30 UTC (`30 * * * *`).
  *
@@ -10,18 +12,17 @@
  *
  * Auth: `authorizeVercelCronRequest` (CRON_SECRET / Vercel cron headers).
  *
- * All year tabs are attempted each run. A failed tab is retried once and does
- * not skip remaining years. Partial failure returns HTTP 500 with `failedSheets`.
+ * Retryable errors (quota, timeouts) are retried once. Failure returns HTTP 500.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
 import { jsonForProjectPipelineSyncAll } from '@/lib/project-pipeline/sync-all-http';
-import { syncAllProjectPipelineSheetsToSupabase } from '@/lib/project-pipeline/sync-to-supabase';
+import { syncCurrentProjectPipelineSheetToSupabase } from '@/lib/project-pipeline/sync-to-supabase';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300;
+export const maxDuration = 120;
 
 async function run(request: NextRequest): Promise<NextResponse> {
   if (!authorizeVercelCronRequest(request)) {
@@ -32,9 +33,12 @@ async function run(request: NextRequest): Promise<NextResponse> {
 
   try {
     const supabase = createServerClient();
-    const result = await syncAllProjectPipelineSheetsToSupabase(supabase);
+    const result = await syncCurrentProjectPipelineSheetToSupabase(supabase);
 
-    return jsonForProjectPipelineSyncAll(result, { elapsedMs: Date.now() - started });
+    return jsonForProjectPipelineSyncAll(result, {
+      elapsedMs: Date.now() - started,
+      syncAll: false,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[cron/sync-project-pipeline]', message);

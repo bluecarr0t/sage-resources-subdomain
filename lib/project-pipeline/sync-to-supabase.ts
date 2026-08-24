@@ -22,6 +22,7 @@ import { pickProjectPipelineSheetFieldSnapshot } from './sheet-field-snapshot';
 import {
   PROJECT_PIPELINE_SHEET_TABS,
   parseProjectPipelineSheetYear,
+  resolveCurrentProjectPipelineSheetTab,
   type ProjectPipelineSheetTab,
 } from './sheet-tabs';
 import {
@@ -261,14 +262,19 @@ export async function syncProjectPipelineSheetToSupabase(
   }
 }
 
-export async function syncAllProjectPipelineSheetsToSupabase(
+export async function syncProjectPipelineSheetsToSupabase(
   supabase: SupabaseClient,
-  options: { env?: NodeJS.ProcessEnv; accessToken?: string } = {}
+  options: {
+    env?: NodeJS.ProcessEnv;
+    accessToken?: string;
+    sheetNames?: readonly ProjectPipelineSheetTab[];
+  } = {}
 ): Promise<SyncAllProjectPipelineSheetsResult> {
   const env = options.env ?? process.env;
   const sheetId = getProjectPipelineSheetId(env);
+  const sheetNames = options.sheetNames ?? PROJECT_PIPELINE_SHEET_TABS;
   const { sheets, failedSheets } = await syncProjectPipelineSheetsWithRetry({
-    sheetNames: PROJECT_PIPELINE_SHEET_TABS,
+    sheetNames,
     syncSheet: (sheetName) =>
       syncProjectPipelineSheetToSupabase(supabase, sheetName, {
         env,
@@ -295,6 +301,26 @@ export async function syncAllProjectPipelineSheetsToSupabase(
     totalJobsAdded: sheets.reduce((sum, sheet) => sum + sheet.jobsAdded, 0),
     totalJobsRemoved: sheets.reduce((sum, sheet) => sum + sheet.jobsRemoved, 0),
   };
+}
+
+export async function syncAllProjectPipelineSheetsToSupabase(
+  supabase: SupabaseClient,
+  options: { env?: NodeJS.ProcessEnv; accessToken?: string } = {}
+): Promise<SyncAllProjectPipelineSheetsResult> {
+  return syncProjectPipelineSheetsToSupabase(supabase, options);
+}
+
+/** Hourly cron: current calendar year tab only (e.g. `2026 Jobs`). */
+export async function syncCurrentProjectPipelineSheetToSupabase(
+  supabase: SupabaseClient,
+  options: { env?: NodeJS.ProcessEnv; accessToken?: string; now?: Date } = {}
+): Promise<SyncAllProjectPipelineSheetsResult> {
+  const sheetName = resolveCurrentProjectPipelineSheetTab(options.now);
+  return syncProjectPipelineSheetsToSupabase(supabase, {
+    env: options.env,
+    accessToken: options.accessToken,
+    sheetNames: [sheetName],
+  });
 }
 
 /** @deprecated Use syncProjectPipelineSheetToSupabase or syncAllProjectPipelineSheetsToSupabase */

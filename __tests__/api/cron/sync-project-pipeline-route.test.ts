@@ -10,6 +10,7 @@ jest.mock('@/lib/vercel-cron-auth', () => ({
   authorizeVercelCronRequest: jest.fn(() => true),
 }));
 
+const mockSyncCurrent = jest.fn();
 const mockSyncAll = jest.fn();
 
 jest.mock('@/lib/supabase', () => ({
@@ -17,6 +18,7 @@ jest.mock('@/lib/supabase', () => ({
 }));
 
 jest.mock('@/lib/project-pipeline/sync-to-supabase', () => ({
+  syncCurrentProjectPipelineSheetToSupabase: (...args: unknown[]) => mockSyncCurrent(...args),
   syncAllProjectPipelineSheetsToSupabase: (...args: unknown[]) => mockSyncAll(...args),
 }));
 
@@ -60,7 +62,7 @@ describe('/api/cron/sync-project-pipeline', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (authorizeVercelCronRequest as jest.Mock).mockReturnValue(true);
-    mockSyncAll.mockResolvedValue(successfulResult);
+    mockSyncCurrent.mockResolvedValue(successfulResult);
   });
 
   it('returns 401 when cron auth fails', async () => {
@@ -69,27 +71,32 @@ describe('/api/cron/sync-project-pipeline', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 200 when every sheet tab synced', async () => {
+  it('syncs only the current-year tab and returns 200', async () => {
     const res = await GET(new NextRequest('http://localhost/api/cron/sync-project-pipeline'));
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.ok).toBe(true);
-    expect(body.totalJobsUpserted).toBe(10);
+    expect(body.syncAll).toBe(false);
+    expect(body.sheets).toEqual([expect.objectContaining({ sheetName: '2026 Jobs' })]);
     expect(body.failedSheets).toEqual([]);
-    expect(mockSyncAll).toHaveBeenCalledTimes(1);
+    expect(mockSyncCurrent).toHaveBeenCalledTimes(1);
+    expect(mockSyncAll).not.toHaveBeenCalled();
   });
 
-  it('returns 500 when some year tabs still failed after retry', async () => {
-    mockSyncAll.mockResolvedValue({
+  it('returns 500 when the current-year tab still failed after retry', async () => {
+    mockSyncCurrent.mockResolvedValue({
       ...successfulResult,
-      failedSheets: [{ sheetName: '2020', error: 'Quota exceeded' }],
+      failedSheets: [{ sheetName: '2026 Jobs', error: 'Quota exceeded' }],
     });
 
-    const res = await POST(new NextRequest('http://localhost/api/cron/sync-project-pipeline', { method: 'POST' }));
+    const res = await POST(
+      new NextRequest('http://localhost/api/cron/sync-project-pipeline', { method: 'POST' })
+    );
     const body = await res.json();
     expect(res.status).toBe(500);
     expect(body.ok).toBe(false);
-    expect(body.message).toContain('2020: Quota exceeded');
-    expect(body.totalJobsUpserted).toBe(10);
+    expect(body.syncAll).toBe(false);
+    expect(body.message).toContain('2026 Jobs: Quota exceeded');
+    expect(mockSyncAll).not.toHaveBeenCalled();
   });
 });
