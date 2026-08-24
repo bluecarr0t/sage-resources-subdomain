@@ -7,6 +7,14 @@ export type GoogleServiceAccountCredentials = {
   private_key: string;
 };
 
+/**
+ * Sage Google Sheets service account (GCP project sageai-475215).
+ * Share private sheets with this email as Viewer. The JSON key itself must
+ * live in Vercel env `GOOGLE_SERVICE_ACCOUNT_JSON` — never in git.
+ */
+export const GOOGLE_SHEETS_SERVICE_ACCOUNT_EMAIL =
+  'google-sheets-export@sageai-475215.iam.gserviceaccount.com';
+
 function normalizeCell(value: unknown): string {
   if (value == null) return '';
   if (typeof value === 'object') {
@@ -96,9 +104,10 @@ export function parseGoogleServiceAccountFromEnv(
     if (fromJson) return fromJson;
   }
 
-  const clientEmail = env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
+  const clientEmail =
+    env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim() || GOOGLE_SHEETS_SERVICE_ACCOUNT_EMAIL;
   const privateKey = env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?.trim();
-  if (!clientEmail || !privateKey) return null;
+  if (!privateKey) return null;
 
   return {
     client_email: clientEmail,
