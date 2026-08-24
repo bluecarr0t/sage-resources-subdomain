@@ -17,13 +17,19 @@ import {
   openInitialPipelineStatusHistory,
 } from './status-history';
 import { matchStatusUpdatesToProperties } from './match-status-updates';
-import { PIPELINE_PROCESSED_URLS_TABLE } from './constants';
-import type { PipelineSegment } from './constants';
+import {
+  PIPELINE_DISCOVERY_SOURCE,
+  PIPELINE_PROCESSED_URLS_TABLE,
+  type PipelineCountry,
+  type PipelineSegment,
+  type PipelineStatusChangeSource,
+} from './constants';
 import type { PipelineExtractedProperty, PipelinePropertyRef } from './types';
 import {
   passesRvPipelineInclusionCriteria,
   passesRvPipelinePostEnrichmentCriteria,
 } from './rv-inclusion-filter';
+import { extractedStateMatchesRegion } from './regions';
 
 export type ProcessPipelineArticleParams = {
   content: string;
@@ -37,6 +43,11 @@ export type ProcessPipelineArticleParams = {
   segment?: PipelineSegment;
   /** When false, skip marking the URL processed (multi-segment pass on same article). */
   markProcessed?: boolean;
+  country?: PipelineCountry;
+  discoverySource?: string;
+  changeSource?: PipelineStatusChangeSource;
+  /** When set, only insert properties whose state/province matches this code. */
+  regionCode?: string | null;
 };
 
 export type ProcessPipelineArticleResult = {
@@ -78,16 +89,27 @@ export async function processPipelineArticle(
     runId,
     segment = 'glamping',
     markProcessed = true,
+    country = 'United States',
+    discoverySource,
+    changeSource = 'weekly_pipeline_sync',
+    regionCode = null,
   } = params;
 
   const { new_properties, status_updates } = await extractPipelineFromArticle(
     content,
     openai,
-    segment
+    segment,
+    country
   );
 
+  const inRegion = regionCode
+    ? new_properties.filter((p) =>
+        extractedStateMatchesRegion(p.state, country, regionCode)
+      )
+    : new_properties;
+
   const newProps = filterNewProperties(
-    new_properties,
+    inRegion,
     dbPropertyNames
   ) as PipelineExtractedProperty[];
 
@@ -114,8 +136,15 @@ export async function processPipelineArticle(
       is_open: prop.is_open,
       property_type: prop.property_type ?? enriched.property_type,
       number_of_units: enriched.number_of_units ?? prop.number_of_units,
+      country,
+      state: prop.state || enriched.state || regionCode || undefined,
     };
-    const row = toPipelineInsertRow(pipelineProp, segment);
+    const row = toPipelineInsertRow(
+      pipelineProp,
+      segment,
+      discoverySource ?? PIPELINE_DISCOVERY_SOURCE,
+      country
+    );
 
     if (dryRun) {
       dbPropertyNames.add(normalizePropertyName(row.property_name));
@@ -141,7 +170,7 @@ export async function processPipelineArticle(
       propertyId: inserted.id,
       slug: inserted.slug,
       isOpen: row.is_open as 'Proposed Development' | 'Under Construction',
-      changeSource: 'weekly_pipeline_sync',
+      changeSource,
       evidenceUrl: articleUrl ?? null,
       runId: runId ?? null,
     });
@@ -166,7 +195,7 @@ export async function processPipelineArticle(
       slug: property.slug,
       previousIsOpen: property.is_open,
       nextIsOpen: update.is_open,
-      changeSource: 'weekly_pipeline_sync',
+      changeSource,
       evidenceUrl: articleUrl ?? null,
       notes: update.evidence ?? null,
       runId: runId ?? null,

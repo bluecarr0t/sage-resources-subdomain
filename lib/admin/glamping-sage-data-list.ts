@@ -1,4 +1,5 @@
 import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '@/lib/glamping-market-snapshot-region';
+import { CA_PROVINCE_DISPLAY_NAME } from '@/lib/normalize-ca-province-key';
 import { US_STATE_NAMES, type US_STATES } from '@/lib/us-states';
 import { applyFuzzySageDataSearch } from '@/lib/admin/sage-data-fuzzy-search';
 
@@ -23,7 +24,7 @@ export type SageDataGlampingListFilters = {
   country: string | undefined;
   /** Case-insensitive partial match on `city`. */
   city: string | undefined;
-  /** USPS state code (e.g. VT) when filtering US properties by state. */
+  /** USPS state or Canadian province code (e.g. VT, QC). */
   state: string | undefined;
   /** Exact `is_open` when set (e.g. Yes, Under Construction, Proposed Development, Temporarily closed, Closed). */
   isOpen: string | undefined;
@@ -66,10 +67,12 @@ export function applySageDataGlampingListFilters<T extends SageGlampingListQuery
   }
   if (filters.state && filters.state !== 'all') {
     const abbr = filters.state.trim().toUpperCase();
-    const fullName =
+    const usName =
       abbr in US_STATE_NAMES
         ? US_STATE_NAMES[abbr as (typeof US_STATES)[number]]
         : null;
+    const caName = CA_PROVINCE_DISPLAY_NAME[abbr] ?? null;
+    const fullName = usName ?? caName;
     if (fullName) {
       q = q.or(`state.eq.${abbr},state.ilike.${fullName}`);
     } else {

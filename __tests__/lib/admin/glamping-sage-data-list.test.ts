@@ -109,6 +109,26 @@ describe('applySageDataGlampingListFilters', () => {
 
     expect(query.calls.some((c) => c.method === 'or')).toBe(false);
   });
+
+  it('matches Canadian province abbreviation or full name', () => {
+    const query = createMockQuery();
+    applySageDataGlampingListFilters(query, {
+      q: '',
+      researchStatus: 'in_progress',
+      country: 'Canada',
+      city: undefined,
+      state: 'QC',
+      isOpen: undefined,
+      discoverySource: undefined,
+      missing: null,
+      glampingServiceTier: undefined,
+    });
+
+    const orCall = query.calls.find(
+      (c) => c.method === 'or' && String(c.args[0]).includes('state.eq.QC')
+    );
+    expect(orCall?.args[0]).toContain('state.ilike.Quebec');
+  });
 });
 
 describe('sage-data-fuzzy-search helpers', () => {

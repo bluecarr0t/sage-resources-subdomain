@@ -1,6 +1,7 @@
 import { ALL_SAGE_DATA_TABLE } from '@/lib/all-sage-data-table';
+import { ALL_GLAMPING_US_COUNTRY_CANONICAL } from '@/lib/all-glamping-properties-country';
 import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
-import type { PipelineSegment } from './constants';
+import type { PipelineCountry, PipelineSegment } from './constants';
 import {
   PIPELINE_DISCOVERY_SOURCE,
   PIPELINE_RV_DISCOVERY_SOURCE,
@@ -58,7 +59,8 @@ export type PipelineInsertRow = {
 export function toPipelineInsertRow(
   property: PipelineExtractedProperty,
   segment: PipelineSegment = 'glamping',
-  discoverySource?: string
+  discoverySource?: string,
+  country: PipelineCountry = 'United States'
 ): PipelineInsertRow {
   const slug = slugifyPropertyName(property.property_name);
   let url = (property.url || '').trim();
@@ -97,7 +99,8 @@ export function toPipelineInsertRow(
     discovery_source: discoverySource ?? defaultDiscoverySource,
     date_added: today,
     date_updated: today,
-    country: 'United States',
+    country:
+      country === 'Canada' ? 'Canada' : ALL_GLAMPING_US_COUNTRY_CANONICAL,
     land_operator_category: 'private_commercial',
     address: property.address || null,
     city: property.city || null,

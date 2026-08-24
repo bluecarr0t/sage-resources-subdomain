@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ChevronRight, Table2 } from 'lucide-react';
 import AdminColumnsView from '@/components/AdminColumnsView';
 import AdminDiscoveryPipelineStats from '@/components/AdminDiscoveryPipelineStats';
+import AdminPipelineStateCoverage from '@/components/AdminPipelineStateCoverage';
 import AdminGlampingMetrics from '@/components/AdminGlampingMetrics';
 import AdminMissingFieldsBreakdown from '@/components/AdminMissingFieldsBreakdown';
 import AdminGlampingServiceTierBreakdown from '@/components/AdminGlampingServiceTierBreakdown';
@@ -44,6 +45,10 @@ export default function SageDataPage() {
         </div>
 
         <AdminGlampingMetrics />
+
+        <div className="mt-8">
+          <AdminPipelineStateCoverage />
+        </div>
 
         <div className="mt-8">
           <AdminDiscoveryPipelineStats />

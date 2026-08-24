@@ -8,6 +8,7 @@ export {
   PIPELINE_PROCESSED_URLS_TABLE,
   PIPELINE_RUNS_TABLE,
   PIPELINE_STATUS_HISTORY_TABLE,
+  PIPELINE_STATE_COVERAGE_TABLE,
 } from './constants';
 
 export type { PipelineSegment, PipelineRvPropertyType } from './constants';
@@ -17,6 +18,8 @@ export {
   PIPELINE_RV_DISCOVERY_QUERIES,
   searchPipelineRvNews,
   searchPipelineAllSegmentsNews,
+  searchPipelineCustomNews,
+  searchPipelineGlampingNews,
 } from './tavily-search';
 
 export {
@@ -43,12 +46,26 @@ export type {
   StatusStintDuration,
 } from './status-history';
 
-export { searchPipelineGlampingNews } from './tavily-search';
-export { extractPipelineFromArticle } from './extract-from-article';
+export { extractPipelineFromArticle, isExtractedCountryAllowed } from './extract-from-article';
 export { processPipelineArticle } from './process-article';
 export { matchStatusUpdatesToProperties } from './match-status-updates';
 export { toPipelineInsertRow } from './to-insert-row';
 export { runWeeklyPipelineSync } from './run-weekly-sync';
+export { runRegionPipelineSync } from './run-region-sync';
+export {
+  ALL_PIPELINE_REGIONS,
+  CA_PIPELINE_REGIONS,
+  US_PIPELINE_REGIONS,
+  findPipelineRegion,
+  parsePipelineCountry,
+  pipelineDiscoverySourceForRegion,
+  extractedStateMatchesRegion,
+} from './regions';
+export { buildRegionPipelineQueries } from './region-queries';
+export {
+  fetchPipelineCoverageSnapshot,
+  sageDataEditorHrefForRegion,
+} from './state-coverage';
 
 export type {
   PipelineArticleExtraction,
@@ -57,3 +74,4 @@ export type {
   PipelineStatusUpdate,
   PipelineWeeklyRunMetrics,
 } from './types';
+export type { PipelineCountry, PipelineSweepStatus } from './constants';

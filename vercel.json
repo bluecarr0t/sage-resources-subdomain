@@ -17,6 +17,10 @@
       "schedule": "0 16 * * 1"
     },
     {
+      "path": "/api/cron/discover-glamping-pipeline-regions",
+      "schedule": "0 18 * * 2"
+    },
+    {
       "path": "/api/cron/research-contacts",
       "schedule": "0 17 * * 2"
     },

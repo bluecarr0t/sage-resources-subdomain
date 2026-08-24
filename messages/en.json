@@ -1969,6 +1969,30 @@
       "healthCronSchedule": "Vercel cron targets this route every Monday at 15:00 UTC (see vercel.json).",
       "runHistoryEmpty": "No rows in run history yet."
     },
+    "pipelineCoverage": {
+      "title": "Pipeline coverage (Proposed / Under Construction)",
+      "subtitle": "Live inventory of pre-opening glamping properties by US state and Canadian province. Sweep status tracks systematic Tavily research; counts come from the database.",
+      "loadingAria": "Pipeline coverage loading",
+      "proposed": "Proposed",
+      "underConstruction": "Under construction",
+      "cancelled": "Cancelled",
+      "zeroPipeline": "Regions with none",
+      "tabUsa": "United States",
+      "tabCanada": "Canada",
+      "colRegion": "Region",
+      "colSweep": "Sweep",
+      "colProposed": "Proposed",
+      "colUc": "UC",
+      "colCancelled": "Cancelled",
+      "colLastSweep": "Last sweep",
+      "colOpen": "Sage Data",
+      "statusPending": "Pending",
+      "statusInProgress": "In progress",
+      "statusComplete": "Swept",
+      "statusNoneFound": "None found",
+      "neverSwept": "Never",
+      "openEditor": "Open"
+    },
     "rvIndustryOverview": {
       "title": "RV Industry Overview",
       "chartDetails": {

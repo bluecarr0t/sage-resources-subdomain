@@ -2,11 +2,20 @@ import type { GlampingIsOpenValue } from '@/lib/glamping-is-open';
 
 export type PipelineSegment = 'glamping' | 'rv';
 
+export const PIPELINE_COUNTRIES = ['United States', 'Canada'] as const;
+export type PipelineCountry = (typeof PIPELINE_COUNTRIES)[number];
+
 /** Stored on new glamping rows from the weekly pipeline sync. */
 export const PIPELINE_DISCOVERY_SOURCE = 'weekly_pipeline_sync';
 
 /** Stored on new RV rows from the weekly pipeline sync. */
 export const PIPELINE_RV_DISCOVERY_SOURCE = 'weekly_pipeline_sync_rv';
+
+/** Prefix for state/province-scoped pipeline inserts (`…_state_TX`, `…_province_QC`). */
+export const PIPELINE_REGION_DISCOVERY_SOURCE_PREFIX = 'weekly_pipeline_sync';
+
+export const PIPELINE_GAP_FILL_DISCOVERY_SOURCE =
+  'web_research_2026_08_pipeline_gap_fill';
 
 /** RV-segment property types: parks, resorts, and RV-primary campgrounds (≥20 sites). */
 export const PIPELINE_RV_PROPERTY_TYPES = [
@@ -31,6 +40,16 @@ export function isPipelineRvSegmentPropertyType(
 export const PIPELINE_PROCESSED_URLS_TABLE = 'glamping_pipeline_processed_urls';
 export const PIPELINE_RUNS_TABLE = 'glamping_pipeline_discovery_runs';
 export const PIPELINE_STATUS_HISTORY_TABLE = 'glamping_pipeline_status_history';
+export const PIPELINE_STATE_COVERAGE_TABLE = 'glamping_pipeline_state_coverage';
+
+export const PIPELINE_SWEEP_STATUSES = [
+  'pending',
+  'in_progress',
+  'complete',
+  'no_projects_found',
+] as const;
+
+export type PipelineSweepStatus = (typeof PIPELINE_SWEEP_STATUSES)[number];
 
 /** Stages eligible for new pipeline inserts. */
 export const PIPELINE_IS_OPEN_VALUES = [
@@ -52,6 +71,7 @@ export type PipelineIsOpenValue = (typeof PIPELINE_IS_OPEN_VALUES)[number];
 
 export const PIPELINE_STATUS_CHANGE_SOURCES = [
   'weekly_pipeline_sync',
+  'region_pipeline_sync',
   'admin_patch',
   'planned_open_cron',
   'initial_backfill',

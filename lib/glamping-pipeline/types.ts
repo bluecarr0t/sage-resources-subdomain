@@ -45,6 +45,8 @@ export type PipelineWeeklyRunMetrics = {
   runId?: string;
   glamping?: PipelineSegmentMetrics;
   rv?: PipelineSegmentMetrics;
+  country?: string;
+  regionCode?: string;
 };
 
 export type PipelinePropertyRef = {

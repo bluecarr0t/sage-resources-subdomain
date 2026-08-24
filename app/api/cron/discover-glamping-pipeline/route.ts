@@ -10,9 +10,11 @@
  * Runs one hour after general glamping discovery.
  *
  * Query params (manual triggers):
- *   ?limit=N   — Tavily max results per query (default 5, max 10)
- *   ?force=1   — bypass processed-URLs dedup for that run
- *   ?dryRun=1  — extract and match only; no inserts or status writes
+ *   ?limit=N     — Tavily max results per query (default 5, max 10)
+ *   ?force=1     — bypass processed-URLs dedup for that run
+ *   ?dryRun=1    — extract and match only; no inserts or status writes
+ *   ?state=TX    — run a single-state (or province) sweep instead of national
+ *   ?country=Canada — used with ?state= (default United States)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -20,6 +22,8 @@ import { createClient } from '@supabase/supabase-js';
 import { OpenAI } from 'openai';
 import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
 import { runWeeklyPipelineSync } from '@/lib/glamping-pipeline';
+import { parsePipelineCountry } from '@/lib/glamping-pipeline/regions';
+import { runRegionPipelineSync } from '@/lib/glamping-pipeline/run-region-sync';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -42,6 +46,8 @@ async function run(request: NextRequest): Promise<NextResponse> {
   const limitPerQuery = parseLimit(url.searchParams.get('limit'));
   const force = url.searchParams.get('force') === '1';
   const dryRun = url.searchParams.get('dryRun') === '1';
+  const state = url.searchParams.get('state')?.trim().toUpperCase() || null;
+  const country = parsePipelineCountry(url.searchParams.get('country')) ?? 'United States';
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const secretKey =
@@ -64,6 +70,27 @@ async function run(request: NextRequest): Promise<NextResponse> {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const openai = new OpenAI({ apiKey: openaiApiKey! });
+
+  if (state) {
+    const { metrics, error, region } = await runRegionPipelineSync(
+      supabase,
+      openai,
+      tavilyKey!,
+      { country, regionCode: state, dryRun, force, limitPerQuery }
+    );
+    if (error) {
+      return NextResponse.json(
+        { success: false, error, metrics, region },
+        { status: 500 }
+      );
+    }
+    return NextResponse.json({
+      success: true,
+      message: `Pipeline region sync complete for ${region?.code ?? state}${dryRun ? ' (dry run)' : ''}`,
+      metrics,
+      region,
+    });
+  }
 
   const { metrics, error } = await runWeeklyPipelineSync(
     supabase,
