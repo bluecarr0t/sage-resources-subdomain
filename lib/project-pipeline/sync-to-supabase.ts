@@ -5,7 +5,6 @@ import {
   getProjectPipelineSheetId,
   fetchProjectPipelineJobs,
 } from './fetch-jobs';
-import { isGoogleSheetsReadQuotaError } from './sheets-read-cache';
 import {
   PROJECT_PIPELINE_JOBS_TABLE,
   PROJECT_PIPELINE_SYNC_RUNS_TABLE,
@@ -23,8 +22,19 @@ import { pickProjectPipelineSheetFieldSnapshot } from './sheet-field-snapshot';
 import {
   PROJECT_PIPELINE_SHEET_TABS,
   parseProjectPipelineSheetYear,
+  resolveCurrentProjectPipelineSheetTab,
   type ProjectPipelineSheetTab,
 } from './sheet-tabs';
+import {
+  formatProjectPipelineFailedSheetsMessage,
+  syncProjectPipelineSheetsWithRetry,
+  type ProjectPipelineSheetSyncFailure,
+} from './sync-sheets-with-retry';
+
+export {
+  describeProjectPipelineSyncAll,
+  type ProjectPipelineSyncAllOutcome,
+} from './sync-sheets-with-retry';
 
 const UPSERT_BATCH_SIZE = 100;
 
@@ -42,6 +52,7 @@ export type SyncProjectPipelineToSupabaseResult = {
 export type SyncAllProjectPipelineSheetsResult = {
   sheetId: string;
   sheets: SyncProjectPipelineToSupabaseResult[];
+  failedSheets: ProjectPipelineSheetSyncFailure[];
   totalJobsFetched: number;
   totalJobsUpserted: number;
   totalJobsAdded: number;
@@ -251,46 +262,65 @@ export async function syncProjectPipelineSheetToSupabase(
   }
 }
 
-export async function syncAllProjectPipelineSheetsToSupabase(
+export async function syncProjectPipelineSheetsToSupabase(
   supabase: SupabaseClient,
-  options: { env?: NodeJS.ProcessEnv; accessToken?: string } = {}
+  options: {
+    env?: NodeJS.ProcessEnv;
+    accessToken?: string;
+    sheetNames?: readonly ProjectPipelineSheetTab[];
+  } = {}
 ): Promise<SyncAllProjectPipelineSheetsResult> {
   const env = options.env ?? process.env;
   const sheetId = getProjectPipelineSheetId(env);
-  const sheets: SyncProjectPipelineToSupabaseResult[] = [];
-  const errors: string[] = [];
-
-  for (const sheetName of PROJECT_PIPELINE_SHEET_TABS) {
-    try {
-      sheets.push(
-        await syncProjectPipelineSheetToSupabase(supabase, sheetName, {
-          env,
-          accessToken: options.accessToken,
-        })
+  const sheetNames = options.sheetNames ?? PROJECT_PIPELINE_SHEET_TABS;
+  const { sheets, failedSheets } = await syncProjectPipelineSheetsWithRetry({
+    sheetNames,
+    syncSheet: (sheetName) =>
+      syncProjectPipelineSheetToSupabase(supabase, sheetName, {
+        env,
+        accessToken: options.accessToken,
+      }),
+    onSheetError: (sheetName, error, attempt) => {
+      console.warn(
+        `[project-pipeline] Sync failed for ${sheetName} (attempt ${attempt})`,
+        error
       );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      errors.push(`${sheetName}: ${message}`);
-      console.warn(`[project-pipeline] Sync failed for ${sheetName}`, error);
+    },
+  });
 
-      if (!isGoogleSheetsReadQuotaError(error)) {
-        throw error;
-      }
-    }
-  }
-
-  if (!sheets.length && errors.length > 0) {
-    throw new Error(errors.join('; '));
+  if (!sheets.length && failedSheets.length > 0) {
+    throw new Error(formatProjectPipelineFailedSheetsMessage(failedSheets));
   }
 
   return {
     sheetId,
     sheets,
+    failedSheets,
     totalJobsFetched: sheets.reduce((sum, sheet) => sum + sheet.jobsFetched, 0),
     totalJobsUpserted: sheets.reduce((sum, sheet) => sum + sheet.jobsUpserted, 0),
     totalJobsAdded: sheets.reduce((sum, sheet) => sum + sheet.jobsAdded, 0),
     totalJobsRemoved: sheets.reduce((sum, sheet) => sum + sheet.jobsRemoved, 0),
   };
+}
+
+export async function syncAllProjectPipelineSheetsToSupabase(
+  supabase: SupabaseClient,
+  options: { env?: NodeJS.ProcessEnv; accessToken?: string } = {}
+): Promise<SyncAllProjectPipelineSheetsResult> {
+  return syncProjectPipelineSheetsToSupabase(supabase, options);
+}
+
+/** Hourly cron: current calendar year tab only (e.g. `2026 Jobs`). */
+export async function syncCurrentProjectPipelineSheetToSupabase(
+  supabase: SupabaseClient,
+  options: { env?: NodeJS.ProcessEnv; accessToken?: string; now?: Date } = {}
+): Promise<SyncAllProjectPipelineSheetsResult> {
+  const sheetName = resolveCurrentProjectPipelineSheetTab(options.now);
+  return syncProjectPipelineSheetsToSupabase(supabase, {
+    env: options.env,
+    accessToken: options.accessToken,
+    sheetNames: [sheetName],
+  });
 }
 
 /** @deprecated Use syncProjectPipelineSheetToSupabase or syncAllProjectPipelineSheetsToSupabase */

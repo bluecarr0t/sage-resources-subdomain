@@ -2,7 +2,10 @@ import {
   isGoogleSheetsOAuthAuthError,
   isGoogleSheetsPermissionError,
 } from '@/lib/project-pipeline/google-sheets-client-errors';
-import { formatProjectPipelineSheetsAccessError } from '@/lib/project-pipeline/google-sheets-errors';
+import {
+  formatProjectPipelineSheetsAccessError,
+  getProjectPipelineServiceAccountEmail,
+} from '@/lib/project-pipeline/google-sheets-errors';
 
 describe('google-sheets-errors', () => {
   it('detects permission errors', () => {
@@ -35,5 +38,17 @@ describe('google-sheets-errors', () => {
 
     expect(message).toContain('pipeline@test.iam.gserviceaccount.com');
     expect(message).toContain('Share');
+  });
+
+  it('uses the default Sage service account email when credentials are not in env', () => {
+    expect(getProjectPipelineServiceAccountEmail({})).toBe(
+      'google-sheets-export@sageai-475215.iam.gserviceaccount.com'
+    );
+
+    const message = formatProjectPipelineSheetsAccessError(
+      new Error('The caller does not have permission'),
+      {}
+    );
+    expect(message).toContain('google-sheets-export@sageai-475215.iam.gserviceaccount.com');
   });
 });

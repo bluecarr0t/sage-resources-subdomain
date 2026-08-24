@@ -80,6 +80,16 @@ describe('parseGoogleServiceAccountFromEnv', () => {
     expect(credentials?.private_key).toContain('\nxyz\n');
   });
 
+  it('uses the Sage service account email when only a private key is set', () => {
+    const credentials = parseGoogleServiceAccountFromEnv({
+      GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: '-----BEGIN PRIVATE KEY-----\\nabc\\n-----END PRIVATE KEY-----\\n',
+    });
+
+    expect(credentials?.client_email).toBe(
+      'google-sheets-export@sageai-475215.iam.gserviceaccount.com'
+    );
+  });
+
   it('returns null when credentials are missing', () => {
     expect(parseGoogleServiceAccountFromEnv({})).toBeNull();
     expect(isGoogleSheetsExportConfigured({})).toBe(false);

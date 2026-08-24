@@ -51,6 +51,19 @@ export function isProjectPipelineSheetTab(value: string): value is ProjectPipeli
   return (PROJECT_PIPELINE_SHEET_TABS as readonly string[]).includes(value);
 }
 
+/**
+ * Google Sheet tab for the current calendar year (UTC), e.g. 2026 → `2026 Jobs`.
+ * Falls back to the newest known tab when that year is not in `PROJECT_PIPELINE_SHEET_TABS` yet.
+ */
+export function resolveCurrentProjectPipelineSheetTab(
+  now: Date = new Date(),
+  tabs: readonly ProjectPipelineSheetTab[] = PROJECT_PIPELINE_SHEET_TABS
+): ProjectPipelineSheetTab {
+  const year = now.getUTCFullYear();
+  const match = tabs.find((tab) => parseProjectPipelineSheetYear(tab) === year);
+  return match ?? tabs[0] ?? DEFAULT_PROJECT_PIPELINE_SHEET_TAB;
+}
+
 export function resolveProjectPipelineSheetTab(
   sheetName: string | null | undefined
 ): ProjectPipelineSheetTab {
