@@ -9,11 +9,15 @@
  * - Migration: scripts/migrations/create-project-pipeline-jobs-2026-06-23.sql
  *
  * Auth: `authorizeVercelCronRequest` (CRON_SECRET / Vercel cron headers).
+ *
+ * All year tabs are attempted each run. A failed tab is retried once and does
+ * not skip remaining years. Partial failure returns HTTP 500 with `failedSheets`.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
+import { jsonForProjectPipelineSyncAll } from '@/lib/project-pipeline/sync-all-http';
 import { syncAllProjectPipelineSheetsToSupabase } from '@/lib/project-pipeline/sync-to-supabase';
 
 export const dynamic = 'force-dynamic';
@@ -30,11 +34,7 @@ async function run(request: NextRequest): Promise<NextResponse> {
     const supabase = createServerClient();
     const result = await syncAllProjectPipelineSheetsToSupabase(supabase);
 
-    return NextResponse.json({
-      ok: true,
-      ...result,
-      elapsedMs: Date.now() - started,
-    });
+    return jsonForProjectPipelineSyncAll(result, { elapsedMs: Date.now() - started });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[cron/sync-project-pipeline]', message);

@@ -4,6 +4,7 @@ import {
   syncAllProjectPipelineSheetsToSupabase,
   syncProjectPipelineSheetToSupabase,
 } from '@/lib/project-pipeline/sync-to-supabase';
+import { jsonForProjectPipelineSyncAll } from '@/lib/project-pipeline/sync-all-http';
 import { resolveProjectPipelineSheetTab } from '@/lib/project-pipeline/sheet-tabs';
 
 export const dynamic = 'force-dynamic';
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
   try {
     if (body.syncAll === true) {
       const result = await syncAllProjectPipelineSheetsToSupabase(supabase, { accessToken });
-      return NextResponse.json({ ok: true, syncAll: true, ...result, elapsedMs: Date.now() - started });
+      return jsonForProjectPipelineSyncAll(result, { elapsedMs: Date.now() - started });
     }
 
     const sheetName = resolveProjectPipelineSheetTab(

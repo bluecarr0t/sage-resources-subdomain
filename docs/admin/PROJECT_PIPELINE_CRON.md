@@ -1,12 +1,13 @@
 # Project pipeline cron sync (production)
 
-Hourly service-account sync keeps `project_pipeline_jobs` fresh so **users do not need OAuth backfill** for every visit.
+Hourly service-account sync keeps `project_pipeline_jobs` fresh so **Job Pipeline** (`/admin/job-pipeline`) stays in sync with the Google Sheet without requiring OAuth backfill on every visit.
 
 ## Schedule
 
-- **Route:** `GET /api/cron/sync-project-pipeline`
+- **Route:** `GET/POST /api/cron/sync-project-pipeline`
 - **Vercel cron:** `30 * * * *` (hourly at :30 UTC) — see `vercel.json`
 - **Tabs synced:** 2026 Jobs → 2020 (all `PROJECT_PIPELINE_SHEET_TABS`)
+- **Failure handling:** each tab is attempted independently; retryable errors (quota, timeouts) are retried once. Remaining years still sync if one tab fails. HTTP 500 when any tab is still failing (`failedSheets` in the JSON body).
 
 ## Required Vercel env vars
 
@@ -37,6 +38,6 @@ npm run sync:project-pipeline      # all tabs
 
 ## Verify in production
 
-1. Vercel → Cron → confirm `sync-project-pipeline` runs successfully.
-2. Supabase → `project_pipeline_sync_runs` has recent `completed_at` rows.
+1. Vercel → Cron → confirm `sync-project-pipeline` runs successfully each hour.
+2. Supabase → `project_pipeline_sync_runs` has recent `completed_at` rows for every year tab.
 3. Job Pipeline loads without `requiresOAuth` for users when `countAllProjectPipelineJobsInSupabase` > 0.

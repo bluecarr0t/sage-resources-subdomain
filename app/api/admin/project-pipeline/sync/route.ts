@@ -9,6 +9,7 @@ import {
   syncAllProjectPipelineSheetsToSupabase,
   syncProjectPipelineSheetToSupabase,
 } from '@/lib/project-pipeline/sync-to-supabase';
+import { jsonForProjectPipelineSyncAll } from '@/lib/project-pipeline/sync-all-http';
 import {
   formatProjectPipelineSheetsAccessError,
   isGoogleSheetsPermissionError,
@@ -16,7 +17,7 @@ import {
 import { resolveProjectPipelineSheetTab } from '@/lib/project-pipeline/sheet-tabs';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export const POST = withAdminAuth(async (request: NextRequest, auth) => {
   const managedUser = await getManagedUser(auth.session.user.id);
@@ -53,12 +54,7 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
   try {
     if (body.syncAll === true) {
       const result = await syncAllProjectPipelineSheetsToSupabase(supabase);
-      return NextResponse.json({
-        ok: true,
-        syncAll: true,
-        ...result,
-        elapsedMs: Date.now() - started,
-      });
+      return jsonForProjectPipelineSyncAll(result, { elapsedMs: Date.now() - started });
     }
 
     const sheetName = resolveProjectPipelineSheetTab(

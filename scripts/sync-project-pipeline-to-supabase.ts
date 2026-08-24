@@ -15,6 +15,7 @@ import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import {
   assertProjectPipelineCronSyncConfigured,
+  describeProjectPipelineSyncAll,
   syncAllProjectPipelineSheetsToSupabase,
   syncProjectPipelineSheetToSupabase,
 } from '../lib/project-pipeline/sync-to-supabase';
@@ -93,6 +94,12 @@ async function main() {
 
   if (syncAll || (!sheetName && !hasServiceAccount && accessToken)) {
     const result = await syncAllProjectPipelineSheetsToSupabase(supabase, syncOptions);
+    const outcome = describeProjectPipelineSyncAll(result);
+    if (!outcome.ok) {
+      console.error(`✗ Project pipeline sync incomplete: ${outcome.message}`);
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(1);
+    }
     console.log('✓ Project pipeline sync complete (all tabs)');
     console.log(JSON.stringify(result, null, 2));
     return;
