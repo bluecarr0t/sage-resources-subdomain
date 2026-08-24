@@ -53,6 +53,14 @@ npx tsx scripts/research-glamping-resorts-openai.ts --dry-run    # no DB
 npx tsx scripts/research-glamping-resorts-openai.ts --no-firecrawl  # skip Firecrawl
 ```
 
+**State/province pipeline (Proposed / Under Construction → `research_status=in_progress`):**
+
+```bash
+npx tsx scripts/research-pipeline-by-state.ts --state TX --dry-run
+npx tsx scripts/research-pipeline-by-state.ts --priority 0
+npx tsx scripts/research-pipeline-by-state.ts --state QC --country Canada
+```
+
 **Ski (Tavily + OpenAI):**
 
 ```bash

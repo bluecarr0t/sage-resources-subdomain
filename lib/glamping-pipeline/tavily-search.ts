@@ -75,6 +75,15 @@ async function searchPipelineNewsQueries(
   return results;
 }
 
+export async function searchPipelineCustomNews(
+  tavilyApiKey: string,
+  queries: readonly string[],
+  limitPerQuery: number = 5,
+  logLabel: string = 'custom'
+): Promise<PipelineTavilyArticle[]> {
+  return searchPipelineNewsQueries(tavilyApiKey, queries, limitPerQuery, logLabel);
+}
+
 export async function searchPipelineGlampingNews(
   tavilyApiKey: string,
   limitPerQuery: number = 5

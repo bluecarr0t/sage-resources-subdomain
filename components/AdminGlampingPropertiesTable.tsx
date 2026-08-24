@@ -20,6 +20,7 @@ import {
   tierDisplayLabel,
 } from '@/lib/glamping-service-tier';
 import { isUnitedStatesCountryFilterValue } from '@/lib/admin/glamping-sage-data-list';
+import { CA_PROVINCE_DISPLAY_NAME } from '@/lib/normalize-ca-province-key';
 import { US_STATES_OPTIONS } from '@/lib/us-states';
 import { useTranslations } from 'next-intl';
 import {
@@ -1506,10 +1507,18 @@ export default function AdminGlampingPropertiesTable() {
   const [pageSize] = useState(50);
   const [searchInput, setSearchInput] = useState(initialSearch);
   const [search, setSearch] = useState(initialSearch);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [countryFilter, setCountryFilter] = useState<string>('all');
-  const [stateFilter, setStateFilter] = useState<string>('all');
-  const [openStatusFilter, setOpenStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>(
+    () => searchParams.get('research_status')?.trim() || 'all'
+  );
+  const [countryFilter, setCountryFilter] = useState<string>(
+    () => searchParams.get('country')?.trim() || 'all'
+  );
+  const [stateFilter, setStateFilter] = useState<string>(
+    () => searchParams.get('state')?.trim().toUpperCase() || 'all'
+  );
+  const [openStatusFilter, setOpenStatusFilter] = useState<string>(
+    () => searchParams.get('is_open')?.trim() || 'all'
+  );
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   /** `null` = list not loaded yet */
   const [countryNames, setCountryNames] = useState<string[] | null>(null);
@@ -1544,7 +1553,17 @@ export default function AdminGlampingPropertiesTable() {
   }, [search, statusFilter, countryFilter, stateFilter, openStatusFilter, sourceFilter, missingDataFilter, serviceTierFilter]);
 
   const stateFilterEnabled =
-    countryFilter === 'all' || isUnitedStatesCountryFilterValue(countryFilter);
+    countryFilter === 'all' ||
+    isUnitedStatesCountryFilterValue(countryFilter) ||
+    countryFilter.trim().toLowerCase() === 'canada';
+
+  const stateSelectOptions =
+    countryFilter.trim().toLowerCase() === 'canada'
+      ? Object.entries(CA_PROVINCE_DISPLAY_NAME).map(([value, label]) => ({
+          value,
+          label,
+        }))
+      : US_STATES_OPTIONS;
 
   useEffect(() => {
     if (!stateFilterEnabled && stateFilter !== 'all') {
@@ -2158,7 +2177,7 @@ export default function AdminGlampingPropertiesTable() {
               title={!stateFilterEnabled ? t('stateFilterUsOnlyHint') : undefined}
             >
               <option value="all">{t('stateAll')}</option>
-              {US_STATES_OPTIONS.map((opt) => (
+              {stateSelectOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>

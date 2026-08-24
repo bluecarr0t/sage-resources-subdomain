@@ -4,11 +4,12 @@ import {
   normalizeGlampingIsOpenLabel,
   isPipelineTrackedIsOpen,
 } from './normalize-is-open';
-import type { PipelineSegment } from './constants';
+import type { PipelineCountry, PipelineSegment } from './constants';
 import {
   PIPELINE_MIN_RV_SITES,
   PIPELINE_RV_PROPERTY_TYPES,
 } from './constants';
+import { parsePipelineCountry } from './regions';
 import type {
   PipelineArticleExtraction,
   PipelineExtractedProperty,
@@ -19,14 +20,26 @@ import {
   GLAMPING_UNIT_TYPE_LLM_RULES,
 } from '@/lib/glamping-unit-type-llm-guidance';
 
-const GLAMPING_EXTRACTION_PROMPT = `Extract USA glamping pipeline intelligence from the article below.
+function glampingExtractionPrompt(country: PipelineCountry): string {
+  const geoRule =
+    country === 'Canada'
+      ? '- Canada only (country Canada). state must be a 2-letter province/territory code (BC, ON, QC, AB, …).'
+      : '- United States only (country USA / United States). state must be a 2-letter US state.';
+  const stateField =
+    country === 'Canada'
+      ? '"state": "2-letter Canadian province",'
+      : '"state": "2-letter US state",';
+  const countryJson = country === 'Canada' ? 'Canada' : 'United States';
+  const scopeLabel = country === 'Canada' ? 'Canada' : 'USA';
+
+  return `Extract ${scopeLabel} glamping pipeline intelligence from the article below.
 
 Focus on:
 1) NEW properties that are **Proposed Development** or **Under Construction** (not yet open for guest bookings).
 2) STATUS UPDATES for properties already mentioned — only when the article clearly states a stage change or current pre-opening stage.
 
 Inclusion rules for new_properties:
-- United States only (country USA / United States).
+${geoRule}
 - At least 4 glamping units (domes, tents, cabins, yurts, etc.) — not RV-primary parks.
 - Glamping-first resorts; not conventional hotels or tent-only campgrounds.
 - is_open must be exactly "Proposed Development" or "Under Construction".
@@ -48,8 +61,8 @@ Return ONLY valid JSON:
     {
       "property_name": "Required",
       "city": "optional",
-      "state": "2-letter US state",
-      "country": "United States",
+      ${stateField}
+      "country": "${countryJson}",
       "address": "optional",
       "url": "optional official site",
       "description": "brief",
@@ -70,6 +83,7 @@ Return ONLY valid JSON:
 
 Article:
 `;
+}
 
 const RV_EXTRACTION_PROMPT = `Extract USA RV park / RV resort / RV-primary campground pipeline intelligence from the article below.
 
@@ -124,15 +138,25 @@ function coerceUnits(val: unknown): number | undefined {
   return Number.isNaN(parsed) ? undefined : parsed;
 }
 
+export function isExtractedCountryAllowed(
+  rawCountry: string | null | undefined,
+  expected: PipelineCountry
+): boolean {
+  const parsed = parsePipelineCountry(rawCountry);
+  if (!parsed) return false;
+  return parsed === expected;
+}
+
 function parseNewProperty(
   raw: Record<string, unknown>,
-  segment: PipelineSegment
+  segment: PipelineSegment,
+  country: PipelineCountry
 ): PipelineExtractedProperty | null {
   const name = String(raw.property_name ?? '').trim();
   if (!name) return null;
 
-  const country = String(raw.country ?? 'United States').trim();
-  if (!/united states|usa|u\.s\./i.test(country)) return null;
+  const extractedCountry = String(raw.country ?? country).trim();
+  if (!isExtractedCountryAllowed(extractedCountry, country)) return null;
 
   const isOpen = normalizeGlampingIsOpenLabel(String(raw.is_open ?? ''));
   if (!isOpen || !isPipelineTrackedIsOpen(isOpen)) return null;
@@ -160,7 +184,7 @@ function parseNewProperty(
     property_name: name,
     city: raw.city != null ? String(raw.city) : undefined,
     state: raw.state != null ? String(raw.state) : undefined,
-    country: 'United States',
+    country,
     address: raw.address != null ? String(raw.address) : undefined,
     url: raw.url != null ? String(raw.url) : undefined,
     description: raw.description != null ? String(raw.description) : undefined,
@@ -200,9 +224,11 @@ function parseStatusUpdate(raw: Record<string, unknown>): PipelineStatusUpdate |
 export async function extractPipelineFromArticle(
   articleText: string,
   openai: OpenAI,
-  segment: PipelineSegment = 'glamping'
+  segment: PipelineSegment = 'glamping',
+  country: PipelineCountry = 'United States'
 ): Promise<PipelineArticleExtraction> {
-  const basePrompt = segment === 'rv' ? RV_EXTRACTION_PROMPT : GLAMPING_EXTRACTION_PROMPT;
+  const basePrompt =
+    segment === 'rv' ? RV_EXTRACTION_PROMPT : glampingExtractionPrompt(country);
   const prompt = basePrompt + articleText.substring(0, 50_000);
 
   const response = await openai.chat.completions.create({
@@ -227,7 +253,7 @@ export async function extractPipelineFromArticle(
     const new_properties: PipelineExtractedProperty[] = [];
     for (const item of parsed.new_properties ?? []) {
       if (item && typeof item === 'object') {
-        const row = parseNewProperty(item as Record<string, unknown>, segment);
+        const row = parseNewProperty(item as Record<string, unknown>, segment, country);
         if (row) new_properties.push(row);
       }
     }

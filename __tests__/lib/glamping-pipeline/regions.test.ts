@@ -1,0 +1,96 @@
+import {
+  CA_PIPELINE_REGIONS,
+  US_PIPELINE_REGIONS,
+  extractedStateMatchesRegion,
+  findPipelineRegion,
+  parsePipelineCountry,
+  pipelineDiscoverySourceForRegion,
+} from '@/lib/glamping-pipeline/regions';
+import { buildRegionPipelineQueries } from '@/lib/glamping-pipeline/region-queries';
+import { isExtractedCountryAllowed } from '@/lib/glamping-pipeline/extract-from-article';
+import { sageDataEditorHrefForRegion } from '@/lib/glamping-pipeline/state-coverage';
+
+describe('pipeline regions', () => {
+  it('covers all 50 US states and 13 Canadian provinces/territories', () => {
+    expect(US_PIPELINE_REGIONS).toHaveLength(50);
+    expect(CA_PIPELINE_REGIONS).toHaveLength(13);
+  });
+
+  it('maps Modern Campground archive slugs', () => {
+    expect(findPipelineRegion('United States', 'NC')?.archiveSlug).toBe(
+      'north-carolina'
+    );
+    expect(findPipelineRegion('Canada', 'BC')?.archiveSlug).toBe(
+      'british-columbia'
+    );
+    expect(findPipelineRegion('Canada', 'PE')?.archiveSlug).toBe(
+      'prince-edward-island'
+    );
+  });
+
+  it('parses country labels', () => {
+    expect(parsePipelineCountry('USA')).toBe('United States');
+    expect(parsePipelineCountry('United States')).toBe('United States');
+    expect(parsePipelineCountry('ca')).toBe('Canada');
+    expect(parsePipelineCountry('Mexico')).toBeNull();
+  });
+
+  it('matches extracted state names to region codes', () => {
+    expect(extractedStateMatchesRegion('TX', 'United States', 'TX')).toBe(true);
+    expect(extractedStateMatchesRegion('Texas', 'United States', 'TX')).toBe(true);
+    expect(extractedStateMatchesRegion('Quebec', 'Canada', 'QC')).toBe(true);
+    expect(extractedStateMatchesRegion('QC', 'Canada', 'QC')).toBe(true);
+    expect(extractedStateMatchesRegion('ON', 'Canada', 'QC')).toBe(false);
+  });
+
+  it('builds discovery source tags', () => {
+    expect(pipelineDiscoverySourceForRegion('United States', 'tx')).toBe(
+      'weekly_pipeline_sync_state_TX'
+    );
+    expect(pipelineDiscoverySourceForRegion('Canada', 'qc')).toBe(
+      'weekly_pipeline_sync_province_QC'
+    );
+  });
+});
+
+describe('region Tavily queries', () => {
+  it('includes Modern Campground archive queries for a US state', () => {
+    const region = findPipelineRegion('United States', 'TX');
+    expect(region).not.toBeNull();
+    const queries = buildRegionPipelineQueries(region!);
+    expect(queries.some((q) => q.includes('site:moderncampground.com/usa/texas'))).toBe(
+      true
+    );
+    expect(queries.some((q) => q.includes('"Texas" proposed glamping'))).toBe(true);
+  });
+
+  it('includes Canada archive path for provinces', () => {
+    const region = findPipelineRegion('Canada', 'QC');
+    const queries = buildRegionPipelineQueries(region!, ['A']);
+    expect(
+      queries.some((q) => q.includes('site:moderncampground.com/canada/quebec'))
+    ).toBe(true);
+  });
+});
+
+describe('extracted country allow-list', () => {
+  it('accepts USA aliases for United States sweeps', () => {
+    expect(isExtractedCountryAllowed('USA', 'United States')).toBe(true);
+    expect(isExtractedCountryAllowed('United States', 'United States')).toBe(true);
+    expect(isExtractedCountryAllowed('Canada', 'United States')).toBe(false);
+  });
+
+  it('accepts Canada aliases for Canada sweeps', () => {
+    expect(isExtractedCountryAllowed('Canada', 'Canada')).toBe(true);
+    expect(isExtractedCountryAllowed('CA', 'Canada')).toBe(true);
+    expect(isExtractedCountryAllowed('USA', 'Canada')).toBe(false);
+  });
+});
+
+describe('sage data editor href', () => {
+  it('pre-fills in_progress + region filters', () => {
+    expect(sageDataEditorHrefForRegion('United States', 'IL')).toBe(
+      '/admin/sage-data/editor?country=United+States&state=IL&research_status=in_progress'
+    );
+  });
+});

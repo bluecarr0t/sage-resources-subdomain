@@ -623,3 +623,31 @@ flowchart LR
 | Firecrawl | ~90 scrape requests (if used) | Depends on plan |
 | OpenAI | ~60–90 GPT-4.1 calls + discovery | ~$3–8 |
 | Supabase | ~30 inserts | Free tier |
+
+---
+
+## 15. State/province pipeline coverage (Proposed / Under Construction)
+
+National weekly sync (`npm run discover:glamping-pipeline`, Monday 16:00 UTC) is **not** sufficient for complete USA/Canada coverage. State-scoped sweeps reuse the same extract → include → insert path (`research_status = in_progress`).
+
+| Piece | Path |
+|-------|------|
+| Region catalog + priority | `lib/glamping-pipeline/regions.ts` |
+| Per-region Tavily queries | `lib/glamping-pipeline/region-queries.ts` |
+| Runner | `lib/glamping-pipeline/run-region-sync.ts` |
+| CLI | `npx tsx scripts/research-pipeline-by-state.ts --state TX` |
+| Coverage table | `glamping_pipeline_state_coverage` |
+| Admin widget | Sage Research & Data → Pipeline coverage |
+| Rotation cron | `/api/cron/discover-glamping-pipeline-regions` (Tue 18:00 UTC, 5 pending regions) |
+
+```bash
+npx tsx scripts/research-pipeline-by-state.ts --state TX --dry-run
+npx tsx scripts/research-pipeline-by-state.ts --priority 0
+npx tsx scripts/research-pipeline-by-state.ts --state QC --country Canada
+npx tsx scripts/research-pipeline-by-state.ts --all-states --skip-covered
+```
+
+Manual cron: `/api/cron/discover-glamping-pipeline?state=TX` (optional `&country=Canada`).
+
+Apply coverage + gap-fill SQL: `npm run migrate:glamping-pipeline-coverage` (or run the SQL in Supabase).
+

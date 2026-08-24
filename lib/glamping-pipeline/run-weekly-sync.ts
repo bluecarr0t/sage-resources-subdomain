@@ -3,26 +3,39 @@ import type { OpenAI } from 'openai';
 import { ALL_SAGE_DATA_TABLE } from '@/lib/all-sage-data-table';
 import { fetchArticleContent } from '@/lib/glamping-discovery/fetch-article';
 import { getDatabasePropertyNames } from '@/lib/glamping-discovery/deduplicate';
-import { searchPipelineAllSegmentsNews } from './tavily-search';
+import {
+  GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN,
+  GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN,
+} from '@/lib/glamping-market-snapshot-region';
+import {
+  searchPipelineAllSegmentsNews,
+  searchPipelineCustomNews,
+} from './tavily-search';
 import { processPipelineArticle } from './process-article';
 import type { ProcessPipelineArticleResult } from './process-article';
 import {
   isPipelineRvSegmentPropertyType,
+  PIPELINE_DISCOVERY_SOURCE,
   PIPELINE_PROCESSED_URLS_TABLE,
   PIPELINE_RUNS_TABLE,
+  PIPELINE_RV_DISCOVERY_SOURCE,
   PIPELINE_WATCH_IS_OPEN_VALUES,
+  type PipelineCountry,
   type PipelineSegment,
+  type PipelineStatusChangeSource,
 } from './constants';
 import type {
   PipelinePropertyRef,
   PipelineSegmentMetrics,
   PipelineWeeklyRunMetrics,
 } from './types';
+import { extractedStateMatchesRegion } from './regions';
 
 const DEFAULT_LIMIT_PER_QUERY = 5;
 const MAX_LIMIT_PER_QUERY = 10;
+const TRACKED_PAGE_SIZE = 1000;
 
-const SEGMENTS: PipelineSegment[] = ['glamping', 'rv'];
+const DEFAULT_SEGMENTS: PipelineSegment[] = ['glamping', 'rv'];
 
 function emptySegmentMetrics(): PipelineSegmentMetrics {
   return {
@@ -87,30 +100,53 @@ async function getProcessedUrls(sb: SupabaseClient): Promise<Set<string>> {
   return new Set((data ?? []).map((r: { url: string }) => r.url));
 }
 
+type TrackedRow = PipelinePropertyRef & {
+  property_type?: string | null;
+  state?: string | null;
+};
 
 async function loadTrackedPipelineProperties(
   sb: SupabaseClient,
-  segment: PipelineSegment
+  segment: PipelineSegment,
+  country: PipelineCountry,
+  regionCode?: string | null
 ): Promise<PipelinePropertyRef[]> {
-  const { data, error } = await sb
-    .from(ALL_SAGE_DATA_TABLE)
-    .select('id, slug, property_name, is_open, property_type')
-    .eq('country', 'United States')
-    .in('is_open', [...PIPELINE_WATCH_IS_OPEN_VALUES]);
+  const countryIn =
+    country === 'Canada'
+      ? [...GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN]
+      : [...GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN];
 
-  if (error) {
-    throw new Error(`Failed to load tracked pipeline properties: ${error.message}`);
+  const collected: TrackedRow[] = [];
+  let offset = 0;
+  for (;;) {
+    const { data, error } = await sb
+      .from(ALL_SAGE_DATA_TABLE)
+      .select('id, slug, property_name, is_open, property_type, state')
+      .in('country', countryIn)
+      .in('is_open', [...PIPELINE_WATCH_IS_OPEN_VALUES])
+      .order('id', { ascending: true })
+      .range(offset, offset + TRACKED_PAGE_SIZE - 1);
+
+    if (error) {
+      throw new Error(`Failed to load tracked pipeline properties: ${error.message}`);
+    }
+
+    const batch = (data ?? []) as TrackedRow[];
+    collected.push(...batch);
+    if (batch.length < TRACKED_PAGE_SIZE) break;
+    offset += TRACKED_PAGE_SIZE;
   }
 
-  const rows = (data ?? []) as (PipelinePropertyRef & {
-    property_type?: string | null;
-  })[];
-
-  return rows
+  return collected
     .filter((row) =>
       segment === 'rv'
         ? isPipelineRvSegmentPropertyType(row.property_type)
         : !isPipelineRvSegmentPropertyType(row.property_type)
+    )
+    .filter((row) =>
+      regionCode
+        ? extractedStateMatchesRegion(row.state, country, regionCode)
+        : true
     )
     .map(({ id, slug, property_name, is_open }) => ({
       id,
@@ -120,33 +156,67 @@ async function loadTrackedPipelineProperties(
     }));
 }
 
+type PersistRunPayload = {
+  dry_run: boolean;
+  started_at: string;
+  completed_at?: string;
+  articles_found?: number;
+  articles_fetched?: number;
+  articles_failed?: number;
+  properties_extracted?: number;
+  properties_new?: number;
+  properties_inserted?: number;
+  status_updates_detected?: number;
+  status_updates_applied?: number;
+  processed_urls_count?: number;
+  error?: string | null;
+  region_code?: string | null;
+  country?: string | null;
+};
+
 async function persistRunMetrics(
   sb: SupabaseClient,
   metrics: PipelineWeeklyRunMetrics,
   error: string | null
 ): Promise<string | undefined> {
+  const payload: PersistRunPayload = {
+    dry_run: metrics.dryRun,
+    started_at: metrics.startedAt,
+    completed_at: metrics.completedAt || new Date().toISOString(),
+    articles_found: metrics.articlesFound,
+    articles_fetched: metrics.articlesFetched,
+    articles_failed: metrics.articlesFailed,
+    properties_extracted: metrics.propertiesExtracted,
+    properties_new: metrics.propertiesNew,
+    properties_inserted: metrics.propertiesInserted,
+    status_updates_detected: metrics.statusUpdatesDetected,
+    status_updates_applied: metrics.statusUpdatesApplied,
+    processed_urls_count: metrics.processedUrlsCount,
+    error,
+    region_code: metrics.regionCode ?? null,
+    country: metrics.country ?? null,
+  };
+
   try {
     const { data, error: insertError } = await sb
       .from(PIPELINE_RUNS_TABLE)
-      .insert({
-        dry_run: metrics.dryRun,
-        started_at: metrics.startedAt,
-        completed_at: metrics.completedAt || new Date().toISOString(),
-        articles_found: metrics.articlesFound,
-        articles_fetched: metrics.articlesFetched,
-        articles_failed: metrics.articlesFailed,
-        properties_extracted: metrics.propertiesExtracted,
-        properties_new: metrics.propertiesNew,
-        properties_inserted: metrics.propertiesInserted,
-        status_updates_detected: metrics.statusUpdatesDetected,
-        status_updates_applied: metrics.statusUpdatesApplied,
-        processed_urls_count: metrics.processedUrlsCount,
-        error,
-      })
+      .insert(payload)
       .select('id')
       .single();
 
     if (insertError) {
+      if (insertError.code === '42703') {
+        delete payload.region_code;
+        delete payload.country;
+        const retry = await sb.from(PIPELINE_RUNS_TABLE).insert(payload).select('id').single();
+        if (retry.error && retry.error.code !== '42P01') {
+          console.warn(
+            '[glamping-pipeline] Could not persist run metrics:',
+            retry.error.message
+          );
+        }
+        return retry.data?.id as string | undefined;
+      }
       if (insertError.code !== '42P01') {
         console.warn('[glamping-pipeline] Could not persist run metrics:', insertError.message);
       }
@@ -167,6 +237,15 @@ export type RunWeeklyPipelineSyncOptions = {
   dryRun?: boolean;
   limitPerQuery?: number;
   force?: boolean;
+  country?: PipelineCountry;
+  regionCode?: string | null;
+  /** Override Tavily queries (glamping). When set, RV queries are skipped unless rvQueries is provided. */
+  glampingQueries?: readonly string[];
+  rvQueries?: readonly string[] | null;
+  segments?: readonly PipelineSegment[];
+  discoverySource?: string;
+  rvDiscoverySource?: string;
+  changeSource?: PipelineStatusChangeSource;
 };
 
 export type RunWeeklyPipelineSyncResult = {
@@ -186,18 +265,38 @@ export async function runWeeklyPipelineSync(
     MAX_LIMIT_PER_QUERY
   );
   const force = options.force ?? false;
+  const country: PipelineCountry = options.country ?? 'United States';
+  const regionCode = options.regionCode ?? null;
+  const segments: readonly PipelineSegment[] =
+    options.segments ??
+    (options.glampingQueries && options.rvQueries == null
+      ? ['glamping']
+      : DEFAULT_SEGMENTS);
+  const changeSource: PipelineStatusChangeSource =
+    options.changeSource ??
+    (regionCode ? 'region_pipeline_sync' : 'weekly_pipeline_sync');
+  const glampingDiscoverySource =
+    options.discoverySource ?? PIPELINE_DISCOVERY_SOURCE;
+  const rvDiscoverySource =
+    options.rvDiscoverySource ?? PIPELINE_RV_DISCOVERY_SOURCE;
 
   const metrics = emptyMetrics(dryRun);
+  metrics.country = country;
+  metrics.regionCode = regionCode ?? undefined;
   let runError: string | null = null;
+
+  const startPayload: PersistRunPayload = {
+    dry_run: dryRun,
+    started_at: metrics.startedAt,
+    region_code: regionCode,
+    country,
+  };
 
   const runId = !dryRun
     ? (
         await supabase
           .from(PIPELINE_RUNS_TABLE)
-          .insert({
-            dry_run: dryRun,
-            started_at: metrics.startedAt,
-          })
+          .insert(startPayload)
           .select('id')
           .single()
       ).data?.id
@@ -207,13 +306,36 @@ export async function runWeeklyPipelineSync(
     const processed = force ? new Set<string>() : await getProcessedUrls(supabase);
     metrics.processedUrlsCount = processed.size;
 
+    const includeRv = segments.includes('rv');
     const [dbPropertyNames, glampingTracked, rvTracked] = await Promise.all([
       getDatabasePropertyNames(supabase),
-      loadTrackedPipelineProperties(supabase, 'glamping'),
-      loadTrackedPipelineProperties(supabase, 'rv'),
+      loadTrackedPipelineProperties(supabase, 'glamping', country, regionCode),
+      includeRv
+        ? loadTrackedPipelineProperties(supabase, 'rv', country, regionCode)
+        : Promise.resolve([] as PipelinePropertyRef[]),
     ]);
 
-    const tavilyResults = await searchPipelineAllSegmentsNews(tavilyApiKey, limitPerQuery);
+    const tavilyResults = options.glampingQueries
+      ? await searchPipelineCustomNews(
+          tavilyApiKey,
+          options.glampingQueries,
+          limitPerQuery,
+          regionCode ? `region:${regionCode}` : 'glamping'
+        ).then(async (glamping) => {
+          if (!includeRv || options.rvQueries == null || options.rvQueries.length === 0) {
+            return glamping;
+          }
+          const rv = await searchPipelineCustomNews(
+            tavilyApiKey,
+            options.rvQueries,
+            limitPerQuery,
+            'rv'
+          );
+          const seen = new Set(glamping.map((a) => a.url));
+          return [...glamping, ...rv.filter((a) => !seen.has(a.url))];
+        })
+      : await searchPipelineAllSegmentsNews(tavilyApiKey, limitPerQuery);
+
     metrics.articlesFound = tavilyResults.length;
 
     for (const { url: articleUrl } of tavilyResults) {
@@ -224,7 +346,7 @@ export async function runWeeklyPipelineSync(
         metrics.articlesFetched++;
         processed.add(articleUrl);
 
-        for (const segment of SEGMENTS) {
+        for (const segment of segments) {
           const result = await processPipelineArticle({
             content,
             articleUrl,
@@ -235,7 +357,12 @@ export async function runWeeklyPipelineSync(
             trackedProperties: segment === 'rv' ? rvTracked : glampingTracked,
             runId,
             segment,
-            markProcessed: segment === 'rv',
+            markProcessed: segment === segments[segments.length - 1],
+            country,
+            regionCode,
+            discoverySource:
+              segment === 'rv' ? rvDiscoverySource : glampingDiscoverySource,
+            changeSource,
           });
 
           const segmentMetrics =
