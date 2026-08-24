@@ -21,9 +21,9 @@ import {
 import type { PipelineWeeklyRunMetrics } from './types';
 import {
   ALL_PIPELINE_REGIONS,
-  findPipelineRegion,
   parsePipelineCountry,
   pipelineRegionKey,
+  sortRegionsByPriority,
   type PipelineRegion,
 } from './regions';
 
@@ -262,25 +262,33 @@ export async function recordRegionSweep(
   }
 }
 
+/** Pending regions in sweep order: P0 US, P0 Canada, then P1…P5. */
+export function selectPendingRegionsForRotation(
+  statusByKey: Map<string, PipelineSweepStatus>,
+  limit: number
+): PipelineRegion[] {
+  const pending = ALL_PIPELINE_REGIONS.filter((region) => {
+    const status =
+      statusByKey.get(pipelineRegionKey(region.country, region.code)) ??
+      'pending';
+    return status === 'pending';
+  });
+  return sortRegionsByPriority(pending).slice(0, Math.max(1, limit));
+}
+
 export async function listPendingRegionsForRotation(
   sb: SupabaseClient,
   limit: number
 ): Promise<PipelineRegion[]> {
-  const snapshot = await fetchPipelineCoverageSnapshot(sb);
-  const pending = snapshot
-    .filter((row) => row.sweepStatus === 'pending')
-    .sort((a, b) => {
-      if (a.priority !== b.priority) return a.priority - b.priority;
-      if (a.country !== b.country) {
-        return a.country === 'United States' ? -1 : 1;
-      }
-      return a.regionCode.localeCompare(b.regionCode);
-    })
-    .slice(0, Math.max(1, limit));
-
-  return pending
-    .map((row) => findPipelineRegion(row.country, row.regionCode))
-    .filter((r): r is PipelineRegion => r != null);
+  const meta = await loadCoverageMetadata(sb);
+  const statusByKey = new Map<string, PipelineSweepStatus>();
+  for (const [key, row] of meta) {
+    statusByKey.set(
+      key,
+      isSweepStatus(row.sweep_status) ? row.sweep_status : 'pending'
+    );
+  }
+  return selectPendingRegionsForRotation(statusByKey, limit);
 }
 
 export function sageDataEditorHrefForRegion(
