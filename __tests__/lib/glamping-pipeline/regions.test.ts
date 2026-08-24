@@ -107,6 +107,15 @@ describe('Tuesday rotation pending order', () => {
     );
   });
 
+  it('skips in_progress and no_projects_found so a hand P0 does not get re-queued', () => {
+    const statusByKey = new Map<string, 'complete' | 'pending' | 'in_progress' | 'no_projects_found'>();
+    statusByKey.set('United States:FL', 'in_progress');
+    statusByKey.set('United States:NC', 'complete');
+    statusByKey.set('United States:NM', 'no_projects_found');
+    const next = selectPendingRegionsForRotation(statusByKey, 5);
+    expect(next.map((r) => r.code)).toEqual(['OK', 'SC', 'TX', 'MB', 'NL']);
+  });
+
   it('rides P1 US after P0 US and Canada are marked complete', () => {
     const statusByKey = new Map<string, 'complete' | 'pending'>();
     for (const code of ['TX', 'FL', 'NC', 'SC', 'NM', 'OK']) {
@@ -123,5 +132,7 @@ describe('Tuesday rotation pending order', () => {
       'United States:MO',
       'United States:OH',
     ]);
+    const sixth = selectPendingRegionsForRotation(statusByKey, 6).at(-1);
+    expect(sixth).toMatchObject({ country: 'United States', code: 'WI', priority: 1 });
   });
 });

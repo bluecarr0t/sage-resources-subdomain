@@ -2,6 +2,11 @@
  * Cron: rotate 5 pending US/Canada regions through the state-scoped pipeline.
  *
  * Schedule: Weekly Tuesdays 18:00 UTC — see vercel.json (`0 18 * * 2`).
+ * Do not invoke this by hand; let Vercel fire it. After P0 is marked complete
+ * from the CLI, the same job takes P1 (IL, IN, MN, MO, OH, then WI).
+ *
+ * Requires `glamping_pipeline_state_coverage` (apply the 2026-08-24 SQL).
+ * Without that table the job fails instead of re-running the same five P0 states.
  *
  * Query params:
  *   ?limit=N     — Tavily max results per query (default 5, max 10)
@@ -14,9 +19,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { OpenAI } from 'openai';
 import { authorizeVercelCronRequest } from '@/lib/vercel-cron-auth';
-import { listPendingRegionsForRotation } from '@/lib/glamping-pipeline/state-coverage';
+import {
+  CoverageTableMissingError,
+  listPendingRegionsForRotation,
+} from '@/lib/glamping-pipeline/state-coverage';
 import { runRegionPipelineSync } from '@/lib/glamping-pipeline/run-region-sync';
-import { regionsAtPriority } from '@/lib/glamping-pipeline/regions';
+import type { PipelineRegion } from '@/lib/glamping-pipeline/regions';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -65,10 +73,32 @@ async function run(request: NextRequest): Promise<NextResponse> {
   });
   const openai = new OpenAI({ apiKey: openaiApiKey! });
 
-  let regions = await listPendingRegionsForRotation(supabase, count);
-  if (regions.length === 0) {
-    regions = regionsAtPriority('United States', 0).slice(0, count);
+  let regions: PipelineRegion[];
+  try {
+    regions = await listPendingRegionsForRotation(supabase, count);
+  } catch (err) {
+    if (err instanceof CoverageTableMissingError) {
+      console.error('[cron/discover-glamping-pipeline-regions]', err.message);
+      return NextResponse.json(
+        { success: false, error: err.message },
+        { status: 500 }
+      );
+    }
+    throw err;
   }
+
+  if (regions.length === 0) {
+    return NextResponse.json({
+      success: true,
+      message: 'No pending regions; P0–P5 already swept',
+      results: [],
+    });
+  }
+
+  console.info(
+    '[cron/discover-glamping-pipeline-regions] selected',
+    regions.map((r) => `${r.country}:${r.code}`).join(', ')
+  );
 
   const results = [];
   let failed = 0;

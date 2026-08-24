@@ -63,6 +63,7 @@ export {
 } from './regions';
 export { buildRegionPipelineQueries } from './region-queries';
 export {
+  CoverageTableMissingError,
   fetchPipelineCoverageSnapshot,
   sageDataEditorHrefForRegion,
 } from './state-coverage';
