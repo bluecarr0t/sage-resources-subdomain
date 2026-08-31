@@ -53,6 +53,7 @@ export function GlampingMarketOverviewStickyNav({
     glampingMarketOverviewPath(nextMarket, nextTier, {
       states: nextMarket === 'us' ? states : null,
     });
+  const classificationLocked = states != null && states.length > 0;
 
   return (
     <>
@@ -78,6 +79,7 @@ export function GlampingMarketOverviewStickyNav({
           market={market}
           tier={tier}
           pathForMarketTier={pathForMarketTier}
+          disabled={classificationLocked}
         />
       </div>
 
@@ -108,6 +110,7 @@ export function GlampingMarketOverviewStickyNav({
               tier={tier}
               pathForMarketTier={pathForMarketTier}
               compact
+              disabled={classificationLocked}
             />
           </div>
         </div>
