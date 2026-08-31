@@ -19,6 +19,10 @@ import {
 const METHOD_LINK_CLASS =
   'text-sage-700 underline decoration-sage-300 underline-offset-2 transition-colors hover:text-sage-800 hover:decoration-sage-500';
 
+const LOCKED_REASON_TITLE = 'Classification locked';
+const LOCKED_REASON =
+  'Regional views always include all service tiers. Choose All US to filter by Luxury, Upscale, Comfort, or Rustic.';
+
 type Props = {
   market: GlampingMarketSnapshotMarket;
   tier: GlampingMarketSnapshotTierFilter;
@@ -28,6 +32,11 @@ type Props = {
   ) => string;
   /** Hide the “What do these mean?” link (e.g. sticky header). */
   compact?: boolean;
+  /**
+   * Freeze the control (regional US views always use all classifications).
+   * Options become non-interactive and All is shown as the active value.
+   */
+  disabled?: boolean;
 };
 
 export function GlampingMarketClassificationFilter({
@@ -35,15 +44,20 @@ export function GlampingMarketClassificationFilter({
   tier,
   pathForMarketTier = glampingMarketOverviewPath,
   compact = false,
+  disabled = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
+  const hintId = useId();
   const close = useCallback(() => setOpen(false), []);
+  const displayTier = disabled ? 'all' : tier;
 
   const active =
     'rounded-sm bg-sage-600 px-3 py-2 text-[11px] font-medium tracking-wide text-white';
   const idle =
     'rounded-sm px-3 py-2 text-[11px] font-medium tracking-wide text-neutral-600 transition-colors hover:text-neutral-900';
+  const idleLocked =
+    'rounded-sm px-3 py-2 text-[11px] font-medium tracking-wide text-neutral-400';
 
   return (
     <div
@@ -54,21 +68,63 @@ export function GlampingMarketClassificationFilter({
       }
     >
       <div
-        className="inline-flex max-w-full shrink-0 flex-wrap self-start rounded border border-sage-200 p-0.5 sm:self-end"
-        role="group"
-        aria-label="Classification"
+        className={`relative inline-flex max-w-full shrink-0 flex-col self-start sm:self-end ${
+          disabled ? 'group' : ''
+        }`}
       >
-        {GLAMPING_MARKET_CLASSIFICATION_FILTER_OPTIONS.map((opt) => (
-          <Link
-            key={opt.value}
-            href={pathForMarketTier(market, opt.value)}
-            scroll={false}
-            className={tier === opt.value ? active : idle}
-            aria-current={tier === opt.value ? 'true' : undefined}
+        <div
+          className={`inline-flex max-w-full shrink-0 flex-wrap rounded border border-sage-200 p-0.5 ${
+            disabled
+              ? 'cursor-help opacity-60 transition-opacity group-hover:opacity-80 group-focus-within:opacity-80 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-sage-600'
+              : ''
+          }`}
+          role="group"
+          aria-label={disabled ? 'Classification (locked to All)' : 'Classification'}
+          aria-disabled={disabled || undefined}
+          aria-describedby={disabled ? hintId : undefined}
+          tabIndex={disabled ? 0 : undefined}
+        >
+          {GLAMPING_MARKET_CLASSIFICATION_FILTER_OPTIONS.map((opt) => {
+            const isActive = displayTier === opt.value;
+            const className = isActive ? active : disabled ? idleLocked : idle;
+            if (disabled) {
+              return (
+                <span
+                  key={opt.value}
+                  className={className}
+                  aria-current={isActive ? 'true' : undefined}
+                >
+                  {opt.label}
+                </span>
+              );
+            }
+            return (
+              <Link
+                key={opt.value}
+                href={pathForMarketTier(market, opt.value)}
+                scroll={false}
+                className={className}
+                aria-current={isActive ? 'true' : undefined}
+              >
+                {opt.label}
+              </Link>
+            );
+          })}
+        </div>
+        {disabled ? (
+          <div
+            id={hintId}
+            role="tooltip"
+            className="pointer-events-none absolute left-0 top-full z-50 mt-2 w-max max-w-[16.5rem] rounded-sm bg-neutral-900 px-3 py-2 text-left opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:left-auto sm:right-0"
           >
-            {opt.label}
-          </Link>
-        ))}
+            <p className="text-[11px] font-medium tracking-wide text-white">
+              {LOCKED_REASON_TITLE}
+            </p>
+            <p className="mt-1 text-[11px] font-light leading-relaxed text-neutral-300">
+              {LOCKED_REASON}
+            </p>
+          </div>
+        ) : null}
       </div>
       {!compact ? (
         <button
