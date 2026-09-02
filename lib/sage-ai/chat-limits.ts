@@ -1,10 +1,10 @@
-/** Vercel function max duration (seconds). Default 120; override with SAGE_AI_MAX_DURATION. */
+/**
+ * Documented chat route budget (seconds). Next.js requires `export const maxDuration`
+ * to be a numeric literal in `app/api/admin/sage-ai/chat/route.ts` (currently 300).
+ * SAGE_AI_MAX_DURATION is no longer read for the route export.
+ */
 export function getSageAiChatMaxDuration(): number {
-  const raw = process.env.SAGE_AI_MAX_DURATION;
-  if (raw == null || raw === '') return 120;
-  const n = Number(raw.replace(/_/g, ''));
-  if (!Number.isFinite(n) || n <= 0) return 120;
-  return Math.min(Math.floor(n), 300);
+  return 300;
 }
 
 /** Max tool+model steps per chat turn. Default 10; override with SAGE_AI_MAX_STEPS. */

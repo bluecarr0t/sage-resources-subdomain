@@ -27,14 +27,12 @@ import {
   loadThreadSummaryForSession,
 } from '@/lib/sage-ai/thread-summary';
 import { buildSageAiSystemPrompt } from '@/lib/sage-ai/system-prompt';
-import {
-  getSageAiChatMaxDuration,
-  getSageAiChatMaxSteps,
-} from '@/lib/sage-ai/chat-limits';
+import { getSageAiChatMaxSteps } from '@/lib/sage-ai/chat-limits';
 import { isValidSageUuid, sageMessageSchema } from '@/lib/sage-ai/route-schemas';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = getSageAiChatMaxDuration();
+/** Must be a numeric literal — Next cannot statically analyze CallExpressions here. */
+export const maxDuration = 300;
 
 const MAX_OUTPUT_TOKENS = 8_192;
 

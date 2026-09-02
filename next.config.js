@@ -8,6 +8,13 @@ const nextConfig = {
   // Brand/property generateStaticParams talk to Supabase; 60s default timed out
   // production deploys of the pipeline rotation cron.
   staticPageGenerationTimeout: 180,
+  // Production main builds have hung for 45m on "Linting and checking validity of
+  // types" with a restored build cache (BUILD_EXCEEDED_MAXIMUM_TIME) while the
+  // same commit's PR preview finished in ~3m. Skip ESLint in `next build`; run
+  // `npm run lint` in CI / locally instead.
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 
   async headers() {
     const frameAncestors = [
