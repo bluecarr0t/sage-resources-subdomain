@@ -37,7 +37,7 @@ export function clientIpFromHeaders(headers: {
 export function parseGa4BlockedIps(
   extra = process.env.GA4_BLOCKED_IPS
 ): Set<string> {
-  const values = [...DEFAULT_BLOCKED_IPS];
+  const values: string[] = [...DEFAULT_BLOCKED_IPS];
   if (extra) {
     for (const part of extra.split(',')) {
       const ip = normalizeClientIp(part);
