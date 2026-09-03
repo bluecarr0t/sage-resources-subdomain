@@ -30,7 +30,7 @@ import {
 import { locales, type Locale } from "@/i18n";
 import { generateHreflangAlternates, getOpenGraphLocale } from "@/lib/i18n-utils";
 import { createLocaleLinks } from "@/lib/locale-links";
-import { getPublicMapGlampingUnitCount } from "@/lib/public-map-unit-count";
+import { getGlampingMarketSnapshotWorldwideUnitCount } from "@/lib/fetch-glamping-market-snapshot-worldwide-units";
 import {
   formatPropertyCountPlus,
   getPublicContentStats,
@@ -227,7 +227,7 @@ export default async function HomePage({ params }: PageProps) {
     const featuredTerms = glossaryTerms.slice(0, 12); // Top 12 terms
 
     const [glampingUnitCount, contentStats] = await Promise.all([
-      getPublicMapGlampingUnitCount(),
+      getGlampingMarketSnapshotWorldwideUnitCount(),
       getPublicContentStats(),
     ]);
     const benchmarkCountDisplay = contentStats.propertyCountDisplay;

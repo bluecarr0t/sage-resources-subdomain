@@ -20,11 +20,8 @@ import {
   rowPassesGlampingMarketUsStatesFilter,
 } from '@/lib/glamping-market-snapshot-us-regions';
 import { normalizeDbStateToUspsAbbr } from '@/lib/normalize-us-state-abbr';
-import {
-  applyGlampingOnlyPropertyTypeFilter,
-  isGlampingMarketSnapshotPropertyType,
-} from '@/lib/glamping-market-snapshot-property-type-filter';
-import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
+import { applyGlampingOnlyPropertyTypeFilter } from '@/lib/glamping-market-snapshot-property-type-filter';
+import { includeGlampingMarketSnapshotInventoryRow } from '@/lib/glamping-market-snapshot-inventory';
 import { normalizeGlampingUnitTypeForStorage } from '@/lib/glamping-unit-type-normalize';
 import {
   glampingMarketSnapshotUnitsForRow,
@@ -253,8 +250,8 @@ export function buildTopUnitTypesByOpenUnits(
  * Published commercial-glamping universe (same land-tenure scope as the public map),
  * filtered to {@link GlampingMarketSnapshotMarket}: United States or Canada.
  * Rows whose `unit_type` is tent-site, RV, or vehicle inventory are omitted
- * ({@link isExcludedGlampingMarketSnapshotUnitType}), and rows whose `property_type`
- * must have `property_type` = Glamping ({@link isGlampingMarketSnapshotPropertyType}).
+ * ({@link includeGlampingMarketSnapshotInventoryRow}), and rows whose `property_type`
+ * must have `property_type` = Glamping.
  */
 async function loadGlampingIndustryMetrics(
   market: GlampingMarketSnapshotMarket,
@@ -307,8 +304,7 @@ async function loadGlampingIndustryMetrics(
     if (batch.length === 0) break;
 
     for (const row of batch) {
-      if (!isGlampingMarketSnapshotPropertyType(row.property_type)) continue;
-      if (isExcludedGlampingMarketSnapshotUnitType(row.unit_type)) continue;
+      if (!includeGlampingMarketSnapshotInventoryRow(row)) continue;
 
       if (market === 'us') {
         const usps = normalizeDbStateToUspsAbbr(row.state);
@@ -316,8 +312,6 @@ async function loadGlampingIndustryMetrics(
       }
 
       const openState = bucketGlampingIsOpenForMetrics(row.is_open);
-      // Cancelled inventory is excluded from headline unit totals and unit-mix.
-      if (openState === 'cancelled') continue;
 
       const name = (row.property_name ?? '').trim();
       if (name) {

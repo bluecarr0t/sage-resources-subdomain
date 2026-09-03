@@ -473,7 +473,7 @@
     "stats": {
       "propertiesCount": "{count, number}+",
       "properties": "Glamping Properties",
-      "units": "Units Tracked",
+      "units": "Glamping Units",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"
     },
