@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 import ChunkLoadErrorHandler from '@/components/ChunkLoadErrorHandler';
+import GhlExternalTracking from '@/components/GhlExternalTracking';
 import { resolveHtmlLang } from '@/lib/resolve-html-lang';
 import {
   clientIpFromHeaders,
@@ -14,11 +15,6 @@ import {
 const DynamicGoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), {
   ssr: false,
 });
-
-const DynamicGhlExternalTracking = dynamic(
-  () => import('@/components/GhlExternalTracking'),
-  { ssr: false }
-);
 
 const GlampingMarketOverviewPromo = dynamic(
   () => import('@/components/GlampingMarketOverviewPromo'),
@@ -62,9 +58,13 @@ export default async function RootLayout({
   const skipInternalTraffic = isGa4BlockedClientIp(
     clientIpFromHeaders(headerStore)
   );
+  const pathname = headerStore.get('x-pathname');
 
   return (
     <html lang={lang} suppressHydrationWarning>
+      <head>
+        <GhlExternalTracking pathname={pathname} />
+      </head>
       <body>
         <ChunkLoadErrorHandler />
         <Suspense fallback={null}>
@@ -74,7 +74,6 @@ export default async function RootLayout({
           {children}
           <GlampingMarketOverviewPromo />
         </ThemeProvider>
-        <DynamicGhlExternalTracking />
       </body>
     </html>
   );
