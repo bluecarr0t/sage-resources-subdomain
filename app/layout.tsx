@@ -1,10 +1,24 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { cookies, headers } from 'next/headers';
 import dynamic from 'next/dynamic';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 import ChunkLoadErrorHandler from '@/components/ChunkLoadErrorHandler';
 import { resolveHtmlLang } from '@/lib/resolve-html-lang';
+import {
+  clientIpFromHeaders,
+  isGa4BlockedClientIp,
+} from '@/lib/ga4-blocked-ips';
+
+const DynamicGoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), {
+  ssr: false,
+});
+
+const DynamicGhlExternalTracking = dynamic(
+  () => import('@/components/GhlExternalTracking'),
+  { ssr: false }
+);
 
 const GlampingMarketOverviewPromo = dynamic(
   () => import('@/components/GlampingMarketOverviewPromo'),
@@ -45,14 +59,22 @@ export default async function RootLayout({
     cookieStore.get('NEXT_LOCALE')?.value
   );
 
+  const skipInternalTraffic = isGa4BlockedClientIp(
+    clientIpFromHeaders(headerStore)
+  );
+
   return (
     <html lang={lang} suppressHydrationWarning>
       <body>
         <ChunkLoadErrorHandler />
+        <Suspense fallback={null}>
+          <DynamicGoogleAnalytics skipInternalTraffic={skipInternalTraffic} />
+        </Suspense>
         <ThemeProvider>
           {children}
           <GlampingMarketOverviewPromo />
         </ThemeProvider>
+        <DynamicGhlExternalTracking />
       </body>
     </html>
   );

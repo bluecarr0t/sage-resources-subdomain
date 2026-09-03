@@ -2,51 +2,72 @@
 
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   getSeoPageContextParams,
   trackScrollDepth,
-  trackPageEngagement,
+  trackResourcesTimeOnPage,
   trackOutboundLink,
   trackCTAClick,
   trackFileDownload,
+  trackPageView,
+  shouldSendGa4Events,
 } from '@/lib/analytics';
 import { isRootDomainContactUrl } from '@/lib/root-domain-attribution';
 import {
   buildGa4ConfigOptions,
+  buildGa4PagePath,
   serializeGa4ConfigForInlineScript,
 } from '@/lib/ga4-cross-domain';
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
-export default function GoogleAnalytics() {
+export default function GoogleAnalytics({
+  skipInternalTraffic = false,
+}: {
+  skipInternalTraffic?: boolean;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const gtagReadyRef = useRef(false);
+  const lastPagePathRef = useRef<string | null>(null);
+  const allowGa4 = shouldSendGa4Events(undefined, { skipInternalTraffic });
+
+  const sendPageView = useCallback(() => {
+    if (!GA_MEASUREMENT_ID || !allowGa4) {
+      return;
+    }
+    if (typeof window === 'undefined' || !window.gtag) return;
+
+    const pagePath = buildGa4PagePath(pathname, searchParams ?? undefined);
+    if (lastPagePathRef.current === pagePath) return;
+    lastPagePathRef.current = pagePath;
+
+    const seoContext = getSeoPageContextParams(pathname);
+    trackPageView({
+      pathname,
+      searchParams: searchParams ?? null,
+      extra: seoContext,
+    });
+  }, [pathname, searchParams, allowGa4]);
+
+  const markGtagReady = useCallback(() => {
+    if (gtagReadyRef.current) return;
+    gtagReadyRef.current = true;
+    sendPageView();
+  }, [sendPageView]);
 
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID) return;
-
-    const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
-
-    // Track page view + SEO section (Phase 0 organic dashboards)
-    if (typeof window !== 'undefined' && window.gtag) {
-      const seoContext = getSeoPageContextParams(pathname);
-      window.gtag(
-        'config',
-        GA_MEASUREMENT_ID,
-        buildGa4ConfigOptions({
-          pagePath: url,
-          debugMode: IS_DEVELOPMENT,
-          extra: seoContext,
-        })
-      );
+    if (!GA_MEASUREMENT_ID || !allowGa4) return;
+    if (gtagReadyRef.current) {
+      sendPageView();
     }
-  }, [pathname, searchParams]);
+  }, [sendPageView]);
 
   // Track scroll depth
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID) return;
+    if (!GA_MEASUREMENT_ID || !allowGa4) return;
 
     let scrollTracked = {
       25: false,
@@ -60,7 +81,6 @@ export default function GoogleAnalytics() {
         ((window.scrollY + window.innerHeight) / document.documentElement.scrollHeight) * 100
       );
 
-      // Track milestone scroll depths
       if (scrollPercent >= 90 && !scrollTracked[90]) {
         trackScrollDepth(90);
         scrollTracked[90] = true;
@@ -78,41 +98,36 @@ export default function GoogleAnalytics() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [pathname]);
 
-  // Track time on page
+  // Track time on page once when the tab hides or unloads (no 30s polling).
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID) return;
+    if (!GA_MEASUREMENT_ID || !allowGa4) return;
 
     const startTime = Date.now();
 
-    const trackEngagement = () => {
-      const timeOnPage = Date.now() - startTime;
-      if (timeOnPage > 3000) {
-        // Only track if user spent more than 3 seconds
-        trackPageEngagement(timeOnPage);
+    const flushEngagement = () => {
+      trackResourcesTimeOnPage(Date.now() - startTime);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushEngagement();
       }
     };
 
-    // Track engagement when user leaves the page
-    const handleBeforeUnload = () => {
-      trackEngagement();
-    };
-
-    // Track engagement every 30 seconds while on page
-    const interval = setInterval(trackEngagement, 30000);
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', flushEngagement);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      clearInterval(interval);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      trackEngagement();
+      window.removeEventListener('pagehide', flushEngagement);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      flushEngagement();
     };
   }, [pathname]);
 
   // Track outbound link clicks
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID) return;
+    if (!GA_MEASUREMENT_ID || !allowGa4) return;
 
     const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -123,12 +138,10 @@ export default function GoogleAnalytics() {
       const href = link.getAttribute('href');
       if (!href) return;
 
-      // Check if it's an outbound link (external domain)
       try {
         const linkUrl = new URL(href, window.location.origin);
         const currentUrl = new URL(window.location.href);
 
-        // Track if it's an external link
         if (linkUrl.hostname !== currentUrl.hostname && !href.startsWith('#')) {
           trackOutboundLink(href, link.textContent || undefined);
           if (isRootDomainContactUrl(href)) {
@@ -150,7 +163,7 @@ export default function GoogleAnalytics() {
 
   // Track file downloads
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID) return;
+    if (!GA_MEASUREMENT_ID || !allowGa4) return;
 
     const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -161,7 +174,6 @@ export default function GoogleAnalytics() {
       const href = link.getAttribute('href');
       if (!href) return;
 
-      // Check if it's a file download
       const fileExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.zip', '.csv'];
       const isFileDownload = fileExtensions.some((ext) => href.toLowerCase().endsWith(ext));
 
@@ -178,7 +190,7 @@ export default function GoogleAnalytics() {
 
   // Track errors
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID) return;
+    if (!GA_MEASUREMENT_ID || !allowGa4) return;
 
     const handleError = (event: ErrorEvent) => {
       if (typeof window !== 'undefined' && window.gtag) {
@@ -195,7 +207,7 @@ export default function GoogleAnalytics() {
     return () => window.removeEventListener('error', handleError);
   }, []);
 
-  if (!GA_MEASUREMENT_ID) {
+  if (!GA_MEASUREMENT_ID || !allowGa4) {
     return null;
   }
 
@@ -206,11 +218,17 @@ export default function GoogleAnalytics() {
         ? 'resources.sageoutdooradvisory.com'
         : 'localhost';
 
+  const bootstrapPagePath =
+    typeof window !== 'undefined'
+      ? buildGa4PagePath(window.location.pathname, window.location.search.replace(/^\?/, ''))
+      : '/';
+
   const bootstrapConfig = serializeGa4ConfigForInlineScript(
     buildGa4ConfigOptions({
-      pagePath: typeof window !== 'undefined' ? window.location.pathname : '/',
+      pagePath: bootstrapPagePath,
       debugMode: IS_DEVELOPMENT,
       hostname: bootstrapHostname,
+      sendPageView: false,
     })
   );
 
@@ -219,10 +237,12 @@ export default function GoogleAnalytics() {
       <Script
         strategy="afterInteractive"
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        onLoad={markGtagReady}
       />
       <Script
         id="google-analytics"
         strategy="afterInteractive"
+        onReady={markGtagReady}
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];

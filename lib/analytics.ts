@@ -23,7 +23,35 @@ import {
 } from '@/lib/seo-page-section';
 import { getResourcesAttributionParamsFromUrl } from '@/lib/root-domain-attribution';
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+function getGaMeasurementId(): string | undefined {
+  return process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+}
+
+/** Block localhost/dev hits from polluting production GA4 unless explicitly allowed. */
+export function shouldSendGa4Events(
+  hostname: string | null | undefined =
+    typeof window !== 'undefined' ? window.location.hostname : undefined,
+  options?: { skipInternalTraffic?: boolean }
+): boolean {
+  if (options?.skipInternalTraffic) return false;
+  if (!getGaMeasurementId()) return false;
+  if (!hostname) return true;
+
+  const host = hostname.toLowerCase();
+  if (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host.endsWith('.local')
+  ) {
+    return process.env.NEXT_PUBLIC_GA4_ALLOW_LOCALHOST === 'true';
+  }
+
+  if (host.endsWith('.vercel.app') || host.endsWith('.vercel.sh')) {
+    return process.env.NEXT_PUBLIC_GA4_ALLOW_PREVIEW === 'true';
+  }
+
+  return true;
+}
 
 function attributionEventParams(url?: string): Record<string, string> {
   if (!url) return {};
@@ -40,7 +68,44 @@ function attributionEventParams(url?: string): Record<string, string> {
  * Check if GA4 is available
  */
 export function isGA4Available(): boolean {
-  return typeof window !== 'undefined' && !!window.gtag && !!GA_MEASUREMENT_ID;
+  return (
+    typeof window !== 'undefined' &&
+    !!window.gtag &&
+    !!getGaMeasurementId() &&
+    shouldSendGa4Events()
+  );
+}
+
+/**
+ * Explicit SPA page_view — required for GA4 landing page + channel reports.
+ * Config-only `send_page_view` is unreliable after hydration on map routes.
+ */
+export function trackPageView(options: {
+  pathname: string;
+  searchParams?: URLSearchParams | string | null;
+  extra?: Record<string, unknown>;
+}): void {
+  if (!isGA4Available()) return;
+
+  const pagePath = (() => {
+    const path = options.pathname.startsWith('/')
+      ? options.pathname
+      : `/${options.pathname}`;
+    const search = options.searchParams;
+    if (!search) return path;
+    const query =
+      search instanceof URLSearchParams
+        ? search.toString()
+        : search.replace(/^\?/, '').trim();
+    return query ? `${path}?${query}` : path;
+  })();
+
+  window.gtag!('event', 'page_view', {
+    page_path: pagePath,
+    page_location: `${window.location.origin}${pagePath}`,
+    page_title: document.title,
+    ...(options.extra ?? {}),
+  });
 }
 
 /**
@@ -149,11 +214,13 @@ export function trackVideoInteraction(
 }
 
 /**
- * Track page engagement (time on page)
+ * Custom time-on-page ping (not GA4's automatic `page_engagement` event).
+ * Fires once on exit — GA4 already collects engagement duration natively.
  */
-export function trackPageEngagement(timeOnPage: number): void {
-  trackEvent('page_engagement', {
-    engagement_time_msec: timeOnPage,
+export function trackResourcesTimeOnPage(timeOnPageMs: number): void {
+  if (timeOnPageMs < 3000) return;
+  trackEvent('resources_time_on_page', {
+    engagement_time_msec: timeOnPageMs,
   });
 }
 
@@ -269,7 +336,7 @@ export function setCustomDimension(
 ): void {
   if (!isGA4Available()) return;
 
-  window.gtag!('config', GA_MEASUREMENT_ID!, {
+  window.gtag!('config', getGaMeasurementId()!, {
     custom_map: {
       [dimensionName]: value,
     },

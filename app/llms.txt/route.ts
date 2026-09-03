@@ -6,6 +6,7 @@ import {
   formatPropertyCountPlus,
   getPublicContentStats,
 } from '@/lib/public-content-stats';
+import { UNIT_TYPE_CONFIGS } from '@/lib/unit-type-config';
 
 /**
  * Sole generator for https://resources.sageoutdooradvisory.com/llms.txt
@@ -76,10 +77,10 @@ export async function GET() {
     `- [Colorado Glamping Market](${enBase}/markets/colorado-glamping): State comps map deep-link with feasibility/appraisal CTA`,
     `- [From comps map to financed study](${enBase}/journeys/from-comps-map-to-financed-study): Case-style journey matching Organic → map research → Sage Introduction`,
     `- [Glamping Near National Parks](${enBase}/glamping/near-national-parks): Find glamping properties within 75 miles of Yellowstone, Yosemite, Great Smoky Mountains, and 60+ national parks`,
-    `- [Glamping Yurts](${enBase}/glamping/yurts): Properties offering yurt accommodations`,
-    `- [Glamping Safari Tents](${enBase}/glamping/safari-tents): Properties offering safari tent accommodations`,
-    `- [Glamping A-Frames](${enBase}/glamping/a-frames): Properties offering A-frame cabin accommodations`,
-    `- [Glamping Treehouses](${enBase}/glamping/treehouses): Properties offering treehouse accommodations`,
+    ...UNIT_TYPE_CONFIGS.map(
+      (c) =>
+        `- [Glamping ${c.displayName}](${enBase}/glamping/${c.slug}): ${c.quickAnswer ? c.quickAnswer.slice(0, 90) + '…' : `Properties offering ${c.displayName.toLowerCase()} accommodations`}`
+    ),
     `- [Sitemap](${baseUrl}/sitemap.xml): Complete sitemap of all pages`,
     '',
     '## Services',

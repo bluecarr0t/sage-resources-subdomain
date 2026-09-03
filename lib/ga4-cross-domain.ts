@@ -56,6 +56,8 @@ export function shouldUseParentCookieDomain(
  */
 export function buildGa4ConfigOptions(options?: {
   pagePath?: string;
+  /** Default false — SPA routes fire explicit `page_view` events instead. */
+  sendPageView?: boolean;
   debugMode?: boolean;
   hostname?: string | null;
   extra?: Record<string, unknown>;
@@ -66,7 +68,7 @@ export function buildGa4ConfigOptions(options?: {
   const useParentCookie = shouldUseParentCookieDomain(hostname);
 
   const config: Ga4ConfigOptions = {
-    send_page_view: true,
+    send_page_view: options?.sendPageView ?? false,
     allow_enhanced_conversions: true,
     allow_google_signals: true,
     allow_ad_personalization_signals: true,
@@ -86,6 +88,22 @@ export function buildGa4ConfigOptions(options?: {
   }
 
   return config;
+}
+
+/** Build page_path including stable query string ordering when possible. */
+export function buildGa4PagePath(
+  pathname: string,
+  searchParams?: URLSearchParams | string | null
+): string {
+  const path = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  if (!searchParams) return path;
+
+  const query =
+    searchParams instanceof URLSearchParams
+      ? searchParams.toString()
+      : searchParams.replace(/^\?/, '').trim();
+
+  return query ? `${path}?${query}` : path;
 }
 
 /** Serialize config for the inline bootstrap <script> (no functions). */

@@ -49,17 +49,26 @@ export async function generateMetadata({
   const pathname = `/${locale}/glamping/${unitTypeSlug}`;
   const url = `https://resources.sageoutdooradvisory.com${pathname}`;
 
+  const primaryKw = config.primaryKeyword ?? `${config.displayName.toLowerCase()} glamping`;
+  const title = `${config.displayName} Glamping Properties | US & Canada | Sage Outdoor Advisory`;
+  const description =
+    config.quickAnswer ??
+    `Directory of glamping properties featuring ${config.displayName.toLowerCase()} accommodations across the US and Canada. Compare options for travel or outdoor hospitality market research.`;
+
+  const keywordList = [
+    primaryKw,
+    ...(config.secondaryKeywords ?? []),
+    'glamping accommodations',
+    'outdoor hospitality',
+  ].join(', ');
+
   return {
-    title: `${config.displayName} Glamping Properties | US & Canada | Sage Outdoor Advisory`,
-    description: `Directory of ${config.displayName.toLowerCase()} glamping stays across the US and Canada. Compare outdoor hospitality properties for travel planning or market research.`,
-    keywords: [
-      `glamping ${config.displayName.toLowerCase()}`,
-      `${config.displayName.toLowerCase()} glamping`,
-      `glamping accommodations`,
-    ].join(', '),
+    title,
+    description,
+    keywords: keywordList,
     openGraph: {
-      title: `Glamping ${config.displayName} | Sage Outdoor Advisory`,
-      description: `Find glamping properties with ${config.displayName.toLowerCase()} accommodations. Discover unique outdoor stays.`,
+      title: `${config.displayName} Glamping | Sage Outdoor Advisory`,
+      description,
       url,
       siteName: 'Sage Outdoor Advisory',
       locale: getOpenGraphLocale(locale as Locale),
@@ -132,27 +141,29 @@ export default async function GlampingByUnitTypePage({ params }: PageProps) {
       .filter((item) => item.url),
   };
 
+  // Use per-type FAQs if configured, otherwise fall back to generic questions.
+  const faqPairs: Array<{ question: string; answer: string }> =
+    config.faqs && config.faqs.length > 0
+      ? config.faqs
+      : [
+          {
+            question: `What is ${config.displayName.toLowerCase()} glamping?`,
+            answer: `${config.displayName} glamping combines the unique structure of ${config.displayName.toLowerCase()} with luxury amenities like real beds, electricity, and often private bathrooms. It offers an immersive outdoor experience with comfort.`,
+          },
+          {
+            question: `Where can I find ${config.displayName.toLowerCase()} glamping?`,
+            answer: `The properties listed offer ${config.displayName.toLowerCase()} accommodations across the United States and Canada. Use the map to explore more options and filter by location.`,
+          },
+        ];
+
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: `What is ${config.displayName.toLowerCase()} glamping?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `${config.displayName} glamping combines the unique structure of ${config.displayName.toLowerCase()} with luxury amenities like real beds, electricity, and often private bathrooms. It offers an immersive outdoor experience with comfort.`,
-        },
-      },
-      {
-        '@type': 'Question',
-        name: `Where can I find ${config.displayName.toLowerCase()} glamping?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `The properties listed offer ${config.displayName.toLowerCase()} accommodations across the United States and Canada. Use the map to explore more options and filter by location.`,
-        },
-      },
-    ],
+    mainEntity: faqPairs.map(({ question, answer }) => ({
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer },
+    })),
   };
 
   return (
@@ -186,6 +197,7 @@ export default async function GlampingByUnitTypePage({ params }: PageProps) {
         unitTypeConfig={config}
         properties={properties}
         locale={locale}
+        faqs={faqPairs}
       />
     </>
   );

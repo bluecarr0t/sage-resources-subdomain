@@ -36,6 +36,7 @@ describe('buildGa4ConfigOptions', () => {
       decorate_forms: true,
     });
     expect(config.page_path).toBe('/en/guides/foo');
+    expect(config.send_page_view).toBe(false);
     expect(config.cookie_flags).toBe('SameSite=None;Secure');
   });
 

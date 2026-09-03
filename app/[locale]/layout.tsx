@@ -1,14 +1,8 @@
-import { Suspense } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Analytics } from '@vercel/analytics/next';
-import dynamic from 'next/dynamic';
 import { locales, type Locale } from '@/i18n';
-
-const DynamicGoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), {
-  ssr: false,
-});
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -32,9 +26,6 @@ export default async function LocaleLayout({
 
   return (
     <>
-      <Suspense fallback={null}>
-        <DynamicGoogleAnalytics />
-      </Suspense>
       <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
       <Analytics />
     </>

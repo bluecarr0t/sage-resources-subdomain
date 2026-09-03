@@ -10,14 +10,32 @@ interface GlampingByUnitTypeTemplateProps {
   unitTypeConfig: UnitTypeConfig;
   properties: SageProperty[];
   locale?: string;
+  /** Per-type FAQ pairs — rendered in the FAQ section and already emitted as FAQPage schema. */
+  faqs?: Array<{ question: string; answer: string }>;
 }
 
 export default function GlampingByUnitTypeTemplate({
   unitTypeConfig,
   properties,
   locale = 'en',
+  faqs,
 }: GlampingByUnitTypeTemplateProps) {
-  const { displayName } = unitTypeConfig;
+  const { displayName, quickAnswer } = unitTypeConfig;
+
+  // Resolved FAQ list — prefer prop (already filtered by page.tsx), then config.
+  const resolvedFaqs =
+    faqs && faqs.length > 0
+      ? faqs
+      : [
+          {
+            question: `What is ${displayName.toLowerCase()} glamping?`,
+            answer: `${displayName} glamping combines the unique structure of ${displayName.toLowerCase()} with luxury amenities like real beds, electricity, and often private bathrooms. It offers an immersive outdoor experience with comfort.`,
+          },
+          {
+            question: `Where can I find ${displayName.toLowerCase()} glamping?`,
+            answer: `The properties listed offer ${displayName.toLowerCase()} accommodations across the United States and Canada. Use the map to explore more options and filter by location.`,
+          },
+        ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -44,11 +62,15 @@ export default function GlampingByUnitTypeTemplate({
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Glamping {displayName}
           </h1>
-          <p className="text-gray-700 max-w-3xl">
-            Discover glamping properties that offer {displayName.toLowerCase()}{' '}
-            accommodations. These unique structures combine outdoor immersion
-            with comfort and style.
-          </p>
+          {quickAnswer ? (
+            <p className="text-gray-700 max-w-3xl leading-relaxed">{quickAnswer}</p>
+          ) : (
+            <p className="text-gray-700 max-w-3xl">
+              Discover glamping properties that offer {displayName.toLowerCase()}{' '}
+              accommodations. These unique structures combine outdoor immersion
+              with comfort and style.
+            </p>
+          )}
         </section>
 
         {/* Property List */}
@@ -143,28 +165,13 @@ export default function GlampingByUnitTypeTemplate({
           >
             Frequently Asked Questions
           </h2>
-          <dl className="space-y-4">
-            <div>
-              <dt className="font-semibold text-gray-900 mb-1">
-                What is {displayName.toLowerCase()} glamping?
-              </dt>
-              <dd className="text-gray-700">
-                {displayName} glamping combines the unique structure of{' '}
-                {displayName.toLowerCase()} with luxury amenities like real beds,
-                electricity, and often private bathrooms. It offers an immersive
-                outdoor experience with comfort.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-gray-900 mb-1">
-                Where can I find {displayName.toLowerCase()} glamping?
-              </dt>
-              <dd className="text-gray-700">
-                The properties listed above offer {displayName.toLowerCase()}{' '}
-                accommodations across the United States and Canada. Use the map
-                to explore more options and filter by location.
-              </dd>
-            </div>
+          <dl className="space-y-6">
+            {resolvedFaqs.map(({ question, answer }) => (
+              <div key={question}>
+                <dt className="font-semibold text-gray-900 mb-1">{question}</dt>
+                <dd className="text-gray-700">{answer}</dd>
+              </div>
+            ))}
           </dl>
         </section>
       </main>
