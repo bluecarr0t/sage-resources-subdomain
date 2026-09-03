@@ -458,21 +458,21 @@
   "home": {
     "metadata": {
       "title": "Outdoor Hospitality Research & Resources | Sage Outdoor Advisory",
-      "description": "Market intelligence for glamping, RV resort, and campground developers and investors: {propertyCount, number}+ unique properties in Sage research across North America and Europe, {guideCount, number} feasibility and appraisal guides, and {glossaryCount, number} industry glossary terms—plus tools to explore supply by market.",
+      "description": "Market intelligence for glamping, RV resort, and campground developers and investors: {propertyCount, number}+ unique glamping properties on the Sage map across North America and Europe, {guideCount, number} feasibility and appraisal guides, and {glossaryCount, number} industry glossary terms—plus tools to explore supply by market.",
       "keywords": "outdoor hospitality feasibility study, glamping market research, RV resort appraisal, campground development, glamping industry data, outdoor hospitality consultants, glamping investment analysis, Europe glamping data, North America glamping map"
     },
     "hero": {
       "headline": "Outdoor Hospitality Market Intelligence",
       "subheadline": "{count, number}+ benchmarks across North America and Europe, feasibility and appraisal guides, and industry terms for outdoor hospitality teams.",
       "quickStats": {
-        "properties": "{count, number} properties in Sage research",
+        "properties": "{count, number} glamping properties",
         "usCanada": "US, Canada & Europe coverage",
         "verified": "Research-grade listings"
       }
     },
     "stats": {
       "propertiesCount": "{count, number}+",
-      "properties": "Properties Tracked",
+      "properties": "Glamping Properties",
       "units": "Units Tracked",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"
@@ -510,7 +510,7 @@
         },
         {
           "question": "How do I find glamping properties near me?",
-          "answer": "Use our interactive map to search for glamping properties by location. We have {count}+ unique properties in Sage research across the United States, Canada, and Europe. You can filter by location, property type, amenities, and price range to find the perfect glamping destination for your outdoor adventure."
+          "answer": "Use our interactive map to search for glamping properties by location. We have {count}+ unique glamping properties on the Sage map across the United States, Canada, and Europe. You can filter by location, property type, amenities, and price range to find the perfect glamping destination for your outdoor adventure."
         },
         {
           "question": "What's the difference between glamping and camping?",
@@ -522,7 +522,7 @@
         },
         {
           "question": "What should I look for in a glamping property?",
-          "answer": "Key factors include location and accessibility, unique accommodation types, quality amenities (wifi, bathrooms, kitchen facilities), safety features, and proximity to attractions. Our database includes detailed information on {count}+ unique properties including ratings, amenities, and pricing to help you compare options."
+          "answer": "Key factors include location and accessibility, unique accommodation types, quality amenities (wifi, bathrooms, kitchen facilities), safety features, and proximity to attractions. Our database includes detailed information on {count}+ unique glamping properties including ratings, amenities, and pricing to help you compare options."
         },
         {
           "question": "Are glamping properties profitable?",

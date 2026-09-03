@@ -1,10 +1,10 @@
 import { getAllGuideSlugs } from '@/lib/guides';
 import { getAllGlossaryTerms } from '@/lib/glossary/index';
-import { getAllSageUniquePropertyCount } from '@/lib/all-sage-unique-property-count';
+import { getPublicMapDisplayedPropertyCount } from '@/lib/public-map-property-count';
 import { roundDownToStep } from '@/lib/round-down-to-step';
 
 export type PublicContentStats = {
-  /** Exact unique published property count from `all_sage_data`. */
+  /** Unique glamping properties on the public map (same count as `/map`). */
   propertyCount: number;
   /** Floored marketing display (nearest 25), e.g. 718 → 700. */
   propertyCountDisplay: number;
@@ -51,11 +51,11 @@ export function applyPropertyCountToContentFields<
 
 /**
  * Single source of truth for public marketing counts:
- * - properties = unique names in `all_sage_data` with `research_status = published`
+ * - properties = unique glamping properties on the public map
  * - guides / glossary = in-repo content inventories
  */
 export async function getPublicContentStats(): Promise<PublicContentStats> {
-  const propertyCount = await getAllSageUniquePropertyCount();
+  const propertyCount = await getPublicMapDisplayedPropertyCount();
   return {
     propertyCount,
     propertyCountDisplay: roundDownToStep(propertyCount, 25),
@@ -77,7 +77,7 @@ export function getPublicContentInventoryCounts(): Pick<
 
 export function buildHomeMetaDescription(stats: PublicContentStats): string {
   const props = formatPropertyCountPlus(stats.propertyCountDisplay);
-  return `${props} unique properties in Sage research, ${stats.guideCount} expert guides, and ${stats.glossaryCount} industry glossary terms. Your trusted resource for outdoor hospitality feasibility studies, appraisals, and property discovery across North America and Europe.`;
+  return `${props} unique glamping properties on the Sage map, ${stats.guideCount} expert guides, and ${stats.glossaryCount} industry glossary terms. Your trusted resource for outdoor hospitality feasibility studies, appraisals, and property discovery across North America and Europe.`;
 }
 
 export function buildHomeOgDescription(stats: PublicContentStats): string {

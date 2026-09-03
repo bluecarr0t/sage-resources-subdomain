@@ -2443,14 +2443,14 @@
       "headline": "Intelligence de marché pour l'hospitalité de plein air",
       "subheadline": "Plus de {count, number} benchmarks en Amérique du Nord et en Europe, guides faisabilité et évaluation, terminologie pour les équipes en hospitalité de plein air.",
       "quickStats": {
-        "properties": "Plus de 650 propriétés de référence",
+        "properties": "{count, number} propriétés de glamping",
         "usCanada": "Couverture États-Unis, Canada et Europe",
         "verified": "Annonces niveau recherche"
       }
     },
     "stats": {
       "propertiesCount": "650+",
-      "properties": "Propriétés suivies",
+      "properties": "Propriétés de glamping",
       "units": "Unités suivies",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"

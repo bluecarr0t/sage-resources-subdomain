@@ -2183,14 +2183,14 @@
       "headline": "Marktintelligenz für Outdoor Hospitality",
       "subheadline": "Über {count, number} Benchmarks in Nordamerika und Europa, Leitfäden zu Machbarkeit und Bewertung, Fachbegriffe für Teams der Outdoor Hospitality.",
       "quickStats": {
-        "properties": "Über 650 Benchmark-Objekte",
+        "properties": "{count, number} Glamping-Objekte",
         "usCanada": "Abdeckung USA, Kanada und Europa",
         "verified": "Listings auf Forschungsniveau"
       }
     },
     "stats": {
       "propertiesCount": "650+",
-      "properties": "Erfasste Objekte",
+      "properties": "Glamping-Objekte",
       "units": "Erfasste Einheiten",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"

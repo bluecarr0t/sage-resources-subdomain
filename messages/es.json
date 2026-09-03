@@ -2187,14 +2187,14 @@
       "headline": "Inteligencia de mercado en hospitalidad outdoor",
       "subheadline": "Más de {count, number} benchmarks en América del Norte y Europa: guías de viabilidad y tasación y terminología, para equipos de hospitalidad outdoor.",
       "quickStats": {
-        "properties": "Más de 650 propiedades de referencia",
+        "properties": "{count, number} propiedades de glamping",
         "usCanada": "Cobertura en EE. UU., Canadá y Europa",
         "verified": "Listados nivel investigación"
       }
     },
     "stats": {
       "propertiesCount": "650+",
-      "properties": "Propiedades registradas",
+      "properties": "Propiedades de glamping",
       "units": "Unidades registradas",
       "guides": "Expert Guides",
       "glossary": "Glossary Terms"

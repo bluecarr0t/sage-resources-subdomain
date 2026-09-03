@@ -44,7 +44,7 @@ describe('public-content-stats', () => {
       guideCount: 19,
       glossaryCount: 89,
     });
-    expect(description).toContain('1,250+ unique properties');
+    expect(description).toContain('1,250+ unique glamping properties');
     expect(description).toContain('19 expert guides');
     expect(description).toContain('89 industry glossary terms');
   });
