@@ -1,28 +1,29 @@
 import { unstable_cache } from 'next/cache';
 import { createServerClient } from '@/lib/supabase';
 import { applyPublicMapCohortFilters } from '@/lib/public-map-cohort-filters';
-import { parseNum } from '@/lib/comps-v2/geo';
+import { sumUnitsByUniquePropertyName } from '@/lib/sum-units-by-unique-property-name';
 
 const TABLE = 'all_sage_data';
 
-function unitsFromRow(quantity_of_units: unknown): number {
-  const n = parseNum(quantity_of_units);
-  if (n == null || n <= 0) return 0;
-  return Math.round(n);
-}
-
 /**
- * Sum of `quantity_of_units` for the public glamping map cohort
- * (same filters as `fetchPublicMapPropertyRows`).
+ * Unit inventory for the public glamping map cohort, one total per unique
+ * Property Name (same filters as `fetchPublicMapPropertyRows`).
  */
 async function loadPublicMapGlampingUnitCount(): Promise<number> {
   const supabase = createServerClient();
 
   let query = applyPublicMapCohortFilters(
-    supabase.from(TABLE).select('quantity_of_units')
+    supabase
+      .from(TABLE)
+      .select('property_name, unit_type, quantity_of_units, property_total_sites')
   ).limit(5000);
 
-  let total = 0;
+  const rows: Array<{
+    property_name?: string | null;
+    unit_type?: string | null;
+    quantity_of_units?: unknown;
+    property_total_sites?: unknown;
+  }> = [];
   let offset = 0;
   const batchSize = 1000;
 
@@ -35,16 +36,12 @@ async function loadPublicMapGlampingUnitCount(): Promise<number> {
     }
 
     if (!batchData?.length) break;
-
-    for (const row of batchData) {
-      total += unitsFromRow(row.quantity_of_units);
-    }
-
+    rows.push(...batchData);
     if (batchData.length < batchSize) break;
     offset += batchSize;
   }
 
-  return total;
+  return sumUnitsByUniquePropertyName(rows);
 }
 
 /**
@@ -54,7 +51,7 @@ async function loadPublicMapGlampingUnitCount(): Promise<number> {
 export function getPublicMapGlampingUnitCount(): Promise<number> {
   return unstable_cache(
     loadPublicMapGlampingUnitCount,
-    ['public-map-glamping-unit-count'],
+    ['public-map-glamping-unit-count-unique-property-name'],
     { revalidate: 1800, tags: ['properties'] }
   )();
 }

@@ -4,7 +4,7 @@ import { getAllSageUniquePropertyCount } from '@/lib/all-sage-unique-property-co
 import { roundDownToStep } from '@/lib/round-down-to-step';
 
 export type PublicContentStats = {
-  /** Exact unique property count from `all_sage_data`. */
+  /** Exact unique published property count from `all_sage_data`. */
   propertyCount: number;
   /** Floored marketing display (nearest 25), e.g. 718 → 700. */
   propertyCountDisplay: number;
@@ -51,7 +51,7 @@ export function applyPropertyCountToContentFields<
 
 /**
  * Single source of truth for public marketing counts:
- * - properties = unique names in `all_sage_data`
+ * - properties = unique names in `all_sage_data` with `research_status = published`
  * - guides / glossary = in-repo content inventories
  */
 export async function getPublicContentStats(): Promise<PublicContentStats> {

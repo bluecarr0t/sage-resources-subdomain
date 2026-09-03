@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { createServerClient } from '@/lib/supabase';
 import { normalizePropertyName } from '@/components/map/utils/propertyProcessing';
+import { PUBLISHED_RESEARCH_STATUS } from '@/lib/published-property-pages';
 
 async function loadAllSageUniquePropertyCount(): Promise<number> {
   const supabase = createServerClient();
@@ -12,6 +13,7 @@ async function loadAllSageUniquePropertyCount(): Promise<number> {
     const { data, error } = await supabase
       .from('all_sage_data')
       .select('property_name')
+      .eq('research_status', PUBLISHED_RESEARCH_STATUS)
       .range(offset, offset + batchSize - 1);
 
     if (error) {
@@ -35,13 +37,14 @@ async function loadAllSageUniquePropertyCount(): Promise<number> {
 }
 
 /**
- * Cached count of unique properties in `all_sage_data` (deduped by normalized
- * property_name). Use for marketing / SEO / llms.txt — not the narrower map cohort.
+ * Cached count of unique published properties in `all_sage_data` (deduped by
+ * normalized property_name, `research_status = published`). Use for marketing /
+ * SEO / llms.txt — not the narrower map cohort.
  */
 export function getAllSageUniquePropertyCount(): Promise<number> {
   return unstable_cache(
     loadAllSageUniquePropertyCount,
-    ['all-sage-unique-property-count'],
+    ['all-sage-unique-property-count-published'],
     { revalidate: 1800, tags: ['properties'] }
   )();
 }
