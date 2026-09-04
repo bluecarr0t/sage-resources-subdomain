@@ -53,7 +53,7 @@ export function GlampingMarketOverviewStickyNav({
     glampingMarketOverviewPath(nextMarket, nextTier, {
       states: nextMarket === 'us' ? states : null,
     });
-  const classificationLocked = states != null && states.length > 0;
+  const classificationLocked = market === 'ca' || (states != null && states.length > 0);
 
   return (
     <>

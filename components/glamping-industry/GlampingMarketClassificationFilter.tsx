@@ -20,8 +20,10 @@ const METHOD_LINK_CLASS =
   'text-sage-700 underline decoration-sage-300 underline-offset-2 transition-colors hover:text-sage-800 hover:decoration-sage-500';
 
 const LOCKED_REASON_TITLE = 'Classification locked';
-const LOCKED_REASON =
+const LOCKED_REASON_US_REGION =
   'Regional views always include all service tiers. Choose All US to filter by Luxury, Upscale, Comfort, or Rustic.';
+const LOCKED_REASON_CANADA =
+  'Canada views always include all service tiers. Choose United States to filter by Luxury, Upscale, Comfort, or Rustic.';
 
 type Props = {
   market: GlampingMarketSnapshotMarket;
@@ -33,8 +35,9 @@ type Props = {
   /** Hide the “What do these mean?” link (e.g. sticky header). */
   compact?: boolean;
   /**
-   * Freeze the control (regional US views always use all classifications).
-   * Options become non-interactive and All is shown as the active value.
+   * Freeze the control (Canada and regional US views always use all
+   * classifications). Options become non-interactive and All is shown as
+   * the active value.
    */
   disabled?: boolean;
 };
@@ -51,6 +54,7 @@ export function GlampingMarketClassificationFilter({
   const hintId = useId();
   const close = useCallback(() => setOpen(false), []);
   const displayTier = disabled ? 'all' : tier;
+  const lockedReason = market === 'ca' ? LOCKED_REASON_CANADA : LOCKED_REASON_US_REGION;
 
   const active =
     'rounded-sm bg-sage-600 px-3 py-2 text-[11px] font-medium tracking-wide text-white';
@@ -121,7 +125,7 @@ export function GlampingMarketClassificationFilter({
               {LOCKED_REASON_TITLE}
             </p>
             <p className="mt-1 text-[11px] font-light leading-relaxed text-neutral-300">
-              {LOCKED_REASON}
+              {lockedReason}
             </p>
           </div>
         ) : null}

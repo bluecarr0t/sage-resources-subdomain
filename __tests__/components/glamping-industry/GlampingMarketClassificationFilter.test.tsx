@@ -1,5 +1,5 @@
 /**
- * Classification filter lock when a US region is selected.
+ * Classification filter lock when Canada or a US region is selected.
  * @jest-environment node
  */
 
@@ -50,6 +50,17 @@ describe('GlampingMarketClassificationFilter', () => {
     expect(html).not.toContain('href=');
     expect(html).toMatch(/aria-current="true"[^>]*>All</);
   });
+
+  it('uses Canada lock copy when the Canada market is disabled', () => {
+    const html = renderToStaticMarkup(
+      <GlampingMarketClassificationFilter market="ca" tier="luxury" disabled />
+    );
+
+    expect(html).toContain('Canada views always include all service tiers');
+    expect(html).toContain('Choose United States to filter');
+    expect(html).not.toContain('Choose All US');
+    expect(html).toMatch(/aria-current="true"[^>]*>All</);
+  });
 });
 
 describe('GlampingMarketOverviewStickyNav classification lock', () => {
@@ -70,5 +81,17 @@ describe('GlampingMarketOverviewStickyNav classification lock', () => {
     expect(html).toContain('aria-label="Classification"');
     expect(html).not.toContain('locked to All');
     expect(html).toContain('href="/glamping-market-overview?tier=luxury"');
+  });
+
+  it('locks classification on the Canada view', () => {
+    const html = renderToStaticMarkup(
+      <GlampingMarketOverviewStickyNav market="ca" tier="luxury" states={null} />
+    );
+
+    expect(html).toContain('Classification (locked to All)');
+    expect(html).toContain('aria-disabled="true"');
+    expect(html).toContain('Canada views always include all service tiers');
+    expect(html).toMatch(/aria-current="true"[^>]*>All</);
+    expect(html).not.toContain('Choose All US');
   });
 });
