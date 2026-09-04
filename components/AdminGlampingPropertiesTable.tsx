@@ -8,6 +8,7 @@ import {
 } from '@/lib/glamping-is-open';
 import {
   GLAMPING_PROPERTY_TYPE_FORM_OPTIONS as PROPERTY_TYPE_FORM_OPTIONS,
+  isRvNonGlampingPropertyType,
   normalizePropertyTypeForForm,
 } from '@/lib/glamping-property-types';
 import {
@@ -19,7 +20,16 @@ import {
   GLAMPING_SERVICE_TIERS,
   tierDisplayLabel,
 } from '@/lib/glamping-service-tier';
+import {
+  GLAMPING_PROFESSIONALIZATION_BREAKDOWN_KEY,
+  GLAMPING_PROFESSIONALIZATION_SCORE_COLUMN,
+  professionalizationScoreBand,
+} from '@/lib/admin/glamping-professionalization-score';
 import { isUnitedStatesCountryFilterValue } from '@/lib/admin/glamping-sage-data-list';
+import {
+  summarizeGlampingUnits,
+  type HasGlampingUnitsFilter,
+} from '@/lib/admin/has-glamping-units';
 import { CA_PROVINCE_DISPLAY_NAME } from '@/lib/normalize-ca-province-key';
 import { US_STATES_OPTIONS } from '@/lib/us-states';
 import { useTranslations } from 'next-intl';
@@ -135,6 +145,12 @@ interface QuickColumn {
 }
 
 const QUICK_COLUMNS: QuickColumn[] = [
+  {
+    key: GLAMPING_PROFESSIONALIZATION_SCORE_COLUMN,
+    label: 'Score',
+    labelKey: 'professionalizationScoreColumn',
+    width: 'w-16',
+  },
   { key: 'property_name', label: 'Property name', width: 'min-w-[220px]' },
   { key: 'url', label: 'Website', type: 'url', width: 'w-14' },
   { key: 'city', label: 'City', width: 'min-w-[140px]' },
@@ -375,6 +391,36 @@ function formatCellValue(value: unknown): string {
   return String(value);
 }
 
+function parseProfessionalizationScore(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return Math.round(value);
+  if (typeof value === 'string' && value.trim() !== '') {
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.round(n) : null;
+  }
+  return null;
+}
+
+function professionalizationScoreTitle(row?: PropertyRow): string | undefined {
+  const raw = row?.[GLAMPING_PROFESSIONALIZATION_BREAKDOWN_KEY];
+  if (!raw || typeof raw !== 'object') return undefined;
+  const reasons = (raw as { reasons?: unknown }).reasons;
+  if (!Array.isArray(reasons) || reasons.length === 0) return undefined;
+  return truncateForNativeTitle(reasons.map((r) => String(r)).join(' · '));
+}
+
+function professionalizationScorePillClasses(
+  band: ReturnType<typeof professionalizationScoreBand>
+): string {
+  switch (band) {
+    case 'green':
+      return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200';
+    case 'yellow':
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200';
+    default:
+      return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200';
+  }
+}
+
 function propertyTypeRawFromAnchorRow(
   rows: PropertyRow[],
   anchorPropertyId: string
@@ -523,13 +569,19 @@ function TableCellReadOnly({
   const displayValue = formatCellValue(value);
   const isPropertyTypeCol = column.key === 'property_type';
   const isServiceTierCol = column.key === 'glamping_service_tier';
+  const isScoreCol = column.key === GLAMPING_PROFESSIONALIZATION_SCORE_COLUMN;
+  const scoreValue = isScoreCol ? parseProfessionalizationScore(value) : null;
   const propertyTypeNormalized = isPropertyTypeCol
     ? normalizePropertyTypeForForm(displayValue)
     : '';
   const propertyTypeOpt = isPropertyTypeCol
     ? PROPERTY_TYPE_FORM_OPTIONS.find((o) => o.value === propertyTypeNormalized)
     : undefined;
-  const isEmpty = !isPropertyTypeCol && !isServiceTierCol && displayValue === '';
+  const isEmpty =
+    !isPropertyTypeCol &&
+    !isServiceTierCol &&
+    !(isScoreCol && scoreValue != null) &&
+    displayValue === '';
   const cellPlainText =
     isServiceTierCol && displayValue
       ? tierDisplayLabel(displayValue, 'short')
@@ -611,6 +663,14 @@ function TableCellReadOnly({
         >
           {displayValue}
         </span>
+      ) : isScoreCol && scoreValue != null ? (
+        <span
+          title={professionalizationScoreTitle(row)}
+          className={`inline-flex min-w-[2.25rem] items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${professionalizationScorePillClasses(professionalizationScoreBand(scoreValue))}`}
+          aria-label={t('professionalizationScoreAria', { score: scoreValue })}
+        >
+          {scoreValue}
+        </span>
       ) : (
         <span className="block truncate text-gray-800 dark:text-gray-200">{cellPlainText}</span>
       )}
@@ -622,6 +682,44 @@ interface SiteEntry {
   clientKey: string;
   dbId?: string;
   draft: Record<string, string>;
+}
+
+function HasGlampingUnitsReadout({
+  rows,
+  loading,
+}: {
+  rows: Array<{ unit_type?: string; quantity_of_units?: string }>;
+  loading: boolean;
+}) {
+  const t = useTranslations('admin.sageData');
+  const summary = useMemo(() => summarizeGlampingUnits(rows), [rows]);
+  const value = loading
+    ? t('hasGlampingUnitsLoading')
+    : summary.hasGlampingUnits
+      ? summary.glampingUnitCount > 0
+        ? t('hasGlampingUnitsYesCount', { count: summary.glampingUnitCount })
+        : t('hasGlampingUnitsYes')
+      : t('hasGlampingUnitsNo');
+
+  return (
+    <div className="md:col-span-2">
+      <p className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+        {t('hasGlampingUnitsLabel')}
+        <span className="ml-1 font-mono text-[10px] text-gray-400 dark:text-gray-500">
+          has_glamping_units
+        </span>
+      </p>
+      <p
+        className="text-sm text-gray-900 dark:text-gray-100"
+        data-testid="has-glamping-units-readout"
+      >
+        {value}
+      </p>
+      <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+        {t('hasGlampingUnitsHint')}
+      </p>
+    </div>
+  );
 }
 
 interface SiblingListResponse {
@@ -1140,6 +1238,9 @@ function EditModal({
                   updated.cancelled_reason_notes = '';
                   updated.cancelled_year = '';
                 }
+                if (field.key === 'property_type' && isRvNonGlampingPropertyType(next)) {
+                  updated.is_glamping_property = 'No';
+                }
                 return updated;
               });
             }}
@@ -1363,6 +1464,12 @@ function EditModal({
               </h3>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {group.fields.map((field) => renderSharedField(field, group.title))}
+                {group.title === 'Core' ? (
+                  <HasGlampingUnitsReadout
+                    rows={siteEntries.map((entry) => entry.draft)}
+                    loading={mode === 'edit' && siblingsLoad !== 'ready'}
+                  />
+                ) : null}
               </div>
             </section>
             );
@@ -1545,12 +1652,15 @@ export default function AdminGlampingPropertiesTable() {
   const [bulkServiceTier, setBulkServiceTier] = useState('');
   const [bulkApplying, setBulkApplying] = useState(false);
   const [serviceTierFilter, setServiceTierFilter] = useState<string>('all');
+  const [hasGlampingUnitsFilter, setHasGlampingUnitsFilter] = useState<
+    'all' | HasGlampingUnitsFilter
+  >('all');
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [search, statusFilter, countryFilter, stateFilter, openStatusFilter, sourceFilter, missingDataFilter, serviceTierFilter]);
+  }, [search, statusFilter, countryFilter, stateFilter, openStatusFilter, sourceFilter, missingDataFilter, serviceTierFilter, hasGlampingUnitsFilter]);
 
   const stateFilterEnabled =
     countryFilter === 'all' ||
@@ -1640,6 +1750,9 @@ export default function AdminGlampingPropertiesTable() {
       if (serviceTierFilter !== 'all') {
         params.set('glamping_service_tier', serviceTierFilter);
       }
+      if (hasGlampingUnitsFilter !== 'all') {
+        params.set('has_glamping_units', hasGlampingUnitsFilter);
+      }
 
       const res = await fetch(`/api/admin/sage-glamping-data/properties?${params.toString()}`, {
         signal:
@@ -1681,6 +1794,7 @@ export default function AdminGlampingPropertiesTable() {
     sourceFilter,
     missingDataFilter,
     serviceTierFilter,
+    hasGlampingUnitsFilter,
     sortBy,
     sortDir,
     t,
@@ -1701,6 +1815,9 @@ export default function AdminGlampingPropertiesTable() {
     }
     if (bulkPropertyType !== '') {
       updates.property_type = bulkPropertyType;
+      if (isRvNonGlampingPropertyType(bulkPropertyType)) {
+        updates.is_glamping_property = 'No';
+      }
     }
     if (bulkServiceTier !== '') {
       updates.glamping_service_tier = bulkServiceTier;
@@ -1875,6 +1992,15 @@ export default function AdminGlampingPropertiesTable() {
     setServiceTierFilter(value);
   };
 
+  const handleHasGlampingUnitsChange = (value: string) => {
+    setPage(1);
+    if (value === 'yes' || value === 'no') {
+      setHasGlampingUnitsFilter(value);
+    } else {
+      setHasGlampingUnitsFilter('all');
+    }
+  };
+
   const handleMissingDataChange = (value: string) => {
     setPage(1);
     if (
@@ -1898,7 +2024,11 @@ export default function AdminGlampingPropertiesTable() {
     } else {
       setSortBy(columnKey);
       setSortDir(
-        columnKey === 'date_updated' || columnKey === 'date_added' ? 'desc' : 'asc'
+        columnKey === 'date_updated' ||
+          columnKey === 'date_added' ||
+          columnKey === GLAMPING_PROFESSIONALIZATION_SCORE_COLUMN
+          ? 'desc'
+          : 'asc'
       );
     }
   };
@@ -2186,7 +2316,7 @@ export default function AdminGlampingPropertiesTable() {
           </label>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(12rem,1fr)_minmax(12rem,1fr)_minmax(14rem,1.2fr)] xl:items-end xl:max-w-4xl">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(12rem,1fr)_minmax(12rem,1fr)_minmax(14rem,1.2fr)_minmax(12rem,1fr)] xl:items-end xl:max-w-5xl">
             <label
             className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
             htmlFor="sage-data-open-status-filter"
@@ -2250,6 +2380,23 @@ export default function AdminGlampingPropertiesTable() {
                   {t(opt.i18nKey)}
                 </option>
               ))}
+            </select>
+          </label>
+          <label
+            className="space-y-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
+            htmlFor="sage-data-has-glamping-units-filter"
+          >
+            <span>{t('hasGlampingUnitsFilterLabel')}</span>
+            <select
+              id="sage-data-has-glamping-units-filter"
+              value={hasGlampingUnitsFilter}
+              onChange={(e) => handleHasGlampingUnitsChange(e.target.value)}
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-sage-600 dark:border-neutral-700 dark:bg-gray-700 dark:text-gray-100"
+              aria-label={t('hasGlampingUnitsFilterAria')}
+            >
+              <option value="all">{t('hasGlampingUnitsFilterAll')}</option>
+              <option value="yes">{t('hasGlampingUnitsFilterYes')}</option>
+              <option value="no">{t('hasGlampingUnitsFilterNo')}</option>
             </select>
           </label>
           </div>

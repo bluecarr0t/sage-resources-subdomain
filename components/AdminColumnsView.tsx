@@ -218,6 +218,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
     title: 'System Metadata',
     columns: [
       'quality_score',
+      'glamping_professionalization_score',
       'created_at',
       'updated_at',
     ],

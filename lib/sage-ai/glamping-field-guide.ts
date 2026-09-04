@@ -396,7 +396,8 @@ export const GLAMPING_FIELD_GUIDE: FieldGuideEntry[] = [
       'true glamping',
       'glamping only',
     ],
-    tool_tip: 'Set `Yes` in filters when the user means glamping product.',
+    tool_tip:
+      'Set `Yes` in filters when the user means glamping product. RV Resort and RV Park always store `No`.',
   },
   {
     column: 'is_open',

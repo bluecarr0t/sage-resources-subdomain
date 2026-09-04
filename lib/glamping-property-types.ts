@@ -31,3 +31,41 @@ export function normalizePropertyTypeForForm(raw: string): string {
   }
   return trimmed;
 }
+
+/** RV product types are never classified as glamping properties. */
+export const RV_NON_GLAMPING_PROPERTY_TYPES = ['RV Resort', 'RV Park'] as const;
+
+export function isRvNonGlampingPropertyType(
+  propertyType: string | null | undefined
+): boolean {
+  return (RV_NON_GLAMPING_PROPERTY_TYPES as readonly string[]).includes(
+    (propertyType ?? '').trim()
+  );
+}
+
+/**
+ * RV Resort / RV Park always store `is_glamping_property = No`.
+ * Other types keep `currentFlag` when set, otherwise default to Yes.
+ */
+export function glampingFlagForPropertyType(
+  propertyType: string | null | undefined,
+  currentFlag?: string | null
+): 'Yes' | 'No' {
+  if (isRvNonGlampingPropertyType(propertyType)) return 'No';
+  const trimmed = (currentFlag ?? '').trim();
+  return trimmed === 'No' ? 'No' : 'Yes';
+}
+
+/** Force `is_glamping_property` to No when the effective type is RV Resort / RV Park. */
+export function applyRvPropertyTypeGlampingFlag(
+  fields: { property_type?: unknown; is_glamping_property?: unknown },
+  currentPropertyType?: string | null
+): void {
+  const nextType =
+    typeof fields.property_type === 'string'
+      ? fields.property_type
+      : currentPropertyType;
+  if (isRvNonGlampingPropertyType(nextType)) {
+    fields.is_glamping_property = 'No';
+  }
+}

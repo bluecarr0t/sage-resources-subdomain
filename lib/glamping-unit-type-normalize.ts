@@ -346,6 +346,11 @@ export function normalizeGlampingUnitTypeForStorage(
   return titleCaseWords(key);
 }
 
+/** Known raw phrases that map to a canonical `unit_type` (for derived filters). */
+export function listUnitTypeNormalizePhrases(): string[] {
+  return Object.keys(PHRASE_CANONICAL);
+}
+
 const CANONICAL_PHRASES_BY_LENGTH = Object.keys(PHRASE_CANONICAL).sort(
   (a, b) => b.length - a.length
 );

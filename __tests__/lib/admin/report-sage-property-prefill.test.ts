@@ -23,6 +23,7 @@ describe('report-sage-property-prefill', () => {
     expect(draft.state).toBe('ME');
     expect(draft.zip_code).toBe('04605');
     expect(draft.property_type).toBe('RV Resort');
+    expect(draft.is_glamping_property).toBe('No');
     expect(draft.property_total_sites).toBe('120');
     expect(draft.lat).toBe('44.57');
     expect(draft.discovery_source).toBe('Past Report');

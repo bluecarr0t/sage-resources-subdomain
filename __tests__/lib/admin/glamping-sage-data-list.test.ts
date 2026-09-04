@@ -129,6 +129,44 @@ describe('applySageDataGlampingListFilters', () => {
     );
     expect(orCall?.args[0]).toContain('state.ilike.Quebec');
   });
+
+  it('filters derived has_glamping_units on the list-anchors view', () => {
+    const yesQuery = createMockQuery();
+    applySageDataGlampingListFilters(yesQuery, {
+      q: '',
+      researchStatus: undefined,
+      country: undefined,
+      city: undefined,
+      state: undefined,
+      isOpen: undefined,
+      discoverySource: undefined,
+      missing: null,
+      glampingServiceTier: undefined,
+      hasGlampingUnits: 'yes',
+    });
+    expect(yesQuery.calls).toContainEqual({
+      method: 'eq',
+      args: ['has_glamping_units', true],
+    });
+
+    const noQuery = createMockQuery();
+    applySageDataGlampingListFilters(noQuery, {
+      q: '',
+      researchStatus: undefined,
+      country: undefined,
+      city: undefined,
+      state: undefined,
+      isOpen: undefined,
+      discoverySource: undefined,
+      missing: null,
+      glampingServiceTier: undefined,
+      hasGlampingUnits: 'no',
+    });
+    expect(noQuery.calls).toContainEqual({
+      method: 'eq',
+      args: ['has_glamping_units', false],
+    });
+  });
 });
 
 describe('sage-data-fuzzy-search helpers', () => {

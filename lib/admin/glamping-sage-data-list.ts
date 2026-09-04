@@ -2,6 +2,7 @@ import { GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN } from '@/lib/glamping-market-sn
 import { CA_PROVINCE_DISPLAY_NAME } from '@/lib/normalize-ca-province-key';
 import { US_STATE_NAMES, type US_STATES } from '@/lib/us-states';
 import { applyFuzzySageDataSearch } from '@/lib/admin/sage-data-fuzzy-search';
+import type { HasGlampingUnitsFilter } from '@/lib/admin/has-glamping-units';
 
 export function escapeIlikeTerm(term: string): string {
   return term.replace(/[%,()]/g, '').trim();
@@ -34,12 +35,17 @@ export type SageDataGlampingListFilters = {
   missing: string | null;
   /** Exact `glamping_service_tier` when set (luxury | upscale | midscale | rustic). */
   glampingServiceTier: string | undefined;
+  /**
+   * Derived from sibling `unit_type`s (`all_sage_data_list_anchors.has_glamping_units`).
+   * Not a stored property column.
+   */
+  hasGlampingUnits?: HasGlampingUnitsFilter;
 };
 
 /** Minimal PostgREST filter surface used by the Sage Data list endpoint. */
 export interface SageGlampingListQuery {
   or(filters: string): SageGlampingListQuery;
-  eq(column: string, value: string): SageGlampingListQuery;
+  eq(column: string, value: string | boolean): SageGlampingListQuery;
   ilike(column: string, value: string): SageGlampingListQuery;
 }
 
@@ -87,6 +93,11 @@ export function applySageDataGlampingListFilters<T extends SageGlampingListQuery
   }
   if (filters.glampingServiceTier && filters.glampingServiceTier !== 'all') {
     q = q.eq('glamping_service_tier', filters.glampingServiceTier);
+  }
+  if (filters.hasGlampingUnits === 'yes') {
+    q = q.eq('has_glamping_units', true);
+  } else if (filters.hasGlampingUnits === 'no') {
+    q = q.eq('has_glamping_units', false);
   }
 
   const missing = filters.missing;

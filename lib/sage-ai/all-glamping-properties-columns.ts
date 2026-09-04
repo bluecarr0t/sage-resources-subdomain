@@ -174,6 +174,7 @@ export const ALL_GLAMPING_PROPERTY_COLUMNS = [
   'river_stream_or_creek',
   'setting_mountainous',
   'quality_score',
+  'glamping_professionalization_score',
   'created_at',
   'updated_at',
   'roverpass_campground_id',
@@ -194,6 +195,7 @@ const EQ_FILTER_EXCLUDE = new Set<string>([
   'amenities_raw',
   'activities_raw',
   'lifestyle_raw',
+  'glamping_professionalization_score',
 ]);
 
 const GROUP_BY_EXCLUDE = new Set<string>([

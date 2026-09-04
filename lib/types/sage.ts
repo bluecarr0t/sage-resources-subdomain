@@ -214,6 +214,8 @@ export interface SageProperty {
 
   // SYSTEM METADATA
   quality_score: number | null;
+  /** Derived 0–100 closeness to a full professionalized glamping property. */
+  glamping_professionalization_score: number | null;
   created_at: string | null;
   updated_at: string | null;
 

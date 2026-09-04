@@ -13,6 +13,8 @@
  *     sortBy       — column name (default 'date_updated')
  *     sortDir      — 'asc' | 'desc' (default 'desc')
  *     glamping_service_tier — exact match (luxury | upscale | midscale | rustic)
+ *     has_glamping_units — optional: 'yes' | 'no' — derived from sibling unit_types
+ *                          (list-anchors `has_glamping_units`; not a stored column)
  *     missing      — optional: 'city' | 'rates' | 'website' | 'lat_lng' | 'total_sites' — gap filters
  *                    (applied to anchor rows only when the list-anchors view is installed)
  *                    (city/url: null or empty string; rates: rate_avg_retail_daily_rate null or 0 — numeric, no `eq.''`);
@@ -34,7 +36,7 @@
  *
  * POST /api/admin/sage-glamping-data/properties
  *   Body: fields for a new row (see EDITABLE_COLUMNS). Required: property_name, city, state, and url or an OTA listing URL.
- *   Defaults: research_status in_progress, is_glamping_property Yes, is_open Yes, source Sage,
+ *   Defaults: research_status in_progress, is_glamping_property Yes (No when property_type is RV Resort / RV Park), is_open Yes, source Sage,
  *   date_added / date_updated today (YYYY-MM-DD).
  */
 
@@ -42,6 +44,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { withAdminAuth } from '@/lib/require-admin-auth';
 import { applySageDataGlampingListFilters } from '@/lib/admin/glamping-sage-data-list';
+import type { HasGlampingUnitsFilter } from '@/lib/admin/has-glamping-units';
 import { dedupeRowsToPropertyAnchors } from '@/lib/admin/glamping-list-anchor-key';
 import {
   idsBelongToSiblingGroup,
@@ -71,6 +74,16 @@ import {
 } from '@/lib/cancelled-project-reason';
 import { sanitizeGlampingSeasonRateUpdates } from '@/lib/glamping-seasonal-rate';
 import { applyIsOpenChangeWithHistory } from '@/lib/glamping-pipeline/status-history';
+import {
+  applyRvPropertyTypeGlampingFlag,
+  isRvNonGlampingPropertyType,
+} from '@/lib/glamping-property-types';
+import {
+  attachProfessionalizationScoresToAnchors,
+  persistProfessionalizationScoreForAnchor,
+  withLiveProfessionalizationScore,
+} from '@/lib/admin/attach-glamping-professionalization-scores';
+import { GLAMPING_PROFESSIONALIZATION_SCORE_COLUMN } from '@/lib/admin/glamping-professionalization-score';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,13 +102,15 @@ function isValidUuidString(value: unknown): value is string {
 }
 
 // Columns the admin editor is NOT allowed to overwrite via PATCH.
-// id / created_at / updated_at are managed by Postgres; quality_score is derived.
+// id / created_at / updated_at are managed by Postgres; quality_score and
+// glamping_professionalization_score are derived.
 const READ_ONLY_COLUMNS = new Set<string>([
   'id',
   'property_id',
   'created_at',
   'updated_at',
   'quality_score',
+  GLAMPING_PROFESSIONALIZATION_SCORE_COLUMN,
 ]);
 
 const EDITABLE_COLUMNS = new Set<string>(
@@ -209,6 +224,9 @@ export const POST = withAdminAuth(async (request) => {
       insertRow.is_glamping_property.trim() !== ''
         ? insertRow.is_glamping_property.trim()
         : 'Yes';
+    if (isRvNonGlampingPropertyType(String(insertRow.property_type ?? ''))) {
+      insertRow.is_glamping_property = 'No';
+    }
     insertRow.is_open =
       typeof insertRow.is_open === 'string' && insertRow.is_open.trim() !== ''
         ? insertRow.is_open.trim()
@@ -334,10 +352,23 @@ export const POST = withAdminAuth(async (request) => {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      property: data,
-    });
+    const created = (data ?? {}) as Record<string, unknown>;
+    try {
+      const scored = await persistProfessionalizationScoreForAnchor(supabase, created);
+      return NextResponse.json({
+        success: true,
+        property: scored ? withLiveProfessionalizationScore(created, scored) : created,
+      });
+    } catch (scoreErr) {
+      console.warn(
+        '[admin/sage-data/properties] POST professionalization score failed:',
+        scoreErr
+      );
+      return NextResponse.json({
+        success: true,
+        property: created,
+      });
+    }
   } catch (err) {
     console.error('[admin/sage-data/properties] POST unexpected error:', err);
     return NextResponse.json(
@@ -411,6 +442,11 @@ export const GET = withAdminAuth(async (request) => {
       glampingServiceTierRaw && isGlampingServiceTier(glampingServiceTierRaw)
         ? glampingServiceTierRaw
         : undefined;
+    const hasGlampingUnitsRaw = params.get('has_glamping_units')?.trim().toLowerCase();
+    const hasGlampingUnitsFilter: HasGlampingUnitsFilter | undefined =
+      hasGlampingUnitsRaw === 'yes' || hasGlampingUnitsRaw === 'no'
+        ? hasGlampingUnitsRaw
+        : undefined;
     const page = parseIntParam(params.get('page'), 1);
     const pageSize = Math.min(
       parseIntParam(params.get('pageSize'), DEFAULT_PAGE_SIZE),
@@ -437,15 +473,19 @@ export const GET = withAdminAuth(async (request) => {
       discoverySource: discoverySourceFilter,
       missing: missingParam,
       glampingServiceTier: glampingServiceTierFilter,
+      hasGlampingUnits: hasGlampingUnitsFilter,
     };
 
-    const buildListQuery = (relation: string) => {
+    const buildListQuery = (
+      relation: string,
+      filters: typeof listFilters = listFilters
+    ) => {
       let q = supabase
         .from(relation)
         .select('*', { count: 'exact' })
         .order(sortBy, { ascending: sortDir === 'asc', nullsFirst: false })
         .range(rangeFrom, rangeTo);
-      q = applySageDataGlampingListFilters(q, listFilters);
+      q = applySageDataGlampingListFilters(q, filters);
       return q;
     };
 
@@ -471,7 +511,10 @@ export const GET = withAdminAuth(async (request) => {
           '[admin/sage-data/properties] LIST_ANCHORS_VIEW missing; falling back to unit-level rows. Apply scripts/migrations/create-all-glamping-properties-list-anchors-view.sql on Postgres.'
         );
         listRelation = TABLE;
-        query = buildListQuery(TABLE);
+        query = buildListQuery(TABLE, {
+          ...listFilters,
+          hasGlampingUnits: undefined,
+        });
         ({ data, count, error } = await query);
       }
     }
@@ -497,9 +540,22 @@ export const GET = withAdminAuth(async (request) => {
       total = Math.max(total, rangeFrom + rows.length);
     }
 
+    let properties = rows as Record<string, unknown>[];
+    try {
+      properties = await attachProfessionalizationScoresToAnchors(
+        supabase,
+        properties
+      );
+    } catch (scoreErr) {
+      console.warn(
+        '[admin/sage-data/properties] GET professionalization hydrate failed:',
+        scoreErr
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      properties: rows,
+      properties,
       total,
       page,
       pageSize,
@@ -629,6 +685,26 @@ export const PATCH = withAdminAuth(async (request) => {
     }
 
     const supabase = createServerClient();
+
+    if ('property_type' in sanitized || 'is_glamping_property' in sanitized) {
+      let currentPropertyType: string | null | undefined;
+      if (!('property_type' in sanitized)) {
+        const { data: currentTypeRow, error: currentTypeErr } = await supabase
+          .from(TABLE)
+          .select('property_type')
+          .eq('id', id)
+          .maybeSingle();
+        if (currentTypeErr) {
+          return NextResponse.json(
+            { success: false, error: currentTypeErr.message },
+            { status: 500 }
+          );
+        }
+        currentPropertyType =
+          (currentTypeRow?.property_type as string | null | undefined) ?? null;
+      }
+      applyRvPropertyTypeGlampingFlag(sanitized, currentPropertyType);
+    }
 
     const needsIsOpenRow =
       'planned_open_date' in sanitized ||
@@ -817,11 +893,25 @@ export const PATCH = withAdminAuth(async (request) => {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      property: data,
-      rejected: rejected.length > 0 ? rejected : undefined,
-    });
+    const patched = (data ?? {}) as Record<string, unknown>;
+    try {
+      const scored = await persistProfessionalizationScoreForAnchor(supabase, patched);
+      return NextResponse.json({
+        success: true,
+        property: scored ? withLiveProfessionalizationScore(patched, scored) : patched,
+        rejected: rejected.length > 0 ? rejected : undefined,
+      });
+    } catch (scoreErr) {
+      console.warn(
+        '[admin/sage-data/properties] PATCH professionalization score failed:',
+        scoreErr
+      );
+      return NextResponse.json({
+        success: true,
+        property: patched,
+        rejected: rejected.length > 0 ? rejected : undefined,
+      });
+    }
   } catch (err) {
     console.error('[admin/sage-data/properties] PATCH unexpected error:', err);
     return NextResponse.json(

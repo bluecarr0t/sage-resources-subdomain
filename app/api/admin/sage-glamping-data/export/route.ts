@@ -28,6 +28,7 @@ const PAGE_SIZE = 1000;
 const XLSX_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const EXCLUDED_FROM_UNIFIED_EXPORT = new Set([
   'quality_score',
+  'glamping_professionalization_score',
   'amenities_raw',
   'activities_raw',
   'lifestyle_raw',

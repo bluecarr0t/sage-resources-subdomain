@@ -1,4 +1,7 @@
-import { normalizePropertyTypeForForm } from '@/lib/glamping-property-types';
+import {
+  glampingFlagForPropertyType,
+  normalizePropertyTypeForForm,
+} from '@/lib/glamping-property-types';
 
 export type ReportSagePropertyPrefill = {
   property_name?: string | null;
@@ -57,6 +60,9 @@ function mapReportMarketTypeToPropertyType(
 export function buildSagePropertyDraftFromReport(
   prefill: ReportSagePropertyPrefill
 ): SagePropertyCreateDraft {
+  const propertyType = normalizePropertyTypeForForm(
+    mapReportMarketTypeToPropertyType(prefill.market_type, prefill.resort_type)
+  );
   return {
     property_name: prefill.property_name?.trim() ?? '',
     address: prefill.address_1?.trim() ?? '',
@@ -64,12 +70,10 @@ export function buildSagePropertyDraftFromReport(
     state: prefill.state?.trim() ?? '',
     zip_code: prefill.zip_code?.trim() ?? '',
     country: prefill.country?.trim() || 'United States',
-    property_type: normalizePropertyTypeForForm(
-      mapReportMarketTypeToPropertyType(prefill.market_type, prefill.resort_type)
-    ),
+    property_type: propertyType,
     is_open: 'Under Construction',
     research_status: 'in_progress',
-    is_glamping_property: 'Yes',
+    is_glamping_property: glampingFlagForPropertyType(propertyType, 'Yes'),
     source: 'Sage',
     discovery_source: 'Past Report',
     url: '',
