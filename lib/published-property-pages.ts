@@ -1,7 +1,7 @@
 /**
  * Public property listing pages: one page per logical property with research_status = published.
- * Does not filter by property_type — Campground, RV Resort, Outdoor Boutique Hotel, and
- * Unknown stay indexable at /property/[slug] even when hidden from /map.
+ * Does not filter by property_type — Campground, RV Resort, Outdoor Boutique Hotel,
+ * Ranch & Lodge, and Unknown stay indexable at /property/[slug] even when hidden from /map.
  */
 import { createServerClient } from '@/lib/supabase';
 import {

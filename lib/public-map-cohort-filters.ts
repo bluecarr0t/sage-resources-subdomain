@@ -12,6 +12,7 @@ export const PUBLIC_MAP_EXCLUDED_PROPERTY_TYPES = [
   'RV Resort',
   'RV Park',
   'Outdoor Boutique Hotel',
+  'Ranch & Lodge',
   'Unknown',
 ] as const;
 
@@ -19,7 +20,7 @@ export const PUBLIC_MAP_EXCLUDED_PROPERTY_TYPES = [
  * PostgREST `.or()` — allow null/empty `property_type`; exclude non-map product types.
  */
 export const PUBLIC_MAP_PROPERTY_TYPE_OR =
-  'property_type.is.null,property_type.not.in.(Campground,"RV Resort","RV Park","Outdoor Boutique Hotel",Unknown)';
+  'property_type.is.null,property_type.not.in.(Campground,"RV Resort","RV Park","Outdoor Boutique Hotel","Ranch & Lodge",Unknown)';
 
 export function isExcludedPropertyTypeForPublicMap(
   propertyType: string | null | undefined
@@ -51,7 +52,7 @@ export function applyPublicMapOperationalCohortFilters<T>(query: T): T {
 }
 
 /**
- * Map marker cohort: operational filters + hide Campground, RV Resort, Outdoor Boutique Hotel, Unknown.
+ * Map marker cohort: operational filters + hide Campground, RV Resort, Outdoor Boutique Hotel, Ranch & Lodge, Unknown.
  * Property listing pages are unaffected.
  */
 export function applyPublicMapCohortFilters<T>(query: T): T {

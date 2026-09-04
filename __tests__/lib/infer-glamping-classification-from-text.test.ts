@@ -52,5 +52,6 @@ describe('infer-glamping-classification-from-text', () => {
     expect(p).toContain('Test Ranch');
     expect(p).toContain('family glamping');
     expect(p).toContain('private_commercial');
+    expect(p).toContain('Ranch & Lodge');
   });
 });

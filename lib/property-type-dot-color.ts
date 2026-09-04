@@ -9,6 +9,7 @@ export const PROPERTY_TYPE_DOT_COLORS: Record<GlampingPropertyTypeFormValue, str
   Glamping: '#5c7a5c',
   'Vacation Rental': '#7a6b5c',
   'Outdoor Boutique Hotel': '#8b7355',
+  'Ranch & Lodge': '#7a5344',
   'Outdoor Resort': '#6d8570',
   'RV Resort': '#6b7d8a',
   'RV Park': '#5a6d78',
@@ -49,6 +50,9 @@ export function getPropertyTypeDotColor(propertyType: string | null | undefined)
   }
   if (/\brv\b/.test(lower) || lower.includes('rv resort')) {
     return PROPERTY_TYPE_DOT_COLORS['RV Resort'];
+  }
+  if (lower.includes('ranch') || /\blodge\b/.test(lower)) {
+    return PROPERTY_TYPE_DOT_COLORS['Ranch & Lodge'];
   }
   if (lower.includes('campground') || lower.includes('camping')) {
     return PROPERTY_TYPE_DOT_COLORS.Campground;

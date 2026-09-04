@@ -9,6 +9,9 @@ describe('getPropertyTypeDotColor', () => {
     expect(getPropertyTypeDotColor('Vacation Rental')).toBe(
       PROPERTY_TYPE_DOT_COLORS['Vacation Rental']
     );
+    expect(getPropertyTypeDotColor('Ranch & Lodge')).toBe(
+      PROPERTY_TYPE_DOT_COLORS['Ranch & Lodge']
+    );
     expect(getPropertyTypeDotColor('Outdoor Resort')).toBe(PROPERTY_TYPE_DOT_COLORS['Outdoor Resort']);
     expect(getPropertyTypeDotColor('RV Resort')).toBe(PROPERTY_TYPE_DOT_COLORS['RV Resort']);
     expect(getPropertyTypeDotColor('RV Park')).toBe(PROPERTY_TYPE_DOT_COLORS['RV Park']);
@@ -19,6 +22,8 @@ describe('getPropertyTypeDotColor', () => {
     expect(getPropertyTypeDotColor('Glamping Resort')).toBe(PROPERTY_TYPE_DOT_COLORS.Glamping);
     expect(getPropertyTypeDotColor('Luxury Campground')).toBe(PROPERTY_TYPE_DOT_COLORS.Campground);
     expect(getPropertyTypeDotColor('Desert RV Park')).toBe(PROPERTY_TYPE_DOT_COLORS['RV Park']);
+    expect(getPropertyTypeDotColor('Guest Ranch')).toBe(PROPERTY_TYPE_DOT_COLORS['Ranch & Lodge']);
+    expect(getPropertyTypeDotColor('Luxury Lodge')).toBe(PROPERTY_TYPE_DOT_COLORS['Ranch & Lodge']);
   });
 
   it('returns neutral for empty or unknown', () => {

@@ -43,6 +43,7 @@ function mapReportMarketTypeToPropertyType(
   if (resort.includes('marina')) return 'Marina';
   if (resort.includes('landscape')) return 'Landscape Hotel';
   if (resort.includes('glamping')) return 'Glamping';
+  if (resort.includes('ranch') || /\blodge\b/.test(resort)) return 'Ranch & Lodge';
 
   const market = (marketType ?? '').toLowerCase();
   if (market === 'rv') return 'RV Resort';

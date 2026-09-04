@@ -68,7 +68,7 @@ ${desc}
 
 Infer two fields:
 
-1) property_type — Short human-readable label for the *product* (not land tenure). Examples: "Glamping Resort", "Luxury Campground", "Marina with Glamping", "Outdoor Resort", "Landscape Hotel", "Boutique Camping", "Farm Stay", "Vineyard Glamping", "RV Resort with Glamping". Pick the best single phrase (Title Case), 2–5 words when possible.
+1) property_type — Short human-readable label for the *product* (not land tenure). Examples: "Glamping Resort", "Luxury Campground", "Marina with Glamping", "Outdoor Resort", "Landscape Hotel", "Ranch & Lodge", "Boutique Camping", "Farm Stay", "Vineyard Glamping", "RV Resort with Glamping". Pick the best single phrase (Title Case), 2–5 words when possible. Prefer "Ranch & Lodge" for guest ranches, dude ranches, luxury ranch resorts, and nature / mountain / fishing lodges that are lodge- or ranch-primary (not tent-forward glamping).
 
 2) land_operator_category — Exactly one of these snake_case tokens:
 - private_commercial — Privately owned or commercially operated on private / resort / farm / vineyard / tribal casino / hotel grounds (default when it is not clearly a government park).

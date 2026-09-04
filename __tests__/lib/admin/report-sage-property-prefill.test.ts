@@ -28,6 +28,25 @@ describe('report-sage-property-prefill', () => {
     expect(draft.discovery_source).toBe('Past Report');
   });
 
+  it('maps ranch and lodge resort types to Ranch & Lodge', () => {
+    expect(
+      buildSagePropertyDraftFromReport({
+        property_name: 'Spring Creek Ranch',
+        city: 'Jackson',
+        state: 'WY',
+        resort_type: 'Luxury Ranch Resort',
+      }).property_type
+    ).toBe('Ranch & Lodge');
+    expect(
+      buildSagePropertyDraftFromReport({
+        property_name: 'Mountain Lodge',
+        city: 'Moose',
+        state: 'WY',
+        resort_type: 'Nature Lodge',
+      }).property_type
+    ).toBe('Ranch & Lodge');
+  });
+
   it('builds API payload with trimmed required fields', () => {
     const payload = sagePropertyCreatePayloadFromDraft(
       buildSagePropertyDraftFromReport({
