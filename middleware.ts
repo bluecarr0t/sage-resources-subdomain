@@ -341,7 +341,11 @@ export async function middleware(request: NextRequest) {
 
     // Protect /admin routes - require valid session (Google OAuth)
     if (pathname.startsWith('/admin')) {
-      const response = NextResponse.next({ request });
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-pathname', pathname);
+      const response = NextResponse.next({
+        request: { headers: requestHeaders },
+      });
       const supabase = createSupabaseMiddlewareClient(request, response);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {

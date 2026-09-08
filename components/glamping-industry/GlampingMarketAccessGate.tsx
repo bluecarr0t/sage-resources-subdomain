@@ -285,7 +285,11 @@ export function GlampingMarketAccessGate({
               {emailOnly ? emailOnlyDescription : leadDescription}
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <form
+              name="glamping_market_overview_gate"
+              onSubmit={handleSubmit}
+              className="mt-6 space-y-4"
+            >
               {!emailOnly ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
@@ -297,6 +301,7 @@ export function GlampingMarketAccessGate({
                     </label>
                     <input
                       id="gate-first-name"
+                      name="first_name"
                       type="text"
                       autoComplete="given-name"
                       required
@@ -316,6 +321,7 @@ export function GlampingMarketAccessGate({
                     </label>
                     <input
                       id="gate-last-name"
+                      name="last_name"
                       type="text"
                       autoComplete="family-name"
                       required
@@ -369,6 +375,7 @@ export function GlampingMarketAccessGate({
                 </label>
                 <input
                   id="gate-email"
+                  name="email"
                   type="email"
                   autoComplete="email"
                   required

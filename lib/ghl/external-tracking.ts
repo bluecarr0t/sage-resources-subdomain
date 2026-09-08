@@ -15,6 +15,19 @@ export function getGhlExternalTrackingId(): string {
   return fromEnv || GHL_EXTERNAL_TRACKING_ID_DEFAULT;
 }
 
+/**
+ * True for admin (and locale-prefixed `/en/admin`) so GHL form-capture cannot
+ * turn Job Pipeline Notes saves into blank CRM contacts.
+ */
+export function isGhlExternalTrackingSkippedPath(
+  pathname: string | null | undefined
+): boolean {
+  if (!pathname) return false;
+  const path = pathname.split('?')[0] ?? '';
+  const segments = path.split('/').filter(Boolean);
+  return segments[0] === 'admin' || segments[1] === 'admin';
+}
+
 export function shouldLoadGhlExternalTracking(
   pathname: string | null | undefined,
   options?: {
@@ -29,9 +42,7 @@ export function shouldLoadGhlExternalTracking(
   if (!getGhlExternalTrackingId()) return false;
   if (nodeEnv === 'development') return false;
   if (vercelEnv === 'preview') return false;
-
-  const path = pathname ?? '';
-  if (path === '/admin' || path.startsWith('/admin/')) return false;
+  if (isGhlExternalTrackingSkippedPath(pathname)) return false;
 
   return true;
 }
