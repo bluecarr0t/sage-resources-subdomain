@@ -37,6 +37,12 @@ jest.mock('@/lib/zapier-webhook', () => ({
   notifyZapierGatedLead: (...args: unknown[]) => mockNotifyZapier(...args),
 }));
 
+const mockSyncGhl = jest.fn();
+
+jest.mock('@/lib/ghl/contacts', () => ({
+  syncGlampingMarketOverviewContactAsync: (...args: unknown[]) => mockSyncGhl(...args),
+}));
+
 jest.mock('@/lib/slack/website-slack-client', () => ({
   notifyMarketOverviewBusinessTypeBackfillSlack: (...args: unknown[]) =>
     mockNotifySlack(...args),
@@ -164,6 +170,12 @@ describe('POST /api/gated-access/business-type', () => {
       email: 'jane@example.com',
       name: 'Jane Doe',
       businessType: 'Investor',
+    });
+    expect(mockSyncGhl).toHaveBeenCalledWith('glamping-market-overview', {
+      email: 'jane@example.com',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      businessType: 'investor',
     });
   });
 });

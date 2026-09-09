@@ -37,6 +37,7 @@ import {
   parseGatedAccessBusinessType,
   type GatedAccessBusinessType,
 } from '@/lib/gated-access-business-type';
+import { syncGlampingMarketOverviewContactAsync } from '@/lib/ghl/contacts';
 import { joinFullName, parsePersonNameFields, splitFullName } from '@/lib/person-name';
 
 export const dynamic = 'force-dynamic';
@@ -205,6 +206,12 @@ export async function POST(request: NextRequest) {
 
     const profile =
       leadProfile ?? (emailOnly ? await lookupLeadProfileParts(email, pageSlug) : null);
+    syncGlampingMarketOverviewContactAsync(pageSlug, {
+      email,
+      firstName: profile?.firstName,
+      lastName: profile?.lastName,
+      businessType: profile?.businessType,
+    });
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {

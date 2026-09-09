@@ -58,6 +58,13 @@ jest.mock('@/lib/supabase', () => ({
   })),
 }));
 
+const mockTagGlampingMarketOverviewContactAsync = jest.fn();
+
+jest.mock('@/lib/ghl/contacts', () => ({
+  syncGlampingMarketOverviewContactAsync: (...args: unknown[]) =>
+    mockTagGlampingMarketOverviewContactAsync(...args),
+}));
+
 import { GET } from '@/app/auth/callback/route';
 import { DEFAULT_ADMIN_PATH } from '@/lib/admin-ui';
 
@@ -138,13 +145,24 @@ describe('GET /auth/callback — gated magic link', () => {
         is_return: false,
       },
     });
-    expect(mockNotifyMarketOverviewSignupSlack).toHaveBeenCalledWith({
-      signupNumber: 43,
-      email: 'jane@example.com',
-      name: 'Jane Doe',
-      totalVerifiedEmails: 43,
-    });
+    expect(mockNotifyMarketOverviewSignupSlack).toHaveBeenCalledWith(
+      expect.objectContaining({
+        signupNumber: 43,
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+        totalVerifiedEmails: 43,
+      })
+    );
     expect(mockNotifyMarketOverviewReturnSigninSlack).not.toHaveBeenCalled();
+    expect(mockTagGlampingMarketOverviewContactAsync).toHaveBeenCalledWith(
+      'glamping-market-overview',
+      {
+        email: 'jane@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: null,
+      }
+    );
   });
 
   it('uses lead rank for Slack # even when total count lags behind', async () => {
@@ -160,12 +178,14 @@ describe('GET /auth/callback — gated magic link', () => {
     );
 
     expect(res.status).toBe(307);
-    expect(mockNotifyMarketOverviewSignupSlack).toHaveBeenCalledWith({
-      signupNumber: 16,
-      email: 'jane@example.com',
-      name: 'Jane Doe',
-      totalVerifiedEmails: 16,
-    });
+    expect(mockNotifyMarketOverviewSignupSlack).toHaveBeenCalledWith(
+      expect.objectContaining({
+        signupNumber: 16,
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+        totalVerifiedEmails: 16,
+      })
+    );
   });
 
   it('posts a return sign-in Slack notice when lead was already verified', async () => {
@@ -198,13 +218,15 @@ describe('GET /auth/callback — gated magic link', () => {
       })
     );
     expect(mockNotifyMarketOverviewSignupSlack).not.toHaveBeenCalled();
-    expect(mockNotifyMarketOverviewReturnSigninSlack).toHaveBeenCalledWith({
-      email: 'jane@example.com',
-      name: 'Jane Doe',
-      signInCount: 3,
-      firstVerifiedAt: '2026-01-01T00:00:00.000Z',
-      totalVerifiedEmails: 43,
-    });
+    expect(mockNotifyMarketOverviewReturnSigninSlack).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+        signInCount: 3,
+        firstVerifiedAt: '2026-01-01T00:00:00.000Z',
+        totalVerifiedEmails: 43,
+      })
+    );
   });
 
   it('prefers token_hash over PKCE code when both are present', async () => {

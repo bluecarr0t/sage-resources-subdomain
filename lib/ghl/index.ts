@@ -1,10 +1,19 @@
 export {
+  getGhlAuthConfig,
   getGhlConfig,
   ghlFetch,
   GhlApiError,
   GHL_API_BASE_URL,
   GHL_API_VERSION,
 } from '@/lib/ghl/client';
+export {
+  GHL_CONTACT_TYPE_CUSTOM_FIELD_ID,
+  GHL_GLAMPING_MARKET_OVERVIEW_TAG,
+  addGhlContactTagByEmail,
+  syncGlampingMarketOverviewContactAsync,
+  tagGlampingMarketOverviewContactAsync,
+  upsertGhlMarketOverviewContact,
+} from '@/lib/ghl/contacts';
 export {
   GHL_JOB_NUMBER_CUSTOM_FIELD_KEY,
   GHL_REPORT_SENT_TO_CLIENT_STAGE_NAME,

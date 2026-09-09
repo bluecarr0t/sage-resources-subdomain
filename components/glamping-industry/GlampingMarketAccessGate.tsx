@@ -20,6 +20,7 @@ import {
   gatedAccessBusinessTypeLabel,
   type GatedAccessBusinessType,
 } from '@/lib/gated-access-business-type';
+import { GHL_GLAMPING_MARKET_OVERVIEW_TAG } from '@/lib/ghl/tags';
 import { supabase } from '@/lib/supabase';
 
 const BUSINESS_TYPE_OPTIONS = GATED_ACCESS_BUSINESS_TYPES.map((type) => ({
@@ -386,6 +387,18 @@ export function GlampingMarketAccessGate({
                   placeholder="morgan@willowcreekglamping.com"
                 />
               </div>
+              {pageSlug === GATED_PAGE_GLAMPING_MARKET_OVERVIEW ? (
+                <input
+                  type="text"
+                  name="tags"
+                  value={GHL_GLAMPING_MARKET_OVERVIEW_TAG}
+                  readOnly
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  autoComplete="off"
+                  className="sr-only"
+                />
+              ) : null}
 
               {error ? (
                 <p role="alert" className="text-xs text-red-700">

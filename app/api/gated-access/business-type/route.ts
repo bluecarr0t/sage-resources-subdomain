@@ -18,6 +18,7 @@ import {
 } from '@/lib/gated-access-business-type';
 import { logGatedContentEvent } from '@/lib/gated-content-events';
 import { joinFullName } from '@/lib/person-name';
+import { syncGlampingMarketOverviewContactAsync } from '@/lib/ghl/contacts';
 import { notifyMarketOverviewBusinessTypeBackfillSlack } from '@/lib/slack/website-slack-client';
 import { createServerClient } from '@/lib/supabase';
 import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
@@ -137,6 +138,12 @@ export async function POST(request: NextRequest) {
     page_slug: pageSlug,
     verified_at: verifiedAt,
     update_source: 'business_type_backfill',
+  });
+  syncGlampingMarketOverviewContactAsync(pageSlug, {
+    email,
+    firstName,
+    lastName,
+    businessType,
   });
 
   await notifyMarketOverviewBusinessTypeBackfillSlack({

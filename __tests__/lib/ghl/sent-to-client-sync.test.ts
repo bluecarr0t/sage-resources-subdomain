@@ -11,7 +11,11 @@ import {
   type GhlOpportunity,
 } from '@/lib/ghl/opportunities';
 import { didSentToClientFlipToYes } from '@/lib/ghl/sync-sent-to-client';
-import { getGhlConfig, resetGhlMissingConfigLogForTests } from '@/lib/ghl/client';
+import {
+  getGhlAuthConfig,
+  getGhlConfig,
+  resetGhlMissingConfigLogForTests,
+} from '@/lib/ghl/client';
 
 const mockFetch = jest.fn();
 
@@ -268,5 +272,16 @@ describe('getGhlConfig', () => {
       locationId: 'loc',
       pipelineId: 'pipe',
     });
+  });
+
+  it('returns auth config without a pipeline id', () => {
+    process.env.GHL_TOKEN = 'pit-abc';
+    process.env.GHL_LOCATION_ID = 'loc';
+    delete process.env.GHL_PIPELINE_ID;
+    expect(getGhlAuthConfig()).toEqual({
+      token: 'pit-abc',
+      locationId: 'loc',
+    });
+    expect(getGhlConfig()).toBeNull();
   });
 });

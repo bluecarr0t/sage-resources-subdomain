@@ -5,20 +5,30 @@
 export const GHL_API_BASE_URL = 'https://services.leadconnectorhq.com';
 export const GHL_API_VERSION = '2021-07-28';
 
-export type GhlConfig = {
+export type GhlAuthConfig = {
   token: string;
   locationId: string;
+};
+
+export type GhlConfig = GhlAuthConfig & {
   pipelineId: string;
 };
 
 let missingConfigLogged = false;
 
-export function getGhlConfig(): GhlConfig | null {
+/** Token + location for contact APIs (tagging does not need a pipeline). */
+export function getGhlAuthConfig(): GhlAuthConfig | null {
   const token = process.env.GHL_TOKEN?.trim() ?? '';
   const locationId = process.env.GHL_LOCATION_ID?.trim() ?? '';
+  if (!token || !locationId) return null;
+  return { token, locationId };
+}
+
+export function getGhlConfig(): GhlConfig | null {
+  const auth = getGhlAuthConfig();
   const pipelineId = process.env.GHL_PIPELINE_ID?.trim() ?? '';
 
-  if (!token || !locationId || !pipelineId) {
+  if (!auth || !pipelineId) {
     if (!missingConfigLogged) {
       missingConfigLogged = true;
       console.warn(
@@ -28,7 +38,7 @@ export function getGhlConfig(): GhlConfig | null {
     return null;
   }
 
-  return { token, locationId, pipelineId };
+  return { ...auth, pipelineId };
 }
 
 /** Reset the one-shot missing-config log (tests only). */
@@ -49,7 +59,7 @@ export class GhlApiError extends Error {
 }
 
 export async function ghlFetch<T>(
-  config: GhlConfig,
+  config: Pick<GhlAuthConfig, 'token'>,
   path: string,
   init?: RequestInit
 ): Promise<T> {

@@ -25,6 +25,7 @@ import {
 } from '@/lib/gated-access-business-type';
 import { logGatedContentEvent } from '@/lib/gated-content-events';
 import { joinFullName, splitFullName } from '@/lib/person-name';
+import { syncGlampingMarketOverviewContactAsync } from '@/lib/ghl/contacts';
 import { notifyZapierGatedLead } from '@/lib/zapier-webhook';
 import {
   notifyMarketOverviewReturnSigninSlack,
@@ -138,6 +139,12 @@ async function upsertGatedLead(user: User, pageSlug: string): Promise<void> {
       business_type: businessType,
       page_slug: pageSlug,
       verified_at: verifiedAt,
+    });
+    syncGlampingMarketOverviewContactAsync(pageSlug, {
+      email,
+      firstName,
+      lastName,
+      businessType,
     });
 
     if (pageSlug === GATED_PAGE_GLAMPING_MARKET_OVERVIEW) {

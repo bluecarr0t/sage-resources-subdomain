@@ -7,6 +7,8 @@
  * - ZAPIER_GATED_LEAD_WEBHOOK_URL
  */
 
+import { GATED_PAGE_GLAMPING_MARKET_OVERVIEW } from '@/lib/gated-access';
+import { GHL_GLAMPING_MARKET_OVERVIEW_TAG } from '@/lib/ghl/tags';
 import { joinFullName, splitFullName } from '@/lib/person-name';
 
 const WEBHOOK_TIMEOUT_MS = 8_000;
@@ -89,5 +91,9 @@ export function notifyZapierGatedLead(payload: GatedLeadZapierPayload): void {
     page_slug: payload.page_slug,
     verified_at: payload.verified_at,
     update_source: payload.update_source?.trim() || undefined,
+    tags:
+      payload.page_slug === GATED_PAGE_GLAMPING_MARKET_OVERVIEW
+        ? GHL_GLAMPING_MARKET_OVERVIEW_TAG
+        : undefined,
   });
 }

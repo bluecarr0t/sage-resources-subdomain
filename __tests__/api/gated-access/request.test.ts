@@ -42,6 +42,13 @@ jest.mock('@/lib/upstash', () => ({
   limit: (...args: unknown[]) => mockLimit(...args),
 }));
 
+const mockTagGlampingMarketOverviewContactAsync = jest.fn();
+
+jest.mock('@/lib/ghl/contacts', () => ({
+  syncGlampingMarketOverviewContactAsync: (...args: unknown[]) =>
+    mockTagGlampingMarketOverviewContactAsync(...args),
+}));
+
 import { POST } from '@/app/api/gated-access/request/route';
 
 function makeRequest(body: unknown): NextRequest {
@@ -91,6 +98,15 @@ describe('POST /api/gated-access/request', () => {
       pageSlug: 'glamping-market-overview',
       metadata: { email_only: false, business_type: 'investor' },
     });
+    expect(mockTagGlampingMarketOverviewContactAsync).toHaveBeenCalledWith(
+      'glamping-market-overview',
+      {
+        email: 'jane@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        businessType: 'investor',
+      }
+    );
   });
 
   it('rejects a missing business type with 400 and does not send a link', async () => {
@@ -102,6 +118,7 @@ describe('POST /api/gated-access/request', () => {
     expect(body.error).toMatch(/what best describes you/i);
     expect(mockSignInWithOtp).not.toHaveBeenCalled();
     expect(mockLogGatedContentEvent).not.toHaveBeenCalled();
+    expect(mockTagGlampingMarketOverviewContactAsync).not.toHaveBeenCalled();
   });
 
   it('rejects an invalid business type with 400', async () => {
