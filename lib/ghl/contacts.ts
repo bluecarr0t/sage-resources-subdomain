@@ -34,14 +34,9 @@ export type GhlContactSyncResult = {
   contactId: string | null;
 };
 
-type GhlDuplicateContactResponse = {
+type GhlContactIdPayload = {
   contact?: { id?: string };
   contacts?: Array<{ id?: string }>;
-  id?: string;
-};
-
-type GhlContactMutationResponse = {
-  contact?: { id?: string };
   id?: string;
 };
 
@@ -60,7 +55,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 function contactIdFromPayload(
-  payload: GhlDuplicateContactResponse | GhlContactMutationResponse | undefined
+  payload: GhlContactIdPayload | undefined
 ): string | null {
   if (!payload) return null;
   const id = payload.contact?.id ?? payload.contacts?.[0]?.id ?? payload.id;
@@ -91,7 +86,7 @@ async function findContactIdByEmail(
     email,
   });
   try {
-    const payload = await ghlFetch<GhlDuplicateContactResponse>(
+    const payload = await ghlFetch<GhlContactIdPayload>(
       config,
       `/contacts/search/duplicate?${params.toString()}`
     );
@@ -180,7 +175,7 @@ export async function upsertGhlMarketOverviewContact(
   const existingId = await findContactIdByEmail(config, email);
 
   if (!existingId) {
-    const created = await ghlFetch<GhlContactMutationResponse>(config, '/contacts/', {
+    const created = await ghlFetch<GhlContactIdPayload>(config, '/contacts/', {
       method: 'POST',
       body: JSON.stringify({
         locationId: config.locationId,
