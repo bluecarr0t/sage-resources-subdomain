@@ -34,6 +34,7 @@ describe('non-locale public sitemap paths', () => {
       '/privacy-policy',
       '/terms-of-service',
     ]);
+    expect(NON_LOCALE_PUBLIC_SITEMAP_PATHS).not.toContain('/glamping-show-quiz');
   });
 
   it('returns sitemap entries for every non-locale public path', () => {

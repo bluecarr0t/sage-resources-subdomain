@@ -24,6 +24,7 @@ const PROMO_EXCLUDED_PREFIXES = [
   '/glamping-market-overview',
   '/outdoor-hospitality-pipeline',
   '/glamping-pipeline-quarterly',
+  '/glamping-show-quiz',
 ] as const;
 
 export function shouldShowMarketOverviewPromoOnPath(pathname: string | null | undefined): boolean {

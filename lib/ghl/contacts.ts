@@ -77,7 +77,7 @@ function contactTypeCustomField(
   };
 }
 
-async function findContactIdByEmail(
+export async function findContactIdByEmail(
   config: GhlAuthConfig,
   email: string
 ): Promise<string | null> {
@@ -99,13 +99,26 @@ async function findContactIdByEmail(
   }
 }
 
-async function addTagsToContact(
+export async function addTagsToContact(
   config: GhlAuthConfig,
   contactId: string,
   tags: string[]
 ): Promise<void> {
+  if (tags.length === 0) return;
   await ghlFetch(config, `/contacts/${encodeURIComponent(contactId)}/tags`, {
     method: 'POST',
+    body: JSON.stringify({ tags }),
+  });
+}
+
+export async function removeTagsFromContact(
+  config: GhlAuthConfig,
+  contactId: string,
+  tags: string[]
+): Promise<void> {
+  if (tags.length === 0) return;
+  await ghlFetch(config, `/contacts/${encodeURIComponent(contactId)}/tags`, {
+    method: 'DELETE',
     body: JSON.stringify({ tags }),
   });
 }

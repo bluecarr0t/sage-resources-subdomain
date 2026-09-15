@@ -27,6 +27,7 @@ describe('promo-market-overview', () => {
     expect(shouldShowMarketOverviewPromoOnPath('/glamping-market-overview/brands')).toBe(
       false
     );
+    expect(shouldShowMarketOverviewPromoOnPath('/glamping-show-quiz')).toBe(false);
   });
 
   it('shows on public content pages', () => {

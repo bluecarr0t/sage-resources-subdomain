@@ -231,6 +231,7 @@ const excludedRoutes = [
   'glamping-unit-type-classification',
   'outdoor-hospitality-pipeline',
   'glamping-market-snapshot',
+  'glamping-show-quiz',
   'admin',
   'pipeline-oauth-sync',
   'sitemap',
@@ -474,8 +475,21 @@ export async function middleware(request: NextRequest) {
           pathname === '/privacy-policy' ||
           pathname === '/terms-of-service' ||
           pathname === '/glamping-unit-type-classification' ||
-          pathname === '/glamping-market-snapshot'
+          pathname === '/glamping-market-snapshot' ||
+          pathname === '/glamping-show-quiz' ||
+          pathname.startsWith('/glamping-show-quiz/')
         ) {
+          if (
+            pathname === '/glamping-show-quiz' ||
+            pathname.startsWith('/glamping-show-quiz/')
+          ) {
+            const response = NextResponse.next({ request });
+            response.headers.set(
+              'X-Robots-Tag',
+              'noindex, nofollow, noarchive, nosnippet'
+            );
+            return response;
+          }
           return NextResponse.next();
         }
       // Still apply i18n middleware for other excluded routes
