@@ -26,7 +26,6 @@ import {
   parseQuizCompany,
   parseQuizPhone,
   parseQuizRegion,
-  quizPhoneRequired,
   resolveQuizOutcome,
 } from '@/lib/glamping-show-quiz';
 import {
@@ -93,7 +92,7 @@ export async function POST(request: NextRequest) {
   const company = parseQuizCompany(body.company);
   if (company === null) {
     return NextResponse.json(
-      { ok: false, error: 'Please enter a valid company or project name.' },
+      { ok: false, error: 'Please enter your company or project name.' },
       { status: 400 }
     );
   }
@@ -109,14 +108,12 @@ export async function POST(request: NextRequest) {
   const newsletterOptIn = isNewsletterOptIn(body.newsletterOptIn);
   const outcome = resolveQuizOutcome(answers);
 
-  const phone = parseQuizPhone(body.phone, quizPhoneRequired(outcome));
+  const phone = parseQuizPhone(body.phone);
   if (phone === null) {
     return NextResponse.json(
       {
         ok: false,
-        error: quizPhoneRequired(outcome)
-          ? 'Please enter a phone number so we can follow up.'
-          : 'Please enter a valid phone number, or leave it blank.',
+        error: 'Please enter a phone number so we can follow up.',
       },
       { status: 400 }
     );

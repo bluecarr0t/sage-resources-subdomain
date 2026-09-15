@@ -424,12 +424,12 @@ export function parseOptionalPhone(value: unknown): string | null {
   return trimmed;
 }
 
-export function quizPhoneRequired(outcome: QuizOutcome): boolean {
-  return outcome === 'ready_now';
+export function quizPhoneRequired(): boolean {
+  return true;
 }
 
-/** Required on Ready Now so booth staff can text or call. Empty string when optional and omitted. */
-export function parseQuizPhone(value: unknown, required: boolean): string | null {
+/** Required so booth staff can text or call. */
+export function parseQuizPhone(value: unknown, required: boolean = true): string | null {
   const parsed = parseOptionalPhone(value);
   if (parsed === null) return null;
   if (required && parsed === '') return null;
@@ -443,13 +443,11 @@ export function formatQuizIdleCountdown(remainingMs: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-/** Empty string when omitted; null when the value is invalid. */
+/** Trimmed company or project name. Null when missing or invalid. */
 export function parseQuizCompany(value: unknown): string | null {
-  if (value == null) return '';
   if (typeof value !== 'string') return null;
   const trimmed = value.trim().replace(/\s+/g, ' ');
-  if (!trimmed) return '';
-  if (trimmed.length > COMPANY_MAX_LENGTH) return null;
+  if (!trimmed || trimmed.length > COMPANY_MAX_LENGTH) return null;
   return trimmed;
 }
 

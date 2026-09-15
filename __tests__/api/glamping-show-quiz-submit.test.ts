@@ -170,19 +170,17 @@ describe('POST /api/glamping-show-quiz/submit', () => {
     expect(mockGhlUpsert).not.toHaveBeenCalled();
   });
 
-  it('rejects free-text regions and allows an empty company', async () => {
+  it('rejects free-text regions and an empty company', async () => {
     const badRegion = await POST(makeRequest({ ...validBody, region: 'Utah' }));
     expect(badRegion.status).toBe(400);
     expect(mockInsertResponse).not.toHaveBeenCalled();
 
     const res = await POST(makeRequest({ ...validBody, company: '  ' }));
-    expect(res.status).toBe(200);
-    expect(mockInsertResponse).toHaveBeenCalledWith(
-      expect.objectContaining({ company: '', region: 'UT' })
-    );
+    expect(res.status).toBe(400);
+    expect(mockInsertResponse).not.toHaveBeenCalled();
   });
 
-  it('rejects Ready Now without a phone and allows other outcomes to skip it', async () => {
+  it('rejects a missing phone for every outcome', async () => {
     const missing = await POST(makeRequest({ ...validBody, phone: '' }));
     expect(missing.status).toBe(400);
     expect(mockInsertResponse).not.toHaveBeenCalled();
@@ -197,13 +195,8 @@ describe('POST /api/glamping-show-quiz/submit', () => {
         timeline: 'no_timeline',
       })
     );
-    expect(exploring.status).toBe(200);
-    expect(mockInsertResponse).toHaveBeenCalledWith(
-      expect.objectContaining({
-        phone: '',
-        outcome: 'just_exploring',
-      })
-    );
+    expect(exploring.status).toBe(400);
+    expect(mockInsertResponse).not.toHaveBeenCalled();
   });
 
   it('rejects submits when the booth PIN gate is on and the cookie is missing', async () => {

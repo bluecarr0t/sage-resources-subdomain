@@ -208,19 +208,16 @@ describe('glamping-show-quiz parsers', () => {
     expect(parseOptionalPhone('123')).toBeNull();
   });
 
-  it('requires a phone on Ready Now and allows it to be blank otherwise', () => {
-    expect(quizPhoneRequired('ready_now')).toBe(true);
-    expect(quizPhoneRequired('getting_close')).toBe(false);
-    expect(quizPhoneRequired('just_exploring')).toBe(false);
-    expect(parseQuizPhone('', true)).toBeNull();
-    expect(parseQuizPhone('312-555-0199', true)).toBe('312-555-0199');
-    expect(parseQuizPhone('', false)).toBe('');
+  it('requires a phone number for every outcome', () => {
+    expect(quizPhoneRequired()).toBe(true);
+    expect(parseQuizPhone('')).toBeNull();
+    expect(parseQuizPhone('312-555-0199')).toBe('312-555-0199');
   });
 
-  it('treats company as optional and requires a known region code', () => {
+  it('requires a company or project name and a known region code', () => {
     expect(parseQuizCompany('Sage Outdoor')).toBe('Sage Outdoor');
-    expect(parseQuizCompany('  ')).toBe('');
-    expect(parseQuizCompany(undefined)).toBe('');
+    expect(parseQuizCompany('  ')).toBeNull();
+    expect(parseQuizCompany(undefined)).toBeNull();
     expect(parseQuizRegion('TN')).toBe('TN');
     expect(parseQuizRegion('Utah')).toBeNull();
     expect(parseQuizRegion('')).toBeNull();

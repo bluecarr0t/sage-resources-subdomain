@@ -23,9 +23,9 @@ import {
   QUIZ_TIMELINE_OPTIONS,
   QUIZ_US_REGION_OPTIONS,
   formatQuizIdleCountdown,
+  parseQuizCompany,
   parseQuizPhone,
   quizIdleResetMs,
-  quizPhoneRequired,
   quizResultCopy,
   resolveQuizOutcome,
   type QuizFlowStep,
@@ -90,11 +90,11 @@ export function GlampingShowQuiz({
   const [outcome, setOutcome] = useState<QuizOutcome | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activityAt, setActivityAt] = useState(0);
   const [pin, setPin] = useState('');
   const [unlocking, setUnlocking] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const idleUntilRef = useRef<number | null>(null);
+  const idleTimerRef = useRef<number | null>(null);
 
   const resetQuiz = useCallback(() => {
     setStep('welcome');
@@ -108,9 +108,29 @@ export function GlampingShowQuiz({
     setError(null);
   }, []);
 
-  const bumpActivity = useCallback(() => {
-    setActivityAt(Date.now());
+  const clearIdleTimer = useCallback(() => {
+    if (idleTimerRef.current == null) return;
+    window.clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = null;
   }, []);
+
+  const armIdle = useCallback(
+    (idleMs: number) => {
+      clearIdleTimer();
+      idleUntilRef.current = Date.now() + idleMs;
+      idleTimerRef.current = window.setTimeout(resetQuiz, idleMs);
+    },
+    [clearIdleTimer, resetQuiz]
+  );
+
+  const bumpActivity = useCallback(() => {
+    const idleMs = quizIdleResetMs(step);
+    if (idleMs == null || submitting || (gateEnabled && !unlocked)) return;
+    armIdle(idleMs);
+    if (step === 'result') {
+      setRemainingMs(idleMs);
+    }
+  }, [armIdle, gateEnabled, step, submitting, unlocked]);
 
   useEffect(() => {
     if (unlocked || !gateEnabled) return undefined;
@@ -138,14 +158,13 @@ export function GlampingShowQuiz({
     if (idleMs == null || submitting || (gateEnabled && !unlocked)) {
       idleUntilRef.current = null;
       setRemainingMs(null);
+      clearIdleTimer();
       return undefined;
     }
-    const until = Date.now() + idleMs;
-    idleUntilRef.current = until;
+    armIdle(idleMs);
     setRemainingMs(idleMs);
-    const timer = window.setTimeout(resetQuiz, idleMs);
-    return () => window.clearTimeout(timer);
-  }, [step, submitting, activityAt, resetQuiz, gateEnabled, unlocked]);
+    return () => clearIdleTimer();
+  }, [armIdle, clearIdleTimer, gateEnabled, step, submitting, unlocked]);
 
   useEffect(() => {
     if (step !== 'result') return undefined;
@@ -213,14 +232,16 @@ export function GlampingShowQuiz({
     setSubmitting(true);
     setError(null);
     const clientOutcome = resolveQuizOutcome({ role, stage, need, timeline });
-    const phone = parseQuizPhone(contact.phone, quizPhoneRequired(clientOutcome));
+    const company = parseQuizCompany(contact.company);
+    if (company === null) {
+      setSubmitting(false);
+      setError('Please enter your company or project name.');
+      return;
+    }
+    const phone = parseQuizPhone(contact.phone);
     if (phone === null) {
       setSubmitting(false);
-      setError(
-        quizPhoneRequired(clientOutcome)
-          ? 'Please enter a phone number so we can follow up.'
-          : 'Please enter a valid phone number, or leave it blank.'
-      );
+      setError('Please enter a phone number so we can follow up.');
       return;
     }
 
@@ -269,7 +290,6 @@ export function GlampingShowQuiz({
     role && stage && need && timeline
       ? resolveQuizOutcome({ role, stage, need, timeline })
       : null;
-  const phoneRequired = pendingOutcome ? quizPhoneRequired(pendingOutcome) : false;
 
   async function handleUnlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -535,9 +555,11 @@ export function GlampingShowQuiz({
                 autoComplete="address-level1"
                 required
                 value={contact.region}
-                onChange={(event) =>
-                  setContact((prev) => ({ ...prev, region: event.target.value }))
-                }
+                onChange={(event) => {
+                  const target = event.target;
+                  if (!(target instanceof HTMLSelectElement)) return;
+                  setContact((prev) => ({ ...prev, region: target.value }));
+                }}
                 className={EDITORIAL_INPUT_CLASS}
               >
                 <option value="">Select a state or region</option>
@@ -558,9 +580,10 @@ export function GlampingShowQuiz({
                 <option value={QUIZ_REGION_OTHER}>Outside the US and Canada</option>
               </Select>
               <Input
-                label="Company or project (optional)"
+                label="Company or project"
                 name="company"
                 autoComplete="organization"
+                required
                 value={contact.company}
                 onChange={(event) =>
                   setContact((prev) => ({ ...prev, company: event.target.value }))
@@ -569,18 +592,18 @@ export function GlampingShowQuiz({
               />
             </div>
             <Input
-              label={phoneRequired ? 'Phone' : 'Phone (optional)'}
+              label="Phone"
               name="phone"
               type="tel"
               autoComplete="tel"
-              required={phoneRequired}
+              required
               value={contact.phone}
               onChange={(event) =>
                 setContact((prev) => ({ ...prev, phone: event.target.value }))
               }
               className={EDITORIAL_INPUT_CLASS}
             />
-            {phoneRequired ? (
+            {pendingOutcome === 'ready_now' ? (
               <p className="-mt-2 text-sm font-light text-neutral-500">
                 We’ll text or call within 48 hours.
               </p>
@@ -588,7 +611,7 @@ export function GlampingShowQuiz({
             <label className="flex items-start gap-3 text-sm font-light text-neutral-700">
               <input
                 type="checkbox"
-                className="mt-1 h-4 w-4 border-sage-300 text-sage-600 focus:ring-sage-400"
+                className="mt-0.5 h-7 w-7 shrink-0 cursor-pointer rounded border-sage-300 accent-sage-600 text-sage-600 focus:ring-2 focus:ring-sage-400"
                 checked={contact.newsletterOptIn}
                 onChange={(event) =>
                   setContact((prev) => ({
