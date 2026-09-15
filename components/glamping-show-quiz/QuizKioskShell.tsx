@@ -25,8 +25,10 @@ export function QuizKioskShell({ children }: { children: ReactNode }) {
     document.addEventListener('gesturechange', preventGesture, { passive: false });
     document.addEventListener('gestureend', preventGesture, { passive: false });
 
-    const orientation = window.screen?.orientation;
-    if (orientation && typeof orientation.lock === 'function') {
+    const orientation = window.screen?.orientation as
+      | (ScreenOrientation & { lock?: (mode: string) => Promise<void> })
+      | undefined;
+    if (typeof orientation?.lock === 'function') {
       void orientation.lock('landscape').catch(() => undefined);
     }
 
