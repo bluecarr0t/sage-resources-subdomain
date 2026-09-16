@@ -16,22 +16,23 @@ import { isValidEmail } from '@/lib/gated-access';
 import { joinFullName, parsePersonNameFields } from '@/lib/person-name';
 import { notifyZapierNewsletterSignup } from '@/lib/zapier-webhook';
 import { upsertGhlGlampingShowQuizContact } from '@/lib/ghl/glamping-show-quiz-contact';
+import { sendQuizMarketOverviewMagicLink } from '@/lib/glamping-show-quiz-gmo-email';
 import {
   insertGlampingShowQuizResponse,
   markGlampingShowQuizGhlSync,
 } from '@/lib/glamping-show-quiz-responses';
+import { createGmoBoothUnlockToken } from '@/lib/gmo-booth-unlock';
 import {
   GLAMPING_SHOW_QUIZ_SOURCE,
   parseQuizAnswers,
   parseQuizCompany,
   parseQuizPhone,
   parseQuizRegion,
+  quizMarketOverviewBoothUrl,
+  quizMarketOverviewUrl,
+  quizRoleContactType,
   resolveQuizOutcome,
 } from '@/lib/glamping-show-quiz';
-import {
-  GLAMPING_SHOW_QUIZ_PIN_COOKIE,
-  cookieMatches,
-} from '@/lib/glamping-show-quiz-gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,13 +52,6 @@ function ghlErrorMessage(err: unknown): string {
 }
 
 export async function POST(request: NextRequest) {
-  if (!cookieMatches(request.cookies.get(GLAMPING_SHOW_QUIZ_PIN_COOKIE)?.value)) {
-    return NextResponse.json(
-      { ok: false, error: 'This quiz is for the Sage booth.' },
-      { status: 403 }
-    );
-  }
-
   let body: Record<string, unknown>;
   try {
     body = (await request.json()) as Record<string, unknown>;
@@ -210,5 +204,37 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, outcome });
+  let marketOverviewUrl: string | undefined;
+  switch (outcome) {
+    case 'getting_close':
+    case 'just_exploring': {
+      const token = createGmoBoothUnlockToken();
+      marketOverviewUrl = token
+        ? quizMarketOverviewBoothUrl(token, outcome)
+        : quizMarketOverviewUrl(outcome);
+      try {
+        await sendQuizMarketOverviewMagicLink({
+          email,
+          firstName: names.firstName,
+          lastName: names.lastName,
+          businessType: quizRoleContactType(answers.role),
+        });
+      } catch (err) {
+        console.error('[glamping-show-quiz] GMO magic link failed:', err);
+      }
+      break;
+    }
+    case 'ready_now':
+      break;
+    default: {
+      const _exhaustive: never = outcome;
+      void _exhaustive;
+    }
+  }
+
+  return NextResponse.json({
+    ok: true,
+    outcome,
+    ...(marketOverviewUrl ? { marketOverviewUrl } : {}),
+  });
 }

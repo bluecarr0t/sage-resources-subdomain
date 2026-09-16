@@ -38,19 +38,32 @@ jest.mock('@/lib/zapier-webhook', () => ({
     mockNotifyZapierNewsletterSignup(...args),
 }));
 
-import { POST } from '@/app/api/glamping-show-quiz/submit/route';
-import {
-  GLAMPING_SHOW_QUIZ_PIN_COOKIE,
-  boothCookieValue,
-} from '@/lib/glamping-show-quiz-gate';
+const mockCreateBoothToken = jest.fn();
+const mockSendMarketOverviewEmail = jest.fn();
 
-function makeRequest(body: unknown, cookie?: string): NextRequest {
+jest.mock('@/lib/gmo-booth-unlock', () => {
+  const actual = jest.requireActual<typeof import('@/lib/gmo-booth-unlock')>(
+    '@/lib/gmo-booth-unlock'
+  );
+  return {
+    ...actual,
+    createGmoBoothUnlockToken: (...args: unknown[]) => mockCreateBoothToken(...args),
+  };
+});
+
+jest.mock('@/lib/glamping-show-quiz-gmo-email', () => ({
+  sendQuizMarketOverviewMagicLink: (...args: unknown[]) =>
+    mockSendMarketOverviewEmail(...args),
+}));
+
+import { POST } from '@/app/api/glamping-show-quiz/submit/route';
+
+function makeRequest(body: unknown): NextRequest {
   return new NextRequest('https://example.com/api/glamping-show-quiz/submit', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'x-forwarded-for': '203.0.113.5',
-      ...(cookie ? { cookie } : {}),
     },
     body: JSON.stringify(body),
   });
@@ -86,21 +99,15 @@ const ghlPayload = {
 };
 
 describe('POST /api/glamping-show-quiz/submit', () => {
-  const originalPin = process.env.GLAMPING_SHOW_QUIZ_PIN;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    delete process.env.GLAMPING_SHOW_QUIZ_PIN;
     mockLimit.mockResolvedValue({ success: true, limit: 5, remaining: 4, reset: 0 });
     mockUpsert.mockResolvedValue({ error: null });
     mockInsertResponse.mockResolvedValue({ id: 'resp-1' });
     mockMarkGhl.mockResolvedValue(undefined);
     mockGhlUpsert.mockResolvedValue({ status: 'created', contactId: 'ghl-1' });
-  });
-
-  afterAll(() => {
-    if (originalPin === undefined) delete process.env.GLAMPING_SHOW_QUIZ_PIN;
-    else process.env.GLAMPING_SHOW_QUIZ_PIN = originalPin;
+    mockCreateBoothToken.mockReturnValue('booth-token');
+    mockSendMarketOverviewEmail.mockResolvedValue(undefined);
   });
 
   it('saves the response then awaits a GHL upsert', async () => {
@@ -117,6 +124,8 @@ describe('POST /api/glamping-show-quiz/submit', () => {
       contactId: 'ghl-1',
     });
     expect(mockNotifyZapierNewsletterSignup).not.toHaveBeenCalled();
+    expect(mockSendMarketOverviewEmail).not.toHaveBeenCalled();
+    expect(mockCreateBoothToken).not.toHaveBeenCalled();
   });
 
   it('records a newsletter signup when opted in', async () => {
@@ -199,30 +208,54 @@ describe('POST /api/glamping-show-quiz/submit', () => {
     expect(mockInsertResponse).not.toHaveBeenCalled();
   });
 
-  it('rejects submits when the booth PIN gate is on and the cookie is missing', async () => {
-    process.env.GLAMPING_SHOW_QUIZ_PIN = 'booth-pin';
-    const res = await POST(makeRequest(validBody));
-    expect(res.status).toBe(403);
-    expect(mockInsertResponse).not.toHaveBeenCalled();
-  });
-
-  it('accepts submits when the booth cookie is valid', async () => {
-    process.env.GLAMPING_SHOW_QUIZ_PIN = 'booth-pin';
-    const res = await POST(
-      makeRequest(
-        validBody,
-        `${GLAMPING_SHOW_QUIZ_PIN_COOKIE}=${boothCookieValue()}`
-      )
-    );
-    expect(res.status).toBe(200);
-    expect(mockInsertResponse).toHaveBeenCalled();
-  });
-
   it('returns 429 when rate limited', async () => {
     mockLimit.mockResolvedValueOnce({ success: false, limit: 5, remaining: 0, reset: 0 });
     const res = await POST(makeRequest(validBody));
     expect(res.status).toBe(429);
     expect(mockInsertResponse).not.toHaveBeenCalled();
     expect(mockGhlUpsert).not.toHaveBeenCalled();
+  });
+
+  it('emails the overview and returns a booth QR URL for market-data outcomes', async () => {
+    const res = await POST(
+      makeRequest({
+        ...validBody,
+        role: 'landowner',
+        stage: 'idea',
+        need: 'exploring',
+        timeline: 'no_timeline',
+      })
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.ok).toBe(true);
+    expect(json.outcome).toBe('just_exploring');
+    expect(json.marketOverviewUrl).toContain(
+      '/api/glamping-show-quiz/open-market-overview'
+    );
+    expect(json.marketOverviewUrl).toContain('booth=booth-token');
+    expect(json.marketOverviewUrl).toContain('utm_content=just_exploring');
+    expect(mockSendMarketOverviewEmail).toHaveBeenCalledWith({
+      email: 'jane@example.com',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      businessType: 'other',
+    });
+  });
+
+  it('still returns the result when the magic link send throws', async () => {
+    mockSendMarketOverviewEmail.mockRejectedValueOnce(new Error('otp down'));
+    const res = await POST(
+      makeRequest({
+        ...validBody,
+        need: 'market_data',
+        timeline: '3_to_12_months',
+      })
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.ok).toBe(true);
+    expect(json.outcome).toBe('getting_close');
+    expect(json.marketOverviewUrl).toContain('booth=booth-token');
   });
 });

@@ -8,10 +8,17 @@ import {
   parseQuizPhone,
   parseQuizRegion,
   formatQuizIdleCountdown,
+  formatQuizPhoneInput,
   quizIdleResetMs,
   quizPhoneRequired,
   quizRoleContactType,
   quizResultCopy,
+  quizMarketOverviewBoothUrl,
+  quizSendsMarketOverview,
+  quizSkipsNeedAndTimeline,
+  quizSkipsStage,
+  quizVisibleQuestionCount,
+  quizVisibleQuestionNumber,
   resolveQuizOutcome,
 } from '@/lib/glamping-show-quiz';
 import {
@@ -66,6 +73,47 @@ describe('glamping-show-quiz scoring', () => {
         timeline: 'no_timeline',
       })
     ).toBe('just_exploring');
+  });
+
+  it('routes existing operators who need a study this quarter to ready now without a land/plans answer', () => {
+    expect(
+      resolveQuizOutcome({
+        role: 'existing_operator',
+        stage: 'operating',
+        need: 'appraisal',
+        timeline: '30_days',
+      })
+    ).toBe('ready_now');
+  });
+
+  it('skips the stage question for existing operators and investors', () => {
+    expect(quizSkipsStage('existing_operator')).toBe(true);
+    expect(quizSkipsStage('investor_lender')).toBe(true);
+    expect(quizSkipsStage('developer_operator')).toBe(false);
+    expect(quizVisibleQuestionCount('existing_operator')).toBe(3);
+    expect(quizVisibleQuestionCount('investor_lender')).toBe(3);
+    expect(quizVisibleQuestionNumber('need', 'existing_operator')).toBe(2);
+    expect(quizVisibleQuestionNumber('timeline', 'investor_lender')).toBe(3);
+    expect(quizVisibleQuestionNumber('need', 'developer_operator')).toBe(3);
+  });
+
+  it('routes investors who need a study this quarter to ready now on an operating deal', () => {
+    expect(
+      resolveQuizOutcome({
+        role: 'investor_lender',
+        stage: 'operating',
+        need: 'appraisal',
+        timeline: '30_days',
+      })
+    ).toBe('ready_now');
+  });
+
+  it('sends vendor/media to the contact form instead of project-stage questions', () => {
+    expect(quizSkipsStage('vendor_media')).toBe(true);
+    expect(quizSkipsNeedAndTimeline('vendor_media')).toBe(true);
+    expect(quizSkipsNeedAndTimeline('existing_operator')).toBe(false);
+    expect(quizVisibleQuestionCount('vendor_media', 'role')).toBe(4);
+    expect(quizVisibleQuestionCount('vendor_media', 'contact')).toBe(1);
   });
 
   it('routes land/plans on a 3–12 month clock, or operating, to getting close', () => {
@@ -145,6 +193,24 @@ describe('glamping-show-quiz tags and contact type', () => {
     );
   });
 
+  it('does not tag implied idea/exploring answers on vendor/media contacts', () => {
+    expect(
+      ghlTagsForQuizAnswers(
+        {
+          role: 'vendor_media',
+          stage: 'idea',
+          need: 'exploring',
+          timeline: 'no_timeline',
+        },
+        'just_exploring'
+      )
+    ).toEqual([
+      GHL_GLAMPING_SHOW_QUIZ_TAG,
+      'Quiz - Vendor/Media',
+      GHL_QUIZ_JUST_EXPLORING_TAG,
+    ]);
+  });
+
   it('strips stale outcome and dimension tags so a retake cannot stack Ready Now with Just Exploring', () => {
     const keep = ghlTagsForQuizAnswers(
       {
@@ -208,6 +274,16 @@ describe('glamping-show-quiz parsers', () => {
     expect(parseOptionalPhone('123')).toBeNull();
   });
 
+  it('formats US phone digits as (541) 632-2366 and ignores letters', () => {
+    expect(formatQuizPhoneInput('')).toBe('');
+    expect(formatQuizPhoneInput('5')).toBe('(5');
+    expect(formatQuizPhoneInput('541')).toBe('(541)');
+    expect(formatQuizPhoneInput('5416')).toBe('(541) 6');
+    expect(formatQuizPhoneInput('5416322366')).toBe('(541) 632-2366');
+    expect(formatQuizPhoneInput('541-632-2366abc')).toBe('(541) 632-2366');
+    expect(formatQuizPhoneInput('(541) 632-2366 extra')).toBe('(541) 632-2366');
+  });
+
   it('requires a phone number for every outcome', () => {
     expect(quizPhoneRequired()).toBe(true);
     expect(parseQuizPhone('')).toBeNull();
@@ -232,6 +308,7 @@ describe('glamping-show-quiz result copy', () => {
     expect(copy.body).toMatch(/bank-accepted/i);
     expect(copy.footnote).toMatch(/48 hours/i);
     expect(copy.primaryCtaLabel).toBe('Schedule a meeting');
+    expect(copy.visitorLabel).toBe('Schedule a meeting');
     expect(copy.qrHint).toBe('Scan with your phone');
     expect(copy.primaryCtaUrl).toContain('https://sageoutdooradvisory.com/contact-us/');
     expect(copy.primaryCtaUrl).toContain('utm_source=glamping_show');
@@ -248,8 +325,11 @@ describe('glamping-show-quiz result copy', () => {
 
   it('points getting-close leads at market data assets', () => {
     const copy = quizResultCopy('getting_close', 'market_data');
+    expect(copy.visitorLabel).toBe('Glamping market data');
     expect(copy.body).toMatch(/Glamping Market Overview/);
+    expect(copy.body).toMatch(/your email/);
     expect(copy.body).toMatch(/USA RV Market Report/);
+    expect(copy.qrHint).toBe('Scan to open on your phone');
     expect(copy.primaryCtaUrl).toContain('/glamping-market-overview');
     expect(copy.secondaryCtaLabel).toBe('USA RV Market Report');
     expect(copy.secondaryCtaUrl).toContain('sageoutdooradvisory.com/shop');
@@ -257,13 +337,28 @@ describe('glamping-show-quiz result copy', () => {
 
   it('points just-exploring leads at the Glamping Market Overview', () => {
     const copy = quizResultCopy('just_exploring', 'exploring');
+    expect(copy.visitorLabel).toBe('Glamping market data');
     expect(copy.primaryCtaLabel).toBe('Glamping Market Overview');
     expect(copy.primaryCtaUrl).toContain('/glamping-market-overview');
     expect(copy.primaryCtaUrl).toContain('utm_content=just_exploring');
     expect(copy.body).toMatch(/Glamping Market Overview/);
+    expect(copy.body).toMatch(/your email/);
+    expect(copy.body).toMatch(/Scan to open it on your phone/);
     expect(copy.body).not.toMatch(/map/i);
     expect(copy.body).not.toMatch(/podcast/i);
+    expect(copy.qrHint).toBe('Scan to open on your phone');
     expect(copy.secondaryCtaUrl).toBeUndefined();
+  });
+
+  it('mints a booth QR URL for market-data outcomes only', () => {
+    expect(quizSendsMarketOverview('getting_close')).toBe(true);
+    expect(quizSendsMarketOverview('just_exploring')).toBe(true);
+    expect(quizSendsMarketOverview('ready_now')).toBe(false);
+    const url = quizMarketOverviewBoothUrl('token-1', 'just_exploring');
+    expect(url).toContain('/api/glamping-show-quiz/open-market-overview');
+    expect(url).toContain('booth=token-1');
+    expect(url).toContain('utm_content=just_exploring');
+    expect(url).toContain('utm_source=glamping_show');
   });
 
   it('idles questions and the contact form at 60s, and the result at 90s', () => {

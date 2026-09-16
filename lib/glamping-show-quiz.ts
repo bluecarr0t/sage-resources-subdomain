@@ -5,6 +5,7 @@
 
 import { RESOURCES_ROOT_CONTACT_BASE } from '@/lib/root-domain-attribution';
 import type { GatedAccessBusinessType } from '@/lib/gated-access-business-type';
+import { GMO_BOOTH_UNLOCK_OPEN_PATH } from '@/lib/gmo-booth-unlock';
 import {
   GHL_GLAMPING_SHOW_QUIZ_TAG,
   GHL_QUIZ_GETTING_CLOSE_TAG,
@@ -251,8 +252,104 @@ function isSageEngagementNeed(need: QuizNeed): boolean {
 }
 
 /**
+ * Project-stage options (idea / land / plans / operating) only apply to
+ * people with a project. Existing operators already said they are operating.
+ * Investors/lenders are evaluating a deal, not sitting land. Vendor/media is
+ * not in that funnel and always scores just exploring.
+ */
+export function quizSkipsStage(role: QuizRole | null): boolean {
+  return (
+    role === 'existing_operator' ||
+    role === 'investor_lender' ||
+    role === 'vendor_media'
+  );
+}
+
+export function quizSkipsNeedAndTimeline(role: QuizRole | null): boolean {
+  return role === 'vendor_media';
+}
+
+export function impliedQuizStage(role: QuizRole): QuizStage | null {
+  switch (role) {
+    case 'existing_operator':
+    case 'investor_lender':
+      return 'operating';
+    case 'vendor_media':
+      return 'idea';
+    case 'landowner':
+    case 'developer_operator':
+      return null;
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
+  }
+}
+
+export function impliedQuizNeed(role: QuizRole): QuizNeed | null {
+  return quizSkipsNeedAndTimeline(role) ? 'exploring' : null;
+}
+
+export function impliedQuizTimeline(role: QuizRole): QuizTimeline | null {
+  return quizSkipsNeedAndTimeline(role) ? 'no_timeline' : null;
+}
+
+export function quizVisibleQuestionCount(
+  role: QuizRole | null,
+  step?: QuizFlowStep
+): 1 | 3 | 4 {
+  if (step === 'role' || role == null) return 4;
+  if (quizSkipsNeedAndTimeline(role)) return 1;
+  if (quizSkipsStage(role)) return 3;
+  return 4;
+}
+
+export function quizVisibleQuestionNumber(
+  step: QuizFlowStep,
+  role: QuizRole | null
+): number {
+  switch (step) {
+    case 'welcome':
+    case 'contact':
+    case 'result':
+      return 0;
+    case 'role':
+      return 1;
+    case 'stage':
+      return 2;
+    case 'need':
+      return quizSkipsStage(role) ? 2 : 3;
+    case 'timeline':
+      return quizSkipsStage(role) ? 3 : 4;
+    default: {
+      const _exhaustive: never = step;
+      return _exhaustive;
+    }
+  }
+}
+
+function isReadyNowSite(answers: QuizAnswers): boolean {
+  if (isLandOrPlans(answers.stage)) return true;
+  switch (answers.role) {
+    case 'existing_operator':
+    case 'investor_lender':
+      return true;
+    case 'landowner':
+    case 'developer_operator':
+    case 'vendor_media':
+      return false;
+    default: {
+      const _exhaustive: never = answers.role;
+      return _exhaustive;
+    }
+  }
+}
+
+/**
  * Ready now is a Sage engagement this quarter: not vendor/media, a study
- * (feasibility or appraisal), land or plans, and a sub-three-month clock.
+ * (feasibility or appraisal), a sub-three-month clock, and either land/plans
+ * or a role that already implies an operating deal (existing operator or
+ * investor/lender).
  * Just exploring is vendor/media, “not sure”, idea stage, or no timeline.
  * Market-data asks, later clocks, and operating businesses are getting close.
  */
@@ -262,7 +359,7 @@ export function resolveQuizOutcome(answers: QuizAnswers): QuizOutcome {
   }
   if (
     isSageEngagementNeed(answers.need) &&
-    isLandOrPlans(answers.stage) &&
+    isReadyNowSite(answers) &&
     isWithinThreeMonths(answers.timeline)
   ) {
     return 'ready_now';
@@ -284,14 +381,16 @@ export function ghlTagsForQuizAnswers(
   answers: QuizAnswers,
   outcome: QuizOutcome
 ): string[] {
-  return [
-    GHL_GLAMPING_SHOW_QUIZ_TAG,
-    ROLE_TAGS[answers.role],
-    STAGE_TAGS[answers.stage],
-    NEED_TAGS[answers.need],
-    TIMELINE_TAGS[answers.timeline],
-    OUTCOME_TAGS[outcome],
-  ];
+  const tags = [GHL_GLAMPING_SHOW_QUIZ_TAG, ROLE_TAGS[answers.role]];
+  if (!quizSkipsNeedAndTimeline(answers.role)) {
+    tags.push(
+      STAGE_TAGS[answers.stage],
+      NEED_TAGS[answers.need],
+      TIMELINE_TAGS[answers.timeline]
+    );
+  }
+  tags.push(OUTCOME_TAGS[outcome]);
+  return tags;
 }
 
 const QUIZ_REPLACEABLE_TAGS = [
@@ -328,6 +427,36 @@ export function quizMarketOverviewUrl(content = 'getting_close'): string {
   );
 }
 
+export function quizMarketOverviewBoothUrl(
+  token: string,
+  content = 'getting_close'
+): string {
+  const parsed = new URL(
+    GMO_BOOTH_UNLOCK_OPEN_PATH,
+    getResourcesSiteOrigin()
+  );
+  parsed.searchParams.set('booth', token);
+  parsed.searchParams.set('utm_source', GLAMPING_SHOW_QUIZ_UTM.utm_source);
+  parsed.searchParams.set('utm_medium', GLAMPING_SHOW_QUIZ_UTM.utm_medium);
+  parsed.searchParams.set('utm_campaign', GLAMPING_SHOW_QUIZ_UTM.utm_campaign);
+  parsed.searchParams.set('utm_content', content);
+  return parsed.toString();
+}
+
+export function quizSendsMarketOverview(outcome: QuizOutcome): boolean {
+  switch (outcome) {
+    case 'getting_close':
+    case 'just_exploring':
+      return true;
+    case 'ready_now':
+      return false;
+    default: {
+      const _exhaustive: never = outcome;
+      return _exhaustive;
+    }
+  }
+}
+
 export function quizResourcesHomeUrl(): string {
   return withQuizUtm(`${getResourcesSiteOrigin()}/`, 'getting_close_home');
 }
@@ -338,6 +467,7 @@ export function quizRvMarketReportUrl(): string {
 
 export type QuizResultCopy = {
   outcome: QuizOutcome;
+  visitorLabel: string;
   headline: string;
   body: string;
   footnote?: string;
@@ -348,6 +478,9 @@ export type QuizResultCopy = {
   secondaryCtaUrl?: string;
 };
 
+const MEETING_VISITOR_LABEL = 'Schedule a meeting';
+const MARKET_DATA_VISITOR_LABEL = 'Glamping market data';
+
 export function quizResultCopy(
   outcome: QuizOutcome,
   need: QuizNeed
@@ -356,6 +489,7 @@ export function quizResultCopy(
     case 'ready_now':
       return {
         outcome,
+        visitorLabel: MEETING_VISITOR_LABEL,
         headline: 'You’re at the stage where Sage delivers the most value.',
         body: readyNowBody(need),
         footnote: 'A team member will follow up within 48 hours.',
@@ -366,22 +500,24 @@ export function quizResultCopy(
     case 'getting_close':
       return {
         outcome,
+        visitorLabel: MARKET_DATA_VISITOR_LABEL,
         headline: 'Start with the data.',
-        body: 'Grab the free 2026 Glamping Market Overview and the Q4 2025 USA RV Market Report. We’ll check in as your timeline firms up.',
+        body: 'We sent the 2026 Glamping Market Overview to your email. Scan to open it on your phone. The USA RV Market Report is on the second QR. We’ll check in as your timeline firms up.',
         primaryCtaLabel: 'Glamping Market Overview',
         primaryCtaUrl: quizMarketOverviewUrl(),
-        qrHint: 'Scan with your phone',
+        qrHint: 'Scan to open on your phone',
         secondaryCtaLabel: 'USA RV Market Report',
         secondaryCtaUrl: quizRvMarketReportUrl(),
       };
     case 'just_exploring':
       return {
         outcome,
+        visitorLabel: MARKET_DATA_VISITOR_LABEL,
         headline: 'You’re early, and that’s the right time to learn the market.',
-        body: 'Start with the free 2026 Glamping Market Overview. Scan to open it on your phone.',
+        body: 'We sent the 2026 Glamping Market Overview to your email. Scan to open it on your phone.',
         primaryCtaLabel: 'Glamping Market Overview',
         primaryCtaUrl: quizMarketOverviewUrl('just_exploring'),
-        qrHint: 'Scan with your phone',
+        qrHint: 'Scan to open on your phone',
       };
     default: {
       const _exhaustive: never = outcome;
@@ -409,7 +545,28 @@ function readyNowBody(need: QuizNeed): string {
 
 const PHONE_DIGIT_MIN = 7;
 const PHONE_DIGIT_MAX = 15;
+const US_PHONE_DIGITS = 10;
 const COMPANY_MAX_LENGTH = 120;
+
+/** Digits only, capped at a US 10-digit number. */
+export function quizPhoneDigits(value: string): string {
+  return value.replace(/\D/g, '').slice(0, US_PHONE_DIGITS);
+}
+
+/**
+ * Booth input mask: (541) 632-2366. Non-digits are stripped; the punctuation
+ * is added as the number is typed.
+ */
+export function formatQuizPhoneInput(value: string): string {
+  const digits = quizPhoneDigits(value);
+  if (!digits) return '';
+  const area = digits.slice(0, 3);
+  if (digits.length < 3) return `(${digits}`;
+  if (digits.length === 3) return `(${area})`;
+  const exchange = digits.slice(3, 6);
+  if (digits.length < 7) return `(${area}) ${exchange}`;
+  return `(${area}) ${exchange}-${digits.slice(6)}`;
+}
 
 /** Trimmed phone, empty string when omitted, or null when invalid. */
 export function parseOptionalPhone(value: unknown): string | null {

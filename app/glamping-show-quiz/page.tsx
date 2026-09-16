@@ -1,14 +1,8 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import { GlampingShowQuiz } from '@/components/glamping-show-quiz/GlampingShowQuiz';
 import { QuizKioskShell } from '@/components/glamping-show-quiz/QuizKioskShell';
 import { EDITORIAL_TOPO_BG_URL } from '@/components/editorial/EditorialPageShell';
 import { GLAMPING_SHOW_QUIZ_TITLE } from '@/lib/glamping-show-quiz';
-import {
-  GLAMPING_SHOW_QUIZ_PIN_COOKIE,
-  cookieMatches,
-  isGlampingShowQuizGateEnabled,
-} from '@/lib/glamping-show-quiz-gate';
 
 export const metadata: Metadata = {
   title: `${GLAMPING_SHOW_QUIZ_TITLE} | Sage Outdoor Advisory`,
@@ -29,10 +23,6 @@ export const metadata: Metadata = {
 };
 
 export default function GlampingShowQuizPage() {
-  const unlocked = cookieMatches(
-    cookies().get(GLAMPING_SHOW_QUIZ_PIN_COOKIE)?.value
-  );
-
   return (
     <QuizKioskShell>
       <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-none bg-[#faf9f3] text-neutral-900">
@@ -42,10 +32,7 @@ export default function GlampingShowQuizPage() {
           aria-hidden
         />
         <main className="relative z-10 flex min-h-0 flex-1 flex-col">
-          <GlampingShowQuiz
-            unlocked={unlocked}
-            gateEnabled={isGlampingShowQuizGateEnabled()}
-          />
+          <GlampingShowQuiz />
         </main>
       </div>
     </QuizKioskShell>

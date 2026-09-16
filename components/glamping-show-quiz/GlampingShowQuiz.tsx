@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import Image from 'next/image';
-import { CheckCircle2, Compass, LineChart } from 'lucide-react';
+import { CheckCircle2, LineChart } from 'lucide-react';
 import { Button, Input, Select } from '@/components/ui';
 import {
   EDITORIAL_BUTTON_OUTLINE_CLASS,
@@ -23,10 +23,18 @@ import {
   QUIZ_TIMELINE_OPTIONS,
   QUIZ_US_REGION_OPTIONS,
   formatQuizIdleCountdown,
+  formatQuizPhoneInput,
+  impliedQuizNeed,
+  impliedQuizStage,
+  impliedQuizTimeline,
   parseQuizCompany,
   parseQuizPhone,
   quizIdleResetMs,
   quizResultCopy,
+  quizSkipsNeedAndTimeline,
+  quizSkipsStage,
+  quizVisibleQuestionCount,
+  quizVisibleQuestionNumber,
   resolveQuizOutcome,
   type QuizFlowStep,
   type QuizNeed,
@@ -66,21 +74,7 @@ const EMPTY_CONTACT: ContactDraft = {
 const OPTION_BUTTON_CLASS =
   'w-full min-h-[3.5rem] rounded-none border border-sage-200/90 bg-white/70 px-4 py-3 text-left text-base font-light text-neutral-800 transition-colors hover:border-sage-400 hover:bg-white focus:outline-none focus:ring-2 focus:ring-sage-300 sm:text-lg';
 
-function questionIndex(step: QuizStep): number {
-  if (step === 'role') return 1;
-  if (step === 'stage') return 2;
-  if (step === 'need') return 3;
-  if (step === 'timeline') return 4;
-  return 0;
-}
-
-export function GlampingShowQuiz({
-  unlocked = true,
-  gateEnabled = false,
-}: {
-  unlocked?: boolean;
-  gateEnabled?: boolean;
-}) {
+export function GlampingShowQuiz() {
   const [step, setStep] = useState<QuizStep>('welcome');
   const [role, setRole] = useState<QuizRole | null>(null);
   const [stage, setStage] = useState<QuizStage | null>(null);
@@ -88,10 +82,9 @@ export function GlampingShowQuiz({
   const [timeline, setTimeline] = useState<QuizTimeline | null>(null);
   const [contact, setContact] = useState<ContactDraft>(EMPTY_CONTACT);
   const [outcome, setOutcome] = useState<QuizOutcome | null>(null);
+  const [marketOverviewUrl, setMarketOverviewUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pin, setPin] = useState('');
-  const [unlocking, setUnlocking] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const idleUntilRef = useRef<number | null>(null);
   const idleTimerRef = useRef<number | null>(null);
@@ -104,6 +97,7 @@ export function GlampingShowQuiz({
     setTimeline(null);
     setContact(EMPTY_CONTACT);
     setOutcome(null);
+    setMarketOverviewUrl(null);
     setSubmitting(false);
     setError(null);
   }, []);
@@ -125,37 +119,16 @@ export function GlampingShowQuiz({
 
   const bumpActivity = useCallback(() => {
     const idleMs = quizIdleResetMs(step);
-    if (idleMs == null || submitting || (gateEnabled && !unlocked)) return;
+    if (idleMs == null || submitting) return;
     armIdle(idleMs);
     if (step === 'result') {
       setRemainingMs(idleMs);
     }
-  }, [armIdle, gateEnabled, step, submitting, unlocked]);
-
-  useEffect(() => {
-    if (unlocked || !gateEnabled) return undefined;
-    const params = new URLSearchParams(window.location.search);
-    const fromQuery = params.get('pin');
-    if (!fromQuery) return undefined;
-    let cancelled = false;
-    void (async () => {
-      const res = await fetch('/api/glamping-show-quiz/unlock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: fromQuery }),
-      });
-      if (!cancelled && res.ok) {
-        window.location.replace('/glamping-show-quiz');
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [unlocked, gateEnabled]);
+  }, [armIdle, step, submitting]);
 
   useEffect(() => {
     const idleMs = quizIdleResetMs(step);
-    if (idleMs == null || submitting || (gateEnabled && !unlocked)) {
+    if (idleMs == null || submitting) {
       idleUntilRef.current = null;
       setRemainingMs(null);
       clearIdleTimer();
@@ -164,7 +137,7 @@ export function GlampingShowQuiz({
     armIdle(idleMs);
     setRemainingMs(idleMs);
     return () => clearIdleTimer();
-  }, [armIdle, clearIdleTimer, gateEnabled, step, submitting, unlocked]);
+  }, [armIdle, clearIdleTimer, step, submitting]);
 
   useEffect(() => {
     if (step !== 'result') return undefined;
@@ -189,13 +162,25 @@ export function GlampingShowQuiz({
     };
   }, [step, bumpActivity]);
 
+  const questionTotal = quizVisibleQuestionCount(role, step);
+  const qNumber = quizVisibleQuestionNumber(step, role);
+
   const progress = useMemo(() => {
-    const q = questionIndex(step);
-    if (q === 0) return step === 'contact' ? 90 : step === 'result' ? 100 : 0;
-    return (q / 4) * 80;
-  }, [step]);
+    if (qNumber === 0) return step === 'contact' ? 90 : step === 'result' ? 100 : 0;
+    return (qNumber / questionTotal) * 80;
+  }, [qNumber, questionTotal, step]);
 
   function goBack() {
+    if (step === 'contact' && quizSkipsNeedAndTimeline(role)) {
+      setError(null);
+      setStep('role');
+      return;
+    }
+    if (step === 'need' && quizSkipsStage(role)) {
+      setError(null);
+      setStep('role');
+      return;
+    }
     const index = STEP_ORDER.indexOf(step);
     if (index <= 0) return;
     setError(null);
@@ -204,6 +189,25 @@ export function GlampingShowQuiz({
 
   function selectRole(value: QuizRole) {
     setRole(value);
+    setError(null);
+    if (quizSkipsNeedAndTimeline(value)) {
+      setStage(impliedQuizStage(value) ?? 'idea');
+      setNeed(impliedQuizNeed(value) ?? 'exploring');
+      setTimeline(impliedQuizTimeline(value) ?? 'no_timeline');
+      setStep('contact');
+      return;
+    }
+    const implied = impliedQuizStage(value);
+    if (implied) {
+      setStage(implied);
+      setNeed(null);
+      setTimeline(null);
+      setStep('need');
+      return;
+    }
+    setStage(null);
+    setNeed(null);
+    setTimeline(null);
     setStep('stage');
   }
 
@@ -225,7 +229,7 @@ export function GlampingShowQuiz({
   async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!role || !stage || !need || !timeline) {
-      setError('Please complete all four questions.');
+      setError('Please complete the quiz.');
       return;
     }
 
@@ -264,7 +268,12 @@ export function GlampingShowQuiz({
         }),
       });
       const data = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; outcome?: QuizOutcome }
+        | {
+            ok?: boolean;
+            error?: string;
+            outcome?: QuizOutcome;
+            marketOverviewUrl?: string;
+          }
         | null;
 
       if (!res.ok || !data?.ok) {
@@ -275,6 +284,11 @@ export function GlampingShowQuiz({
 
       trackFormSubmission('glamping_show_quiz', 'booth', true);
       setOutcome(data.outcome ?? clientOutcome);
+      setMarketOverviewUrl(
+        typeof data.marketOverviewUrl === 'string' && data.marketOverviewUrl
+          ? data.marketOverviewUrl
+          : null
+      );
       setStep('result');
     } catch {
       trackFormSubmission('glamping_show_quiz', 'booth', false);
@@ -285,86 +299,6 @@ export function GlampingShowQuiz({
   }
 
   const result = outcome && need ? quizResultCopy(outcome, need) : null;
-  const qNumber = questionIndex(step);
-  const pendingOutcome =
-    role && stage && need && timeline
-      ? resolveQuizOutcome({ role, stage, need, timeline })
-      : null;
-
-  async function handleUnlock(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setUnlocking(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/glamping-show-quiz/unlock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin }),
-      });
-      const data = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string }
-        | null;
-      if (!res.ok || !data?.ok) {
-        setError(data?.error ?? 'That PIN is not valid.');
-        return;
-      }
-      window.location.replace('/glamping-show-quiz');
-    } catch {
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setUnlocking(false);
-    }
-  }
-
-  if (gateEnabled && !unlocked) {
-    return (
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-8 sm:px-8 sm:py-12">
-        <header className="mb-8 flex items-center justify-between gap-4">
-          <Image
-            src={QUIZ_LOGO_SRC}
-            alt="Sage Outdoor Advisory"
-            width={500}
-            height={250}
-            className="h-20 w-auto sm:h-24"
-            priority
-            unoptimized
-          />
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-500">
-            The Glamping Show
-          </p>
-        </header>
-        <section>
-          <h1 className="font-[Georgia] text-3xl font-medium tracking-tight text-neutral-900 sm:text-4xl">
-            Sage booth
-          </h1>
-          <p className="mt-3 max-w-xl text-base font-light leading-relaxed text-neutral-600">
-            Enter the booth PIN to start the quiz on this tablet.
-          </p>
-          <form onSubmit={handleUnlock} className="mt-8 max-w-sm space-y-4">
-            <Input
-              label="Booth PIN"
-              name="pin"
-              type="password"
-              autoComplete="off"
-              inputMode="numeric"
-              required
-              value={pin}
-              onChange={(event) => setPin(event.target.value)}
-              className={EDITORIAL_INPUT_CLASS}
-            />
-            {error ? (
-              <p className="text-sm text-red-700" role="alert">
-                {error}
-              </p>
-            ) : null}
-            <Button type="submit" size="lg" disabled={unlocking}>
-              {unlocking ? 'Unlocking…' : 'Unlock quiz'}
-            </Button>
-          </form>
-        </section>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-8 sm:px-8 sm:py-12">
@@ -393,7 +327,7 @@ export function GlampingShowQuiz({
           </div>
           {qNumber > 0 ? (
             <p className="mt-2 text-[11px] uppercase tracking-widest text-neutral-500">
-              Question {qNumber} of 4
+              Question {qNumber} of {questionTotal}
             </p>
           ) : (
             <p className="mt-2 text-[11px] uppercase tracking-widest text-neutral-500">
@@ -412,8 +346,8 @@ export function GlampingShowQuiz({
             {GLAMPING_SHOW_QUIZ_TITLE}
           </h1>
           <p className="mt-4 max-w-xl text-base font-light leading-relaxed text-neutral-600 sm:text-lg">
-            Four questions. We’ll point you to a consultation, market data, or the
-            Glamping Market Overview, whichever fits where you are today.
+            A few questions. We’ll point you to schedule a meeting or glamping
+            market data, whichever fits where you are today.
           </p>
           <div className="mt-10">
             <button
@@ -549,6 +483,30 @@ export function GlampingShowQuiz({
               className={EDITORIAL_INPUT_CLASS}
             />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                label="Phone"
+                name="phone"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                required
+                maxLength={14}
+                value={contact.phone}
+                onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+                  if (event.metaKey || event.ctrlKey || event.altKey) return;
+                  if (event.key.length !== 1) return;
+                  if (!/\d/.test(event.key)) {
+                    event.preventDefault();
+                  }
+                }}
+                onChange={(event) =>
+                  setContact((prev) => ({
+                    ...prev,
+                    phone: formatQuizPhoneInput(event.target.value),
+                  }))
+                }
+                className={EDITORIAL_INPUT_CLASS}
+              />
               <Select
                 label="Project state or region"
                 name="region"
@@ -579,39 +537,22 @@ export function GlampingShowQuiz({
                 </optgroup>
                 <option value={QUIZ_REGION_OTHER}>Outside the US and Canada</option>
               </Select>
-              <Input
-                label="Company or project"
-                name="company"
-                autoComplete="organization"
-                required
-                value={contact.company}
-                onChange={(event) =>
-                  setContact((prev) => ({ ...prev, company: event.target.value }))
-                }
-                className={EDITORIAL_INPUT_CLASS}
-              />
             </div>
             <Input
-              label="Phone"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
+              label="Company or project"
+              name="company"
+              autoComplete="organization"
               required
-              value={contact.phone}
+              value={contact.company}
               onChange={(event) =>
-                setContact((prev) => ({ ...prev, phone: event.target.value }))
+                setContact((prev) => ({ ...prev, company: event.target.value }))
               }
               className={EDITORIAL_INPUT_CLASS}
             />
-            {pendingOutcome === 'ready_now' ? (
-              <p className="-mt-2 text-sm font-light text-neutral-500">
-                We’ll text or call within 48 hours.
-              </p>
-            ) : null}
             <label className="flex items-start gap-3 text-sm font-light text-neutral-700">
               <input
                 type="checkbox"
-                className="mt-0.5 h-7 w-7 shrink-0 cursor-pointer rounded border-sage-300 accent-sage-600 text-sage-600 focus:ring-2 focus:ring-sage-400"
+                className="mt-0.5 h-6 w-6 shrink-0 cursor-pointer rounded border-sage-300 accent-sage-600 text-sage-600 focus:ring-2 focus:ring-sage-400"
                 checked={contact.newsletterOptIn}
                 onChange={(event) =>
                   setContact((prev) => ({
@@ -672,7 +613,7 @@ export function GlampingShowQuiz({
             </div>
             <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start">
               <QuizQrCode
-                url={result.primaryCtaUrl}
+                url={marketOverviewUrl ?? result.primaryCtaUrl}
                 label={result.primaryCtaLabel}
                 hint={result.qrHint}
                 size={result.secondaryCtaUrl ? 'sm' : 'md'}
@@ -705,21 +646,13 @@ function ResultIdentity({ outcome }: { outcome: QuizOutcome }) {
         </span>
       );
     case 'getting_close':
-      return (
-        <span
-          className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-sage-100 text-sage-800"
-          aria-hidden
-        >
-          <LineChart className="h-6 w-6" strokeWidth={2.25} />
-        </span>
-      );
     case 'just_exploring':
       return (
         <span
           className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-sage-100 text-sage-800"
           aria-hidden
         >
-          <Compass className="h-6 w-6" strokeWidth={2.25} />
+          <LineChart className="h-6 w-6" strokeWidth={2.25} />
         </span>
       );
     default: {
@@ -735,7 +668,7 @@ function ResultHeading({ result }: { result: QuizResultCopy }) {
       return (
         <>
           <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-sage-600">
-            Ready now
+            {result.visitorLabel}
           </p>
           <h2 className="mt-2 font-[Georgia] text-2xl font-medium tracking-tight text-sage-700 sm:text-3xl">
             {result.headline}
@@ -743,21 +676,11 @@ function ResultHeading({ result }: { result: QuizResultCopy }) {
         </>
       );
     case 'getting_close':
-      return (
-        <>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-sage-700">
-            Getting close
-          </p>
-          <h2 className="mt-2 font-[Georgia] text-2xl font-medium tracking-tight text-sage-800 sm:text-3xl">
-            {result.headline}
-          </h2>
-        </>
-      );
     case 'just_exploring':
       return (
         <>
           <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-sage-700">
-            Just exploring
+            {result.visitorLabel}
           </p>
           <h2 className="mt-2 font-[Georgia] text-2xl font-medium tracking-tight text-sage-800 sm:text-3xl">
             {result.headline}

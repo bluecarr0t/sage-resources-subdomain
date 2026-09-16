@@ -5,9 +5,14 @@
  */
 
 import { cache } from 'react';
+import { cookies } from 'next/headers';
 import { isAllowedEmailDomain, isManagedUser } from '@/lib/auth-helpers';
 import { findVerifiedGatedLead } from '@/lib/check-gated-page-access';
 import { GATED_PAGE_GLAMPING_MARKET_OVERVIEW } from '@/lib/gated-access';
+import {
+  GMO_BOOTH_UNLOCK_COOKIE,
+  verifyGmoBoothUnlockToken,
+} from '@/lib/gmo-booth-unlock';
 import { createServerClientWithCookies } from '@/lib/supabase-server';
 
 export type GlampingMarketOverviewAccessState = {
@@ -21,6 +26,11 @@ export type GlampingMarketOverviewAccessState = {
 
 export const getGlampingMarketOverviewAccessState = cache(
   async (): Promise<GlampingMarketOverviewAccessState> => {
+    const boothCookie = (await cookies()).get(GMO_BOOTH_UNLOCK_COOKIE)?.value;
+    if (verifyGmoBoothUnlockToken(boothCookie)) {
+      return { unlocked: true, needsBusinessType: false };
+    }
+
     const supabase = await createServerClientWithCookies();
     const {
       data: { user },

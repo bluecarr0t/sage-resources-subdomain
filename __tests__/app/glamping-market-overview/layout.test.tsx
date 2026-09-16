@@ -5,7 +5,7 @@
 
 import { Fragment, isValidElement, type ReactElement } from 'react';
 
-const mockIsUnlocked = jest.fn();
+const mockGetAccessState = jest.fn();
 
 jest.mock('next/headers', () => ({
   headers: jest.fn(async () => ({
@@ -14,7 +14,8 @@ jest.mock('next/headers', () => ({
 }));
 
 jest.mock('@/lib/glamping-market-overview-access', () => ({
-  isGlampingMarketOverviewUnlocked: (...args: unknown[]) => mockIsUnlocked(...args),
+  getGlampingMarketOverviewAccessState: (...args: unknown[]) =>
+    mockGetAccessState(...args),
 }));
 
 jest.mock('@/components/glamping-industry/GlampingMarketOverviewGatedShell', () => ({
@@ -39,7 +40,10 @@ describe('GlampingMarketOverviewLayout', () => {
   });
 
   it('renders gated shell without page children when access is not verified', async () => {
-    mockIsUnlocked.mockResolvedValue(false);
+    mockGetAccessState.mockResolvedValue({
+      unlocked: false,
+      needsBusinessType: false,
+    });
 
     const child = <span data-testid="metrics">secret metrics</span>;
     const result = await GlampingMarketOverviewLayout({ children: child });
@@ -50,27 +54,33 @@ describe('GlampingMarketOverviewLayout', () => {
     expect(shell.props.children).toBeUndefined();
     expect(shell.props.pageSlug).toBe(GATED_PAGE_GLAMPING_MARKET_OVERVIEW);
     expect(shell.props.seoVariant).toBe('overview');
-    expect(mockIsUnlocked).toHaveBeenCalled();
+    expect(mockGetAccessState).toHaveBeenCalled();
   });
 
   it('renders page children when magic-link access is verified', async () => {
-    mockIsUnlocked.mockResolvedValue(true);
+    mockGetAccessState.mockResolvedValue({
+      unlocked: true,
+      needsBusinessType: false,
+    });
 
     const child = <span data-testid="metrics">secret metrics</span>;
     const result = await GlampingMarketOverviewLayout({ children: child });
 
     expect(isValidElement(result)).toBe(true);
-    const [, content] = fragmentChildren(result as ReactElement);
-    expect(content).toEqual(child);
+    const parts = fragmentChildren(result as ReactElement);
+    expect(parts.at(-1)).toEqual(child);
   });
 
   it('renders children when access check grants admin bypass', async () => {
-    mockIsUnlocked.mockResolvedValue(true);
+    mockGetAccessState.mockResolvedValue({
+      unlocked: true,
+      needsBusinessType: false,
+    });
 
     const child = <span>metrics</span>;
     const result = await GlampingMarketOverviewLayout({ children: child });
 
-    const [, content] = fragmentChildren(result as ReactElement);
-    expect(content).toEqual(child);
+    const parts = fragmentChildren(result as ReactElement);
+    expect(parts.at(-1)).toEqual(child);
   });
 });

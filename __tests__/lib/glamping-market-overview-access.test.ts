@@ -35,6 +35,18 @@ jest.mock('@/lib/check-gated-page-access', () => ({
   findVerifiedGatedLead: (...args: unknown[]) => mockFindVerifiedGatedLead(...args),
 }));
 
+const mockCookieGet = jest.fn();
+
+jest.mock('next/headers', () => ({
+  cookies: jest.fn(async () => ({
+    get: (...args: unknown[]) => mockCookieGet(...args),
+  })),
+}));
+
+import {
+  GMO_BOOTH_UNLOCK_COOKIE,
+  createGmoBoothUnlockToken,
+} from '@/lib/gmo-booth-unlock';
 import { getGlampingMarketOverviewAccessState } from '@/lib/glamping-market-overview-access';
 
 describe('getGlampingMarketOverviewAccessState', () => {
@@ -43,6 +55,7 @@ describe('getGlampingMarketOverviewAccessState', () => {
     mockIsManagedUser.mockResolvedValue(false);
     mockFindVerifiedGatedLead.mockResolvedValue(null);
     mockGetUser.mockResolvedValue({ data: { user: null } });
+    mockCookieGet.mockReturnValue(undefined);
   });
 
   it('returns locked when there is no session', async () => {
@@ -112,5 +125,23 @@ describe('getGlampingMarketOverviewAccessState', () => {
       unlocked: true,
       needsBusinessType: false,
     });
+  });
+
+  it('unlocks a valid booth QR cookie without prompting for business type', async () => {
+    const originalSecret = process.env.GMO_BOOTH_UNLOCK_SECRET;
+    process.env.GMO_BOOTH_UNLOCK_SECRET = 'booth-test-secret';
+    const token = createGmoBoothUnlockToken();
+    mockCookieGet.mockImplementation((name: string) =>
+      name === GMO_BOOTH_UNLOCK_COOKIE ? { value: token } : undefined
+    );
+
+    await expect(getGlampingMarketOverviewAccessState()).resolves.toEqual({
+      unlocked: true,
+      needsBusinessType: false,
+    });
+    expect(mockGetUser).not.toHaveBeenCalled();
+
+    if (originalSecret === undefined) delete process.env.GMO_BOOTH_UNLOCK_SECRET;
+    else process.env.GMO_BOOTH_UNLOCK_SECRET = originalSecret;
   });
 });
