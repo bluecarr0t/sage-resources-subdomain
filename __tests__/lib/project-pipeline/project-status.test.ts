@@ -6,6 +6,8 @@ import {
   getProjectStatusStyle,
   isConsultantWorkloadVisibleProjectStatus,
   normalizeProjectPipelineProjectStatus,
+  areProjectPipelineTableStatusFiltersEqual,
+  resolveProjectPipelineTableStatusFilters,
 } from '@/lib/project-pipeline/project-status';
 
 describe('normalizeProjectPipelineProjectStatus', () => {
@@ -20,6 +22,31 @@ describe('normalizeProjectPipelineProjectStatus', () => {
     expect(normalizeProjectPipelineProjectStatus('In-Progress')).toBe('In-Progress');
     expect(normalizeProjectPipelineProjectStatus('On Hold')).toBe('On Hold');
     expect(normalizeProjectPipelineProjectStatus('Completed')).toBe('Completed');
+  });
+});
+
+describe('resolveProjectPipelineTableStatusFilters', () => {
+  it('defaults Outdoor to In-Progress and In Review', () => {
+    expect(resolveProjectPipelineTableStatusFilters('Outdoor')).toEqual([
+      'In-Progress',
+      'In Review',
+    ]);
+  });
+
+  it('uses the fallback status for other segments', () => {
+    expect(resolveProjectPipelineTableStatusFilters('Commercial')).toEqual(['In-Progress']);
+    expect(resolveProjectPipelineTableStatusFilters('', 'In Review')).toEqual(['In Review']);
+  });
+});
+
+describe('areProjectPipelineTableStatusFiltersEqual', () => {
+  it('ignores order', () => {
+    expect(
+      areProjectPipelineTableStatusFiltersEqual(
+        ['In Review', 'In-Progress'],
+        ['In-Progress', 'In Review']
+      )
+    ).toBe(true);
   });
 });
 

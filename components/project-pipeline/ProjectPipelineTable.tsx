@@ -44,10 +44,12 @@ import {
   shouldShowProjectPipelineFlagWarning,
 } from '@/lib/project-pipeline/project-flag';
 import {
+  areProjectPipelineTableStatusFiltersEqual,
   compareProjectPipelineProjectStatus,
   DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER,
   normalizeProjectPipelineProjectStatus,
   PROJECT_PIPELINE_PROJECT_STATUSES,
+  resolveProjectPipelineTableStatusFilters,
   type ProjectPipelineProjectStatus,
 } from '@/lib/project-pipeline/project-status';
 import { ProjectPipelineConsultantWorkloadTable } from '@/components/project-pipeline/ProjectPipelineConsultantWorkloadTable';
@@ -82,7 +84,7 @@ function filterProjectPipelineJobs(
   filters: {
     search: string;
     serviceFilter: string;
-    projectStatusFilter?: string;
+    projectStatusFilter?: readonly string[];
     segmentFilter?: string;
     dueWithin30DaysOnly?: boolean;
     outdoorPastDueOnly?: boolean;
@@ -91,12 +93,15 @@ function filterProjectPipelineJobs(
   return jobs.filter((job) => {
     if (!jobMatchesProjectPipelineSearchQuery(job, filters.search)) return false;
     if (filters.serviceFilter && job.service !== filters.serviceFilter) return false;
-    if (
-      filters.projectStatusFilter &&
-      normalizeProjectPipelineProjectStatus(effectiveProjectStatusForFilter(job)) !==
-        normalizeProjectPipelineProjectStatus(filters.projectStatusFilter)
-    ) {
-      return false;
+    if (filters.projectStatusFilter && filters.projectStatusFilter.length > 0) {
+      const allowed = new Set(
+        filters.projectStatusFilter.map((status) =>
+          normalizeProjectPipelineProjectStatus(status)
+        )
+      );
+      if (!allowed.has(normalizeProjectPipelineProjectStatus(effectiveProjectStatusForFilter(job)))) {
+        return false;
+      }
     }
     if (
       filters.segmentFilter &&
@@ -219,8 +224,11 @@ export function ProjectPipelineTable({
   const format = useFormatter();
   const [search, setSearch] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
-  const [projectStatusFilter, setProjectStatusFilter] = useState(
-    () => defaultProjectStatusFilter || DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER
+  const [projectStatusFilter, setProjectStatusFilter] = useState<string[]>(() =>
+    resolveProjectPipelineTableStatusFilters(
+      segmentFilter,
+      defaultProjectStatusFilter || DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER
+    )
   );
   const [sortKey, setSortKey] = useState<SortKey>('dueDate');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -254,11 +262,28 @@ export function ProjectPipelineTable({
     consultantWorkloadActive,
   ]);
 
+  const defaultStatusFilters = useMemo(
+    () =>
+      resolveProjectPipelineTableStatusFilters(
+        segmentFilter,
+        defaultProjectStatusFilter || DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER
+      ),
+    [defaultProjectStatusFilter, segmentFilter]
+  );
+
+  useEffect(() => {
+    setProjectStatusFilter((current) =>
+      areProjectPipelineTableStatusFiltersEqual(current, defaultStatusFilters)
+        ? current
+        : defaultStatusFilters
+    );
+  }, [defaultStatusFilters]);
+
   useEffect(() => {
     if (!metricTableFilterVersion) return;
     setSearch('');
     setServiceFilter('');
-    setProjectStatusFilter('');
+    setProjectStatusFilter(defaultStatusFilters);
     setPage(1);
   }, [metricTableFilterVersion]);
 
@@ -429,7 +454,7 @@ export function ProjectPipelineTable({
   const clearFilters = () => {
     setSearch('');
     setServiceFilter('');
-    setProjectStatusFilter(defaultProjectStatusFilter);
+    setProjectStatusFilter(defaultStatusFilters);
     onSegmentFilterChange(DEFAULT_PROJECT_PIPELINE_SEGMENT_FILTER);
     onDueWithin30DaysOnlyChange(false);
     onOutdoorPastDueOnlyChange(false);
@@ -439,7 +464,7 @@ export function ProjectPipelineTable({
   const hasActiveFilters =
     search.trim() ||
     serviceFilter ||
-    projectStatusFilter !== defaultProjectStatusFilter ||
+    !areProjectPipelineTableStatusFiltersEqual(projectStatusFilter, defaultStatusFilters) ||
     dueWithin30DaysOnly ||
     outdoorPastDueOnly ||
     segmentFilter !== DEFAULT_PROJECT_PIPELINE_SEGMENT_FILTER;
@@ -888,20 +913,21 @@ export function ProjectPipelineTable({
               ]}
             />
           </div>
-          <div className="w-full sm:w-48">
-            <Select
+          <div className="w-full sm:w-64">
+            <DropdownSelect
+              multiple
               value={projectStatusFilter}
-              onChange={(e) => setProjectStatusFilter(e.target.value)}
+              onChange={setProjectStatusFilter}
               aria-label={t('filterProjectStatus')}
-              className="h-10 text-sm"
-            >
-              <option value="">{t('filterProjectStatusAll')}</option>
-              {PROJECT_PIPELINE_PROJECT_STATUSES.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </Select>
+              placeholder={t('filterProjectStatusAll')}
+              options={[
+                { value: '', label: t('filterProjectStatusAll') },
+                ...PROJECT_PIPELINE_PROJECT_STATUSES.map((value) => ({
+                  value,
+                  label: value,
+                })),
+              ]}
+            />
           </div>
           {!consultantWorkloadToggleAfterAuthorPreview ? consultantWorkloadToggleButton : null}
           {showAuthorPreviewToggle && onAuthorPreviewToggle ? (

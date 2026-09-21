@@ -1,0 +1,3 @@
+-- Open-year research (review before apply). Does not write by itself.
+-- Rows are property-level: every still-blank unit row for the property.
+-- Updates: 0

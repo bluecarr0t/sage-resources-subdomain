@@ -1,4 +1,5 @@
 import {
+  GATED_PAGE_CLIENT_PORTAL,
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   GATED_PAGE_PIPELINE_QUARTERLY,
   buildMagicLinkRedirectUrl,
@@ -21,6 +22,7 @@ describe('gated-access helpers', () => {
     it('recognizes gated page slugs', () => {
       expect(isGatedPageSlug(GATED_PAGE_GLAMPING_MARKET_OVERVIEW)).toBe(true);
       expect(isGatedPageSlug(GATED_PAGE_PIPELINE_QUARTERLY)).toBe(true);
+      expect(isGatedPageSlug(GATED_PAGE_CLIENT_PORTAL)).toBe(true);
     });
 
     it('rejects unknown slugs and nullish values', () => {
@@ -32,8 +34,8 @@ describe('gated-access helpers', () => {
 
   describe('getGatedPageRedirectPath', () => {
     it('maps the known slug to its path', () => {
-      expect(getGatedPageRedirectPath(GATED_PAGE_GLAMPING_MARKET_OVERVIEW)).toBe(
-        '/glamping-market-overview'
+      expect(getGatedPageRedirectPath(GATED_PAGE_CLIENT_PORTAL)).toBe(
+        '/client-portal'
       );
     });
 

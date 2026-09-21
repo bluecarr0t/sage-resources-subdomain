@@ -1,0 +1,62 @@
+id,property_id,property_name,queue,url,reason
+11764,d515dee5-3708-4aa1-8eb3-8c763215b7b1,Allaire State Park,state_park_placeholder,https://www.nj.gov/dep/parksandforests/parks/allaire.html,no_quoted_unit_type
+11750,1fd9631f-9be0-460b-8b3b-38665f09df29,Bear Mountain State Park,state_park_placeholder,https://parks.ny.gov/parks/bearmountain/,no_glamping_product_on_page
+11741,56ac2ffe-a526-48bb-bb64-0050b11f0fc3,Big Ridge State Park,state_park_placeholder,https://tnstateparks.com/parks/big-ridge,no_quoted_unit_type
+11759,4dbc6806-9864-429b-8f4a-cdb3181e6d7c,Bradbury Mountain State Park,state_park_placeholder,https://www.maine.gov/dacf/parks/bradbury_mountain_sp/index.shtml,no_glamping_product_on_page
+11734,afaee746-b5e2-4b56-be73-60346ecc2ec2,Brown County State Park (Abe Martin Lodge),state_park_placeholder,https://www.in.gov/dnr/state-parks/parks-lakes/brown-county-state-park/,no_quoted_unit_type
+11731,d7f9905a-617b-420f-bd01-afdf52e92a76,Bruneau Dunes State Park,state_park_placeholder,https://parksandrecreation.idaho.gov/parks/bruneau-dunes,no_glamping_product_on_page
+11719,6b3d2d42-f141-473e-ae67-c22d4ddbe549,Buccaneer State Park,state_park_placeholder,https://www.mdwfp.com/parks-destinations/state-parks/buccaneer,no_glamping_product_on_page
+11758,a90331d0-e84c-451c-9ca2-f63fbf2856b0,Camden Hills State Park,state_park_placeholder,https://www.maine.gov/dacf/parks/camden_hills_sp/index.shtml,no_glamping_product_on_page
+11765,a5cc2451-47ca-4295-9e43-0ef4e71fbf36,Cape Henlopen State Park,state_park_placeholder,https://destateparks.com/Beaches/CapeHenlopen,no_glamping_product_on_page
+11722,3b84be1a-1900-4826-b2b3-106203e2d5f6,Chain O'Lakes State Park,state_park_placeholder,https://www2.illinois.gov/dnr/Parks/Pages/ChainOLakes.aspx,no_glamping_product_on_page
+11708,df56f6ef-7c66-4d73-aa87-002012e28d58,Cliffs of the Neuse State Park,state_park_placeholder,https://www.ncparks.gov/state-parks/cliffs-neuse-state-park,no_quoted_unit_type
+11736,67a3f3f6-c553-4735-a66e-816c3b2eb92d,Clifty Falls State Park Inn,state_park_placeholder,https://www.in.gov/dnr/state-parks/parks-lakes/clifty-falls-state-park/,no_glamping_product_on_page
+11772,e47dd88b-366f-40aa-aa18-86b6eaf33171,Crawford Notch State Park,state_park_placeholder,https://www.nhstateparks.org/visit/state-parks/crawford-notch-state-park.html,no_glamping_product_on_page
+11703,26dfd645-c716-4eeb-81e4-da37fd764d1d,Edisto Beach State Park,state_park_placeholder,https://southcarolinaparks.com/edisto-beach,no_quoted_unit_type
+11770,e2a1aee1-d8d8-423e-8671-8c63cf752d88,Ellacoya State Park,state_park_placeholder,https://www.nhstateparks.org/visit/state-parks/ellacoya-state-park.html,no_glamping_product_on_page
+11691,f97afbab-fc89-45b5-8ae6-0a4990a17d17,Fontainebleau State Park,state_park_placeholder,https://www.lastateparks.com/parks-preserves/fontainebleau-state-park,no_quoted_unit_type
+11769,4a82dbbb-1f0a-44c7-840a-2e27df3f9bbf,Franconia Notch State Park,state_park_placeholder,https://www.nhstateparks.org/visit/state-parks/franconia-notch-state-park.html,no_glamping_product_on_page
+11716,4fdbb28a-8c9a-4026-b805-2e1db936e837,Geneva State Park Lodge,state_park_placeholder,https://www.greatohiolodges.com/lodges/geneva/,no_glamping_product_on_page
+11707,76e222be-307b-442c-8121-c0d0e23581a9,Goose Creek State Park,state_park_placeholder,https://www.ncparks.gov/state-parks/goose-creek-state-park,no_quoted_unit_type
+11710,662a25a5-6e95-4126-8171-6f2b66bad2ab,Gooseberry Falls State Park,state_park_placeholder,https://www.dnr.state.mn.us/state_parks/park.html?id=spk00172,no_glamping_product_on_page
+11761,12a41264-667c-4071-aceb-0c834e41529f,High Point State Park,state_park_placeholder,https://www.nj.gov/dep/parksandforests/parks/highpoint.html,no_quoted_unit_type
+11721,30c98cf3-89eb-499f-a3c7-1547c01724a2,Hugh White State Park,state_park_placeholder,https://www.mdwfp.com/parks-destinations/state-parks/hugh-white,no_glamping_product_on_page
+11762,988b5707-6dcd-412b-9447-2f9a68ba18f9,Island Beach State Park,state_park_placeholder,https://www.nj.gov/dep/parksandforests/parks/islandbeach.html,no_glamping_product_on_page
+11712,b1a27e6b-61b0-4e1a-9dab-8f951ffa0ed3,Itasca State Park,state_park_placeholder,https://www.dnr.state.mn.us/state_parks/park.html?id=spk00171,no_glamping_product_on_page
+11711,e35ebd9b-8ef2-45d9-ade2-81aa63567104,Jay Cooke State Park,state_park_placeholder,https://www.dnr.state.mn.us/state_parks/park.html?id=spk00173,no_glamping_product_on_page
+11701,6cde624e-cfcd-403b-9ae2-9e0a196e3d21,John Pennekamp Coral Reef State Park,state_park_placeholder,https://www.floridastateparks.org/parks-and-trails/john-pennekamp-coral-reef-state-park,no_glamping_product_on_page
+11725,7d2312dd-5477-4f09-9f05-5ef11b93fe2b,Kankakee River State Park,state_park_placeholder,https://www2.illinois.gov/dnr/Parks/Pages/KankakeeRiver.aspx,no_glamping_product_on_page
+11767,6a63322e-b60f-440c-a0c5-296826d3c16a,Killens Pond State Park,state_park_placeholder,https://destateparks.com/Inland/KillensPond,no_glamping_product_on_page
+11732,c64b389c-20c0-4a15-98e9-cb2ca491588e,Lake Cascade State Park,state_park_placeholder,https://parksandrecreation.idaho.gov/parks/lake-cascade,no_quoted_unit_type
+11690,87deedc2-515d-40c5-a6e3-ed10d6116d7c,Lake Fausse Pointe State Park,state_park_placeholder,https://www.lastateparks.com/parks-preserves/lake-fausse-pointe-state-park,no_quoted_unit_type
+11752,b41fd566-da81-4f36-98ba-b7eec86c7ee6,Letchworth State Park,state_park_placeholder,https://parks.ny.gov/parks/letchworth/,no_quoted_unit_type
+11726,66e38254-72e0-4ef3-acf9-2487fd34e3a1,Ludington State Park,state_park_placeholder,https://www2.dnr.state.mi.us/parksandtrails/details.aspx?id=424&type=SFPG,no_glamping_product_on_page
+11768,98a2d83a-38b3-4465-a30e-9ba89cdaa910,Lums Pond State Park,state_park_placeholder,https://destateparks.com/Inland/LumsPond,no_glamping_product_on_page
+11715,60d678ee-a756-41f4-84e8-386d6d1cf3b6,Maumee Bay State Park Lodge,state_park_placeholder,https://www.greatohiolodges.com/lodges/maumee-bay/,no_quoted_unit_type
+11706,477c86a7-d129-4ae4-bc98-cab1cfd020c1,Merchants Millpond State Park,state_park_placeholder,https://www.ncparks.gov/state-parks/merchants-millpond-state-park,no_glamping_product_on_page
+11749,24c7f7bd-7e17-45eb-bd92-940c0df76179,Minnewaska State Park Preserve,state_park_placeholder,https://parks.ny.gov/parks/minnewaska/,no_glamping_product_on_page
+11755,35d0cd04-da76-4759-a9a8-2bf2b39d75e8,Mount Greylock State Reservation,state_park_placeholder,https://www.mass.gov/locations/mount-greylock-state-reservation,scrape_fetch_error
+11704,7129bea8-ff09-472b-9d40-4b8f9aba4525,Myrtle Beach State Park,state_park_placeholder,https://southcarolinaparks.com/myrtle-beach,no_quoted_unit_type
+11753,dded0cf4-6429-4c05-9e1f-2c7464039106,Nickerson State Park,state_park_placeholder,https://www.mass.gov/locations/nickerson-state-park,scrape_fetch_error
+11771,fcc66c36-ab2a-4e33-8d39-9b7060274027,Pawtuckaway State Park,state_park_placeholder,https://www.nhstateparks.org/visit/state-parks/pawtuckaway-state-park.html,no_glamping_product_on_page
+11720,985c8f61-bf29-4c10-84fd-c6b4774fae57,Percy Quin State Park,state_park_placeholder,https://www.mdwfp.com/parks-destinations/state-parks/percy-quin,no_glamping_product_on_page
+11730,8b904632-3191-46d0-9f03-e2ee77135932,Ponderosa State Park,state_park_placeholder,https://parksandrecreation.idaho.gov/parks/ponderosa,no_quoted_unit_type
+11737,66f80e62-1cbc-4513-b652-b0c0e033fc3f,Potato Creek State Park,state_park_placeholder,https://www.in.gov/dnr/state-parks/parks-lakes/potato-creek-state-park/,no_quoted_unit_type
+11709,0cdcacb7-baa4-4afc-bc2e-ef588e5f5868,Raven Rock State Park,state_park_placeholder,https://www.ncparks.gov/state-parks/raven-rock-state-park,no_quoted_unit_type
+11723,5e060832-0cd5-4240-aede-38b418911c04,Rock Cut State Park,state_park_placeholder,https://www2.illinois.gov/dnr/Parks/Pages/RockCut.aspx,no_glamping_product_on_page
+11775,284291b0-feb6-4dec-a594-fc7d2b3897af,Rocky Neck State Park,state_park_placeholder,https://portal.ct.gov/DEEP/State-Parks/Parks/Rocky-Neck-State-Park,no_quoted_unit_type
+11714,9df4456f-9499-46dc-b763-af338cfb65e1,Salt Fork State Park Lodge,state_park_placeholder,https://www.greatohiolodges.com/lodges/salt-fork/,no_glamping_product_on_page
+11760,33c7b72a-bc17-48aa-8935-176192986c56,Sebago Lake State Park,state_park_placeholder,https://www.maine.gov/dacf/parks/sebago_lake_sp/index.shtml,no_glamping_product_on_page
+11729,5c62bcc7-70c9-41c9-bc2e-bf513e3c6fe1,Silver Lake State Park,state_park_placeholder,https://www2.dnr.state.mi.us/parksandtrails/details.aspx?id=496&type=SFPG,no_glamping_product_on_page
+11776,e6374b90-0f93-4855-8e05-255c1c7a7556,Silver Sands State Park,state_park_placeholder,https://portal.ct.gov/DEEP/State-Parks/Parks/Silver-Sands-State-Park,no_glamping_product_on_page
+11700,841e25a2-4670-4e86-b41c-2fb8e7a64225,Stephen Foster Folk Culture Center State Park,state_park_placeholder,https://www.floridastateparks.org/parks-and-trails/stephen-foster-folk-culture-center-state-park,no_quoted_unit_type
+11705,1dd632bd-0631-438a-9395-6ba836dc5d35,Table Rock State Park,state_park_placeholder,https://southcarolinaparks.com/table-rock,no_quoted_unit_type
+11728,2b722511-9954-49eb-bfee-f59d0886cba5,Tawas Point State Park,state_park_placeholder,https://www2.dnr.state.mi.us/parksandtrails/details.aspx?id=509&type=SFPG,no_glamping_product_on_page
+11713,649da717-1325-486c-b9be-a7a78efd3853,Tettegouche State Park,state_park_placeholder,https://www.dnr.state.mn.us/state_parks/park.html?id=spk00174,no_glamping_product_on_page
+11694,525c0537-d634-48ae-ba24-9a4befa8ec48,The Lodge at Gulf State Park,state_park_placeholder,https://www.hilton.com/en/hotels/pnsgigi-the-lodge-at-gulf-state-park/,no_glamping_product_on_page
+11693,55133fdd-86e5-4972-a958-fb996cd28977,Tickfaw State Park,state_park_placeholder,https://www.lastateparks.com/parks-preserves/tickfaw-state-park,no_quoted_unit_type
+11718,8d7c6c54-e37c-4d1d-8adf-4376d3df994a,Tishomingo State Park,state_park_placeholder,https://www.mdwfp.com/parks-destinations/state-parks/tishomingo,no_glamping_product_on_page
+11766,565629a3-f695-4558-a9a0-8336cd260e3c,Trap Pond State Park,state_park_placeholder,https://destateparks.com/Inland/TrapPond,no_glamping_product_on_page
+11735,954c8766-60d5-491b-9660-be1338e68b27,Turkey Run State Park Inn,state_park_placeholder,https://www.in.gov/dnr/state-parks/parks-lakes/turkey-run-state-park/,no_quoted_unit_type
+11724,edc16d17-4f60-4330-bad7-9a7103f92077,White Pines Forest State Park,state_park_placeholder,https://www2.illinois.gov/dnr/Parks/Pages/WhitePinesForest.aspx,no_glamping_product_on_page
+11763,87d79b0b-1c69-4605-bca5-57a17e518cca,Worthington State Forest,state_park_placeholder,https://www.nj.gov/dep/parksandforests/parks/worthington.html,no_glamping_product_on_page

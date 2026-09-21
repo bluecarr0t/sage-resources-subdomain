@@ -23,6 +23,10 @@ jest.mock('@/lib/project-pipeline/notifications/schedule-review-calendar-event',
     mockSchedulePipelineReviewCalendarEventsAsync(...args),
 }));
 
+jest.mock('@/lib/client-portal/notify-status-change', () => ({
+  notifyClientPortalStatusChangeAsync: jest.fn(),
+}));
+
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 import { notifyPipelineJobChanges } from '@/lib/project-pipeline/notifications/notify-pipeline-job-change';
 

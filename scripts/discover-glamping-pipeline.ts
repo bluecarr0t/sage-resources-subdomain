@@ -7,6 +7,7 @@
  *   npx tsx scripts/discover-glamping-pipeline.ts --dry-run
  *   npx tsx scripts/discover-glamping-pipeline.ts --limit 3
  *   npx tsx scripts/discover-glamping-pipeline.ts --force
+ *   npx tsx scripts/discover-glamping-pipeline.ts --glamping-only
  *
  * First run: npm run migrate:glamping-pipeline
  */
@@ -15,13 +16,17 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { OpenAI } from 'openai';
-import { runWeeklyPipelineSync } from '../lib/glamping-pipeline';
+import {
+  PIPELINE_DISCOVERY_QUERIES,
+  runWeeklyPipelineSync,
+} from '../lib/glamping-pipeline';
 
 config({ path: resolve(process.cwd(), '.env.local') });
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const force = args.includes('--force');
+const glampingOnly = args.includes('--glamping-only');
 const limitIdx = args.indexOf('--limit');
 const limitPerQuery =
   limitIdx >= 0 && args[limitIdx + 1]
@@ -53,14 +58,18 @@ const supabase = createClient(supabaseUrl, secretKey, {
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
 async function main() {
+  const segments = glampingOnly ? (['glamping'] as const) : undefined;
   console.log(
-    `Starting pipeline sync (glamping + RV/campground)${dryRun ? ' (dry run)' : ''}${force ? ' (force)' : ''}...`
+    `Starting pipeline sync (${glampingOnly ? 'glamping only' : 'glamping + RV/campground'})${dryRun ? ' (dry run)' : ''}${force ? ' (force)' : ''}...`
   );
 
   const { metrics, error } = await runWeeklyPipelineSync(supabase, openai, tavilyKey, {
     dryRun,
     force,
     limitPerQuery,
+    segments,
+    glampingQueries: glampingOnly ? PIPELINE_DISCOVERY_QUERIES : undefined,
+    rvQueries: glampingOnly ? null : undefined,
   });
 
   console.log(JSON.stringify(metrics, null, 2));

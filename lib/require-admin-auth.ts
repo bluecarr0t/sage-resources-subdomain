@@ -84,6 +84,19 @@ export function withAdminAuth<
       }
     }
 
-    return handler(request, { supabase: authResult.supabase, session: authResult.session }, context);
+    try {
+      return await handler(
+        request,
+        { supabase: authResult.supabase, session: authResult.session },
+        context
+      );
+    } catch (error) {
+      console.error('[withAdminAuth] Unhandled route error', error);
+      const message = error instanceof Error ? error.message : 'Internal server error';
+      return NextResponse.json(
+        { error: 'Internal server error', message },
+        { status: 500 }
+      );
+    }
   };
 }

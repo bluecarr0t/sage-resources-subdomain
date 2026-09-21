@@ -28,6 +28,8 @@ describe('promo-market-overview', () => {
       false
     );
     expect(shouldShowMarketOverviewPromoOnPath('/glamping-show-quiz')).toBe(false);
+    expect(shouldShowMarketOverviewPromoOnPath('/client-portal')).toBe(false);
+    expect(shouldShowMarketOverviewPromoOnPath('/client-portal/26-274A-08')).toBe(false);
   });
 
   it('shows on public content pages', () => {

@@ -129,7 +129,7 @@ export type QuizOption<T extends string> = {
 };
 
 export const QUIZ_ROLE_OPTIONS: readonly QuizOption<QuizRole>[] = [
-  { value: 'landowner', label: 'Landowner exploring an outdoor hospitality concept' },
+  { value: 'landowner', label: 'Landowner or still looking for land' },
   { value: 'developer_operator', label: 'Developer or operator with a project in motion' },
   { value: 'existing_operator', label: 'Existing operator looking to expand, refinance, or sell' },
   { value: 'investor_lender', label: 'Investor or lender evaluating a deal' },
@@ -143,10 +143,43 @@ export const QUIZ_STAGE_OPTIONS: readonly QuizOption<QuizStage>[] = [
   { value: 'operating', label: 'Already operating, want market data or growth strategy' },
 ];
 
+const LANDOWNER_STAGE_OPTIONS: readonly QuizOption<QuizStage>[] = [
+  { value: 'idea', label: 'Still looking, no site yet' },
+  { value: 'has_land', label: 'Have land, need to know if it pencils' },
+  {
+    value: 'has_plans',
+    label: 'Have land and a concept, next is plans or capital',
+  },
+];
+
+const DEVELOPER_STAGE_OPTIONS: readonly QuizOption<QuizStage>[] = [
+  { value: 'idea', label: 'Still assembling the site' },
+  { value: 'has_land', label: 'Site is under control, need feasibility' },
+  {
+    value: 'has_plans',
+    label: 'Plans are in, need financing or an appraisal',
+  },
+  { value: 'operating', label: 'Already open and operating' },
+];
+
+const INVESTOR_STAGE_OPTIONS: readonly QuizOption<QuizStage>[] = [
+  { value: 'idea', label: 'Still screening, no specific asset yet' },
+  { value: 'has_land', label: 'Land or greenfield concept' },
+  { value: 'has_plans', label: 'Entitled project seeking capital' },
+  { value: 'operating', label: 'Operating asset' },
+];
+
 export const QUIZ_NEED_OPTIONS: readonly QuizOption<QuizNeed>[] = [
   { value: 'feasibility', label: 'Feasibility study' },
   { value: 'appraisal', label: 'Appraisal or valuation' },
   { value: 'market_data', label: 'Market and competitive data (rates, occupancy, dev costs)' },
+  { value: 'exploring', label: 'Not sure, just exploring' },
+];
+
+const EXISTING_OPERATOR_NEED_OPTIONS: readonly QuizOption<QuizNeed>[] = [
+  { value: 'feasibility', label: 'Feasibility for expansion or a new site' },
+  { value: 'appraisal', label: 'Appraisal, refinance, or sale' },
+  { value: 'market_data', label: 'Market data (rates, occupancy, comps)' },
   { value: 'exploring', label: 'Not sure, just exploring' },
 ];
 
@@ -253,16 +286,72 @@ function isSageEngagementNeed(need: QuizNeed): boolean {
 
 /**
  * Project-stage options (idea / land / plans / operating) only apply to
- * people with a project. Existing operators already said they are operating.
- * Investors/lenders are evaluating a deal, not sitting land. Vendor/media is
- * not in that funnel and always scores just exploring.
+ * people who have not already named a stage. Existing operators skip this
+ * question (implied operating). Investors/lenders answer a deal-stage
+ * question with the same slugs. Vendor/media is not in that funnel and
+ * always scores just exploring.
  */
 export function quizSkipsStage(role: QuizRole | null): boolean {
-  return (
-    role === 'existing_operator' ||
-    role === 'investor_lender' ||
-    role === 'vendor_media'
-  );
+  return role === 'existing_operator' || role === 'vendor_media';
+}
+
+export function quizStagePrompt(role: QuizRole | null): string {
+  if (role == null) return 'Where does your project stand today?';
+  switch (role) {
+    case 'landowner':
+      return 'Where are you with the land?';
+    case 'developer_operator':
+      return 'How far along is the project?';
+    case 'investor_lender':
+      return 'What kind of deal is this?';
+    case 'existing_operator':
+    case 'vendor_media':
+      return 'Where does your project stand today?';
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
+  }
+}
+
+export function quizStageOptionsForRole(
+  role: QuizRole | null
+): readonly QuizOption<QuizStage>[] {
+  if (role == null) return QUIZ_STAGE_OPTIONS;
+  switch (role) {
+    case 'landowner':
+      return LANDOWNER_STAGE_OPTIONS;
+    case 'developer_operator':
+      return DEVELOPER_STAGE_OPTIONS;
+    case 'investor_lender':
+      return INVESTOR_STAGE_OPTIONS;
+    case 'existing_operator':
+    case 'vendor_media':
+      return QUIZ_STAGE_OPTIONS;
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
+  }
+}
+
+export function quizNeedOptionsForRole(
+  role: QuizRole | null
+): readonly QuizOption<QuizNeed>[] {
+  if (role == null) return QUIZ_NEED_OPTIONS;
+  switch (role) {
+    case 'existing_operator':
+      return EXISTING_OPERATOR_NEED_OPTIONS;
+    case 'landowner':
+    case 'developer_operator':
+    case 'investor_lender':
+    case 'vendor_media':
+      return QUIZ_NEED_OPTIONS;
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
+  }
 }
 
 export function quizSkipsNeedAndTimeline(role: QuizRole | null): boolean {
@@ -272,12 +361,12 @@ export function quizSkipsNeedAndTimeline(role: QuizRole | null): boolean {
 export function impliedQuizStage(role: QuizRole): QuizStage | null {
   switch (role) {
     case 'existing_operator':
-    case 'investor_lender':
       return 'operating';
     case 'vendor_media':
       return 'idea';
     case 'landowner':
     case 'developer_operator':
+    case 'investor_lender':
       return null;
     default: {
       const _exhaustive: never = role;
@@ -332,8 +421,9 @@ function isReadyNowSite(answers: QuizAnswers): boolean {
   if (isLandOrPlans(answers.stage)) return true;
   switch (answers.role) {
     case 'existing_operator':
-    case 'investor_lender':
       return true;
+    case 'investor_lender':
+      return answers.stage === 'operating';
     case 'landowner':
     case 'developer_operator':
     case 'vendor_media':
@@ -348,8 +438,8 @@ function isReadyNowSite(answers: QuizAnswers): boolean {
 /**
  * Ready now is a Sage engagement this quarter: not vendor/media, a study
  * (feasibility or appraisal), a sub-three-month clock, and either land/plans
- * or a role that already implies an operating deal (existing operator or
- * investor/lender).
+ * or an operating deal (existing operator, or investor/lender who picked an
+ * operating asset).
  * Just exploring is vendor/media, “not sure”, idea stage, or no timeline.
  * Market-data asks, later clocks, and operating businesses are getting close.
  */

@@ -395,4 +395,20 @@ describe('GET /auth/callback — gated magic link', () => {
     expect(location).toContain('access=link-expired');
     expect(mockVerifyOtp).not.toHaveBeenCalled();
   });
+
+  it('preserves a client-portal job redirect and does not upsert a gated lead', async () => {
+    const res = await GET(
+      callbackUrl({
+        token_hash: 'otp-token-hash',
+        type: 'magiclink',
+        redirect: '/client-portal/26-100A-01',
+      })
+    );
+
+    expect(res.status).toBe(307);
+    const location = res.headers.get('location') ?? '';
+    expect(location).toMatch(/\/client-portal\/26-100A-01$/);
+    expect(mockVerifyOtp).toHaveBeenCalled();
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
 });

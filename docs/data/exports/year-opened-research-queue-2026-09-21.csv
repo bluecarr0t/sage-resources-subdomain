@@ -1,0 +1,198 @@
+queue,property_id,property_name,city,state,url,open_status,known_year,blank_rows,row_count
+fully_blank,2b4b9efd-e1b1-4c32-bc9c-04a02358a2fb,22 West Cabins & Recreation,Walden,CO,https://22west.net/en/moose-haven-cabin-22-west,open,,2,2
+fully_blank,bfe27649-7d1e-4e4c-8aec-2cde8a83c1a3,Alexander's Lodge Yurts,Ashford,WA,https://alexanderslodge.com/,open,,1,1
+fully_blank,dc56af74-f2b0-43af-a5b4-d2c577a16ac9,Ancient Lore Village,Knoxville,TN,https://www.ancientlorevillage.com/,open,,1,1
+fully_blank,aa305e34-fa76-4d0d-88e3-b2c37c68c1e2,Ashland Glamping,Ashland,NE,https://www.ashlandglamping.com/vacation-rentals-homes/172953-modern-dome-or-ashland-glamping/,open,,9,9
+copy_forward,527a6ccc-49aa-4038-9e4d-31f7b2f95408,AutoCamp Asheville,Asheville,NC,https://autocamp.com/location/asheville/,open,2012,1,2
+fully_blank,519865e7-df19-4356-a854-b4ca89b90e3b,Avalanche Ranch,Redstone Historic District,CO,https://avalancheranch.com,open,,2,2
+fully_blank,1e2bbd94-4bcd-4ad6-8dcd-7f3d9106b6e5,Basecamp Resort,Ingram,TX,https://basecampresort.com/,open,,1,1
+fully_blank,0a070e3f-7887-4590-920c-35401efed1ee,Bear Woods Resort and Campground,Bear Lake,MI,https://bearwoodsresort.com/,open,,2,2
+fully_blank,55c34eed-a302-45c7-b081-5852df69adb4,Bel Air Asheville,Black Mountain,NC,https://belairasheville.com/,proposed,,1,1
+fully_blank,822b300d-553b-4169-a6a1-f460b5858c9d,Bentonville Bike Camp,Bentonville,AR,https://www.hipcamp.com/en-US/land/arkansas-bentonville-bike-camp-pw1h1v65,open,,3,3
+fully_blank,a6a4956b-e4eb-4e5e-8d47-f091395afc68,Bespoke Outdoor Bubbles,Cleveland,TX,https://bespokeoutdoorbubbles.com/blissful-bubble-dome/,open,,4,4
+fully_blank,73b983a9-3b09-47f7-9799-23da76458749,Bison Creek Ranch,East Glacier,MT,https://bisoncreekranch.com,open,,2,2
+fully_blank,cfadc6b0-905b-4d01-ac51-1e5f8efcd3c6,Bliss Camps Glamping (Rocky Mountain Glamping),Lyons,CO,https://blisscamps.com/,open,,7,7
+fully_blank,f8a24d87-aebc-4a05-83b4-5d7124519036,Blue Bear Mountain Camp,Todd,NC,https://www.bluebearmountain.com/,open,,1,1
+fully_blank,59790cc9-1d9e-4273-8b79-b9f1423f07e4,Blue Moon Rising,McHenry,MD,https://bluemoonrising.org,open,,1,1
+fully_blank,00a9b25b-2a69-4690-8a4d-35765840b953,Boonies Farm,Worden,IL,https://www.booniesfarm.com/,open,,1,1
+fully_blank,014c6750-6123-4fcd-9ebe-cef01111852b,Branson Treehouse Adventures,Branson,MO,https://www.bransontreehouseadventures.com,open,,1,1
+fully_blank,6748d0d0-0c7e-4fdb-987e-53d0f877b796,Bristol Cabins,Lava Hot Springs,ID,https://bristolcabins.org,open,,2,2
+fully_blank,aaebc816-80e3-404e-9743-102330ee5ae0,Bubble Terlingua,Study Butte,TX,https://basecampterlingua.com/bubble-terlingua/,open,,2,2
+fully_blank,b11f6f6b-f6f1-435c-bfe1-83d1c39efede,Callicoon Hills,Callicoon Center,NY,https://callicoonhills.com/stay/,open,,2,2
+fully_blank,0ed65a3c-274b-4274-b8dd-ef394dfce9f7,Cameron Ranch Glamping - Bastrop,Bastrop,TX,https://cameronranchglamping.com/,open,,1,1
+fully_blank,51a8f391-1dc7-4d7e-9e60-d4c80cafbd41,Camp Dakota,Scotts Mills,OR,http://www.campdakota.com/,open,,5,5
+fully_blank,5d8aad98-a289-4099-a76d-bdba8658a7ab,Camp Elena,Terlingua,TX,https://www.campelena.com/,open,,1,1
+fully_blank,b807577b-d4c3-45bc-9ec0-6a86d2898b6d,Camp Ferncrest - Acadia,Sargentville,ME,https://campferncrest.com/,open,,7,7
+copy_forward,53743d4e-7fde-4755-935f-576416fd0bc2,Camp Ferncrest - Chambers Creek,Grandview,TX,https://campferncrest.com/locations/chambers-creek,open,2026,1,2
+fully_blank,d564e53c-466e-4871-80b5-a2c521b50709,Camp Ferncrest - Flint Creek,Colcord,OK,https://campferncrest.com/,open,,7,7
+fully_blank,7a0264e1-934d-407d-969c-764acd15bca4,Camp Ferncrest - Promised Land,Greentown,PA,https://campferncrest.com/,open,,7,7
+fully_blank,46c18432-6ab8-4eae-a734-0da1ebe0b2b2,Camp Kettlewood,East Troy,WI,https://www.campkettlewood.com/,open,,12,12
+fully_blank,091c3f48-4793-431e-be25-1365f3228d65,Camp Yellow Cardinal,Meherrin,VA,https://campyellowcardinal.com/,under_construction,,1,1
+fully_blank,f8f8501e-858a-4d89-946b-995afa5348ac,Catalina Island Camp,Catalina Island,CA,https://catalinaislandcamps.com/,open,,1,1
+fully_blank,51c12a70-de70-45a9-946d-c01bd2b506a4,Caterpillar Hill Glampground,Sedgwick,ME,https://penobscotbaypress.com/articles/latestnews-theweeklypacket/glampground-proposed-for-caterpillar-hill-property/,proposed,,1,1
+fully_blank,09d7f420-ca5a-4641-bf72-58b38f8e3c88,Cedar Bloom Farm,Cave Junction,OR,https://www.cedarbloomfarm.com/,open,,1,1
+fully_blank,336617ad-fce4-40ac-8f34-fbbff4be977e,Cedar Creek Treehouse,Ashford,WA,,other,,1,1
+fully_blank,7d10646a-705b-4c8e-9859-b9feca370209,Cedar Ridge Ranch,Carbondale,CO,https://www.cedarridgeranch.com/,open,,2,2
+fully_blank,f5aa8fc0-a0bb-4d93-b7d0-a50d0754ed99,Chico Hot Springs Resort,Pray,MT,https://www.chicohotsprings.com/,open,,1,1
+fully_blank,e51df53b-1248-43f1-98da-de0e1880465a,Clear Sky Acadia,Lamoine,ME,https://themainemonitor.org/lamoine-bans-glampgrounds/,other,,1,1
+fully_blank,4b51946f-b1a5-4b2c-87a1-8ea01d4ee856,Collective Yellowstone,Big Sky,MT,https://www.collectiveretreats.com/retreats/collective-yellowstone/,other,,1,1
+fully_blank,bc67bd91-f03f-4d24-87db-5d9cd2f4d28d,Container Cabins in the Catskills,Saugerties,NY,https://www.containercabinsinthecatskills.com/,open,,1,1
+fully_blank,b41e8a20-d742-40d6-a826-b4d6858b110c,Copacabana Campground,Scranton,PA,https://www.thetimes-tribune.com/2026/02/02/monday-update-glamping-style-campground-copacabana-still-under-development-in-scranton/,proposed,,1,1
+fully_blank,06544c3e-1326-487f-9bec-1f8ee6c5e9a3,Costanoa,Pescadero,CA,https://costanoa.com,open,,4,4
+fully_blank,c30e638f-8dee-4125-a1c7-7cf492cc7f58,Coy and Wilma's Campsites and Cabins,Sesser,IL,https://www.coyandwilmas.com,open,,3,3
+fully_blank,f375efbe-bfb4-4c75-8227-cd941a6acebf,Crater Lake Resort,Chiloquin,OR,https://craterlakeresort.com/,open,,1,1
+fully_blank,70c7c5a9-0412-4032-b873-e7cb778bc0f7,Cutty's Hayden Creek Resort,Coaldale,CO,https://cuttysresort.net,open,,3,3
+fully_blank,8ddceb97-c80a-4965-9d0a-31d97250d7ba,Cypress Valley,Spicewood,TX,https://www.cypressvalley.com/,open,,1,1
+fully_blank,5f1d01c5-35e9-456e-bede-d7c06d588ab6,Darla the Glamping Trailer,Ashford,WA,https://ashfordlodge.co/,open,,1,1
+fully_blank,84317f6f-f19d-4ad0-9e63-077add748ed8,Dream Away Lodge Glamping Resort,Becket,MA,https://www.berkshireeagle.com/news/southern_berkshires/becket-planning-board-glamping-project-drops-application/article_2708534a-f35b-11ec-8810-9be1cc4e59a9.html,other,,2,2
+fully_blank,838cd515-c12c-4111-9d41-1e0d28fafa95,Dunton Hot Springs,Dolores,CO,https://www.duntondestinations.com/hot-springs,open,,1,1
+fully_blank,a8be4aad-812f-4d2b-a311-f307d4ff2667,Dunya Camp,Summerville,GA,https://dunyacamp.com/,open,,1,1
+fully_blank,3e27838b-f2d5-4431-943f-07286f65144c,East Zion Resort,Orderville,UT,https://www.eastzionresort.com/lodging,open,,11,11
+fully_blank,e7ddf68b-0093-40ef-a3b2-4587e2bf696f,Eastwind Oliverea Valley,Big Indian,NY,https://eastwindhotels.com/oliverea-valley/,open,,1,1
+fully_blank,0ee476ec-3d26-41fc-8b53-002639d49f0f,Echo Valley Micro-Resort,Dry Fork,VA,https://www.echovalleymicroresort.com/,under_construction,,3,3
+fully_blank,84d54466-09b0-4624-bb80-ed4608d6ee87,Eco Dome Landers,Landers,CA,https://www.deserttrumpet.org/p/eco-dome-owner-presents-revised-project,proposed,,1,1
+fully_blank,80bf5650-a2ec-4301-8a1b-dfd76063c88e,Elk Lake Resort,Bend,OR,https://elklakeresort.net/,open,,5,5
+fully_blank,558568ad-394a-4983-af06-c9032c9f35a2,Emmanuel Church Road Glamping Retreat,Amherst,VA,https://newsadvance.com/news/community/new-era-progress/article_c18f05a0-f1f4-4d84-9038-1165417dd232.html,proposed,,1,1
+fully_blank,6eeb4249-2530-406a-bc68-f4e11d6821f1,Entrada Moab,Moab,UT,https://www.moabtimes.com/articles/county-approves-glamping-eco-resort/,under_construction,,1,1
+fully_blank,1eed22fc-916f-4748-8fee-f9f0716ede7b,Eureka Springs Treehouses,Eureka Springs,AR,https://secure.thinkreservations.com/estreehouses/reservations/availability,open,,24,24
+fully_blank,19d8505d-8904-4c06-bdb0-2edbbb6392c2,Eureka Yurts and Cabins,Eureka Springs,AR,https://eurekayurts.com/,open,,2,2
+fully_blank,fd7bf646-7c94-49df-b4a7-56fe9b7206d0,Falling Waters Adventure Resort,Bryson City,NC,https://www.fallingwatersresort.com,open,,1,1
+fully_blank,24838276-9f5c-4ee4-8a44-2adb3eefce6e,Flamingo Everglades Glamping Tents,Homestead,FL,https://flamingoeverglades.com/,open,,1,1
+fully_blank,7b9fadce-f952-4d53-a3ab-d52cf588a419,GLAMP Smoky Mountains,Cosby,TN,https://glamp.stayminty.com/,open,,1,1
+fully_blank,d17b62c4-5a8f-4e2b-9c1d-7f3a6e8b0d42,Glamping Loft Lake Geneva,Lake Geneva,WI,https://www.genevalakesvacations.com/vrp/unit/Main_Street_Loft-95-15/,open,,1,1
+fully_blank,0c2d0d45-ac3c-47cf-91e8-fdfd90a664df,Good Creek Meadows,Olney,MT,https://www.hipcamp.com/en-US/land/montana-good-creek-meadows-2ejhzmq1,open,,2,2
+fully_blank,4c54a6fe-6c00-4796-af86-64161b5e8cc9,Goosewing Ranch,Kelly,WY,https://goosewingranch.com/,open,,4,4
+fully_blank,39349470-8b4e-4ea7-a41b-622ca29fdf59,Grand Lake Lodge,Grand Lake,CO,https://www.grandlakelodge.com/room/lake-view-jupe/,open,,1,1
+fully_blank,1f6c251b-64c6-4847-bb08-c88ebee79f07,Green Rock Retreat,Culver,OR,https://www.greenrockretreat.com/,open,,1,1
+fully_blank,2417c2f9-5f10-41da-ac59-f575565ee25f,Happy Hollow Homestead,Marengo,IN,https://www.hipcamp.com/en-US/land/indiana-hones-pointe-3pw1hmxd,open,,1,1
+fully_blank,48bb4f91-7b3b-4811-bd3a-d4b351532275,Hardscrabble Ranch,Bozeman,MT,https://www.hardscrabbleranch.com/glamping-tents,open,,1,1
+fully_blank,7b50221d-6491-4663-bc06-959d3b1f56b0,Hart's Camp,Pacific City,OR,https://www.hartscamp.com/,open,,1,1
+fully_blank,3d46b9f5-61ab-4ea3-9f17-f16425f71e74,Haven Yurts,Fredericksburg,TX,https://www.havenyurts.com/yurts,open,,4,4
+fully_blank,e15b9692-9e32-4203-8ec8-ae077e9c3ecf,Hidden Harmony,Poga,TN,https://wcyb.com/news/local/carter-county-planning-commission-rejects-plan-for-glamping-retreat,proposed,,1,1
+fully_blank,4de6e19b-6199-4fc6-818c-c3349b6ae3e5,Hidden Hollow Resort,Chickamauga,GA,http://hiddenhollowresort.com/index.html,open,,1,1
+fully_blank,dc230036-0899-40c5-82f1-4716d15e2413,Highland Ranch,Kalispell,MT,https://www.highlandranch.com/accommodations/jupe-tent,open,,3,3
+fully_blank,ea257743-1b29-48da-bf41-5cfede9bdc73,Highwood Retreat,Springfield,VT,https://resnexus.com/resnexus/reservations/book/C19E9143-1FF2-4069-9DF7-941074AC9852,open,,2,2
+fully_blank,3e48ad3e-072a-4c0e-b354-5e67d1ce71ed,Huttopia Berkshires,Hancock,MA,https://canada-usa.huttopia.com/en/site/berkshires/,open,,1,1
+copy_forward,4b802f57-c33a-4f21-8b3e-0ed4679a2b21,Huttopia Paradise Springs,Valyermo,CA,https://canada-usa.huttopia.com/en/,open,1923,4,5
+fully_blank,c9483e0d-d516-4f82-ae55-ee877087d0bc,Idaho Wilderness Yurts,Idaho City,ID,https://www.idahowildernessyurts.com/,open,,1,1
+fully_blank,fb77589c-e072-48da-90c2-586e31f318a1,In The Trees,Amherst,VA,https://www.inthetreesmaine.com/,open,,1,1
+fully_blank,8203ec3e-ab51-428a-988a-1b7dbe0eb64a,Iron & Vine Luxury Treehouse,Ashford,WA,https://ironandvinetreehouse.com/,open,,1,1
+fully_blank,b1df8259-b22f-4c15-9d29-8985f415f4d9,Joyful Journey Hot Springs,Moffat,CO,https://joyfuljourneyhotsprings.com/,open,,2,2
+fully_blank,e4bfdf06-b255-411b-be22-2450d12824f4,Key Largo Kampground,,,https://keylargokampground.com/,open,,1,1
+fully_blank,74e34101-0071-497c-b004-e96880a609b5,KitFox,Santa Fe,NM,https://www.kitfoxsantafe.com,open,,1,1
+fully_blank,8f95ef51-7136-4729-9a96-04e22bb62165,Lago Linda Hideaway,Beattyville,KY,https://lagolinda.com/,open,,4,4
+fully_blank,c19c8b39-de56-41ff-80b0-928685c2c138,Lagom Retreat,Dripping Springs,TX,https://lagom-retreat.com/,open,,1,1
+fully_blank,d59510bc-dcc9-42ef-af0d-722bc0137c6b,Lilla Rustica Treehouse,Moretown,VT,https://www.treehouserentals.com/property/cozy-warm-treehouse-with-amazing-views-winter-paradise-hike-from-cabin/HA-3212044380,open,,1,1
+fully_blank,3347a615-917c-4975-a95b-f05c4266a815,Loloma Lodge,McKenzie Bridge,OR,https://www.lolomalodge.com/,open,,1,1
+fully_blank,ba752549-96db-4deb-af93-d20e3f4e6a5c,Long Valley Junction Glamping Resort,Long Valley Junction,UT,https://citizenportal.ai/articles/7562066/utah/kane-county/kane-county-boards-and-commissions/kane-county-commission/commission-adopts-rezoning-for-long-valley-junction-glamping-and-cabin-project,proposed,,1,1
+fully_blank,3628303d-e305-4692-b832-105f3ae4d171,Maine Guide Company,Carmel,ME,https://www.hipcamp.com/en-GB/land/maine-maine-guide-company-2ejh6own,open,,1,1
+fully_blank,f8008bf4-a9a8-4e7d-be5e-05c18aff883c,Menizei,Joyce,WA,https://menizei.com/,open,,1,1
+fully_blank,bf60f7ad-2fc9-4ce9-bfbd-4cd25bac3fd5,Mojave Country Club,Twentynine Palms,CA,https://mojavecountryclub.com/,open,,1,1
+fully_blank,85c5b687-4623-48de-bd91-3e08a3cb44b7,Monument Glamping,Monument,CO,https://monumentglamping.com/,open,,1,1
+fully_blank,e3778afd-4189-442e-98fd-49d2732b0318,Moose Meadow Lodge,Waterbury,VT,http://www.moosemeadowlodge.net,open,,1,1
+fully_blank,4ccbe46a-49e6-4430-b86a-293e03af4abb,Moravian Falls Family Campground & Cabins,Moravian Falls,NC,https://www.moravianfallscampground.com/?_ga-ft=1Z1KIz.0.0.0.0.4K0ZOv-1PX66Pv.0.0,open,,2,2
+fully_blank,1ae105c8-ef01-471e-972f-f481763d7f57,Mossquatch Resort,Forks,WA,https://resnexus.com/resnexus/reservations/book/61FB2386-B719-4DA9-8F87-F86A2A9E8065,open,,4,4
+fully_blank,af10962b-32b4-4dfc-bced-48f0d0031157,Mount Snow Yurt,Dover,VT,https://mountsnowyurt.com/,open,,1,1
+fully_blank,28e6edff-b668-4e00-86c7-67a7d27253e0,Mt. Hood Tiny House Village,Welches,OR,https://www.mthoodtinyhouse.com/,open,,1,1
+fully_blank,80e41d7c-e63c-4d9d-991c-8a5856f0dae1,Nicholas Beaver Lake Glamping Resort,Rogers,AR,https://www.arkansasonline.com/news/2024/mar/21/benton-county-planning-board-gives-green-light-to/,proposed,,2,2
+fully_blank,53260890-3e81-40e0-9666-48e2a3f695bf,Nolla A-Frames Near Yosemite,Groveland,CA,https://nollacabins.com/destinations/yosemite,open,,3,3
+fully_blank,41a97ec1-044a-4492-a455-767db81350e3,Nomad Ridge at The Wilds,Cumberland,OH,https://www.thewilds.org/yurts,open,,1,1
+fully_blank,9b8b0155-3f97-455f-99ae-1267aa855630,Notch Road Glamping Resort,North Adams,MA,https://moderncampground.com/usa/massachusetts/north-adams-planning-board-approves-revised-glamping-resort-on-notch-road/,proposed,,1,1
+fully_blank,ffde6056-2597-4b85-a2e4-d0f9dbbbd49f,Oceanview Mountaintop Bubble Dome,Rancho Palos Verdes,CA,https://www.hipcamp.com/en-US/land/california-oceanview-mountaintop-bubble-dome-dw9h9m88,other,,1,1
+fully_blank,a50f1d35-4d76-4958-b998-3557dc91eb69,Oculis Lodge,Glacier,WA,https://moderncampground.com/usa/washington/crowdfunded-glamping-venture-near-mount-baker-closes-leaving-backers-uncertain/,other,,1,1
+copy_forward,ae850e9d-38db-4cea-93b4-711f855b4c44,Off Map Glamping,South Haven,MI,https://www.stayoffmap.com/,open,2021,4,6
+fully_blank,86f9b55e-378c-46c9-b425-4229cbb0279b,Onera Wimberley,Wimberley,TX,https://stayonera.com/locations/wimberley/,open,,1,1
+fully_blank,7224b076-38a8-4a71-bc17-d0ff6917c2de,Oso Blu Yurts,Garden City,UT,https://bearlakeutahvacationrental.com/,open,,1,1
+fully_blank,08a93e36-c9c7-4bce-b74c-64afeac27b60,Ouachita Wilde,Mena,AR,https://resnexus.com/resnexus/reservations/book/A699365C-E037-4019-A7CB-04ECD6099F79,open,,3,3
+fully_blank,5805dc2b-d071-4ba7-afbd-0bbebdfa7f86,Out N About Treehouse,Cave Junction,OR,https://treehouses.com/,open,,4,4
+fully_blank,1732b969-26c6-4147-a2b4-931e16d4adcf,Outdoors Elevated,Uinta Mountains,UT,https://theoutdoorselevated.net/,open,,1,1
+fully_blank,7af99b0a-99f6-47d3-9616-2ed3129a3724,Outpost X,Beryl,UT,https://outpost-x.com/,open,,1,1
+fully_blank,ddef014e-95c5-4184-95d8-46e41de1210e,Paint Rock Farm,Hot Springs,NC,https://www.paintrockfarm.com/,open,,1,1
+fully_blank,6028cf61-d1f8-4c73-8f89-fe635f6c7698,Palo 32°,Strawn,TX,https://www.palo32.com/,open,,1,1
+fully_blank,830beaf8-fab0-4989-8398-4469842fab43,Paradise Ranch Inn,Three Rivers,CA,http://paradiseranch.me/,open,,4,4
+fully_blank,8ee7ece8-5139-4bd3-b8b0-5fe4cbd9e78a,Piney Hills Campground,Mauk,GA,https://pineyhillscampground.com/services/a-frames/xl-a-frame-site-1-150292838,open,,2,2
+fully_blank,33996933-be9a-4e04-88e9-186d01d09ad6,Pisgah Glamping at Lake Powhatan,Asheville,NC,https://www.pisgah-glamping.com/,open,,1,1
+fully_blank,76a8d0fc-de87-4e62-b762-e0dcb7823b6d,Pitch Yellowstone,Livingston,MT,https://pitchyellowstone.com/,open,,1,1
+fully_blank,7a90bd94-7636-414e-8a5c-2bb1b271ac98,Point of View Lake Resort,Phelps,WI,https://povresort.com/,open,,14,14
+fully_blank,1411077c-8173-4015-b660-f95e72e33909,Princeville Glamping Resort,Princeville,HI,https://www.residekauai.com/blog/proposed-glamping-resort-in-princeville/,other,,1,1
+fully_blank,2eb9a012-53b1-4d75-99b6-86e3985fe322,Prospect and Refuge,Chattanooga,TN,https://www.prospectandrefugeresorts.com/,under_construction,,3,3
+fully_blank,2c59ee1d-715e-4ca0-8938-f1923bc6536d,Punkin Hollow Resort,Stanton,KY,https://www.punkinhollow.net/,open,,1,1
+fully_blank,bab2827e-f0f3-44fe-b70e-2e2a75326ce5,Rimrock Ranch,Pioneertown,CA,https://www.therimrockranch.com/,open,,1,1
+fully_blank,97fb75b6-f1a3-4f12-896a-71989a64690a,Rio Bella Resort,Rio Frio,TX,https://friorivercabinrentals.com/,open,,1,1
+fully_blank,11aa2819-c3a3-4286-b799-337431e9b00b,River's Edge Treehouse Resort,Robbinsville,NC,https://www.riversedgetreehouses.com,open,,1,1
+fully_blank,61bfb101-e227-4469-9af2-cf78da5498a0,Riverbend Glamping Getaway,Gallatin Gateway,MT,https://riverbendglamping.com/,proposed,,3,3
+fully_blank,f2b14797-003c-4e06-b6ce-a07baaa4f220,Roadhouse Ranch & Camp,Terrebonne,OR,https://www.roadhouseranch.com/,open,,1,1
+fully_blank,d2150e8e-a018-40f3-8c58-ddd4a0ab81bf,Roamstead,Cosby,TN,https://resnexus.com/resnexus/reservations/book/FBF415F2-C33B-4F06-BDCC-DD190FDF60BB,open,,15,15
+fully_blank,44c4e4c1-a6a8-40af-bc7e-6cabd0633b1f,Rockdale Glamping Retreat,Conyers,GA,https://moderncampground.com/usa/georgia/rockdale-county-glamping-proposal-advances-despite-residential-moratorium/,proposed,,1,1
+fully_blank,723e7d6c-453f-4bc5-9275-00e015441a3a,Safari Wilderness Glamping,Lakeland,FL,https://safariwilderness.com/,open,,1,1
+fully_blank,7dc970da-15e8-4d42-bed5-672276bbb0ac,Savannah Sunset Resort and Spa,Jackson,NJ,https://reservations.sixflags.com/savannahsunset/availability.asp,open,,9,9
+fully_blank,1f6f4e92-f05f-492e-9fec-95242f4fa76e,Scruffy Buffalo,Almo,ID,https://www.scruffybuffaloranch.com/,open,,1,1
+fully_blank,7aaa5233-9e19-49fd-8568-a7e4f9410b50,Serenity Ridge,Mill Spring,NC,https://www.serenityridgenc.com/glamping-yurt,open,,8,8
+fully_blank,eb163e7b-f8a4-4226-9c78-c09704d64943,Shell Camp Florida,Cape Coral,FL,https://www.shellcampflorida.com/,open,,1,1
+fully_blank,9a5253ca-b644-4ec0-93c4-c0888437befe,Sheltered Nook on Tillamook Bay,Bay City,OR,https://www.shelterednook.com/,open,,1,1
+fully_blank,8547d712-7bc2-45db-a5fe-514e2c286928,Silver Bullet Retreats,Orlando,FL,https://silverbulletretreats.com/,open,,1,1
+fully_blank,e32b009f-90be-44e7-bc33-d58bf49d94eb,Silver Lake,Dunmore,PA,https://moderncampground.com/usa/pennsylvania/dunmore-approves-five-cabin-campground-near-i-84-380-interchange/,proposed,,1,1
+copy_forward,7824773f-426e-4eb0-b4a1-ee646595fb65,Sinya on Lone Man Creek,Wimberley,TX,https://www.hillcountrysinya.com/,open,2009,1,2
+fully_blank,2c50aa69-71d8-4ee0-ade0-5905d20da874,Six Senses Camp Korongo,Kanab,UT,https://www.sixsenses.com/en/corporate/media-center/press-releases/2026/six-senses-camo-korongo-announcement/,proposed,,1,1
+copy_forward,7a21a358-5241-4ff5-ad36-a7f70d6d915b,Skamania Lodge,Stevenson,WA,https://www.skamania.com,open,2024,2,3
+copy_forward,95799e27-51c0-4863-b001-67bb75cf4022,SKYE Texas Hill Country Resort,Fredericksburg,TX,https://www.skyetexashillcountry.com/,open,2024,1,3
+fully_blank,2c56e524-c9ce-458d-9e7f-99cfab9ec3c6,Sou'wester Lodge,Seaview,WA,https://souwesterlodge.com/,open,,1,1
+fully_blank,35101060-7de5-4324-b008-d15349c88e20,Space Cowboys,Terlingua,TX,https://bookspacecowboys.com/,open,,1,1
+fully_blank,e044224b-7b11-4cd8-ae6b-468bdf25afda,Spoon Mountain Glamping,Wimberley,TX,https://www.spoonmountainglamping.com/,open,,1,1
+fully_blank,a2ebd9fb-e929-43ad-b8b6-127de6770c42,Spring Ranch Campground,Fairfield,NE,https://v2.reservationkey.com/88259/reserve/c,open,,5,5
+fully_blank,e615c6ce-c944-4998-8a03-540189a40092,Stargazer Dome,Mineral,WA,https://visitrainier.com/the-stargazer-dome/,open,,1,1
+fully_blank,4fc505b0-bf19-438d-a477-fa1d4e7df420,Starlight Haven at Hot Springs,Hot Springs,AR,https://www.visitstarlight.com/hot-springs/,open,,1,1
+fully_blank,db02f3e9-ace4-46eb-a4bf-40fe02d05719,Sticks and Stones Farm,Newtown,CT,https://www.sticksandstonesfarm.com,open,,2,2
+fully_blank,e58a1d5b-1f57-48df-aed6-86216f1ee5eb,Stone City Treehouse,Hardwick,VT,https://www.stonecitytreehouse.com/treehouse-and-glamping-experiences-at-stone-city,open,,1,1
+fully_blank,a3457bc3-69fc-4530-890f-bbd821a31557,Strawberry Park Hot Springs,Steamboat Springs,CO,https://strawberryhotsprings.com/lodging/,open,,7,7
+fully_blank,1f7fdc39-28c6-400b-b0bd-bfa117aeaf7a,Summit Big Bend,Terlingua,TX,https://summitbigbend.com/,open,,1,1
+fully_blank,cf1fa996-2b1e-459d-ad9c-7a126ff7db2b,Talaz,Stateline,NV,https://www.talaz.com/,under_construction,,1,1
+fully_blank,b6ed04ad-846c-46ba-ba74-8104f2c9ebf1,Talula Mesa Glamping Resort,Marble Falls,TX,https://www.talulamesa.com/,open,,1,1
+fully_blank,6ac68a51-7b3f-49d0-b10d-6365f53986a2,Tarantula Ranch,Amargosa Valley,NV,https://resnexus.com/resnexus/reservations/book/B3F72B7A-F2FA-4231-B60D-2E88B01E00AC/,open,,16,16
+fully_blank,ef2d8414-256d-4d33-bfa4-6531057470db,Teakettle Mountain Glamping Resort,Blankenship,MT,https://hungryhorsenews.com/news/2025/sep/03/teakettle-suit-formally-dropped/,other,,1,1
+fully_blank,367108eb-b341-49fc-9fd1-27a566b4c280,Tennessee Pass,Leadville,CO,https://www.tennesseepass.com,open,,1,1
+fully_blank,1163a07a-998e-48f1-be42-bc449b8270c8,Terramor Outdoor Resort - Saugerties,Saugerties,NY,https://www.dailyfreeman.com/2023/02/08/terramor-withdraws-controversial-saugerties-glamping-plan/,other,,1,1
+fully_blank,5d65dc63-00ac-41de-ba97-cf90f30baa98,Terramor Outdoor Resort - Wilmington,Wilmington,NY,https://moderncampground.com/usa/new-york/terramor-outdoor-resort-seeks-to-transform-old-campground-into-year-round-luxury-glamping-experience/,proposed,,1,1
+fully_blank,7bf42b80-03f3-4be9-b7e5-0abcf3238c09,The Canyon at Pond Creek,Pikeville,TN,https://us2.cloudbeds.com/en/reservation/NxfNT7?rid=72539036008681,open,,6,6
+fully_blank,0536a92c-c4d1-4878-8377-5a7c91df407f,The Charmadillo,Center Point,TX,https://www.thecharmadillo.com/lodging,open,,3,3
+fully_blank,8d4ee921-b6b0-488c-a9e7-63a184208db1,The Cozy Peach at Schnepf Farms,Queen Creek,AZ,https://schnepffarms.com/glamping/,open,,1,1
+fully_blank,05d268d4-d3b1-479d-9104-d7c170e1fcb1,The Destination,Dadeville,AL,https://www.tdbsc.com/,open,,1,1
+fully_blank,3b645ca2-990f-42ba-9650-2da0e398801b,The Eagle's Nest,Jarbidge,NV,https://www.glamping.com/destination/north-america/nevada/jarbidge/the-eagles-nest/,open,,1,1
+fully_blank,7c6d48ab-f90d-4aca-9c4c-6301e65ea381,The Green O,Greenough,MT,https://www.thegreeno.com/,open,,1,1
+fully_blank,062455a0-63d5-4c83-b047-87df70420ee6,The Griffin Ranch,Fort McCoy,FL,https://www.thegriffinranch.com/,open,,1,1
+fully_blank,e09490fa-37e6-42bf-b562-6f3d40b24703,The Highlands Resort,Guerneville,CA,https://www.highlandsresort.com/,open,,1,1
+fully_blank,65b68658-29ed-48a3-9ce7-26b6a5ddc236,The Hill - Olympic Peninsula Glamping,Port Angeles,WA,https://www.olympicpeninsulaglamping.com/,open,,1,1
+fully_blank,2284cb70-3899-4dd7-8f49-7b721ca41ded,The Outpost Grand Canyon,Williams,AZ,https://bookingsus.newbook.cloud/online/the_outpost,open,,10,10
+fully_blank,7db88fc7-026e-452f-888e-c04efd87525a,The Retreat at Fredericksburg,Fredericksburg,TX,https://theretreatatfredericksburg.com/,open,,8,8
+fully_blank,8da63336-b539-4e48-bc13-663b32cfa8e3,The Ridge at Stanley Gap,Blue Ridge,GA,https://www.hipcamp.com/en-US/land/georgia-the-ridge-at-stanley-gap-9mxhzddj,open,,1,1
+fully_blank,53937332-9514-4e1e-9b74-680cbc1c3389,The Shady Dell,Bisbee,AZ,http://theshadydell.com/,open,,1,1
+fully_blank,597a1b8a-8348-4ae9-8aea-6326915b0e03,The Sky Retreat at Westwater,Moab,UT,https://www.grandcountyutah.net/CivicAlerts.asp?AID=286&ARC=467,proposed,,1,1
+fully_blank,3566f6a0-9a83-4a90-bb50-4c99b480dc5f,The Yurtopian Wimberley,Wimberley,TX,https://theyurtopian.com/book-glamping-in-texas-hill-country/,open,,6,6
+fully_blank,14a0d295-0df6-4ea2-bc9a-9823c67ef6ae,Timberline Glamping at Kingston Downs,Rome,GA,https://kingstondowns.tlglamping.com/,open,,3,3
+fully_blank,7a37d2a5-d378-45bb-82b4-93eba7ea205d,Timberline Glamping at Lake Lanier River Forks,Gainesville,GA,https://riverforks.tlglamping.com/,open,,3,3
+fully_blank,bf189a9d-fa5e-49b6-9b59-dece38f04ac2,Timberline Glamping at Lula,Lula,GA,https://lula.tlglamping.com/,open,,3,3
+fully_blank,ffbb1bd6-a231-4912-90fd-fc4f35ef6e1a,Timberline Glamping at Pine Acres,Acworth,GA,https://lakeallatoona.tlglamping.com/,open,,1,1
+fully_blank,2c7cc642-7bde-4914-aae6-06180e93de32,Timberline Glamping at Williamsburg,Williamsburg,VA,https://williamsburg.tlglamping.com/,open,,3,3
+fully_blank,eb462331-603a-438e-a482-6acda3f39750,Tin Roof Cabin Resort,Moab,UT,https://www.grandcountyutah.net/CivicAlerts.asp?AID=310&ARC=519,proposed,,1,1
+fully_blank,8ad55a16-d31a-48b4-9504-ffd6b1d54f5d,Trail Lakes Campground,Ochopee,FL,https://www.evergladescamping.net/,open,,2,2
+fully_blank,c4e8f2a1-7b3d-4f9e-a156-0b2e4d8c9f31,Treebox,Walnut Creek,OH,https://www.treeboxstays.com/Accommodations/The-Dwell-House.html,open,,8,8
+fully_blank,e37464c8-5acf-438d-b3ad-d37105868d95,Treehouse Resort at River Road,New Braunfels,TX,https://www.treehouseresort.com,open,,1,1
+fully_blank,acac94a6-b62c-41f8-9815-7c856ca97103,Treetop Villas at Mirror Lake,Wisconsin Dells,WI,https://www.treetopvillas.com,open,,1,1
+fully_blank,91308d0e-ed9f-48ee-b682-e34bb1734314,Triple G's Resort,Essex,MT,https://www.triplegsresort.com/,open,,1,1
+fully_blank,00616bd2-e669-4ada-94cd-32efb6d695ca,Trout Creek Wilderness Lodge,Molalla,OR,https://www.troutcreekwildernesslodge.com/,open,,1,1
+fully_blank,cdecdd89-16b7-4685-8270-81c20f88b1a5,Tu Tu' Tun Lodge,Gold Beach,OR,https://tututun.com/,open,,1,1
+fully_blank,db89ebba-eb1a-4904-9a4d-b049c6f9958e,Twin Lakes Camp Resort,DeFuniak Springs,FL,https://twinlakescampresort.com/,open,,3,3
+fully_blank,506529fd-918d-47a6-952e-3075eda9246d,UDOSCAPE,Lago Vista,TX,https://www.udoscape.com,open,,1,1
+fully_blank,c3231e55-5cd9-4ca6-bc42-f63c486edd88,Under Canvas Lanesborough,Lanesborough,MA,https://www.berkshireeagle.com/business/lanesborough-glamping-resort-gets-two-oks/article_502641d9-9018-4874-8111-0adc438aee74.html,proposed,,1,1
+fully_blank,43bb27cb-7d91-4489-8214-25a62c43ca14,Under Canvas Mancos,Mancos,CO,https://www.the-journal.com/articles/planning-and-zoning-denies-application-for-glamping-development-outside-mancos/,proposed,,1,1
+fully_blank,e4c55c5c-13e1-485f-acde-f56ccf50fb01,Under Canvas Santa Fe,Santa Fe,NM,https://www.undercanvas.com/camps/santa-fe/,proposed,,1,1
+fully_blank,a1945707-91b3-4bb5-b71a-fef68e433e80,Vegas Glamping,Nelson,NV,https://vegasglamping.com/our-destination/safari-tent/,open,,7,7
+copy_forward,015cbbf3-927b-4d98-b6bb-51b3e94f14bf,Westgate River Ranch Resort & Rodeo,River Ranch,FL,https://resort.to/wrrrr?y_source=1_OTc1MjIxNy03MTUtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D,open,1965,17,22
+fully_blank,8bc36f84-3b45-4ac6-945e-90a910263b7b,Wildhaven Lake Berryessa,Lake Berryessa,CA,https://www.pressdemocrat.com/2026/05/08/margaritaville-resort-in-doubt-as-napa-county-considers-glamping-project-for-lake-berryessa/,under_construction,,2,2
+copy_forward,7e8a4411-b439-4967-8b26-c04339debd7d,Wildhaven Sonoma,Healdsburg,CA,https://www.wildhavensonoma.com/,open,2020,3,4
+copy_forward,b0d08d0f-71b7-4c40-94b6-a76808a8f2c5,Wildhaven Yosemite,Mariposa,CA,https://wildhavenyosemite.com/,open,2024,5,7
+fully_blank,070638cf-99a5-4281-b6e7-f046dac7f970,Willenborg Woods,Charleston,IL,https://www.hipcamp.com/en-US/land/illinois-willenborg-woods-y0zhqem8,open,,3,3
+fully_blank,38b37797-1ecc-4c2b-9b0e-b29986c6690c,Wylder Hope Valley,Hope Valley,CA,https://www.desolationhotel.com/hope-valley,open,,1,1
+fully_blank,fc464d0e-c85b-41eb-825f-8e3c5e4562ac,Yak Eco Camp,Rosman,NC,https://yakbrevard.com/,open,,1,1
+fully_blank,b6ba1189-7bcd-4a92-b0a4-ee95c1663ec6,Yurt in Putney,Putney,VT,https://www.thevermontretreat.com/,open,,1,1
+fully_blank,ebbbde2b-6412-4890-b36e-62ef68a55d4d,Yurts of the World,Lava Hot Springs,ID,https://www.yurtsoftheworld.com/,open,,1,1

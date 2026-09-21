@@ -14,6 +14,7 @@ import type { User } from '@supabase/supabase-js';
 import { createServerClient } from '@/lib/supabase';
 import { createSupabaseRouteHandlerClient } from '@/lib/supabase-server';
 import {
+  GATED_PAGE_CLIENT_PORTAL,
   GATED_PAGE_GLAMPING_MARKET_OVERVIEW,
   getGatedPageRedirectPath,
   isEmailOtpType,
@@ -61,8 +62,23 @@ function gatedSlugForRedirect(redirect: string): string | null {
   ) {
     return GATED_PAGE_GLAMPING_MARKET_OVERVIEW;
   }
+  if (path === '/client-portal' || path.startsWith('/client-portal/')) {
+    return GATED_PAGE_CLIENT_PORTAL;
+  }
   const slug = path.replace(/^\//, '');
   return isGatedPageSlug(slug) ? slug : null;
+}
+
+function resolveGatedRedirectTarget(
+  destination: string,
+  gatedSlug: string | null
+): string {
+  if (!gatedSlug) return destination;
+  const base = getGatedPageRedirectPath(gatedSlug);
+  if (destination === base || destination.startsWith(`${base}/`)) {
+    return destination;
+  }
+  return base;
 }
 
 /**
@@ -244,7 +260,7 @@ async function completeGatedSession(
   gatedSlug: string | null,
   user: User | null | undefined
 ): Promise<NextResponse> {
-  if (gatedSlug && user) {
+  if (gatedSlug && gatedSlug !== GATED_PAGE_CLIENT_PORTAL && user) {
     await upsertGatedLead(user, gatedSlug);
   }
   return response;
@@ -259,9 +275,7 @@ export async function GET(request: NextRequest) {
 
   const destination = getSafeRedirect(redirectParam);
   const gatedSlug = gatedSlugForRedirect(destination);
-  const redirectTarget = gatedSlug
-    ? getGatedPageRedirectPath(gatedSlug)
-    : destination;
+  const redirectTarget = resolveGatedRedirectTarget(destination, gatedSlug);
 
   // Prefer token_hash (cross-device email links) over PKCE code exchange.
   if (tokenHash && isEmailOtpType(otpTypeParam)) {

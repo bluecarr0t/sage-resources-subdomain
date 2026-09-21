@@ -1,0 +1,31 @@
+id,property_id,property_name,queue,url,reason
+10863,74efe3e7-e269-4efa-b680-eb4d592e9baa,Aman Camp Sarika,property_shell,https://www.aman.com/resorts/amangiri/camp-sarika,no_quoted_unit_type
+10673,b9d265f9-2853-4a93-b24a-061e14b274d9,Black Hills Glamping,property_shell,https://www.glampingblackhills.com/,scrape_fetch_error
+10861,f8f8501e-858a-4d89-946b-995afa5348ac,Catalina Island Camp,property_shell,https://catalinaislandcamps.com/,no_glamping_product_on_page
+12316,bbe419c9-6b8e-4456-8e49-f08518c30da2,Colorado Rafting Tours Royal Gorge Adventure Beach,property_shell,https://www.glamping.com/destination/north-america/colorado/canon-city/colorado-rafting-tours-royal-gorge-adventure-beach/,no_quoted_unit_type
+12347,53082848-fbd4-4bd2-890d-09b60c191903,Country Woods Inn,property_shell,https://www.glamping.com/destination/north-america/texas/glen-rose/country-woods-inn/,no_quoted_unit_type
+12326,f0817133-c65d-4aaf-9919-2de7b86d9e77,Eagle Lake Sporting Camps,property_shell,https://www.eaglelake.com/,scrape_too_short
+12324,dda6d0f7-2563-4e29-b9ed-ad78c8f6ece5,Elysium Woods,property_shell,https://www.elysiumwoods.com/,no_quoted_unit_type
+11326,c6519775-3af7-4485-a367-64b6b3db19cd,Enchantment Resort,property_shell,https://www.enchantmentresort.com,no_glamping_product_on_page
+11649,9f6059a7-a516-4716-b4c5-a9c779bcd75e,Gateway Canyons Resort & Spa,property_shell,https://www.gatewaycanyons.com/,no_glamping_product_on_page
+11462,77761442-2481-4901-a293-18ef22bf34a6,Haven Hills Campground & Resort,property_shell,https://www.havenhillscampground.com/,no_quoted_unit_type
+10846,881d84b0-d724-439f-ba76-8acfc46ddcb6,Headwaters Jupiter,property_shell,https://headwatersjupiter.com/,no_glamping_product_on_page
+12320,9ebb3588-f28e-4d79-8161-3e770c75f0d5,Heaven's Gate Mountain Getaway,property_shell,https://www.glamping.com/destination/north-america/georgia/ellijay/heavens-gate-mountain-getaway/,no_quoted_unit_type
+10859,3e48ad3e-072a-4c0e-b354-5e67d1ce71ed,Huttopia Berkshires,property_shell,https://canada-usa.huttopia.com/en/site/berkshires/,no_quoted_unit_type
+10793,e4bfdf06-b255-411b-be22-2450d12824f4,Key Largo Kampground,property_shell,https://keylargokampground.com/,no_quoted_unit_type
+12322,e07a16da-cf3f-4f8e-8f37-a52d9e9f559c,Maui Eco Retreat,property_shell,https://www.mauiecoretreat.com/,no_glamping_product_on_page
+12332,c89a712b-b873-42e2-84eb-b83cb5cf1f20,Mountain Horse Farm B&B and Wellness Retreat,property_shell,https://www.mountainhorsefarm.com/,scrape_fetch_error
+12354,8fe2f291-001b-4e16-880b-652f01f35547,Mulroy's Irish Acres Farm,property_shell,https://www.glamping.com/destination/north-america/wisconsin/new-london/mulroys-irish-acres-farm/,no_quoted_unit_type
+12310,3e7d1dfc-4338-499c-bcd5-639b0b4fd00b,Murphys Glamping,property_shell,https://www.glamping.com/destination/north-america/california/murphys/murphys-glamping/,no_quoted_unit_type
+12330,ae167fb2-6018-4a56-a267-947ab46c68e7,Rancho Gallina,property_shell,https://www.glamping.com/destination/north-america/new-mexico/santa-fe/rancho-gallina/,no_quoted_unit_type
+12327,0deb3dc6-558b-4076-8baf-f21b2f7ec0ea,Seguin,property_shell,https://www.glamping.com/destination/north-america/maine/georgetown/seguin/,no_quoted_unit_type
+10844,5467e778-a16a-4e2f-8560-2e57d8aca62c,Shawnee Inn & Golf Resort,property_shell,https://www.shawneeinn.com/,no_glamping_product_on_page
+12341,5981e6eb-010c-4d2e-98bf-d7c47c7b905c,Shelter Cove Resort & Marina,property_shell,https://www.glamping.com/destination/north-america/oregon/crescent/shelter-cove-resort-marina/,no_quoted_unit_type
+12308,e89766df-1c10-4de7-861f-b30cd4cd9a19,Sorensen's Resort,property_shell,https://www.sorensensresort.com/,no_glamping_product_on_page
+11622,2c56e524-c9ce-458d-9e7f-99cfab9ec3c6,Sou'wester Lodge,property_shell,https://souwesterlodge.com/,no_quoted_unit_type
+12325,d0da99df-57ba-4d86-80a2-3ef8dfeb0f48,Spencer Pond Camps,property_shell,https://www.spencerpondcamps.com/,scrape_fetch_error
+10840,7c6d48ab-f90d-4aca-9c4c-6301e65ea381,The Green O,property_shell,https://www.thegreeno.com/,no_quoted_unit_type
+10841,062455a0-63d5-4c83-b047-87df70420ee6,The Griffin Ranch,property_shell,https://www.thegriffinranch.com/,no_quoted_unit_type
+10878,91308d0e-ed9f-48ee-b682-e34bb1734314,Triple G's Resort,property_shell,https://www.triplegsresort.com/,no_quoted_unit_type
+12338,5381e71a-805c-4728-8d31-501648b351d3,Wren Eagle Retreat,property_shell,https://www.wreneagle.com/,no_glamping_product_on_page
+10668,c9482aca-7023-4d29-a4c3-4a40faa9a4e1,Zion Ponderosa Ranch Resort,named_site,https://www.zionponderosa.com/,site_code_not_identified

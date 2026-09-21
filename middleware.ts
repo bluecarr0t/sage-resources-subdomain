@@ -227,9 +227,10 @@ const excludedRoutes = [
   'auth',
   'privacy-policy',
   'terms-of-service',
-  'glamping-market-overview',
+    'glamping-market-overview',
   'glamping-unit-type-classification',
   'outdoor-hospitality-pipeline',
+  'client-portal',
   'glamping-market-snapshot',
   'glamping-show-quiz',
   'admin',
@@ -451,10 +452,18 @@ export async function middleware(request: NextRequest) {
           pathname === '/glamping-market-overview' ||
           pathname.startsWith('/glamping-market-overview/') ||
           pathname === '/outdoor-hospitality-pipeline' ||
-          pathname.startsWith('/outdoor-hospitality-pipeline/')
+          pathname.startsWith('/outdoor-hospitality-pipeline/') ||
+          pathname === '/client-portal' ||
+          pathname.startsWith('/client-portal/')
         ) {
           const response = NextResponse.next({ request });
           response.headers.set('x-pathname', pathname);
+          if (
+            pathname === '/client-portal' ||
+            pathname.startsWith('/client-portal/')
+          ) {
+            response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+          }
           const supabase = createSupabaseMiddlewareClient(request, response);
           await supabase.auth.getUser();
           return response;

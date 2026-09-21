@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { computeProjectPipelineMetrics } from '@/lib/project-pipeline/metrics';
+import { resolveProjectPipelineTableStatusFilters } from '@/lib/project-pipeline/project-status';
 import type { ProjectPipelineJob } from '@/lib/project-pipeline/types';
 
 export type ProjectPipelineMetricFilter =
@@ -93,7 +94,7 @@ export function applyProjectPipelineMetricFilter(
   segmentFilter: string;
   dueWithin30DaysOnly: boolean;
   outdoorPastDueOnly: boolean;
-  projectStatusFilter: string;
+  projectStatusFilter: string[];
   search: string;
   serviceFilter: string;
 } {
@@ -107,12 +108,16 @@ export function applyProjectPipelineMetricFilter(
         return { segmentFilter: 'Outdoor', dueWithin30DaysOnly: true, outdoorPastDueOnly: false };
       case 'outdoorPastDue':
         return { segmentFilter: 'Outdoor', dueWithin30DaysOnly: false, outdoorPastDueOnly: true };
+      default: {
+        const exhaustive: never = filter;
+        return exhaustive;
+      }
     }
   })();
 
   return {
     ...segmentAndDue,
-    projectStatusFilter: '',
+    projectStatusFilter: resolveProjectPipelineTableStatusFilters(segmentAndDue.segmentFilter),
     search: '',
     serviceFilter: '',
   };

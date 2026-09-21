@@ -102,6 +102,17 @@ export async function processPipelineArticle(
     country
   );
 
+  if (new_properties.length > 0 || status_updates.length > 0) {
+    console.log(
+      `[glamping-pipeline] ${articleUrl ?? 'article'}: ${new_properties.length} extracted, ${status_updates.length} status updates`
+    );
+    for (const p of new_properties) {
+      console.log(
+        `  extracted: ${p.property_name} | ${p.is_open} | ${p.city ?? '?'}, ${p.state ?? '?'} | ${p.number_of_units ?? '?'} units`
+      );
+    }
+  }
+
   const inRegion = regionCode
     ? new_properties.filter((p) =>
         extractedStateMatchesRegion(p.state, country, regionCode)
@@ -118,6 +129,11 @@ export async function processPipelineArticle(
       segment === 'rv'
         ? passesRvPipelineInclusionCriteria(p)
         : passesInclusionCriteria(p);
+    if (!result.pass) {
+      console.log(
+        `[glamping-pipeline] skip extracted ${p.property_name} (${p.is_open ?? '?'}, ${p.state ?? '?'}): ${result.reason}`
+      );
+    }
     return result.pass;
   });
 
@@ -128,7 +144,12 @@ export async function processPipelineArticle(
       segment === 'rv'
         ? passesRvPipelinePostEnrichmentCriteria(enriched)
         : passesPostEnrichmentUnitCriteria(enriched);
-    if (!post.pass) continue;
+    if (!post.pass) {
+      console.log(
+        `[glamping-pipeline] skip after enrich ${prop.property_name}: ${post.reason}`
+      );
+      continue;
+    }
 
     const pipelineProp: PipelineExtractedProperty = {
       ...enriched,
@@ -144,6 +165,10 @@ export async function processPipelineArticle(
       segment,
       discoverySource ?? PIPELINE_DISCOVERY_SOURCE,
       country
+    );
+
+    console.log(
+      `[glamping-pipeline] ${dryRun ? 'would insert' : 'insert'} ${row.property_name} | ${row.is_open} | ${row.city ?? '?'}, ${row.state ?? '?'} | ${row.quantity_of_units ?? '?'} ${row.unit_type ?? 'units'}`
     );
 
     if (dryRun) {

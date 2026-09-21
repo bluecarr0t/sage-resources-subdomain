@@ -16,10 +16,8 @@ import {
   GLAMPING_SHOW_QUIZ_TITLE,
   QUIZ_CA_REGION_OPTIONS,
   QUIZ_FLOW_STEPS,
-  QUIZ_NEED_OPTIONS,
   QUIZ_REGION_OTHER,
   QUIZ_ROLE_OPTIONS,
-  QUIZ_STAGE_OPTIONS,
   QUIZ_TIMELINE_OPTIONS,
   QUIZ_US_REGION_OPTIONS,
   formatQuizIdleCountdown,
@@ -30,9 +28,12 @@ import {
   parseQuizCompany,
   parseQuizPhone,
   quizIdleResetMs,
+  quizNeedOptionsForRole,
   quizResultCopy,
   quizSkipsNeedAndTimeline,
   quizSkipsStage,
+  quizStageOptionsForRole,
+  quizStagePrompt,
   quizVisibleQuestionCount,
   quizVisibleQuestionNumber,
   resolveQuizOutcome,
@@ -381,10 +382,10 @@ export function GlampingShowQuiz() {
 
       {step === 'stage' ? (
         <QuestionBlock
-          prompt="Where does your project stand today?"
+          prompt={quizStagePrompt(role)}
           onBack={goBack}
         >
-          {QUIZ_STAGE_OPTIONS.map((option) => (
+          {quizStageOptionsForRole(role).map((option) => (
             <button
               key={option.value}
               type="button"
@@ -402,7 +403,7 @@ export function GlampingShowQuiz() {
           prompt="What would help you most right now?"
           onBack={goBack}
         >
-          {QUIZ_NEED_OPTIONS.map((option) => (
+          {quizNeedOptionsForRole(role).map((option) => (
             <button
               key={option.value}
               type="button"

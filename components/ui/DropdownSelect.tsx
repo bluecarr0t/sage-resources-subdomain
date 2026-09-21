@@ -16,9 +16,7 @@ export interface DropdownSelectOption {
   label: string;
 }
 
-export interface DropdownSelectProps {
-  value: string;
-  onChange: (value: string) => void;
+interface DropdownSelectBaseProps {
   options: readonly DropdownSelectOption[];
   id?: string;
   'aria-label'?: string;
@@ -33,6 +31,18 @@ export interface DropdownSelectProps {
   variant?: 'default' | 'editorial';
 }
 
+export type DropdownSelectProps =
+  | (DropdownSelectBaseProps & {
+      multiple?: false;
+      value: string;
+      onChange: (value: string) => void;
+    })
+  | (DropdownSelectBaseProps & {
+      multiple: true;
+      value: readonly string[];
+      onChange: (value: string[]) => void;
+    });
+
 const DEFAULT_TRIGGER_CLASS =
   'relative flex h-10 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 pr-9 text-left text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-sage-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100';
 
@@ -44,21 +54,21 @@ const DEFAULT_LIST_CLASS =
 const EDITORIAL_LIST_CLASS =
   'absolute left-0 top-full z-50 mt-1.5 max-h-60 w-full min-w-full overflow-auto border border-sage-200/90 bg-white py-1 shadow-md';
 
-export function DropdownSelect({
-  value,
-  onChange,
-  options,
-  id,
-  'aria-label': ariaLabel,
-  'aria-labelledby': ariaLabelledBy,
-  'aria-describedby': ariaDescribedBy,
-  'aria-invalid': ariaInvalid,
-  'aria-required': ariaRequired,
-  placeholder = 'Select…',
-  className = '',
-  disabled = false,
-  variant = 'default',
-}: DropdownSelectProps) {
+export function DropdownSelect(props: DropdownSelectProps) {
+  const {
+    options,
+    id,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': ariaDescribedBy,
+    'aria-invalid': ariaInvalid,
+    'aria-required': ariaRequired,
+    placeholder = 'Select…',
+    className = '',
+    disabled = false,
+    variant = 'default',
+  } = props;
+  const isMultiple = props.multiple === true;
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,9 +78,18 @@ export function DropdownSelect({
   const generatedId = useId();
   const listboxId = `${id ?? generatedId}-listbox`;
 
-  const selectedIndex = options.findIndex((option) => option.value === value);
+  const selectedValues = isMultiple
+    ? new Set(props.value)
+    : new Set(props.value ? [props.value] : []);
+  const selectedIndex = options.findIndex((option) => selectedValues.has(option.value));
+  const selectedLabels = options
+    .filter((option) => option.value && selectedValues.has(option.value))
+    .map((option) => option.label);
+  const allOptionLabel = options.find((option) => option.value === '')?.label;
   const selectedLabel =
-    selectedIndex >= 0 ? options[selectedIndex]!.label : null;
+    selectedLabels.length > 0
+      ? selectedLabels.join(', ')
+      : allOptionLabel ?? (selectedIndex >= 0 ? options[selectedIndex]!.label : null);
   const isEditorial = variant === 'editorial';
 
   const close = useCallback(() => {
@@ -107,12 +126,28 @@ export function DropdownSelect({
 
   const selectOption = useCallback(
     (nextValue: string) => {
-      onChange(nextValue);
+      if (props.multiple === true) {
+        if (nextValue === '') {
+          props.onChange([]);
+          return;
+        }
+
+        const selectableCount = options.filter((option) => option.value !== '').length;
+        const current = props.value.filter((value) => value !== '');
+        const exists = current.includes(nextValue);
+        const next = exists
+          ? current.filter((value) => value !== nextValue)
+          : [...current, nextValue];
+        props.onChange(next.length >= selectableCount ? [] : next);
+        return;
+      }
+
+      props.onChange(nextValue);
       close();
       // Return focus to the trigger after choosing (listbox pattern).
       queueMicrotask(() => triggerRef.current?.focus());
     },
-    [onChange, close]
+    [close, options, props]
   );
 
   const onTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -247,6 +282,7 @@ export function DropdownSelect({
           ref={listRef}
           id={listboxId}
           role="listbox"
+          aria-multiselectable={isMultiple || undefined}
           aria-labelledby={ariaLabelledBy}
           aria-label={ariaLabel}
           tabIndex={-1}
@@ -254,7 +290,10 @@ export function DropdownSelect({
           className={listClass}
         >
           {options.map((option, index) => {
-            const selected = value === option.value;
+            const selected =
+              option.value === ''
+                ? selectedValues.size === 0
+                : selectedValues.has(option.value);
             const active = index === activeIndex;
 
             return (

@@ -10,6 +10,7 @@ import {
   formatQuizIdleCountdown,
   formatQuizPhoneInput,
   quizIdleResetMs,
+  quizNeedOptionsForRole,
   quizPhoneRequired,
   quizRoleContactType,
   quizResultCopy,
@@ -17,9 +18,12 @@ import {
   quizSendsMarketOverview,
   quizSkipsNeedAndTimeline,
   quizSkipsStage,
+  quizStageOptionsForRole,
+  quizStagePrompt,
   quizVisibleQuestionCount,
   quizVisibleQuestionNumber,
   resolveQuizOutcome,
+  impliedQuizStage,
 } from '@/lib/glamping-show-quiz';
 import {
   GHL_GLAMPING_SHOW_QUIZ_TAG,
@@ -86,14 +90,17 @@ describe('glamping-show-quiz scoring', () => {
     ).toBe('ready_now');
   });
 
-  it('skips the stage question for existing operators and investors', () => {
+  it('skips the stage question for existing operators but not investors', () => {
     expect(quizSkipsStage('existing_operator')).toBe(true);
-    expect(quizSkipsStage('investor_lender')).toBe(true);
+    expect(quizSkipsStage('investor_lender')).toBe(false);
     expect(quizSkipsStage('developer_operator')).toBe(false);
+    expect(impliedQuizStage('existing_operator')).toBe('operating');
+    expect(impliedQuizStage('investor_lender')).toBeNull();
     expect(quizVisibleQuestionCount('existing_operator')).toBe(3);
-    expect(quizVisibleQuestionCount('investor_lender')).toBe(3);
+    expect(quizVisibleQuestionCount('investor_lender')).toBe(4);
     expect(quizVisibleQuestionNumber('need', 'existing_operator')).toBe(2);
-    expect(quizVisibleQuestionNumber('timeline', 'investor_lender')).toBe(3);
+    expect(quizVisibleQuestionNumber('stage', 'investor_lender')).toBe(2);
+    expect(quizVisibleQuestionNumber('timeline', 'investor_lender')).toBe(4);
     expect(quizVisibleQuestionNumber('need', 'developer_operator')).toBe(3);
   });
 
@@ -103,6 +110,25 @@ describe('glamping-show-quiz scoring', () => {
         role: 'investor_lender',
         stage: 'operating',
         need: 'appraisal',
+        timeline: '30_days',
+      })
+    ).toBe('ready_now');
+  });
+
+  it('does not score screening investors as ready now even with a study this quarter', () => {
+    expect(
+      resolveQuizOutcome({
+        role: 'investor_lender',
+        stage: 'idea',
+        need: 'feasibility',
+        timeline: '30_days',
+      })
+    ).toBe('just_exploring');
+    expect(
+      resolveQuizOutcome({
+        role: 'investor_lender',
+        stage: 'has_land',
+        need: 'feasibility',
         timeline: '30_days',
       })
     ).toBe('ready_now');
@@ -166,6 +192,43 @@ describe('glamping-show-quiz scoring', () => {
         timeline: '30_days',
       })
     ).toBe('just_exploring');
+  });
+});
+
+describe('glamping-show-quiz role-branched questions', () => {
+  it('customizes the stage prompt and options for landowners and developers', () => {
+    expect(quizStagePrompt('landowner')).toBe('Where are you with the land?');
+    expect(quizStageOptionsForRole('landowner').map((option) => option.value)).toEqual([
+      'idea',
+      'has_land',
+      'has_plans',
+    ]);
+    expect(quizStagePrompt('developer_operator')).toBe(
+      'How far along is the project?'
+    );
+    expect(
+      quizStageOptionsForRole('developer_operator').map((option) => option.value)
+    ).toEqual(['idea', 'has_land', 'has_plans', 'operating']);
+  });
+
+  it('asks investors a deal-stage question with the same scoring slugs', () => {
+    expect(quizStagePrompt('investor_lender')).toBe('What kind of deal is this?');
+    expect(
+      quizStageOptionsForRole('investor_lender').map((option) => option.value)
+    ).toEqual(['idea', 'has_land', 'has_plans', 'operating']);
+    expect(quizStageOptionsForRole('investor_lender')[3]?.label).toBe(
+      'Operating asset'
+    );
+  });
+
+  it('customizes need copy for existing operators', () => {
+    expect(quizNeedOptionsForRole('existing_operator')[0]?.label).toBe(
+      'Feasibility for expansion or a new site'
+    );
+    expect(quizNeedOptionsForRole('existing_operator')[1]?.label).toBe(
+      'Appraisal, refinance, or sale'
+    );
+    expect(quizNeedOptionsForRole('landowner')[0]?.label).toBe('Feasibility study');
   });
 });
 

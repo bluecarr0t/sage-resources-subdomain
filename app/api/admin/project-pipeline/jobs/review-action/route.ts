@@ -64,49 +64,50 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
   const note = typeof body.note === 'string' ? body.note : '';
   const reviewStatus = typeof body.reviewStatus === 'string' ? body.reviewStatus : undefined;
   const jobRef = body.job;
-  const sheetName = resolveProjectPipelineSheetTab(jobRef.pipelineSheetName);
-  const managedUser = await getManagedUser(auth.session.user.id);
-  const viewerDisplayName = managedUser?.display_name ?? null;
-  const viewerEmail = auth.session.user.email ?? '';
-  const pipelineViewAll = canViewAllPipelineJobs(managedUser);
-  const isAdmin = isManagedUserAdmin(managedUser);
-
-  const editUser = {
-    ...resolveProjectPipelineEditUser({
-      viewerEmail,
-      viewerDisplayName,
-      previewAsDisplayName: body.previewAsDisplayName,
-    }),
-    pipelineViewAll,
-  };
-
-  const supabase = createServerClient();
-  const sheetId = getProjectPipelineSheetId();
-
-  const existingJob = await fetchProjectPipelineJobByJobNumber(supabase, {
-    sheetId,
-    sheetName,
-    jobNumber: jobRef.jobNumber,
-  });
-
-  if (!existingJob) {
-    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
-  }
-
-  if (
-    !canEditProjectPipelineJob({
-      job: jobRef,
-      sheetName,
-      pipelineViewAll,
-      isAdmin,
-      existingJob,
-      viewerDisplayName: editUser.displayName,
-    })
-  ) {
-    return NextResponse.json({ error: 'You cannot edit this project' }, { status: 403 });
-  }
 
   try {
+    const sheetName = resolveProjectPipelineSheetTab(jobRef.pipelineSheetName);
+    const managedUser = await getManagedUser(auth.session.user.id);
+    const viewerDisplayName = managedUser?.display_name ?? null;
+    const viewerEmail = auth.session.user.email ?? '';
+    const pipelineViewAll = canViewAllPipelineJobs(managedUser);
+    const isAdmin = isManagedUserAdmin(managedUser);
+
+    const editUser = {
+      ...resolveProjectPipelineEditUser({
+        viewerEmail,
+        viewerDisplayName,
+        previewAsDisplayName: body.previewAsDisplayName,
+      }),
+      pipelineViewAll,
+    };
+
+    const supabase = createServerClient();
+    const sheetId = getProjectPipelineSheetId();
+
+    const existingJob = await fetchProjectPipelineJobByJobNumber(supabase, {
+      sheetId,
+      sheetName,
+      jobNumber: jobRef.jobNumber,
+    });
+
+    if (!existingJob) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    if (
+      !canEditProjectPipelineJob({
+        job: jobRef,
+        sheetName,
+        pipelineViewAll,
+        isAdmin,
+        existingJob,
+        viewerDisplayName: editUser.displayName,
+      })
+    ) {
+      return NextResponse.json({ error: 'You cannot edit this project' }, { status: 403 });
+    }
+
     const updatedJob = applyProjectPipelineReviewAction({
       job: {
         ...existingJob,
@@ -171,6 +172,9 @@ export const POST = withAdminAuth(async (request: NextRequest, auth) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Review action failed';
     const status = message.includes('cannot') || message.includes('required') ? 403 : 500;
+    if (status >= 500) {
+      console.error('[project-pipeline/jobs/review-action] failed', error);
+    }
     return NextResponse.json({ error: message, message }, { status });
   }
 });

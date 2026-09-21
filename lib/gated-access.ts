@@ -13,10 +13,14 @@ export const GATED_PAGE_GLAMPING_MARKET_OVERVIEW = 'glamping-market-overview';
 /** Paid Pipeline Quarterly product (MVP — preview/staging only until launch). */
 export const GATED_PAGE_PIPELINE_QUARTERLY = 'outdoor-hospitality-pipeline';
 
+/** Outdoor client portal (local MVP — hidden in production). */
+export const GATED_PAGE_CLIENT_PORTAL = 'client-portal';
+
 /** Every slug we currently gate, mapped to the path it unlocks. */
 const GATED_PAGE_PATHS: Record<string, string> = {
   [GATED_PAGE_GLAMPING_MARKET_OVERVIEW]: '/glamping-market-overview',
   [GATED_PAGE_PIPELINE_QUARTERLY]: '/outdoor-hospitality-pipeline',
+  [GATED_PAGE_CLIENT_PORTAL]: '/client-portal',
 };
 
 export type GatedPageSlug = keyof typeof GATED_PAGE_PATHS;

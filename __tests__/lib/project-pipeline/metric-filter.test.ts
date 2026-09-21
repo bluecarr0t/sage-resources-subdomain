@@ -9,7 +9,7 @@ describe('applyProjectPipelineMetricFilter', () => {
       segmentFilter: 'Outdoor',
       dueWithin30DaysOnly: false,
       outdoorPastDueOnly: false,
-      projectStatusFilter: '',
+      projectStatusFilter: ['In-Progress', 'In Review'],
       search: '',
       serviceFilter: '',
     });
@@ -20,7 +20,7 @@ describe('applyProjectPipelineMetricFilter', () => {
       segmentFilter: 'Commercial',
       dueWithin30DaysOnly: false,
       outdoorPastDueOnly: false,
-      projectStatusFilter: '',
+      projectStatusFilter: ['In-Progress'],
       search: '',
       serviceFilter: '',
     });
@@ -31,7 +31,7 @@ describe('applyProjectPipelineMetricFilter', () => {
       segmentFilter: 'Outdoor',
       dueWithin30DaysOnly: true,
       outdoorPastDueOnly: false,
-      projectStatusFilter: '',
+      projectStatusFilter: ['In-Progress', 'In Review'],
       search: '',
       serviceFilter: '',
     });
@@ -42,7 +42,7 @@ describe('applyProjectPipelineMetricFilter', () => {
       segmentFilter: 'Outdoor',
       dueWithin30DaysOnly: false,
       outdoorPastDueOnly: true,
-      projectStatusFilter: '',
+      projectStatusFilter: ['In-Progress', 'In Review'],
       search: '',
       serviceFilter: '',
     });

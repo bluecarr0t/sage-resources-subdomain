@@ -14,6 +14,7 @@ import {
 } from '@/components/project-pipeline/ProjectPipelineJobModalFields';
 import { ProjectPipelineJobNotesThread } from '@/components/project-pipeline/ProjectPipelineJobNotesThread';
 import { ProjectPipelineReviewNotesThread } from '@/components/project-pipeline/ProjectPipelineReviewNotesThread';
+import { ProjectPipelineClientPortalSection } from '@/components/project-pipeline/ProjectPipelineClientPortalSection';
 import { ReviewStatusSelect } from '@/components/project-pipeline/ReviewStatusSelect';
 import { DEFAULT_PROJECT_PIPELINE_SENT_TO_CLIENT } from '@/lib/project-pipeline/sent-to-client';
 import {
@@ -422,6 +423,7 @@ export function ProjectPipelineJobModal({
           fields={[...WORKFLOW_DETAIL_FIELDS, ...MORE_DETAIL_FIELDS]}
         />
       )}
+      {isCreateMode ? null : <ProjectPipelineClientPortalSection job={draft} />}
     </div>
   );
 

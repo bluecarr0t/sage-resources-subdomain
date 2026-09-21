@@ -13,9 +13,35 @@ export type ProjectPipelineProjectStatus =
 export const DEFAULT_PROJECT_PIPELINE_PROJECT_STATUS: ProjectPipelineProjectStatus =
   'Not Started';
 
-/** Default Project Status filter on /admin/job-pipeline. */
+/** Default Project Status filter on /admin/job-pipeline (non-Outdoor segments). */
 export const DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER: ProjectPipelineProjectStatus =
   'In-Progress';
+
+/** Default Project Status filters when the Outdoor segment is selected. */
+export const DEFAULT_OUTDOOR_PROJECT_PIPELINE_TABLE_STATUS_FILTERS: readonly ProjectPipelineProjectStatus[] =
+  ['In-Progress', 'In Review'];
+
+export function resolveProjectPipelineTableStatusFilters(
+  segmentFilter: string,
+  fallbackStatus: string = DEFAULT_PROJECT_PIPELINE_TABLE_STATUS_FILTER
+): ProjectPipelineProjectStatus[] {
+  if (segmentFilter === 'Outdoor') {
+    return [...DEFAULT_OUTDOOR_PROJECT_PIPELINE_TABLE_STATUS_FILTERS];
+  }
+
+  return [normalizeProjectPipelineProjectStatus(fallbackStatus)];
+}
+
+export function areProjectPipelineTableStatusFiltersEqual(
+  a: readonly string[],
+  b: readonly string[]
+): boolean {
+  if (a.length !== b.length) return false;
+  const normalizedB = new Set(b.map((status) => normalizeProjectPipelineProjectStatus(status)));
+  return a.every((status) =>
+    normalizedB.has(normalizeProjectPipelineProjectStatus(status))
+  );
+}
 
 export function normalizeProjectPipelineProjectStatus(
   value: string | null | undefined

@@ -8,6 +8,13 @@ import { withOtaWarehouseClient } from '@/lib/ota-warehouse-db';
 import { resolveGeocodeForCompsSearch } from '@/lib/geocode';
 import { geocodeZipForSitesExport } from '@/lib/sites-export/geocode-zip';
 import { resolveUsStateAbbr } from '@/lib/us-state-centers';
+import {
+  resolveAmenityGroups,
+  unitTypeLikePatterns,
+} from '@/lib/ota-occupancy-amenity-aliases';
+import { isOtaPlaceholderRate } from '@/lib/ota-placeholder-rates';
+
+export { isOtaPlaceholderRate };
 
 export const OTA_MONTHLY_EXPORT_COLUMNS = [
   'source',
@@ -37,6 +44,13 @@ export type OtaMonthlySource = 'hipcamp' | 'campspot';
 
 export type OtaMonthlyExportRow = Record<OtaMonthlyExportColumn, string>;
 
+export type OtaMonthlySiteFilter = {
+  /** User tokens such as `hot-tub` or `wifi`. Resolved per source to warehouse keys. */
+  amenities?: string[];
+  /** Unit-type contains matches such as `rv`, `tent`, `lodging`. */
+  unitTypes?: string[];
+};
+
 export type OtaMonthlyRadiusExportOptions = {
   /** US/CAN postal code center point. Provide this OR `city` + `state`. */
   zip?: string;
@@ -45,6 +59,7 @@ export type OtaMonthlyRadiusExportOptions = {
   radiusMiles?: number;
   years?: number[];
   sources?: OtaMonthlySource[];
+  siteFilter?: OtaMonthlySiteFilter;
 };
 
 export type OtaMonthlyExportLocation = {
@@ -79,20 +94,19 @@ export type OtaMonthlyRadiusExportResult = OtaMonthlyExportLocation & {
   /** Per-source sheets for multi-tab Excel download. */
   export_sheets: Array<{ name: string; data: OtaMonthlyExportRow[] }>;
   total_row_count: number;
+  site_filter: {
+    amenities: string[];
+    unit_types: string[];
+    unknown_amenities: string[];
+  };
 };
 
-const KNOWN_PLACEHOLDER_RATES = new Set(['1011.5', '1011.50', '1026.67', '705.06']);
 const DEFAULT_YEARS = [2025, 2026] as const;
 const DEFAULT_RADIUS_MILES = 50;
 const DEFAULT_SOURCES: OtaMonthlySource[] = ['hipcamp', 'campspot'];
 const PROPERTY_ID_BATCH_SIZE = 250;
 const US_ZIP_RE = /^\d{5}(-\d{4})?$/;
 const DB_STATEMENT_TIMEOUT_MS = 90_000;
-
-export function isOtaPlaceholderRate(val: string | undefined): boolean {
-  if (!val?.trim()) return false;
-  return KNOWN_PLACEHOLDER_RATES.has(val.trim());
-}
 
 type PropertyMonthlyRow = {
   name: string;
@@ -227,12 +241,122 @@ function propertyIdParam(
   return propertyIds;
 }
 
+function hasSiteFilter(filter?: OtaMonthlySiteFilter): boolean {
+  return Boolean(
+    (filter?.amenities?.length ?? 0) > 0 || (filter?.unitTypes?.length ?? 0) > 0,
+  );
+}
+
+function matchingSitesCte(source: OtaMonthlySource): string {
+  switch (source) {
+    case 'campspot':
+      return `
+    matching_sites AS (
+      SELECT DISTINCT sp.id AS site_id, sp.property_id
+      FROM (
+        SELECT DISTINCT ON (id, property_id) id, property_id, parent_id
+        FROM campspot.sites
+        WHERE property_id = ANY($1::int[])
+        ORDER BY id, property_id, scraping_id DESC
+      ) sp
+      LEFT JOIN campspot.sitedetails sd
+        ON sd.id = sp.parent_id AND sd.property_id = sp.property_id
+      JOIN campspot.propertydetails pd ON pd.id = sp.property_id
+      WHERE (
+        jsonb_array_length($3::jsonb) = 0
+        OR NOT EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements($3::jsonb) AS grp(alias_list)
+          WHERE NOT (
+            (coalesce(sd.amenities::jsonb, '{}'::jsonb) || coalesce(pd.amenities::jsonb, '{}'::jsonb))
+            ?| ARRAY(SELECT jsonb_array_elements_text(alias_list))
+          )
+        )
+      )
+      AND (
+        cardinality($4::text[]) = 0
+        OR lower(coalesce(sd.category, '')) LIKE ANY($4::text[])
+      )
+    ),`;
+    case 'hipcamp':
+      return `
+    matching_sites AS (
+      SELECT DISTINCT sd.id AS site_id, sd.property_id::text AS property_id
+      FROM hipcamp.sitedetails sd
+      JOIN hipcamp.propertydetails pd ON pd.id = sd.property_id
+      WHERE sd.property_id::text = ANY($1::text[])
+        AND (
+          jsonb_array_length($3::jsonb) = 0
+          OR NOT EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements($3::jsonb) AS grp(alias_list)
+            WHERE NOT (
+              (
+                coalesce(sd.amenities::jsonb, '{}'::jsonb)
+                || coalesce(sd.core_amenities::jsonb, '{}'::jsonb)
+                || coalesce(pd.core_amenities::jsonb, '{}'::jsonb)
+                || coalesce(pd.basic_amenities::jsonb, '{}'::jsonb)
+              )
+              ?| ARRAY(SELECT jsonb_array_elements_text(alias_list))
+            )
+          )
+        )
+        AND (
+          cardinality($4::text[]) = 0
+          OR lower(coalesce(sd.category, '')) LIKE ANY($4::text[])
+          OR coalesce(sd.category_list::text, '') ILIKE ANY($4::text[])
+        )
+    ),`;
+    default: {
+      const exhaustive: never = source;
+      throw new Error(`Unsupported OTA source: ${String(exhaustive)}`);
+    }
+  }
+}
+
+function mapMonthlyQueryRows(
+  rows: PropertyMonthlyRow[],
+  distanceById: Map<string, number>,
+): PropertyMonthlyRow[] {
+  const MIN_SITES_FOR_LOW_OCC_MONTH = 5;
+  return (rows ?? []).map((r) => {
+    const occ = parseFloat(r.avg_occupancy_rate_pct ?? '0');
+    const sitesAbove5 = parseInt(r.sites_with_occ_above_5 ?? '0', 10);
+    const hasValidRates =
+      !isOtaPlaceholderRate(r.median_retail_daily_rate) &&
+      (r.median_retail_daily_rate ?? '').trim() !== '';
+    const showRates =
+      occ > 5 || (sitesAbove5 >= MIN_SITES_FOR_LOW_OCC_MONTH && hasValidRates);
+    const median =
+      showRates && !isOtaPlaceholderRate(r.median_retail_daily_rate)
+        ? (r.median_retail_daily_rate ?? '')
+        : '';
+    const mean =
+      showRates && !isOtaPlaceholderRate(r.mean_retail_daily_rate)
+        ? (r.mean_retail_daily_rate ?? '')
+        : '';
+    const minPrice =
+      showRates && !isOtaPlaceholderRate(r.min_price) ? (r.min_price ?? '') : '';
+    const maxPrice =
+      showRates && !isOtaPlaceholderRate(r.max_price) ? (r.max_price ?? '') : '';
+    return {
+      ...r,
+      median_retail_daily_rate: median,
+      mean_retail_daily_rate: mean,
+      min_price: minPrice,
+      max_price: maxPrice,
+      distance_miles: String(distanceById.get(r.property_id) ?? ''),
+    };
+  });
+}
+
 async function fetchPropertyMonthlyRowsBatch(
   client: PoolClient,
   source: OtaMonthlySource,
   propertyIds: string[],
   years: number[],
   distanceById: Map<string, number>,
+  siteFilter?: OtaMonthlySiteFilter,
 ): Promise<PropertyMonthlyRow[]> {
   if (propertyIds.length === 0) return [];
 
@@ -241,12 +365,41 @@ async function fetchPropertyMonthlyRowsBatch(
     source === 'campspot'
       ? 'pd.id = sma.property_id'
       : 'pd.id::text = sma.property_id';
+  const filtered = hasSiteFilter(siteFilter);
+  const amenityGroups =
+    siteFilter?.amenities?.length
+      ? resolveAmenityGroups(siteFilter.amenities, source).groups
+      : [];
+  const unitPatterns = unitTypeLikePatterns(siteFilter?.unitTypes ?? []);
+  const matchingCte = filtered ? matchingSitesCte(source) : '';
+  let matchingJoin = '';
+  if (filtered) {
+    switch (source) {
+      case 'campspot':
+        matchingJoin =
+          'JOIN matching_sites ms ON ms.site_id = sma.site_id AND ms.property_id = sma.property_id';
+        break;
+      case 'hipcamp':
+        matchingJoin =
+          'JOIN matching_sites ms ON ms.site_id = sma.site_id AND ms.property_id = sma.property_id::text';
+        break;
+      default: {
+        const exhaustive: never = source;
+        throw new Error(`Unsupported OTA source: ${String(exhaustive)}`);
+      }
+    }
+  }
+  const params: unknown[] = filtered
+    ? [propertyIdParam(source, propertyIds), years, JSON.stringify(amenityGroups), unitPatterns]
+    : [propertyIdParam(source, propertyIds), years];
 
   const { rows } = await client.query<PropertyMonthlyRow>(
     `
-    WITH property_monthly AS (
+    WITH ${matchingCte}
+    property_monthly AS (
       SELECT sma.property_id, sma.year, sma.month, sma.month_name, avg(sma.avg_occupancy::float) as occ
       FROM ${source}.site_monthly_analytics sma
+      ${matchingJoin}
       WHERE sma.year = ANY($2::numeric[]) AND ${idFilter}
       GROUP BY sma.property_id, sma.year, sma.month, sma.month_name
     ),
@@ -283,45 +436,17 @@ async function fetchPropertyMonthlyRowsBatch(
       pp.low_month,
       ''::text as distance_miles
     FROM ${source}.site_monthly_analytics sma
+    ${matchingJoin}
     JOIN ${source}.propertydetails pd ON ${joinPropertyId}
     LEFT JOIN property_peaks pp ON pp.property_id = sma.property_id AND pp.year = sma.year
     WHERE sma.year = ANY($2::numeric[]) AND ${idFilter}
     GROUP BY pd.id, pd.name, pd.link, pd.city, pd.state, sma.property_id, sma.year, sma.month, sma.month_name, pp.high_month, pp.low_month
     ORDER BY pd.name, sma.year, sma.month::int
   `,
-    [propertyIdParam(source, propertyIds), years],
+    params,
   );
 
-  const MIN_SITES_FOR_LOW_OCC_MONTH = 5;
-  return (rows ?? []).map((r) => {
-    const occ = parseFloat(r.avg_occupancy_rate_pct ?? '0');
-    const sitesAbove5 = parseInt(r.sites_with_occ_above_5 ?? '0', 10);
-    const hasValidRates =
-      !isOtaPlaceholderRate(r.median_retail_daily_rate) &&
-      (r.median_retail_daily_rate ?? '').trim() !== '';
-    const showRates =
-      occ > 5 || (sitesAbove5 >= MIN_SITES_FOR_LOW_OCC_MONTH && hasValidRates);
-    const median =
-      showRates && !isOtaPlaceholderRate(r.median_retail_daily_rate)
-        ? (r.median_retail_daily_rate ?? '')
-        : '';
-    const mean =
-      showRates && !isOtaPlaceholderRate(r.mean_retail_daily_rate)
-        ? (r.mean_retail_daily_rate ?? '')
-        : '';
-    const minPrice =
-      showRates && !isOtaPlaceholderRate(r.min_price) ? (r.min_price ?? '') : '';
-    const maxPrice =
-      showRates && !isOtaPlaceholderRate(r.max_price) ? (r.max_price ?? '') : '';
-    return {
-      ...r,
-      median_retail_daily_rate: median,
-      mean_retail_daily_rate: mean,
-      min_price: minPrice,
-      max_price: maxPrice,
-      distance_miles: String(distanceById.get(r.property_id) ?? ''),
-    };
-  });
+  return mapMonthlyQueryRows(rows, distanceById);
 }
 
 async function fetchPropertyMonthlyRows(
@@ -330,6 +455,7 @@ async function fetchPropertyMonthlyRows(
   propertyIds: string[],
   years: number[],
   distanceById: Map<string, number>,
+  siteFilter?: OtaMonthlySiteFilter,
 ): Promise<PropertyMonthlyRow[]> {
   if (propertyIds.length === 0) return [];
 
@@ -342,6 +468,7 @@ async function fetchPropertyMonthlyRows(
       batch,
       years,
       distanceById,
+      siteFilter,
     );
     rows.push(...batchRows);
   }
@@ -406,6 +533,7 @@ export async function exportOtaPropertyMonthlyByRadius(
         propertyIds,
         years,
         distanceById,
+        options.siteFilter,
       );
       const exportRows = mapOtaMonthlyRowsToExport(source, rawRows);
       combined.push(...exportRows);
@@ -421,6 +549,15 @@ export async function exportOtaPropertyMonthlyByRadius(
 
   exportSheets.push({ name: 'combined', data: combined });
 
+  const requestedAmenities = options.siteFilter?.amenities ?? [];
+  const unknownAmenities = [
+    ...new Set(
+      (options.sources?.length ? options.sources : [...DEFAULT_SOURCES]).flatMap(
+        (source) => resolveAmenityGroups(requestedAmenities, source).unknown,
+      ),
+    ),
+  ];
+
   return {
     location_label,
     zip,
@@ -433,5 +570,10 @@ export async function exportOtaPropertyMonthlyByRadius(
     data: combined,
     export_sheets: exportSheets,
     total_row_count: combined.length,
+    site_filter: {
+      amenities: requestedAmenities,
+      unit_types: options.siteFilter?.unitTypes ?? [],
+      unknown_amenities: unknownAmenities,
+    },
   };
 }

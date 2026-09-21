@@ -1,4 +1,5 @@
 import { notifyPipelineEmail, isPipelineEmailEnabled } from '@/lib/email/resend-client';
+import { notifyClientPortalStatusChangeAsync } from '@/lib/client-portal/notify-status-change';
 import {
   buildDueDateChangeEmail,
   buildProjectStatusChangeEmail,
@@ -725,6 +726,7 @@ export async function notifyPipelineJobChanges(
         headline: `Project status: ${change.newValue || 'updated'}`,
         detailLines: [`Was: ${change.previousValue || '—'}`],
       });
+      notifyClientPortalStatusChangeAsync(input.savedJob);
     }
   }
 }

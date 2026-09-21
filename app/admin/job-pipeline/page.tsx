@@ -67,6 +67,7 @@ import {
 import { resolveProjectPipelineSyncJobsAdded } from '@/lib/project-pipeline/sync-success-message';
 import type { ProjectPipelineApiResponse, ProjectPipelineJob } from '@/lib/project-pipeline/types';
 import type { ProjectPipelineReviewNoteType } from '@/lib/project-pipeline/review-notes';
+import { readApiJson } from '@/lib/read-api-json';
 
 const PIPELINE_OAUTH_SCOPE = googleSheetsPipelineOAuthScopeString();
 const PIPELINE_OAUTH_BACKFILL_KEY = 'project-pipeline-oauth-backfill-attempted';
@@ -532,12 +533,10 @@ export default function ProjectPipelinePage() {
         }),
       });
 
-      const body = (await res.json()) as {
-        error?: string;
-        message?: string;
+      const body = await readApiJson<{
         warning?: string;
         job?: ProjectPipelineJob;
-      };
+      }>(res, t('saveJobError'));
       if (!res.ok) {
         throw new Error(body.message || body.error || t('saveJobError'));
       }
@@ -554,11 +553,9 @@ export default function ProjectPipelinePage() {
         body: JSON.stringify({ job }),
       });
 
-      const body = (await res.json()) as {
-        error?: string;
-        message?: string;
+      const body = await readApiJson<{
         job?: ProjectPipelineJob;
-      };
+      }>(res, t('createJobError'));
       if (!res.ok) {
         throw new Error(body.message || body.error || t('createJobError'));
       }
@@ -575,10 +572,7 @@ export default function ProjectPipelinePage() {
         body: JSON.stringify({ job }),
       });
 
-      const body = (await res.json()) as {
-        error?: string;
-        message?: string;
-      };
+      const body = await readApiJson(res, t('deleteJobError'));
       if (!res.ok) {
         throw new Error(body.message || body.error || t('deleteJobError'));
       }
@@ -607,11 +601,9 @@ export default function ProjectPipelinePage() {
         }),
       });
 
-      const body = (await res.json()) as {
-        error?: string;
-        message?: string;
+      const body = await readApiJson<{
         job?: ProjectPipelineJob;
-      };
+      }>(res, t('reviewActionError'));
       if (!res.ok) {
         throw new Error(body.message || body.error || t('reviewActionError'));
       }
@@ -634,11 +626,9 @@ export default function ProjectPipelinePage() {
         }),
       });
 
-      const body = (await res.json()) as {
-        error?: string;
-        message?: string;
+      const body = await readApiJson<{
         job?: ProjectPipelineJob;
-      };
+      }>(res, t('jobNoteAddError'));
       if (!res.ok) {
         throw new Error(body.message || body.error || t('jobNoteAddError'));
       }
@@ -666,11 +656,9 @@ export default function ProjectPipelinePage() {
         }),
       });
 
-      const body = (await res.json()) as {
-        error?: string;
-        message?: string;
+      const body = await readApiJson<{
         job?: ProjectPipelineJob;
-      };
+      }>(res, t('saveProjectStatusError'));
       if (!res.ok) {
         throw new Error(body.message || body.error || t('saveProjectStatusError'));
       }
