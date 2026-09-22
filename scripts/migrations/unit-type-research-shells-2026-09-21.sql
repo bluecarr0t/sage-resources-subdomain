@@ -1,5 +1,5 @@
 -- Unit-type research (review before apply). Does not write by itself.
--- Properties: 13
+-- Properties: 11
 
 -- #1 Rock Tavern River Kamp: set blank row to Yurt
 UPDATE public.all_sage_data SET
@@ -28,39 +28,6 @@ UPDATE public.all_sage_data SET
   notes = COALESCE(notes, '') || E'\n\n' || 'Unit type research (2026-09-21): Lodge — https://www.glamping.com/destination/north-america/wisconsin/gillett/apple-creek-whitetails/ — "The Apple Creek main hunting lodge is surrounded by the well-stocked trout ponds and is nestled in the center of the 1,500-acre whitetail hunting ranch."'
 WHERE id = 12353
   AND (unit_type IS NULL OR btrim(unit_type) = '');
-
--- Bliss Camps Glamping (Rocky Mountain Glamping): set blank row to Cabin Tent
-UPDATE public.all_sage_data SET
-  unit_type = 'Cabin Tent',
-  site_name = CASE WHEN site_name IS NULL OR btrim(site_name) = '' THEN 'Cabin Tent' ELSE site_name END,
-  date_updated = '2026-09-21',
-  discovery_source = CASE
-    WHEN discovery_source IS NULL OR btrim(discovery_source) = '' THEN 'web_research_unit_type_2026_09'
-    WHEN discovery_source ILIKE '%web_research_unit_type_2026_09%' THEN discovery_source
-    ELSE discovery_source || '; web_research_unit_type_2026_09'
-  END,
-  notes = COALESCE(notes, '') || E'\n\n' || 'Unit type research (2026-09-21): Cabin Tent — https://blisscamps.com/ — "Enjoy our mountain getaway in a luxury Explorer canvas Cabin Tent with deck, at your secluded, private campsite."'
-WHERE id = 11595
-  AND (unit_type IS NULL OR btrim(unit_type) = '');
-
--- Bliss Camps Glamping (Rocky Mountain Glamping): add Safari Tent
-INSERT INTO public.all_sage_data
-SELECT (jsonb_populate_record(NULL::public.all_sage_data, to_jsonb(src) || jsonb_build_object(
-  'id', nextval('all_glamping_properties_new_id_seq1'),
-  'unit_type', 'Safari Tent',
-  'site_name', 'Safari Tent',
-  'quantity_of_units', NULL,
-  'slug', NULL,
-  'date_updated', '2026-09-21',
-  'discovery_source', CASE
-    WHEN src.discovery_source IS NULL OR btrim(src.discovery_source) = '' THEN 'web_research_unit_type_2026_09'
-    WHEN src.discovery_source ILIKE '%web_research_unit_type_2026_09%' THEN src.discovery_source
-    ELSE src.discovery_source || '; web_research_unit_type_2026_09'
-  END,
-  'notes', COALESCE(src.notes, '') || E'\n\n' || 'Unit type research (2026-09-21): Safari Tent — https://blisscamps.com/ — "Enjoy our mountain getaway in a luxury canvas wall tent, at your secluded, private campsite."'
-))).*
-FROM public.all_sage_data src
-WHERE src.id = 11595;
 
 -- Blue Bear Mountain Camp: set blank row to Dome
 UPDATE public.all_sage_data SET
@@ -196,20 +163,6 @@ UPDATE public.all_sage_data SET
   END,
   notes = COALESCE(notes, '') || E'\n\n' || 'Unit type research (2026-09-21): Cabin — https://somersetresort.com/ — "At Somerset Resort, uncover the allure of our luxurious cabins, each designed to offer an unforgettable camping experience where elegance and nature intertwine seamlessly."'
 WHERE id = 11441
-  AND (unit_type IS NULL OR btrim(unit_type) = '');
-
--- Sterling Ridge Resort: set blank row to Cabin
-UPDATE public.all_sage_data SET
-  unit_type = 'Cabin',
-  site_name = CASE WHEN site_name IS NULL OR btrim(site_name) = '' THEN 'Cabin' ELSE site_name END,
-  date_updated = '2026-09-21',
-  discovery_source = CASE
-    WHEN discovery_source IS NULL OR btrim(discovery_source) = '' THEN 'web_research_unit_type_2026_09'
-    WHEN discovery_source ILIKE '%web_research_unit_type_2026_09%' THEN discovery_source
-    ELSE discovery_source || '; web_research_unit_type_2026_09'
-  END,
-  notes = COALESCE(notes, '') || E'\n\n' || 'Unit type research (2026-09-21): Cabin — https://www.sterlingridgeresort.com/ — "The Ridgeview Cabin is a stunning, freshly renovated log home with four bedrooms and two bathrooms."'
-WHERE id = 12349
   AND (unit_type IS NULL OR btrim(unit_type) = '');
 
 -- The Hideaway Ranch: set blank row to Cabin

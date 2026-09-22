@@ -23,6 +23,14 @@ const STOPWORDS = new Set([
   'hotel',
   'park',
   'luxury',
+  'state',
+  'states',
+  'island',
+  'islands',
+  'hill',
+  'hills',
+  'mountain',
+  'mountains',
 ]);
 
 const MONTHS = [

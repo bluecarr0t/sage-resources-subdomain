@@ -60,3 +60,7 @@ id,property_id,property_name,queue,url,reason
 11735,954c8766-60d5-491b-9660-be1338e68b27,Turkey Run State Park Inn,state_park_placeholder,https://www.in.gov/dnr/state-parks/parks-lakes/turkey-run-state-park/,no_quoted_unit_type
 11724,edc16d17-4f60-4330-bad7-9a7103f92077,White Pines Forest State Park,state_park_placeholder,https://www2.illinois.gov/dnr/Parks/Pages/WhitePinesForest.aspx,no_glamping_product_on_page
 11763,87d79b0b-1c69-4605-bca5-57a17e518cca,Worthington State Forest,state_park_placeholder,https://www.nj.gov/dep/parksandforests/parks/worthington.html,no_glamping_product_on_page
+11717,d1129d18-09ad-4575-9230-0f0d1f73d8cf,Hocking Hills State Park Lodge,state_park_placeholder,https://www.greatohiolodges.com/lodges/hocking-hills/,quote_name_token_too_generic
+11699,35374206-601a-42b4-9433-3adf5365c3be,Hontoon Island State Park,state_park_placeholder,https://www.floridastateparks.org/parks-and-trails/hontoon-island-state-park,quote_name_token_too_generic
+11733,d78a4355-9c3a-4508-82c0-9313dd133d39,Three Island Crossing State Park,state_park_placeholder,https://parksandrecreation.idaho.gov/parks/three-island-crossing,quote_name_token_too_generic
+11751,5d036415-d526-4b91-8ae9-50bdc0624453,Watkins Glen State Park,state_park_placeholder,https://parks.ny.gov/parks/watkinsglen/,quote_name_token_too_generic

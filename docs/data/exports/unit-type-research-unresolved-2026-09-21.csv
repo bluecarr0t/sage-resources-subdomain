@@ -29,3 +29,5 @@ id,property_id,property_name,queue,url,reason
 10878,91308d0e-ed9f-48ee-b682-e34bb1734314,Triple G's Resort,property_shell,https://www.triplegsresort.com/,no_quoted_unit_type
 12338,5381e71a-805c-4728-8d31-501648b351d3,Wren Eagle Retreat,property_shell,https://www.wreneagle.com/,no_glamping_product_on_page
 10668,c9482aca-7023-4d29-a4c3-4a40faa9a4e1,Zion Ponderosa Ranch Resort,named_site,https://www.zionponderosa.com/,site_code_not_identified
+11595,cfadc6b0-905b-4d01-ac51-1e5f8efcd3c6,Bliss Camps Glamping (Rocky Mountain Glamping),property_shell,https://blisscamps.com/,quote_name_token_too_generic
+12349,222b33db-a470-4b3c-a1c9-a1626facc90b,Sterling Ridge Resort,property_shell,https://www.sterlingridgeresort.com/,quote_name_token_too_generic

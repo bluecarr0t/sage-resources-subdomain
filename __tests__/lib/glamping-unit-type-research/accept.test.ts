@@ -59,6 +59,32 @@ describe('acceptUnitTypeFinding', () => {
     }
   });
 
+  it('rejects a quote that only shares a generic landscape word', () => {
+    const quote =
+      'Enjoy our mountain getaway in a luxury Explorer canvas Cabin Tent with deck, at your secluded, private campsite.';
+    const decision = acceptUnitTypeFinding({
+      propertyName: 'Bliss Camps Glamping (Rocky Mountain Glamping)',
+      markdown: quote,
+      products: [
+        { unitType: 'Cabin Tent', siteName: 'Cabin Tent', quantity: null, quote },
+      ],
+    });
+    expect(decision).toEqual({ ok: false, reason: 'no_quoted_unit_type' });
+  });
+
+  it('rejects a quote that only shares a generic place word', () => {
+    const quote =
+      'Cabins: Rustic Cabins (3 night minimum) Base Rate: $58.00 per night Out of State Fee: $7.00 per night';
+    const decision = acceptUnitTypeFinding({
+      propertyName: 'Watkins Glen State Park',
+      markdown: quote,
+      products: [
+        { unitType: 'Cabin', siteName: 'Cabin', quantity: null, quote },
+      ],
+    });
+    expect(decision).toEqual({ ok: false, reason: 'no_quoted_unit_type' });
+  });
+
   it('rejects a canvas tent catch-all', () => {
     const decision = acceptUnitTypeFinding({
       propertyName: 'Huckleberry Tent & Breakfast',

@@ -39,7 +39,10 @@ function canonicalUnitType(raw: string): string | null {
 function quoteNamesProperty(quote: string, propertyName: string): boolean {
   const tokens = distinctiveNameTokens(propertyName);
   const lower = quote.toLowerCase();
-  return tokens.length > 0 && tokens.some((token) => lower.includes(token));
+  return (
+    tokens.length > 0 &&
+    tokens.some((token) => new RegExp(`\\b${token}\\b`).test(lower))
+  );
 }
 
 function quoteOnPage(quote: string, markdown: string): boolean {

@@ -6,6 +6,8 @@ import {
   buildUnifiedExportXlsxBuffer,
   cellValue,
   cellValueForXlsx,
+  csvCell,
+  xlsxNumFmtForColumn,
 } from '@/lib/admin/sage-glamping-unified-export-xlsx';
 import { ALL_GLAMPING_PROPERTY_COLUMNS } from '@/lib/sage-ai/all-glamping-properties-columns';
 
@@ -15,7 +17,7 @@ export const maxDuration = 300;
 type ExportFormat = 'csv' | 'xlsx';
 type ExportTable = 'all_sage_data' | 'all_roverpass_data_new';
 type ExportRow = Record<string, unknown>;
-type ExportCell = string | number | boolean;
+type ExportCell = string | number | boolean | Date | null;
 
 /** Per-row export metadata (not written to CSV/XLSX — only keys in EXPORT_COLUMNS are). */
 type AugmentedExportRow = ExportRow & {
@@ -96,15 +98,6 @@ function buildFilename(format: ExportFormat): string {
   return `glamping-and-roverpass-unified-${date}.${format}`;
 }
 
-function csvCell(value: unknown): string {
-  const raw = cellValue(value);
-  let text = String(raw);
-  if (/^[=+\-@]/.test(text)) {
-    text = `'${text}`;
-  }
-  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
 async function fetchAllRows(
   supabase: SupabaseClient,
   table: ExportTable
@@ -151,7 +144,7 @@ function normalizeRows(
 function* exportDataRows(rows: ExportRow[]): Generator<ExportCell[]> {
   for (const row of rows) {
     yield EXPORT_COLUMNS.map((column) =>
-      cellValueForXlsx(getExportSourceValue(row, column))
+      cellValueForXlsx(getExportSourceValue(row, column), column)
     );
   }
 }
@@ -194,7 +187,8 @@ export const GET = withAdminAuth(async (request) => {
 
     const xlsxBuffer = await buildUnifiedExportXlsxBuffer(
       [...EXPORT_OUTPUT_COLUMN_NAMES] as ExportCell[],
-      exportDataRows(rows)
+      exportDataRows(rows),
+      EXPORT_COLUMNS.map((column) => xlsxNumFmtForColumn(column))
     );
     return new NextResponse(new Uint8Array(xlsxBuffer), {
       status: 200,
