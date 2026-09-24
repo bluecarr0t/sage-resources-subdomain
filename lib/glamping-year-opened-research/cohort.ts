@@ -192,7 +192,8 @@ export function toQueueCsv(properties: YearOpenedProperty[]): string {
   return `${lines.join('\n')}\n`;
 }
 
-function csvCell(value: string): string {
-  if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
-  return value;
+function csvCell(value: string | number): string {
+  const text = String(value);
+  if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+  return text;
 }

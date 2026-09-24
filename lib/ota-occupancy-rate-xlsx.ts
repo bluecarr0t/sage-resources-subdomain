@@ -1,7 +1,7 @@
 import { homedir } from 'os';
 import { mkdirSync } from 'fs';
 import { resolve } from 'path';
-import ExcelJS from 'exceljs';
+import ExcelJS, { type Cvfo } from 'exceljs';
 import {
   OTA_MONTHLY_EXPORT_COLUMNS,
   type OtaMonthlyExportRow,
@@ -208,7 +208,7 @@ export function addColorScale(
   metric: HeatmapMetric,
   priority = 1,
 ) {
-  let cfvo: Array<{ type: string; value?: number }>;
+  let cfvo: Cvfo[];
   switch (metric) {
     case 'occupancy':
       cfvo = [
