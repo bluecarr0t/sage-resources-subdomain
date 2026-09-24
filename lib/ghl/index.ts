@@ -20,9 +20,13 @@ export {
   findOpportunitiesByJobNumber,
   findStageIdByName,
   getOpportunityJobNumber,
+  loadOpportunityCustomFieldKeyById,
   moveOpportunityToReportSentToClient,
   normalizeGhlOpportunityFieldKey,
   opportunityMatchesJobNumber,
+  opportunityNeedsFieldCatalog,
+  readGhlCustomFieldValue,
+  resolveGhlCustomFieldKey,
   resolveReportSentToClientStageId,
   updateOpportunityStage,
 } from '@/lib/ghl/opportunities';

@@ -7,9 +7,15 @@ export type GhlCustomField = {
   id?: string;
   key?: string;
   fieldKey?: string;
+  type?: string;
   fieldValue?: unknown;
   field_value?: unknown;
+  /** Search results use this instead of `fieldValue`. */
+  fieldValueString?: unknown;
 };
+
+/** Opportunity custom-field id → `fieldKey` (`opportunity.job_number`). */
+export type GhlOpportunityFieldKeyById = ReadonlyMap<string, string>;
 
 export type GhlOpportunity = {
   id: string;
@@ -54,14 +60,41 @@ export function normalizeGhlOpportunityFieldKey(key: string | null | undefined):
   return trimmed.replace(/^opportunity\./i, '').toLowerCase();
 }
 
-export function getOpportunityJobNumber(opportunity: GhlOpportunity): string | null {
+function customFieldExplicitKey(field: GhlCustomField): string {
+  return (field.key ?? field.fieldKey ?? '').trim();
+}
+
+/** Value from a GET (`fieldValue`) or a search row (`fieldValueString`). */
+export function readGhlCustomFieldValue(field: GhlCustomField): string {
+  return stringifyFieldValue(field.fieldValue ?? field.field_value ?? field.fieldValueString);
+}
+
+/**
+ * Search and GET payloads identify custom fields by id. `key` / `fieldKey` are
+ * filled in from the location catalog when the payload omits them.
+ */
+export function resolveGhlCustomFieldKey(
+  field: GhlCustomField,
+  fieldKeyById?: GhlOpportunityFieldKeyById
+): string {
+  const explicit = customFieldExplicitKey(field);
+  if (explicit) return explicit;
+  const id = field.id?.trim() ?? '';
+  if (!id || !fieldKeyById) return '';
+  return fieldKeyById.get(id) ?? '';
+}
+
+export function getOpportunityJobNumber(
+  opportunity: GhlOpportunity,
+  fieldKeyById?: GhlOpportunityFieldKeyById
+): string | null {
   const fields = opportunity.customFields ?? [];
   for (const field of fields) {
-    const rawKey = field.key ?? field.fieldKey ?? '';
+    const rawKey = resolveGhlCustomFieldKey(field, fieldKeyById);
     if (normalizeGhlOpportunityFieldKey(rawKey) !== GHL_JOB_NUMBER_CUSTOM_FIELD_KEY) {
       continue;
     }
-    const value = stringifyFieldValue(field.fieldValue ?? field.field_value);
+    const value = readGhlCustomFieldValue(field);
     return value || null;
   }
   return null;
@@ -69,12 +102,21 @@ export function getOpportunityJobNumber(opportunity: GhlOpportunity): string | n
 
 export function opportunityMatchesJobNumber(
   opportunity: GhlOpportunity,
-  jobNumber: string
+  jobNumber: string,
+  fieldKeyById?: GhlOpportunityFieldKeyById
 ): boolean {
   const expected = jobNumber.trim();
   if (!expected) return false;
-  const actual = getOpportunityJobNumber(opportunity);
+  const actual = getOpportunityJobNumber(opportunity, fieldKeyById);
   return actual != null && actual === expected;
+}
+
+/** True when the payload has field ids and no readable job_number key yet. */
+export function opportunityNeedsFieldCatalog(opportunity: GhlOpportunity): boolean {
+  if (getOpportunityJobNumber(opportunity) != null) return false;
+  return (opportunity.customFields ?? []).some(
+    (field) => !customFieldExplicitKey(field) && Boolean(field.id?.trim())
+  );
 }
 
 export function findStageIdByName(
@@ -90,6 +132,16 @@ export function findStageIdByName(
   return match?.id ?? null;
 }
 
+type LocationCustomFieldDefinition = {
+  id?: string;
+  fieldKey?: string;
+  model?: string;
+};
+
+type LocationCustomFieldsResponse = {
+  customFields?: LocationCustomFieldDefinition[];
+};
+
 type SearchOpportunitiesResponse = {
   opportunities?: GhlOpportunity[];
 };
@@ -101,6 +153,26 @@ type GetPipelinesResponse = {
 type GetOpportunityResponse = {
   opportunity?: GhlOpportunity;
 } & GhlOpportunity;
+
+/** Map opportunity custom-field ids to field keys for this location. */
+export async function loadOpportunityCustomFieldKeyById(
+  config: GhlConfig
+): Promise<Map<string, string>> {
+  const params = new URLSearchParams({ model: 'opportunity' });
+  const data = await ghlFetch<LocationCustomFieldsResponse>(
+    config,
+    `/locations/${encodeURIComponent(config.locationId)}/customFields?${params.toString()}`
+  );
+  const fieldKeyById = new Map<string, string>();
+  for (const field of data.customFields ?? []) {
+    const id = field.id?.trim() ?? '';
+    const fieldKey = field.fieldKey?.trim() ?? '';
+    if (!id || !fieldKey) continue;
+    if (field.model && field.model !== 'opportunity') continue;
+    fieldKeyById.set(id, fieldKey);
+  }
+  return fieldKeyById;
+}
 
 async function searchOpportunitiesPage(
   config: GhlConfig,
@@ -146,7 +218,9 @@ async function getOpportunityById(
 
 /**
  * Find opportunities whose custom field `job_number` exactly matches.
- * Searches by query + pipeline, then verifies the custom field (GET if search omits keys).
+ * Search and GET return field ids, not keys. The location catalog maps those
+ * ids (`opportunity.job_number`) before the value is compared. A GET is only
+ * used when the search row still has no readable job number.
  */
 export async function findOpportunitiesByJobNumber(
   config: GhlConfig,
@@ -171,20 +245,40 @@ export async function findOpportunitiesByJobNumber(
     if (pageRows.length < 100) break;
   }
 
+  let fieldKeyById: Map<string, string> | undefined;
+  async function fieldKeys(): Promise<Map<string, string>> {
+    if (fieldKeyById) return fieldKeyById;
+    const loaded = await loadOpportunityCustomFieldKeyById(config);
+    fieldKeyById = loaded;
+    return loaded;
+  }
+
+  async function keysFor(
+    opportunity: GhlOpportunity
+  ): Promise<GhlOpportunityFieldKeyById | undefined> {
+    if (!opportunityNeedsFieldCatalog(opportunity)) return fieldKeyById;
+    return fieldKeys();
+  }
+
   const matches: GhlOpportunity[] = [];
 
   for (const candidate of candidates) {
-    if (opportunityMatchesJobNumber(candidate, expected)) {
+    const searchKeys = await keysFor(candidate);
+    if (opportunityMatchesJobNumber(candidate, expected, searchKeys)) {
       matches.push(candidate);
       continue;
     }
 
-    // Search payloads sometimes omit custom field keys — load full opportunity.
-    if (!candidate.customFields?.length || getOpportunityJobNumber(candidate) == null) {
-      const full = await getOpportunityById(config, candidate.id);
-      if (full && opportunityMatchesJobNumber(full, expected)) {
-        matches.push(full);
-      }
+    const searchJobNumber = getOpportunityJobNumber(candidate, searchKeys);
+    if ((candidate.customFields?.length ?? 0) > 0 && searchJobNumber != null) {
+      continue;
+    }
+
+    const full = await getOpportunityById(config, candidate.id);
+    if (!full) continue;
+    const fullKeys = await keysFor(full);
+    if (opportunityMatchesJobNumber(full, expected, fullKeys)) {
+      matches.push(full);
     }
   }
 

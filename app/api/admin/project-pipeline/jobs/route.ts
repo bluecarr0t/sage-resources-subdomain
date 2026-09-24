@@ -45,7 +45,7 @@ import {
   appendProjectPipelineReviewNote,
   parseProjectPipelineReviewNotes,
 } from '@/lib/project-pipeline/review-notes';
-import { syncGhlOpportunityOnSentToClientAsync } from '@/lib/ghl/sync-sent-to-client';
+import { syncGhlOpportunityOnSentToClient } from '@/lib/ghl/sync-sent-to-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -303,7 +303,7 @@ export const PUT = withAdminAuth(async (request: NextRequest, auth) => {
       managedUsers,
     });
 
-    syncGhlOpportunityOnSentToClientAsync({
+    await syncGhlOpportunityOnSentToClient({
       previous: existingJob,
       next: savedJob,
     });

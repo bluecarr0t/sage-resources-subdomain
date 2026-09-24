@@ -36,7 +36,13 @@ export async function syncGhlOpportunityOnSentToClient(
     return;
   }
 
-  const result = await moveOpportunityToReportSentToClient(config, jobNumber);
+  let result: Awaited<ReturnType<typeof moveOpportunityToReportSentToClient>>;
+  try {
+    result = await moveOpportunityToReportSentToClient(config, jobNumber);
+  } catch (err) {
+    console.error('[ghl] Sent to Client opportunity sync failed:', err);
+    return;
+  }
 
   switch (result.status) {
     case 'updated':
@@ -71,7 +77,10 @@ export async function syncGhlOpportunityOnSentToClient(
   }
 }
 
-/** Fire-and-forget: never throws to the jobs PUT caller. */
+/**
+ * Prefer awaiting `syncGhlOpportunityOnSentToClient` from the job save.
+ * This wrapper never throws; it exists for callers that cannot await.
+ */
 export function syncGhlOpportunityOnSentToClientAsync(input: SyncGhlSentToClientInput): void {
   void syncGhlOpportunityOnSentToClient(input).catch((err) => {
     console.error('[ghl] Sent to Client opportunity sync failed:', err);

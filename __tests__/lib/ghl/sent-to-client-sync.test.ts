@@ -68,6 +68,28 @@ describe('ghl sent-to-client helpers', () => {
       };
       expect(opportunityMatchesJobNumber(opp, '26-200B-03')).toBe(true);
     });
+
+    it('reads search payloads that only include field id and fieldValueString', () => {
+      const opp: GhlOpportunity = {
+        id: 'opp-search',
+        customFields: [
+          { id: 'Z2IRP0BFJhrJKZNt9ObY', type: 'TEXT', fieldValueString: '26-244A-07' },
+        ],
+      };
+      expect(getOpportunityJobNumber(opp)).toBeNull();
+      const fieldKeyById = new Map([['Z2IRP0BFJhrJKZNt9ObY', 'opportunity.job_number']]);
+      expect(getOpportunityJobNumber(opp, fieldKeyById)).toBe('26-244A-07');
+      expect(opportunityMatchesJobNumber(opp, '26-244A-07', fieldKeyById)).toBe(true);
+    });
+
+    it('reads GET payloads that only include field id and fieldValue', () => {
+      const opp: GhlOpportunity = {
+        id: 'opp-get',
+        customFields: [{ id: 'Z2IRP0BFJhrJKZNt9ObY', fieldValue: '26-127A-02' }],
+      };
+      const fieldKeyById = new Map([['Z2IRP0BFJhrJKZNt9ObY', 'opportunity.job_number']]);
+      expect(getOpportunityJobNumber(opp, fieldKeyById)).toBe('26-127A-02');
+    });
   });
 
   describe('findStageIdByName', () => {
@@ -218,6 +240,99 @@ describe('moveOpportunityToReportSentToClient', () => {
 
     const result = await moveOpportunityToReportSentToClient(config, '26-100A-01');
     expect(result).toEqual({ status: 'not_found' });
+  });
+
+  const jobNumberFieldId = 'Z2IRP0BFJhrJKZNt9ObY';
+  const reportSentPipelines = {
+    pipelines: [
+      {
+        id: 'pipe-1',
+        stages: [
+          { id: 'stage-old', name: 'Mid Project Client Call' },
+          { id: 'stage-sent', name: 'Report Sent to Client' },
+        ],
+      },
+    ],
+  };
+  const jobNumberCatalog = {
+    customFields: [
+      {
+        id: jobNumberFieldId,
+        fieldKey: 'opportunity.job_number',
+        model: 'opportunity',
+      },
+    ],
+  };
+
+  it('updates stage when search returns a field id and fieldValueString', async () => {
+    mockFetch
+      .mockResolvedValueOnce(
+        jsonResponse({
+          opportunities: [
+            {
+              id: 'opp-1',
+              pipelineStageId: 'stage-old',
+              customFields: [
+                { id: jobNumberFieldId, type: 'TEXT', fieldValueString: '26-244A-07' },
+              ],
+            },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(jsonResponse(jobNumberCatalog))
+      .mockResolvedValueOnce(jsonResponse(reportSentPipelines))
+      .mockResolvedValueOnce(jsonResponse({}));
+
+    const result = await moveOpportunityToReportSentToClient(config, '26-244A-07');
+    expect(result).toEqual({ status: 'updated', opportunityId: 'opp-1' });
+    expect(mockFetch).toHaveBeenCalledTimes(4);
+    expect(String(mockFetch.mock.calls[0]?.[0])).toContain('/opportunities/search');
+    expect(String(mockFetch.mock.calls[1]?.[0])).toContain(
+      '/locations/loc-1/customFields?model=opportunity'
+    );
+    expect(String(mockFetch.mock.calls[2]?.[0])).toContain('/opportunities/pipelines');
+    expect(mockFetch.mock.calls[3]?.[1]).toEqual(
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({
+          pipelineId: 'pipe-1',
+          pipelineStageId: 'stage-sent',
+        }),
+      })
+    );
+  });
+
+  it('loads the catalog after GET when search omits custom fields', async () => {
+    mockFetch
+      .mockResolvedValueOnce(
+        jsonResponse({
+          opportunities: [
+            {
+              id: 'opp-1',
+              pipelineStageId: 'stage-old',
+              customFields: [],
+            },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          opportunity: {
+            id: 'opp-1',
+            pipelineStageId: 'stage-old',
+            customFields: [{ id: jobNumberFieldId, fieldValue: '26-127A-02' }],
+          },
+        })
+      )
+      .mockResolvedValueOnce(jsonResponse(jobNumberCatalog))
+      .mockResolvedValueOnce(jsonResponse(reportSentPipelines))
+      .mockResolvedValueOnce(jsonResponse({}));
+
+    const result = await moveOpportunityToReportSentToClient(config, '26-127A-02');
+    expect(result).toEqual({ status: 'updated', opportunityId: 'opp-1' });
+    expect(String(mockFetch.mock.calls[1]?.[0])).toContain('/opportunities/opp-1');
+    expect(String(mockFetch.mock.calls[2]?.[0])).toContain('/customFields');
+    expect(mockFetch.mock.calls[4]?.[1]).toEqual(expect.objectContaining({ method: 'PUT' }));
   });
 
   it('returns ambiguous when multiple exact matches', async () => {
