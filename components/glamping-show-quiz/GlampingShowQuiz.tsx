@@ -29,6 +29,7 @@ import {
   parseQuizPhone,
   quizIdleResetMs,
   quizNeedOptionsForRole,
+  quizBoothPhoneUrl,
   quizResultCopy,
   quizSkipsNeedAndTimeline,
   quizSkipsStage,
@@ -350,7 +351,7 @@ export function GlampingShowQuiz() {
             A few questions. We’ll point you to schedule a meeting or glamping
             market data, whichever fits where you are today.
           </p>
-          <div className="mt-10">
+          <div className="mt-10 flex flex-wrap items-start gap-10">
             <button
               type="button"
               className={`${EDITORIAL_BUTTON_PRIMARY_CLASS} min-h-12 px-8 text-sm`}
@@ -358,6 +359,14 @@ export function GlampingShowQuiz() {
             >
               Start the quiz
             </button>
+            <div className="hidden sm:block">
+              <QuizQrCode
+                url={quizBoothPhoneUrl()}
+                label="On your phone"
+                hint="Scan to take the quiz"
+                size="xs"
+              />
+            </div>
           </div>
         </section>
       ) : null}

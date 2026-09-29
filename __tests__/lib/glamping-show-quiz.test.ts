@@ -14,6 +14,7 @@ import {
   quizPhoneRequired,
   quizRoleContactType,
   quizResultCopy,
+  quizBoothPhoneUrl,
   quizMarketOverviewBoothUrl,
   quizSendsMarketOverview,
   quizSkipsNeedAndTimeline,
@@ -439,5 +440,14 @@ describe('glamping-show-quiz result copy', () => {
 
   it('keeps the booth path off public listing constants', () => {
     expect(GLAMPING_SHOW_QUIZ_PATH).toBe('/glamping-show-quiz');
+  });
+
+  it('points the booth start-screen QR at the quiz on a phone', () => {
+    const url = quizBoothPhoneUrl();
+    expect(url).toContain('/glamping-show-quiz');
+    expect(url).toContain('utm_source=glamping_show');
+    expect(url).toContain('utm_medium=booth_quiz');
+    expect(url).toContain('utm_campaign=gsa_2026');
+    expect(url).toContain('utm_content=booth_kiosk');
   });
 });

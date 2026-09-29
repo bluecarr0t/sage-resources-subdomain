@@ -510,6 +510,14 @@ export function quizCalendarUrl(): string {
   return withQuizUtm(RESOURCES_ROOT_CONTACT_BASE, 'glamping_show_quiz');
 }
 
+/** Booth-screen QR so a visitor can open the quiz on their phone. */
+export function quizBoothPhoneUrl(): string {
+  return withQuizUtm(
+    `${getResourcesSiteOrigin()}${GLAMPING_SHOW_QUIZ_PATH}`,
+    'booth_kiosk'
+  );
+}
+
 export function quizMarketOverviewUrl(content = 'getting_close'): string {
   return withQuizUtm(
     `${getResourcesSiteOrigin()}/glamping-market-overview`,

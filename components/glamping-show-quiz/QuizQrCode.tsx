@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 
-type QuizQrCodeSize = 'md' | 'sm';
+type QuizQrCodeSize = 'md' | 'sm' | 'xs';
 
 type QuizQrCodeProps = {
   url: string;
@@ -15,6 +15,13 @@ type QuizQrCodeProps = {
 const SIZE_CLASS: Record<QuizQrCodeSize, string> = {
   md: 'h-52 w-52 sm:h-60 sm:w-60',
   sm: 'h-40 w-40 sm:h-44 sm:w-44',
+  xs: 'h-32 w-32',
+};
+
+const QR_PIXELS: Record<QuizQrCodeSize, number> = {
+  md: 240,
+  sm: 180,
+  xs: 128,
 };
 
 export function QuizQrCode({ url, label, hint, size = 'md' }: QuizQrCodeProps) {
@@ -26,7 +33,7 @@ export function QuizQrCode({ url, label, hint, size = 'md' }: QuizQrCodeProps) {
     void QRCode.toString(url, {
       type: 'svg',
       margin: 1,
-      width: size === 'sm' ? 180 : 240,
+      width: QR_PIXELS[size],
       errorCorrectionLevel: 'M',
       color: { dark: '#2c362c', light: '#00000000' },
     })
@@ -58,8 +65,14 @@ export function QuizQrCode({ url, label, hint, size = 'md' }: QuizQrCodeProps) {
           Preparing QR code…
         </div>
       )}
-      <figcaption className="max-w-[15rem] text-center">
-        <p className="font-[Georgia] text-base font-medium tracking-tight text-sage-800 sm:text-lg">
+      <figcaption
+        className={`text-center ${size === 'xs' ? 'max-w-[8.5rem]' : 'max-w-[15rem]'}`}
+      >
+        <p
+          className={`font-[Georgia] font-medium tracking-tight text-sage-800 ${
+            size === 'xs' ? 'text-sm' : 'text-base sm:text-lg'
+          }`}
+        >
           {label}
         </p>
         <p className="mt-1 text-[11px] font-medium uppercase tracking-widest text-neutral-500">
