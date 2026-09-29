@@ -2,17 +2,25 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 
-function isCoarsePortrait(): boolean {
+const TABLET_MIN_WIDTH_PX = 600;
+
+function isPhoneWidth(): boolean {
+  return window.matchMedia(`(max-width: ${TABLET_MIN_WIDTH_PX - 1}px)`).matches;
+}
+
+/** Portrait booth tablets only. Phones stay usable upright. */
+function isTabletPortrait(): boolean {
   if (typeof window === 'undefined') return false;
   return (
     window.matchMedia('(pointer: coarse)').matches &&
-    window.matchMedia('(orientation: portrait)').matches
+    window.matchMedia('(orientation: portrait)').matches &&
+    window.matchMedia(`(min-width: ${TABLET_MIN_WIDTH_PX}px)`).matches
   );
 }
 
 /**
- * Booth tablet shell: blocks pinch-zoom and overscroll, prefers landscape,
- * and asks to rotate when a phone is held upright.
+ * Booth tablet shell: blocks pinch-zoom and overscroll, prefers landscape
+ * on a tablet, and asks to rotate when a tablet is held upright.
  */
 export function QuizKioskShell({ children }: { children: ReactNode }) {
   const [needsRotate, setNeedsRotate] = useState(false);
@@ -28,11 +36,11 @@ export function QuizKioskShell({ children }: { children: ReactNode }) {
     const orientation = window.screen?.orientation as
       | (ScreenOrientation & { lock?: (mode: string) => Promise<void> })
       | undefined;
-    if (typeof orientation?.lock === 'function') {
+    if (!isPhoneWidth() && typeof orientation?.lock === 'function') {
       void orientation.lock('landscape').catch(() => undefined);
     }
 
-    const sync = () => setNeedsRotate(isCoarsePortrait());
+    const sync = () => setNeedsRotate(isTabletPortrait());
     sync();
     window.addEventListener('orientationchange', sync);
     window.addEventListener('resize', sync);

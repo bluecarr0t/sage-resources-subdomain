@@ -599,6 +599,21 @@ export function GlampingShowQuiz() {
               {result.footnote ? (
                 <p className="mt-3 text-sm font-light text-neutral-500">{result.footnote}</p>
               ) : null}
+              {result.outcome === 'ready_now' ? (
+                <p className="mt-6 sm:hidden">
+                  <a
+                    href={result.primaryCtaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={EDITORIAL_BUTTON_PRIMARY_CLASS}
+                  >
+                    {result.primaryCtaLabel}
+                  </a>
+                  <span className="mt-2 block text-[11px] font-medium uppercase tracking-widest text-neutral-500">
+                    Tap this on your phone
+                  </span>
+                </p>
+              ) : null}
               {remainingMs != null ? (
                 <p className="mt-6 text-[11px] font-medium uppercase tracking-widest text-neutral-500">
                   Resets in {formatQuizIdleCountdown(remainingMs)}
