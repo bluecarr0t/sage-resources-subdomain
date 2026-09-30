@@ -27,11 +27,13 @@ export async function POST(request: NextRequest) {
     // Revalidate all property-related caches (Redis + Next.js)
     const result = await revalidatePropertiesCache();
     
-    // Also revalidate property pages paths
+    // Also revalidate property pages paths and market-overview brands ranking
     revalidatePath('/', 'layout');
     revalidatePath('/map', 'page');
     revalidatePath('/[locale]/map', 'page');
     revalidatePath('/[locale]/property', 'page');
+    revalidatePath('/glamping-market-overview/brands', 'page');
+    revalidatePath('/[locale]/glamping-market-overview/brands', 'page');
     
     return NextResponse.json({
       success: true,
