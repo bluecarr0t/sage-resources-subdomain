@@ -36,6 +36,7 @@ import {
   type GlampingMarketAmenityImpactKey,
 } from '@/lib/glamping-amenity-impact';
 import { isComparableMarketArdrRateBasis } from '@/lib/glamping-rate-basis';
+import { readSupabasePage } from '@/lib/supabase-page-fetch';
 
 const PAGE_SIZE = 1000;
 
@@ -70,25 +71,21 @@ async function loadAmenityImpact(
   let offset = 0;
 
   for (;;) {
-    let query = applyGlampingOnlyPropertyTypeFilter(
-      supabase
-        .from('all_sage_data')
-        .select(
-          'property_name, property_type, unit_type, state, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis, unit_private_bathroom, property_hot_tub, property_food_on_site, property_restaurant'
-        )
-        .eq('is_glamping_property', 'Yes')
-        .eq('research_status', 'published')
-        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-        .in('country', countryIn)
-    );
-    query = applyGlampingMarketSnapshotTierToQuery(query, tier);
-    const { data, error } = await query
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) throw new Error(error.message);
-
-    const batch = (data ?? []) as SageRow[];
+    const batch = await readSupabasePage<SageRow>(() => {
+      let query = applyGlampingOnlyPropertyTypeFilter(
+        supabase
+          .from('all_sage_data')
+          .select(
+            'property_name, property_type, unit_type, state, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis, unit_private_bathroom, property_hot_tub, property_food_on_site, property_restaurant'
+          )
+          .eq('is_glamping_property', 'Yes')
+          .eq('research_status', 'published')
+          .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
+          .in('country', countryIn)
+      );
+      query = applyGlampingMarketSnapshotTierToQuery(query, tier);
+      return query.order('id', { ascending: true }).range(offset, offset + PAGE_SIZE - 1);
+    });
     if (batch.length === 0) break;
 
     for (const row of batch) {

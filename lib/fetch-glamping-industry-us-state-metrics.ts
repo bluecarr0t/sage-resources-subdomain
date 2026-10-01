@@ -30,6 +30,7 @@ import {
   parseGlampingMarketSnapshotPositiveNumber,
 } from '@/lib/glamping-market-snapshot/site-units-for-row';
 import { isComparableMarketArdrRateBasis } from '@/lib/glamping-rate-basis';
+import { readSupabasePage } from '@/lib/supabase-page-fetch';
 
 const PAGE_SIZE = 1000;
 
@@ -140,25 +141,19 @@ async function loadGlampingIndustryUsStateMetrics(
 
   let offset = 0;
   for (;;) {
-    let query = applyGlampingOnlyPropertyTypeFilter(
-      supabase
-        .from('all_sage_data')
-        .select(GLAMPING_MARKET_SNAPSHOT_US_STATE_SELECT)
-        .eq('is_glamping_property', 'Yes')
-        .eq('research_status', 'published')
-        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-        .in('country', [...GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN])
-    );
-    query = applyGlampingMarketSnapshotTierToQuery(query, tier);
-    const { data, error } = await query
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return { ok: false, error: error.message };
-    }
-
-    const batch = (data ?? []) as Row[];
+    const batch = await readSupabasePage<Row>(() => {
+      let query = applyGlampingOnlyPropertyTypeFilter(
+        supabase
+          .from('all_sage_data')
+          .select(GLAMPING_MARKET_SNAPSHOT_US_STATE_SELECT)
+          .eq('is_glamping_property', 'Yes')
+          .eq('research_status', 'published')
+          .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
+          .in('country', [...GLAMPING_MARKET_SNAPSHOT_US_COUNTRY_IN])
+      );
+      query = applyGlampingMarketSnapshotTierToQuery(query, tier);
+      return query.order('id', { ascending: true }).range(offset, offset + PAGE_SIZE - 1);
+    });
     if (batch.length === 0) break;
 
     for (const row of batch) {
@@ -226,12 +221,19 @@ export async function fetchGlampingIndustryUsStateMetrics(
   states: string[] | null = null
 ): Promise<{ ok: true; data: GlampingUsStateMetricsMap } | { ok: false; error: string }> {
   const statesKey = glampingMarketOverviewStatesKey(states);
-  return unstable_cache(
-    () => loadGlampingIndustryUsStateMetrics(tier, states),
-    ['glamping-industry-us-state-metrics', tier, statesKey, 'rate-basis-v2-us-states'],
-    {
-      revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
-      tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
-    }
-  )();
+  try {
+    return await unstable_cache(
+      () => loadGlampingIndustryUsStateMetrics(tier, states),
+      ['glamping-industry-us-state-metrics', tier, statesKey, 'rate-basis-v3-us-states'],
+      {
+        revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+        tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
+      }
+    )();
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Unknown US state metrics error',
+    };
+  }
 }

@@ -23,6 +23,7 @@ import {
 import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
 import { normalizeCaProvinceToCode } from '@/lib/normalize-ca-province-key';
 import { isComparableMarketArdrRateBasis } from '@/lib/glamping-rate-basis';
+import { readSupabasePage } from '@/lib/supabase-page-fetch';
 
 const PAGE_SIZE = 1000;
 
@@ -94,25 +95,19 @@ async function loadGlampingIndustryCaProvinceMetrics(
 
   let offset = 0;
   for (;;) {
-    let query = applyGlampingOnlyPropertyTypeFilter(
-      supabase
-        .from('all_sage_data')
-        .select(GLAMPING_MARKET_SNAPSHOT_CA_PROVINCE_SELECT)
-        .eq('is_glamping_property', 'Yes')
-        .eq('research_status', 'published')
-        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-        .in('country', [...GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN])
-    );
-    query = applyGlampingMarketSnapshotTierToQuery(query, tier);
-    const { data, error } = await query
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return { ok: false, error: error.message };
-    }
-
-    const batch = (data ?? []) as Row[];
+    const batch = await readSupabasePage<Row>(() => {
+      let query = applyGlampingOnlyPropertyTypeFilter(
+        supabase
+          .from('all_sage_data')
+          .select(GLAMPING_MARKET_SNAPSHOT_CA_PROVINCE_SELECT)
+          .eq('is_glamping_property', 'Yes')
+          .eq('research_status', 'published')
+          .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
+          .in('country', [...GLAMPING_MARKET_SNAPSHOT_CA_COUNTRY_IN])
+      );
+      query = applyGlampingMarketSnapshotTierToQuery(query, tier);
+      return query.order('id', { ascending: true }).range(offset, offset + PAGE_SIZE - 1);
+    });
     if (batch.length === 0) break;
 
     for (const row of batch) {
@@ -163,12 +158,19 @@ async function loadGlampingIndustryCaProvinceMetrics(
 export async function fetchGlampingIndustryCaProvinceMetrics(
   tier: GlampingMarketSnapshotTierFilter = 'all'
 ): Promise<{ ok: true; data: GlampingCaProvinceMetricsMap } | { ok: false; error: string }> {
-  return unstable_cache(
-    () => loadGlampingIndustryCaProvinceMetrics(tier),
-    ['glamping-industry-ca-province-metrics', tier, 'rate-basis-v1'],
-    {
-      revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
-      tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
-    }
-  )();
+  try {
+    return await unstable_cache(
+      () => loadGlampingIndustryCaProvinceMetrics(tier),
+      ['glamping-industry-ca-province-metrics', tier, 'rate-basis-v2'],
+      {
+        revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+        tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
+      }
+    )();
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Unknown Canada province metrics error',
+    };
+  }
 }

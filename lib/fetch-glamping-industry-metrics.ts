@@ -29,6 +29,7 @@ import {
 } from '@/lib/glamping-market-snapshot/site-units-for-row';
 import { fetchAllSageDataLastUpdatedAt } from '@/lib/fetch-all-sage-data-last-updated';
 import { isComparableMarketArdrRateBasis } from '@/lib/glamping-rate-basis';
+import { readSupabasePage } from '@/lib/supabase-page-fetch';
 
 const PAGE_SIZE = 1000;
 
@@ -280,27 +281,21 @@ async function loadGlampingIndustryMetrics(
 
   let offset = 0;
   for (;;) {
-    let query = applyGlampingOnlyPropertyTypeFilter(
-      supabase
-        .from('all_sage_data')
-        .select(
-          'property_name, property_type, unit_type, state, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis'
-        )
-        .eq('is_glamping_property', 'Yes')
-        .eq('research_status', 'published')
-        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-        .in('country', countryIn)
-    );
-    query = applyGlampingMarketSnapshotTierToQuery(query, tier);
-    const { data, error } = await query
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return { ok: false, error: error.message };
-    }
-
-    const batch = (data ?? []) as Row[];
+    const batch = await readSupabasePage<Row>(() => {
+      let query = applyGlampingOnlyPropertyTypeFilter(
+        supabase
+          .from('all_sage_data')
+          .select(
+            'property_name, property_type, unit_type, state, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis'
+          )
+          .eq('is_glamping_property', 'Yes')
+          .eq('research_status', 'published')
+          .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
+          .in('country', countryIn)
+      );
+      query = applyGlampingMarketSnapshotTierToQuery(query, tier);
+      return query.order('id', { ascending: true }).range(offset, offset + PAGE_SIZE - 1);
+    });
     if (batch.length === 0) break;
 
     for (const row of batch) {
@@ -407,12 +402,19 @@ export async function fetchGlampingIndustryMetrics(
   states: string[] | null = null
 ): Promise<{ ok: true; data: GlampingIndustryMetrics } | { ok: false; error: string }> {
   const statesKey = glampingMarketOverviewStatesKey(market === 'us' ? states : null);
-  return unstable_cache(
-    () => loadGlampingIndustryMetrics(market, tier, market === 'us' ? states : null),
-    ['glamping-industry-metrics', market, tier, statesKey, 'open-unit-mix-v5-us-states'],
-    {
-      revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
-      tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
-    }
-  )();
+  try {
+    return await unstable_cache(
+      () => loadGlampingIndustryMetrics(market, tier, market === 'us' ? states : null),
+      ['glamping-industry-metrics', market, tier, statesKey, 'open-unit-mix-v6-us-states'],
+      {
+        revalidate: GLAMPING_MARKET_OVERVIEW_REVALIDATE_SECONDS,
+        tags: [...GLAMPING_MARKET_OVERVIEW_CACHE_TAGS],
+      }
+    )();
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Unknown market metrics error',
+    };
+  }
 }

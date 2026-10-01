@@ -85,6 +85,15 @@ export const supabase = new Proxy({} as SupabaseClient, {
 }) as SupabaseClient;
 
 /**
+ * Next.js caches `fetch` GETs by default. PostgREST pagination and
+ * `unstable_cache` both rely on a live response, and a cached body (or a
+ * failed cache write of a large page) surfaces as `TypeError: fetch failed`.
+ */
+function supabaseServerFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  return fetch(input, { ...init, cache: 'no-store' });
+}
+
+/**
  * Server-side Supabase client
  * Only use in server-side code (API routes, Server Components, Server Actions)
  * Uses the secret key for privileged access - bypasses RLS
@@ -109,6 +118,7 @@ export function createServerClient(): SupabaseClient {
           persistSession: false,
           autoRefreshToken: false,
         },
+        global: { fetch: supabaseServerFetch },
       }
     );
   }
@@ -118,5 +128,6 @@ export function createServerClient(): SupabaseClient {
       persistSession: false,
       autoRefreshToken: false,
     },
+    global: { fetch: supabaseServerFetch },
   });
 }

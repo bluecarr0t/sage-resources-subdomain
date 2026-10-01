@@ -35,6 +35,7 @@ import {
   type ProximityPropertyRow,
 } from '@/lib/glamping-proximity-analysis';
 import { isComparableMarketArdrRateBasis } from '@/lib/glamping-rate-basis';
+import { readSupabasePage } from '@/lib/supabase-page-fetch';
 
 const PAGE_SIZE = 1000;
 
@@ -94,25 +95,21 @@ async function loadOpenProximityProperties(
   let offset = 0;
 
   for (;;) {
-    let query = applyGlampingOnlyPropertyTypeFilter(
-      supabase
-        .from('all_sage_data')
-        .select(
-          'property_name, property_type, unit_type, state, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis, lat, lon'
-        )
-        .eq('is_glamping_property', 'Yes')
-        .eq('research_status', 'published')
-        .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
-        .in('country', countryIn)
-    );
-    query = applyGlampingMarketSnapshotTierToQuery(query, tier);
-    const { data, error } = await query
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) throw new Error(error.message);
-
-    const batch = (data ?? []) as SageRow[];
+    const batch = await readSupabasePage<SageRow>(() => {
+      let query = applyGlampingOnlyPropertyTypeFilter(
+        supabase
+          .from('all_sage_data')
+          .select(
+            'property_name, property_type, unit_type, state, is_open, quantity_of_units, property_total_sites, rate_avg_retail_daily_rate, rate_basis, lat, lon'
+          )
+          .eq('is_glamping_property', 'Yes')
+          .eq('research_status', 'published')
+          .or(PRIVATE_COMMERCIAL_GLAMPING_LAND_OPERATOR_OR)
+          .in('country', countryIn)
+      );
+      query = applyGlampingMarketSnapshotTierToQuery(query, tier);
+      return query.order('id', { ascending: true }).range(offset, offset + PAGE_SIZE - 1);
+    });
     if (batch.length === 0) break;
 
     for (const row of batch) {

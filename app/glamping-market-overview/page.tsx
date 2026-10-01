@@ -106,6 +106,8 @@ const GlampingAmenityImpactChart = nextDynamic(
 );
 
 export const dynamic = 'force-dynamic';
+/** Cold unfiltered snapshots page the full US cohort. Keep the function alive past the short default. */
+export const maxDuration = 60;
 
 function formatInt(n: number): string {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);
