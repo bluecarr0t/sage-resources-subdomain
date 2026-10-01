@@ -13,6 +13,8 @@ import { chainLabelFromPropertyName } from '@/lib/brand-chain-label';
 import type { GlampingBrand, GlampingBrandTier } from '@/lib/glamping-brands';
 import { excludeClosedGlampingRows } from '@/lib/glamping-is-open';
 import { isExcludedLandOperatorForPublicMap } from '@/lib/glamping-land-operator-category';
+import { isExcludedGlampingMarketSnapshotUnitType } from '@/lib/glamping-market-snapshot-unit-filter';
+import { isGlampingMarketSnapshotPropertyType } from '@/lib/glamping-market-snapshot-property-type-filter';
 import { applyBrandsPageLandOperatorFilter } from '@/lib/public-map-cohort-filters';
 
 const PROPERTIES_TABLE = 'all_sage_data';
@@ -242,6 +244,35 @@ async function fetchPublishedRowsForBrand(
   return directRows;
 }
 
+function parsePositiveNightlyRate(value: string | number | null | undefined): number | null {
+  if (value == null || value === '') return null;
+  const n = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/**
+ * "From" rate on a brand listing: lowest published nightly rate among glamping
+ * unit rows at that location. The anchor row is the oldest id, which is often
+ * a premium SKU, so it is not a starting rate.
+ * RV pads, tent sites, campsites, hotel rooms, and suites stay off this floor.
+ * If the location has no glamping-typed rows, fall back to the lowest rate on any row.
+ */
+export function lowestListingNightlyRate(rows: readonly SageProperty[]): number | null {
+  const glampingRows = rows.filter(
+    (row) =>
+      isGlampingMarketSnapshotPropertyType(row.property_type) &&
+      !isExcludedGlampingMarketSnapshotUnitType(row.unit_type)
+  );
+  const pool = glampingRows.length > 0 ? glampingRows : rows;
+  let lowest: number | null = null;
+  for (const row of pool) {
+    const rate = parsePositiveNightlyRate(row.rate_avg_retail_daily_rate);
+    if (rate == null) continue;
+    if (lowest == null || rate < lowest) lowest = rate;
+  }
+  return lowest;
+}
+
 function buildListingsFromRows(rows: SageProperty[]): BrandPropertyListing[] {
   const openRows = excludeClosedGlampingRows(rows).filter(
     (row) => !isExcludedLandOperatorForPublicMap(row.land_operator_category)
@@ -274,7 +305,7 @@ function buildListingsFromRows(rows: SageProperty[]): BrandPropertyListing[] {
       state: anchor.state ?? null,
       country: anchor.country ?? null,
       unitTypes,
-      rate: anchor.rate_avg_retail_daily_rate ?? null,
+      rate: lowestListingNightlyRate(groupRows),
       lat: coords?.[0] ?? null,
       lon: coords?.[1] ?? null,
       groupKey,
